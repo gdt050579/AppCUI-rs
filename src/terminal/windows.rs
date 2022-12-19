@@ -1,7 +1,9 @@
-use super::Color;
 use super::Attribute;
+use super::Color;
 use super::Surface;
+use super::SystemEvent;
 use super::Terminal;
+use super::Key;
 
 type HANDLE = u32;
 type BOOL = u32;
@@ -10,7 +12,10 @@ const INVALID_HANDLE_VALUE: u32 = 0xFFFFFFFF;
 const STD_INPUT_HANDLE: i32 = -10;
 const STD_OUTPUT_HANDLE: i32 = -11;
 const FALSE: u32 = 0;
+const TRUE: u32 = 1;
 const COMMON_LVB_UNDERSCORE: u16 = 0x8000;
+const KEY_EVENT: u16 = 0x0001;
+const WINDOW_BUFFER_SIZE_EVENT: u16 = 0x0004;
 
 #[repr(C)]
 #[warn(non_camel_case_types)]
@@ -47,6 +52,36 @@ struct CHAR_INFO {
     code: u16,
     attr: u16,
 }
+
+#[repr(C)]
+#[warn(non_camel_case_types)]
+#[derive(Copy, Clone, Debug)]
+struct KEY_EVENT_RECORD {
+    bKeyDown: BOOL,
+    wRepeatCount: u16,
+    wVirtualKeyCode: u16,
+    wVirtualScanCode: u16,
+    UnicodeChar: u16,
+    dwControlKeyState: u32,
+}
+
+#[repr(C)]
+#[warn(non_camel_case_types)]
+#[derive(Copy, Clone)]
+union WindowsTerminalEvent {
+    KeyEvent: KEY_EVENT_RECORD,
+    WindowBufferSizeEvent: COORD,
+    extra:u32,
+}
+
+#[repr(C)]
+#[warn(non_camel_case_types)]
+#[derive(Copy, Clone)]
+struct INPUT_RECORD {
+    EventType: u16,
+    Event: WindowsTerminalEvent,
+}
+
 extern "system" {
     #[warn(non_camel_case_types)]
     fn GetStdHandle(v: i32) -> HANDLE;
@@ -65,6 +100,15 @@ extern "system" {
         handle: HANDLE,
         lpConsoleScreenBufferInfo: &mut CONSOLE_SCREEN_BUFFER_INFO,
     ) -> BOOL;
+
+    #[warn(non_camel_case_types)]
+    fn ReadConsoleInputW(
+        handle: HANDLE,
+        lpBuffer: *mut INPUT_RECORD,
+        nLength: u32,
+        lpNumberOfEventsRead: &mut u32,
+    ) -> BOOL;
+
 }
 
 fn get_handle(handle_id: i32) -> Option<u32> {
@@ -118,7 +162,6 @@ pub struct WindowsTerminal {
     width: u32,
     height: u32,
     chars: Vec<CHAR_INFO>,
-
 }
 
 impl WindowsTerminal {
@@ -150,7 +193,7 @@ impl Terminal for WindowsTerminal {
         if (surface.width != self.width) || (surface.height != self.height) {
             return;
         }
-        
+
         // copy surface into CHAR_INFO
         let sz = self.chars.len();
         for i in 0..sz {
@@ -172,7 +215,7 @@ impl Terminal for WindowsTerminal {
                 screen_char.attr |= COMMON_LVB_UNDERSCORE;
             }
         }
-        // 
+        //
         let sz = COORD {
             x: self.width as i16,
             y: self.height as i16,
@@ -181,8 +224,8 @@ impl Terminal for WindowsTerminal {
         let region = SMALL_RECT {
             left: 0,
             top: 0,
-            right: sz.x-1,
-            bottom: sz.y-1,
+            right: sz.x - 1,
+            bottom: sz.y - 1,
         };
         unsafe {
             WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, start, &region);
@@ -193,5 +236,65 @@ impl Terminal for WindowsTerminal {
     }
     fn get_height(&self) -> u32 {
         return self.height;
+    }
+    fn get_system_event(&mut self) -> SystemEvent {
+        let mut ir = INPUT_RECORD { EventType: 0, Event: WindowsTerminalEvent{extra:0} };
+        let mut nr_read = 0u32;
+
+        unsafe {
+            if (ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE)
+                || (nr_read != 1)
+            {
+                return SystemEvent::None;
+            }
+        }
+
+        if ir.EventType == KEY_EVENT
+        {
+            let mut key = Key::default();
+            if (ir.Event.KeyEvent.UnicodeChar >= 32) && (ir.Event.KeyEvent.bKeyDown == TRUE)
+            {
+                let res = char::from_u32(ir.Event.KeyEvent.UnicodeChar as u32);
+                if res.is_some() {
+                    key.character = res.unwrap();
+                }
+            }
+        if (ir.Event.KeyEvent.wVirtualKeyCode < KEYTRANSLATION_MATRIX_SIZE)
+            evnt.keyCode = KeyTranslationMatrix[ir.Event.KeyEvent.wVirtualKeyCode];
+        else
+            evnt.keyCode = Input::Key::None;
+
+        auto eventShiftState = Input::Key::None;
+        if ((ir.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) != 0)
+            eventShiftState |= Input::Key::Alt;
+        if ((ir.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0)
+            eventShiftState |= Input::Key::Shift;
+        if ((ir.Event.KeyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0)
+            eventShiftState |= Input::Key::Ctrl;
+
+        // if ALT or CTRL are pressed, clear the ascii code
+        if ((((uint32) eventShiftState) & ((uint32) (Input::Key::Alt | Input::Key::Ctrl))) != 0)
+            evnt.unicodeCharacter = 0;
+
+        if (evnt.keyCode == Input::Key::None)
+        {
+            if (eventShiftState != this->shiftState)
+                evnt.eventType = SystemEventType::ShiftStateChanged;
+            else if ((evnt.unicodeCharacter > 0) && (ir.Event.KeyEvent.bKeyDown))
+                evnt.eventType = SystemEventType::KeyPressed;
+            evnt.keyCode = eventShiftState;
+        }
+        else
+        {
+            evnt.keyCode |= eventShiftState;
+            if (ir.Event.KeyEvent.bKeyDown)
+                evnt.eventType = SystemEventType::KeyPressed;
+        }
+        this->shiftState = eventShiftState;
+
+        }
+
+
+        return SystemEvent::None;
     }
 }

@@ -1,7 +1,7 @@
 use super::KeyCode;
 use super::KeyModifier;
 
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,PartialEq)]
 pub struct Key {
     pub code: KeyCode,
     pub modifier: KeyModifier,
@@ -15,5 +15,11 @@ impl Key {
             modifier: modifier,
             character: character
         }
+    }
+}
+
+impl Default for Key {
+    fn default() -> Self {
+        Self { code: KeyCode::None, modifier: KeyModifier::None, character: 0 }
     }
 }
