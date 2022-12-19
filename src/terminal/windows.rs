@@ -1,9 +1,12 @@
+use crate::input::KeyCode;
+use crate::input::KeyModifier;
+
 use super::Attribute;
 use super::Color;
+use super::Key;
 use super::Surface;
 use super::SystemEvent;
 use super::Terminal;
-use super::Key;
 
 type HANDLE = u32;
 type BOOL = u32;
@@ -16,6 +19,271 @@ const TRUE: u32 = 1;
 const COMMON_LVB_UNDERSCORE: u16 = 0x8000;
 const KEY_EVENT: u16 = 0x0001;
 const WINDOW_BUFFER_SIZE_EVENT: u16 = 0x0004;
+
+const RIGHT_ALT_PRESSED: u32 = 0x0001;
+const LEFT_ALT_PRESSED: u32 = 0x0002;
+const RIGHT_CTRL_PRESSED: u32 = 0x0004;
+const LEFT_CTRL_PRESSED: u32 = 0x0008;
+const SHIFT_PRESSED: u32 = 0x0010;
+
+const translation_matrix: [KeyCode; 256] = [
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::Backspace,
+    KeyCode::Tab,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::Enter,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::Escape,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::Space,
+    KeyCode::PageUp,
+    KeyCode::PageDown,
+    KeyCode::End,
+    KeyCode::Home,
+    KeyCode::Left,
+    KeyCode::Up,
+    KeyCode::Right,
+    KeyCode::Down,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::Insert,
+    KeyCode::Delete,
+    KeyCode::None,
+    KeyCode::N0,
+    KeyCode::N1,
+    KeyCode::N2,
+    KeyCode::N3,
+    KeyCode::N4,
+    KeyCode::N5,
+    KeyCode::N6,
+    KeyCode::N7,
+    KeyCode::N8,
+    KeyCode::N9,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::A,
+    KeyCode::B,
+    KeyCode::C,
+    KeyCode::D,
+    KeyCode::E,
+    KeyCode::F,
+    KeyCode::G,
+    KeyCode::H,
+    KeyCode::I,
+    KeyCode::J,
+    KeyCode::K,
+    KeyCode::L,
+    KeyCode::M,
+    KeyCode::N,
+    KeyCode::O,
+    KeyCode::P,
+    KeyCode::Q,
+    KeyCode::R,
+    KeyCode::S,
+    KeyCode::T,
+    KeyCode::U,
+    KeyCode::V,
+    KeyCode::W,
+    KeyCode::X,
+    KeyCode::Y,
+    KeyCode::Z,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::F1,
+    KeyCode::F2,
+    KeyCode::F3,
+    KeyCode::F4,
+    KeyCode::F5,
+    KeyCode::F6,
+    KeyCode::F7,
+    KeyCode::F8,
+    KeyCode::F9,
+    KeyCode::F10,
+    KeyCode::F11,
+    KeyCode::F12,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+    KeyCode::None,
+];
 
 #[repr(C)]
 #[warn(non_camel_case_types)]
@@ -71,7 +339,7 @@ struct KEY_EVENT_RECORD {
 union WindowsTerminalEvent {
     KeyEvent: KEY_EVENT_RECORD,
     WindowBufferSizeEvent: COORD,
-    extra:u32,
+    extra: u32,
 }
 
 #[repr(C)]
@@ -238,7 +506,10 @@ impl Terminal for WindowsTerminal {
         return self.height;
     }
     fn get_system_event(&mut self) -> SystemEvent {
-        let mut ir = INPUT_RECORD { EventType: 0, Event: WindowsTerminalEvent{extra:0} };
+        let mut ir = INPUT_RECORD {
+            EventType: 0,
+            Event: WindowsTerminalEvent { extra: 0 },
+        };
         let mut nr_read = 0u32;
 
         unsafe {
@@ -249,51 +520,60 @@ impl Terminal for WindowsTerminal {
             }
         }
 
-        if ir.EventType == KEY_EVENT
-        {
+        if ir.EventType == KEY_EVENT {
             let mut key = Key::default();
-            if (ir.Event.KeyEvent.UnicodeChar >= 32) && (ir.Event.KeyEvent.bKeyDown == TRUE)
-            {
-                let res = char::from_u32(ir.Event.KeyEvent.UnicodeChar as u32);
-                if res.is_some() {
-                    key.character = res.unwrap();
+            unsafe {
+                if (ir.Event.KeyEvent.UnicodeChar >= 32) && (ir.Event.KeyEvent.bKeyDown == TRUE) {
+                    let res = char::from_u32(ir.Event.KeyEvent.UnicodeChar as u32);
+                    if res.is_some() {
+                        key.character = res.unwrap();
+                    }
+                }
+                if ir.Event.KeyEvent.wVirtualKeyCode < 256 {
+                    key.code = translation_matrix[ir.Event.KeyEvent.wVirtualKeyCode as usize];
+                }
+
+                if (ir.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
+                    != 0
+                {
+                    key.modifier |= KeyModifier::Alt;
+                }
+                if (ir.Event.KeyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
+                    != 0
+                {
+                    key.modifier |= KeyModifier::Ctrl;
+                }
+                if (ir.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0 {
+                    key.modifier |= KeyModifier::Shift;
+                }
+
+                // if ALT or CTRL are pressed, clear the ascii code
+                if key
+                    .modifier
+                    .contains_one(KeyModifier::Alt | KeyModifier::Ctrl)
+                {
+                    key.character = 0 as char;
                 }
             }
-        if (ir.Event.KeyEvent.wVirtualKeyCode < KEYTRANSLATION_MATRIX_SIZE)
-            evnt.keyCode = KeyTranslationMatrix[ir.Event.KeyEvent.wVirtualKeyCode];
-        else
-            evnt.keyCode = Input::Key::None;
 
-        auto eventShiftState = Input::Key::None;
-        if ((ir.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) != 0)
-            eventShiftState |= Input::Key::Alt;
-        if ((ir.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0)
-            eventShiftState |= Input::Key::Shift;
-        if ((ir.Event.KeyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0)
-            eventShiftState |= Input::Key::Ctrl;
+            // if (evnt.keyCode == Input::Key::None)
+            // {
+            //     if (eventShiftState != this->shiftState)
+            //         evnt.eventType = SystemEventType::ShiftStateChanged;
+            //     else if ((evnt.unicodeCharacter > 0) && (ir.Event.KeyEvent.bKeyDown))
+            //         evnt.eventType = SystemEventType::KeyPressed;
+            //     evnt.keyCode = eventShiftState;
+            // }
+            // else
+            // {
+            //     evnt.keyCode |= eventShiftState;
+            //     if (ir.Event.KeyEvent.bKeyDown)
+            //         evnt.eventType = SystemEventType::KeyPressed;
+            // }
+            // this->shiftState = eventShiftState;
 
-        // if ALT or CTRL are pressed, clear the ascii code
-        if ((((uint32) eventShiftState) & ((uint32) (Input::Key::Alt | Input::Key::Ctrl))) != 0)
-            evnt.unicodeCharacter = 0;
-
-        if (evnt.keyCode == Input::Key::None)
-        {
-            if (eventShiftState != this->shiftState)
-                evnt.eventType = SystemEventType::ShiftStateChanged;
-            else if ((evnt.unicodeCharacter > 0) && (ir.Event.KeyEvent.bKeyDown))
-                evnt.eventType = SystemEventType::KeyPressed;
-            evnt.keyCode = eventShiftState;
+            return SystemEvent::Key(key);
         }
-        else
-        {
-            evnt.keyCode |= eventShiftState;
-            if (ir.Event.KeyEvent.bKeyDown)
-                evnt.eventType = SystemEventType::KeyPressed;
-        }
-        this->shiftState = eventShiftState;
-
-        }
-
 
         return SystemEvent::None;
     }

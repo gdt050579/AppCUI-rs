@@ -20,6 +20,6 @@ impl Key {
 
 impl Default for Key {
     fn default() -> Self {
-        Self { code: KeyCode::None, modifier: KeyModifier::None, character: 0 }
+        Self { code: KeyCode::None, modifier: KeyModifier::None, character: 0 as char }
     }
 }
