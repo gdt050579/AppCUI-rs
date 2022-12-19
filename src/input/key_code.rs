@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Copy,Clone,PartialEq)]
+#[derive(Copy,Clone,PartialEq,Debug)]
 pub enum KeyCode {
     None = 0,
     F1 = 1,

@@ -1,4 +1,5 @@
 use appcui::graphics::*;
+use appcui::input::KeyCode;
 use appcui::terminal::*;
 
 #[test]
@@ -18,4 +19,21 @@ fn test_1() {
 
     term.update_screen(&s);
 
+}
+
+#[test]
+fn test_2() {
+    let term = TerminalType::new(TerminalType::WindowsConsole);
+    assert!(term.is_some());
+    let mut term = term.unwrap();
+    loop {
+        let sys_event = term.get_system_event();
+        if let SystemEvent::Key(kb) = sys_event {
+            println!("Key pressed: {:?}",kb);
+            if kb.code == KeyCode::Escape {
+                break;
+            }
+        }
+    }
+    println!("Done");
 }

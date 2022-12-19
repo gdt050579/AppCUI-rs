@@ -1,7 +1,7 @@
 use super::KeyCode;
 use super::KeyModifier;
 
-#[derive(Copy,Clone,PartialEq)]
+#[derive(Copy,Clone,PartialEq,Debug)]
 pub struct Key {
     pub code: KeyCode,
     pub modifier: KeyModifier,
