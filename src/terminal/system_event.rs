@@ -1,4 +1,4 @@
-#[derive(Copy,Clone,PartialEq)]
+#[derive(Copy,Clone,PartialEq,Debug)]
 pub enum SystemEvent
 {
     None,

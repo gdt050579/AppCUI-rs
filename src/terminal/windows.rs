@@ -430,6 +430,7 @@ pub struct WindowsTerminal {
     width: u32,
     height: u32,
     chars: Vec<CHAR_INFO>,
+    shift_state: KeyModifier,
 }
 
 impl WindowsTerminal {
@@ -446,6 +447,7 @@ impl WindowsTerminal {
             width: info.size.x as u32,
             height: info.size.y as u32,
             chars: Vec::with_capacity(100),
+            shift_state: KeyModifier::None,
         });
         term.chars.resize(
             (term.width as usize) * (term.height as usize),
@@ -554,24 +556,20 @@ impl Terminal for WindowsTerminal {
                 {
                     key.character = 0 as char;
                 }
+                if key.has_key() {
+                    if ir.Event.KeyEvent.bKeyDown == FALSE {
+                        // key is up (no need to send)
+                        return SystemEvent::None;
+                    }
+                } else {
+                    // check for change in modifier
+                    if self.shift_state == key.modifier {
+                        // nothing changed --> return
+                        return SystemEvent::None;
+                    }
+                    self.shift_state = key.modifier;
+                }
             }
-
-            // if (evnt.keyCode == Input::Key::None)
-            // {
-            //     if (eventShiftState != this->shiftState)
-            //         evnt.eventType = SystemEventType::ShiftStateChanged;
-            //     else if ((evnt.unicodeCharacter > 0) && (ir.Event.KeyEvent.bKeyDown))
-            //         evnt.eventType = SystemEventType::KeyPressed;
-            //     evnt.keyCode = eventShiftState;
-            // }
-            // else
-            // {
-            //     evnt.keyCode |= eventShiftState;
-            //     if (ir.Event.KeyEvent.bKeyDown)
-            //         evnt.eventType = SystemEventType::KeyPressed;
-            // }
-            // this->shiftState = eventShiftState;
-
             return SystemEvent::Key(key);
         }
 
