@@ -5,8 +5,8 @@ use super::graphics::Surface;
 use super::graphics::Color;
 use super::graphics::Attribute;
 use super::input::Key;
-use super::input::KeyCode;
-use super::input::KeyModifier;
+use super::graphics::Size;
+
 
 pub use self::system_event::SystemEvent;
 

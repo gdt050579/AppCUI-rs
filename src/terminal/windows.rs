@@ -288,6 +288,14 @@ const translation_matrix: [KeyCode; 256] = [
 #[repr(C)]
 #[warn(non_camel_case_types)]
 #[derive(Default, Copy, Clone, Debug)]
+struct SIZE {
+    width: u16,
+    height: u16,
+}
+
+#[repr(C)]
+#[warn(non_camel_case_types)]
+#[derive(Default, Copy, Clone, Debug)]
 struct COORD {
     x: i16,
     y: i16,
@@ -338,7 +346,7 @@ struct KEY_EVENT_RECORD {
 #[derive(Copy, Clone)]
 union WindowsTerminalEvent {
     KeyEvent: KEY_EVENT_RECORD,
-    WindowBufferSizeEvent: COORD,
+    WindowBufferSizeEvent: SIZE,
     extra: u32,
 }
 
@@ -522,6 +530,7 @@ impl Terminal for WindowsTerminal {
             }
         }
 
+        // Key processing
         if ir.EventType == KEY_EVENT {
             let mut key = Key::default();
             unsafe {
@@ -571,6 +580,16 @@ impl Terminal for WindowsTerminal {
                 }
             }
             return SystemEvent::Key(key);
+        }
+
+        // resize
+        if ir.EventType == WINDOW_BUFFER_SIZE_EVENT {
+            unsafe {
+                return SystemEvent::Resize(super::Size::new(
+                    ir.Event.WindowBufferSizeEvent.width as u32,
+                    ir.Event.WindowBufferSizeEvent.height as u32,
+                ));
+            }
         }
 
         return SystemEvent::None;

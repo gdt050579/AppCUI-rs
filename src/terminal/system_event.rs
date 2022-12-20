@@ -3,5 +3,6 @@ pub enum SystemEvent
 {
     None,
     AppClose,
-    Key(super::Key)
+    Key(super::Key),
+    Resize(super::Size)
 }
