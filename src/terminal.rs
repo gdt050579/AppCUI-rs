@@ -3,7 +3,7 @@ mod system_event;
 
 use super::graphics::Surface;
 use super::graphics::Color;
-use super::graphics::Attribute;
+use super::graphics::CharFlags;
 use super::input::Key;
 use super::graphics::Size;
 

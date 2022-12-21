@@ -1,5 +1,5 @@
 use super::Color;
-use super::Attribute;
+use super::CharFlags;
 
 static UNICODE_CODES: [char; 44] = [
     '\u{2554}', '\u{2557}', '\u{255D}', '\u{255A}', '\u{2550}', '\u{2551}',
@@ -88,16 +88,16 @@ pub struct Character {
     pub code: char,
     pub foreground: Color,
     pub background: Color,
-    pub attribute: Attribute,
+    pub flags: CharFlags,
 }
 impl Character {
     #[inline]
-    pub fn new<T>(code: T, fore: Color, back: Color, attr: Attribute) -> Self where char: From<T>  {
+    pub fn new<T>(code: T, fore: Color, back: Color, flags: CharFlags) -> Self where char: From<T>  {
         Character {
             code: char::from(code),
             foreground: fore,
             background: back,
-            attribute: attr,
+            flags: flags,
         }
     }
     #[inline]
@@ -106,7 +106,7 @@ impl Character {
             code: char::from(code),
             foreground: Color::Transparent,
             background: Color::Transparent,
-            attribute: Attribute::None,
+            flags: CharFlags::None,
         }
     }
     #[inline]
@@ -115,7 +115,7 @@ impl Character {
             code: 0 as char,
             foreground: fore,
             background: back,
-            attribute: Attribute::None,
+            flags: CharFlags::None,
         }
     }
     #[inline]
@@ -129,6 +129,6 @@ impl Character {
         if ch.background != Color::Transparent {
             self.background = ch.background;
         }
-        self.attribute = ch.attribute;
+        self.flags = ch.flags;
     }
 }

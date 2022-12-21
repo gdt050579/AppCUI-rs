@@ -1,7 +1,7 @@
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
 
-use super::Attribute;
+use super::CharFlags;
 use super::Color;
 use super::Key;
 use super::Surface;
@@ -489,7 +489,7 @@ impl Terminal for WindowsTerminal {
             if ch.background != Color::Transparent {
                 screen_char.attr |= ((ch.background as u8) as u16) << 4;
             }
-            if ch.attribute.contains(Attribute::Underline) {
+            if ch.flags.contains(CharFlags::Underline) {
                 screen_char.attr |= COMMON_LVB_UNDERSCORE;
             }
         }

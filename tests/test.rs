@@ -9,13 +9,13 @@ fn test_1() {
     let mut term = term.unwrap();
     let mut s = Surface::new(term.get_width(), term.get_height());
     
-    s.clear(Character::new(SpecialChar::CircleEmpty, Color::White, Color::DarkBlue,Attribute::None));
+    s.clear(Character::new(SpecialChar::CircleEmpty, Color::White, Color::DarkBlue,CharFlags::None));
     s.fill_rect(5, 5, 7, 7, Character::with_char(' '));
-    s.fill_rect(15, 5, 20, 7, Character::new('x',Color::Red, Color::Black, Attribute::Underline));
+    s.fill_rect(15, 5, 20, 7, Character::new('x',Color::Red, Color::Black, CharFlags::Underline));
     s.set_origin(30, 5);
-    s.fill_rect_with_size(35, 5, 40, 7, Character::new(SpecialChar::Block25,Color::DarkRed, Color::Black, Attribute::None));
+    s.fill_rect_with_size(35, 5, 40, 7, Character::new(SpecialChar::Block25,Color::DarkRed, Color::Black, CharFlags::None));
     s.reset_origin();
-    s.fill_horizontal_line(1, 3, 5, Character::new('|', Color::Yellow, Color::Red, Attribute::None));
+    s.fill_horizontal_line(1, 3, 5, Character::new('|', Color::Yellow, Color::Red, CharFlags::None));
 
     term.update_screen(&s);
 

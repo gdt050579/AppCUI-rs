@@ -1,5 +1,6 @@
-use super::Attribute;
+use super::CharAttribute;
 use super::Character;
+use super::ClipArea;
 use super::Color;
 use super::LineType;
 
@@ -9,6 +10,7 @@ pub struct Surface {
     pub(crate) translate_x: i32,
     pub(crate) translate_y: i32,
     pub(crate) chars: Vec<Character>,
+    clip: ClipArea,
 }
 
 impl Surface {
@@ -22,8 +24,9 @@ impl Surface {
             translate_x: 0,
             translate_y: 0,
             chars: Vec::<Character>::with_capacity(count),
+            clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
         };
-        let c = Character::new(' ', Color::White, Color::Black, Attribute::None);
+        let c = Character::new(' ', Color::White, Color::Black, super::CharFlags::None);
         for _ in 0..count {
             s.chars.push(c);
         }
@@ -41,14 +44,11 @@ impl Surface {
     fn coords_to_position(&self, x: i32, y: i32) -> Option<usize> {
         let x = x + self.translate_x;
         let y = y + self.translate_y;
-        if (x < 0) || (y < 0) {
-            return None;
-        };
-        let x_p = x as u32;
-        let y_p = y as u32;
-        if (x_p >= self.width) || (y_p >= self.height) {
+        if self.clip.contains(x, y) == false {
             return None;
         }
+        let x_p = x as usize;
+        let y_p = y as usize;
         let pos = (y_p as usize) * (self.width as usize) + (x_p as usize);
         return Some(pos);
     }
@@ -62,6 +62,21 @@ impl Surface {
     pub fn reset_origin(&mut self) {
         self.translate_x = 0;
         self.translate_y = 0;
+    }
+
+    #[inline]
+    pub fn set_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        self.clip.set(
+            i32::max(0, left),
+            i32::max(0, top),
+            i32::min((self.width - 1) as i32, right),
+            i32::min((self.height - 1) as i32, bottom),
+        );
+    }
+    #[inline]
+    pub fn reset_clip(&mut self) {
+        self.clip
+            .set(0, 0, (self.width - 1) as i32, (self.height - 1) as i32);
     }
 
     #[inline]
