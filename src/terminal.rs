@@ -1,4 +1,5 @@
 mod windows;
+mod debug;
 mod system_event;
 
 use super::graphics::Surface;
