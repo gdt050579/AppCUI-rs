@@ -5,6 +5,7 @@ mod surface;
 mod line_type;
 mod size;
 mod clip_area;
+mod tests;
 
 
 pub use self::character::Character;
