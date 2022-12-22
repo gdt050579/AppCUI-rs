@@ -22,7 +22,7 @@ impl SurfaceTester {
         let mut y = 0u32;
 
         // firt border
-        for i in 0..=6 + self.surface.width {
+        for _ in 0..=6 + self.surface.width {
             self.temp_buf.push('=');
         }
         println!("+{}+", self.temp_buf);
@@ -50,7 +50,7 @@ impl SurfaceTester {
 
         // separator line
         self.temp_buf.push('|');
-        for i in 0..=6 + self.surface.width {
+        for _ in 0..=6 + self.surface.width {
             self.temp_buf.push('-');
         }
         self.temp_buf.push('|');
@@ -72,7 +72,7 @@ impl SurfaceTester {
             }
         }
         // last border
-        for i in 0..=6 + self.surface.width {
+        for _ in 0..=6 + self.surface.width {
             self.temp_buf.push('=');
         }
         println!("+{}+", self.temp_buf);
