@@ -90,8 +90,8 @@ impl SurfaceTester {
             buf[3] = (((ch.code as u32) >> 24) & 0xFF) as u8;
             buf[4] = ch.foreground as u8;
             buf[5] = ch.background as u8;
-            buf[6] = 0;
-            buf[7] = 0;
+            buf[6] = ((ch.flags.get_value() >> 8) & 0xFF) as u8;
+            buf[7] = (ch.flags.get_value() & 0xFF) as u8;
             for b in buf {
                 hash = hash ^ (b as u64);
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
@@ -122,5 +122,22 @@ fn check_clear() {
         Color::Black,
         CharFlags::None,
     ));
-    s.print();
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x19B0E1632DAE6325);
+}
+#[test]
+fn check_rect() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new(
+        '.',
+        Color::White,
+        Color::Black,
+        CharFlags::None,
+    ));
+    s.fill_rect(2, 2, 4, 4, Character::new('@',Color::Aqua, Color::Red, CharFlags::Bold));
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x9E357B7ADEDEB720);
+    s.fill_rect_with_size(4, 1, 10, 2 , Character::with_char('X'));
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xD897421A927A1A1);
 }
