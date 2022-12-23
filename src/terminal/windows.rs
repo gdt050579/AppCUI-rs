@@ -324,6 +324,14 @@ struct CONSOLE_SCREEN_BUFFER_INFO {
 #[repr(C)]
 #[warn(non_camel_case_types)]
 #[derive(Default, Copy, Clone, Debug)]
+struct CONSOLE_CURSOR_INFO {
+    size: u32,
+    visible: BOOL,
+}
+
+#[repr(C)]
+#[warn(non_camel_case_types)]
+#[derive(Default, Copy, Clone, Debug)]
 struct CHAR_INFO {
     code: u16,
     attr: u16,
@@ -363,6 +371,8 @@ extern "system" {
     fn GetStdHandle(v: i32) -> HANDLE;
     #[warn(non_camel_case_types)]
     fn SetConsoleCursorPosition(handle: HANDLE, pos: COORD) -> BOOL;
+    #[warn(non_camel_case_types)]
+    fn SetConsoleCursorInfo(handle: HANDLE, info: &CONSOLE_CURSOR_INFO) -> BOOL;
     #[warn(non_camel_case_types)]
     fn WriteConsoleOutputW(
         handle: HANDLE,
@@ -406,15 +416,6 @@ fn get_console_screen_buffer_info(handle: HANDLE) -> Option<CONSOLE_SCREEN_BUFFE
         return Some(cbuf);
     }
 }
-
-fn set_console_cursor_pos(handle: u32, x: i32, y: i32) -> bool {
-    let pos = COORD {
-        x: x as i16,
-        y: y as i16,
-    };
-    unsafe { SetConsoleCursorPosition(handle, pos) != 0 }
-}
-
 
 pub struct WindowsTerminal {
     stdin_handle: HANDLE,
@@ -492,6 +493,29 @@ impl Terminal for WindowsTerminal {
         unsafe {
             WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, start, &region);
         }
+        // update the cursor
+        if surface.cursor.is_visible() {
+            let pos = COORD {
+                x: surface.cursor.x as i16,
+                y: surface.cursor.y as i16,
+            };
+            let info = CONSOLE_CURSOR_INFO {
+                size: 10,
+                visible: TRUE
+            };
+            unsafe {
+                SetConsoleCursorPosition(self.stdout_handle, pos);
+                SetConsoleCursorInfo(self.stdout_handle, &info);
+            }
+        } else {
+            let info = CONSOLE_CURSOR_INFO {
+                size: 10,
+                visible: FALSE
+            };
+            unsafe {
+                SetConsoleCursorInfo(self.stdout_handle, &info);
+            }            
+        }
     }
     fn get_width(&self) -> u32 {
         return self.width;
@@ -518,7 +542,8 @@ impl Terminal for WindowsTerminal {
         if ir.event_type == KEY_EVENT {
             let mut key = Key::default();
             unsafe {
-                if (ir.event.key_event.unicode_char >= 32) && (ir.event.key_event.key_down == TRUE) {
+                if (ir.event.key_event.unicode_char >= 32) && (ir.event.key_event.key_down == TRUE)
+                {
                     let res = char::from_u32(ir.event.key_event.unicode_char as u32);
                     if res.is_some() {
                         key.character = res.unwrap();
