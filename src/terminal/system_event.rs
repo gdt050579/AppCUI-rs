@@ -4,5 +4,6 @@ pub enum SystemEvent
     None,
     AppClose,
     Key(super::Key),
-    Resize(super::Size)
+    Resize(super::Size),
+    Mouse(super::MouseEvent)
 }
