@@ -96,8 +96,30 @@ impl Surface {
     }
 
     pub fn clear(&mut self, ch: Character) {
-        for c in &mut self.chars {
-            c.set(&ch);
+        if !self.clip.is_visible() {
+            return;
+        }
+        if (self.clip.left == 0)
+            && (self.clip.top == 0)
+            && (self.clip.right == self.right_most)
+            && (self.clip.bottom == self.bottom_most)
+        {
+            // the entire screen has to be cleared
+            for c in &mut self.chars {
+                c.set(&ch);
+            }
+        } else {
+            // only the clip must pe cleared
+            let mut pos = (self.clip.left as usize);
+            let sz = (self.clip.right + 1 - self.clip.left) as usize;
+            pos += (self.clip.top as usize) * (self.width as usize);
+
+            for _ in self.clip.top..=self.clip.bottom {
+                for c in &mut self.chars[pos..(pos + sz)] {
+                    c.set(&ch);
+                }
+                pos += self.width as usize;
+            }
         }
     }
 

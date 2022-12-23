@@ -128,6 +128,30 @@ fn check_clear() {
     assert_eq!(s.compute_hash(), 0x19B0E1632DAE6325);
 }
 #[test]
+fn check_clear_with_clipping() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.clear(Character::new(
+        'x',
+        Color::White,
+        Color::Black,
+        CharFlags::None,
+    ));
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xD82E620861132325);
+    s.set_clip(2, 2, 10, 6);
+    s.clear(Character::with_char(' '));
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x4556A89C009CADFD);
+    s.set_clip(8, 4, 20, 9);
+    s.clear(Character::with_char('.'));
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xC0F23672210DB085);
+    s.reset_clip();
+    s.clear(Character::with_char('+'));
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x6D177D1CC0356225);
+}
+#[test]
 fn check_fill_rect() {
     let mut s = SurfaceTester::new(20, 5);
     s.clear(Character::new(
