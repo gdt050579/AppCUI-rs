@@ -11,12 +11,14 @@ pub struct Surface {
     pub(crate) translate_y: i32,
     pub(crate) chars: Vec<Character>,
     clip: ClipArea,
+    right_most: i32,
+    bottom_most: i32,
 }
 
 impl Surface {
     pub fn new(width: u32, height: u32) -> Surface {
-        let w = width.clamp(5, 10000);
-        let h = height.clamp(5, 10000);
+        let w = width.clamp(1, 10000);
+        let h = height.clamp(1, 10000);
         let count = (w as usize) * (h as usize);
         let mut s = Surface {
             width: w,
@@ -25,6 +27,8 @@ impl Surface {
             translate_y: 0,
             chars: Vec::<Character>::with_capacity(count),
             clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
+            right_most: (w - 1) as i32,
+            bottom_most: (h - 1) as i32,
         };
         let c = Character::new(' ', Color::White, Color::Black, super::CharFlags::None);
         for _ in 0..count {
@@ -69,14 +73,13 @@ impl Surface {
         self.clip.set(
             i32::max(0, left),
             i32::max(0, top),
-            i32::min((self.width - 1) as i32, right),
-            i32::min((self.height - 1) as i32, bottom),
+            i32::min(self.right_most, right),
+            i32::min(self.bottom_most, bottom),
         );
     }
     #[inline]
     pub fn reset_clip(&mut self) {
-        self.clip
-            .set(0, 0, (self.width - 1) as i32, (self.height - 1) as i32);
+        self.clip.set(0, 0, self.right_most, self.bottom_most);
     }
 
     #[inline]
