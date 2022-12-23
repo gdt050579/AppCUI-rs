@@ -11,7 +11,7 @@ pub(super) struct LineTypeChars {
     pub(super) vertical: char,
 }
 
-static LINE_TYPE_CHARS: [LineTypeChars; 6] = [
+static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
     /* Single Lines */
     LineTypeChars {
         corner_top_left: '\u{250C}',
@@ -90,6 +90,19 @@ static LINE_TYPE_CHARS: [LineTypeChars; 6] = [
         horizontal: '-',
         vertical: '|',
     },
+    /* Border */
+    LineTypeChars {
+        corner_top_left: '\u{256D}',
+        horizontal_on_top: '\u{2500}',
+        corner_top_right: '\u{256E}',
+        vertical_on_right: '\u{2502}',
+        corner_bottom_right: '\u{256F}',
+        horizontal_on_bottom: '\u{2500}',
+        corner_bottom_left: '\u{2570}',
+        vertical_on_left: '\u{2502}',
+        horizontal: '\u{2500}',
+        vertical: '\u{2502}',
+    },    
 ];
 
 /*

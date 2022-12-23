@@ -205,7 +205,15 @@ fn check_draw_rect() {
         8,
         LineType::AsciiRound,
         CharAttribute::with_color(Color::Green, Color::White),
-    );     
-    s.print();
-    //assert_eq!(s.compute_hash(), 0x8D0FF039A76E6925);
+    );   
+    s.draw_rect(
+        1,
+        6,
+        17,
+        9,
+        LineType::SingleRound,
+        CharAttribute::with_color(Color::Green, Color::White),
+    );       
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xD99DB2F59085FE71);
 }
