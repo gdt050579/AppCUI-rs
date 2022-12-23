@@ -5,6 +5,7 @@ mod surface;
 mod line_type;
 mod size;
 mod clip_area;
+mod cursor;
 #[cfg(test)]
 mod tests;
 
@@ -17,4 +18,5 @@ pub use self::char_attribute::CharAttribute;
 pub use self::line_type::LineType;
 pub use self::surface::Surface;
 pub use self::size::Size;
+pub use self::cursor::Cursor;
 use self::clip_area::ClipArea;

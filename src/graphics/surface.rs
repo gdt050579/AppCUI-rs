@@ -1,7 +1,11 @@
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
+use super::Cursor;
 use super::LineType;
+
+const MAX_SURFACE_WIDTH: u32 = 10000;
+const MAX_SURFACE_HEIGHT: u32 = 10000;
 
 pub struct Surface {
     pub(crate) width: u32,
@@ -9,6 +13,7 @@ pub struct Surface {
     pub(crate) translate_x: i32,
     pub(crate) translate_y: i32,
     pub(crate) chars: Vec<Character>,
+    pub(crate) cursor: Cursor,
     clip: ClipArea,
     right_most: i32,
     bottom_most: i32,
@@ -16,8 +21,8 @@ pub struct Surface {
 
 impl Surface {
     pub fn new(width: u32, height: u32) -> Surface {
-        let w = width.clamp(1, 10000);
-        let h = height.clamp(1, 10000);
+        let w = width.clamp(1, MAX_SURFACE_WIDTH);
+        let h = height.clamp(1, MAX_SURFACE_HEIGHT);
         let count = (w as usize) * (h as usize);
         let mut s = Surface {
             width: w,
@@ -26,6 +31,7 @@ impl Surface {
             translate_y: 0,
             chars: Vec::<Character>::with_capacity(count),
             clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
+            cursor: Cursor::new(),
             right_most: (w - 1) as i32,
             bottom_most: (h - 1) as i32,
         };
@@ -60,7 +66,6 @@ impl Surface {
         self.translate_x = x;
         self.translate_y = y;
     }
-
     #[inline]
     pub fn reset_origin(&mut self) {
         self.translate_x = 0;
@@ -79,6 +84,21 @@ impl Surface {
     #[inline]
     pub fn reset_clip(&mut self) {
         self.clip.set(0, 0, self.right_most, self.bottom_most);
+    }
+
+    #[inline]
+    pub fn set_cursor(&mut self, x: i32, y: i32) {
+        let x = x + self.translate_x;
+        let y = y + self.translate_y;
+        if self.clip.contains(x, y) {
+            self.cursor.set(x as u32, y as u32);
+        } else {
+            self.cursor.hide();
+        }
+    }
+    #[inline]
+    pub fn hide_cursor(&mut self) {
+        self.cursor.hide();
     }
 
     #[inline]
@@ -165,7 +185,6 @@ impl Surface {
             y += 1;
         }
     }
-
     pub fn fill_vertical_line_width_size(&mut self, x: i32, y: i32, height: u32, ch: Character) {
         if height > 0 {
             self.fill_vertical_line(x, y, y + ((height - 1) as i32), ch);
