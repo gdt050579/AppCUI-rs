@@ -415,22 +415,6 @@ fn set_console_cursor_pos(handle: u32, x: i32, y: i32) -> bool {
     unsafe { SetConsoleCursorPosition(handle, pos) != 0 }
 }
 
-fn update_screen(handle: u32, buf: &[CHAR_INFO], width: u32, height: u32) {
-    let sz = COORD {
-        x: width as i16,
-        y: height as i16,
-    };
-    let start = COORD { x: 0, y: 0 };
-    let region = SMALL_RECT {
-        left: 0,
-        top: 0,
-        right: sz.x,
-        bottom: sz.y,
-    };
-    unsafe {
-        WriteConsoleOutputW(handle, buf.as_ptr(), sz, start, &region);
-    }
-}
 
 pub struct WindowsTerminal {
     stdin_handle: HANDLE,
