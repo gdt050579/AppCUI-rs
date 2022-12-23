@@ -151,7 +151,7 @@ fn check_fill_rect() {
 }
 #[test]
 fn check_draw_rect() {
-    let mut s = SurfaceTester::new(20, 7);
+    let mut s = SurfaceTester::new(40, 7);
     s.clear(Character::new(
         '.',
         Color::White,
@@ -173,6 +173,14 @@ fn check_draw_rect() {
         5,
         LineType::Double,
         CharAttribute::with_color(Color::White, Color::Green),
+    );
+    s.draw_rect(
+        20,
+        0,
+        28,
+        3,
+        LineType::SingleThick,
+        CharAttribute::with_color(Color::Aqua, Color::Black),
     );
     s.print();
     //assert_eq!(s.compute_hash(), 0x8D0FF039A76E6925);

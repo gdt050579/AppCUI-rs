@@ -11,7 +11,7 @@ pub(super) struct LineTypeChars {
     pub(super) vertical: char,
 }
 
-static LINE_TYPE_CHARS: [LineTypeChars; 2] = [
+static LINE_TYPE_CHARS: [LineTypeChars; 3] = [
     LineTypeChars {
         corner_top_left: '\u{250C}',
         horizontal_on_top: '\u{2500}',
@@ -36,13 +36,25 @@ static LINE_TYPE_CHARS: [LineTypeChars; 2] = [
         horizontal: '\u{2551}',
         vertical: '\u{2550}',
     },
+    LineTypeChars {
+        corner_top_left: '\u{250F}',
+        horizontal_on_top: '\u{2501}',
+        corner_top_right: '\u{2513}',
+        vertical_on_right: '\u{2503}',
+        corner_bottom_right: '\u{251B}',
+        horizontal_on_bottom: '\u{2501}',
+        corner_bottom_left: '\u{2517}',
+        vertical_on_left: '\u{2503}',
+        horizontal: '\u{2503}',
+        vertical: '\u{2501}',
+    },
 ];
 
 /*
 struct AppCUI::Graphics::LineTypeChars line_types_chars[] = {
     //{ 0x250C, 0x2500, 0x2510, 0x2502, 0x2518, 0x2500, 0x2514, 0x2502 }, /* Single Lines */
     //{ 0x2554, 0x2550, 0x2557, 0x2551, 0x255D, 0x2550, 0x255A, 0x2551 }, /* Double Lines */
-    { 0x250F, 0x2501, 0x2513, 0x2503, 0x251B, 0x2501, 0x2517, 0x2503 }, /* Single Thick lines */
+    //{ 0x250F, 0x2501, 0x2513, 0x2503, 0x251B, 0x2501, 0x2517, 0x2503 }, /* Single Thick lines */
     { 0x2584, 0x2584, 0x2584, 0x2588, 0x2580, 0x2580, 0x2580, 0x2588 }, /* Border */
     { '+', '-', '+', '|', '+', '-', '+', '|' },                         /* Ascii */
     { '/', '-', '\\', '|', '/', '-', '\\', '|' },                       /* Ascii Round */
