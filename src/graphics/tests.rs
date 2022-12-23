@@ -288,6 +288,26 @@ fn check_draw_horizontal_line() {
     s.draw_horizontal_line(1, 9, 15, LineType::Ascii, CharAttribute::default());
     s.draw_horizontal_line(1, 11, 15, LineType::AsciiRound, CharAttribute::default());
     s.draw_horizontal_line(1, 13, 15, LineType::SingleRound, CharAttribute::default());
-    s.print();
+    //s.print();
+    assert_eq!(s.compute_hash(),0xC8627A5B784CE327);
+}
+
+#[test]
+fn check_draw_horizontal_line_with_size() {
+    let mut s = SurfaceTester::new(20, 15);
+    s.clear(Character::new(
+        ' ',
+        Color::White,
+        Color::Black,
+        CharFlags::None,
+    ));
+    s.draw_horizontal_line_with_size(1, 1, 15, LineType::Single, CharAttribute::default());
+    s.draw_horizontal_line_with_size(1, 3, 15, LineType::Double, CharAttribute::default());
+    s.draw_horizontal_line_with_size(1, 5, 15, LineType::SingleThick, CharAttribute::default());
+    s.draw_horizontal_line_with_size(1, 7, 15, LineType::Border, CharAttribute::default());
+    s.draw_horizontal_line_with_size(1, 9, 15, LineType::Ascii, CharAttribute::default());
+    s.draw_horizontal_line_with_size(1, 11, 15, LineType::AsciiRound, CharAttribute::default());
+    s.draw_horizontal_line_with_size(1, 13, 15, LineType::SingleRound, CharAttribute::default());
+    //s.print();
     assert_eq!(s.compute_hash(),0xC8627A5B784CE327);
 }

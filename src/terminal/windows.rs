@@ -26,7 +26,7 @@ const RIGHT_CTRL_PRESSED: u32 = 0x0004;
 const LEFT_CTRL_PRESSED: u32 = 0x0008;
 const SHIFT_PRESSED: u32 = 0x0010;
 
-const translation_matrix: [KeyCode; 256] = [
+const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
     KeyCode::None,
     KeyCode::None,
@@ -333,20 +333,20 @@ struct CHAR_INFO {
 #[warn(non_camel_case_types)]
 #[derive(Copy, Clone, Debug)]
 struct KEY_EVENT_RECORD {
-    bKeyDown: BOOL,
-    wRepeatCount: u16,
-    wVirtualKeyCode: u16,
-    wVirtualScanCode: u16,
-    UnicodeChar: u16,
-    dwControlKeyState: u32,
+    key_down: BOOL,
+    repeat_count: u16,
+    virtual_key_code: u16,
+    virtual_scan_code: u16,
+    unicode_char: u16,
+    control_key_state: u32,
 }
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Copy, Clone)]
 union WindowsTerminalEvent {
-    KeyEvent: KEY_EVENT_RECORD,
-    WindowBufferSizeEvent: SIZE,
+    key_event: KEY_EVENT_RECORD,
+    window_buffer_size_event: SIZE,
     extra: u32,
 }
 
@@ -354,8 +354,8 @@ union WindowsTerminalEvent {
 #[warn(non_camel_case_types)]
 #[derive(Copy, Clone)]
 struct INPUT_RECORD {
-    EventType: u16,
-    Event: WindowsTerminalEvent,
+    event_type: u16,
+    event: WindowsTerminalEvent,
 }
 
 extern "system" {
@@ -517,8 +517,8 @@ impl Terminal for WindowsTerminal {
     }
     fn get_system_event(&mut self) -> SystemEvent {
         let mut ir = INPUT_RECORD {
-            EventType: 0,
-            Event: WindowsTerminalEvent { extra: 0 },
+            event_type: 0,
+            event: WindowsTerminalEvent { extra: 0 },
         };
         let mut nr_read = 0u32;
 
@@ -531,30 +531,30 @@ impl Terminal for WindowsTerminal {
         }
 
         // Key processing
-        if ir.EventType == KEY_EVENT {
+        if ir.event_type == KEY_EVENT {
             let mut key = Key::default();
             unsafe {
-                if (ir.Event.KeyEvent.UnicodeChar >= 32) && (ir.Event.KeyEvent.bKeyDown == TRUE) {
-                    let res = char::from_u32(ir.Event.KeyEvent.UnicodeChar as u32);
+                if (ir.event.key_event.unicode_char >= 32) && (ir.event.key_event.key_down == TRUE) {
+                    let res = char::from_u32(ir.event.key_event.unicode_char as u32);
                     if res.is_some() {
                         key.character = res.unwrap();
                     }
                 }
-                if ir.Event.KeyEvent.wVirtualKeyCode < 256 {
-                    key.code = translation_matrix[ir.Event.KeyEvent.wVirtualKeyCode as usize];
+                if ir.event.key_event.virtual_key_code < 256 {
+                    key.code = TRANSLATION_MATRIX[ir.event.key_event.virtual_key_code as usize];
                 }
 
-                if (ir.Event.KeyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
+                if (ir.event.key_event.control_key_state & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
                     != 0
                 {
                     key.modifier |= KeyModifier::Alt;
                 }
-                if (ir.Event.KeyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
+                if (ir.event.key_event.control_key_state & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
                     != 0
                 {
                     key.modifier |= KeyModifier::Ctrl;
                 }
-                if (ir.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0 {
+                if (ir.event.key_event.control_key_state & SHIFT_PRESSED) != 0 {
                     key.modifier |= KeyModifier::Shift;
                 }
 
@@ -566,7 +566,7 @@ impl Terminal for WindowsTerminal {
                     key.character = 0 as char;
                 }
                 if key.has_key() {
-                    if ir.Event.KeyEvent.bKeyDown == FALSE {
+                    if ir.event.key_event.key_down == FALSE {
                         // key is up (no need to send)
                         return SystemEvent::None;
                     }
@@ -583,11 +583,11 @@ impl Terminal for WindowsTerminal {
         }
 
         // resize
-        if ir.EventType == WINDOW_BUFFER_SIZE_EVENT {
+        if ir.event_type == WINDOW_BUFFER_SIZE_EVENT {
             unsafe {
                 return SystemEvent::Resize(super::Size::new(
-                    ir.Event.WindowBufferSizeEvent.width as u32,
-                    ir.Event.WindowBufferSizeEvent.height as u32,
+                    ir.event.window_buffer_size_event.width as u32,
+                    ir.event.window_buffer_size_event.height as u32,
                 ));
             }
         }

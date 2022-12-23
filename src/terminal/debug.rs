@@ -5,7 +5,7 @@ struct DebugTerminal {
 
 }
 impl Terminal for DebugTerminal {
-    fn update_screen(&mut self, surface: &crate::graphics::Surface) {
+    fn update_screen(&mut self, surface: &Surface) {
         todo!()
     }
 

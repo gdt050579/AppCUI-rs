@@ -210,7 +210,30 @@ impl Surface {
                 attr.background,
                 attr.flags,
             ),
-        );        
+        );
+    }
+
+    pub fn draw_horizontal_line_with_size(
+        &mut self,
+        x: i32,
+        y: i32,
+        width: u32,
+        line_type: LineType,
+        attr: CharAttribute,
+    ) {
+        if width > 0 {
+            self.fill_horizontal_line(
+                x,
+                y,
+                x + ((width - 1) as i32),
+                Character::new(
+                    line_type.get_chars().horizontal,
+                    attr.foreground,
+                    attr.background,
+                    attr.flags,
+                ),
+            );
+        }
     }
 
     pub fn draw_rect(
