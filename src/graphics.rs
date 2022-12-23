@@ -5,6 +5,7 @@ mod surface;
 mod line_type;
 mod size;
 mod clip_area;
+#[cfg(test)]
 mod tests;
 
 
