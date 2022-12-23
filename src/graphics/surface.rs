@@ -1,7 +1,6 @@
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
-use super::Color;
 use super::LineType;
 
 pub struct Surface {
@@ -30,7 +29,7 @@ impl Surface {
             right_most: (w - 1) as i32,
             bottom_most: (h - 1) as i32,
         };
-        let c = Character::new(' ', Color::White, Color::Black, super::CharFlags::None);
+        let c = Character::default();
         for _ in 0..count {
             s.chars.push(c);
         }
