@@ -22,7 +22,7 @@ const FALSE: u32 = 0;
 const TRUE: u32 = 1;
 const COMMON_LVB_UNDERSCORE: u16 = 0x8000;
 const KEY_EVENT: u16 = 0x0001;
-const MOUSE_EVENT: u16 = 0x0008;
+const MOUSE_EVENT: u16 = 0x0002;
 const WINDOW_BUFFER_SIZE_EVENT: u16 = 0x0004;
 const FROM_LEFT_1ST_BUTTON_PRESSED: u32 = 0x0001;
 const RIGHTMOST_BUTTON_PRESSED: u32 = 0x0002;
@@ -576,13 +576,14 @@ impl Terminal for WindowsTerminal {
             event: WindowsTerminalEvent { extra: 0 },
         };
         let mut nr_read = 0u32;
-
+        
         unsafe {
             if (ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE)
                 || (nr_read != 1)
             {
                 return SystemEvent::None;
             }
+            //println!("Event: {}",ir.event_type);
         }
 
         // Key processing
