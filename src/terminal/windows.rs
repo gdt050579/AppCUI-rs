@@ -1,5 +1,9 @@
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
+use crate::input::MouseButton;
+use crate::input::MouseEvent;
+use crate::input::MouseEventType;
+use crate::input::MouseWheelDirection;
 
 use super::CharFlags;
 use super::Color;
@@ -18,9 +22,14 @@ const FALSE: u32 = 0;
 const TRUE: u32 = 1;
 const COMMON_LVB_UNDERSCORE: u16 = 0x8000;
 const KEY_EVENT: u16 = 0x0001;
+const MOUSE_EVENT: u16 = 0x0008;
 const WINDOW_BUFFER_SIZE_EVENT: u16 = 0x0004;
-
+const FROM_LEFT_1ST_BUTTON_PRESSED: u32 = 0x0001;
+const RIGHTMOST_BUTTON_PRESSED: u32 = 0x0002;
 const RIGHT_ALT_PRESSED: u32 = 0x0001;
+const DOUBLE_CLICK: u32 = 0x0002;
+const MOUSE_MOVED: u32 = 0x0001;
+const MOUSE_WHEELED: u32 = 0x0004;
 const LEFT_ALT_PRESSED: u32 = 0x0002;
 const RIGHT_CTRL_PRESSED: u32 = 0x0004;
 const LEFT_CTRL_PRESSED: u32 = 0x0008;
@@ -350,10 +359,21 @@ struct KEY_EVENT_RECORD {
 }
 
 #[repr(C)]
+#[warn(non_camel_case_types)]
+#[derive(Copy, Clone, Debug)]
+struct MOUSE_EVENT_RECORD {
+    mouse_position: COORD,
+    button_state: u32,
+    control_key_state: u32,
+    event_flags: u32,
+}
+
+#[repr(C)]
 #[allow(non_camel_case_types)]
 #[derive(Copy, Clone)]
 union WindowsTerminalEvent {
     key_event: KEY_EVENT_RECORD,
+    mouse_event: MOUSE_EVENT_RECORD,
     window_buffer_size_event: SIZE,
     extra: u32,
 }
@@ -424,6 +444,8 @@ pub struct WindowsTerminal {
     height: u32,
     chars: Vec<CHAR_INFO>,
     shift_state: KeyModifier,
+    last_mouse_x: i32,
+    last_mouse_y: i32,
 }
 
 impl WindowsTerminal {
@@ -441,6 +463,8 @@ impl WindowsTerminal {
             height: info.size.y as u32,
             chars: Vec::with_capacity(100),
             shift_state: KeyModifier::None,
+            last_mouse_x: i32::MAX,
+            last_mouse_y: i32::MAX,
         });
         term.chars.resize(
             (term.width as usize) * (term.height as usize),
@@ -501,7 +525,7 @@ impl Terminal for WindowsTerminal {
             };
             let info = CONSOLE_CURSOR_INFO {
                 size: 10,
-                visible: TRUE
+                visible: TRUE,
             };
             unsafe {
                 SetConsoleCursorPosition(self.stdout_handle, pos);
@@ -510,11 +534,11 @@ impl Terminal for WindowsTerminal {
         } else {
             let info = CONSOLE_CURSOR_INFO {
                 size: 10,
-                visible: FALSE
+                visible: FALSE,
             };
             unsafe {
                 SetConsoleCursorInfo(self.stdout_handle, &info);
-            }            
+            }
         }
     }
     fn get_width(&self) -> u32 {
@@ -589,6 +613,64 @@ impl Terminal for WindowsTerminal {
                 }
             }
             return SystemEvent::Key(key);
+        }
+
+        // mouse processing
+        if ir.event_type == MOUSE_EVENT {
+            unsafe {
+                // for Windows 11
+                if ir.event.mouse_event.event_flags == 0x01 {
+                    if ((ir.event.mouse_event.mouse_position.x as i32) == self.last_mouse_x)
+                        && ((ir.event.mouse_event.mouse_position.y as i32) == self.last_mouse_y)
+                    {
+                        return SystemEvent::None;
+                    }
+
+                    self.last_mouse_x = ir.event.mouse_event.mouse_position.x as i32;
+                    self.last_mouse_y = ir.event.mouse_event.mouse_position.y as i32;
+                }
+
+                let mut mouse_event = MouseEvent::default();
+                mouse_event.x = ir.event.mouse_event.mouse_position.x as i32;
+                mouse_event.y = ir.event.mouse_event.mouse_position.y as i32;
+
+                if (ir.event.mouse_event.button_state & FROM_LEFT_1ST_BUTTON_PRESSED) != 0 {
+                    mouse_event.button = MouseButton::Left;
+                } else if (ir.event.mouse_event.button_state & RIGHTMOST_BUTTON_PRESSED) != 0 {
+                    mouse_event.button = MouseButton::Right;
+                } else if ir.event.mouse_event.button_state > 0 {
+                    mouse_event.button = MouseButton::Center;
+                }
+
+                match ir.event.mouse_event.event_flags {
+                    0 => {
+                        if ir.event.mouse_event.button_state != 0 {
+                            mouse_event.event = MouseEventType::ButtonDown;
+                        } else {
+                            mouse_event.event = MouseEventType::ButtonUp;
+                        }
+                    }
+                    DOUBLE_CLICK => {
+                        mouse_event.event = MouseEventType::DoubleClick;
+                    }
+                    MOUSE_MOVED => {
+                        mouse_event.event = MouseEventType::Move;
+                    }
+                    MOUSE_WHEELED => {
+                        mouse_event.event = MouseEventType::Wheel;
+                        if ir.event.mouse_event.button_state >= 0x80000000 {
+                            mouse_event.wheel_direction = MouseWheelDirection::Down;
+                        } else {
+                            mouse_event.wheel_direction = MouseWheelDirection::Up;
+                        }
+                    }
+                    _ => {
+                        return SystemEvent::None;
+                    }
+                }
+            
+                return SystemEvent::Mouse(mouse_event);
+            }
         }
 
         // resize
