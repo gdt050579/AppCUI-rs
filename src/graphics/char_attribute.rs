@@ -1,7 +1,7 @@
 use super::Color;
 use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits=16)]
+#[EnumBitFlags(bits = 16)]
 pub enum CharFlags {
     Bold = 0x0001,
     Italic = 0x0002,
@@ -15,11 +15,18 @@ pub struct CharAttribute {
 }
 
 impl CharAttribute {
-    pub fn new(fore: Color, back: Color, flags: CharFlags)->CharAttribute {
-        CharAttribute{
+    pub fn new(fore: Color, back: Color, flags: CharFlags) -> CharAttribute {
+        CharAttribute {
             foreground: fore,
             background: back,
-            flags: flags
+            flags: flags,
+        }
+    }
+    pub fn with_color(fore: Color, back: Color) -> CharAttribute {
+        CharAttribute {
+            foreground: fore,
+            background: back,
+            flags: CharFlags::None,
         }
     }
 }

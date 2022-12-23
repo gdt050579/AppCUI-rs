@@ -1,8 +1,10 @@
 use std::ops::{Deref, DerefMut};
 
+use super::CharAttribute;
 use super::CharFlags;
 use super::Character;
 use super::Color;
+use super::LineType;
 use super::Surface;
 
 struct SurfaceTester {
@@ -126,7 +128,7 @@ fn check_clear() {
     assert_eq!(s.compute_hash(), 0x19B0E1632DAE6325);
 }
 #[test]
-fn check_rect() {
+fn check_fill_rect() {
     let mut s = SurfaceTester::new(20, 5);
     s.clear(Character::new(
         '.',
@@ -134,10 +136,44 @@ fn check_rect() {
         Color::Black,
         CharFlags::None,
     ));
-    s.fill_rect(2, 2, 4, 4, Character::new('@',Color::Aqua, Color::Red, CharFlags::Bold));
+    s.fill_rect(
+        2,
+        2,
+        4,
+        4,
+        Character::new('@', Color::Aqua, Color::Red, CharFlags::Bold),
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0x9E357B7ADEDEB720);
-    s.fill_rect_with_size(4, 1, 10, 2 , Character::with_char('X'));
+    s.fill_rect_with_size(4, 1, 10, 2, Character::with_char('X'));
     //s.print();
     assert_eq!(s.compute_hash(), 0xD897421A927A1A1);
+}
+#[test]
+fn check_draw_rect() {
+    let mut s = SurfaceTester::new(20, 7);
+    s.clear(Character::new(
+        '.',
+        Color::White,
+        Color::Black,
+        CharFlags::None,
+    ));
+    s.draw_rect(
+        2,
+        2,
+        10,
+        4,
+        LineType::Single,
+        CharAttribute::with_color(Color::Yellow, Color::Blue),
+    );
+    s.draw_rect(
+        12,
+        1,
+        18,
+        5,
+        LineType::Double,
+        CharAttribute::with_color(Color::White, Color::Green),
+    );
+    s.print();
+    //assert_eq!(s.compute_hash(), 0x8D0FF039A76E6925);
 }

@@ -117,35 +117,66 @@ impl Surface {
         }
     }
 
-    pub fn fill_horizontal_line(&mut self, x: i32, y: i32, width: u32, ch: Character) {
-        let mut sz = width;
-        let mut x = x;
-        while sz > 0 {
+    pub fn fill_horizontal_line(&mut self, left: i32, y: i32, right: i32, ch: Character) {
+        let mut x = left;
+        while x <= right {
             if let Some(pos) = self.coords_to_position(x, y) {
                 self.chars[pos].set(&ch);
             }
             x += 1;
-            sz -= 1;
+        }
+    }
+    pub fn fill_horizontal_line_with_size(&mut self, x: i32, y: i32, width: u32, ch: Character) {
+        if width > 0 {
+            self.fill_horizontal_line(x, y, x + ((width - 1) as i32), ch);
         }
     }
 
-    pub fn fill_vertical_line(&mut self, x: i32, y: i32, height: u32, ch: Character) {
-        let mut sz = height;
-        let mut y = y;
-        while sz > 0 {
+    pub fn fill_vertical_line(&mut self, x: i32, top: i32, bottom: i32, ch: Character) {
+        let mut y = top;
+        while y <= bottom {
             if let Some(pos) = self.coords_to_position(x, y) {
                 self.chars[pos].set(&ch);
             }
             y += 1;
-            sz -= 1;
         }
     }
 
-    pub fn draw_rect(&mut self, left: i32, top: i32, right: i32, bottom: i32, line_type: LineType) {
-        if (left > right) || (bottom > top) {
+    pub fn fill_vertical_line_width_size(&mut self, x: i32, y: i32, height: u32, ch: Character) {
+        if height > 0 {
+            self.fill_vertical_line(x, y, y + ((height - 1) as i32), ch);
+        }
+    }
+
+    pub fn draw_rect(
+        &mut self,
+        left: i32,
+        top: i32,
+        right: i32,
+        bottom: i32,
+        line_type: LineType,
+        attr: CharAttribute,
+    ) {
+        if (left > right) || (top > bottom) {
             return;
         }
-        todo!();
+        let line_chars = line_type.get_chars();
+        let mut ch = Character::new(' ', attr.foreground, attr.background, attr.flags);
+        ch.code = line_chars.horizontal_on_top;
+        self.fill_horizontal_line(left, top, right, ch);
+        ch.code = line_chars.horizontal_on_bottom;
+        self.fill_horizontal_line(left, bottom, right, ch);
+        ch.code = line_chars.vertical_on_left;
+        self.fill_vertical_line(left, top, bottom, ch);
+        ch.code = line_chars.vertical_on_right;
+        self.fill_vertical_line(right, top, bottom, ch);
+        ch.code = line_chars.corner_top_left;
+        self.set(left, top, ch);
+        ch.code = line_chars.corner_top_right;
+        self.set(right, top, ch);
+        ch.code = line_chars.corner_bottom_right;
+        self.set(right, bottom, ch);
+        ch.code = line_chars.corner_bottom_left;
+        self.set(left, bottom, ch);
     }
-
 }
