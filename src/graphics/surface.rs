@@ -110,7 +110,7 @@ impl Surface {
             }
         } else {
             // only the clip must pe cleared
-            let mut pos = (self.clip.left as usize);
+            let mut pos = self.clip.left as usize;
             let sz = (self.clip.right + 1 - self.clip.left) as usize;
             pos += (self.clip.top as usize) * (self.width as usize);
 
