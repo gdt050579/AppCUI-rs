@@ -34,6 +34,10 @@ const LEFT_ALT_PRESSED: u32 = 0x0002;
 const RIGHT_CTRL_PRESSED: u32 = 0x0004;
 const LEFT_CTRL_PRESSED: u32 = 0x0008;
 const SHIFT_PRESSED: u32 = 0x0010;
+const ENABLE_WINDOW_INPUT: u32 = 0x0008;
+const ENABLE_MOUSE_INPUT : u32 = 0x0010;
+const ENABLE_EXTENDED_FLAGS: u32 = 0x0080;
+
 
 const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
@@ -394,6 +398,10 @@ extern "system" {
     #[warn(non_camel_case_types)]
     fn SetConsoleCursorInfo(handle: HANDLE, info: &CONSOLE_CURSOR_INFO) -> BOOL;
     #[warn(non_camel_case_types)]
+    fn GetConsoleMode(handle: HANDLE, mode_flags: &mut u32) -> BOOL;
+    #[warn(non_camel_case_types)]
+    fn SetConsoleMode(handle: HANDLE, mode_flags: u32) -> BOOL;
+    #[warn(non_camel_case_types)]
     fn WriteConsoleOutputW(
         handle: HANDLE,
         lpBuffer: *const CHAR_INFO,
@@ -446,12 +454,26 @@ pub struct WindowsTerminal {
     shift_state: KeyModifier,
     last_mouse_x: i32,
     last_mouse_y: i32,
+    original_mode_flags: u32,
 }
 
 impl WindowsTerminal {
     pub fn create() -> Option<Box<WindowsTerminal>> {
         let stdin = get_handle(STD_INPUT_HANDLE)?;
         let stdout = get_handle(STD_OUTPUT_HANDLE)?;
+        let mut original_mode_flags = 0u32;
+        unsafe {
+            if GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
+                return None;
+            }
+            if SetConsoleMode(
+                stdin,
+                ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS,
+            ) == FALSE
+            {
+                return None;
+            }
+        }
         let info = get_console_screen_buffer_info(stdout)?;
         if (info.size.x < 1) || (info.size.y < 1) {
             return None;
@@ -465,6 +487,7 @@ impl WindowsTerminal {
             shift_state: KeyModifier::None,
             last_mouse_x: i32::MAX,
             last_mouse_y: i32::MAX,
+            original_mode_flags: original_mode_flags,
         });
         term.chars.resize(
             (term.width as usize) * (term.height as usize),
@@ -668,7 +691,7 @@ impl Terminal for WindowsTerminal {
                         return SystemEvent::None;
                     }
                 }
-            
+
                 return SystemEvent::Mouse(mouse_event);
             }
         }
