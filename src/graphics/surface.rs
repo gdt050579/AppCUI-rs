@@ -192,6 +192,27 @@ impl Surface {
         }
     }
 
+    pub fn draw_horizontal_line(
+        &mut self,
+        left: i32,
+        y: i32,
+        right: i32,
+        line_type: LineType,
+        attr: CharAttribute,
+    ) {
+        self.fill_horizontal_line(
+            left,
+            y,
+            right,
+            Character::new(
+                line_type.get_chars().horizontal,
+                attr.foreground,
+                attr.background,
+                attr.flags,
+            ),
+        );        
+    }
+
     pub fn draw_rect(
         &mut self,
         left: i32,
