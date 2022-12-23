@@ -335,3 +335,26 @@ fn check_draw_horizontal_line_with_size() {
     //s.print();
     assert_eq!(s.compute_hash(),0xC8627A5B784CE327);
 }
+
+#[test]
+fn check_cursor() {
+    let mut s = SurfaceTester::new(20, 15);
+    s.set_cursor(10, 5);
+    assert!((s.cursor.x == 10) && (s.cursor.y==5));
+    assert!(s.cursor.is_visible());
+    s.hide_cursor();
+    assert!(s.cursor.is_visible()==false);
+    s.set_origin(3, 3);
+    s.set_cursor(2, 2);
+    assert!((s.cursor.x == 5) && (s.cursor.y==5));
+    s.set_cursor(-2, -2);
+    assert!((s.cursor.x == 1) && (s.cursor.y==1));
+    s.set_clip(3, 3, 6, 6);
+    s.set_cursor(-2, -2);
+    assert!(s.cursor.is_visible()==false);
+    s.set_cursor(4, 4);
+    assert!(s.cursor.is_visible()==false);
+    s.set_cursor(2, 2);
+    assert!((s.cursor.x == 5) && (s.cursor.y==5));  
+    assert!(s.cursor.is_visible());
+}
