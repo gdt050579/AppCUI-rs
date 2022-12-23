@@ -230,3 +230,43 @@ fn check_draw_rect_with_size() {
     //s.print();
     assert_eq!(s.compute_hash(),0xB2DEA1E9B27FD8B1);
 }
+
+#[test]
+fn check_draw_vertical_line() {
+    let mut s = SurfaceTester::new(15, 7);
+    s.clear(Character::new(
+        ' ',
+        Color::White,
+        Color::Black,
+        CharFlags::None,
+    ));
+    s.draw_vertical_line(1, 1, 5, LineType::Single, CharAttribute::default());
+    s.draw_vertical_line(3, 1, 5, LineType::Double, CharAttribute::default());
+    s.draw_vertical_line(5, 1, 5, LineType::SingleThick, CharAttribute::default());
+    s.draw_vertical_line(7, 1, 5, LineType::Border, CharAttribute::default());
+    s.draw_vertical_line(9, 1, 5, LineType::Ascii, CharAttribute::default());
+    s.draw_vertical_line(11, 1, 5, LineType::AsciiRound, CharAttribute::default());
+    s.draw_vertical_line(13, 1, 5, LineType::SingleRound, CharAttribute::default());
+    //s.print();
+    assert_eq!(s.compute_hash(),0xBA48710BD060DFAB);
+}
+
+#[test]
+fn check_draw_vertical_line_with_size() {
+    let mut s = SurfaceTester::new(15, 7);
+    s.clear(Character::new(
+        ' ',
+        Color::White,
+        Color::Black,
+        CharFlags::None,
+    ));
+    s.draw_vertical_line_with_size(1, 1, 5, LineType::Single, CharAttribute::default());
+    s.draw_vertical_line_with_size(3, 1, 5, LineType::Double, CharAttribute::default());
+    s.draw_vertical_line_with_size(5, 1, 5, LineType::SingleThick, CharAttribute::default());
+    s.draw_vertical_line_with_size(7, 1, 5, LineType::Border, CharAttribute::default());
+    s.draw_vertical_line_with_size(9, 1, 5, LineType::Ascii, CharAttribute::default());
+    s.draw_vertical_line_with_size(11, 1, 5, LineType::AsciiRound, CharAttribute::default());
+    s.draw_vertical_line_with_size(13, 1, 5, LineType::SingleRound, CharAttribute::default());
+    //s.print();
+    assert_eq!(s.compute_hash(),0xBA48710BD060DFAB);
+}

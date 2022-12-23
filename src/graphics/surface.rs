@@ -148,6 +148,50 @@ impl Surface {
         }
     }
 
+    pub fn draw_vertical_line(
+        &mut self,
+        x: i32,
+        top: i32,
+        bottom: i32,
+        line_type: LineType,
+        attr: CharAttribute,
+    ) {
+        self.fill_vertical_line(
+            x,
+            top,
+            bottom,
+            Character::new(
+                line_type.get_chars().vertical,
+                attr.foreground,
+                attr.background,
+                attr.flags,
+            ),
+        );
+    }
+
+    pub fn draw_vertical_line_with_size(
+        &mut self,
+        x: i32,
+        y: i32,
+        height: u32,
+        line_type: LineType,
+        attr: CharAttribute,
+    ) {
+        if height > 0 {
+            self.fill_vertical_line(
+                x,
+                y,
+                y + ((height - 1) as i32),
+                Character::new(
+                    line_type.get_chars().vertical,
+                    attr.foreground,
+                    attr.background,
+                    attr.flags,
+                ),
+            );
+        }
+    }
+
     pub fn draw_rect(
         &mut self,
         left: i32,

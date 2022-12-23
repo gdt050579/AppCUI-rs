@@ -22,8 +22,8 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
         horizontal_on_bottom: '\u{2500}',
         corner_bottom_left: '\u{2514}',
         vertical_on_left: '\u{2502}',
-        horizontal: '\u{2502}',
-        vertical: '\u{2500}',
+        horizontal: '\u{2500}',
+        vertical: '\u{2502}',
     },
     /* Double Lines */
     LineTypeChars {
@@ -35,8 +35,8 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
         horizontal_on_bottom: '\u{2550}',
         corner_bottom_left: '\u{255A}',
         vertical_on_left: '\u{2551}',
-        horizontal: '\u{2551}',
-        vertical: '\u{2550}',
+        horizontal: '\u{2550}',
+        vertical: '\u{2551}',
     },
     /* Single Thick lines */
     LineTypeChars {
@@ -48,8 +48,8 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
         horizontal_on_bottom: '\u{2501}',
         corner_bottom_left: '\u{2517}',
         vertical_on_left: '\u{2503}',
-        horizontal: '\u{2503}',
-        vertical: '\u{2501}',
+        horizontal: '\u{2501}',
+        vertical: '\u{2503}',
     },
     /* Border */
     LineTypeChars {
@@ -104,18 +104,6 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
         vertical: '\u{2502}',
     },    
 ];
-
-/*
-struct AppCUI::Graphics::LineTypeChars line_types_chars[] = {
-    //{ 0x250C, 0x2500, 0x2510, 0x2502, 0x2518, 0x2500, 0x2514, 0x2502 }, /* Single Lines */
-    //{ 0x2554, 0x2550, 0x2557, 0x2551, 0x255D, 0x2550, 0x255A, 0x2551 }, /* Double Lines */
-    //{ 0x250F, 0x2501, 0x2513, 0x2503, 0x251B, 0x2501, 0x2517, 0x2503 }, /* Single Thick lines */
-    //{ 0x2584, 0x2584, 0x2584, 0x2588, 0x2580, 0x2580, 0x2580, 0x2588 }, /* Border */
-    //{ '+', '-', '+', '|', '+', '-', '+', '|' },                         /* Ascii */
-    //{ '/', '-', '\\', '|', '/', '-', '\\', '|' },                       /* Ascii Round */
-    { 0x256D, 0x2500, 0x256E, 0x2502, 0x256F, 0x2500, 0x2570, 0x2502 }, /* Single Round */
-};
-*/
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
