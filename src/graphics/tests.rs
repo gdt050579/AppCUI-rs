@@ -217,3 +217,16 @@ fn check_draw_rect() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xD99DB2F59085FE71);
 }
+#[test]
+fn check_draw_rect_with_size() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.clear(Character::new(
+        ' ',
+        Color::White,
+        Color::Black,
+        CharFlags::None,
+    ));
+    s.draw_rect_with_size(1, 1, 20, 5, LineType::Double, CharAttribute::default());
+    //s.print();
+    assert_eq!(s.compute_hash(),0xB2DEA1E9B27FD8B1);
+}

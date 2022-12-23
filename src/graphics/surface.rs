@@ -179,4 +179,25 @@ impl Surface {
         ch.code = line_chars.corner_bottom_left;
         self.set(left, bottom, ch);
     }
+
+    pub fn draw_rect_with_size(
+        &mut self,
+        x: i32,
+        y: i32,
+        width: u32,
+        height: u32,
+        line_type: LineType,
+        attr: CharAttribute,
+    ) {
+        if (width > 0) && (height > 0) {
+            self.draw_rect(
+                x,
+                y,
+                x + ((width - 1) as i32),
+                y + ((height - 1) as i32),
+                line_type,
+                attr,
+            );
+        }
+    }
 }

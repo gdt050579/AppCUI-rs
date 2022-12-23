@@ -30,3 +30,12 @@ impl CharAttribute {
         }
     }
 }
+impl Default for CharAttribute {
+    fn default() -> Self {
+        Self {
+            foreground: Color::White,
+            background: Color::Black,
+            flags: CharFlags::None,
+        }
+    }
+}
