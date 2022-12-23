@@ -11,7 +11,8 @@ pub(super) struct LineTypeChars {
     pub(super) vertical: char,
 }
 
-static LINE_TYPE_CHARS: [LineTypeChars; 3] = [
+static LINE_TYPE_CHARS: [LineTypeChars; 4] = [
+    /* Single Lines */
     LineTypeChars {
         corner_top_left: '\u{250C}',
         horizontal_on_top: '\u{2500}',
@@ -24,6 +25,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 3] = [
         horizontal: '\u{2502}',
         vertical: '\u{2500}',
     },
+    /* Double Lines */
     LineTypeChars {
         corner_top_left: '\u{2554}',
         horizontal_on_top: '\u{2550}',
@@ -36,6 +38,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 3] = [
         horizontal: '\u{2551}',
         vertical: '\u{2550}',
     },
+    /* Single Thick lines */
     LineTypeChars {
         corner_top_left: '\u{250F}',
         horizontal_on_top: '\u{2501}',
@@ -48,6 +51,19 @@ static LINE_TYPE_CHARS: [LineTypeChars; 3] = [
         horizontal: '\u{2503}',
         vertical: '\u{2501}',
     },
+    /* Border */
+    LineTypeChars {
+        corner_top_left: '\u{2584}',
+        horizontal_on_top: '\u{2584}',
+        corner_top_right: '\u{2584}',
+        vertical_on_right: '\u{2588}',
+        corner_bottom_right: '\u{2580}',
+        horizontal_on_bottom: '\u{2580}',
+        corner_bottom_left: '\u{2580}',
+        vertical_on_left: '\u{2588}',
+        horizontal: '\u{2588}',
+        vertical: '\u{2588}',
+    },    
 ];
 
 /*
