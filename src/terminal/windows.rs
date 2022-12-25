@@ -586,7 +586,7 @@ impl Terminal for WindowsTerminal {
             //println!("Event: {}",ir.event_type);
         }
 
-        // Key processing
+        // Key processings
         if ir.event_type == KEY_EVENT {
             let mut key = Key::default();
             unsafe {

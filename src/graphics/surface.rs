@@ -333,16 +333,15 @@ impl Surface {
     }
 
     pub fn draw_surface(&mut self, x: i32, y: i32, surface: &Surface) {
-        if self.clip.is_visible()==false {
+        if self.clip.is_visible() == false {
             return;
         }
         let mut index = 0usize;
-        for s_x in 0..=surface.right_most {
-            for s_y in 0..=surface.bottom_most {
-                self.set(x+s_x,y+s_y,surface.chars[index]);
-                index+=1;
-            } 
+        for s_y in 0..=surface.bottom_most {
+            for s_x in 0..=surface.right_most {
+                self.set(x + s_x, y + s_y, surface.chars[index]);
+                index += 1;
+            }
         }
     }
-
 }

@@ -358,3 +358,31 @@ fn check_cursor() {
     assert!((s.cursor.x == 5) && (s.cursor.y==5));  
     assert!(s.cursor.is_visible());
 }
+
+
+#[test]
+fn check_draw_surface() {
+    let mut s = SurfaceTester::new(20, 15);
+    let mut s2 = Surface::new(8,6);
+    s2.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
+    s2.draw_rect(0, 0, 7, 5, LineType::Double, CharAttribute::with_color(Color::White, Color::DarkRed));
+    s.draw_surface(2, 2, &s2);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x22F426820E128C0D);
+    s.draw_surface(-2, -2, &s2);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x6D7FD783EB0FC3F0);
+    s.clear(Character::with_char('.'));
+    s.set_clip(3, 3, 5, 5);
+    s.set_origin(3, 3);
+    s.draw_surface(0, 0, &s2);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x3C4BAE452177CAE0);
+    s.draw_surface(-5, -3, &s2);
+    //s.print();
+    assert_eq!(s.compute_hash(),0xA18677AAC315ACE5);
+    s.reset_clip();
+    s.draw_surface(-5, -3, &s2);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x3E6031703919C392);
+}
