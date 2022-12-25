@@ -60,11 +60,53 @@ impl SurfaceTester {
 
         temp_buf.clear();
         for ch in &self.surface.chars {
+            temp_buf.push_str("\x1b[");
+            match ch.foreground {
+                Color::Black => temp_buf.push_str("30"),
+                Color::DarkRed => temp_buf.push_str("31"),
+                Color::DarkGreen => temp_buf.push_str("32"),
+                Color::Olive => temp_buf.push_str("33"),
+                Color::DarkBlue => temp_buf.push_str("34"),
+                Color::Magenta => temp_buf.push_str("35"),
+                Color::Teal => temp_buf.push_str("36"),
+                Color::Silver => temp_buf.push_str("37"),
+                Color::Gray=> temp_buf.push_str("90"),
+                Color::Red=> temp_buf.push_str("91"),
+                Color::Green=> temp_buf.push_str("92"),
+                Color::Yellow=> temp_buf.push_str("93"),
+                Color::Blue=> temp_buf.push_str("94"),
+                Color::Pink=> temp_buf.push_str("95"),
+                Color::Aqua=> temp_buf.push_str("96"),
+                Color::White=> temp_buf.push_str("97"),
+                _ => temp_buf.push_str("37") /* default is white */
+            }
+            temp_buf.push(';');
+            match ch.background {
+                Color::Black => temp_buf.push_str("40"),
+                Color::DarkRed => temp_buf.push_str("41"),
+                Color::DarkGreen => temp_buf.push_str("42"),
+                Color::Olive => temp_buf.push_str("43"),
+                Color::DarkBlue => temp_buf.push_str("44"),
+                Color::Magenta => temp_buf.push_str("45"),
+                Color::Teal => temp_buf.push_str("46"),
+                Color::Silver => temp_buf.push_str("47"),
+                Color::Gray=> temp_buf.push_str("100"),
+                Color::Red=> temp_buf.push_str("101"),
+                Color::Green=> temp_buf.push_str("102"),
+                Color::Yellow=> temp_buf.push_str("103"),
+                Color::Blue=> temp_buf.push_str("104"),
+                Color::Pink=> temp_buf.push_str("105"),
+                Color::Aqua=> temp_buf.push_str("106"),
+                Color::White=> temp_buf.push_str("107"),
+                _ => temp_buf.push_str("40") /* default is white */
+            }         
+            temp_buf.push_str("m");   
             if ch.code < ' ' {
                 temp_buf.push(' ');
             } else {
                 temp_buf.push(ch.code);
             }
+            temp_buf.push_str("\x1b[0m"); // reset to default color
             x += 1;
             if x == self.surface.width {
                 println!("|{:>3} | {} |", y, temp_buf);
