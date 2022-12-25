@@ -1,8 +1,74 @@
+use crate::graphics::SpecialChar;
+
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
+use super::Color;
 use super::Cursor;
 use super::LineType;
+use super::Pixel;
+use super::Image;
+
+const COLORMAP_16_COLORS: [Color; 27] = [
+    /* 0*/ Color::Black, // (0, 0, 0)
+    /* 1*/ Color::DarkBlue, // (0, 0, 1)
+    /* 2*/ Color::Blue, // (0, 0, 2)
+    /* 3*/ Color::DarkGreen, // (0, 1, 0)
+    /* 4*/ Color::Teal, // (0, 1, 1)
+    /* 5*/ Color::Teal, // (0, 1, 2) [Aprox]
+    /* 6*/ Color::Green, // (0, 2, 0)
+    /* 7*/ Color::Teal, // (0, 2, 1) [Aprox]
+    /* 8*/ Color::Aqua, // (0, 2, 2)
+    /* 9*/ Color::DarkRed, // (1, 0, 0)
+    /*10*/ Color::Magenta, // (1, 0, 1)
+    /*11*/ Color::Magenta, // (1, 0, 2) [Aprox]
+    /*12*/ Color::Olive, // (1, 1, 0)
+    /*13*/ Color::Gray, // (1, 1, 1)
+    /*14*/ Color::Gray, // (1, 1, 2) [Aprox]
+    /*15*/ Color::Olive, // (1, 2, 0) [Aprox]
+    /*16*/ Color::Gray, // (1, 2, 1) [Aprox]
+    /*17*/ Color::Silver, // (1, 2, 2) [Aprox]
+    /*18*/ Color::Red, // (2, 0, 0)
+    /*19*/ Color::Magenta, // (2, 0, 1) [Aprox]
+    /*20*/ Color::Pink, // (2, 0, 2)
+    /*21*/ Color::Olive, // (2, 1, 0) [Aprox]
+    /*22*/ Color::Gray, // (2, 1, 1) [Aprox]
+    /*23*/ Color::Silver, // (2, 1, 2) [Aprox]
+    /*24*/ Color::Yellow, // (2, 2, 0)
+    /*25*/ Color::Silver, // (2, 2, 1) [Aprox]
+    /*26*/ Color::White, // (2, 2, 2)
+];
+
+fn RGB_to_16Color(pixel: Pixel) -> Color {
+    let b = if pixel.blue <= 16 {
+        0u32
+    } else {
+        if pixel.blue < 192 {
+            1u32
+        } else {
+            2u32
+        }
+    };
+    let r = if pixel.red <= 16 {
+        0u32
+    } else {
+        if pixel.red < 192 {
+            1u32
+        } else {
+            2u32
+        }
+    };    
+    let g = if pixel.green <= 16 {
+        0u32
+    } else {
+        if pixel.green < 192 {
+            1u32
+        } else {
+            2u32
+        }
+    }; 
+    return COLORMAP_16_COLORS[(r * 9 + g * 3 + b) as usize];
+}
 
 const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
@@ -344,4 +410,54 @@ impl Surface {
             }
         }
     }
+
+
+    fn paint_SmallBlocks(&mut self,img: &Image, x: i32, y: i32, rap: u32) {
+        let w = img.get_width();
+        let h = img.get_height();
+        let x_step = rap;
+        let y_step = rap * 2;
+        let mut cp = Character::default();
+        let mut py = y;
+        let mut img_y = 0;
+        while img_y<h
+        {
+            let mut px = x;
+            let mut img_x = 0u32;
+            while img_x<w 
+            {
+                if rap == 1 {
+                    cp.foreground = RGB_to_16Color(img.get_pixel_or_default(img_x, img_y));
+                    cp.background = RGB_to_16Color(img.get_pixel_or_default(img_x, img_y+1));
+                }
+                else {
+                    //cp.foreground = RGB_to_16Color(img.ComputeSquareAverageColor(img_x, img_y, rap));
+                    //cp.background = RGB_to_16Color(img.ComputeSquareAverageColor(img_x, img_y + rap, rap));
+                }
+    
+                if (cp.background == cp.foreground)
+                {
+                    if (cp.background == Color::Black) {
+                        cp.code = ' ';
+                    } else {
+                        cp.code = char::from(SpecialChar::Block100);
+                    }
+                }
+                else {
+                    cp.code = char::from(SpecialChar::BlockUpperHalf);
+                }
+                self.set(px,py,cp);
+                img_x += x_step;
+                px+=1;
+            }
+            py+=1;
+            img_y+=y_step;
+        }
+    }
+    
+
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image) {
+        self.paint_SmallBlocks(image,x,y,1);
+    }
+
 }

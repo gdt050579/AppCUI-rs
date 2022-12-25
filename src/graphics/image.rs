@@ -93,17 +93,24 @@ impl Image {
         }
     }
     #[inline]
-    pub fn set(&mut self, x: u32, y: u32, pixel: Pixel) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, pixel: Pixel) {
         if (x < self.width) && (y < self.height) {
             self.pixels[(y as usize) * (self.height as usize) + (x as usize)] = pixel;
         }
     }
     #[inline]
-    pub fn get(&mut self, x: u32, y: u32) -> Option<Pixel> {
+    pub fn get_pixel(&self, x: u32, y: u32) -> Option<Pixel> {
         if (x < self.width) && (y < self.height) {
             return Some(self.pixels[(y as usize) * (self.height as usize) + (x as usize)]);
         }
         return None;
+    }
+    #[inline]
+    pub fn get_pixel_or_default(&self, x: u32, y: u32) -> Pixel {
+        if (x < self.width) && (y < self.height) {
+            return self.pixels[(y as usize) * (self.height as usize) + (x as usize)];
+        }
+        return Pixel::default();
     }
     #[inline]
     pub fn get_width(&self) -> u32 {
