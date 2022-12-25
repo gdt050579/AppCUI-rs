@@ -428,3 +428,18 @@ fn check_draw_surface() {
     //s.print();
     assert_eq!(s.compute_hash(),0x3E6031703919C392);
 }
+
+#[test]
+fn check_colors() {
+    let mut s = SurfaceTester::new(40, 5);
+    s.set(1,1,Character::new('A', Color::White, Color::Red, CharFlags::None));
+    s.set(2,1,Character::new('A', Color::Red, Color::Black, CharFlags::None));
+    s.set(3,1,Character::new('B', Color::Yellow, Color::Blue, CharFlags::None));
+    s.set(4,1,Character::new('B', Color::Blue, Color::Yellow, CharFlags::None));
+    s.set(5,1,Character::new('C', Color::Yellow, Color::DarkBlue, CharFlags::None));
+    s.set(6,1,Character::new('B', Color::Black, Color::Magenta, CharFlags::None));
+    s.fill_rect(10, 1, 30, 3, Character::new(' ',Color::Yellow,Color::DarkBlue, CharFlags::None));
+    s.draw_rect(10, 1, 30, 3, LineType::Double, CharAttribute::with_color(Color::White, Color::DarkBlue));
+    //s.print();
+    assert_eq!(s.compute_hash(),0xF47F25A9A2342269);
+}
