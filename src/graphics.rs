@@ -6,6 +6,9 @@ mod line_type;
 mod size;
 mod clip_area;
 mod cursor;
+mod pixel;
+mod image;
+
 #[cfg(test)]
 mod tests;
 
