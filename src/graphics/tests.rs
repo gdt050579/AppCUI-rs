@@ -4,6 +4,7 @@ use super::CharAttribute;
 use super::CharFlags;
 use super::Character;
 use super::Color;
+use super::Image;
 use super::LineType;
 use super::Surface;
 
@@ -442,4 +443,25 @@ fn check_colors() {
     s.draw_rect(10, 1, 30, 3, LineType::Double, CharAttribute::with_color(Color::White, Color::DarkBlue));
     //s.print();
     assert_eq!(s.compute_hash(),0xF47F25A9A2342269);
+}
+
+
+#[test]
+fn check_draw_imge() {
+    let mut s = SurfaceTester::new(40, 10);
+    let i = Image::from_str(r#"
+        |BB.........BB|
+        |B..rr...rr..B|
+        |..rrrr.rrrr..|
+        |.rrrrrrrrrrr.|
+        |.raaaaaaaaar.|
+        |..ryyyyyyyr..|
+        |   rwwwwwr   |
+        |....rwwwr....|
+        |G....rwr....G|
+        |GG....r....GG|
+    "#).unwrap();
+    s.draw_image(1, 1, &i);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x98D9570FC2A6432A);
 }

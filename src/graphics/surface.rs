@@ -5,9 +5,9 @@ use super::Character;
 use super::ClipArea;
 use super::Color;
 use super::Cursor;
+use super::Image;
 use super::LineType;
 use super::Pixel;
-use super::Image;
 
 const COLORMAP_16_COLORS: [Color; 27] = [
     /* 0*/ Color::Black, // (0, 0, 0)
@@ -39,7 +39,7 @@ const COLORMAP_16_COLORS: [Color; 27] = [
     /*26*/ Color::White, // (2, 2, 2)
 ];
 
-fn RGB_to_16Color(pixel: Pixel) -> Color {
+fn rgb_to_color(pixel: Pixel) -> Color {
     let b = if pixel.blue <= 16 {
         0u32
     } else {
@@ -57,7 +57,7 @@ fn RGB_to_16Color(pixel: Pixel) -> Color {
         } else {
             2u32
         }
-    };    
+    };
     let g = if pixel.green <= 16 {
         0u32
     } else {
@@ -66,7 +66,7 @@ fn RGB_to_16Color(pixel: Pixel) -> Color {
         } else {
             2u32
         }
-    }; 
+    };
     return COLORMAP_16_COLORS[(r * 9 + g * 3 + b) as usize];
 }
 
@@ -411,8 +411,7 @@ impl Surface {
         }
     }
 
-
-    fn paint_SmallBlocks(&mut self,img: &Image, x: i32, y: i32, rap: u32) {
+    fn paint_small_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
         let w = img.get_width();
         let h = img.get_height();
         let x_step = rap;
@@ -420,44 +419,37 @@ impl Surface {
         let mut cp = Character::default();
         let mut py = y;
         let mut img_y = 0;
-        while img_y<h
-        {
+        while img_y < h {
             let mut px = x;
             let mut img_x = 0u32;
-            while img_x<w 
-            {
+            while img_x < w {
                 if rap == 1 {
-                    cp.foreground = RGB_to_16Color(img.get_pixel_or_default(img_x, img_y));
-                    cp.background = RGB_to_16Color(img.get_pixel_or_default(img_x, img_y+1));
-                }
-                else {
+                    cp.foreground = rgb_to_color(img.get_pixel_or_default(img_x, img_y));
+                    cp.background = rgb_to_color(img.get_pixel_or_default(img_x, img_y + 1));
+                } else {
                     //cp.foreground = RGB_to_16Color(img.ComputeSquareAverageColor(img_x, img_y, rap));
                     //cp.background = RGB_to_16Color(img.ComputeSquareAverageColor(img_x, img_y + rap, rap));
                 }
-    
-                if (cp.background == cp.foreground)
-                {
-                    if (cp.background == Color::Black) {
+
+                if cp.background == cp.foreground {
+                    if cp.background == Color::Black {
                         cp.code = ' ';
                     } else {
                         cp.code = char::from(SpecialChar::Block100);
                     }
-                }
-                else {
+                } else {
                     cp.code = char::from(SpecialChar::BlockUpperHalf);
                 }
-                self.set(px,py,cp);
+                self.set(px, py, cp);
                 img_x += x_step;
-                px+=1;
+                px += 1;
             }
-            py+=1;
-            img_y+=y_step;
+            py += 1;
+            img_y += y_step;
         }
     }
-    
 
     pub fn draw_image(&mut self, x: i32, y: i32, image: &Image) {
-        self.paint_SmallBlocks(image,x,y,1);
+        self.paint_small_blocks(image, x, y, 1);
     }
-
 }

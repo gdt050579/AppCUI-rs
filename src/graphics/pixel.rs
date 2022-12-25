@@ -45,7 +45,7 @@ impl Pixel {
     }
     pub fn from_color(color: Color) -> Self {
         let idx = color as u8;
-        if idx > 16 {
+        if idx >= 16 {
             Pixel {
                 red: 0,
                 green: 0,
@@ -55,8 +55,8 @@ impl Pixel {
         } else {
             let u = COLOR_TO_PIXEL[idx as usize];
             Pixel {
-                red: ((u >> 24) & 0xFF) as u8,
-                green: ((u >> 16) & 0xFF) as u8,
+                red: ((u >> 16) & 0xFF) as u8,
+                green: ((u >> 8) & 0xFF) as u8,
                 blue: ((u & 0xFF) as u8),
                 alpha: 255,
             }
