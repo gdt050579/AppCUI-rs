@@ -22,4 +22,6 @@ pub use self::line_type::LineType;
 pub use self::surface::Surface;
 pub use self::size::Size;
 pub use self::cursor::Cursor;
+pub use self::pixel::Pixel;
+pub use self::image::Image;
 use self::clip_area::ClipArea;
