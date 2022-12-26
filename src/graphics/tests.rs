@@ -477,3 +477,19 @@ fn check_draw_imge() {
     //s.print();
     assert_eq!(s.compute_hash(),0x9803283450732669);
 }
+
+#[test]
+fn check_write_string_single_line() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.write_string(1, 1, "text", CharAttribute::with_color(Color::White, Color::DarkRed), false);
+    s.set_clip(6, 1, 10, 1);
+    s.set_origin(6, 1);
+    s.write_string(0, 0, "A longer text", CharAttribute::with_color(Color::White, Color::DarkRed), false);
+    s.reset_clip();
+    s.write_string(0, 2, "A longer text", CharAttribute::with_color(Color::White, Color::DarkBlue), false);
+    s.set_clip(6, 4, 10, 4);
+    s.set_origin(6, 4);
+    s.write_string(-2, 0, "A longer text", CharAttribute::with_color(Color::White, Color::Magenta), false);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x8D311DA4D1D1666E);
+}

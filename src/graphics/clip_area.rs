@@ -38,4 +38,8 @@ impl ClipArea {
             && (y >= self.top)
             && (y <= self.bottom);
     }
+    #[inline]
+    pub fn contains_y(&self, y: i32) -> bool {
+        return self.visible && (y >= self.top) && (y <= self.bottom);
+    }
 }

@@ -369,6 +369,33 @@ impl Surface {
         }
     }
 
+    pub fn write_string(
+        &mut self,
+        x: i32,
+        y: i32,
+        text: &str,
+        attr: CharAttribute,
+        multi_line: bool,
+    ) {
+        let mut c = Character::new(' ', attr.foreground, attr.background, attr.flags);
+        if !multi_line {
+            // single line support
+            if self.clip.contains_y(y+self.translate_y)==false {
+                return; // no need to draw
+            }
+            let mut p_x = x;            
+            for ch in text.chars() {
+                if let Some(pos) = self.coords_to_position(p_x,y) {
+                    c.code = ch;
+                    self.chars[pos].set(&c);
+                }
+                p_x += 1;
+            }
+        } else {
+
+        }
+    }
+
     fn paint_small_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
         let w = img.get_width();
         let h = img.get_height();
@@ -412,20 +439,29 @@ impl Surface {
     }
 
     fn paint_large_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
-        let w    = img.get_width();
-        let h    = img.get_height();
+        let w = img.get_width();
+        let h = img.get_height();
         let mut img_y = 0u32;
         let mut p_y = y;
-        while img_y < h 
-        {
+        while img_y < h {
             let mut p_x = x;
             let mut img_x = 0u32;
-            while img_x<w
-            {
+            while img_x < w {
                 if rap == 1 {
-                    self.fill_horizontal_line(p_x, p_y, p_x+1, img.get_pixel_or_default(img_x, img_y).to_character());
+                    self.fill_horizontal_line(
+                        p_x,
+                        p_y,
+                        p_x + 1,
+                        img.get_pixel_or_default(img_x, img_y).to_character(),
+                    );
                 } else {
-                    self.fill_horizontal_line(p_x, p_y, p_x+1, img.compute_square_average_color(img_x, img_y, rap).to_character());
+                    self.fill_horizontal_line(
+                        p_x,
+                        p_y,
+                        p_x + 1,
+                        img.compute_square_average_color(img_x, img_y, rap)
+                            .to_character(),
+                    );
                 }
                 img_x += rap;
                 p_x += 2;
@@ -436,20 +472,29 @@ impl Surface {
     }
 
     fn paint_gray_scale(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
-        let w    = img.get_width();
-        let h    = img.get_height();
+        let w = img.get_width();
+        let h = img.get_height();
         let mut img_y = 0u32;
         let mut p_y = y;
-        while img_y < h 
-        {
+        while img_y < h {
             let mut p_x = x;
             let mut img_x = 0u32;
-            while img_x<w
-            {
+            while img_x < w {
                 if rap == 1 {
-                    self.fill_horizontal_line(p_x, p_y, p_x+1, img.get_pixel_or_default(img_x, img_y).to_gray_scale());
+                    self.fill_horizontal_line(
+                        p_x,
+                        p_y,
+                        p_x + 1,
+                        img.get_pixel_or_default(img_x, img_y).to_gray_scale(),
+                    );
                 } else {
-                    self.fill_horizontal_line(p_x, p_y, p_x+1, img.compute_square_average_color(img_x, img_y, rap).to_gray_scale());
+                    self.fill_horizontal_line(
+                        p_x,
+                        p_y,
+                        p_x + 1,
+                        img.compute_square_average_color(img_x, img_y, rap)
+                            .to_gray_scale(),
+                    );
                 }
                 img_x += rap;
                 p_x += 2;
@@ -458,7 +503,6 @@ impl Surface {
             p_y += 1;
         }
     }
-
 
     pub fn draw_image(
         &mut self,
@@ -475,10 +519,8 @@ impl Surface {
             }
             ImageRenderingMethod::PixelTo64ColorsLargeBlock => {
                 self.paint_large_blocks(image, x, y, rap)
-            }     
-            ImageRenderingMethod::GrayScale => {
-                self.paint_gray_scale(image, x, y, rap)
-            }        
+            }
+            ImageRenderingMethod::GrayScale => self.paint_gray_scale(image, x, y, rap),
             _ => {
                 todo!()
             }
