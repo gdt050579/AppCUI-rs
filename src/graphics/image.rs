@@ -120,4 +120,33 @@ impl Image {
     pub fn get_height(&self) -> u32 {
         self.height
     }
+
+    pub (super) fn compute_square_average_color(&self, x: u32, y: u32, sz: u32) -> Pixel {
+        if (x >= self.width) || (y >= self.height) || (sz == 0) {
+            return Pixel::default(); // nothing to compute
+        }
+        let e_x = (x + sz).clamp(0, self.width);
+        let e_y = (y + sz).clamp(0, self.height);
+        let actual_width = (e_x - x) as usize;
+        let mut sum_r = 0u32;
+        let mut sum_g = 0u32;
+        let mut sum_b = 0u32;
+        let mut pos = (y as usize) * (self.width as usize) + (x as usize);
+        let mut p_y = y;
+        while p_y < e_y {
+            for px in &self.pixels[pos..(pos + actual_width)] {
+                sum_r += px.red as u32;
+                sum_g += px.green as u32;
+                sum_b += px.blue as u32;
+            }
+            pos += self.width as usize;
+            p_y += 1;
+        }
+        let nr_pixels = sz * sz;
+        return Pixel::from_rgb(
+            (sum_r / nr_pixels) as u8,
+            (sum_g / nr_pixels) as u8,
+            (sum_b / nr_pixels) as u8,
+        );
+    }
 }

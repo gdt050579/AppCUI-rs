@@ -427,8 +427,10 @@ impl Surface {
                     cp.foreground = rgb_to_color(img.get_pixel_or_default(img_x, img_y));
                     cp.background = rgb_to_color(img.get_pixel_or_default(img_x, img_y + 1));
                 } else {
-                    //cp.foreground = RGB_to_16Color(img.ComputeSquareAverageColor(img_x, img_y, rap));
-                    //cp.background = RGB_to_16Color(img.ComputeSquareAverageColor(img_x, img_y + rap, rap));
+                    cp.foreground =
+                        rgb_to_color(img.compute_square_average_color(img_x, img_y, rap));
+                    cp.background =
+                        rgb_to_color(img.compute_square_average_color(img_x, img_y + rap, rap));
                 }
 
                 if cp.background == cp.foreground {
@@ -450,6 +452,6 @@ impl Surface {
     }
 
     pub fn draw_image(&mut self, x: i32, y: i32, image: &Image) {
-        self.paint_small_blocks(image, x, y, 1);
+        self.paint_small_blocks(image, x, y, 2);
     }
 }
