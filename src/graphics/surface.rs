@@ -7,90 +7,26 @@ use super::Color;
 use super::Cursor;
 use super::Image;
 use super::LineType;
-use super::Pixel;
-
-const COLORMAP_16_COLORS: [Color; 27] = [
-    /* 0*/ Color::Black, // (0, 0, 0)
-    /* 1*/ Color::DarkBlue, // (0, 0, 1)
-    /* 2*/ Color::Blue, // (0, 0, 2)
-    /* 3*/ Color::DarkGreen, // (0, 1, 0)
-    /* 4*/ Color::Teal, // (0, 1, 1)
-    /* 5*/ Color::Teal, // (0, 1, 2) [Aprox]
-    /* 6*/ Color::Green, // (0, 2, 0)
-    /* 7*/ Color::Teal, // (0, 2, 1) [Aprox]
-    /* 8*/ Color::Aqua, // (0, 2, 2)
-    /* 9*/ Color::DarkRed, // (1, 0, 0)
-    /*10*/ Color::Magenta, // (1, 0, 1)
-    /*11*/ Color::Magenta, // (1, 0, 2) [Aprox]
-    /*12*/ Color::Olive, // (1, 1, 0)
-    /*13*/ Color::Gray, // (1, 1, 1)
-    /*14*/ Color::Gray, // (1, 1, 2) [Aprox]
-    /*15*/ Color::Olive, // (1, 2, 0) [Aprox]
-    /*16*/ Color::Gray, // (1, 2, 1) [Aprox]
-    /*17*/ Color::Silver, // (1, 2, 2) [Aprox]
-    /*18*/ Color::Red, // (2, 0, 0)
-    /*19*/ Color::Magenta, // (2, 0, 1) [Aprox]
-    /*20*/ Color::Pink, // (2, 0, 2)
-    /*21*/ Color::Olive, // (2, 1, 0) [Aprox]
-    /*22*/ Color::Gray, // (2, 1, 1) [Aprox]
-    /*23*/ Color::Silver, // (2, 1, 2) [Aprox]
-    /*24*/ Color::Yellow, // (2, 2, 0)
-    /*25*/ Color::Silver, // (2, 2, 1) [Aprox]
-    /*26*/ Color::White, // (2, 2, 2)
-];
-
-fn rgb_to_color(pixel: Pixel) -> Color {
-    let b = if pixel.blue <= 16 {
-        0u32
-    } else {
-        if pixel.blue < 192 {
-            1u32
-        } else {
-            2u32
-        }
-    };
-    let r = if pixel.red <= 16 {
-        0u32
-    } else {
-        if pixel.red < 192 {
-            1u32
-        } else {
-            2u32
-        }
-    };
-    let g = if pixel.green <= 16 {
-        0u32
-    } else {
-        if pixel.green < 192 {
-            1u32
-        } else {
-            2u32
-        }
-    };
-    return COLORMAP_16_COLORS[(r * 9 + g * 3 + b) as usize];
-}
 
 #[repr(u32)]
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ImageRenderingMethod {
     PixelTo16ColorsSmallBlock,
     PixelTo64ColorsLargeBlock,
     GrayScale,
-    AsciiArt
+    AsciiArt,
 }
 #[repr(u32)]
-#[derive(Copy,Clone,Debug,PartialEq)]
-pub enum ImageScaleMethod
-{
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum ImageScaleMethod {
     NoScale = 1,
     Scale50 = 2,
     Scale33 = 3,
     Scale25 = 4,
     Scale20 = 5,
     Scale10 = 10,
-    Scale5  = 20
+    Scale5 = 20,
 }
-
 
 const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
@@ -446,13 +382,15 @@ impl Surface {
             let mut img_x = 0u32;
             while img_x < w {
                 if rap == 1 {
-                    cp.foreground = rgb_to_color(img.get_pixel_or_default(img_x, img_y));
-                    cp.background = rgb_to_color(img.get_pixel_or_default(img_x, img_y + 1));
+                    cp.foreground = img.get_pixel_or_default(img_x, img_y).to_color();
+                    cp.background = img.get_pixel_or_default(img_x, img_y + 1).to_color();
                 } else {
-                    cp.foreground =
-                        rgb_to_color(img.compute_square_average_color(img_x, img_y, rap));
-                    cp.background =
-                        rgb_to_color(img.compute_square_average_color(img_x, img_y + rap, rap));
+                    cp.foreground = img
+                        .compute_square_average_color(img_x, img_y, rap)
+                        .to_color();
+                    cp.background = img
+                        .compute_square_average_color(img_x, img_y + rap, rap)
+                        .to_color();
                 }
 
                 if cp.background == cp.foreground {
@@ -473,11 +411,22 @@ impl Surface {
         }
     }
 
-    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: ImageRenderingMethod, scale_method: ImageScaleMethod) {
+    pub fn draw_image(
+        &mut self,
+        x: i32,
+        y: i32,
+        image: &Image,
+        rendering_method: ImageRenderingMethod,
+        scale_method: ImageScaleMethod,
+    ) {
         let rap = scale_method as u32;
         match rendering_method {
-            ImageRenderingMethod::PixelTo16ColorsSmallBlock => self.paint_small_blocks(image, x, y, rap),
-            _ => { todo!() }
+            ImageRenderingMethod::PixelTo16ColorsSmallBlock => {
+                self.paint_small_blocks(image, x, y, rap)
+            }
+            _ => {
+                todo!()
+            }
         }
     }
 }
