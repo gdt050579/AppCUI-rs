@@ -472,4 +472,8 @@ fn check_draw_imge() {
     s.draw_image(0, 0, &i, ImageRenderingMethod::PixelTo64ColorsLargeBlock, ImageScaleMethod::NoScale);
     //s.print();
     assert_eq!(s.compute_hash(),0x7BAAAA0605CBFA25);
+    s.clear(Character::default());
+    s.draw_image(0, 0, &i, ImageRenderingMethod::GrayScale, ImageScaleMethod::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x9803283450732669);
 }
