@@ -7,6 +7,8 @@ use super::Color;
 use super::Image;
 use super::LineType;
 use super::Surface;
+use super::ImageRenderingMethod;
+use super::ImageScaleMethod;
 
 struct SurfaceTester {
     surface: Surface,
@@ -461,7 +463,9 @@ fn check_draw_imge() {
         |G....rwr....G|
         |GG....r....GG|
     "#).unwrap();
-    s.draw_image(1, 1, &i);
+    s.draw_image(1, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::NoScale);
+    s.draw_image(20, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::Scale50);
+    s.draw_image(30, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::Scale25);
     s.print();
-    //assert_eq!(s.compute_hash(),0x98D9570FC2A6432A);
+    assert_eq!(s.compute_hash(),0xFD04064498933DB);
 }

@@ -20,6 +20,8 @@ pub use self::char_attribute::CharFlags;
 pub use self::char_attribute::CharAttribute;
 pub use self::line_type::LineType;
 pub use self::surface::Surface;
+pub use self::surface::ImageRenderingMethod;
+pub use self::surface::ImageScaleMethod;
 pub use self::size::Size;
 pub use self::cursor::Cursor;
 pub use self::pixel::Pixel;

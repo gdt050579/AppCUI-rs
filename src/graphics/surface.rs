@@ -78,6 +78,19 @@ pub enum ImageRenderingMethod {
     GrayScale,
     AsciiArt
 }
+#[repr(u32)]
+#[derive(Copy,Clone,Debug,PartialEq)]
+pub enum ImageScaleMethod
+{
+    NoScale = 1,
+    Scale50 = 2,
+    Scale33 = 3,
+    Scale25 = 4,
+    Scale20 = 5,
+    Scale10 = 10,
+    Scale5  = 20
+}
+
 
 const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
@@ -460,9 +473,10 @@ impl Surface {
         }
     }
 
-    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: ImageRenderingMethod) {
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: ImageRenderingMethod, scale_method: ImageScaleMethod) {
+        let rap = scale_method as u32;
         match rendering_method {
-            ImageRenderingMethod::PixelTo16ColorsSmallBlock => self.paint_small_blocks(image, x, y, 1),
+            ImageRenderingMethod::PixelTo16ColorsSmallBlock => self.paint_small_blocks(image, x, y, rap),
             _ => { todo!() }
         }
     }
