@@ -1,4 +1,7 @@
+use super::CharFlags;
+use super::Character;
 use super::Color;
+use super::SpecialChar;
 
 const COLOR_TO_PIXEL: [u32; 16] = [
     0x000000, // Black
@@ -49,6 +52,143 @@ const COLORMAP_16_COLORS: [Color; 27] = [
     /*26*/ Color::White, // (2, 2, 2)
 ];
 
+const COLORMAP_64_COLORS: [Color; 125] = [
+    Color::Black,
+    Color::Blue,
+    Color::Blue,
+    Color::Blue,
+    Color::Blue,
+    Color::Green,
+    Color::Aqua,
+    Color::Blue,
+    Color::Blue,
+    Color::Blue,
+    Color::Green,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Green,
+    Color::Green,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Green,
+    Color::Green,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Red,
+    Color::Pink,
+    Color::Blue,
+    Color::Blue,
+    Color::Blue,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::Blue,
+    Color::Blue,
+    Color::Green,
+    Color::White,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Green,
+    Color::Green,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Green,
+    Color::Green,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Aqua,
+    Color::Red,
+    Color::Pink,
+    Color::Pink,
+    Color::Pink,
+    Color::Pink,
+    Color::Yellow,
+    Color::White,
+    Color::Pink,
+    Color::Pink,
+    Color::Pink,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::Aqua,
+    Color::Red,
+    Color::Red,
+    Color::Pink,
+    Color::Pink,
+    Color::Pink,
+    Color::Red,
+    Color::Red,
+    Color::Pink,
+    Color::Pink,
+    Color::Pink,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::Red,
+    Color::Red,
+    Color::Pink,
+    Color::Pink,
+    Color::Pink,
+    Color::Red,
+    Color::Red,
+    Color::Pink,
+    Color::Pink,
+    Color::Pink,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::Pink,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::Yellow,
+    Color::Yellow,
+    Color::Yellow,
+    Color::White,
+    Color::White,
+];
+
+const COLORMAP_64_COLORS_PROC: [u8; 125] = [
+    0, 25, 50, 75, 100, 25, 25, 50, 75, 100, 50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100, 100, 75,
+    75, 100, 25, 25, 50, 75, 100, 25, 25, 25, 75, 100, 50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100,
+    100, 75, 75, 100, 50, 25, 50, 50, 75, 25, 25, 50, 50, 75, 50, 50, 50, 50, 50, 50, 50, 50, 75,
+    75, 75, 75, 50, 75, 100, 75, 75, 50, 75, 75, 75, 75, 50, 75, 75, 50, 50, 50, 75, 75, 75, 75,
+    75, 75, 75, 75, 75, 75, 75, 100, 100, 100, 75, 75, 100, 100, 100, 75, 75, 100, 75, 75, 50, 75,
+    100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
+];
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Pixel {
     pub red: u8,
@@ -92,7 +232,7 @@ impl Pixel {
             }
         }
     }
-    pub fn to_color(&self) -> Color {
+    pub(super) fn to_color(&self) -> Color {
         let b = if self.blue <= 16 {
             0u32
         } else {
@@ -121,6 +261,34 @@ impl Pixel {
             }
         };
         return COLORMAP_16_COLORS[(r * 9 + g * 3 + b) as usize];
+    }
+    pub(super) fn to_character(&self) -> Character {
+        let r = ((self.red as u32) + 32) / 64;
+        let g = ((self.green as u32) + 32) / 64;
+        let b = ((self.blue as u32) + 32) / 64;
+        let idx = (r * 25 + g * 5 + b) as usize;
+        let col = COLORMAP_64_COLORS[idx];
+        let proc = COLORMAP_64_COLORS_PROC[idx];
+        match proc {
+            0 => {
+                return Character::new(' ', Color::Black, Color::Black, CharFlags::None);
+            }
+            25 => {
+                return Character::new(SpecialChar::Block25, col, Color::Black, CharFlags::None);
+            }   
+            50 => {
+                return Character::new(SpecialChar::Block50, col, Color::Black, CharFlags::None);
+            }     
+            75 => {
+                return Character::new(SpecialChar::Block75, col, Color::Black, CharFlags::None);
+            }    
+            100 => {
+                return Character::new(' ', col, col, CharFlags::None);
+            }                                      
+            _ => {
+                return Character::default();
+            }
+        }
     }
 }
 
