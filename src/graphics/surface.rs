@@ -70,6 +70,15 @@ fn rgb_to_color(pixel: Pixel) -> Color {
     return COLORMAP_16_COLORS[(r * 9 + g * 3 + b) as usize];
 }
 
+#[repr(u32)]
+#[derive(Copy,Clone,Debug,PartialEq)]
+pub enum ImageRenderingMethod {
+    PixelTo16ColorsSmallBlock,
+    PixelTo64ColorsLargeBlock,
+    GrayScale,
+    AsciiArt
+}
+
 const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
 
@@ -451,7 +460,10 @@ impl Surface {
         }
     }
 
-    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image) {
-        self.paint_small_blocks(image, x, y, 2);
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: ImageRenderingMethod) {
+        match rendering_method {
+            ImageRenderingMethod::PixelTo16ColorsSmallBlock => self.paint_small_blocks(image, x, y, 1),
+            _ => { todo!() }
+        }
     }
 }
