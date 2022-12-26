@@ -466,6 +466,10 @@ fn check_draw_imge() {
     s.draw_image(1, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::NoScale);
     s.draw_image(20, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::Scale50);
     s.draw_image(30, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::Scale25);
-    s.print();
+    //s.print();
     assert_eq!(s.compute_hash(),0xFD04064498933DB);
+    s.clear(Character::default());
+    s.draw_image(0, 0, &i, ImageRenderingMethod::PixelTo64ColorsLargeBlock, ImageScaleMethod::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x7BAAAA0605CBFA25);
 }

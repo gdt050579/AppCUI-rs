@@ -434,7 +434,30 @@ impl Surface {
             p_y += 1;
         }
     }
-    
+
+    fn paint_gray_scale(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
+        let w    = img.get_width();
+        let h    = img.get_height();
+        let mut img_y = 0u32;
+        let mut p_y = y;
+        while img_y < h 
+        {
+            let mut p_x = x;
+            let mut img_x = 0u32;
+            while img_x<w
+            {
+                if rap == 1 {
+                    self.fill_horizontal_line(p_x, p_y, p_x+1, img.get_pixel_or_default(img_x, img_y).to_gray_scale());
+                } else {
+                    self.fill_horizontal_line(p_x, p_y, p_x+1, img.compute_square_average_color(img_x, img_y, rap).to_gray_scale());
+                }
+                img_x += rap;
+                p_x += 2;
+            }
+            img_y += rap;
+            p_y += 1;
+        }
+    }
 
 
     pub fn draw_image(
@@ -452,7 +475,10 @@ impl Surface {
             }
             ImageRenderingMethod::PixelTo64ColorsLargeBlock => {
                 self.paint_large_blocks(image, x, y, rap)
-            }            
+            }     
+            ImageRenderingMethod::GrayScale => {
+                self.paint_gray_scale(image, x, y, rap)
+            }        
             _ => {
                 todo!()
             }

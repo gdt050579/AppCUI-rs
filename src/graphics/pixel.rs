@@ -275,20 +275,37 @@ impl Pixel {
             }
             25 => {
                 return Character::new(SpecialChar::Block25, col, Color::Black, CharFlags::None);
-            }   
+            }
             50 => {
                 return Character::new(SpecialChar::Block50, col, Color::Black, CharFlags::None);
-            }     
+            }
             75 => {
                 return Character::new(SpecialChar::Block75, col, Color::Black, CharFlags::None);
-            }    
+            }
             100 => {
                 return Character::new(' ', col, col, CharFlags::None);
-            }                                      
+            }
             _ => {
                 return Character::default();
             }
         }
+    }
+    pub(super) fn to_gray_scale(&self) -> Character {
+        let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32))/3;
+        if val < 32 {
+            return Character::new(' ',Color::Black,Color::Black,CharFlags::None);
+        }
+        if val < 96 {
+            return Character::new(SpecialChar::Block25,Color::White,Color::Black,CharFlags::None);
+        }     
+        if val < 160 {
+            return Character::new(SpecialChar::Block50,Color::White,Color::Black,CharFlags::None);
+        }  
+        if val < 224 {
+            return Character::new(SpecialChar::Block75,Color::White,Color::Black,CharFlags::None);
+        } else {
+            return Character::new(' ',Color::White,Color::White,CharFlags::None);
+        }                     
     }
 }
 
