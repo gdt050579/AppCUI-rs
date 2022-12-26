@@ -493,3 +493,13 @@ fn check_write_string_single_line() {
     //s.print();
     assert_eq!(s.compute_hash(),0x8D311DA4D1D1666E);
 }
+
+#[test]
+fn check_write_string_multi_line() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.write_string(1, 1, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkRed), true);
+    s.set_clip(10, 3, 20, 4);
+    s.write_string(9, 3, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkGreen), true);
+    //s.print();
+    assert_eq!(s.compute_hash(),0xFD638AC7F26D347A);
+}

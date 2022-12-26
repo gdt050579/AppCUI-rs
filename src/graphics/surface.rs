@@ -380,19 +380,32 @@ impl Surface {
         let mut c = Character::new(' ', attr.foreground, attr.background, attr.flags);
         if !multi_line {
             // single line support
-            if self.clip.contains_y(y+self.translate_y)==false {
+            if self.clip.contains_y(y + self.translate_y) == false {
                 return; // no need to draw
             }
-            let mut p_x = x;            
+            let mut p_x = x;
             for ch in text.chars() {
-                if let Some(pos) = self.coords_to_position(p_x,y) {
+                if let Some(pos) = self.coords_to_position(p_x, y) {
                     c.code = ch;
                     self.chars[pos].set(&c);
                 }
                 p_x += 1;
             }
         } else {
-
+            let mut p_x = x;
+            let mut p_y = y;
+            for ch in text.chars() {
+                if (ch == '\n') || (ch == '\r') {
+                    p_y += 1;
+                    p_x = x;
+                    continue;
+                }
+                if let Some(pos) = self.coords_to_position(p_x, p_y) {
+                    c.code = ch;
+                    self.chars[pos].set(&c);
+                }
+                p_x += 1;
+            }
         }
     }
 
