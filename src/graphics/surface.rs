@@ -7,6 +7,7 @@ use super::Color;
 use super::Cursor;
 use super::Image;
 use super::LineType;
+use super::TextFormat;
 
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -407,6 +408,10 @@ impl Surface {
                 p_x += 1;
             }
         }
+    }
+
+    pub fn write_text(text: &str, format: &TextFormat) {
+        
     }
 
     fn paint_small_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {

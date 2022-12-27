@@ -8,6 +8,7 @@ mod clip_area;
 mod cursor;
 mod pixel;
 mod image;
+mod text_format;
 
 #[cfg(test)]
 mod tests;
@@ -26,4 +27,6 @@ pub use self::size::Size;
 pub use self::cursor::Cursor;
 pub use self::pixel::Pixel;
 pub use self::image::Image;
+pub use self::text_format::TextAlignament;
+pub use self::text_format::TextFormat;
 use self::clip_area::ClipArea;
