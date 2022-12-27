@@ -1,6 +1,7 @@
 use crate::graphics::SpecialChar;
 
 use super::CharAttribute;
+use super::CharFlags;
 use super::Character;
 use super::ClipArea;
 use super::Color;
@@ -411,7 +412,7 @@ impl Surface {
     }
 
     pub fn write_text(text: &str, format: &TextFormat) {
-        
+
     }
 
     fn paint_small_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
