@@ -7,6 +7,12 @@ Where:
 - <separator> can be ',' or ';'
 - <word> and <value> = any sequance of chars different than space, tab
 */
+enum ValueNumericalType {
+    None,
+    Value(i32),
+    Percentage(i32)
+}
+
 #[repr(u8)]
 enum CharType {
     None = 0,
@@ -90,4 +96,57 @@ impl<'a> InternalParser<'a> {
             }
         }
     }
+    #[inline]
+    fn analize_value(&self,buf: &[u8]) -> ValueNumericalType
+    {
+        let mut negative = false;
+        let mut is_percentage = false;
+        let mut first_part = 0i32;
+        let mut second_part = 0i32;
+        let mut pos = 0usize;
+        let end = buf.length();
+
+        if (end>0) && (buf[0]==b'-') {
+            negative = true;
+            pos+=1;
+        }
+        while (pos < end) && ((buf[pos] >= b'0') && (buf[pos] <= b'9'))
+        {
+            first_part = first_part * 10 + ((buf[pos] - b'0') as i32);
+            pos+=1;
+        }
+        if (pos < end) && (buf[pos] == b'.')
+        {
+            let mut cnt = 0;
+            while (pos < end) && ((buf[pos] >= b'0') && (buf[pos] <= b'9'))
+            {
+                if cnt<2 {
+                second_part = second_part * 10 + ((buf[pos] - b'0') as i32);
+                cnt+=1;
+                }
+                pos+=1;
+            }
+        }
+        if (pos < end) && (buf[pos] == b'%')
+        {
+            is_percentage = true;
+            pos+=1;
+        }
+        if pos < end {
+            return ValueNumericalType::None; // not a valid number
+        }
+        // valid number
+        if (is_percentage)
+        {
+            let mut proc = first_part * 100 + (second_part % 100);
+            if negative { proc = -proc; }
+            return ValueNumericalType::Percentage(proc);
+        }
+        else
+        {
+            if negative { first_part = -first_part; }
+            return ValueNumericalType::Value(first_part);
+        }
+    }
+
 }
