@@ -16,6 +16,4 @@ pub struct TextFormat {
     char_attr: CharAttribute,
     hotkey_attr: CharAttribute,    
     align: TextAlignament,
-
-
 }
