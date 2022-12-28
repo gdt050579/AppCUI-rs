@@ -43,14 +43,21 @@ static LOWER_CASE_TABLE: [u8; 256] = [
 
 fn compute_hash(buf: &[u8]) -> u64 {
     // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-    let mut hash: u64 = 0xcbf29ce484222325u64;
-    for value in buf {
-        hash = hash ^ ((LOWER_CASE_TABLE[(*value) as usize]) as u64);
-        hash = hash * 0x00000100000001B3u64;
+    if buf.len() == 0 {
+        return 0;
+    }
+    let mut hash = 0xcbf29ce484222325u64;
+    let mut idx = 0usize;
+    while idx < buf.len() {
+        hash = hash ^ (LOWER_CASE_TABLE[buf[idx] as usize] as u64);
+        //hash = hash * 0x00000100000001B3u64;
+        hash = hash.wrapping_mul(0x00000100000001B3u64);
+        idx += 1;
     }
     return hash;
+
 }
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub(crate) struct KeyValuePair<'a> {
     pub(crate) key_hash: u64,
     pub(crate) key: &'a str,
@@ -86,7 +93,7 @@ impl<'a> KeyValueParser<'a> {
     }
     #[inline]
     fn get_current_char_type(&self) -> CharType {
-        if self.current > self.end {
+        if self.current >= self.end {
             return CharType::None;
         }
         let ch = self.text_buffer[self.current];
@@ -191,7 +198,7 @@ impl<'a> KeyValueParser<'a> {
         self.item.key = &self.text[key_start..key_end];
         self.item.numerical_value = 0;
 
-        if self.get_current_char_type() != CharType::Eq {
+        if self.get_current_char_type() == CharType::Eq {
             self.current += 1;
             self.skip(CharType::Space);
             if self.get_current_char_type() != CharType::Word {
@@ -208,7 +215,7 @@ impl<'a> KeyValueParser<'a> {
             self.item.value_type = ValueType::None;
         }
         self.skip(CharType::Space);
-        if self.get_current_char_type() != CharType::Separator {
+        if self.get_current_char_type() == CharType::Separator {
             self.current += 1;
         }
         return Some(&self.item);
