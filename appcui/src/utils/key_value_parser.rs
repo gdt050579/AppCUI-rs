@@ -10,10 +10,11 @@ Where:
 enum ValueNumericalType {
     None,
     Value(i32),
-    Percentage(i32)
+    Percentage(i32),
 }
 
 #[repr(u8)]
+#[derive(Copy,Clone,Debug,PartialEq)]
 enum CharType {
     None = 0,
     Word = 1,
@@ -41,19 +42,33 @@ fn compute_hash(buf: &[u8]) -> u64 {
     // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
     let mut hash: u64 = 0xcbf29ce484222325u64;
     for value in buf {
-        hash = hash ^ (LOWER_CASE_TABLE[(*value) as usize]);
+        hash = hash ^ ((LOWER_CASE_TABLE[(*value) as usize]) as u64);
         hash = hash * 0x00000100000001B3u64;
     }
     return hash;
 }
+pub (crate) struct KeyValuePair {
 
-struct InternalParser<'a> {
-    text: &[u8],
+}
+pub (crate) struct KeyValueParser<'a> {
+    text: &'a [u8],
     current: usize,
     end: usize,
+    item: KeyValuePair,
 }
+// pub (crate) struct KeyValueParserIterator {
+//     parser: KeyValueParser
+// }
 
-impl<'a> InternalParser<'a> {
+impl<'a> KeyValueParser<'a> {
+    pub fn new(text_representation: &str) -> KeyValueParser {
+        KeyValueParser {
+            text: text_representation.as_bytes(),
+            current: 0,
+            end: text_representation.len(),
+            item: KeyValuePair{}
+        }
+    }
     #[inline]
     fn get_current_char_type(&self) -> CharType {
         if self.current > self.end {
@@ -61,16 +76,16 @@ impl<'a> InternalParser<'a> {
         }
         let ch = self.text[self.current];
         match ch {
-            ' ' | '\t' => {
+            b' ' | b'\t' => {
                 return CharType::Space;
             }
-            ';' | ',' => {
+            b';' | b',' => {
                 return CharType::Separator;
             }
-            ':' | '=' => {
+            b':' | b'=' => {
                 return CharType::Eq;
             }
-            '_' => {
+            _ => {
                 return CharType::Word;
             }
         }
@@ -82,13 +97,13 @@ impl<'a> InternalParser<'a> {
         }
     }
     #[inline]
-    fn parse_word() {
+    fn parse_word(&mut self) {
         loop {
             self.skip(CharType::Word);
-            if self.get_current_char_type() != ChatType::Space {
+            if self.get_current_char_type() != CharType::Space {
                 return;
             }
-            let cpos = current;
+            let cpos = self.current;
             self.skip(CharType::Space);
             if self.get_current_char_type() != CharType::Word {
                 self.current = cpos;
@@ -97,56 +112,74 @@ impl<'a> InternalParser<'a> {
         }
     }
     #[inline]
-    fn analize_value(&self,buf: &[u8]) -> ValueNumericalType
-    {
+    fn analize_value(&self, buf: &[u8]) -> ValueNumericalType {
         let mut negative = false;
         let mut is_percentage = false;
         let mut first_part = 0i32;
         let mut second_part = 0i32;
         let mut pos = 0usize;
-        let end = buf.length();
+        let end = buf.len();
 
-        if (end>0) && (buf[0]==b'-') {
+        if (end > 0) && (buf[0] == b'-') {
             negative = true;
-            pos+=1;
+            pos += 1;
         }
-        while (pos < end) && ((buf[pos] >= b'0') && (buf[pos] <= b'9'))
-        {
+        while (pos < end) && ((buf[pos] >= b'0') && (buf[pos] <= b'9')) {
             first_part = first_part * 10 + ((buf[pos] - b'0') as i32);
-            pos+=1;
+            pos += 1;
         }
-        if (pos < end) && (buf[pos] == b'.')
-        {
+        if (pos < end) && (buf[pos] == b'.') {
             let mut cnt = 0;
-            while (pos < end) && ((buf[pos] >= b'0') && (buf[pos] <= b'9'))
-            {
-                if cnt<2 {
-                second_part = second_part * 10 + ((buf[pos] - b'0') as i32);
-                cnt+=1;
+            while (pos < end) && ((buf[pos] >= b'0') && (buf[pos] <= b'9')) {
+                if cnt < 2 {
+                    second_part = second_part * 10 + ((buf[pos] - b'0') as i32);
+                    cnt += 1;
                 }
-                pos+=1;
+                pos += 1;
             }
         }
-        if (pos < end) && (buf[pos] == b'%')
-        {
+        if (pos < end) && (buf[pos] == b'%') {
             is_percentage = true;
-            pos+=1;
+            pos += 1;
         }
         if pos < end {
             return ValueNumericalType::None; // not a valid number
         }
         // valid number
-        if (is_percentage)
-        {
+        if is_percentage {
             let mut proc = first_part * 100 + (second_part % 100);
-            if negative { proc = -proc; }
+            if negative {
+                proc = -proc;
+            }
             return ValueNumericalType::Percentage(proc);
-        }
-        else
-        {
-            if negative { first_part = -first_part; }
+        } else {
+            if negative {
+                first_part = -first_part;
+            }
             return ValueNumericalType::Value(first_part);
         }
     }
+}
 
+// impl IntoIterator for KeyValueParser {
+//     type Item = &KeyValuePair;
+//     type IntoIter = KeyValueParserIterator;
+
+//     fn into_iter(self) -> Self::IntoIter {
+//         KeyValueParserIterator {
+//             pixel: self,
+//             index: 0,
+//         }
+//     }
+// }
+
+impl<'a> Iterator for KeyValueParser<'a> {
+    type Item = &KeyValuePair;  
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current>=self.end {
+            return None;
+        }
+        self.skip(CharType::Space);
+        return None;
+    } 
 }
