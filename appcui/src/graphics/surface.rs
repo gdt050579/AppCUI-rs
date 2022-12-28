@@ -411,7 +411,7 @@ impl Surface {
         }
     }
 
-    pub fn write_text(text: &str, format: &TextFormat) {
+    pub fn write_text(_text: &str, _format: &TextFormat) {
 
     }
 

@@ -7,14 +7,17 @@ Where:
 - <separator> can be ',' or ';'
 - <word> and <value> = any sequance of chars different than space, tab
 */
-enum ValueNumericalType {
+#[repr(u8)]
+#[derive(Copy,Clone,Debug,PartialEq)]
+pub(crate) enum ValueType {
     None,
-    Value(i32),
-    Percentage(i32),
+    String,
+    Number,
+    Percentage,
 }
 
 #[repr(u8)]
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 enum CharType {
     None = 0,
     Word = 1,
@@ -47,23 +50,22 @@ fn compute_hash(buf: &[u8]) -> u64 {
     }
     return hash;
 }
-pub (crate) struct KeyValuePair<'a> {
-    key_hash: u64,
-    key: &'a str,
-    value_hash: u64,
-    value: &'a str,
-    numerical_value: i32
+#[derive(Debug)]
+pub(crate) struct KeyValuePair<'a> {
+    pub(crate) key_hash: u64,
+    pub(crate) key: &'a str,
+    pub(crate) value_hash: u64,
+    pub(crate) value: &'a str,
+    pub(crate) numerical_value: i32,
+    pub(crate) value_type: ValueType,
 }
-pub (crate) struct KeyValueParser<'a> {
+pub(crate) struct KeyValueParser<'a> {
     text: &'a str,
     text_buffer: &'a [u8],
     current: usize,
     end: usize,
-    item: KeyValuePair,
+    item: KeyValuePair<'a>,
 }
-// pub (crate) struct KeyValueParserIterator {
-//     parser: KeyValueParser
-// }
 
 impl<'a> KeyValueParser<'a> {
     pub fn new(text_representation: &str) -> KeyValueParser {
@@ -72,13 +74,14 @@ impl<'a> KeyValueParser<'a> {
             text_buffer: text_representation.as_bytes(),
             current: 0,
             end: text_representation.len(),
-            item: KeyValuePair{
+            item: KeyValuePair {
                 key_hash: 0,
                 key: "",
                 value_hash: 0,
                 value: "",
                 numerical_value: 0,
-            }
+                value_type: ValueType::None,
+            },
         }
     }
     #[inline]
@@ -109,7 +112,7 @@ impl<'a> KeyValueParser<'a> {
         }
     }
     #[inline]
-    fn parse_word(&mut self)->usize {
+    fn parse_word(&mut self) -> usize {
         loop {
             self.skip(CharType::Word);
             if self.get_current_char_type() != CharType::Space {
@@ -124,7 +127,7 @@ impl<'a> KeyValueParser<'a> {
         }
     }
     #[inline]
-    fn analize_value(&self, buf: &[u8]) -> ValueNumericalType {
+    fn analize_value(&mut self, buf: &[u8]) {
         let mut negative = false;
         let mut is_percentage = false;
         let mut first_part = 0i32;
@@ -155,44 +158,30 @@ impl<'a> KeyValueParser<'a> {
             pos += 1;
         }
         if pos < end {
-            return ValueNumericalType::None; // not a valid number
+            self.item.value_type = ValueType::String;
+            return;
         }
         // valid number
         if is_percentage {
-            let mut proc = first_part * 100 + (second_part % 100);
+            self.item.numerical_value = first_part * 100 + (second_part % 100);
             if negative {
-                proc = -proc;
+                self.item.numerical_value = -self.item.numerical_value;
             }
-            return ValueNumericalType::Percentage(proc);
+            self.item.value_type = ValueType::Percentage;
         } else {
+            self.item.numerical_value = first_part;
             if negative {
-                first_part = -first_part;
+                self.item.numerical_value = -self.item.numerical_value;
             }
-            return ValueNumericalType::Value(first_part);
+            self.item.value_type = ValueType::Number;
         }
     }
-}
-
-// impl IntoIterator for KeyValueParser {
-//     type Item = &KeyValuePair;
-//     type IntoIter = KeyValueParserIterator;
-
-//     fn into_iter(self) -> Self::IntoIter {
-//         KeyValueParserIterator {
-//             pixel: self,
-//             index: 0,
-//         }
-//     }
-// }
-
-impl<'a> Iterator for KeyValueParser<'a> {
-    type Item = &'a KeyValuePair;  
-    fn next(&mut self) -> Option<Self::Item> {
+    pub fn next(&mut self) -> Option<&KeyValuePair> {
         self.skip(CharType::Space);
-        if self.current>=self.end {
+        if self.current >= self.end {
             return None;
         }
-        if self.get_current_char_type()!=CharType::Word {
+        if self.get_current_char_type() != CharType::Word {
             return None;
         }
         let key_start = self.current;
@@ -201,11 +190,11 @@ impl<'a> Iterator for KeyValueParser<'a> {
         self.item.key_hash = compute_hash(&self.text_buffer[key_start..key_end]);
         self.item.key = &self.text[key_start..key_end];
         self.item.numerical_value = 0;
-        
-        if self.get_current_char_type()!=CharType::Eq {
-            self.current+=1;
+
+        if self.get_current_char_type() != CharType::Eq {
+            self.current += 1;
             self.skip(CharType::Space);
-            if self.get_current_char_type()!=CharType::Word {
+            if self.get_current_char_type() != CharType::Word {
                 return None;
             }
             let value_start = self.current;
@@ -213,13 +202,15 @@ impl<'a> Iterator for KeyValueParser<'a> {
             self.skip(CharType::Space);
             self.item.value = &self.text[value_start..value_end];
             self.item.value_hash = compute_hash(&self.text_buffer[value_start..value_end]);
-            
+            self.analize_value(&self.text_buffer[value_start..value_end]);
         } else {
             // empty
+            self.item.value_type = ValueType::None;
         }
-        if self.get_current_char_type()!=CharType::Separator {
-            self.current+=1;
+        self.skip(CharType::Space);
+        if self.get_current_char_type() != CharType::Separator {
+            self.current += 1;
         }
         return Some(&self.item);
-    } 
+    }
 }
