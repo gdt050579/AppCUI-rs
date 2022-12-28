@@ -47,11 +47,16 @@ fn compute_hash(buf: &[u8]) -> u64 {
     }
     return hash;
 }
-pub (crate) struct KeyValuePair {
-
+pub (crate) struct KeyValuePair<'a> {
+    key_hash: u64,
+    key: &'a str,
+    value_hash: u64,
+    value: &'a str,
+    numerical_value: i32
 }
 pub (crate) struct KeyValueParser<'a> {
-    text: &'a [u8],
+    text: &'a str,
+    text_buffer: &'a [u8],
     current: usize,
     end: usize,
     item: KeyValuePair,
@@ -63,10 +68,17 @@ pub (crate) struct KeyValueParser<'a> {
 impl<'a> KeyValueParser<'a> {
     pub fn new(text_representation: &str) -> KeyValueParser {
         KeyValueParser {
-            text: text_representation.as_bytes(),
+            text: text_representation,
+            text_buffer: text_representation.as_bytes(),
             current: 0,
             end: text_representation.len(),
-            item: KeyValuePair{}
+            item: KeyValuePair{
+                key_hash: 0,
+                key: "",
+                value_hash: 0,
+                value: "",
+                numerical_value: 0,
+            }
         }
     }
     #[inline]
@@ -74,7 +86,7 @@ impl<'a> KeyValueParser<'a> {
         if self.current > self.end {
             return CharType::None;
         }
-        let ch = self.text[self.current];
+        let ch = self.text_buffer[self.current];
         match ch {
             b' ' | b'\t' => {
                 return CharType::Space;
@@ -97,17 +109,17 @@ impl<'a> KeyValueParser<'a> {
         }
     }
     #[inline]
-    fn parse_word(&mut self) {
+    fn parse_word(&mut self)->usize {
         loop {
             self.skip(CharType::Word);
             if self.get_current_char_type() != CharType::Space {
-                return;
+                return self.current;
             }
             let cpos = self.current;
             self.skip(CharType::Space);
             if self.get_current_char_type() != CharType::Word {
                 self.current = cpos;
-                return;
+                return cpos;
             }
         }
     }
@@ -174,12 +186,40 @@ impl<'a> KeyValueParser<'a> {
 // }
 
 impl<'a> Iterator for KeyValueParser<'a> {
-    type Item = &KeyValuePair;  
+    type Item = &'a KeyValuePair;  
     fn next(&mut self) -> Option<Self::Item> {
+        self.skip(CharType::Space);
         if self.current>=self.end {
             return None;
         }
+        if self.get_current_char_type()!=CharType::Word {
+            return None;
+        }
+        let key_start = self.current;
+        let key_end = self.parse_word();
         self.skip(CharType::Space);
-        return None;
+        self.item.key_hash = compute_hash(&self.text_buffer[key_start..key_end]);
+        self.item.key = &self.text[key_start..key_end];
+        self.item.numerical_value = 0;
+        
+        if self.get_current_char_type()!=CharType::Eq {
+            self.current+=1;
+            self.skip(CharType::Space);
+            if self.get_current_char_type()!=CharType::Word {
+                return None;
+            }
+            let value_start = self.current;
+            let value_end = self.parse_word();
+            self.skip(CharType::Space);
+            self.item.value = &self.text[value_start..value_end];
+            self.item.value_hash = compute_hash(&self.text_buffer[value_start..value_end]);
+            
+        } else {
+            // empty
+        }
+        if self.get_current_char_type()!=CharType::Separator {
+            self.current+=1;
+        }
+        return Some(&self.item);
     } 
 }
