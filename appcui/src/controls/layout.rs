@@ -2,13 +2,13 @@ mod alignament;
 mod coordonate;
 mod size;
 mod layout_information;
-mod layout_param;
+mod parameter;
 
 use alignament::Alignament;
 use coordonate::Coordonate;
 use size::Size;
 use layout_information::LayoutInformation;
-use layout_param::LayoutParam;
+use parameter::Parameter;
 
 pub struct Layout<'a> {
     format: &'a str

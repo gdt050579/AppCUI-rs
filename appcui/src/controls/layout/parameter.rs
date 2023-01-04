@@ -1,5 +1,6 @@
 #[repr(u8)]
-enum Parameter
+#[derive(Copy,Clone)]
+pub (super) enum Parameter
 {
     X      = 0,
     Y      = 1,
@@ -15,51 +16,51 @@ enum Parameter
 
 static HASH_TO_PARAMETER: [Option<Parameter>; 47] = [
     None,
-    Some(Type::Bottom),
+    Some(Parameter::Bottom),
     None,
-    Some(Type::Dock),
-    None,
-    None,
-    Some(Type::Align),
-    Some(Type::Top),
-    None,
-    Some(Type::Bottom),
-    None,
-    Some(Type::Left),
+    Some(Parameter::Dock),
     None,
     None,
+    Some(Parameter::Align),
+    Some(Parameter::Top),
     None,
-    Some(Type::Height),
+    Some(Parameter::Bottom),
     None,
-    None,
-    Some(Type::Left),
-    Some(Type::Top),
-    Some(Type::Width),
-    Some(Type::Align),
+    Some(Parameter::Left),
     None,
     None,
     None,
-    Some(Type::Right),
-    Some(Type::Width),
+    Some(Parameter::Height),
+    None,
+    None,
+    Some(Parameter::Left),
+    Some(Parameter::Top),
+    Some(Parameter::Width),
+    Some(Parameter::Align),
     None,
     None,
     None,
-    Some(Type::Y),
-    Some(Type::X),
+    Some(Parameter::Right),
+    Some(Parameter::Width),
     None,
     None,
-    Some(Type::Right),
+    None,
+    Some(Parameter::Y),
+    Some(Parameter::X),
     None,
     None,
+    Some(Parameter::Right),
     None,
     None,
     None,
     None,
     None,
     None,
-    Some(Type::Dock),
     None,
-    Some(Type::Height),
+    None,
+    Some(Parameter::Dock),
+    None,
+    Some(Parameter::Height),
     None,
 ];
 
@@ -115,7 +116,7 @@ static HASH_COLISION_VALIDATOR: [u64;47] = [
 
 impl Parameter {
     pub(super) fn new(hash: u64) -> Option<Parameter> {
-        let entry_index = hash % 47;
+        let entry_index = (hash % 47) as usize;
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
