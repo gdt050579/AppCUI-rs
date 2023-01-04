@@ -7,7 +7,7 @@ use crate::utils::KeyValueParser;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits:16)]
-pub enum LayoutInformationFields {
+pub enum LayoutUsedParams {
     X = 0x0001,
     Y = 0x0002,
     LEFT = 0x0004,
@@ -28,7 +28,7 @@ pub(super) struct LayoutInformation {
     pub a_right: Coordonate,
     pub a_top: Coordonate,
     pub a_bottom: Coordonate,
-    pub fields: LayoutInformationFields,
+    pub params: LayoutInformationFields,
     pub align: Alignament,
     pub dock: Alignament,
 }
@@ -44,7 +44,7 @@ impl Default for LayoutInformation {
             a_right: Coordonate::Absolute(0),
             a_top: Coordonate::Absolute(0),
             a_bottom: Coordonate::Absolute(0),
-            fields: LayoutInformationFields::None,
+            params: LayoutUsedParams::None,
             align: Alignament::TopLeft,
             dock: Alignament::TopLeft,
         }    

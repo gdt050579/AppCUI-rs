@@ -1,5 +1,5 @@
 #[repr(u8)]
-enum LayoutParam
+enum Parameter
 {
     X      = 0,
     Y      = 1,
@@ -13,7 +13,7 @@ enum LayoutParam
     Dock   = 9,
 }
 
-static HASH_TO_LAYOUT_PARAM: [Option<LayoutParam>; 47] = [
+static HASH_TO_PARAMETER: [Option<Parameter>; 47] = [
     None,
     Some(Type::Bottom),
     None,
@@ -113,12 +113,12 @@ static HASH_COLISION_VALIDATOR: [u64;47] = [
     0x0,
 ];
 
-impl LayoutParam {
-    pub(super) fn new(hash: u64) -> Option<LayoutParam> {
+impl Parameter {
+    pub(super) fn new(hash: u64) -> Option<Parameter> {
         let entry_index = hash % 47;
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        return HASH_TO_LAYOUT_PARAM[entry_index];
+        return HASH_TO_PARAMETER[entry_index];
     }
-}
+}   
