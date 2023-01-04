@@ -1,7 +1,7 @@
 use super::Color;
 use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits = 16)]
+#[EnumBitFlags(bits = 16,debug=true)]
 pub enum CharFlags {
     Bold = 0x0001,
     Italic = 0x0002,
