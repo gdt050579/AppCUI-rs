@@ -115,7 +115,7 @@ static HASH_COLISION_VALIDATOR: [u64;47] = [
 ];
 
 impl Parameter {
-    pub(super) fn new(hash: u64) -> Option<Parameter> {
+    pub(super) fn from_hash(hash: u64) -> Option<Parameter> {
         let entry_index = (hash % 47) as usize;
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;

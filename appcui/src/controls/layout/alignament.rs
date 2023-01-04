@@ -209,7 +209,7 @@ static HASH_COLISION_VALIDATOR: [u64; 95] = [
 ];
 
 impl Alignament {
-    pub(super) fn new(hash: u64) -> Option<Alignament> {
+    pub(super) fn from_hash(hash: u64) -> Option<Alignament> {
         let entry_index = (hash % 95) as usize;
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;

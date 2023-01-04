@@ -3,7 +3,9 @@ use super::Coordonate;
 use super::Size;
 use super::Parameter;
 use crate::utils::KeyValueParser;
+use crate::utils::ValueType;
 use EnumBitFlags::EnumBitFlags;
+
 
 #[EnumBitFlags(bits:16)]
 pub enum LayoutUsedParams {
@@ -56,90 +58,106 @@ impl LayoutInformation {
         let mut parser = KeyValueParser::new(format);
 
         while let Some(p) = parser.next() {
-            if let Some(param) = Parameter::new(p.key_hash)
+            if let Some(param) = Parameter::from_hash(p.key_hash)
             {
-
+                match param {
+                    Parameter::X => {
+                        if p.is_numerical_value() {
+                            inf.x = Coordonate::new(&p);
+                            inf.params |= LayoutUsedParams::X;
+                        } else {
+                            panic!("Invalid value for X parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
+                        }
+                    },
+                    Parameter::Y => {
+                        if p.is_numerical_value() {
+                            inf.y = Coordonate::new(&p);
+                            inf.params |= LayoutUsedParams::Y;
+                        } else {
+                            panic!("Invalid value for Y parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
+                        }
+                    },
+                    Parameter::Left => {
+                        if p.is_numerical_value() {
+                            inf.a_left = Coordonate::new(&p);
+                            inf.params |= LayoutUsedParams::LEFT;
+                        } else {
+                            panic!("Invalid value for LEFT parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
+                        }
+                    },
+                    Parameter::Right => {
+                        if p.is_numerical_value() {
+                            inf.a_right = Coordonate::new(&p);
+                            inf.params |= LayoutUsedParams::RIGHT;
+                        } else {
+                            panic!("Invalid value for RIGHT parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
+                        }
+                    },
+                    Parameter::Top => {
+                        if p.is_numerical_value() {
+                            inf.a_top = Coordonate::new(&p);
+                            inf.params |= LayoutUsedParams::TOP;
+                        } else {
+                            panic!("Invalid value for TOP parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
+                        }
+                    },
+                    Parameter::Bottom => {
+                        if p.is_numerical_value() {
+                            inf.a_bottom = Coordonate::new(&p);
+                            inf.params |= LayoutUsedParams::BOTTOM;
+                        } else {
+                            panic!("Invalid value for BOTTOM parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
+                        }
+                    },
+                    Parameter::Width => {
+                        if p.is_numerical_value() {
+                            if p.numerical_value<0 {
+                                panic!("The value for WIDTH parameter can not be a negative value: {} in layout: {}",p.value,format);
+                            }
+                            inf.width = Size::new(&p);
+                            inf.params |= LayoutUsedParams::WIDTH;
+                        } else {
+                            panic!("Invalid value for WIDTH parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
+                        }
+                    },
+                    Parameter::Height => {
+                        if p.is_numerical_value() {
+                            if p.numerical_value<0 {
+                                panic!("The value for HEIGHT parameter can not be a negative value: {} in layout: {}",p.value,format);
+                            }
+                            inf.height = Size::new(&p);
+                            inf.params |= LayoutUsedParams::HEIGHT;
+                        } else {
+                            panic!("Invalid value for HEIGHT parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
+                        }
+                    },
+                    Parameter::Align => {
+                        if p.value_type != ValueType::String {
+                            panic!("Invalid value for dock parameter: {} in layout: {}",p.value,format);
+                        }
+                        if let Some(d) = Alignament::from_hash(p.value_hash) {
+                            inf.dock = d;
+                            inf.params |= LayoutUsedParams::DOCK;
+                        } else {
+                            panic!("Invalid value for dock parameter: {} in layout: {}",p.value,format);
+                        }
+                    },
+                    Parameter::Dock => {
+                        if p.value_type != ValueType::String {
+                            panic!("Invalid value for alignament parameter: {} in layout: {}",p.value,format);
+                        }
+                        if let Some(a) = Alignament::from_hash(p.value_hash) {
+                            inf.align = a;
+                            inf.params |= LayoutUsedParams::ALIGN;
+                        } else {
+                            panic!("Invalid value for alignament parameter: {} in layout: {}",p.value,format);
+                        }
+                    }
+                }
             } else {
                 panic!("Unknwon layout parameter: {}",p.key);
             }
         }
-        //     AppCUI::Utils::KeyValueParser parser;
-        //     ControlLayout::Type layoutType;
-
-        
-        //     // reset inf
-        
-        //     ASSERT(parser.Parse(layout), parser.GetErrorName().data());
-        //     for (auto idx = 0U; idx < parser.GetCount(); idx++)
-        //     {
-        //         const auto& item = parser[idx];
-        //         if (ControlLayout::HashToType(item.Key.hash, layoutType) == false)
-        //         {
-        //             error.Set("Unknwon layout item: ");
-        //             error.Add((const char*) item.Key.data, item.Key.dataSize);
-        //             ASSERT(false, error.GetText());
-        //         }
-        //         const bool isNumericalValue =
-        //               (item.Value.type == KeyValuePair::Type::Number) || (item.Value.type == KeyValuePair::Type::Percentage);
-        //         int32 value = item.Value.number;
-        //         valueType   = (item.Value.type == KeyValuePair::Type::Percentage) ? LayoutValueType::Percentage
-        //                                                                           : LayoutValueType::CharacterOffset;
-        //         switch (layoutType)
-        //         {
-        //         case ControlLayout::Type::X:
-        //             ASSERT(isNumericalValue, "Field 'X' must be a valid number or percentage");
-        //             SET_LAYOUT_INFO(LAYOUT_FLAG_X, x);
-        //             break;
-        //         case ControlLayout::Type::Y:
-        //             ASSERT(isNumericalValue, "Field 'XY' must be a valid number or percentage");
-        //             SET_LAYOUT_INFO(LAYOUT_FLAG_Y, y);
-        //             break;
-        //         case ControlLayout::Type::Left:
-        //             ASSERT(isNumericalValue, "Field 'Left' must be a valid number or percentage");
-        //             SET_LAYOUT_INFO(LAYOUT_FLAG_LEFT, a_left);
-        //             break;
-        //         case ControlLayout::Type::Right:
-        //             ASSERT(isNumericalValue, "Field 'Right' must be a valid number or percentage");
-        //             SET_LAYOUT_INFO(LAYOUT_FLAG_RIGHT, a_right);
-        //             break;
-        //         case ControlLayout::Type::Top:
-        //             ASSERT(isNumericalValue, "Field 'Top' must be a valid number or percentage");
-        //             SET_LAYOUT_INFO(LAYOUT_FLAG_TOP, a_top);
-        //             break;
-        //         case ControlLayout::Type::Bottom:
-        //             ASSERT(isNumericalValue, "Field 'Bottom' must be a valid number or percentage");
-        //             SET_LAYOUT_INFO(LAYOUT_FLAG_BOTTOM, a_bottom);
-        //             break;
-        //         case ControlLayout::Type::Width:
-        //             ASSERT(isNumericalValue, "Field 'Width' must be a valid number or percentage");
-        //             SET_LAYOUT_INFO(LAYOUT_FLAG_WIDTH, width);
-        //             break;
-        //         case ControlLayout::Type::Height:
-        //             ASSERT(isNumericalValue, "Field 'Height' must be a valid number or percentage");
-        //             SET_LAYOUT_INFO(LAYOUT_FLAG_HEIGHT, height);
-        //             break;
-        //         case ControlLayout::Type::Align:
-        //             ASSERT(item.Value.type == KeyValuePair::Type::String, "Align parameter requires a string value");
-        //             ASSERT(ControlAlignament::HashToType(item.Value.hash, inf.align), "Unknwon align value");
-        //             inf.flags |= LAYOUT_FLAG_ALIGN;
-        //             break;
-        //         case ControlLayout::Type::Dock:
-        //             ASSERT(item.Value.type == KeyValuePair::Type::String, "Dock parameter requires a string value");
-        //             ASSERT(ControlAlignament::HashToType(item.Value.hash, inf.dock), "Unknwon dock value");
-        //             inf.flags |= LAYOUT_FLAG_DOCK;
-        //             break;
-        //         default:
-        //             error.Set("Internal error - fail to parse item: ");
-        //             error.Add((const char*) item.Key.data, item.Key.dataSize);
-        //             ASSERT(false, error.GetText());
-        //             return false;
-        //         }
-        //     }
-        //     // all good
-        //     return true;
-        // }
-        
-
         return inf;
     }
 }

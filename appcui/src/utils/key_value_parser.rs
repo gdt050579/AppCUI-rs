@@ -8,7 +8,7 @@ Where:
 - <word> and <value> = any sequance of chars different than space, tab
 */
 #[repr(u8)]
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub(crate) enum ValueType {
     None,
     String,
@@ -55,9 +55,8 @@ fn compute_hash(buf: &[u8]) -> u64 {
         idx += 1;
     }
     return hash;
-
 }
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct KeyValuePair<'a> {
     pub(crate) key_hash: u64,
     pub(crate) key: &'a str,
@@ -65,6 +64,18 @@ pub(crate) struct KeyValuePair<'a> {
     pub(crate) value: &'a str,
     pub(crate) numerical_value: i32,
     pub(crate) value_type: ValueType,
+}
+impl KeyValuePair<'_> {
+    pub (crate) fn is_numerical_value(&self) -> bool {
+        match self.value_type {
+            ValueType::Number | ValueType::Percentage => {
+                return true;
+            }
+            _ => {
+                return false;
+            }
+        }
+    }  
 }
 pub(crate) struct KeyValueParser<'a> {
     text: &'a str,
@@ -219,5 +230,5 @@ impl<'a> KeyValueParser<'a> {
             self.current += 1;
         }
         return Some(&self.item);
-    }
+    }  
 }
