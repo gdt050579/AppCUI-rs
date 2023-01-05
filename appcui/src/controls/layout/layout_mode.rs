@@ -73,7 +73,6 @@ pub(super) struct LeftTopRightBottomAnchorsLayout {
     pub bottom: Coordonate,
 }
 pub(super) enum LayoutMode {
-    None,
     PointAndSize(PointAndSizeLayout),
     LeftRightAnchors(LeftRightAnchorsLayout),
     TopBottomAnchors(TopBottomAnchorsLayout),
