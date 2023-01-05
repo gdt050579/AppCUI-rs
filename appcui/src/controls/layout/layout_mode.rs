@@ -65,6 +65,13 @@ pub(super) struct TopRightBottomAnchorsLayout {
     pub bottom: Coordonate,
     pub width: Size,
 }
+#[derive(Copy, Clone)]
+pub(super) struct LeftTopRightBottomAnchorsLayout {
+    pub left: Coordonate,
+    pub top: Coordonate,
+    pub right: Coordonate,
+    pub bottom: Coordonate,
+}
 pub(super) enum LayoutMode {
     None,
     PointAndSize(PointAndSizeLayout),
@@ -76,7 +83,7 @@ pub(super) enum LayoutMode {
     TopLeftBottomAnchors(TopLeftBottomAnchorsLayout),
     TopRightBottomAnchors(TopRightBottomAnchorsLayout),
 
-    LeftTopRightBottomAnchors,
+    LeftTopRightBottomAnchors(LeftTopRightBottomAnchorsLayout)
 }
 impl LayoutMode {
     fn new_docked_layout(params: &LayoutParameters) -> LayoutMode {
@@ -319,7 +326,18 @@ impl LayoutMode {
         })
     }
     fn new_LTRB_anchors_layout(params: &LayoutParameters) -> LayoutMode {
-        todo!();
+        should_not_use!(params.x, "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used");
+        should_not_use!(params.y, "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used");
+        should_not_use!(params.height, "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used");
+        should_not_use!(params.width, "When (left,top,right,bottom) parameters are used together, 'widyj' parameter can not be used");
+        should_not_use!(params.align, "When (left,top,right,bottom) parameters are used together, 'align' parameter can not be used");
+
+        LayoutMode::LeftTopRightBottomAnchors(LeftTopRightBottomAnchorsLayout {
+            left: params.a_left.unwrap(),
+            top: params.a_top.unwrap(),
+            right: params.a_right.unwrap(),
+            bottom: params.a_bottom.unwrap(),
+        })        
     }
     pub(super) fn new(format: &str) -> LayoutMode {
         let params_list = LayoutParameters::new(format);
