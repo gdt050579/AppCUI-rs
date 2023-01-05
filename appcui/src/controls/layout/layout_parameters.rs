@@ -20,7 +20,7 @@ pub enum LayoutUsedParams {
     ALIGN = 0x0100,
     DOCK = 0x0200,
 }
-pub(super) struct LayoutInformation {
+pub(super) struct LayoutParameters {
     pub x: Coordonate,
     pub y: Coordonate,
     pub width: Size,
@@ -33,10 +33,10 @@ pub(super) struct LayoutInformation {
     pub align: Alignament,
     pub dock: Alignament,
 }
-impl Default for LayoutInformation {
+impl Default for LayoutParameters {
     #[inline]
     fn default() -> Self {
-        LayoutInformation {
+        LayoutParameters {
             x: Coordonate::Absolute(0),
             y: Coordonate::Absolute(0),
             width: Size::Absolute(0),
@@ -51,10 +51,10 @@ impl Default for LayoutInformation {
         }    
     }
 }
-impl LayoutInformation {
+impl LayoutParameters {
 
-    pub (super) fn new(format: &str) -> LayoutInformation {
-        let mut inf = LayoutInformation::default();
+    pub (super) fn new(format: &str) -> LayoutParameters {
+        let mut inf = LayoutParameters::default();
         let mut parser = KeyValueParser::new(format);
 
         while let Some(p) = parser.next() {
