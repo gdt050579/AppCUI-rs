@@ -4,6 +4,14 @@ use super::LayoutParameters;
 use super::LayoutUsedParams;
 use super::Size;
 
+macro_rules! should_not_use {
+    ($param:expr, $msg:literal) => {
+        if $param.is_some() {
+            panic!($msg);
+        }
+    };
+}
+
 #[derive(Copy, Clone)]
 pub(super) struct PointAndSizeLayout {
     pub x: Coordonate,
@@ -37,20 +45,13 @@ pub(super) enum LayoutMode {
 }
 impl LayoutMode {
     fn new_docked_layout(params: &LayoutParameters) -> LayoutMode {
-        if params.used_params.contains_one(
-            LayoutUsedParams::X
-                | LayoutUsedParams::Y
-                | LayoutUsedParams::TOP
-                | LayoutUsedParams::BOTTOM
-                | LayoutUsedParams::LEFT
-                | LayoutUsedParams::RIGHT,
-        ) {
-            panic!("When dock|d parameter is used, none of the position (x,y) or anchor (left,right,bottom,top) parameters can not be uesd");
-        }
-        if params.used_params.contains_one(LayoutUsedParams::ALIGN) {
-            panic!("When dock|d parameter is used, 'align' parameter can not be used !");
-        }
-        // if width or height are not present, default them to 100%
+        should_not_use!(params.x,"When ('dock' or 'd') parameter is used,'x' parameter can not be used !");
+        should_not_use!(params.y,"When ('dock' or 'd') parameter is used,'y' parameter can not be used !");
+        should_not_use!(params.a_top,"When ('dock' or 'd') parameter is used,('top' or 't') parameters can not be used !");
+        should_not_use!(params.a_bottom,"When ('dock' or 'd') parameter is used,('bottom' or 'b') parameters can not be used !");
+        should_not_use!(params.a_left,"When ('dock' or 'd') parameter is used,('left' or 'l') parameters can not be used !");
+        should_not_use!(params.a_right,"When ('dock' or 'd') parameter is used,('right' or 'r') parameters can not be used !");
+        should_not_use!(params.align,"When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !");
 
         LayoutMode::PointAndSize(PointAndSizeLayout {
             x: Coordonate::Absolute(0),
