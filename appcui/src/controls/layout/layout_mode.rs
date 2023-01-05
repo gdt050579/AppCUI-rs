@@ -29,12 +29,20 @@ pub(super) struct LeftRightAnchorsLayout {
     pub height: Size,
     pub align: Alignament,
 }
+#[derive(Copy, Clone)]
+pub(super) struct TopBottomAnchorsLayout {
+    pub top: Coordonate,
+    pub bottom: Coordonate,
+    pub x: Coordonate,
+    pub width: Size,
+    pub align: Alignament,
+}
 
 pub(super) enum LayoutMode {
     None,
     PointAndSize(PointAndSizeLayout),
     LeftRightAnchors(LeftRightAnchorsLayout),
-    TopBottomAnchorsAndWidth,
+    TopBottomAnchors(TopBottomAnchorsLayout),
 
     LeftTopRightAnchorsAndHeight,
     LeftBottomRightAnchorsAndHeight,
@@ -120,7 +128,23 @@ impl LayoutMode {
         })
     }
     fn new_vertical_anchor_layout(params: &LayoutParameters) -> LayoutMode {
-        todo!();
+        should_not_use!(params.x,"When (top,bottom) parameters are used together, 'Y' parameter can not be used");
+        should_not_use!(params.width,"When (top,bottom) parameters are used toghere, ('height' or 'h') parameters can not be used as the width is deduced from bottom-top difference");
+
+        if let Some(align) = params.align {
+            match align {
+                Alignament::Left|Alignament::Center|Alignament::Right => {},
+                _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) alignament values are allowed !")
+            }
+        }
+
+        LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout { 
+            top: params.a_top.unwrap(),
+            bottom: params.a_bottom.unwrap(),
+            x: params.x.unwrap_or(Coordonate::Absolute(0)),
+            width: params.width.unwrap_or(Size::Absolute(1)),
+            align: params.align.unwrap_or(Alignament::Center),
+        })
     }
     fn new_LTR_anchors_layout(params: &LayoutParameters) -> LayoutMode {
         todo!();
