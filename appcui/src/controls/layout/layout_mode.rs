@@ -69,12 +69,12 @@ impl LayoutMode {
         const RIGHT_TOP_ANCHOR: u16 = LayoutUsedParams::RIGHT.get_value() | LayoutUsedParams::TOP.get_value();
         const LEFT_BOTTOM_ANCHOR: u16 = LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::BOTTOM.get_value();
         const RIGHT_BOTTOM_ANCHOR: u16 = LayoutUsedParams::RIGHT.get_value() | LayoutUsedParams::BOTTOM.get_value();
-        const HORIZONTAL_ANCHOR: u16 =(LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::RIGHT.get_value();
+        const HORIZONTAL_ANCHOR: u16 =LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::RIGHT.get_value();
         const VERTICAL_ANCHOR: u16 = LayoutUsedParams::TOP.get_value() | LayoutUsedParams::BOTTOM.get_value();
         const LTR_ANCHOR: u16 = LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::TOP.get_value() | LayoutUsedParams::RIGHT.get_value();
         const LBR_ANCHOR: u16 = LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::BOTTOM.get_value() | LayoutUsedParams::RIGHT.get_value();
         const TLB_ANCHOR: u16 = LayoutUsedParams::TOP.get_value() | LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::BOTTOM.get_value();
-        const TRB_ANCHOR: u16 = LayoutUsedParams::TOP.get_value() | LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::BOTTOM.get_value();
+        const TRB_ANCHOR: u16 = LayoutUsedParams::TOP.get_value() | LayoutUsedParams::RIGHT.get_value() | LayoutUsedParams::BOTTOM.get_value();
         const LTRB_ANCHOR: u16 = LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::TOP.get_value() | LayoutUsedParams::RIGHT.get_value() | LayoutUsedParams::BOTTOM.get_value();
         match anchors {
             LEFT_TOP_ANCHOR  => {
