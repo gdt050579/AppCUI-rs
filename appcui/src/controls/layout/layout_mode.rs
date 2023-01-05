@@ -44,6 +44,13 @@ pub(super) struct LeftTopRightAnchorsLayout {
     pub right: Coordonate,
     pub height: Size,
 }
+#[derive(Copy, Clone)]
+pub(super) struct LeftBottomRightAnchorsLayout {
+    pub left: Coordonate,
+    pub bottom: Coordonate,
+    pub right: Coordonate,
+    pub height: Size,
+}
 pub(super) enum LayoutMode {
     None,
     PointAndSize(PointAndSizeLayout),
@@ -51,7 +58,7 @@ pub(super) enum LayoutMode {
     TopBottomAnchors(TopBottomAnchorsLayout),
 
     LeftTopRightAnchors(LeftTopRightAnchorsLayout),
-    LeftBottomRightAnchorsAndHeight,
+    LeftBottomRightAnchors(LeftBottomRightAnchorsLayout),
     TopLeftBottomAnchorsAndWidth,
     TopRightBottomAnchorsAndWidth,
 
@@ -223,7 +230,29 @@ impl LayoutMode {
         })
     }
     fn new_LBR_anchors_layout(params: &LayoutParameters) -> LayoutMode {
-        todo!();
+        should_not_use!(
+            params.x,
+            "When (left,bottom,right) parameters are used together, 'X' parameter can not be used"
+        );
+        should_not_use!(
+            params.y,
+            "When (left,bottom,right) parameters are used together, 'Y' parameter can not be used"
+        );
+        should_not_use!(
+            params.width,
+            "When (left,bottom,right) parameters are used together, 'width' parameter can not be used"
+        );
+        should_not_use!(
+            params.align,
+            "When (left,bottom,right) parameters are used together, 'align' parameter can not be used"
+        );
+
+        LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout {
+            left: params.a_left.unwrap(),
+            bottom: params.a_bottom.unwrap(),
+            right: params.a_right.unwrap(),
+            height: params.height.unwrap_or(Size::Absolute(1)),
+        })
     }
     fn new_TLB_anchors_layout(params: &LayoutParameters) -> LayoutMode {
         todo!();
