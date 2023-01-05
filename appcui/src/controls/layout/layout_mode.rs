@@ -65,37 +65,17 @@ impl LayoutMode {
     fn new_XYWH_layout(params: &LayoutParameters) -> LayoutMode {
         // it is assume that DOCK|D is not set (as it was process early in ProcessDockedLayout)
         // if X and Y are set --> Left, Right, Top and Bottom should not be set
-        if params.used_params.contains_one(
-            LayoutUsedParams::LEFT
-                | LayoutUsedParams::RIGHT
-                | LayoutUsedParams::TOP
-                | LayoutUsedParams::BOTTOM,
-        ) {
-            panic!("When (x,y) parameters are used, none of the anchor (left,right,bottom,top) parameters can not be used");
-        }
-
-        // if width or height are not present, they are defaulted to 1 character
-        // if align is not presented, it is defaulted to TopLeft
-        // anchor is always TopLeft
+        should_not_use!(params.a_left,"When (x,y) parameters are used, ('left' or 'l') parameter can not be used !");
+        should_not_use!(params.a_right,"When (x,y) parameters are used, ('right' or 'r') parameter can not be used !");
+        should_not_use!(params.a_top,"When (x,y) parameters are used, ('top' or 't') parameter can not be used !");
+        should_not_use!(params.a_bottom,"When (x,y) parameters are used, ('bottom' or 'b') parameter can not be used !");
 
         LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: params.x,
-            y: params.y,
-            width: if params.used_params.contains(LayoutUsedParams::WIDTH) {
-                params.width
-            } else {
-                Size::Absolute(1)
-            },
-            height: if params.used_params.contains(LayoutUsedParams::HEIGHT) {
-                params.height
-            } else {
-                Size::Absolute(1)
-            },
-            align: if params.used_params.contains(LayoutUsedParams::ALIGN) {
-                params.align
-            } else {
-                Alignament::TopLeft
-            },
+            x: params.x.unwrap(),
+            y: params.y.unwrap(),
+            width: params.width.unwrap_or(Size::Absolute(1)),
+            height: params.height.unwrap_or(Size::Absolute(1)),
+            align: params.align.unwrap_or(Alignament::TopLeft),
             anchor: Alignament::TopLeft,
         })
     }
