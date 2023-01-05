@@ -29,7 +29,7 @@ pub(super) struct LayoutParameters {
     pub a_right: Coordonate,
     pub a_top: Coordonate,
     pub a_bottom: Coordonate,
-    pub params: LayoutUsedParams,
+    pub used_params: LayoutUsedParams,
     pub align: Alignament,
     pub dock: Alignament,
 }
@@ -45,7 +45,7 @@ impl Default for LayoutParameters {
             a_right: Coordonate::Absolute(0),
             a_top: Coordonate::Absolute(0),
             a_bottom: Coordonate::Absolute(0),
-            params: LayoutUsedParams::None,
+            used_params: LayoutUsedParams::None,
             align: Alignament::TopLeft,
             dock: Alignament::TopLeft,
         }    
@@ -64,7 +64,7 @@ impl LayoutParameters {
                     Parameter::X => {
                         if p.is_numerical_value() {
                             inf.x = Coordonate::new(&p);
-                            inf.params |= LayoutUsedParams::X;
+                            inf.used_params |= LayoutUsedParams::X;
                         } else {
                             panic!("Invalid value for X parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
@@ -72,7 +72,7 @@ impl LayoutParameters {
                     Parameter::Y => {
                         if p.is_numerical_value() {
                             inf.y = Coordonate::new(&p);
-                            inf.params |= LayoutUsedParams::Y;
+                            inf.used_params |= LayoutUsedParams::Y;
                         } else {
                             panic!("Invalid value for Y parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
@@ -80,7 +80,7 @@ impl LayoutParameters {
                     Parameter::Left => {
                         if p.is_numerical_value() {
                             inf.a_left = Coordonate::new(&p);
-                            inf.params |= LayoutUsedParams::LEFT;
+                            inf.used_params |= LayoutUsedParams::LEFT;
                         } else {
                             panic!("Invalid value for LEFT parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
@@ -88,7 +88,7 @@ impl LayoutParameters {
                     Parameter::Right => {
                         if p.is_numerical_value() {
                             inf.a_right = Coordonate::new(&p);
-                            inf.params |= LayoutUsedParams::RIGHT;
+                            inf.used_params |= LayoutUsedParams::RIGHT;
                         } else {
                             panic!("Invalid value for RIGHT parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
@@ -96,7 +96,7 @@ impl LayoutParameters {
                     Parameter::Top => {
                         if p.is_numerical_value() {
                             inf.a_top = Coordonate::new(&p);
-                            inf.params |= LayoutUsedParams::TOP;
+                            inf.used_params |= LayoutUsedParams::TOP;
                         } else {
                             panic!("Invalid value for TOP parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
@@ -104,7 +104,7 @@ impl LayoutParameters {
                     Parameter::Bottom => {
                         if p.is_numerical_value() {
                             inf.a_bottom = Coordonate::new(&p);
-                            inf.params |= LayoutUsedParams::BOTTOM;
+                            inf.used_params |= LayoutUsedParams::BOTTOM;
                         } else {
                             panic!("Invalid value for BOTTOM parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
@@ -115,7 +115,7 @@ impl LayoutParameters {
                                 panic!("The value for WIDTH parameter can not be a negative value: {} in layout: {}",p.value,format);
                             }
                             inf.width = Size::new(&p);
-                            inf.params |= LayoutUsedParams::WIDTH;
+                            inf.used_params |= LayoutUsedParams::WIDTH;
                         } else {
                             panic!("Invalid value for WIDTH parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
                         }
@@ -126,7 +126,7 @@ impl LayoutParameters {
                                 panic!("The value for HEIGHT parameter can not be a negative value: {} in layout: {}",p.value,format);
                             }
                             inf.height = Size::new(&p);
-                            inf.params |= LayoutUsedParams::HEIGHT;
+                            inf.used_params |= LayoutUsedParams::HEIGHT;
                         } else {
                             panic!("Invalid value for HEIGHT parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
                         }
@@ -137,7 +137,7 @@ impl LayoutParameters {
                         }
                         if let Some(d) = Alignament::from_hash(p.value_hash) {
                             inf.dock = d;
-                            inf.params |= LayoutUsedParams::DOCK;
+                            inf.used_params |= LayoutUsedParams::DOCK;
                         } else {
                             panic!("Invalid value for dock parameter: {} in layout: {}",p.value,format);
                         }
@@ -148,7 +148,7 @@ impl LayoutParameters {
                         }
                         if let Some(a) = Alignament::from_hash(p.value_hash) {
                             inf.align = a;
-                            inf.params |= LayoutUsedParams::ALIGN;
+                            inf.used_params |= LayoutUsedParams::ALIGN;
                         } else {
                             panic!("Invalid value for alignament parameter: {} in layout: {}",p.value,format);
                         }

@@ -2,6 +2,7 @@ mod alignament;
 mod coordonate;
 mod size;
 mod layout_parameters;
+mod layout_mode;
 mod parameter;
 
 use alignament::Alignament;
