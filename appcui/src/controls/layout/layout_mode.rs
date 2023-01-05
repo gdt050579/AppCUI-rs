@@ -344,14 +344,11 @@ impl LayoutMode {
 
         // check if layout params are OK
         // Step 1 ==> if dock option is present
-        if params_list.used_params.contains(LayoutUsedParams::DOCK) {
+        if params_list.dock.is_some() {
             return LayoutMode::new_docked_layout(&params_list);
         }
         // Step 2 ==> check (X,Y) + (W,H) + (optional align)
-        if params_list
-            .used_params
-            .contains(LayoutUsedParams::X | LayoutUsedParams::Y)
-        {
+        if params_list.x.is_some() && params_list.y.is_some() {
             return LayoutMode::new_XYWH_layout(&params_list);
         }
 
