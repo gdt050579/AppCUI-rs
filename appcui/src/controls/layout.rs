@@ -9,6 +9,7 @@ use alignament::Alignament;
 use coordonate::Coordonate;
 use size::Size;
 use layout_parameters::LayoutParameters;
+use layout_parameters::LayoutUsedParams;
 use parameter::Parameter;
 
 pub struct Layout<'a> {

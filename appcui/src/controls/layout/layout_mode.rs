@@ -1,8 +1,23 @@
-use super::{alignament::Alignament, layout_parameters::LayoutUsedParams, LayoutParameters};
+use super::Alignament;
+use super::LayoutParameters;
+use super::LayoutUsedParams;
+use super::Coordonate;
+use super::Size;
+
+#[derive(Copy,Clone)]
+pub (super) struct PointAndSizeLayout
+{
+    pub x: Coordonate,
+    pub y: Coordonate,
+    pub width: Size,
+    pub height: Size,
+    pub align: Alignament,
+    pub anchor: Alignament
+}
 
 pub(super) enum LayoutMode {
     None,
-    PointAndSize,
+    PointAndSize(PointAndSizeLayout),
     LeftRightAnchorsAndHeight,
     TopBottomAnchorsAndWidth,
 
@@ -15,7 +30,24 @@ pub(super) enum LayoutMode {
 }
 impl LayoutMode {
     fn new_docked_layout(params: &LayoutParameters) -> LayoutMode {
-        todo!();
+        if params.used_params.contains_one(LayoutUsedParams::LEFT|LayoutUsedParams::RIGHT|LayoutUsedParams::TOP|LayoutUsedParams::BOTTOM|LayoutUsedParams::LEFT|LayoutUsedParams::RIGHT) {
+            panic!("When dock|d parameter is used, none of the position (x,y) or anchor (left,right,bottom,top) parameters can not be uesd");
+        }
+        if params.used_params.contains_one(LayoutUsedParams::ALIGN) {
+            panic!("When dock|d parameter is used, 'align' parameter can not be used !");
+        }     
+        // if width or height are not present, default them to 100%
+        
+        LayoutMode::PointAndSize(
+            PointAndSizeLayout {
+                x: Coordonate::Absolute(0),
+                y: Coordonate::Absolute(0),
+                width: if params.used_params.contains(LayoutUsedParams::WIDTH) { params.width } else { Size::Percentage(10000) },
+                height: if params.used_params.contains(LayoutUsedParams::HEIGHT) { params.height } else { Size::Percentage(10000) },
+                align: params.dock,
+                anchor: params.dock
+            }
+        )
     }
     fn new_XYWH_layout(params: &LayoutParameters) -> LayoutMode {
         todo!();
