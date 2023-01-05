@@ -98,8 +98,39 @@ impl LayoutMode {
             anchor: Alignament::TopLeft,
         })
     }
-    fn new_corner_anchor_layout(params: &LayoutParameters, align: Alignament) -> LayoutMode {
-        todo!();
+    fn new_corner_anchor_layout(params: &LayoutParameters, anchor: Alignament) -> LayoutMode {
+        if params
+            .used_params
+            .contains_one(LayoutUsedParams::X | LayoutUsedParams::Y)
+        {
+            panic!("When a corner anchor is being use (top,left,righ,bottom) , (X,Y) coordonates can not be used");
+        }
+
+        // if width or height are not present, they are defaulted to 1 character
+        LayoutMode::PointAndSize(PointAndSizeLayout {
+            x: match anchor {
+                Alignament::TopLeft | Alignament::BottomLeft => params.a_left,
+                Alignament::TopRight | Alignament::BottomRight => params.a_right,
+                _ => unreachable!("Internal error --> this point should not ne reached"),
+            },
+            y: match anchor {
+                Alignament::TopLeft | Alignament::TopRight => params.a_top,
+                Alignament::BottomLeft | Alignament::BottomRight => params.a_bottom,
+                _ => unreachable!("Internal error --> this point should not ne reached"),
+            },
+            width: if params.used_params.contains(LayoutUsedParams::WIDTH) {
+                params.width
+            } else {
+                Size::Absolute(1)
+            },
+            height: if params.used_params.contains(LayoutUsedParams::HEIGHT) {
+                params.height
+            } else {
+                Size::Absolute(1)
+            },
+            align: anchor,
+            anchor: anchor,
+        })
     }
     fn new_horizontal_anchor_layout(params: &LayoutParameters) -> LayoutMode {
         todo!();
