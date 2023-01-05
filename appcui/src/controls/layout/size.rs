@@ -16,16 +16,16 @@ impl Size {
             }
         }
     }
-    pub(super) fn new(value: &KeyValuePair) -> Self {
+    pub(super) fn new(value: &KeyValuePair) -> Option<Self> {
         match value.value_type {
             ValueType::Number => {
-                return Size::Absolute(value.numerical_value.clamp(0, 30000) as u16);
+                return Some(Size::Absolute(value.numerical_value.clamp(0, 30000) as u16));
             }
             ValueType::Percentage => {
-                return Size::Percentage(value.numerical_value.clamp(0, 30000) as u16);
+                return Some(Size::Percentage(value.numerical_value.clamp(0, 30000) as u16));
             }
             _ => {
-                return Size::Absolute(0);
+                return None;
             }
         }
     }

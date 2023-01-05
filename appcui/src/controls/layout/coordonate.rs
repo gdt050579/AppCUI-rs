@@ -16,16 +16,16 @@ impl Coordonate {
             }
         }
     }
-    pub(super) fn new(value: &KeyValuePair) -> Self {
+    pub(super) fn new(value: &KeyValuePair) -> Option<Self> {
         match value.value_type {
             ValueType::Number => {
-                return Coordonate::Absolute(value.numerical_value.clamp(-30000, 30000) as i16);
+                return Some(Coordonate::Absolute(value.numerical_value.clamp(-30000, 30000) as i16));
             }
             ValueType::Percentage => {
-                return Coordonate::Percentage(value.numerical_value.clamp(-30000, 30000) as i16);
+                return Some(Coordonate::Percentage(value.numerical_value.clamp(-30000, 30000) as i16));
             }
             _ => {
-                return Coordonate::Absolute(0);
+                return None;
             }
         }
     }

@@ -21,33 +21,33 @@ pub enum LayoutUsedParams {
     DOCK = 0x0200,
 }
 pub(super) struct LayoutParameters {
-    pub x: Coordonate,
-    pub y: Coordonate,
-    pub width: Size,
-    pub height: Size,
-    pub a_left: Coordonate,
-    pub a_right: Coordonate,
-    pub a_top: Coordonate,
-    pub a_bottom: Coordonate,
+    pub x: Option<Coordonate>,
+    pub y: Option<Coordonate>,
+    pub width: Option<Size>,
+    pub height: Option<Size>,
+    pub a_left: Option<Coordonate>,
+    pub a_right: Option<Coordonate>,
+    pub a_top: Option<Coordonate>,
+    pub a_bottom: Option<Coordonate>,
     pub used_params: LayoutUsedParams,
-    pub align: Alignament,
-    pub dock: Alignament,
+    pub align: Option<Alignament>,
+    pub dock: Option<Alignament>,
 }
 impl Default for LayoutParameters {
     #[inline]
     fn default() -> Self {
         LayoutParameters {
-            x: Coordonate::Absolute(0),
-            y: Coordonate::Absolute(0),
-            width: Size::Absolute(0),
-            height: Size::Absolute(0),
-            a_left: Coordonate::Absolute(0),
-            a_right: Coordonate::Absolute(0),
-            a_top: Coordonate::Absolute(0),
-            a_bottom: Coordonate::Absolute(0),
+            x: None,
+            y: None,
+            width: None,
+            height: None,
+            a_left: None,
+            a_right: None,
+            a_top: None,
+            a_bottom: None,
             used_params: LayoutUsedParams::None,
-            align: Alignament::TopLeft,
-            dock: Alignament::TopLeft,
+            align: None,
+            dock: None,
         }    
     }
 }
@@ -136,7 +136,7 @@ impl LayoutParameters {
                             panic!("Invalid value for dock parameter: {} in layout: {}",p.value,format);
                         }
                         if let Some(d) = Alignament::from_hash(p.value_hash) {
-                            inf.dock = d;
+                            inf.dock = Some(d);
                             inf.used_params |= LayoutUsedParams::DOCK;
                         } else {
                             panic!("Invalid value for dock parameter: {} in layout: {}",p.value,format);
@@ -147,7 +147,7 @@ impl LayoutParameters {
                             panic!("Invalid value for alignament parameter: {} in layout: {}",p.value,format);
                         }
                         if let Some(a) = Alignament::from_hash(p.value_hash) {
-                            inf.align = a;
+                            inf.align = Some(a);
                             inf.used_params |= LayoutUsedParams::ALIGN;
                         } else {
                             panic!("Invalid value for alignament parameter: {} in layout: {}",p.value,format);

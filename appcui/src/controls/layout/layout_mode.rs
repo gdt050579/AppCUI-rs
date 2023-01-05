@@ -13,11 +13,19 @@ pub(super) struct PointAndSizeLayout {
     pub align: Alignament,
     pub anchor: Alignament,
 }
+#[derive(Copy, Clone)]
+pub(super) struct LeftRightAnchorsLayout {
+    pub left: Coordonate,
+    pub right: Coordonate,
+    pub y: Coordonate,
+    pub height: Size,
+    pub align: Alignament,
+}
 
 pub(super) enum LayoutMode {
     None,
     PointAndSize(PointAndSizeLayout),
-    LeftRightAnchorsAndHeight,
+    LeftRightAnchors(LeftRightAnchorsLayout),
     TopBottomAnchorsAndWidth,
 
     LeftTopRightAnchorsAndHeight,
@@ -47,18 +55,10 @@ impl LayoutMode {
         LayoutMode::PointAndSize(PointAndSizeLayout {
             x: Coordonate::Absolute(0),
             y: Coordonate::Absolute(0),
-            width: if params.used_params.contains(LayoutUsedParams::WIDTH) {
-                params.width
-            } else {
-                Size::Percentage(10000)
-            },
-            height: if params.used_params.contains(LayoutUsedParams::HEIGHT) {
-                params.height
-            } else {
-                Size::Percentage(10000)
-            },
-            align: params.dock,
-            anchor: params.dock,
+            width: params.width.unwrap_or(Size::Percentage(1000)),
+            height: params.height.unwrap_or(Size::Percentage(1000)),
+            align: params.dock.unwrap(),
+            anchor: params.dock.unwrap(),
         })
     }
     fn new_XYWH_layout(params: &LayoutParameters) -> LayoutMode {
@@ -133,7 +133,60 @@ impl LayoutMode {
         })
     }
     fn new_horizontal_anchor_layout(params: &LayoutParameters) -> LayoutMode {
-        todo!();
+        if params.used_params.contains(LayoutUsedParams::X) {
+            panic!("When (left,right) parameters are used toghere, 'X' parameter can not be used");
+        }
+        if params.used_params.contains(LayoutUsedParams::WIDTH) {
+            panic!("When (left,right) parameters are used toghere, width can not be used as it is deduced from left-right difference");
+        }
+        if params.used_params.contains(LayoutUsedParams::ALIGN) {
+            match params.align {
+                Alignament::Top|Alignament::Center|Alignament::Bottom => {},
+                _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignament values are allowed !")
+            }
+        }
+        // if y is not provided ==> default it to 0
+        // if align is not provided ==> default it to Center
+        // if height is not provided ==> default it to 1 char
+        LayoutMode::LeftRightAnchors(LeftRightAnchorsLayout {
+            left: params.a_left,
+            right: params.a_right,
+            y: (),
+            height: (),
+            align: (),
+        })
+
+        /*
+
+
+        // if "align" is not provided, it is defaulted to center
+        if ((inf.flags & LAYOUT_FLAG_ALIGN) == 0)
+            inf.align = Alignament::Center;
+
+
+        // if "height" is not provided, it is defaulted to 1
+        if ((inf.flags & LAYOUT_FLAG_HEIGHT) == 0)
+            this->Layout.Format.Height = { 1, LayoutValueType::CharacterOffset };
+        else
+            this->Layout.Format.Height = inf.height;
+
+        // if "Y" is not provided, it is defaulted to 0
+        if ((inf.flags & LAYOUT_FLAG_Y) == 0)
+            this->Layout.Format.Y = { 0, LayoutValueType::CharacterOffset };
+        else
+            this->Layout.Format.Y = inf.y;
+
+        // construct de layout
+        this->Layout.Format.LayoutMode  = LayoutFormatMode::LeftRightAnchorsAndHeight;
+        this->Layout.Format.AnchorLeft  = inf.a_left;
+        this->Layout.Format.AnchorRight = inf.a_right;
+        this->Layout.Format.Align       = inf.align;
+
+        // all good
+        return true;
+
+
+            */
     }
     fn new_vertical_anchor_layout(params: &LayoutParameters) -> LayoutMode {
         todo!();
