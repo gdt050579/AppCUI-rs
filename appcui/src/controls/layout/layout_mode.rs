@@ -101,60 +101,23 @@ impl LayoutMode {
         })
     }
     fn new_horizontal_anchor_layout(params: &LayoutParameters) -> LayoutMode {
-        if params.used_params.contains(LayoutUsedParams::X) {
-            panic!("When (left,right) parameters are used toghere, 'X' parameter can not be used");
-        }
-        if params.used_params.contains(LayoutUsedParams::WIDTH) {
-            panic!("When (left,right) parameters are used toghere, width can not be used as it is deduced from left-right difference");
-        }
-        if params.used_params.contains(LayoutUsedParams::ALIGN) {
-            match params.align {
+        should_not_use!(params.x,"When (left,right) parameters are used together, 'X' parameter can not be used");
+        should_not_use!(params.width,"When (left,right) parameters are used toghere, ('width' or 'w') parameters can not be used as the width is deduced from left-right difference");
+
+        if let Some(align) = params.align {
+            match align {
                 Alignament::Top|Alignament::Center|Alignament::Bottom => {},
                 _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignament values are allowed !")
             }
         }
-        // if y is not provided ==> default it to 0
-        // if align is not provided ==> default it to Center
-        // if height is not provided ==> default it to 1 char
+
         LayoutMode::LeftRightAnchors(LeftRightAnchorsLayout {
-            left: params.a_left,
-            right: params.a_right,
-            y: (),
-            height: (),
-            align: (),
+            left: params.a_left.unwrap(),
+            right: params.a_right.unwrap(),
+            y: params.y.unwrap_or(Coordonate::Absolute(0)),
+            height: params.height.unwrap_or(Size::Absolute(1)),
+            align: params.align.unwrap_or(Alignament::Center),
         })
-
-        /*
-
-
-        // if "align" is not provided, it is defaulted to center
-        if ((inf.flags & LAYOUT_FLAG_ALIGN) == 0)
-            inf.align = Alignament::Center;
-
-
-        // if "height" is not provided, it is defaulted to 1
-        if ((inf.flags & LAYOUT_FLAG_HEIGHT) == 0)
-            this->Layout.Format.Height = { 1, LayoutValueType::CharacterOffset };
-        else
-            this->Layout.Format.Height = inf.height;
-
-        // if "Y" is not provided, it is defaulted to 0
-        if ((inf.flags & LAYOUT_FLAG_Y) == 0)
-            this->Layout.Format.Y = { 0, LayoutValueType::CharacterOffset };
-        else
-            this->Layout.Format.Y = inf.y;
-
-        // construct de layout
-        this->Layout.Format.LayoutMode  = LayoutFormatMode::LeftRightAnchorsAndHeight;
-        this->Layout.Format.AnchorLeft  = inf.a_left;
-        this->Layout.Format.AnchorRight = inf.a_right;
-        this->Layout.Format.Align       = inf.align;
-
-        // all good
-        return true;
-
-
-            */
     }
     fn new_vertical_anchor_layout(params: &LayoutParameters) -> LayoutMode {
         todo!();
