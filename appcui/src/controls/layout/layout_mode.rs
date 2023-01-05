@@ -37,14 +37,20 @@ pub(super) struct TopBottomAnchorsLayout {
     pub width: Size,
     pub align: Alignament,
 }
-
+#[derive(Copy, Clone)]
+pub(super) struct LeftTopRightAnchorsLayout {
+    pub left: Coordonate,
+    pub top: Coordonate,
+    pub right: Coordonate,
+    pub height: Size,
+}
 pub(super) enum LayoutMode {
     None,
     PointAndSize(PointAndSizeLayout),
     LeftRightAnchors(LeftRightAnchorsLayout),
     TopBottomAnchors(TopBottomAnchorsLayout),
 
-    LeftTopRightAnchorsAndHeight,
+    LeftTopRightAnchors(LeftTopRightAnchorsLayout),
     LeftBottomRightAnchorsAndHeight,
     TopLeftBottomAnchorsAndWidth,
     TopRightBottomAnchorsAndWidth,
@@ -53,13 +59,34 @@ pub(super) enum LayoutMode {
 }
 impl LayoutMode {
     fn new_docked_layout(params: &LayoutParameters) -> LayoutMode {
-        should_not_use!(params.x,"When ('dock' or 'd') parameter is used,'x' parameter can not be used !");
-        should_not_use!(params.y,"When ('dock' or 'd') parameter is used,'y' parameter can not be used !");
-        should_not_use!(params.a_top,"When ('dock' or 'd') parameter is used,('top' or 't') parameters can not be used !");
-        should_not_use!(params.a_bottom,"When ('dock' or 'd') parameter is used,('bottom' or 'b') parameters can not be used !");
-        should_not_use!(params.a_left,"When ('dock' or 'd') parameter is used,('left' or 'l') parameters can not be used !");
-        should_not_use!(params.a_right,"When ('dock' or 'd') parameter is used,('right' or 'r') parameters can not be used !");
-        should_not_use!(params.align,"When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !");
+        should_not_use!(
+            params.x,
+            "When ('dock' or 'd') parameter is used,'x' parameter can not be used !"
+        );
+        should_not_use!(
+            params.y,
+            "When ('dock' or 'd') parameter is used,'y' parameter can not be used !"
+        );
+        should_not_use!(
+            params.a_top,
+            "When ('dock' or 'd') parameter is used,('top' or 't') parameters can not be used !"
+        );
+        should_not_use!(
+            params.a_bottom,
+            "When ('dock' or 'd') parameter is used,('bottom' or 'b') parameters can not be used !"
+        );
+        should_not_use!(
+            params.a_left,
+            "When ('dock' or 'd') parameter is used,('left' or 'l') parameters can not be used !"
+        );
+        should_not_use!(
+            params.a_right,
+            "When ('dock' or 'd') parameter is used,('right' or 'r') parameters can not be used !"
+        );
+        should_not_use!(
+            params.align,
+            "When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !"
+        );
 
         LayoutMode::PointAndSize(PointAndSizeLayout {
             x: Coordonate::Absolute(0),
@@ -73,10 +100,22 @@ impl LayoutMode {
     fn new_XYWH_layout(params: &LayoutParameters) -> LayoutMode {
         // it is assume that DOCK|D is not set (as it was process early in ProcessDockedLayout)
         // if X and Y are set --> Left, Right, Top and Bottom should not be set
-        should_not_use!(params.a_left,"When (x,y) parameters are used, ('left' or 'l') parameter can not be used !");
-        should_not_use!(params.a_right,"When (x,y) parameters are used, ('right' or 'r') parameter can not be used !");
-        should_not_use!(params.a_top,"When (x,y) parameters are used, ('top' or 't') parameter can not be used !");
-        should_not_use!(params.a_bottom,"When (x,y) parameters are used, ('bottom' or 'b') parameter can not be used !");
+        should_not_use!(
+            params.a_left,
+            "When (x,y) parameters are used, ('left' or 'l') parameter can not be used !"
+        );
+        should_not_use!(
+            params.a_right,
+            "When (x,y) parameters are used, ('right' or 'r') parameter can not be used !"
+        );
+        should_not_use!(
+            params.a_top,
+            "When (x,y) parameters are used, ('top' or 't') parameter can not be used !"
+        );
+        should_not_use!(
+            params.a_bottom,
+            "When (x,y) parameters are used, ('bottom' or 'b') parameter can not be used !"
+        );
 
         LayoutMode::PointAndSize(PointAndSizeLayout {
             x: params.x.unwrap(),
@@ -88,8 +127,14 @@ impl LayoutMode {
         })
     }
     fn new_corner_anchor_layout(params: &LayoutParameters, anchor: Alignament) -> LayoutMode {
-        should_not_use!(params.x,"When a corner anchor is being use (top,left,righ,bottom), 'x' can bot be used !");
-        should_not_use!(params.y,"When a corner anchor is being use (top,left,righ,bottom), 'y' can bot be used !");
+        should_not_use!(
+            params.x,
+            "When a corner anchor is being use (top,left,righ,bottom), 'x' can bot be used !"
+        );
+        should_not_use!(
+            params.y,
+            "When a corner anchor is being use (top,left,righ,bottom), 'y' can bot be used !"
+        );
 
         LayoutMode::PointAndSize(PointAndSizeLayout {
             x: match anchor {
@@ -109,7 +154,10 @@ impl LayoutMode {
         })
     }
     fn new_horizontal_anchor_layout(params: &LayoutParameters) -> LayoutMode {
-        should_not_use!(params.x,"When (left,right) parameters are used together, 'X' parameter can not be used");
+        should_not_use!(
+            params.x,
+            "When (left,right) parameters are used together, 'X' parameter can not be used"
+        );
         should_not_use!(params.width,"When (left,right) parameters are used toghere, ('width' or 'w') parameters can not be used as the width is deduced from left-right difference");
 
         if let Some(align) = params.align {
@@ -128,8 +176,11 @@ impl LayoutMode {
         })
     }
     fn new_vertical_anchor_layout(params: &LayoutParameters) -> LayoutMode {
-        should_not_use!(params.x,"When (top,bottom) parameters are used together, 'Y' parameter can not be used");
-        should_not_use!(params.width,"When (top,bottom) parameters are used toghere, ('height' or 'h') parameters can not be used as the width is deduced from bottom-top difference");
+        should_not_use!(
+            params.y,
+            "When (top,bottom) parameters are used together, 'Y' parameter can not be used"
+        );
+        should_not_use!(params.height,"When (top,bottom) parameters are used toghere, ('height' or 'h') parameters can not be used as the width is deduced from bottom-top difference");
 
         if let Some(align) = params.align {
             match align {
@@ -138,7 +189,7 @@ impl LayoutMode {
             }
         }
 
-        LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout { 
+        LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout {
             top: params.a_top.unwrap(),
             bottom: params.a_bottom.unwrap(),
             x: params.x.unwrap_or(Coordonate::Absolute(0)),
@@ -147,7 +198,29 @@ impl LayoutMode {
         })
     }
     fn new_LTR_anchors_layout(params: &LayoutParameters) -> LayoutMode {
-        todo!();
+        should_not_use!(
+            params.x,
+            "When (left,top,right) parameters are used together, 'X' parameter can not be used"
+        );
+        should_not_use!(
+            params.y,
+            "When (left,top,right) parameters are used together, 'Y' parameter can not be used"
+        );
+        should_not_use!(
+            params.width,
+            "When (left,top,right) parameters are used together, 'width' parameter can not be used"
+        );
+        should_not_use!(
+            params.align,
+            "When (left,top,right) parameters are used together, 'align' parameter can not be used"
+        );
+
+        LayoutMode::LeftTopRightAnchors(LeftTopRightAnchorsLayout {
+            left: params.a_left.unwrap(),
+            top: params.a_top.unwrap(),
+            right: params.a_right.unwrap(),
+            height: params.height.unwrap_or(Size::Absolute(1)),
+        })
     }
     fn new_LBR_anchors_layout(params: &LayoutParameters) -> LayoutMode {
         todo!();
