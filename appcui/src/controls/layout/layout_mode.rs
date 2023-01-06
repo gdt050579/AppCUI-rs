@@ -12,7 +12,7 @@ macro_rules! should_not_use {
     };
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct PointAndSizeLayout {
     pub x: Coordonate,
     pub y: Coordonate,
@@ -21,7 +21,7 @@ pub(super) struct PointAndSizeLayout {
     pub align: Alignament,
     pub anchor: Alignament,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftRightAnchorsLayout {
     pub left: Coordonate,
     pub right: Coordonate,
@@ -29,7 +29,7 @@ pub(super) struct LeftRightAnchorsLayout {
     pub height: Size,
     pub align: Alignament,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopBottomAnchorsLayout {
     pub top: Coordonate,
     pub bottom: Coordonate,
@@ -37,41 +37,43 @@ pub(super) struct TopBottomAnchorsLayout {
     pub width: Size,
     pub align: Alignament,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftTopRightAnchorsLayout {
     pub left: Coordonate,
     pub top: Coordonate,
     pub right: Coordonate,
     pub height: Size,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftBottomRightAnchorsLayout {
     pub left: Coordonate,
     pub bottom: Coordonate,
     pub right: Coordonate,
     pub height: Size,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopLeftBottomAnchorsLayout {
     pub top: Coordonate,
     pub left: Coordonate,
     pub bottom: Coordonate,
     pub width: Size,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopRightBottomAnchorsLayout {
     pub top: Coordonate,
     pub right: Coordonate,
     pub bottom: Coordonate,
     pub width: Size,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftTopRightBottomAnchorsLayout {
     pub left: Coordonate,
     pub top: Coordonate,
     pub right: Coordonate,
     pub bottom: Coordonate,
 }
+
+#[derive(Copy,Clone,PartialEq, Debug)]
 pub(super) enum LayoutMode {
     PointAndSize(PointAndSizeLayout),
     LeftRightAnchors(LeftRightAnchorsLayout),

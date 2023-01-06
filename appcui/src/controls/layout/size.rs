@@ -1,6 +1,6 @@
 use crate::utils::{KeyValuePair, ValueType};
 
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,PartialEq, Debug)]
 pub(super) enum Size {
     Absolute(u16),
     Percentage(u16),

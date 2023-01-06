@@ -5,12 +5,15 @@ mod size;
 mod layout_parameters;
 mod layout_mode;
 mod parameter;
+#[cfg(test)]
+mod tests;
 
 use alignament::Alignament;
 use anchors::Anchors;
 use coordonate::Coordonate;
 use size::Size;
 use layout_parameters::LayoutParameters;
+use layout_mode::LayoutMode;
 use parameter::Parameter;
 
 pub struct Layout<'a> {

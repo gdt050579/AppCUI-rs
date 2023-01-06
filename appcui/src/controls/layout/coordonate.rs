@@ -1,6 +1,6 @@
 use crate::utils::{KeyValuePair, ValueType};
 
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,PartialEq, Debug)]
 pub(super) enum Coordonate {
     Absolute(i16),
     Percentage(i16),

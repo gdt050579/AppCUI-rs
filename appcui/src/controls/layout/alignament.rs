@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,PartialEq, Debug)]
 pub(super) enum Alignament {
     TopLeft = 0,
     Top,
