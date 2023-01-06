@@ -1,7 +1,7 @@
 use super::Alignament;
+use super::Anchors;
 use super::Coordonate;
 use super::LayoutParameters;
-use super::LayoutUsedParams;
 use super::Size;
 
 macro_rules! should_not_use {
@@ -82,7 +82,7 @@ pub(super) enum LayoutMode {
     TopLeftBottomAnchors(TopLeftBottomAnchorsLayout),
     TopRightBottomAnchors(TopRightBottomAnchorsLayout),
 
-    LeftTopRightBottomAnchors(LeftTopRightBottomAnchorsLayout)
+    LeftTopRightBottomAnchors(LeftTopRightBottomAnchorsLayout),
 }
 impl LayoutMode {
     fn new_docked_layout(params: &LayoutParameters) -> LayoutMode {
@@ -336,8 +336,9 @@ impl LayoutMode {
             top: params.a_top.unwrap(),
             right: params.a_right.unwrap(),
             bottom: params.a_bottom.unwrap(),
-        })        
+        })
     }
+
     pub(super) fn new(format: &str) -> LayoutMode {
         let params_list = LayoutParameters::new(format);
 
@@ -351,72 +352,39 @@ impl LayoutMode {
             return LayoutMode::new_XYWH_layout(&params_list);
         }
 
-        let anchors = (params_list.used_params
-            & (LayoutUsedParams::LEFT
-                | LayoutUsedParams::TOP
-                | LayoutUsedParams::RIGHT
-                | LayoutUsedParams::BOTTOM))
-            .get_value();
-        const LEFT_TOP_ANCHOR: u16 =
-            LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::TOP.get_value();
-        const RIGHT_TOP_ANCHOR: u16 =
-            LayoutUsedParams::RIGHT.get_value() | LayoutUsedParams::TOP.get_value();
-        const LEFT_BOTTOM_ANCHOR: u16 =
-            LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::BOTTOM.get_value();
-        const RIGHT_BOTTOM_ANCHOR: u16 =
-            LayoutUsedParams::RIGHT.get_value() | LayoutUsedParams::BOTTOM.get_value();
-        const HORIZONTAL_ANCHOR: u16 =
-            LayoutUsedParams::LEFT.get_value() | LayoutUsedParams::RIGHT.get_value();
-        const VERTICAL_ANCHOR: u16 =
-            LayoutUsedParams::TOP.get_value() | LayoutUsedParams::BOTTOM.get_value();
-        const LTR_ANCHOR: u16 = LayoutUsedParams::LEFT.get_value()
-            | LayoutUsedParams::TOP.get_value()
-            | LayoutUsedParams::RIGHT.get_value();
-        const LBR_ANCHOR: u16 = LayoutUsedParams::LEFT.get_value()
-            | LayoutUsedParams::BOTTOM.get_value()
-            | LayoutUsedParams::RIGHT.get_value();
-        const TLB_ANCHOR: u16 = LayoutUsedParams::TOP.get_value()
-            | LayoutUsedParams::LEFT.get_value()
-            | LayoutUsedParams::BOTTOM.get_value();
-        const TRB_ANCHOR: u16 = LayoutUsedParams::TOP.get_value()
-            | LayoutUsedParams::RIGHT.get_value()
-            | LayoutUsedParams::BOTTOM.get_value();
-        const LTRB_ANCHOR: u16 = LayoutUsedParams::LEFT.get_value()
-            | LayoutUsedParams::TOP.get_value()
-            | LayoutUsedParams::RIGHT.get_value()
-            | LayoutUsedParams::BOTTOM.get_value();
+        let anchors = params_list.get_anchors();
         match anchors {
-            LEFT_TOP_ANCHOR => {
+            Anchors::TopLeft => {
                 return LayoutMode::new_corner_anchor_layout(&params_list, Alignament::TopLeft);
             }
-            RIGHT_TOP_ANCHOR => {
+            Anchors::TopRight => {
                 return LayoutMode::new_corner_anchor_layout(&params_list, Alignament::TopRight);
             }
-            RIGHT_BOTTOM_ANCHOR => {
+            Anchors::BottomRight => {
                 return LayoutMode::new_corner_anchor_layout(&params_list, Alignament::BottomRight);
             }
-            LEFT_BOTTOM_ANCHOR => {
+            Anchors::BottomLeft => {
                 return LayoutMode::new_corner_anchor_layout(&params_list, Alignament::BottomLeft);
             }
-            HORIZONTAL_ANCHOR => {
+            Anchors::LeftRight=> {
                 return LayoutMode::new_horizontal_anchor_layout(&params_list);
             }
-            VERTICAL_ANCHOR => {
+            Anchors::TopBottom => {
                 return LayoutMode::new_vertical_anchor_layout(&params_list);
             }
-            LTR_ANCHOR => {
+            Anchors::LeftTopRight => {
                 return LayoutMode::new_LTR_anchors_layout(&params_list);
             }
-            LBR_ANCHOR => {
+            Anchors::LeftBottomRight => {
                 return LayoutMode::new_LBR_anchors_layout(&params_list);
             }
-            TLB_ANCHOR => {
+            Anchors::TopLeftBottom => {
                 return LayoutMode::new_TLB_anchors_layout(&params_list);
             }
-            TRB_ANCHOR => {
+            Anchors::TopRightBottom => {
                 return LayoutMode::new_TRB_anchors_layout(&params_list);
             }
-            LTRB_ANCHOR => {
+            Anchors::All => {
                 return LayoutMode::new_LTRB_anchors_layout(&params_list);
             }
             _ => {
