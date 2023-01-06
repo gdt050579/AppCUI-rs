@@ -108,23 +108,7 @@ impl LayoutParameters {
                     Parameter::Align => {
                         if p.value_type != ValueType::String {
                             panic!(
-                                "Invalid value for dock parameter: {} in layout: {}",
-                                p.value, format
-                            );
-                        }
-                        if let Some(d) = Alignament::from_hash(p.value_hash) {
-                            inf.dock = Some(d);
-                        } else {
-                            panic!(
-                                "Invalid value for dock parameter: {} in layout: {}",
-                                p.value, format
-                            );
-                        }
-                    }
-                    Parameter::Dock => {
-                        if p.value_type != ValueType::String {
-                            panic!(
-                                "Invalid value for alignament parameter: {} in layout: {}",
+                                "Invalid value for 'align' parameter: {} in layout: {}",
                                 p.value, format
                             );
                         }
@@ -132,7 +116,23 @@ impl LayoutParameters {
                             inf.align = Some(a);
                         } else {
                             panic!(
-                                "Invalid value for alignament parameter: {} in layout: {}",
+                                "Invalid value for 'align' parameter: {} in layout: {}",
+                                p.value, format
+                            );
+                        }
+                    }
+                    Parameter::Dock => {
+                        if p.value_type != ValueType::String {
+                            panic!(
+                                "Invalid value for 'dock' parameter: {} in layout: {}",
+                                p.value, format
+                            );
+                        }
+                        if let Some(d) = Alignament::from_hash(p.value_hash) {
+                            inf.dock = Some(d);
+                        } else {
+                            panic!(
+                                "Invalid value for 'dock' parameter: {} in layout: {}",
                                 p.value, format
                             );
                         }
