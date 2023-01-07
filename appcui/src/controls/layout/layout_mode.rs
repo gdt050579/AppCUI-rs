@@ -1,19 +1,12 @@
-use super::point_and_size_layout::PointAndSizeLayout;
 use super::should_not_use;
 use super::Alignament;
 use super::Anchors;
 use super::Coordonate;
 use super::LayoutParameters;
+use super::LeftRightAnchorsLayout;
+use super::PointAndSizeLayout;
 use super::Size;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub(super) struct LeftRightAnchorsLayout {
-    pub left: Coordonate,
-    pub right: Coordonate,
-    pub y: Coordonate,
-    pub height: Size,
-    pub align: Alignament,
-}
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopBottomAnchorsLayout {
     pub top: Coordonate,
@@ -72,28 +65,6 @@ pub(super) enum LayoutMode {
     LeftTopRightBottomAnchors(LeftTopRightBottomAnchorsLayout),
 }
 impl LayoutMode {
-    fn new_horizontal_anchor_layout(params: &LayoutParameters) -> LayoutMode {
-        should_not_use!(
-            params.x,
-            "When (left,right) parameters are used together, 'X' parameter can not be used"
-        );
-        should_not_use!(params.width,"When (left,right) parameters are used toghere, ('width' or 'w') parameters can not be used as the width is deduced from left-right difference");
-
-        if let Some(align) = params.align {
-            match align {
-                Alignament::Top|Alignament::Center|Alignament::Bottom => {},
-                _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignament values are allowed !")
-            }
-        }
-
-        LayoutMode::LeftRightAnchors(LeftRightAnchorsLayout {
-            left: params.a_left.unwrap(),
-            right: params.a_right.unwrap(),
-            y: params.y.unwrap_or(Coordonate::Absolute(0)),
-            height: params.height.unwrap_or(Size::Absolute(1)),
-            align: params.align.unwrap_or(Alignament::Center),
-        })
-    }
     fn new_vertical_anchor_layout(params: &LayoutParameters) -> LayoutMode {
         should_not_use!(
             params.y,
@@ -271,7 +242,7 @@ impl LayoutMode {
                 ));
             }
             Anchors::LeftRight => {
-                return LayoutMode::new_horizontal_anchor_layout(&params_list);
+                return LayoutMode::LeftRightAnchors(LeftRightAnchorsLayout::new(&params_list));
             }
             Anchors::TopBottom => {
                 return LayoutMode::new_vertical_anchor_layout(&params_list);

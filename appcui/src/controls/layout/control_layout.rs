@@ -47,11 +47,11 @@ impl ControlLayout {
         self.y = y;
     }
     #[inline]
-    pub (crate) fn get_width(&self) -> u16 {
+    pub(crate) fn get_width(&self) -> u16 {
         self.width
     }
     #[inline]
-    pub (crate) fn get_heght(&self) -> u16 {
+    pub(crate) fn get_heght(&self) -> u16 {
         self.height
     }
     pub(crate) fn update(&mut self, parent_width: u16, parent_height: u16) {
@@ -59,7 +59,9 @@ impl ControlLayout {
             LayoutMode::PointAndSize(layout_mode) => {
                 layout_mode.update_control_layout(self, parent_width, parent_height)
             }
-            LayoutMode::LeftRightAnchors(layout_mode) => todo!(),
+            LayoutMode::LeftRightAnchors(layout_mode) => {
+                layout_mode.update_control_layout(self, parent_width, parent_height)
+            }
             LayoutMode::TopBottomAnchors(layout_mode) => todo!(),
             LayoutMode::LeftTopRightAnchors(layout_mode) => todo!(),
             LayoutMode::LeftBottomRightAnchors(layout_mode) => todo!(),

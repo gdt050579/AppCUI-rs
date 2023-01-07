@@ -8,6 +8,7 @@ mod parameter;
 mod macros;
 mod control_layout;
 mod point_and_size_layout;
+mod left_right_anchors_layout;
 #[cfg(test)]
 mod tests;
 
@@ -19,6 +20,7 @@ use layout_parameters::LayoutParameters;
 use layout_mode::LayoutMode;
 use parameter::Parameter;
 use point_and_size_layout::PointAndSizeLayout;
+use left_right_anchors_layout::LeftRightAnchorsLayout;
 use macros::should_not_use;
 pub use control_layout::Layout;
 pub (in crate) use control_layout::ControlLayout;
