@@ -81,23 +81,5 @@ impl ControlLayout {
                 layout_mode.update_control_layout(self, parent_width, parent_height)
             }
         }
-        /*
-        // compute position
-        switch (this->Layout.Format.LayoutMode)
-        {
-
-
-        case LayoutFormatMode::LeftTopRightBottomAnchors:
-            SetControlSize(
-                  md.ParentWidth - (md.AnchorLeft + md.AnchorRight), md.ParentHeigh - (md.AnchorTop + md.AnchorBottom));
-            this->Layout.X = md.AnchorLeft;
-            this->Layout.Y = md.AnchorTop;
-            return true;
-        default:
-            RETURNERROR(false, "Unknwon layout format mode: %d", (int) this->Layout.Format.LayoutMode);
-        }
-
-
-            */
     }
 }
