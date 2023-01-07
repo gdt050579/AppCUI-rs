@@ -1,26 +1,11 @@
+use super::point_and_size_layout::PointAndSizeLayout;
+use super::should_not_use;
 use super::Alignament;
 use super::Anchors;
 use super::Coordonate;
 use super::LayoutParameters;
 use super::Size;
 
-macro_rules! should_not_use {
-    ($param:expr, $msg:literal) => {
-        if $param.is_some() {
-            panic!($msg);
-        }
-    };
-}
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub(super) struct PointAndSizeLayout {
-    pub x: Coordonate,
-    pub y: Coordonate,
-    pub width: Size,
-    pub height: Size,
-    pub align: Alignament,
-    pub anchor: Alignament,
-}
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftRightAnchorsLayout {
     pub left: Coordonate,
@@ -73,7 +58,7 @@ pub(super) struct LeftTopRightBottomAnchorsLayout {
     pub bottom: Coordonate,
 }
 
-#[derive(Copy,Clone,PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) enum LayoutMode {
     PointAndSize(PointAndSizeLayout),
     LeftRightAnchors(LeftRightAnchorsLayout),
@@ -87,101 +72,6 @@ pub(super) enum LayoutMode {
     LeftTopRightBottomAnchors(LeftTopRightBottomAnchorsLayout),
 }
 impl LayoutMode {
-    fn new_docked_layout(params: &LayoutParameters) -> LayoutMode {
-        should_not_use!(
-            params.x,
-            "When ('dock' or 'd') parameter is used,'x' parameter can not be used !"
-        );
-        should_not_use!(
-            params.y,
-            "When ('dock' or 'd') parameter is used,'y' parameter can not be used !"
-        );
-        should_not_use!(
-            params.a_top,
-            "When ('dock' or 'd') parameter is used,('top' or 't') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_bottom,
-            "When ('dock' or 'd') parameter is used,('bottom' or 'b') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_left,
-            "When ('dock' or 'd') parameter is used,('left' or 'l') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_right,
-            "When ('dock' or 'd') parameter is used,('right' or 'r') parameters can not be used !"
-        );
-        should_not_use!(
-            params.align,
-            "When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !"
-        );
-
-        LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: Coordonate::Absolute(0),
-            y: Coordonate::Absolute(0),
-            width: params.width.unwrap_or(Size::Percentage(1000)),
-            height: params.height.unwrap_or(Size::Percentage(1000)),
-            align: params.dock.unwrap(),
-            anchor: params.dock.unwrap(),
-        })
-    }
-    fn new_XYWH_layout(params: &LayoutParameters) -> LayoutMode {
-        // it is assume that DOCK|D is not set (as it was process early in ProcessDockedLayout)
-        // if X and Y are set --> Left, Right, Top and Bottom should not be set
-        should_not_use!(
-            params.a_left,
-            "When (x,y) parameters are used, ('left' or 'l') parameter can not be used !"
-        );
-        should_not_use!(
-            params.a_right,
-            "When (x,y) parameters are used, ('right' or 'r') parameter can not be used !"
-        );
-        should_not_use!(
-            params.a_top,
-            "When (x,y) parameters are used, ('top' or 't') parameter can not be used !"
-        );
-        should_not_use!(
-            params.a_bottom,
-            "When (x,y) parameters are used, ('bottom' or 'b') parameter can not be used !"
-        );
-
-        LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: params.x.unwrap(),
-            y: params.y.unwrap(),
-            width: params.width.unwrap_or(Size::Absolute(1)),
-            height: params.height.unwrap_or(Size::Absolute(1)),
-            align: params.align.unwrap_or(Alignament::TopLeft),
-            anchor: Alignament::TopLeft,
-        })
-    }
-    fn new_corner_anchor_layout(params: &LayoutParameters, anchor: Alignament) -> LayoutMode {
-        should_not_use!(
-            params.x,
-            "When a corner anchor is being use (top,left,righ,bottom), 'x' can bot be used !"
-        );
-        should_not_use!(
-            params.y,
-            "When a corner anchor is being use (top,left,righ,bottom), 'y' can bot be used !"
-        );
-
-        LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: match anchor {
-                Alignament::TopLeft | Alignament::BottomLeft => params.a_left.unwrap(),
-                Alignament::TopRight | Alignament::BottomRight => params.a_right.unwrap(),
-                _ => unreachable!("Internal error --> this point should not ne reached"),
-            },
-            y: match anchor {
-                Alignament::TopLeft | Alignament::TopRight => params.a_top.unwrap(),
-                Alignament::BottomLeft | Alignament::BottomRight => params.a_bottom.unwrap(),
-                _ => unreachable!("Internal error --> this point should not ne reached"),
-            },
-            width: params.width.unwrap_or(Size::Absolute(1)),
-            height: params.height.unwrap_or(Size::Absolute(1)),
-            align: anchor,
-            anchor: anchor,
-        })
-    }
     fn new_horizontal_anchor_layout(params: &LayoutParameters) -> LayoutMode {
         should_not_use!(
             params.x,
@@ -347,28 +237,40 @@ impl LayoutMode {
         // check if layout params are OK
         // Step 1 ==> if dock option is present
         if params_list.dock.is_some() {
-            return LayoutMode::new_docked_layout(&params_list);
+            return LayoutMode::PointAndSize(PointAndSizeLayout::new_docked(&params_list));
         }
         // Step 2 ==> check (X,Y) + (W,H) + (optional align)
         if params_list.x.is_some() && params_list.y.is_some() {
-            return LayoutMode::new_XYWH_layout(&params_list);
+            return LayoutMode::PointAndSize(PointAndSizeLayout::new_XYWH(&params_list));
         }
 
         let anchors = params_list.get_anchors();
         match anchors {
             Anchors::TopLeft => {
-                return LayoutMode::new_corner_anchor_layout(&params_list, Alignament::TopLeft);
+                return LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(
+                    &params_list,
+                    Alignament::TopLeft,
+                ));
             }
             Anchors::TopRight => {
-                return LayoutMode::new_corner_anchor_layout(&params_list, Alignament::TopRight);
+                return LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(
+                    &params_list,
+                    Alignament::TopRight,
+                ));
             }
             Anchors::BottomRight => {
-                return LayoutMode::new_corner_anchor_layout(&params_list, Alignament::BottomRight);
+                return LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(
+                    &params_list,
+                    Alignament::BottomRight,
+                ));
             }
             Anchors::BottomLeft => {
-                return LayoutMode::new_corner_anchor_layout(&params_list, Alignament::BottomLeft);
+                return LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(
+                    &params_list,
+                    Alignament::BottomLeft,
+                ));
             }
-            Anchors::LeftRight=> {
+            Anchors::LeftRight => {
                 return LayoutMode::new_horizontal_anchor_layout(&params_list);
             }
             Anchors::TopBottom => {

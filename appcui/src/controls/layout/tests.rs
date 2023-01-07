@@ -1,4 +1,4 @@
-use super::layout_mode::PointAndSizeLayout;
+use super::PointAndSizeLayout;
 use super::Alignament;
 use super::Coordonate;
 use super::Size;
