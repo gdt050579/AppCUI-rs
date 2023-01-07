@@ -77,7 +77,9 @@ impl ControlLayout {
             LayoutMode::TopRightBottomAnchors(layout_mode) => {
                 layout_mode.update_control_layout(self, parent_width, parent_height)
             }
-            LayoutMode::LeftTopRightBottomAnchors(layout_mode) => todo!(),
+            LayoutMode::AllAnchors(layout_mode) => {
+                layout_mode.update_control_layout(self, parent_width, parent_height)
+            }
         }
         /*
         // compute position

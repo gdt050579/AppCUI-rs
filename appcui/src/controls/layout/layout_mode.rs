@@ -1,7 +1,5 @@
-use super::should_not_use;
 use super::Alignament;
 use super::Anchors;
-use super::Coordonate;
 use super::LayoutParameters;
 use super::LeftRightAnchorsLayout;
 use super::TopBottomAnchorsLayout;
@@ -10,18 +8,8 @@ use super::LeftBottomRightAnchorsLayout;
 use super::TopLeftBottomAnchorsLayout;
 use super::TopRightBottomAnchorsLayout;
 use super::PointAndSizeLayout;
+use super::AllAnchorsLayout;
 
-
-
-
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub(super) struct LeftTopRightBottomAnchorsLayout {
-    pub left: Coordonate,
-    pub top: Coordonate,
-    pub right: Coordonate,
-    pub bottom: Coordonate,
-}
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) enum LayoutMode {
@@ -34,25 +22,9 @@ pub(super) enum LayoutMode {
     TopLeftBottomAnchors(TopLeftBottomAnchorsLayout),
     TopRightBottomAnchors(TopRightBottomAnchorsLayout),
 
-    LeftTopRightBottomAnchors(LeftTopRightBottomAnchorsLayout),
+    AllAnchors(AllAnchorsLayout),
 }
 impl LayoutMode {
-
-    fn new_LTRB_anchors_layout(params: &LayoutParameters) -> LayoutMode {
-        should_not_use!(params.x, "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used");
-        should_not_use!(params.y, "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used");
-        should_not_use!(params.height, "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used");
-        should_not_use!(params.width, "When (left,top,right,bottom) parameters are used together, 'widyj' parameter can not be used");
-        should_not_use!(params.align, "When (left,top,right,bottom) parameters are used together, 'align' parameter can not be used");
-
-        LayoutMode::LeftTopRightBottomAnchors(LeftTopRightBottomAnchorsLayout {
-            left: params.a_left.unwrap(),
-            top: params.a_top.unwrap(),
-            right: params.a_right.unwrap(),
-            bottom: params.a_bottom.unwrap(),
-        })
-    }
-
     pub(super) fn new(format: &str) -> LayoutMode {
         let params_list = LayoutParameters::new(format);
 
@@ -111,7 +83,7 @@ impl LayoutMode {
                 return LayoutMode::TopRightBottomAnchors(TopRightBottomAnchorsLayout::new(&params_list));
             }
             Anchors::All => {
-                return LayoutMode::new_LTRB_anchors_layout(&params_list);
+                return LayoutMode::AllAnchors(AllAnchorsLayout::new(&params_list));
             }
             _ => {
                 panic!("Invalid format: {} --> this combination can not be used to create a layout for a control ", format);
