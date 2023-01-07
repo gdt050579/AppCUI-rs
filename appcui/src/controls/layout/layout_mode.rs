@@ -6,18 +6,13 @@ use super::LayoutParameters;
 use super::LeftRightAnchorsLayout;
 use super::TopBottomAnchorsLayout;
 use super::LeftTopRightAnchorsLayout;
+use super::LeftBottomRightAnchorsLayout;
 use super::PointAndSizeLayout;
 use super::Size;
 
 
 
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub(super) struct LeftBottomRightAnchorsLayout {
-    pub left: Coordonate,
-    pub bottom: Coordonate,
-    pub right: Coordonate,
-    pub height: Size,
-}
+
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopLeftBottomAnchorsLayout {
     pub top: Coordonate,
@@ -55,31 +50,6 @@ pub(super) enum LayoutMode {
 }
 impl LayoutMode {
 
-    fn new_LBR_anchors_layout(params: &LayoutParameters) -> LayoutMode {
-        should_not_use!(
-            params.x,
-            "When (left,bottom,right) parameters are used together, 'X' parameter can not be used"
-        );
-        should_not_use!(
-            params.y,
-            "When (left,bottom,right) parameters are used together, 'Y' parameter can not be used"
-        );
-        should_not_use!(
-            params.width,
-            "When (left,bottom,right) parameters are used together, 'width' parameter can not be used"
-        );
-        should_not_use!(
-            params.align,
-            "When (left,bottom,right) parameters are used together, 'align' parameter can not be used"
-        );
-
-        LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout {
-            left: params.a_left.unwrap(),
-            bottom: params.a_bottom.unwrap(),
-            right: params.a_right.unwrap(),
-            height: params.height.unwrap_or(Size::Absolute(1)),
-        })
-    }
     fn new_TLB_anchors_layout(params: &LayoutParameters) -> LayoutMode {
         should_not_use!(
             params.x,
@@ -194,7 +164,7 @@ impl LayoutMode {
                 return LayoutMode::LeftTopRightAnchors(LeftTopRightAnchorsLayout::new(&params_list));
             }
             Anchors::LeftBottomRight => {
-                return LayoutMode::new_LBR_anchors_layout(&params_list);
+                return LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout::new(&params_list));
             }
             Anchors::TopLeftBottom => {
                 return LayoutMode::new_TLB_anchors_layout(&params_list);
