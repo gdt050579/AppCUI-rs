@@ -5,6 +5,7 @@ mod size;
 mod layout_parameters;
 mod layout_mode;
 mod parameter;
+mod control_layout;
 #[cfg(test)]
 mod tests;
 
@@ -15,17 +16,7 @@ use size::Size;
 use layout_parameters::LayoutParameters;
 use layout_mode::LayoutMode;
 use parameter::Parameter;
+pub use control_layout::Layout;
+pub (in crate) use control_layout::ControlLayout;
 
-pub struct Layout<'a> {
-    format: &'a str
-}
 
-impl Layout<'_> {
-    pub fn new(format: &str)->Layout {
-        Layout {format: format}
-    }
-}
-
-pub (in crate) struct ControlLayout {
-
-}
