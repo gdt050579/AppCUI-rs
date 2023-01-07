@@ -6,13 +6,13 @@ pub(super) enum Size {
     Percentage(u16),
 }
 impl Size {
-    pub(super) fn to_absolute_coordonate(&self, parent_size: u32) -> u32 {
+    pub(super) fn to_absolute_size(&self, parent_size: u16) -> u16 {
         match self {
             Size::Absolute(v) => {
-                return (*v) as u32;
+                return (*v) as u16;
             }
             Size::Percentage(v) => {
-                return ((*v) as u32) * parent_size / 10000u32;
+                return (((*v) as u32) * (parent_size as u32) / 10000u32).clamp(0, 0xFFFF) as u16;
             }
         }
     }

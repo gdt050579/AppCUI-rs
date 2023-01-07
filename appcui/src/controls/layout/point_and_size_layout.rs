@@ -1,8 +1,9 @@
-use super::Coordonate;
-use super::Alignament;
-use super::Size;
-use super::LayoutParameters;
 use super::should_not_use;
+use super::Alignament;
+use super::ControlLayout;
+use super::Coordonate;
+use super::LayoutParameters;
+use super::Size;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct PointAndSizeLayout {
@@ -15,7 +16,7 @@ pub(super) struct PointAndSizeLayout {
 }
 impl PointAndSizeLayout {
     #[inline]
-    pub (super) fn new_docked(params: &LayoutParameters) -> Self {
+    pub(super) fn new_docked(params: &LayoutParameters) -> Self {
         should_not_use!(
             params.x,
             "When ('dock' or 'd') parameter is used,'x' parameter can not be used !"
@@ -56,7 +57,7 @@ impl PointAndSizeLayout {
     }
 
     #[inline]
-    pub (super) fn new_XYWH(params: &LayoutParameters) -> Self {
+    pub(super) fn new_XYWH(params: &LayoutParameters) -> Self {
         // it is assume that DOCK|D is not set (as it was process early in ProcessDockedLayout)
         // if X and Y are set --> Left, Right, Top and Bottom should not be set
         should_not_use!(
@@ -84,10 +85,10 @@ impl PointAndSizeLayout {
             align: params.align.unwrap_or(Alignament::TopLeft),
             anchor: Alignament::TopLeft,
         }
-    }    
+    }
 
     #[inline]
-    pub (super) fn new_corner_anchor(params: &LayoutParameters, anchor: Alignament) -> Self {
+    pub(super) fn new_corner_anchor(params: &LayoutParameters, anchor: Alignament) -> Self {
         should_not_use!(
             params.x,
             "When a corner anchor is being use (top,left,righ,bottom), 'x' can bot be used !"
@@ -115,4 +116,74 @@ impl PointAndSizeLayout {
         }
     }
 
+    #[inline]
+    pub(super) fn update_control_layout(
+        &self,
+        control_layout: &mut ControlLayout,
+        parent_width: u16,
+        parent_height: u16,
+    ) {
+        control_layout.resize(
+            self.width.to_absolute_size(parent_width),
+            self.height.to_absolute_size(parent_height),
+        );
+        let x = self.x.to_absolute_coordonate(parent_width);
+        let y = self.y.to_absolute_coordonate(parent_height);
+        
+        // compute (x,y) based on anchor
+        match self.anchor {
+            Alignament::TopLeft => control_layout.set_position(x, y),
+            Alignament::Top => control_layout.set_position((parent_width/2) as i32, y),
+            Alignament::TopRight => control_layout.set_position((parent_width as i32)-x, y),
+            Alignament::Right => control_layout.set_position((parent_width as i32)-x, (parent_height/2) as i32),
+            Alignament::BottomRight => control_layout.set_position((parent_width as i32)-x, (parent_height as i32)-y),
+            Alignament::Bottom => control_layout.set_position((parent_width/2) as i32, (parent_height as i32)-y),
+            Alignament::BottomLeft => control_layout.set_position(x, (parent_height as i32)-y),
+            Alignament::Left => control_layout.set_position(x, (parent_height/2) as i32),
+            Alignament::Center => control_layout.set_position((parent_width/2) as i32, (parent_height/2) as i32),
+        }
+
+        // align (x,y) from the current position based on Width/Height
+        /*
+            switch (md.Align)
+            {
+            case Alignament::TopLeft:
+                // do nothing
+                break;
+            case Alignament::Top:
+                this->Layout.X -= this->Layout.Width / 2;
+                break;
+            case Alignament::TopRight:
+                this->Layout.X -= this->Layout.Width;
+                break;
+            case Alignament::Right:
+                this->Layout.X -= this->Layout.Width;
+                this->Layout.Y -= this->Layout.Height / 2;
+                break;
+            case Alignament::BottomRight:
+                this->Layout.X -= this->Layout.Width;
+                this->Layout.Y -= this->Layout.Height;
+                break;
+            case Alignament::Bottom:
+                this->Layout.X -= this->Layout.Width / 2;
+                this->Layout.Y -= this->Layout.Height;
+                break;
+            case Alignament::BottomLeft:
+                this->Layout.Y -= this->Layout.Height;
+                break;
+            case Alignament::Left:
+                this->Layout.Y -= this->Layout.Height / 2;
+                break;
+            case Alignament::Center:
+                this->Layout.X -= this->Layout.Width / 2;
+                this->Layout.Y -= this->Layout.Height / 2;
+                break;
+            default:
+                RETURNERROR(false, "Invalid alignament value: %d", md.Align);
+            };
+            return true;
+
+
+        */
+    }
 }

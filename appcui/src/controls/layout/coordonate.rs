@@ -6,7 +6,7 @@ pub(super) enum Coordonate {
     Percentage(i16),
 }
 impl Coordonate {
-    pub(super) fn to_absolute_coordonate(&self, parent_size: u32) -> i32 {
+    pub(super) fn to_absolute_coordonate(&self, parent_size: u16) -> i32 {
         match self {
             Coordonate::Absolute(v) => {
                 return (*v) as i32;
