@@ -46,6 +46,14 @@ impl ControlLayout {
         self.x = x;
         self.y = y;
     }
+    #[inline]
+    pub (crate) fn get_width(&self) -> u16 {
+        self.width
+    }
+    #[inline]
+    pub (crate) fn get_heght(&self) -> u16 {
+        self.height
+    }
     pub(crate) fn update(&mut self, parent_width: u16, parent_height: u16) {
         match self.mode {
             LayoutMode::PointAndSize(layout_mode) => {

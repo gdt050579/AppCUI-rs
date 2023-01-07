@@ -127,63 +127,58 @@ impl PointAndSizeLayout {
             self.width.to_absolute_size(parent_width),
             self.height.to_absolute_size(parent_height),
         );
-        let x = self.x.to_absolute_coordonate(parent_width);
-        let y = self.y.to_absolute_coordonate(parent_height);
-        
+        let mut x = self.x.to_absolute_coordonate(parent_width);
+        let mut y = self.y.to_absolute_coordonate(parent_height);
+
         // compute (x,y) based on anchor
         match self.anchor {
-            Alignament::TopLeft => control_layout.set_position(x, y),
-            Alignament::Top => control_layout.set_position((parent_width/2) as i32, y),
-            Alignament::TopRight => control_layout.set_position((parent_width as i32)-x, y),
-            Alignament::Right => control_layout.set_position((parent_width as i32)-x, (parent_height/2) as i32),
-            Alignament::BottomRight => control_layout.set_position((parent_width as i32)-x, (parent_height as i32)-y),
-            Alignament::Bottom => control_layout.set_position((parent_width/2) as i32, (parent_height as i32)-y),
-            Alignament::BottomLeft => control_layout.set_position(x, (parent_height as i32)-y),
-            Alignament::Left => control_layout.set_position(x, (parent_height/2) as i32),
-            Alignament::Center => control_layout.set_position((parent_width/2) as i32, (parent_height/2) as i32),
+            Alignament::TopLeft => {}
+            Alignament::Top => x = (parent_width / 2) as i32,
+            Alignament::TopRight => x = (parent_width as i32) - x,
+            Alignament::Right => {
+                x = (parent_width as i32) - x;
+                y = (parent_height / 2) as i32;
+            }
+            Alignament::BottomRight => {
+                x = (parent_width as i32) - x;
+                y = (parent_height as i32) - y;
+            }
+            Alignament::Bottom => {
+                x = (parent_width / 2) as i32;
+                y = (parent_height as i32) - y;
+            }
+            Alignament::BottomLeft => y = (parent_height as i32) - y,
+            Alignament::Left => y = (parent_height / 2) as i32,
+            Alignament::Center => {
+                x = (parent_width / 2) as i32;
+                y = (parent_height / 2) as i32;
+            }
         }
-
         // align (x,y) from the current position based on Width/Height
-        /*
-            switch (md.Align)
-            {
-            case Alignament::TopLeft:
-                // do nothing
-                break;
-            case Alignament::Top:
-                this->Layout.X -= this->Layout.Width / 2;
-                break;
-            case Alignament::TopRight:
-                this->Layout.X -= this->Layout.Width;
-                break;
-            case Alignament::Right:
-                this->Layout.X -= this->Layout.Width;
-                this->Layout.Y -= this->Layout.Height / 2;
-                break;
-            case Alignament::BottomRight:
-                this->Layout.X -= this->Layout.Width;
-                this->Layout.Y -= this->Layout.Height;
-                break;
-            case Alignament::Bottom:
-                this->Layout.X -= this->Layout.Width / 2;
-                this->Layout.Y -= this->Layout.Height;
-                break;
-            case Alignament::BottomLeft:
-                this->Layout.Y -= this->Layout.Height;
-                break;
-            case Alignament::Left:
-                this->Layout.Y -= this->Layout.Height / 2;
-                break;
-            case Alignament::Center:
-                this->Layout.X -= this->Layout.Width / 2;
-                this->Layout.Y -= this->Layout.Height / 2;
-                break;
-            default:
-                RETURNERROR(false, "Invalid alignament value: %d", md.Align);
-            };
-            return true;
-
-
-        */
+        match self.align {
+            Alignament::TopLeft => {}
+            Alignament::Top => x -= (control_layout.get_width() / 2) as i32,
+            Alignament::TopRight => x -= control_layout.get_width() as i32,
+            Alignament::Right => {
+                x -= control_layout.get_width() as i32;
+                y -= (control_layout.get_heght() / 2) as i32;
+            }
+            Alignament::BottomRight => {
+                x -= control_layout.get_width() as i32;
+                y -= control_layout.get_heght() as i32;
+            }
+            Alignament::Bottom => {
+                x -= (control_layout.get_width() / 2) as i32;
+                y -= control_layout.get_heght() as i32;
+            }
+            Alignament::BottomLeft => y -= control_layout.get_heght() as i32,
+            Alignament::Left => y -= (control_layout.get_heght() / 2) as i32,
+            Alignament::Center => {
+                x -= (control_layout.get_width() / 2) as i32;
+                y -= (control_layout.get_heght() / 2) as i32;
+            }
+        }
+        // set new position
+        control_layout.set_position(x, y);
     }
 }
