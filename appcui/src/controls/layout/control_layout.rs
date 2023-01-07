@@ -71,7 +71,9 @@ impl ControlLayout {
             LayoutMode::LeftBottomRightAnchors(layout_mode) => {
                 layout_mode.update_control_layout(self, parent_width, parent_height)
             }
-            LayoutMode::TopLeftBottomAnchors(layout_mode) => todo!(),
+            LayoutMode::TopLeftBottomAnchors(layout_mode) => {
+                layout_mode.update_control_layout(self, parent_width, parent_height)
+            }
             LayoutMode::TopRightBottomAnchors(layout_mode) => todo!(),
             LayoutMode::LeftTopRightBottomAnchors(layout_mode) => todo!(),
         }
@@ -79,16 +81,7 @@ impl ControlLayout {
         // compute position
         switch (this->Layout.Format.LayoutMode)
         {
-        case LayoutFormatMode::LeftTopRightAnchorsAndHeight:
-            SetControlSize(md.ParentWidth - (md.AnchorLeft + md.AnchorRight), md.Height);
-            this->Layout.X = md.AnchorLeft;
-            this->Layout.Y = md.AnchorTop;
-            return true;
-        case LayoutFormatMode::LeftBottomRightAnchorsAndHeight:
-            SetControlSize(md.ParentWidth - (md.AnchorLeft + md.AnchorRight), md.Height);
-            this->Layout.X = md.AnchorLeft;
-            this->Layout.Y = md.ParentHeigh - (md.AnchorBottom + this->Layout.Height);
-            return true;
+
         case LayoutFormatMode::TopLeftBottomAnchorsAndWidth:
             SetControlSize(md.Width, md.ParentHeigh - (md.AnchorTop + md.AnchorBottom));
             this->Layout.X = md.AnchorLeft;

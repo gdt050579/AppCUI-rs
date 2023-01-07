@@ -7,19 +7,12 @@ use super::LeftRightAnchorsLayout;
 use super::TopBottomAnchorsLayout;
 use super::LeftTopRightAnchorsLayout;
 use super::LeftBottomRightAnchorsLayout;
+use super::TopLeftBottomAnchorsLayout;
 use super::PointAndSizeLayout;
 use super::Size;
 
 
 
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub(super) struct TopLeftBottomAnchorsLayout {
-    pub top: Coordonate,
-    pub left: Coordonate,
-    pub bottom: Coordonate,
-    pub width: Size,
-}
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopRightBottomAnchorsLayout {
     pub top: Coordonate,
@@ -50,31 +43,7 @@ pub(super) enum LayoutMode {
 }
 impl LayoutMode {
 
-    fn new_TLB_anchors_layout(params: &LayoutParameters) -> LayoutMode {
-        should_not_use!(
-            params.x,
-            "When (top,left,bottom) parameters are used together, 'X' parameter can not be used"
-        );
-        should_not_use!(
-            params.y,
-            "When (top,left,bottom) parameters are used together, 'Y' parameter can not be used"
-        );
-        should_not_use!(
-            params.height,
-            "When (top,left,bottom) parameters are used together, 'height' parameter can not be used"
-        );
-        should_not_use!(
-            params.align,
-            "When (top,left,bottom) parameters are used together, 'align' parameter can not be used"
-        );
 
-        LayoutMode::TopLeftBottomAnchors(TopLeftBottomAnchorsLayout {
-            top: params.a_top.unwrap(),
-            left: params.a_left.unwrap(),
-            bottom: params.a_bottom.unwrap(),
-            width: params.width.unwrap_or(Size::Absolute(1)),
-        })
-    }
     fn new_TRB_anchors_layout(params: &LayoutParameters) -> LayoutMode {
         should_not_use!(
             params.x,
@@ -167,7 +136,7 @@ impl LayoutMode {
                 return LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout::new(&params_list));
             }
             Anchors::TopLeftBottom => {
-                return LayoutMode::new_TLB_anchors_layout(&params_list);
+                return LayoutMode::TopLeftBottomAnchors(TopLeftBottomAnchorsLayout::new(&params_list));
             }
             Anchors::TopRightBottom => {
                 return LayoutMode::new_TRB_anchors_layout(&params_list);
