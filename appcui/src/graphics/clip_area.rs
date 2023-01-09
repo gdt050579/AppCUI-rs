@@ -43,7 +43,7 @@ impl ClipArea {
         return self.visible && (y >= self.top) && (y <= self.bottom);
     }
     #[inline]
-    pub fn intesect_with(&mut self, clip: &ClipArea) {
+    pub fn intersect_with(&mut self, clip: &ClipArea) {
         self.set(
             i32::max(self.left, clip.left),
             i32::max(self.top, clip.top),
