@@ -3,7 +3,7 @@ pub enum SystemEvent
 {
     None,
     AppClose,
-    Key(super::Key),
+    KeyEvent(super::KeyEvent),
     Resize(super::Size),
-    Mouse(super::MouseEvent)
+    MouseEvent(super::MouseEvent)
 }

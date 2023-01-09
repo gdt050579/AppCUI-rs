@@ -5,7 +5,7 @@ mod system_event;
 use super::graphics::Surface;
 use super::graphics::Color;
 use super::graphics::CharFlags;
-use super::input::Key;
+use super::input::KeyEvent;
 use super::input::MouseEvent;
 use super::graphics::Size;
 

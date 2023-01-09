@@ -7,7 +7,7 @@ use crate::input::MouseWheelDirection;
 
 use super::CharFlags;
 use super::Color;
-use super::Key;
+use super::KeyEvent;
 use super::Surface;
 use super::SystemEvent;
 use super::Terminal;
@@ -35,9 +35,8 @@ const RIGHT_CTRL_PRESSED: u32 = 0x0004;
 const LEFT_CTRL_PRESSED: u32 = 0x0008;
 const SHIFT_PRESSED: u32 = 0x0010;
 const ENABLE_WINDOW_INPUT: u32 = 0x0008;
-const ENABLE_MOUSE_INPUT : u32 = 0x0010;
+const ENABLE_MOUSE_INPUT: u32 = 0x0010;
 const ENABLE_EXTENDED_FLAGS: u32 = 0x0080;
-
 
 const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
@@ -576,7 +575,7 @@ impl Terminal for WindowsTerminal {
             event: WindowsTerminalEvent { extra: 0 },
         };
         let mut nr_read = 0u32;
-        
+
         unsafe {
             if (ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE)
                 || (nr_read != 1)
@@ -588,55 +587,63 @@ impl Terminal for WindowsTerminal {
 
         // Key processings
         if ir.event_type == KEY_EVENT {
-            let mut key = Key::default();
+            let mut key_code = KeyCode::None;
+            let mut key_modifier = KeyModifier::None;
+            let mut character = '\0';
             unsafe {
                 if (ir.event.key_event.unicode_char >= 32) && (ir.event.key_event.key_down == TRUE)
                 {
                     let res = char::from_u32(ir.event.key_event.unicode_char as u32);
                     if res.is_some() {
-                        key.character = res.unwrap();
+                        character = res.unwrap();
                     }
                 }
                 if ir.event.key_event.virtual_key_code < 256 {
-                    key.code = TRANSLATION_MATRIX[ir.event.key_event.virtual_key_code as usize];
+                    key_code = TRANSLATION_MATRIX[ir.event.key_event.virtual_key_code as usize];
                 }
 
                 if (ir.event.key_event.control_key_state & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
                     != 0
                 {
-                    key.modifier |= KeyModifier::Alt;
+                    key_modifier |= KeyModifier::Alt;
                 }
                 if (ir.event.key_event.control_key_state & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
                     != 0
                 {
-                    key.modifier |= KeyModifier::Ctrl;
+                    key_modifier |= KeyModifier::Ctrl;
                 }
                 if (ir.event.key_event.control_key_state & SHIFT_PRESSED) != 0 {
-                    key.modifier |= KeyModifier::Shift;
+                    key_modifier |= KeyModifier::Shift;
                 }
 
                 // if ALT or CTRL are pressed, clear the ascii code
-                if key
-                    .modifier
-                    .contains_one(KeyModifier::Alt | KeyModifier::Ctrl)
-                {
-                    key.character = 0 as char;
+                if key_modifier.contains_one(KeyModifier::Alt | KeyModifier::Ctrl) {
+                    character = '\0';
                 }
-                if key.has_key() {
+                if (key_code != KeyCode::None) || (character != '\0') {
                     if ir.event.key_event.key_down == FALSE {
                         // key is up (no need to send)
                         return SystemEvent::None;
                     }
                 } else {
                     // check for change in modifier
-                    if self.shift_state == key.modifier {
+                    if self.shift_state == key_modifier {
                         // nothing changed --> return
                         return SystemEvent::None;
                     }
-                    self.shift_state = key.modifier;
+                    let old_state = self.shift_state;
+                    self.shift_state = key_modifier;
+                    return SystemEvent::KeyEvent(KeyEvent::new_modifier_changed(
+                        old_state,
+                        key_modifier,
+                    ));
                 }
             }
-            return SystemEvent::Key(key);
+            return SystemEvent::KeyEvent(KeyEvent::new_key_pressed(
+                key_code,
+                key_modifier,
+                character,
+            ));
         }
 
         // mouse processing
@@ -693,7 +700,7 @@ impl Terminal for WindowsTerminal {
                     }
                 }
 
-                return SystemEvent::Mouse(mouse_event);
+                return SystemEvent::MouseEvent(mouse_event);
             }
         }
 
