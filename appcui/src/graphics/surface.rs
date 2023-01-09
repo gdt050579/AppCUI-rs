@@ -41,6 +41,7 @@ pub struct Surface {
     pub(crate) chars: Vec<Character>,
     pub(crate) cursor: Cursor,
     clip: ClipArea,
+    base_clip: ClipArea,
     right_most: i32,
     bottom_most: i32,
 }
@@ -57,6 +58,7 @@ impl Surface {
             translate_y: 0,
             chars: Vec::<Character>::with_capacity(count),
             clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
+            base_clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
             cursor: Cursor::new(),
             right_most: (w - 1) as i32,
             bottom_most: (h - 1) as i32,
@@ -101,15 +103,26 @@ impl Surface {
     #[inline]
     pub fn set_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.clip.set(
+            i32::max(self.base_clip.left, left),
+            i32::max(self.base_clip.top, top),
+            i32::min(self.base_clip.right, right),
+            i32::min(self.base_clip.top, bottom),
+        );
+    }
+    #[inline]
+    pub fn reset_clip(&mut self) {
+        self.clip = self.base_clip;
+    }
+
+    #[inline]
+    pub (in crate) fn set_base_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        self.base_clip.set(
             i32::max(0, left),
             i32::max(0, top),
             i32::min(self.right_most, right),
             i32::min(self.bottom_most, bottom),
         );
-    }
-    #[inline]
-    pub fn reset_clip(&mut self) {
-        self.clip.set(0, 0, self.right_most, self.bottom_most);
+        self.clip.intesect_with(&self.base_clip);
     }
 
     #[inline]

@@ -42,4 +42,13 @@ impl ClipArea {
     pub fn contains_y(&self, y: i32) -> bool {
         return self.visible && (y >= self.top) && (y <= self.bottom);
     }
+    #[inline]
+    pub fn intesect_with(&mut self, clip: &ClipArea) {
+        self.set(
+            i32::max(self.left, clip.left),
+            i32::max(self.top, clip.top),
+            i32::min(self.right, clip.right),
+            i32::min(self.bottom, clip.bottom),
+        )
+    }
 }
