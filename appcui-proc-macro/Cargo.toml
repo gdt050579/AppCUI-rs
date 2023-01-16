@@ -1,0 +1,14 @@
+[package]
+name = "AppCUIProcMacro"
+version = "1.0.0"
+edition = "2021"
+authors = ["gavrilut.dragos@gmail.com"]
+description = "..."
+license = "MIT"
+#repository = "https://github.com/gdt050579/EnumBitFlags/"
+#readme = "README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
