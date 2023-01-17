@@ -18,9 +18,15 @@ mod templates {
 
     pub static ON_PAINT_CODE: &str = "
     impl OnPaint for $STRUCT_NAME$ {
-        fn on_paint(&self)  { self.base.on_paint(); }
+        fn on_paint(&self, surface: &Surface)  { self.base.on_paint(surface); }
     }
     ";
+
+    pub static ON_KEY_PRESSED_CODE: &str = "
+    impl OnKeyPressed for $STRUCT_NAME$ {
+        fn on_key_pressed(&mut self, key: Key, character: char) { self.base.on_key_pressed(key, character); }
+    }
+    ";    
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
