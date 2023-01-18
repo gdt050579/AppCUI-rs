@@ -1,7 +1,7 @@
 use super::LayoutMode;
 
 pub struct Layout<'a> {
-    format: &'a str,
+    pub (in super::super) format: &'a str,
 }
 
 impl Layout<'_> {
