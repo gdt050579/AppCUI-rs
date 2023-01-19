@@ -1,5 +1,5 @@
 #[derive(Copy, Clone, Debug)]
-pub(super) struct ClipArea {
+pub(crate) struct ClipArea {
     pub left: i32,
     pub top: i32,
     pub right: i32,
@@ -50,5 +50,11 @@ impl ClipArea {
             i32::min(self.right, clip.right),
             i32::min(self.bottom, clip.bottom),
         )
+    }
+}
+
+impl Default for ClipArea {
+    fn default() -> Self {
+        Self { left: 0, top: 0, right: 0, bottom: 0, visible: false }
     }
 }
