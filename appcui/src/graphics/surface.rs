@@ -1,9 +1,10 @@
 use crate::graphics::SpecialChar;
 
 use super::CharAttribute;
-use super::CharFlags;
+//use super::CharFlags;
 use super::Character;
 use super::ClipArea;
+use super::Point;
 use super::Color;
 use super::Cursor;
 use super::Image;
@@ -36,12 +37,10 @@ const MAX_SURFACE_HEIGHT: u32 = 10000;
 pub struct Surface {
     pub(crate) width: u32,
     pub(crate) height: u32,
-    origin_x: i32,
-    origin_y: i32,
-    base_origin_x: i32,
-    base_origin_y: i32,
     pub(crate) chars: Vec<Character>,
     pub(crate) cursor: Cursor,
+    origin: Point,
+    base_origin: Point,
     clip: ClipArea,
     base_clip: ClipArea,
     right_most: i32,
@@ -56,10 +55,8 @@ impl Surface {
         let mut s = Surface {
             width: w,
             height: h,
-            origin_x: 0,
-            origin_y: 0,
-            base_origin_x: 0,
-            base_origin_y: 0,
+            origin: Point::default(),
+            base_origin: Point::default(),
             chars: Vec::<Character>::with_capacity(count),
             clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
             base_clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
@@ -83,8 +80,8 @@ impl Surface {
     }
     #[inline]
     fn coords_to_position(&self, x: i32, y: i32) -> Option<usize> {
-        let x = x + self.origin_x;
-        let y = y + self.origin_y;
+        let x = x + self.origin.x;
+        let y = y + self.origin.y;
         if self.clip.contains(x, y) == false {
             return None;
         }
@@ -95,18 +92,18 @@ impl Surface {
     }
     #[inline]
     pub fn set_origin(&mut self, x: i32, y: i32) {
-        self.origin_x = x + self.base_origin_x;
-        self.origin_y = y + self.base_origin_y;
+        self.origin.x = x + self.base_origin.x;
+        self.origin.y = y + self.base_origin.y;
     }
     #[inline]
     pub fn reset_origin(&mut self) {
-        self.origin_x = self.base_origin_x;
-        self.origin_y = self.base_origin_y;
+        self.origin.x = self.base_origin.x;
+        self.origin.y = self.base_origin.y;
     }
     #[inline]
     pub (in crate) fn set_base_origin(&mut self, x: i32, y: i32) {
-        self.base_origin_x = x;
-        self.base_origin_y = y;
+        self.base_origin.x = x;
+        self.base_origin.y = y;
     }
 
     #[inline]
@@ -136,8 +133,8 @@ impl Surface {
 
     #[inline]
     pub fn set_cursor(&mut self, x: i32, y: i32) {
-        let x = x + self.origin_x;
-        let y = y + self.origin_y;
+        let x = x + self.origin.x;
+        let y = y + self.origin.y;
         if self.clip.contains(x, y) {
             self.cursor.set(x as u32, y as u32);
         } else {
@@ -404,7 +401,7 @@ impl Surface {
         let mut c = Character::new(' ', attr.foreground, attr.background, attr.flags);
         if !multi_line {
             // single line support
-            if self.clip.contains_y(y + self.origin_y) == false {
+            if self.clip.contains_y(y + self.origin.y) == false {
                 return; // no need to draw
             }
             let mut p_x = x;

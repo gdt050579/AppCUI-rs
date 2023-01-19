@@ -44,4 +44,37 @@ impl Control {
     pub fn is_enabled(&self)->bool {
         self.status_flags.contains(StatusFlags::Enabled)
     }
+
+
+    fn compute_control_layour(&mut self, parent_screen_clip: &ClipArea)
+{
+    if (ctrl == nullptr)
+        return;
+    CREATE_CONTROL_CONTEXT(ctrl, Members, );
+    // compute the clip
+    Members->ScreenClip.Set(
+          parentClip, Members->Layout.X, Members->Layout.Y, Members->Layout.Width, Members->Layout.Height);
+    // compute the expanded clip if neccesary
+    if (ctrl == app->ExpandedControl)
+    {
+        if ((Members->Flags & GATTR_EXPANDED) == 0)
+        {
+            Members->ExpandedViewClip = Members->ScreenClip;
+            ctrl->OnExpandView(Members->ExpandedViewClip);
+            Members->Flags |= GATTR_EXPANDED;
+        }
+    }
+    // calculez clip-ul client
+    Graphics::Clip client;
+    client.Set(
+          parentClip,
+          Members->Layout.X + Members->Margins.Left,
+          Members->Layout.Y + Members->Margins.Top,
+          Members->Layout.Width - (Members->Margins.Right + Members->Margins.Left),
+          Members->Layout.Height - (Members->Margins.Bottom + Members->Margins.Top));
+    // calculez pentru fiecare copil
+    for (uint32 tr = 0; tr < Members->ControlsCount; tr++)
+        ComputeControlLayout(client, Members->Controls[tr]);
+}
+
 }
