@@ -12,10 +12,10 @@ enum StatusFlags {
 }
 pub struct Control {
     layout: ControlLayout,
-    children: Vec<Rc<Control>>,
-    parent: Option<Rc<Control>>,
+    pub(crate) children: Vec<Rc<Control>>,
+    pub(crate) parent: Option<Rc<Control>>,
     status_flags: StatusFlags,
-    screen_clip: ClipArea,
+    pub(crate) screen_clip: ClipArea,
 }
 
 impl Control {
