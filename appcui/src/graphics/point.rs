@@ -1,3 +1,4 @@
+#[derive(Copy,Clone,Debug)]
 pub(crate) struct Point {
     pub x: i32,
     pub y: i32,
