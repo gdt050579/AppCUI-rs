@@ -19,6 +19,10 @@ impl ClipArea {
         }
     }
     #[inline]
+    pub fn with_size(x: i32, y: i32, width: u16, height: u16) -> ClipArea {
+        ClipArea::new(x, y, x + (width as i32) - 1, y + (height as i32) - 1)
+    }
+    #[inline]
     pub fn set(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.left = left;
         self.top = top;
@@ -54,6 +58,14 @@ impl ClipArea {
             i32::min(self.right, clip.right),
             i32::min(self.bottom, clip.bottom),
         )
+    }
+    #[inline]
+    pub fn reduce_margines(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        self.left += left;
+        self.right -= right;
+        self.top += top;
+        self.bottom -= bottom;
+        self.visible = (self.left <= self.right) && (self.top <= self.bottom);
     }
 }
 

@@ -53,8 +53,8 @@ impl LeftRightAnchorsLayout {
         );
         match self.align {
             Alignament::Top => control_layout.set_position(left, y),
-            Alignament::Bottom => control_layout.set_position(left, y - (control_layout.get_heght() as i32)),
-            Alignament::Center => control_layout.set_position(left, y - ((control_layout.get_heght()/2) as i32)),
+            Alignament::Bottom => control_layout.set_position(left, y - (control_layout.get_height() as i32)),
+            Alignament::Center => control_layout.set_position(left, y - ((control_layout.get_height()/2) as i32)),
             _ => unreachable!("This code should not be reached --> internal error")
         }
     }

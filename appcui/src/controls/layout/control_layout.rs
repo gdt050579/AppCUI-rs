@@ -51,7 +51,7 @@ impl ControlLayout {
         self.width
     }
     #[inline]
-    pub(crate) fn get_heght(&self) -> u16 {
+    pub(crate) fn get_height(&self) -> u16 {
         self.height
     }
     #[inline]

@@ -54,7 +54,7 @@ impl LeftBottomRightAnchorsLayout {
         );
         control_layout.set_position(
             left,
-            (parent_height as i32) - (bottom + (control_layout.get_heght() as i32)),
+            (parent_height as i32) - (bottom + (control_layout.get_height() as i32)),
         );
     }
 }

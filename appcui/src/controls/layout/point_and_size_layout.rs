@@ -161,21 +161,21 @@ impl PointAndSizeLayout {
             Alignament::TopRight => x -= control_layout.get_width() as i32,
             Alignament::Right => {
                 x -= control_layout.get_width() as i32;
-                y -= (control_layout.get_heght() / 2) as i32;
+                y -= (control_layout.get_height() / 2) as i32;
             }
             Alignament::BottomRight => {
                 x -= control_layout.get_width() as i32;
-                y -= control_layout.get_heght() as i32;
+                y -= control_layout.get_height() as i32;
             }
             Alignament::Bottom => {
                 x -= (control_layout.get_width() / 2) as i32;
-                y -= control_layout.get_heght() as i32;
+                y -= control_layout.get_height() as i32;
             }
-            Alignament::BottomLeft => y -= control_layout.get_heght() as i32,
-            Alignament::Left => y -= (control_layout.get_heght() / 2) as i32,
+            Alignament::BottomLeft => y -= control_layout.get_height() as i32,
+            Alignament::Left => y -= (control_layout.get_height() / 2) as i32,
             Alignament::Center => {
                 x -= (control_layout.get_width() / 2) as i32;
-                y -= (control_layout.get_heght() / 2) as i32;
+                y -= (control_layout.get_height() / 2) as i32;
             }
         }
         // set new position
