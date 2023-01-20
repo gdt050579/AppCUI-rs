@@ -16,6 +16,7 @@ pub struct Control {
     pub(crate) parent: Option<Rc<Control>>,
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
+    pub(crate) screen_origin: Point,
 }
 
 impl Control {
@@ -26,6 +27,7 @@ impl Control {
             parent: None,
             status_flags: StatusFlags::None,
             screen_clip: ClipArea::default(),
+            screen_origin: Point::default(),
         }
     }
     #[inline]
@@ -46,11 +48,17 @@ impl Control {
     }
 
 
-    fn compute_control_layour(&mut self, parent_screen_clip: &ClipArea)
+    fn recompute_control_layout(&mut self, parent_clip: &ClipArea, parent_screen_origin: Point)
 {
-    if (ctrl == nullptr)
-        return;
-    CREATE_CONTROL_CONTEXT(ctrl, Members, );
+    // check if the parent is available
+    if self.parent.is_none() {
+        return; // nothing to compute --> I'm the desktop
+    }
+    let p = self.parent.as_ref().unwrap();
+    self.screen_origin.x = parent_screen_origin.x + self.layout.get_x();
+    self.screen_origin.y = parent_screen_origin.y + self.layout.get_y();
+    self.screen_clip.set_with_size(self.screen_origin.x,self.screen_origin.y,self.layout.get_width(),self.layout.get_heght());
+    self.screen_clip.intersect_with(parent_clip);    
     // compute the clip
     Members->ScreenClip.Set(
           parentClip, Members->Layout.X, Members->Layout.Y, Members->Layout.Width, Members->Layout.Height);
