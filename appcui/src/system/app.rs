@@ -6,6 +6,7 @@ pub struct App
     theme: Theme,
     terminal: Box<dyn Terminal>,
     surface: Surface,
+    //desktop: Rc<dyn 
 }
 impl App {
     pub fn new()->Self {

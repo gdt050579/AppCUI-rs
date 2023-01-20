@@ -68,7 +68,7 @@ impl Control {
     #[inline]
     pub (crate) fn get_client_clip(&self)->ClipArea {
         let mut c = ClipArea::with_size(self.screen_origin.x, self.screen_origin.y, self.layout.get_width(), self.layout.get_height());
-        c.reduce_margines(self.margins.left as i32, self.margins.top as i32, self.margins.right as i32, self.margins.bottom as i32);
+        c.reduce_margins(self.margins.left as i32, self.margins.top as i32, self.margins.right as i32, self.margins.bottom as i32);
         c.intersect_with(&self.screen_clip);
         c
     }

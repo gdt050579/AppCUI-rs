@@ -60,7 +60,7 @@ impl ClipArea {
         )
     }
     #[inline]
-    pub fn reduce_margines(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+    pub fn reduce_margins(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.left += left;
         self.right -= right;
         self.top += top;
