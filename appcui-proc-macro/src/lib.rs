@@ -27,7 +27,10 @@ mod templates {
     ";
 
     pub static CONTROL_TRAIT: &str = "
-    impl Control for $STRUCT_NAME$ {}
+    impl Control for $STRUCT_NAME$ {
+        fn get_basic_control(&self) -> &BasicControl { return self.base.get_basic_control(); }
+        fn get_mut_basic_control(&mut self)-> &mut BasicControl { return self.base.get_mut_basic_control(); }
+    }
     ";
 
     pub static ON_PAINT_TRAIT: &str = "

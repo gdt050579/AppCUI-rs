@@ -1,32 +1,38 @@
-use std::rc::Rc;
 use super::Theme;
 use crate::controls::events::Control;
-use crate::graphics::Surface;
-use crate::terminal::*;
 use crate::controls::*;
+use crate::graphics::{ClipArea, Point, Surface};
+use crate::terminal::*;
 
-pub struct App
-{
+pub struct App {
     theme: Theme,
     terminal: Box<dyn Terminal>,
     surface: Surface,
-    root_control: Rc<dyn Control>, 
+    root_control: Box<dyn Control>,
 }
 impl App {
-    pub fn new()->Self {
-        let term = TerminalType::new(TerminalType::WindowsConsole).expect("Unable to create a terminal object !");
-        let surface = Surface::new(term.get_width(),term.get_height());
+    pub fn new() -> Self {
+        let term = TerminalType::new(TerminalType::WindowsConsole)
+            .expect("Unable to create a terminal object !");
+        let surface = Surface::new(term.get_width(), term.get_height());
         App {
             theme: Theme::default(),
             terminal: term,
             surface: surface,
-            root_control: Rc::new(Desktop::new()),
+            root_control: Box::new(Desktop::new()),
         }
     }
     pub fn run(self) {
         // must pe self so that after a run a second call will not be possible
     }
 
-
-
+    fn recompute_layouts(&mut self) {
+        let client = ClipArea::new(
+            0,
+            0,
+            (self.terminal.get_width() as i32) - 1,
+            (self.terminal.get_height() as i32) - 1,
+        );
+        self.root_control.get_mut_basic_control().update_layout(&client, Point::default());
+    }
 }

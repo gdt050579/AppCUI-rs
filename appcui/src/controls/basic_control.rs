@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use EnumBitFlags::EnumBitFlags;
 use super::events::{Control, OnPaint, OnKeyPressed};
 use super::layout::ControlLayout;
@@ -21,8 +20,7 @@ struct Margins {
 pub struct BasicControl {
     layout: ControlLayout,
     margins: Margins,
-    pub(crate) children: Vec<Rc<dyn Control>>,
-    pub(crate) parent: Option<Rc<dyn Control>>,
+    pub(crate) children: Vec<Box<dyn Control>>,
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
@@ -34,7 +32,6 @@ impl BasicControl {
             children: Vec::new(),
             layout: ControlLayout::new(layout_format.format),
             margins: Margins { left: 0, right: 0, top: 0, bottom: 0 },
-            parent: None,
             status_flags: StatusFlags::None,
             screen_clip: ClipArea::default(),
             screen_origin: Point::default(),
@@ -74,6 +71,15 @@ impl BasicControl {
         c
     }
 
+    pub (crate) fn update_layout(&mut self, parent_clip: &ClipArea, parent_origin: Point) {
+        self.update_control_layout_and_screen_origin(parent_clip, parent_origin);
+        // process the same thing for its children
+        let client_clip = self.get_client_clip();       
+        for c in self.children.iter_mut() {
+            c.get_mut_basic_control().update_layout(&client_clip, self.screen_origin);
+        }
+    }
+
 }
 impl OnPaint for BasicControl {}
 impl OnKeyPressed for BasicControl {}
@@ -86,4 +92,8 @@ impl AsMut<BasicControl> for BasicControl {
     fn as_mut(&mut self) -> &mut BasicControl {
         self
     }
+}
+impl Control for BasicControl {
+    fn get_basic_control(&self) -> &BasicControl { self }
+    fn get_mut_basic_control(&mut self)-> &mut BasicControl { self }
 }
