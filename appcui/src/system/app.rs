@@ -1,12 +1,16 @@
+use std::rc::Rc;
 use super::Theme;
+use crate::controls::events::Control;
 use crate::graphics::Surface;
 use crate::terminal::*;
+use crate::controls::*;
+
 pub struct App
 {
     theme: Theme,
     terminal: Box<dyn Terminal>,
     surface: Surface,
-    //desktop: Rc<dyn 
+    root_control: Rc<dyn Control>, 
 }
 impl App {
     pub fn new()->Self {
@@ -15,7 +19,8 @@ impl App {
         App {
             theme: Theme::default(),
             terminal: term,
-            surface: surface
+            surface: surface,
+            root_control: Rc::new(Desktop::new()),
         }
     }
     pub fn run(self) {

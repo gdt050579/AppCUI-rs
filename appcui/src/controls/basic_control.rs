@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use EnumBitFlags::EnumBitFlags;
+use super::events::Control;
 use super::layout::ControlLayout;
 use super::Layout;
 use crate::graphics::*;
@@ -17,18 +18,18 @@ struct Margins {
     top: u8,
     bottom: u8
 }
-pub struct Control {
+pub struct BasicControl {
     layout: ControlLayout,
     margins: Margins,
-    pub(crate) children: Vec<Rc<Control>>,
-    pub(crate) parent: Option<Rc<Control>>,
+    pub(crate) children: Vec<Rc<dyn Control>>,
+    pub(crate) parent: Option<Rc<dyn Control>>,
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
 }
 
-impl Control {
-    fn new(layout_format: Layout) -> Self {
+impl BasicControl {
+    pub fn new(layout_format: Layout) -> Self {
         Self {
             children: Vec::new(),
             layout: ControlLayout::new(layout_format.format),
