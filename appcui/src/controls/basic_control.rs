@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use EnumBitFlags::EnumBitFlags;
-use super::events::Control;
+use super::events::{Control, OnPaint, OnKeyPressed};
 use super::layout::ControlLayout;
 use super::Layout;
 use crate::graphics::*;
@@ -74,4 +74,16 @@ impl BasicControl {
         c
     }
 
+}
+impl OnPaint for BasicControl {}
+impl OnKeyPressed for BasicControl {}
+impl AsRef<BasicControl> for BasicControl {
+    fn as_ref(&self) -> &BasicControl {
+        self
+    }
+}
+impl AsMut<BasicControl> for BasicControl {
+    fn as_mut(&mut self) -> &mut BasicControl {
+        self
+    }
 }

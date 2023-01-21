@@ -7,7 +7,7 @@ use std::str::FromStr;
 extern crate proc_macro;
 
 mod templates {
-    pub static DEREF_CODE: &str = "
+    pub static DEREF_TRAIT: &str = "
     impl std::ops::Deref for $STRUCT_NAME$ {
         type Target = $BASE$;
         fn deref(&self) -> &Self::Target { return &self.base; }
@@ -17,13 +17,26 @@ mod templates {
     }
     ";
 
-    pub static ON_PAINT_CODE: &str = "
-    impl OnPaint for $STRUCT_NAME$ {
-        fn on_paint(&self, surface: &Surface)  { self.base.on_paint(surface); }
+    pub static ASREF_TRAIT: &str = "
+    impl AsRef<BasicControl> for $STRUCT_NAME$ {
+        fn as_ref(&self) -> &BasicControl { return self.base.as_ref(); }
+    }
+    impl AsMut<BasicControl> for $STRUCT_NAME$ {
+        fn as_mut(&mut self) -> &mut BasicControl { return self.base.as_mut(); }
     }
     ";
 
-    pub static ON_KEY_PRESSED_CODE: &str = "
+    pub static CONTROL_TRAIT: &str = "
+    impl Control for $STRUCT_NAME$ {}
+    ";
+
+    pub static ON_PAINT_TRAIT: &str = "
+    impl OnPaint for $STRUCT_NAME$ {
+        fn on_paint(&self, surface: &Surface, theme: &Theme)  { self.base.on_paint(surface, theme); }
+    }
+    ";
+
+    pub static ON_KEY_PRESSED_TRAIT: &str = "
     impl OnKeyPressed for $STRUCT_NAME$ {
         fn on_key_pressed(&mut self, key: Key, character: char) { self.base.on_key_pressed(key, character); }
     }
@@ -39,12 +52,16 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     base_definition.push_str(", ");
     let mut code = input.to_string().replace("{", base_definition.as_str());
     let struct_name = utils::extract_structure_name(code.as_str());
-    code.push_str(templates::DEREF_CODE);
-    if a.on_paint {
-        code.push_str(templates::ON_PAINT_CODE);
+    code.push_str(templates::DEREF_TRAIT);
+    code.push_str(templates::ASREF_TRAIT);
+    code.push_str(templates::CONTROL_TRAIT);
+
+    // defaults for various events
+    if !a.on_paint {
+        code.push_str(templates::ON_PAINT_TRAIT);
     }
-    if a.on_key_pressed {
-        code.push_str(templates::ON_KEY_PRESSED_CODE);
+    if !a.on_key_pressed {
+        code.push_str(templates::ON_KEY_PRESSED_TRAIT);
     }
     // replace templates
     code = code
