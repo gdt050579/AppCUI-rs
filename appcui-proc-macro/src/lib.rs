@@ -2,6 +2,7 @@ mod arguments;
 mod utils;
 use arguments::*;
 use proc_macro::*;
+use std::str::FromStr;
 
 extern crate proc_macro;
 
@@ -42,11 +43,13 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     if a.on_paint {
         code.push_str(templates::ON_PAINT_CODE);
     }
-
+    if a.on_key_pressed {
+        code.push_str(templates::ON_KEY_PRESSED_CODE);
+    }
     // replace templates
     code = code
         .replace("$STRUCT_NAME$", &struct_name)
         .replace("$BASE$", &a.base);
     println!("{}", code);
-    TokenStream::new()
+    TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }
