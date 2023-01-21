@@ -22,8 +22,10 @@ impl App {
             root_control: Box::new(Desktop::new()),
         }
     }
-    pub fn run(self) {
+    pub fn run(mut self) {
         // must pe self so that after a run a second call will not be possible
+        self.recompute_layouts();
+        self.paint();
     }
 
     fn recompute_layouts(&mut self) {
@@ -34,5 +36,9 @@ impl App {
             (self.terminal.get_height() as i32) - 1,
         );
         self.root_control.get_mut_basic_control().update_layout(&client, Point::default());
+    }
+    fn paint(&mut self) {
+        self.root_control.get_mut_basic_control().paint(&mut self.surface,&self.theme);
+        self.terminal.update_screen(&self.surface);
     }
 }

@@ -1,21 +1,22 @@
-use EnumBitFlags::EnumBitFlags;
-use super::events::{Control, OnPaint, OnKeyPressed};
+use super::events::{Control, OnKeyPressed, OnPaint};
 use super::layout::ControlLayout;
 use super::Layout;
 use crate::graphics::*;
+use crate::system::Theme;
+use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits=8)]
+#[EnumBitFlags(bits = 8)]
 enum StatusFlags {
     Visible = 0x01,
     Enabled = 0x02,
-    TabStop = 0x04
+    TabStop = 0x04,
 }
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 struct Margins {
     left: u8,
     right: u8,
     top: u8,
-    bottom: u8
+    bottom: u8,
 }
 pub struct BasicControl {
     layout: ControlLayout,
@@ -31,55 +32,98 @@ impl BasicControl {
         Self {
             children: Vec::new(),
             layout: ControlLayout::new(layout_format.format),
-            margins: Margins { left: 0, right: 0, top: 0, bottom: 0 },
+            margins: Margins {
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+            },
             status_flags: StatusFlags::None,
             screen_clip: ClipArea::default(),
             screen_origin: Point::default(),
         }
     }
     #[inline]
-    pub fn get_width(&self)->u16 {
+    pub fn get_width(&self) -> u16 {
         self.layout.get_width()
     }
     #[inline]
-    pub fn get_height(&self)->u16 {
+    pub fn get_height(&self) -> u16 {
         self.layout.get_height()
     }
     #[inline]
-    pub fn is_visible(&self)->bool {
+    pub fn is_visible(&self) -> bool {
         self.status_flags.contains(StatusFlags::Visible)
     }
     #[inline]
-    pub fn is_enabled(&self)->bool {
+    pub fn is_enabled(&self) -> bool {
         self.status_flags.contains(StatusFlags::Enabled)
     }
 
-
     #[inline]
-    pub (crate) fn update_control_layout_and_screen_origin(&mut self, parent_clip: &ClipArea, parent_screen_origin: Point)
-    {
+    pub(crate) fn update_control_layout_and_screen_origin(
+        &mut self,
+        parent_clip: &ClipArea,
+        parent_screen_origin: Point,
+    ) {
         self.screen_origin.x = parent_screen_origin.x + self.layout.get_x();
         self.screen_origin.y = parent_screen_origin.y + self.layout.get_y();
-        self.screen_clip.set_with_size(self.screen_origin.x,self.screen_origin.y,self.layout.get_width(),self.layout.get_height());
-        self.screen_clip.intersect_with(parent_clip);    
+        self.screen_clip.set_with_size(
+            self.screen_origin.x,
+            self.screen_origin.y,
+            self.layout.get_width(),
+            self.layout.get_height(),
+        );
+        self.screen_clip.intersect_with(parent_clip);
     }
     #[inline]
-    pub (crate) fn get_client_clip(&self)->ClipArea {
-        let mut c = ClipArea::with_size(self.screen_origin.x, self.screen_origin.y, self.layout.get_width(), self.layout.get_height());
-        c.reduce_margins(self.margins.left as i32, self.margins.top as i32, self.margins.right as i32, self.margins.bottom as i32);
+    pub(crate) fn get_client_clip(&self) -> ClipArea {
+        let mut c = ClipArea::with_size(
+            self.screen_origin.x,
+            self.screen_origin.y,
+            self.layout.get_width(),
+            self.layout.get_height(),
+        );
+        c.reduce_margins(
+            self.margins.left as i32,
+            self.margins.top as i32,
+            self.margins.right as i32,
+            self.margins.bottom as i32,
+        );
         c.intersect_with(&self.screen_clip);
         c
     }
 
-    pub (crate) fn update_layout(&mut self, parent_clip: &ClipArea, parent_origin: Point) {
+    pub(crate) fn update_layout(&mut self, parent_clip: &ClipArea, parent_origin: Point) {
         self.update_control_layout_and_screen_origin(parent_clip, parent_origin);
         // process the same thing for its children
-        let client_clip = self.get_client_clip();       
+        let client_clip = self.get_client_clip();
         for c in self.children.iter_mut() {
-            c.get_mut_basic_control().update_layout(&client_clip, self.screen_origin);
+            c.get_mut_basic_control()
+                .update_layout(&client_clip, self.screen_origin);
         }
     }
 
+    pub(crate) fn paint(&mut self, surface: &mut Surface, theme: &Theme) {
+        if (self.is_visible()==false) || (self.screen_clip.is_visible()==false)
+        {
+            return; // nothing to draw
+        }
+        // paint myself
+        surface.set_base_clip(
+            self.screen_clip.left,
+            self.screen_clip.top,
+            self.screen_clip.right,
+            self.screen_clip.bottom,
+        );
+        surface.set_base_origin(self.screen_origin.x, self.screen_origin.y);
+        self.on_paint(surface, theme);
+        // paint all children
+        // should be painted in a specific order
+        for c in self.children.iter_mut() {
+            c.get_mut_basic_control().paint(surface, theme);
+        }
+    }
 }
 impl OnPaint for BasicControl {}
 impl OnKeyPressed for BasicControl {}
@@ -94,6 +138,10 @@ impl AsMut<BasicControl> for BasicControl {
     }
 }
 impl Control for BasicControl {
-    fn get_basic_control(&self) -> &BasicControl { self }
-    fn get_mut_basic_control(&mut self)-> &mut BasicControl { self }
+    fn get_basic_control(&self) -> &BasicControl {
+        self
+    }
+    fn get_mut_basic_control(&mut self) -> &mut BasicControl {
+        self
+    }
 }
