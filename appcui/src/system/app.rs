@@ -45,7 +45,7 @@ impl App {
     fn paint(&mut self) {
         self.root_control
             .get_mut_basic_control()
-            .paint(&mut self.surface, &self.theme);
+            .paint(&mut self.root_control, &mut self.surface, &self.theme);
         self.terminal.update_screen(&self.surface);
     }
 }
