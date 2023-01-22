@@ -12,8 +12,8 @@ pub struct App {
 }
 impl App {
     pub fn new() -> Self {
-        let term = TerminalType::new(TerminalType::Debug)
-            .expect("Unable to create a terminal object !");
+        let term =
+            TerminalType::new(TerminalType::Debug).expect("Unable to create a terminal object !");
         let surface = Surface::new(term.get_width(), term.get_height());
         App {
             theme: Theme::default(),
@@ -35,10 +35,17 @@ impl App {
             (self.terminal.get_width() as i32) - 1,
             (self.terminal.get_height() as i32) - 1,
         );
-        self.root_control.get_mut_basic_control().update_layout(&client, Point::default());
+        self.root_control.get_mut_basic_control().update_layout(
+            &client,
+            Point::default(),
+            self.terminal.get_width() as u16,
+            self.terminal.get_height() as u16,
+        );
     }
     fn paint(&mut self) {
-        self.root_control.get_mut_basic_control().paint(&mut self.surface,&self.theme);
+        self.root_control
+            .get_mut_basic_control()
+            .paint(&mut self.surface, &self.theme);
         self.terminal.update_screen(&self.surface);
     }
 }

@@ -6,3 +6,4 @@ pub mod desktop;
 pub use layout::Layout;
 pub use basic_control::BasicControl;
 pub use desktop::Desktop;
+use basic_control::StatusFlags;
