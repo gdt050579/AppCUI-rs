@@ -4,7 +4,7 @@ use crate::input::*;
 use crate::system::Theme;
 
 pub trait OnPaint {
-    fn on_paint(&self, _surface: &Surface, _theme: &Theme) {}
+    fn on_paint(&self, _surface: &mut Surface, _theme: &Theme) {}
 }
 
 pub trait OnKeyPressed {

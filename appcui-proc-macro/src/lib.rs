@@ -35,7 +35,7 @@ mod templates {
 
     pub static ON_PAINT_TRAIT: &str = "
     impl OnPaint for $STRUCT_NAME$ {
-        fn on_paint(&self, surface: &Surface, theme: &Theme)  { self.base.on_paint(surface, theme); }
+        fn on_paint(&self, surface: &mut Surface, theme: &Theme)  { self.base.on_paint(surface, theme); }
     }
     ";
 
