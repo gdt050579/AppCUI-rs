@@ -14,6 +14,7 @@ pub use self::system_event::SystemEvent;
 
 
 use self::windows::WindowsTerminal;
+use self::debug::DebugTerminal;
 
 pub trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
@@ -24,6 +25,7 @@ pub trait Terminal {
 
 #[repr(u8)]
 pub enum TerminalType {
+    Debug,
     WindowsConsole,
 }
 impl TerminalType {
@@ -35,6 +37,12 @@ impl TerminalType {
                     return Some(term);
                 }
                 return None;
+            }
+            TerminalType::Debug => {
+                if let Some(term) = DebugTerminal::create() {
+                    return Some(term);
+                }
+                return None;               
             }
         }
     }   

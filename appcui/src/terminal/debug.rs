@@ -3,18 +3,18 @@ use super::SystemEvent;
 use super::Terminal;
 use crate::graphics::Color;
 
-struct DebugTerminal {
+pub(crate) struct DebugTerminal {
     width: u32,
     height: u32,
     temp_str: String,
 }
 impl DebugTerminal {
-    fn new() -> Self {
-        DebugTerminal {
+    pub(crate) fn create() -> Option<Box<Self>> {
+        Some(Box::new(DebugTerminal {
             width: 80,
             height: 25,
             temp_str: String::with_capacity(80 * 6),
-        }
+        }))
     }
 }
 impl Terminal for DebugTerminal {

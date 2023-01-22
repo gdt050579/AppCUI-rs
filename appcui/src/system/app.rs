@@ -12,7 +12,7 @@ pub struct App {
 }
 impl App {
     pub fn new() -> Self {
-        let term = TerminalType::new(TerminalType::WindowsConsole)
+        let term = TerminalType::new(TerminalType::Debug)
             .expect("Unable to create a terminal object !");
         let surface = Surface::new(term.get_width(), term.get_height());
         App {
