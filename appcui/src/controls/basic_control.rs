@@ -121,10 +121,9 @@ impl BasicControl {
             );
         }
     }
-
-    pub(crate) fn paint(&mut self, control: &mut Box<dyn Control>,surface: &mut Surface, theme: &Theme) {
+    pub(crate) fn prepare_paint(&self, surface: &mut Surface)->bool {
         if (self.is_visible() == false) || (self.screen_clip.is_visible() == false) {
-            return; // nothing to draw
+            return false; // nothing to draw
         }
         // paint myself
         surface.set_base_clip(
@@ -136,13 +135,9 @@ impl BasicControl {
         surface.set_base_origin(self.screen_origin.x, self.screen_origin.y);
         surface.reset_clip();
         surface.reset_origin();
-        control.on_paint(surface, theme);
-        // paint all children
-        // should be painted in a specific order
-        for c in self.children.iter_mut() {
-            c.get_mut_basic_control().paint(c, surface, theme);
-        }
+        return true;
     }
+
 }
 impl OnPaint for BasicControl {}
 impl OnKeyPressed for BasicControl {}

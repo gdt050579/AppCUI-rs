@@ -10,6 +10,7 @@ pub struct App {
     surface: Surface,
     root_control: Box<dyn Control>,
 }
+
 impl App {
     pub fn new() -> Self {
         let term =
@@ -26,6 +27,7 @@ impl App {
         // must pe self so that after a run a second call will not be possible
         self.recompute_layouts();
         self.paint();
+
     }
 
     fn recompute_layouts(&mut self) {
@@ -42,10 +44,17 @@ impl App {
             self.terminal.get_height() as u16,
         );
     }
+    fn paint_control(control: &mut Box<dyn Control>, surface: &mut Surface, theme: &Theme) {
+        control.get_basic_control().prepare_paint(surface);
+        control.on_paint(surface, theme);
+        // paint all children
+        // should be painted in a specific order
+        for c in control.get_mut_basic_control().children.iter_mut() {
+            App::paint_control(c, surface, theme);
+        }
+    }
     fn paint(&mut self) {
-        self.root_control
-            .get_mut_basic_control()
-            .paint(&mut self.root_control, &mut self.surface, &self.theme);
+        App::paint_control(&mut self.root_control, &mut self.surface, & self.theme);
         self.terminal.update_screen(&self.surface);
     }
 }
