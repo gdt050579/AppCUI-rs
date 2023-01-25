@@ -1,3 +1,5 @@
+use std::ptr::NonNull;
+
 use super::events::{Control, OnKeyPressed, OnPaint};
 use super::layout::ControlLayout;
 use super::Layout;
@@ -18,17 +20,29 @@ struct Margins {
     top: u8,
     bottom: u8,
 }
+
+struct ControlWrapper {
+    interface: NonNull<dyn Control>,
+    base: *mut BasicControl,
+    version: u32,
+}
+impl ControlWrapper {
+    #[inline]
+    fn get_control(&self) -> &dyn Control {
+        unsafe { &*(self.interface.as_ptr()) }
+    }
+}
 pub struct BasicControl {
     layout: ControlLayout,
     margins: Margins,
-    pub(crate) children: Vec<Box<dyn Control>>,
+    pub(crate) children: Vec<ControlWrapper>,
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
 }
 
 impl BasicControl {
-    pub fn new(layout_format: Layout,status_flags: StatusFlags) -> Self {
+    pub fn new(layout_format: Layout, status_flags: StatusFlags) -> Self {
         Self {
             children: Vec::new(),
             layout: ControlLayout::new(layout_format.format),
@@ -113,15 +127,17 @@ impl BasicControl {
         // process the same thing for its children
         let client_clip = self.get_client_clip();
         for c in self.children.iter_mut() {
-            c.get_mut_basic_control().update_layout(
-                &client_clip,
-                self.screen_origin,
-                self.layout.get_width(),
-                self.layout.get_height(),
-            );
+            unsafe {
+                (*c.base).update_layout(
+                    &client_clip,
+                    self.screen_origin,
+                    self.layout.get_width(),
+                    self.layout.get_height(),
+                );
+            }
         }
     }
-    pub(crate) fn prepare_paint(&self, surface: &mut Surface)->bool {
+    pub(crate) fn prepare_paint(&self, surface: &mut Surface) -> bool {
         if (self.is_visible() == false) || (self.screen_clip.is_visible() == false) {
             return false; // nothing to draw
         }
@@ -137,7 +153,6 @@ impl BasicControl {
         surface.reset_origin();
         return true;
     }
-
 }
 impl OnPaint for BasicControl {}
 impl OnKeyPressed for BasicControl {}
