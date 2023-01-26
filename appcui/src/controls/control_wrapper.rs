@@ -3,14 +3,26 @@ use super::ControlManager;
 use std::ptr::NonNull;
 
 pub(crate) struct ControlWrapper {
-    pub(crate) interface: NonNull<dyn Control>,
-    pub(crate) manager: *mut ControlManager,
-    pub(crate) version: u32,
+    interface: NonNull<dyn Control>,
+    manager: *mut ControlManager,
+    version: u32,
 }
 impl ControlWrapper {
     #[inline]
     pub(crate) fn get_control(&self) -> &dyn Control {
         unsafe { &*(self.interface.as_ptr()) }
+    }
+    #[inline]
+    pub(crate) fn get_control_mut(&mut self) -> &mut dyn Control {
+        unsafe { &mut *(self.interface.as_ptr()) }
+    }
+    #[inline]
+    pub(crate) fn get_manager(&self) -> &ControlManager {
+        unsafe { &*self.manager }
+    }
+    #[inline]
+    pub(crate) fn get_manager_mut(&mut self) -> &mut ControlManager {
+        unsafe { &mut *self.manager }
     }
     pub(crate) fn new<T>(obj: T, version: u32) -> ControlWrapper
     where

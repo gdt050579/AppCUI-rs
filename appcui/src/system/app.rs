@@ -21,7 +21,7 @@ impl App {
             theme: Theme::default(),
             terminal: term,
             surface: surface,
-            root_control: ControlWrapper::,
+            root_control: ControlWrapper::new(Desktop::new(),1),
         }
     }
     pub fn run(mut self) {
@@ -38,6 +38,7 @@ impl App {
             (self.terminal.get_width() as i32) - 1,
             (self.terminal.get_height() as i32) - 1,
         );
+        let a = unsafe { &(*self.root_control.manager)};
         self.root_control.get_mut_basic_control().update_layout(
             &client,
             Point::default(),
