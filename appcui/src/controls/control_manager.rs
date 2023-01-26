@@ -23,7 +23,7 @@ struct Margins {
 
 struct ControlWrapper {
     interface: NonNull<dyn Control>,
-    base: *mut BasicControl,
+    manager: *mut ControlManager,
     version: u32,
 }
 impl ControlWrapper {
@@ -32,7 +32,7 @@ impl ControlWrapper {
         unsafe { &*(self.interface.as_ptr()) }
     }
 }
-pub struct BasicControl {
+pub struct ControlManager {
     layout: ControlLayout,
     margins: Margins,
     pub(crate) children: Vec<ControlWrapper>,
@@ -41,7 +41,7 @@ pub struct BasicControl {
     pub(crate) screen_origin: Point,
 }
 
-impl BasicControl {
+impl ControlManager {
     pub fn new(layout_format: Layout, status_flags: StatusFlags) -> Self {
         Self {
             children: Vec::new(),
@@ -128,7 +128,7 @@ impl BasicControl {
         let client_clip = self.get_client_clip();
         for c in self.children.iter_mut() {
             unsafe {
-                (*c.base).update_layout(
+                (*c.manager).update_layout(
                     &client_clip,
                     self.screen_origin,
                     self.layout.get_width(),
@@ -154,18 +154,9 @@ impl BasicControl {
         return true;
     }
 }
-impl OnPaint for BasicControl {}
-impl OnKeyPressed for BasicControl {}
-impl AsRef<BasicControl> for BasicControl {
-    fn as_ref(&self) -> &BasicControl {
-        self
-    }
-}
-impl AsMut<BasicControl> for BasicControl {
-    fn as_mut(&mut self) -> &mut BasicControl {
-        self
-    }
-}
+impl OnPaint for ControlManager {}
+impl OnKeyPressed for ControlManager {}
+
 impl Control for BasicControl {
     fn get_basic_control(&self) -> &BasicControl {
         self

@@ -1,12 +1,12 @@
 pub mod layout;
 pub mod events;
-pub mod basic_control;
+pub mod control_manager;
 pub mod desktop;
 pub mod control_handle;
 
 pub use layout::Layout;
-pub use basic_control::BasicControl;
+pub use control_manager::ControlManager;
 pub use desktop::Desktop;
 pub use control_handle::ControlHandle;
 
-use basic_control::StatusFlags;
+use control_manager::StatusFlags;
