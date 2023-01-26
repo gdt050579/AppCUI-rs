@@ -24,6 +24,10 @@ impl ControlWrapper {
     pub(crate) fn get_manager_mut(&mut self) -> &mut ControlManager {
         unsafe { &mut *self.manager }
     }
+    #[inline]
+    pub(crate) fn get_version(&self) -> u32 {
+       self.version
+    }
     pub(crate) fn new<T>(obj: T, version: u32) -> ControlWrapper
     where
         T: Control,
