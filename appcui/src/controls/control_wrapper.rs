@@ -30,7 +30,7 @@ impl ControlWrapper {
     }
     pub(crate) fn new<T>(obj: T, version: u32) -> ControlWrapper
     where
-        T: Control,
+        T: Control +'static,
     {
         let ptr = Box::into_raw(Box::new(obj));
         let ctrl: NonNull<dyn Control> = unsafe { NonNull::new_unchecked(ptr) };

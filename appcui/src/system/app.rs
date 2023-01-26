@@ -38,20 +38,19 @@ impl App {
             (self.terminal.get_width() as i32) - 1,
             (self.terminal.get_height() as i32) - 1,
         );
-        let a = unsafe { &(*self.root_control.manager)};
-        self.root_control.get_mut_basic_control().update_layout(
+        self.root_control.get_manager_mut().update_layout(
             &client,
             Point::default(),
             self.terminal.get_width() as u16,
             self.terminal.get_height() as u16,
         );
     }
-    fn paint_control(control: &mut Box<dyn Control>, surface: &mut Surface, theme: &Theme) {
-        control.get_basic_control().prepare_paint(surface);
-        control.on_paint(surface, theme);
+    fn paint_control(wrapper: &mut ControlWrapper, surface: &mut Surface, theme: &Theme) {
+        wrapper.get_manager().prepare_paint(surface);
+        wrapper.get_control().on_paint(surface, theme);
         // paint all children
         // should be painted in a specific order
-        for c in control.get_mut_basic_control().children.iter_mut() {
+        for c in wrapper.get_manager_mut().children.iter_mut() {
             App::paint_control(c, surface, theme);
         }
     }

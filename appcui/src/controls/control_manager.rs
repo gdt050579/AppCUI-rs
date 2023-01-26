@@ -1,10 +1,7 @@
-use std::ptr::NonNull;
-
-use super::events::{Control, OnKeyPressed, OnPaint};
+use super::events::{OnKeyPressed, OnPaint};
 use super::layout::ControlLayout;
-use super::Layout;
+use super::{ControlWrapper, Layout};
 use crate::graphics::*;
-use crate::system::Theme;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 8)]
@@ -21,17 +18,6 @@ struct Margins {
     bottom: u8,
 }
 
-pub (crate) struct ControlWrapper {
-    pub (crate) interface: NonNull<dyn Control>,
-    pub (crate) manager: *mut ControlManager,
-    pub (crate) version: u32,
-}
-impl ControlWrapper {
-    #[inline]
-    pub (crate) fn get_control(&self) -> &dyn Control {
-        unsafe { &*(self.interface.as_ptr()) }
-    }
-}
 pub struct ControlManager {
     layout: ControlLayout,
     margins: Margins,
@@ -127,14 +113,12 @@ impl ControlManager {
         // process the same thing for its children
         let client_clip = self.get_client_clip();
         for c in self.children.iter_mut() {
-            unsafe {
-                (*c.manager).update_layout(
-                    &client_clip,
-                    self.screen_origin,
-                    self.layout.get_width(),
-                    self.layout.get_height(),
-                );
-            }
+            c.get_manager_mut().update_layout(
+                &client_clip,
+                self.screen_origin,
+                self.layout.get_width(),
+                self.layout.get_height(),
+            );
         }
     }
     pub(crate) fn prepare_paint(&self, surface: &mut Surface) -> bool {
@@ -156,4 +140,3 @@ impl ControlManager {
 }
 impl OnPaint for ControlManager {}
 impl OnKeyPressed for ControlManager {}
-
