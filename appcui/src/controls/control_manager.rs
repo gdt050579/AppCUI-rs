@@ -21,14 +21,14 @@ struct Margins {
     bottom: u8,
 }
 
-struct ControlWrapper {
-    interface: NonNull<dyn Control>,
-    manager: *mut ControlManager,
-    version: u32,
+pub (crate) struct ControlWrapper {
+    pub (crate) interface: NonNull<dyn Control>,
+    pub (crate) manager: *mut ControlManager,
+    pub (crate) version: u32,
 }
 impl ControlWrapper {
     #[inline]
-    fn get_control(&self) -> &dyn Control {
+    pub (crate) fn get_control(&self) -> &dyn Control {
         unsafe { &*(self.interface.as_ptr()) }
     }
 }

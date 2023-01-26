@@ -9,4 +9,6 @@ pub use control_manager::ControlManager;
 pub use desktop::Desktop;
 pub use control_handle::ControlHandle;
 
+pub (crate) use control_manager::ControlWrapper;
+
 use control_manager::StatusFlags;

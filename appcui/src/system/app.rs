@@ -1,4 +1,5 @@
 use super::Theme;
+use crate::controls::ControlWrapper;
 use crate::controls::events::Control;
 use crate::controls::*;
 use crate::graphics::{ClipArea, Point, Surface};
@@ -8,7 +9,7 @@ pub struct App {
     theme: Theme,
     terminal: Box<dyn Terminal>,
     surface: Surface,
-    root_control: Box<dyn Control>,
+    root_control: ControlWrapper,
 }
 
 impl App {
@@ -20,7 +21,7 @@ impl App {
             theme: Theme::default(),
             terminal: term,
             surface: surface,
-            root_control: Box::new(Desktop::new()),
+            root_control: ControlWrapper::,
         }
     }
     pub fn run(mut self) {
@@ -54,7 +55,7 @@ impl App {
         }
     }
     fn paint(&mut self) {
-        App::paint_control(&mut self.root_control, &mut self.surface, & self.theme);
+        App::paint_control(&mut self.root_control, &mut self.surface, &self.theme);
         self.terminal.update_screen(&self.surface);
     }
 }
