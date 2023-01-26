@@ -17,19 +17,8 @@ mod templates {
     }
     ";
 
-    pub static ASREF_TRAIT: &str = "
-    impl AsRef<BasicControl> for $STRUCT_NAME$ {
-        fn as_ref(&self) -> &BasicControl { return self.base.as_ref(); }
-    }
-    impl AsMut<BasicControl> for $STRUCT_NAME$ {
-        fn as_mut(&mut self) -> &mut BasicControl { return self.base.as_mut(); }
-    }
-    ";
-
     pub static CONTROL_TRAIT: &str = "
     impl Control for $STRUCT_NAME$ {
-        fn get_basic_control(&self) -> &BasicControl { return self.base.get_basic_control(); }
-        fn get_mut_basic_control(&mut self)-> &mut BasicControl { return self.base.get_mut_basic_control(); }
     }
     ";
 
@@ -56,7 +45,6 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut code = input.to_string().replace("{", base_definition.as_str());
     let struct_name = utils::extract_structure_name(code.as_str());
     code.push_str(templates::DEREF_TRAIT);
-    code.push_str(templates::ASREF_TRAIT);
     code.push_str(templates::CONTROL_TRAIT);
 
     // defaults for various events

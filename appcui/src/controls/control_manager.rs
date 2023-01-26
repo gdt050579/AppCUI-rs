@@ -157,11 +157,3 @@ impl ControlManager {
 impl OnPaint for ControlManager {}
 impl OnKeyPressed for ControlManager {}
 
-impl Control for BasicControl {
-    fn get_basic_control(&self) -> &BasicControl {
-        self
-    }
-    fn get_mut_basic_control(&mut self) -> &mut BasicControl {
-        self
-    }
-}
