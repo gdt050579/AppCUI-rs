@@ -41,3 +41,9 @@ impl ControlWrapper {
         }
     }
 }
+
+impl Drop for ControlWrapper {
+    fn drop(&mut self) {
+        unsafe { Box::from_raw(self.interface.as_ptr()) };
+    }
+}

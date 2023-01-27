@@ -22,13 +22,13 @@ impl App {
             terminal: term,
             surface: surface,
             root_control: ControlWrapper::new(Desktop::new(),1),
-        }
+        }        
     }
     pub fn run(mut self) {
         // must pe self so that after a run a second call will not be possible
         self.recompute_layouts();
         self.paint();
-
+        let a = Box::new(App::new());
     }
 
     fn recompute_layouts(&mut self) {
