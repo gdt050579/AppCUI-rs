@@ -1,6 +1,9 @@
 use super::events::Control;
 use super::ControlManager;
 use std::ptr::NonNull;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static GLOBAL_VERSION: AtomicUsize = AtomicUsize::new(0);
 
 pub(crate) struct ControlWrapper {
     interface: NonNull<dyn Control>,
@@ -28,7 +31,7 @@ impl ControlWrapper {
     pub(crate) fn get_version(&self) -> u32 {
        self.version
     }
-    pub(crate) fn new<T>(obj: T, version: u32) -> ControlWrapper
+    pub(crate) fn new<T>(obj: T) -> ControlWrapper
     where
         T: Control +'static,
     {
@@ -37,7 +40,7 @@ impl ControlWrapper {
         ControlWrapper {
             interface: ctrl,
             manager: ptr as *mut ControlManager,
-            version: version,
+            version: (GLOBAL_VERSION.fetch_add(1, Ordering::SeqCst) & 0xFFFFFFFF) as u32,
         }
     }
 }
