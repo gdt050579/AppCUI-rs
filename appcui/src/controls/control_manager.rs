@@ -1,4 +1,4 @@
-use super::events::{OnKeyPressed, OnPaint};
+use super::events::{OnKeyPressed, OnPaint, OnMouseEvent};
 use super::layout::ControlLayout;
 use super::{ControlWrapper, Layout};
 use crate::graphics::*;
@@ -151,3 +151,4 @@ impl ControlManager {
 }
 impl OnPaint for ControlManager {}
 impl OnKeyPressed for ControlManager {}
+impl OnMouseEvent for ControlManager {}

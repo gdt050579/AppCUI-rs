@@ -8,5 +8,8 @@ pub trait OnPaint {
 pub trait OnKeyPressed {
     fn on_key_pressed(&mut self, _key: Key, _character: char) {}
 }
-pub trait Control: OnPaint + OnKeyPressed {
+pub trait OnMouseEvent {
+    fn on_mouse_event(&mut self, _event: &MouseEvent) {}
+}
+pub trait Control: OnPaint + OnKeyPressed + OnMouseEvent {
 }

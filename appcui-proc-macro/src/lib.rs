@@ -32,7 +32,13 @@ mod templates {
     impl OnKeyPressed for $STRUCT_NAME$ {
         fn on_key_pressed(&mut self, key: Key, character: char) { self.base.on_key_pressed(key, character); }
     }
-    ";    
+    ";   
+    
+    pub static ON_MOUSE_EVENT_TRAIT: &str = "
+    impl OnMouseEvent for $STRUCT_NAME$ {
+        fn on_mouse_event(&mut self, event: &MouseEvent){ self.base.on_mouse_event(event); }
+    }
+    "; 
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
@@ -53,6 +59,9 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     }
     if !a.on_key_pressed {
         code.push_str(templates::ON_KEY_PRESSED_TRAIT);
+    }
+    if !a.on_mouse_event {
+        code.push_str(templates::ON_MOUSE_EVENT_TRAIT);
     }
     // replace templates
     code = code

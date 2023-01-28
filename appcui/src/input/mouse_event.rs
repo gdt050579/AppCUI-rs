@@ -5,6 +5,12 @@ use super::MouseWheelDirection;
 pub enum MouseEvent {
     Enter,
     Leave,
+    Over,
+    Pressed,
+    Released,
+    DoubleClick,
+    Drag,
+    Wheel
 }
 
 

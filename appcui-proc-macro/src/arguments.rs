@@ -13,6 +13,7 @@ pub struct Arguments {
     // overwritebles
     pub on_paint: bool,
     pub on_key_pressed: bool,
+    pub on_mouse_event: bool,
 
     // internal
     state: State,
@@ -29,7 +30,8 @@ impl Arguments {
             values: Vec::with_capacity(8),
             debug_mode: false,
             on_paint: false,
-            on_key_pressed: false
+            on_key_pressed: false,
+            on_mouse_event: false,
         }
     }
 
@@ -65,8 +67,9 @@ impl Arguments {
             match trait_name.as_str() {
                 "OnPaint" => self.on_paint = true,
                 "OnKeyPressed" => self.on_key_pressed = true,
+                "OnMouseEvent" => self.on_mouse_event = true,
                 other => {
-                    panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed");
+                    panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed, OnMouseEvent");
                 }
             }
         }
