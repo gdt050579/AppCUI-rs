@@ -4,11 +4,11 @@ use super::CharAttribute;
 //use super::CharFlags;
 use super::Character;
 use super::ClipArea;
-use super::Point;
 use super::Color;
 use super::Cursor;
 use super::Image;
 use super::LineType;
+use super::Point;
 use super::TextFormat;
 
 #[repr(u32)]
@@ -64,10 +64,7 @@ impl Surface {
             right_most: (w - 1) as i32,
             bottom_most: (h - 1) as i32,
         };
-        let c = Character::default();
-        for _ in 0..count {
-            s.chars.push(c);
-        }
+        s.chars.resize(count, Character::default());    
         return s;
     }
     #[inline]
@@ -101,7 +98,7 @@ impl Surface {
         self.origin.y = self.base_origin.y;
     }
     #[inline]
-    pub (in crate) fn set_base_origin(&mut self, x: i32, y: i32) {
+    pub(crate) fn set_base_origin(&mut self, x: i32, y: i32) {
         self.base_origin.x = x;
         self.base_origin.y = y;
     }
@@ -121,7 +118,7 @@ impl Surface {
     }
 
     #[inline]
-    pub (in crate) fn set_base_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+    pub(crate) fn set_base_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.base_clip.set(
             i32::max(0, left),
             i32::max(0, top),
@@ -430,9 +427,7 @@ impl Surface {
         }
     }
 
-    pub fn write_text(_text: &str, _format: &TextFormat) {
-
-    }
+    pub fn write_text(_text: &str, _format: &TextFormat) {}
 
     fn paint_small_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
         let w = img.get_width();
@@ -563,5 +558,22 @@ impl Surface {
                 todo!()
             }
         }
+    }
+
+    pub(crate) fn resize(&mut self, width: u32, height: u32) {
+        let w = width.clamp(1, MAX_SURFACE_WIDTH);
+        let h = height.clamp(1, MAX_SURFACE_HEIGHT);
+        let count = (w as usize) * (h as usize);
+        self.chars.clear();
+        self.chars.reserve(count);
+        self.chars.resize(count, Character::default());
+        self.right_most = (w as i32) - 1;
+        self.bottom_most = (h as i32) - 1;
+        self.width = w;
+        self.height = h;
+        self.set_base_clip(0, 0, self.right_most, self.bottom_most);
+        self.reset_clip();
+        self.set_base_origin(0, 0);
+        self.reset_origin();
     }
 }

@@ -503,3 +503,21 @@ fn check_write_string_multi_line() {
     //s.print();
     assert_eq!(s.compute_hash(),0xFD638AC7F26D347A);
 }
+
+#[test]
+fn check_resize() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.write_string(1, 1, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkRed), true);
+    //s.print();
+    assert_eq!(s.compute_hash(),0xB015E3D08D4D238B);
+    s.resize(20, 5);
+    assert_eq!(s.get_width(),20);
+    assert_eq!(s.get_height(),5);
+    s.write_string(1, 1, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkRed), true);
+    //s.print();    
+    assert_eq!(s.compute_hash(),0x5CA6952034D223D2);
+    s.resize(100, 30);
+    s.write_string(1, 1, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkRed), true);
+    //s.print();
+    assert_eq!(s.compute_hash(),0x9891C34A4738FD0B); 
+}
