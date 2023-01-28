@@ -1,13 +1,16 @@
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
-use crate::input::MouseEvent;
-use crate::input::MouseEventType;
 use crate::input::MouseWheelDirection;
 
 use super::CharFlags;
 use super::Color;
 use super::KeyEvent;
+use super::MouseButtonDownEvent;
+use super::MouseButtonUpEvent;
+use super::MouseMoveEvent;
+use super::MouseWheelEvent;
+use super::MouseDoubleClickEvent;
 use super::Surface;
 use super::SystemEvent;
 use super::Terminal;
@@ -661,46 +664,57 @@ impl Terminal for WindowsTerminal {
                     self.last_mouse_y = ir.event.mouse_event.mouse_position.y as i32;
                 }
 
-                let mut mouse_event = MouseEvent::default();
-                mouse_event.x = ir.event.mouse_event.mouse_position.x as i32;
-                mouse_event.y = ir.event.mouse_event.mouse_position.y as i32;
-
-                if (ir.event.mouse_event.button_state & FROM_LEFT_1ST_BUTTON_PRESSED) != 0 {
-                    mouse_event.button = MouseButton::Left;
-                } else if (ir.event.mouse_event.button_state & RIGHTMOST_BUTTON_PRESSED) != 0 {
-                    mouse_event.button = MouseButton::Right;
-                } else if ir.event.mouse_event.button_state > 0 {
-                    mouse_event.button = MouseButton::Center;
-                }
+                let x = ir.event.mouse_event.mouse_position.x as i32;
+                let y = ir.event.mouse_event.mouse_position.y as i32;
+                let button = {
+                    if (ir.event.mouse_event.button_state & FROM_LEFT_1ST_BUTTON_PRESSED) != 0 {
+                        MouseButton::Left
+                    } else if (ir.event.mouse_event.button_state & RIGHTMOST_BUTTON_PRESSED) != 0 {
+                        MouseButton::Right
+                    } else if ir.event.mouse_event.button_state > 0 {
+                        MouseButton::Center
+                    } else {
+                        MouseButton::None
+                    }
+                };
 
                 match ir.event.mouse_event.event_flags {
                     0 => {
                         if ir.event.mouse_event.button_state != 0 {
-                            mouse_event.event = MouseEventType::ButtonDown;
+                            return SystemEvent::MouseButtonDown(MouseButtonDownEvent {
+                                x,
+                                y,
+                                button,
+                            });
                         } else {
-                            mouse_event.event = MouseEventType::ButtonUp;
+                            return SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button });
                         }
                     }
                     DOUBLE_CLICK => {
-                        mouse_event.event = MouseEventType::DoubleClick;
+                        return SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
                     }
                     MOUSE_MOVED => {
-                        mouse_event.event = MouseEventType::Move;
+                        return SystemEvent::MouseMove(MouseMoveEvent { x, y, button });
                     }
                     MOUSE_WHEELED => {
-                        mouse_event.event = MouseEventType::Wheel;
                         if ir.event.mouse_event.button_state >= 0x80000000 {
-                            mouse_event.wheel_direction = MouseWheelDirection::Down;
+                            return SystemEvent::MouseWheel(MouseWheelEvent {
+                                x,
+                                y,
+                                direction: MouseWheelDirection::Down,
+                            });
                         } else {
-                            mouse_event.wheel_direction = MouseWheelDirection::Up;
+                            return SystemEvent::MouseWheel(MouseWheelEvent {
+                                x,
+                                y,
+                                direction: MouseWheelDirection::Up,
+                            });
                         }
                     }
                     _ => {
                         return SystemEvent::None;
                     }
                 }
-
-                return SystemEvent::MouseEvent(mouse_event);
             }
         }
 

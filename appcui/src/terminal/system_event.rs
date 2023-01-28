@@ -1,7 +1,7 @@
 use crate::input::{MouseButton, MouseWheelDirection};
 
 #[derive(Copy,Clone,PartialEq,Debug)]
-pub (crate) struct MouseDownEvent
+pub (crate) struct MouseButtonDownEvent
 {
     pub (crate) x: i32,
     pub (crate) y: i32,
@@ -9,7 +9,15 @@ pub (crate) struct MouseDownEvent
 }
 
 #[derive(Copy,Clone,PartialEq,Debug)]
-pub (crate) struct MouseUpEvent
+pub (crate) struct MouseButtonUpEvent
+{
+    pub (crate) x: i32,
+    pub (crate) y: i32,
+    pub (crate) button: MouseButton
+}
+
+#[derive(Copy,Clone,PartialEq,Debug)]
+pub (crate) struct MouseDoubleClickEvent
 {
     pub (crate) x: i32,
     pub (crate) y: i32,
@@ -39,8 +47,9 @@ pub (crate) enum SystemEvent
     AppClose,
     KeyEvent(super::KeyEvent),
     Resize(super::Size),
-    MouseDown(MouseDownEvent),
-    MouseUp(MouseUpEvent),
+    MouseButtonDown(MouseButtonDownEvent),
+    MouseButtonUp(MouseButtonUpEvent),
+    MouseDoubleClick(MouseDoubleClickEvent),
     MouseMove(MouseMoveEvent),
     MouseWheel(MouseWheelEvent)
 }

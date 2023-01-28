@@ -6,17 +6,21 @@ use super::graphics::Surface;
 use super::graphics::Color;
 use super::graphics::CharFlags;
 use super::input::KeyEvent;
-use super::input::MouseEvent;
 use super::graphics::Size;
 
 
-pub use self::system_event::SystemEvent;
+pub (crate) use self::system_event::SystemEvent;
+pub (crate) use self::system_event::MouseButtonUpEvent;
+pub (crate) use self::system_event::MouseButtonDownEvent;
+pub (crate) use self::system_event::MouseDoubleClickEvent;
+pub (crate) use self::system_event::MouseMoveEvent;
+pub (crate) use self::system_event::MouseWheelEvent;
 
 
 use self::windows::WindowsTerminal;
 use self::debug::DebugTerminal;
 
-pub trait Terminal {
+pub (crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
     fn get_width(&self) -> u32;
     fn get_height(&self) -> u32;
@@ -29,7 +33,7 @@ pub enum TerminalType {
     WindowsConsole,
 }
 impl TerminalType {
-    pub fn new(terminal_type: TerminalType) -> Option<Box<dyn Terminal>>
+    pub (crate) fn new(terminal_type: TerminalType) -> Option<Box<dyn Terminal>>
     {
         match terminal_type {
             TerminalType::WindowsConsole => {
