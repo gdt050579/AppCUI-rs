@@ -18,6 +18,7 @@ struct Margins {
     bottom: u8,
 }
 
+#[repr(C)]
 pub struct ControlManager {
     layout: ControlLayout,
     margins: Margins,
