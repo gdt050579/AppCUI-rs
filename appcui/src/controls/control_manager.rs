@@ -29,10 +29,10 @@ pub struct ControlManager {
 }
 
 impl ControlManager {
-    pub fn new(layout_format: Layout, status_flags: StatusFlags) -> Self {
+    pub fn new(layout: Layout, status_flags: StatusFlags) -> Self {
         Self {
             children: Vec::new(),
-            layout: ControlLayout::new(layout_format.format),
+            layout: ControlLayout::new(layout.format),
             margins: Margins {
                 left: 0,
                 right: 0,
@@ -59,6 +59,16 @@ impl ControlManager {
     #[inline]
     pub fn is_enabled(&self) -> bool {
         self.status_flags.contains(StatusFlags::Enabled)
+    }
+    #[inline]
+    pub fn set_size_bounds(
+        &mut self,
+        min_width: u16,
+        min_height: u16,
+        max_width: u16,
+        max_height: u16,
+    ) {
+        self.layout.set_size_bounds(min_width, min_height, max_width, max_height);
     }
 
     #[inline]

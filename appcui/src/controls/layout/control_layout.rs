@@ -1,7 +1,7 @@
 use super::LayoutMode;
 
 pub struct Layout<'a> {
-    pub (in super::super) format: &'a str,
+    pub(in super::super) format: &'a str,
 }
 
 impl Layout<'_> {
@@ -42,6 +42,23 @@ impl ControlLayout {
         self.height = height.clamp(self.min_height, self.max_height);
     }
     #[inline]
+    pub(crate) fn set_size_bounds(
+        &mut self,
+        min_width: u16,
+        min_height: u16,
+        max_width: u16,
+        max_height: u16,
+    ) {
+        if (min_width<=max_width) && (min_height<=max_height) {
+            self.min_width = min_width;
+            self.min_height = min_height;
+            self.max_width = max_width;
+            self.max_height = max_height;
+            self.resize(self.width, self.height);
+        }
+    }
+
+    #[inline]
     pub(crate) fn set_position(&mut self, x: i32, y: i32) {
         self.x = x;
         self.y = y;
@@ -55,11 +72,11 @@ impl ControlLayout {
         self.height
     }
     #[inline]
-    pub(crate) fn get_x(&self)->i32 {
+    pub(crate) fn get_x(&self) -> i32 {
         self.x
     }
     #[inline]
-    pub(crate) fn get_y(&self)->i32 {
+    pub(crate) fn get_y(&self) -> i32 {
         self.y
     }
     pub(crate) fn update(&mut self, parent_width: u16, parent_height: u16) {

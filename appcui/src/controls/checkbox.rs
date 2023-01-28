@@ -23,8 +23,7 @@ impl CheckBox {
             caption: String::from(caption),
             checked
         };
-        cb.base.layout.min_width = 5;
-        cb.base.layout.min_height = 1;
+        cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
         cb
     }
 }
@@ -80,15 +79,6 @@ impl OnPaint for CheckBox {
 /*
 namespace AppCUI::Controls
 {
-CheckBox::CheckBox(const ConstString& caption, string_view layout, int controlID)
-    : Control(new ControlContext(), caption, layout, true)
-{
-    auto Members              = reinterpret_cast<ControlContext*>(this->Context);
-    Members->Layout.MinWidth  = 5;
-    Members->Layout.MinHeight = 1;
-    Members->Flags            = GATTR_ENABLE | GATTR_VISIBLE | GATTR_TABSTOP;
-    this->SetControlID(controlID);
-}
 
 void CheckBox::Paint(Graphics::Renderer& renderer)
 {
@@ -135,10 +125,6 @@ bool CheckBox::OnMouseLeave()
     return true;
 }
 // handlers covariant
-Handlers::CheckState* CheckBox::Handlers()
-{
-    GET_CONTROL_HANDLERS(Handlers::CheckState);
-}
 
 
 
