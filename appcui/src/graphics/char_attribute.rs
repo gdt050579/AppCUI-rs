@@ -29,6 +29,13 @@ impl CharAttribute {
             flags: CharFlags::None,
         }
     }
+    pub fn with_fore_color(fore: Color) -> CharAttribute {
+        CharAttribute {
+            foreground: fore,
+            background: Color::Transparent,
+            flags: CharFlags::None,
+        }
+    }
 }
 impl Default for CharAttribute {
     fn default() -> Self {
