@@ -29,18 +29,11 @@ impl CheckBox {
 }
 impl OnPaint for CheckBox {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let col_text = if self.is_enabled() == false {
-            theme.text.inactive
-        } else {
-            if self.has_focus() {
-                theme.text.focused
-            } else {
-                if self.is_mouse_over() {
-                    theme.text.hovered
-                } else {
-                    theme.text.normal
-                }
-            }
+        let col_text = match () {
+            _ if !self.is_enabled() => theme.text.inactive,
+            _ if self.has_focus() => theme.text.focused,
+            _ if self.is_mouse_over() => theme.text.hovered,
+            _ => theme.text.normal,
         };
 
         let col_hot_key = if self.is_enabled() {
