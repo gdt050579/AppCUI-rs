@@ -18,10 +18,10 @@ impl CheckBox {
         let mut cb = CheckBox {
             base: ControlManager::new(
                 layout,
-                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::Focusable,
+                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),
             caption: String::from(caption),
-            checked
+            checked,
         };
         cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
         cb
@@ -29,50 +29,53 @@ impl CheckBox {
 }
 impl OnPaint for CheckBox {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-/*
-    CREATE_CONTROL_CONTEXT(this, Members, );
+        let col_text = if self.is_enabled() == false {
+            theme.text.inactive
+        } else {
+            if self.has_focus() {
+                theme.text.focused
+            } else {
+                if self.is_mouse_over() {
+                    theme.text.hovered
+                } else {
+                    theme.text.normal
+                }
+            }
+        };
 
-    const ColorPair colHK = Members->Flags & GATTR_ENABLE ? Members->Cfg->Text.HotKey : Members->Cfg->Text.Inactive;
-    ColorPair colTxt;
-    if (!this->IsEnabled())
-        colTxt = Members->Cfg->Text.Inactive;
-    else if (Members->Focused)
-        colTxt = Members->Cfg->Text.Focused;
-    else if (Members->MouseIsOver)
-        colTxt = Members->Cfg->Text.Hovered;
-    else
-        colTxt = Members->Cfg->Text.Normal;
+        let col_hot_key = if self.is_enabled() {
+            theme.text.hot_key
+        } else {
+            theme.text.inactive
+        };
 
-
-    renderer.WriteSingleLineText(0, 0, "[ ] ", colTxt);
-
-    WriteTextParams params(WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey);
-    params.HotKeyPosition = Members->HotKeyOffset;
-    params.X              = 4;
-    params.Y              = 0;
-    if (Members->Layout.Height == 1)
-    {
-        params.Color       = colTxt;
-        params.HotKeyColor = colHK;
-        params.Flags |= WriteTextFlags::SingleLine;
-    }
-    else
-    {
-        params.Color       = colTxt;
-        params.HotKeyColor = colHK;
-        params.Flags |= WriteTextFlags::MultipleLines | WriteTextFlags::WrapToWidth;
-        params.Width = Members->Layout.Width - 4; // without the '[ ] ' characters
-    }
-    renderer.WriteText(Members->Text, params);
-
-    if (IsChecked())
-    {
-        const auto col = (Members->Flags & GATTR_ENABLE) ? Members->Cfg->Symbol.Checked : Members->Cfg->Symbol.Inactive;
-        renderer.WriteSpecialCharacter(1, 0, SpecialChars::CheckMark, col);
-    }
-    if (Members->Focused)
-        renderer.SetCursor(1, 0);
-*/
+        surface.write_string(0, 0, "[ ] ", col_text, false);
+        /*
+            WriteTextParams params(WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey);
+            params.HotKeyPosition = Members->HotKeyOffset;
+            params.X              = 4;
+            params.Y              = 0;
+            if (Members->Layout.Height == 1)
+            {
+                params.Color       = colTxt;
+                params.HotKeyColor = colHK;
+                params.Flags |= WriteTextFlags::SingleLine;
+            }
+            else
+            {
+                params.Color       = colTxt;
+                params.HotKeyColor = colHK;
+                params.Flags |= WriteTextFlags::MultipleLines | WriteTextFlags::WrapToWidth;
+                params.Width = Members->Layout.Width - 4; // without the '[ ] ' characters
+            }
+        */
+        if self.checked {
+            //let col = self.is_enabled() { theme.symbol.checked } else {theme.symbol.inactive }
+            //surface.set(1,0,Character::new(SpecialChar::CheckMark,col.fore, col.back,col.flags));
+        }
+        if self.has_focus() {
+            surface.set_cursor(1, 0);
+        }
     }
 }
 

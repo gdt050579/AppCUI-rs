@@ -8,6 +8,7 @@ pub enum CharFlags {
     Underline = 0x0004,
 }
 
+#[derive(Copy,Clone)]
 pub struct CharAttribute {
     pub foreground: Color,
     pub background: Color,

@@ -15,7 +15,7 @@ impl Desktop {
         Desktop {
             base: ControlManager::new(
                 Layout::new("x:0,y:0,w:100%,h:100%"),
-                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::Focusable,
+                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),
         }
     }

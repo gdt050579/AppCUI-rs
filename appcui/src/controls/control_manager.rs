@@ -8,7 +8,7 @@ use EnumBitFlags::EnumBitFlags;
 pub enum StatusFlags {
     Visible = 0x01,
     Enabled = 0x02,
-    Focusable = 0x04,
+    AcceptInput = 0x04,
 }
 #[derive(Copy, Clone)]
 struct Margins {
@@ -60,6 +60,10 @@ impl ControlManager {
     pub fn is_enabled(&self) -> bool {
         self.status_flags.contains(StatusFlags::Enabled)
     }
+    #[inline]
+    pub fn has_focus(&self)-> bool { false }
+    #[inline]
+    pub fn is_mouse_over(&self)->bool { false }
     #[inline]
     pub fn set_size_bounds(
         &mut self,
