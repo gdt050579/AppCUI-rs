@@ -1,3 +1,4 @@
+use super::CharAttribute;
 use super::CharFlags;
 use super::Color;
 
@@ -120,6 +121,18 @@ impl Character {
             foreground: fore,
             background: back,
             flags: CharFlags::None,
+        }
+    }
+    #[inline]
+    pub fn with_attributes<T>(code: T, attr: CharAttribute) -> Self
+    where
+        char: From<T>,
+    {
+        Character {
+            code: char::from(code),
+            foreground: attr.foreground,
+            background: attr.background,
+            flags: attr.flags,
         }
     }
     #[inline]

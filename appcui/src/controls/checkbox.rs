@@ -63,8 +63,8 @@ impl OnPaint for CheckBox {
             }
         */
         if self.checked {
-            //let col = self.is_enabled() { theme.symbol.checked } else {theme.symbol.inactive }
-            //surface.set(1,0,Character::new(SpecialChar::CheckMark,col.fore, col.back,col.flags));
+            let col = if self.is_enabled() { theme.symbol.checked } else {theme.symbol.inactive };
+            surface.set(1,0,Character::with_attributes(SpecialChar::CheckMark,col));
         }
         if self.has_focus() {
             surface.set_cursor(1, 0);
