@@ -5,10 +5,12 @@ use super::CharFlags;
 use super::Character;
 use super::Color;
 use super::Image;
-use super::LineType;
-use super::Surface;
 use super::ImageRenderingMethod;
 use super::ImageScaleMethod;
+use super::LineType;
+use super::Surface;
+use super::TextAlignament;
+use super::TextFormat;
 
 struct SurfaceTester {
     surface: Surface,
@@ -73,15 +75,15 @@ impl SurfaceTester {
                 Color::Magenta => temp_buf.push_str("35"),
                 Color::Teal => temp_buf.push_str("36"),
                 Color::Silver => temp_buf.push_str("37"),
-                Color::Gray=> temp_buf.push_str("90"),
-                Color::Red=> temp_buf.push_str("91"),
-                Color::Green=> temp_buf.push_str("92"),
-                Color::Yellow=> temp_buf.push_str("93"),
-                Color::Blue=> temp_buf.push_str("94"),
-                Color::Pink=> temp_buf.push_str("95"),
-                Color::Aqua=> temp_buf.push_str("96"),
-                Color::White=> temp_buf.push_str("97"),
-                _ => temp_buf.push_str("37") /* default is white */
+                Color::Gray => temp_buf.push_str("90"),
+                Color::Red => temp_buf.push_str("91"),
+                Color::Green => temp_buf.push_str("92"),
+                Color::Yellow => temp_buf.push_str("93"),
+                Color::Blue => temp_buf.push_str("94"),
+                Color::Pink => temp_buf.push_str("95"),
+                Color::Aqua => temp_buf.push_str("96"),
+                Color::White => temp_buf.push_str("97"),
+                _ => temp_buf.push_str("37"), /* default is white */
             }
             temp_buf.push(';');
             match ch.background {
@@ -93,17 +95,17 @@ impl SurfaceTester {
                 Color::Magenta => temp_buf.push_str("45"),
                 Color::Teal => temp_buf.push_str("46"),
                 Color::Silver => temp_buf.push_str("47"),
-                Color::Gray=> temp_buf.push_str("100"),
-                Color::Red=> temp_buf.push_str("101"),
-                Color::Green=> temp_buf.push_str("102"),
-                Color::Yellow=> temp_buf.push_str("103"),
-                Color::Blue=> temp_buf.push_str("104"),
-                Color::Pink=> temp_buf.push_str("105"),
-                Color::Aqua=> temp_buf.push_str("106"),
-                Color::White=> temp_buf.push_str("107"),
-                _ => temp_buf.push_str("40") /* default is white */
-            }         
-            temp_buf.push_str("m");   
+                Color::Gray => temp_buf.push_str("100"),
+                Color::Red => temp_buf.push_str("101"),
+                Color::Green => temp_buf.push_str("102"),
+                Color::Yellow => temp_buf.push_str("103"),
+                Color::Blue => temp_buf.push_str("104"),
+                Color::Pink => temp_buf.push_str("105"),
+                Color::Aqua => temp_buf.push_str("106"),
+                Color::White => temp_buf.push_str("107"),
+                _ => temp_buf.push_str("40"), /* default is white */
+            }
+            temp_buf.push_str("m");
             if ch.code < ' ' {
                 temp_buf.push(' ');
             } else {
@@ -258,7 +260,7 @@ fn check_draw_rect() {
         3,
         LineType::Border,
         CharAttribute::with_color(Color::Aqua, Color::Black),
-    );   
+    );
     s.draw_rect(
         20,
         4,
@@ -266,7 +268,7 @@ fn check_draw_rect() {
         8,
         LineType::Ascii,
         CharAttribute::with_color(Color::Green, Color::White),
-    );     
+    );
     s.draw_rect(
         31,
         4,
@@ -274,7 +276,7 @@ fn check_draw_rect() {
         8,
         LineType::AsciiRound,
         CharAttribute::with_color(Color::Green, Color::White),
-    );   
+    );
     s.draw_rect(
         1,
         6,
@@ -282,7 +284,7 @@ fn check_draw_rect() {
         9,
         LineType::SingleRound,
         CharAttribute::with_color(Color::Green, Color::White),
-    );       
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0xD99DB2F59085FE71);
 }
@@ -297,7 +299,7 @@ fn check_draw_rect_with_size() {
     ));
     s.draw_rect_with_size(1, 1, 20, 5, LineType::Double, CharAttribute::default());
     //s.print();
-    assert_eq!(s.compute_hash(),0xB2DEA1E9B27FD8B1);
+    assert_eq!(s.compute_hash(), 0xB2DEA1E9B27FD8B1);
 }
 
 #[test]
@@ -317,7 +319,7 @@ fn check_draw_vertical_line() {
     s.draw_vertical_line(11, 1, 5, LineType::AsciiRound, CharAttribute::default());
     s.draw_vertical_line(13, 1, 5, LineType::SingleRound, CharAttribute::default());
     //s.print();
-    assert_eq!(s.compute_hash(),0xBA48710BD060DFAB);
+    assert_eq!(s.compute_hash(), 0xBA48710BD060DFAB);
 }
 
 #[test]
@@ -337,9 +339,8 @@ fn check_draw_vertical_line_with_size() {
     s.draw_vertical_line_with_size(11, 1, 5, LineType::AsciiRound, CharAttribute::default());
     s.draw_vertical_line_with_size(13, 1, 5, LineType::SingleRound, CharAttribute::default());
     //s.print();
-    assert_eq!(s.compute_hash(),0xBA48710BD060DFAB);
+    assert_eq!(s.compute_hash(), 0xBA48710BD060DFAB);
 }
-
 
 #[test]
 fn check_draw_horizontal_line() {
@@ -358,7 +359,7 @@ fn check_draw_horizontal_line() {
     s.draw_horizontal_line(1, 11, 15, LineType::AsciiRound, CharAttribute::default());
     s.draw_horizontal_line(1, 13, 15, LineType::SingleRound, CharAttribute::default());
     //s.print();
-    assert_eq!(s.compute_hash(),0xC8627A5B784CE327);
+    assert_eq!(s.compute_hash(), 0xC8627A5B784CE327);
 }
 
 #[test]
@@ -378,80 +379,128 @@ fn check_draw_horizontal_line_with_size() {
     s.draw_horizontal_line_with_size(1, 11, 15, LineType::AsciiRound, CharAttribute::default());
     s.draw_horizontal_line_with_size(1, 13, 15, LineType::SingleRound, CharAttribute::default());
     //s.print();
-    assert_eq!(s.compute_hash(),0xC8627A5B784CE327);
+    assert_eq!(s.compute_hash(), 0xC8627A5B784CE327);
 }
 
 #[test]
 fn check_cursor() {
     let mut s = SurfaceTester::new(20, 15);
     s.set_cursor(10, 5);
-    assert!((s.cursor.x == 10) && (s.cursor.y==5));
+    assert!((s.cursor.x == 10) && (s.cursor.y == 5));
     assert!(s.cursor.is_visible());
     s.hide_cursor();
-    assert!(s.cursor.is_visible()==false);
+    assert!(s.cursor.is_visible() == false);
     s.set_origin(3, 3);
     s.set_cursor(2, 2);
-    assert!((s.cursor.x == 5) && (s.cursor.y==5));
+    assert!((s.cursor.x == 5) && (s.cursor.y == 5));
     s.set_cursor(-2, -2);
-    assert!((s.cursor.x == 1) && (s.cursor.y==1));
+    assert!((s.cursor.x == 1) && (s.cursor.y == 1));
     s.set_clip(3, 3, 6, 6);
     s.set_cursor(-2, -2);
-    assert!(s.cursor.is_visible()==false);
+    assert!(s.cursor.is_visible() == false);
     s.set_cursor(4, 4);
-    assert!(s.cursor.is_visible()==false);
+    assert!(s.cursor.is_visible() == false);
     s.set_cursor(2, 2);
-    assert!((s.cursor.x == 5) && (s.cursor.y==5));  
+    assert!((s.cursor.x == 5) && (s.cursor.y == 5));
     assert!(s.cursor.is_visible());
 }
-
 
 #[test]
 fn check_draw_surface() {
     let mut s = SurfaceTester::new(20, 15);
-    let mut s2 = Surface::new(8,6);
-    s2.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
-    s2.draw_rect(0, 0, 7, 5, LineType::Double, CharAttribute::with_color(Color::White, Color::DarkRed));
+    let mut s2 = Surface::new(8, 6);
+    s2.clear(Character::new(
+        'X',
+        Color::Yellow,
+        Color::Black,
+        CharFlags::None,
+    ));
+    s2.draw_rect(
+        0,
+        0,
+        7,
+        5,
+        LineType::Double,
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+    );
     s.draw_surface(2, 2, &s2);
     //s.print();
-    assert_eq!(s.compute_hash(),0x22F426820E128C0D);
+    assert_eq!(s.compute_hash(), 0x22F426820E128C0D);
     s.draw_surface(-2, -2, &s2);
     //s.print();
-    assert_eq!(s.compute_hash(),0x6D7FD783EB0FC3F0);
+    assert_eq!(s.compute_hash(), 0x6D7FD783EB0FC3F0);
     s.clear(Character::with_char('.'));
     s.set_clip(3, 3, 5, 5);
     s.set_origin(3, 3);
     s.draw_surface(0, 0, &s2);
     //s.print();
-    assert_eq!(s.compute_hash(),0x3C4BAE452177CAE0);
+    assert_eq!(s.compute_hash(), 0x3C4BAE452177CAE0);
     s.draw_surface(-5, -3, &s2);
     //s.print();
-    assert_eq!(s.compute_hash(),0xA18677AAC315ACE5);
+    assert_eq!(s.compute_hash(), 0xA18677AAC315ACE5);
     s.reset_clip();
     s.draw_surface(-5, -3, &s2);
     //s.print();
-    assert_eq!(s.compute_hash(),0x3E6031703919C392);
+    assert_eq!(s.compute_hash(), 0x3E6031703919C392);
 }
 
 #[test]
 fn check_colors() {
     let mut s = SurfaceTester::new(40, 5);
-    s.set(1,1,Character::new('A', Color::White, Color::Red, CharFlags::None));
-    s.set(2,1,Character::new('A', Color::Red, Color::Black, CharFlags::None));
-    s.set(3,1,Character::new('B', Color::Yellow, Color::Blue, CharFlags::None));
-    s.set(4,1,Character::new('B', Color::Blue, Color::Yellow, CharFlags::None));
-    s.set(5,1,Character::new('C', Color::Yellow, Color::DarkBlue, CharFlags::None));
-    s.set(6,1,Character::new('B', Color::Black, Color::Magenta, CharFlags::None));
-    s.fill_rect(10, 1, 30, 3, Character::new(' ',Color::Yellow,Color::DarkBlue, CharFlags::None));
-    s.draw_rect(10, 1, 30, 3, LineType::Double, CharAttribute::with_color(Color::White, Color::DarkBlue));
+    s.set(
+        1,
+        1,
+        Character::new('A', Color::White, Color::Red, CharFlags::None),
+    );
+    s.set(
+        2,
+        1,
+        Character::new('A', Color::Red, Color::Black, CharFlags::None),
+    );
+    s.set(
+        3,
+        1,
+        Character::new('B', Color::Yellow, Color::Blue, CharFlags::None),
+    );
+    s.set(
+        4,
+        1,
+        Character::new('B', Color::Blue, Color::Yellow, CharFlags::None),
+    );
+    s.set(
+        5,
+        1,
+        Character::new('C', Color::Yellow, Color::DarkBlue, CharFlags::None),
+    );
+    s.set(
+        6,
+        1,
+        Character::new('B', Color::Black, Color::Magenta, CharFlags::None),
+    );
+    s.fill_rect(
+        10,
+        1,
+        30,
+        3,
+        Character::new(' ', Color::Yellow, Color::DarkBlue, CharFlags::None),
+    );
+    s.draw_rect(
+        10,
+        1,
+        30,
+        3,
+        LineType::Double,
+        CharAttribute::with_color(Color::White, Color::DarkBlue),
+    );
     //s.print();
-    assert_eq!(s.compute_hash(),0xF47F25A9A2342269);
+    assert_eq!(s.compute_hash(), 0xF47F25A9A2342269);
 }
-
 
 #[test]
 fn check_draw_imge() {
     let mut s = SurfaceTester::new(40, 10);
-    let i = Image::from_str(r#"
+    let i = Image::from_str(
+        r#"
         |BB.........BB|
         |B..rr...rr..B|
         |..rrrr.rrrr..|
@@ -462,62 +511,172 @@ fn check_draw_imge() {
         |....rwwwr....|
         |G....rwr....G|
         |GG....r....GG|
-    "#).unwrap();
-    s.draw_image(1, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::NoScale);
-    s.draw_image(20, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::Scale50);
-    s.draw_image(30, 1, &i, ImageRenderingMethod::PixelTo16ColorsSmallBlock, ImageScaleMethod::Scale25);
+    "#,
+    )
+    .unwrap();
+    s.draw_image(
+        1,
+        1,
+        &i,
+        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
+        ImageScaleMethod::NoScale,
+    );
+    s.draw_image(
+        20,
+        1,
+        &i,
+        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
+        ImageScaleMethod::Scale50,
+    );
+    s.draw_image(
+        30,
+        1,
+        &i,
+        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
+        ImageScaleMethod::Scale25,
+    );
     //s.print();
-    assert_eq!(s.compute_hash(),0xFD04064498933DB);
+    assert_eq!(s.compute_hash(), 0xFD04064498933DB);
     s.clear(Character::default());
-    s.draw_image(0, 0, &i, ImageRenderingMethod::PixelTo64ColorsLargeBlock, ImageScaleMethod::NoScale);
+    s.draw_image(
+        0,
+        0,
+        &i,
+        ImageRenderingMethod::PixelTo64ColorsLargeBlock,
+        ImageScaleMethod::NoScale,
+    );
     //s.print();
-    assert_eq!(s.compute_hash(),0x7BAAAA0605CBFA25);
+    assert_eq!(s.compute_hash(), 0x7BAAAA0605CBFA25);
     s.clear(Character::default());
-    s.draw_image(0, 0, &i, ImageRenderingMethod::GrayScale, ImageScaleMethod::NoScale);
+    s.draw_image(
+        0,
+        0,
+        &i,
+        ImageRenderingMethod::GrayScale,
+        ImageScaleMethod::NoScale,
+    );
     //s.print();
-    assert_eq!(s.compute_hash(),0x9803283450732669);
+    assert_eq!(s.compute_hash(), 0x9803283450732669);
 }
 
 #[test]
 fn check_write_string_single_line() {
     let mut s = SurfaceTester::new(40, 10);
-    s.write_string(1, 1, "text", CharAttribute::with_color(Color::White, Color::DarkRed), false);
+    s.write_string(
+        1,
+        1,
+        "text",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        false,
+    );
     s.set_clip(6, 1, 10, 1);
     s.set_origin(6, 1);
-    s.write_string(0, 0, "A longer text", CharAttribute::with_color(Color::White, Color::DarkRed), false);
+    s.write_string(
+        0,
+        0,
+        "A longer text",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        false,
+    );
     s.reset_clip();
-    s.write_string(0, 2, "A longer text", CharAttribute::with_color(Color::White, Color::DarkBlue), false);
+    s.write_string(
+        0,
+        2,
+        "A longer text",
+        CharAttribute::with_color(Color::White, Color::DarkBlue),
+        false,
+    );
     s.set_clip(6, 4, 10, 4);
     s.set_origin(6, 4);
-    s.write_string(-2, 0, "A longer text", CharAttribute::with_color(Color::White, Color::Magenta), false);
+    s.write_string(
+        -2,
+        0,
+        "A longer text",
+        CharAttribute::with_color(Color::White, Color::Magenta),
+        false,
+    );
     //s.print();
-    assert_eq!(s.compute_hash(),0x8D311DA4D1D1666E);
+    assert_eq!(s.compute_hash(), 0x8D311DA4D1D1666E);
 }
 
 #[test]
 fn check_write_string_multi_line() {
     let mut s = SurfaceTester::new(40, 10);
-    s.write_string(1, 1, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkRed), true);
+    s.write_string(
+        1,
+        1,
+        "Hello, world\nThis is a multi-line\nString",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        true,
+    );
     s.set_clip(10, 3, 20, 4);
-    s.write_string(9, 3, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkGreen), true);
+    s.write_string(
+        9,
+        3,
+        "Hello, world\nThis is a multi-line\nString",
+        CharAttribute::with_color(Color::White, Color::DarkGreen),
+        true,
+    );
     //s.print();
-    assert_eq!(s.compute_hash(),0xFD638AC7F26D347A);
+    assert_eq!(s.compute_hash(), 0xFD638AC7F26D347A);
 }
 
 #[test]
 fn check_resize() {
     let mut s = SurfaceTester::new(40, 10);
-    s.write_string(1, 1, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkRed), true);
+    s.write_string(
+        1,
+        1,
+        "Hello, world\nThis is a multi-line\nString",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        true,
+    );
     //s.print();
-    assert_eq!(s.compute_hash(),0xB015E3D08D4D238B);
+    assert_eq!(s.compute_hash(), 0xB015E3D08D4D238B);
     s.resize(20, 5);
-    assert_eq!(s.get_width(),20);
-    assert_eq!(s.get_height(),5);
-    s.write_string(1, 1, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkRed), true);
-    //s.print();    
-    assert_eq!(s.compute_hash(),0x5CA6952034D223D2);
-    s.resize(100, 30);
-    s.write_string(1, 1, "Hello, world\nThis is a multi-line\nString", CharAttribute::with_color(Color::White, Color::DarkRed), true);
+    assert_eq!(s.get_width(), 20);
+    assert_eq!(s.get_height(), 5);
+    s.write_string(
+        1,
+        1,
+        "Hello, world\nThis is a multi-line\nString",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        true,
+    );
     //s.print();
-    assert_eq!(s.compute_hash(),0x9891C34A4738FD0B); 
+    assert_eq!(s.compute_hash(), 0x5CA6952034D223D2);
+    s.resize(100, 30);
+    s.write_string(
+        1,
+        1,
+        "Hello, world\nThis is a multi-line\nString",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        true,
+    );
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x9891C34A4738FD0B);
+}
+
+#[test]
+fn check_write_text_single_line_simple() {
+    let mut s = SurfaceTester::new(60, 7);
+    s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+
+    let mut format = TextFormat::new_single_line(
+        30,
+        1,
+        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
+        TextAlignament::Left,
+    );
+    s.write_text("Left Align at 30", &format);
+    format.align = TextAlignament::Center;
+    format.y = 3;
+    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkGreen);
+    s.write_text("Centered! at 30", &format);
+    format.align = TextAlignament::Right;
+    format.y = 5;
+    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);    
+    s.write_text("Right align ends at 30", &format);
+
+    s.print();
 }

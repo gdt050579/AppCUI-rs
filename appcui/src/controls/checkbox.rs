@@ -48,16 +48,14 @@ impl OnPaint for CheckBox {
             params.HotKeyPosition = Members->HotKeyOffset;
             params.X              = 4;
             params.Y              = 0;
+            params.Color          = colTxt;
+            params.HotKeyColor    = colHK;
             if (Members->Layout.Height == 1)
             {
-                params.Color       = colTxt;
-                params.HotKeyColor = colHK;
                 params.Flags |= WriteTextFlags::SingleLine;
             }
             else
             {
-                params.Color       = colTxt;
-                params.HotKeyColor = colHK;
                 params.Flags |= WriteTextFlags::MultipleLines | WriteTextFlags::WrapToWidth;
                 params.Width = Members->Layout.Width - 4; // without the '[ ] ' characters
             }

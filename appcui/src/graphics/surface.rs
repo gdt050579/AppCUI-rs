@@ -442,13 +442,13 @@ impl Surface {
         let mut x = match format.align {
             TextAlignament::Left => format.x,
             TextAlignament::Center => format.x - (chars_count / 2) as i32,
-            TextAlignament::Right => format.x - chars_count as i32,
+            TextAlignament::Right => format.x + 1 - chars_count as i32,
         };
         let width = u16::min(format.width.unwrap_or(chars_count), chars_count);
         let left_margin = match format.align {
             TextAlignament::Left => format.x,
             TextAlignament::Center => format.x - (width / 2) as i32,
-            TextAlignament::Right => format.x - width as i32,
+            TextAlignament::Right => format.x + 1 - width as i32,
         };
         let right_margin = left_margin + (width as i32);
         let mut c = Character::with_attributes(' ', format.char_attr);
