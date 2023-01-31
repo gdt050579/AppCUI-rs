@@ -9,6 +9,7 @@ use super::Cursor;
 use super::Image;
 use super::LineType;
 use super::Point;
+use super::TextAlignament;
 use super::TextFormat;
 
 #[repr(u32)]
@@ -64,7 +65,7 @@ impl Surface {
             right_most: (w - 1) as i32,
             bottom_most: (h - 1) as i32,
         };
-        s.chars.resize(count, Character::default());    
+        s.chars.resize(count, Character::default());
         return s;
     }
     #[inline]
@@ -427,7 +428,72 @@ impl Surface {
         }
     }
 
-    pub fn write_text(_text: &str, _format: &TextFormat) {}
+    fn write_text_single_line(
+        &mut self,
+        text: &str,
+        y: i32,
+        chars_count: u16,
+        ch_index: usize,
+        format: &TextFormat,
+    ) {
+        if self.clip.contains_y(y) == false {
+            return; // no need to draw
+        }
+        let mut x = match format.align {
+            TextAlignament::Left => format.x,
+            TextAlignament::Center => format.x - (chars_count / 2) as i32,
+            TextAlignament::Right => format.x - chars_count as i32,
+        };
+        let width = u16::min(format.width.unwrap_or(chars_count), chars_count);
+        let left_margin = match format.align {
+            TextAlignament::Left => format.x,
+            TextAlignament::Center => format.x - (width / 2) as i32,
+            TextAlignament::Right => format.x - width as i32,
+        };
+        let right_margin = left_margin + (width as i32);
+        let mut c = Character::with_attributes(' ', format.char_attr);
+
+        if format.hotkey_pos.is_some() && format.hotkey_attr.is_some() {
+            let hkpos = format.hotkey_pos.unwrap();
+            let mut cpos = ch_index;
+            for ch in text.chars() {
+                if (x >= left_margin) && (x < right_margin) {
+                    if let Some(pos) = self.coords_to_position(x, y) {
+                        if cpos == hkpos {
+                        } else {
+                            c.code = ch;
+                            self.chars[pos].set(&c);
+                        }
+                    }
+                }
+                x += 1;
+                cpos += 1;
+            }
+        } else {
+            for ch in text.chars() {
+                if (x >= left_margin) && (x < right_margin) {
+                    if let Some(pos) = self.coords_to_position(x, y) {
+                        c.code = ch;
+                        self.chars[pos].set(&c);
+                    }
+                }
+                x += 1;
+            }
+        }
+    }
+    fn write_text_multi_line(&mut self, text: &str, format: &TextFormat) {}
+    pub fn write_text(&mut self, text: &str, format: &TextFormat) {
+        if format.multi_lines {
+            self.write_text_multi_line(text, format);
+        } else {
+            let chars_count = if format.chars_count.is_some() {
+                format.chars_count.unwrap()
+            } else {
+                text.chars().count() as u16
+            };
+            self.write_text_single_line(text, format.y + self.origin.y, chars_count, 0, format);
+        }
+    }
 
     fn paint_small_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
         let w = img.get_width();
