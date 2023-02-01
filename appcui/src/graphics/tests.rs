@@ -820,3 +820,32 @@ fn check_write_text_multi_line_character_wrap() {
     //s.print();
     assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
 }
+
+#[test]
+fn check_write_text_multi_line_character_wrap_new_lines() {
+    let mut s = SurfaceTester::new(80, 10);
+    let txt = "This is a line\nthat will be wrapped on multiple lines\non a\ngiven character width";
+    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let mut format = TextFormat::multi_line_with_text_wrap(
+        2,
+        1,
+        10,
+        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
+        TextAlignament::Left,
+        TextWrap::Character,
+    );
+    s.write_text(txt, &format);    
+    format.align = TextAlignament::Center;
+    format.x = 40;
+    format.width = Some(30);
+    s.write_text(txt, &format);
+    format.align = TextAlignament::Right;
+    format.x = 78;
+    format.width = Some(7);
+    s.write_text(txt, &format);
+
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xB7A3A6A4DED903CC);
+}
