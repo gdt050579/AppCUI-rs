@@ -147,7 +147,7 @@ impl Surface {
     #[inline]
     pub fn set(&mut self, x: i32, y: i32, ch: Character) {
         if let Some(pos) = self.coords_to_position(x, y) {
-            self.chars[pos].set(&ch);
+            self.chars[pos].set(ch);
         }
     }
 
@@ -168,7 +168,7 @@ impl Surface {
         {
             // the entire screen has to be cleared
             for c in &mut self.chars {
-                c.set(&ch);
+                c.set(ch);
             }
         } else {
             // only the clip must pe cleared
@@ -178,7 +178,7 @@ impl Surface {
 
             for _ in self.clip.top..=self.clip.bottom {
                 for c in &mut self.chars[pos..(pos + sz)] {
-                    c.set(&ch);
+                    c.set(ch);
                 }
                 pos += self.width as usize;
             }
@@ -192,7 +192,7 @@ impl Surface {
         for x in left..=right {
             for y in top..=bottom {
                 if let Some(pos) = self.coords_to_position(x, y) {
-                    self.chars[pos].set(&ch);
+                    self.chars[pos].set(ch);
                 }
             }
         }
@@ -208,7 +208,7 @@ impl Surface {
         let mut x = left;
         while x <= right {
             if let Some(pos) = self.coords_to_position(x, y) {
-                self.chars[pos].set(&ch);
+                self.chars[pos].set(ch);
             }
             x += 1;
         }
@@ -223,7 +223,7 @@ impl Surface {
         let mut y = top;
         while y <= bottom {
             if let Some(pos) = self.coords_to_position(x, y) {
-                self.chars[pos].set(&ch);
+                self.chars[pos].set(ch);
             }
             y += 1;
         }
@@ -406,7 +406,7 @@ impl Surface {
             for ch in text.chars() {
                 if let Some(pos) = self.coords_to_position(p_x, y) {
                     c.code = ch;
-                    self.chars[pos].set(&c);
+                    self.chars[pos].set(c);
                 }
                 p_x += 1;
             }
@@ -421,7 +421,7 @@ impl Surface {
                 }
                 if let Some(pos) = self.coords_to_position(p_x, p_y) {
                     c.code = ch;
-                    self.chars[pos].set(&c);
+                    self.chars[pos].set(c);
                 }
                 p_x += 1;
             }
@@ -462,7 +462,7 @@ impl Surface {
                         if cpos == hkpos {
                         } else {
                             c.code = ch;
-                            self.chars[pos].set(&c);
+                            self.chars[pos].set(c);
                         }
                     }
                 }
@@ -474,7 +474,7 @@ impl Surface {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
                         c.code = ch;
-                        self.chars[pos].set(&c);
+                        self.chars[pos].set(c);
                     }
                 }
                 x += 1;

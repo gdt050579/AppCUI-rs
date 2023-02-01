@@ -136,7 +136,7 @@ impl Character {
         }
     }
     #[inline]
-    pub fn set(&mut self, ch: &Character) {
+    pub fn set(&mut self, ch: Character) {
         if ch.code != (0 as char) {
             self.code = ch.code;
         }
