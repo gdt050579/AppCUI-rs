@@ -795,6 +795,7 @@ fn check_write_text_multi_line_no_wrap_how_key() {
 #[test]
 fn check_write_text_multi_line_character_wrap() {
     let mut s = SurfaceTester::new(80, 10);
+    let txt = "This is a line that will be wrapped on multiple lines on a given character width";
     s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
     s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
     s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
@@ -806,15 +807,16 @@ fn check_write_text_multi_line_character_wrap() {
         TextAlignament::Left,
         TextWrap::Character,
     );
+    s.write_text(txt, &format);    
+    format.align = TextAlignament::Center;
+    format.x = 40;
+    format.width = Some(30);
+    s.write_text(txt, &format);
+    format.align = TextAlignament::Right;
+    format.x = 78;
+    format.width = Some(7);
+    s.write_text(txt, &format);
 
-    s.write_text("This is a line that will be wrapped on multiple lines on a 10 character width", &format);    
-    // format.align = TextAlignament::Center;
-    // format.x = 40;
-    // s.write_text("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format); 
-    // format.align = TextAlignament::Right;
-    // format.x = 78;
-    // s.write_text("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format); 
-
-    s.print();
-    //assert_eq!(s.compute_hash(), 0x5CA9237E8FF59BAF);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
 }

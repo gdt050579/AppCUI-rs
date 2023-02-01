@@ -525,7 +525,7 @@ impl Surface {
         let mut chars_count = 0u16;
         let mut ch_index = 0usize;
         for (index, ch) in text.char_indices() {
-            if (ch == '\n') || (ch == '\r') || (chars_count==width) {
+            if (ch == '\n') || (ch == '\r') {
                 if chars_count > 0 {
                     self.write_text_single_line(
                         &text[start_ofs..index],
@@ -539,9 +539,23 @@ impl Surface {
                 ch_index += (chars_count as usize) + 1;
                 chars_count = 0;
                 start_ofs = index + 1;
-            } else {
-                chars_count += 1;
+                continue;
             }
+            if chars_count == width {
+                self.write_text_single_line(
+                    &text[start_ofs..index],
+                    y,
+                    chars_count,
+                    ch_index,
+                    format,
+                );
+                y += 1;
+                ch_index += chars_count as usize;
+                chars_count = 1; // current character
+                start_ofs = index;
+                continue;
+            }
+            chars_count += 1;
         }
         if chars_count > 0 {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
