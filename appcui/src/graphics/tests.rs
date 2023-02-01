@@ -772,15 +772,20 @@ fn check_write_text_multi_line_no_wrap_how_key() {
         CharAttribute::with_color(Color::Yellow, Color::DarkBlue),
         TextAlignament::Left,
     );
-    format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkBlue));
-    s.write_text("This is a\nmulti-line text\nwith 4 lines\nall left-aligned !", &format);    
+    format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkRed));
+    format.hotkey_pos = Some(11);
+    s.write_text("This is a\nmulti-line text\nwith 5 lines\nall left-aligned !\nand with hot key 'u'", &format);    
     format.align = TextAlignament::Center;
     format.x = 40;
-    s.write_text("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format); 
+    format.hotkey_pos = Some(26);
+    format.char_attr = CharAttribute::with_color(Color::White, Color::Gray);
+    s.write_text("This is a\nmulti-line text\nwith 5 lines\nall centered at y=40\nand with hot key 'w'", &format); 
     format.align = TextAlignament::Right;
     format.x = 78;
-    s.write_text("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format); 
+    format.hotkey_pos = Some(75);
+    format.char_attr = CharAttribute::with_color(Color::White, Color::DarkGreen);
+    s.write_text("This is a\nmulti-line text\nwith 6 lines\naligned to right\n\nand with hot key 'x'", &format); 
 
     //s.print();
-    assert_eq!(s.compute_hash(), 0x5CA9237E8FF59BAF);
+    assert_eq!(s.compute_hash(), 0xCED1C065F1F2053B);
 }

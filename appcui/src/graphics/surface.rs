@@ -501,7 +501,7 @@ impl Surface {
                     );
                 }
                 y += 1;
-                ch_index += chars_count as usize;
+                ch_index += (chars_count as usize) + 1;
                 chars_count = 0;
                 start_ofs = index + 1;
             } else {
