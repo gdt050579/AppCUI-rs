@@ -43,23 +43,19 @@ impl OnPaint for CheckBox {
         };
 
         surface.write_string(0, 0, "[ ] ", col_text, false);
+        let mut format = TextFormat::new(4,0,col_text,TextAlignament::Left,self.get_height()>1);
         /*
-            WriteTextParams params(WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey);
             params.HotKeyPosition = Members->HotKeyOffset;
-            params.X              = 4;
-            params.Y              = 0;
-            params.Color          = colTxt;
             params.HotKeyColor    = colHK;
             if (Members->Layout.Height == 1)
             {
-                params.Flags |= WriteTextFlags::SingleLine;
             }
             else
             {
-                params.Flags |= WriteTextFlags::MultipleLines | WriteTextFlags::WrapToWidth;
                 params.Width = Members->Layout.Width - 4; // without the '[ ] ' characters
             }
         */
+        surface.write_text(&self.caption, &format);
         if self.checked {
             let col = if self.is_enabled() { theme.symbol.checked } else {theme.symbol.inactive };
             surface.set(1,0,Character::with_attributes(SpecialChar::CheckMark,col));

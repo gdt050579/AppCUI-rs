@@ -562,7 +562,7 @@ impl Surface {
         }
     }
     pub fn write_text(&mut self, text: &str, format: &TextFormat) {
-        if format.multi_lines {
+        if format.multi_line {
             match format.text_wrap {
                 TextWrap::None => self.write_text_multi_line_no_wrap(text, format),
                 TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),

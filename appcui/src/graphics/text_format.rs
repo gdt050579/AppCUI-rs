@@ -36,10 +36,26 @@ pub struct TextFormat {
     pub chars_count: Option<u16>,
     pub align: TextAlignament,
     pub text_wrap: TextWrap,
-    pub multi_lines: bool,
+    pub multi_line: bool,
 }
 
 impl TextFormat {
+    pub fn new(
+        x: i32,
+        y: i32,
+        char_attr: CharAttribute,
+        align: TextAlignament,
+        multi_line: bool,
+    ) -> Self {
+        TextFormat {
+            x,
+            y,
+            char_attr,
+            align,
+            multi_line,
+            ..Default::default()
+        }
+    }
     pub fn single_line_with_hotkey(
         x: i32,
         y: i32,
@@ -53,7 +69,7 @@ impl TextFormat {
             y,
             char_attr,
             align,
-            multi_lines: false,
+            multi_line: false,
             hotkey_attr: Some(hotkey_attr),
             hotkey_pos: Some(hotkey_pos),
             ..Default::default()
@@ -65,7 +81,7 @@ impl TextFormat {
             y,
             char_attr,
             align,
-            multi_lines: false,
+            multi_line: false,
             ..Default::default()
         }
     }
@@ -75,7 +91,7 @@ impl TextFormat {
             y,
             char_attr,
             align,
-            multi_lines: true,
+            multi_line: true,
             ..Default::default()
         }
     }
@@ -93,7 +109,7 @@ impl TextFormat {
             char_attr,
             align,
             text_wrap,
-            multi_lines: true,
+            multi_line: true,
             width: Some(width),
             ..Default::default()
         }
