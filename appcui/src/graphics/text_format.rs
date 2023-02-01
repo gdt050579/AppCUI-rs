@@ -1,4 +1,4 @@
-use super::{CharAttribute, Character};
+use super::CharAttribute;
 
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -40,15 +40,22 @@ pub struct TextFormat {
 }
 
 impl TextFormat {
-    pub fn single_line_with_hotkey(x: i32, y: i32, char_attr: CharAttribute, hotkey_attr: CharAttribute, hotkey_pos: usize, align: TextAlignament) -> Self {
+    pub fn single_line_with_hotkey(
+        x: i32,
+        y: i32,
+        char_attr: CharAttribute,
+        hotkey_attr: CharAttribute,
+        hotkey_pos: usize,
+        align: TextAlignament,
+    ) -> Self {
         TextFormat {
             x,
             y,
             char_attr,
             align,
             multi_lines: false,
-            hotkey_attr : Some(hotkey_attr),
-            hotkey_pos : Some(hotkey_pos),
+            hotkey_attr: Some(hotkey_attr),
+            hotkey_pos: Some(hotkey_pos),
             ..Default::default()
         }
     }
@@ -69,6 +76,25 @@ impl TextFormat {
             char_attr,
             align,
             multi_lines: true,
+            ..Default::default()
+        }
+    }
+    pub fn multi_line_with_text_wrap(
+        x: i32,
+        y: i32,
+        width: u16,
+        char_attr: CharAttribute,
+        align: TextAlignament,
+        text_wrap: TextWrap,
+    ) -> Self {
+        TextFormat {
+            x,
+            y,
+            char_attr,
+            align,
+            text_wrap,
+            multi_lines: true,
+            width: Some(width),
             ..Default::default()
         }
     }

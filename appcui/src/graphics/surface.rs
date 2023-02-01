@@ -512,15 +512,48 @@ impl Surface {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
-    fn write_text_multi_line(&mut self, text: &str, format: &TextFormat) {
-        match format.text_wrap {
-            TextWrap::None => self.write_text_multi_line_no_wrap(text, format),
-            _ => unimplemented!(),
+    fn write_text_multi_line_character_wrap(&mut self, text: &str, format: &TextFormat) {
+        if format.width.is_none() {
+            panic!("Using TextWrap::Character requires to fill the field width from TextFormat")
+        }
+        let width = format.width.unwrap();
+        if width == 0 {
+            return; // nothing to draw
+        }
+        let mut y = format.y + self.origin.y;
+        let mut start_ofs = 0usize;
+        let mut chars_count = 0u16;
+        let mut ch_index = 0usize;
+        for (index, ch) in text.char_indices() {
+            if (ch == '\n') || (ch == '\r') || (chars_count==width) {
+                if chars_count > 0 {
+                    self.write_text_single_line(
+                        &text[start_ofs..index],
+                        y,
+                        chars_count,
+                        ch_index,
+                        format,
+                    );
+                }
+                y += 1;
+                ch_index += (chars_count as usize) + 1;
+                chars_count = 0;
+                start_ofs = index + 1;
+            } else {
+                chars_count += 1;
+            }
+        }
+        if chars_count > 0 {
+            self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
     pub fn write_text(&mut self, text: &str, format: &TextFormat) {
         if format.multi_lines {
-            self.write_text_multi_line(text, format);
+            match format.text_wrap {
+                TextWrap::None => self.write_text_multi_line_no_wrap(text, format),
+                TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),
+                _ => unimplemented!(),
+            }
         } else {
             let chars_count = if format.chars_count.is_some() {
                 format.chars_count.unwrap()

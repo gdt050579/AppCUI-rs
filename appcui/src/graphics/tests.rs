@@ -1,5 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
+use crate::graphics::text_format::TextWrap;
+
 use super::CharAttribute;
 use super::CharFlags;
 use super::Character;
@@ -788,4 +790,31 @@ fn check_write_text_multi_line_no_wrap_how_key() {
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xCED1C065F1F2053B);
+}
+
+#[test]
+fn check_write_text_multi_line_character_wrap() {
+    let mut s = SurfaceTester::new(80, 10);
+    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let mut format = TextFormat::multi_line_with_text_wrap(
+        2,
+        1,
+        10,
+        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
+        TextAlignament::Left,
+        TextWrap::Character,
+    );
+
+    s.write_text("This is a line that will be wrapped on multiple lines on a 10 character width", &format);    
+    // format.align = TextAlignament::Center;
+    // format.x = 40;
+    // s.write_text("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format); 
+    // format.align = TextAlignament::Right;
+    // format.x = 78;
+    // s.write_text("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format); 
+
+    s.print();
+    //assert_eq!(s.compute_hash(), 0x5CA9237E8FF59BAF);
 }
