@@ -662,7 +662,7 @@ fn check_write_text_single_line_simple() {
     let mut s = SurfaceTester::new(60, 7);
     s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
 
-    let mut format = TextFormat::new_single_line(
+    let mut format = TextFormat::single_line(
         30,
         1,
         CharAttribute::with_color(Color::Yellow, Color::DarkRed),
@@ -687,7 +687,7 @@ fn check_write_text_single_line_width() {
     let mut s = SurfaceTester::new(60, 7);
     s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
 
-    let mut format = TextFormat::new_single_line(
+    let mut format = TextFormat::single_line(
         30,
         1,
         CharAttribute::with_color(Color::Yellow, Color::DarkRed),
@@ -706,4 +706,32 @@ fn check_write_text_single_line_width() {
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xC503745C2440B5F6);
+}
+#[test]
+fn check_write_text_single_line_hot_key() {
+    let mut s = SurfaceTester::new(60, 7);
+    s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+
+    let mut format = TextFormat::single_line_with_hotkey(
+        30,
+        1,
+        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
+        CharAttribute::with_color(Color::Black, Color::Yellow),
+        4,
+        TextAlignament::Left,
+    );
+    s.write_text("HotKey is 'E'", &format);
+    format.align = TextAlignament::Center;
+    format.y = 3;
+    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkGreen);
+    format.hotkey_pos = Some(0);
+    s.write_text("Centered (hotkey='C')", &format);
+    format.align = TextAlignament::Right;
+    format.y = 5;
+    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);  
+    format.hotkey_pos = Some(20);  
+    s.write_text("Right align ends at 30", &format);
+
+    s.print();
+    //assert_eq!(s.compute_hash(), 0x8DFA95B692742714);
 }

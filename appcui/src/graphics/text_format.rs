@@ -42,7 +42,19 @@ pub struct TextFormat {
 }
 
 impl TextFormat {
-    pub fn new_single_line(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament) -> Self {
+    pub fn single_line_with_hotkey(x: i32, y: i32, char_attr: CharAttribute, hotkey_attr: CharAttribute, hotkey_pos: usize, align: TextAlignament) -> Self {
+        TextFormat {
+            x,
+            y,
+            char_attr,
+            align,
+            multi_lines: false,
+            hotkey_attr : Some(hotkey_attr),
+            hotkey_pos : Some(hotkey_pos),
+            ..Default::default()
+        }
+    }
+    pub fn single_line(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament) -> Self {
         TextFormat {
             x,
             y,
