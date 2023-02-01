@@ -849,3 +849,35 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7A3A6A4DED903CC);
 }
+
+#[test]
+fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
+    let mut s = SurfaceTester::new(80, 10);
+    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let mut format = TextFormat::multi_line_with_text_wrap(
+        2,
+        1,
+        10,
+        CharAttribute::with_color(Color::Black, Color::Silver),
+        TextAlignament::Left,
+        TextWrap::Character,
+    );
+    format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkRed));
+    format.hotkey_pos = Some(17);
+    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'", &format);    
+    format.align = TextAlignament::Center;
+    format.x = 40;
+    format.width = Some(30);
+    format.hotkey_pos = Some(28);
+    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'", &format); 
+    format.align = TextAlignament::Right;
+    format.x = 78;
+    format.width = Some(15);
+    format.hotkey_pos = Some(67);
+    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'", &format); 
+
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x3CE81721E1BB64FA);
+}
