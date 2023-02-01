@@ -735,3 +735,52 @@ fn check_write_text_single_line_hot_key() {
     //s.print();
     assert_eq!(s.compute_hash(), 0x19AE9890D9B9E3AF);
 }
+
+#[test]
+fn check_write_text_multi_line_no_wrap() {
+    let mut s = SurfaceTester::new(80, 7);
+    s.draw_vertical_line(2, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let mut format = TextFormat::multi_line(
+        2,
+        1,
+        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
+        TextAlignament::Left,
+    );
+    s.write_text("This is a\nmulti-line text\nwith 4 lines\nall left-aligned !", &format);    
+    format.align = TextAlignament::Center;
+    format.x = 40;
+    s.write_text("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format); 
+    format.align = TextAlignament::Right;
+    format.x = 78;
+    s.write_text("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format); 
+
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x5CA9237E8FF59BAF);
+}
+
+#[test]
+fn check_write_text_multi_line_no_wrap_how_key() {
+    let mut s = SurfaceTester::new(80, 7);
+    s.draw_vertical_line(2, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let mut format = TextFormat::multi_line(
+        2,
+        1,
+        CharAttribute::with_color(Color::Yellow, Color::DarkBlue),
+        TextAlignament::Left,
+    );
+    format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkBlue));
+    s.write_text("This is a\nmulti-line text\nwith 4 lines\nall left-aligned !", &format);    
+    format.align = TextAlignament::Center;
+    format.x = 40;
+    s.write_text("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format); 
+    format.align = TextAlignament::Right;
+    format.x = 78;
+    s.write_text("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format); 
+
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x5CA9237E8FF59BAF);
+}

@@ -503,10 +503,13 @@ impl Surface {
                 y += 1;
                 ch_index += chars_count as usize;
                 chars_count = 0;
-                start_ofs = index;
+                start_ofs = index + 1;
             } else {
                 chars_count += 1;
             }
+        }
+        if chars_count > 0 {
+            self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
     fn write_text_multi_line(&mut self, text: &str, format: &TextFormat) {

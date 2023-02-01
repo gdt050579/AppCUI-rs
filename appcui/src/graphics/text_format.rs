@@ -35,8 +35,6 @@ pub struct TextFormat {
     pub hotkey_pos: Option<usize>,
     pub chars_count: Option<u16>,
     pub align: TextAlignament,
-    pub left_margin_char: Option<Character>,
-    pub right_margin_char: Option<Character>,
     pub text_wrap: TextWrap,
     pub multi_lines: bool,
 }
@@ -61,6 +59,16 @@ impl TextFormat {
             char_attr,
             align,
             multi_lines: false,
+            ..Default::default()
+        }
+    }
+    pub fn multi_line(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament) -> Self {
+        TextFormat {
+            x,
+            y,
+            char_attr,
+            align,
+            multi_lines: true,
             ..Default::default()
         }
     }
