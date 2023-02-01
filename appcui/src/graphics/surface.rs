@@ -2,6 +2,7 @@ use crate::graphics::SpecialChar;
 
 use super::CharAttribute;
 //use super::CharFlags;
+use super::text_format::TextWrap;
 use super::Character;
 use super::ClipArea;
 use super::Color;
@@ -460,7 +461,8 @@ impl Surface {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
                         if cpos == hkpos {
-                            self.chars[pos].set(Character::with_attributes(ch, format.hotkey_attr.unwrap()));
+                            self.chars[pos]
+                                .set(Character::with_attributes(ch, format.hotkey_attr.unwrap()));
                         } else {
                             c.code = ch;
                             self.chars[pos].set(c);
@@ -482,7 +484,37 @@ impl Surface {
             }
         }
     }
-    fn write_text_multi_line(&mut self, text: &str, format: &TextFormat) {}
+    fn write_text_multi_line_no_wrap(&mut self, text: &str, format: &TextFormat) {
+        let mut y = format.y + self.origin.y;
+        let mut start_ofs = 0usize;
+        let mut chars_count = 0u16;
+        let mut ch_index = 0usize;
+        for (index, ch) in text.char_indices() {
+            if (ch == '\n') || (ch == '\r') {
+                if chars_count > 0 {
+                    self.write_text_single_line(
+                        &text[start_ofs..index],
+                        y,
+                        chars_count,
+                        ch_index,
+                        format,
+                    );
+                }
+                y += 1;
+                ch_index += chars_count as usize;
+                chars_count = 0;
+                start_ofs = index;
+            } else {
+                chars_count += 1;
+            }
+        }
+    }
+    fn write_text_multi_line(&mut self, text: &str, format: &TextFormat) {
+        match format.text_wrap {
+            TextWrap::None => self.write_text_multi_line_no_wrap(text, format),
+            _ => unimplemented!(),
+        }
+    }
     pub fn write_text(&mut self, text: &str, format: &TextFormat) {
         if format.multi_lines {
             self.write_text_multi_line(text, format);

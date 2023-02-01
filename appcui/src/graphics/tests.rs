@@ -732,6 +732,6 @@ fn check_write_text_single_line_hot_key() {
     format.hotkey_pos = Some(20);  
     s.write_text("Right align ends at 30", &format);
 
-    s.print();
-    //assert_eq!(s.compute_hash(), 0x8DFA95B692742714);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x19AE9890D9B9E3AF);
 }
