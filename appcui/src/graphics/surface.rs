@@ -460,6 +460,7 @@ impl Surface {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
                         if cpos == hkpos {
+                            self.chars[pos].set(Character::with_attributes(ch, format.hotkey_attr.unwrap()));
                         } else {
                             c.code = ch;
                             self.chars[pos].set(c);
