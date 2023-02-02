@@ -44,28 +44,14 @@ enum CharacterType {
 }
 impl From<char> for CharacterType {
     fn from(value: char) -> Self {
-        match value {
-            '\n' | '\r' => {
-                return CharacterType::NewLine;
-            }
-            ' ' | '\t' => {
-                return CharacterType::Space;
-            }
-            'a'..='z' => {
-                return CharacterType::Word;
-            }
-            'A'..='Z' => {
-                return CharacterType::Word;
-            }
-            '0'..='9' => {
-                return CharacterType::Word;
-            }
-            '\u{80}'..=char::MAX => {
-                return CharacterType::Word;
-            }
-            _ => {
-                return CharacterType::Other;
-            }
+        return match value {
+            '\n' | '\r' => CharacterType::NewLine,
+            ' ' | '\t' => CharacterType::Space,
+            'a'..='z' => CharacterType::Word,
+            'A'..='Z' => CharacterType::Word,
+            '0'..='9' => CharacterType::Word,
+            '\u{80}'..=char::MAX => CharacterType::Word,
+            _ => CharacterType::Other        
         }
     }
 }
@@ -613,8 +599,18 @@ impl Surface {
         let mut start_token_ofs = 0usize;
         let mut chars_count_until_token = 0u16;
         let mut last_char_type = CharacterType::Undefined;
+        let mut start_new_line = true;
+
         for (index, ch) in text.char_indices() {
             let char_type = CharacterType::from(ch);
+            if start_new_line {
+                if char_type == CharacterType::Space {
+                    chars_count+=1;
+                    continue;
+                }
+                start_ofs = index;
+                start_new_line = false;
+            }
             if (char_type == CharacterType::NewLine) || (chars_count == width) {
                 // print the part
                 match last_char_type {
@@ -654,6 +650,7 @@ impl Surface {
                 start_token_ofs = index;
                 chars_count_until_token = chars_count;
                 last_char_type = char_type;
+                
             }
             chars_count += 1;
         }
