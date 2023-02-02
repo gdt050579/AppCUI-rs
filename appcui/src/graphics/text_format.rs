@@ -18,6 +18,7 @@ impl Default for TextAlignament {
 pub enum TextWrap {
     None,
     Character,
+    Word,
 }
 impl Default for TextWrap {
     fn default() -> Self {

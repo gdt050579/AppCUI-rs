@@ -881,3 +881,32 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     //s.print();
     assert_eq!(s.compute_hash(), 0x3CE81721E1BB64FA);
 }
+
+#[test]
+fn check_write_text_multi_line_word_wrap() {
+    let mut s = SurfaceTester::new(80, 10);
+    let txt = "This is a line that will be wrapped on multiple lines on a given character width";
+    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let mut format = TextFormat::multi_line_with_text_wrap(
+        2,
+        1,
+        10,
+        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
+        TextAlignament::Left,
+        TextWrap::Word,
+    );
+    s.write_text(txt, &format);    
+    format.align = TextAlignament::Center;
+    format.x = 40;
+    format.width = Some(30);
+    s.write_text(txt, &format);
+    format.align = TextAlignament::Right;
+    format.x = 78;
+    format.width = Some(7);
+    s.write_text(txt, &format);
+
+    s.print();
+    //assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
+}

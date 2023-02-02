@@ -561,12 +561,90 @@ impl Surface {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
+    fn write_text_multi_line_word_wrap(&mut self, text: &str, format: &TextFormat) {
+        if format.width.is_none() {
+            panic!("Using TextWrap::Word requires to fill the field width from TextFormat")
+        }
+        let width = format.width.unwrap();
+        if width == 0 {
+            return; // nothing to draw
+        }
+        let mut y = format.y + self.origin.y;
+        let mut start_ofs = 0usize;
+        let mut chars_count = 0u16;
+        let mut ch_index = 0usize;
+        let mut found_word_start = false;
+        let mut start_word_ofs = 0usize;
+        let mut chars_count_until_word = 0u16;
+        for (index, ch) in text.char_indices() {
+            if (ch == '\n') || (ch == '\r') {
+                if chars_count > 0 {
+                    self.write_text_single_line(
+                        &text[start_ofs..index],
+                        y,
+                        chars_count,
+                        ch_index,
+                        format,
+                    );
+                }
+                y += 1;
+                ch_index += (chars_count as usize) + 1;
+                chars_count = 0;
+                start_ofs = index + 1;
+                continue;
+            }
+            if chars_count == width {
+                if (found_word_start) && (start_ofs != start_word_ofs) {
+                    self.write_text_single_line(
+                        &text[start_ofs..start_word_ofs],
+                        y,
+                        chars_count_until_word,
+                        ch_index,
+                        format,
+                    );
+                    ch_index += chars_count_until_word as usize;
+                    chars_count = 1 + chars_count - chars_count_until_word; // current character
+                    start_ofs = start_word_ofs;
+                } else {
+                    self.write_text_single_line(
+                        &text[start_ofs..index],
+                        y,
+                        chars_count,
+                        ch_index,
+                        format,
+                    );
+                    ch_index += chars_count as usize;
+                    chars_count = 1; // current character
+                    start_ofs = index;
+                }
+                y += 1;
+                continue;
+            }
+            if ((ch >= 'A') && (ch <= 'Z'))
+                || ((ch >= 'a') && (ch <= 'z'))
+                || ((ch >= '0') && (ch <= '9'))
+                || (ch > 127 as char)
+            {
+                if !found_word_start {
+                    found_word_start = true;
+                    start_word_ofs = index;
+                    chars_count_until_word = chars_count;
+                }
+            } else {
+                found_word_start = false;
+            }
+            chars_count += 1;
+        }
+        if chars_count > 0 {
+            self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
+        }
+    }
     pub fn write_text(&mut self, text: &str, format: &TextFormat) {
         if format.multi_line {
             match format.text_wrap {
                 TextWrap::None => self.write_text_multi_line_no_wrap(text, format),
                 TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),
-                _ => unimplemented!(),
+                TextWrap::Word => self.write_text_multi_line_word_wrap(text, format),
             }
         } else {
             let chars_count = if format.chars_count.is_some() {
