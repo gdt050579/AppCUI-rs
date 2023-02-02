@@ -33,6 +33,43 @@ pub enum ImageScaleMethod {
     Scale5 = 20,
 }
 
+#[repr(u8)]
+#[derive(PartialEq, Clone, Copy)]
+enum CharacterType {
+    NewLine,
+    Word,
+    Space,
+    Other,
+    Undefined,
+}
+impl From<char> for CharacterType {
+    fn from(value: char) -> Self {
+        match value {
+            '\n' | '\r' => {
+                return CharacterType::NewLine;
+            }
+            ' ' | '\t' => {
+                return CharacterType::Space;
+            }
+            'a'..='z' => {
+                return CharacterType::Word;
+            }
+            'A'..='Z' => {
+                return CharacterType::Word;
+            }
+            '0'..='9' => {
+                return CharacterType::Word;
+            }
+            '\u{80}'..=char::MAX => {
+                return CharacterType::Word;
+            }
+            _ => {
+                return CharacterType::Other;
+            }
+        }
+    }
+}
+
 const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
 
@@ -573,67 +610,50 @@ impl Surface {
         let mut start_ofs = 0usize;
         let mut chars_count = 0u16;
         let mut ch_index = 0usize;
-        let mut found_word_start = false;
-        let mut start_word_ofs = 0usize;
-        let mut chars_count_until_word = 0u16;
+        let mut start_token_ofs = 0usize;
+        let mut chars_count_until_token = 0u16;
+        let mut last_char_type = CharacterType::Undefined;
         for (index, ch) in text.char_indices() {
-            if (ch == '\n') || (ch == '\r') {
-                if chars_count > 0 {
-                    self.write_text_single_line(
-                        &text[start_ofs..index],
+            let char_type = CharacterType::from(ch);
+            if (char_type == CharacterType::NewLine) || (chars_count == width) {
+                // print the part
+                match last_char_type {
+                    CharacterType::Word | CharacterType::Space => self.write_text_single_line(
+                        &text[start_ofs..start_token_ofs],
                         y,
-                        chars_count,
+                        chars_count_until_token,
                         ch_index,
                         format,
-                    );
+                    ),
+                    _ => self.write_text_single_line(
+                        &text[start_ofs..start_token_ofs],
+                        y,
+                        chars_count_until_token,
+                        ch_index,
+                        format,
+                    ),
                 }
-                y += 1;
-                ch_index += (chars_count as usize) + 1;
-                chars_count = 0;
-                start_ofs = index + 1;
-                found_word_start = false;
-                continue;
-            }
-            if chars_count == width {
-                if (found_word_start) && (start_ofs != start_word_ofs) {
-                    self.write_text_single_line(
-                        &text[start_ofs..start_word_ofs],
-                        y,
-                        chars_count_until_word,
-                        ch_index,
-                        format,
-                    );
-                    ch_index += chars_count_until_word as usize;
-                    chars_count = 1 + chars_count - chars_count_until_word; // current character
-                    start_ofs = start_word_ofs;
+                if last_char_type == CharacterType::Word {
+                    start_ofs = start_token_ofs;
+                    chars_count = 1 + chars_count - chars_count_until_token;
+                    ch_index += chars_count_until_token as usize
                 } else {
-                    self.write_text_single_line(
-                        &text[start_ofs..index],
-                        y,
-                        chars_count,
-                        ch_index,
-                        format,
-                    );
-                    ch_index += chars_count as usize;
-                    chars_count = 1; // current character
-                    start_ofs = index;
+                    start_ofs = index + 1;
+                    chars_count = if chars_count == width {1} else {0};
+                    ch_index += chars_count as usize
                 }
                 y += 1;
-                found_word_start = false;
+                if char_type != last_char_type {
+                    start_token_ofs = index;
+                    chars_count_until_token = chars_count;
+                    last_char_type = char_type;
+                }
                 continue;
             }
-            if ((ch >= 'A') && (ch <= 'Z'))
-                || ((ch >= 'a') && (ch <= 'z'))
-                || ((ch >= '0') && (ch <= '9'))
-                || (ch > 127 as char)
-            {
-                if !found_word_start {
-                    found_word_start = true;
-                    start_word_ofs = index;
-                    chars_count_until_word = chars_count;
-                }
-            } else {
-                found_word_start = false;
+            if char_type != last_char_type {
+                start_token_ofs = index;
+                chars_count_until_token = chars_count;
+                last_char_type = char_type;
             }
             chars_count += 1;
         }

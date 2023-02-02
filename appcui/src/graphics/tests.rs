@@ -885,7 +885,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
 #[test]
 fn check_write_text_multi_line_word_wrap() {
     let mut s = SurfaceTester::new(80, 10);
-    let txt = "This is a line that will be wrapped on multiple lines on a given character width";
+    let txt = "This is     a line that       will be wrapped    on multiple lines on a given long-character width";
     s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
     s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
     s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
