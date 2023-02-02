@@ -591,6 +591,7 @@ impl Surface {
                 ch_index += (chars_count as usize) + 1;
                 chars_count = 0;
                 start_ofs = index + 1;
+                found_word_start = false;
                 continue;
             }
             if chars_count == width {
@@ -618,6 +619,7 @@ impl Surface {
                     start_ofs = index;
                 }
                 y += 1;
+                found_word_start = false;
                 continue;
             }
             if ((ch >= 'A') && (ch <= 'Z'))
