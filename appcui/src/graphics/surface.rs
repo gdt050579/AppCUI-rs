@@ -594,50 +594,95 @@ impl Surface {
         }
         let mut y = format.y + self.origin.y;
         let mut start_ofs = 0usize;
+        let mut end_ofs = 0usize;
+        let mut next_ofs = 0usize;
+
+        let mut chars_count_end_ofs = 0u16;
+        let mut chars_count_next_ofs = 0u16;
+
         let mut chars_count = 0u16;
         let mut ch_index = 0usize;
-        let mut start_token_ofs = 0usize;
-        let mut chars_count_until_token = 0u16;
+
         let mut last_char_type = CharacterType::Undefined;
         let mut continue_from_previous_line = false;
+        let mut strip_left_spaces = false;
 
         for (index, ch) in text.char_indices() {
             let char_type = CharacterType::from(ch);
+            chars_count += 1;
             if continue_from_previous_line {
+                strip_left_spaces = char_type == CharacterType::Space;
+                continue_from_previous_line = false;
+            }
+            if strip_left_spaces {
                 if char_type == CharacterType::Space {
                     chars_count += 1;
                     continue;
                 }
                 start_ofs = index;
-                start_token_ofs = index;
+                end_ofs = index;
                 chars_count = 0;
-                continue_from_previous_line = false;
+                strip_left_spaces = false;
             }
+            if ((last_char_type == CharacterType::Word) && (last_char_type != char_type))
+                || (last_char_type == CharacterType::Other)
+            {
+                // we have either a word or a punctuation mark that is finished
+                end_ofs = index;
+                chars_count_end_ofs = chars_count;
+            }
+            if ((char_type == CharacterType::Word) && (last_char_type != char_type))
+                || (char_type == CharacterType::Other)
+            {
+                // we have a possible new start (either an word or a punctuation mark)
+                next_ofs = index;
+                chars_count_next_ofs = chars_count;
+            }
+
             if (char_type == CharacterType::NewLine) || (chars_count == width) {
                 // print the part
-                println!("ss->{} to {}, len={}",start_ofs,start_token_ofs,text.len());
+                println!(
+                    "start={} end={} =>'{}' , next={} index={} =>'{}'",
+                    start_ofs,
+                    end_ofs,
+                    &text[start_ofs..end_ofs],
+                    next_ofs,
+                    index,
+                    &text[next_ofs..index],
+                );
                 self.write_text_single_line(
-                    &text[start_ofs..start_token_ofs],
+                    &text[start_ofs..end_ofs],
                     y,
-                    chars_count_until_token,
+                    chars_count_end_ofs,
                     ch_index,
                     format,
                 );
-                start_ofs = start_token_ofs;
-                chars_count = 1 + chars_count - chars_count_until_token;
-                continue_from_previous_line = char_type != CharacterType::NewLine;
-                last_char_type = CharacterType::Undefined;
+                if char_type == CharacterType::NewLine {
+                    start_ofs = index+1;
+                    chars_count = 0;                    
+                } else {
+                    if next_ofs>end_ofs {
+                        start_ofs = next_ofs;
+                        chars_count = chars_count - chars_count_next_ofs;
+                    } else {
+                        start_ofs = index+1;
+                        //chars_count = chars_count - chars_count_end_ofs;
+                        chars_count = 0;
+                        continue_from_previous_line = true;
+                    }
+                }
+                last_char_type = char_type;
+                println!(
+                    "   ->new_start={}, chars_count={}, index={} [{continue_from_previous_line}]=> '{}'\n",
+                    start_ofs,
+                    chars_count,
+                    index,
+                    &text[start_ofs..]
+                );
                 y += 1;
                 continue;
             }
-            if (char_type != last_char_type) || (char_type == CharacterType::Other) {
-                if last_char_type != CharacterType::Space {
-                    start_token_ofs = index;
-                    chars_count_until_token = chars_count;
-                }
-                last_char_type = char_type;
-            }
-            chars_count += 1;
+            last_char_type = char_type;
         }
         if chars_count > 0 {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
