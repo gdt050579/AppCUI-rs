@@ -51,8 +51,8 @@ impl From<char> for CharacterType {
             'A'..='Z' => CharacterType::Word,
             '0'..='9' => CharacterType::Word,
             '\u{80}'..=char::MAX => CharacterType::Word,
-            _ => CharacterType::Other        
-        }
+            _ => CharacterType::Other,
+        };
     }
 }
 
@@ -599,58 +599,43 @@ impl Surface {
         let mut start_token_ofs = 0usize;
         let mut chars_count_until_token = 0u16;
         let mut last_char_type = CharacterType::Undefined;
-        let mut start_new_line = true;
+        let mut continue_from_previous_line = false;
 
         for (index, ch) in text.char_indices() {
             let char_type = CharacterType::from(ch);
-            if start_new_line {
+            if continue_from_previous_line {
                 if char_type == CharacterType::Space {
-                    chars_count+=1;
+                    chars_count += 1;
                     continue;
                 }
                 start_ofs = index;
-                start_new_line = false;
+                start_token_ofs = index;
+                chars_count = 0;
+                continue_from_previous_line = false;
             }
             if (char_type == CharacterType::NewLine) || (chars_count == width) {
                 // print the part
-                match last_char_type {
-                    CharacterType::Word | CharacterType::Space => self.write_text_single_line(
-                        &text[start_ofs..start_token_ofs],
-                        y,
-                        chars_count_until_token,
-                        ch_index,
-                        format,
-                    ),
-                    _ => self.write_text_single_line(
-                        &text[start_ofs..start_token_ofs],
-                        y,
-                        chars_count_until_token,
-                        ch_index,
-                        format,
-                    ),
-                }
-                if last_char_type == CharacterType::Word {
-                    start_ofs = start_token_ofs;
-                    chars_count = 1 + chars_count - chars_count_until_token;
-                    ch_index += chars_count_until_token as usize
-                } else {
-                    start_ofs = index + 1;
-                    chars_count = if chars_count == width {1} else {0};
-                    ch_index += chars_count as usize
-                }
+                println!("ss->{} to {}, len={}",start_ofs,start_token_ofs,text.len());
+                self.write_text_single_line(
+                    &text[start_ofs..start_token_ofs],
+                    y,
+                    chars_count_until_token,
+                    ch_index,
+                    format,
+                );
+                start_ofs = start_token_ofs;
+                chars_count = 1 + chars_count - chars_count_until_token;
+                continue_from_previous_line = char_type != CharacterType::NewLine;
+                last_char_type = CharacterType::Undefined;
                 y += 1;
-                if char_type != last_char_type {
-                    start_token_ofs = index;
-                    chars_count_until_token = chars_count;
-                    last_char_type = char_type;
-                }
                 continue;
             }
-            if char_type != last_char_type {
-                start_token_ofs = index;
-                chars_count_until_token = chars_count;
+            if (char_type != last_char_type) || (char_type == CharacterType::Other) {
+                if last_char_type != CharacterType::Space {
+                    start_token_ofs = index;
+                    chars_count_until_token = chars_count;
+                }
                 last_char_type = char_type;
-                
             }
             chars_count += 1;
         }
