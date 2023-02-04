@@ -7,7 +7,7 @@ use crate::input::*;
 use crate::system::*;
 use AppCUIProcMacro::AppCUIControl;
 
-#[AppCUIControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed)]
+#[AppCUIControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
 pub struct CheckBox {
     caption: String,
     checked: bool,
@@ -89,6 +89,20 @@ impl OnKeyPressed for CheckBox {
         }
     }
 }
+impl OnMouseEvent for CheckBox {
+    fn on_mouse_event(&mut self, event: &MouseEvent) {
+        match event {
+            MouseEvent::Enter => todo!(),
+            MouseEvent::Leave => todo!(),
+            MouseEvent::Over => todo!(),
+            MouseEvent::Pressed => todo!(),
+            MouseEvent::Released => todo!(),
+            MouseEvent::DoubleClick => todo!(),
+            MouseEvent::Drag => todo!(),
+            MouseEvent::Wheel => todo!(),
+        }
+    }
+}
 /*
 void CheckBox::OnHotKey()
 {
@@ -104,15 +118,6 @@ void CheckBox::OnHotKey()
         }
     }
     RaiseEvent(Event::CheckedStatusChanged);
-}
-bool CheckBox::OnKeyEvent(Input::Key KeyCode, char16)
-{
-    if ((KeyCode == Key::Space) || (KeyCode == Key::Enter))
-    {
-        OnHotKey();
-        return true;
-    }
-    return false;
 }
 void CheckBox::OnMouseReleased(int x, int y, Input::MouseButton)
 {
