@@ -602,40 +602,45 @@ impl Surface {
 
         let mut chars_count = 0u16;
         let mut ch_index = 0usize;
+        let mut current_char_index = 0usize;
+        let mut current_char_index_on_next = 0usize;
 
         let mut last_char_type = CharacterType::Undefined;
         let mut strip_spaces = false;
 
-        for (index, ch) in text.char_indices() {
+        for (offset, ch) in text.char_indices() {
             let char_type = CharacterType::from(ch);
+            current_char_index += 1;
             if strip_spaces {
                 if char_type == CharacterType::Space {
                     continue;
                 }
-                start_ofs = index;
-                end_ofs = index;
+                start_ofs = offset;
+                end_ofs = offset;
                 chars_count = 0;
                 strip_spaces = false;
+                ch_index = current_char_index - 1;
             }
             if ((last_char_type == CharacterType::Word) && (last_char_type != char_type))
                 || (last_char_type == CharacterType::Other)
             {
                 // we have either a word or a punctuation mark that is finished
-                end_ofs = index;
+                end_ofs = offset;
                 chars_count_end_ofs = chars_count;
             }
             if ((char_type == CharacterType::Word) && (last_char_type != char_type))
                 || (char_type == CharacterType::Other)
             {
                 // we have a possible new start (either an word or a punctuation mark)
-                next_ofs = index;
+                next_ofs = offset;
                 chars_count_next_ofs = chars_count;
+                current_char_index_on_next = current_char_index - 1;
             }
 
             if (char_type == CharacterType::NewLine) || (chars_count == width) {
                 if end_ofs <= start_ofs {
                     //println!("Word bigger than the line (start={start_ofs}, end={end_ofs}, index={index})");
-                    end_ofs = index;
+                    end_ofs = offset;
                     chars_count_end_ofs = chars_count;
                 }
                 // print the part
@@ -648,14 +653,17 @@ impl Surface {
                     format,
                 );
                 if char_type == CharacterType::NewLine {
-                    start_ofs = index + 1;
+                    start_ofs = offset + 1;
+                    ch_index = current_char_index;
                     chars_count = 0;
                 } else {
                     if next_ofs >= end_ofs {
                         start_ofs = next_ofs;
+                        ch_index = current_char_index_on_next;
                         chars_count = 1 + chars_count - chars_count_next_ofs;
                     } else {
-                        start_ofs = index;
+                        start_ofs = offset;
+                        ch_index = current_char_index - 1;
                         chars_count = 1; // current char
                         strip_spaces = char_type == CharacterType::Space;
                     }
