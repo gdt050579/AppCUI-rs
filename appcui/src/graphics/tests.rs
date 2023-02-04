@@ -893,33 +893,47 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32)->SurfaceTester {
         TextAlignament::Left,
         TextWrap::Word,
     );
-    s.write_text(txt, &format);  
+    // s.write_text(txt, &format);  
 
-    format.width = Some(11);
-    format.x = 14;
-    s.write_text(txt, &format);    
+    // format.width = Some(11);
+    // format.x = 14;
+    // s.write_text(txt, &format);    
     
-    format.width = Some(12);
-    format.x = 27;
-    s.write_text(txt, &format);    
+    // format.width = Some(12);
+    // format.x = 27;
+    // s.write_text(txt, &format);    
     
-    format.width = Some(13);
-    format.x = 41;
-    s.write_text(txt, &format);    
+    // format.width = Some(13);
+    // format.x = 41;
+    // s.write_text(txt, &format);    
     
-    format.width = Some(14);
-    format.x = 56;
-    s.write_text(txt, &format);    
+    // format.width = Some(14);
+    // format.x = 56;
+    // s.write_text(txt, &format);    
     
-    format.width = Some(6);
-    format.x = 72;
+    // format.width = Some(6);
+    // format.x = 72;
+    // s.write_text(txt, &format);
+
+    format.width = Some(3);
+    format.x = 80;
     s.write_text(txt, &format);
+
+    // format.width = Some(1);
+    // format.x = 85;
+    // s.write_text(txt, &format);
 
     return s;
 }
 #[test]
-fn check_write_text_multi_line_word_wrap() {
-    let mut s = print_word_wrapped("This is     a line that       will be wrapped    on multiple lines on a given long-character width", 80, 20);
+fn check_write_text_multi_line_word_wrap_1() {
+    let mut s = print_word_wrapped("This is     a line that       will be wrapped    on multiple lines on a given long-character width", 90, 20);
+    s.print();
+    //assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
+}
+#[test]
+fn check_write_text_multi_line_word_wrap_2() {
+    let mut s = print_word_wrapped("+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc", 90, 20);
     s.print();
     //assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
 }

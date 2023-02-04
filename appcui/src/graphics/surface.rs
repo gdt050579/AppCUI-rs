@@ -617,9 +617,8 @@ impl Surface {
                 chars_count = 0;
                 strip_spaces = false;
             }
-            chars_count += 1;
             let tmp = &text[index..];
-            
+
             if ((last_char_type == CharacterType::Word) && (last_char_type != char_type))
                 || (last_char_type == CharacterType::Other)
             {
@@ -636,7 +635,7 @@ impl Surface {
             }
 
             if (char_type == CharacterType::NewLine) || (chars_count == width) {
-                if end_ofs<=start_ofs {
+                if end_ofs <= start_ofs {
                     println!("Word bigger than the line (start={start_ofs}, end={end_ofs}, index={index})");
                     end_ofs = index;
                     chars_count_end_ofs = chars_count;
@@ -659,12 +658,12 @@ impl Surface {
                     format,
                 );
                 if char_type == CharacterType::NewLine {
-                    start_ofs = index+1;
-                    chars_count = 0;                    
+                    start_ofs = index + 1;
+                    chars_count = 0;
                 } else {
-                    if next_ofs>end_ofs {
+                    if next_ofs >= end_ofs {
                         start_ofs = next_ofs;
-                        chars_count = chars_count - chars_count_next_ofs;
+                        chars_count = 1 + chars_count - chars_count_next_ofs;
                     } else {
                         start_ofs = index;
                         chars_count = 1; // current char
@@ -683,6 +682,7 @@ impl Surface {
                 continue;
             }
             last_char_type = char_type;
+            chars_count += 1;
         }
         if chars_count > 0 {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
