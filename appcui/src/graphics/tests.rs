@@ -882,14 +882,9 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     assert_eq!(s.compute_hash(), 0x3CE81721E1BB64FA);
 }
 
-#[test]
-fn check_write_text_multi_line_word_wrap() {
-    let mut s = SurfaceTester::new(80, 10);
-    let txt = "This is     a line that       will be wrapped    on multiple lines on a given long-character width";
+fn print_word_wrapped(txt: &str, width: u32, height: u32)->SurfaceTester {
+    let mut s = SurfaceTester::new(width, height);
     println!("{txt}");
-    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
     let mut format = TextFormat::multi_line_with_text_wrap(
         2,
         1,
@@ -898,16 +893,33 @@ fn check_write_text_multi_line_word_wrap() {
         TextAlignament::Left,
         TextWrap::Word,
     );
-    s.write_text(txt, &format);    
-    // format.align = TextAlignament::Center;
-    // format.x = 40;
-    // format.width = Some(30);
-    // s.write_text(txt, &format);
-    // format.align = TextAlignament::Right;
-    // format.x = 78;
-    // format.width = Some(7);
-    // s.write_text(txt, &format);
+    s.write_text(txt, &format);  
 
+    format.width = Some(11);
+    format.x = 14;
+    s.write_text(txt, &format);    
+    
+    format.width = Some(12);
+    format.x = 27;
+    s.write_text(txt, &format);    
+    
+    format.width = Some(13);
+    format.x = 41;
+    s.write_text(txt, &format);    
+    
+    format.width = Some(14);
+    format.x = 56;
+    s.write_text(txt, &format);    
+    
+    format.width = Some(6);
+    format.x = 72;
+    s.write_text(txt, &format);
+
+    return s;
+}
+#[test]
+fn check_write_text_multi_line_word_wrap() {
+    let mut s = print_word_wrapped("This is     a line that       will be wrapped    on multiple lines on a given long-character width", 80, 20);
     s.print();
     //assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
 }

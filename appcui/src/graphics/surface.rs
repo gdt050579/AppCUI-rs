@@ -604,26 +604,22 @@ impl Surface {
         let mut ch_index = 0usize;
 
         let mut last_char_type = CharacterType::Undefined;
-        let mut continue_from_previous_line = false;
-        let mut strip_left_spaces = false;
+        let mut strip_spaces = false;
 
         for (index, ch) in text.char_indices() {
             let char_type = CharacterType::from(ch);
-            chars_count += 1;
-            if continue_from_previous_line {
-                strip_left_spaces = char_type == CharacterType::Space;
-                continue_from_previous_line = false;
-            }
-            if strip_left_spaces {
+            if strip_spaces {
                 if char_type == CharacterType::Space {
-                    chars_count += 1;
                     continue;
                 }
                 start_ofs = index;
                 end_ofs = index;
                 chars_count = 0;
-                strip_left_spaces = false;
+                strip_spaces = false;
             }
+            chars_count += 1;
+            let tmp = &text[index..];
+            
             if ((last_char_type == CharacterType::Word) && (last_char_type != char_type))
                 || (last_char_type == CharacterType::Other)
             {
@@ -640,6 +636,11 @@ impl Surface {
             }
 
             if (char_type == CharacterType::NewLine) || (chars_count == width) {
+                if end_ofs<=start_ofs {
+                    println!("Word bigger than the line (start={start_ofs}, end={end_ofs}, index={index})");
+                    end_ofs = index;
+                    chars_count_end_ofs = chars_count;
+                }
                 // print the part
                 println!(
                     "start={} end={} =>'{}' , next={} index={} =>'{}'",
@@ -665,15 +666,14 @@ impl Surface {
                         start_ofs = next_ofs;
                         chars_count = chars_count - chars_count_next_ofs;
                     } else {
-                        start_ofs = index+1;
-                        //chars_count = chars_count - chars_count_end_ofs;
-                        chars_count = 0;
-                        continue_from_previous_line = true;
+                        start_ofs = index;
+                        chars_count = 1; // current char
+                        strip_spaces = char_type == CharacterType::Space;
                     }
                 }
                 last_char_type = char_type;
                 println!(
-                    "   ->new_start={}, chars_count={}, index={} [{continue_from_previous_line}]=> '{}'\n",
+                    "   ->new_start={}, chars_count={}, index={} [{strip_spaces}]=> '{}'\n",
                     start_ofs,
                     chars_count,
                     index,
