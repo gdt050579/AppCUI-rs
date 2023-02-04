@@ -3,8 +3,8 @@ use crate::input::*;
 pub (crate) struct Caption
 {
     text: String,
-    chars_count: u32,
-    hotkey_pos: u32,
+    chars_count: usize,
+    hotkey_pos: usize,
     hotkey: Key
 }
 impl Caption {
@@ -29,7 +29,7 @@ impl Caption {
                 if buf[pos]==b'&' {
                     self.hotkey = Key::from_char(buf[pos+1] as char, KeyModifier::Alt);
                     if self.hotkey.code != KeyCode::None {
-                        self.hotkey_pos = pos as u32;
+                        self.hotkey_pos = pos;
                         break;
                     }
                 }
@@ -46,18 +46,18 @@ impl Caption {
             self.hotkey_pos = 0;
             self.hotkey = Key::default();
         }
-        self.chars_count = self.text.chars().count() as u32;
+        self.chars_count = self.text.chars().count() ;
     }
     #[inline]
     pub (crate) fn get_text(&self)->&str {
         self.text.as_str()
     }
     #[inline]
-    pub (crate) fn get_chars_count(&self)->u32 {
+    pub (crate) fn get_chars_count(&self)->usize {
         self.chars_count
     }
     #[inline]
-    pub (crate) fn get_hotkey_pos(&self)->Option<u32> {
+    pub (crate) fn get_hotkey_pos(&self)->Option<usize> {
         if self.hotkey.code == KeyCode::None {
             None
         } else {

@@ -52,10 +52,10 @@ impl OnPaint for CheckBox {
                 format.text_wrap = TextWrap::Word;
                 format.width = Some(w-4);
             }
-            /*
-                params.HotKeyPosition = Members->HotKeyOffset;
-                params.HotKeyColor    = colHK;
-            */
+            if self.caption.has_hotkey() {
+                format.hotkey_pos = self.caption.get_hotkey_pos();
+                format.hotkey_attr = Some(col_hot_key);
+            }
             surface.write_text(&self.caption.get_text(), &format);
         }
         if self.checked {
