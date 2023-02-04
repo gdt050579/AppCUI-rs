@@ -931,26 +931,60 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize)->Su
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_1() {
-    let mut s = print_word_wrapped("This is     a line that       will be wrapped    on multiple lines on a given long-character width", 90, 20, 16);
+    let s = print_word_wrapped("This is     a line that       will be wrapped    on multiple lines on a given long-character width", 90, 20, 16);
     //s.print();
     assert_eq!(s.compute_hash(), 0x4F03DE6BBFE0E049);
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_2() {    
-    let mut s = print_word_wrapped("+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc", 90, 20, 12);
+    let s = print_word_wrapped("+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc", 90, 20, 12);
     //s.print();
     assert_eq!(s.compute_hash(), 0xB123507C204CAE78);
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_3() {
-    let mut s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 18);
+    let s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 18);
     //s.print();
     assert_eq!(s.compute_hash(), 0x6FBCFB162D486AEE);
 }
 
 #[test]
 fn check_write_text_multi_line_word_wrap_4() {
-    let mut s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 42);
+    let s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 42);
     //s.print();
     assert_eq!(s.compute_hash(), 0x1C1D4F88EB2DFAEB);
+}
+
+#[test]
+fn check_write_text_multi_line_word_wrap_aligned() {
+    let txt = "This is     a line that       will be wrapped    on multiple lines on a given long-character width";
+    let mut s = SurfaceTester::new(90, 15);
+    s.write_string(0, 0, "Hotkey is: ", CharAttribute::with_color(Color::Yellow, Color::Red), false);
+    let ch = txt.chars().nth(16).unwrap();
+    s.set(12, 0, Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None));
+    let mut format = TextFormat::multi_line_with_text_wrap(
+        2,
+        1,
+        12,
+        CharAttribute::with_color(Color::Black, Color::Silver),
+        TextAlignament::Left,
+        TextWrap::Word,
+    );
+    format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
+    format.hotkey_pos = Some(16);
+    s.write_text(txt, &format);  
+
+    format.width = Some(20);
+    format.x = 45;
+    format.align = TextAlignament::Center;
+    s.write_text(txt, &format);    
+    
+
+    format.width = Some(15);
+    format.x = 88;
+    format.align = TextAlignament::Right;
+    s.write_text(txt, &format);
+    
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x70526C060A7E28C6);
 }
