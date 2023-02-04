@@ -893,35 +893,35 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32)->SurfaceTester {
         TextAlignament::Left,
         TextWrap::Word,
     );
-    // s.write_text(txt, &format);  
+    s.write_text(txt, &format);  
 
-    // format.width = Some(11);
-    // format.x = 14;
-    // s.write_text(txt, &format);    
+    format.width = Some(11);
+    format.x = 14;
+    s.write_text(txt, &format);    
     
-    // format.width = Some(12);
-    // format.x = 27;
-    // s.write_text(txt, &format);    
+    format.width = Some(12);
+    format.x = 27;
+    s.write_text(txt, &format);    
     
-    // format.width = Some(13);
-    // format.x = 41;
-    // s.write_text(txt, &format);    
+    format.width = Some(13);
+    format.x = 41;
+    s.write_text(txt, &format);    
     
-    // format.width = Some(14);
-    // format.x = 56;
-    // s.write_text(txt, &format);    
+    format.width = Some(14);
+    format.x = 56;
+    s.write_text(txt, &format);    
     
-    // format.width = Some(6);
-    // format.x = 72;
-    // s.write_text(txt, &format);
+    format.width = Some(6);
+    format.x = 72;
+    s.write_text(txt, &format);
 
     format.width = Some(3);
     format.x = 80;
     s.write_text(txt, &format);
 
-    // format.width = Some(1);
-    // format.x = 85;
-    // s.write_text(txt, &format);
+    format.width = Some(1);
+    format.x = 85;
+    s.write_text(txt, &format);
 
     return s;
 }

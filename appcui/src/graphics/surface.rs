@@ -617,8 +617,6 @@ impl Surface {
                 chars_count = 0;
                 strip_spaces = false;
             }
-            let tmp = &text[index..];
-
             if ((last_char_type == CharacterType::Word) && (last_char_type != char_type))
                 || (last_char_type == CharacterType::Other)
             {
@@ -636,20 +634,12 @@ impl Surface {
 
             if (char_type == CharacterType::NewLine) || (chars_count == width) {
                 if end_ofs <= start_ofs {
-                    println!("Word bigger than the line (start={start_ofs}, end={end_ofs}, index={index})");
+                    //println!("Word bigger than the line (start={start_ofs}, end={end_ofs}, index={index})");
                     end_ofs = index;
                     chars_count_end_ofs = chars_count;
                 }
                 // print the part
-                println!(
-                    "start={} end={} =>'{}' , next={} index={} =>'{}'",
-                    start_ofs,
-                    end_ofs,
-                    &text[start_ofs..end_ofs],
-                    next_ofs,
-                    index,
-                    &text[next_ofs..index],
-                );
+                // println!("start={} end={} =>'{}' , next={} index={} =>'{}'",start_ofs,end_ofs,&text[start_ofs..end_ofs],next_ofs,index,&text[next_ofs..index]);
                 self.write_text_single_line(
                     &text[start_ofs..end_ofs],
                     y,
@@ -671,13 +661,7 @@ impl Surface {
                     }
                 }
                 last_char_type = char_type;
-                println!(
-                    "   ->new_start={}, chars_count={}, index={} [{strip_spaces}]=> '{}'\n",
-                    start_ofs,
-                    chars_count,
-                    index,
-                    &text[start_ofs..]
-                );
+                //println!("   ->new_start={}, chars_count={}, index={} [{strip_spaces}]=> '{}'\n",start_ofs,chars_count,index,&text[start_ofs..]);
                 y += 1;
                 continue;
             }
