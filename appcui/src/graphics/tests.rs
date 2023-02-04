@@ -882,7 +882,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     assert_eq!(s.compute_hash(), 0x3CE81721E1BB64FA);
 }
 
-fn print_word_wrapped(txt: &str, width: u32, height: u32)->SurfaceTester {
+fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize)->SurfaceTester {
     let mut s = SurfaceTester::new(width, height);
     println!("{txt}");
     let mut format = TextFormat::multi_line_with_text_wrap(
@@ -893,6 +893,8 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32)->SurfaceTester {
         TextAlignament::Left,
         TextWrap::Word,
     );
+    format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
+    format.hotkey_pos = Some(hotkey_pos);
     s.write_text(txt, &format);  
 
     format.width = Some(11);
@@ -927,13 +929,19 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32)->SurfaceTester {
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_1() {
-    let mut s = print_word_wrapped("This is     a line that       will be wrapped    on multiple lines on a given long-character width", 90, 20);
+    let mut s = print_word_wrapped("This is     a line that       will be wrapped    on multiple lines on a given long-character width", 90, 20, 16);
     s.print();
     //assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_2() {
-    let mut s = print_word_wrapped("+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc", 90, 20);
+    let mut s = print_word_wrapped("+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc", 90, 20, 12);
+    s.print();
+    //assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
+}
+#[test]
+fn check_write_text_multi_line_word_wrap_3() {
+    let mut s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 18);
     s.print();
     //assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
 }
