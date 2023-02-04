@@ -56,7 +56,7 @@ impl OnPaint for CheckBox {
                 params.HotKeyPosition = Members->HotKeyOffset;
                 params.HotKeyColor    = colHK;
             */
-            surface.write_text(&self.caption, &format);
+            surface.write_text(&self.caption.get_text(), &format);
         }
         if self.checked {
             let col = if self.is_enabled() {
