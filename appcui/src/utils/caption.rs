@@ -8,28 +8,56 @@ pub (crate) struct Caption
     hotkey: Key
 }
 impl Caption {
-    fn new(text: &str, has_hotkey: bool)->Self {
+    pub (crate) fn new(text: &str, process_hotkey: bool)->Self {
         let mut s = Caption {
-            text: String::with_capacity(text.len()),
+            text: String::with_capacity(text.len()+16),
             chars_count: 0,
             hotkey_pos: 0,
             hotkey: Key::default()
         };
+        s.set_text(text, process_hotkey);
         s
     }
-    fn set_text(&mut self, text: &str, has_hotkey: bool) {
-
+    pub (crate) fn set_text(&mut self, text: &str, process_hotkey: bool) {
+        if (process_hotkey) && (text.len()>0) {
+            // search for &<char>
+            let buf = text.as_bytes();
+            let len = buf.len()-1;
+            let mut pos = 0;
+            self.hotkey = Key::default();
+            while pos<len {
+                if buf[pos]==b'&' {
+                    self.hotkey = Key::from_char(buf[pos+1] as char, KeyModifier::Alt);
+                    if self.hotkey.code != KeyCode::None {
+                        self.hotkey_pos = pos as u32;
+                        break;
+                    }
+                }
+                pos+=1;
+            }
+            if self.hotkey.code!=KeyCode::None {
+                self.text.clear();
+                self.text.push_str(&text[..pos]);
+                self.text.push_str(&text[pos+1..]);
+            }
+        } else {
+            self.text.clear();
+            self.text.push_str(text);
+            self.hotkey_pos = 0;
+            self.hotkey = Key::default();
+        }
+        self.chars_count = self.text.chars().count() as u32;
     }
     #[inline]
-    fn get_text(&self)->&str {
+    pub (crate) fn get_text(&self)->&str {
         self.text.as_str()
     }
     #[inline]
-    fn get_chars_count(&self)->u32 {
+    pub (crate) fn get_chars_count(&self)->u32 {
         self.chars_count
     }
     #[inline]
-    fn get_hotkey_pos(&self)->Option<u32> {
+    pub (crate) fn get_hotkey_pos(&self)->Option<u32> {
         if self.hotkey.code == KeyCode::None {
             None
         } else {
@@ -37,11 +65,11 @@ impl Caption {
         }
     }
     #[inline]
-    fn get_hotkey(&self)->Key {
+    pub (crate) fn get_hotkey(&self)->Key {
         self.hotkey
     }
     #[inline]
-    fn has_hotkey(&self)->bool {
+    pub (crate) fn has_hotkey(&self)->bool {
         self.hotkey.code != KeyCode::None
     }
 }

@@ -5,11 +5,12 @@ use super::StatusFlags;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
+use crate::utils::*;
 use AppCUIProcMacro::AppCUIControl;
 
 #[AppCUIControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
 pub struct CheckBox {
-    caption: String,
+    caption: Caption,
     checked: bool,
 }
 
@@ -20,7 +21,7 @@ impl CheckBox {
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),
-            caption: String::from(caption),
+            caption: Caption::new(caption,true),
             checked,
         };
         cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
