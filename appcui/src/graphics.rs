@@ -30,5 +30,6 @@ pub use self::pixel::Pixel;
 pub use self::image::Image;
 pub use self::text_format::TextAlignament;
 pub use self::text_format::TextFormat;
+pub use self::text_format::TextWrap;
 pub (crate) use self::clip_area::ClipArea;
 pub (crate) use self::point::Point;

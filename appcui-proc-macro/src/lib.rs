@@ -39,6 +39,13 @@ mod templates {
         fn on_mouse_event(&mut self, event: &MouseEvent){ self.base.on_mouse_event(event); }
     }
     "; 
+
+    pub static ON_DEFAULT_ACTION_TRAIT: &str = "
+    impl OnDefaultAction for $STRUCT_NAME$ {
+        fn on_default_action(&mut self){ self.base.on_default_action(); }
+    }
+    "; 
+
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
@@ -62,6 +69,9 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     }
     if !a.on_mouse_event {
         code.push_str(templates::ON_MOUSE_EVENT_TRAIT);
+    }
+    if !a.on_default_action {
+        code.push_str(templates::ON_DEFAULT_ACTION_TRAIT);
     }
     // replace templates
     code = code

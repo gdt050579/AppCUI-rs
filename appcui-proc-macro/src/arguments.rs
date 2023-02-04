@@ -14,6 +14,7 @@ pub struct Arguments {
     pub on_paint: bool,
     pub on_key_pressed: bool,
     pub on_mouse_event: bool,
+    pub on_default_action: bool,
 
     // internal
     state: State,
@@ -32,6 +33,7 @@ impl Arguments {
             on_paint: false,
             on_key_pressed: false,
             on_mouse_event: false,
+            on_default_action: false,
         }
     }
 
@@ -68,8 +70,9 @@ impl Arguments {
                 "OnPaint" => self.on_paint = true,
                 "OnKeyPressed" => self.on_key_pressed = true,
                 "OnMouseEvent" => self.on_mouse_event = true,
+                "OnDefaultAction" => self.on_default_action = true,
                 other => {
-                    panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed, OnMouseEvent");
+                    panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed, OnMouseEvent, OnDefaultAction");
                 }
             }
         }

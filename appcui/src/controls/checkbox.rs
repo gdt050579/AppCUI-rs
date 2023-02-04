@@ -7,7 +7,7 @@ use crate::input::*;
 use crate::system::*;
 use AppCUIProcMacro::AppCUIControl;
 
-#[AppCUIControl(overwrite=OnPaint)]
+#[AppCUIControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed)]
 pub struct CheckBox {
     caption: String,
     checked: bool,
@@ -43,37 +43,53 @@ impl OnPaint for CheckBox {
         };
 
         surface.write_string(0, 0, "[ ] ", col_text, false);
-        let mut format = TextFormat::new(4,0,col_text,TextAlignament::Left,self.get_height()>1);
-        /*
-            params.HotKeyPosition = Members->HotKeyOffset;
-            params.HotKeyColor    = colHK;
-            if (Members->Layout.Height == 1)
-            {
+        let w = self.get_width();
+        if w > 4 {
+            let mut format =
+                TextFormat::new(4, 0, col_text, TextAlignament::Left, self.get_height() > 1);
+            if format.multi_line {
+                format.text_wrap = TextWrap::Word;
+                format.width = Some(w-4);
             }
-            else
-            {
-                params.Width = Members->Layout.Width - 4; // without the '[ ] ' characters
-            }
-        */
-        surface.write_text(&self.caption, &format);
+            /*
+                params.HotKeyPosition = Members->HotKeyOffset;
+                params.HotKeyColor    = colHK;
+            */
+            surface.write_text(&self.caption, &format);
+        }
         if self.checked {
-            let col = if self.is_enabled() { theme.symbol.checked } else {theme.symbol.inactive };
-            surface.set(1,0,Character::with_attributes(SpecialChar::CheckMark,col));
+            let col = if self.is_enabled() {
+                theme.symbol.checked
+            } else {
+                theme.symbol.inactive
+            };
+            surface.set(
+                1,
+                0,
+                Character::with_attributes(SpecialChar::CheckMark, col),
+            );
         }
         if self.has_focus() {
             surface.set_cursor(1, 0);
         }
     }
 }
-
-/*
-namespace AppCUI::Controls
+impl OnDefaultAction for CheckBox
 {
-
-void CheckBox::Paint(Graphics::Renderer& renderer)
-{
-
+    fn on_default_action(&mut self) {
+        self.checked = !self.checked;
+        // RaiseEvent(Event::CheckedStatusChanged); ???
+    }
 }
+impl OnKeyPressed for CheckBox {
+    fn on_key_pressed(&mut self, key: Key, _character: char) 
+    {
+        if (key.modifier == KeyModifier::None) && ((key.code == KeyCode::Space) || (key.code == KeyCode::Enter)) {
+            self.on_default_action();
+        }
+    }
+}
+/*
 void CheckBox::OnHotKey()
 {
     SetChecked(!IsChecked());

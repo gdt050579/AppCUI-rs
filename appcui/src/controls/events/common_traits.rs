@@ -11,5 +11,8 @@ pub trait OnKeyPressed {
 pub trait OnMouseEvent {
     fn on_mouse_event(&mut self, _event: &MouseEvent) {}
 }
-pub trait Control: OnPaint + OnKeyPressed + OnMouseEvent {
+pub trait OnDefaultAction {
+    fn on_default_action(&mut self) {}
+}
+pub trait Control: OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction {
 }
