@@ -21,7 +21,7 @@ impl CheckBox {
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),
-            caption: Caption::new(caption,true),
+            caption: Caption::new(caption, true),
             checked,
         };
         cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
@@ -50,7 +50,7 @@ impl OnPaint for CheckBox {
                 TextFormat::new(4, 0, col_text, TextAlignament::Left, self.get_height() > 1);
             if format.multi_line {
                 format.text_wrap = TextWrap::Word;
-                format.width = Some(w-4);
+                format.width = Some(w - 4);
             }
             if self.caption.has_hotkey() {
                 format.hotkey_pos = self.caption.get_hotkey_pos();
@@ -75,19 +75,21 @@ impl OnPaint for CheckBox {
         }
     }
 }
-impl OnDefaultAction for CheckBox
-{
+impl OnDefaultAction for CheckBox {
     fn on_default_action(&mut self) {
         self.checked = !self.checked;
         // RaiseEvent(Event::CheckedStatusChanged); ???
     }
 }
 impl OnKeyPressed for CheckBox {
-    fn on_key_pressed(&mut self, key: Key, _character: char) 
-    {
-        if (key.modifier == KeyModifier::None) && ((key.code == KeyCode::Space) || (key.code == KeyCode::Enter)) {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> KeyPressedResult {
+        if (key.modifier == KeyModifier::None)
+            && ((key.code == KeyCode::Space) || (key.code == KeyCode::Enter))
+        {
             self.on_default_action();
+            return KeyPressedResult::Processed;
         }
+        return KeyPressedResult::Ignored;
     }
 }
 impl OnMouseEvent for CheckBox {
