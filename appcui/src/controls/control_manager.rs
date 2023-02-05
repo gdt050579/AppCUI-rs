@@ -1,4 +1,5 @@
-use super::events::{OnKeyPressed, OnPaint, OnMouseEvent, OnDefaultAction};
+use super::events::Event;
+use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint};
 use super::layout::ControlLayout;
 use super::{ControlWrapper, Layout};
 use crate::graphics::*;
@@ -61,9 +62,13 @@ impl ControlManager {
         self.status_flags.contains(StatusFlags::Enabled)
     }
     #[inline]
-    pub fn has_focus(&self)-> bool { false }
+    pub fn has_focus(&self) -> bool {
+        false
+    }
     #[inline]
-    pub fn is_mouse_over(&self)->bool { false }
+    pub fn is_mouse_over(&self) -> bool {
+        false
+    }
     #[inline]
     pub fn set_size_bounds(
         &mut self,
@@ -72,7 +77,8 @@ impl ControlManager {
         max_width: u16,
         max_height: u16,
     ) {
-        self.layout.set_size_bounds(min_width, min_height, max_width, max_height);
+        self.layout
+            .set_size_bounds(min_width, min_height, max_width, max_height);
     }
 
     #[inline]
@@ -151,6 +157,9 @@ impl ControlManager {
         surface.reset_clip();
         surface.reset_origin();
         return true;
+    }
+    pub(crate) fn raise_event(&self, event: Event) {
+        todo!();
     }
 }
 impl OnPaint for ControlManager {}

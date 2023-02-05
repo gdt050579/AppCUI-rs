@@ -78,7 +78,7 @@ impl OnPaint for CheckBox {
 impl OnDefaultAction for CheckBox {
     fn on_default_action(&mut self) {
         self.checked = !self.checked;
-        // RaiseEvent(Event::CheckedStatusChanged); ???
+        self.raise_event(Event::CheckedStatusChanged);
     }
 }
 impl OnKeyPressed for CheckBox {
