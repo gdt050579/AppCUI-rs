@@ -3,6 +3,7 @@ use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint};
 use super::layout::ControlLayout;
 use super::{ControlWrapper, Layout};
 use crate::graphics::*;
+use crate::input::*;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 8)]
@@ -27,6 +28,7 @@ pub struct ControlManager {
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
+    pub(crate) hotkey: Key,
 }
 
 impl ControlManager {
@@ -43,6 +45,7 @@ impl ControlManager {
             status_flags: status_flags,
             screen_clip: ClipArea::default(),
             screen_origin: Point::default(),
+            hotkey: Key::default(),
         }
     }
     #[inline]
@@ -79,6 +82,14 @@ impl ControlManager {
     ) {
         self.layout
             .set_size_bounds(min_width, min_height, max_width, max_height);
+    }
+    #[inline]
+    pub fn set_hotkey(&mut self, hotkey: Key) {
+        self.hotkey = hotkey
+    }
+    #[inline]
+    pub fn get_hotkey(&self) -> Key {
+        self.hotkey
     }
 
     #[inline]
