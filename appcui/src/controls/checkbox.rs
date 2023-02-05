@@ -25,6 +25,8 @@ impl CheckBox {
             checked,
         };
         cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
+        let hotkey = cb.caption.get_hotkey();
+        cb.set_hotkey(hotkey);
         cb
     }
 }
