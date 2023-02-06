@@ -18,7 +18,7 @@ impl App {
             TerminalType::new(TerminalType::Debug).expect("Unable to create a terminal object !");
         let surface = Surface::new(term.get_width(), term.get_height());
         App {
-            theme: Theme::default(),
+            theme: Theme::new(),
             terminal: term,
             surface: surface,
             root_control: ControlWrapper::new(Desktop::new()),

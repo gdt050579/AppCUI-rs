@@ -38,7 +38,7 @@ pub struct Theme {
     pub symbol: Symbol,
 }
 impl Theme {
-    fn new()->Self {
+    pub(crate) fn new()->Self {
         let mut t = Theme::default();
         t.set_regular_theme();
         return t;
