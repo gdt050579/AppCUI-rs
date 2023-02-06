@@ -16,6 +16,8 @@ use control_manager::StatusFlags;
 // controls
 pub mod desktop;
 pub mod checkbox;
+pub mod label;
 // re-export
 pub use desktop::Desktop;
 pub use checkbox::CheckBox;
+pub use label::Label;
