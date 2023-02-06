@@ -1,4 +1,4 @@
-use crate::input::{MouseButton, MouseWheelDirection};
+use crate::input::{MouseButton, MouseWheelDirection, Key, KeyModifier};
 
 #[derive(Copy,Clone,PartialEq,Debug)]
 pub (crate) struct MouseButtonDownEvent
@@ -39,13 +39,25 @@ pub (crate) struct MouseWheelEvent
     pub (crate) y: i32,
     pub (crate) direction: MouseWheelDirection
 }
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct KeyPressedEvent {
+    pub key: Key,
+    pub character: char,
+}
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct KeyModifierChangedEvent {
+    pub new_state: KeyModifier,
+    pub old_state: KeyModifier,
+}
+
 
 #[derive(Copy,Clone,PartialEq,Debug)]
 pub (crate) enum SystemEvent
 {
     None,
     AppClose,
-    KeyEvent(super::KeyEvent),
+    KeyPressed(KeyPressedEvent),
+    KeyModifierChanged(KeyModifierChangedEvent),
     Resize(super::Size),
     MouseButtonDown(MouseButtonDownEvent),
     MouseButtonUp(MouseButtonUpEvent),

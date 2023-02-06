@@ -1,16 +1,18 @@
+use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::input::MouseWheelDirection;
 
+use super::system_event::KeyModifierChangedEvent;
 use super::CharFlags;
 use super::Color;
-use super::KeyEvent;
+use super::KeyPressedEvent;
 use super::MouseButtonDownEvent;
 use super::MouseButtonUpEvent;
+use super::MouseDoubleClickEvent;
 use super::MouseMoveEvent;
 use super::MouseWheelEvent;
-use super::MouseDoubleClickEvent;
 use super::Surface;
 use super::SystemEvent;
 use super::Terminal;
@@ -636,17 +638,16 @@ impl Terminal for WindowsTerminal {
                     }
                     let old_state = self.shift_state;
                     self.shift_state = key_modifier;
-                    return SystemEvent::KeyEvent(KeyEvent::new_modifier_changed(
-                        old_state,
-                        key_modifier,
-                    ));
+                    return SystemEvent::KeyModifierChanged(KeyModifierChangedEvent {
+                        new_state: key_modifier,
+                        old_state: old_state,
+                    });
                 }
             }
-            return SystemEvent::KeyEvent(KeyEvent::new_key_pressed(
-                key_code,
-                key_modifier,
+            return SystemEvent::KeyPressed(KeyPressedEvent {
+                key: Key::new(key_code, key_modifier),
                 character,
-            ));
+            });
         }
 
         // mouse processing
@@ -691,7 +692,11 @@ impl Terminal for WindowsTerminal {
                         }
                     }
                     DOUBLE_CLICK => {
-                        return SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
+                        return SystemEvent::MouseDoubleClick(MouseDoubleClickEvent {
+                            x,
+                            y,
+                            button,
+                        });
                     }
                     MOUSE_MOVED => {
                         return SystemEvent::MouseMove(MouseMoveEvent { x, y, button });
