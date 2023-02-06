@@ -25,6 +25,7 @@ pub struct ControlManager {
     layout: ControlLayout,
     margins: Margins,
     pub(crate) children: Vec<ControlWrapper>,
+    pub(crate) focused_child: u32,
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
@@ -35,6 +36,7 @@ impl ControlManager {
     pub fn new(layout: Layout, status_flags: StatusFlags) -> Self {
         Self {
             children: Vec::new(),
+            focused_child: 0,
             layout: ControlLayout::new(layout.format),
             margins: Margins {
                 left: 0,
@@ -63,6 +65,12 @@ impl ControlManager {
     #[inline]
     pub fn is_enabled(&self) -> bool {
         self.status_flags.contains(StatusFlags::Enabled)
+    }
+    #[inline]
+    pub fn can_receive_input(&self) -> bool {
+        // all 3 flags must be present for an object to be able to receive input (key or mouse)
+        self.status_flags
+            .contains(StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput)
     }
     #[inline]
     pub fn has_focus(&self) -> bool {

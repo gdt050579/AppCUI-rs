@@ -6,7 +6,7 @@ pub trait OnPaint {
     fn on_paint(&self, _surface: &mut Surface, _theme: &Theme) {}
 }
 #[repr(u8)]
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,PartialEq)]
 pub enum KeyPressedResult {
     Processed, Ignored
 }

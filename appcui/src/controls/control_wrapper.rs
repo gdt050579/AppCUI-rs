@@ -1,4 +1,6 @@
-use super::events::Control;
+use crate::input::Key;
+
+use super::events::{Control, KeyPressedResult};
 use super::ControlManager;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -19,21 +21,21 @@ impl ControlWrapper {
     pub(crate) fn get_control_mut(&mut self) -> &mut dyn Control {
         unsafe { &mut *(self.interface.as_ptr()) }
     }
-    #[inline]
+    #[inline(always)]
     pub(crate) fn get_manager(&self) -> &ControlManager {
         unsafe { &*self.manager }
     }
-    #[inline]
+    #[inline(always)]
     pub(crate) fn get_manager_mut(&mut self) -> &mut ControlManager {
         unsafe { &mut *self.manager }
     }
     #[inline]
     pub(crate) fn get_version(&self) -> u32 {
-       self.version
+        self.version
     }
     pub(crate) fn new<T>(obj: T) -> ControlWrapper
     where
-        T: Control +'static,
+        T: Control + 'static,
     {
         let ptr = Box::into_raw(Box::new(obj));
         let ctrl: NonNull<dyn Control> = unsafe { NonNull::new_unchecked(ptr) };
@@ -42,6 +44,19 @@ impl ControlWrapper {
             manager: ptr as *mut ControlManager,
             version: (GLOBAL_VERSION.fetch_add(1, Ordering::SeqCst) & 0xFFFFFFFF) as u32,
         }
+    }
+    pub(crate) fn process_keypressed_event(&mut self, key: Key, character: char) -> bool {
+        let manager = self.get_manager_mut();
+        let idx = manager.focused_child as usize;
+        if idx < manager.children.len() {
+            let focused_child = &mut manager.children[idx];
+            let focused_child_manager = focused_child.get_manager_mut();
+            if focused_child_manager.can_receive_input() && focused_child.process_keypressed_event(key, character) {
+                return true;        
+            }
+        }
+        // if the child did not process the key, try to process-it myself
+        return self.get_control_mut().on_key_pressed(key, character) == KeyPressedResult::Processed;
     }
 }
 
