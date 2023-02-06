@@ -29,6 +29,10 @@ impl CheckBox {
         cb.set_hotkey(hotkey);
         cb
     }
+    #[inline] 
+    fn is_checked(&self) -> bool {
+        self.checked
+    }
 }
 impl OnPaint for CheckBox {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
