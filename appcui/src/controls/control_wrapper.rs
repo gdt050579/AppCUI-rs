@@ -1,4 +1,6 @@
+use crate::graphics::Surface;
 use crate::input::Key;
+use crate::system::Theme;
 
 use super::events::{Control, KeyPressedResult};
 use super::ControlManager;
@@ -57,6 +59,15 @@ impl ControlWrapper {
         }
         // if the child did not process the key, try to process-it myself
         return self.get_control_mut().on_key_pressed(key, character) == KeyPressedResult::Processed;
+    }
+    pub (crate) fn paint(&mut self, surface: &mut Surface, theme: &Theme) {
+        self.get_manager().prepare_paint(surface);
+        self.get_control().on_paint(surface, theme);
+        // paint all children
+        // should be painted in a specific order
+        for c in self.get_manager_mut().children.iter_mut() {
+            c.paint(surface, theme);
+        }
     }
 }
 

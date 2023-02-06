@@ -44,17 +44,9 @@ impl App {
             self.terminal.get_height() as u16,
         );
     }
-    fn paint_control(wrapper: &mut ControlWrapper, surface: &mut Surface, theme: &Theme) {
-        wrapper.get_manager().prepare_paint(surface);
-        wrapper.get_control().on_paint(surface, theme);
-        // paint all children
-        // should be painted in a specific order
-        for c in wrapper.get_manager_mut().children.iter_mut() {
-            App::paint_control(c, surface, theme);
-        }
-    }
+
     fn paint(&mut self) {
-        App::paint_control(&mut self.root_control, &mut self.surface, &self.theme);
+        self.root_control.paint(&mut self.surface, &self.theme);
         self.terminal.update_screen(&self.surface);
     }
 }
