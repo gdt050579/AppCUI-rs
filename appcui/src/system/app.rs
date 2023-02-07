@@ -1,9 +1,7 @@
 use super::Theme;
 use crate::controls::ControlWrapper;
-use crate::controls::events::Control;
 use crate::controls::*;
 use crate::graphics::{ClipArea, Point, Surface};
-use crate::input::Key;
 use crate::terminal::*;
 
 pub struct App {
