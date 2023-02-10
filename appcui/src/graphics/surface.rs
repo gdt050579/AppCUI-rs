@@ -508,7 +508,7 @@ impl Surface {
         }
     }
     fn write_text_multi_line_no_wrap(&mut self, text: &str, format: &TextFormat) {
-        let mut y = format.y + self.origin.y;
+        let mut y = format.y;
         let mut start_ofs = 0usize;
         let mut chars_count = 0u16;
         let mut ch_index = 0usize;
@@ -543,7 +543,7 @@ impl Surface {
         if width == 0 {
             return; // nothing to draw
         }
-        let mut y = format.y + self.origin.y;
+        let mut y = format.y;
         let mut start_ofs = 0usize;
         let mut chars_count = 0u16;
         let mut ch_index = 0usize;
@@ -592,7 +592,7 @@ impl Surface {
         if width == 0 {
             return; // nothing to draw
         }
-        let mut y = format.y + self.origin.y;
+        let mut y = format.y;
         let mut start_ofs = 0usize;
         let mut end_ofs = 0usize;
         let mut next_ofs = 0usize;

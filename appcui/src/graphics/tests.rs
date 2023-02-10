@@ -988,3 +988,38 @@ fn check_write_text_multi_line_word_wrap_aligned() {
     //s.print();
     assert_eq!(s.compute_hash(), 0x70526C060A7E28C6);
 }
+
+#[test]
+fn check_write_text_multi_line_word_wrap_aligned_v2() {
+    let txt = "This is     a line that       will be wrapped    on multiple lines on a given long-character width";
+    let mut s = SurfaceTester::new(100, 15);
+    s.set_origin(2, 2);
+    s.write_string(0, 0, "Hotkey is: ", CharAttribute::with_color(Color::Yellow, Color::Red), false);
+    let ch = txt.chars().nth(16).unwrap();
+    s.set(12, 0, Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None));
+    let mut format = TextFormat::multi_line_with_text_wrap(
+        2,
+        1,
+        12,
+        CharAttribute::with_color(Color::Black, Color::Silver),
+        TextAlignament::Left,
+        TextWrap::Word,
+    );
+    format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
+    format.hotkey_pos = Some(16);
+    s.write_text(txt, &format);  
+
+    format.width = Some(20);
+    format.x = 45;
+    format.align = TextAlignament::Center;
+    s.write_text(txt, &format);    
+    
+
+    format.width = Some(15);
+    format.x = 88;
+    format.align = TextAlignament::Right;
+    s.write_text(txt, &format);
+    
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xB7682D58B284C726);
+}
