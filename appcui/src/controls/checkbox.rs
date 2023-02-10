@@ -29,7 +29,7 @@ impl CheckBox {
         cb.set_hotkey(hotkey);
         cb
     }
-    #[inline] 
+    #[inline]
     pub fn is_checked(&self) -> bool {
         self.checked
     }
@@ -53,7 +53,7 @@ impl OnPaint for CheckBox {
         let w = self.get_width();
         if w > 4 {
             let mut format =
-                TextFormat::new(4, 0, col_text, TextAlignament::Left, self.get_height() > 1);
+                TextFormat::new(4, 0, col_text, TextAlignament::Left, self.get_height() > 1);            
             if format.multi_line {
                 format.text_wrap = TextWrap::Word;
                 format.width = Some(w - 4);
@@ -62,6 +62,7 @@ impl OnPaint for CheckBox {
                 format.hotkey_pos = self.caption.get_hotkey_pos();
                 format.hotkey_attr = Some(col_hot_key);
             }
+            format.width = Some(self.caption.get_chars_count() as u16);
             surface.write_text(&self.caption.get_text(), &format);
         }
         if self.checked {
