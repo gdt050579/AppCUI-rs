@@ -62,7 +62,7 @@ impl OnPaint for CheckBox {
                 format.hotkey_pos = self.caption.get_hotkey_pos();
                 format.hotkey_attr = Some(col_hot_key);
             }
-            format.width = Some(self.caption.get_chars_count() as u16);
+            format.chars_count = Some(self.caption.get_chars_count() as u16);
             surface.write_text(&self.caption.get_text(), &format);
         }
         if self.checked {
