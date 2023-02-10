@@ -1,0 +1,12 @@
+[package]
+name = "examples"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[dev-dependencies]
+appcui = { version = "1.0.0", path = "../appcui" }
+
+[[example]]
+name = "SimpleWindow"
+path = "SimpleWindow.rs"

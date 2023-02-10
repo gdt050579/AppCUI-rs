@@ -3,4 +3,5 @@
 members = [
   "appcui", 
   "appcui-proc-macro",
+  "examples"
 ]
