@@ -13,7 +13,7 @@ pub struct Label {
     caption: Caption,
 }
 impl Label {
-    pub(crate) fn new(caption: &str, layout: Layout) -> Self {
+    pub fn new(caption: &str, layout: Layout) -> Self {
         Label {
             base: ControlManager::new(layout, StatusFlags::Visible | StatusFlags::Enabled),
             caption: Caption::new(caption, true),
@@ -33,6 +33,7 @@ impl OnPaint for Label {
             format.text_wrap = TextWrap::Word;
             format.width = Some(self.get_width());
         }
+        format.chars_count = Some(self.caption.get_chars_count() as u16);
         surface.write_text(self.caption.get_text(), &format);
     }
 }
