@@ -1,6 +1,7 @@
 use super::Theme;
 use crate::controls::ControlWrapper;
 use crate::controls::*;
+use crate::controls::events::Control;
 use crate::graphics::{ClipArea, Point, Surface};
 use crate::terminal::*;
 
@@ -14,7 +15,7 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let term =
-            TerminalType::new(TerminalType::WindowsConsole).expect("Unable to create a terminal object !");
+            TerminalType::new(TerminalType::Debug).expect("Unable to create a terminal object !");
         let surface = Surface::new(term.get_width(), term.get_height());
         App {
             theme: Theme::new(),
@@ -41,6 +42,10 @@ impl App {
             SystemEvent::MouseWheel(_) => todo!(),
         }
 
+    }
+
+    pub fn add<T>(&mut self, window: T) where T: Control+'static {
+        self.root_control.get_manager_mut().children.push(ControlWrapper::new(window));
     }
 
     fn recompute_layouts(&mut self) {

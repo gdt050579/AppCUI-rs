@@ -15,7 +15,7 @@ pub struct CheckBox {
 }
 
 impl CheckBox {
-    pub(crate) fn new(caption: &str, layout: Layout, checked: bool) -> Self {
+    pub fn new(caption: &str, layout: Layout, checked: bool) -> Self {
         let mut cb = CheckBox {
             base: ControlManager::new(
                 layout,
@@ -30,7 +30,7 @@ impl CheckBox {
         cb
     }
     #[inline] 
-    fn is_checked(&self) -> bool {
+    pub fn is_checked(&self) -> bool {
         self.checked
     }
 }

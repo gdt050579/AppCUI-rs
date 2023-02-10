@@ -39,6 +39,10 @@ impl Caption {
                 self.text.clear();
                 self.text.push_str(&text[..pos]);
                 self.text.push_str(&text[pos+1..]);
+            } else {
+                self.text.clear();
+                self.hotkey_pos = 0;
+                self.text.push_str(text);
             }
         } else {
             self.text.clear();

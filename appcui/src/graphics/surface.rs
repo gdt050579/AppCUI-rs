@@ -460,7 +460,7 @@ impl Surface {
         ch_index: usize,
         format: &TextFormat,
     ) {
-        if self.clip.contains_y(y) == false {
+        if self.clip.contains_y(y+self.origin.y) == false {
             return; // no need to draw
         }
         let mut x = match format.align {
@@ -693,7 +693,7 @@ impl Surface {
             } else {
                 text.chars().count() as u16
             };
-            self.write_text_single_line(text, format.y + self.origin.y, chars_count, 0, format);
+            self.write_text_single_line(text, format.y, chars_count, 0, format);
         }
     }
 
