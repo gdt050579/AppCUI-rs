@@ -89,14 +89,14 @@ impl OnDefaultAction for CheckBox {
     }
 }
 impl OnKeyPressed for CheckBox {
-    fn on_key_pressed(&mut self, key: Key, _character: char) -> KeyPressedResult {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         if (key.modifier == KeyModifier::None)
             && ((key.code == KeyCode::Space) || (key.code == KeyCode::Enter))
         {
             self.on_default_action();
-            return KeyPressedResult::Processed;
+            return EventProcessStatus::Processed;
         }
-        return KeyPressedResult::Ignored;
+        return EventProcessStatus::Ignored;
     }
 }
 impl OnMouseEvent for CheckBox {

@@ -2,7 +2,7 @@ use crate::graphics::Surface;
 use crate::input::Key;
 use crate::system::Theme;
 
-use super::events::{Control, KeyPressedResult};
+use super::events::{Control, EventProcessStatus};
 use super::ControlManager;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -58,7 +58,7 @@ impl ControlWrapper {
             }
         }
         // if the child did not process the key, try to process-it myself
-        return self.get_control_mut().on_key_pressed(key, character) == KeyPressedResult::Processed;
+        return self.get_control_mut().on_key_pressed(key, character) == EventProcessStatus::Processed;
     }
     pub (crate) fn paint(&mut self, surface: &mut Surface, theme: &Theme) {
         self.get_manager().prepare_paint(surface);

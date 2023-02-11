@@ -30,7 +30,7 @@ mod templates {
 
     pub static ON_KEY_PRESSED_TRAIT: &str = "
     impl OnKeyPressed for $STRUCT_NAME$ {
-        fn on_key_pressed(&mut self, key: Key, character: char)->KeyPressedResult { return self.base.on_key_pressed(key, character); }
+        fn on_key_pressed(&mut self, key: Key, character: char)->EventProcessStatus { return self.base.on_key_pressed(key, character); }
     }
     ";   
     
