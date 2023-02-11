@@ -36,7 +36,7 @@ mod templates {
     
     pub static ON_MOUSE_EVENT_TRAIT: &str = "
     impl OnMouseEvent for $STRUCT_NAME$ {
-        fn on_mouse_event(&mut self, event: &MouseEvent){ self.base.on_mouse_event(event); }
+        fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus { return self.base.on_mouse_event(event); }
     }
     "; 
 

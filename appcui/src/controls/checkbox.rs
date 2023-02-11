@@ -100,7 +100,7 @@ impl OnKeyPressed for CheckBox {
     }
 }
 impl OnMouseEvent for CheckBox {
-    fn on_mouse_event(&mut self, event: &MouseEvent) {
+    fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus {
         match event {
             MouseEvent::Enter => todo!(),
             MouseEvent::Leave => todo!(),
