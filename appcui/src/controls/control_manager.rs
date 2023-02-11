@@ -181,7 +181,7 @@ impl ControlManager {
         surface.reset_origin();
         return true;
     }
-    pub(crate) fn raise_event(&self, event: Event) {
+    pub(crate) fn raise_event(&self, _event: Event) {
         todo!();
     }
 }

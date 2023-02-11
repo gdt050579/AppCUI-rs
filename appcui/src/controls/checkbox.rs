@@ -102,10 +102,9 @@ impl OnKeyPressed for CheckBox {
 impl OnMouseEvent for CheckBox {
     fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus {
         match event {
-            MouseEvent::Enter => {
+            MouseEvent::Enter|MouseEvent::Leave => {
                 EventProcessStatus::Processed
             },
-            MouseEvent::Leave => EventProcessStatus::Processed,
             MouseEvent::Released(data) => {
                 if self.is_coord_in_control(data.x,data.y) {
                     self.on_default_action();
