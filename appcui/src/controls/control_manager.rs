@@ -99,6 +99,10 @@ impl ControlManager {
     pub fn get_hotkey(&self) -> Key {
         self.hotkey
     }
+    #[inline(always)]
+    pub (crate) fn is_coord_in_control(&self,x: i32, y: i32) -> bool {
+        (x>=0) && (y>=0) && (x<(self.layout.get_width() as i32)) && (y<(self.layout.get_height() as i32))
+    }
 
     #[inline]
     pub(crate) fn update_control_layout_and_screen_origin(

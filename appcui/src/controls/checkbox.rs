@@ -102,14 +102,17 @@ impl OnKeyPressed for CheckBox {
 impl OnMouseEvent for CheckBox {
     fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus {
         match event {
-            MouseEvent::Enter => todo!(),
-            MouseEvent::Leave => todo!(),
-            MouseEvent::Over => todo!(),
-            MouseEvent::Pressed => todo!(),
-            MouseEvent::Released => todo!(),
-            MouseEvent::DoubleClick => todo!(),
-            MouseEvent::Drag => todo!(),
-            MouseEvent::Wheel => todo!(),
+            MouseEvent::Enter => {
+                EventProcessStatus::Processed
+            },
+            MouseEvent::Leave => EventProcessStatus::Processed,
+            MouseEvent::Released(data) => {
+                if self.is_coord_in_control(data.x,data.y) {
+                    self.on_default_action();
+                }
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored
         }
     }
 }
@@ -129,11 +132,6 @@ void CheckBox::OnHotKey()
     }
     RaiseEvent(Event::CheckedStatusChanged);
 }
-void CheckBox::OnMouseReleased(int x, int y, Input::MouseButton)
-{
-    if (IsMouseInControl(x, y))
-        OnHotKey();
-}
 bool CheckBox::OnMouseEnter()
 {
     CREATE_CONTROL_CONTEXT(this, Members, false);
@@ -141,12 +139,4 @@ bool CheckBox::OnMouseEnter()
         this->ShowToolTip(Members->Text);
     return true;
 }
-bool CheckBox::OnMouseLeave()
-{
-    return true;
-}
-// handlers covariant
-
-
-
 */
