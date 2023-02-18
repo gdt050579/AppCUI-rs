@@ -1,5 +1,6 @@
-mod windows;
-mod debug;
+mod windows_terminal;
+mod debug_terminal;
+mod null_terminal;
 mod system_event;
 
 use super::graphics::Surface;
@@ -17,8 +18,8 @@ pub (crate) use self::system_event::MouseWheelEvent;
 pub (crate) use self::system_event::KeyPressedEvent;
 
 
-use self::windows::WindowsTerminal;
-use self::debug::DebugTerminal;
+use self::windows_terminal::WindowsTerminal;
+use self::debug_terminal::DebugTerminal;
 
 pub (crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
