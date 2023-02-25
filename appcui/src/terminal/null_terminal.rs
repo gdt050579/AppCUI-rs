@@ -1,10 +1,9 @@
-use super::Terminal;
 use super::SystemEvent;
+use super::Terminal;
 
-pub (crate) struct NullTerminal {}
+pub(crate) struct NullTerminal {}
 impl Terminal for NullTerminal {
-    fn update_screen(&mut self, surface: &crate::graphics::Surface) {
-    }
+    fn update_screen(&mut self, surface: &crate::graphics::Surface) {}
 
     fn get_width(&self) -> u32 {
         0
@@ -14,7 +13,7 @@ impl Terminal for NullTerminal {
         0
     }
 
-    fn get_system_event(&mut self)-> SystemEvent {
+    fn get_system_event(&mut self) -> SystemEvent {
         SystemEvent::None
     }
 }

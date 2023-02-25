@@ -1,9 +1,8 @@
 use super::Theme;
-use crate::controls::events::{Control, EventProcessStatus};
+use crate::controls::events::Control;
 use crate::controls::ControlManager;
 use crate::controls::*;
 use crate::graphics::{ClipArea, Point, Surface};
-use crate::input::Key;
 use crate::terminal::*;
 
 pub(crate) struct RuntimeManager {
@@ -20,7 +19,7 @@ impl RuntimeManager {
         let term =
             TerminalType::new(TerminalType::Debug).expect("Unable to create a terminal object !");
         let surface = Surface::new(term.get_width(), term.get_height());
-        let mut manager = RuntimeManager {
+        let manager = RuntimeManager {
             theme: Theme::new(),
             terminal: term,
             surface: surface,
@@ -38,7 +37,9 @@ impl RuntimeManager {
         T: Control + 'static,
     {
         let c = ControlManager::new(obj);
-        return ControlHandle::new(0, c.get_version());
+        let v = c.get_version();
+        self.root.get_base_mut().children.push(c);
+        return ControlHandle::new(0, v);
     }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
