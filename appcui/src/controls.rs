@@ -1,16 +1,15 @@
 pub mod layout;
 pub mod events;
-pub mod control_manager;
+pub mod control_base;
 pub mod control_handle;
-pub (crate) mod control_wrapper;
+pub (crate) mod control_manager;
 
 pub use layout::Layout;
-pub use control_manager::ControlManager;
+pub use control_base::ControlBase;
 pub use control_handle::ControlHandle;
+pub (crate) use control_manager::ControlManager;
 
-pub (crate) use control_wrapper::ControlWrapper;
-
-use control_manager::StatusFlags;
+use control_base::StatusFlags;
 
 
 // controls

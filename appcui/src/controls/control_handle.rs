@@ -6,7 +6,7 @@ pub struct ControlHandle<T> {
     _phantom: PhantomData<T>,
 }
 impl<T> ControlHandle<T> {
-    pub (super) fn new(index: u32, version: u32) -> Self {
+    pub (crate) fn new(index: u32, version: u32) -> Self {
         ControlHandle {
             index: index,
             version: version,

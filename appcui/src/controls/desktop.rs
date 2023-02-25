@@ -1,5 +1,5 @@
 use super::events::*;
-use super::ControlManager;
+use super::ControlBase;
 use super::Layout;
 use super::StatusFlags;
 use crate::graphics::*;
@@ -13,7 +13,7 @@ pub struct Desktop {}
 impl Desktop {
     pub(crate) fn new() -> Self {
         Desktop {
-            base: ControlManager::new(
+            base: ControlBase::new(
                 Layout::new("x:0,y:0,w:100%,h:100%"),
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),

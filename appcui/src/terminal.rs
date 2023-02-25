@@ -20,6 +20,7 @@ pub (crate) use self::system_event::KeyPressedEvent;
 
 use self::windows_terminal::WindowsTerminal;
 use self::debug_terminal::DebugTerminal;
+pub (crate) use self::null_terminal::NullTerminal;
 
 pub (crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);

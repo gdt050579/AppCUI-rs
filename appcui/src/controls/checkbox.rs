@@ -1,5 +1,5 @@
 use super::events::*;
-use super::ControlManager;
+use super::ControlBase;
 use super::Layout;
 use super::StatusFlags;
 use crate::graphics::*;
@@ -17,7 +17,7 @@ pub struct CheckBox {
 impl CheckBox {
     pub fn new(caption: &str, layout: Layout, checked: bool) -> Self {
         let mut cb = CheckBox {
-            base: ControlManager::new(
+            base: ControlBase::new(
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),

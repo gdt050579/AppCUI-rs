@@ -1,5 +1,5 @@
 use super::events::*;
-use super::ControlManager;
+use super::ControlBase;
 use super::Layout;
 use super::StatusFlags;
 use crate::graphics::*;
@@ -15,7 +15,7 @@ pub struct Label {
 impl Label {
     pub fn new(caption: &str, layout: Layout) -> Self {
         Label {
-            base: ControlManager::new(layout, StatusFlags::Visible | StatusFlags::Enabled),
+            base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled),
             caption: Caption::new(caption, true),
         }
     }
