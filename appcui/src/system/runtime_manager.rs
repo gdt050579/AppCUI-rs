@@ -1,8 +1,9 @@
 use super::Theme;
+use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
 use crate::controls::ControlManager;
 use crate::controls::*;
-use crate::graphics::{ClipArea, Point, Surface};
+use crate::graphics::Surface;
 use crate::terminal::*;
 
 pub(crate) struct RuntimeManager {
@@ -61,18 +62,8 @@ impl RuntimeManager {
     }
 
     fn recompute_layouts(&mut self) {
-        let client = ClipArea::new(
-            0,
-            0,
-            (self.terminal.get_width() as i32) - 1,
-            (self.terminal.get_height() as i32) - 1,
-        );
-        self.root.update_layout(
-            &client,
-            Point::default(),
-            self.terminal.get_width() as u16,
-            self.terminal.get_height() as u16,
-        );
+        let term_layout = ParentLayout::from(&self.terminal);
+        self.root.update_layout(&term_layout);
     }
 
     fn paint(&mut self) {
@@ -81,6 +72,7 @@ impl RuntimeManager {
     }
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
-        self.root.process_keypressed_event(event.key, event.character);
+        self.root
+            .process_keypressed_event(event.key, event.character);
     }
 }

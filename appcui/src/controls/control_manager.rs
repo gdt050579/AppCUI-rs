@@ -1,6 +1,7 @@
 use crate::graphics::{ClipArea, Point, Surface};
 use crate::input::Key;
 use crate::system::Theme;
+use crate::terminal::Terminal;
 
 use super::events::{Control, EventProcessStatus};
 use super::ControlBase;
@@ -8,6 +9,38 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 static GLOBAL_VERSION: AtomicUsize = AtomicUsize::new(0);
+
+pub(crate) struct ParentLayout {
+    pub(super) clip: ClipArea,
+    pub(super) origin: Point,
+    pub(super) width: u16,
+    pub(super) height: u16,
+}
+impl From<&mut ControlBase> for ParentLayout {
+    fn from(base: &mut ControlBase) -> Self {
+        ParentLayout {
+            clip: base.get_client_clip(),
+            origin: base.screen_origin,
+            width: base.get_width(),
+            height: base.get_height(),
+        }
+    }
+}
+impl From<&Box<dyn Terminal>> for ParentLayout {
+    fn from(terminal: &Box<dyn Terminal>) -> Self {
+        ParentLayout {
+            clip: ClipArea::new(
+                0,
+                0,
+                (terminal.get_width() as i32) - 1,
+                (terminal.get_height() as i32) - 1,
+            ),
+            origin: Point::default(),
+            width: terminal.get_width() as u16,
+            height: terminal.get_height() as u16,
+        }
+    }
+}
 
 pub(crate) struct ControlManager {
     interface: NonNull<dyn Control>,
@@ -62,27 +95,13 @@ impl ControlManager {
             }
         }
     }
-    pub(crate) fn update_layout(
-        &mut self,
-        parent_clip: &ClipArea,
-        parent_origin: Point,
-        parent_width: u16,
-        parent_height: u16,
-    ) {
+    pub(crate) fn update_layout(&mut self, parent_layout: &ParentLayout) {
         let base = self.get_base_mut();
-        base.update_control_layout_and_screen_origin(
-            parent_clip,
-            parent_origin,
-            parent_width,
-            parent_height,
-        );
+        base.update_control_layout_and_screen_origin(parent_layout);
         // process the same thing for its children
-        let client_clip = base.get_client_clip();
-        let w = base.get_width();
-        let h = base.get_height();
-        let p = base.screen_origin;
-        for child in &mut base.children {
-            child.update_layout(&client_clip, p, w, h);
+        let my_layout = ParentLayout::from(base);
+        for child in &mut self.get_base_mut().children {
+            child.update_layout(&my_layout);
         }
     }
     pub(crate) fn process_keypressed_event(
