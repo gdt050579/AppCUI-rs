@@ -13,7 +13,6 @@ pub(crate) struct ControlManager {
     interface: NonNull<dyn Control>,
     base: *mut ControlBase,
     version: u32,
-    index: u32,
 }
 impl ControlManager {
     #[inline]
@@ -46,7 +45,6 @@ impl ControlManager {
             interface: ctrl,
             base: ptr as *mut ControlBase,
             version: (GLOBAL_VERSION.fetch_add(1, Ordering::SeqCst) & 0xFFFFFFFF) as u32,
-            index: ControlBase::INVALID_CONTROL_ID,
         }
     }
     pub(crate) fn get_mut<T>(&mut self) -> &mut T
