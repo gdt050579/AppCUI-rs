@@ -1,25 +1,55 @@
-pub (crate) struct ToolTip
-{
-    visible: bool
+use crate::graphics::{Surface, Rect};
+
+use super::Theme;
+
+pub(crate) struct ToolTip {
+    visible: bool,
 }
 impl ToolTip {
-    pub (crate) fn new()->Self {
-        ToolTip {
-            visible: false
-        }
+    pub(crate) fn new() -> Self {
+        ToolTip { visible: false }
     }
     #[inline(always)]
-    pub (crate) fn is_visible(&self) {
+    pub(crate) fn is_visible(&self) -> bool {
         self.visible
     }
-    pub (crate) fn show(&mut self, text: &str, object_rect: &Rect, width: u32, height: u32) {
-        todo!();
+    pub(crate) fn show(&mut self, text: &str, object_rect: &Rect, screen_width: u32, screen_height: u32) {
+        self.visible = false;
+
+        let mut nr_lines = 0u32;
+        let max_width = screen_width / 2;
+        let mut w = 0u32;
+        let mut best_width = 0u32;
+        let mut chars_count = 0usize;
+        for c in text.chars() {
+            chars_count += 1;
+            if (c == '\n') || (c == '\r') {
+                best_width = best_width.max(w);
+                w = 0;
+                nr_lines += 1;
+                continue;
+            }
+            w += 1;
+            if w > max_width {
+                best_width = max_width;
+                w = 0;
+                nr_lines += 1;
+            }
+        }
+        if w > 0 {
+            best_width = best_width.max(w);
+            nr_lines += 1;
+        }
+        nr_lines = nr_lines.min(screen_height/4).max(1);
+        best_width = best_width.max(5)+2;
     }
-    pub (crate) fn hide(&mut self) {
+    pub(crate) fn hide(&mut self) {
         self.visible = false;
     }
-    pub (crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
-        if !self.visible { return; }
+    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
+        if !self.visible {
+            return;
+        }
         todo!();
     }
 }
