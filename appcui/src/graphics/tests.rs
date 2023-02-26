@@ -1,5 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
+use crate::graphics::Point;
 use crate::graphics::text_format::TextWrap;
 
 use super::CharAttribute;
@@ -1022,4 +1023,14 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
     
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7682D58B284C726);
+}
+
+#[test]
+fn check_point() {
+    let p = Point::default();
+    assert_eq!(p.x,0);
+    assert_eq!(p.y,0);
+    let p = Point::new(1,2);
+    assert_eq!(p.x,1);
+    assert_eq!(p.y,2);
 }
