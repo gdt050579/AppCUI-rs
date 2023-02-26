@@ -1,6 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
 use crate::graphics::Point;
+use crate::graphics::Rect;
 use crate::graphics::text_format::TextWrap;
 
 use super::CharAttribute;
@@ -1033,4 +1034,55 @@ fn check_point() {
     let p = Point::new(1,2);
     assert_eq!(p.x,1);
     assert_eq!(p.y,2);
+}
+
+#[test]
+fn check_rect_new() {
+    let r = Rect::new(1,2,3,4);
+    assert_eq!(r.get_left(),1);
+    assert_eq!(r.get_top(),2);
+    assert_eq!(r.get_right(),3);
+    assert_eq!(r.get_bottom(),4);
+    assert_eq!(r.get_width(),3);
+    assert_eq!(r.get_height(),3);
+    let r = Rect::new(3,4,1,2);
+    assert_eq!(r.get_left(),1);
+    assert_eq!(r.get_top(),2);
+    assert_eq!(r.get_right(),3);
+    assert_eq!(r.get_bottom(),4);
+    assert_eq!(r.get_width(),3);
+    assert_eq!(r.get_height(),3);
+    let r = Rect::new(1,1,1,1);  
+    assert_eq!(r.get_left(),1);
+    assert_eq!(r.get_top(),1);
+    assert_eq!(r.get_right(),1);
+    assert_eq!(r.get_bottom(),1);
+    assert_eq!(r.get_width(),1);
+    assert_eq!(r.get_height(),1);
+    let r = Rect::new(1,1,9,1);  
+    assert_eq!(r.get_left(),1);
+    assert_eq!(r.get_top(),1);
+    assert_eq!(r.get_right(),9);
+    assert_eq!(r.get_bottom(),1);
+    assert_eq!(r.get_width(),9);
+    assert_eq!(r.get_height(),1);
+}
+
+#[test]
+fn check_rect_with_size() {
+    let r = Rect::with_size(1,2,5,8);
+    assert_eq!(r.get_left(),1);
+    assert_eq!(r.get_top(),2);
+    assert_eq!(r.get_right(),5);
+    assert_eq!(r.get_bottom(),9);
+    assert_eq!(r.get_width(),5);
+    assert_eq!(r.get_height(),8);
+    let r = Rect::with_size(1,2,0,0);
+    assert_eq!(r.get_left(),1);
+    assert_eq!(r.get_top(),2);
+    assert_eq!(r.get_right(),1);
+    assert_eq!(r.get_bottom(),2);
+    assert_eq!(r.get_width(),1);
+    assert_eq!(r.get_height(),1);
+
 }

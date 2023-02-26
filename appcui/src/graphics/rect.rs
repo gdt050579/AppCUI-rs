@@ -31,8 +31,8 @@ impl Rect {
         Self {
             left: x,
             top: y,
-            right: x + (width as i32) - 1,
-            bottom: y + (height as i32) - 1,
+            right: x + (width as i32).max(1) - 1,
+            bottom: y + (height as i32).max(1) - 1,
         }
     }
     pub fn width_alignament(x: i32, y: i32, width: u16, height: u16, align: Alignament) -> Self {
@@ -61,8 +61,8 @@ impl Rect {
         Self {
             left: x,
             top: y,
-            right: x + (width as i32) - 1,
-            bottom: y + (height as i32) - 1,
+            right: x + (width as i32).max(1) - 1,
+            bottom: y + (height as i32).max(1) - 1,
         }
     }
     #[inline]
