@@ -210,7 +210,7 @@ impl Surface {
         }
     }
 
-    pub fn fill_rect(&mut self,rect: Rect, ch: Character) {
+    pub fn fill_rect(&mut self, rect: Rect, ch: Character) {
         let left = rect.get_left();
         let right = rect.get_right();
         let top = rect.get_top();
@@ -342,18 +342,12 @@ impl Surface {
         }
     }
 
-    pub fn draw_rect(
-        &mut self,
-        left: i32,
-        top: i32,
-        right: i32,
-        bottom: i32,
-        line_type: LineType,
-        attr: CharAttribute,
-    ) {
-        if (left > right) || (top > bottom) {
-            return;
-        }
+    pub fn draw_rect(&mut self, rect: Rect, line_type: LineType, attr: CharAttribute) {
+        let left = rect.get_left();
+        let right = rect.get_right();
+        let top = rect.get_top();
+        let bottom = rect.get_bottom();
+
         let line_chars = line_type.get_chars();
         let mut ch = Character::new(' ', attr.foreground, attr.background, attr.flags);
         ch.code = line_chars.horizontal_on_top;
@@ -372,27 +366,6 @@ impl Surface {
         self.set(right, bottom, ch);
         ch.code = line_chars.corner_bottom_left;
         self.set(left, bottom, ch);
-    }
-
-    pub fn draw_rect_with_size(
-        &mut self,
-        x: i32,
-        y: i32,
-        width: u32,
-        height: u32,
-        line_type: LineType,
-        attr: CharAttribute,
-    ) {
-        if (width > 0) && (height > 0) {
-            self.draw_rect(
-                x,
-                y,
-                x + ((width - 1) as i32),
-                y + ((height - 1) as i32),
-                line_type,
-                attr,
-            );
-        }
     }
 
     pub fn draw_surface(&mut self, x: i32, y: i32, surface: &Surface) {
@@ -456,7 +429,7 @@ impl Surface {
         ch_index: usize,
         format: &TextFormat,
     ) {
-        if self.clip.contains_y(y+self.origin.y) == false {
+        if self.clip.contains_y(y + self.origin.y) == false {
             return; // no need to draw
         }
         let mut x = match format.align {

@@ -231,58 +231,37 @@ fn check_draw_rect() {
         CharFlags::None,
     ));
     s.draw_rect(
-        2,
-        2,
-        10,
-        4,
+        Rect::new(2, 2, 10, 4),
         LineType::Single,
         CharAttribute::with_color(Color::Yellow, Color::Blue),
     );
     s.draw_rect(
-        12,
-        1,
-        18,
-        5,
+        Rect::new(12, 1, 18, 5),
         LineType::Double,
         CharAttribute::with_color(Color::White, Color::Green),
     );
     s.draw_rect(
-        20,
-        0,
-        28,
-        3,
+        Rect::new(20, 0, 28, 3),
         LineType::SingleThick,
         CharAttribute::with_color(Color::Aqua, Color::Black),
     );
     s.draw_rect(
-        29,
-        0,
-        39,
-        3,
+        Rect::new(29, 0, 39, 3),
         LineType::Border,
         CharAttribute::with_color(Color::Aqua, Color::Black),
     );
     s.draw_rect(
-        20,
-        4,
-        30,
-        8,
+        Rect::new(20, 4, 30, 8),
         LineType::Ascii,
         CharAttribute::with_color(Color::Green, Color::White),
     );
     s.draw_rect(
-        31,
-        4,
-        38,
-        8,
+        Rect::new(31, 4, 38, 8),
         LineType::AsciiRound,
         CharAttribute::with_color(Color::Green, Color::White),
     );
     s.draw_rect(
-        1,
-        6,
-        17,
-        9,
+        Rect::new(1, 6, 17, 9),
         LineType::SingleRound,
         CharAttribute::with_color(Color::Green, Color::White),
     );
@@ -298,7 +277,11 @@ fn check_draw_rect_with_size() {
         Color::Black,
         CharFlags::None,
     ));
-    s.draw_rect_with_size(1, 1, 20, 5, LineType::Double, CharAttribute::default());
+    s.draw_rect(
+        Rect::with_size(1, 1, 20, 5),
+        LineType::Double,
+        CharAttribute::default(),
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0xB2DEA1E9B27FD8B1);
 }
@@ -417,10 +400,7 @@ fn check_draw_surface() {
         CharFlags::None,
     ));
     s2.draw_rect(
-        0,
-        0,
-        7,
-        5,
+        Rect::new(0, 0, 7, 5),
         LineType::Double,
         CharAttribute::with_color(Color::White, Color::DarkRed),
     );
@@ -483,10 +463,7 @@ fn check_colors() {
         Character::new(' ', Color::Yellow, Color::DarkBlue, CharFlags::None),
     );
     s.draw_rect(
-        10,
-        1,
-        30,
-        3,
+        Rect::new(10, 1, 30, 3),
         LineType::Double,
         CharAttribute::with_color(Color::White, Color::DarkBlue),
     );
