@@ -89,4 +89,12 @@ impl Rect {
     pub fn get_height(&self) -> u32 {
         ((self.bottom - self.top) as u32) + 1u32
     }
+    #[inline]
+    pub fn get_x_center(&self) -> i32 {
+        (self.right+self.left)/2
+    }
+    #[inline]
+    pub fn get_y_center(&self) -> i32 {
+        (self.bottom+self.top)/2
+    }
 }

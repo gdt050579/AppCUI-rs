@@ -1045,6 +1045,9 @@ fn check_rect_new() {
     assert_eq!(r.get_bottom(),4);
     assert_eq!(r.get_width(),3);
     assert_eq!(r.get_height(),3);
+    assert_eq!(r.get_x_center(),2);
+    assert_eq!(r.get_y_center(),3);
+
     let r = Rect::new(3,4,1,2);
     assert_eq!(r.get_left(),1);
     assert_eq!(r.get_top(),2);
