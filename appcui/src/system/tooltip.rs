@@ -1,19 +1,33 @@
-use crate::graphics::{Surface, Rect};
+use std::default;
+
+use crate::graphics::{Point, Rect, SpecialChar, Surface};
 
 use super::Theme;
 
 pub(crate) struct ToolTip {
     visible: bool,
+    arrow_pos: Point,
+    arrow_char: SpecialChar,
 }
 impl ToolTip {
     pub(crate) fn new() -> Self {
-        ToolTip { visible: false }
+        ToolTip {
+            visible: false,
+            arrow_pos: Point::default(),
+            arrow_char: SpecialChar::ArrowDown,
+        }
     }
     #[inline(always)]
     pub(crate) fn is_visible(&self) -> bool {
         self.visible
     }
-    pub(crate) fn show(&mut self, text: &str, object_rect: &Rect, screen_width: u32, screen_height: u32) {
+    pub(crate) fn show(
+        &mut self,
+        text: &str,
+        object_rect: &Rect,
+        screen_width: u32,
+        screen_height: u32,
+    ) -> bool {
         self.visible = false;
 
         let mut nr_lines = 0u32;
@@ -40,8 +54,45 @@ impl ToolTip {
             best_width = best_width.max(w);
             nr_lines += 1;
         }
-        nr_lines = nr_lines.min(screen_height/4).max(1);
-        best_width = best_width.max(5)+2;
+        nr_lines = nr_lines.min(screen_height / 4).max(1);
+        best_width = best_width.max(5) + 2;
+
+        // find best position  (prefer on-top)
+        if object_rect.get_top() >= ((nr_lines + 1) as i32) {
+            let cx = object_rect.get_x_center();
+            let mut x = cx - ((best_width / 2) as i32);
+            let best_x = x;
+            x = x.min((screen_width as i32) - (best_width as i32)).max(0);
+            self.arrow_pos = Point::new(((best_width / 2) as i32) + (best_x - x), nr_lines as i32);
+            self.arrow_char = SpecialChar::ArrowDown;
+
+            self.visible = true;
+            return true;
+        }
+        /*
+        if (objRect.GetTop() >= (nrLines + 1))
+        {
+            [DONE]    const int cx = objRect.GetCenterX();
+            [DONE]    int x        = cx - bestWidth / 2;
+            [DONE]    auto bestX   = x;
+            [DONE]    x            = std::min<>(x, screenWidth - bestWidth);
+            [DONE]    x            = std::max<>(x, 0);
+
+            ScreenClip.Set(x, objRect.GetTop() - (nrLines + 1), bestWidth, nrLines + 1);
+            TextRect.Create(0, 0, bestWidth, nrLines, Alignament::TopLeft);
+            [DONE]    Arrow.Set(bestWidth / 2 + (bestX - x), nrLines);
+            TxParams.X     = 1;
+            TxParams.Y     = 0;
+            TxParams.Color = Cfg->ToolTip.Text;
+            TxParams.Width = bestWidth - 2;
+            [DONE] ArrowChar      = SpecialChars::ArrowDown;
+
+            Visible = true;
+            return true;
+        }
+        */
+        // no solution --> ToolTip will not be shown
+        return false;
     }
     pub(crate) fn hide(&mut self) {
         self.visible = false;
