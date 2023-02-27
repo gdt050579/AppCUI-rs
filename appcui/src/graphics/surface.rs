@@ -1,6 +1,7 @@
 use crate::graphics::SpecialChar;
 
 use super::CharAttribute;
+use super::Rect;
 //use super::CharFlags;
 use super::text_format::TextWrap;
 use super::Character;
@@ -209,22 +210,17 @@ impl Surface {
         }
     }
 
-    pub fn fill_rect(&mut self, left: i32, top: i32, right: i32, bottom: i32, ch: Character) {
-        if (left > right) || (top > bottom) {
-            return;
-        }
+    pub fn fill_rect(&mut self,rect: Rect, ch: Character) {
+        let left = rect.get_left();
+        let right = rect.get_right();
+        let top = rect.get_top();
+        let bottom = rect.get_bottom();
         for x in left..=right {
             for y in top..=bottom {
                 if let Some(pos) = self.coords_to_position(x, y) {
                     self.chars[pos].set(ch);
                 }
             }
-        }
-    }
-
-    pub fn fill_rect_with_size(&mut self, x: i32, y: i32, width: u32, height: u32, ch: Character) {
-        if (width > 0) && (height > 0) {
-            self.fill_rect(x, y, x + (width as i32) - 1, y + (height as i32) - 1, ch)
         }
     }
 

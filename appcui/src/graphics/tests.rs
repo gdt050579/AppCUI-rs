@@ -1,8 +1,8 @@
 use std::ops::{Deref, DerefMut};
 
+use crate::graphics::text_format::TextWrap;
 use crate::graphics::Point;
 use crate::graphics::Rect;
-use crate::graphics::text_format::TextWrap;
 
 use super::CharAttribute;
 use super::CharFlags;
@@ -212,15 +212,12 @@ fn check_fill_rect() {
         CharFlags::None,
     ));
     s.fill_rect(
-        2,
-        2,
-        4,
-        4,
+        Rect::new(2, 2, 4, 4),
         Character::new('@', Color::Aqua, Color::Red, CharFlags::Bold),
     );
     //s.print();
     assert_eq!(s.compute_hash(), 0x9E357B7ADEDEB720);
-    s.fill_rect_with_size(4, 1, 10, 2, Character::with_char('X'));
+    s.fill_rect(Rect::with_size(4, 1, 10, 2), Character::with_char('X'));
     //s.print();
     assert_eq!(s.compute_hash(), 0xD897421A927A1A1);
 }
@@ -482,10 +479,7 @@ fn check_colors() {
         Character::new('B', Color::Black, Color::Magenta, CharFlags::None),
     );
     s.fill_rect(
-        10,
-        1,
-        30,
-        3,
+        Rect::new(10, 1, 30, 3),
         Character::new(' ', Color::Yellow, Color::DarkBlue, CharFlags::None),
     );
     s.draw_rect(
@@ -664,7 +658,13 @@ fn check_resize() {
 #[test]
 fn check_write_text_single_line_simple() {
     let mut s = SurfaceTester::new(60, 7);
-    s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(
+        30,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
 
     let mut format = TextFormat::single_line(
         30,
@@ -679,7 +679,7 @@ fn check_write_text_single_line_simple() {
     s.write_text("Centered! at 30", &format);
     format.align = TextAlignament::Right;
     format.y = 5;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);    
+    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
     s.write_text("Right align ends at 30", &format);
 
     //s.print();
@@ -689,7 +689,13 @@ fn check_write_text_single_line_simple() {
 #[test]
 fn check_write_text_single_line_width() {
     let mut s = SurfaceTester::new(60, 7);
-    s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(
+        30,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
 
     let mut format = TextFormat::single_line(
         30,
@@ -705,7 +711,7 @@ fn check_write_text_single_line_width() {
     s.write_text("----123456----", &format);
     format.align = TextAlignament::Right;
     format.y = 5;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);    
+    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
     s.write_text("--------------------123456", &format);
 
     //s.print();
@@ -714,7 +720,13 @@ fn check_write_text_single_line_width() {
 #[test]
 fn check_write_text_single_line_hot_key() {
     let mut s = SurfaceTester::new(60, 7);
-    s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(
+        30,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
 
     let mut format = TextFormat::single_line_with_hotkey(
         30,
@@ -732,8 +744,8 @@ fn check_write_text_single_line_hot_key() {
     s.write_text("Centered (hotkey='C')", &format);
     format.align = TextAlignament::Right;
     format.y = 5;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);  
-    format.hotkey_pos = Some(20);  
+    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
+    format.hotkey_pos = Some(20);
     s.write_text("Right align ends at 30", &format);
 
     //s.print();
@@ -743,22 +755,49 @@ fn check_write_text_single_line_hot_key() {
 #[test]
 fn check_write_text_multi_line_no_wrap() {
     let mut s = SurfaceTester::new(80, 7);
-    s.draw_vertical_line(2, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(40, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(78, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(
+        2,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        40,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        78,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
     let mut format = TextFormat::multi_line(
         2,
         1,
         CharAttribute::with_color(Color::Yellow, Color::DarkRed),
         TextAlignament::Left,
     );
-    s.write_text("This is a\nmulti-line text\nwith 4 lines\nall left-aligned !", &format);    
+    s.write_text(
+        "This is a\nmulti-line text\nwith 4 lines\nall left-aligned !",
+        &format,
+    );
     format.align = TextAlignament::Center;
     format.x = 40;
-    s.write_text("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format); 
+    s.write_text(
+        "This is a\nmulti-line text\nwith 5 lines\n\nall centered !",
+        &format,
+    );
     format.align = TextAlignament::Right;
     format.x = 78;
-    s.write_text("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format); 
+    s.write_text(
+        "This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right",
+        &format,
+    );
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x5CA9237E8FF59BAF);
@@ -767,9 +806,27 @@ fn check_write_text_multi_line_no_wrap() {
 #[test]
 fn check_write_text_multi_line_no_wrap_how_key() {
     let mut s = SurfaceTester::new(80, 7);
-    s.draw_vertical_line(2, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(40, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(78, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(
+        2,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        40,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        78,
+        0,
+        7,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
     let mut format = TextFormat::multi_line(
         2,
         1,
@@ -778,17 +835,26 @@ fn check_write_text_multi_line_no_wrap_how_key() {
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkRed));
     format.hotkey_pos = Some(11);
-    s.write_text("This is a\nmulti-line text\nwith 5 lines\nall left-aligned !\nand with hot key 'u'", &format);    
+    s.write_text(
+        "This is a\nmulti-line text\nwith 5 lines\nall left-aligned !\nand with hot key 'u'",
+        &format,
+    );
     format.align = TextAlignament::Center;
     format.x = 40;
     format.hotkey_pos = Some(26);
     format.char_attr = CharAttribute::with_color(Color::White, Color::Gray);
-    s.write_text("This is a\nmulti-line text\nwith 5 lines\nall centered at y=40\nand with hot key 'w'", &format); 
+    s.write_text(
+        "This is a\nmulti-line text\nwith 5 lines\nall centered at y=40\nand with hot key 'w'",
+        &format,
+    );
     format.align = TextAlignament::Right;
     format.x = 78;
     format.hotkey_pos = Some(75);
     format.char_attr = CharAttribute::with_color(Color::White, Color::DarkGreen);
-    s.write_text("This is a\nmulti-line text\nwith 6 lines\naligned to right\n\nand with hot key 'x'", &format); 
+    s.write_text(
+        "This is a\nmulti-line text\nwith 6 lines\naligned to right\n\nand with hot key 'x'",
+        &format,
+    );
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xCED1C065F1F2053B);
@@ -798,9 +864,27 @@ fn check_write_text_multi_line_no_wrap_how_key() {
 fn check_write_text_multi_line_character_wrap() {
     let mut s = SurfaceTester::new(80, 10);
     let txt = "This is a line that will be wrapped on multiple lines on a given character width";
-    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(
+        2,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        40,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        78,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
     let mut format = TextFormat::multi_line_with_text_wrap(
         2,
         1,
@@ -809,7 +893,7 @@ fn check_write_text_multi_line_character_wrap() {
         TextAlignament::Left,
         TextWrap::Character,
     );
-    s.write_text(txt, &format);    
+    s.write_text(txt, &format);
     format.align = TextAlignament::Center;
     format.x = 40;
     format.width = Some(30);
@@ -827,9 +911,27 @@ fn check_write_text_multi_line_character_wrap() {
 fn check_write_text_multi_line_character_wrap_new_lines() {
     let mut s = SurfaceTester::new(80, 10);
     let txt = "This is a line\nthat will be wrapped on multiple lines\non a\ngiven character width";
-    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(
+        2,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        40,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        78,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
     let mut format = TextFormat::multi_line_with_text_wrap(
         2,
         1,
@@ -838,7 +940,7 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
         TextAlignament::Left,
         TextWrap::Character,
     );
-    s.write_text(txt, &format);    
+    s.write_text(txt, &format);
     format.align = TextAlignament::Center;
     format.x = 40;
     format.width = Some(30);
@@ -855,9 +957,27 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
 #[test]
 fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     let mut s = SurfaceTester::new(80, 10);
-    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
-    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(
+        2,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        40,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
+    s.draw_vertical_line(
+        78,
+        0,
+        10,
+        LineType::Double,
+        CharAttribute::with_fore_color(Color::White),
+    );
     let mut format = TextFormat::multi_line_with_text_wrap(
         2,
         1,
@@ -868,27 +988,46 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkRed));
     format.hotkey_pos = Some(17);
-    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'", &format);    
+    s.write_text(
+        "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'",
+        &format,
+    );
     format.align = TextAlignament::Center;
     format.x = 40;
     format.width = Some(30);
     format.hotkey_pos = Some(28);
-    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'", &format); 
+    s.write_text(
+        "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'",
+        &format,
+    );
     format.align = TextAlignament::Right;
     format.x = 78;
     format.width = Some(15);
     format.hotkey_pos = Some(67);
-    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'", &format); 
+    s.write_text(
+        "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'",
+        &format,
+    );
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x3CE81721E1BB64FA);
 }
 
-fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize)->SurfaceTester {
+fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize) -> SurfaceTester {
     let mut s = SurfaceTester::new(width, height);
-    s.write_string(0, 0, "Hotkey is: ", CharAttribute::with_color(Color::Yellow, Color::Red), false);
+    s.write_string(
+        0,
+        0,
+        "Hotkey is: ",
+        CharAttribute::with_color(Color::Yellow, Color::Red),
+        false,
+    );
     let ch = txt.chars().nth(hotkey_pos).unwrap();
-    s.set(12, 0, Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None));
+    s.set(
+        12,
+        0,
+        Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),
+    );
     let mut format = TextFormat::multi_line_with_text_wrap(
         2,
         1,
@@ -899,24 +1038,24 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize)->Su
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
     format.hotkey_pos = Some(hotkey_pos);
-    s.write_text(txt, &format);  
+    s.write_text(txt, &format);
 
     format.width = Some(11);
     format.x = 14;
-    s.write_text(txt, &format);    
-    
+    s.write_text(txt, &format);
+
     format.width = Some(12);
     format.x = 27;
-    s.write_text(txt, &format);    
-    
+    s.write_text(txt, &format);
+
     format.width = Some(13);
     format.x = 41;
-    s.write_text(txt, &format);    
-    
+    s.write_text(txt, &format);
+
     format.width = Some(14);
     format.x = 56;
-    s.write_text(txt, &format);    
-    
+    s.write_text(txt, &format);
+
     format.width = Some(6);
     format.x = 72;
     s.write_text(txt, &format);
@@ -938,21 +1077,36 @@ fn check_write_text_multi_line_word_wrap_1() {
     assert_eq!(s.compute_hash(), 0x4F03DE6BBFE0E049);
 }
 #[test]
-fn check_write_text_multi_line_word_wrap_2() {    
-    let s = print_word_wrapped("+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc", 90, 20, 12);
+fn check_write_text_multi_line_word_wrap_2() {
+    let s = print_word_wrapped(
+        "+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc",
+        90,
+        20,
+        12,
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0xB123507C204CAE78);
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_3() {
-    let s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 18);
+    let s = print_word_wrapped(
+        "Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line",
+        90,
+        20,
+        18,
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0x6FBCFB162D486AEE);
 }
 
 #[test]
 fn check_write_text_multi_line_word_wrap_4() {
-    let s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 42);
+    let s = print_word_wrapped(
+        "Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line",
+        90,
+        20,
+        42,
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0x1C1D4F88EB2DFAEB);
 }
@@ -961,9 +1115,19 @@ fn check_write_text_multi_line_word_wrap_4() {
 fn check_write_text_multi_line_word_wrap_aligned() {
     let txt = "This is     a line that       will be wrapped    on multiple lines on a given long-character width";
     let mut s = SurfaceTester::new(90, 15);
-    s.write_string(0, 0, "Hotkey is: ", CharAttribute::with_color(Color::Yellow, Color::Red), false);
+    s.write_string(
+        0,
+        0,
+        "Hotkey is: ",
+        CharAttribute::with_color(Color::Yellow, Color::Red),
+        false,
+    );
     let ch = txt.chars().nth(16).unwrap();
-    s.set(12, 0, Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None));
+    s.set(
+        12,
+        0,
+        Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),
+    );
     let mut format = TextFormat::multi_line_with_text_wrap(
         2,
         1,
@@ -974,19 +1138,18 @@ fn check_write_text_multi_line_word_wrap_aligned() {
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
     format.hotkey_pos = Some(16);
-    s.write_text(txt, &format);  
+    s.write_text(txt, &format);
 
     format.width = Some(20);
     format.x = 45;
     format.align = TextAlignament::Center;
-    s.write_text(txt, &format);    
-    
+    s.write_text(txt, &format);
 
     format.width = Some(15);
     format.x = 88;
     format.align = TextAlignament::Right;
     s.write_text(txt, &format);
-    
+
     //s.print();
     assert_eq!(s.compute_hash(), 0x70526C060A7E28C6);
 }
@@ -996,9 +1159,19 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
     let txt = "This is     a line that       will be wrapped    on multiple lines on a given long-character width";
     let mut s = SurfaceTester::new(100, 15);
     s.set_origin(2, 2);
-    s.write_string(0, 0, "Hotkey is: ", CharAttribute::with_color(Color::Yellow, Color::Red), false);
+    s.write_string(
+        0,
+        0,
+        "Hotkey is: ",
+        CharAttribute::with_color(Color::Yellow, Color::Red),
+        false,
+    );
     let ch = txt.chars().nth(16).unwrap();
-    s.set(12, 0, Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None));
+    s.set(
+        12,
+        0,
+        Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),
+    );
     let mut format = TextFormat::multi_line_with_text_wrap(
         2,
         1,
@@ -1009,19 +1182,18 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
     format.hotkey_pos = Some(16);
-    s.write_text(txt, &format);  
+    s.write_text(txt, &format);
 
     format.width = Some(20);
     format.x = 45;
     format.align = TextAlignament::Center;
-    s.write_text(txt, &format);    
-    
+    s.write_text(txt, &format);
 
     format.width = Some(15);
     format.x = 88;
     format.align = TextAlignament::Right;
     s.write_text(txt, &format);
-    
+
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7682D58B284C726);
 }
@@ -1029,128 +1201,128 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
 #[test]
 fn check_point() {
     let p = Point::default();
-    assert_eq!(p.x,0);
-    assert_eq!(p.y,0);
-    let p = Point::new(1,2);
-    assert_eq!(p.x,1);
-    assert_eq!(p.y,2);
+    assert_eq!(p.x, 0);
+    assert_eq!(p.y, 0);
+    let p = Point::new(1, 2);
+    assert_eq!(p.x, 1);
+    assert_eq!(p.y, 2);
 }
 
 #[test]
 fn check_rect_new() {
-    let r = Rect::new(1,2,3,4);
-    assert_eq!(r.get_left(),1);
-    assert_eq!(r.get_top(),2);
-    assert_eq!(r.get_right(),3);
-    assert_eq!(r.get_bottom(),4);
-    assert_eq!(r.get_width(),3);
-    assert_eq!(r.get_height(),3);
-    assert_eq!(r.get_x_center(),2);
-    assert_eq!(r.get_y_center(),3);
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.get_left(), 1);
+    assert_eq!(r.get_top(), 2);
+    assert_eq!(r.get_right(), 3);
+    assert_eq!(r.get_bottom(), 4);
+    assert_eq!(r.get_width(), 3);
+    assert_eq!(r.get_height(), 3);
+    assert_eq!(r.get_x_center(), 2);
+    assert_eq!(r.get_y_center(), 3);
 
-    let r = Rect::new(3,4,1,2);
-    assert_eq!(r.get_left(),1);
-    assert_eq!(r.get_top(),2);
-    assert_eq!(r.get_right(),3);
-    assert_eq!(r.get_bottom(),4);
-    assert_eq!(r.get_width(),3);
-    assert_eq!(r.get_height(),3);
-    let r = Rect::new(1,1,1,1);  
-    assert_eq!(r.get_left(),1);
-    assert_eq!(r.get_top(),1);
-    assert_eq!(r.get_right(),1);
-    assert_eq!(r.get_bottom(),1);
-    assert_eq!(r.get_width(),1);
-    assert_eq!(r.get_height(),1);
-    let r = Rect::new(1,1,9,1);  
-    assert_eq!(r.get_left(),1);
-    assert_eq!(r.get_top(),1);
-    assert_eq!(r.get_right(),9);
-    assert_eq!(r.get_bottom(),1);
-    assert_eq!(r.get_width(),9);
-    assert_eq!(r.get_height(),1);
+    let r = Rect::new(3, 4, 1, 2);
+    assert_eq!(r.get_left(), 1);
+    assert_eq!(r.get_top(), 2);
+    assert_eq!(r.get_right(), 3);
+    assert_eq!(r.get_bottom(), 4);
+    assert_eq!(r.get_width(), 3);
+    assert_eq!(r.get_height(), 3);
+    let r = Rect::new(1, 1, 1, 1);
+    assert_eq!(r.get_left(), 1);
+    assert_eq!(r.get_top(), 1);
+    assert_eq!(r.get_right(), 1);
+    assert_eq!(r.get_bottom(), 1);
+    assert_eq!(r.get_width(), 1);
+    assert_eq!(r.get_height(), 1);
+    let r = Rect::new(1, 1, 9, 1);
+    assert_eq!(r.get_left(), 1);
+    assert_eq!(r.get_top(), 1);
+    assert_eq!(r.get_right(), 9);
+    assert_eq!(r.get_bottom(), 1);
+    assert_eq!(r.get_width(), 9);
+    assert_eq!(r.get_height(), 1);
 }
 
 #[test]
 fn check_rect_with_size() {
-    let r = Rect::with_size(1,2,5,8);
-    assert_eq!(r.get_left(),1);
-    assert_eq!(r.get_top(),2);
-    assert_eq!(r.get_right(),5);
-    assert_eq!(r.get_bottom(),9);
-    assert_eq!(r.get_width(),5);
-    assert_eq!(r.get_height(),8);
-    let r = Rect::with_size(1,2,0,0);
-    assert_eq!(r.get_left(),1);
-    assert_eq!(r.get_top(),2);
-    assert_eq!(r.get_right(),1);
-    assert_eq!(r.get_bottom(),2);
-    assert_eq!(r.get_width(),1);
-    assert_eq!(r.get_height(),1);
+    let r = Rect::with_size(1, 2, 5, 8);
+    assert_eq!(r.get_left(), 1);
+    assert_eq!(r.get_top(), 2);
+    assert_eq!(r.get_right(), 5);
+    assert_eq!(r.get_bottom(), 9);
+    assert_eq!(r.get_width(), 5);
+    assert_eq!(r.get_height(), 8);
+    let r = Rect::with_size(1, 2, 0, 0);
+    assert_eq!(r.get_left(), 1);
+    assert_eq!(r.get_top(), 2);
+    assert_eq!(r.get_right(), 1);
+    assert_eq!(r.get_bottom(), 2);
+    assert_eq!(r.get_width(), 1);
+    assert_eq!(r.get_height(), 1);
 }
 #[test]
 fn check_rect_with_alignament() {
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::TopLeft);
-    assert_eq!(r.get_left(),10);
-    assert_eq!(r.get_top(),10);
-    assert_eq!(r.get_right(),13);
-    assert_eq!(r.get_bottom(),15);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::Top);
-    assert_eq!(r.get_left(),8);
-    assert_eq!(r.get_top(),10);
-    assert_eq!(r.get_right(),11);
-    assert_eq!(r.get_bottom(),15);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::TopRight);
-    assert_eq!(r.get_left(),7);
-    assert_eq!(r.get_top(),10);
-    assert_eq!(r.get_right(),10);
-    assert_eq!(r.get_bottom(),15);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::Right);
-    assert_eq!(r.get_left(),7);
-    assert_eq!(r.get_top(),7);
-    assert_eq!(r.get_right(),10);
-    assert_eq!(r.get_bottom(),12);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::BottomRight);
-    assert_eq!(r.get_left(),7);
-    assert_eq!(r.get_top(),5);
-    assert_eq!(r.get_right(),10);
-    assert_eq!(r.get_bottom(),10);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::Bottom);
-    assert_eq!(r.get_left(),8);
-    assert_eq!(r.get_top(),5);
-    assert_eq!(r.get_right(),11);
-    assert_eq!(r.get_bottom(),10);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::BottomLeft);
-    assert_eq!(r.get_left(),10);
-    assert_eq!(r.get_top(),5);
-    assert_eq!(r.get_right(),13);
-    assert_eq!(r.get_bottom(),10);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::Left);
-    assert_eq!(r.get_left(),10);
-    assert_eq!(r.get_top(),7);
-    assert_eq!(r.get_right(),13);
-    assert_eq!(r.get_bottom(),12);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
-    let r = Rect::width_alignament(10,10,4,6,crate::graphics::rect::Alignament::Center);
-    assert_eq!(r.get_left(),8);
-    assert_eq!(r.get_top(),7);
-    assert_eq!(r.get_right(),11);
-    assert_eq!(r.get_bottom(),12);
-    assert_eq!(r.get_width(),4);
-    assert_eq!(r.get_height(),6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::TopLeft);
+    assert_eq!(r.get_left(), 10);
+    assert_eq!(r.get_top(), 10);
+    assert_eq!(r.get_right(), 13);
+    assert_eq!(r.get_bottom(), 15);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::Top);
+    assert_eq!(r.get_left(), 8);
+    assert_eq!(r.get_top(), 10);
+    assert_eq!(r.get_right(), 11);
+    assert_eq!(r.get_bottom(), 15);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::TopRight);
+    assert_eq!(r.get_left(), 7);
+    assert_eq!(r.get_top(), 10);
+    assert_eq!(r.get_right(), 10);
+    assert_eq!(r.get_bottom(), 15);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::Right);
+    assert_eq!(r.get_left(), 7);
+    assert_eq!(r.get_top(), 7);
+    assert_eq!(r.get_right(), 10);
+    assert_eq!(r.get_bottom(), 12);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::BottomRight);
+    assert_eq!(r.get_left(), 7);
+    assert_eq!(r.get_top(), 5);
+    assert_eq!(r.get_right(), 10);
+    assert_eq!(r.get_bottom(), 10);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::Bottom);
+    assert_eq!(r.get_left(), 8);
+    assert_eq!(r.get_top(), 5);
+    assert_eq!(r.get_right(), 11);
+    assert_eq!(r.get_bottom(), 10);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::BottomLeft);
+    assert_eq!(r.get_left(), 10);
+    assert_eq!(r.get_top(), 5);
+    assert_eq!(r.get_right(), 13);
+    assert_eq!(r.get_bottom(), 10);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::Left);
+    assert_eq!(r.get_left(), 10);
+    assert_eq!(r.get_top(), 7);
+    assert_eq!(r.get_right(), 13);
+    assert_eq!(r.get_bottom(), 12);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
+    let r = Rect::width_alignament(10, 10, 4, 6, crate::graphics::rect::Alignament::Center);
+    assert_eq!(r.get_left(), 8);
+    assert_eq!(r.get_top(), 7);
+    assert_eq!(r.get_right(), 11);
+    assert_eq!(r.get_bottom(), 12);
+    assert_eq!(r.get_width(), 4);
+    assert_eq!(r.get_height(), 6);
 }
