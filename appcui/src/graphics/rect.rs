@@ -35,7 +35,7 @@ impl Rect {
             bottom: y + (height as i32).max(1) - 1,
         }
     }
-    pub fn width_alignament(x: i32, y: i32, width: u16, height: u16, align: Alignament) -> Self {
+    pub fn with_alignament(x: i32, y: i32, width: u16, height: u16, align: Alignament) -> Self {
         let x = match align {
             Alignament::TopLeft => x,
             Alignament::Top => x - ((width as i32) / 2),
