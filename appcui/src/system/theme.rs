@@ -19,6 +19,11 @@ pub struct Text {
     pub enphasized_3: CharAttribute,
 }
 #[derive(Default)]
+pub struct ToolTip {
+    pub text: CharAttribute,
+    pub arrow: CharAttribute
+}
+#[derive(Default)]
 pub struct Symbol {
     pub inactive: CharAttribute,
     pub hovered: CharAttribute,
@@ -36,6 +41,7 @@ pub struct Theme {
     pub desktop: Desktop,
     pub text: Text,
     pub symbol: Symbol,
+    pub tooltip: ToolTip,
 }
 impl Theme {
     pub(crate) fn new()->Self {
@@ -68,6 +74,9 @@ impl Theme {
         self.symbol.close = CharAttribute::with_fore_color(Color::Red);
         self.symbol.maximized = CharAttribute::with_fore_color(Color::Aqua);
         self.symbol.resize = CharAttribute::with_fore_color(Color::Aqua);
+
+        self.tooltip.text = CharAttribute::with_color(Color::Black, Color::Aqua);
+        self.tooltip.arrow = CharAttribute::with_color(Color::Green, Color::Black);
 
     }
 }

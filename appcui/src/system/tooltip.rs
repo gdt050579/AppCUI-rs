@@ -1,11 +1,12 @@
 use std::default;
 
-use crate::graphics::{Point, Rect, SpecialChar, Surface, TextFormat};
+use crate::graphics::{Character, Point, Rect, SpecialChar, Surface, TextFormat};
 
 use super::Theme;
 
 pub(crate) struct ToolTip {
     visible: bool,
+    text_pos: Point,
     arrow_pos: Point,
     arrow_char: SpecialChar,
     format: TextFormat,
@@ -15,10 +16,11 @@ impl ToolTip {
     pub(crate) fn new() -> Self {
         ToolTip {
             visible: false,
+            text_pos: Point::default(),
             arrow_pos: Point::default(),
             arrow_char: SpecialChar::ArrowDown,
             format: TextFormat::default(),
-            canvas: Surface::new(16,16),
+            canvas: Surface::new(16, 16),
         }
     }
     #[inline(always)]
@@ -31,6 +33,7 @@ impl ToolTip {
         object_rect: &Rect,
         screen_width: u32,
         screen_height: u32,
+        theme: &Theme,
     ) -> bool {
         self.visible = false;
 
@@ -69,38 +72,20 @@ impl ToolTip {
             x = x.min((screen_width as i32) - (best_width as i32)).max(0);
             self.arrow_pos = Point::new(((best_width / 2) as i32) + (best_x - x), nr_lines as i32);
             self.arrow_char = SpecialChar::ArrowDown;
+            self.text_pos = Point::new(x, object_rect.get_top() - ((nr_lines + 1) as i32));
             self.format.multi_line = nr_lines > 1;
             self.format.width = Some((best_width - 2) as u16);
-            self.format.x = x + 1;
-            self.format.y = object_rect.get_top() - ((nr_lines + 1) as i32);
+            self.format.x = 1;
+            self.format.y = 0;
             self.format.chars_count = Some(chars_count as u16);
+            self.format.char_attr = theme.tooltip.text;
             self.canvas.resize(best_width, nr_lines);
+            self.canvas
+                .clear(Character::with_attributes(' ', theme.tooltip.text));
+            self.canvas.write_text(text, &self.format);
             self.visible = true;
             return true;
         }
-        /*
-        if (objRect.GetTop() >= (nrLines + 1))
-        {
-            [DONE]    const int cx = objRect.GetCenterX();
-            [DONE]    int x        = cx - bestWidth / 2;
-            [DONE]    auto bestX   = x;
-            [DONE]    x            = std::min<>(x, screenWidth - bestWidth);
-            [DONE]    x            = std::max<>(x, 0);
-
-            ScreenClip.Set(x, objRect.GetTop() - (nrLines + 1), bestWidth, nrLines + 1);
-            TextRect.Create(0, 0, bestWidth, nrLines, Alignament::TopLeft);
-            [DONE]    Arrow.Set(bestWidth / 2 + (bestX - x), nrLines);
-            [DONE]    TxParams.X     = 1;
-            [DONE]    TxParams.Y     = 0;
-            TxParams.Color = Cfg->ToolTip.Text;
-            [DONE]    TxParams.Width = bestWidth - 2;
-            [DONE]    ArrowChar      = SpecialChars::ArrowDown;
-
-            [DONE]    Visible = true;
-            [DONE]    return true;
-        }
-        */
-        // no solution --> ToolTip will not be shown
         return false;
     }
     pub(crate) fn hide(&mut self) {
@@ -110,7 +95,12 @@ impl ToolTip {
         if !self.visible {
             return;
         }
-        todo!();
+        surface.draw_surface(self.text_pos.x, self.text_pos.y, &self.canvas);
+        surface.set(
+            self.arrow_pos.x,
+            self.arrow_pos.y,
+            Character::with_attributes(self.arrow_char, theme.tooltip.arrow),
+        );
     }
 }
 
