@@ -1,6 +1,6 @@
 use std::default;
 
-use crate::graphics::{Point, Rect, SpecialChar, Surface};
+use crate::graphics::{Point, Rect, SpecialChar, Surface, TextFormat};
 
 use super::Theme;
 
@@ -8,6 +8,8 @@ pub(crate) struct ToolTip {
     visible: bool,
     arrow_pos: Point,
     arrow_char: SpecialChar,
+    format: TextFormat,
+    canvas: Surface,
 }
 impl ToolTip {
     pub(crate) fn new() -> Self {
@@ -15,6 +17,8 @@ impl ToolTip {
             visible: false,
             arrow_pos: Point::default(),
             arrow_char: SpecialChar::ArrowDown,
+            format: TextFormat::default(),
+            canvas: Surface::new(16,16),
         }
     }
     #[inline(always)]
@@ -65,7 +69,12 @@ impl ToolTip {
             x = x.min((screen_width as i32) - (best_width as i32)).max(0);
             self.arrow_pos = Point::new(((best_width / 2) as i32) + (best_x - x), nr_lines as i32);
             self.arrow_char = SpecialChar::ArrowDown;
-
+            self.format.multi_line = nr_lines > 1;
+            self.format.width = Some((best_width - 2) as u16);
+            self.format.x = x + 1;
+            self.format.y = object_rect.get_top() - ((nr_lines + 1) as i32);
+            self.format.chars_count = Some(chars_count as u16);
+            self.canvas.resize(best_width, nr_lines);
             self.visible = true;
             return true;
         }
@@ -81,14 +90,14 @@ impl ToolTip {
             ScreenClip.Set(x, objRect.GetTop() - (nrLines + 1), bestWidth, nrLines + 1);
             TextRect.Create(0, 0, bestWidth, nrLines, Alignament::TopLeft);
             [DONE]    Arrow.Set(bestWidth / 2 + (bestX - x), nrLines);
-            TxParams.X     = 1;
-            TxParams.Y     = 0;
+            [DONE]    TxParams.X     = 1;
+            [DONE]    TxParams.Y     = 0;
             TxParams.Color = Cfg->ToolTip.Text;
-            TxParams.Width = bestWidth - 2;
-            [DONE] ArrowChar      = SpecialChars::ArrowDown;
+            [DONE]    TxParams.Width = bestWidth - 2;
+            [DONE]    ArrowChar      = SpecialChars::ArrowDown;
 
-            Visible = true;
-            return true;
+            [DONE]    Visible = true;
+            [DONE]    return true;
         }
         */
         // no solution --> ToolTip will not be shown

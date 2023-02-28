@@ -26,7 +26,6 @@ impl Default for TextWrap {
     }
 }
 
-#[derive(Default)]
 pub struct TextFormat {
     pub x: i32,
     pub y: i32,
