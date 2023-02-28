@@ -116,3 +116,20 @@ impl TextFormat {
         }
     }
 }
+
+impl Default for TextFormat {
+    fn default() -> Self {
+        Self {
+            x: 0,
+            y: 0,
+            width: None,
+            char_attr: Default::default(),
+            hotkey_attr: None,
+            hotkey_pos: None,
+            chars_count: None,
+            align: TextAlignament::Left,
+            text_wrap: TextWrap::None,
+            multi_line: false,
+        }
+    }
+}
