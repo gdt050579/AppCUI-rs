@@ -59,7 +59,7 @@ impl ToolTip {
             best_width = best_width.max(w);
             nr_lines += 1;
         }
-        nr_lines = nr_lines.min(screen_height / 4).max(1);
+        nr_lines = nr_lines.min(screen_height / 3).max(1);
         best_width = best_width.max(5) + 2;
 
         // find best position  (prefer on-top)
@@ -85,6 +85,28 @@ impl ToolTip {
             self.visible = true;
             return true;
         }
+        // bottom position
+        if (object_rect.get_bottom() + ((nr_lines + 1) as i32)) <= screen_height as i32 {
+            let cx = object_rect.get_x_center();
+            let mut x = cx - ((best_width / 2) as i32);
+            let bottom = object_rect.get_bottom();
+            let best_x = x;
+            x = x.min((screen_width as i32) - (best_width as i32)).max(0);
+            self.arrow_pos = Point::new(((best_width / 2) as i32) + (best_x - x), bottom+1);
+            self.arrow_char = SpecialChar::ArrowUp;
+            self.text_pos = Point::new(x, bottom+2);
+            self.format.multi_line = nr_lines > 1;
+            self.format.width = Some((best_width - 2) as u16);
+            self.format.x = 1;
+            self.format.y = 0;
+            self.format.chars_count = Some(chars_count as u16);
+            self.format.char_attr = theme.tooltip.text;
+            self.format.text_wrap = TextWrap::Word;
+            self.canvas.resize(best_width, nr_lines);
+            self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
+            self.canvas.write_text(text, &self.format);
+            self.visible = true;
+        }
         return false;
     }
     pub(crate) fn hide(&mut self) {
@@ -102,36 +124,3 @@ impl ToolTip {
         );
     }
 }
-
-/*
-
-bool ToolTipController::Show(const ConstString& text, Graphics::Rect& objRect, int screenWidth, int screenHeight)
-{
-
-    // check bottom position
-    if (objRect.GetBottom() + (nrLines + 1) <= screenHeight)
-    {
-        const int cx = objRect.GetCenterX();
-        int x        = cx - bestWidth / 2;
-        auto bestX   = x;
-        x            = std::min<>(x, screenWidth - bestWidth);
-        x            = std::max<>(x, 0);
-        ScreenClip.Set(x, objRect.GetBottom() + 1, bestWidth, nrLines + 1);
-        TextRect.Create(0, 1, bestWidth, nrLines, Alignament::TopLeft);
-        Arrow.Set(bestWidth / 2 + (bestX - x), 0);
-        TxParams.X     = 1;
-        TxParams.Y     = 1;
-        TxParams.Color = Cfg->ToolTip.Text;
-        TxParams.Width = bestWidth - 2;
-        ArrowChar      = SpecialChars::ArrowUp;
-
-        Visible = true;
-        return true;
-    }
-    // no solution --> ToolTip will not be shown
-    return false;
-}
-} // namespace AppCUI::Internal
-
-
-*/

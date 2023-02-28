@@ -34,14 +34,52 @@ fn check_tooltip_single_line() {
 
 #[test]
 fn check_tooltip_multi_line() {
-    let s = draw_tool_tip(Size::new(40, 10), Rect::new(2, 3, 10, 5), "A multi-line tooltip\nto show case");
+    let s = draw_tool_tip(
+        Size::new(40, 10),
+        Rect::new(2, 3, 10, 5),
+        "A multi-line tooltip\nto show case",
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0x737C188B334A13C2);
 }
 
 #[test]
 fn check_tooltip_multi_line_2() {
-    let s = draw_tool_tip(Size::new(40, 15), Rect::new(2, 4, 10, 5), "A multi-line tooltip to show case in this example");
+    let s = draw_tool_tip(
+        Size::new(40, 15),
+        Rect::new(2, 4, 10, 5),
+        "A multi-line tooltip to show case in this example",
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0x8E67370E48B93A77);
+}
+#[test]
+fn check_tooltip_multi_line_3() {
+    let s = draw_tool_tip(
+        Size::new(40, 15),
+        Rect::new(0, 4, 5, 5),
+        "A multi-line tooltip to show case in this example",
+    );
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x6F0C45230D2BDDE7);
+}
+#[test]
+fn check_tooltip_bottom_pos() {
+    let s = draw_tool_tip(
+        Size::new(40, 10),
+        Rect::new(3, 0, 10, 5),
+        "A multi-line tooltip to show case in this example",
+    );
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xD12BB7D1C8BA1281);
+}
+#[test]
+fn check_tooltip_bottom_pos_no_show() {
+    let s = draw_tool_tip(
+        Size::new(40, 10),
+        Rect::new(3, 0, 10, 7),
+        "A multi-line tooltip to show case in this example",
+    );
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x9F6184450761DB25);
 }
