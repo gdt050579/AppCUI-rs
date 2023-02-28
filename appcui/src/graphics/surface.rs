@@ -155,6 +155,14 @@ impl Surface {
     }
 
     #[inline]
+    pub(crate) fn reset(&mut self) {
+        self.set_base_clip(0, 0, self.right_most, self.bottom_most);
+        self.reset_clip();
+        self.set_base_origin(0, 0);
+        self.reset_origin();
+    }
+
+    #[inline]
     pub fn set_cursor(&mut self, x: i32, y: i32) {
         let x = x + self.origin.x;
         let y = y + self.origin.y;
@@ -808,9 +816,6 @@ impl Surface {
         self.bottom_most = (h as i32) - 1;
         self.width = w;
         self.height = h;
-        self.set_base_clip(0, 0, self.right_most, self.bottom_most);
-        self.reset_clip();
-        self.set_base_origin(0, 0);
-        self.reset_origin();
+        self.reset();
     }
 }

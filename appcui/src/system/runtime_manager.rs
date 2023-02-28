@@ -1,4 +1,4 @@
-use super::Theme;
+use super::{Theme, ToolTip};
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
 use crate::controls::ControlManager;
@@ -11,6 +11,7 @@ pub(crate) struct RuntimeManager {
     terminal: Box<dyn Terminal>,
     surface: Surface,
     root: ControlManager,
+    tooltip: ToolTip,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -25,6 +26,7 @@ impl RuntimeManager {
             terminal: term,
             surface: surface,
             root: ControlManager::new(Desktop::new()),
+            tooltip: ToolTip::new(),
         };
         unsafe {
             RUNTIME_MANAGER = Some(manager);
@@ -68,6 +70,10 @@ impl RuntimeManager {
 
     fn paint(&mut self) {
         self.root.paint(&mut self.surface, &self.theme);
+        if self.tooltip.is_visible() {
+            self.surface.reset();
+            self.tooltip.paint(&mut self.surface, &self.theme);
+        }
         self.terminal.update_screen(&self.surface);
     }
 
