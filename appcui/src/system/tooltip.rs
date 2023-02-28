@@ -1,6 +1,6 @@
 use std::default;
 
-use crate::graphics::{Character, Point, Rect, SpecialChar, Surface, TextFormat};
+use crate::graphics::{Character, Point, Rect, SpecialChar, Surface, TextFormat, TextWrap};
 
 use super::Theme;
 
@@ -68,17 +68,19 @@ impl ToolTip {
         if object_rect.get_top() >= ((nr_lines + 1) as i32) {
             let cx = object_rect.get_x_center();
             let mut x = cx - ((best_width / 2) as i32);
+            let top = object_rect.get_top();
             let best_x = x;
             x = x.min((screen_width as i32) - (best_width as i32)).max(0);
-            self.arrow_pos = Point::new(((best_width / 2) as i32) + (best_x - x), nr_lines as i32);
+            self.arrow_pos = Point::new(((best_width / 2) as i32) + (best_x - x), top-1);
             self.arrow_char = SpecialChar::ArrowDown;
-            self.text_pos = Point::new(x, object_rect.get_top() - ((nr_lines + 1) as i32));
+            self.text_pos = Point::new(x, top - ((nr_lines + 1) as i32));
             self.format.multi_line = nr_lines > 1;
             self.format.width = Some((best_width - 2) as u16);
             self.format.x = 1;
             self.format.y = 0;
             self.format.chars_count = Some(chars_count as u16);
             self.format.char_attr = theme.tooltip.text;
+            self.format.text_wrap = TextWrap::Word;
             self.canvas.resize(best_width, nr_lines);
             self.canvas
                 .clear(Character::with_attributes(' ', theme.tooltip.text));
@@ -226,22 +228,6 @@ bool ToolTipController::Show(const ConstString& text, Graphics::Rect& objRect, i
     }
     // no solution --> ToolTip will not be shown
     return false;
-}
-
-void ToolTipController::Paint(Graphics::Renderer& renderer)
-{
-    if (!Visible)
-        return;
-
-    renderer.FillRect(
-          TextRect.GetLeft(), TextRect.GetTop(), TextRect.GetRight(), TextRect.GetBottom(), ' ', Cfg->ToolTip.Text);
-    renderer.WriteSpecialCharacter(Arrow.X, Arrow.Y, ArrowChar, Cfg->ToolTip.Arrow);
-    renderer.SetClipMargins(
-          TextRect.GetLeft(),
-          TextRect.GetTop(),
-          ScreenClip.ClipRect.Width - (TextRect.GetRight() + 1),
-          ScreenClip.ClipRect.Height - (TextRect.GetBottom() + 1));
-    renderer.WriteText(this->Text, TxParams);
 }
 } // namespace AppCUI::Internal
 

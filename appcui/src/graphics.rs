@@ -14,7 +14,8 @@ mod text_format;
 
 #[cfg(test)]
 mod tests;
-
+#[cfg(test)]
+mod surface_tester;
 
 pub use self::character::Character;
 pub use self::character::SpecialChar;
@@ -35,3 +36,6 @@ pub use self::text_format::TextFormat;
 pub use self::text_format::TextWrap;
 pub (crate) use self::clip_area::ClipArea;
 pub (crate) use self::point::Point;
+
+#[cfg(test)]
+pub (crate) use self::surface_tester::SurfaceTester;
