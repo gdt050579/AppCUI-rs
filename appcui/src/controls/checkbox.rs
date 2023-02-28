@@ -102,7 +102,13 @@ impl OnKeyPressed for CheckBox {
 impl OnMouseEvent for CheckBox {
     fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus {
         match event {
-            MouseEvent::Enter|MouseEvent::Leave => {
+            MouseEvent::Enter => {
+                if self.caption.get_chars_count()>(self.get_width()-4) as usize {
+                    self.show_tooltip(self.caption.get_text());
+                }
+                EventProcessStatus::Processed
+            },
+            MouseEvent::Leave => {
                 EventProcessStatus::Processed
             },
             MouseEvent::Released(data) => {
@@ -130,12 +136,5 @@ void CheckBox::OnHotKey()
         }
     }
     RaiseEvent(Event::CheckedStatusChanged);
-}
-bool CheckBox::OnMouseEnter()
-{
-    CREATE_CONTROL_CONTEXT(this, Members, false);
-    if ((int) Members->Text.Len() >= Members->Layout.Width)
-        this->ShowToolTip(Members->Text);
-    return true;
 }
 */
