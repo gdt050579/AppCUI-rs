@@ -5,6 +5,7 @@ use super::layout::ControlLayout;
 use super::{ControlManager, Layout};
 use crate::graphics::*;
 use crate::input::*;
+use crate::system::RuntimeManager;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 8)]
@@ -159,6 +160,30 @@ impl ControlBase {
     }
     pub(crate) fn raise_event(&self, _event: Event) {
         todo!();
+    }
+    pub(crate) fn show_tooltip_on_point(&self, txt: &str, x: i32, y: i32) {
+        if self.is_visible() && self.screen_clip.is_visible() {
+            let r = Rect::with_size(self.screen_clip.left + x, self.screen_clip.top + y, 1, 1);
+            RuntimeManager::get().show_tooltip(txt, &r);
+        } else {
+            RuntimeManager::get().hide_tooltip();
+        }
+    }
+    pub(crate) fn show_tooltip(&self, txt: &str) {
+        if self.is_visible() && self.screen_clip.is_visible() {
+            let r = Rect::new(
+                self.screen_clip.left,
+                self.screen_clip.top,
+                self.screen_clip.right,
+                self.screen_clip.bottom,
+            );
+            RuntimeManager::get().show_tooltip(txt, &r);
+        } else {
+            RuntimeManager::get().hide_tooltip();
+        }
+    }
+    pub(crate) fn hide_tooltip(&self) {
+        RuntimeManager::get().hide_tooltip();
     }
 }
 impl OnPaint for ControlBase {}

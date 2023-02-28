@@ -3,7 +3,7 @@ use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
 use crate::controls::ControlManager;
 use crate::controls::*;
-use crate::graphics::Surface;
+use crate::graphics::{Surface, Rect};
 use crate::terminal::*;
 
 pub(crate) struct RuntimeManager {
@@ -34,6 +34,12 @@ impl RuntimeManager {
     }
     pub(crate) fn get() -> &'static mut RuntimeManager {
         unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
+    }
+    pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
+        self.tooltip.show(txt, &rect, self.terminal.get_width(), self.terminal.get_height(), &self.theme);
+    }
+    pub(crate) fn hide_tooltip(&mut self) {
+        self.tooltip.hide();
     }
     pub(crate) fn add<T>(&mut self, obj: T) -> ControlHandle<T>
     where
