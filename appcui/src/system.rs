@@ -2,6 +2,7 @@ mod theme;
 mod app;
 mod runtime_manager;
 mod tooltip;
+mod command_bar;
 #[cfg(test)]
 mod tests;
 

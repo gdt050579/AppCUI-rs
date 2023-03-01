@@ -35,7 +35,6 @@ pub struct ControlBase {
 }
 
 impl ControlBase {
-    pub(crate) const INVALID_CONTROL_ID: u32 = 0xFFFFFFFF;
     pub fn new(layout: Layout, status_flags: StatusFlags) -> Self {
         Self {
             children: Vec::new(),
