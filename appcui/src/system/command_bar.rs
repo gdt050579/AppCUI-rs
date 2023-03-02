@@ -1,12 +1,24 @@
-const MAX_KEYS: usize = 10; // no bigger than 255
+use crate::input::{Key, KeyCode};
+
+const MAX_KEYS: usize = 64; // no bigger than 255
 const MAX_SHIFT_STATES: usize = 8;
 
-struct Item {}
+#[derive(Default)]
+struct Item {
+    text: String,
+    key: &'static str,
+    left: i32,
+    right: i32,
+    command: u32,
+    version: u32,
+}
 struct CommandBar {
     width: u32,
     y: i32,
-    items: [[Option<Item>; MAX_KEYS]; MAX_SHIFT_STATES],
+    version: u32,
+    items: [[Item; MAX_KEYS]; MAX_SHIFT_STATES],
     indexes: [Vec<u8>; MAX_SHIFT_STATES],
+    has_shifts: [bool; MAX_SHIFT_STATES],
 }
 
 impl CommandBar {
@@ -14,8 +26,10 @@ impl CommandBar {
         let mut obj = Self {
             width,
             y: (height as i32) - 1,
+            version: 0,
             items: Default::default(),
             indexes: Default::default(),
+            has_shifts: [false; MAX_SHIFT_STATES],
         };
         for vec in &mut obj.indexes {
             vec.reserve(MAX_KEYS);
@@ -25,6 +39,45 @@ impl CommandBar {
     pub(crate) fn set_desktop_size(&mut self, width: u32, height: u32) {
         self.width = width;
         self.y = (height as i32) - 1;
+    }
+
+    pub(crate) fn clear(&mut self) {
+        self.version += 1;
+        for has_shift in &mut self.has_shifts {
+            *has_shift = false;
+        }
+        for vec in &mut self.indexes {
+            vec.clear();
+        }
+        //    HoveredField       = nullptr;
+        //    RecomputeScreenPos = true;
+    }
+
+    pub fn set(&mut self, key: Key, text: &str, command: u32) -> bool {
+        if key.code == KeyCode::None {
+            return false;
+        }
+        let key_index = (key.code as u8) as usize;
+        if key_index >= MAX_KEYS {
+            return false;
+        }
+        let shift_state = key.modifier.get_value() as usize;
+        if shift_state >= MAX_SHIFT_STATES {
+            return false;
+        }
+        let item = &mut self.items[shift_state][key_index];
+
+        item.text.clear();
+        item.text.push_str(text);
+        item.command = command;
+        item.left = -1;
+        item.right = -1;
+        item.key = key.code.get_name();
+        item.version = self.version;
+
+        self.has_shifts[shift_state] = true;
+
+        true
     }
 }
 
@@ -134,22 +187,7 @@ void CommandBarController::Clear()
 }
 bool CommandBarController::Set(Input::Key keyCode, const ConstString& caption, int Command)
 {
-    CHECK(Command >= 0, false, "Command should be bigger or equal to 0");
-    CHECK(keyCode != Key::None, false, "Key code should be bigger than 0");
-    uint32 index = (((uint32) keyCode) & 0xFF);
-    uint32 shift = ((uint32) keyCode) >> ((uint32) Utils::KeyUtils::KEY_SHIFT_BITS);
-    CHECK(index < (uint32) Input::Key::Count, false, "Invalid key code !");
-    CHECK(shift < MAX_COMMANDBAR_SHIFTSTATES, false, "Invalid shift combination !");
 
-    CommandBarField* b = &Fields[shift][index];
-    CHECK(b->Name.Set(caption), false, "Fail to copy caption");
-    CHECK(b->Name.Add(" "), false, "Fail to add extra step !");
-
-    b->Command              = Command;
-    b->KeyCode              = keyCode;
-    b->ClearCommandUniqueID = ClearCommandUniqueID;
-    b->KeyName              = Utils::KeyUtils::GetKeyNamePadded(b->KeyCode);
-    HasKeys[shift]          = true;
     RecomputeScreenPos      = true;
     return true;
 }
