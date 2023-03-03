@@ -16,7 +16,7 @@ struct CommandBar {
     width: u32,
     y: i32,
     version: u32,
-    items: [[Item; MAX_KEYS]; MAX_SHIFT_STATES],
+    items: Vec<Item>,
     indexes: [Vec<u8>; MAX_SHIFT_STATES],
     has_shifts: [bool; MAX_SHIFT_STATES],
 }
@@ -27,12 +27,22 @@ impl CommandBar {
             width,
             y: (height as i32) - 1,
             version: 0,
-            items: Default::default(),
+            items: Vec::with_capacity(MAX_KEYS * MAX_SHIFT_STATES),
             indexes: Default::default(),
             has_shifts: [false; MAX_SHIFT_STATES],
         };
         for vec in &mut obj.indexes {
             vec.reserve(MAX_KEYS);
+        }
+        for i in 0..(MAX_KEYS * MAX_SHIFT_STATES) {
+            obj.items.push(Item {
+                text: String::new(),
+                key: "",
+                left: -1,
+                right: -1,
+                command: 0,
+                version: 0,
+            });
         }
         obj
     }
@@ -65,7 +75,7 @@ impl CommandBar {
         if shift_state >= MAX_SHIFT_STATES {
             return false;
         }
-        let item = &mut self.items[shift_state][key_index];
+        let item = &mut self.items[shift_state * MAX_KEYS + key_index];
 
         item.text.clear();
         item.text.push_str(text);
@@ -168,23 +178,7 @@ void CommandBarController::SetDesktopSize(uint32 desktopWidth, uint32 desktopHei
 {
     this->RecomputeScreenPos = true;
 }
-void CommandBarController::Clear()
-{
-    // always obtain a new unique ID (whenever a clear command is called)
-    // this allows us NOT to reset all of the previous command (thus being more fast)
-    // as CommandBarController::Clear() is called every time Focus changes -> this technique is important for
-    // performance
-    ClearCommandUniqueID++;
 
-    // Clear shift keys for fast process
-    for (uint32 tr = 0; tr < MAX_COMMANDBAR_SHIFTSTATES; tr++)
-    {
-        HasKeys[tr]      = false;
-        IndexesCount[tr] = 0;
-    }
-    HoveredField       = nullptr;
-    RecomputeScreenPos = true;
-}
 bool CommandBarController::Set(Input::Key keyCode, const ConstString& caption, int Command)
 {
 
