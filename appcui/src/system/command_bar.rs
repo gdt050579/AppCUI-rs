@@ -36,7 +36,7 @@ impl CommandBar {
         let mut obj = Self {
             width,
             y: (height as i32) - 1,
-            version: 0,
+            version: 1,
             items: Vec::with_capacity(MAX_KEYS * MAX_SHIFT_STATES),
             indexes: Default::default(),
             has_shifts: [false; MAX_SHIFT_STATES],
@@ -112,7 +112,7 @@ impl CommandBar {
         true
     }
 
-    pub (crate) fn update_positions(&mut self) {
+    pub(crate) fn update_positions(&mut self) {
         // recompute all positions regardless of the shift state
         for shift_state in 0..MAX_SHIFT_STATES {
             let vidx = &mut self.indexes[shift_state];
@@ -122,7 +122,11 @@ impl CommandBar {
             }
             let start_index = MAX_KEYS * shift_state;
             let end_index = start_index + MAX_KEYS;
-            let mut x = (KeyModifier::get_name_from_index(shift_state).len() + 1) as i32;
+            let mut x = if shift_state == 0 {
+                0
+            } else {
+                (KeyModifier::get_name_from_index(shift_state).len() + 1) as i32
+            };println!("x={x}");
             for idx in start_index..end_index {
                 let item = &mut self.items[idx];
                 if item.version != self.version {
