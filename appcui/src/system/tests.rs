@@ -101,10 +101,11 @@ fn prepare_command_bar(width: u32, height: u32) -> CommandBar {
 }
 
 #[test]
-fn check_command_bar() {
-    let mut s = SurfaceTester::new(40,5);
-    let mut c = prepare_command_bar(s.get_width(), s.get_height());
+fn check_command_bar_1() {
+    let mut s = SurfaceTester::new(60,5);
+    let c = prepare_command_bar(s.get_width(), s.get_height());
     s.clear(Character::new('X',Color::Black,Color::DarkBlue, CharFlags::None));
     c.paint(&mut s, &Theme::new());
-    s.print();
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xD466864BD254E538);
 }

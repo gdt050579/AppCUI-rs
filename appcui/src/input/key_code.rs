@@ -134,6 +134,7 @@ const KEY_NAME: [&str; 64] = [
     "9",
 ];
 
+
 const KEY_NAME_PADDED: [&str; 64] = [
     "",
     " F1 ",

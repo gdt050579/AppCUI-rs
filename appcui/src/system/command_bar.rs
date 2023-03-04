@@ -100,12 +100,13 @@ impl CommandBar {
 
         item.text.clear();
         item.text.push_str(text);
+        item.text.push(' '); // one extra space
         item.command = command;
         item.left = -1;
         item.right = -1;
-        item.key = key.code.get_name();
+        item.key = key.code.get_name_padded();
         item.version = self.version;
-        item.size = (item.key.len() + item.text.chars().count() + 3) as u16;
+        item.size = (item.key.len() + item.text.chars().count()) as u16;
 
         self.has_shifts[shift_state] = true;
 
@@ -125,8 +126,8 @@ impl CommandBar {
             let mut x = if shift_state == 0 {
                 0
             } else {
-                (KeyModifier::get_name_from_index(shift_state).len() + 1) as i32
-            };println!("x={x}");
+                KeyModifier::get_name_from_index(shift_state).len() as i32
+            };
             for idx in start_index..end_index {
                 let item = &mut self.items[idx];
                 if item.version != self.version {
@@ -176,7 +177,7 @@ impl CommandBar {
                 _ => theme.menu.text.normal,
             };
             surface.write_string(
-                item.left + (item.key.len() as i32) + 1,
+                item.left + (item.key.len() as i32),
                 self.y,
                 &item.text,
                 col_text,
