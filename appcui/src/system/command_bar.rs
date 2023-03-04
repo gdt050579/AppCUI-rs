@@ -1,6 +1,6 @@
 use crate::{
     graphics::{CharAttribute, CharFlags, Character, Surface},
-    input::{Key, KeyCode, KeyModifier},
+    input::{Key, KeyCode, KeyModifier, MouseEvent}, controls::events::EventProcessStatus,
 };
 
 use super::Theme;
@@ -69,6 +69,8 @@ impl CommandBar {
     pub(crate) fn set_key_modifier(&mut self, modifier: KeyModifier) {
         if modifier != self.modifier {
             self.modifier = modifier;
+            self.hovered_index = INVALID_INDEX;
+            self.pressed_index = INVALID_INDEX;
         }
     }
 
@@ -184,6 +186,10 @@ impl CommandBar {
                 false,
             );
         }
+    }
+
+    pub(crate) fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus {
+        EventProcessStatus::Ignored
     }
 }
 
