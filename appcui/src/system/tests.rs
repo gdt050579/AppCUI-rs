@@ -1,3 +1,4 @@
+use super::CommandBar;
 use super::Theme;
 use super::ToolTip;
 use crate::graphics::CharFlags;
@@ -6,6 +7,9 @@ use crate::graphics::Color;
 use crate::graphics::Rect;
 use crate::graphics::Size;
 use crate::graphics::SurfaceTester;
+use crate::input::Key;
+use crate::input::KeyCode;
+use crate::input::KeyModifier;
 
 fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
     let mut tooltip = ToolTip::new();
@@ -25,6 +29,7 @@ fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
     tooltip.paint(&mut s, &theme);
     s
 }
+
 #[test]
 fn check_tooltip_single_line() {
     let s = draw_tool_tip(Size::new(40, 6), Rect::new(2, 2, 10, 4), "A simple tooltip");
@@ -42,7 +47,6 @@ fn check_tooltip_multi_line() {
     //s.print();
     assert_eq!(s.compute_hash(), 0x737C188B334A13C2);
 }
-
 #[test]
 fn check_tooltip_multi_line_2() {
     let s = draw_tool_tip(
@@ -82,4 +86,14 @@ fn check_tooltip_bottom_pos_no_show() {
     );
     //s.print();
     assert_eq!(s.compute_hash(), 0x9F6184450761DB25);
+}
+
+fn prepare_command_bar(width: u32, height: u32) -> CommandBar {
+    let mut c = CommandBar::new(width,height);
+    c.set(Key::new(KeyCode::F2, KeyModifier::None), "Save", 1);
+    c.set(Key::new(KeyCode::F3, KeyModifier::None), "Open", 2);
+    c.set(Key::new(KeyCode::F5, KeyModifier::None), "Run", 3);
+    c.set(Key::new(KeyCode::F7, KeyModifier::None), "Compile", 4);
+    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", 5);
+    c
 }

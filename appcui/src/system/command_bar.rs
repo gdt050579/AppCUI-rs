@@ -19,7 +19,7 @@ struct Item {
     version: u32,
     size: u16,
 }
-struct CommandBar {
+pub struct CommandBar {
     width: u32,
     y: i32,
     version: u32,
