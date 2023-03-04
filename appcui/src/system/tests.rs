@@ -94,6 +94,17 @@ fn prepare_command_bar(width: u32, height: u32) -> CommandBar {
     c.set(Key::new(KeyCode::F3, KeyModifier::None), "Open", 2);
     c.set(Key::new(KeyCode::F5, KeyModifier::None), "Run", 3);
     c.set(Key::new(KeyCode::F7, KeyModifier::None), "Compile", 4);
-    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", 5);
+    c.set(Key::new(KeyCode::F8, KeyModifier::None), "Delete", 5);
+    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", 6);
+    c.update_positions();
     c
+}
+
+#[test]
+fn check_command_bar() {
+    let mut s = SurfaceTester::new(40,5);
+    let mut c = prepare_command_bar(s.get_width(), s.get_height());
+    s.clear(Character::new('X',Color::Black,Color::DarkBlue, CharFlags::None));
+    c.paint(&mut s, &Theme::new());
+    s.print();
 }
