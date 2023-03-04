@@ -7,6 +7,7 @@ use super::Theme;
 
 const MAX_KEYS: usize = 64; // no bigger than 255
 const MAX_SHIFT_STATES: usize = 8;
+const INVALID_INDEX: u32 = 0xFFFFFFFF;
 
 #[derive(Default)]
 struct Item {
@@ -26,6 +27,8 @@ struct CommandBar {
     items: Vec<Item>,
     indexes: [Vec<u32>; MAX_SHIFT_STATES],
     has_shifts: [bool; MAX_SHIFT_STATES],
+    hovered_index: u32,
+    pressed_index: u32,
 }
 
 impl CommandBar {
@@ -38,6 +41,8 @@ impl CommandBar {
             indexes: Default::default(),
             has_shifts: [false; MAX_SHIFT_STATES],
             modifier: KeyModifier::None,
+            hovered_index: INVALID_INDEX,
+            pressed_index: INVALID_INDEX,
         };
         for vec in &mut obj.indexes {
             vec.reserve(MAX_KEYS);
@@ -75,8 +80,8 @@ impl CommandBar {
         for vec in &mut self.indexes {
             vec.clear();
         }
-        //    HoveredField       = nullptr;
-        //    RecomputeScreenPos = true;
+        self.hovered_index = INVALID_INDEX;
+        self.pressed_index = INVALID_INDEX;
     }
 
     pub fn set(&mut self, key: Key, text: &str, command: u32) -> bool {
@@ -107,7 +112,7 @@ impl CommandBar {
         true
     }
 
-    fn update_positions(&mut self) {
+    pub (crate) fn update_positions(&mut self) {
         // recompute all positions regardless of the shift state
         for shift_state in 0..MAX_SHIFT_STATES {
             let vidx = &mut self.indexes[shift_state];
@@ -141,71 +146,44 @@ impl CommandBar {
             self.width as i32,
             Character::with_attributes(' ', theme.menu.text.normal),
         );
-
-        /*
-
-        if (RecomputeScreenPos)
-            ComputeScreenPos();
-
-        if (ShiftStatus.length() > 0)
-            renderer.WriteSingleLineText(0, BarLayout.Y, ShiftStatus, Cfg->Menu.Text.Inactive);
-
-        uint32 shift = ((uint32) CurrentShiftKey) >> ((uint32) Utils::KeyUtils::KEY_SHIFT_BITS);
-        if (shift >= MAX_COMMANDBAR_SHIFTSTATES)
-            return;
-        if (HasKeys[shift] == false)
-            return;
-
-        CommandBarFieldIndex* bi = &VisibleFields[shift][0];
-        CommandBarFieldIndex* ei = bi + IndexesCount[shift];
-        CommandBarField* cmd;
-
-        Graphics::ColorPair colText, colHotKey;
-
-        while (bi < ei)
-        {
-            cmd = bi->Field;
-            if (cmd == this->PressedField)
-            {
-                colText = Cfg->Menu.Text.PressedOrSelected;
-                colHotKey = Cfg->Menu.ShortCut.PressedOrSelected;
-            }
-            else if (cmd == this->HoveredField)
-            {
-                colText   = Cfg->Menu.Text.Hovered;
-                colHotKey = Cfg->Menu.ShortCut.Hovered;
-            }
-            else
-            {
-                colText   = Cfg->Menu.Text.Normal;
-                colHotKey = Cfg->Menu.ShortCut.Normal;
-            }
-
-            renderer.WriteSingleLineText(cmd->StartScreenPos, BarLayout.Y, cmd->KeyName, colHotKey);
-            renderer.WriteSingleLineText(
-                  cmd->StartScreenPos + (int) cmd->KeyName.length(), BarLayout.Y, cmd->Name, colText);
-
-            bi++;
+        let modifier_name = self.modifier.get_name();
+        if modifier_name.len() > 0 {
+            surface.write_string(0, self.y, modifier_name, theme.menu.text.inactive, false);
         }
+        let shift_idx = self.modifier.get_value() as usize;
+        if (shift_idx >= MAX_SHIFT_STATES) || (self.has_shifts[shift_idx] == false) {
+            return;
+        }
+        for idx in &self.indexes[shift_idx] {
+            let item = &self.items[(*idx) as usize];
 
-            */
+            // write the key
+            let col_key = match () {
+                _ if (*idx) == self.pressed_index => theme.menu.shortcut.pressed_or_selectd,
+                _ if (*idx) == self.hovered_index => theme.menu.shortcut.hovered,
+                _ => theme.menu.shortcut.normal,
+            };
+            surface.write_string(item.left, self.y, item.key, col_key, false);
+
+            // write the text
+            let col_text = match () {
+                _ if (*idx) == self.pressed_index => theme.menu.text.pressed_or_selectd,
+                _ if (*idx) == self.hovered_index => theme.menu.text.hovered,
+                _ => theme.menu.text.normal,
+            };
+            surface.write_string(
+                item.left + (item.key.len() as i32) + 1,
+                self.y,
+                &item.text,
+                col_text,
+                false,
+            );
+        }
     }
 }
 
 /*
 
-    struct CommandBarField
-    {
-        int Command, StartScreenPos, EndScreenPos;
-        Input::Key KeyCode;
-        string_view KeyName;
-        Graphics::CharacterBuffer Name;
-        uint32 ClearCommandUniqueID;
-    };
-    struct CommandBarFieldIndex
-    {
-        CommandBarField* Field;
-    };
     class CommandBarController
     {
         CommandBarField Fields[MAX_COMMANDBAR_SHIFTSTATES][(uint32) Input::Key::Count];
