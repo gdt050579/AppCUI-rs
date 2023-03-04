@@ -1,5 +1,5 @@
 use crate::graphics::CharAttribute;
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct ControlCharAttributesState {
     pub normal: CharAttribute,
     pub focused: CharAttribute,

@@ -1,8 +1,8 @@
-use crate::{graphics::*, controls::ControlCharAttributesState};
+use crate::{controls::ControlCharAttributesState, graphics::*};
 
 #[derive(Default)]
 pub struct Desktop {
-    pub character: Character
+    pub character: Character,
 }
 #[derive(Default)]
 pub struct Text {
@@ -21,7 +21,7 @@ pub struct Text {
 #[derive(Default)]
 pub struct ToolTip {
     pub text: CharAttribute,
-    pub arrow: CharAttribute
+    pub arrow: CharAttribute,
 }
 #[derive(Default)]
 pub struct Symbol {
@@ -41,9 +41,8 @@ pub struct Menu {
     pub text: ControlCharAttributesState,
     pub hotkey: ControlCharAttributesState,
     pub shortcut: ControlCharAttributesState,
-    pub symbol: ControlCharAttributesState
+    pub symbol: ControlCharAttributesState,
 }
-
 
 #[derive(Default)]
 pub struct Theme {
@@ -52,17 +51,22 @@ pub struct Theme {
     pub symbol: Symbol,
     pub tooltip: ToolTip,
     pub menu: Menu,
-    pub parent_menu: Menu
+    pub parent_menu: Menu,
 }
 impl Theme {
-    pub(crate) fn new()->Self {
+    pub(crate) fn new() -> Self {
         let mut t = Theme::default();
         t.set_regular_theme();
         return t;
     }
     fn set_regular_theme(&mut self) {
-        self.desktop.character = Character::new(SpecialChar::Block50,Color::Gray, Color::Black, CharFlags::None);
-        
+        self.desktop.character = Character::new(
+            SpecialChar::Block50,
+            Color::Gray,
+            Color::Black,
+            CharFlags::None,
+        );
+
         self.text.normal = CharAttribute::with_fore_color(Color::Silver);
         self.text.error = CharAttribute::with_fore_color(Color::Red);
         self.text.warning = CharAttribute::with_fore_color(Color::Olive);
@@ -89,5 +93,50 @@ impl Theme {
         self.tooltip.text = CharAttribute::with_color(Color::Black, Color::Aqua);
         self.tooltip.arrow = CharAttribute::with_color(Color::Green, Color::Black);
 
+        self.menu.text = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Black, Color::White),
+            focused: CharAttribute::with_color(Color::Black, Color::White),
+            hovered: CharAttribute::with_color(Color::Black, Color::Silver),
+            inactive: CharAttribute::with_color(Color::Gray, Color::White),
+            pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Magenta),
+        };
+        self.menu.hotkey = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::DarkRed, Color::White),
+            focused: CharAttribute::with_color(Color::DarkRed, Color::White),
+            hovered: CharAttribute::with_color(Color::DarkRed, Color::Silver),
+            inactive: CharAttribute::with_color(Color::Gray, Color::White),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Magenta),
+        };
+        self.menu.symbol = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::DarkGreen, Color::White),
+            focused: CharAttribute::with_color(Color::DarkGreen, Color::White),
+            hovered: CharAttribute::with_color(Color::Magenta, Color::Silver),
+            inactive: CharAttribute::with_color(Color::Gray, Color::White),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Magenta),
+        };
+        self.menu.shortcut = self.menu.hotkey;
+
+        self.parent_menu.text = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Black, Color::Silver),
+            focused: CharAttribute::with_color(Color::Black, Color::Silver),
+            hovered: CharAttribute::with_color(Color::Black, Color::Gray),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Silver),
+            pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Gray),
+        };
+        self.parent_menu.hotkey = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::DarkRed, Color::Silver),
+            focused: CharAttribute::with_color(Color::DarkRed, Color::Silver),
+            hovered: CharAttribute::with_color(Color::DarkRed, Color::Gray),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Silver),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Gray),
+        };    
+        self.parent_menu.symbol = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::DarkGreen, Color::Silver),
+            focused: CharAttribute::with_color(Color::DarkGreen, Color::Silver),
+            hovered: CharAttribute::with_color(Color::Magenta, Color::Gray),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Silver),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Gray),
+        };     
+        self.parent_menu.shortcut = self.parent_menu.hotkey;
     }
 }
