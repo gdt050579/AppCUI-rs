@@ -1,4 +1,4 @@
-use crate::input::{Key, KeyCode};
+use crate::input::{Key, KeyCode, KeyModifier};
 
 const MAX_KEYS: usize = 64; // no bigger than 255
 const MAX_SHIFT_STATES: usize = 8;
@@ -11,13 +11,14 @@ struct Item {
     right: i32,
     command: u32,
     version: u32,
+    size: u16,
 }
 struct CommandBar {
     width: u32,
     y: i32,
     version: u32,
     items: Vec<Item>,
-    indexes: [Vec<u8>; MAX_SHIFT_STATES],
+    indexes: [Vec<u32>; MAX_SHIFT_STATES],
     has_shifts: [bool; MAX_SHIFT_STATES],
 }
 
@@ -34,7 +35,7 @@ impl CommandBar {
         for vec in &mut obj.indexes {
             vec.reserve(MAX_KEYS);
         }
-        for i in 0..(MAX_KEYS * MAX_SHIFT_STATES) {
+        for _ in 0..(MAX_KEYS * MAX_SHIFT_STATES) {
             obj.items.push(Item {
                 text: String::new(),
                 key: "",
@@ -42,6 +43,7 @@ impl CommandBar {
                 right: -1,
                 command: 0,
                 version: 0,
+                size: 0,
             });
         }
         obj
@@ -49,6 +51,7 @@ impl CommandBar {
     pub(crate) fn set_desktop_size(&mut self, width: u32, height: u32) {
         self.width = width;
         self.y = (height as i32) - 1;
+        self.update_positions();
     }
 
     pub(crate) fn clear(&mut self) {
@@ -84,10 +87,38 @@ impl CommandBar {
         item.right = -1;
         item.key = key.code.get_name();
         item.version = self.version;
+        item.size = (item.key.len() + item.text.chars().count() + 3) as u16;
 
         self.has_shifts[shift_state] = true;
 
         true
+    }
+
+    fn update_positions(&mut self) {
+        // recompute all positions regardless of the shift state
+        for shift_state in 0..MAX_SHIFT_STATES {
+            let vidx = &mut self.indexes[shift_state];
+            vidx.clear();
+            if self.has_shifts[shift_state] == false {
+                continue;
+            }
+            let start_index = MAX_KEYS * shift_state;
+            let end_index = start_index + MAX_KEYS;
+            let mut x = (KeyModifier::get_name_from_index(shift_state).len() + 1) as i32;
+            for idx in start_index..end_index {
+                let item = &mut self.items[idx];
+                if item.version != self.version {
+                    continue;
+                }
+                vidx.push(idx as u32);
+                item.left = x;
+                item.right = x + item.size as i32;
+                x = item.right + 1;
+                if x > (self.width as i32) {
+                    break;
+                }
+            }
+        }
     }
 }
 

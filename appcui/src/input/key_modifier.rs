@@ -1,13 +1,13 @@
 use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits=8)]
+#[EnumBitFlags(bits = 8)]
 pub enum KeyModifier {
     Alt = 0x01,
     Ctrl = 0x02,
-    Shift = 0x04
+    Shift = 0x04,
 }
 
-static KEY_NAME: [&str;8] = [
+static KEY_NAME: [&str; 8] = [
     /* 0 */ "",
     /* 1 */ "Alt+",
     /* 2 */ "Ctrl+",
@@ -19,10 +19,13 @@ static KEY_NAME: [&str;8] = [
 ];
 
 impl KeyModifier {
-    pub fn get_name(&self)->&'static str {
-        if self.value<8 {
+    pub fn get_name(&self) -> &'static str {
+        if self.value < 8 {
             return KEY_NAME[self.value as usize];
         }
         return "";
+    }
+    pub(crate) fn get_name_from_index(index: usize) -> &'static str {
+        return if index < 8 { KEY_NAME[index] } else { "" };
     }
 }
