@@ -1,4 +1,4 @@
-use crate::graphics::*;
+use crate::{graphics::*, controls::ControlCharAttributesState};
 
 #[derive(Default)]
 pub struct Desktop {
@@ -37,11 +37,22 @@ pub struct Symbol {
     pub resize: CharAttribute,
 }
 #[derive(Default)]
+pub struct Menu {
+    pub text: ControlCharAttributesState,
+    pub hotkey: ControlCharAttributesState,
+    pub shortcut: ControlCharAttributesState,
+    pub symbol: ControlCharAttributesState
+}
+
+
+#[derive(Default)]
 pub struct Theme {
     pub desktop: Desktop,
     pub text: Text,
     pub symbol: Symbol,
     pub tooltip: ToolTip,
+    pub menu: Menu,
+    pub parent_menu: Menu
 }
 impl Theme {
     pub(crate) fn new()->Self {

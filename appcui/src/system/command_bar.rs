@@ -1,4 +1,9 @@
-use crate::input::{Key, KeyCode, KeyModifier};
+use crate::{
+    graphics::{CharAttribute, CharFlags, Character, Surface},
+    input::{Key, KeyCode, KeyModifier},
+};
+
+use super::Theme;
 
 const MAX_KEYS: usize = 64; // no bigger than 255
 const MAX_SHIFT_STATES: usize = 8;
@@ -17,6 +22,7 @@ struct CommandBar {
     width: u32,
     y: i32,
     version: u32,
+    modifier: KeyModifier,
     items: Vec<Item>,
     indexes: [Vec<u32>; MAX_SHIFT_STATES],
     has_shifts: [bool; MAX_SHIFT_STATES],
@@ -31,6 +37,7 @@ impl CommandBar {
             items: Vec::with_capacity(MAX_KEYS * MAX_SHIFT_STATES),
             indexes: Default::default(),
             has_shifts: [false; MAX_SHIFT_STATES],
+            modifier: KeyModifier::None,
         };
         for vec in &mut obj.indexes {
             vec.reserve(MAX_KEYS);
@@ -52,6 +59,12 @@ impl CommandBar {
         self.width = width;
         self.y = (height as i32) - 1;
         self.update_positions();
+    }
+
+    pub(crate) fn set_key_modifier(&mut self, modifier: KeyModifier) {
+        if modifier != self.modifier {
+            self.modifier = modifier;
+        }
     }
 
     pub(crate) fn clear(&mut self) {
@@ -119,6 +132,63 @@ impl CommandBar {
                 }
             }
         }
+    }
+
+    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
+        surface.fill_horizontal_line(
+            0,
+            self.y,
+            self.width as i32,
+            Character::with_attributes(' ', theme.menu.text.normal),
+        );
+
+        /*
+
+        if (RecomputeScreenPos)
+            ComputeScreenPos();
+
+        if (ShiftStatus.length() > 0)
+            renderer.WriteSingleLineText(0, BarLayout.Y, ShiftStatus, Cfg->Menu.Text.Inactive);
+
+        uint32 shift = ((uint32) CurrentShiftKey) >> ((uint32) Utils::KeyUtils::KEY_SHIFT_BITS);
+        if (shift >= MAX_COMMANDBAR_SHIFTSTATES)
+            return;
+        if (HasKeys[shift] == false)
+            return;
+
+        CommandBarFieldIndex* bi = &VisibleFields[shift][0];
+        CommandBarFieldIndex* ei = bi + IndexesCount[shift];
+        CommandBarField* cmd;
+
+        Graphics::ColorPair colText, colHotKey;
+
+        while (bi < ei)
+        {
+            cmd = bi->Field;
+            if (cmd == this->PressedField)
+            {
+                colText = Cfg->Menu.Text.PressedOrSelected;
+                colHotKey = Cfg->Menu.ShortCut.PressedOrSelected;
+            }
+            else if (cmd == this->HoveredField)
+            {
+                colText   = Cfg->Menu.Text.Hovered;
+                colHotKey = Cfg->Menu.ShortCut.Hovered;
+            }
+            else
+            {
+                colText   = Cfg->Menu.Text.Normal;
+                colHotKey = Cfg->Menu.ShortCut.Normal;
+            }
+
+            renderer.WriteSingleLineText(cmd->StartScreenPos, BarLayout.Y, cmd->KeyName, colHotKey);
+            renderer.WriteSingleLineText(
+                  cmd->StartScreenPos + (int) cmd->KeyName.length(), BarLayout.Y, cmd->Name, colText);
+
+            bi++;
+        }
+
+            */
     }
 }
 
@@ -218,90 +288,11 @@ bool CommandBarController::Set(Input::Key keyCode, const ConstString& caption, i
 }
 void CommandBarController::Paint(Graphics::Renderer& renderer)
 {
-    renderer.FillHorizontalLineSize(0, BarLayout.Y, BarLayout.Width, ' ', Cfg->Menu.Text.Normal);
-    if (RecomputeScreenPos)
-        ComputeScreenPos();
 
-    if (ShiftStatus.length() > 0)
-        renderer.WriteSingleLineText(0, BarLayout.Y, ShiftStatus, Cfg->Menu.Text.Inactive);
-
-    uint32 shift = ((uint32) CurrentShiftKey) >> ((uint32) Utils::KeyUtils::KEY_SHIFT_BITS);
-    if (shift >= MAX_COMMANDBAR_SHIFTSTATES)
-        return;
-    if (HasKeys[shift] == false)
-        return;
-
-    CommandBarFieldIndex* bi = &VisibleFields[shift][0];
-    CommandBarFieldIndex* ei = bi + IndexesCount[shift];
-    CommandBarField* cmd;
-
-    Graphics::ColorPair colText, colHotKey;
-
-    while (bi < ei)
-    {
-        cmd = bi->Field;
-        if (cmd == this->PressedField)
-        {
-            colText = Cfg->Menu.Text.PressedOrSelected;
-            colHotKey = Cfg->Menu.ShortCut.PressedOrSelected;
-        }
-        else if (cmd == this->HoveredField)
-        {
-            colText   = Cfg->Menu.Text.Hovered;
-            colHotKey = Cfg->Menu.ShortCut.Hovered;
-        }
-        else
-        {
-            colText   = Cfg->Menu.Text.Normal;
-            colHotKey = Cfg->Menu.ShortCut.Normal;
-        }
-
-        renderer.WriteSingleLineText(cmd->StartScreenPos, BarLayout.Y, cmd->KeyName, colHotKey);
-        renderer.WriteSingleLineText(
-              cmd->StartScreenPos + (int) cmd->KeyName.length(), BarLayout.Y, cmd->Name, colText);
-
-        bi++;
-    }
 }
 void CommandBarController::ComputeScreenPos()
 {
-    int startPoz;
-    // validez shift state
-    ShiftStatus = Utils::KeyUtils::GetKeyModifierName(this->CurrentShiftKey);
-    startPoz    = (int) ShiftStatus.length();
-    if (startPoz > 0)
-        startPoz++;
 
-    // creez lista secundara de pointeri
-    bool* hasKeys = &HasKeys[0];
-    for (uint32 tr = 0; tr < MAX_COMMANDBAR_SHIFTSTATES; tr++, hasKeys++)
-    {
-        if ((*hasKeys) == false)
-            continue;
-        CommandBarField* bf           = &Fields[tr][0];
-        CommandBarField* ef           = bf + (uint32) Key::Count;
-        CommandBarFieldIndex* current = &VisibleFields[tr][0];
-        int* ic                       = &IndexesCount[tr];
-        *ic                           = 0;
-        int start                     = startPoz;
-        while (bf < ef)
-        {
-            // we consider valid only items that were added with a specific ClearCommandUniqueID ID
-            if (bf->ClearCommandUniqueID == this->ClearCommandUniqueID)
-            {
-                current->Field = bf;
-                current++;
-                bf->StartScreenPos = start;
-                start += (int) (bf->KeyName.length() + bf->Name.Len());
-                bf->EndScreenPos = start;
-
-                if (start > this->BarLayout.Width)
-                    break;
-                (*ic)++;
-            }
-            bf++;
-        }
-    }
     this->HoveredField = nullptr;
     this->PressedField = nullptr;
     RecomputeScreenPos = false;
