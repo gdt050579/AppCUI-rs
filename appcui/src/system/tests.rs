@@ -109,3 +109,14 @@ fn check_command_bar_1() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xD466864BD254E538);
 }
+
+#[test]
+fn check_command_bar_2() {
+    let mut s = SurfaceTester::new(60,5);
+    let mut c = prepare_command_bar(s.get_width(), s.get_height());
+    s.clear(Character::new('.',Color::Black,Color::DarkBlue, CharFlags::None));
+    c.set_key_modifier(KeyModifier::Alt);
+    c.paint(&mut s, &Theme::new());
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x940B30F3F39A2B3A);
+}
