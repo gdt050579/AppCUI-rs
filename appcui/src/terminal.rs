@@ -31,6 +31,7 @@ pub (crate) trait Terminal {
 
 #[repr(u8)]
 pub enum TerminalType {
+    Default,
     Debug,
     WindowsConsole,
 }
@@ -38,6 +39,9 @@ impl TerminalType {
     pub (crate) fn new(terminal_type: TerminalType) -> Option<Box<dyn Terminal>>
     {
         match terminal_type {
+            TerminalType::Default => {
+                None
+            },
             TerminalType::WindowsConsole => {
                 if let Some(term) = WindowsTerminal::create() {
                     return Some(term);

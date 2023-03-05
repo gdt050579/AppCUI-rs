@@ -1,9 +1,9 @@
-use super::{Theme, ToolTip, CommandBar};
+use super::{CommandBar, InitializationData, InitializationFlags, Theme, ToolTip};
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
 use crate::controls::ControlManager;
 use crate::controls::*;
-use crate::graphics::{Surface, Rect};
+use crate::graphics::{Rect, Surface};
 use crate::terminal::*;
 
 pub(crate) struct RuntimeManager {
@@ -12,33 +12,45 @@ pub(crate) struct RuntimeManager {
     surface: Surface,
     root: ControlManager,
     tooltip: ToolTip,
-    commandbar: Option<Box<CommandBar>>
+    commandbar: Option<CommandBar>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
 impl RuntimeManager {
-    pub(super) fn create() {
-        let term =
-            TerminalType::new(TerminalType::Debug).expect("Unable to create a terminal object !");
-        let surface = Surface::new(term.get_width(), term.get_height());
+    pub(super) fn create(data: InitializationData) -> Result<(), super::Error> {
+        let term = TerminalType::new(data.terminal).expect("Unable to create a terminal object !");
+        let width = term.get_width();
+        let height = term.get_height();
+        let surface = Surface::new(width, height);
         let manager = RuntimeManager {
             theme: Theme::new(),
             terminal: term,
             surface: surface,
             root: ControlManager::new(Desktop::new()),
             tooltip: ToolTip::new(),
-            commandbar: None,
+            commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
+                Some(CommandBar::new(width, height))
+            } else {
+                None
+            },
         };
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
+        Ok(())
     }
     pub(crate) fn get() -> &'static mut RuntimeManager {
         unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
-        self.tooltip.show(txt, &rect, self.terminal.get_width(), self.terminal.get_height(), &self.theme);
+        self.tooltip.show(
+            txt,
+            &rect,
+            self.terminal.get_width(),
+            self.terminal.get_height(),
+            &self.theme,
+        );
     }
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
@@ -80,7 +92,10 @@ impl RuntimeManager {
         self.root.paint(&mut self.surface, &self.theme);
         self.surface.reset();
         if self.commandbar.is_some() {
-            self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
+            self.commandbar
+                .as_ref()
+                .unwrap()
+                .paint(&mut self.surface, &self.theme);
         }
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);
