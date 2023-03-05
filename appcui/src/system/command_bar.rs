@@ -1,6 +1,8 @@
 use crate::{
+    controls::events::EventProcessStatus,
     graphics::{CharAttribute, CharFlags, Character, Surface},
-    input::{Key, KeyCode, KeyModifier, MouseEvent}, controls::events::EventProcessStatus,
+    input::{Key, KeyCode, KeyModifier, MouseEvent},
+    terminal::{MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent},
 };
 
 use super::Theme;
@@ -115,6 +117,24 @@ impl CommandBar {
         true
     }
 
+    pub(crate) fn get_command(&self, key: Key) -> Option<u32> {
+        if key.code == KeyCode::None {
+            return None;
+        }
+        let key_index = (key.code as u8) as usize;
+        if key_index >= MAX_KEYS {
+            return None;
+        }
+        let shift_state = key.modifier.get_value() as usize;
+        if shift_state >= MAX_SHIFT_STATES {
+            return None;
+        }
+        let item = &self.items[shift_state * MAX_KEYS + key_index];
+        if item.version != self.version {
+            return None;
+        }
+        return Some(item.command);
+    }
     pub(crate) fn update_positions(&mut self) {
         // recompute all positions regardless of the shift state
         for shift_state in 0..MAX_SHIFT_STATES {
@@ -144,6 +164,8 @@ impl CommandBar {
                 }
             }
         }
+        self.hovered_index = INVALID_INDEX;
+        self.pressed_index = INVALID_INDEX;
     }
 
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -188,201 +210,62 @@ impl CommandBar {
         }
     }
 
-    pub(crate) fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus {
-        EventProcessStatus::Ignored
-    }
-}
-
-/*
-
-    class CommandBarController
-    {
-        CommandBarField Fields[MAX_COMMANDBAR_SHIFTSTATES][(uint32) Input::Key::Count];
-        CommandBarFieldIndex VisibleFields[MAX_COMMANDBAR_SHIFTSTATES][(uint32) Input::Key::Count];
-        int IndexesCount[MAX_COMMANDBAR_SHIFTSTATES];
-        bool HasKeys[MAX_COMMANDBAR_SHIFTSTATES];
-
-        struct
-        {
-            int Y, Width;
-        } BarLayout;
-
-        string_view ShiftStatus;
-
-        Application::Config* Cfg;
-        Input::Key CurrentShiftKey;
-        int LastCommand;
-        CommandBarField* PressedField;
-        CommandBarField* HoveredField;
-        uint32 ClearCommandUniqueID;
-        bool RecomputeScreenPos;
-
-        void ComputeScreenPos();
-        bool CleanFieldStatus();
-        CommandBarField* MousePositionToField(int x, int y);
-
-      public:
-        CommandBarController(uint32 desktopWidth, uint32 desktopHeight, Application::Config* cfg);
-        void Paint(Graphics::Renderer& renderer);
-        void Clear();
-        bool Set(Input::Key keyCode, const ConstString& caption, int Command);
-        bool SetShiftKey(Input::Key keyCode);
-        bool OnMouseMove(int x, int y, bool& repaint);
-        bool OnMouseDown();
-        bool OnMouseUp(int& command);
-        int GetCommandForKey(Input::Key keyCode);
-    };
-
-
-
-#include "Internal.hpp"
-
-namespace AppCUI::Internal
-{
-using namespace Input;
-
-CommandBarController::CommandBarController(
-      uint32 desktopWidth, uint32 desktopHeight, Application::Config* cfg)
-{
-    this->Cfg = cfg;
-    SetDesktopSize(desktopWidth, desktopHeight);
-    ClearCommandUniqueID = 0;
-    for (uint32 tr = 0; tr < MAX_COMMANDBAR_SHIFTSTATES; tr++)
-    {
-        CommandBarField* b = &Fields[tr][0];
-        CommandBarField* e = b + (uint32) Key::Count;
-        while (b < e)
-        {
-            b->ClearCommandUniqueID = ClearCommandUniqueID;
-            b++;
+    fn mouse_poseition_to_index(&self, x: i32, y: i32) -> Option<u32> {
+        if y != self.y {
+            return None;
         }
+        let shift_idx = self.modifier.get_value() as usize;
+        if (shift_idx >= MAX_SHIFT_STATES) || (self.has_shifts[shift_idx] == false) {
+            return None;
+        }
+        for idx in &self.indexes[shift_idx] {
+            let item = &self.items[(*idx) as usize];
+            if (x >= item.left) && (x < item.right) {
+                return Some(*idx);
+            }
+        }
+        None
     }
-    CurrentShiftKey = Input::Key::None;
-    PressedField    = nullptr;
-    HoveredField    = nullptr;
-    LastCommand     = 0;
-    ShiftStatus     = string_view("", 0);
-    Clear();
-}
-void CommandBarController::SetDesktopSize(uint32 desktopWidth, uint32 desktopHeight)
-{
-    this->RecomputeScreenPos = true;
-}
 
-bool CommandBarController::Set(Input::Key keyCode, const ConstString& caption, int Command)
-{
-
-    RecomputeScreenPos      = true;
-    return true;
-}
-void CommandBarController::Paint(Graphics::Renderer& renderer)
-{
-
-}
-void CommandBarController::ComputeScreenPos()
-{
-
-    this->HoveredField = nullptr;
-    this->PressedField = nullptr;
-    RecomputeScreenPos = false;
-}
-bool CommandBarController::SetShiftKey(Input::Key keyCode)
-{
-    if (keyCode != CurrentShiftKey)
-    {
-        CurrentShiftKey = keyCode;
-        ComputeScreenPos();
-        return true;
-    }
-    return false;
-}
-CommandBarField* CommandBarController::MousePositionToField(int x, int y)
-{
-    if (RecomputeScreenPos)
-        ComputeScreenPos();
-    uint32 shift = ((uint32) CurrentShiftKey) >> ((uint32) Utils::KeyUtils::KEY_SHIFT_BITS);
-    CHECK(shift < MAX_COMMANDBAR_SHIFTSTATES, nullptr, "");
-    if (HasKeys[shift] == false)
-        return nullptr;
-    if (y < this->BarLayout.Y)
-        return nullptr;
-    CommandBarFieldIndex* bi = &VisibleFields[shift][0];
-    CommandBarFieldIndex* ei = bi + IndexesCount[shift];
-    while (bi < ei)
-    {
-        if ((x >= bi->Field->StartScreenPos) && (x < bi->Field->EndScreenPos))
-            return (bi->Field);
-        bi++;
-    }
-    return nullptr;
-}
-bool CommandBarController::CleanFieldStatus()
-{
-    if ((this->HoveredField) || (this->PressedField))
-    {
-        this->HoveredField = nullptr;
-        this->PressedField = nullptr;
-        return true;
-    }
-    return false;
-}
-bool CommandBarController::OnMouseMove(int x, int y, bool& repaint)
-{
-    repaint = false;
-    if (y < this->BarLayout.Y)
-    {
-        repaint = CleanFieldStatus();
-        return false; // sunt in afara lui
-    }
-    if (this->HoveredField)
-    {
-        // cached position
-        if ((x >= this->HoveredField->StartScreenPos) && (x < this->HoveredField->EndScreenPos))
+    pub(crate) fn on_mouse_move(&mut self, event: &MouseMoveEvent) -> bool {
+        if event.y != self.y {
+            self.hovered_index = INVALID_INDEX;
+            self.pressed_index = INVALID_INDEX;
+            return false;
+        }
+        // check if the current hovered index is not the actual index for current mouse pos
+        if (self.hovered_index != INVALID_INDEX) && ((self.hovered_index as usize) < self.items.len()) {
+            let item = &self.items[self.hovered_index as usize];
+            if (event.x>=item.left) && (event.x<item.right) {
+                return true;
+            }
+        }
+        // else check the new index (if any)
+        if let Some(idx) = self.mouse_poseition_to_index(event.x, event.y) {
+            self.hovered_index = idx;
             return true;
+        }
+        self.hovered_index = INVALID_INDEX;
+        return false;
     }
-    CommandBarField* field = MousePositionToField(x, y);
-    if (field != this->HoveredField)
-    {
-        this->HoveredField = field;
-        repaint            = true;
+
+    pub(crate) fn on_mouse_down(&mut self, event: &MouseButtonDownEvent) -> bool {
+        if self.hovered_index != INVALID_INDEX {
+            self.pressed_index = self.hovered_index;
+            return true;
+        }
+        return false;
     }
-    return true;
-}
-bool CommandBarController::OnMouseDown()
-{
-    if (this->HoveredField)
-    {
-        this->PressedField = this->HoveredField;
-        return true;
+    pub(crate) fn on_mouse_up(&mut self, event: &MouseButtonUpEvent) -> Option<u32> {
+        let idx = self.pressed_index as u32;
+        self.hovered_index = INVALID_INDEX;
+        self.pressed_index = INVALID_INDEX;
+
+        if (idx != INVALID_INDEX) && ((idx as usize) < self.items.len()) {
+            return Some(self.items[idx as usize].command);
+        }
+        return None;
     }
-    return false;
 }
-bool CommandBarController::OnMouseUp(int& command)
-{
-    if (this->PressedField)
-    {
-        command = this->PressedField->Command;
-        if (command < 0)
-            command = -1;
-        this->PressedField = nullptr;
-        return true;
-    }
-    command = -1;
-    return false;
-}
-int CommandBarController::GetCommandForKey(Input::Key keyCode)
-{
-    uint32 index = (((uint32) keyCode) & 0xFF);
-    uint32 shift = (((uint32) keyCode) >> Utils::KeyUtils::KEY_SHIFT_BITS);
-    CHECK(index < (uint32) Input::Key::Count, -1, "Invalid key code !");
-    CHECK((shift < MAX_COMMANDBAR_SHIFTSTATES), -1, "Invalid shift combination !");
-    CommandBarField* b = &Fields[shift][index];
-    // if ClearCommandUniqueID is not thee same as the current one, then its an old item and we discard it
-    if (b->ClearCommandUniqueID != ClearCommandUniqueID)
-        return -1;
-    return b->Command;
-}
-} // namespace AppCUI::Internal
 
 
-*/
