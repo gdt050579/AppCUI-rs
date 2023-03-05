@@ -1,7 +1,7 @@
 use crate::{
     controls::events::EventProcessStatus,
-    graphics::{CharAttribute, CharFlags, Character, Surface},
-    input::{Key, KeyCode, KeyModifier, MouseEvent},
+    graphics::{Character, Surface},
+    input::{Key, KeyCode, KeyModifier},
     terminal::{MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent},
 };
 

@@ -7,6 +7,7 @@ use super::graphics::Surface;
 use super::graphics::Color;
 use super::graphics::CharFlags;
 use super::graphics::Size;
+use super::system::Error;
 
 
 pub (crate) use self::system_event::SystemEvent;
@@ -36,7 +37,7 @@ pub enum TerminalType {
     WindowsConsole,
 }
 impl TerminalType {
-    pub (crate) fn new(terminal_type: TerminalType) -> Option<Box<dyn Terminal>>
+    pub (crate) fn new(terminal_type: TerminalType) -> Result<Box<dyn Terminal>,Error>
     {
         match terminal_type {
             TerminalType::Default => {
