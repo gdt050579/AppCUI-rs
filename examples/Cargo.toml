@@ -9,4 +9,4 @@ appcui = { version = "1.0.0", path = "../appcui" }
 
 [[example]]
 name = "SimpleWindow"
-path = "SimpleWindow.rs"
+path = "simple_window.rs"
