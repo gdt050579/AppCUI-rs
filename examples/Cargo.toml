@@ -8,5 +8,5 @@ edition = "2021"
 appcui = { version = "1.0.0", path = "../appcui" }
 
 [[example]]
-name = "SimpleWindow"
+name = "simple_window"
 path = "simple_window.rs"
