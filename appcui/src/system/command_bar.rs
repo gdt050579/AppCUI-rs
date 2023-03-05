@@ -241,6 +241,7 @@ impl CommandBar {
             }
         }
         // else check the new index (if any)
+        self.pressed_index = INVALID_INDEX;
         if let Some(idx) = self.mouse_poseition_to_index(event.x, event.y) {
             self.hovered_index = idx;
             return true;
@@ -267,5 +268,3 @@ impl CommandBar {
         return None;
     }
 }
-
-
