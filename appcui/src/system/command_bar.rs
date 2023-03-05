@@ -251,6 +251,7 @@ impl CommandBar {
     }
 
     pub(crate) fn on_mouse_down(&mut self, event: &MouseButtonDownEvent) -> bool {
+        self.pressed_index = INVALID_INDEX;
         if self.hovered_index != INVALID_INDEX {
             self.pressed_index = self.hovered_index;
             return true;

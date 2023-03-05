@@ -6,10 +6,13 @@ use crate::graphics::Character;
 use crate::graphics::Color;
 use crate::graphics::Rect;
 use crate::graphics::Size;
+use crate::graphics::SpecialChar;
 use crate::graphics::SurfaceTester;
 use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
+use crate::input::MouseButton;
+use crate::terminal::MouseMoveEvent;
 
 fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
     let mut tooltip = ToolTip::new();
@@ -119,4 +122,28 @@ fn check_command_bar_2() {
     c.paint(&mut s, &Theme::new());
     //s.print();
     assert_eq!(s.compute_hash(), 0x940B30F3F39A2B3A);
+}
+#[test]
+fn check_command_bar_hover() {
+    let mut s = SurfaceTester::new(60,5);
+    let mut c = prepare_command_bar(s.get_width(), s.get_height());
+    s.clear(Character::new(SpecialChar::Block50,Color::Black,Color::DarkBlue, CharFlags::None));
+    for x in 0..9 {
+        c.on_mouse_move(&MouseMoveEvent{ x, y: 4, button: MouseButton::None });
+        c.paint(&mut s, &Theme::new());
+        //s.print();
+        assert_eq!(s.compute_hash(), 0x6FFD6A9E00B06190);
+    }
+    c.on_mouse_move(&MouseMoveEvent{ x:9 , y: 4, button: MouseButton::None });
+    c.paint(&mut s, &Theme::new());
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x8FE003D26FC257B8);
+    c.on_mouse_move(&MouseMoveEvent{ x:10 , y: 4, button: MouseButton::None });
+    c.paint(&mut s, &Theme::new());
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x24738CE8FFD30F80);
+    c.on_mouse_move(&MouseMoveEvent{ x:10 , y: 3, button: MouseButton::None });
+    c.paint(&mut s, &Theme::new());
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x8FE003D26FC257B8);
 }
