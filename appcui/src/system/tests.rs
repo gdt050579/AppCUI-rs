@@ -12,6 +12,8 @@ use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
+use crate::terminal::MouseButtonDownEvent;
+use crate::terminal::MouseButtonUpEvent;
 use crate::terminal::MouseMoveEvent;
 
 fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
@@ -98,7 +100,7 @@ fn prepare_command_bar(width: u32, height: u32) -> CommandBar {
     c.set(Key::new(KeyCode::F5, KeyModifier::None), "Run", 3);
     c.set(Key::new(KeyCode::F7, KeyModifier::None), "Compile", 4);
     c.set(Key::new(KeyCode::F8, KeyModifier::None), "Delete", 5);
-    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", 6);
+    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", 12345);
     c.update_positions();
     c
 }
@@ -146,4 +148,25 @@ fn check_command_bar_hover() {
     c.paint(&mut s, &Theme::new());
     //s.print();
     assert_eq!(s.compute_hash(), 0x8FE003D26FC257B8);
+}
+
+#[test]
+fn check_command_bar_click() {
+    let mut s = SurfaceTester::new(60,5);
+    let mut c = prepare_command_bar(s.get_width(), s.get_height());
+    s.clear(Character::new(SpecialChar::Block50,Color::Black,Color::DarkBlue, CharFlags::None));
+    c.set_key_modifier(KeyModifier::Alt);
+    c.on_mouse_move(&MouseMoveEvent{ x:9 , y: 4, button: MouseButton::None });
+    c.paint(&mut s, &Theme::new());
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xF768DE602AA7C28A);
+    c.on_mouse_down(&MouseButtonDownEvent{ x:9 , y: 4, button: MouseButton::Left });
+    c.paint(&mut s, &Theme::new());
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x66FEDFABE303DEF6);
+    let result = c.on_mouse_up(&MouseButtonUpEvent{ x:9 , y: 4, button: MouseButton::Left }).unwrap();
+    c.paint(&mut s, &Theme::new());
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x2C57C3580F2C055A);
+    assert_eq!(result, 12345);
 }
