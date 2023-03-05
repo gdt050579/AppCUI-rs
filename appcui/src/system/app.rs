@@ -1,4 +1,5 @@
 use super::RuntimeManager;
+use super::Error;
 use crate::controls::events::Control;
 
 
@@ -7,10 +8,10 @@ pub struct App {
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self,Error> {
         // before creating an App --> initialize Runtime Manager
         RuntimeManager::create();
-        App { _phantom: () }
+        Ok(App { _phantom: () })
     }
     pub fn run(self) {
         // must pe self so that after a run a second call will not be possible

@@ -4,7 +4,7 @@ use appcui::terminal::*;
 
 #[test]
 fn test_1() {
-    let mut app = appcui::system::App::new();
+    let app = appcui::system::App::new().unwrap();
     app.run();
 }
 
