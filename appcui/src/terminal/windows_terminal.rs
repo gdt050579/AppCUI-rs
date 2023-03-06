@@ -16,6 +16,7 @@ use super::MouseWheelEvent;
 use super::Surface;
 use super::SystemEvent;
 use super::Terminal;
+use crate::system::Error;
 
 type HANDLE = u32;
 type BOOL = u32;
@@ -429,23 +430,23 @@ extern "system" {
 
 }
 
-fn get_handle(handle_id: i32) -> Option<u32> {
+fn get_handle(handle_id: i32) -> Result<u32,Error> {
     unsafe {
         let h = GetStdHandle(handle_id);
         if h == INVALID_HANDLE_VALUE {
-            return None;
+            return Err(Error::FailToGetStdInOutHandler);
         }
-        return Some(h);
+        return Ok(h);
     }
 }
 
-fn get_console_screen_buffer_info(handle: HANDLE) -> Option<CONSOLE_SCREEN_BUFFER_INFO> {
+fn get_console_screen_buffer_info(handle: HANDLE) -> Result<CONSOLE_SCREEN_BUFFER_INFO,Error> {
     unsafe {
         let mut cbuf = CONSOLE_SCREEN_BUFFER_INFO::default();
         if GetConsoleScreenBufferInfo(handle, &mut cbuf) == FALSE {
-            return None;
+            return Err(Error::GetConsoleScreenBufferInfoFailed);
         }
-        return Some(cbuf);
+        return Ok(cbuf);
     }
 }
 
@@ -462,25 +463,25 @@ pub struct WindowsTerminal {
 }
 
 impl WindowsTerminal {
-    pub fn create() -> Option<Box<WindowsTerminal>> {
+    pub (crate) fn create() -> Result<Box<dyn Terminal>,Error> {
         let stdin = get_handle(STD_INPUT_HANDLE)?;
         let stdout = get_handle(STD_OUTPUT_HANDLE)?;
         let mut original_mode_flags = 0u32;
         unsafe {
             if GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
-                return None;
+                return Err(Error::GetConsoleModeFailed);
             }
             if SetConsoleMode(
                 stdin,
                 ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS,
             ) == FALSE
             {
-                return None;
+                return Err(Error::SetConsoleModeFailed);
             }
         }
         let info = get_console_screen_buffer_info(stdout)?;
         if (info.size.x < 1) || (info.size.y < 1) {
-            return None;
+            return Err(Error::InvalidSize);
         }
         let mut term = Box::new(WindowsTerminal {
             stdin_handle: stdin,
@@ -497,7 +498,7 @@ impl WindowsTerminal {
             (term.width as usize) * (term.height as usize),
             CHAR_INFO { code: 32, attr: 0 },
         );
-        return Some(term);
+        return Ok(term);
     }
 }
 

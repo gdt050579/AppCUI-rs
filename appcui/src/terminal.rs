@@ -41,20 +41,11 @@ impl TerminalType {
     {
         match terminal_type {
             TerminalType::Default => {
-                None
+                // shold be different based on OS
+                return DebugTerminal::create();
             },
-            TerminalType::WindowsConsole => {
-                if let Some(term) = WindowsTerminal::create() {
-                    return Some(term);
-                }
-                return None;
-            }
-            TerminalType::Debug => {
-                if let Some(term) = DebugTerminal::create() {
-                    return Some(term);
-                }
-                return None;               
-            }
+            TerminalType::WindowsConsole => WindowsTerminal::create(),
+            TerminalType::Debug => DebugTerminal::create()
         }
     }   
 }

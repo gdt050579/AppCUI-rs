@@ -2,6 +2,7 @@ use super::Surface;
 use super::SystemEvent;
 use super::Terminal;
 use crate::graphics::Color;
+use crate::system::Error;
 
 pub(crate) struct DebugTerminal {
     width: u32,
@@ -9,8 +10,8 @@ pub(crate) struct DebugTerminal {
     temp_str: String,
 }
 impl DebugTerminal {
-    pub(crate) fn create() -> Option<Box<Self>> {
-        Some(Box::new(DebugTerminal {
+    pub(crate) fn create() -> Result<Box<dyn Terminal>,Error> {
+        Ok(Box::new(DebugTerminal {
             width: 80,
             height: 25,
             temp_str: String::with_capacity(80 * 6),
