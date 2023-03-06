@@ -3,7 +3,7 @@ use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
 use crate::controls::ControlManager;
 use crate::controls::*;
-use crate::graphics::{Rect, Surface};
+use crate::graphics::{Rect, Surface, Size};
 use crate::terminal::*;
 
 pub(crate) struct RuntimeManager {
@@ -19,7 +19,7 @@ static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
 impl RuntimeManager {
     pub(super) fn create(data: InitializationData) -> Result<(), super::Error> {
-        let term = TerminalType::new(data.terminal).expect("Unable to create a terminal object !");
+        let term = TerminalType::new(data.terminal)?;
         let width = term.get_width();
         let height = term.get_height();
         let surface = Surface::new(width, height);
@@ -74,7 +74,7 @@ impl RuntimeManager {
             SystemEvent::AppClose => todo!(),
             SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
             SystemEvent::KeyModifierChanged(_) => todo!(),
-            SystemEvent::Resize(_) => todo!(),
+            SystemEvent::Resize(new_size) => self.on_terminal_resize(new_size),
             SystemEvent::MouseButtonDown(_) => todo!(),
             SystemEvent::MouseButtonUp(_) => todo!(),
             SystemEvent::MouseDoubleClick(_) => todo!(),
@@ -106,5 +106,11 @@ impl RuntimeManager {
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
         self.root
             .process_keypressed_event(event.key, event.character);
+    }
+    fn on_terminal_resize(&mut self, new_size: Size) {
+        self.surface.resize(new_size.width, new_size.height);
+        if self.commandbar.is_some() {
+            self.commandbar.as_mut().unwrap().set_desktop_size(new_size.width, new_size.height);
+        }
     }
 }
