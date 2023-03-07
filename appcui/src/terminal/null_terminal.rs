@@ -12,7 +12,7 @@ impl Terminal for NullTerminal {
     fn get_height(&self) -> u32 {
         0
     }
-
+    fn on_resize(&mut self, new_size: crate::graphics::Size) {}
     fn get_system_event(&mut self) -> SystemEvent {
         SystemEvent::None
     }

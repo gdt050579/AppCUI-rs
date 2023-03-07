@@ -74,7 +74,7 @@ impl RuntimeManager {
             SystemEvent::AppClose => todo!(),
             SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
             SystemEvent::KeyModifierChanged(_) => todo!(),
-            SystemEvent::Resize(new_size) => self.on_terminal_resize(new_size),
+            SystemEvent::Resize(new_size) => self.process_terminal_resize_event(new_size),
             SystemEvent::MouseButtonDown(_) => todo!(),
             SystemEvent::MouseButtonUp(_) => todo!(),
             SystemEvent::MouseDoubleClick(_) => todo!(),
@@ -107,7 +107,7 @@ impl RuntimeManager {
         self.root
             .process_keypressed_event(event.key, event.character);
     }
-    fn on_terminal_resize(&mut self, new_size: Size) {
+    fn process_terminal_resize_event(&mut self, new_size: Size) {
         // sanity checks
         if (new_size.width==0) || (new_size.height==0) {
             return;
@@ -115,7 +115,8 @@ impl RuntimeManager {
         if (new_size.width == self.surface.get_width()) && (new_size.height == self.surface.get_height()) {
             return;
         }
-        self.surface.resize(new_size);        
+        self.surface.resize(new_size);   
+        self.terminal.on_resize(new_size);     
         if self.commandbar.is_some() {
             self.commandbar.as_mut().unwrap().set_desktop_size(new_size);
         }

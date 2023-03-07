@@ -86,7 +86,10 @@ impl Terminal for DebugTerminal {
     fn get_height(&self) -> u32 {
         self.height
     }
-
+    fn on_resize(&mut self, new_size: crate::graphics::Size) {
+        self.width = new_size.width;
+        self.height = new_size.height;
+    }
     fn get_system_event(&mut self) -> SystemEvent {
         SystemEvent::None
     }

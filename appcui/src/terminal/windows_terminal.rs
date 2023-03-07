@@ -575,6 +575,17 @@ impl Terminal for WindowsTerminal {
     fn get_height(&self) -> u32 {
         return self.height;
     }
+    fn on_resize(&mut self, new_size: crate::graphics::Size) {
+        if (self.width == new_size.width) && (self.height == new_size.height) {
+            return;
+        }     
+        self.chars.resize(
+            (new_size.width as usize) * (new_size.height as usize),
+            CHAR_INFO { code: 32, attr: 0 },
+        );
+        self.width = new_size.width;
+        self.height = new_size.height;
+    }
     fn get_system_event(&mut self) -> SystemEvent {
         let mut ir = INPUT_RECORD {
             event_type: 0,

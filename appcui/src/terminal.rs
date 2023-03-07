@@ -28,6 +28,7 @@ pub (crate) trait Terminal {
     fn get_width(&self) -> u32;
     fn get_height(&self) -> u32;
     fn get_system_event(&mut self)-> SystemEvent;
+    fn on_resize(&mut self, new_size: Size);
 }
 
 #[repr(u8)]
