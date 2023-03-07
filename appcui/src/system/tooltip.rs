@@ -1,4 +1,4 @@
-use crate::graphics::{Character, Point, Rect, SpecialChar, Surface, TextFormat, TextWrap};
+use crate::graphics::{Character, Point, Rect, SpecialChar, Surface, TextFormat, TextWrap, Size};
 
 use super::Theme;
 
@@ -79,7 +79,7 @@ impl ToolTip {
             self.format.chars_count = Some(chars_count as u16);
             self.format.char_attr = theme.tooltip.text;
             self.format.text_wrap = TextWrap::Word;
-            self.canvas.resize(best_width, nr_lines);
+            self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
             self.canvas.write_text(text, &self.format);
             self.visible = true;
@@ -102,7 +102,7 @@ impl ToolTip {
             self.format.chars_count = Some(chars_count as u16);
             self.format.char_attr = theme.tooltip.text;
             self.format.text_wrap = TextWrap::Word;
-            self.canvas.resize(best_width, nr_lines);
+            self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
             self.canvas.write_text(text, &self.format);
             self.visible = true;

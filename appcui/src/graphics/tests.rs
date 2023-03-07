@@ -1,3 +1,4 @@
+use crate::graphics::Size;
 use crate::graphics::text_format::TextWrap;
 use crate::graphics::Point;
 use crate::graphics::Rect;
@@ -458,7 +459,7 @@ fn check_resize() {
     );
     //s.print();
     assert_eq!(s.compute_hash(), 0xB015E3D08D4D238B);
-    s.resize(20, 5);
+    s.resize(Size::new(20, 5));
     assert_eq!(s.get_width(), 20);
     assert_eq!(s.get_height(), 5);
     s.write_string(
@@ -470,7 +471,7 @@ fn check_resize() {
     );
     //s.print();
     assert_eq!(s.compute_hash(), 0x5CA6952034D223D2);
-    s.resize(100, 30);
+    s.resize(Size::new(100, 30));
     s.write_string(
         1,
         1,

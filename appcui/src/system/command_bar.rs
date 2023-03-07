@@ -1,6 +1,6 @@
 use crate::{
     controls::events::EventProcessStatus,
-    graphics::{Character, Surface},
+    graphics::{Character, Surface, Size},
     input::{Key, KeyCode, KeyModifier},
     terminal::{MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent},
 };
@@ -62,9 +62,9 @@ impl CommandBar {
         }
         obj
     }
-    pub(crate) fn set_desktop_size(&mut self, width: u32, height: u32) {
-        self.width = width;
-        self.y = (height as i32) - 1;
+    pub(crate) fn set_desktop_size(&mut self, size: Size) {
+        self.width = size.width;
+        self.y = (size.height as i32) - 1;
         self.update_positions();
     }
 

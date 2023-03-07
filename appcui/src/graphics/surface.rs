@@ -2,6 +2,7 @@ use crate::graphics::SpecialChar;
 
 use super::CharAttribute;
 use super::Rect;
+use super::Size;
 //use super::CharFlags;
 use super::text_format::TextWrap;
 use super::Character;
@@ -805,9 +806,9 @@ impl Surface {
         }
     }
 
-    pub(crate) fn resize(&mut self, width: u32, height: u32) {
-        let w = width.clamp(1, MAX_SURFACE_WIDTH);
-        let h = height.clamp(1, MAX_SURFACE_HEIGHT);
+    pub(crate) fn resize(&mut self, size: Size) {
+        let w = size.width.clamp(1, MAX_SURFACE_WIDTH);
+        let h = size.height.clamp(1, MAX_SURFACE_HEIGHT);
         let count = (w as usize) * (h as usize);
         self.chars.clear();
         self.chars.reserve(count);

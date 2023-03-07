@@ -108,9 +108,16 @@ impl RuntimeManager {
             .process_keypressed_event(event.key, event.character);
     }
     fn on_terminal_resize(&mut self, new_size: Size) {
-        self.surface.resize(new_size.width, new_size.height);
+        // sanity checks
+        if (new_size.width==0) || (new_size.height==0) {
+            return;
+        }
+        if (new_size.width == self.surface.get_width()) && (new_size.height == self.surface.get_height()) {
+            return;
+        }
+        self.surface.resize(new_size);        
         if self.commandbar.is_some() {
-            self.commandbar.as_mut().unwrap().set_desktop_size(new_size.width, new_size.height);
+            self.commandbar.as_mut().unwrap().set_desktop_size(new_size);
         }
     }
 }
