@@ -18,10 +18,10 @@ use super::SystemEvent;
 use super::Terminal;
 use crate::system::Error;
 
-type HANDLE = u32;
+type HANDLE = usize;
 type BOOL = u32;
 
-const INVALID_HANDLE_VALUE: u32 = 0xFFFFFFFF;
+const INVALID_HANDLE_VALUE: usize = usize::MAX;
 const STD_INPUT_HANDLE: i32 = -10;
 const STD_OUTPUT_HANDLE: i32 = -11;
 const FALSE: u32 = 0;
@@ -430,7 +430,7 @@ extern "system" {
 
 }
 
-fn get_handle(handle_id: i32) -> Result<u32,Error> {
+fn get_handle(handle_id: i32) -> Result<HANDLE,Error> {
     unsafe {
         let h = GetStdHandle(handle_id);
         if h == INVALID_HANDLE_VALUE {
@@ -488,7 +488,7 @@ impl WindowsTerminal {
             stdout_handle: stdout,
             width: info.size.x as u32,
             height: info.size.y as u32,
-            chars: Vec::with_capacity(100),
+            chars: Vec::with_capacity(1024),
             shift_state: KeyModifier::None,
             last_mouse_x: i32::MAX,
             last_mouse_y: i32::MAX,

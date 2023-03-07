@@ -43,7 +43,7 @@ impl TerminalType {
         match terminal_type {
             TerminalType::Default => {
                 // shold be different based on OS
-                return DebugTerminal::create();
+                return WindowsTerminal::create();
             },
             TerminalType::WindowsConsole => WindowsTerminal::create(),
             TerminalType::Debug => DebugTerminal::create()
