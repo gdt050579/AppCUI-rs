@@ -1,3 +1,4 @@
+use crate::graphics::ClipArea;
 use super::{MenuItem, menu_button_state::MenuButtonState};
 
 pub struct Menu {
@@ -8,7 +9,8 @@ pub struct Menu {
     pub(super) first_visible_item: u32,
     pub(super) visible_items_count: u32,
     pub(super) button_up: MenuButtonState,
-    pub(super) button_down: MenuButtonState
+    pub(super) button_down: MenuButtonState,
+    pub(super) clip: ClipArea,
 }
 impl Menu {
     pub fn add(&mut self, item: MenuItem) {

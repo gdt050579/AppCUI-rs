@@ -1,56 +1,46 @@
-pub (super) MousePositionInfo {  
-    item_index: u32,
-    is_on_menu: bool,
-    is_on_up_button: bool,
-    is_on_bottom_button: bool
+use super::{menu_item_type::MenuItemType, Menu};
+
+pub(super) struct MousePositionInfo {
+    pub(super) item_index: u32,
+    pub(super) is_on_menu: bool,
+    pub(super) is_on_up_button: bool,
+    pub(super) is_on_bottom_button: bool,
 }
 impl MousePositionInfo {
-    fn new(x: i32, y: i32, menu: &Menu)->Self {
-        let mut mpi = MousePositionInfo {item_index:0, is_on_menu: false, is_on_bottom_button: false, is_on_bottom_button: false};
-        if (x >= 1) && (y >= 1) && (x <= (menu.width as i32)) && (y <= (menu.visible_items_count as i32))
+    pub(super) const INVALID_INDEX: u32 = 0xFFFFFFFFu32;
+
+    pub(super) fn new(x: i32, y: i32, menu: &Menu) -> Self {
+        let mut mpi = MousePositionInfo {
+            item_index: MousePositionInfo::INVALID_INDEX,
+            is_on_menu: false,
+            is_on_up_button: false,
+            is_on_bottom_button: false,
+        };
+        if (x >= 1)
+            && (y >= 1)
+            && (x <= (menu.width as i32))
+            && (y <= (menu.visible_items_count as i32))
         {
-            mpi.ItemIndex = (y - 1) + FirstVisibleItem;
-            if ((mpi.ItemIndex < ItemsCount) && (Items[mpi.ItemIndex]->Enabled) &&
-                (Items[mpi.ItemIndex]->Type != MenuItemType::Line))
-            {
-                // all good - current item is valid
+            let item_index = ((y - 1) as u32) + menu.first_visible_item;
+            let idx = item_index as usize;
+            if idx < menu.items.len() {
+                let item = &menu.items[idx];
+                mpi.item_index = if (item.enabled) && (item.menu_type != MenuItemType::Line) {
+                    item_index
+                } else {
+                    MousePositionInfo::INVALID_INDEX
+                };
             }
-            else
-            {
-                mpi.ItemIndex = NO_MENUITEM_SELECTED;
-            }
         }
-        else
-        {
-            mpi.ItemIndex = NO_MENUITEM_SELECTED;
+        let center_x = (menu.width >> 1) as i32;
+        mpi.is_on_menu = (x >= 0)
+            && (y >= 0)
+            && (x < (menu.width as i32) + 2)
+            && (y < (menu.visible_items_count as i32) + 2);
+        if (x >= center_x) && (x <= center_x + 2) {
+            mpi.is_on_up_button = y == 0;
+            mpi.is_on_bottom_button = y == menu.clip.bottom;
         }
-    
-/*
-    if ((x >= 1) && (y >= 1) && (x <= (int) Width) && (y <= (int) VisibleItemsCount))
-    {
-        mpi.ItemIndex = (y - 1) + FirstVisibleItem;
-        if ((mpi.ItemIndex < ItemsCount) && (Items[mpi.ItemIndex]->Enabled) &&
-            (Items[mpi.ItemIndex]->Type != MenuItemType::Line))
-        {
-            // all good - current item is valid
-        }
-        else
-        {
-            mpi.ItemIndex = NO_MENUITEM_SELECTED;
-        }
-    }
-    else
-    {
-        mpi.ItemIndex = NO_MENUITEM_SELECTED;
-    }
-    mpi.IsOnMenu       = (x >= 0) && (y >= 0) && (x < (int) this->Width + 2) && (y < (int) this->VisibleItemsCount + 2);
-    const auto middle   = this->Width >> 1;
-    mpi.IsOnUpButton   = (y == 0) && (static_cast<uint32>(x) >= middle) && (static_cast<uint32>(x) <= middle + 2);
-    mpi.IsOnDownButton  = (y == ScreenClip.ClipRect.Height - 1) && (static_cast<uint32>(x) >= middle) &&
-                         (static_cast<uint32>(x) <= middle + 2);
-
-
-
-*/
+        mpi
     }
 }
