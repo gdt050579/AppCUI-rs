@@ -1,6 +1,6 @@
 use super::{menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuItem};
 use crate::{
-    graphics::{Character, ClipArea, LineType, Rect, Surface},
+    graphics::{Character, ClipArea, LineType, Rect, SpecialChar, Surface},
     system::Theme,
 };
 
@@ -41,7 +41,21 @@ impl Menu {
         );
         // draw scroll buttons if case
         if (self.visible_items_count as usize) < self.items.len() {
+            // top button
             let c = self.button_up.get_color(self.first_visible_item == 0, col);
+            let x = (self.width >> 1) as i32;
+            surface.fill_horizontal_line(x, 0, x + 2, Character::with_attributes(' ', c));
+            surface.write_char(x + 1, 0, Character::with_attributes(SpecialChar::TriangleUp, c));
+
+            // bottom button
+            // this->FirstVisibleItem + this->VisibleItemsCount >= this->ItemsCount
+            let c = self.button_up.get_color(
+                (self.first_visible_item + self.visible_items_count) as usize > self.items.len(),
+                col,
+            );
+            let y = self.clip.bottom - self.clip.top;
+            surface.fill_horizontal_line(x, y, x + 2, Character::with_attributes(' ', c));
+            surface.write_char(x + 1,y,Character::with_attributes(SpecialChar::TriangleUp, c));
         }
         /*
 
@@ -54,27 +68,6 @@ impl Menu {
         // draw scroll buttons if case
         if (this->VisibleItemsCount < this->ItemsCount)
         {
-            ColorPair c;
-            // top button
-            if (this->FirstVisibleItem == 0)
-                c = col->Text.Inactive;
-            else
-            {
-                switch (this->ButtonUp)
-                {
-                case MenuButtonState::Normal:
-                    c = col->Text.Normal;
-                    break;
-                case MenuButtonState::Hovered:
-                    c = col->Text.Hovered;
-                    break;
-                case MenuButtonState::Pressed:
-                    c = col->Text.PressedOrSelected;
-                    break;
-                }
-            }
-
-            renderer.FillHorizontalLineSize(this->Width / 2, 0, 3, ' ', c);
             renderer.WriteSpecialCharacter(1 + this->Width / 2, 0, SpecialChars::TriangleUp, c);
 
             // bottom button

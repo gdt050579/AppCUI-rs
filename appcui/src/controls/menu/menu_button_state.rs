@@ -1,4 +1,4 @@
-use crate::system::MenuTheme;
+use crate::{graphics::CharAttribute, system::MenuTheme};
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
@@ -9,7 +9,7 @@ pub(super) enum MenuButtonState {
 }
 impl MenuButtonState {
     #[inline(always)]
-    pub (super) fn get_color(&self, inactive: bool, color: &MenuTheme) {
+    pub(super) fn get_color(&self, inactive: bool, color: &MenuTheme) -> CharAttribute {
         if inactive {
             color.text.inactive
         } else {
@@ -18,6 +18,6 @@ impl MenuButtonState {
                 MenuButtonState::Hovered => color.text.hovered,
                 MenuButtonState::Pressed => color.text.pressed_or_selectd,
             }
-        };
+        }
     }
 }
