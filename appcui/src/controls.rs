@@ -18,6 +18,8 @@ use control_base::StatusFlags;
 pub mod desktop;
 pub mod checkbox;
 pub mod label;
+pub mod menu;
+pub mod window;
 // re-export
 pub use desktop::Desktop;
 pub use checkbox::CheckBox;
