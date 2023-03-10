@@ -1,9 +1,20 @@
-use super::MenuItem;
+use super::{MenuItem, menu_button_state::MenuButtonState};
 
 pub struct Menu {
-    items: Vec<MenuItem>
+    pub(super) items: Vec<MenuItem>,
+    pub(super) current: u32,
+    pub(super) width: u16,
+    pub(super) text_with: u16,
+    pub(super) first_visible_item: u32,
+    pub(super) visible_items_count: u32,
+    pub(super) button_up: MenuButtonState,
+    pub(super) button_down: MenuButtonState
 }
-
+impl Menu {
+    pub fn add(&mut self, item: MenuItem) {
+        self.items.push(item);
+    }
+}
 /*
 
 
@@ -59,14 +70,6 @@ MenuItem::MenuItem(const ConstString& text, Menu* subMenu)
         ShortcutKey = Input::Key::None;
         SubMenu     = subMenu;
     }
-}
-
-MenuItem::~MenuItem()
-{
-    if (SubMenu)
-        delete SubMenu;
-    SubMenu = nullptr;
-    Name.Destroy();
 }
 
 MenuContext::MenuContext()
@@ -266,28 +269,7 @@ bool MenuContext::SetChecked(uint32 menuIndex, bool status)
 }
 void MenuContext::ComputeMousePositionInfo(int x, int y, MenuMousePositionInfo& mpi)
 {
-    if ((x >= 1) && (y >= 1) && (x <= (int) Width) && (y <= (int) VisibleItemsCount))
-    {
-        mpi.ItemIndex = (y - 1) + FirstVisibleItem;
-        if ((mpi.ItemIndex < ItemsCount) && (Items[mpi.ItemIndex]->Enabled) &&
-            (Items[mpi.ItemIndex]->Type != MenuItemType::Line))
-        {
-            // all good - current item is valid
-        }
-        else
-        {
-            mpi.ItemIndex = NO_MENUITEM_SELECTED;
-        }
-    }
-    else
-    {
-        mpi.ItemIndex = NO_MENUITEM_SELECTED;
-    }
-    mpi.IsOnMenu       = (x >= 0) && (y >= 0) && (x < (int) this->Width + 2) && (y < (int) this->VisibleItemsCount + 2);
-    const auto middle   = this->Width >> 1;
-    mpi.IsOnUpButton   = (y == 0) && (static_cast<uint32>(x) >= middle) && (static_cast<uint32>(x) <= middle + 2);
-    mpi.IsOnDownButton  = (y == ScreenClip.ClipRect.Height - 1) && (static_cast<uint32>(x) >= middle) &&
-                         (static_cast<uint32>(x) <= middle + 2);
+    // done
 }
 bool MenuContext::OnMouseMove(int x, int y, bool& repaint)
 {
