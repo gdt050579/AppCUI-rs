@@ -1,7 +1,23 @@
+use crate::system::MenuTheme;
+
 #[repr(u8)]
 #[derive(Copy, Clone)]
 pub(super) enum MenuButtonState {
     Normal,
     Hovered,
     Pressed,
+}
+impl MenuButtonState {
+    #[inline(always)]
+    pub (super) fn get_color(&self, inactive: bool, color: &MenuTheme) {
+        if inactive {
+            color.text.inactive
+        } else {
+            match self {
+                MenuButtonState::Normal => color.text.normal,
+                MenuButtonState::Hovered => color.text.hovered,
+                MenuButtonState::Pressed => color.text.pressed_or_selectd,
+            }
+        };
+    }
 }

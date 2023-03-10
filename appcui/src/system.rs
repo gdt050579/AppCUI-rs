@@ -9,6 +9,8 @@ mod initialization_data;
 mod tests;
 
 pub use self::theme::Theme;
+pub (crate) use self::theme::MenuTheme;
+
 pub use self::app::App;
 pub use self::command_bar::CommandBar;
 pub use self::error::Error;

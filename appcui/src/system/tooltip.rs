@@ -117,7 +117,7 @@ impl ToolTip {
             return;
         }
         surface.draw_surface(self.text_pos.x, self.text_pos.y, &self.canvas);
-        surface.set(
+        surface.write_char(
             self.arrow_pos.x,
             self.arrow_pos.y,
             Character::with_attributes(self.arrow_char, theme.tooltip.arrow),

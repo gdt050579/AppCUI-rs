@@ -1,11 +1,11 @@
 use crate::{controls::ControlCharAttributesState, graphics::*};
 
 #[derive(Default)]
-pub struct Desktop {
+pub struct DesktopTheme {
     pub character: Character,
 }
 #[derive(Default)]
-pub struct Text {
+pub struct TextTheme {
     pub normal: CharAttribute,
     pub hot_key: CharAttribute,
     pub inactive: CharAttribute,
@@ -19,12 +19,12 @@ pub struct Text {
     pub enphasized_3: CharAttribute,
 }
 #[derive(Default)]
-pub struct ToolTip {
+pub struct ToolTipTheme {
     pub text: CharAttribute,
     pub arrow: CharAttribute,
 }
 #[derive(Default)]
-pub struct Symbol {
+pub struct SymbolTheme {
     pub inactive: CharAttribute,
     pub hovered: CharAttribute,
     pub pressed: CharAttribute,
@@ -37,7 +37,7 @@ pub struct Symbol {
     pub resize: CharAttribute,
 }
 #[derive(Default)]
-pub struct Menu {
+pub struct MenuTheme {
     pub text: ControlCharAttributesState,
     pub hotkey: ControlCharAttributesState,
     pub shortcut: ControlCharAttributesState,
@@ -46,12 +46,12 @@ pub struct Menu {
 
 #[derive(Default)]
 pub struct Theme {
-    pub desktop: Desktop,
-    pub text: Text,
-    pub symbol: Symbol,
-    pub tooltip: ToolTip,
-    pub menu: Menu,
-    pub parent_menu: Menu,
+    pub desktop: DesktopTheme,
+    pub text: TextTheme,
+    pub symbol: SymbolTheme,
+    pub tooltip: ToolTipTheme,
+    pub menu: MenuTheme,
+    pub parent_menu: MenuTheme,
 }
 impl Theme {
     pub(crate) fn new() -> Self {
