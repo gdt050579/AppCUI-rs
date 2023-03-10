@@ -1,5 +1,5 @@
 use crate::graphics::ClipArea;
-use super::{MenuItem, menu_button_state::MenuButtonState};
+use super::{MenuItem, menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo};
 
 pub struct Menu {
     pub(super) items: Vec<MenuItem>,
@@ -16,6 +16,9 @@ impl Menu {
     pub fn add(&mut self, item: MenuItem) {
         self.items.push(item);
     }
+    fn is_on_menu(&self, x: i32, y: i32)->bool {
+        MousePositionInfo::new(x,y,&self).is_on_menu
+    }
 }
 /*
 
@@ -27,15 +30,6 @@ namespace AppCUI
 using namespace Graphics;
 using namespace Controls;
 using namespace Input;
-
-#define CTX ((MenuContext*) this->Context)
-#define CHECK_VALID_ITEM(retValue)                                                                                     \
-    CHECK(menuItem < CTX->ItemsCount,                                                                                  \
-          retValue,                                                                                                    \
-          "Invalid index: %u (should be a value between [0..%u)",                                                      \
-          (uint32) menuItem,                                                                                           \
-          CTX->ItemsCount);
-constexpr uint32 NO_MENUITEM_SELECTED = 0xFFFFFFFFU;
 
 MenuItem::MenuItem()
 {
@@ -350,12 +344,7 @@ bool MenuContext::OnMouseReleased(int x, int y)
     }
     return false;
 }
-bool MenuContext::IsOnMenu(int x, int y)
-{
-    MenuMousePositionInfo mpi;
-    ComputeMousePositionInfo(x, y, mpi);
-    return mpi.IsOnMenu;
-}
+
 bool MenuContext::OnMouseWheel(int, int, Input::MouseWheel direction)
 {
     if (this->VisibleItemsCount >= this->ItemsCount)
