@@ -279,32 +279,32 @@ fn check_draw_surface() {
 #[test]
 fn check_colors() {
     let mut s = SurfaceTester::new(40, 5);
-    s.set(
+    s.write_char(
         1,
         1,
         Character::new('A', Color::White, Color::Red, CharFlags::None),
     );
-    s.set(
+    s.write_char(
         2,
         1,
         Character::new('A', Color::Red, Color::Black, CharFlags::None),
     );
-    s.set(
+    s.write_char(
         3,
         1,
         Character::new('B', Color::Yellow, Color::Blue, CharFlags::None),
     );
-    s.set(
+    s.write_char(
         4,
         1,
         Character::new('B', Color::Blue, Color::Yellow, CharFlags::None),
     );
-    s.set(
+    s.write_char(
         5,
         1,
         Character::new('C', Color::Yellow, Color::DarkBlue, CharFlags::None),
     );
-    s.set(
+    s.write_char(
         6,
         1,
         Character::new('B', Color::Black, Color::Magenta, CharFlags::None),
@@ -851,7 +851,7 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize) -> 
         false,
     );
     let ch = txt.chars().nth(hotkey_pos).unwrap();
-    s.set(
+    s.write_char(
         12,
         0,
         Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),
@@ -951,7 +951,7 @@ fn check_write_text_multi_line_word_wrap_aligned() {
         false,
     );
     let ch = txt.chars().nth(16).unwrap();
-    s.set(
+    s.write_char(
         12,
         0,
         Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),
@@ -995,7 +995,7 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
         false,
     );
     let ch = txt.chars().nth(16).unwrap();
-    s.set(
+    s.write_char(
         12,
         0,
         Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),

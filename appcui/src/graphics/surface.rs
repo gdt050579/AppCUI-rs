@@ -178,8 +178,8 @@ impl Surface {
         self.cursor.hide();
     }
 
-    #[inline]
-    pub fn set(&mut self, x: i32, y: i32, ch: Character) {
+    #[inline(always)]
+    pub fn write_char(&mut self, x: i32, y: i32, ch: Character) {
         if let Some(pos) = self.coords_to_position(x, y) {
             self.chars[pos].set(ch);
         }
@@ -368,13 +368,13 @@ impl Surface {
         ch.code = line_chars.vertical_on_right;
         self.fill_vertical_line(right, top, bottom, ch);
         ch.code = line_chars.corner_top_left;
-        self.set(left, top, ch);
+        self.write_char(left, top, ch);
         ch.code = line_chars.corner_top_right;
-        self.set(right, top, ch);
+        self.write_char(right, top, ch);
         ch.code = line_chars.corner_bottom_right;
-        self.set(right, bottom, ch);
+        self.write_char(right, bottom, ch);
         ch.code = line_chars.corner_bottom_left;
-        self.set(left, bottom, ch);
+        self.write_char(left, bottom, ch);
     }
 
     pub fn draw_surface(&mut self, x: i32, y: i32, surface: &Surface) {
@@ -384,7 +384,7 @@ impl Surface {
         let mut index = 0usize;
         for s_y in 0..=surface.bottom_most {
             for s_x in 0..=surface.right_most {
-                self.set(x + s_x, y + s_y, surface.chars[index]);
+                self.write_char(x + s_x, y + s_y, surface.chars[index]);
                 index += 1;
             }
         }
@@ -708,7 +708,7 @@ impl Surface {
                 } else {
                     cp.code = char::from(SpecialChar::BlockUpperHalf);
                 }
-                self.set(px, py, cp);
+                self.write_char(px, py, cp);
                 img_x += x_step;
                 px += 1;
             }
