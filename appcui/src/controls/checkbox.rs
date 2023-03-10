@@ -71,7 +71,7 @@ impl OnPaint for CheckBox {
             } else {
                 theme.symbol.inactive
             };
-            surface.set(
+            surface.write_char(
                 1,
                 0,
                 Character::with_attributes(SpecialChar::CheckMark, col),
