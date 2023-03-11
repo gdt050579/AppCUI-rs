@@ -1,12 +1,16 @@
-use super::{menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuItem};
+use super::{
+    menu_button_state::MenuButtonState, menu_item_type::MenuItemType,
+    mouse_position_info::MousePositionInfo, MenuItem,
+};
 use crate::{
     graphics::{
         Character, ClipArea, LineType, Rect, SpecialChar, Surface, TextAlignament, TextFormat,
         TextWrap,
     },
+    input::{Key, KeyCode},
     system::Theme,
 };
-
+const MAX_ITEMS: usize = 128;
 pub struct Menu {
     pub(super) items: Vec<MenuItem>,
     pub(super) current: u32,
@@ -30,10 +34,102 @@ impl Menu {
             return;
         }
         self.first_visible_item = self.first_visible_item.min(self.current);
-        if (self.current-self.first_visible_item) > self.visible_items_count {
+        if (self.current - self.first_visible_item) > self.visible_items_count {
             self.first_visible_item = (self.current + 1) - self.visible_items_count;
         }
     }
+
+    fn move_currentitem_to(&mut self, key: Key) {
+        let mut idx: [usize; MAX_ITEMS] = [0usize; MAX_ITEMS];
+        let mut idx_count = 0usize;
+        let items_count = self.items.len();
+        for i in 0usize..items_count {
+            let item = &self.items[i];
+            if !item.enabled {
+                continue;
+            }
+            match item.item_type {
+                MenuItemType::Check
+                | MenuItemType::Command
+                | MenuItemType::Radio
+                | MenuItemType::SubMenu => {
+                    idx[idx_count] = i;
+                    idx_count += 1;
+                }
+                _ => {}
+            }
+            if idx_count >= items_count {
+                break;
+            }
+        }
+        if idx_count == 0 {
+            // no items or all items are disabled
+            self.current = MenuItem::INVALID_INDEX;
+            return;
+        }
+        // if CurrentItem is MenuItem::INVALID_INDEX ==> select the first available item
+        if self.current as usize >= items_count {
+            self.current = idx[0] as u32;
+        } else {
+            // make sure that this->CurrentItem is part of the list
+            let mut current_idx = MenuItem::INVALID_INDEX;
+            let mut best_diff = 0xFFFFFFFFu32;
+            for tr in 0..idx_count {
+                {
+                    let diff = if idx[tr] < self.current as usize {
+                        self.current - (idx[tr] as u32)
+                    } else {
+                        (idx[tr] as u32) - self.current
+                    };
+                    if diff < best_diff {
+                        best_diff = diff;
+                        current_idx = tr as u32;
+                    }
+                }
+            }
+            // sanity check
+            if current_idx as usize >= idx_count {
+                // no item is selected
+                self.current = MenuItem::INVALID_INDEX;
+                return;
+            }
+            match key.code {
+                KeyCode::Up => {
+                    if current_idx > 0 {
+                        current_idx -= 1;
+                    } else {
+                        current_idx = (idx_count as u32) - 1;
+                    }
+                }
+                KeyCode::Down => {
+                    current_idx += 1;
+                    if current_idx >= idx_count as u32 {
+                        current_idx = 0;
+                    }
+                }
+                KeyCode::PageUp => {
+                    if current_idx >= self.visible_items_count {
+                        current_idx -= self.visible_items_count;
+                    } else {
+                        current_idx = 0;
+                    }
+                }
+                KeyCode::PageDown => {
+                    current_idx = self.visible_items_count;
+                    if current_idx >= idx_count as u32 {
+                        current_idx = (idx_count as u32) - 1;
+                    }
+                }
+                KeyCode::Home => current_idx = 0,
+                KeyCode::End => current_idx = (idx_count as u32) - 1,
+                _ => {}
+            }
+            self.current = idx[current_idx as usize] as u32;
+        }
+        
+        self.update_first_visible_item();
+    }
+
     fn paint(&self, surface: &mut Surface, theme: &Theme, active: bool) {
         let col = if active {
             &theme.menu
@@ -106,51 +202,6 @@ impl Menu {
 }
 /*
 
-
-#include "ControlContext.hpp"
-
-namespace AppCUI
-{
-using namespace Graphics;
-using namespace Controls;
-using namespace Input;
-
-MenuItem::MenuItem()
-{
-    Type         = MenuItemType::Line;
-    Enabled      = true;
-    Checked      = true;
-    SubMenu      = nullptr;
-    CommandID    = -1;
-    HotKey       = Input::Key::None;
-    ShortcutKey  = Input::Key::None;
-    HotKeyOffset = CharacterBuffer::INVALID_HOTKEY_OFFSET;
-}
-MenuItem::MenuItem(MenuItemType type, const ConstString& text, int cmdID, bool checked, Input::Key shortcutKey)
-{
-    Type = MenuItemType::Invalid;
-    if (Name.SetWithHotKey(text, HotKeyOffset, HotKey))
-    {
-        Type        = type;
-        Enabled     = true;
-        Checked     = checked;
-        SubMenu     = nullptr;
-        CommandID   = cmdID;
-        ShortcutKey = shortcutKey;
-    }
-}
-MenuItem::MenuItem(const ConstString& text, Menu* subMenu)
-{
-    Type = MenuItemType::Invalid;
-    if (Name.SetWithHotKey(text, HotKeyOffset, HotKey))
-    {
-        Type        = MenuItemType::SubMenu;
-        Enabled     = true;
-        Checked     = false;
-        ShortcutKey = Input::Key::None;
-        SubMenu     = subMenu;
-    }
-}
 
 MenuContext::MenuContext()
 {
@@ -312,18 +363,7 @@ bool MenuContext::OnMouseWheel(int, int, Input::MouseWheel direction)
 }
 void MenuContext::CreateAvailableItemsList(uint32* indexes, uint32& count)
 {
-    // assume indexes is valid and has a size of MAX_NUMBER_OF_MENU_ITEMS
-    count = 0;
-    for (uint32 tr = 0; tr < ItemsCount; tr++)
-    {
-        if (!Items[tr]->Enabled)
-            continue;
-        if ((Items[tr]->Type == MenuItemType::Command) || (Items[tr]->Type == MenuItemType::Check) ||
-            (Items[tr]->Type == MenuItemType::Radio) || (Items[tr]->Type == MenuItemType::SubMenu))
-        {
-            indexes[count++] = tr;
-        }
-    }
+    // DONE
 }
 void MenuContext::RunItemAction(uint32 itemIndex)
 {
@@ -366,83 +406,10 @@ void MenuContext::CloseMenu()
 }
 void MenuContext::UpdateFirstVisibleItem()
 {
+    // Done
 }
 void MenuContext::MoveCurrentItemTo(Input::Key keyCode)
 {
-    uint32 idx[MAX_NUMBER_OF_MENU_ITEMS];
-    uint32 idxCount;
-    CreateAvailableItemsList(idx, idxCount);
-    if (idxCount == 0)
-    {
-        // no items or all items are disabled
-        this->CurrentItem = NO_MENUITEM_SELECTED;
-        return;
-    }
-    // if CurrentItem is NO_MENUITEM_SELECTED ==> select the first available item
-    if (this->CurrentItem >= this->ItemsCount)
-    {
-        this->CurrentItem = idx[0];
-    }
-    else
-    {
-        // make sure that this->CurrentItem is part of the list
-        uint32 currentIdx = 0xFFFFFFFF;
-        uint32 bestDiff   = 0xFFFFFFFF;
-        for (uint32 tr = 0; tr < idxCount; tr++)
-        {
-            uint32 diff;
-            if (idx[tr] < this->CurrentItem)
-                diff = this->CurrentItem - idx[tr];
-            else
-                diff = idx[tr] - this->CurrentItem;
-            if (diff < bestDiff)
-            {
-                bestDiff   = diff;
-                currentIdx = tr;
-            }
-        }
-        // sanity check
-        if (currentIdx >= idxCount)
-        {
-            // no item is selected
-            this->CurrentItem = NO_MENUITEM_SELECTED;
-            return;
-        }
-        // compute the new position
-        switch (keyCode)
-        {
-        case Key::Up:
-            if (currentIdx > 0)
-                currentIdx--;
-            else
-                currentIdx = idxCount - 1;
-            break;
-        case Key::Down:
-            currentIdx++;
-            if (currentIdx >= idxCount)
-                currentIdx = 0;
-            break;
-        case Key::PageUp:
-            if (currentIdx >= this->VisibleItemsCount)
-                currentIdx -= this->VisibleItemsCount;
-            else
-                currentIdx = 0;
-            break;
-        case Key::PageDown:
-            currentIdx += this->VisibleItemsCount;
-            if (currentIdx >= idxCount)
-                currentIdx = idxCount - 1;
-            break;
-        case Key::Home:
-            currentIdx = 0;
-            break;
-        case Key::End:
-            currentIdx = idxCount - 1;
-            break;
-        }
-        this->CurrentItem = idx[currentIdx];
-    }
-    UpdateFirstVisibleItem();
 }
 // key events
 bool MenuContext::OnKeyEvent(Input::Key keyCode)

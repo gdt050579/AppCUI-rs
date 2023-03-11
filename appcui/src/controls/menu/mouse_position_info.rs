@@ -1,4 +1,4 @@
-use super::{menu_item_type::MenuItemType, Menu};
+use super::{menu_item_type::MenuItemType, Menu, MenuItem};
 
 pub(super) struct MousePositionInfo {
     pub(super) item_index: u32,
@@ -7,11 +7,9 @@ pub(super) struct MousePositionInfo {
     pub(super) is_on_bottom_button: bool,
 }
 impl MousePositionInfo {
-    pub(super) const INVALID_INDEX: u32 = 0xFFFFFFFFu32;
-
     pub(super) fn new(x: i32, y: i32, menu: &Menu) -> Self {
         let mut mpi = MousePositionInfo {
-            item_index: MousePositionInfo::INVALID_INDEX,
+            item_index: MenuItem::INVALID_INDEX,
             is_on_menu: false,
             is_on_up_button: false,
             is_on_bottom_button: false,
@@ -28,7 +26,7 @@ impl MousePositionInfo {
                 mpi.item_index = if (item.enabled) && (item.item_type != MenuItemType::Line) {
                     item_index
                 } else {
-                    MousePositionInfo::INVALID_INDEX
+                    MenuItem::INVALID_INDEX
                 };
             }
         }
