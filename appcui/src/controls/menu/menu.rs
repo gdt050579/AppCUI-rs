@@ -1,6 +1,9 @@
 use super::{menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuItem};
 use crate::{
-    graphics::{Character, ClipArea, LineType, Rect, SpecialChar, Surface, TextFormat, TextAlignament, TextWrap},
+    graphics::{
+        Character, ClipArea, LineType, Rect, SpecialChar, Surface, TextAlignament, TextFormat,
+        TextWrap,
+    },
     system::Theme,
 };
 
@@ -21,6 +24,15 @@ impl Menu {
     }
     fn is_on_menu(&self, x: i32, y: i32) -> bool {
         MousePositionInfo::new(x, y, &self).is_on_menu
+    }
+    fn update_first_visible_item(&mut self) {
+        if self.current as usize >= self.items.len() {
+            return;
+        }
+        self.first_visible_item = self.first_visible_item.min(self.current);
+        if (self.current-self.first_visible_item) > self.visible_items_count {
+            self.first_visible_item = (self.current + 1) - self.visible_items_count;
+        }
     }
     fn paint(&self, surface: &mut Surface, theme: &Theme, active: bool) {
         let col = if active {
@@ -45,7 +57,11 @@ impl Menu {
             let c = self.button_up.get_color(self.first_visible_item == 0, col);
             let x = (self.width >> 1) as i32;
             surface.fill_horizontal_line(x, 0, x + 2, Character::with_attributes(' ', c));
-            surface.write_char(x + 1, 0, Character::with_attributes(SpecialChar::TriangleUp, c));
+            surface.write_char(
+                x + 1,
+                0,
+                Character::with_attributes(SpecialChar::TriangleUp, c),
+            );
 
             // bottom button
             // this->FirstVisibleItem + this->VisibleItemsCount >= this->ItemsCount
@@ -55,7 +71,11 @@ impl Menu {
             );
             let y = self.clip.bottom - self.clip.top;
             surface.fill_horizontal_line(x, y, x + 2, Character::with_attributes(' ', c));
-            surface.write_char(x + 1,y,Character::with_attributes(SpecialChar::TriangleUp, c));
+            surface.write_char(
+                x + 1,
+                y,
+                Character::with_attributes(SpecialChar::TriangleUp, c),
+            );
         }
         // write items
         let mut format = TextFormat::default();
@@ -65,13 +85,22 @@ impl Menu {
         format.width = Some(self.text_with);
 
         let start = self.first_visible_item as usize;
-        let end = self.items.len().min((self.first_visible_item+self.visible_items_count) as usize);
-        if end<=start {
+        let end = self
+            .items
+            .len()
+            .min((self.first_visible_item + self.visible_items_count) as usize);
+        if end <= start {
             return;
         }
         for idx in start..end {
             let item = &self.items[idx as usize];
-            item.paint(surface, &mut format, self.width, idx == self.current as usize, col);
+            item.paint(
+                surface,
+                &mut format,
+                self.width,
+                idx == self.current as usize,
+                col,
+            );
         }
     }
 }
@@ -337,13 +366,6 @@ void MenuContext::CloseMenu()
 }
 void MenuContext::UpdateFirstVisibleItem()
 {
-    // if no current item -> exit
-    if (this->CurrentItem >= this->ItemsCount)
-        return;
-    if (this->CurrentItem < this->FirstVisibleItem)
-        this->FirstVisibleItem = this->CurrentItem;
-    if ((this->CurrentItem - this->FirstVisibleItem) >= this->VisibleItemsCount)
-        this->FirstVisibleItem = (this->CurrentItem - this->VisibleItemsCount) + 1;
 }
 void MenuContext::MoveCurrentItemTo(Input::Key keyCode)
 {
