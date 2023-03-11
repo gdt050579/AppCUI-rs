@@ -3,6 +3,7 @@ use super::{
     mouse_position_info::MousePositionInfo, MenuItem,
 };
 use crate::{
+    controls::events::EventProcessStatus,
     graphics::{
         Character, ClipArea, LineType, Rect, SpecialChar, Surface, TextAlignament, TextFormat,
         TextWrap,
@@ -126,7 +127,7 @@ impl Menu {
             }
             self.current = idx[current_idx as usize] as u32;
         }
-        
+
         self.update_first_visible_item();
     }
 
@@ -198,6 +199,24 @@ impl Menu {
                 col,
             );
         }
+    }
+
+    fn on_mouse_released(&mut self, x: i32, y: i32) -> EventProcessStatus {
+        let mpi = MousePositionInfo::new(x, y, self);
+        if (self.visible_items_count as usize) < self.items.len() {
+            if (mpi.is_on_up_button) && (self.first_visible_item > 0) {
+                self.button_up = MenuButtonState::Hovered;
+                return EventProcessStatus::Processed;
+            }
+            if (mpi.is_on_bottom_button)
+                && ((self.visible_items_count + self.first_visible_item) as usize)
+                    < self.items.len()
+            {
+                self.button_down = MenuButtonState::Hovered;
+                return EventProcessStatus::Processed;
+            }
+        }
+        EventProcessStatus::Ignored
     }
 }
 /*
@@ -326,23 +345,7 @@ MousePressedResult MenuContext::OnMousePressed(int x, int y)
 }
 bool MenuContext::OnMouseReleased(int x, int y)
 {
-    MenuMousePositionInfo mpi;
-    ComputeMousePositionInfo(x, y, mpi);
-    // check buttons
-    if (this->VisibleItemsCount < this->ItemsCount)
-    {
-        if ((mpi.IsOnUpButton) && (this->FirstVisibleItem > 0))
-        {
-            this->ButtonUp = MenuButtonState::Hovered;
-            return true;
-        }
-        if ((mpi.IsOnDownButton) && (this->FirstVisibleItem + this->VisibleItemsCount < this->ItemsCount))
-        {
-            this->ButtonDown = MenuButtonState::Hovered;
-            return true;
-        }
-    }
-    return false;
+    // done
 }
 
 bool MenuContext::OnMouseWheel(int, int, Input::MouseWheel direction)
