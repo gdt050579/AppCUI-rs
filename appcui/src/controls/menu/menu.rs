@@ -1,6 +1,6 @@
 use super::{menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuItem};
 use crate::{
-    graphics::{Character, ClipArea, LineType, Rect, SpecialChar, Surface},
+    graphics::{Character, ClipArea, LineType, Rect, SpecialChar, Surface, TextFormat, TextAlignament, TextWrap},
     system::Theme,
 };
 
@@ -57,120 +57,22 @@ impl Menu {
             surface.fill_horizontal_line(x, y, x + 2, Character::with_attributes(' ', c));
             surface.write_char(x + 1,y,Character::with_attributes(SpecialChar::TriangleUp, c));
         }
-        /*
+        // write items
+        let mut format = TextFormat::default();
+        format.multi_line = false;
+        format.align = TextAlignament::Left;
+        format.text_wrap = TextWrap::None;
+        format.width = Some(self.text_with);
 
-        WriteTextParams textParams(
-              WriteTextFlags::SingleLine | WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey |
-                    WriteTextFlags::ClipToWidth | WriteTextFlags::FitTextToWidth,
-              TextAlignament::Left);
-        textParams.Width = this->TextWidth;
-
-        // draw scroll buttons if case
-        if (this->VisibleItemsCount < this->ItemsCount)
-        {
-            renderer.WriteSpecialCharacter(1 + this->Width / 2, 0, SpecialChars::TriangleUp, c);
-
-            // bottom button
-            if (this->FirstVisibleItem + this->VisibleItemsCount >= this->ItemsCount)
-                c = col->Text.Inactive;
-            else
-            {
-                switch (this->ButtonDown)
-                {
-                case MenuButtonState::Normal:
-                    c = col->Text.Normal;
-                    break;
-                case MenuButtonState::Hovered:
-                    c = col->Text.Hovered;
-                    break;
-                case MenuButtonState::Pressed:
-                    c = col->Text.PressedOrSelected;
-                    break;
-                }
-            }
-
-            renderer.FillHorizontalLineSize(this->Width / 2, ScreenClip.ClipRect.Height - 1, 3, ' ', c);
-            renderer.WriteSpecialCharacter(
-                  1 + this->Width / 2, ScreenClip.ClipRect.Height - 1, SpecialChars::TriangleDown, c);
+        let start = self.first_visible_item as usize;
+        let end = self.items.len().min((self.first_visible_item+self.visible_items_count) as usize);
+        if end<=start {
+            return;
         }
-
-        // draw items
-        for (uint32 tr = 1; tr <= this->VisibleItemsCount; tr++)
-        {
-            uint32 actualIndex = this->FirstVisibleItem + tr - 1;
-            if (actualIndex >= ItemsCount)
-                break;
-            MenuItem* item = this->Items[actualIndex].get();
-            ColorPair shortCutCol, checkColor;
-            if (item->Enabled == false)
-            {
-                textParams.Color       = col->Text.Inactive;
-                textParams.HotKeyColor = col->HotKey.Inactive;
-                shortCutCol            = col->ShortCut.Inactive;
-                checkColor             = col->Symbol.Inactive;
-            }
-            else
-            {
-                if (actualIndex == this->CurrentItem)
-                {
-                    textParams.Color       = col->Text.Hovered;
-                    textParams.HotKeyColor = col->HotKey.Hovered;
-                    shortCutCol            = col->ShortCut.Hovered;
-                    checkColor             = col->Symbol.Hovered;
-                    renderer.FillHorizontalLine(1, tr, Width, ' ', col->Text.Hovered);
-                }
-                else
-                {
-                    textParams.Color       = col->Text.Normal;
-                    textParams.HotKeyColor = col->HotKey.Normal;
-                    shortCutCol            = col->ShortCut.Normal;
-                    checkColor             = col->Symbol.Normal;
-                }
-            }
-
-            textParams.HotKeyPosition = item->HotKeyOffset;
-            textParams.Y              = tr;
-
-            switch (item->Type)
-            {
-            case MenuItemType::Line:
-                renderer.DrawHorizontalLine(1, tr, this->Width, col->Text.Normal);
-                break;
-            case MenuItemType::Command:
-                textParams.X = 2;
-                renderer.WriteText(item->Name, textParams);
-                break;
-            case MenuItemType::Check:
-                textParams.X = 4;
-                renderer.WriteText(item->Name, textParams);
-                if (item->Checked)
-                    renderer.WriteSpecialCharacter(2, tr, SpecialChars::CheckMark, checkColor);
-                break;
-            case MenuItemType::Radio:
-                textParams.X = 4;
-                renderer.WriteText(item->Name, textParams);
-                if (item->Checked)
-                    renderer.WriteSpecialCharacter(2, tr, SpecialChars::CircleFilled, checkColor);
-                else
-                    renderer.WriteSpecialCharacter(2, tr, SpecialChars::CircleEmpty, checkColor);
-                break;
-            case MenuItemType::SubMenu:
-                textParams.X = 2;
-                renderer.WriteText(item->Name, textParams);
-                renderer.WriteSpecialCharacter(this->Width - 1, tr, SpecialChars::TriangleRight, textParams.Color);
-                break;
-            }
-            if (item->ShortcutKey != Key::None)
-            {
-                auto k_n = KeyUtils::GetKeyName(item->ShortcutKey);
-                auto m_n = KeyUtils::GetKeyModifierName(item->ShortcutKey);
-                renderer.WriteSingleLineText(this->Width - (uint32) k_n.size(), tr, k_n, shortCutCol);
-                renderer.WriteSingleLineText(this->Width - (uint32) (k_n.size() + m_n.size()), tr, m_n, shortCutCol);
-            }
+        for idx in start..end {
+            let item = &self.items[idx as usize];
+            item.paint(surface, &mut format, self.width, idx == self.current as usize, col);
         }
-
-
-            */
     }
 }
 /*
