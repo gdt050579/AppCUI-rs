@@ -7,6 +7,8 @@ use crate::system::Theme;
 pub enum EventProcessStatus {
     Processed,
     Ignored,
+    Update,
+    Cancel
 }
 
 pub trait OnPaint {
