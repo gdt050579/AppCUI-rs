@@ -3,12 +3,12 @@ use super::{
     mouse_position_info::MousePositionInfo, MenuItem,
 };
 use crate::{
-    controls::events::EventProcessStatus,
+    controls::events::{Event, EventProcessStatus},
     graphics::{
         Character, ClipArea, LineType, Rect, SpecialChar, Surface, TextAlignament, TextFormat,
         TextWrap,
     },
-    input::{Key, KeyCode},
+    input::{Key, KeyCode, MouseWheelDirection},
     system::Theme,
 };
 const MAX_ITEMS: usize = 128;
@@ -131,6 +131,36 @@ impl Menu {
         self.update_first_visible_item();
     }
 
+    fn process_shortcut(&mut self, key: Key) -> bool {
+        for item in &mut self.items {
+            if !item.enabled {
+                continue;
+            }
+            if (item.item_type == MenuItemType::Command)
+                || (item.item_type == MenuItemType::Check)
+                || (item.item_type == MenuItemType::Radio)
+            {
+                /*
+                    if (Items[tr]->Type == MenuItemType::Check)
+                    this->SetChecked(tr, !Items[tr]->Checked);
+                if (Items[tr]->Type == MenuItemType::Radio)
+                    this->SetChecked(tr, true);
+                if (Items[tr]->CommandID >= 0)
+                {
+                    Application::GetApplication()->SendCommand(Items[tr]->CommandID);
+                }
+                */
+                return true; // key was processed
+            }
+            if item.item_type == MenuItemType::SubMenu {
+                if item.submenu.as_mut().unwrap().process_shortcut(key) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     fn paint(&self, surface: &mut Surface, theme: &Theme, active: bool) {
         let col = if active {
             &theme.menu
@@ -208,7 +238,7 @@ impl Menu {
                 self.button_up = MenuButtonState::Hovered;
                 return EventProcessStatus::Processed;
             }
-            if (mpi.is_on_bottom_button)
+            if (mpi.is_on_down_button)
                 && ((self.visible_items_count + self.first_visible_item) as usize)
                     < self.items.len()
             {
@@ -217,6 +247,62 @@ impl Menu {
             }
         }
         EventProcessStatus::Ignored
+    }
+    fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
+        let mpi = MousePositionInfo::new(x, y, self);
+        let button_up_status = if mpi.is_on_up_button {
+            MenuButtonState::Hovered
+        } else {
+            MenuButtonState::Normal
+        };
+        let button_down_status = if mpi.is_on_down_button {
+            MenuButtonState::Hovered
+        } else {
+            MenuButtonState::Normal
+        };
+        let mut need_repaint = false;
+        if button_up_status != self.button_up {
+            self.button_up = button_up_status;
+            need_repaint = true;
+        }
+        if button_down_status != self.button_down {
+            self.button_down = button_down_status;
+            need_repaint = true;
+        }
+        if self.current != mpi.item_index {
+            self.current = mpi.item_index;
+            need_repaint = true;
+        }
+        if need_repaint {
+            if mpi.is_on_menu {
+                return EventProcessStatus::Processed;
+            } else {
+                return EventProcessStatus::Update;
+            }
+        } else {
+            if mpi.is_on_menu {
+                return EventProcessStatus::Cancel;
+            } else {
+                return EventProcessStatus::Ignored;
+            }
+        }
+    }
+    fn on_mouse_wheel(&mut self, direction: MouseWheelDirection) -> EventProcessStatus {
+        if (self.visible_items_count as usize) >= self.items.len() {
+            // nothing to scroll
+            return EventProcessStatus::Ignored;
+        }
+        if (direction == MouseWheelDirection::Up) && (self.first_visible_item > 0) {
+            self.first_visible_item -= 1;
+            return EventProcessStatus::Processed;
+        }
+        if (direction == MouseWheelDirection::Down)
+            && (((self.visible_items_count + self.first_visible_item) as usize) < self.items.len())
+        {
+            self.first_visible_item += 1;
+            return EventProcessStatus::Processed;
+        }
+        return EventProcessStatus::Ignored;
     }
 }
 /*
@@ -288,27 +374,7 @@ void MenuContext::ComputeMousePositionInfo(int x, int y, MenuMousePositionInfo& 
 }
 bool MenuContext::OnMouseMove(int x, int y, bool& repaint)
 {
-    MenuMousePositionInfo mpi;
-    ComputeMousePositionInfo(x, y, mpi);
-    auto buttonUpStatus   = mpi.IsOnUpButton ? MenuButtonState::Hovered : MenuButtonState::Normal;
-    auto buttonDownStatus = mpi.IsOnDownButton ? MenuButtonState::Hovered : MenuButtonState::Normal;
-    auto processed        = mpi.IsOnMenu;
-    if (buttonUpStatus != this->ButtonUp)
-    {
-        this->ButtonUp = buttonUpStatus;
-        repaint        = true;
-    }
-    if (buttonDownStatus != this->ButtonDown)
-    {
-        this->ButtonDown = buttonDownStatus;
-        repaint          = true;
-    }
-    if (CurrentItem != mpi.ItemIndex)
-    {
-        CurrentItem = mpi.ItemIndex;
-        repaint     = true;
-    }
-    return processed;
+    // done
 }
 MousePressedResult MenuContext::OnMousePressed(int x, int y)
 {
@@ -350,19 +416,7 @@ bool MenuContext::OnMouseReleased(int x, int y)
 
 bool MenuContext::OnMouseWheel(int, int, Input::MouseWheel direction)
 {
-    if (this->VisibleItemsCount >= this->ItemsCount)
-        return false; // nothing to scroll
-    if ((direction == MouseWheel::Up) && (this->FirstVisibleItem > 0))
-    {
-        this->FirstVisibleItem--;
-        return true;
-    }
-    if ((direction == MouseWheel::Down) && ((this->FirstVisibleItem + this->VisibleItemsCount) < this->ItemsCount))
-    {
-        this->FirstVisibleItem++;
-        return true;
-    }
-    return false;
+    // done
 }
 void MenuContext::CreateAvailableItemsList(uint32* indexes, uint32& count)
 {
@@ -467,35 +521,7 @@ bool MenuContext::OnKeyEvent(Input::Key keyCode)
 }
 bool MenuContext::ProcessShortCut(Input::Key keyCode)
 {
-    for (uint32 tr = 0; tr < this->ItemsCount; tr++)
-    {
-        if (!Items[tr]->Enabled)
-            continue;
-        if ((Items[tr]->Type == MenuItemType::Command) || (Items[tr]->Type == MenuItemType::Check) ||
-            (Items[tr]->Type == MenuItemType::Radio))
-        {
-            if (Items[tr]->ShortcutKey == keyCode)
-            {
-                if (Items[tr]->Type == MenuItemType::Check)
-                    this->SetChecked(tr, !Items[tr]->Checked);
-                if (Items[tr]->Type == MenuItemType::Radio)
-                    this->SetChecked(tr, true);
-                if (Items[tr]->CommandID >= 0)
-                {
-                    Application::GetApplication()->SendCommand(Items[tr]->CommandID);
-                }
-                return true; // key was processed
-            }
-        }
-        if ((Items[tr]->Type == MenuItemType::SubMenu) && (Items[tr]->SubMenu))
-        {
-            MenuContext* ctx = reinterpret_cast<MenuContext*>(Items[tr]->SubMenu->Context);
-            if (ctx->ProcessShortCut(keyCode))
-                return true;
-        }
-    }
-    // if nothing matched - return false;
-    return false;
+    // done
 }
 
 void MenuContext::Show(

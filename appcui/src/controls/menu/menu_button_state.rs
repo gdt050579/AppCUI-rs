@@ -1,7 +1,7 @@
 use crate::{graphics::CharAttribute, system::MenuTheme};
 
 #[repr(u8)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub(super) enum MenuButtonState {
     Normal,
     Hovered,

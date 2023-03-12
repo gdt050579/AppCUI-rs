@@ -4,7 +4,7 @@ pub(super) struct MousePositionInfo {
     pub(super) item_index: u32,
     pub(super) is_on_menu: bool,
     pub(super) is_on_up_button: bool,
-    pub(super) is_on_bottom_button: bool,
+    pub(super) is_on_down_button: bool,
 }
 impl MousePositionInfo {
     pub(super) fn new(x: i32, y: i32, menu: &Menu) -> Self {
@@ -12,7 +12,7 @@ impl MousePositionInfo {
             item_index: MenuItem::INVALID_INDEX,
             is_on_menu: false,
             is_on_up_button: false,
-            is_on_bottom_button: false,
+            is_on_down_button: false,
         };
         if (x >= 1)
             && (y >= 1)
@@ -37,7 +37,7 @@ impl MousePositionInfo {
             && (y < (menu.visible_items_count as i32) + 2);
         if (x >= center_x) && (x <= center_x + 2) {
             mpi.is_on_up_button = y == 0;
-            mpi.is_on_bottom_button = y == menu.clip.bottom;
+            mpi.is_on_down_button = y == menu.clip.bottom;
         }
         mpi
     }
