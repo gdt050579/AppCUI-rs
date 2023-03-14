@@ -304,6 +304,78 @@ impl Menu {
         }
         return EventProcessStatus::Ignored;
     }
+
+    fn check_radio_item(&mut self, index: usize) {
+        // safety checks
+        let count = self.items.len();
+        if index >= count {
+            return;
+        }
+        if self.items[index].item_type != MenuItemType::Radio {
+            return;
+        }
+        let mut idx = index;
+        while (idx > 0) && (self.items[idx].item_type == MenuItemType::Radio) {
+            self.items[idx].checked = false;
+            idx -= 1;
+        }
+        if (idx == 0) && (self.items[0].item_type == MenuItemType::Radio) {
+            self.items[0].checked = false;
+        }
+        idx = index;
+        while (idx < count) && (self.items[idx].item_type == MenuItemType::Radio) {
+            self.items[idx].checked = false;
+            idx += 1;
+        }
+        self.items[index].checked = true;
+    }
+    fn send_command(&mut self, command_id: u32) {
+        todo!("to be added !");
+        /*
+        Application::GetApplication()->CloseContextualMenu();
+        Application::GetApplication()->SendCommand(commandID);
+        */
+    }
+    fn close(&mut self ) {
+        todo!("must be implemented");
+        /*
+            if (this->Parent)
+        Application::GetApplication()->ShowContextualMenu(this->Parent);
+    else
+        Application::GetApplication()->CloseContextualMenu();        
+        */
+    }
+    fn run_item_action(&mut self, index: usize) {
+        if index >= self.items.len() {
+            return;
+        }
+        let mut item = &mut self.items[index];
+        let command_id = item.commandID;
+        let item_type = item.item_type;
+        match item_type {
+            MenuItemType::Command => {
+                self.send_command(command_id);
+            }
+            MenuItemType::Check => {
+                item.checked = !item.checked;
+                self.send_command(command_id);
+            }
+            MenuItemType::Radio => {
+                self.check_radio_item(index);
+                self.send_command(command_id);
+            }
+            MenuItemType::Line => { /* do nothing */ }
+            MenuItemType::SubMenu => {
+                todo!()
+                /*
+                            itm->SubMenu->Show(
+                      Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
+                // transfer owner
+                (reinterpret_cast<MenuContext*>(itm->SubMenu->Context))->Owner = this->Owner;
+                    */
+            }
+        }
+    }
 }
 /*
 
@@ -322,51 +394,13 @@ MenuContext::MenuContext()
     this->ButtonUp          = MenuButtonState::Normal;
     this->ButtonDown        = MenuButtonState::Normal;
 }
-ItemHandle MenuContext::AddItem(unique_ptr<MenuItem> itm)
-{
-    if (itm->Type == MenuItemType::Invalid)
-        return InvalidItemHandle;
-    CHECK(this->ItemsCount < MAX_NUMBER_OF_MENU_ITEMS,
-          InvalidItemHandle,
-          "A maximum of 256 items can be added to a Menu");
 
-    auto res                = ItemHandle{ (uint32) this->ItemsCount };
-    Items[this->ItemsCount] = std::move(itm);
-    this->ItemsCount++;
-    return res;
-}
 void MenuContext::Paint(Graphics::Renderer& renderer, bool activ)
 {
 }
 bool MenuContext::SetChecked(uint32 menuIndex, bool status)
 {
-    CHECK(menuIndex < ItemsCount,
-          false,
-          "Invalid menu index (%u) , should be between 0 and less than %u",
-          menuIndex,
-          ItemsCount);
-    auto i = this->Items[menuIndex].get();
-    CHECK((i->Type == MenuItemType::Check) || (i->Type == MenuItemType::Radio),
-          false,
-          "Only Check and Radio item can change their state");
-    if (i->Type == MenuItemType::Radio)
-    {
-        // radio menu item -> uncheck all items that are radioboxes
-        uint32 index = menuIndex;
-        while (((index < this->ItemsCount)) && (this->Items[index]->Type == MenuItemType::Radio))
-        {
-            this->Items[index]->Checked = false;
-            index--;
-        }
-        index = menuIndex + 1;
-        while ((index < this->ItemsCount) && (this->Items[index]->Type == MenuItemType::Radio))
-        {
-            this->Items[index]->Checked = false;
-            index++;
-        }
-    }
-    i->Checked = status;
-    return true;
+    // done
 }
 void MenuContext::ComputeMousePositionInfo(int x, int y, MenuMousePositionInfo& mpi)
 {
@@ -424,42 +458,11 @@ void MenuContext::CreateAvailableItemsList(uint32* indexes, uint32& count)
 }
 void MenuContext::RunItemAction(uint32 itemIndex)
 {
-    if (itemIndex >= this->ItemsCount)
-        return;
-    auto itm      = this->Items[itemIndex].get();
-    int commandID = -1;
-    switch (itm->Type)
-    {
-    case MenuItemType::Check:
-        this->SetChecked(itemIndex, !itm->Checked);
-        commandID = itm->CommandID;
-        break;
-    case MenuItemType::Radio:
-        this->SetChecked(itemIndex, true);
-        commandID = itm->CommandID;
-        break;
-    case MenuItemType::SubMenu:
-        itm->SubMenu->Show(
-              Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
-        // transfer owner
-        (reinterpret_cast<MenuContext*>(itm->SubMenu->Context))->Owner = this->Owner;
-        break;
-    case MenuItemType::Command:
-        commandID = itm->CommandID;
-        break;
-    }
-    if (commandID >= 0)
-    {
-        Application::GetApplication()->CloseContextualMenu();
-        Application::GetApplication()->SendCommand(commandID);
-    }
+    // Done
 }
 void MenuContext::CloseMenu()
 {
-    if (this->Parent)
-        Application::GetApplication()->ShowContextualMenu(this->Parent);
-    else
-        Application::GetApplication()->CloseContextualMenu();
+    // Done
 }
 void MenuContext::UpdateFirstVisibleItem()
 {
