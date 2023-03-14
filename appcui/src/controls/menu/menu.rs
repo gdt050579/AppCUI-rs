@@ -306,6 +306,42 @@ impl Menu {
         }
         return EventProcessStatus::Ignored;
     }
+    fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
+        let mpi = MousePositionInfo::new(x, y, self);
+        // check buttons
+        if (self.visible_items_count as usize) < self.items.len() {
+            if (mpi.is_on_up_button) && (self.first_visible_item>0) {
+                self.button_up = MenuButtonState::Pressed;
+                self.on_mouse_wheel(MouseWheelDirection::Up);
+                return EventProcessStatus::Processed;
+                // return MousePressedResult::Repaint;
+            }
+            if (mpi.is_on_down_button)
+                && ((self.visible_items_count + self.first_visible_item) as usize)
+                    < self.items.len()
+            {
+                self.button_down = MenuButtonState::Pressed;
+                self.on_mouse_wheel(MouseWheelDirection::Down);
+                return EventProcessStatus::Processed;
+                // return MousePressedResult::Repaint;
+            }
+        }
+    // if click on a valid item, apply the action and close the menu
+    if mpi.item_index != MenuItem::INVALID_INDEX {
+        self.run_item_action(mpi.item_index as usize);
+        return EventProcessStatus::Processed;
+        // return MousePressedResult::Repaint;
+    }
+
+    // is it's on the menu -> do nothing
+    if mpi.is_on_menu {
+        return EventProcessStatus::Cancel;
+        // return MousePressedResult::None;
+    }
+    // if it's outsize, check if mouse is on one of its parens
+    return EventProcessStatus::Ignored;
+    // return MousePressedResult::CheckParent;
+    }
 
     fn check_radio_item(&mut self, index: usize) {
         // safety checks
@@ -472,36 +508,7 @@ bool MenuContext::OnMouseMove(int x, int y, bool& repaint)
 }
 MousePressedResult MenuContext::OnMousePressed(int x, int y)
 {
-    MenuMousePositionInfo mpi;
-    ComputeMousePositionInfo(x, y, mpi);
-    // check buttons
-    if (this->VisibleItemsCount < this->ItemsCount)
-    {
-        if ((mpi.IsOnUpButton) && (this->FirstVisibleItem > 0))
-        {
-            this->ButtonUp = MenuButtonState::Pressed;
-            OnMouseWheel(x, y, MouseWheel::Up);
-            return MousePressedResult::Repaint;
-        }
-        if ((mpi.IsOnDownButton) && (this->FirstVisibleItem + this->VisibleItemsCount < this->ItemsCount))
-        {
-            this->ButtonDown = MenuButtonState::Pressed;
-            OnMouseWheel(x, y, MouseWheel::Down);
-            return MousePressedResult::Repaint;
-        }
-    }
-    // if click on a valid item, apply the action and close the menu
-    if (mpi.ItemIndex != NO_MENUITEM_SELECTED)
-    {
-        RunItemAction(mpi.ItemIndex);
-        // other type of items
-        return MousePressedResult::Repaint;
-    }
-    // is it's on the menu -> do nothing
-    if (mpi.IsOnMenu)
-        return MousePressedResult::None;
-    // if it's outsize, check if mouse is on one of its parens
-    return MousePressedResult::CheckParent;
+    // done
 }
 bool MenuContext::OnMouseReleased(int x, int y)
 {
