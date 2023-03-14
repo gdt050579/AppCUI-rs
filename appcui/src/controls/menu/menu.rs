@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use super::{
     menu_button_state::MenuButtonState, menu_item_type::MenuItemType,
     mouse_position_info::MousePositionInfo, MenuItem,
@@ -336,14 +338,14 @@ impl Menu {
         Application::GetApplication()->SendCommand(commandID);
         */
     }
-    fn close(&mut self ) {
+    fn close(&mut self) {
         todo!("must be implemented");
         /*
-            if (this->Parent)
-        Application::GetApplication()->ShowContextualMenu(this->Parent);
-    else
-        Application::GetApplication()->CloseContextualMenu();        
-        */
+        if (this->Parent)
+            Application::GetApplication()->ShowContextualMenu(this->Parent);
+        else
+            Application::GetApplication()->CloseContextualMenu();
+            */
     }
     fn run_item_action(&mut self, index: usize) {
         if index >= self.items.len() {
@@ -375,6 +377,63 @@ impl Menu {
                     */
             }
         }
+    }
+
+    fn on_key_pressed(&mut self, key: Key) -> EventProcessStatus {
+        match key.code {
+            KeyCode::Up
+            | KeyCode::Down
+            | KeyCode::Home
+            | KeyCode::End
+            | KeyCode::PageUp
+            | KeyCode::PageDown => {
+                self.move_currentitem_to(key);
+                return EventProcessStatus::Processed;
+            }
+            KeyCode::Enter | KeyCode::Space => {
+                self.run_item_action(self.current as usize);
+                return EventProcessStatus::Processed;
+            }
+            KeyCode::Escape => {
+                self.close();
+                return EventProcessStatus::Processed;
+            }
+            KeyCode::Left => {
+                todo!("not implemented yet");
+                /*
+                            if (this->Parent)
+                            {
+                                CloseMenu();
+                                return true;
+                            }
+                            return false;
+                */
+            }
+            KeyCode::Right => {
+                if (self.current as usize) < self.items.len() {
+                    let item = &self.items[self.current as usize];
+                    if (item.enabled) && (item.item_type == MenuItemType::SubMenu) {
+                        self.run_item_action(self.current as usize);
+                        return EventProcessStatus::Processed;
+                    }
+                }
+                return EventProcessStatus::Ignored;
+            },
+            _ => {}
+        }
+        // check short keys
+        let count = self.items.len();
+        let mut idx = 0usize;
+        while idx < count {
+            let item = &self.items[idx];
+            if (item.enabled) && (item.caption.get_hotkey() == key) {
+                self.current = idx as u32;
+                self.update_first_visible_item();
+                self.run_item_action(idx);
+                return EventProcessStatus::Processed;
+            }
+        }
+        return EventProcessStatus::Ignored;
     }
 }
 /*
@@ -474,53 +533,7 @@ void MenuContext::MoveCurrentItemTo(Input::Key keyCode)
 // key events
 bool MenuContext::OnKeyEvent(Input::Key keyCode)
 {
-    // check movement keys
-    switch (keyCode)
-    {
-    case Key::Up:
-    case Key::Down:
-    case Key::Home:
-    case Key::End:
-    case Key::PageUp:
-    case Key::PageDown:
-        MoveCurrentItemTo(keyCode);
-        return true;
-    case Key::Enter:
-    case Key::Space:
-        RunItemAction(this->CurrentItem);
-        return true;
-    case Key::Escape:
-        CloseMenu();
-        return true;
-    case Key::Right:
-        if ((this->CurrentItem < ItemsCount) && (Items[this->CurrentItem]->Enabled) &&
-            (Items[this->CurrentItem]->Type == MenuItemType::SubMenu))
-        {
-            RunItemAction(this->CurrentItem);
-            return true;
-        }
-        return false;
-    case Key::Left:
-        if (this->Parent)
-        {
-            CloseMenu();
-            return true;
-        }
-        return false;
-    }
-    // check short keys
-    for (uint32 tr = 0; tr < ItemsCount; tr++)
-    {
-        if ((Items[tr]->HotKey != Key::None) && (Items[tr]->HotKey == keyCode) && (Items[tr]->Enabled))
-        {
-            this->CurrentItem = tr;
-            UpdateFirstVisibleItem();
-            RunItemAction(tr);
-            return true;
-        }
-    }
-    // no binding
-    return false;
+    // done
 }
 bool MenuContext::ProcessShortCut(Input::Key keyCode)
 {
