@@ -418,7 +418,7 @@ impl Menu {
                     }
                 }
                 return EventProcessStatus::Ignored;
-            },
+            }
             _ => {}
         }
         // check short keys
@@ -432,6 +432,7 @@ impl Menu {
                 self.run_item_action(idx);
                 return EventProcessStatus::Processed;
             }
+            idx+=1;
         }
         return EventProcessStatus::Ignored;
     }
