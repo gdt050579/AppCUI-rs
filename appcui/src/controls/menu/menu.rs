@@ -134,7 +134,7 @@ impl Menu {
     }
 
     fn process_shortcut(&mut self, key: Key) -> bool {
-        for item in &mut self.items {
+        for (index,item) in self.items.iter_mut().enumerate() {
             if !item.enabled {
                 continue;
             }
@@ -142,9 +142,13 @@ impl Menu {
                 || (item.item_type == MenuItemType::Check)
                 || (item.item_type == MenuItemType::Radio)
             {
+                if item.item_type == MenuItemType::Check {
+                    item.checked = !item.checked;
+                }
+                if item.item_type == MenuItemType::Radio {
+                    self.check_radio_item(index);
+                }
                 /*
-                    if (Items[tr]->Type == MenuItemType::Check)
-                    this->SetChecked(tr, !Items[tr]->Checked);
                 if (Items[tr]->Type == MenuItemType::Radio)
                     this->SetChecked(tr, true);
                 if (Items[tr]->CommandID >= 0)
@@ -310,7 +314,7 @@ impl Menu {
         let mpi = MousePositionInfo::new(x, y, self);
         // check buttons
         if (self.visible_items_count as usize) < self.items.len() {
-            if (mpi.is_on_up_button) && (self.first_visible_item>0) {
+            if (mpi.is_on_up_button) && (self.first_visible_item > 0) {
                 self.button_up = MenuButtonState::Pressed;
                 self.on_mouse_wheel(MouseWheelDirection::Up);
                 return EventProcessStatus::Processed;
@@ -326,21 +330,21 @@ impl Menu {
                 // return MousePressedResult::Repaint;
             }
         }
-    // if click on a valid item, apply the action and close the menu
-    if mpi.item_index != MenuItem::INVALID_INDEX {
-        self.run_item_action(mpi.item_index as usize);
-        return EventProcessStatus::Processed;
-        // return MousePressedResult::Repaint;
-    }
+        // if click on a valid item, apply the action and close the menu
+        if mpi.item_index != MenuItem::INVALID_INDEX {
+            self.run_item_action(mpi.item_index as usize);
+            return EventProcessStatus::Processed;
+            // return MousePressedResult::Repaint;
+        }
 
-    // is it's on the menu -> do nothing
-    if mpi.is_on_menu {
-        return EventProcessStatus::Cancel;
-        // return MousePressedResult::None;
-    }
-    // if it's outsize, check if mouse is on one of its parens
-    return EventProcessStatus::Ignored;
-    // return MousePressedResult::CheckParent;
+        // is it's on the menu -> do nothing
+        if mpi.is_on_menu {
+            return EventProcessStatus::Cancel;
+            // return MousePressedResult::None;
+        }
+        // if it's outsize, check if mouse is on one of its parens
+        return EventProcessStatus::Ignored;
+        // return MousePressedResult::CheckParent;
     }
 
     fn check_radio_item(&mut self, index: usize) {
@@ -468,7 +472,7 @@ impl Menu {
                 self.run_item_action(idx);
                 return EventProcessStatus::Processed;
             }
-            idx+=1;
+            idx += 1;
         }
         return EventProcessStatus::Ignored;
     }
