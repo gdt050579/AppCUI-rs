@@ -534,7 +534,7 @@ impl Menu {
         if max_size.height >= 5 {
             max_height_for_current_screen = max_height_for_current_screen.min(max_size.height);
         }
-        let mut menu_width = max_width_for_current_screen.min((best_width as u32) + 2);
+        let menu_width = max_width_for_current_screen.min((best_width as u32) + 2);
         let mut menu_height = max_height_for_current_screen.min((self.items.len() as u32) + 2);
 
         // Set direction
