@@ -7,8 +7,8 @@ use super::{
 use crate::{
     controls::events::{Event, EventProcessStatus},
     graphics::{
-        Character, ClipArea, LineType, Rect, SpecialChar, Surface, TextAlignament, TextFormat,
-        TextWrap,
+        Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
+        TextFormat, TextWrap,
     },
     input::{Key, KeyCode, MouseWheelDirection},
     system::Theme,
@@ -18,7 +18,7 @@ pub struct Menu {
     pub(super) items: Vec<MenuItem>,
     pub(super) current: u32,
     pub(super) width: u16,
-    pub(super) text_with: u16,
+    pub(super) text_width: u16,
     pub(super) first_visible_item: u32,
     pub(super) visible_items_count: u32,
     pub(super) button_up: MenuButtonState,
@@ -134,7 +134,7 @@ impl Menu {
     }
 
     fn process_shortcut(&mut self, key: Key) -> bool {
-        for (index,item) in self.items.iter_mut().enumerate() {
+        for (index, item) in self.items.iter_mut().enumerate() {
             if !item.enabled {
                 continue;
             }
@@ -149,8 +149,6 @@ impl Menu {
                     self.check_radio_item(index);
                 }
                 /*
-                if (Items[tr]->Type == MenuItemType::Radio)
-                    this->SetChecked(tr, true);
                 if (Items[tr]->CommandID >= 0)
                 {
                     Application::GetApplication()->SendCommand(Items[tr]->CommandID);
@@ -215,7 +213,7 @@ impl Menu {
         format.multi_line = false;
         format.align = TextAlignament::Left;
         format.text_wrap = TextWrap::None;
-        format.width = Some(self.text_with);
+        format.width = Some(self.text_width);
 
         let start = self.first_visible_item as usize;
         let end = self
@@ -475,6 +473,145 @@ impl Menu {
             idx += 1;
         }
         return EventProcessStatus::Ignored;
+    }
+
+    fn show(&mut self, x: i32, y: i32, max_size: Size, term_size: Size) {
+        if (term_size.width < 5) || (term_size.height < 5) {
+            // can not display if terminal is less than 5 x 5
+            return;
+        }
+        /*
+                void MenuContext::Show(
+              Controls::Menu* me, Reference<Controls::Control> relativeControl, int x, int y, const Graphics::Size& maxSize)
+        {
+            // compute abosolute position
+            while (relativeControl.IsValid())
+            {
+                x += relativeControl->GetX();
+                y += relativeControl->GetY();
+                // move to parent
+                relativeControl = relativeControl->GetParent();
+                // add parent margins
+                if (relativeControl.IsValid())
+                {
+                    x += ((ControlContext*) relativeControl->Context)->Margins.Left;
+                    y += ((ControlContext*) relativeControl->Context)->Margins.Top;
+                }
+            }
+            */
+
+        // compute best width
+        let mut max_width_left = 0usize;
+        let mut max_hot_key_width = 0usize;
+        for item in &self.items {
+            let mut w_left = item.caption.get_chars_count() + 4;
+            let mut w_right = 0usize;
+            if (item.item_type == MenuItemType::Radio) || (item.item_type == MenuItemType::Check) {
+                w_left += 2;
+            }
+            if item.shortcut.code != KeyCode::None {
+                w_right += item.shortcut.code.get_name().len();
+                w_right += item.shortcut.modifier.get_name().len();
+                if w_right > 0 {
+                    w_right += 2;
+                }
+            }
+            max_width_left = max_width_left.max(w_left);
+            max_hot_key_width = max_hot_key_width.max(w_right);
+        }
+        let best_width = (max_width_left + max_hot_key_width) | 1; // make sure it's not an odd number (this will help better position Arrow Up and Down)
+
+        // adjust X and Y to be on the screen
+        let x = x.clamp(0, term_size.width as i32);
+        let y = y.clamp(0, term_size.height as i32);
+
+        // validate max and min limits for menu width and height
+        let mut max_width_for_current_screen = 37u32.max(term_size.width / 4); // use a non-odd number (31 / 33 / 35 --> bigger them 30)
+        let mut max_height_for_current_screen = 5u32.max(term_size.height - 4);
+        if max_size.width >= 30 {
+            max_width_for_current_screen = max_width_for_current_screen.min(max_size.width | 1);
+        }
+        if max_size.height >= 5 {
+            max_height_for_current_screen = max_height_for_current_screen.min(max_size.height);
+        }
+        let mut menu_width = max_width_for_current_screen.min((best_width as u32) + 2);
+        let mut menu_height = max_height_for_current_screen.min((self.items.len() as u32) + 2);
+
+        // Set direction
+        let to_left = {
+            if x + (menu_width as i32) <= (term_size.width as i32) {
+                true // best fit on left
+            } else if x >= (menu_width as i32) {
+                false // best fit on right
+            } else {
+                x < ((term_size.width / 2) as i32) // if x is closest to right edge - expand to left, otherwise to right
+            }
+        };
+
+        let to_bottom = {
+            if y + (menu_height as i32) <= (term_size.height as i32) {
+                true // best fit on bottom
+            } else if y >= (menu_height as i32) {
+                false // best fit on top
+            } else {
+                let result = y < ((term_size.height / 2) as i32); // if y is closest to top edge - expand to top, otherwise to bottom
+                if result {
+                    menu_height = 5u32.max(((term_size.height as i32) - y) as u32);
+                } else {
+                    menu_height = 5u32.max(y as u32); // y - 0 = y
+                }
+                result
+            }
+        };
+
+        self.visible_items_count = menu_height - 2;
+        self.width = (menu_width - 2) as u16;
+        self.text_width = self.width - ((max_hot_key_width + 2) as u16);
+        // set the actual clip
+        if to_left {
+            if to_bottom {
+                self.clip
+                    .set_with_size(x, y, menu_width as u16, menu_height as u16);
+            } else {
+                self.clip.set_with_size(
+                    x,
+                    y + 1 - (menu_height as i32),
+                    menu_width as u16,
+                    menu_height as u16,
+                );
+            }
+        } else {
+            if to_bottom {
+                self.clip.set_with_size(
+                    x + 1 - (menu_width as i32),
+                    y,
+                    menu_width as u16,
+                    menu_height as u16,
+                );
+            } else {
+                self.clip.set_with_size(
+                    x + 1 - (menu_width as i32),
+                    y + 1 - (menu_height as i32),
+                    menu_width as u16,
+                    menu_height as u16,
+                );
+            }
+        }
+        
+        // clear selection & buttons
+        self.first_visible_item = 0;
+        self.current = MenuItem::INVALID_INDEX;
+        self.button_up = MenuButtonState::Normal;
+        self.button_down = MenuButtonState::Normal;
+
+        // link to application
+        /*
+        auto* app = Application::GetApplication();
+        if (app)
+            app->ShowContextualMenu(me);
+
+
+            */
     }
 }
 /*
