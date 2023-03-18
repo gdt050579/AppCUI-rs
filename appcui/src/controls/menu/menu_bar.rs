@@ -37,7 +37,7 @@ impl MenuBar {
         self.width = width;
         self.update_positions();
     }
-    fn add(&mut self, menu: Menu, caption: Caption) {
+    pub (crate) fn add(&mut self, menu: Menu, caption: Caption) {
         self.items.push(MenuBarItem { caption, menu, x: 0 });
         self.update_positions();
     }

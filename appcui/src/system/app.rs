@@ -2,6 +2,8 @@ use super::InitializationData;
 use super::RuntimeManager;
 use super::Error;
 use crate::controls::events::Control;
+use crate::controls::menu::Menu;
+use crate::utils::Caption;
 
 
 pub struct App {
@@ -26,6 +28,9 @@ impl App {
         T: Control + 'static,
     {
         RuntimeManager::get().add(window);
+    }
+    pub fn add_menu(&mut self, menu: Menu, name: &str) {
+        RuntimeManager::get().add_menu(menu, Caption::new(name, true));
     }
 
 

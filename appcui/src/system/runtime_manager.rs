@@ -1,11 +1,12 @@
 use super::{CommandBar, InitializationData, InitializationFlags, Theme, ToolTip};
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
+use crate::controls::menu::{MenuBar, Menu};
 use crate::controls::ControlManager;
 use crate::controls::*;
-use crate::controls::menu::MenuBar;
-use crate::graphics::{Rect, Surface, Size};
+use crate::graphics::{Rect, Size, Surface};
 use crate::terminal::*;
+use crate::utils::Caption;
 
 pub(crate) struct RuntimeManager {
     theme: Theme,
@@ -71,6 +72,11 @@ impl RuntimeManager {
         self.root.get_base_mut().children.push(c);
         return ControlHandle::new(0, v);
     }
+    pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
+        if self.menubar.is_some() {
+            self.menubar.as_mut().unwrap().add(menu,caption);
+        }
+    }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
         self.recompute_layouts();
@@ -105,7 +111,10 @@ impl RuntimeManager {
                 .paint(&mut self.surface, &self.theme);
         }
         if self.menubar.is_some() {
-            self.menubar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
+            self.menubar
+                .as_ref()
+                .unwrap()
+                .paint(&mut self.surface, &self.theme);
         }
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);
@@ -119,14 +128,16 @@ impl RuntimeManager {
     }
     fn process_terminal_resize_event(&mut self, new_size: Size) {
         // sanity checks
-        if (new_size.width==0) || (new_size.height==0) {
+        if (new_size.width == 0) || (new_size.height == 0) {
             return;
         }
-        if (new_size.width == self.surface.get_width()) && (new_size.height == self.surface.get_height()) {
+        if (new_size.width == self.surface.get_width())
+            && (new_size.height == self.surface.get_height())
+        {
             return;
         }
-        self.surface.resize(new_size);   
-        self.terminal.on_resize(new_size);     
+        self.surface.resize(new_size);
+        self.terminal.on_resize(new_size);
         if self.commandbar.is_some() {
             self.commandbar.as_mut().unwrap().set_desktop_size(new_size);
         }
