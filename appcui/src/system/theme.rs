@@ -49,7 +49,7 @@ pub struct WindowTheme {
     pub inactive: CharAttribute,
     pub error: CharAttribute,
     pub warning: CharAttribute,
-    pub info: CharAttribute
+    pub info: CharAttribute,
 }
 #[derive(Default)]
 pub struct Theme {
@@ -60,6 +60,7 @@ pub struct Theme {
     pub menu: MenuTheme,
     pub parent_menu: MenuTheme,
     pub window: WindowTheme,
+    pub border: ControlCharAttributesState,    
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -137,21 +138,30 @@ impl Theme {
             hovered: CharAttribute::with_color(Color::DarkRed, Color::Gray),
             inactive: CharAttribute::with_color(Color::Gray, Color::Silver),
             pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Gray),
-        };    
+        };
         self.parent_menu.symbol = ControlCharAttributesState {
             normal: CharAttribute::with_color(Color::DarkGreen, Color::Silver),
             focused: CharAttribute::with_color(Color::DarkGreen, Color::Silver),
             hovered: CharAttribute::with_color(Color::Magenta, Color::Gray),
             inactive: CharAttribute::with_color(Color::Gray, Color::Silver),
             pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Gray),
-        };     
+        };
         self.parent_menu.shortcut = self.parent_menu.hotkey;
 
-        self.window.inactive = CharAttribute::with_back_color(Color::Black);
-        self.window.normal   = CharAttribute::with_back_color(Color::DarkBlue);
-        self.window.error    = CharAttribute::with_back_color(Color::DarkRed);
-        self.window.warning  = CharAttribute::with_back_color(Color::Olive);
-        self.window.info     = CharAttribute::with_back_color(Color::DarkGreen);
-    
+        self.window.inactive = CharAttribute::with_color(Color::Black, Color::Black);
+        self.window.normal = CharAttribute::with_color(Color::Black, Color::DarkBlue);
+        self.window.error = CharAttribute::with_color(Color::Black, Color::DarkRed);
+        self.window.warning = CharAttribute::with_color(Color::Black, Color::Olive);
+        self.window.info = CharAttribute::with_color(Color::Black, Color::DarkGreen);
+
+
+        self.border = ControlCharAttributesState {
+            normal: CharAttribute::with_fore_color(Color::Silver),
+            focused: CharAttribute::with_fore_color(Color::White),
+            hovered: CharAttribute::with_fore_color(Color::Yellow),
+            inactive: CharAttribute::with_fore_color(Color::Gray),
+            pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Magenta),
+        };
     }
 }
+//         inline void Set(focused, normal, inactive, hovered, pressedOrSelected)

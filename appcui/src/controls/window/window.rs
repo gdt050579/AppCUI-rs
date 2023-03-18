@@ -14,6 +14,7 @@ pub struct Window {
     title: String,
     flags: WindowFlags,
     menu: Option<MenuBar>,
+    resize_move_mode: bool,
 }
 
 impl Window {
@@ -23,26 +24,39 @@ impl Window {
             title: String::from(title),
             flags,
             menu: None,
+            resize_move_mode: false,
         }
     }
 }
 impl OnPaint for Window {
-    fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
-        
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        let color_window = match () {
+            _ if !self.has_focus() => theme.window.inactive,
+            _ if self.flags.contains(WindowFlags::WarningWindow) => theme.window.warning,
+            _ if self.flags.contains(WindowFlags::ErrorWindow) => theme.window.error,
+            _ if self.flags.contains(WindowFlags::NotifyWindow) => theme.window.info,
+            _  => theme.window.normal,
+        };
+        // set some colors
+        let color_title: CharAttribute;
+        let color_border: CharAttribute;
+        let line_type: LineType;
+
+        // initialization
+        if self.has_focus() {
+
+        } else {
+            color_title              = theme.text.normal;
+            color_border             = theme.border.normal;
+            line_type                = LineType::Single;
+            self.resize_move_mode = false;
+        }
     }
 /*
     CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, );
     ColorPair colorTitle, colorWindow, colorBorder, colorStartEndSeparators, tmpCol, tmpHK;
     LineType lineType;
 
-    if ((Members->Flags & WindowFlags::WarningWindow) != WindowFlags::None)
-        colorWindow = { Color::Black, Members->Cfg->Window.Background.Warning };
-    else if ((Members->Flags & WindowFlags::ErrorWindow) != WindowFlags::None)
-        colorWindow = { Color::Black, Members->Cfg->Window.Background.Error };
-    else if ((Members->Flags & WindowFlags::NotifyWindow) != WindowFlags::None)
-        colorWindow = { Color::Black, Members->Cfg->Window.Background.Info };
-    else
-        colorWindow = { Color::Black, Members->Cfg->Window.Background.Normal };
 
     const auto sepColor = Members->Focused ? Members->Cfg->Lines.Normal : Members->Cfg->Lines.Inactive;
 
@@ -57,11 +71,7 @@ impl OnPaint for Window {
     }
     else
     {
-        colorTitle              = Members->Cfg->Text.Normal;
-        colorWindow.Background  = Members->Cfg->Window.Background.Inactive;
-        colorBorder             = Members->Cfg->Border.Normal;
-        lineType                = LineType::Single;
-        Members->ResizeMoveMode = false;
+
     }
     renderer.Clear(' ', colorWindow);
     renderer.DrawRectSize(0, 0, Members->Layout.Width, Members->Layout.Height, colorBorder, lineType);
