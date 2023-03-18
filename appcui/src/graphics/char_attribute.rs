@@ -37,6 +37,13 @@ impl CharAttribute {
             flags: CharFlags::None,
         }
     }
+    pub fn with_back_color(back: Color) -> CharAttribute {
+        CharAttribute {
+            foreground: Color::Transparent,
+            background: back,
+            flags: CharFlags::None,
+        }
+    }
 }
 impl Default for CharAttribute {
     fn default() -> Self {

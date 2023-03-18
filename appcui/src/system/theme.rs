@@ -43,7 +43,14 @@ pub struct MenuTheme {
     pub shortcut: ControlCharAttributesState,
     pub symbol: ControlCharAttributesState,
 }
-
+#[derive(Default)]
+pub struct WindowTheme {
+    pub normal: CharAttribute,
+    pub inactive: CharAttribute,
+    pub error: CharAttribute,
+    pub warning: CharAttribute,
+    pub info: CharAttribute
+}
 #[derive(Default)]
 pub struct Theme {
     pub desktop: DesktopTheme,
@@ -52,6 +59,7 @@ pub struct Theme {
     pub tooltip: ToolTipTheme,
     pub menu: MenuTheme,
     pub parent_menu: MenuTheme,
+    pub window: WindowTheme,
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -138,5 +146,12 @@ impl Theme {
             pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Gray),
         };     
         self.parent_menu.shortcut = self.parent_menu.hotkey;
+
+        self.window.inactive = CharAttribute::with_back_color(Color::Black);
+        self.window.normal   = CharAttribute::with_back_color(Color::DarkBlue);
+        self.window.error    = CharAttribute::with_back_color(Color::DarkRed);
+        self.window.warning  = CharAttribute::with_back_color(Color::Olive);
+        self.window.info     = CharAttribute::with_back_color(Color::DarkGreen);
+    
     }
 }
