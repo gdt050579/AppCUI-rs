@@ -12,11 +12,12 @@ use crate::{
     },
     input::{Key, KeyCode, MouseWheelDirection},
     system::Theme,
+    utils::{Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
 pub struct Menu {
     pub(super) items: Vec<MenuItem>,
-    pub(super) current: u32,
+    pub(super) current: VectorIndex,
     pub(super) width: u16,
     pub(super) text_width: u16,
     pub(super) first_visible_item: u32,
@@ -33,12 +34,13 @@ impl Menu {
         MousePositionInfo::new(x, y, &self).is_on_menu
     }
     fn update_first_visible_item(&mut self) {
-        if self.current as usize >= self.items.len() {
+        if !self.current.in_range(self.items.len()) {
             return;
         }
-        self.first_visible_item = self.first_visible_item.min(self.current);
-        if (self.current - self.first_visible_item) > self.visible_items_count {
-            self.first_visible_item = (self.current + 1) - self.visible_items_count;
+        let cpoz = self.current.index() as u32;
+        self.first_visible_item = self.first_visible_item.min(cpoz);
+        if (cpoz - self.first_visible_item) > self.visible_items_count {
+            self.first_visible_item = (cpoz + 1) - self.visible_items_count;
         }
     }
 
@@ -67,67 +69,61 @@ impl Menu {
         }
         if idx_count == 0 {
             // no items or all items are disabled
-            self.current = MenuItem::INVALID_INDEX;
+            self.current = VectorIndex::invalid();
             return;
         }
         // if CurrentItem is MenuItem::INVALID_INDEX ==> select the first available item
-        if self.current as usize >= items_count {
-            self.current = idx[0] as u32;
+        if self.current.in_range(items_count) {
+            self.current.set(idx[0],self.items.len(),false);
         } else {
             // make sure that this->CurrentItem is part of the list
-            let mut current_idx = MenuItem::INVALID_INDEX;
-            let mut best_diff = 0xFFFFFFFFu32;
+            let mut current_idx = VectorIndex::invalid();
+            let mut best_diff = usize::MAX;
             for tr in 0..idx_count {
-                {
-                    let diff = if idx[tr] < self.current as usize {
-                        self.current - (idx[tr] as u32)
+
+                    let diff = if idx[tr] < self.current.index() {
+                        self.current.index() - idx[tr]
                     } else {
-                        (idx[tr] as u32) - self.current
+                        idx[tr] - self.current.index()
                     };
                     if diff < best_diff {
                         best_diff = diff;
-                        current_idx = tr as u32;
+                        current_idx = VectorIndex::with_value(tr);
                     }
-                }
             }
             // sanity check
-            if current_idx as usize >= idx_count {
+            if !current_idx.in_range(idx_count) {
                 // no item is selected
-                self.current = MenuItem::INVALID_INDEX;
+                self.current = VectorIndex::invalid();
                 return;
             }
             match key.code {
                 KeyCode::Up => {
-                    if current_idx > 0 {
-                        current_idx -= 1;
-                    } else {
-                        current_idx = (idx_count as u32) - 1;
-                    }
+                    current_idx.sub(1, idx_count, Strategy::Rotate);
                 }
                 KeyCode::Down => {
-                    current_idx += 1;
-                    if current_idx >= idx_count as u32 {
-                        current_idx = 0;
-                    }
+                    current_idx.add(1, idx_count, Strategy::Rotate);
                 }
                 KeyCode::PageUp => {
-                    if current_idx >= self.visible_items_count {
-                        current_idx -= self.visible_items_count;
-                    } else {
-                        current_idx = 0;
-                    }
+                    current_idx.sub(
+                        self.visible_items_count as usize,
+                        idx_count,
+                        Strategy::Clamp,
+                    );
                 }
                 KeyCode::PageDown => {
-                    current_idx = self.visible_items_count;
-                    if current_idx >= idx_count as u32 {
-                        current_idx = (idx_count as u32) - 1;
-                    }
+                    current_idx.add(
+                        self.visible_items_count as usize,
+                        idx_count,
+                        Strategy::Clamp,
+                    );
                 }
-                KeyCode::Home => current_idx = 0,
-                KeyCode::End => current_idx = (idx_count as u32) - 1,
+                KeyCode::Home => current_idx = VectorIndex::first(),
+                KeyCode::End => current_idx = VectorIndex::last(idx_count),
                 _ => {}
             }
-            self.current = idx[current_idx as usize] as u32;
+            self.current
+                .set(idx[current_idx.index()] as usize, self.items.len(), false);
         }
 
         self.update_first_visible_item();
@@ -229,7 +225,7 @@ impl Menu {
                 surface,
                 &mut format,
                 self.width,
-                idx == self.current as usize,
+                idx == self.current.index(),
                 col,
             );
         }
@@ -329,8 +325,8 @@ impl Menu {
             }
         }
         // if click on a valid item, apply the action and close the menu
-        if mpi.item_index != MenuItem::INVALID_INDEX {
-            self.run_item_action(mpi.item_index as usize);
+        if mpi.item_index.is_valid() {
+            self.run_item_action(mpi.item_index.index());
             return EventProcessStatus::Processed;
             // return MousePressedResult::Repaint;
         }
@@ -429,7 +425,7 @@ impl Menu {
                 return EventProcessStatus::Processed;
             }
             KeyCode::Enter | KeyCode::Space => {
-                self.run_item_action(self.current as usize);
+                self.run_item_action(self.current.index());
                 return EventProcessStatus::Processed;
             }
             KeyCode::Escape => {
@@ -448,10 +444,10 @@ impl Menu {
                 */
             }
             KeyCode::Right => {
-                if (self.current as usize) < self.items.len() {
-                    let item = &self.items[self.current as usize];
+                if self.current.in_range(self.items.len()) {
+                    let item = &self.items[self.current.index()];
                     if (item.enabled) && (item.item_type == MenuItemType::SubMenu) {
-                        self.run_item_action(self.current as usize);
+                        self.run_item_action(self.current.index());
                         return EventProcessStatus::Processed;
                     }
                 }
@@ -465,7 +461,7 @@ impl Menu {
         while idx < count {
             let item = &self.items[idx];
             if (item.enabled) && (item.caption.get_hotkey() == key) {
-                self.current = idx as u32;
+                self.current = VectorIndex::with_value(idx);
                 self.update_first_visible_item();
                 self.run_item_action(idx);
                 return EventProcessStatus::Processed;
@@ -597,10 +593,10 @@ impl Menu {
                 );
             }
         }
-        
+
         // clear selection & buttons
         self.first_visible_item = 0;
-        self.current = MenuItem::INVALID_INDEX;
+        self.current = VectorIndex::invalid();
         self.button_up = MenuButtonState::Normal;
         self.button_down = MenuButtonState::Normal;
 

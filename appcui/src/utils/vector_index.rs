@@ -3,7 +3,7 @@ pub enum Strategy {
     Rotate,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub(crate) struct VectorIndex {
     value: usize,
 }
@@ -41,6 +41,10 @@ impl VectorIndex {
     #[inline(always)]
     pub fn is_valid(&self) -> bool {
         self.value != Self::INVALID_INDEX
+    }
+    #[inline(always)]
+    pub fn in_range(&self, count: usize) -> bool {
+        (self.value < count) && (count != Self::INVALID_INDEX)
     }
     #[inline(always)]
     pub fn set(&mut self, value: usize, count: usize, clamp: bool) {

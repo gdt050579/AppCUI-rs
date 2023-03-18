@@ -18,7 +18,6 @@ pub struct MenuItem {
 }
 
 impl MenuItem {
-    pub(super) const INVALID_INDEX: u32 = 0xFFFFFFFFu32;
     #[inline(always)]
     fn get_text_attr(&self, current_item: bool, color: &MenuTheme) -> CharAttribute {
         match () {

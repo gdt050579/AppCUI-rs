@@ -1,4 +1,4 @@
-use crate::{utils::Caption, controls::events::{EventProcessStatus, Event}, input::Key, graphics::Surface, system::Theme};
+use crate::{utils::{Caption, VectorIndex}, controls::events::{EventProcessStatus, Event}, input::Key, graphics::Surface, system::Theme};
 
 use super::{MenuBarItem, Menu};
 
@@ -7,6 +7,8 @@ pub(crate) struct MenuBar {
     x: i32,
     y: i32,
     width: u32,
+    opened_item: VectorIndex,
+    hovered_item: VectorIndex,
 }
 
 impl MenuBar {
@@ -76,8 +78,8 @@ impl MenuBar {
     }
 
     fn close(&mut self) {
-        // this->OpenedItem  = NO_ITEM_SELECTED;
-        // this->HoveredItem = NO_ITEM_SELECTED;
+        self.opened_item = VectorIndex::invalid();
+        self.hovered_item = VectorIndex::invalid();
     }
     fn open(&mut self, index: u32) {
 /*
@@ -93,8 +95,7 @@ impl MenuBar {
     }
     #[inline(always)]
     fn is_opened(&self) -> bool {
-        false
-        //return this->OpenedItem != NO_ITEM_SELECTED;
+        return self.opened_item.is_valid();
     }
     fn on_key_event(&mut self, key: Key) -> EventProcessStatus {
         if self.is_opened() {

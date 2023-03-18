@@ -94,4 +94,11 @@ fn check_index()
     i.add(2,9,Strategy::Rotate);
     assert_eq!(i.index(),7);
 
+    i = VectorIndex::with_value(5);
+    assert_eq!(i.in_range(10),true);
+    assert_eq!(i.in_range(6),true);
+    assert_eq!(i.in_range(5),false);
+    assert_eq!(i.in_range(usize::MAX),false);
+
+
 }
