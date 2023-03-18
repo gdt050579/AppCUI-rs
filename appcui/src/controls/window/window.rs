@@ -36,6 +36,15 @@ impl Window {
             title_left_margin: 0,
         }
     }
+    pub fn add<T>(&mut self, control: T)
+    where
+        T: Control + 'static,
+    {
+        // GDT: only for test --> not the final implementation
+        let c = ControlManager::new(control);
+        //let v = c.get_version();
+        self.children.push(c);
+    }
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {

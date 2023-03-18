@@ -24,3 +24,5 @@ pub mod window;
 pub use desktop::Desktop;
 pub use checkbox::CheckBox;
 pub use label::Label;
+pub use window::Window;
+pub use window::WindowFlags;
