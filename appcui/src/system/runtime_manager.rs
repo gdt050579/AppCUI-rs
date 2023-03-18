@@ -3,6 +3,7 @@ use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
 use crate::controls::ControlManager;
 use crate::controls::*;
+use crate::controls::menu::MenuBar;
 use crate::graphics::{Rect, Surface, Size};
 use crate::terminal::*;
 
@@ -13,6 +14,7 @@ pub(crate) struct RuntimeManager {
     root: ControlManager,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
+    menubar: Option<MenuBar>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -31,6 +33,11 @@ impl RuntimeManager {
             tooltip: ToolTip::new(),
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
                 Some(CommandBar::new(width, height))
+            } else {
+                None
+            },
+            menubar: if data.flags.contains(InitializationFlags::Menu) {
+                None
             } else {
                 None
             },
@@ -96,6 +103,9 @@ impl RuntimeManager {
                 .as_ref()
                 .unwrap()
                 .paint(&mut self.surface, &self.theme);
+        }
+        if self.menubar.is_some() {
+            self.menubar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
         }
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);

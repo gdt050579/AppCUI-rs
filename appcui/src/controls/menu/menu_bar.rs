@@ -1,8 +1,8 @@
-use crate::{utils::Caption, controls::events::{EventProcessStatus, Event}, input::Key};
+use crate::{utils::Caption, controls::events::{EventProcessStatus, Event}, input::Key, graphics::Surface, system::Theme};
 
 use super::{MenuBarItem, Menu};
 
-pub(super) struct MenuBar {
+pub(crate) struct MenuBar {
     items: Vec<MenuBarItem>,
     x: i32,
     y: i32,
@@ -141,6 +141,42 @@ impl MenuBar {
     // nothing to process
     return EventProcessStatus::Ignored;      
     }
+
+    pub (crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
+/*
+    renderer.FillHorizontalLine(this->X, this->Y, this->X + Width - 1, ' ', Cfg->Menu.Text.Normal);
+    WriteTextParams params(
+          WriteTextFlags::SingleLine | WriteTextFlags::LeftMargin | WriteTextFlags::RightMargin |
+                WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey,
+          TextAlignament::Left);
+    params.Y = this->Y;
+
+    for (uint32 tr = 0; tr < this->ItemsCount; tr++)
+    {
+        params.X              = this->X + Items[tr]->X + 1;
+        params.HotKeyPosition = Items[tr]->HotKeyOffset;
+
+        if (tr == this->OpenedItem)
+        {
+            params.Color       = Cfg->Menu.Text.PressedOrSelected;
+            params.HotKeyColor = Cfg->Menu.HotKey.PressedOrSelected;
+        }
+        else if (tr == this->HoveredItem)
+        {
+            params.Color       = Cfg->Menu.Text.Hovered;
+            params.HotKeyColor = Cfg->Menu.HotKey.Hovered;
+        }
+        else
+        {
+            params.Color       = Cfg->Menu.Text.Normal;
+            params.HotKeyColor = Cfg->Menu.HotKey.Normal;
+        }
+
+        renderer.WriteText(Items[tr]->Name, params);
+    }
+
+ */        
+    }
 }
 
 /*
@@ -219,36 +255,7 @@ bool MenuBar::OnKeyEvent(Input::Key keyCode)
 }
 void MenuBar::Paint(Graphics::Renderer& renderer)
 {
-    renderer.FillHorizontalLine(this->X, this->Y, this->X + Width - 1, ' ', Cfg->Menu.Text.Normal);
-    WriteTextParams params(
-          WriteTextFlags::SingleLine | WriteTextFlags::LeftMargin | WriteTextFlags::RightMargin |
-                WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey,
-          TextAlignament::Left);
-    params.Y = this->Y;
-
-    for (uint32 tr = 0; tr < this->ItemsCount; tr++)
-    {
-        params.X              = this->X + Items[tr]->X + 1;
-        params.HotKeyPosition = Items[tr]->HotKeyOffset;
-
-        if (tr == this->OpenedItem)
-        {
-            params.Color       = Cfg->Menu.Text.PressedOrSelected;
-            params.HotKeyColor = Cfg->Menu.HotKey.PressedOrSelected;
-        }
-        else if (tr == this->HoveredItem)
-        {
-            params.Color       = Cfg->Menu.Text.Hovered;
-            params.HotKeyColor = Cfg->Menu.HotKey.Hovered;
-        }
-        else
-        {
-            params.Color       = Cfg->Menu.Text.Normal;
-            params.HotKeyColor = Cfg->Menu.HotKey.Normal;
-        }
-
-        renderer.WriteText(Items[tr]->Name, params);
-    }
+    // done
 }
 } // namespace AppCUI::Internal
 
