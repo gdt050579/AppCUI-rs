@@ -1,4 +1,4 @@
-use crate::utils::Caption;
+use crate::{utils::Caption, controls::events::{EventProcessStatus, Event}, input::Key};
 
 use super::{MenuBarItem, Menu};
 
@@ -41,6 +41,106 @@ impl MenuBar {
         self.items.push(MenuBarItem { caption, menu, x: 0 });
         self.update_positions();
     }
+
+    fn on_mouse_pressed(&mut self, x: i32, y: i32)->EventProcessStatus {
+        if let Some(idx) = self.mouse_position_to_index(x, y) {
+            self.open(idx as u32);
+            return EventProcessStatus::Processed;
+        }
+        return EventProcessStatus::Ignored;
+    }
+    fn on_mouse_move(&mut self, x: i32, y: i32)->EventProcessStatus {
+        if let Some(idx) = self.mouse_position_to_index(x, y) {
+
+        }
+        return EventProcessStatus::Ignored;
+/*
+    uint32 idx = MousePositionToItem(x, y);
+    if (idx != this->HoveredItem)
+    {
+        this->HoveredItem = idx;
+        repaint           = true;
+        // if MenuBar is already opened, moving a mouse over another menu will implicetely open that menu
+        if ((this->OpenedItem != NO_ITEM_SELECTED) && (idx != NO_ITEM_SELECTED))
+            Open(idx);
+        return true;
+    }
+    if (y == this->Y)
+    {
+        repaint = false;
+        return true;
+    }
+    return false;
+
+*/        
+    }
+
+    fn close(&mut self) {
+        // this->OpenedItem  = NO_ITEM_SELECTED;
+        // this->HoveredItem = NO_ITEM_SELECTED;
+    }
+    fn open(&mut self, index: u32) {
+/*
+    this->OpenedItem = menuIndex;
+    if (menuIndex < ItemsCount)
+    {
+        Items[menuIndex]->Mnu.Show(this->Parent, this->X + Items[menuIndex]->X, this->Y + 1);
+        // set the owner
+        ((MenuContext*) (Items[menuIndex]->Mnu.Context))->Owner = this;
+    }
+
+ */
+    }
+    #[inline(always)]
+    fn is_opened(&self) -> bool {
+        false
+        //return this->OpenedItem != NO_ITEM_SELECTED;
+    }
+    fn on_key_event(&mut self, key: Key) -> EventProcessStatus {
+        if self.is_opened() {
+/*
+        switch (keyCode)
+        {
+        case Key::Left:
+            if (this->OpenedItem > 0)
+                Open(this->OpenedItem - 1);
+            else
+                Open(this->ItemsCount - 1);
+            return true;
+        case Key::Right:
+            if (this->OpenedItem + 1 < ItemsCount)
+                Open(this->OpenedItem + 1);
+            else
+                Open(0);
+            return true;
+        default:
+            break;
+        }
+
+ */            
+        } else {
+            for (index,item) in self.items.iter().enumerate() {
+                if item.caption.get_hotkey() == key {
+                    self.open(index as u32);
+                    return EventProcessStatus::Processed;
+                }
+            }
+        }
+/*
+
+    // check recursivelly if a shortcut key was not pressed
+    for (uint32 tr = 0; tr < this->ItemsCount; tr++)
+    {
+        if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
+        {
+            Close();
+            return true;
+        }
+    }
+    */
+    // nothing to process
+    return EventProcessStatus::Ignored;      
+    }
 }
 
 /*
@@ -79,20 +179,7 @@ Menu* MenuBar::GetMenu(ItemHandle itemHandle)
 }
 ItemHandle MenuBar::AddMenu(const ConstString& name)
 {
-    CHECK(this->ItemsCount < MenuBar::MAX_ITEMS,
-          ItemHandle{ NO_ITEM_SELECTED },
-          "Too many menu items - max allowed is: %d",
-          MenuBar::MAX_ITEMS);
-    if (!Items[this->ItemsCount])
-        Items[this->ItemsCount] = std::make_unique<MenuBarItem>();
-    auto* i = Items[this->ItemsCount].get();
-    CHECK(i->Name.SetWithHotKey(name, i->HotKeyOffset, i->HotKey, Key::Alt),
-          ItemHandle{ NO_ITEM_SELECTED },
-          "Fail to set Menu name");
-
-    this->ItemsCount++;
-    RecomputePositions();
-    return ItemHandle{ this->ItemsCount - 1 };
+    // done
 }
 void MenuBar::RecomputePositions()
 {
@@ -104,22 +191,7 @@ void MenuBar::SetWidth(uint32 value)
 }
 bool MenuBar::OnMouseMove(int x, int y, bool& repaint)
 {
-    uint32 idx = MousePositionToItem(x, y);
-    if (idx != this->HoveredItem)
-    {
-        this->HoveredItem = idx;
-        repaint           = true;
-        // if MenuBar is already opened, moving a mouse over another menu will implicetely open that menu
-        if ((this->OpenedItem != NO_ITEM_SELECTED) && (idx != NO_ITEM_SELECTED))
-            Open(idx);
-        return true;
-    }
-    if (y == this->Y)
-    {
-        repaint = false;
-        return true;
-    }
-    return false;
+    // done
 }
 uint32 MenuBar::MousePositionToItem(int x, int y)
 {
@@ -127,78 +199,23 @@ uint32 MenuBar::MousePositionToItem(int x, int y)
 }
 void MenuBar::Open(uint32 menuIndex)
 {
-    this->OpenedItem = menuIndex;
-    if (menuIndex < ItemsCount)
-    {
-        Items[menuIndex]->Mnu.Show(this->Parent, this->X + Items[menuIndex]->X, this->Y + 1);
-        // set the owner
-        ((MenuContext*) (Items[menuIndex]->Mnu.Context))->Owner = this;
-    }
+    // done
 }
 bool MenuBar::OnMousePressed(int x, int y, Input::MouseButton /*button*/)
 {
-    uint32 idx = MousePositionToItem(x, y);
-    if (idx != this->OpenedItem)
-    {
-        Open(idx);
-        return true;
-    }
-    return false;
+    // done
 }
 void MenuBar::Close()
 {
-    this->OpenedItem  = NO_ITEM_SELECTED;
-    this->HoveredItem = NO_ITEM_SELECTED;
+    // oone
 }
 bool MenuBar::IsOpened()
 {
-    return this->OpenedItem != NO_ITEM_SELECTED;
+    // done
 }
 bool MenuBar::OnKeyEvent(Input::Key keyCode)
 {
-    if (IsOpened())
-    {
-        switch (keyCode)
-        {
-        case Key::Left:
-            if (this->OpenedItem > 0)
-                Open(this->OpenedItem - 1);
-            else
-                Open(this->ItemsCount - 1);
-            return true;
-        case Key::Right:
-            if (this->OpenedItem + 1 < ItemsCount)
-                Open(this->OpenedItem + 1);
-            else
-                Open(0);
-            return true;
-        default:
-            break;
-        }
-    }
-    else
-    {
-        // if not open - check for hot keys
-        for (uint32 tr = 0; tr < this->ItemsCount; tr++)
-        {
-            if (this->Items[tr]->HotKey == keyCode)
-            {
-                Open(tr);
-                return true;
-            }
-        }
-    }
-    // check recursivelly if a shortcut key was not pressed
-    for (uint32 tr = 0; tr < this->ItemsCount; tr++)
-    {
-        if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
-        {
-            Close();
-            return true;
-        }
-    }
-    // nothing to process
-    return false;
+    // done
 }
 void MenuBar::Paint(Graphics::Renderer& renderer)
 {
