@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use super::{
     menu_button_state::MenuButtonState, menu_item_type::MenuItemType,
     mouse_position_info::MousePositionInfo, MenuItem,

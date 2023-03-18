@@ -2,18 +2,22 @@ use AppCUIProcMacro::AppCUIControl;
 
 use super::DragStatus;
 use super::WindowFlags;
+use super::bar_item::BarItem;
 use crate::controls::events::*;
 use crate::controls::menu::MenuBar;
 use crate::controls::*;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
+use crate::utils::VectorIndex;
 
 #[AppCUIControl(overwrite=OnPaint)]
 pub struct Window {
     title: String,
     flags: WindowFlags,
     menu: Option<MenuBar>,
+    bar_items: Vec<BarItem>,
+    current_bar_item: VectorIndex,
     resize_move_mode: bool,
     drag_status: DragStatus,
     title_max_width: u16,
@@ -34,6 +38,8 @@ impl Window {
             drag_status: DragStatus::None,
             title_max_width: 0,
             title_left_margin: 0,
+            bar_items: Vec::with_capacity(4),
+            current_bar_item: VectorIndex::invalid(),
         }
     }
     pub fn add<T>(&mut self, control: T)
@@ -84,6 +90,9 @@ impl OnPaint for Window {
         surface.draw_rect(Rect::with_size(0, 0, self.get_width(), self.get_height()), line_type, color_border);
 
         // paint bar items
+        for (index,item) in self.bar_items.iter().enumerate() {
+            item.paint(surface, theme);
+        }
         // to be added
 
         // paint title
