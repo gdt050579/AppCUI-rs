@@ -61,6 +61,7 @@ pub struct Theme {
     pub parent_menu: MenuTheme,
     pub window: WindowTheme,
     pub border: ControlCharAttributesState,    
+    pub lines: ControlCharAttributesState,  
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -159,6 +160,14 @@ impl Theme {
             normal: CharAttribute::with_fore_color(Color::Silver),
             focused: CharAttribute::with_fore_color(Color::White),
             hovered: CharAttribute::with_fore_color(Color::Yellow),
+            inactive: CharAttribute::with_fore_color(Color::Gray),
+            pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Magenta),
+        };
+
+        self.lines = ControlCharAttributesState {
+            normal: CharAttribute::with_fore_color(Color::DarkGreen),
+            focused: CharAttribute::with_fore_color(Color::DarkGreen),
+            hovered: CharAttribute::with_fore_color(Color::Gray),
             inactive: CharAttribute::with_fore_color(Color::Gray),
             pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Magenta),
         };
