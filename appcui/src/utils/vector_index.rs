@@ -4,11 +4,11 @@ pub enum Strategy {
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct Index {
+pub(crate) struct VectorIndex {
     value: usize,
 }
 
-impl Index {
+impl VectorIndex {
     const INVALID_INDEX: usize = usize::MAX;
     #[inline(always)]
     pub fn first() -> Self {
@@ -103,7 +103,7 @@ impl Index {
         }
     }
 }
-impl Default for Index {
+impl Default for VectorIndex {
     fn default() -> Self {
         Self {
             value: Self::INVALID_INDEX,

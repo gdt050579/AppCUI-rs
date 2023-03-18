@@ -1,6 +1,6 @@
 use super::KeyValueParser;
 use super::ValueType;
-use super::Index;
+use super::VectorIndex;
 use super::Strategy;
 
 #[test]
@@ -49,15 +49,15 @@ fn check_key_value_parser_text()
 #[test]
 fn check_index()
 {
-    let mut i = Index::first();
+    let mut i = VectorIndex::first();
     assert_eq!(i.index(),0);
-    i = Index::last(6);
+    i = VectorIndex::last(6);
     assert_eq!(i.index(),5);
     i.set(10,5,true);
     assert_eq!(i.index(),4);
     i.set(10,5,false);
     assert_eq!(i.is_valid(),false);
-    i = Index::with_value(3);
+    i = VectorIndex::with_value(3);
     assert_eq!(i.index(),3);
     i.sub(1, 10, Strategy::Clamp);
     assert_eq!(i.index(),2);
@@ -69,10 +69,10 @@ fn check_index()
     assert_eq!(i.index(),0);
     i.sub(1, 10, Strategy::Clamp);
     assert_eq!(i.index(),0);
-    i = Index::with_value(3);
+    i = VectorIndex::with_value(3);
     i.sub(125, 10, Strategy::Clamp);
     assert_eq!(i.index(),0);
-    i = Index::with_value(3);
+    i = VectorIndex::with_value(3);
     i.sub(4, 10, Strategy::Rotate);
     assert_eq!(i.index(),9);
     i.sub(4, 10, Strategy::Rotate);
