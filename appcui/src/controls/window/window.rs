@@ -16,6 +16,8 @@ pub struct Window {
     menu: Option<MenuBar>,
     resize_move_mode: bool,
     drag_status: DragStatus,
+    title_max_width: u16,
+    title_left_margin: i32,
 }
 
 impl Window {
@@ -30,6 +32,8 @@ impl Window {
             menu: None,
             resize_move_mode: false,
             drag_status: DragStatus::None,
+            title_max_width: 0,
+            title_left_margin: 0,
         }
     }
 }
@@ -66,18 +70,29 @@ impl OnPaint for Window {
             color_border = theme.border.normal;
             line_type = LineType::Single;
         }
+    
+        surface.clear(Character::with_attributes(' ', color_window));
+        surface.draw_rect(Rect::with_size(0, 0, self.get_width(), self.get_height()), line_type, color_border);
+
+        // paint bar items
+        // to be added
+
+        // paint title
+        if self.title_max_width >= 2 {
+            let mut format = TextFormat::single_line(self.title_left_margin, 0, color_title, TextAlignament::Center);
+            format.width = Some(self.title_max_width);
+            surface.write_text(self.title.as_str(), &format);
+        }
+        // paint the menu
+        if self.menu.is_some() {
+            self.menu.as_ref().unwrap().paint(surface, theme);
+        }
     }
     /*
        CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, );
        ColorPair colorTitle, colorWindow, colorBorder, colorStartEndSeparators, tmpCol, tmpHK;
        LineType lineType;
 
-
-       const auto sepColor = Members->Focused ? Members->Cfg->Lines.Normal : Members->Cfg->Lines.Inactive;
-
-
-       renderer.Clear(' ', colorWindow);
-       renderer.DrawRectSize(0, 0, Members->Layout.Width, Members->Layout.Height, colorBorder, lineType);
 
        auto* btn = Members->ControlBar.Items;
        for (uint32 tr = 0; tr < Members->ControlBar.Count; tr++, btn++)
@@ -239,24 +254,5 @@ impl OnPaint for Window {
                    renderer.WriteCharacter(btn->X + btn->Size, btn->Y, '|', sepColor);
            }
        }
-
-       // Title
-       if (Members->TitleMaxWidth >= 2)
-       {
-           WriteTextParams params(
-                 WriteTextFlags::SingleLine | WriteTextFlags::ClipToWidth | WriteTextFlags::FitTextToWidth |
-                       WriteTextFlags::OverwriteColors | WriteTextFlags::LeftMargin | WriteTextFlags::RightMargin,
-                 TextAlignament::Center);
-           params.X     = Members->TitleLeftMargin;
-           params.Y     = 0;
-           params.Color = colorTitle;
-           params.Width = Members->TitleMaxWidth;
-           renderer.WriteText(Members->Text, params);
-       }
-       // menu
-       if (Members->menu)
-           Members->menu->Paint(renderer);
-
-
     */
 }
