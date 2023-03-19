@@ -1,6 +1,12 @@
-use crate::{utils::{Caption, VectorIndex, Strategy}, controls::events::{EventProcessStatus, Event}, input::{Key, KeyCode, KeyModifier}, graphics::Surface, system::Theme};
+use crate::{
+    controls::events::{Event, EventProcessStatus},
+    graphics::{Character, Surface, TextFormat, TextAlignament},
+    input::{Key, KeyCode, KeyModifier},
+    system::Theme,
+    utils::{Caption, Strategy, VectorIndex},
+};
 
-use super::{MenuBarItem, Menu};
+use super::{Menu, MenuBarItem};
 
 pub(crate) struct MenuBar {
     items: Vec<MenuBarItem>,
@@ -39,44 +45,42 @@ impl MenuBar {
         self.width = width;
         self.update_positions();
     }
-    pub (crate) fn add(&mut self, menu: Menu, caption: Caption) {
-        self.items.push(MenuBarItem { caption, menu, x: 0 });
+    pub(crate) fn add(&mut self, menu: Menu, caption: Caption) {
+        self.items.push(MenuBarItem {
+            caption,
+            menu,
+            x: 0,
+        });
         self.update_positions();
     }
 
-    fn on_mouse_pressed(&mut self, x: i32, y: i32)->EventProcessStatus {
+    fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
         if let Some(idx) = self.mouse_position_to_index(x, y) {
             self.open(VectorIndex::from(idx));
             return EventProcessStatus::Processed;
         }
         return EventProcessStatus::Ignored;
     }
-    fn on_mouse_move(&mut self, x: i32, y: i32)->EventProcessStatus {
+    fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
         if let Some(idx) = self.mouse_position_to_index(x, y) {
             if self.hovered_item.index() != idx {
                 self.hovered_item = VectorIndex::from(idx);
+                // if MenuBar is already opened, moving a mouse over another menu will implicetely open that menu
+                if self.opened_item.is_valid() {
+                    self.open(self.hovered_item);
+                }
+                return EventProcessStatus::Processed;
+            } else {
+                // the same index (and a valid one)
+                return EventProcessStatus::Cancel;
+            }
+        } else {
+            if self.hovered_item.is_valid() {
+                self.hovered_item = VectorIndex::invalid();
+                return EventProcessStatus::Update;
             }
         }
         return EventProcessStatus::Ignored;
-/*
-    uint32 idx = MousePositionToItem(x, y);
-    if (idx != this->HoveredItem)
-    {
-        this->HoveredItem = idx;
-        repaint           = true;
-        // if MenuBar is already opened, moving a mouse over another menu will implicetely open that menu
-        if ((this->OpenedItem != NO_ITEM_SELECTED) && (idx != NO_ITEM_SELECTED))
-            Open(idx);
-        return true;
-    }
-    if (y == this->Y)
-    {
-        repaint = false;
-        return true;
-    }
-    return false;
-
-*/        
     }
 
     fn close(&mut self) {
@@ -114,7 +118,7 @@ impl MenuBar {
                 return EventProcessStatus::Processed;
             }
         } else {
-            for (index,item) in self.items.iter().enumerate() {
+            for (index, item) in self.items.iter().enumerate() {
                 if item.caption.get_hotkey() == key {
                     self.open(VectorIndex::from(index));
                     return EventProcessStatus::Processed;
@@ -127,74 +131,51 @@ impl MenuBar {
             // {
             //     Close();
             //     return true;
-            // }           
-        } 
+            // }
+        }
 
-    // nothing to process
-    return EventProcessStatus::Ignored;      
+        // nothing to process
+        return EventProcessStatus::Ignored;
     }
 
-    pub (crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
-/*
-    renderer.FillHorizontalLine(this->X, this->Y, this->X + Width - 1, ' ', Cfg->Menu.Text.Normal);
-    WriteTextParams params(
-          WriteTextFlags::SingleLine | WriteTextFlags::LeftMargin | WriteTextFlags::RightMargin |
-                WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey,
-          TextAlignament::Left);
-    params.Y = this->Y;
-
-    for (uint32 tr = 0; tr < this->ItemsCount; tr++)
-    {
-        params.X              = this->X + Items[tr]->X + 1;
-        params.HotKeyPosition = Items[tr]->HotKeyOffset;
-
-        if (tr == this->OpenedItem)
-        {
-            params.Color       = Cfg->Menu.Text.PressedOrSelected;
-            params.HotKeyColor = Cfg->Menu.HotKey.PressedOrSelected;
+    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
+        surface.fill_horizontal_line_with_size(
+            self.x,
+            self.y,
+            self.width,
+            Character::with_attributes(' ', theme.text.normal),
+        );
+        let mut format =
+            TextFormat::single_line(0, self.y, theme.text.normal, TextAlignament::Left);
+            let open_idx = self.opened_item.index();
+            let hover_idx = self.hovered_item.index();
+        for (index,item) in self.items.iter().enumerate() {
+            format.x = self.x + item.x + 1;
+            format.hotkey_pos = item.caption.get_hotkey_pos();
+            format.chars_count = Some(item.caption.get_chars_count() as u16);
+            format.char_attr = match () {
+                _ if index==open_idx => theme.menu.text.pressed_or_selectd,
+                _ if index==hover_idx => theme.menu.text.hovered,
+                _ => theme.menu.text.normal,
+            };
+            if item.caption.has_hotkey() {
+                format.hotkey_attr = Some(match () {
+                    _ if index==open_idx => theme.menu.hotkey.pressed_or_selectd,
+                    _ if index==hover_idx => theme.menu.hotkey.hovered,
+                    _ => theme.menu.hotkey.normal,
+                });
+            }
+            surface.write_text(item.caption.get_text(), &format);
+            //GDT: spaces around the text are missing (to be fixed)
         }
-        else if (tr == this->HoveredItem)
-        {
-            params.Color       = Cfg->Menu.Text.Hovered;
-            params.HotKeyColor = Cfg->Menu.HotKey.Hovered;
-        }
-        else
-        {
-            params.Color       = Cfg->Menu.Text.Normal;
-            params.HotKeyColor = Cfg->Menu.HotKey.Normal;
-        }
-
-        renderer.WriteText(Items[tr]->Name, params);
-    }
-
- */        
     }
 }
 
 /*
 
-
-#include "ControlContext.hpp"
-
-namespace AppCUI::Internal
-{
-constexpr uint32 NO_ITEM_SELECTED = 0xFFFFFFFFU;
-
-MenuBarItem::MenuBarItem()
-{
-    this->HotKey       = Input::Key::None;
-    this->HotKeyOffset = Graphics::CharacterBuffer::INVALID_HOTKEY_OFFSET;
-    this->X            = 0;
-}
 MenuBar::MenuBar(Controls::Control* parent, int x, int y)
 {
-    this->ItemsCount  = 0;
-    this->Width       = 0;
-    this->OpenedItem  = NO_ITEM_SELECTED;
-    this->HoveredItem = NO_ITEM_SELECTED;
-    this->Cfg         = Application::GetAppConfig();
-    this->X           = x;
-    this->Y           = y;
+
     this->Parent      = parent;
 }
 Menu* MenuBar::GetMenu(ItemHandle itemHandle)
@@ -205,51 +186,6 @@ Menu* MenuBar::GetMenu(ItemHandle itemHandle)
           (uint32) itemHandle);
     return &Items[(uint32) itemHandle]->Mnu;
 }
-ItemHandle MenuBar::AddMenu(const ConstString& name)
-{
-    // done
-}
-void MenuBar::RecomputePositions()
-{
-    // done
-}
-void MenuBar::SetWidth(uint32 value)
-{
-    // done
-}
-bool MenuBar::OnMouseMove(int x, int y, bool& repaint)
-{
-    // done
-}
-uint32 MenuBar::MousePositionToItem(int x, int y)
-{
-    // done
-}
-void MenuBar::Open(uint32 menuIndex)
-{
-    // done
-}
-bool MenuBar::OnMousePressed(int x, int y, Input::MouseButton /*button*/)
-{
-    // done
-}
-void MenuBar::Close()
-{
-    // oone
-}
-bool MenuBar::IsOpened()
-{
-    // done
-}
-bool MenuBar::OnKeyEvent(Input::Key keyCode)
-{
-    // done
-}
-void MenuBar::Paint(Graphics::Renderer& renderer)
-{
-    // done
-}
-} // namespace AppCUI::Internal
 
 
 */
