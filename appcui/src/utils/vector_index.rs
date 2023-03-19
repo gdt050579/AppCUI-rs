@@ -114,3 +114,13 @@ impl Default for VectorIndex {
         }
     }
 }
+impl From<usize> for VectorIndex {
+    fn from(value: usize) -> Self {
+        VectorIndex { value }
+    }
+}
+impl From<u32> for VectorIndex {
+    fn from(value: u32) -> Self {
+        VectorIndex { value: value as usize }
+    }
+}

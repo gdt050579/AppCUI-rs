@@ -1,4 +1,4 @@
-use crate::{utils::{Caption, VectorIndex}, controls::events::{EventProcessStatus, Event}, input::Key, graphics::Surface, system::Theme};
+use crate::{utils::{Caption, VectorIndex, Strategy}, controls::events::{EventProcessStatus, Event}, input::{Key, KeyCode, KeyModifier}, graphics::Surface, system::Theme};
 
 use super::{MenuBarItem, Menu};
 
@@ -46,14 +46,16 @@ impl MenuBar {
 
     fn on_mouse_pressed(&mut self, x: i32, y: i32)->EventProcessStatus {
         if let Some(idx) = self.mouse_position_to_index(x, y) {
-            self.open(idx as u32);
+            self.open(VectorIndex::from(idx));
             return EventProcessStatus::Processed;
         }
         return EventProcessStatus::Ignored;
     }
     fn on_mouse_move(&mut self, x: i32, y: i32)->EventProcessStatus {
         if let Some(idx) = self.mouse_position_to_index(x, y) {
-
+            if self.hovered_item.index() != idx {
+                self.hovered_item = VectorIndex::from(idx);
+            }
         }
         return EventProcessStatus::Ignored;
 /*
@@ -81,17 +83,13 @@ impl MenuBar {
         self.opened_item = VectorIndex::invalid();
         self.hovered_item = VectorIndex::invalid();
     }
-    fn open(&mut self, index: u32) {
-/*
-    this->OpenedItem = menuIndex;
-    if (menuIndex < ItemsCount)
-    {
-        Items[menuIndex]->Mnu.Show(this->Parent, this->X + Items[menuIndex]->X, this->Y + 1);
-        // set the owner
-        ((MenuContext*) (Items[menuIndex]->Mnu.Context))->Owner = this;
-    }
-
- */
+    fn open(&mut self, index: VectorIndex) {
+        self.opened_item = index;
+        if index.in_range(self.items.len()) {
+            // Items[menuIndex]->Mnu.Show(this->Parent, this->X + Items[menuIndex]->X, this->Y + 1);
+            // // set the owner
+            // ((MenuContext*) (Items[menuIndex]->Mnu.Context))->Owner = this;
+        }
     }
     #[inline(always)]
     fn is_opened(&self) -> bool {
@@ -99,46 +97,39 @@ impl MenuBar {
     }
     fn on_key_event(&mut self, key: Key) -> EventProcessStatus {
         if self.is_opened() {
-/*
-        switch (keyCode)
-        {
-        case Key::Left:
-            if (this->OpenedItem > 0)
-                Open(this->OpenedItem - 1);
-            else
-                Open(this->ItemsCount - 1);
-            return true;
-        case Key::Right:
-            if (this->OpenedItem + 1 < ItemsCount)
-                Open(this->OpenedItem + 1);
-            else
-                Open(0);
-            return true;
-        default:
-            break;
-        }
-
- */            
+            if (key.code == KeyCode::Left) && (key.modifier == KeyModifier::None) {
+                let mut idx = self.opened_item;
+                idx.sub(1, self.items.len(), Strategy::Rotate);
+                if idx.is_valid() {
+                    self.open(idx);
+                }
+                return EventProcessStatus::Processed;
+            }
+            if (key.code == KeyCode::Right) && (key.modifier == KeyModifier::None) {
+                let mut idx = self.opened_item;
+                idx.add(1, self.items.len(), Strategy::Rotate);
+                if idx.is_valid() {
+                    self.open(idx);
+                }
+                return EventProcessStatus::Processed;
+            }
         } else {
             for (index,item) in self.items.iter().enumerate() {
                 if item.caption.get_hotkey() == key {
-                    self.open(index as u32);
+                    self.open(VectorIndex::from(index));
                     return EventProcessStatus::Processed;
                 }
             }
         }
-/*
+        // check recursivelly if a shortcut key was not pressed
+        for item in &self.items {
+            // if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
+            // {
+            //     Close();
+            //     return true;
+            // }           
+        } 
 
-    // check recursivelly if a shortcut key was not pressed
-    for (uint32 tr = 0; tr < this->ItemsCount; tr++)
-    {
-        if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
-        {
-            Close();
-            return true;
-        }
-    }
-    */
     // nothing to process
     return EventProcessStatus::Ignored;      
     }
