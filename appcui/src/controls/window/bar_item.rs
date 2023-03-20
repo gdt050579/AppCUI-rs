@@ -79,16 +79,20 @@ impl BarItem {
             && ((self.status & (StatusFlags::Visible | StatusFlags::Hidden))
                 == StatusFlags::Visible)
     }
-    fn paint_hotkey(&self, surface: &mut Surface, theme: &Theme, paint_data: &BarItemPaintData) {
+    fn paint_hotkey(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        paint_data: &BarItemPaintData,
+    ) -> bool {
         surface.write_char(
             self.x,
             self.y,
             Character::with_attributes('[', paint_data.sep_attr),
         );
-        let attr = if paint_data.focused {
-            theme.text.normal
-        } else {
-            theme.text.inactive
+        let attr = match paint_data.focused {
+            true => theme.text.normal,
+            false => theme.text.inactive,
         };
         surface.write_string(self.x + 1, self.y, self.text.get_text(), attr, false);
         surface.write_char(
@@ -96,17 +100,22 @@ impl BarItem {
             self.y,
             Character::with_attributes(']', paint_data.sep_attr),
         );
+        return false;
     }
-    fn paint_tag(&self, surface: &mut Surface, theme: &Theme, paint_data: &BarItemPaintData) {
+    fn paint_tag(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        paint_data: &BarItemPaintData,
+    ) -> bool {
         surface.write_char(
             self.x,
             self.y,
             Character::with_attributes('[', paint_data.sep_attr),
         );
-        let attr = if paint_data.focused {
-            theme.text.enphasized_2
-        } else {
-            theme.text.inactive
+        let attr = match paint_data.focused {
+            true => theme.text.enphasized_2,
+            false => theme.text.inactive,
         };
         surface.write_string(self.x + 1, self.y, self.text.get_text(), attr, false);
         surface.write_char(
@@ -114,6 +123,20 @@ impl BarItem {
             self.y,
             Character::with_attributes(']', paint_data.sep_attr),
         );
+        return false;
+    }
+    fn paint_text(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        paint_data: &BarItemPaintData,
+    ) -> bool {
+        let attr = match paint_data.focused {
+            true => theme.text.normal,
+            false => theme.text.inactive,
+        };
+        surface.write_string(self.x + 1, self.y, self.text.get_text(), attr, false);
+        return true;
     }
     pub(super) fn paint(
         &self,
@@ -128,7 +151,7 @@ impl BarItem {
             BarItemLayout::TopLeft | BarItemLayout::BottomLeft => true,
             _ => false,
         };
-        match self.item_type {
+        let draw_separators = match self.item_type {
             BarItemType::HotKeY => self.paint_hotkey(surface, theme, paint_data),
             BarItemType::CloseButton => todo!(),
             BarItemType::MaximizeRestoreButton => todo!(),
@@ -137,7 +160,36 @@ impl BarItem {
             BarItemType::Button => todo!(),
             BarItemType::SingleChoice => todo!(),
             BarItemType::CheckBox => todo!(),
-            BarItemType::Text => todo!(),
+            BarItemType::Text => self.paint_text(surface, theme, paint_data),
+        };
+        // separators
+        if draw_separators {
+            if self.status.contains(StatusFlags::LeftGroupMarker) {
+                surface.write_char(
+                    self.x - 1,
+                    self.y,
+                    Character::with_attributes('[', paint_data.sep_attr),
+                );
+            } else if from_left {
+                surface.write_char(
+                    self.x - 1,
+                    self.y,
+                    Character::with_attributes('|', paint_data.sep_attr),
+                );
+            }
+            if self.status.contains(StatusFlags::RightGroupMarker) {
+                surface.write_char(
+                    self.x + (self.width as i32),
+                    self.y,
+                    Character::with_attributes(']', paint_data.sep_attr),
+                );
+            } else if !from_left {
+                surface.write_char(
+                    self.x + (self.width as i32),
+                    self.y,
+                    Character::with_attributes('|', paint_data.sep_attr),
+                );
+            }
         }
         /*
                 auto* btn = Members->ControlBar.Items;
@@ -272,23 +324,10 @@ impl BarItem {
                        drawSeparators = true;
                        break;
                    case WindowBarItemType::Text:
-                       tmpCol = Members->Focused ? Members->Cfg->Text.Normal : Members->Cfg->Text.Inactive;
-                       renderer.WriteSingleLineText(btn->X, btn->Y, btn->Text, tmpCol);
-                       drawSeparators = true;
+                       // done
                        break;
                    }
-                   // separators
-                   if (drawSeparators)
-                   {
-                       if ((uint8) btn->Flags & (uint8) WindowBarItemFlags::LeftGroupMarker)
-                           renderer.WriteCharacter(btn->X - 1, btn->Y, '[', colorStartEndSeparators);
-                       else if (fromLeft)
-                           renderer.WriteCharacter(btn->X - 1, btn->Y, '|', sepColor);
-                       if ((uint8) btn->Flags & (uint8) WindowBarItemFlags::RightGroupMarker)
-                           renderer.WriteCharacter(btn->X + btn->Size, btn->Y, ']', colorStartEndSeparators);
-                       else if (!fromLeft)
-                           renderer.WriteCharacter(btn->X + btn->Size, btn->Y, '|', sepColor);
-                   }
+
                }
 
 
