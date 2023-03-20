@@ -97,6 +97,24 @@ impl BarItem {
             Character::with_attributes(']', paint_data.sep_attr),
         );
     }
+    fn paint_tag(&self, surface: &mut Surface, theme: &Theme, paint_data: &BarItemPaintData) {
+        surface.write_char(
+            self.x,
+            self.y,
+            Character::with_attributes('[', paint_data.sep_attr),
+        );
+        let attr = if paint_data.focused {
+            theme.text.enphasized_2
+        } else {
+            theme.text.inactive
+        };
+        surface.write_string(self.x + 1, self.y, self.text.get_text(), attr, false);
+        surface.write_char(
+            self.x + (self.width as i32) - 1,
+            self.y,
+            Character::with_attributes(']', paint_data.sep_attr),
+        );
+    }
     pub(super) fn paint(
         &self,
         surface: &mut Surface,
@@ -115,7 +133,7 @@ impl BarItem {
             BarItemType::CloseButton => todo!(),
             BarItemType::MaximizeRestoreButton => todo!(),
             BarItemType::WindowResize => todo!(),
-            BarItemType::Tag => todo!(),
+            BarItemType::Tag => self.paint_tag(surface, theme, paint_data),
             BarItemType::Button => todo!(),
             BarItemType::SingleChoice => todo!(),
             BarItemType::CheckBox => todo!(),
@@ -181,10 +199,7 @@ impl BarItem {
                             // done
                        break;
                    case WindowBarItemType::Tag:
-                       renderer.WriteCharacter(btn->X, btn->Y, '[', colorStartEndSeparators);
-                       tmpCol = Members->Focused ? Members->Cfg->Text.Emphasized2 : Members->Cfg->Text.Inactive;
-                       renderer.WriteSingleLineText(btn->X + 1, btn->Y, btn->Text, tmpCol);
-                       renderer.WriteCharacter(btn->X + btn->Size - 1, btn->Y, ']', colorStartEndSeparators);
+                            // done
                        break;
 
                    case WindowBarItemType::Button:
