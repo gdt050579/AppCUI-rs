@@ -4,7 +4,6 @@ use crate::{utils::Caption, graphics::Surface, system::Theme};
 
 #[repr(u8)]
 pub(super) enum BarItemType {
-    None,
     HotKeY,
     CloseButton,
     MaximizeRestoreButton,
@@ -70,6 +69,9 @@ impl BarItem {
             && ((self.status & (StatusFlags::Visible | StatusFlags::Hidden))
                 == StatusFlags::Visible)
     }
+    fn paint_hotkey(&self, surface: &mut Surface, theme: &Theme) {
+
+    }
     pub (super) fn paint(&self, surface: &mut Surface, theme: &Theme) {
         if (self.is_visible()==false) || (self.is_hidden()) {
             return;
@@ -78,14 +80,21 @@ impl BarItem {
             BarItemLayout::TopLeft | BarItemLayout::BottomLeft => true,
             _ => false 
         };
+        match self.item_type {
+            BarItemType::HotKeY => self.paint_hotkey(surface, theme),
+            BarItemType::CloseButton => todo!(),
+            BarItemType::MaximizeRestoreButton => todo!(),
+            BarItemType::WindowResize => todo!(),
+            BarItemType::Tag => todo!(),
+            BarItemType::Button => todo!(),
+            BarItemType::SingleChoice => todo!(),
+            BarItemType::CheckBox => todo!(),
+            BarItemType::Text => todo!(),
+        }
 /*  
         auto* btn = Members->ControlBar.Items;
 
        {
-           if ((!btn->IsVisible()) || (btn->IsHidden()))
-               continue;
-           bool fromLeft = (btn->Layout == WindowControlsBarLayout::TopBarFromLeft) ||
-                           (btn->Layout == WindowControlsBarLayout::BottomBarFromLeft);
            bool showChecked        = false;
            colorStartEndSeparators = colorBorder;
            auto state              = ControlState::Normal;
