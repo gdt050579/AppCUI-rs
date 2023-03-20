@@ -3,6 +3,7 @@ use AppCUIProcMacro::AppCUIControl;
 use super::DragStatus;
 use super::WindowFlags;
 use super::bar_item::BarItem;
+use super::bar_item::BarItemPaintData;
 use crate::controls::events::*;
 use crate::controls::menu::MenuBar;
 use crate::controls::*;
@@ -89,9 +90,12 @@ impl OnPaint for Window {
         surface.clear(Character::with_attributes(' ', color_window));
         surface.draw_rect(Rect::with_size(0, 0, self.get_width(), self.get_height()), line_type, color_border);
 
+        let mut paint_data = BarItemPaintData{ focused: self.has_focus(), current: false, sep_attr:color_sep };
+        let current_bar_index = self.current_bar_item.index();
         // paint bar items
         for (index,item) in self.bar_items.iter().enumerate() {
-            item.paint(surface, theme);
+            paint_data.current = index==current_bar_index;
+            item.paint(surface, theme, &paint_data);
         }
 
         // paint title
