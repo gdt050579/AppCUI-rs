@@ -1,9 +1,9 @@
 use AppCUIProcMacro::AppCUIControl;
 
-use super::DragStatus;
-use super::WindowFlags;
 use super::bar_item::BarItem;
 use super::bar_item::BarItemPaintData;
+use super::DragStatus;
+use super::WindowFlags;
 use crate::controls::events::*;
 use crate::controls::menu::MenuBar;
 use crate::controls::*;
@@ -74,7 +74,7 @@ impl OnPaint for Window {
             color_sep = theme.lines.normal;
             color_border = match self.drag_status {
                 DragStatus::None => theme.border.focused,
-                _ => theme.border.pressed_or_selectd
+                _ => theme.border.pressed_or_selectd,
             };
             line_type = match self.drag_status {
                 DragStatus::None => LineType::Double,
@@ -86,21 +86,36 @@ impl OnPaint for Window {
             color_border = theme.border.normal;
             line_type = LineType::Single;
         }
-    
-        surface.clear(Character::with_attributes(' ', color_window));
-        surface.draw_rect(Rect::with_size(0, 0, self.get_width(), self.get_height()), line_type, color_border);
 
-        let mut paint_data = BarItemPaintData{ focused: self.has_focus(), current: false, sep_attr:color_sep };
+        surface.clear(Character::with_attributes(' ', color_window));
+        surface.draw_rect(
+            Rect::with_size(0, 0, self.get_width(), self.get_height()),
+            line_type,
+            color_border,
+        );
+
+        let mut paint_data = BarItemPaintData {
+            focused: self.has_focus(),
+            current: false,
+            maximized: todo!(),
+            is_current_item_pressed: todo!(),
+            sep_attr: color_sep,
+        };
         let current_bar_index = self.current_bar_item.index();
         // paint bar items
-        for (index,item) in self.bar_items.iter().enumerate() {
-            paint_data.current = index==current_bar_index;
+        for (index, item) in self.bar_items.iter().enumerate() {
+            paint_data.current = index == current_bar_index;
             item.paint(surface, theme, &paint_data);
         }
 
         // paint title
         if self.title_max_width >= 2 {
-            let mut format = TextFormat::single_line(self.title_left_margin, 0, color_title, TextAlignament::Center);
+            let mut format = TextFormat::single_line(
+                self.title_left_margin,
+                0,
+                color_title,
+                TextAlignament::Center,
+            );
             format.width = Some(self.title_max_width);
             surface.write_text(self.title.as_str(), &format);
         }

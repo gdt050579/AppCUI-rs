@@ -1,7 +1,7 @@
 use EnumBitFlags::EnumBitFlags;
 
 use crate::{
-    graphics::{CharAttribute, Character, Surface},
+    graphics::{CharAttribute, Character, SpecialChar, Surface},
     system::Theme,
     utils::Caption,
 };
@@ -9,6 +9,8 @@ use crate::{
 pub(super) struct BarItemPaintData {
     pub(super) focused: bool,
     pub(super) current: bool,
+    pub(super) maximized: bool,
+    pub(super) is_current_item_pressed: bool,
     pub(super) sep_attr: CharAttribute,
 }
 
@@ -32,6 +34,41 @@ enum BarItemLayout {
     BottomLeft,
     TopRight,
     BottomRight,
+}
+
+enum SymbolAttrState {
+    Hovered,
+    Normal,
+    Pressed,
+    Inactive,
+}
+impl SymbolAttrState {
+    fn new(paint_data: &BarItemPaintData) -> Self {
+        if paint_data.current {
+            if paint_data.is_current_item_pressed {
+                SymbolAttrState::Pressed
+            } else {
+                // showChecked = ((Members->Focused) && (btn->IsChecked()));
+                SymbolAttrState::Hovered
+            }
+        } else {
+            if paint_data.focused {
+                // showChecked = btn->IsChecked();
+                SymbolAttrState::Normal
+            } else {
+                SymbolAttrState::Inactive
+            }
+        }
+    }
+    #[inline(always)]
+    fn get_attr(&self, theme: &Theme, default_attr: CharAttribute) -> CharAttribute {
+        match self {
+            SymbolAttrState::Hovered => theme.symbol.hovered,
+            SymbolAttrState::Normal => default_attr,
+            SymbolAttrState::Pressed => theme.symbol.pressed,
+            SymbolAttrState::Inactive => theme.symbol.inactive,
+        }
+    }
 }
 
 #[EnumBitFlags(bits = 8)]
@@ -79,56 +116,7 @@ impl BarItem {
             && ((self.status & (StatusFlags::Visible | StatusFlags::Hidden))
                 == StatusFlags::Visible)
     }
-    #[inline(always)]
-    fn get_symbol_color(paint_data: &BarItemPaintData, theme: &Theme, default_attr: CharAttribute)->CharAttribute
-    {
-        if paint_data.current {
-/*
-                   if (Members->ControlBar.Current == tr)
-                   {
-                       // hover or pressed
-                       if (Members->ControlBar.IsCurrentItemPressed)
-                           state = ControlState::PressedOrSelected;
-                       else
-                       {
-                           showChecked = ((Members->Focused) && (btn->IsChecked()));
-                           state       = ControlState::Hovered;
-                       }
-                   }
 
- */
-        } else {
-            if paint_data.focused { default_attr } else { theme.symbol.inactive }
-/*
-                       if (Members->Focused)
-                       {
-                           showChecked = btn->IsChecked();
-                           state       = ControlState::Focused;
-                       }
-                       else
-                           state = ControlState::Inactive;
-
- */
-        }
-        /*
-        switch (state)
-        {
-        case ControlState::Hovered:
-            return Cfg->Symbol.Hovered;
-        case ControlState::PressedOrSelected:
-            return Cfg->Symbol.Pressed;
-        case ControlState::Inactive:
-            return Cfg->Symbol.Inactive;
-        default:
-            return col;
-        }
-
-
-
-        */
-    }
-
-    
     fn paint_hotkey(
         &self,
         surface: &mut Surface,
@@ -188,6 +176,52 @@ impl BarItem {
         surface.write_string(self.x + 1, self.y, self.text.get_text(), attr, false);
         return true;
     }
+    fn paint_close_button(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        paint_data: &BarItemPaintData,
+    ) -> bool {
+        let st = SymbolAttrState::new(paint_data);
+        surface.write_string(
+            self.x,
+            self.y,
+            "[ ]",
+            st.get_attr(theme, paint_data.sep_attr),
+            false,
+        );
+        surface.write_char(
+            self.x + 1,
+            self.y,
+            Character::with_attributes('x', st.get_attr(theme, theme.symbol.close)),
+        );
+        return false;
+    }
+    fn paint_maxrestore_button(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        paint_data: &BarItemPaintData,
+    ) -> bool {
+        let st = SymbolAttrState::new(paint_data);
+        surface.write_string(
+            self.x,
+            self.y,
+            "[ ]",
+            st.get_attr(theme, paint_data.sep_attr),
+            false,
+        );
+        let ch = match paint_data.maximized {
+            true => SpecialChar::ArrowUpDown,
+            false => SpecialChar::ArrowUp,
+        };
+        surface.write_char(
+            self.x + 1,
+            self.y,
+            Character::with_attributes(ch, st.get_attr(theme, theme.symbol.maximized)),
+        );
+        return false;
+    }
     pub(super) fn paint(
         &self,
         surface: &mut Surface,
@@ -197,14 +231,15 @@ impl BarItem {
         if (self.is_visible() == false) || (self.is_hidden()) {
             return;
         }
+
         let from_left = match self.layout {
             BarItemLayout::TopLeft | BarItemLayout::BottomLeft => true,
             _ => false,
         };
         let draw_separators = match self.item_type {
             BarItemType::HotKeY => self.paint_hotkey(surface, theme, paint_data),
-            BarItemType::CloseButton => todo!(),
-            BarItemType::MaximizeRestoreButton => todo!(),
+            BarItemType::CloseButton => self.paint_close_button(surface, theme, paint_data),
+            BarItemType::MaximizeRestoreButton => self.paint_maxrestore_button(surface, theme, paint_data),
             BarItemType::WindowResize => todo!(),
             BarItemType::Tag => self.paint_tag(surface, theme, paint_data),
             BarItemType::Button => todo!(),
@@ -255,10 +290,7 @@ impl BarItem {
                    switch (btn->Type)
                    {
                    case WindowBarItemType::CloseButton:
-                       renderer.WriteSingleLineText(
-                             btn->X, btn->Y, "[ ]", Members->GetSymbolColor(state, colorStartEndSeparators));
-                       renderer.WriteCharacter(
-                             btn->X + 1, btn->Y, 'x', Members->GetSymbolColor(state, Members->Cfg->Symbol.Close));
+                        // done
                        break;
                    case WindowBarItemType::MaximizeRestoreButton:
                        renderer.WriteSingleLineText(
