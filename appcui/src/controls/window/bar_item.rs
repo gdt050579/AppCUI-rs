@@ -79,6 +79,56 @@ impl BarItem {
             && ((self.status & (StatusFlags::Visible | StatusFlags::Hidden))
                 == StatusFlags::Visible)
     }
+    #[inline(always)]
+    fn get_symbol_color(paint_data: &BarItemPaintData, theme: &Theme, default_attr: CharAttribute)->CharAttribute
+    {
+        if paint_data.current {
+/*
+                   if (Members->ControlBar.Current == tr)
+                   {
+                       // hover or pressed
+                       if (Members->ControlBar.IsCurrentItemPressed)
+                           state = ControlState::PressedOrSelected;
+                       else
+                       {
+                           showChecked = ((Members->Focused) && (btn->IsChecked()));
+                           state       = ControlState::Hovered;
+                       }
+                   }
+
+ */
+        } else {
+            if paint_data.focused { default_attr } else { theme.symbol.inactive }
+/*
+                       if (Members->Focused)
+                       {
+                           showChecked = btn->IsChecked();
+                           state       = ControlState::Focused;
+                       }
+                       else
+                           state = ControlState::Inactive;
+
+ */
+        }
+        /*
+        switch (state)
+        {
+        case ControlState::Hovered:
+            return Cfg->Symbol.Hovered;
+        case ControlState::PressedOrSelected:
+            return Cfg->Symbol.Pressed;
+        case ControlState::Inactive:
+            return Cfg->Symbol.Inactive;
+        default:
+            return col;
+        }
+
+
+
+        */
+    }
+
+    
     fn paint_hotkey(
         &self,
         surface: &mut Surface,
@@ -199,29 +249,9 @@ impl BarItem {
                    colorStartEndSeparators = colorBorder;
                    auto state              = ControlState::Normal;
 
-                   if (Members->ControlBar.Current == tr)
-                   {
-                       // hover or pressed
-                       if (Members->ControlBar.IsCurrentItemPressed)
-                           state = ControlState::PressedOrSelected;
-                       else
-                       {
-                           showChecked = ((Members->Focused) && (btn->IsChecked()));
-                           state       = ControlState::Hovered;
-                       }
-                   }
-                   else
-                   {
-                       if (Members->Focused)
-                       {
-                           showChecked = btn->IsChecked();
-                           state       = ControlState::Focused;
-                       }
-                       else
-                           state = ControlState::Inactive;
-                   }
+
                    // bool hoverOrPressed = (state == ControlState::Hovered) || (state == ControlState::PressedOrSelected);
-                   bool drawSeparators = false;
+
                    switch (btn->Type)
                    {
                    case WindowBarItemType::CloseButton:
