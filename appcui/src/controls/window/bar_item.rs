@@ -197,7 +197,7 @@ impl BarItem {
         );
         return false;
     }
-    fn paint_maxrestore_button(
+    fn paint_max_button(
         &self,
         surface: &mut Surface,
         theme: &Theme,
@@ -222,6 +222,25 @@ impl BarItem {
         );
         return false;
     }
+    fn paint_resize_button(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        paint_data: &BarItemPaintData,
+    ) -> bool {
+        if paint_data.focused {
+            let st = SymbolAttrState::new(paint_data);
+            surface.write_char(
+                self.x,
+                self.y,
+                Character::with_attributes(
+                    SpecialChar::BoxBottomRightCornerSingleLine,
+                    st.get_attr(theme, theme.symbol.resize),
+                ),
+            );
+        }
+        return false;
+    }
     pub(super) fn paint(
         &self,
         surface: &mut Surface,
@@ -239,8 +258,8 @@ impl BarItem {
         let draw_separators = match self.item_type {
             BarItemType::HotKeY => self.paint_hotkey(surface, theme, paint_data),
             BarItemType::CloseButton => self.paint_close_button(surface, theme, paint_data),
-            BarItemType::MaximizeRestoreButton => self.paint_maxrestore_button(surface, theme, paint_data),
-            BarItemType::WindowResize => todo!(),
+            BarItemType::MaximizeRestoreButton => self.paint_max_button(surface, theme, paint_data),
+            BarItemType::WindowResize => self.paint_resize_button(surface, theme, paint_data),
             BarItemType::Tag => self.paint_tag(surface, theme, paint_data),
             BarItemType::Button => todo!(),
             BarItemType::SingleChoice => todo!(),
@@ -293,21 +312,10 @@ impl BarItem {
                         // done
                        break;
                    case WindowBarItemType::MaximizeRestoreButton:
-                       renderer.WriteSingleLineText(
-                             btn->X, btn->Y, "[ ]", Members->GetSymbolColor(state, colorStartEndSeparators));
-                       renderer.WriteSpecialCharacter(
-                             btn->X + 1,
-                             btn->Y,
-                             Members->Maximized ? SpecialChars::ArrowUpDown : SpecialChars::ArrowUp,
-                             Members->GetSymbolColor(state, Members->Cfg->Symbol.Maximized));
+                       // done
                        break;
                    case WindowBarItemType::WindowResize:
-                       if (Members->Focused)
-                           renderer.WriteSpecialCharacter(
-                                 btn->X,
-                                 btn->Y,
-                                 SpecialChars::BoxBottomRightCornerSingleLine,
-                                 Members->GetSymbolColor(state, Members->Cfg->Symbol.Resize));
+                        // done
                        break;
                    case WindowBarItemType::HotKeY:
                             // done
