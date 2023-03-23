@@ -1,7 +1,7 @@
 use EnumBitFlags::EnumBitFlags;
 
 use crate::{
-    graphics::{CharAttribute, Character, SpecialChar, Surface},
+    graphics::{CharAttribute, Character, SpecialChar, Surface, TextAlignament, TextFormat},
     system::Theme,
     utils::Caption,
 };
@@ -36,6 +36,7 @@ enum BarItemLayout {
     BottomRight,
 }
 
+#[derive(PartialEq)]
 enum SymbolAttrState {
     Hovered,
     Normal,
@@ -74,34 +75,18 @@ impl SymbolAttrState {
         match self {
             SymbolAttrState::Hovered => theme.button.text.hovered,
             SymbolAttrState::Normal => theme.text.normal,
-            SymbolAttrState::Pressed => theme.button.text.pressed_or_selected,
+            SymbolAttrState::Pressed => theme.button.text.pressed_or_selectd,
             SymbolAttrState::Inactive => theme.text.inactive,
         }
-
-/*
-switch (state)
-                       {
-                       case ControlState::Hovered:
-                           tmpCol = Members->Cfg->Button.Text.Hovered;
-                           tmpHK  = Members->Cfg->Button.Text.Hovered;
-                           break;
-                       case ControlState::Normal:
-                           tmpCol = Members->Cfg->Text.Normal;
-                           tmpHK  = Members->Cfg->Text.HotKey;
-                           break;
-                       case ControlState::Focused:
-                           tmpCol = Members->Cfg->Text.Normal;
-                           tmpHK  = Members->Cfg->Text.HotKey;
-                           break;
-                       case ControlState::PressedOrSelected:
-                           tmpCol = Members->Cfg->Button.Text.PressedOrSelected;
-                           tmpHK  = Members->Cfg->Button.Text.PressedOrSelected;
-                           break;
-                       default:
-                           tmpHK = tmpCol = Members->Cfg->Text.Inactive;
-                           break;
-                       }
- */        
+    }
+    #[inline(always)]
+    fn get_hotkey_attr(&self, theme: &Theme) -> CharAttribute {
+        match self {
+            SymbolAttrState::Hovered => theme.button.text.hovered,
+            SymbolAttrState::Normal => theme.text.hot_key,
+            SymbolAttrState::Pressed => theme.button.text.pressed_or_selectd,
+            SymbolAttrState::Inactive => theme.text.inactive,
+        }
     }
 }
 
@@ -275,6 +260,37 @@ impl BarItem {
         }
         return false;
     }
+    fn paint_button(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        paint_data: &BarItemPaintData,
+    ) -> bool {
+        let st = SymbolAttrState::new(paint_data);
+        let show_checked =
+            paint_data.focused && self.is_checked() && (st != SymbolAttrState::Pressed);
+        let mut format = TextFormat::single_line(
+            self.x,
+            self.y,
+            if show_checked {
+                theme.button.text.pressed_or_selectd
+            } else {
+                st.get_button_attr(theme)
+            },
+            TextAlignament::Left,
+        );
+        format.width = Some(self.text.get_chars_count() as u16);
+        format.hotkey_pos = self.text.get_hotkey_pos();
+        if self.text.has_hotkey() {
+            format.hotkey_attr = Some(if show_checked {
+                theme.button.hotkey.pressed_or_selectd
+            } else {
+                st.get_hotkey_attr(theme)
+            });
+        }
+        surface.write_text(self.text.get_text(), &format);
+        return true;
+    }
     pub(super) fn paint(
         &self,
         surface: &mut Surface,
@@ -295,7 +311,7 @@ impl BarItem {
             BarItemType::MaximizeRestoreButton => self.paint_max_button(surface, theme, paint_data),
             BarItemType::WindowResize => self.paint_resize_button(surface, theme, paint_data),
             BarItemType::Tag => self.paint_tag(surface, theme, paint_data),
-            BarItemType::Button => todo!(),
+            BarItemType::Button => self.paint_button(surface, theme, paint_data),
             BarItemType::SingleChoice => todo!(),
             BarItemType::CheckBox => todo!(),
             BarItemType::Text => self.paint_text(surface, theme, paint_data),
@@ -382,16 +398,7 @@ impl BarItem {
                            tmpHK = tmpCol = Members->Cfg->Text.Inactive;
                            break;
                        }
-                       if (showChecked)
-                           renderer.WriteSingleLineText(
-                                 btn->X,
-                                 btn->Y,
-                                 btn->Text,
-                                 Members->Cfg->Button.Text.PressedOrSelected,
-                                 Members->Cfg->Button.HotKey.PressedOrSelected,
-                                 btn->HotKeyOffset);
-                       else
-                           renderer.WriteSingleLineText(btn->X, btn->Y, btn->Text, tmpCol, tmpHK, btn->HotKeyOffset);
+
                        drawSeparators = true;
                        break;
                    case WindowBarItemType::CheckBox:
