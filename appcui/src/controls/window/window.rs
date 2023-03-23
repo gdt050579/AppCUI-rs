@@ -20,6 +20,7 @@ pub struct Window {
     bar_items: Vec<BarItem>,
     current_bar_item: VectorIndex,
     resize_move_mode: bool,
+    maximized: bool,
     drag_status: DragStatus,
     title_max_width: u16,
     title_left_margin: i32,
@@ -36,6 +37,7 @@ impl Window {
             flags,
             menu: None,
             resize_move_mode: false,
+            maximized: false,
             drag_status: DragStatus::None,
             title_max_width: 0,
             title_left_margin: 0,
@@ -97,7 +99,7 @@ impl OnPaint for Window {
         let mut paint_data = BarItemPaintData {
             focused: self.has_focus(),
             current: false,
-            maximized: todo!(),
+            maximized: self.maximized,
             is_current_item_pressed: todo!(),
             sep_attr: color_sep,
         };
