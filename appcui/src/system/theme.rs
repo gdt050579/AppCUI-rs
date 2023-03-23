@@ -52,6 +52,12 @@ pub struct WindowTheme {
     pub info: CharAttribute,
 }
 #[derive(Default)]
+pub struct ButtonTheme {
+    pub text: ControlCharAttributesState,
+    pub hotkey: ControlCharAttributesState,
+    pub shadow: CharAttribute,
+}
+#[derive(Default)]
 pub struct Theme {
     pub desktop: DesktopTheme,
     pub text: TextTheme,
@@ -62,6 +68,7 @@ pub struct Theme {
     pub window: WindowTheme,
     pub border: ControlCharAttributesState,    
     pub lines: ControlCharAttributesState,  
+    pub button: ButtonTheme,
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -171,6 +178,23 @@ impl Theme {
             inactive: CharAttribute::with_fore_color(Color::Gray),
             pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Magenta),
         };
+
+        self.button.text = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Black, Color::Gray),
+            focused: CharAttribute::with_color(Color::Black, Color::White),
+            hovered: CharAttribute::with_color(Color::Black, Color::Yellow),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Black),
+            pressed_or_selectd: CharAttribute::with_color(Color::Black, Color::Olive),
+        };
+        self.button.hotkey = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::DarkRed, Color::Gray),
+            focused: CharAttribute::with_color(Color::Magenta, Color::White),
+            hovered: CharAttribute::with_color(Color::Magenta, Color::Yellow),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Black),
+            pressed_or_selectd: CharAttribute::with_color(Color::DarkRed, Color::Olive),
+        };
+        self.button.shadow = CharAttribute::with_fore_color(Color::Black);
+
     }
 }
 //         inline void Set(focused, normal, inactive, hovered, pressedOrSelected)

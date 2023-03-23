@@ -69,6 +69,40 @@ impl SymbolAttrState {
             SymbolAttrState::Inactive => theme.symbol.inactive,
         }
     }
+    #[inline(always)]
+    fn get_button_attr(&self, theme: &Theme) -> CharAttribute {
+        match self {
+            SymbolAttrState::Hovered => theme.button.text.hovered,
+            SymbolAttrState::Normal => theme.text.normal,
+            SymbolAttrState::Pressed => theme.button.text.pressed_or_selected,
+            SymbolAttrState::Inactive => theme.text.inactive,
+        }
+
+/*
+switch (state)
+                       {
+                       case ControlState::Hovered:
+                           tmpCol = Members->Cfg->Button.Text.Hovered;
+                           tmpHK  = Members->Cfg->Button.Text.Hovered;
+                           break;
+                       case ControlState::Normal:
+                           tmpCol = Members->Cfg->Text.Normal;
+                           tmpHK  = Members->Cfg->Text.HotKey;
+                           break;
+                       case ControlState::Focused:
+                           tmpCol = Members->Cfg->Text.Normal;
+                           tmpHK  = Members->Cfg->Text.HotKey;
+                           break;
+                       case ControlState::PressedOrSelected:
+                           tmpCol = Members->Cfg->Button.Text.PressedOrSelected;
+                           tmpHK  = Members->Cfg->Button.Text.PressedOrSelected;
+                           break;
+                       default:
+                           tmpHK = tmpCol = Members->Cfg->Text.Inactive;
+                           break;
+                       }
+ */        
+    }
 }
 
 #[EnumBitFlags(bits = 8)]
