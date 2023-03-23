@@ -291,6 +291,40 @@ impl BarItem {
         surface.write_text(self.text.get_text(), &format);
         return true;
     }
+    fn paint_checkbox(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        paint_data: &BarItemPaintData,
+    ) -> bool {
+        let st = SymbolAttrState::new(paint_data);
+        let text_attr = st.get_button_attr(theme);
+        let mut format =
+            TextFormat::single_line(self.x + 2, self.y, text_attr, TextAlignament::Left);
+        format.width = Some(self.text.get_chars_count() as u16);
+        format.hotkey_pos = self.text.get_hotkey_pos();
+        if self.text.has_hotkey() {
+            format.hotkey_attr = Some(st.get_hotkey_attr(theme));
+        }
+        surface.fill_horizontal_line(
+            self.x,
+            self.y,
+            self.x + 1,
+            Character::with_attributes(' ', text_attr),
+        );
+        surface.write_text(self.text.get_text(), &format);
+        if self.is_checked() {
+            surface.write_char(
+                self.x,
+                self.y,
+                Character::with_attributes(
+                    SpecialChar::CheckMark,
+                    st.get_attr(theme, theme.symbol.checked),
+                ),
+            );
+        }
+        return true;
+    }
     pub(super) fn paint(
         &self,
         surface: &mut Surface,
@@ -313,7 +347,7 @@ impl BarItem {
             BarItemType::Tag => self.paint_tag(surface, theme, paint_data),
             BarItemType::Button => self.paint_button(surface, theme, paint_data),
             BarItemType::SingleChoice => self.paint_button(surface, theme, paint_data),
-            BarItemType::CheckBox => todo!(),
+            BarItemType::CheckBox => self.paint_checkbox(surface, theme, paint_data),
             BarItemType::Text => self.paint_text(surface, theme, paint_data),
         };
         // separators
@@ -345,81 +379,6 @@ impl BarItem {
                 );
             }
         }
-        /*
-                auto* btn = Members->ControlBar.Items;
-
-               {
-                   bool showChecked        = false;
-                   colorStartEndSeparators = colorBorder;
-                   auto state              = ControlState::Normal;
-
-
-                   // bool hoverOrPressed = (state == ControlState::Hovered) || (state == ControlState::PressedOrSelected);
-
-                   switch (btn->Type)
-                   {
-                   case WindowBarItemType::CloseButton:
-                        // done
-                       break;
-                   case WindowBarItemType::MaximizeRestoreButton:
-                       // done
-                       break;
-                   case WindowBarItemType::WindowResize:
-                        // done
-                       break;
-                   case WindowBarItemType::HotKeY:
-                            // done
-                       break;
-                   case WindowBarItemType::Tag:
-                            // done
-                       break;
-
-                   case WindowBarItemType::Button:
-                   case WindowBarItemType::SingleChoice:
-                        // done
-                       break;
-                   case WindowBarItemType::CheckBox:
-                       switch (state)
-                       {
-                       case ControlState::Hovered:
-                           tmpCol = Members->Cfg->Button.Text.Hovered;
-                           tmpHK  = Members->Cfg->Button.Text.Hovered;
-                           break;
-                       case ControlState::Normal:
-                           tmpCol = Members->Cfg->Text.Normal;
-                           tmpHK  = Members->Cfg->Text.HotKey;
-                           break;
-                       case ControlState::Focused:
-                           tmpCol = Members->Cfg->Text.Normal;
-                           tmpHK  = Members->Cfg->Text.HotKey;
-                           break;
-                       case ControlState::PressedOrSelected:
-                           tmpCol = Members->Cfg->Button.Text.PressedOrSelected;
-                           tmpHK  = Members->Cfg->Button.Text.PressedOrSelected;
-                           break;
-                       default:
-                           tmpHK = tmpCol = Members->Cfg->Text.Inactive;
-                           break;
-                       }
-                       renderer.FillHorizontalLine(btn->X, btn->Y, btn->X + 1, ' ', tmpCol);
-                       renderer.WriteSingleLineText(btn->X + 2, btn->Y, btn->Text, tmpCol, tmpHK, btn->HotKeyOffset);
-                       if (btn->IsChecked())
-                       {
-                           // tmpCol = (Members->Focused && (!hoverOrPressed)) ? wcfg->ControlBar.CheckMark : c_i->Text;
-                           tmpCol = Members->GetSymbolColor(state, Members->Cfg->Symbol.Checked);
-                           renderer.WriteSpecialCharacter(btn->X, btn->Y, SpecialChars::CheckMark, tmpCol);
-                       }
-                       drawSeparators = true;
-                       break;
-                   case WindowBarItemType::Text:
-                       // done
-                       break;
-                   }
-
-               }
-
-
-        */
     }
 }
 // inline void SetFlag(WindowBarItemFlags flg)
