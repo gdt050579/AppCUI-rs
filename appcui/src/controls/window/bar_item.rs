@@ -312,7 +312,7 @@ impl BarItem {
             BarItemType::WindowResize => self.paint_resize_button(surface, theme, paint_data),
             BarItemType::Tag => self.paint_tag(surface, theme, paint_data),
             BarItemType::Button => self.paint_button(surface, theme, paint_data),
-            BarItemType::SingleChoice => todo!(),
+            BarItemType::SingleChoice => self.paint_button(surface, theme, paint_data),
             BarItemType::CheckBox => todo!(),
             BarItemType::Text => self.paint_text(surface, theme, paint_data),
         };
@@ -376,30 +376,7 @@ impl BarItem {
 
                    case WindowBarItemType::Button:
                    case WindowBarItemType::SingleChoice:
-                       switch (state)
-                       {
-                       case ControlState::Hovered:
-                           tmpCol = Members->Cfg->Button.Text.Hovered;
-                           tmpHK  = Members->Cfg->Button.Text.Hovered;
-                           break;
-                       case ControlState::Normal:
-                           tmpCol = Members->Cfg->Text.Normal;
-                           tmpHK  = Members->Cfg->Text.HotKey;
-                           break;
-                       case ControlState::Focused:
-                           tmpCol = Members->Cfg->Text.Normal;
-                           tmpHK  = Members->Cfg->Text.HotKey;
-                           break;
-                       case ControlState::PressedOrSelected:
-                           tmpCol = Members->Cfg->Button.Text.PressedOrSelected;
-                           tmpHK  = Members->Cfg->Button.Text.PressedOrSelected;
-                           break;
-                       default:
-                           tmpHK = tmpCol = Members->Cfg->Text.Inactive;
-                           break;
-                       }
-
-                       drawSeparators = true;
+                        // done
                        break;
                    case WindowBarItemType::CheckBox:
                        switch (state)
