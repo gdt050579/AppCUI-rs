@@ -19,6 +19,7 @@ pub struct Window {
     menu: Option<MenuBar>,
     bar_items: Vec<BarItem>,
     current_bar_item: VectorIndex,
+    is_current_item_pressed: bool,
     resize_move_mode: bool,
     maximized: bool,
     drag_status: DragStatus,
@@ -38,6 +39,7 @@ impl Window {
             menu: None,
             resize_move_mode: false,
             maximized: false,
+            is_current_item_pressed: false,
             drag_status: DragStatus::None,
             title_max_width: 0,
             title_left_margin: 0,
@@ -100,7 +102,7 @@ impl OnPaint for Window {
             focused: self.has_focus(),
             current: false,
             maximized: self.maximized,
-            is_current_item_pressed: todo!(),
+            is_current_item_pressed: self.is_current_item_pressed,
             sep_attr: color_sep,
         };
         let current_bar_index = self.current_bar_item.index();
