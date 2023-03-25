@@ -59,6 +59,19 @@ pub(super) struct Decorator {
 }
 
 impl Decorator {
+    pub (super) fn with_type(decorator_type: DecoratorType, layout: DecoratorLayout, width: u16, tooltip: &str) -> Self {
+        Self {
+            tooltip: String::from(tooltip),
+            text: Caption::default(),
+            decorator_type,
+            status: StatusFlags::None,
+            x:0,
+            y:0,
+            width,
+            id: 0,
+            layout
+        }      
+    }
     pub (super) fn new(decorator_type: DecoratorType, layout: DecoratorLayout, text: Caption) -> Self {
         Self {
             tooltip: String::new(),
@@ -103,6 +116,10 @@ impl Decorator {
             DecoratorType::Button | DecoratorType::SingleChoice | DecoratorType::CheckBox | DecoratorType::Text => true,
             _ => false
         }
+    }
+    #[inline(always)]
+    pub(super) fn hide(&mut self)  {
+        self.status |= StatusFlags::Hidden;
     }
 
     fn paint_hotkey(

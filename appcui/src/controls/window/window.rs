@@ -1,5 +1,8 @@
 use AppCUIProcMacro::AppCUIControl;
 
+use super::decorator::DecoratorLayout;
+use super::Decorator;
+use super::DecoratorType;
 use super::DecoratorsList;
 use super::DragStatus;
 use super::WindowFlags;
@@ -9,7 +12,6 @@ use crate::controls::*;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
-
 
 #[AppCUIControl(overwrite=OnPaint)]
 pub struct Window {
@@ -26,7 +28,7 @@ pub struct Window {
 
 impl Window {
     pub fn new(title: &str, layout: Layout, flags: WindowFlags) -> Self {
-        Window {
+        let mut win = Window {
             base: ControlBase::new(
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
@@ -40,7 +42,75 @@ impl Window {
             drag_status: DragStatus::None,
             title_max_width: 0,
             title_left_margin: 0,
+        };
+        win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
+        if flags.contains(WindowFlags::NoCloseButton) == false {
+            win.decorators.add(Decorator::with_type(
+                DecoratorType::CloseButton,
+                DecoratorLayout::TopRight,
+                3,
+                "Close window",
+            ));
         }
+        if flags.contains(WindowFlags::Sizeable) {
+            win.decorators.add(Decorator::with_type(
+                DecoratorType::MaximizeRestoreButton,
+                DecoratorLayout::TopLeft,
+                3,
+                "Maximize or restore the size of this window",
+            ));
+            win.decorators.add(Decorator::with_type(
+                DecoratorType::WindowResize,
+                DecoratorLayout::BottomRight,
+                1,
+                "Click and drag to resize this window",
+            ));
+        }
+        // hotkey
+        let mut hotkey_decorator = Decorator::with_type(
+            DecoratorType::HotKeY,
+            DecoratorLayout::TopRight,
+            3,
+            "Press Alt+xx to switch to this window",
+        );
+        hotkey_decorator.hide();
+        win.decorators.add(hotkey_decorator);
+
+        // tag
+        let mut tag_decorator = Decorator::with_type(
+            DecoratorType::Tag,
+            DecoratorLayout::TopRight,
+            3,
+            "",
+        );
+        tag_decorator.hide();
+        win.decorators.add(tag_decorator);
+
+        win
+
+        /*
+
+           ASSERT(SetMargins(1, 1, 1, 1), "Failed to set margins !");
+
+           Members->DialogResult                    = Dialogs::Result::None;
+           Members->referalItemHandle               = InvalidItemHandle;
+           Members->windowItemHandle                = InvalidItemHandle;
+
+
+           UpdateWindowsButtonsPoz(Members);
+
+           if ((Flags & WindowFlags::Maximized) == WindowFlags::Maximized)
+           {
+               ASSERT(Maxim izeRestore(), "Fail to maximize window !");
+           }
+           if ((Flags & WindowFlags::Menu) == WindowFlags::Menu)
+           {
+               Members->menu = std::make_unique<Internal::MenuBar>(this, 1, 1);
+               Members->Margins.Top += 1;
+               Members->menu->SetWidth(Members->Layout.Width - 2);
+           }
+
+        */
     }
     pub fn add<T>(&mut self, control: T)
     where
@@ -362,150 +432,7 @@ bool ProcessHotKey(Control* ctrl, Input::Key KeyCode)
     }
     return false;
 }
-void UpdateWindowButtonPos(WindowBarItem* b, WindowControlBarLayoutData& layout, bool fromLeft)
-{
-    int next;
 
-    bool partOfGroup = (b->Type == WindowBarItemType::Button) | (b->Type == WindowBarItemType::SingleChoice) |
-                       (b->Type == WindowBarItemType::CheckBox) | (b->Type == WindowBarItemType::Text);
-    WindowBarItem* group = nullptr;
-    int extraX           = 0;
-
-    if (fromLeft)
-        group = layout.LeftGroup;
-    else
-        group = layout.RighGroup;
-
-    // analyze current group
-    if (partOfGroup)
-    {
-        if (group)
-        {
-            if (group->Type != b->Type)
-            {
-                if (fromLeft)
-                    group->SetFlag(WindowBarItemFlags::RightGroupMarker); // new group, close previous one
-                else
-                    group->SetFlag(WindowBarItemFlags::LeftGroupMarker); // new group, close previous one
-                group  = nullptr;
-                extraX = 2;
-            }
-        }
-        else
-            extraX = 1;
-    }
-    else
-    {
-        if (group)
-        {
-            if (fromLeft)
-                group->SetFlag(WindowBarItemFlags::RightGroupMarker); // close previous one
-            else
-                group->SetFlag(WindowBarItemFlags::LeftGroupMarker); // close previous one
-            group = nullptr;
-        }
-    }
-    if (fromLeft)
-        layout.LeftGroup = group;
-    else
-        layout.RighGroup = group;
-
-    b->Y = layout.Y;
-    if (fromLeft)
-    {
-        b->X = layout.Left + extraX;
-        next = b->X + b->Size + 1;
-        if (next < layout.Right)
-        {
-            b->SetFlag(WindowBarItemFlags::Visible);
-            layout.Left = next;
-            if (partOfGroup)
-            {
-                if (layout.LeftGroup == nullptr)
-                    b->SetFlag(WindowBarItemFlags::LeftGroupMarker);
-                else
-                    b->RemoveFlag(WindowBarItemFlags::LeftGroupMarker);
-                layout.LeftGroup = b;
-            }
-        }
-    }
-    else
-    {
-        b->X = layout.Right - b->Size + 1;
-        b->X -= extraX;
-        next = b->X - 2;
-        if (next > layout.Left)
-        {
-            b->SetFlag(WindowBarItemFlags::Visible);
-            layout.Right = next;
-            if (partOfGroup)
-            {
-                if (layout.RighGroup == nullptr)
-                    b->SetFlag(WindowBarItemFlags::RightGroupMarker);
-                else
-                    b->RemoveFlag(WindowBarItemFlags::RightGroupMarker);
-                layout.RighGroup = b;
-            }
-        }
-    }
-}
-void UpdateWindowsButtonsPoz(WindowControlContext* wcc)
-{
-    for (uint32 tr = 0; tr < wcc->ControlBar.Count; tr++)
-        wcc->ControlBar.Items[tr].RemoveFlag(WindowBarItemFlags::Visible);
-
-    WindowControlBarLayoutData top, bottom;
-    top.Left         = 1;
-    bottom.Left      = 1;
-    top.Y            = 0;
-    bottom.Y         = wcc->Layout.Height - 1;
-    top.Right        = wcc->Layout.Width - 2;
-    bottom.Right     = wcc->Layout.Width - 1;
-    top.LeftGroup    = nullptr;
-    top.RighGroup    = nullptr;
-    bottom.LeftGroup = nullptr;
-    bottom.RighGroup = nullptr;
-
-    auto* btn = wcc->ControlBar.Items;
-    for (uint32 tr = 0; tr < wcc->ControlBar.Count; tr++, btn++)
-    {
-        if (btn->IsHidden())
-            continue;
-        switch (btn->Layout)
-        {
-        case WindowControlsBarLayout::TopBarFromLeft:
-            UpdateWindowButtonPos(btn, top, true);
-            break;
-        case WindowControlsBarLayout::TopBarFromRight:
-            UpdateWindowButtonPos(btn, top, false);
-            break;
-        case WindowControlsBarLayout::BottomBarFromLeft:
-            UpdateWindowButtonPos(btn, bottom, true);
-            break;
-        case WindowControlsBarLayout::BottomBarFromRight:
-            UpdateWindowButtonPos(btn, bottom, false);
-            break;
-        }
-    }
-    // group flags
-    if (top.LeftGroup)
-        top.LeftGroup->SetFlag(WindowBarItemFlags::RightGroupMarker);
-    if (top.RighGroup)
-        top.RighGroup->SetFlag(WindowBarItemFlags::LeftGroupMarker);
-    if (bottom.LeftGroup)
-        bottom.LeftGroup->SetFlag(WindowBarItemFlags::RightGroupMarker);
-    if (bottom.RighGroup)
-        bottom.RighGroup->SetFlag(WindowBarItemFlags::LeftGroupMarker);
-
-    // set title space
-    wcc->TitleLeftMargin = top.Left + 1;
-    wcc->TitleMaxWidth   = top.Right - wcc->TitleLeftMargin;
-    if (wcc->TitleMaxWidth <= 2)
-        wcc->TitleMaxWidth = 0;
-
-    if (wcc->menu)
-        wcc->menu->SetWidth(wcc->Layout.Width - 2);
-}
 void WindowRadioButtonClicked(WindowBarItem* start, WindowBarItem* end, WindowBarItem* current)
 {
     // go back and disable check
@@ -819,77 +746,7 @@ Window::~Window()
 Window::Window(const ConstString& caption, string_view layout, WindowFlags Flags)
     : Control(new WindowControlContext(), caption, layout, false)
 {
-    auto Members              = reinterpret_cast<WindowControlContext*>(this->Context);
-    Members->Layout.MaxHeight = 200000;
-    Members->Layout.MaxWidth  = 200000;
-    Members->Layout.MinHeight = 3;
-    Members->Layout.MinWidth  = 12; // left_corner(1 char), maximize button(3chars),OneSpaceLeftPadding,
-                                    // title, OneSpaceRightPadding, close
-                                    // button(char),right_corner(1 char) = 10+szTitle (szTitle = min 2 chars)
-    ASSERT(SetMargins(1, 1, 1, 1), "Failed to set margins !");
-    Members->Flags = GATTR_ENABLE | GATTR_VISIBLE | GATTR_TABSTOP | (uint32) Flags;
-
-    Members->Maximized                       = false;
-    Members->ResizeMoveMode                  = false;
-    Members->dragStatus                      = WindowDragStatus::None;
-    Members->DialogResult                    = Dialogs::Result::None;
-    Members->ControlBar.Current              = NO_CONTROLBAR_ITEM;
-    Members->ControlBar.IsCurrentItemPressed = false;
-    Members->ControlBar.Count                = 0;
-    Members->referalItemHandle               = InvalidItemHandle;
-    Members->windowItemHandle                = InvalidItemHandle;
-
-    ASSERT(Members->RecomputeLayout(nullptr), "Fail to recompute layout !");
-    this->RecomputeLayout();
-
-    // init the buttons
-    if ((Flags & WindowFlags::NoCloseButton) == WindowFlags::None)
-    {
-        Members->ControlBar.Items[Members->ControlBar.Count++].Init(
-              WindowBarItemType::CloseButton, WindowControlsBarLayout::TopBarFromRight, 3, "Close window");
-    }
-    if ((Flags & WindowFlags::Sizeable) != WindowFlags::None)
-    {
-        Members->ControlBar.Items[Members->ControlBar.Count++].Init(
-              WindowBarItemType::MaximizeRestoreButton,
-              WindowControlsBarLayout::TopBarFromLeft,
-              3,
-              "Maximize or restore the size of this window");
-        Members->ControlBar.Items[Members->ControlBar.Count++].Init(
-              WindowBarItemType::WindowResize,
-              WindowControlsBarLayout::BottomBarFromRight,
-              1,
-              "Click and drag to resize this window");
-    }
-    // hot key
-    Members->ControlBar.Items[Members->ControlBar.Count].Init(
-          WindowBarItemType::HotKeY,
-          WindowControlsBarLayout::TopBarFromRight,
-          3,
-          "Press Alt+xx to switch to this window");
-    // the button exists but it is hidden
-    Members->ControlBar.Items[Members->ControlBar.Count].SetFlag(WindowBarItemFlags::Hidden);
-    Members->ControlBar.Count++;
-
-    // TAG
-    Members->ControlBar.Items[Members->ControlBar.Count].Init(
-          WindowBarItemType::Tag, WindowControlsBarLayout::TopBarFromLeft, 3, "");
-    // the button exists but it is hidden
-    Members->ControlBar.Items[Members->ControlBar.Count].SetFlag(WindowBarItemFlags::Hidden);
-    Members->ControlBar.Count++;
-
-    UpdateWindowsButtonsPoz(Members);
-
-    if ((Flags & WindowFlags::Maximized) == WindowFlags::Maximized)
-    {
-        ASSERT(Maxim izeRestore(), "Fail to maximize window !");
-    }
-    if ((Flags & WindowFlags::Menu) == WindowFlags::Menu)
-    {
-        Members->menu = std::make_unique<Internal::MenuBar>(this, 1, 1);
-        Members->Margins.Top += 1;
-        Members->menu->SetWidth(Members->Layout.Width - 2);
-    }
+    // done
 }
 
 void Window::Paint(Graphics::Renderer& renderer)
