@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use EnumBitFlags::EnumBitFlags;
 
 use crate::{
@@ -15,7 +17,7 @@ pub(super) struct BarItemPaintData {
 }
 
 #[repr(u8)]
-pub(super) enum BarItemType {
+pub(super) enum DecoratorType {
     HotKeY,
     CloseButton,
     MaximizeRestoreButton,
@@ -98,10 +100,10 @@ enum StatusFlags {
     LeftGroupMarker = 0x08,
     RightGroupMarker = 0x10,
 }
-pub(super) struct BarItem {
+pub(super) struct Decorator {
     tooltip: String,
     text: Caption,
-    item_type: BarItemType,
+    item_type: DecoratorType,
     status: StatusFlags,
     x: i32,
     y: i32,
@@ -110,7 +112,7 @@ pub(super) struct BarItem {
     layout: BarItemLayout,
 }
 
-impl BarItem {
+impl Decorator {
     #[inline(always)]
     pub(super) fn is_visible(&self) -> bool {
         self.status.contains(StatusFlags::Visible)
@@ -134,6 +136,14 @@ impl BarItem {
             && (x < (self.x + (self.width as i32)))
             && ((self.status & (StatusFlags::Visible | StatusFlags::Hidden))
                 == StatusFlags::Visible)
+    }
+
+    #[inline(always)]
+    pub(super) fn is_part_of_groupt(&self) -> bool {
+        match self.item_type {
+            DecoratorType::Button | DecoratorType::SingleChoice | DecoratorType::CheckBox | DecoratorType::Text => true,
+            _ => false
+        }
     }
 
     fn paint_hotkey(
@@ -340,15 +350,15 @@ impl BarItem {
             _ => false,
         };
         let draw_separators = match self.item_type {
-            BarItemType::HotKeY => self.paint_hotkey(surface, theme, paint_data),
-            BarItemType::CloseButton => self.paint_close_button(surface, theme, paint_data),
-            BarItemType::MaximizeRestoreButton => self.paint_max_button(surface, theme, paint_data),
-            BarItemType::WindowResize => self.paint_resize_button(surface, theme, paint_data),
-            BarItemType::Tag => self.paint_tag(surface, theme, paint_data),
-            BarItemType::Button => self.paint_button(surface, theme, paint_data),
-            BarItemType::SingleChoice => self.paint_button(surface, theme, paint_data),
-            BarItemType::CheckBox => self.paint_checkbox(surface, theme, paint_data),
-            BarItemType::Text => self.paint_text(surface, theme, paint_data),
+            DecoratorType::HotKeY => self.paint_hotkey(surface, theme, paint_data),
+            DecoratorType::CloseButton => self.paint_close_button(surface, theme, paint_data),
+            DecoratorType::MaximizeRestoreButton => self.paint_max_button(surface, theme, paint_data),
+            DecoratorType::WindowResize => self.paint_resize_button(surface, theme, paint_data),
+            DecoratorType::Tag => self.paint_tag(surface, theme, paint_data),
+            DecoratorType::Button => self.paint_button(surface, theme, paint_data),
+            DecoratorType::SingleChoice => self.paint_button(surface, theme, paint_data),
+            DecoratorType::CheckBox => self.paint_checkbox(surface, theme, paint_data),
+            DecoratorType::Text => self.paint_text(surface, theme, paint_data),
         };
         // separators
         if draw_separators {
