@@ -1,4 +1,4 @@
-use super::{BarItemPaintData, Decorator};
+use super::{DecoratorPaintData, Decorator};
 use crate::{utils::VectorIndex, graphics::Surface, system::Theme};
 
 pub(super) struct DecoratorsList {
@@ -16,7 +16,7 @@ impl DecoratorsList {
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, focused: bool, maximized: bool) {
-        let mut paint_data = BarItemPaintData {
+        let mut paint_data = DecoratorPaintData {
             focused,
             current: false,
             maximized,

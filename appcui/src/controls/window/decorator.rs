@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use EnumBitFlags::EnumBitFlags;
 
 use crate::{
@@ -8,7 +6,9 @@ use crate::{
     utils::Caption,
 };
 
-pub(super) struct BarItemPaintData {
+use super::SymbolAttrState;
+
+pub(super) struct DecoratorPaintData {
     pub(super) focused: bool,
     pub(super) current: bool,
     pub(super) maximized: bool,
@@ -30,67 +30,13 @@ pub(super) enum DecoratorType {
 }
 
 #[repr(u8)]
-enum BarItemLayout {
-    None,
+pub(super) enum DecoratorLayout {
     TopLeft,
     BottomLeft,
     TopRight,
     BottomRight,
 }
 
-#[derive(PartialEq)]
-enum SymbolAttrState {
-    Hovered,
-    Normal,
-    Pressed,
-    Inactive,
-}
-impl SymbolAttrState {
-    fn new(paint_data: &BarItemPaintData) -> Self {
-        if paint_data.current {
-            if paint_data.is_current_item_pressed {
-                SymbolAttrState::Pressed
-            } else {
-                // showChecked = ((Members->Focused) && (btn->IsChecked()));
-                SymbolAttrState::Hovered
-            }
-        } else {
-            if paint_data.focused {
-                // showChecked = btn->IsChecked();
-                SymbolAttrState::Normal
-            } else {
-                SymbolAttrState::Inactive
-            }
-        }
-    }
-    #[inline(always)]
-    fn get_attr(&self, theme: &Theme, default_attr: CharAttribute) -> CharAttribute {
-        match self {
-            SymbolAttrState::Hovered => theme.symbol.hovered,
-            SymbolAttrState::Normal => default_attr,
-            SymbolAttrState::Pressed => theme.symbol.pressed,
-            SymbolAttrState::Inactive => theme.symbol.inactive,
-        }
-    }
-    #[inline(always)]
-    fn get_button_attr(&self, theme: &Theme) -> CharAttribute {
-        match self {
-            SymbolAttrState::Hovered => theme.button.text.hovered,
-            SymbolAttrState::Normal => theme.text.normal,
-            SymbolAttrState::Pressed => theme.button.text.pressed_or_selectd,
-            SymbolAttrState::Inactive => theme.text.inactive,
-        }
-    }
-    #[inline(always)]
-    fn get_hotkey_attr(&self, theme: &Theme) -> CharAttribute {
-        match self {
-            SymbolAttrState::Hovered => theme.button.text.hovered,
-            SymbolAttrState::Normal => theme.text.hot_key,
-            SymbolAttrState::Pressed => theme.button.text.pressed_or_selectd,
-            SymbolAttrState::Inactive => theme.text.inactive,
-        }
-    }
-}
 
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
@@ -103,16 +49,29 @@ enum StatusFlags {
 pub(super) struct Decorator {
     tooltip: String,
     text: Caption,
-    item_type: DecoratorType,
+    decorator_type: DecoratorType,
     status: StatusFlags,
     x: i32,
     y: i32,
     width: u16,
     id: u32,
-    layout: BarItemLayout,
+    layout: DecoratorLayout,
 }
 
 impl Decorator {
+    pub (super) fn new(decorator_type: DecoratorType, layout: DecoratorLayout, text: Caption) -> Self {
+        Self {
+            tooltip: String::new(),
+            text,
+            decorator_type,
+            status: StatusFlags::None,
+            x:0,
+            y:0,
+            width:0,
+            id: 0,
+            layout
+        }
+    }
     #[inline(always)]
     pub(super) fn is_visible(&self) -> bool {
         self.status.contains(StatusFlags::Visible)
@@ -139,8 +98,8 @@ impl Decorator {
     }
 
     #[inline(always)]
-    pub(super) fn is_part_of_groupt(&self) -> bool {
-        match self.item_type {
+    pub(super) fn is_part_of_group(&self) -> bool {
+        match self.decorator_type {
             DecoratorType::Button | DecoratorType::SingleChoice | DecoratorType::CheckBox | DecoratorType::Text => true,
             _ => false
         }
@@ -150,7 +109,7 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) -> bool {
         surface.write_char(
             self.x,
@@ -173,7 +132,7 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) -> bool {
         surface.write_char(
             self.x,
@@ -196,7 +155,7 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) -> bool {
         let attr = match paint_data.focused {
             true => theme.text.normal,
@@ -209,7 +168,7 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) -> bool {
         let st = SymbolAttrState::new(paint_data);
         surface.write_string(
@@ -230,7 +189,7 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) -> bool {
         let st = SymbolAttrState::new(paint_data);
         surface.write_string(
@@ -255,7 +214,7 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) -> bool {
         if paint_data.focused {
             let st = SymbolAttrState::new(paint_data);
@@ -274,7 +233,7 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) -> bool {
         let st = SymbolAttrState::new(paint_data);
         let show_checked =
@@ -305,7 +264,7 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) -> bool {
         let st = SymbolAttrState::new(paint_data);
         let text_attr = st.get_button_attr(theme);
@@ -339,17 +298,17 @@ impl Decorator {
         &self,
         surface: &mut Surface,
         theme: &Theme,
-        paint_data: &BarItemPaintData,
+        paint_data: &DecoratorPaintData,
     ) {
         if (self.is_visible() == false) || (self.is_hidden()) {
             return;
         }
 
         let from_left = match self.layout {
-            BarItemLayout::TopLeft | BarItemLayout::BottomLeft => true,
+            DecoratorLayout::TopLeft | DecoratorLayout::BottomLeft => true,
             _ => false,
         };
-        let draw_separators = match self.item_type {
+        let draw_separators = match self.decorator_type {
             DecoratorType::HotKeY => self.paint_hotkey(surface, theme, paint_data),
             DecoratorType::CloseButton => self.paint_close_button(surface, theme, paint_data),
             DecoratorType::MaximizeRestoreButton => self.paint_max_button(surface, theme, paint_data),
