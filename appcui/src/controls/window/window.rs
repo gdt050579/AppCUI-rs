@@ -153,9 +153,10 @@ impl OnPaint for Window {
             line_type = LineType::Single;
         }
 
+        let sz = self.get_size();
         surface.clear(Character::with_attributes(' ', color_window));
         surface.draw_rect(
-            Rect::with_size(0, 0, self.get_width(), self.get_height()),
+            Rect::with_size(0, 0, sz.width as u16, sz.height as u16),
             line_type,
             color_border,
         );

@@ -50,13 +50,14 @@ impl OnPaint for CheckBox {
         };
 
         surface.write_string(0, 0, "[ ] ", col_text, false);
-        let w = self.get_width();
-        if w > 4 {
+        let sz = self.get_size();
+
+        if sz.width > 4 {
             let mut format =
-                TextFormat::new(4, 0, col_text, TextAlignament::Left, self.get_height() > 1);            
+                TextFormat::new(4, 0, col_text, TextAlignament::Left, sz.height> 1);            
             if format.multi_line {
                 format.text_wrap = TextWrap::Word;
-                format.width = Some(w - 4);
+                format.width = Some(sz.width as u16 - 4);
             }
             if self.caption.has_hotkey() {
                 format.hotkey_pos = self.caption.get_hotkey_pos();
@@ -103,7 +104,7 @@ impl OnMouseEvent for CheckBox {
     fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus {
         match event {
             MouseEvent::Enter => {
-                if self.caption.get_chars_count()>(self.get_width()-4) as usize {
+                if self.caption.get_chars_count()>(self.get_size().width-4) as usize {
                     self.show_tooltip(self.caption.get_text());
                 }
                 EventProcessStatus::Processed

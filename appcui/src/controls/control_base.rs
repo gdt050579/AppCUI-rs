@@ -53,12 +53,11 @@ impl ControlBase {
         }
     }
     #[inline]
-    pub fn get_width(&self) -> u16 {
-        self.layout.get_width()
-    }
-    #[inline]
-    pub fn get_height(&self) -> u16 {
-        self.layout.get_height()
+    pub fn get_size(&self) -> Size {
+        Size {
+            width: self.layout.get_width() as u32,
+            height: self.layout.get_height() as u32,
+        }
     }
     #[inline]
     pub fn is_visible(&self) -> bool {

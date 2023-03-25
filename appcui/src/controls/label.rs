@@ -22,7 +22,8 @@ impl Label {
 }
 impl OnPaint for Label {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let mut format = TextFormat::new(0,0,CharAttribute::default(),TextAlignament::Left,self.get_height()>1);
+        let sz = self.get_size();
+        let mut format = TextFormat::new(0,0,CharAttribute::default(),TextAlignament::Left,sz.height>1);
         format.chars_count = Some(self.caption.get_chars_count() as u16);
         format.char_attr = if self.is_enabled() { theme. text.normal } else { theme.text.inactive };
         format.hotkey_pos = self.caption.get_hotkey_pos();
@@ -31,7 +32,7 @@ impl OnPaint for Label {
         }
         if format.multi_line {
             format.text_wrap = TextWrap::Word;
-            format.width = Some(self.get_width());
+            format.width = Some(sz.width as u16);
         }
         format.chars_count = Some(self.caption.get_chars_count() as u16);
         surface.write_text(self.caption.get_text(), &format);
