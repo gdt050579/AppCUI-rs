@@ -17,7 +17,9 @@ pub(super) struct DecoratorPaintData {
 }
 
 #[repr(u8)]
+#[derive(Clone, Copy, PartialEq)]
 pub(super) enum DecoratorType {
+    None,
     HotKeY,
     CloseButton,
     MaximizeRestoreButton,
@@ -30,13 +32,13 @@ pub(super) enum DecoratorType {
 }
 
 #[repr(u8)]
+#[derive(Clone, Copy)]
 pub(super) enum DecoratorLayout {
     TopLeft,
     BottomLeft,
     TopRight,
     BottomRight,
 }
-
 
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
@@ -59,30 +61,39 @@ pub(super) struct Decorator {
 }
 
 impl Decorator {
-    pub (super) fn with_type(decorator_type: DecoratorType, layout: DecoratorLayout, width: u16, tooltip: &str) -> Self {
+    pub(super) fn with_type(
+        decorator_type: DecoratorType,
+        layout: DecoratorLayout,
+        width: u16,
+        tooltip: &str,
+    ) -> Self {
         Self {
             tooltip: String::from(tooltip),
             text: Caption::default(),
             decorator_type,
             status: StatusFlags::None,
-            x:0,
-            y:0,
+            x: 0,
+            y: 0,
             width,
             id: 0,
-            layout
-        }      
+            layout,
+        }
     }
-    pub (super) fn new(decorator_type: DecoratorType, layout: DecoratorLayout, text: Caption) -> Self {
+    pub(super) fn new(
+        decorator_type: DecoratorType,
+        layout: DecoratorLayout,
+        text: Caption,
+    ) -> Self {
         Self {
             tooltip: String::new(),
             text,
             decorator_type,
             status: StatusFlags::None,
-            x:0,
-            y:0,
-            width:0,
+            x: 0,
+            y: 0,
+            width: 0,
             id: 0,
-            layout
+            layout,
         }
     }
     #[inline(always)]
@@ -113,13 +124,43 @@ impl Decorator {
     #[inline(always)]
     pub(super) fn is_part_of_group(&self) -> bool {
         match self.decorator_type {
-            DecoratorType::Button | DecoratorType::SingleChoice | DecoratorType::CheckBox | DecoratorType::Text => true,
-            _ => false
+            DecoratorType::Button
+            | DecoratorType::SingleChoice
+            | DecoratorType::CheckBox
+            | DecoratorType::Text => true,
+            _ => false,
         }
     }
     #[inline(always)]
-    pub(super) fn hide(&mut self)  {
+    pub(super) fn hide(&mut self) {
         self.status |= StatusFlags::Hidden;
+    }
+    #[inline(always)]
+    pub(super) fn set_right_marker(&mut self) {
+        self.status |= StatusFlags::RightGroupMarker;
+    }
+    #[inline(always)]
+    pub(super) fn set_left_marker(&mut self) {
+        self.status |= StatusFlags::LeftGroupMarker;
+    }
+    #[inline(always)]
+    pub(super) fn set_visible(&mut self) {
+        self.status |= StatusFlags::Visible;
+    }
+    #[inline(always)]
+    pub(super) fn clear(&mut self) {
+        self.status.remove(
+            StatusFlags::Visible | StatusFlags::LeftGroupMarker | StatusFlags::RightGroupMarker,
+        );
+    }
+
+    #[inline(always)]
+    pub(super) fn get_type(&self) -> DecoratorType {
+        self.decorator_type
+    }
+    #[inline(always)]
+    pub(super) fn get_layout(&self) -> DecoratorLayout {
+        self.layout
     }
 
     fn paint_hotkey(
@@ -326,9 +367,12 @@ impl Decorator {
             _ => false,
         };
         let draw_separators = match self.decorator_type {
+            DecoratorType::None => false,
             DecoratorType::HotKeY => self.paint_hotkey(surface, theme, paint_data),
             DecoratorType::CloseButton => self.paint_close_button(surface, theme, paint_data),
-            DecoratorType::MaximizeRestoreButton => self.paint_max_button(surface, theme, paint_data),
+            DecoratorType::MaximizeRestoreButton => {
+                self.paint_max_button(surface, theme, paint_data)
+            }
             DecoratorType::WindowResize => self.paint_resize_button(surface, theme, paint_data),
             DecoratorType::Tag => self.paint_tag(surface, theme, paint_data),
             DecoratorType::Button => self.paint_button(surface, theme, paint_data),
@@ -366,12 +410,64 @@ impl Decorator {
             }
         }
     }
+
+    pub(super) fn update_position_from_left(
+        &mut self,
+        x: i32,
+        y: i32,
+        last: DecoratorType,
+    ) -> (i32, bool) {
+        let part_of_group = self.is_part_of_group();
+        let mut extra_space = 0;
+        let mut right_group_marker = false;
+        if part_of_group {
+            extra_space = 1;
+            if self.decorator_type != last {
+                right_group_marker = true;
+                extra_space += 1;
+            }
+        } else {
+            if last != DecoratorType::None {
+                right_group_marker = true;
+            }
+        }
+        self.y = y;
+        self.x = x + extra_space;
+        let next = self.x + (self.width as i32) + 1;
+        if part_of_group && (self.decorator_type != last) {
+            self.status |= StatusFlags::LeftGroupMarker;
+        }
+
+        (next, right_group_marker)
+    }
+    pub(super) fn update_position_from_right(
+        &mut self,
+        x: i32,
+        y: i32,
+        last: DecoratorType,
+    ) -> (i32, bool) {
+        let part_of_group = self.is_part_of_group();
+        let mut extra_space = 0;
+        let mut left_group_marker = false;
+        if part_of_group {
+            extra_space = 1;
+            if self.decorator_type != last {
+                left_group_marker = true;
+                extra_space += 1;
+            }
+        } else {
+            if last != DecoratorType::None {
+                left_group_marker = true;
+            }
+        }
+        self.y = y;
+        self.x = x - (self.width as i32 + 1);
+        self.x -= extra_space;
+        let next = self.x - 2;
+        if part_of_group && (self.decorator_type != last) {
+            self.status |= StatusFlags::RightGroupMarker;
+        }
+
+        (next, left_group_marker)
+    }
 }
-// inline void SetFlag(WindowBarItemFlags flg)
-// {
-//     Flags = static_cast<WindowBarItemFlags>(((unsigned char) Flags) | ((unsigned char) flg));
-// }
-// inline void RemoveFlag(WindowBarItemFlags flg)
-// {
-//     Flags = static_cast<WindowBarItemFlags>(((unsigned char) Flags) & (~((unsigned char) flg)));
-// }

@@ -1,5 +1,26 @@
-use super::{DecoratorPaintData, Decorator};
-use crate::{utils::VectorIndex, graphics::Surface, system::Theme};
+use super::{Decorator, DecoratorPaintData, DecoratorType};
+use crate::{
+    graphics::{Size, Surface},
+    system::Theme,
+    utils::VectorIndex,
+};
+
+struct PositionHelper {
+    x: i32,
+    y: i32,
+    index: VectorIndex,
+    decoraror_type: DecoratorType,
+}
+impl PositionHelper {
+    fn new(x: i32, y: i32) -> Self {
+        Self {
+            x,
+            y,
+            index: VectorIndex::default(),
+            decoraror_type: DecoratorType::None,
+        }
+    }
+}
 
 pub(super) struct DecoratorsList {
     items: Vec<Decorator>,
@@ -15,16 +36,26 @@ impl DecoratorsList {
             pressed: false,
         }
     }
-    pub(super) fn add(&mut self,decorator: Decorator) {
+    pub(super) fn add(&mut self, decorator: Decorator) {
         self.items.push(decorator);
     }
-    pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, focused: bool, maximized: bool) {
+    pub(super) fn paint(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        focused: bool,
+        maximized: bool,
+    ) {
         let mut paint_data = DecoratorPaintData {
             focused,
             current: false,
             maximized,
             is_current_item_pressed: self.pressed,
-            sep_attr: if focused { theme.lines.normal } else { theme.lines.inactive },
+            sep_attr: if focused {
+                theme.lines.normal
+            } else {
+                theme.lines.inactive
+            },
         };
         let current_bar_index = self.current.index();
         // paint bar items
@@ -33,153 +64,84 @@ impl DecoratorsList {
             item.paint(surface, theme, &paint_data);
         }
     }
-}
+    fn update_position_from_left(&mut self, index: usize, pos: &mut PositionHelper, right: i32) {
+        let d = &mut self.items[index];
+        let (next, add_flags) = d.update_position_from_left(pos.x, pos.y, pos.decoraror_type);
+        let last_index = pos.index;
+        if next < right {
+            d.set_visible();
+            pos.index = VectorIndex::with_value(index);
+            pos.x = next;
+            pos.decoraror_type = d.get_type();
+        }
+        if add_flags && last_index.is_valid() {
+            self.items[last_index.index()].set_right_marker();
+        }
+    }
+    fn update_position_from_right(&mut self, index: usize, pos: &mut PositionHelper, left: i32) {
+        let d = &mut self.items[index];
+        let (next, add_flags) = d.update_position_from_right(pos.x, pos.y, pos.decoraror_type);
+        let last_index = pos.index;
+        if next > left {
+            d.set_visible();
+            pos.index = VectorIndex::with_value(index);
+            pos.x = next;
+            pos.decoraror_type = d.get_type();
+        }
+        if add_flags && last_index.is_valid() {
+            self.items[last_index.index()].set_left_marker();
+        }
+    }
+    pub(super) fn update_positions(&mut self, size: Size) -> (i32, u16) {
+        // clear all flags (visible & left|right marker)
+        for d in &mut self.items {
+            d.clear();
+        }
+        let mut top_left = PositionHelper::new(1, 0);
+        let mut top_right = PositionHelper::new((size.width as i32) - 2, 0);
+        let mut bottom_left = PositionHelper::new(1, (size.height as i32) - 1);
+        let mut bottom_right =
+            PositionHelper::new((size.width as i32) - 1, (size.height as i32) - 1);
+        let count = self.items.len();
 
-/*
-void UpdateWindowButtonPos(WindowBarItem* b, WindowControlBarLayoutData& layout, bool fromLeft)
-{
-    int next;
-
-    bool partOfGroup = (b->Type == WindowBarItemType::Button) | (b->Type == WindowBarItemType::SingleChoice) |
-                       (b->Type == WindowBarItemType::CheckBox) | (b->Type == WindowBarItemType::Text);
-    WindowBarItem* group = nullptr;
-    int extraX           = 0;
-
-    if (fromLeft)
-        group = layout.LeftGroup;
-    else
-        group = layout.RighGroup;
-
-    // analyze current group
-    if (partOfGroup)
-    {
-        if (group)
-        {
-            if (group->Type != b->Type)
-            {
-                if (fromLeft)
-                    group->SetFlag(WindowBarItemFlags::RightGroupMarker); // new group, close previous one
-                else
-                    group->SetFlag(WindowBarItemFlags::LeftGroupMarker); // new group, close previous one
-                group  = nullptr;
-                extraX = 2;
+        for index in 0..count {
+            let d = &self.items[index];
+            if d.is_hidden() {
+                continue;
+            }
+            let layout = d.get_layout();
+            match layout {
+                super::decorator::DecoratorLayout::TopLeft => {
+                    self.update_position_from_left(index, &mut top_left, top_right.x);
+                }
+                super::decorator::DecoratorLayout::BottomLeft => {
+                    self.update_position_from_left(index, &mut bottom_left, bottom_right.x)
+                }
+                super::decorator::DecoratorLayout::TopRight => {
+                    self.update_position_from_right(index, &mut top_right, top_left.x);
+                }
+                super::decorator::DecoratorLayout::BottomRight => {
+                    self.update_position_from_right(index, &mut bottom_right, bottom_left.x);
+                }
             }
         }
-        else
-            extraX = 1;
-    }
-    else
-    {
-        if (group)
-        {
-            if (fromLeft)
-                group->SetFlag(WindowBarItemFlags::RightGroupMarker); // close previous one
-            else
-                group->SetFlag(WindowBarItemFlags::LeftGroupMarker); // close previous one
-            group = nullptr;
-        }
-    }
-    if (fromLeft)
-        layout.LeftGroup = group;
-    else
-        layout.RighGroup = group;
 
-    b->Y = layout.Y;
-    if (fromLeft)
-    {
-        b->X = layout.Left + extraX;
-        next = b->X + b->Size + 1;
-        if (next < layout.Right)
-        {
-            b->SetFlag(WindowBarItemFlags::Visible);
-            layout.Left = next;
-            if (partOfGroup)
-            {
-                if (layout.LeftGroup == nullptr)
-                    b->SetFlag(WindowBarItemFlags::LeftGroupMarker);
-                else
-                    b->RemoveFlag(WindowBarItemFlags::LeftGroupMarker);
-                layout.LeftGroup = b;
-            }
+        // last elements
+        if top_left.index.is_valid() {
+            self.items[top_left.index.index()].set_right_marker();
         }
-    }
-    else
-    {
-        b->X = layout.Right - b->Size + 1;
-        b->X -= extraX;
-        next = b->X - 2;
-        if (next > layout.Left)
-        {
-            b->SetFlag(WindowBarItemFlags::Visible);
-            layout.Right = next;
-            if (partOfGroup)
-            {
-                if (layout.RighGroup == nullptr)
-                    b->SetFlag(WindowBarItemFlags::RightGroupMarker);
-                else
-                    b->RemoveFlag(WindowBarItemFlags::RightGroupMarker);
-                layout.RighGroup = b;
-            }
+        if bottom_left.index.is_valid() {
+            self.items[bottom_left.index.index()].set_right_marker();
         }
+        if top_right.index.is_valid() {
+            self.items[top_right.index.index()].set_left_marker();
+        }
+        if bottom_right.index.is_valid() {
+            self.items[bottom_right.index.index()].set_left_marker();
+        }
+        let title_x_pos = top_left.x+1;
+        let title_space = (top_right.x - title_x_pos).max(0);
+        (title_x_pos, title_space as u16)
     }
 }
-void UpdateWindowsButtonsPoz(WindowControlContext* wcc)
-{
-    for (uint32 tr = 0; tr < wcc->ControlBar.Count; tr++)
-        wcc->ControlBar.Items[tr].RemoveFlag(WindowBarItemFlags::Visible);
 
-    WindowControlBarLayoutData top, bottom;
-    top.Left         = 1;
-    bottom.Left      = 1;
-    top.Y            = 0;
-    bottom.Y         = wcc->Layout.Height - 1;
-    top.Right        = wcc->Layout.Width - 2;
-    bottom.Right     = wcc->Layout.Width - 1;
-    top.LeftGroup    = nullptr;
-    top.RighGroup    = nullptr;
-    bottom.LeftGroup = nullptr;
-    bottom.RighGroup = nullptr;
-
-    auto* btn = wcc->ControlBar.Items;
-    for (uint32 tr = 0; tr < wcc->ControlBar.Count; tr++, btn++)
-    {
-        if (btn->IsHidden())
-            continue;
-        switch (btn->Layout)
-        {
-        case WindowControlsBarLayout::TopBarFromLeft:
-            UpdateWindowButtonPos(btn, top, true);
-            break;
-        case WindowControlsBarLayout::TopBarFromRight:
-            UpdateWindowButtonPos(btn, top, false);
-            break;
-        case WindowControlsBarLayout::BottomBarFromLeft:
-            UpdateWindowButtonPos(btn, bottom, true);
-            break;
-        case WindowControlsBarLayout::BottomBarFromRight:
-            UpdateWindowButtonPos(btn, bottom, false);
-            break;
-        }
-    }
-    // group flags
-    if (top.LeftGroup)
-        top.LeftGroup->SetFlag(WindowBarItemFlags::RightGroupMarker);
-    if (top.RighGroup)
-        top.RighGroup->SetFlag(WindowBarItemFlags::LeftGroupMarker);
-    if (bottom.LeftGroup)
-        bottom.LeftGroup->SetFlag(WindowBarItemFlags::RightGroupMarker);
-    if (bottom.RighGroup)
-        bottom.RighGroup->SetFlag(WindowBarItemFlags::LeftGroupMarker);
-
-    // set title space
-    wcc->TitleLeftMargin = top.Left + 1;
-    wcc->TitleMaxWidth   = top.Right - wcc->TitleLeftMargin;
-    if (wcc->TitleMaxWidth <= 2)
-        wcc->TitleMaxWidth = 0;
-
-    if (wcc->menu)
-        wcc->menu->SetWidth(wcc->Layout.Width - 2);
-}
-
-
- */
