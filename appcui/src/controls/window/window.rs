@@ -87,6 +87,11 @@ impl Window {
         tag_decorator.hide();
         win.decorators.add(tag_decorator);
 
+        if flags.contains(WindowFlags::Menu) {
+            win.menu = Some(MenuBar::new());
+            win.set_margins(1, 2, 1, 1);
+        }
+
         win
 
         /*
@@ -101,12 +106,6 @@ impl Window {
            if ((Flags & WindowFlags::Maximized) == WindowFlags::Maximized)
            {
                ASSERT(Maxim izeRestore(), "Fail to maximize window !");
-           }
-           if ((Flags & WindowFlags::Menu) == WindowFlags::Menu)
-           {
-               Members->menu = std::make_unique<Internal::MenuBar>(this, 1, 1);
-               Members->Margins.Top += 1;
-               Members->menu->SetWidth(Members->Layout.Width - 2);
            }
 
         */

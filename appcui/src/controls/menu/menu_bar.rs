@@ -18,6 +18,16 @@ pub(crate) struct MenuBar {
 }
 
 impl MenuBar {
+    pub (crate) fn new() -> Self {
+        Self {
+            items: Vec::with_capacity(4),
+            x: 0,
+            y: 0,
+            width: 0,
+            opened_item: VectorIndex::invalid(),
+            hovered_item: VectorIndex::invalid(),
+        }
+    }
     fn update_positions(&mut self) {
         let mut x = 0;
         for item in &mut self.items {
