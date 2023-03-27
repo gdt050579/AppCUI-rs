@@ -93,6 +93,13 @@ impl ControlBase {
             .set_size_bounds(min_width, min_height, max_width, max_height);
     }
     #[inline]
+    pub (crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
+        self.margins.left = left;
+        self.margins.top = top;
+        self.margins.bottom = bottom;
+        self.margins.right = right;
+    }
+    #[inline]
     pub fn set_hotkey(&mut self, hotkey: Key) {
         self.hotkey = hotkey
     }
