@@ -98,9 +98,15 @@ impl ControlManager {
     }
     pub(crate) fn update_layout(&mut self, parent_layout: &ParentLayout) {
         let base = self.get_base_mut();
+        let old_size = base.get_size();
         base.update_control_layout_and_screen_origin(parent_layout);
+        let new_size = base.get_size();
         // process the same thing for its children
         let my_layout = ParentLayout::from(base);
+        // if size has been changed --> call on_resize
+        if new_size!=old_size {
+            self.get_control_mut().on_resize(old_size, new_size);
+        }
         for child in &mut self.get_base_mut().children {
             child.update_layout(&my_layout);
         }

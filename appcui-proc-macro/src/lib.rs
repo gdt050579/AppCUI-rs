@@ -45,7 +45,12 @@ mod templates {
         fn on_default_action(&mut self){ self.base.on_default_action(); }
     }
     "; 
-
+    
+    pub static ON_RESIZE_TRAIT: &str = "
+    impl OnResize for $STRUCT_NAME$ {
+        fn on_resize(&mut self, old: Size, new: Size)  { self.base.on_resize(old, new); }
+    }
+    ";
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
@@ -72,6 +77,9 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     }
     if !a.on_default_action {
         code.push_str(templates::ON_DEFAULT_ACTION_TRAIT);
+    }
+    if !a.on_resize {
+        code.push_str(templates::ON_RESIZE_TRAIT);
     }
     // replace templates
     code = code

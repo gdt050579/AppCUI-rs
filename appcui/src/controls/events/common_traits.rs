@@ -27,4 +27,8 @@ pub trait OnMouseEvent {
 pub trait OnDefaultAction {
     fn on_default_action(&mut self) {}
 }
-pub trait Control: OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction {}
+
+pub trait OnResize {
+    fn on_resize(&mut self, old: Size, new: Size) {}
+}
+pub trait Control: OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize {}
