@@ -53,8 +53,7 @@ impl OnPaint for CheckBox {
         let sz = self.get_size();
 
         if sz.width > 4 {
-            let mut format =
-                TextFormat::new(4, 0, col_text, TextAlignament::Left, sz.height> 1);            
+            let mut format = TextFormat::new(4, 0, col_text, TextAlignament::Left, sz.height > 1);
             if format.multi_line {
                 format.text_wrap = TextWrap::Word;
                 format.width = Some(sz.width as u16 - 4);
@@ -101,24 +100,22 @@ impl OnKeyPressed for CheckBox {
     }
 }
 impl OnMouseEvent for CheckBox {
-    fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter => {
-                if self.caption.get_chars_count()>(self.get_size().width-4) as usize {
+                if self.caption.get_chars_count() > (self.get_size().width - 4) as usize {
                     self.show_tooltip(self.caption.get_text());
                 }
                 EventProcessStatus::Processed
-            },
-            MouseEvent::Leave => {
-                EventProcessStatus::Processed
-            },
+            }
+            MouseEvent::Leave => EventProcessStatus::Processed,
             MouseEvent::Released(data) => {
-                if self.is_coord_in_control(data.x,data.y) {
+                if self.is_coord_in_control(data.x, data.y) {
                     self.on_default_action();
                 }
                 EventProcessStatus::Processed
             }
-            _ => EventProcessStatus::Ignored
+            _ => EventProcessStatus::Ignored,
         }
     }
 }

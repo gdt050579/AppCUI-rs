@@ -11,7 +11,7 @@ pub(super) struct MousePositionInfo {
 impl MousePositionInfo {
     pub(super) fn new(x: i32, y: i32, menu: &Menu) -> Self {
         let mut mpi = MousePositionInfo {
-            item_index: VectorIndex::invalid(),
+            item_index: VectorIndex::Invalid,
             is_on_menu: false,
             is_on_up_button: false,
             is_on_down_button: false,
@@ -28,7 +28,7 @@ impl MousePositionInfo {
                 mpi.item_index = if (item.enabled) && (item.item_type != MenuItemType::Line) {
                     VectorIndex::with_value(item_index)
                 } else {
-                    VectorIndex::invalid()
+                    VectorIndex::Invalid
                 };
             }
         }

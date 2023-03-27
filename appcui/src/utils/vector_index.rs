@@ -10,10 +10,11 @@ pub(crate) struct VectorIndex {
 
 impl VectorIndex {
     const INVALID_INDEX: usize = usize::MAX;
-    #[inline(always)]
-    pub fn first() -> Self {
-        Self { value: 0 }
-    }
+    #[warn(non_upper_case_globals)]
+    pub (crate) const Invalid: VectorIndex = VectorIndex { value: usize::MAX };
+    #[warn(non_upper_case_globals)]
+    pub (crate) const First: VectorIndex = VectorIndex { value: 0 };
+
     #[inline(always)]
     pub fn last(count: usize) -> Self {
         Self {
@@ -27,12 +28,6 @@ impl VectorIndex {
     #[inline(always)]
     pub fn with_value(value: usize) -> Self {
         Self { value }
-    }
-    #[inline(always)]
-    pub fn invalid() -> Self {
-        Self {
-            value: Self::INVALID_INDEX,
-        }
     }
     #[inline(always)]
     pub fn index(&self) -> usize {

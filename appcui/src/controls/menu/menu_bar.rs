@@ -24,8 +24,8 @@ impl MenuBar {
             x: 0,
             y: 0,
             width: 0,
-            opened_item: VectorIndex::invalid(),
-            hovered_item: VectorIndex::invalid(),
+            opened_item: VectorIndex::Invalid,
+            hovered_item: VectorIndex::Invalid
         }
     }
     fn update_positions(&mut self) {
@@ -86,7 +86,7 @@ impl MenuBar {
             }
         } else {
             if self.hovered_item.is_valid() {
-                self.hovered_item = VectorIndex::invalid();
+                self.hovered_item = VectorIndex::Invalid;
                 return EventProcessStatus::Update;
             }
         }
@@ -94,8 +94,8 @@ impl MenuBar {
     }
 
     fn close(&mut self) {
-        self.opened_item = VectorIndex::invalid();
-        self.hovered_item = VectorIndex::invalid();
+        self.opened_item = VectorIndex::Invalid;
+        self.hovered_item = VectorIndex::Invalid;
     }
     fn open(&mut self, index: VectorIndex) {
         self.opened_item = index;

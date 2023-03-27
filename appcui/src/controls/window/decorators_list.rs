@@ -32,7 +32,7 @@ impl DecoratorsList {
     pub(super) fn new() -> Self {
         Self {
             items: Vec::with_capacity(4),
-            current: VectorIndex::invalid(),
+            current: VectorIndex::Invalid,
             pressed: false,
         }
     }

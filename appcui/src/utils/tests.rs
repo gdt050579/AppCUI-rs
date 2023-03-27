@@ -49,7 +49,7 @@ fn check_key_value_parser_text()
 #[test]
 fn check_index()
 {
-    let mut i = VectorIndex::first();
+    let mut i = VectorIndex::First;
     assert_eq!(i.index(),0);
     i = VectorIndex::last(6);
     assert_eq!(i.index(),5);

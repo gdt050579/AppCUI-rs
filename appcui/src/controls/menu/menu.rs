@@ -67,7 +67,7 @@ impl Menu {
         }
         if idx_count == 0 {
             // no items or all items are disabled
-            self.current = VectorIndex::invalid();
+            self.current = VectorIndex::Invalid;
             return;
         }
         // if CurrentItem is MenuItem::INVALID_INDEX ==> select the first available item
@@ -75,7 +75,7 @@ impl Menu {
             self.current.set(idx[0],self.items.len(),false);
         } else {
             // make sure that this->CurrentItem is part of the list
-            let mut current_idx = VectorIndex::invalid();
+            let mut current_idx = VectorIndex::Invalid;
             let mut best_diff = usize::MAX;
             for tr in 0..idx_count {
 
@@ -92,7 +92,7 @@ impl Menu {
             // sanity check
             if !current_idx.in_range(idx_count) {
                 // no item is selected
-                self.current = VectorIndex::invalid();
+                self.current = VectorIndex::Invalid;
                 return;
             }
             match key.code {
@@ -116,7 +116,7 @@ impl Menu {
                         Strategy::Clamp,
                     );
                 }
-                KeyCode::Home => current_idx = VectorIndex::first(),
+                KeyCode::Home => current_idx = VectorIndex::First,
                 KeyCode::End => current_idx = VectorIndex::last(idx_count),
                 _ => {}
             }
@@ -594,7 +594,7 @@ impl Menu {
 
         // clear selection & buttons
         self.first_visible_item = 0;
-        self.current = VectorIndex::invalid();
+        self.current = VectorIndex::Invalid;
         self.button_up = MenuButtonState::Normal;
         self.button_down = MenuButtonState::Normal;
 
