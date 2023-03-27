@@ -13,7 +13,7 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
 
-#[AppCUIControl(overwrite=OnPaint)]
+#[AppCUIControl(overwrite=OnPaint+OnResize)]
 pub struct Window {
     title: String,
     flags: WindowFlags,
@@ -177,6 +177,17 @@ impl OnPaint for Window {
         // paint the menu
         if self.menu.is_some() {
             self.menu.as_ref().unwrap().paint(surface, theme);
+        }
+    }
+}
+
+impl OnResize for Window {
+    fn on_resize(&mut self, _: Size, new_size: Size) {
+        // recompute decorator based on the new size
+        self.decorators.update_positions(new_size);
+        // recompute menu based on new size
+        if let Some(menu) = &mut self.menu {
+            menu.set_position(0, 0, new_size.width);
         }
     }
 }

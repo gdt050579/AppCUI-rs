@@ -49,7 +49,7 @@ impl MenuBar {
         }
         return None;
     }
-    fn set_position(&mut self, x: i32, y: i32, width: u32) {
+    pub (crate) fn set_position(&mut self, x: i32, y: i32, width: u32) {
         self.x = x;
         self.y = y;
         self.width = width;
