@@ -7,11 +7,13 @@ use super::DecoratorsList;
 use super::DragStatus;
 use super::WindowFlags;
 use crate::controls::events::*;
+use crate::controls::menu::Menu;
 use crate::controls::menu::MenuBar;
 use crate::controls::*;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
+use crate::utils::Caption;
 
 #[AppCUIControl(overwrite=OnPaint+OnResize)]
 pub struct Window {
@@ -118,6 +120,18 @@ impl Window {
         let c = ControlManager::new(control);
         //let v = c.get_version();
         self.children.push(c);
+    }
+    pub fn set_title(&mut self, title: &str) {
+        self.title.clear();
+        self.title.push_str(title);        
+    }
+    pub fn get_title(&self) -> &str {
+        &self.title
+    }   
+    pub fn add_menu(&mut self, menu: Menu, text: &str) {
+        if let Some(m) = &mut self.menu {
+            m.add(menu, Caption::new(text, true));  
+        }
     }
 }
 impl OnPaint for Window {

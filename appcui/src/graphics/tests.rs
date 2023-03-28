@@ -1,5 +1,5 @@
 use crate::graphics::Size;
-use crate::graphics::text_format::TextWrap;
+use crate::graphics::TextWrap;
 use crate::graphics::Point;
 use crate::graphics::Rect;
 
