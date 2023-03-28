@@ -13,8 +13,8 @@ impl DebugTerminal {
     pub(crate) fn create() -> Result<Box<dyn Terminal>,Error> {
         Ok(Box::new(DebugTerminal {
             width: 80,
-            height: 25,
-            temp_str: String::with_capacity(80 * 6),
+            height: 40,
+            temp_str: String::with_capacity(80 * 40),
         }))
     }
 }
