@@ -1,6 +1,6 @@
 use crate::utils::VectorIndex;
 
-use super::{menu_item_type::MenuItemType, Menu, MenuItem};
+use super::{menu_item_type::MenuItemType, Menu};
 
 pub(super) struct MousePositionInfo {
     pub(super) item_index: VectorIndex,

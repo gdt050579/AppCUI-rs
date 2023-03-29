@@ -1,7 +1,7 @@
 use crate::{
     graphics::{CharAttribute, Character, LineType, SpecialChar, Surface, TextFormat},
     input::{Key, KeyCode},
-    system::{MenuTheme, Theme},
+    system::{MenuTheme},
     utils::Caption,
 };
 

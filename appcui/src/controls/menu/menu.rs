@@ -3,7 +3,7 @@ use super::{
     mouse_position_info::MousePositionInfo, MenuItem,
 };
 use crate::{
-    controls::events::{Event, EventProcessStatus},
+    controls::events::EventProcessStatus,
     graphics::{
         Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
         TextFormat, TextWrap,

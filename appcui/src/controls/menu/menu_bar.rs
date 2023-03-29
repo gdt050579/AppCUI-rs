@@ -1,5 +1,5 @@
 use crate::{
-    controls::events::{Event, EventProcessStatus},
+    controls::events::EventProcessStatus,
     graphics::{Character, Surface, TextFormat, TextAlignament},
     input::{Key, KeyCode, KeyModifier},
     system::Theme,
