@@ -98,7 +98,7 @@ impl DecoratorsList {
             d.clear();
         }
         let mut top_left = PositionHelper::new(1, 0);
-        let mut top_right = PositionHelper::new((size.width as i32) - 2, 0);
+        let mut top_right = PositionHelper::new((size.width as i32) - 1, 0);
         let mut bottom_left = PositionHelper::new(1, (size.height as i32) - 1);
         let mut bottom_right =
             PositionHelper::new((size.width as i32) - 1, (size.height as i32) - 1);
