@@ -28,6 +28,9 @@ pub struct Window {
     title_left_margin: i32,
 }
 
+const MOVE_TO_LOWER_MARGIN: i32 = -100000;
+const MOVE_TO_UPPER_MARGIN: i32 = 100000;
+
 impl Window {
     pub fn new(title: &str, layout: Layout, flags: WindowFlags) -> Self {
         let mut win = Window {
@@ -146,6 +149,51 @@ impl Window {
     MoveTo(((sz.Width - Members->Layout.Width) / 2), ((sz.Height - Members->Layout.Height) / 2));
     UpdateWindowsButtonsPoz(Members);
     return true;
+        
+         */
+    }
+    fn resize_window_with(&mut self, add_to_width: i32, add_to_height: i32) {
+        let mut size = self.get_size();
+        let new_width = ((size.width as i32) + add_to_width).clamp(0, 0xFFFF);
+        let new_height = ((size.height as i32) + add_to_height).clamp(0, 0xFFFF);
+        self.set_size(size);
+        /*
+            const int w = win->GetWidth() + addToWidth;
+    const int h = win->GetHeight() + addToHeight;
+    win->Resize(w, h);
+         */
+    }
+    fn move_window_pos_to(&mut self, add_x: i32, add_y: i32, keep_in_desktop_bounderies: bool) {
+        let size = self.get_size();
+        let screen_size = RuntimeManager::get().get_size();
+        /*
+        void MoveWindowPosTo(Window* win, int addX, int addY, bool keepInDesktopBounderies)
+{
+    auto x      = win->GetX() + addX;
+    auto y      = win->GetY() + addY;
+    const int w = win->GetWidth();
+    const int h = win->GetHeight();
+    Size desktopSize;
+    if (AppCUI::Application::GetApplicationSize(desktopSize) == false)
+        return;
+    if (keepInDesktopBounderies)
+    {
+        x = std::min<>(x, ((int) desktopSize.Width) - w);
+        y = std::min<>(y, ((int) desktopSize.Height) - h);
+        x = std::max<>(0, x);
+        y = std::max<>(0, y);
+    }
+    else
+    {
+        x = std::min<>(x, ((int) desktopSize.Width) - 1);
+        y = std::min<>(y, ((int) desktopSize.Height) - 1);
+        if (x + w < 1)
+            x = 1 - w;
+        if (y + h < 1)
+            y = 1 - h;
+    }
+    win->MoveTo(x, y);
+}
         
          */
     }
@@ -272,15 +320,19 @@ impl OnKeyPressed for Window {
                     return EventProcessStatus::Processed;
                 },
                 key!("Ctrl+Up") => {
-                    self.resize_window_to(0, -1);
+                    self.resize_window_with(0, -1);
                     return EventProcessStatus::Processed;
                 },
                 key!("Ctrl+Down") => {
-                    self.resize_window_to(0, 1);
+                    self.resize_window_with(0, 1);
                     return EventProcessStatus::Processed;
                 },
                 key!("Ctrl+Left") => {
-                    self.resize_window_to(-1, 0);
+                    self.resize_window_with(-1, 0);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Ctrl+Right") => {
+                    self.resize_window_with(1, 0);
                     return EventProcessStatus::Processed;
                 },
                 
@@ -675,36 +727,11 @@ void WindowRadioButtonClicked(WindowBarItem* start, WindowBarItem* end, WindowBa
 }
 void MoveWindowPosTo(Window* win, int addX, int addY, bool keepInDesktopBounderies)
 {
-    auto x      = win->GetX() + addX;
-    auto y      = win->GetY() + addY;
-    const int w = win->GetWidth();
-    const int h = win->GetHeight();
-    Size desktopSize;
-    if (AppCUI::Application::GetApplicationSize(desktopSize) == false)
-        return;
-    if (keepInDesktopBounderies)
-    {
-        x = std::min<>(x, ((int) desktopSize.Width) - w);
-        y = std::min<>(y, ((int) desktopSize.Height) - h);
-        x = std::max<>(0, x);
-        y = std::max<>(0, y);
-    }
-    else
-    {
-        x = std::min<>(x, ((int) desktopSize.Width) - 1);
-        y = std::min<>(y, ((int) desktopSize.Height) - 1);
-        if (x + w < 1)
-            x = 1 - w;
-        if (y + h < 1)
-            y = 1 - h;
-    }
-    win->MoveTo(x, y);
+    // done
 }
 void ResizeWindow(Window* win, int addToWidth, int addToHeight)
 {
-    const int w = win->GetWidth() + addToWidth;
-    const int h = win->GetHeight() + addToHeight;
-    win->Resize(w, h);
+    // done
 }
 //=========================================================================================================================================================
 ItemHandle Controls::WindowControlsBar::AddCommandItem(const ConstString& name, int ID, const ConstString& toolTip)
