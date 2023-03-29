@@ -133,6 +133,22 @@ impl Window {
             m.add(menu, Caption::new(text, true));  
         }
     }
+    fn center_to_screen(&mut self) {
+        let screen_size = RuntimeManager::get().get_size();
+        let win_size = self.get_size();
+        let x = (screen_size.width as i32 - win_size.width as i32) / 2;
+        let y = (screen_size.height as i32 - win_size.height as i32) / 2;
+
+        /*
+            CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
+    Size sz;
+    CHECK(Application::GetDesktopSize(sz), false, "Fail to get desktop size !");
+    MoveTo(((sz.Width - Members->Layout.Width) / 2), ((sz.Height - Members->Layout.Height) / 2));
+    UpdateWindowsButtonsPoz(Members);
+    return true;
+        
+         */
+    }
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -282,18 +298,6 @@ impl OnKeyPressed for Window {
         switch (KeyCode)
         {
         
-        case Key::Ctrl | Key::Up:
-            ResizeWindow(this, 0, -1);
-            return true;
-        case Key::Ctrl | Key::Down:
-            ResizeWindow(this, 0, 1);
-            return true;
-        case Key::Ctrl | Key::Left:
-            ResizeWindow(this, -1, 0);
-            return true;
-        case Key::Ctrl | Key::Right:
-            ResizeWindow(this, 1, 0);
-            return true;
         }
     }
     else
@@ -987,12 +991,7 @@ bool Window::MaximizeRestore()
 }
 bool Window::CenterScreen()
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    Size sz;
-    CHECK(Application::GetDesktopSize(sz), false, "Fail to get desktop size !");
-    MoveTo(((sz.Width - Members->Layout.Width) / 2), ((sz.Height - Members->Layout.Height) / 2));
-    UpdateWindowsButtonsPoz(Members);
-    return true;
+//
 }
 void Window::OnMousePressed(int x, int y, Input::MouseButton button)
 {

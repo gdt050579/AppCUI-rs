@@ -51,6 +51,12 @@ impl RuntimeManager {
     pub(crate) fn get() -> &'static mut RuntimeManager {
         unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
     }
+    pub(crate) fn get_size(&self) -> Size {
+        Size {
+            width: self.terminal.get_width(),
+            height: self.terminal.get_height(),
+        }
+    }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
         self.tooltip.show(
             txt,
