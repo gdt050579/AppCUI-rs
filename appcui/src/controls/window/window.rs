@@ -1,4 +1,4 @@
-use AppCUIProcMacro::AppCUIControl;
+use AppCUIProcMacro::*;
 
 use super::decorator::DecoratorLayout;
 use super::Decorator;
@@ -15,7 +15,7 @@ use crate::input::*;
 use crate::system::*;
 use crate::utils::Caption;
 
-#[AppCUIControl(overwrite=OnPaint+OnResize)]
+#[AppCUIControl(overwrite=OnPaint+OnResize+OnKeyPressed)]
 pub struct Window {
     title: String,
     flags: WindowFlags,
@@ -204,6 +204,189 @@ impl OnResize for Window {
             menu.set_position(0, 0, new_size.width);
         }
     }
+}
+
+impl OnKeyPressed for Window {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        if self.resize_move_mode {
+            match key.get_compact_code() {
+                key!("Escape") | key!("Enter") | key!("Space") | key!("Tab") => {
+                    self.resize_move_mode = false;
+                    return EventProcessStatus::Processed;
+                },
+                key!("Up") => {
+                    self.move_window_pos_to(0, -1, false);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Down") => {
+                    self.move_window_pos_to(0, 1, false);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Left") => {
+                    self.move_window_pos_to(-1, 0, false);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Right") => {
+                    self.move_window_pos_to(1, 0, false);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Alt+Up") => {
+                    self.move_window_pos_to(0, MOVE_TO_LOWER_MARGIN, true);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Alt+Down") => {
+                    self.move_window_pos_to(0, MOVE_TO_UPPER_MARGIN, true);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Alt+Left") => {
+                    self.move_window_pos_to(MOVE_TO_LOWER_MARGIN, 0, true);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Alt+Right") => {
+                    self.move_window_pos_to(MOVE_TO_UPPER_MARGIN, 0, true);
+                    return EventProcessStatus::Processed;
+                },
+                key!("C") => {
+                    self.center_to_screen();
+                    return EventProcessStatus::Processed;
+                },
+                key!("M") | key!("R") => {
+                    self.maximize_restore();
+                    self.update_decorators();
+                    return EventProcessStatus::Processed;
+                },
+                key!("Ctrl+Up") => {
+                    self.resize_window_to(0, -1);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Ctrl+Down") => {
+                    self.resize_window_to(0, 1);
+                    return EventProcessStatus::Processed;
+                },
+                key!("Ctrl+Left") => {
+                    self.resize_window_to(-1, 0);
+                    return EventProcessStatus::Processed;
+                },
+                
+                _ => return EventProcessStatus::Ignored,
+            }
+        } else {}
+        EventProcessStatus::Ignored
+    }
+    /*
+    Control* tmp;
+    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
+
+    if (Members->ResizeMoveMode)
+    {
+        switch (KeyCode)
+        {
+        
+        case Key::Ctrl | Key::Up:
+            ResizeWindow(this, 0, -1);
+            return true;
+        case Key::Ctrl | Key::Down:
+            ResizeWindow(this, 0, 1);
+            return true;
+        case Key::Ctrl | Key::Left:
+            ResizeWindow(this, -1, 0);
+            return true;
+        case Key::Ctrl | Key::Right:
+            ResizeWindow(this, 1, 0);
+            return true;
+        }
+    }
+    else
+    {
+        switch (KeyCode)
+        {
+        case Key::Ctrl | Key::Alt | Key::M:
+        case Key::Ctrl | Key::Alt | Key::R:
+            Members->ResizeMoveMode = true;
+            return true;
+
+        case Key::Tab | Key::Shift:
+            tmp = FindNextControl(this, false, true, true, true);
+            if (tmp != nullptr)
+                tmp->SetFocus();
+            return true;
+        case Key::Tab:
+            tmp = FindNextControl(this, true, true, true, true);
+            if (tmp != nullptr)
+                tmp->SetFocus();
+            return true;
+        case Key::Left:
+        case Key::Left | Key::Ctrl:
+        case Key::Left | Key::Alt:
+            tmp = FindClosestControl(this, MoveDirection::ToLeft);
+            if (tmp != nullptr)
+                tmp->SetFocus();
+            return true;
+        case Key::Right:
+        case Key::Right | Key::Ctrl:
+        case Key::Right | Key::Alt:
+            tmp = FindClosestControl(this, MoveDirection::ToRight);
+            if (tmp != nullptr)
+                tmp->SetFocus();
+            return true;
+        case Key::Up:
+        case Key::Up | Key::Ctrl:
+        case Key::Up | Key::Alt:
+            tmp = FindClosestControl(this, MoveDirection::ToTop);
+            if (tmp != nullptr)
+                tmp->SetFocus();
+            return true;
+        case Key::Down:
+        case Key::Down | Key::Ctrl:
+        case Key::Down | Key::Alt:
+            tmp = FindClosestControl(this, MoveDirection::ToBottom);
+            if (tmp != nullptr)
+                tmp->SetFocus();
+            return true;
+        case Key::Escape:
+            if (!(Members->Flags && WindowFlags::NoCloseButton))
+            {
+                RaiseEvent(Event::WindowClose);
+                return true;
+            }
+            return false;
+        case Key::Enter:
+            if (Members->Flags && WindowFlags::ProcessReturn)
+            {
+                RaiseEvent(Event::WindowAccept);
+                return true;
+            }
+            return false;
+        }
+        // first we check menu hot keys
+        if (Members->menu)
+        {
+            if (Members->menu->OnKeyEvent(KeyCode))
+                return true;
+        }
+        // check cntrols hot keys
+        if ((((uint32) KeyCode) & (uint32) (Key::Shift | Key::Alt | Key::Ctrl)) == ((uint32) Key::Alt))
+        {
+            if (ProcessHotKey(this, KeyCode))
+                return true;
+            auto* b = Members->ControlBar.Items;
+            auto* e = b + Members->ControlBar.Count;
+            while (b < e)
+            {
+                if (b->HotKey == KeyCode)
+                {
+                    if (ProcessControlBarItem((uint32) (b - Members->ControlBar.Items)))
+                        return true;
+                }
+                b++;
+            }
+        }
+    }
+    // key was not prcessed, pass it to my parent
+    return false;    
+    
+    
+     */
 }
 
 /*
@@ -1026,152 +1209,7 @@ bool Window::OnEvent(Reference<Control>, Event eventType, int)
 }
 bool Window::OnKeyEvent(Input::Key KeyCode, char16)
 {
-    Control* tmp;
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-
-    if (Members->ResizeMoveMode)
-    {
-        switch (KeyCode)
-        {
-        case Key::Escape:
-        case Key::Enter:
-        case Key::Space:
-        case Key::Tab:
-            Members->ResizeMoveMode = false;
-            return true;
-        case Key::Up:
-            MoveWindowPosTo(this, 0, -1, false);
-            return true;
-        case Key::Down:
-            MoveWindowPosTo(this, 0, 1, false);
-            return true;
-        case Key::Left:
-            MoveWindowPosTo(this, -1, 0, false);
-            return true;
-        case Key::Right:
-            MoveWindowPosTo(this, 1, 0, false);
-            return true;
-        case Key::Alt | Key::Up:
-            MoveWindowPosTo(this, 0, MOVE_TO_LOWER_MARGIN, true);
-            return true;
-        case Key::Alt | Key::Down:
-            MoveWindowPosTo(this, 0, MOVE_TO_UPPER_MARGIN, true);
-            return true;
-        case Key::Alt | Key::Left:
-            MoveWindowPosTo(this, MOVE_TO_LOWER_MARGIN, 0, true);
-            return true;
-        case Key::Alt | Key::Right:
-            MoveWindowPosTo(this, MOVE_TO_UPPER_MARGIN, 0, true);
-            return true;
-        case Key::C:
-            CenterScreen();
-            return true;
-        case Key::M:
-        case Key::R:
-            MaximizeRestore();
-            return true;
-        case Key::Ctrl | Key::Up:
-            ResizeWindow(this, 0, -1);
-            return true;
-        case Key::Ctrl | Key::Down:
-            ResizeWindow(this, 0, 1);
-            return true;
-        case Key::Ctrl | Key::Left:
-            ResizeWindow(this, -1, 0);
-            return true;
-        case Key::Ctrl | Key::Right:
-            ResizeWindow(this, 1, 0);
-            return true;
-        }
-    }
-    else
-    {
-        switch (KeyCode)
-        {
-        case Key::Ctrl | Key::Alt | Key::M:
-        case Key::Ctrl | Key::Alt | Key::R:
-            Members->ResizeMoveMode = true;
-            return true;
-
-        case Key::Tab | Key::Shift:
-            tmp = FindNextControl(this, false, true, true, true);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Tab:
-            tmp = FindNextControl(this, true, true, true, true);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Left:
-        case Key::Left | Key::Ctrl:
-        case Key::Left | Key::Alt:
-            tmp = FindClosestControl(this, MoveDirection::ToLeft);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Right:
-        case Key::Right | Key::Ctrl:
-        case Key::Right | Key::Alt:
-            tmp = FindClosestControl(this, MoveDirection::ToRight);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Up:
-        case Key::Up | Key::Ctrl:
-        case Key::Up | Key::Alt:
-            tmp = FindClosestControl(this, MoveDirection::ToTop);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Down:
-        case Key::Down | Key::Ctrl:
-        case Key::Down | Key::Alt:
-            tmp = FindClosestControl(this, MoveDirection::ToBottom);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Escape:
-            if (!(Members->Flags && WindowFlags::NoCloseButton))
-            {
-                RaiseEvent(Event::WindowClose);
-                return true;
-            }
-            return false;
-        case Key::Enter:
-            if (Members->Flags && WindowFlags::ProcessReturn)
-            {
-                RaiseEvent(Event::WindowAccept);
-                return true;
-            }
-            return false;
-        }
-        // first we check menu hot keys
-        if (Members->menu)
-        {
-            if (Members->menu->OnKeyEvent(KeyCode))
-                return true;
-        }
-        // check cntrols hot keys
-        if ((((uint32) KeyCode) & (uint32) (Key::Shift | Key::Alt | Key::Ctrl)) == ((uint32) Key::Alt))
-        {
-            if (ProcessHotKey(this, KeyCode))
-                return true;
-            auto* b = Members->ControlBar.Items;
-            auto* e = b + Members->ControlBar.Count;
-            while (b < e)
-            {
-                if (b->HotKey == KeyCode)
-                {
-                    if (ProcessControlBarItem((uint32) (b - Members->ControlBar.Items)))
-                        return true;
-                }
-                b++;
-            }
-        }
-    }
-    // key was not prcessed, pass it to my parent
-    return false;
+    // done
 }
 void Window::OnHotKeyChanged()
 {
