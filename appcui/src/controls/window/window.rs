@@ -156,7 +156,6 @@ impl Window {
         let mut size = self.get_size();
         let new_width = ((size.width as i32) + add_to_width).clamp(0, 0xFFFF);
         let new_height = ((size.height as i32) + add_to_height).clamp(0, 0xFFFF);
-        self.set_size(size);
         /*
             const int w = win->GetWidth() + addToWidth;
     const int h = win->GetHeight() + addToHeight;
@@ -196,6 +195,34 @@ impl Window {
 }
         
          */
+    }
+
+    fn maximize_restore(&mut self) {
+/*
+    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
+    if (Members->Maximized == false)
+    {
+        Members->oldPosX = GetX();
+        Members->oldPosY = GetY();
+        Members->oldW    = GetWidth();
+        Members->oldH    = GetHeight();
+        Size sz;
+        CHECK(Application::GetDesktopSize(sz), false, "Fail to get desktop size");
+        this->MoveTo(0, 0);
+        if (this->Resize(sz.Width, sz.Height))
+            Members->Maximized = true;
+    }
+    else
+    {
+        this->MoveTo(Members->oldPosX, Members->oldPosY);
+        this->Resize(Members->oldW, Members->oldH);
+        Members->Maximized = false;
+    }
+    UpdateWindowsButtonsPoz(Members);
+    AppCUI::Application::GetApplication()->RepaintStatus = REPAINT_STATUS_COMPUTE_POSITION;
+    return true;
+
+ */        
     }
 }
 impl OnPaint for Window {
@@ -316,7 +343,6 @@ impl OnKeyPressed for Window {
                 },
                 key!("M") | key!("R") => {
                     self.maximize_restore();
-                    self.update_decorators();
                     return EventProcessStatus::Processed;
                 },
                 key!("Ctrl+Up") => {
@@ -993,28 +1019,7 @@ void Window::Paint(Graphics::Renderer& renderer)
 }
 bool Window::MaximizeRestore()
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    if (Members->Maximized == false)
-    {
-        Members->oldPosX = GetX();
-        Members->oldPosY = GetY();
-        Members->oldW    = GetWidth();
-        Members->oldH    = GetHeight();
-        Size sz;
-        CHECK(Application::GetDesktopSize(sz), false, "Fail to get desktop size");
-        this->MoveTo(0, 0);
-        if (this->Resize(sz.Width, sz.Height))
-            Members->Maximized = true;
-    }
-    else
-    {
-        this->MoveTo(Members->oldPosX, Members->oldPosY);
-        this->Resize(Members->oldW, Members->oldH);
-        Members->Maximized = false;
-    }
-    UpdateWindowsButtonsPoz(Members);
-    AppCUI::Application::GetApplication()->RepaintStatus = REPAINT_STATUS_COMPUTE_POSITION;
-    return true;
+    // done
 }
 bool Window::CenterScreen()
 {
