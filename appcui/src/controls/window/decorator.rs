@@ -136,6 +136,10 @@ impl Decorator {
         self.status |= StatusFlags::Hidden;
     }
     #[inline(always)]
+    pub(super) fn unhide(&mut self) {
+        self.status.remove(StatusFlags::Hidden);
+    }
+    #[inline(always)]
     pub(super) fn set_right_marker(&mut self) {
         self.status |= StatusFlags::RightGroupMarker;
     }
@@ -161,6 +165,19 @@ impl Decorator {
     #[inline(always)]
     pub(super) fn get_layout(&self) -> DecoratorLayout {
         self.layout
+    }
+
+    pub(super) fn set_text(&mut self, text: &str, process_hotkey: bool) {
+        self.text.set_text(text, process_hotkey);
+    }
+    pub(super) fn get_text(&self) -> &str {
+        self.text.get_text()
+    }
+    pub(super) fn set_tooltip(&mut self, tooltip: &str) {
+        self.tooltip.clear();
+        if tooltip.len()>0 {
+            self.tooltip.push_str(tooltip);
+        }
     }
 
     fn paint_hotkey(

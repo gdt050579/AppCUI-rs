@@ -224,6 +224,17 @@ impl Window {
 
  */        
     }
+    pub fn set_tag(&mut self, name: &str) {
+        self.decorators.set_tag(name);
+        self.decorators.update_positions(self.get_size());
+    }
+    pub fn get_tag(&self) -> Option<&str> {
+        self.decorators.get_tag()
+    }
+    pub fn clear_tag(&mut self) {
+        self.decorators.set_tag("");
+        self.decorators.update_positions(self.get_size());
+    }
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -1273,43 +1284,11 @@ void Window::OnHotKeyChanged()
 }
 void Window::SetTag(const ConstString& name, const ConstString& toolTipText)
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, );
-    // find tag win button
-    WindowBarItem* b = nullptr;
-    for (uint32 tr = 0; tr < Members->ControlBar.Count; tr++)
-        if (Members->ControlBar.Items[tr].Type == WindowBarItemType::Tag)
-        {
-            b = &Members->ControlBar.Items[tr];
-            break;
-        }
-    // sanity check (in reality the pointer should always be valid)
-    if (!b)
-        return;
-    if (!b->ToolTipText.Set(toolTipText))
-        return;
-    if (!b->Text.Set(name))
-        return;
-    if (b->Text.Len() > MAX_TAG_CHARS)
-        if (!b->Text.Delete(MAX_TAG_CHARS, b->Text.Len()))
-            return;
-    // all good
-    b->Size = (int) (b->Text.Len() + 2);
-    b->RemoveFlag(WindowBarItemFlags::Hidden);
-    UpdateWindowsButtonsPoz(Members);
+    // done
 }
 const Graphics::CharacterBuffer& Window::GetTag()
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, tempReferenceChBuf);
-    // find tag win button
-    for (uint32 tr = 0; tr < Members->ControlBar.Count; tr++)
-    {
-        if (Members->ControlBar.Items[tr].Type == WindowBarItemType::Tag)
-        {
-            return Members->ControlBar.Items[tr].Text;
-        }
-    }
-
-    return tempReferenceChBuf;
+    // done
 }
 
 bool Window::Exit(Dialogs::Result dialogResult)

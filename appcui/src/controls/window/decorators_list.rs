@@ -22,6 +22,7 @@ impl PositionHelper {
     }
 }
 
+const MAX_TAG_CHARS: usize = 8;
 pub(super) struct DecoratorsList {
     items: Vec<Decorator>,
     current: VectorIndex,
@@ -142,6 +143,39 @@ impl DecoratorsList {
         let title_x_pos = top_left.x+1;
         let title_space = (top_right.x - title_x_pos).max(0);
         (title_x_pos, title_space as u16)
+    }
+    pub(super) fn set_tag(&mut self, name: &str) {
+        for d in &mut self.items {
+            if d.get_type() == DecoratorType::Tag {
+                if name.len() == 0 {
+                    d.hide();
+                    break;
+                }
+                if name.len()>MAX_TAG_CHARS {
+                    d.set_text(&name[..MAX_TAG_CHARS],false);
+                } else {
+                    d.set_text(name,false);
+                }
+                d.set_tooltip(name);
+                d.unhide();
+                break;
+            }
+        }
+    }
+    pub(super) fn get_tag(&self) -> Option<&str> {
+        for d in &self.items {
+            if d.get_type() == DecoratorType::Tag {
+                if d.is_hidden() {
+                    return None;
+                }
+                let tag_name = d.get_text();
+                if tag_name.len() == 0 {
+                    return None;
+                }
+                return Some(tag_name);
+            }
+        }
+        None
     }
 }
 
