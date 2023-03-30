@@ -36,8 +36,8 @@ impl MenuBar {
         }
     }
     fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
-        let mut x = x - self.x;
-        let mut y = y - self.y;
+        let x = x - self.x;
+        let y = y - self.y;
 
         if y != 0 {
             return None;
