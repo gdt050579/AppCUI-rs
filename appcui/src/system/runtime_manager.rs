@@ -1,7 +1,7 @@
 use super::{CommandBar, InitializationData, InitializationFlags, Theme, ToolTip};
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
-use crate::controls::menu::{MenuBar, Menu};
+use crate::controls::menu::{Menu, MenuBar};
 use crate::controls::ControlManager;
 use crate::controls::*;
 use crate::graphics::{Rect, Size, Surface};
@@ -90,15 +90,15 @@ impl RuntimeManager {
     }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
         if self.menubar.is_some() {
-            self.menubar.as_mut().unwrap().add(menu,caption);
+            self.menubar.as_mut().unwrap().add(menu, caption);
         }
     }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
         if self.recompute_layout {
-        self.recompute_layouts();
+            self.recompute_layouts();
         }
-        if self.repaint {
+        if self.repaint | self.recompute_layout {
             self.paint();
         }
         self.recompute_layout = false;
@@ -160,11 +160,12 @@ impl RuntimeManager {
         }
         self.surface.resize(new_size);
         self.terminal.on_resize(new_size);
-        if let Some(commandbar)=self.commandbar.as_mut(){
+        if let Some(commandbar) = self.commandbar.as_mut() {
             commandbar.set_desktop_size(new_size);
         }
         if let Some(menubar) = self.menubar.as_mut() {
             menubar.set_position(0, 0, new_size.width);
         }
+        self.recompute_layout = true;
     }
 }
