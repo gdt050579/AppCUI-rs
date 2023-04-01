@@ -218,11 +218,15 @@ impl Window {
             self.old_rect = Rect::with_point_and_size(self.get_position(), self.get_size());
             let desktop_rect = RuntimeManager::get().get_desktop_rect();
             self.set_position(desktop_rect.get_left(), desktop_rect.get_top());
-            self.set_size(desktop_rect.get_width(), desktop_rect.get_height());
+            self.set_size(desktop_rect.get_width() as u16, desktop_rect.get_height() as u16);
             self.maximized = true;
         } else {
-            self.set_position(self.old_rect.get_left(), self.old_rect.get_top());
-            self.set_size(self.old_rect.get_width(), self.old_rect.get_height());
+            let l = self.old_rect.get_left();
+            let t = self.old_rect.get_top();
+            self.set_position(l,t);
+            let w = self.old_rect.get_width() as u16;
+            let h = self.old_rect.get_height() as u16;
+            self.set_size(w, h);
             self.maximized = false;
         }
     }

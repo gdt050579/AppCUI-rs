@@ -60,12 +60,24 @@ impl ControlBase {
         }
     }
     #[inline(always)]
+    pub fn set_size(&mut self, width: u16, height: u16)  {
+        self.layout.resize(width, height);
+    }
+
+
+    #[inline(always)]
     pub fn get_position(&self) -> Point {
         Point {
             x: self.layout.get_x() as i32,
             y: self.layout.get_y() as i32,
         }
     }
+    pub fn set_position(&mut self, x: i32, y: i32) {
+        self.layout.set_position(x, y);
+        //GDT: we should change the layout mode
+        RuntimeManager::get().request_recompute_layout();
+    }
+
     #[inline]
     pub fn is_visible(&self) -> bool {
         self.status_flags.contains(StatusFlags::Visible)
@@ -100,11 +112,7 @@ impl ControlBase {
             .set_size_bounds(min_width, min_height, max_width, max_height);
     }
 
-    pub fn set_position(&mut self, x: i32, y: i32) {
-        self.layout.set_position(x, y);
-        //GDT: we should change the layout mode
-        RuntimeManager::get().request_recompute_layout();
-    }
+
     #[inline]
     pub (crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
         self.margins.left = left;

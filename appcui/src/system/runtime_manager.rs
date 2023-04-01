@@ -62,22 +62,18 @@ impl RuntimeManager {
         }
     }
     pub(crate) fn get_desktop_rect(&self) -> Rect {
-        Rect {
-            left: 0,
-            top: if self.menubar.is_some() {
-                1
-            } else {
-                0
-            },
-            right: (self.terminal.get_width() as i32) - 1,
-            bottom: if self.commandbar.is_some() {
+        Rect::new(
+            0,
+            if self.menubar.is_some() { 1 } else { 0 },
+            (self.terminal.get_width() as i32) - 1,
+            if self.commandbar.is_some() {
                 (self.terminal.get_height() as i32) - 2
             } else {
                 (self.terminal.get_height() as i32) - 1
             },
-        }
+        )
     }
-    pub(crate) fn request_paint(&mut self) {
+    pub(crate) fn request_repaint(&mut self) {
         self.repaint = true;
     }
     pub(crate) fn request_recompute_layout(&mut self) {
