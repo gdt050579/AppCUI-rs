@@ -17,12 +17,11 @@ use crate::utils::Caption;
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
-enum MoveDirection
-{
+enum MoveDirection {
     ToLeft,
     ToRight,
     ToTop,
-    ToBottom
+    ToBottom,
 }
 
 #[AppCUIControl(overwrite=OnPaint+OnResize+OnKeyPressed)]
@@ -36,13 +35,14 @@ pub struct Window {
     drag_status: DragStatus,
     title_max_width: u16,
     title_left_margin: i32,
+    old_rect: Rect,
 }
 
 const MOVE_TO_LOWER_MARGIN: i32 = -100000;
 const MOVE_TO_UPPER_MARGIN: i32 = 100000;
 
 impl Window {
-    fn point_to_point_distance(origin_rect: Rect, object_rect: Rect, dir: MoveDirection)->u32 {
+    fn point_to_point_distance(origin_rect: Rect, object_rect: Rect, dir: MoveDirection) -> u32 {
         let origin: Point;
         let object: Point;
         match dir {
@@ -54,7 +54,7 @@ impl Window {
                 if object.x >= origin.x {
                     return u32::MAX;
                 }
-            },
+            }
             MoveDirection::ToRight => {
                 // we need to have <origin>[space]<object>
                 object = Point::new(object_rect.get_left(), object_rect.get_top());
@@ -62,7 +62,7 @@ impl Window {
                 if object.x <= origin.x {
                     return u32::MAX;
                 }
-            },
+            }
             MoveDirection::ToTop => {
                 // we need to have <object>[space]<origin>
                 object = Point::new(object_rect.get_left(), object_rect.get_bottom());
@@ -70,7 +70,7 @@ impl Window {
                 if object.y >= origin.y {
                     return u32::MAX;
                 }
-            },
+            }
             MoveDirection::ToBottom => {
                 // we need to have <origin>[space]<object>
                 object = Point::new(object_rect.get_left(), object_rect.get_top());
@@ -78,9 +78,10 @@ impl Window {
                 if object.y <= origin.y {
                     return u32::MAX;
                 }
-            },
+            }
         }
-        return (((object.x - origin.x) * (object.x - origin.x)) as u32)+ (((object.y - origin.y) * (object.y - origin.y)) as u32);
+        return (((object.x - origin.x) * (object.x - origin.x)) as u32)
+            + (((object.y - origin.y) * (object.y - origin.y)) as u32);
     }
     pub fn new(title: &str, layout: Layout, flags: WindowFlags) -> Self {
         let mut win = Window {
@@ -97,6 +98,7 @@ impl Window {
             drag_status: DragStatus::None,
             title_max_width: 0,
             title_left_margin: 0,
+            old_rect: Rect::new(0, 0, 0, 0),
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
@@ -133,12 +135,8 @@ impl Window {
         win.decorators.add(hotkey_decorator);
 
         // tag
-        let mut tag_decorator = Decorator::with_type(
-            DecoratorType::Tag,
-            DecoratorLayout::TopRight,
-            3,
-            "",
-        );
+        let mut tag_decorator =
+            Decorator::with_type(DecoratorType::Tag, DecoratorLayout::TopRight, 3, "");
         tag_decorator.hide();
         win.decorators.add(tag_decorator);
 
@@ -176,14 +174,14 @@ impl Window {
     }
     pub fn set_title(&mut self, title: &str) {
         self.title.clear();
-        self.title.push_str(title);        
+        self.title.push_str(title);
     }
     pub fn get_title(&self) -> &str {
         &self.title
-    }   
+    }
     pub fn add_menu(&mut self, menu: Menu, text: &str) {
         if let Some(m) = &mut self.menu {
-            m.add(menu, Caption::new(text, true));  
+            m.add(menu, Caption::new(text, true));
         }
     }
     fn center_to_screen(&mut self) {
@@ -191,79 +189,42 @@ impl Window {
         let win_size = self.get_size();
         let x = (screen_size.width as i32 - win_size.width as i32) / 2;
         let y = (screen_size.height as i32 - win_size.height as i32) / 2;
-        self.set_position(x, y);        
+        self.set_position(x, y);
     }
     fn resize_window_with(&mut self, add_to_width: i32, add_to_height: i32) {
         let mut size = self.get_size();
         let new_width = ((size.width as i32) + add_to_width).clamp(0, 0xFFFF);
         let new_height = ((size.height as i32) + add_to_height).clamp(0, 0xFFFF);
         /*
-            const int w = win->GetWidth() + addToWidth;
-    const int h = win->GetHeight() + addToHeight;
-    win->Resize(w, h);
-         */
+        win->Resize(w, h);
+             */
     }
     fn move_window_pos_to(&mut self, add_x: i32, add_y: i32, keep_in_desktop_bounderies: bool) {
         let size = self.get_size();
         let screen_size = RuntimeManager::get().get_terminal_size();
-        /*
-        void MoveWindowPosTo(Window* win, int addX, int addY, bool keepInDesktopBounderies)
-{
-    auto x      = win->GetX() + addX;
-    auto y      = win->GetY() + addY;
-    const int w = win->GetWidth();
-    const int h = win->GetHeight();
-    Size desktopSize;
-    if (AppCUI::Application::GetApplicationSize(desktopSize) == false)
-        return;
-    if (keepInDesktopBounderies)
-    {
-        x = std::min<>(x, ((int) desktopSize.Width) - w);
-        y = std::min<>(y, ((int) desktopSize.Height) - h);
-        x = std::max<>(0, x);
-        y = std::max<>(0, y);
-    }
-    else
-    {
-        x = std::min<>(x, ((int) desktopSize.Width) - 1);
-        y = std::min<>(y, ((int) desktopSize.Height) - 1);
-        if (x + w < 1)
-            x = 1 - w;
-        if (y + h < 1)
-            y = 1 - h;
-    }
-    win->MoveTo(x, y);
-}
-        
-         */
+        let mut pos = self.get_position();
+        if keep_in_desktop_bounderies {
+            pos.x = (pos.x + add_x).clamp(0, screen_size.width as i32 - size.width as i32);
+            pos.y = (pos.y + add_y).clamp(0, screen_size.height as i32 - size.height as i32);
+        } else {
+            pos.x = (pos.x + add_x).clamp(0, screen_size.width as i32 - 1);
+            pos.y = (pos.y + add_y).clamp(0, screen_size.height as i32 - 1);
+        }
+        self.set_position(pos.x, pos.y);
     }
 
     fn maximize_restore(&mut self) {
-/*
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    if (Members->Maximized == false)
-    {
-        Members->oldPosX = GetX();
-        Members->oldPosY = GetY();
-        Members->oldW    = GetWidth();
-        Members->oldH    = GetHeight();
-        Size sz;
-        CHECK(Application::GetDesktopSize(sz), false, "Fail to get desktop size");
-        this->MoveTo(0, 0);
-        if (this->Resize(sz.Width, sz.Height))
-            Members->Maximized = true;
-    }
-    else
-    {
-        this->MoveTo(Members->oldPosX, Members->oldPosY);
-        this->Resize(Members->oldW, Members->oldH);
-        Members->Maximized = false;
-    }
-    UpdateWindowsButtonsPoz(Members);
-    AppCUI::Application::GetApplication()->RepaintStatus = REPAINT_STATUS_COMPUTE_POSITION;
-    return true;
-
- */        
+        if self.maximized == false {
+            self.old_rect = Rect::with_point_and_size(self.get_position(), self.get_size());
+            let desktop_rect = RuntimeManager::get().get_desktop_rect();
+            self.set_position(desktop_rect.get_left(), desktop_rect.get_top());
+            self.set_size(desktop_rect.get_width(), desktop_rect.get_height());
+            self.maximized = true;
+        } else {
+            self.set_position(self.old_rect.get_left(), self.old_rect.get_top());
+            self.set_size(self.old_rect.get_width(), self.old_rect.get_height());
+            self.maximized = false;
+        }
     }
     pub fn set_tag(&mut self, name: &str) {
         self.decorators.set_tag(name);
@@ -356,67 +317,68 @@ impl OnKeyPressed for Window {
                 key!("Escape") | key!("Enter") | key!("Space") | key!("Tab") => {
                     self.resize_move_mode = false;
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Up") => {
                     self.move_window_pos_to(0, -1, false);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Down") => {
                     self.move_window_pos_to(0, 1, false);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Left") => {
                     self.move_window_pos_to(-1, 0, false);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Right") => {
                     self.move_window_pos_to(1, 0, false);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Alt+Up") => {
                     self.move_window_pos_to(0, MOVE_TO_LOWER_MARGIN, true);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Alt+Down") => {
                     self.move_window_pos_to(0, MOVE_TO_UPPER_MARGIN, true);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Alt+Left") => {
                     self.move_window_pos_to(MOVE_TO_LOWER_MARGIN, 0, true);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Alt+Right") => {
                     self.move_window_pos_to(MOVE_TO_UPPER_MARGIN, 0, true);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("C") => {
                     self.center_to_screen();
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("M") | key!("R") => {
                     self.maximize_restore();
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Ctrl+Up") => {
                     self.resize_window_with(0, -1);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Ctrl+Down") => {
                     self.resize_window_with(0, 1);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Ctrl+Left") => {
                     self.resize_window_with(-1, 0);
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Ctrl+Right") => {
                     self.resize_window_with(1, 0);
                     return EventProcessStatus::Processed;
-                },
-                
+                }
+
                 _ => return EventProcessStatus::Ignored,
             }
-        } else {}
+        } else {
+        }
         EventProcessStatus::Ignored
     }
     /*
@@ -427,7 +389,7 @@ impl OnKeyPressed for Window {
     {
         switch (KeyCode)
         {
-        
+
         }
     }
     else
@@ -517,9 +479,9 @@ impl OnKeyPressed for Window {
         }
     }
     // key was not prcessed, pass it to my parent
-    return false;    
-    
-    
+    return false;
+
+
      */
 }
 

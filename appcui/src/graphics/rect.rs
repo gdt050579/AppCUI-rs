@@ -1,3 +1,5 @@
+use super::{Size, Point};
+
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Alignament {
@@ -63,6 +65,14 @@ impl Rect {
             top: y,
             right: x + (width as i32).max(1) - 1,
             bottom: y + (height as i32).max(1) - 1,
+        }
+    }
+    pub fn with_point_and_size(point: Point, size: Size)->Self {
+        Rect {
+            left: point.x,
+            top: point.y,
+            right: point.x + (size.width as i32).max(1) - 1,
+            bottom: point.y + (size.height as i32).max(1) - 1,
         }
     }
     #[inline]

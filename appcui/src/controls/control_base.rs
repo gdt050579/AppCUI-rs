@@ -52,11 +52,18 @@ impl ControlBase {
             hotkey: Key::default(),
         }
     }
-    #[inline]
+    #[inline(always)]
     pub fn get_size(&self) -> Size {
         Size {
             width: self.layout.get_width() as u32,
             height: self.layout.get_height() as u32,
+        }
+    }
+    #[inline(always)]
+    pub fn get_position(&self) -> Point {
+        Point {
+            x: self.layout.get_x() as i32,
+            y: self.layout.get_y() as i32,
         }
     }
     #[inline]
