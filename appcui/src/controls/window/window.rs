@@ -15,6 +15,16 @@ use crate::input::*;
 use crate::system::*;
 use crate::utils::Caption;
 
+#[repr(u8)]
+#[derive(Copy, Clone, PartialEq)]
+enum MoveDirection
+{
+    ToLeft,
+    ToRight,
+    ToTop,
+    ToBottom
+}
+
 #[AppCUIControl(overwrite=OnPaint+OnResize+OnKeyPressed)]
 pub struct Window {
     title: String,
@@ -32,6 +42,46 @@ const MOVE_TO_LOWER_MARGIN: i32 = -100000;
 const MOVE_TO_UPPER_MARGIN: i32 = 100000;
 
 impl Window {
+    fn point_to_point_distance(origin_rect: Rect, object_rect: Rect, dir: MoveDirection)->u32 {
+        let origin: Point;
+        let object: Point;
+        match dir {
+            MoveDirection::ToLeft => {
+                // we need to have <object>[space]<origin>
+                // we compare <TOP,LEFT>
+                object = Point::new(object_rect.get_right(), object_rect.get_top());
+                origin = Point::new(origin_rect.get_left(), origin_rect.get_top());
+                if object.x >= origin.x {
+                    return u32::MAX;
+                }
+            },
+            MoveDirection::ToRight => {
+                // we need to have <origin>[space]<object>
+                object = Point::new(object_rect.get_left(), object_rect.get_top());
+                origin = Point::new(origin_rect.get_right(), origin_rect.get_top());
+                if object.x <= origin.x {
+                    return u32::MAX;
+                }
+            },
+            MoveDirection::ToTop => {
+                // we need to have <object>[space]<origin>
+                object = Point::new(object_rect.get_left(), object_rect.get_bottom());
+                origin = Point::new(origin_rect.get_left(), origin_rect.get_top());
+                if object.y >= origin.y {
+                    return u32::MAX;
+                }
+            },
+            MoveDirection::ToBottom => {
+                // we need to have <origin>[space]<object>
+                object = Point::new(object_rect.get_left(), object_rect.get_top());
+                origin = Point::new(origin_rect.get_left(), origin_rect.get_bottom());
+                if object.y <= origin.y {
+                    return u32::MAX;
+                }
+            },
+        }
+        return (((object.x - origin.x) * (object.x - origin.x)) as u32)+ (((object.y - origin.y) * (object.y - origin.y)) as u32);
+    }
     pub fn new(title: &str, layout: Layout, flags: WindowFlags) -> Self {
         let mut win = Window {
             base: ControlBase::new(
@@ -493,13 +543,7 @@ struct WindowControlBarLayoutData
     WindowBarItem* LeftGroup;
     WindowBarItem* RighGroup;
 };
-enum class MoveDirection
-{
-    ToLeft,
-    ToRight,
-    ToTop,
-    ToBottom
-};
+
 Control* FindNextControl(Control* parent, bool forward, bool startFromCurrentOne, bool rootLevel, bool noSteps)
 {
     if (parent == nullptr)
@@ -583,42 +627,7 @@ Control* FindNextControl(Control* parent, bool forward, bool startFromCurrentOne
 }
 uint32 PointToPointDistance(const Rect& originRect, const Rect& objectRect, MoveDirection dir)
 {
-    // computes the point to point square distance only if the direction is respected
-    Point origin, object;
-
-    switch (dir)
-    {
-    case AppCUI::MoveDirection::ToLeft:
-        // we need to have <object>[space]<origin>
-        // we compare <TOP,LEFT>
-        object.Set(objectRect.GetRight(), objectRect.GetTop());
-        origin.Set(originRect.GetLeft(), originRect.GetTop());
-        if (object.X >= origin.X)
-            return INFINITE_DISTANCE;
-        break;
-    case AppCUI::MoveDirection::ToRight:
-        // we need to have <origin>[space]<object>
-        object.Set(objectRect.GetLeft(), objectRect.GetTop());
-        origin.Set(originRect.GetRight(), originRect.GetTop());
-        if (object.X <= origin.X)
-            return INFINITE_DISTANCE;
-        break;
-    case AppCUI::MoveDirection::ToTop:
-        // we need to have <object>[space]<origin>
-        object.Set(objectRect.GetLeft(), objectRect.GetBottom());
-        origin.Set(originRect.GetLeft(), originRect.GetTop());
-        if (object.Y >= origin.Y)
-            return INFINITE_DISTANCE;
-        break;
-    case AppCUI::MoveDirection::ToBottom:
-        // we need to have <origin>[space]<object>
-        object.Set(objectRect.GetLeft(), objectRect.GetTop());
-        origin.Set(originRect.GetLeft(), originRect.GetBottom());
-        if (object.Y <= origin.Y)
-            return INFINITE_DISTANCE;
-        break;
-    }
-    return (object.X - origin.X) * (object.X - origin.X) + (object.Y - origin.Y) * (object.Y - origin.Y);
+    // done
 }
 Control* FindClosestControl(Control* parent, MoveDirection dir, const Rect& origin)
 {
