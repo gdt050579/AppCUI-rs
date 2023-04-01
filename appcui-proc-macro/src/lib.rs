@@ -62,6 +62,7 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     base_definition.push_str(", ");
     let mut code = input.to_string().replace("{", base_definition.as_str());
     let struct_name = utils::extract_structure_name(code.as_str());
+    code.insert_str(0, "#[repr(C)]\n");
     code.push_str(templates::DEREF_TRAIT);
     code.push_str(templates::CONTROL_TRAIT);
 

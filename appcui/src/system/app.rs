@@ -21,10 +21,10 @@ impl App {
     pub fn new() -> Result<Self,Error> {
         App::create(InitializationData::new())
     }
-    pub fn debug() -> Result<Self,Error> {
+    pub fn debug(width: u16, height: u16) -> Result<Self,Error> {
         let i = InitializationData {
             flags: InitializationFlags::None,
-            size: Some(Size{width: 80, height: 25}),
+            size: Some(Size{width: width as u32, height: height as u32}),
             terminal: TerminalType::Debug
         };
         App::create(i)
