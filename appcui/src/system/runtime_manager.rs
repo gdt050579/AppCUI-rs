@@ -16,6 +16,8 @@ pub(crate) struct RuntimeManager {
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
     menubar: Option<MenuBar>,
+    recompute_layout: bool,
+    repaint: bool,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -32,6 +34,8 @@ impl RuntimeManager {
             surface: surface,
             root: ControlManager::new(Desktop::new()),
             tooltip: ToolTip::new(),
+            recompute_layout: true,
+            repaint: true,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
                 Some(CommandBar::new(width, height))
             } else {
@@ -51,11 +55,17 @@ impl RuntimeManager {
     pub(crate) fn get() -> &'static mut RuntimeManager {
         unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
     }
-    pub(crate) fn get_size(&self) -> Size {
+    pub(crate) fn get_terminal_size(&self) -> Size {
         Size {
             width: self.terminal.get_width(),
             height: self.terminal.get_height(),
         }
+    }
+    pub(crate) fn request_paint(&mut self) {
+        self.repaint = true;
+    }
+    pub(crate) fn request_recompute_layout(&mut self) {
+        self.recompute_layout = true;
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
         self.tooltip.show(
@@ -85,8 +95,14 @@ impl RuntimeManager {
     }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
+        if self.recompute_layout {
         self.recompute_layouts();
-        self.paint();
+        }
+        if self.repaint {
+            self.paint();
+        }
+        self.recompute_layout = false;
+        self.repaint = false;
         let sys_event = self.terminal.get_system_event();
         match sys_event {
             SystemEvent::None => {}

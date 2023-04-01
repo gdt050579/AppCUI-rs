@@ -7,3 +7,9 @@ pub (super) struct MenuBarItem {
     pub (super) menu: Menu,
     pub (super) x: i32,
 }
+
+impl MenuBarItem {
+    pub (super) fn paint(&self, surface: &mut Surface, theme: &Theme) {
+
+    }
+}

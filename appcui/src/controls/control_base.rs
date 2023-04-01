@@ -92,6 +92,12 @@ impl ControlBase {
         self.layout
             .set_size_bounds(min_width, min_height, max_width, max_height);
     }
+
+    pub fn set_position(&mut self, x: i32, y: i32) {
+        self.layout.set_position(x, y);
+        //GDT: we should change the layout mode
+        RuntimeManager::get().request_recompute_layout();
+    }
     #[inline]
     pub (crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
         self.margins.left = left;
@@ -146,6 +152,7 @@ impl ControlBase {
         c.intersect_with(&self.screen_clip);
         c
     }
+
 
     pub(crate) fn prepare_paint(&self, surface: &mut Surface) -> bool {
         if (self.is_visible() == false) || (self.screen_clip.is_visible() == false) {

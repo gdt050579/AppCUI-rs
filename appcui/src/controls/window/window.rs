@@ -137,20 +137,11 @@ impl Window {
         }
     }
     fn center_to_screen(&mut self) {
-        let screen_size = RuntimeManager::get().get_size();
+        let screen_size = RuntimeManager::get().get_terminal_size();
         let win_size = self.get_size();
         let x = (screen_size.width as i32 - win_size.width as i32) / 2;
         let y = (screen_size.height as i32 - win_size.height as i32) / 2;
-
-        /*
-            CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    Size sz;
-    CHECK(Application::GetDesktopSize(sz), false, "Fail to get desktop size !");
-    MoveTo(((sz.Width - Members->Layout.Width) / 2), ((sz.Height - Members->Layout.Height) / 2));
-    UpdateWindowsButtonsPoz(Members);
-    return true;
-        
-         */
+        self.set_position(x, y);        
     }
     fn resize_window_with(&mut self, add_to_width: i32, add_to_height: i32) {
         let mut size = self.get_size();
@@ -164,7 +155,7 @@ impl Window {
     }
     fn move_window_pos_to(&mut self, add_x: i32, add_y: i32, keep_in_desktop_bounderies: bool) {
         let size = self.get_size();
-        let screen_size = RuntimeManager::get().get_size();
+        let screen_size = RuntimeManager::get().get_terminal_size();
         /*
         void MoveWindowPosTo(Window* win, int addX, int addY, bool keepInDesktopBounderies)
 {
