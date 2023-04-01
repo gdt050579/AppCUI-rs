@@ -160,8 +160,11 @@ impl RuntimeManager {
         }
         self.surface.resize(new_size);
         self.terminal.on_resize(new_size);
-        if self.commandbar.is_some() {
-            self.commandbar.as_mut().unwrap().set_desktop_size(new_size);
+        if let Some(commandbar)=self.commandbar.as_mut(){
+            commandbar.set_desktop_size(new_size);
+        }
+        if let Some(menubar) = self.menubar.as_mut() {
+            menubar.set_position(0, 0, new_size.width);
         }
     }
 }
