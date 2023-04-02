@@ -14,6 +14,7 @@ use crate::utils::Caption;
 enum LoopStatus {
     Normal,
     StopApp,
+    StopCurrent
 }
 
 pub(crate) struct RuntimeManager {
@@ -117,6 +118,8 @@ impl RuntimeManager {
     }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
+        self.recompute_layout = true;
+        self.repaint = true;
         while self.loop_status == LoopStatus::Normal {
             if self.recompute_layout {
                 self.recompute_layouts();
