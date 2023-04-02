@@ -3,6 +3,8 @@ mod debug_terminal;
 mod null_terminal;
 mod system_event;
 
+use crate::system::InitializationData;
+
 use super::graphics::Surface;
 use super::graphics::Color;
 use super::graphics::CharFlags;
@@ -38,15 +40,15 @@ pub enum TerminalType {
     WindowsConsole,
 }
 impl TerminalType {
-    pub (crate) fn new(terminal_type: TerminalType) -> Result<Box<dyn Terminal>,Error>
+    pub (crate) fn new(data: &InitializationData) -> Result<Box<dyn Terminal>,Error>
     {
-        match terminal_type {
+        match data.terminal {
             TerminalType::Default => {
                 // shold be different based on OS
                 return WindowsTerminal::create();
             },
             TerminalType::WindowsConsole => WindowsTerminal::create(),
-            TerminalType::Debug => DebugTerminal::create()
+            TerminalType::Debug => DebugTerminal::create(data)
         }
     }   
 }

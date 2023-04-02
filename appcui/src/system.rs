@@ -17,4 +17,4 @@ pub use self::error::Error;
 pub use self::initialization_data::InitializationFlags;
 pub (crate) use self::runtime_manager::RuntimeManager;
 pub (crate) use self::tooltip::ToolTip;
-pub (self) use self::initialization_data::InitializationData;
+pub (crate) use self::initialization_data::InitializationData;

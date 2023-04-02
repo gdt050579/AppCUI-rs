@@ -3,6 +3,7 @@ use super::SystemEvent;
 use super::Terminal;
 use crate::graphics::Color;
 use crate::system::Error;
+use crate::system::InitializationData;
 
 pub(crate) struct DebugTerminal {
     width: u32,
@@ -10,11 +11,23 @@ pub(crate) struct DebugTerminal {
     temp_str: String,
 }
 impl DebugTerminal {
-    pub(crate) fn create() -> Result<Box<dyn Terminal>,Error> {
+    pub(crate) fn create(data: &InitializationData) -> Result<Box<dyn Terminal>, Error> {
+        let mut w = if data.size.is_none() {
+            80
+        } else {
+            data.size.unwrap().width as u32
+        };
+        let mut h = if data.size.is_none() {
+            40
+        } else {
+            data.size.unwrap().height as u32
+        };
+        w = w.clamp(10, 1000);
+        h = h.clamp(10, 1000);
         Ok(Box::new(DebugTerminal {
-            width: 80,
-            height: 40,
-            temp_str: String::with_capacity(80 * 40),
+            width: w,
+            height: h,
+            temp_str: String::with_capacity((w * h) as usize),
         }))
     }
 }

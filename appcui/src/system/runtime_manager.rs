@@ -24,7 +24,7 @@ static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
 impl RuntimeManager {
     pub(super) fn create(data: InitializationData) -> Result<(), super::Error> {
-        let term = TerminalType::new(data.terminal)?;
+        let term = TerminalType::new(&data)?;
         let width = term.get_width();
         let height = term.get_height();
         let surface = Surface::new(width, height);
