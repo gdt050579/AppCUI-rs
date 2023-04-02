@@ -51,6 +51,13 @@ mod templates {
         fn on_resize(&mut self, old: Size, new: Size)  { self.base.on_resize(old, new); }
     }
     ";
+
+    pub static ON_FOCUS_TRAIT: &str = "
+    impl OnFocus for $STRUCT_NAME$ {
+        fn on_focus(&mut self)  { self.base.on_focus(); }
+        fn on_lose_focus(&mut self)  { self.base.on_lose_focus(); }
+    }
+    ";
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
@@ -81,6 +88,9 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     }
     if !a.on_resize {
         code.push_str(templates::ON_RESIZE_TRAIT);
+    }
+    if !a.on_focus {
+        code.push_str(templates::ON_FOCUS_TRAIT);
     }
     // replace templates
     code = code

@@ -13,6 +13,7 @@ pub enum StatusFlags {
     Visible = 0x01,
     Enabled = 0x02,
     AcceptInput = 0x04,
+    Focused = 0x08,
 }
 #[derive(Copy, Clone)]
 struct Margins {
@@ -60,10 +61,9 @@ impl ControlBase {
         }
     }
     #[inline(always)]
-    pub fn set_size(&mut self, width: u16, height: u16)  {
+    pub fn set_size(&mut self, width: u16, height: u16) {
         self.layout.resize(width, height);
     }
-
 
     #[inline(always)]
     pub fn get_position(&self) -> Point {
@@ -78,23 +78,35 @@ impl ControlBase {
         RuntimeManager::get().request_recompute_layout();
     }
 
-    #[inline]
+    pub fn request_focus(&mut self)->bool {
+        if self.has_focus() || !self.can_receive_input() {
+            return false;
+        }
+        // we need to check if current child can receive focus
+        // if yes, we shoudl request focus for it
+        // if no, just request focus for the current control
+
+        RuntimeManager::get().request_focus_for_control(self.version);
+        true
+    }
+
+    #[inline(always)]
     pub fn is_visible(&self) -> bool {
         self.status_flags.contains(StatusFlags::Visible)
     }
-    #[inline]
+    #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         self.status_flags.contains(StatusFlags::Enabled)
     }
-    #[inline]
+    #[inline(always)]
     pub fn can_receive_input(&self) -> bool {
         // all 3 flags must be present for an object to be able to receive input (key or mouse)
         self.status_flags
             .contains(StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput)
     }
-    #[inline]
+    #[inline(always)]
     pub fn has_focus(&self) -> bool {
-        false
+        self.status_flags.contains(StatusFlags::Focused)
     }
     #[inline]
     pub fn is_mouse_over(&self) -> bool {
@@ -112,9 +124,8 @@ impl ControlBase {
             .set_size_bounds(min_width, min_height, max_width, max_height);
     }
 
-
     #[inline]
-    pub (crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
+    pub(crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
         self.margins.left = left;
         self.margins.top = top;
         self.margins.bottom = bottom;
@@ -167,7 +178,6 @@ impl ControlBase {
         c.intersect_with(&self.screen_clip);
         c
     }
-
 
     pub(crate) fn prepare_paint(&self, surface: &mut Surface) -> bool {
         if (self.is_visible() == false) || (self.screen_clip.is_visible() == false) {

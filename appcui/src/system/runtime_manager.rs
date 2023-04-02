@@ -105,6 +105,9 @@ impl RuntimeManager {
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
+    pub(crate) fn request_focus_for_control(&mut self, version: u32) {
+        todo!()
+    }
     pub(crate) fn add<T>(&mut self, obj: T) -> ControlHandle<T>
     where
         T: Control + 'static,
