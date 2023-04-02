@@ -5,9 +5,9 @@ use super::StatusFlags;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
-use AppCUIProcMacro::AppCUIControl;
+use AppCUIProcMacro::*;
 
-#[AppCUIControl(overwrite=OnPaint)]
+#[AppCUIControl(overwrite=OnPaint+OnKeyPressed)]
 pub struct Desktop {}
 
 impl Desktop {
@@ -30,5 +30,38 @@ impl OnPaint for Desktop {
             CharAttribute::with_color(Color::White, Color::Red),
             false,
         );
+    }
+}
+impl OnKeyPressed for Desktop {
+    fn on_key_pressed(&mut self, key: Key, _: char) -> EventProcessStatus {
+        match key.get_compact_code() {
+            key!("Escape") => {
+                RuntimeManager::get().close();
+                return EventProcessStatus::Processed;
+            },
+            key!("Ctrl+Tab")=> {
+                // GoToNextWindow(Members, 1);
+                return  EventProcessStatus::Processed;
+            },
+            key!("Ctrl+Shift+Tab") => {
+                // GoToNextWindow(Members, -1);
+                return EventProcessStatus::Processed;
+            },
+            key!("Alt+0") => {
+                // Dialogs::WindowManager::Show();
+                return EventProcessStatus::Processed;
+            },
+            _ => {}
+        }
+        // check controls hot keys
+        if key.modifier.contains(KeyModifier::Alt) {
+            for ctrl in self.children.iter_mut() {
+                if ctrl.get_base_mut().get_hotkey() == key {
+                    // ctrl.set_focus();
+                    return EventProcessStatus::Processed;
+                }
+            }
+        }
+        EventProcessStatus::Ignored
     }
 }

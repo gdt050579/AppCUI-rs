@@ -102,6 +102,9 @@ impl RuntimeManager {
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
     }
+    pub(crate) fn close(&mut self) {
+        self.loop_status = LoopStatus::StopApp;
+    }
     pub(crate) fn add<T>(&mut self, obj: T) -> ControlHandle<T>
     where
         T: Control + 'static,
