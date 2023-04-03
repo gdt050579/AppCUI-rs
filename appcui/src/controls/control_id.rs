@@ -12,6 +12,7 @@ impl ControlID {
             id: (GLOBAL_VERSION.fetch_add(1, Ordering::SeqCst) & 0xFFFFFFFE) as u32
         }
     }
+    #[inline(always)]
     pub fn is_valid(&self) -> bool {
         self.id != u32::MAX
     }

@@ -29,6 +29,7 @@ pub(crate) struct RuntimeManager {
     recompute_layout: bool,
     repaint: bool,
     loop_status: LoopStatus,
+    request_focus: Option<ControlID>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -47,6 +48,7 @@ impl RuntimeManager {
             tooltip: ToolTip::new(),
             recompute_layout: true,
             repaint: true,
+            request_focus: None,
             loop_status: LoopStatus::Normal,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
                 Some(CommandBar::new(width, height))
@@ -107,7 +109,7 @@ impl RuntimeManager {
         self.loop_status = LoopStatus::StopApp;
     }
     pub(crate) fn request_focus_for_control(&mut self, id: ControlID) {
-        todo!()
+        self.request_focus = Some(id);
     }
     pub(crate) fn add<T>(&mut self, obj: T) -> ControlHandle<T>
     where
