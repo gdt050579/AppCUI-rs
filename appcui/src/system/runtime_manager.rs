@@ -1,4 +1,5 @@
 use super::{CommandBar, InitializationData, InitializationFlags, Theme, ToolTip};
+use crate::controls::control_id::ControlID;
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::Control;
 use crate::controls::menu::{Menu, MenuBar};
@@ -105,7 +106,7 @@ impl RuntimeManager {
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
-    pub(crate) fn request_focus_for_control(&mut self, version: u32) {
+    pub(crate) fn request_focus_for_control(&mut self, id: ControlID) {
         todo!()
     }
     pub(crate) fn add<T>(&mut self, obj: T) -> ControlHandle<T>
@@ -113,9 +114,11 @@ impl RuntimeManager {
         T: Control + 'static,
     {
         let c = ControlManager::new(obj);
-        let v = c.get_version();
-        self.root.get_base_mut().children.push(c);
-        return ControlHandle::new(0, v);
+        let parent = self.root.get_base_mut();
+        let id = parent.id;
+        let count = parent.children.len() as u32;
+        parent.children.push(c);
+        return ControlHandle::new(count, id);
     }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
         if self.menubar.is_some() {

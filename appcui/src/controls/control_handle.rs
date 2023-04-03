@@ -1,29 +1,31 @@
 use std::marker::PhantomData;
 
-#[derive(Copy,Clone,PartialEq)]
+use super::ControlID;
+
+#[derive(Copy, Clone, PartialEq)]
 pub struct ControlHandle<T> {
     index: u32,
-    version: u32,
+    id: ControlID,
     _phantom: PhantomData<T>,
 }
 impl<T> ControlHandle<T> {
-    pub (crate) fn new(index: u32, version: u32) -> Self {
+    pub(crate) fn new(index: u32, id: ControlID) -> Self {
         ControlHandle {
-            index: index,
-            version: version,
+            index,
+            id,
             _phantom: PhantomData,
         }
     }
     #[inline(always)]
     pub fn is_valid(&self) -> bool {
-        (self.index != 0xFFFFFFFF) || (self.version != 0xFFFFFFFF)
+        (self.index != 0xFFFFFFFF) || (self.id.is_valid())
     }
 }
 impl<T> Default for ControlHandle<T> {
     fn default() -> Self {
         ControlHandle {
             index: 0xFFFFFFFF,
-            version: 0xFFFFFFFF,
+            id: ControlID::INVALID,
             _phantom: PhantomData,
         }
     }

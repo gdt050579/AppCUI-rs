@@ -2,6 +2,7 @@ pub mod layout;
 pub mod events;
 pub mod control_base;
 pub mod control_handle;
+pub mod control_id;
 pub mod control_char_attributes_state;
 pub (crate) mod control_manager;
 
@@ -10,6 +11,7 @@ pub use control_base::ControlBase;
 pub use control_handle::ControlHandle;
 pub use control_char_attributes_state::ControlCharAttributesState;
 pub (crate) use control_manager::ControlManager;
+pub (crate) use control_id::ControlID;
 
 use control_base::StatusFlags;
 

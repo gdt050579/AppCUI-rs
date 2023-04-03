@@ -6,9 +6,7 @@ use crate::terminal::Terminal;
 use super::events::{Control, EventProcessStatus};
 use super::ControlBase;
 use std::ptr::NonNull;
-use std::sync::atomic::{AtomicUsize, Ordering};
 
-static GLOBAL_VERSION: AtomicUsize = AtomicUsize::new(0);
 
 pub(crate) struct ParentLayout {
     pub(super) clip: ClipArea,
@@ -46,7 +44,6 @@ impl From<&Box<dyn Terminal>> for ParentLayout {
 pub(crate) struct ControlManager {
     interface: NonNull<dyn Control>,
     base: *mut ControlBase,
-    version: u32,
 }
 impl ControlManager {
     #[inline]
@@ -65,10 +62,6 @@ impl ControlManager {
     pub(crate) fn get_base_mut(&mut self) -> &mut ControlBase {
         unsafe { &mut *self.base }
     }
-    #[inline]
-    pub(crate) fn get_version(&self) -> u32 {
-        self.version
-    }
     pub(crate) fn new<T>(obj: T) -> ControlManager
     where
         T: Control + 'static,
@@ -78,7 +71,6 @@ impl ControlManager {
         ControlManager {
             interface: ctrl,
             base: ptr as *mut ControlBase,
-            version: (GLOBAL_VERSION.fetch_add(1, Ordering::SeqCst) & 0xFFFFFFFF) as u32,
         }
     }
     pub(crate) fn get_mut<T>(&mut self) -> &mut T

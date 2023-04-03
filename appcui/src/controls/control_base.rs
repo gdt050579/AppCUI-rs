@@ -1,8 +1,8 @@
 use super::control_manager::ParentLayout;
-use super::events::Event;
+use super::events::{Event, OnFocus};
 use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize};
 use super::layout::ControlLayout;
-use super::{ControlManager, Layout};
+use super::{ControlManager, Layout, ControlID};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::RuntimeManager;
@@ -33,6 +33,7 @@ pub struct ControlBase {
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
     pub(crate) hotkey: Key,
+    pub(crate) id: ControlID,
 }
 
 impl ControlBase {
@@ -51,8 +52,9 @@ impl ControlBase {
             screen_clip: ClipArea::default(),
             screen_origin: Point::default(),
             hotkey: Key::default(),
+            id: ControlID::new(),
         }
-    }
+    }    
     #[inline(always)]
     pub fn get_size(&self) -> Size {
         Size {
@@ -86,7 +88,7 @@ impl ControlBase {
         // if yes, we shoudl request focus for it
         // if no, just request focus for the current control
 
-        RuntimeManager::get().request_focus_for_control(self.version);
+        RuntimeManager::get().request_focus_for_control(self.id);
         true
     }
 
@@ -228,3 +230,4 @@ impl OnKeyPressed for ControlBase {}
 impl OnMouseEvent for ControlBase {}
 impl OnDefaultAction for ControlBase {}
 impl OnResize for ControlBase {}
+impl OnFocus for ControlBase {}
