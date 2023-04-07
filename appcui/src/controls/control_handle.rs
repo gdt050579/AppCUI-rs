@@ -30,3 +30,4 @@ impl<T> Default for ControlHandle<T> {
         }
     }
 }
+type Handle = ControlHandle<()>;

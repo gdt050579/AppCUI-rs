@@ -30,6 +30,7 @@ pub(crate) struct RuntimeManager {
     repaint: bool,
     loop_status: LoopStatus,
     request_focus: Option<ControlID>,
+    current_focus: Option<ControlID>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -49,6 +50,7 @@ impl RuntimeManager {
             recompute_layout: true,
             repaint: true,
             request_focus: None,
+            current_focus: None,
             loop_status: LoopStatus::Normal,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
                 Some(CommandBar::new(width, height))
