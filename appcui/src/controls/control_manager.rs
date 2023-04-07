@@ -7,7 +7,6 @@ use super::events::{Control, EventProcessStatus};
 use super::ControlBase;
 use std::ptr::NonNull;
 
-
 pub(crate) struct ParentLayout {
     pub(super) clip: ClipArea,
     pub(super) origin: Point,
@@ -84,7 +83,9 @@ impl ControlManager {
             // paint is possible
             self.get_control().on_paint(surface, theme);
             for child in &self.get_base().children {
-                child.paint(surface, theme);
+                if let Some(child) = child.as_ref() {
+                    child.paint(surface, theme);
+                }
             }
         }
     }
@@ -96,11 +97,13 @@ impl ControlManager {
         // process the same thing for its children
         let my_layout = ParentLayout::from(base);
         // if size has been changed --> call on_resize
-        if new_size!=old_size {
+        if new_size != old_size {
             self.get_control_mut().on_resize(old_size, new_size);
         }
         for child in &mut self.get_base_mut().children {
-            child.update_layout(&my_layout);
+            if let Some(child) = child.as_mut() {
+                child.update_layout(&my_layout);
+            }
         }
     }
     pub(crate) fn process_keypressed_event(
@@ -116,9 +119,10 @@ impl ControlManager {
         if focused_child_index >= base.children.len() {
             return EventProcessStatus::Ignored;
         }
-        let child = &mut base.children[focused_child_index];
-        if child.process_keypressed_event(key, character) == EventProcessStatus::Processed {
-            return EventProcessStatus::Processed;
+        if let Some(child) = &mut base.children[focused_child_index] {
+            if child.process_keypressed_event(key, character) == EventProcessStatus::Processed {
+                return EventProcessStatus::Processed;
+            }
         }
         // else --> call it ourselves
         return self.get_control_mut().on_key_pressed(key, character);

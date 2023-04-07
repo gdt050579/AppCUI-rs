@@ -115,12 +115,7 @@ impl RuntimeManager {
     where
         T: Control + 'static,
     {
-        let c = ControlManager::new(obj);
-        let parent = self.root.get_base_mut();
-        let id = parent.id;
-        let count = parent.children.len() as u32;
-        parent.children.push(c);
-        return ControlHandle::new(count, id);
+        return self.root.get_base_mut().add_child(obj);
     }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
         if self.menubar.is_some() {
@@ -132,6 +127,10 @@ impl RuntimeManager {
         self.recompute_layout = true;
         self.repaint = true;
         while self.loop_status == LoopStatus::Normal {
+            if let Some(id) = self.request_focus {
+                self.update_focus(id);
+                self.request_focus = None;
+            }
             if self.recompute_layout {
                 self.recompute_layouts();
             }
@@ -156,6 +155,11 @@ impl RuntimeManager {
                 SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
             }
         }
+    }
+
+    fn update_focus(&mut self, id: ControlID) {
+        // update focus 
+        
     }
 
     fn recompute_layouts(&mut self) {

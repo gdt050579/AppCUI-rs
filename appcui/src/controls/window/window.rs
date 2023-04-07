@@ -163,14 +163,11 @@ impl Window {
 
         */
     }
-    pub fn add<T>(&mut self, control: T)
+    pub fn add<T>(&mut self, control: T)->ControlHandle<T>
     where
         T: Control + 'static,
     {
-        // GDT: only for test --> not the final implementation
-        let c = ControlManager::new(control);
-        //let v = c.get_version();
-        self.children.push(c);
+        return self.add_child(control);
     }
     pub fn set_title(&mut self, title: &str) {
         self.title.clear();

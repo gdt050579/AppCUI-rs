@@ -1,8 +1,8 @@
 use super::control_manager::ParentLayout;
-use super::events::{Event, OnFocus};
+use super::events::{Control, Event, OnFocus};
 use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize};
 use super::layout::ControlLayout;
-use super::{ControlManager, Layout, ControlID};
+use super::{ControlHandle, ControlID, ControlManager, Layout};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::RuntimeManager;
@@ -27,7 +27,8 @@ struct Margins {
 pub struct ControlBase {
     layout: ControlLayout,
     margins: Margins,
-    pub(crate) children: Vec<ControlManager>,
+    parent: Option<*mut ControlBase>,
+    pub(crate) children: Vec<Option<ControlManager>>,
     pub(crate) focused_child_index: u32,
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
@@ -39,6 +40,7 @@ pub struct ControlBase {
 impl ControlBase {
     pub fn new(layout: Layout, status_flags: StatusFlags) -> Self {
         Self {
+            parent: None,
             children: Vec::new(),
             focused_child_index: 0,
             layout: ControlLayout::new(layout.format),
@@ -54,7 +56,7 @@ impl ControlBase {
             hotkey: Key::default(),
             id: ControlID::new(),
         }
-    }    
+    }
     #[inline(always)]
     pub fn get_size(&self) -> Size {
         Size {
@@ -80,7 +82,7 @@ impl ControlBase {
         RuntimeManager::get().request_recompute_layout();
     }
 
-    pub fn request_focus(&mut self)->bool {
+    pub fn request_focus(&mut self) -> bool {
         if self.has_focus() || !self.can_receive_input() {
             return false;
         }
@@ -90,6 +92,29 @@ impl ControlBase {
 
         RuntimeManager::get().request_focus_for_control(self.id);
         true
+    }
+
+    #[inline]
+    pub(crate) fn get_parent_mut(&mut self) -> Option<&mut ControlBase> {
+        unsafe {
+            if let Some(p) = self.parent {
+                Some(&mut *p)
+            } else {
+                None
+            }
+        }
+    }
+    pub(crate) fn add_child<T>(&mut self, control: T) -> ControlHandle<T>
+    where
+        T: Control + 'static,
+    {
+        let mut c = ControlManager::new(control);
+        c.get_base_mut().parent = Some(self as *mut ControlBase);
+        let idx = self.children.len() as u32;
+        let id = c.get_base().id;
+        self.children.push(Some(c));
+        // if no control is focused, we should test to see if the current one can be focused
+        return ControlHandle::<T>::new(idx, id);
     }
 
     #[inline(always)]
