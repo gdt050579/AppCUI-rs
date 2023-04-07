@@ -12,6 +12,7 @@ pub use control_handle::ControlHandle;
 pub use control_char_attributes_state::ControlCharAttributesState;
 pub (crate) use control_manager::ControlManager;
 pub (crate) use control_id::ControlID;
+pub (crate) use control_handle::Handle;
 
 use control_base::StatusFlags;
 

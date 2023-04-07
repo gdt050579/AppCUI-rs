@@ -1,12 +1,12 @@
 use super::{CommandBar, InitializationData, InitializationFlags, Theme, ToolTip};
 use crate::controls::control_id::ControlID;
 use crate::controls::control_manager::ParentLayout;
-use crate::controls::events::Control;
+use crate::controls::events::{Control, EventProcessStatus};
 use crate::controls::menu::{Menu, MenuBar};
 use crate::controls::ControlManager;
 use crate::controls::*;
 use crate::graphics::{Rect, Size, Surface};
-use crate::input::KeyModifier;
+use crate::input::{Key, KeyModifier};
 use crate::terminal::*;
 use crate::utils::Caption;
 
@@ -15,14 +15,15 @@ use crate::utils::Caption;
 enum LoopStatus {
     Normal,
     StopApp,
-    StopCurrent
+    StopCurrent,
 }
 
 pub(crate) struct RuntimeManager {
     theme: Theme,
     terminal: Box<dyn Terminal>,
     surface: Surface,
-    root: ControlManager,
+    controls: Vec<Option<ControlManager>>,
+    desktop_handler: Handle,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
     menubar: Option<MenuBar>,
@@ -41,16 +42,17 @@ impl RuntimeManager {
         let width = term.get_width();
         let height = term.get_height();
         let surface = Surface::new(width, height);
-        let manager = RuntimeManager {
+        let mut manager = RuntimeManager {
             theme: Theme::new(),
             terminal: term,
             surface: surface,
-            root: ControlManager::new(Desktop::new()),
+            desktop_handler: Handle::new(0),
             tooltip: ToolTip::new(),
             recompute_layout: true,
             repaint: true,
             request_focus: None,
             current_focus: None,
+            controls: Vec::with_capacity(64),
             loop_status: LoopStatus::Normal,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
                 Some(CommandBar::new(width, height))
@@ -63,6 +65,9 @@ impl RuntimeManager {
                 None
             },
         };
+        let mut desktop = ControlManager::new(Desktop::new());
+        desktop.get_base_mut().handle = Some(manager.desktop_handler);
+        manager.controls.push(Some(desktop));
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
@@ -117,7 +122,32 @@ impl RuntimeManager {
     where
         T: Control + 'static,
     {
-        return self.root.get_base_mut().add_child(obj);
+        self.controls[0].unwrap().get_base_mut().add_child(obj)
+    }
+    pub(crate) fn get_control(&mut self, handle: Handle) -> Option<&mut ControlManager> {
+        let idx = handle.get_index();
+        if idx < self.controls.len() {
+            let c = self.controls[idx].as_mut();
+            if c.is_some() {
+                if c.unwrap().get_base().handle.unwrap() == handle {
+                    return c;
+                }
+            }
+        }
+        None
+    }
+    pub(crate) fn add_control_manager(&mut self, mut manager: ControlManager) -> Handle {
+        let idx = self.controls.len() as u32;
+        let handle = Handle::new(idx);
+        manager.get_base_mut().handle = Some(handle);
+        // set the handle for all children
+        for child in manager.get_base().children.iter() {
+            if let Some(control) = self.get_control(*child) {
+                control.get_base_mut().parent = Some(handle);
+            }
+        }
+        self.controls.push(Some(manager));
+        handle
     }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
         if self.menubar.is_some() {
@@ -160,17 +190,33 @@ impl RuntimeManager {
     }
 
     fn update_focus(&mut self, id: ControlID) {
-        // update focus 
-        
+        // update focus
     }
 
     fn recompute_layouts(&mut self) {
         let term_layout = ParentLayout::from(&self.terminal);
-        self.root.update_layout(&term_layout);
+        self.update_control_layout(self.desktop_handler, &term_layout);
     }
 
+    pub(crate) fn update_control_layout(&mut self, handle: Handle, parent_layout: &ParentLayout) {
+        if let Some(control) = self.get_control(handle) {
+            let base = control.get_base_mut();
+            let old_size = base.get_size();
+            base.update_control_layout_and_screen_origin(parent_layout);
+            let new_size = base.get_size();
+            // process the same thing for its children
+            let my_layout = ParentLayout::from(base);
+            // if size has been changed --> call on_resize
+            if new_size != old_size {
+                control.get_control_mut().on_resize(old_size, new_size);
+            }
+            for child_handle in &control.get_base().children {
+                self.update_control_layout(*child_handle, &my_layout)
+            }
+        }
+    }
     fn paint(&mut self) {
-        self.root.paint(&mut self.surface, &self.theme);
+        self.paint_control(self.desktop_handler, &mut self.surface, &self.theme);
         self.surface.reset();
         if self.commandbar.is_some() {
             self.commandbar
@@ -189,6 +235,17 @@ impl RuntimeManager {
         }
         self.terminal.update_screen(&self.surface);
     }
+    fn paint_control(&self, handle: Handle, surface: &mut Surface, theme: &Theme) {
+        if let Some(control) = self.get_control(handle) {
+            if control.get_base().prepare_paint(surface) {
+                // paint is possible
+                control.get_control().on_paint(surface, theme);
+                for child_handle in &control.get_base().children {
+                    self.paint_control(*child_handle, surface, theme);
+                }
+            }
+        }
+    }
 
     fn process_key_modifier_changed_event(&mut self, new_state: KeyModifier) {
         if let Some(commandbar) = self.commandbar.as_mut() {
@@ -198,9 +255,37 @@ impl RuntimeManager {
     }
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
-        self.root
-            .process_keypressed_event(event.key, event.character);
+        self.process_control_keypressed_event(self.desktop_handler, event.key, event.character);
     }
+    pub(crate) fn process_control_keypressed_event(
+        &mut self,
+        handle: Handle,
+        key: Key,
+        character: char,
+    ) -> EventProcessStatus {
+        if let Some(control) = self.get_control(handle) {
+            let base = control.get_base_mut();
+            if base.can_receive_input() == false {
+                return EventProcessStatus::Ignored;
+            }
+            let focused_child_index = base.focused_child_index as usize;
+            if focused_child_index >= base.children.len() {
+                return EventProcessStatus::Ignored;
+            }
+            let handle_child = base.children[focused_child_index];
+            if self.process_control_keypressed_event(handle_child, key, character)
+                == EventProcessStatus::Processed
+            {
+                return EventProcessStatus::Processed;
+            }
+        }
+        if let Some(control) = self.get_control(handle) {
+            // else --> call it ourselves
+            return control.get_control_mut().on_key_pressed(key, character);
+        }
+        return EventProcessStatus::Ignored;
+    }
+
     fn process_terminal_resize_event(&mut self, new_size: Size) {
         // sanity checks
         if (new_size.width == 0) || (new_size.height == 0) {

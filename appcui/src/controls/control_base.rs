@@ -2,7 +2,7 @@ use super::control_manager::ParentLayout;
 use super::events::{Control, Event, OnFocus};
 use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize};
 use super::layout::ControlLayout;
-use super::{ControlHandle, ControlID, ControlManager, Layout};
+use super::{Handle, ControlID, ControlManager, Layout, ControlHandle};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::RuntimeManager;
@@ -27,8 +27,9 @@ struct Margins {
 pub struct ControlBase {
     layout: ControlLayout,
     margins: Margins,
-    parent: Option<*mut ControlBase>,
-    pub(crate) children: Vec<Option<ControlManager>>,
+    pub(crate) handle: Option<Handle>,
+    pub(crate) parent: Option<Handle>,
+    pub(crate) children: Vec<Handle>,
     pub(crate) focused_child_index: u32,
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
@@ -41,6 +42,7 @@ impl ControlBase {
     pub fn new(layout: Layout, status_flags: StatusFlags) -> Self {
         Self {
             parent: None,
+            handle: None,
             children: Vec::new(),
             focused_child_index: 0,
             layout: ControlLayout::new(layout.format),
@@ -94,27 +96,19 @@ impl ControlBase {
         true
     }
 
-    #[inline]
-    pub(crate) fn get_parent_mut(&mut self) -> Option<&mut ControlBase> {
-        unsafe {
-            if let Some(p) = self.parent {
-                Some(&mut *p)
-            } else {
-                None
-            }
-        }
-    }
     pub(crate) fn add_child<T>(&mut self, control: T) -> ControlHandle<T>
     where
         T: Control + 'static,
     {
         let mut c = ControlManager::new(control);
-        c.get_base_mut().parent = Some(self as *mut ControlBase);
-        let idx = self.children.len() as u32;
-        let id = c.get_base().id;
-        self.children.push(Some(c));
+        // if I am already registered, I will set the parent of my child
+        if let Some(handle) = self.handle {
+            c.get_base_mut().parent = Some(handle);
+        }
+        let handle = RuntimeManager::get().add_control_manager(c);
+        self.children.push(handle);
         // if no control is focused, we should test to see if the current one can be focused
-        return ControlHandle::<T>::new(idx, id);
+        return ControlHandle::new(handle);
     }
 
     #[inline(always)]

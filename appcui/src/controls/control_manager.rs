@@ -78,55 +78,7 @@ impl ControlManager {
     {
         unsafe { &mut *(self.base as *mut T) }
     }
-    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
-        if self.get_base().prepare_paint(surface) {
-            // paint is possible
-            self.get_control().on_paint(surface, theme);
-            for child in &self.get_base().children {
-                if let Some(child) = child.as_ref() {
-                    child.paint(surface, theme);
-                }
-            }
-        }
-    }
-    pub(crate) fn update_layout(&mut self, parent_layout: &ParentLayout) {
-        let base = self.get_base_mut();
-        let old_size = base.get_size();
-        base.update_control_layout_and_screen_origin(parent_layout);
-        let new_size = base.get_size();
-        // process the same thing for its children
-        let my_layout = ParentLayout::from(base);
-        // if size has been changed --> call on_resize
-        if new_size != old_size {
-            self.get_control_mut().on_resize(old_size, new_size);
-        }
-        for child in &mut self.get_base_mut().children {
-            if let Some(child) = child.as_mut() {
-                child.update_layout(&my_layout);
-            }
-        }
-    }
-    pub(crate) fn process_keypressed_event(
-        &mut self,
-        key: Key,
-        character: char,
-    ) -> EventProcessStatus {
-        let base = self.get_base_mut();
-        if base.can_receive_input() == false {
-            return EventProcessStatus::Ignored;
-        }
-        let focused_child_index = base.focused_child_index as usize;
-        if focused_child_index >= base.children.len() {
-            return EventProcessStatus::Ignored;
-        }
-        if let Some(child) = &mut base.children[focused_child_index] {
-            if child.process_keypressed_event(key, character) == EventProcessStatus::Processed {
-                return EventProcessStatus::Processed;
-            }
-        }
-        // else --> call it ourselves
-        return self.get_control_mut().on_key_pressed(key, character);
-    }
+
 }
 
 impl Drop for ControlManager {
