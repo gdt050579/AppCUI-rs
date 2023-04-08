@@ -66,9 +66,11 @@ impl RuntimeManager {
                 None
             },
         };
-        let desktop = ControlManager::new(Desktop::new());
+        let mut desktop = ControlManager::new(Desktop::new());
         let controls = unsafe { &mut *manager.controls };
+        desktop.get_base_mut().update_focus_flag(true);
         manager.desktop_handler = controls.add(desktop);
+        manager.current_focus = Some(manager.desktop_handler);
         controls
             .get(manager.desktop_handler)
             .unwrap()
