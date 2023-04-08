@@ -14,7 +14,7 @@ impl ControlsVector {
         if idx < self.controls.len() {
             let c = self.controls[idx].as_mut();
             if c.is_some() {
-                if c.unwrap().get_base().handle.unwrap() == handle {
+                if c.as_ref().unwrap().get_base().handle.unwrap() == handle {
                     return c;
                 }
             }
@@ -23,7 +23,7 @@ impl ControlsVector {
     }
     #[inline(always)]
     pub(crate) fn get_desktop(&mut self) -> &mut ControlManager {
-        return &mut self.controls[0].unwrap();
+        return self.controls[0].as_mut().unwrap();
     }
     pub(crate) fn add(&mut self, mut manager: ControlManager) -> Handle {
         let idx = self.controls.len() as u32;

@@ -65,7 +65,7 @@ impl RuntimeManager {
                 None
             },
         };
-        let mut desktop = ControlManager::new(Desktop::new());
+        let desktop = ControlManager::new(Desktop::new());
         let controls = unsafe { &mut *manager.controls };
         manager.desktop_handler = controls.add(desktop);
         controls
@@ -127,10 +127,12 @@ impl RuntimeManager {
     where
         T: Control + 'static,
     {
-        let mut controls = unsafe { &mut *self.controls };
+        let controls = unsafe { &mut *self.controls };
         controls.get_desktop().get_base_mut().add_child(obj)
     }
-
+    pub(crate) fn get_controls(&self) -> &mut ControlsVector {
+        unsafe { &mut *self.controls }
+    }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
         if self.menubar.is_some() {
             self.menubar.as_mut().unwrap().add(menu, caption);
@@ -171,7 +173,7 @@ impl RuntimeManager {
         }
     }
 
-    fn update_focus(&mut self, id: ControlID) {
+    fn update_focus(&mut self, _id: ControlID) {
         // update focus
     }
 
@@ -181,7 +183,7 @@ impl RuntimeManager {
     }
 
     pub(crate) fn update_control_layout(&mut self, handle: Handle, parent_layout: &ParentLayout) {
-        let mut controls = unsafe { &mut *self.controls };
+        let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
             let old_size = base.get_size();
@@ -199,7 +201,7 @@ impl RuntimeManager {
         }
     }
     fn paint(&mut self) {
-        self.paint_control(self.desktop_handler, &mut self.surface, &self.theme);
+        self.paint_control(self.desktop_handler);
         self.surface.reset();
         if self.commandbar.is_some() {
             self.commandbar
@@ -218,14 +220,14 @@ impl RuntimeManager {
         }
         self.terminal.update_screen(&self.surface);
     }
-    fn paint_control(&mut self, handle: Handle, surface: &mut Surface, theme: &Theme) {
-        let mut controls = unsafe { &mut *self.controls };
+    fn paint_control(&mut self, handle: Handle) {
+        let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
-            if control.get_base().prepare_paint(surface) {
+            if control.get_base().prepare_paint(&mut self.surface) {
                 // paint is possible
-                control.get_control().on_paint(surface, theme);
+                control.get_control().on_paint(&mut self.surface, & self.theme);
                 for child_handle in &control.get_base().children {
-                    self.paint_control(*child_handle, surface, theme);
+                    self.paint_control(*child_handle);
                 }
             }
         }
@@ -247,7 +249,7 @@ impl RuntimeManager {
         key: Key,
         character: char,
     ) -> EventProcessStatus {
-        let mut controls = unsafe { &mut *self.controls };
+        let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
             if base.can_receive_input() == false {
@@ -290,11 +292,11 @@ impl RuntimeManager {
         }
         self.recompute_layout = true;
     }
-    fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {}
-    fn process_mousemove_event(&mut self, event: MouseMoveEvent) {}
-    fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {}
-    fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {}
-    fn process_mouse_dblclick_event(&mut self, event: MouseDoubleClickEvent) {}
+    fn process_mousewheel_event(&mut self, _event: MouseWheelEvent) {}
+    fn process_mousemove_event(&mut self, _event: MouseMoveEvent) {}
+    fn process_mousebuttondown_event(&mut self, _event: MouseButtonDownEvent) {}
+    fn process_mousebuttonup_event(&mut self, _event: MouseButtonUpEvent) {}
+    fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent) {}
 }
 
 impl Drop for RuntimeManager {

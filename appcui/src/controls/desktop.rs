@@ -55,9 +55,9 @@ impl OnKeyPressed for Desktop {
         }
         // check controls hot keys
         if key.modifier.contains(KeyModifier::Alt) {
-            let rm = RuntimeManager::get();
+            let controls = RuntimeManager::get().get_controls();
             for ctrl in self.children.iter() {
-                if let Some(child) = rm.get_control(*ctrl) {
+                if let Some(child) = controls.get(*ctrl) {
                     if child.get_base_mut().get_hotkey() == key {
                         // child.set_focus();
                         return EventProcessStatus::Processed;

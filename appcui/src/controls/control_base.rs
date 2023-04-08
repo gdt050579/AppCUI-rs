@@ -105,7 +105,7 @@ impl ControlBase {
         if let Some(handle) = self.handle {
             c.get_base_mut().parent = Some(handle);
         }
-        let handle = RuntimeManager::get().add_control_manager(c);
+        let handle = RuntimeManager::get().get_controls().add(c);
         self.children.push(handle);
         // if no control is focused, we should test to see if the current one can be focused
         return ControlHandle::new(handle);
