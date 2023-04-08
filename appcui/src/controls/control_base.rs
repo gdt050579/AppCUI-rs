@@ -131,17 +131,17 @@ impl ControlBase {
         let mut c = ControlManager::new(control);        
         // if I am already registered, I will set the parent of my child
         let base = c.get_base_mut();
-        let focusable = base.can_receive_input();
+        let focusable = base.can_receive_input();      
         if let Some(handle) = self.handle {
             base.parent = Some(handle);
         }
+        let rm = RuntimeManager::get();
+        let handle = rm.get_controls().add(c);
+        self.children.push(handle);
         if focusable {
-            base.request_focus();
+            rm.request_focus_for_control(handle);
             // si ar trebui sa setez si index-ul in lista de copii
         }
-        let handle = RuntimeManager::get().get_controls().add(c);
-        self.children.push(handle);
-
         return ControlHandle::new(handle);
     }
 

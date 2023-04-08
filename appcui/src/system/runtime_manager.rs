@@ -186,15 +186,15 @@ impl RuntimeManager {
             if let Some(control) = controls.get(h) {
                 self.focus_chain.push(h);
                 if !control.get_base_mut().mark_to_receive_focus() {
-                    break false;
+                    break true;
                 }
                 if let Some(parent) = control.get_base().parent {
                     h = parent;
                 } else {
-                    break true;
+                    break false; // all good, we reached the desktop
                 }
             } else {
-                break false;
+                break true;
             }
         };
         if invalid_chain_for_focus {
