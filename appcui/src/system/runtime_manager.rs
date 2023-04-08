@@ -1,4 +1,4 @@
-use super::{CommandBar, InitializationData, InitializationFlags, Theme, ToolTip};
+use super::{CommandBar, ControlsVector, InitializationData, InitializationFlags, Theme, ToolTip};
 use crate::controls::control_id::ControlID;
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, EventProcessStatus};
@@ -22,7 +22,7 @@ pub(crate) struct RuntimeManager {
     theme: Theme,
     terminal: Box<dyn Terminal>,
     surface: Surface,
-    controls: Vec<Option<ControlManager>>,
+    controls: *mut ControlsVector,
     desktop_handler: Handle,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
@@ -52,7 +52,7 @@ impl RuntimeManager {
             repaint: true,
             request_focus: None,
             current_focus: None,
-            controls: Vec::with_capacity(64),
+            controls: Box::into_raw(Box::new(ControlsVector::new())),
             loop_status: LoopStatus::Normal,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
                 Some(CommandBar::new(width, height))
@@ -66,8 +66,13 @@ impl RuntimeManager {
             },
         };
         let mut desktop = ControlManager::new(Desktop::new());
-        desktop.get_base_mut().handle = Some(manager.desktop_handler);
-        manager.controls.push(Some(desktop));
+        let controls = unsafe { &mut *manager.controls };
+        manager.desktop_handler = controls.add(desktop);
+        controls
+            .get(manager.desktop_handler)
+            .unwrap()
+            .get_base_mut()
+            .handle = Some(manager.desktop_handler);
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
@@ -122,33 +127,10 @@ impl RuntimeManager {
     where
         T: Control + 'static,
     {
-        self.controls[0].unwrap().get_base_mut().add_child(obj)
+        let mut controls = unsafe { &mut *self.controls };
+        controls.get_desktop().get_base_mut().add_child(obj)
     }
-    pub(crate) fn get_control(&mut self, handle: Handle) -> Option<&mut ControlManager> {
-        let idx = handle.get_index();
-        if idx < self.controls.len() {
-            let c = self.controls[idx].as_mut();
-            if c.is_some() {
-                if c.unwrap().get_base().handle.unwrap() == handle {
-                    return c;
-                }
-            }
-        }
-        None
-    }
-    pub(crate) fn add_control_manager(&mut self, mut manager: ControlManager) -> Handle {
-        let idx = self.controls.len() as u32;
-        let handle = Handle::new(idx);
-        manager.get_base_mut().handle = Some(handle);
-        // set the handle for all children
-        for child in manager.get_base().children.iter() {
-            if let Some(control) = self.get_control(*child) {
-                control.get_base_mut().parent = Some(handle);
-            }
-        }
-        self.controls.push(Some(manager));
-        handle
-    }
+
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
         if self.menubar.is_some() {
             self.menubar.as_mut().unwrap().add(menu, caption);
@@ -199,7 +181,8 @@ impl RuntimeManager {
     }
 
     pub(crate) fn update_control_layout(&mut self, handle: Handle, parent_layout: &ParentLayout) {
-        if let Some(control) = self.get_control(handle) {
+        let mut controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
             let old_size = base.get_size();
             base.update_control_layout_and_screen_origin(parent_layout);
@@ -235,8 +218,9 @@ impl RuntimeManager {
         }
         self.terminal.update_screen(&self.surface);
     }
-    fn paint_control(&self, handle: Handle, surface: &mut Surface, theme: &Theme) {
-        if let Some(control) = self.get_control(handle) {
+    fn paint_control(&mut self, handle: Handle, surface: &mut Surface, theme: &Theme) {
+        let mut controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(handle) {
             if control.get_base().prepare_paint(surface) {
                 // paint is possible
                 control.get_control().on_paint(surface, theme);
@@ -263,7 +247,8 @@ impl RuntimeManager {
         key: Key,
         character: char,
     ) -> EventProcessStatus {
-        if let Some(control) = self.get_control(handle) {
+        let mut controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
             if base.can_receive_input() == false {
                 return EventProcessStatus::Ignored;
@@ -278,11 +263,10 @@ impl RuntimeManager {
             {
                 return EventProcessStatus::Processed;
             }
-        }
-        if let Some(control) = self.get_control(handle) {
             // else --> call it ourselves
             return control.get_control_mut().on_key_pressed(key, character);
         }
+
         return EventProcessStatus::Ignored;
     }
 
