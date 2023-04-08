@@ -1,5 +1,4 @@
 use super::{CommandBar, ControlsVector, InitializationData, InitializationFlags, Theme, ToolTip};
-use crate::controls::control_id::ControlID;
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, EventProcessStatus};
 use crate::controls::menu::{Menu, MenuBar};
@@ -30,8 +29,8 @@ pub(crate) struct RuntimeManager {
     recompute_layout: bool,
     repaint: bool,
     loop_status: LoopStatus,
-    request_focus: Option<ControlID>,
-    current_focus: Option<ControlID>,
+    request_focus: Option<Handle>,
+    current_focus: Option<Handle>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -120,8 +119,8 @@ impl RuntimeManager {
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
-    pub(crate) fn request_focus_for_control(&mut self, id: ControlID) {
-        self.request_focus = Some(id);
+    pub(crate) fn request_focus_for_control(&mut self, handle: Handle) {
+        self.request_focus = Some(handle);
     }
     pub(crate) fn add<T>(&mut self, obj: T) -> ControlHandle<T>
     where
@@ -143,8 +142,8 @@ impl RuntimeManager {
         self.recompute_layout = true;
         self.repaint = true;
         while self.loop_status == LoopStatus::Normal {
-            if let Some(id) = self.request_focus {
-                self.update_focus(id);
+            if let Some(handle) = self.request_focus {
+                self.update_focus(handle);
                 self.request_focus = None;
             }
             if self.recompute_layout {
@@ -173,7 +172,7 @@ impl RuntimeManager {
         }
     }
 
-    fn update_focus(&mut self, _id: ControlID) {
+    fn update_focus(&mut self, handle: Handle) {
         // update focus
     }
 

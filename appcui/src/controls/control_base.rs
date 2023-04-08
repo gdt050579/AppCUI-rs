@@ -2,7 +2,7 @@ use super::control_manager::ParentLayout;
 use super::events::{Control, Event, OnFocus};
 use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize};
 use super::layout::ControlLayout;
-use super::{Handle, ControlID, ControlManager, Layout, ControlHandle};
+use super::{ControlHandle, ControlID, ControlManager, Handle, Layout};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::RuntimeManager;
@@ -92,8 +92,11 @@ impl ControlBase {
         // if yes, we shoudl request focus for it
         // if no, just request focus for the current control
 
-        RuntimeManager::get().request_focus_for_control(self.id);
-        true
+        if let Some(handle) = self.handle {
+            RuntimeManager::get().request_focus_for_control(handle);
+            return true;
+        }
+        return false;
     }
 
     pub(crate) fn add_child<T>(&mut self, control: T) -> ControlHandle<T>
