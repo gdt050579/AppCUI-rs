@@ -173,7 +173,43 @@ impl RuntimeManager {
     }
 
     fn update_focus(&mut self, handle: Handle) {
-        // update focus
+        // 1. mark all controls from the path as preparing to received focus
+        let controls = unsafe { &mut *self.controls };
+        let mut h = handle;
+        let invalid_chain_for_focus = loop {
+            if let Some(control) = controls.get(h) {
+                if !control.get_base_mut().mark_to_receive_focus() {
+                    break false;
+                }
+                if let Some(parent) = control.get_base().parent {
+                    h = parent;
+                } else {
+                    break true;
+                }
+            }
+        };
+        if invalid_chain_for_focus {
+            // clear all marks
+            controls.clean_marked_for_focus();
+            return;
+        }
+
+        // 2. if there is already an object with focus --> call on_focus_lost
+        if let Some(focused) = self.current_focus {
+            let mut h = focused;
+            while let Some(control) = controls.get(h) {
+                if control.get_base().is_marked_to_receive_focus() {
+                    break;
+                }
+                control.get_control_mut().on_lose_focus();
+                if let Some(parent) = control.get_base().parent {
+                    h = parent;
+                } else {
+                    break;
+                }
+            }
+        }
+        self.current_focus = None;
     }
 
     fn recompute_layouts(&mut self) {
@@ -224,7 +260,9 @@ impl RuntimeManager {
         if let Some(control) = controls.get(handle) {
             if control.get_base().prepare_paint(&mut self.surface) {
                 // paint is possible
-                control.get_control().on_paint(&mut self.surface, & self.theme);
+                control
+                    .get_control()
+                    .on_paint(&mut self.surface, &self.theme);
                 for child_handle in &control.get_base().children {
                     self.paint_control(*child_handle);
                 }

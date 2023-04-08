@@ -38,4 +38,11 @@ impl ControlsVector {
         self.controls.push(Some(manager));
         handle
     }
+    pub(crate) fn clean_marked_for_focus(&mut self) {
+        for c in self.controls.iter_mut() {
+            if let Some(control) = c {
+                control.get_base_mut().clear_mark_to_receive_focus();
+            }
+        }
+    }
 }

@@ -14,6 +14,7 @@ pub enum StatusFlags {
     Enabled = 0x02,
     AcceptInput = 0x04,
     Focused = 0x08,
+    MarkedForFocus = 0x10,
 }
 #[derive(Copy, Clone)]
 struct Margins {
@@ -82,6 +83,21 @@ impl ControlBase {
         self.layout.set_position(x, y);
         //GDT: we should change the layout mode
         RuntimeManager::get().request_recompute_layout();
+    }
+
+    pub(crate) fn mark_to_receive_focus(&mut self) -> bool {
+        if self.can_receive_input() {
+            self.status_flags |= StatusFlags::MarkedForFocus;
+            return true;
+        }
+        return false;
+    }
+    pub(crate) fn clear_mark_to_receive_focus(&mut self) {
+        self.status_flags.remove(StatusFlags::MarkedForFocus);
+    }
+    #[inline(always)]
+    pub fn is_marked_to_receive_focus(&self)->bool {
+        self.status_flags.contains(StatusFlags::MarkedForFocus)
     }
 
     pub fn request_focus(&mut self) -> bool {
