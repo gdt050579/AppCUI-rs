@@ -201,6 +201,7 @@ impl RuntimeManager {
                 if control.get_base().is_marked_to_receive_focus() {
                     break;
                 }
+                control.get_base_mut().update_focus_flag(false);
                 control.get_control_mut().on_lose_focus();
                 if let Some(parent) = control.get_base().parent {
                     h = parent;

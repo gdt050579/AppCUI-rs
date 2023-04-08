@@ -85,6 +85,15 @@ impl ControlBase {
         RuntimeManager::get().request_recompute_layout();
     }
 
+    #[inline(always)]
+    pub(crate) fn update_focus_flag(&mut self, has_focus: bool) {
+        if has_focus {
+            self.status_flags |= StatusFlags::Focused;
+        } else {
+            self.status_flags.remove(StatusFlags::Focused);
+        }
+    }
+    #[inline(always)]
     pub(crate) fn mark_to_receive_focus(&mut self) -> bool {
         if self.can_receive_input() {
             self.status_flags |= StatusFlags::MarkedForFocus;
@@ -96,7 +105,7 @@ impl ControlBase {
         self.status_flags.remove(StatusFlags::MarkedForFocus);
     }
     #[inline(always)]
-    pub fn is_marked_to_receive_focus(&self)->bool {
+    pub fn is_marked_to_receive_focus(&self) -> bool {
         self.status_flags.contains(StatusFlags::MarkedForFocus)
     }
 
