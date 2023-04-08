@@ -31,6 +31,7 @@ pub(crate) struct RuntimeManager {
     loop_status: LoopStatus,
     request_focus: Option<Handle>,
     current_focus: Option<Handle>,
+    focus_chain: Vec<Handle>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -51,6 +52,7 @@ impl RuntimeManager {
             repaint: true,
             request_focus: None,
             current_focus: None,
+            focus_chain: Vec::with_capacity(16),
             controls: Box::into_raw(Box::new(ControlsVector::new())),
             loop_status: LoopStatus::Normal,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
@@ -174,10 +176,13 @@ impl RuntimeManager {
 
     fn update_focus(&mut self, handle: Handle) {
         // 1. mark all controls from the path as preparing to received focus
+        // we will use focuse_chain as a temporary value to hold the chain
+        self.focus_chain.clear();
         let controls = unsafe { &mut *self.controls };
         let mut h = handle;
         let invalid_chain_for_focus = loop {
             if let Some(control) = controls.get(h) {
+                self.focus_chain.push(h);
                 if !control.get_base_mut().mark_to_receive_focus() {
                     break false;
                 }
@@ -186,6 +191,8 @@ impl RuntimeManager {
                 } else {
                     break true;
                 }
+            } else {
+                break false;
             }
         };
         if invalid_chain_for_focus {
@@ -210,7 +217,21 @@ impl RuntimeManager {
                 }
             }
         }
-        self.current_focus = None;
+
+        // 3. now lets call on_focus (in the reverse order --> from parent to child)
+        while let Some(handle) = self.focus_chain.pop() {
+            if let Some(control) = controls.get(handle) {
+                let base = control.get_base_mut();
+                base.clear_mark_to_receive_focus();
+                if base.has_focus() {
+                    continue;
+                }
+                base.update_focus_flag(true);
+                control.get_control_mut().on_focus();
+            }
+        }
+        self.current_focus = Some(handle);
+        self.request_focus = None;
     }
 
     fn recompute_layouts(&mut self) {
