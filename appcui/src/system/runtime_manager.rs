@@ -297,6 +297,14 @@ impl RuntimeManager {
     fn process_mouse_dblclick_event(&mut self, event: MouseDoubleClickEvent) {}
 }
 
+impl Drop for RuntimeManager {
+    fn drop(&mut self) {
+        unsafe {
+            Box::from_raw(self.controls);
+        }
+    }
+}
+
 /*
 bool ApplicationImpl::ExecuteEventLoop(Control* ctrl, bool resetState)
 {
