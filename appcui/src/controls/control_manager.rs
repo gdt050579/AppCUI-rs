@@ -1,9 +1,7 @@
-use crate::graphics::{ClipArea, Point, Surface};
-use crate::input::Key;
-use crate::system::Theme;
+use crate::graphics::{ClipArea, Point};
 use crate::terminal::Terminal;
 
-use super::events::{Control, EventProcessStatus};
+use super::events::Control;
 use super::ControlBase;
 use std::ptr::NonNull;
 
