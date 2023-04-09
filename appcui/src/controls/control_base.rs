@@ -2,7 +2,7 @@ use super::control_manager::ParentLayout;
 use super::events::{Control, Event, OnFocus};
 use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize};
 use super::layout::ControlLayout;
-use super::{ControlHandle, ControlID, ControlManager, Handle, Layout};
+use super::{ControlHandle,ControlManager, Handle, Layout};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::RuntimeManager;
@@ -36,7 +36,6 @@ pub struct ControlBase {
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
     pub(crate) hotkey: Key,
-    pub(crate) id: ControlID,
 }
 
 impl ControlBase {
@@ -57,7 +56,6 @@ impl ControlBase {
             screen_clip: ClipArea::default(),
             screen_origin: Point::default(),
             hotkey: Key::default(),
-            id: ControlID::new(),
         }
     }
     #[inline(always)]
