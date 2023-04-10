@@ -6,6 +6,7 @@ use super::{ControlHandle,ControlManager, Handle, Layout};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::RuntimeManager;
+use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 8)]
@@ -31,7 +32,8 @@ pub struct ControlBase {
     pub(crate) handle: Option<Handle>,
     pub(crate) parent: Option<Handle>,
     pub(crate) children: Vec<Handle>,
-    pub(crate) focused_child_index: u32,
+    pub(crate) focused_child_index: VectorIndex,
+    pub(crate) parent_index: VectorIndex,
     status_flags: StatusFlags,
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
@@ -44,7 +46,8 @@ impl ControlBase {
             parent: None,
             handle: None,
             children: Vec::new(),
-            focused_child_index: 0,
+            focused_child_index: VectorIndex::Invalid,
+            parent_index: VectorIndex::Invalid,
             layout: ControlLayout::new(layout.format),
             margins: Margins {
                 left: 0,

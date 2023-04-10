@@ -7,7 +7,7 @@ use crate::controls::*;
 use crate::graphics::{Rect, Size, Surface};
 use crate::input::{Key, KeyModifier};
 use crate::terminal::*;
-use crate::utils::Caption;
+use crate::utils::{Caption, VectorIndex};
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -28,6 +28,7 @@ pub(crate) struct RuntimeManager {
     menubar: Option<MenuBar>,
     recompute_layout: bool,
     repaint: bool,
+    recompute_parent_indexes: bool,
     loop_status: LoopStatus,
     request_focus: Option<Handle>,
     current_focus: Option<Handle>,
@@ -50,6 +51,7 @@ impl RuntimeManager {
             tooltip: ToolTip::new(),
             recompute_layout: true,
             repaint: true,
+            recompute_parent_indexes: true,
             request_focus: None,
             current_focus: None,
             focus_chain: Vec::with_capacity(16),
@@ -146,6 +148,10 @@ impl RuntimeManager {
         self.recompute_layout = true;
         self.repaint = true;
         while self.loop_status == LoopStatus::Normal {
+            if self.recompute_parent_indexes {
+                self.update_parent_indexes(self.desktop_handler);
+                self.recompute_parent_indexes = false;
+            }
             if let Some(handle) = self.request_focus {
                 self.update_focus(handle);
                 self.request_focus = None;
@@ -241,6 +247,20 @@ impl RuntimeManager {
         self.update_control_layout(self.desktop_handler, &term_layout);
     }
 
+    fn update_parent_indexes(&mut self, handle: Handle) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(handle) {
+            let base = control.get_base_mut();
+            for i in 0..base.children.len() {
+                let child_handle = base.children[i];
+                if let Some(child) = unsafe { (&mut *self.controls).get(child_handle) } {
+                    child.get_base_mut().parent_index = VectorIndex::with_value(i);
+                    self.update_parent_indexes(child_handle);
+                }
+            }
+        }
+    }
+
     pub(crate) fn update_control_layout(&mut self, handle: Handle, parent_layout: &ParentLayout) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
@@ -316,11 +336,10 @@ impl RuntimeManager {
             if base.can_receive_input() == false {
                 return EventProcessStatus::Ignored;
             }
-            let focused_child_index = base.focused_child_index as usize;
-            if focused_child_index >= base.children.len() {
+            if !base.focused_child_index.in_range(base.children.len()) {
                 return EventProcessStatus::Ignored;
             }
-            let handle_child = base.children[focused_child_index];
+            let handle_child = base.children[base.focused_child_index.index()];
             if self.process_control_keypressed_event(handle_child, key, character)
                 == EventProcessStatus::Processed
             {
