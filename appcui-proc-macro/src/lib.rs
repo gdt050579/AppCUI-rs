@@ -58,6 +58,13 @@ mod templates {
         fn on_lose_focus(&mut self)  { self.base.on_lose_focus(); }
     }
     ";
+
+    pub static ON_EVENT_TRAIT: &str = "
+    impl OnEvent for $STRUCT_NAME$ {
+        fn on_event(&mut self, event: Event, sender: Handle)->EventProcessStatus  { return self.base.on_event(event, sender); }
+    }
+    ";
+
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
@@ -91,6 +98,9 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     }
     if !a.on_focus {
         code.push_str(templates::ON_FOCUS_TRAIT);
+    }
+    if !a.on_event {
+        code.push_str(templates::ON_EVENT_TRAIT);
     }
     // replace templates
     code = code

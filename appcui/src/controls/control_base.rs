@@ -1,6 +1,6 @@
 use super::control_manager::ParentLayout;
-use super::events::{Control, Event, OnFocus};
-use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize};
+use super::events::{Control, Event};
+use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize, OnFocus, OnEvent};
 use super::layout::ControlLayout;
 use super::{ControlHandle, ControlManager, Handle, Layout};
 use crate::graphics::*;
@@ -287,3 +287,4 @@ impl OnMouseEvent for ControlBase {}
 impl OnDefaultAction for ControlBase {}
 impl OnResize for ControlBase {}
 impl OnFocus for ControlBase {}
+impl OnEvent for ControlBase {}

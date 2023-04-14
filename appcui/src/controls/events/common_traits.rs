@@ -1,6 +1,9 @@
+use crate::controls::Handle;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::Theme;
+
+use super::Event;
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
@@ -8,7 +11,7 @@ pub enum EventProcessStatus {
     Processed,
     Ignored,
     Update,
-    Cancel
+    Cancel,
 }
 
 pub trait OnPaint {
@@ -37,4 +40,13 @@ pub trait OnFocus {
     fn on_lose_focus(&mut self) {}
 }
 
-pub trait Control: OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus {}
+pub trait OnEvent {
+    fn on_event(&mut self, _event: Event, _sender: Handle) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+
+pub trait Control:
+    OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent
+{
+}

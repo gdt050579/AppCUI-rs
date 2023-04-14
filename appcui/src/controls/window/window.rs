@@ -7,6 +7,7 @@ use super::DecoratorsList;
 use super::DragStatus;
 use super::WindowFlags;
 use crate::controls::events::*;
+use crate::controls::Handle;
 use crate::controls::menu::Menu;
 use crate::controls::menu::MenuBar;
 use crate::controls::*;

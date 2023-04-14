@@ -158,6 +158,9 @@ impl RuntimeManager {
         self.recompute_layout = true;
         self.repaint = true;
         while self.loop_status == LoopStatus::Normal {
+            if !self.events.is_empty() {
+                self.process_events_queue();
+            }
             if self.recompute_parent_indexes {
                 self.update_parent_indexes(self.desktop_handler);
                 self.recompute_parent_indexes = false;
@@ -191,6 +194,15 @@ impl RuntimeManager {
                 SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
                 SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
                 SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
+            }
+        }
+    }
+
+    fn process_events_queue(&mut self) {
+        let controls = unsafe { &mut *self.controls };
+        while let Some(evnt) =  self.events.pop() {            
+            if let Some(control) = controls.get(evnt.sender) {
+                //control.emit(evnt.event);
             }
         }
     }
