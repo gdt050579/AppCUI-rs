@@ -2,7 +2,7 @@ use super::control_manager::ParentLayout;
 use super::events::{Control, Event, OnFocus};
 use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize};
 use super::layout::ControlLayout;
-use super::{ControlHandle,ControlManager, Handle, Layout};
+use super::{ControlHandle, ControlManager, Handle, Layout};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::RuntimeManager;
@@ -129,10 +129,10 @@ impl ControlBase {
     where
         T: Control + 'static,
     {
-        let mut c = ControlManager::new(control);        
+        let mut c = ControlManager::new(control);
         // if I am already registered, I will set the parent of my child
         let base = c.get_base_mut();
-        let focusable = base.can_receive_input();      
+        let focusable = base.can_receive_input();
         if let Some(handle) = self.handle {
             base.parent = Some(handle);
         }
@@ -251,8 +251,10 @@ impl ControlBase {
         surface.reset_origin();
         return true;
     }
-    pub(crate) fn raise_event(&self, _event: Event) {
-        todo!();
+    pub(crate) fn raise_event(&self, event: Event) {
+        if let Some(handle) = self.handle {
+            RuntimeManager::get().send_event(event, handle);
+        }
     }
     pub(crate) fn show_tooltip_on_point(&self, txt: &str, x: i32, y: i32) {
         if self.is_visible() && self.screen_clip.is_visible() {

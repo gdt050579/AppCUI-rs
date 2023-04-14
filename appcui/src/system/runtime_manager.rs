@@ -1,6 +1,6 @@
 use super::{CommandBar, ControlsVector, InitializationData, InitializationFlags, Theme, ToolTip};
 use crate::controls::control_manager::ParentLayout;
-use crate::controls::events::{Control, EventProcessStatus};
+use crate::controls::events::{Control, EventProcessStatus, Event};
 use crate::controls::menu::{Menu, MenuBar};
 use crate::controls::ControlManager;
 use crate::controls::*;
@@ -17,6 +17,11 @@ enum LoopStatus {
     StopCurrent,
 }
 
+#[derive(Copy, Clone)]
+struct EmittedEvent {
+    event: Event,
+    sender: Handle,
+}
 pub(crate) struct RuntimeManager {
     theme: Theme,
     terminal: Box<dyn Terminal>,
@@ -33,6 +38,7 @@ pub(crate) struct RuntimeManager {
     request_focus: Option<Handle>,
     current_focus: Option<Handle>,
     focus_chain: Vec<Handle>,
+    events: Vec<EmittedEvent>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -55,6 +61,7 @@ impl RuntimeManager {
             request_focus: None,
             current_focus: None,
             focus_chain: Vec::with_capacity(16),
+            events: Vec::with_capacity(16),
             controls: Box::into_raw(Box::new(ControlsVector::new())),
             loop_status: LoopStatus::Normal,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
@@ -121,6 +128,9 @@ impl RuntimeManager {
     }
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
+    }
+    pub(crate) fn send_event(&mut self, event: Event, sender: Handle) {
+        self.events.push(EmittedEvent{ event, sender });
     }
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
