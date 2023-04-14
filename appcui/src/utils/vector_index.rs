@@ -40,7 +40,7 @@ impl VectorIndex {
     }
     #[inline(always)]
     pub fn in_range(&self, count: usize) -> bool {
-        (self.value < count) && (count != Self::INVALID_INDEX)
+        self.value < count
     }
     #[inline(always)]
     pub fn set(&mut self, value: usize, count: usize, clamp: bool) {

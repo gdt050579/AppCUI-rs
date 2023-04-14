@@ -2,8 +2,8 @@ use appcui::controls::*;
 use appcui::system::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    //let mut a = App::debug(60,20)?;
-    let mut a = App::default()?;
+    let mut a = App::debug(60,20)?;
+    //let mut a = App::default()?;
     let mut w = Window::new(
         "Simple window",
         Layout::new("d:c,w:40,h:10"),

@@ -164,6 +164,8 @@ impl RuntimeManager {
             }
             self.recompute_layout = false;
             self.repaint = false;
+            self.debug_print(self.desktop_handler, 0);
+            return;
             let sys_event = self.terminal.get_system_event();
             match sys_event {
                 SystemEvent::None => {}
@@ -377,6 +379,30 @@ impl RuntimeManager {
     fn process_mousebuttondown_event(&mut self, _event: MouseButtonDownEvent) {}
     fn process_mousebuttonup_event(&mut self, _event: MouseButtonUpEvent) {}
     fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent) {}
+
+    fn debug_print(&self, handle: Handle, depth: i32) {
+        for _ in 0..depth {
+            print!(" ");
+        }
+        let base = self.get_controls().get(handle).unwrap().get_base();
+        if base.parent_index.is_valid() {
+            print!("{}. ", base.parent_index.index());
+        } else {
+            print!("?.");
+        }
+        print!("[ID:{},Index:{}],", handle.get_id(), handle.get_index());
+        print!("  Children: {}", base.children.len());
+        if base.focused_child_index.is_valid() {
+            print!("  Idx:{}", base.focused_child_index.index());
+        } else {
+            print!("  Idx:Invalid");
+        }
+        print!("  Focus:{}", base.has_focus());
+        println!("");
+        for handle in base.children.iter() {
+            self.debug_print(*handle, depth + 2);
+        }
+    }
 }
 
 impl Drop for RuntimeManager {
