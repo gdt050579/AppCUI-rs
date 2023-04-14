@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 static GLOBAL_ID: AtomicUsize = AtomicUsize::new(0);
 
-#[derive(Clone, Copy, PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Handle {
     value: NonZeroU64,
 }

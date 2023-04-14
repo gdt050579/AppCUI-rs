@@ -1,6 +1,7 @@
 pub enum Strategy {
     Clamp,
     Rotate,
+    RotateWithInvalidState,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -11,9 +12,9 @@ pub(crate) struct VectorIndex {
 impl VectorIndex {
     const INVALID_INDEX: usize = usize::MAX;
     #[warn(non_upper_case_globals)]
-    pub (crate) const Invalid: VectorIndex = VectorIndex { value: usize::MAX };
+    pub(crate) const Invalid: VectorIndex = VectorIndex { value: usize::MAX };
     #[warn(non_upper_case_globals)]
-    pub (crate) const First: VectorIndex = VectorIndex { value: 0 };
+    pub(crate) const First: VectorIndex = VectorIndex { value: 0 };
 
     #[inline(always)]
     pub fn last(count: usize) -> Self {
@@ -59,45 +60,68 @@ impl VectorIndex {
     }
     #[inline(always)]
     pub fn add(&mut self, value: usize, count: usize, strategy: Strategy) {
-        if self.value == Self::INVALID_INDEX {
-            return;
-        }
         if count == 0 {
             self.value = Self::INVALID_INDEX;
             return;
         }
         match strategy {
             Strategy::Clamp => {
-                self.value += value;
-                if self.value >= count {
-                    self.value = count - 1;
+                if self.value != Self::INVALID_INDEX {
+                    self.value += value;
+                    if self.value >= count {
+                        self.value = count - 1;
+                    }
                 }
             }
             Strategy::Rotate => {
-                self.value = (self.value + value) % count;
+                if self.value != Self::INVALID_INDEX {
+                    self.value = (self.value + value) % count;
+                }
+            }
+            Strategy::RotateWithInvalidState => {
+                if self.value != Self::INVALID_INDEX {
+                    self.value += value;
+                    if self.value >= count {
+                        self.value = Self::INVALID_INDEX
+                    }
+                } else {
+                    self.value = 0; // first
+                }
             }
         }
     }
     #[inline(always)]
     pub fn sub(&mut self, value: usize, count: usize, strategy: Strategy) {
-        if self.value == Self::INVALID_INDEX {
-            return;
-        }
         if count == 0 {
             self.value = Self::INVALID_INDEX;
             return;
         }
         match strategy {
             Strategy::Clamp => {
-                if self.value >= value {
-                    self.value -= value;
-                } else {
-                    self.value = 0;
+                if self.value != Self::INVALID_INDEX {
+                    if self.value >= value {
+                        self.value -= value;
+                    } else {
+                        self.value = 0;
+                    }
                 }
             }
             Strategy::Rotate => {
-                let value = value % count;
-                self.value = (self.value + count - value) % count;
+                if self.value != Self::INVALID_INDEX {
+                    let value = value % count;
+                    self.value = (self.value + count - value) % count;
+                }
+            }
+            Strategy::RotateWithInvalidState => {
+                if self.value != Self::INVALID_INDEX {
+                    if self.value >= value {
+                        self.value -= value;
+                    } else {
+                        self.value = Self::INVALID_INDEX;
+                    }
+                } else {
+                    self.value = count - 1;
+                }
             }
         }
     }
@@ -116,6 +140,8 @@ impl From<usize> for VectorIndex {
 }
 impl From<u32> for VectorIndex {
     fn from(value: u32) -> Self {
-        VectorIndex { value: value as usize }
+        VectorIndex {
+            value: value as usize,
+        }
     }
 }

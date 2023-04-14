@@ -14,6 +14,8 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
 use crate::utils::Caption;
+use crate::utils::Strategy;
+use crate::utils::VectorIndex;
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
@@ -163,7 +165,7 @@ impl Window {
 
         */
     }
-    pub fn add<T>(&mut self, control: T)->ControlHandle<T>
+    pub fn add<T>(&mut self, control: T) -> ControlHandle<T>
     where
         T: Control + 'static,
     {
@@ -215,18 +217,154 @@ impl Window {
             self.old_rect = Rect::with_point_and_size(self.get_position(), self.get_size());
             let desktop_rect = RuntimeManager::get().get_desktop_rect();
             self.set_position(desktop_rect.get_left(), desktop_rect.get_top());
-            self.set_size(desktop_rect.get_width() as u16, desktop_rect.get_height() as u16);
+            self.set_size(
+                desktop_rect.get_width() as u16,
+                desktop_rect.get_height() as u16,
+            );
             self.maximized = true;
         } else {
             let l = self.old_rect.get_left();
             let t = self.old_rect.get_top();
-            self.set_position(l,t);
+            self.set_position(l, t);
             let w = self.old_rect.get_width() as u16;
             let h = self.old_rect.get_height() as u16;
             self.set_size(w, h);
             self.maximized = false;
         }
     }
+
+    fn find_next_control(
+        handle: Handle,
+        forward: bool,
+        start_from_current: bool,
+    ) -> Option<Handle> {
+        let rm = RuntimeManager::get();
+        if let Some(control) = rm.get_controls().get(handle) {
+            let base = control.get_base();
+            // if I have any child --> check to see if I can move there
+            if base.children.len() > 0 {
+                let mut idx = if start_from_current {
+                    base.focused_child_index
+                } else {
+                    VectorIndex::Invalid
+                };
+                let count = base.children.len();
+                loop {
+                    if forward {
+                        idx.add(1, count, Strategy::RotateWithInvalidState);
+                    } else {
+                        idx.sub(1, count, Strategy::RotateWithInvalidState);
+                    }
+                    if idx.in_range(count) {
+                        let child_handle = base.children[idx.index()];
+                        if let Some(child) = rm.get_controls().get(child_handle) {
+                            if child.get_base().can_receive_input() {
+                                return Window::find_next_control(child_handle, forward, false);
+                            }
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                None
+            } else {
+                // no childrem --> see if I am a good fit
+                if base.can_receive_input() {
+                    return Some(handle);
+                }
+                return None;
+            }
+        } else {
+            return None; // invalid handle
+        }
+
+        /*
+
+                Control* FindNextControl(Control* parent, bool forward, bool startFromCurrentOne, bool rootLevel, bool noSteps)
+        {
+            if (parent == nullptr)
+                return nullptr;
+            CREATE_CONTROL_CONTEXT(parent, Members, nullptr);
+            // daca am copii
+            if (Members->ControlsCount != 0)
+            {
+                int start, end;
+                if (startFromCurrentOne)
+                    start = Members->CurrentControlIndex;
+                else
+                    start = -1;
+                if (start < 0)
+                {
+                    if (forward)
+                        start = 0;
+                    else
+                        start = Members->ControlsCount - 1;
+                }
+                // calculez si end
+                if (forward)
+                    end = Members->ControlsCount;
+                else
+                    end = -1;
+                // sanity check
+                if (((forward) && (start >= end)) || ((!forward) && (start <= end)))
+                    return nullptr;
+                // ma plimb intre elemente
+                bool firstElement = true;
+                while (true)
+                {
+                    Control* copil = Members->Controls[start];
+                    if ((copil != nullptr) && (copil->Context != nullptr))
+                    {
+                        ControlContext* cMembers = (ControlContext*) copil->Context;
+                        // am un element posibil ok
+                        if (((cMembers->Flags & (GATTR_VISIBLE | GATTR_ENABLE)) == (GATTR_VISIBLE | GATTR_ENABLE)))
+                        {
+                            Control* res = FindNextControl(
+                                  copil, forward, startFromCurrentOne & firstElement, false, noSteps & firstElement);
+                            if (res != nullptr)
+                                return res;
+                        }
+                    }
+
+                    if (forward)
+                        start++;
+                    else
+                        start--;
+                    noSteps = false;
+                    if (start == end)
+                    {
+                        if ((!rootLevel) || (startFromCurrentOne == false))
+                            return nullptr;
+                        // am ajuns la finalul listei si nu am gasit sau am parcurs toata lista
+                        // daca nu - parcurg si restul listei
+                        if (forward)
+                        {
+                            start = 0;
+                            end   = Members->CurrentControlIndex + 1;
+                        }
+                        else
+                        {
+                            start = Members->ControlsCount - 1;
+                            end   = Members->CurrentControlIndex + 1;
+                        }
+                        // sanity check
+                        if (((forward) && (start >= end)) || ((!forward) && (start <= end)))
+                            return nullptr;
+                        rootLevel    = false;
+                        firstElement = false;
+                    }
+                    firstElement = false;
+                }
+            }
+            // daca nu am copii
+            if (((Members->Flags & GATTR_TABSTOP) != 0) && (noSteps == false))
+                return parent;
+            return nullptr;
+
+
+                 */
+    }
+
     pub fn set_tag(&mut self, name: &str) {
         self.decorators.set_tag(name);
         self.decorators.update_positions(self.get_size());
@@ -379,6 +517,26 @@ impl OnKeyPressed for Window {
                 _ => return EventProcessStatus::Ignored,
             }
         } else {
+            match key.get_compact_code() {
+                key!("Tab") => {
+                    if let Some(my_handle) = self.handle {
+                        if let Some(new_child) = Window::find_next_control(my_handle, true, true) {
+                            RuntimeManager::get().request_focus_for_control(new_child);
+                        }
+                    }
+                    return EventProcessStatus::Processed;
+                },
+                key!("Shift+Tab") => {
+                    if let Some(my_handle) = self.handle {
+                        if let Some(new_child) = Window::find_next_control(my_handle, false, true) {
+                            RuntimeManager::get().request_focus_for_control(new_child);
+                        }
+                    }
+                    return EventProcessStatus::Processed;
+                },
+                _ => {}
+            }
+            
         }
         EventProcessStatus::Ignored
     }
