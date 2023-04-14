@@ -155,6 +155,7 @@ impl RuntimeManager {
             if let Some(handle) = self.request_focus {
                 self.update_focus(handle);
                 self.request_focus = None;
+                self.repaint = true;
             }
             if self.recompute_layout {
                 self.recompute_layouts();
@@ -245,7 +246,7 @@ impl RuntimeManager {
                     if let Some(p_handle) = parent_handle {
                         if let Some(p) = controls.get(p_handle) {
                             let base = p.get_base_mut();
-                            base.focused_child_index = parent_index;                            
+                            base.focused_child_index = parent_index;
                         }
                     }
                 }
@@ -350,14 +351,13 @@ impl RuntimeManager {
             if base.can_receive_input() == false {
                 return EventProcessStatus::Ignored;
             }
-            if !base.focused_child_index.in_range(base.children.len()) {
-                return EventProcessStatus::Ignored;
-            }
-            let handle_child = base.children[base.focused_child_index.index()];
-            if self.process_control_keypressed_event(handle_child, key, character)
-                == EventProcessStatus::Processed
-            {
-                return EventProcessStatus::Processed;
+            if base.focused_child_index.in_range(base.children.len()) {
+                let handle_child = base.children[base.focused_child_index.index()];
+                if self.process_control_keypressed_event(handle_child, key, character)
+                    == EventProcessStatus::Processed
+                {
+                    return EventProcessStatus::Processed;
+                }
             }
             // else --> call it ourselves
             return control.get_control_mut().on_key_pressed(key, character);
