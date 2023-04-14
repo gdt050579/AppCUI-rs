@@ -263,7 +263,9 @@ impl Window {
                             }
                         }
                     } else {
-                        break;
+                        if start_from_current == false {
+                            break;
+                        }
                     }
                 }
                 None
@@ -525,7 +527,7 @@ impl OnKeyPressed for Window {
                         }
                     }
                     return EventProcessStatus::Processed;
-                },
+                }
                 key!("Shift+Tab") => {
                     if let Some(my_handle) = self.handle {
                         if let Some(new_child) = Window::find_next_control(my_handle, false, true) {
@@ -533,10 +535,9 @@ impl OnKeyPressed for Window {
                         }
                     }
                     return EventProcessStatus::Processed;
-                },
+                }
                 _ => {}
             }
-            
         }
         EventProcessStatus::Ignored
     }
