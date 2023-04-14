@@ -164,8 +164,8 @@ impl RuntimeManager {
             }
             self.recompute_layout = false;
             self.repaint = false;
-            self.debug_print(self.desktop_handler, 0);
-            return;
+            //self.debug_print(self.desktop_handler, 0);
+            //return;
             let sys_event = self.terminal.get_system_event();
             match sys_event {
                 SystemEvent::None => {}
@@ -229,16 +229,28 @@ impl RuntimeManager {
         }
 
         // 3. now lets call on_focus (in the reverse order --> from parent to child)
+        let mut parent_handle = None;
         while let Some(handle) = self.focus_chain.pop() {
-            if let Some(control) = controls.get(handle) {
+            //println!("Pop handle: {},{}",handle.get_id(),handle.get_index());
+            let child = controls.get(handle);
+            if let Some(control) = child {
                 let base = control.get_base_mut();
+                let parent_index = base.parent_index;
                 base.clear_mark_to_receive_focus();
-                if base.has_focus() {
-                    continue;
+                if !base.has_focus() {
+                    base.update_focus_flag(true);
+                    control.get_control_mut().on_focus();
                 }
-                base.update_focus_flag(true);
-                control.get_control_mut().on_focus();
+                if parent_index.is_valid() {
+                    if let Some(p_handle) = parent_handle {
+                        if let Some(p) = controls.get(p_handle) {
+                            let base = p.get_base_mut();
+                            base.focused_child_index = parent_index;                            
+                        }
+                    }
+                }
             }
+            parent_handle = Some(handle);
         }
         self.current_focus = Some(handle);
         self.request_focus = None;

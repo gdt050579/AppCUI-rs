@@ -191,7 +191,7 @@ impl Window {
         self.set_position(x, y);
     }
     fn resize_window_with(&mut self, add_to_width: i32, add_to_height: i32) {
-        let mut size = self.get_size();
+        let size = self.get_size();
         let new_width = ((size.width as i32) + add_to_width).clamp(0, 0xFFFF);
         let new_height = ((size.height as i32) + add_to_height).clamp(0, 0xFFFF);
         /*
