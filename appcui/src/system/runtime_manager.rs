@@ -1,6 +1,6 @@
 use super::{CommandBar, ControlsVector, InitializationData, InitializationFlags, Theme, ToolTip};
 use crate::controls::control_manager::ParentLayout;
-use crate::controls::events::{Control, EventProcessStatus, Event};
+use crate::controls::events::{Control, Event, EventProcessStatus};
 use crate::controls::menu::{Menu, MenuBar};
 use crate::controls::ControlManager;
 use crate::controls::*;
@@ -130,7 +130,7 @@ impl RuntimeManager {
         self.tooltip.hide();
     }
     pub(crate) fn send_event(&mut self, event: Event, sender: Handle) {
-        self.events.push(EmittedEvent{ event, sender });
+        self.events.push(EmittedEvent { event, sender });
     }
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
@@ -198,12 +198,33 @@ impl RuntimeManager {
         }
     }
 
-    fn process_events_queue(&mut self) {
+    fn process_one_event(&mut self, evnt: EmittedEvent) {
+        let mut h = evnt.sender;
         let controls = unsafe { &mut *self.controls };
-        while let Some(evnt) =  self.events.pop() {            
-            if let Some(control) = controls.get(evnt.sender) {
-                //control.emit(evnt.event);
+        while let Some(control) = controls.get(h) {
+            let result = control.get_control_mut().on_event(evnt.event, evnt.sender);
+            match result {
+                EventProcessStatus::Processed => {
+                    return;
+                }
+                EventProcessStatus::Ignored => {}
+                EventProcessStatus::Update => {
+                    self.repaint = true;
+                }
+                EventProcessStatus::Cancel => {
+                    return;
+                }
             }
+            if let Some(parent) = control.get_base().parent {
+                h = parent;
+            } else {
+                break;
+            }
+        }
+    }
+    fn process_events_queue(&mut self) {
+        while let Some(evnt) = self.events.pop() {
+            self.process_one_event(evnt);
         }
     }
 
@@ -359,7 +380,14 @@ impl RuntimeManager {
     }
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
-        self.process_control_keypressed_event(self.desktop_handler, event.key, event.character);
+        match self.process_control_keypressed_event(
+            self.desktop_handler,
+            event.key,
+            event.character,
+        ) {
+            EventProcessStatus::Processed | EventProcessStatus::Update => self.repaint = true,
+            _ => {}
+        }
     }
     pub(crate) fn process_control_keypressed_event(
         &mut self,
