@@ -7,7 +7,7 @@ use crate::controls::*;
 use crate::graphics::{Rect, Size, Surface};
 use crate::input::{Key, KeyModifier};
 use crate::terminal::*;
-use crate::utils::{Caption, VectorIndex};
+use crate::utils::{Caption, Strategy, VectorIndex};
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -414,6 +414,37 @@ impl RuntimeManager {
         }
 
         return EventProcessStatus::Ignored;
+    }
+
+    fn coordinates_to_control(&mut self, handle: Handle, x: i32, y: i32) -> Option<Handle> {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(handle) {
+            let base = control.get_base_mut();
+            if base.can_receive_input() == false {
+                return None;
+            }
+            if !base.screen_clip.contains(x, y) {
+                return None;
+            }
+            let count = base.children.len();
+            if count > 0 {
+                let mut idx = if base.focused_child_index.in_range(count) {
+                    base.focused_child_index.index()
+                } else {
+                    0
+                };
+                for _ in 0..count {
+                    let handle_child = base.children[idx];
+                    if let Some(handle) = self.coordinates_to_control(handle_child, x, y) {
+                        return Some(handle);
+                    }
+                    idx = (idx + 1) % count;
+                }
+            }
+
+            return Some(handle);
+        }
+        None
     }
 
     fn process_terminal_resize_event(&mut self, new_size: Size) {
