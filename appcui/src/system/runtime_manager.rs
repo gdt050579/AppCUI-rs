@@ -5,7 +5,7 @@ use crate::controls::menu::{Menu, MenuBar};
 use crate::controls::ControlManager;
 use crate::controls::*;
 use crate::graphics::{Rect, Size, Surface};
-use crate::input::{Key, KeyModifier};
+use crate::input::{Key, KeyModifier, MouseEvent, MouseEventData};
 use crate::terminal::*;
 use crate::utils::{Caption, Strategy, VectorIndex};
 
@@ -15,6 +15,14 @@ enum LoopStatus {
     Normal,
     StopApp,
     StopCurrent,
+}
+
+#[derive(Clone, Copy)]
+enum MouseLockedObject {
+    None,
+    Control(Handle),
+    CommandBar,
+    MenuBar,
 }
 
 #[derive(Copy, Clone)]
@@ -39,6 +47,7 @@ pub(crate) struct RuntimeManager {
     current_focus: Option<Handle>,
     focus_chain: Vec<Handle>,
     events: Vec<EmittedEvent>,
+    mouse_locked_object: MouseLockedObject,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -64,6 +73,7 @@ impl RuntimeManager {
             events: Vec::with_capacity(16),
             controls: Box::into_raw(Box::new(ControlsVector::new())),
             loop_status: LoopStatus::Normal,
+            mouse_locked_object: MouseLockedObject::None,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
                 Some(CommandBar::new(width, height))
             } else {
@@ -469,7 +479,76 @@ impl RuntimeManager {
     }
     fn process_mousewheel_event(&mut self, _event: MouseWheelEvent) {}
     fn process_mousemove_event(&mut self, _event: MouseMoveEvent) {}
-    fn process_mousebuttondown_event(&mut self, _event: MouseButtonDownEvent) {}
+    fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
+        // Hide ToolTip
+        self.hide_tooltip();
+        // check contextual menu
+        /*
+            if (this->VisibleMenu)
+            {
+                ProcessMenuMouseClick(this->VisibleMenu, x, y);
+                return;
+            }
+        */
+        // check main menu
+        if let Some(menu) = self.menubar.as_mut() {
+            /*
+            if ((this->menu) && (this->menu->OnMousePressed(x, y, button)))
+            {
+                RepaintStatus |= REPAINT_STATUS_DRAW;
+                return;
+            }
+
+             */
+        }
+        // check command bar
+        if let Some(commandbar) = self.commandbar.as_mut() {
+            if commandbar.on_mouse_down(&event) {
+                self.repaint = true;
+                self.mouse_locked_object = MouseLockedObject::CommandBar;
+                return;
+            }
+        }
+        // check for a control
+        if let Some(handle) = self.coordinates_to_control(self.desktop_handler, event.x, event.y) {
+            let controls = unsafe { &mut *self.controls };
+            if let Some(control) = controls.get(handle) {
+                self.update_focus(handle);
+                let base = control.get_base();
+                let scr_x = base.screen_clip.left;
+                let scr_y = base.screen_clip.top;
+                control
+                    .get_control_mut()
+                    .on_mouse_event(&MouseEvent::Pressed(MouseEventData {
+                        x: event.x - scr_x,
+                        y: event.y - scr_y,
+                        button: event.button,
+                    }));
+                self.mouse_locked_object = MouseLockedObject::Control(handle);
+                self.repaint = true;
+                return;
+            }
+        }
+        self.mouse_locked_object = MouseLockedObject::None;
+        /*
+        void ApplicationImpl::OnMouseDown(int x, int y, Input::MouseButton button)
+        {
+
+            // check controls
+            if (ModalControlsCount == 0)
+                MouseLockedControl = CoordinatesToControl(this->AppDesktop, x, y);
+            else
+                MouseLockedControl = CoordinatesToControl(ModalControlsStack[ModalControlsCount - 1], x, y);
+
+            if (MouseLockedControl != nullptr)
+            {
+                // done
+            }
+        }
+
+
+        */
+    }
     fn process_mousebuttonup_event(&mut self, _event: MouseButtonUpEvent) {}
     fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent) {}
 
