@@ -209,7 +209,7 @@ impl CommandBar {
         }
     }
 
-    fn mouse_poseition_to_index(&self, x: i32, y: i32) -> Option<u32> {
+    fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<u32> {
         if y != self.y {
             return None;
         }
@@ -241,7 +241,7 @@ impl CommandBar {
         }
         // else check the new index (if any)
         self.pressed_index = INVALID_INDEX;
-        if let Some(idx) = self.mouse_poseition_to_index(event.x, event.y) {
+        if let Some(idx) = self.mouse_position_to_index(event.x, event.y) {
             self.hovered_index = idx;
             return true;
         }
