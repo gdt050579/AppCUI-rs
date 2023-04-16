@@ -257,7 +257,7 @@ impl CommandBar {
         }
         return false;
     }
-    pub(crate) fn on_mouse_up(&mut self, _: &MouseButtonUpEvent) -> Option<u32> {
+    pub(crate) fn on_mouse_up(&mut self) -> Option<u32> {
         let idx = self.pressed_index as u32;
         self.hovered_index = INVALID_INDEX;
         self.pressed_index = INVALID_INDEX;

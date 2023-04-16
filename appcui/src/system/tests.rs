@@ -164,7 +164,7 @@ fn check_command_bar_click() {
     c.paint(&mut s, &Theme::new());
     //s.print();
     assert_eq!(s.compute_hash(), 0x66FEDFABE303DEF6);
-    let result = c.on_mouse_up(&MouseButtonUpEvent{ x:9 , y: 4, button: MouseButton::Left }).unwrap();
+    let result = c.on_mouse_up().unwrap();
     c.paint(&mut s, &Theme::new());
     //s.print();
     assert_eq!(s.compute_hash(), 0x2C57C3580F2C055A);

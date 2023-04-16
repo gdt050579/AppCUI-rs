@@ -64,7 +64,7 @@ impl MenuBar {
         self.update_positions();
     }
 
-    fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
+    pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
         if let Some(idx) = self.mouse_position_to_index(x, y) {
             self.open(VectorIndex::from(idx));
             return EventProcessStatus::Processed;

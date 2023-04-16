@@ -1,4 +1,6 @@
-use super::{CommandBar, ControlHandleManager, InitializationData, InitializationFlags, Theme, ToolTip};
+use super::{
+    CommandBar, ControlHandleManager, InitializationData, InitializationFlags, Theme, ToolTip,
+};
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, Event, EventProcessStatus};
 use crate::controls::menu::{Menu, MenuBar};
@@ -236,6 +238,10 @@ impl RuntimeManager {
         while let Some(evnt) = self.events.pop() {
             self.process_one_event(evnt);
         }
+    }
+
+    fn send_command(&mut self, _command: u32) {
+        todo!("send_command");
     }
 
     fn update_focus(&mut self, handle: Handle) {
@@ -492,14 +498,11 @@ impl RuntimeManager {
         */
         // check main menu
         if let Some(menu) = self.menubar.as_mut() {
-            /*
-            if ((this->menu) && (this->menu->OnMousePressed(x, y, button)))
-            {
-                RepaintStatus |= REPAINT_STATUS_DRAW;
+            if menu.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
+                self.repaint = true;
+                self.mouse_locked_object = MouseLockedObject::MenuBar;
                 return;
             }
-
-             */
         }
         // check command bar
         if let Some(commandbar) = self.commandbar.as_mut() {
@@ -549,7 +552,42 @@ impl RuntimeManager {
 
         */
     }
-    fn process_mousebuttonup_event(&mut self, _event: MouseButtonUpEvent) {}
+    fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
+        // check contextual menus
+        /*if (this->VisibleMenu)
+        {
+            ProcessMenuMouseReleased(this->VisibleMenu, x, y);
+        }*/
+        match self.mouse_locked_object {
+            MouseLockedObject::None => {}
+            MouseLockedObject::Control(handle) => {
+                let controls = unsafe { &mut *self.controls };
+                if let Some(control) = controls.get(handle) {
+                    let base = control.get_base();
+                    let scr_x = base.screen_clip.left;
+                    let scr_y = base.screen_clip.top;
+                    control
+                        .get_control_mut()
+                        .on_mouse_event(&MouseEvent::Released(MouseEventData {
+                            x: event.x - scr_x,
+                            y: event.y - scr_y,
+                            button: event.button,
+                        }));
+                    self.repaint = true;
+                }
+            }
+            MouseLockedObject::CommandBar => {
+                if let Some(cmdbar) = self.commandbar.as_mut() {
+                    if let Some(command) = cmdbar.on_mouse_up() {
+                        self.send_command(command);
+                    }
+                    self.repaint = true;
+                }
+            }
+            MouseLockedObject::MenuBar => todo!(),
+        }
+        self.mouse_locked_object = MouseLockedObject::None;
+    }
     fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent) {}
 
     fn debug_print(&self, handle: Handle, depth: i32) {
