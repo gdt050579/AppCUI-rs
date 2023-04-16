@@ -483,7 +483,29 @@ impl RuntimeManager {
         }
         self.recompute_layout = true;
     }
-    fn process_mousewheel_event(&mut self, _event: MouseWheelEvent) {}
+    fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
+        // if (this->VisibleMenu)
+        // {
+        //     auto* mcx = reinterpret_cast<MenuContext*>(this->VisibleMenu->Context);
+        //     if (mcx->OnMouseWheel(x, y, direction))
+        //         RepaintStatus |= REPAINT_STATUS_DRAW;
+        //     return;
+        // }
+        match self.mouse_locked_object {
+            MouseLockedObject::None => {}
+            _ => return,
+        }
+        if let Some(handle) = self.coordinates_to_control(self.desktop_handler, event.x, event.y)
+        {
+            let controls = unsafe { &mut *self.controls };
+            if let Some(control) = controls.get(handle) {
+                match control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) {
+                    EventProcessStatus::Processed | EventProcessStatus::Update => self.repaint = true,
+                    _ => {}
+                }
+            }
+        }
+    }
     fn process_mousemove_event(&mut self, _event: MouseMoveEvent) {}
     fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
         // Hide ToolTip
