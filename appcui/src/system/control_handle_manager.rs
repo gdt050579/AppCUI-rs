@@ -1,10 +1,10 @@
 use crate::controls::{ControlManager, Handle};
 
-pub(crate) struct ControlsVector {
+pub(crate) struct ControlHandleManager {
     controls: Vec<Option<ControlManager>>,
 }
-impl ControlsVector {
-    pub(crate) fn new() -> ControlsVector {
+impl ControlHandleManager {
+    pub(crate) fn new() -> ControlHandleManager {
         Self {
             controls: Vec::with_capacity(64),
         }

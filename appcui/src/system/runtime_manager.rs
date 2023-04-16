@@ -1,4 +1,4 @@
-use super::{CommandBar, ControlsVector, InitializationData, InitializationFlags, Theme, ToolTip};
+use super::{CommandBar, ControlHandleManager, InitializationData, InitializationFlags, Theme, ToolTip};
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, Event, EventProcessStatus};
 use crate::controls::menu::{Menu, MenuBar};
@@ -34,7 +34,7 @@ pub(crate) struct RuntimeManager {
     theme: Theme,
     terminal: Box<dyn Terminal>,
     surface: Surface,
-    controls: *mut ControlsVector,
+    controls: *mut ControlHandleManager,
     desktop_handler: Handle,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
@@ -71,7 +71,7 @@ impl RuntimeManager {
             current_focus: None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
-            controls: Box::into_raw(Box::new(ControlsVector::new())),
+            controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
@@ -155,7 +155,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         controls.get_desktop().get_base_mut().add_child(obj)
     }
-    pub(crate) fn get_controls(&self) -> &mut ControlsVector {
+    pub(crate) fn get_controls(&self) -> &mut ControlHandleManager {
         unsafe { &mut *self.controls }
     }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
