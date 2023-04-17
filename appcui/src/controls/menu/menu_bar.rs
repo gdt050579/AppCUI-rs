@@ -71,7 +71,7 @@ impl MenuBar {
         }
         return EventProcessStatus::Ignored;
     }
-    fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
+    pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
         if let Some(idx) = self.mouse_position_to_index(x, y) {
             if self.hovered_item.index() != idx {
                 self.hovered_item = VectorIndex::from(idx);

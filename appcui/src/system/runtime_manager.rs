@@ -6,8 +6,8 @@ use crate::controls::events::{Control, Event, EventProcessStatus};
 use crate::controls::menu::{Menu, MenuBar};
 use crate::controls::ControlManager;
 use crate::controls::*;
-use crate::graphics::{Rect, Size, Surface};
-use crate::input::{Key, KeyModifier, MouseEvent, MouseEventData};
+use crate::graphics::{Point, Rect, Size, Surface};
+use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::terminal::*;
 use crate::utils::{Caption, Strategy, VectorIndex};
 
@@ -47,6 +47,7 @@ pub(crate) struct RuntimeManager {
     loop_status: LoopStatus,
     request_focus: Option<Handle>,
     current_focus: Option<Handle>,
+    mouse_over_control: Option<Handle>,
     focus_chain: Vec<Handle>,
     events: Vec<EmittedEvent>,
     mouse_locked_object: MouseLockedObject,
@@ -71,6 +72,7 @@ impl RuntimeManager {
             recompute_parent_indexes: true,
             request_focus: None,
             current_focus: None,
+            mouse_over_control: None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
@@ -463,6 +465,59 @@ impl RuntimeManager {
         None
     }
 
+    fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool {
+        let mut processed = false;
+        // Process event in the following order:
+        // first the context menu and its owner, then the menu bar and then cmdbar
+        /*
+        if (this->VisibleMenu)
+        {
+            auto* mnuC = ((MenuContext*) (this->VisibleMenu->Context));
+            processed =
+                  mnuC->OnMouseMove(x - mnuC->ScreenClip.ScreenPosition.X, y - mnuC->ScreenClip.ScreenPosition.Y, repaint);
+            if ((!processed) && (mnuC->Owner))
+                processed = mnuC->Owner->OnMouseMove(x, y, repaint);
+        }
+        */
+
+        if let Some(menubar) = self.menubar.as_mut() {
+            processed = match menubar.on_mouse_move(x, y) {
+                EventProcessStatus::Processed => {
+                    self.repaint = true;
+                    true
+                }
+                EventProcessStatus::Ignored => false,
+                EventProcessStatus::Update => {
+                    self.repaint = true;
+                    true
+                }
+                EventProcessStatus::Cancel => false,
+            }
+        }
+        if !processed {
+            if let Some(cmdbar) = self.commandbar.as_mut() {
+                processed = cmdbar.on_mouse_move(&MouseMoveEvent {
+                    x,
+                    y,
+                    button: MouseButton::Left,
+                });
+                self.repaint |= processed;
+            }
+        }
+        if processed {
+            /*
+                    if (this->MouseOverControl)
+                    {
+                        if (this->MouseOverControl->OnMouseLeave())
+                            RepaintStatus |= REPAINT_STATUS_DRAW;
+                        ((ControlContext*) (MouseOverControl->Context))->MouseIsOver = false;
+                    }
+                    this->MouseOverControl = nullptr;
+            */
+        }
+        return processed;
+    }
+
     fn process_terminal_resize_event(&mut self, new_size: Size) {
         // sanity checks
         if (new_size.width == 0) || (new_size.height == 0) {
@@ -495,18 +550,114 @@ impl RuntimeManager {
             MouseLockedObject::None => {}
             _ => return,
         }
-        if let Some(handle) = self.coordinates_to_control(self.desktop_handler, event.x, event.y)
-        {
+        if let Some(handle) = self.coordinates_to_control(self.desktop_handler, event.x, event.y) {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get(handle) {
-                match control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) {
-                    EventProcessStatus::Processed | EventProcessStatus::Update => self.repaint = true,
+                match control
+                    .get_control_mut()
+                    .on_mouse_event(&MouseEvent::Wheel(event.direction))
+                {
+                    EventProcessStatus::Processed | EventProcessStatus::Update => {
+                        self.repaint = true
+                    }
                     _ => {}
                 }
             }
         }
     }
-    fn process_mousemove_event(&mut self, _event: MouseMoveEvent) {}
+    fn process_mousedrag(&mut self, handle: Handle, event: MouseMoveEvent) {
+        self.hide_tooltip();
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(handle) {
+            let base = control.get_base_mut();
+            let scr_x = base.screen_clip.left;
+            let scr_y = base.screen_clip.top;
+            let response =
+                control
+                    .get_control_mut()
+                    .on_mouse_event(&MouseEvent::Drag(MouseEventData {
+                        x: event.x - scr_x,
+                        y: event.y - scr_y,
+                        button: event.button,
+                    }));
+            let do_update = match response {
+                EventProcessStatus::Processed | EventProcessStatus::Update => true,
+                _ => false,
+            };
+            self.repaint |= do_update;
+            self.recompute_layout |= do_update;
+        }
+    }
+    fn process_mousemove(&mut self, event: MouseMoveEvent) {
+        if self.process_menu_and_cmdbar_mousemove(event.x, event.y) {
+            return;
+        }
+        let controls = unsafe { &mut *self.controls };
+        let handle = self.coordinates_to_control(self.desktop_handler, event.x, event.y);
+        if handle != self.mouse_over_control {
+            self.hide_tooltip();
+            if let Some(c_handle) = self.mouse_over_control {
+                if let Some(control) = controls.get(c_handle) {
+                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
+                    self.repaint |= match response {
+                        EventProcessStatus::Processed | EventProcessStatus::Update => true,
+                        _ => false,
+                    }
+                }
+            }
+            self.mouse_over_control = handle;
+            if let Some(c_handle) = self.mouse_over_control {
+                if let Some(control) = controls.get(c_handle) {
+                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Enter);
+                    self.repaint |= match response {
+                        EventProcessStatus::Processed | EventProcessStatus::Update => true,
+                        _ => false,
+                    };
+                    let base = control.get_base();
+                    let scr_x = base.screen_clip.left;
+                    let scr_y = base.screen_clip.top;
+                    let response =
+                        control
+                            .get_control_mut()
+                            .on_mouse_event(&MouseEvent::Over(Point::new(
+                                event.x - scr_x,
+                                event.y - scr_y,
+                            )));
+                    self.repaint |= match response {
+                        EventProcessStatus::Processed | EventProcessStatus::Update => true,
+                        _ => false,
+                    }
+                }
+            }
+        } else {
+            if let Some(handle) = self.mouse_over_control {
+                if let Some(control) = controls.get(handle) {
+                    let base = control.get_base();
+                    let scr_x = base.screen_clip.left;
+                    let scr_y = base.screen_clip.top;
+                    let response =
+                        control
+                            .get_control_mut()
+                            .on_mouse_event(&MouseEvent::Over(Point::new(
+                                event.x - scr_x,
+                                event.y - scr_y,
+                            )));
+                    self.repaint |= match response {
+                        EventProcessStatus::Processed | EventProcessStatus::Update => true,
+                        _ => false,
+                    }
+                }
+            }
+        }
+    }
+    fn process_mousemove_event(&mut self, event: MouseMoveEvent) {
+        match self.mouse_locked_object {
+            MouseLockedObject::None => self.process_mousemove(event),
+            MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
+            MouseLockedObject::CommandBar => {}
+            MouseLockedObject::MenuBar => todo!(),
+        }
+    }
     fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
         // Hide ToolTip
         self.hide_tooltip();
