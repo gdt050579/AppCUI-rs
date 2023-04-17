@@ -9,13 +9,14 @@ use crate::system::RuntimeManager;
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits = 8)]
+#[EnumBitFlags(bits = 16)]
 pub enum StatusFlags {
-    Visible = 0x01,
-    Enabled = 0x02,
-    AcceptInput = 0x04,
-    Focused = 0x08,
-    MarkedForFocus = 0x10,
+    Visible = 0x0001,
+    Enabled = 0x0002,
+    AcceptInput = 0x0004,
+    Focused = 0x0008,
+    MarkedForFocus = 0x0010,
+    MouseOver = 0x0020,
 }
 #[derive(Copy, Clone)]
 struct Margins {
@@ -166,7 +167,15 @@ impl ControlBase {
     }
     #[inline]
     pub fn is_mouse_over(&self) -> bool {
-        false
+        self.status_flags.contains(StatusFlags::MouseOver)
+    }
+    #[inline(always)]
+    pub(crate) fn update_mouse_over_flag(&mut self, mouse_is_over: bool) {
+        if mouse_is_over {
+            self.status_flags |= StatusFlags::MouseOver;
+        } else {
+            self.status_flags.remove(StatusFlags::MouseOver);
+        }
     }
     #[inline]
     pub fn set_size_bounds(
