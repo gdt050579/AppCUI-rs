@@ -505,15 +505,15 @@ impl RuntimeManager {
             }
         }
         if processed {
-            /*
-                    if (this->MouseOverControl)
-                    {
-                        if (this->MouseOverControl->OnMouseLeave())
-                            RepaintStatus |= REPAINT_STATUS_DRAW;
-                        ((ControlContext*) (MouseOverControl->Context))->MouseIsOver = false;
-                    }
-                    this->MouseOverControl = nullptr;
-            */
+            let controls = unsafe { &mut *self.controls };
+            if let Some(c_handle) = self.mouse_over_control {
+                if let Some(control) = controls.get(c_handle) {
+                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
+                    self.repaint |= response.is_processed_or_update();
+                    control.get_base_mut().update_mouse_over_flag(false);
+                }
+                self.mouse_over_control = None;
+            }
         }
         return processed;
     }
@@ -580,10 +580,7 @@ impl RuntimeManager {
                         y: event.y - scr_y,
                         button: event.button,
                     }));
-            let do_update = match response {
-                EventProcessStatus::Processed | EventProcessStatus::Update => true,
-                _ => false,
-            };
+            let do_update = response.is_processed_or_update();
             self.repaint |= do_update;
             self.recompute_layout |= do_update;
         }
@@ -600,16 +597,18 @@ impl RuntimeManager {
                 if let Some(control) = controls.get(c_handle) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
                     self.repaint |= response.is_processed_or_update();
+                    control.get_base_mut().update_mouse_over_flag(false);
                 }
             }
             self.mouse_over_control = handle;
             if let Some(c_handle) = self.mouse_over_control {
                 if let Some(control) = controls.get(c_handle) {
-                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Enter);
-                    self.repaint |= response.is_processed_or_update();
-                    let base = control.get_base();
+                    let base = control.get_base_mut();
+                    base.update_mouse_over_flag(true);
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
+                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Enter);
+                    self.repaint |= response.is_processed_or_update();
                     let response =
                         control
                             .get_control_mut()
