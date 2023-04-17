@@ -599,20 +599,14 @@ impl RuntimeManager {
             if let Some(c_handle) = self.mouse_over_control {
                 if let Some(control) = controls.get(c_handle) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
-                    self.repaint |= match response {
-                        EventProcessStatus::Processed | EventProcessStatus::Update => true,
-                        _ => false,
-                    }
+                    self.repaint |= response.is_processed_or_update();
                 }
             }
             self.mouse_over_control = handle;
             if let Some(c_handle) = self.mouse_over_control {
                 if let Some(control) = controls.get(c_handle) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Enter);
-                    self.repaint |= match response {
-                        EventProcessStatus::Processed | EventProcessStatus::Update => true,
-                        _ => false,
-                    };
+                    self.repaint |= response.is_processed_or_update();
                     let base = control.get_base();
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
@@ -623,10 +617,7 @@ impl RuntimeManager {
                                 event.x - scr_x,
                                 event.y - scr_y,
                             )));
-                    self.repaint |= match response {
-                        EventProcessStatus::Processed | EventProcessStatus::Update => true,
-                        _ => false,
-                    }
+                    self.repaint |= response.is_processed_or_update();
                 }
             }
         } else {
@@ -642,10 +633,7 @@ impl RuntimeManager {
                                 event.x - scr_x,
                                 event.y - scr_y,
                             )));
-                    self.repaint |= match response {
-                        EventProcessStatus::Processed | EventProcessStatus::Update => true,
-                        _ => false,
-                    }
+                    self.repaint |= response.is_processed_or_update();
                 }
             }
         }
