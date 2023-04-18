@@ -65,6 +65,12 @@ mod templates {
     }
     ";
 
+    pub static ON_COMMAND_TRAIT: &str = "
+    impl OnCommand for $STRUCT_NAME$ {
+        fn on_command(&mut self, command: u32)->EventProcessStatus  { return self.base.on_command(command); }
+    }
+    ";
+
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
@@ -101,6 +107,9 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     }
     if !a.on_event {
         code.push_str(templates::ON_EVENT_TRAIT);
+    }
+    if !a.on_command {
+        code.push_str(templates::ON_COMMAND_TRAIT);
     }
     // replace templates
     code = code
