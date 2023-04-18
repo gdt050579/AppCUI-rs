@@ -426,7 +426,7 @@ impl OnPaint for Window {
         // paint title
         if self.title_max_width >= 2 {
             let mut format = TextFormat::single_line(
-                self.title_left_margin,
+                self.title_left_margin + ((self.title_max_width as i32)/ 2),
                 0,
                 color_title,
                 TextAlignament::Center,
@@ -444,7 +444,9 @@ impl OnPaint for Window {
 impl OnResize for Window {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         // recompute decorator based on the new size
-        self.decorators.update_positions(new_size);
+        let (title_pos, title_width) = self.decorators.update_positions(new_size);
+        self.title_left_margin = title_pos;
+        self.title_max_width = title_width;
         // recompute menu based on new size
         if let Some(menu) = &mut self.menu {
             menu.set_position(0, 0, new_size.width);
