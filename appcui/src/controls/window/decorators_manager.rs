@@ -40,10 +40,21 @@ impl DecoratorsManager {
     pub(super) fn add(&mut self, decorator: Decorator) {
         self.items.push(decorator);
     }
+    pub(super) fn get(&self, index: usize) -> Option<&Decorator> {
+        self.items.get(index)
+    }
     pub(super) fn position_to_decorator(&self, x: i32, y: i32) -> Option<usize> {
         for (index, item) in self.items.iter().enumerate() {
             if item.contains(x, y) {
                 return Some(index);
+            }
+        }
+        None
+    }
+    pub(super) fn get_from_position(&self, x: i32, y: i32)-> Option<(usize,&Decorator)> {
+        for (index, item) in self.items.iter().enumerate() {
+            if item.contains(x, y) {
+                return Some((index,item));
             }
         }
         None
@@ -184,6 +195,12 @@ impl DecoratorsManager {
             }
         }
         None
+    }
+    pub(super) fn set_current(&mut self, idx: VectorIndex) {
+        self.current = idx;
+    }
+    pub(super) fn get_current(&self) -> VectorIndex {
+        self.current
     }
 }
 

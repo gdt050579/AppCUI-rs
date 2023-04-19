@@ -113,6 +113,10 @@ impl Decorator {
         self.x + ((self.width / 2) as i32)
     }
     #[inline(always)]
+    pub(super) fn get_y(&self) -> i32 {
+        self.y
+    }
+    #[inline(always)]
     pub(super) fn contains(&self, x: i32, y: i32) -> bool {
         (y == self.y)
             && (x >= self.x)
@@ -178,6 +182,9 @@ impl Decorator {
         if tooltip.len()>0 {
             self.tooltip.push_str(tooltip);
         }
+    }
+    pub(super) fn get_tooltip(&self) -> &str {
+        &self.tooltip
     }
 
     fn paint_hotkey(

@@ -7,9 +7,9 @@ use super::DecoratorsManager;
 use super::DragStatus;
 use super::WindowFlags;
 use crate::controls::events::*;
-use crate::controls::Handle;
 use crate::controls::menu::Menu;
 use crate::controls::menu::MenuBar;
+use crate::controls::Handle;
 use crate::controls::*;
 use crate::graphics::*;
 use crate::input::*;
@@ -27,7 +27,7 @@ enum MoveDirection {
     ToBottom,
 }
 
-#[AppCUIControl(overwrite=OnPaint+OnResize+OnKeyPressed)]
+#[AppCUIControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent)]
 pub struct Window {
     title: String,
     flags: WindowFlags,
@@ -379,6 +379,37 @@ impl Window {
         self.decorators.set_tag("");
         self.decorators.update_positions(self.get_size());
     }
+
+    fn on_mouse_over(&mut self, x: i32, y: i32) -> EventProcessStatus {
+        if let Some(menu) = self.menu.as_mut() {
+            let result = menu.on_mouse_move(x, y);
+            if result.is_processed_or_update() {
+                self.hide_tooltip();
+                return result;
+            }
+        }
+        if let Some((index,decorator)) = self.decorators.get_from_position(x, y) {
+            let cx = decorator.center_x();
+            let y = decorator.get_y();
+            let tooltip = decorator.get_tooltip();
+            if tooltip.is_empty() {
+                self.hide_tooltip();
+            } else {
+                self.show_tooltip_on_point(tooltip, cx, y);
+            }
+            self.decorators.set_current(VectorIndex::with_value(index));
+            return EventProcessStatus::Processed;
+        }
+        // if I reach this point - tool tip should not be shown and there is no win button selected
+        self.hide_tooltip();
+        let cidx = self.decorators.get_current();
+        if !cidx.is_valid() {
+            return EventProcessStatus::Ignored;
+        }
+        self.decorators.set_current(VectorIndex::Invalid);
+        return EventProcessStatus::Processed;
+    }
+
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -426,7 +457,7 @@ impl OnPaint for Window {
         // paint title
         if self.title_max_width >= 2 {
             let mut format = TextFormat::single_line(
-                self.title_left_margin + ((self.title_max_width as i32)/ 2),
+                self.title_left_margin + ((self.title_max_width as i32) / 2),
                 0,
                 color_title,
                 TextAlignament::Center,
@@ -646,6 +677,22 @@ impl OnKeyPressed for Window {
 
 
      */
+}
+
+impl OnMouseEvent for Window {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => return EventProcessStatus::Ignored,
+            MouseEvent::Leave => todo!(),
+            MouseEvent::Over(point) => return self.on_mouse_over(point.x, point.y),
+            MouseEvent::Pressed(_) => todo!(),
+            MouseEvent::Released(_) => todo!(),
+            MouseEvent::DoubleClick(_) => todo!(),
+            MouseEvent::Drag(_) => todo!(),
+            MouseEvent::Wheel(_) => todo!(),
+        }
+        
+    }
 }
 
 /*
@@ -1274,44 +1321,7 @@ bool Window::OnMouseDrag(int x, int y, Input::MouseButton)
 }
 bool Window::OnMouseOver(int x, int y)
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    if (Members->menu)
-    {
-        bool repaint;
-        if (Members->menu->OnMouseMove(x, y, repaint))
-        {
-            HideToolTip();
-            return true;
-        }
-    }
-
-    // check buttons
-    for (uint32 tr = 0; tr < Members->ControlBar.Count; tr++)
-    {
-        if (Members->ControlBar.Items[tr].Contains(x, y))
-        {
-            if (!Members->ControlBar.Items[tr].ToolTipText.IsEmpty())
-            {
-                ShowToolTip(
-                      Members->ControlBar.Items[tr].ToolTipText,
-                      Members->ControlBar.Items[tr].CenterX(),
-                      Members->ControlBar.Items[tr].Y);
-            }
-            else
-            {
-                HideToolTip();
-            }
-            Members->ControlBar.Current = tr; // set current button
-            return true;
-        }
-    }
-    // if I reach this point - tool tip should not be shown and there is no win button selected
-    HideToolTip();
-
-    if (Members->ControlBar.Current == NO_CONTROLBAR_ITEM)
-        return false; // already outside any window button
-    Members->ControlBar.Current = NO_CONTROLBAR_ITEM;
-    return true;
+    // done
 }
 bool Window::OnMouseLeave()
 {
