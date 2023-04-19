@@ -3,7 +3,7 @@ use AppCUIProcMacro::*;
 use super::decorator::DecoratorLayout;
 use super::Decorator;
 use super::DecoratorType;
-use super::DecoratorsList;
+use super::DecoratorsManager;
 use super::DragStatus;
 use super::WindowFlags;
 use crate::controls::events::*;
@@ -32,7 +32,7 @@ pub struct Window {
     title: String,
     flags: WindowFlags,
     menu: Option<MenuBar>,
-    decorators: DecoratorsList,
+    decorators: DecoratorsManager,
     resize_move_mode: bool,
     maximized: bool,
     drag_status: DragStatus,
@@ -97,7 +97,7 @@ impl Window {
             menu: None,
             resize_move_mode: false,
             maximized: false,
-            decorators: DecoratorsList::new(),
+            decorators: DecoratorsManager::new(),
             drag_status: DragStatus::None,
             title_max_width: 0,
             title_left_margin: 0,
