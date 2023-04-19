@@ -202,5 +202,11 @@ impl DecoratorsManager {
     pub(super) fn get_current(&self) -> VectorIndex {
         self.current
     }
+    pub(super) fn is_current_item_pressed(&self) -> bool {
+        self.pressed
+    }
+    pub(super) fn set_current_item_pressed(&mut self, pressed: bool) {
+        self.pressed = pressed;
+    }
 }
 

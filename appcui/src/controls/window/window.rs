@@ -410,6 +410,16 @@ impl Window {
         return EventProcessStatus::Processed;
     }
 
+    fn on_mouse_leave(&mut self)-> EventProcessStatus {
+        let cidx = self.decorators.get_current();
+        self.decorators.set_current_item_pressed(false);
+        if !cidx.is_valid() {
+            return EventProcessStatus::Ignored;
+        }
+        self.decorators.set_current(VectorIndex::Invalid);
+        self.hide_tooltip();
+        return EventProcessStatus::Processed;
+    }
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -683,7 +693,7 @@ impl OnMouseEvent for Window {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter => return EventProcessStatus::Ignored,
-            MouseEvent::Leave => todo!(),
+            MouseEvent::Leave => return self.on_mouse_leave(),
             MouseEvent::Over(point) => return self.on_mouse_over(point.x, point.y),
             MouseEvent::Pressed(_) => todo!(),
             MouseEvent::Released(_) => todo!(),
@@ -1325,12 +1335,7 @@ bool Window::OnMouseOver(int x, int y)
 }
 bool Window::OnMouseLeave()
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    Members->ControlBar.IsCurrentItemPressed = false;
-    if (Members->ControlBar.Current == NO_CONTROLBAR_ITEM)
-        return false; // already outside any window button
-    Members->ControlBar.Current = NO_CONTROLBAR_ITEM;
-    return true;
+    // done
 }
 bool Window::OnBeforeResize(int newWidth, int newHeight)
 {
