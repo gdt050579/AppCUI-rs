@@ -36,6 +36,7 @@ pub struct Window {
     resize_move_mode: bool,
     maximized: bool,
     drag_status: DragStatus,
+    drag_start_point: Point,
     title_max_width: u16,
     title_left_margin: i32,
     old_rect: Rect,
@@ -99,6 +100,7 @@ impl Window {
             maximized: false,
             decorators: DecoratorsManager::new(),
             drag_status: DragStatus::None,
+            drag_start_point: Point::new(0, 0),
             title_max_width: 0,
             title_left_margin: 0,
             old_rect: Rect::new(0, 0, 0, 0),
@@ -420,6 +422,35 @@ impl Window {
         self.hide_tooltip();
         return EventProcessStatus::Processed;
     }
+
+    fn on_mouse_pressed(&mut self, x: i32, y: i32)->EventProcessStatus {
+        self.decorators.set_current_item_pressed(false);
+        self.drag_status = DragStatus::None;
+        self.resize_move_mode = false;
+
+        if let Some(menubar) = self.menu.as_mut() {
+            return menubar.on_mouse_pressed(x, y);
+        }
+
+        if let Some(index) = self.decorators.get_index_from_position(x, y) {            
+            self.decorators.set_current(VectorIndex::with_value(index));
+            self.decorators.set_current_item_pressed(true);
+            let decorator = self.decorators.get(index).unwrap();
+            if decorator.get_type() == DecoratorType::WindowResize {
+                self.drag_status = DragStatus::Resize;
+            }
+            return EventProcessStatus::Processed;
+        }
+        self.decorators.set_current(VectorIndex::Invalid);
+        self.hide_tooltip();
+
+        if !self.flags.contains(WindowFlags::FixedPosition) {
+            self.drag_status = DragStatus::Move;
+            self.drag_start_point.x = x;
+            self.drag_start_point.y = y;
+        }
+        return EventProcessStatus::Processed;      
+    }
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -695,7 +726,7 @@ impl OnMouseEvent for Window {
             MouseEvent::Enter => return EventProcessStatus::Ignored,
             MouseEvent::Leave => return self.on_mouse_leave(),
             MouseEvent::Over(point) => return self.on_mouse_over(point.x, point.y),
-            MouseEvent::Pressed(_) => todo!(),
+            MouseEvent::Pressed(event) => return self.on_mouse_pressed(event.x, event.y),
             MouseEvent::Released(_) => todo!(),
             MouseEvent::DoubleClick(_) => todo!(),
             MouseEvent::Drag(_) => todo!(),
@@ -1220,39 +1251,7 @@ bool Window::CenterScreen()
 }
 void Window::OnMousePressed(int x, int y, Input::MouseButton button)
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, );
-    Members->dragStatus                      = WindowDragStatus::None;
-    Members->ControlBar.IsCurrentItemPressed = false;
-    Members->ResizeMoveMode                  = false;
-
-    if (Members->menu)
-    {
-        if (Members->menu->OnMousePressed(x, y, button))
-            return;
-    }
-
-    // win buttons
-    Members->ControlBar.Current = NO_CONTROLBAR_ITEM;
-    for (uint32 tr = 0; tr < Members->ControlBar.Count; tr++)
-    {
-        if (Members->ControlBar.Items[tr].Contains(x, y))
-        {
-            Members->ControlBar.Current              = tr; // set current button
-            Members->ControlBar.IsCurrentItemPressed = true;
-            if (Members->ControlBar.Items[tr].Type == WindowBarItemType::WindowResize)
-                Members->dragStatus = WindowDragStatus::Resize;
-            return;
-        }
-    }
-    // Hide tool tip
-    HideToolTip();
-
-    if ((Members->Flags & WindowFlags::FixedPosition) == WindowFlags::None)
-    {
-        Members->dragStatus  = WindowDragStatus::Move;
-        Members->dragOffsetX = x;
-        Members->dragOffsetY = y;
-    }
+    // done
 }
 bool Window::ProcessControlBarItem(uint32 index)
 {

@@ -59,6 +59,14 @@ impl DecoratorsManager {
         }
         None
     }
+    pub(super) fn get_index_from_position(&self, x: i32, y: i32)-> Option<usize> {
+        for (index, item) in self.items.iter().enumerate() {
+            if item.contains(x, y) {
+                return Some(index);
+            }
+        }
+        None
+    }
     pub(super) fn paint(
         &self,
         surface: &mut Surface,
