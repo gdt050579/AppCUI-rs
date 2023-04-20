@@ -390,7 +390,7 @@ impl Window {
                 return result;
             }
         }
-        if let Some((index,decorator)) = self.decorators.get_from_position(x, y) {
+        if let Some((index, decorator)) = self.decorators.get_from_position(x, y) {
             let cx = decorator.center_x();
             let y = decorator.get_y();
             let tooltip = decorator.get_tooltip();
@@ -412,7 +412,7 @@ impl Window {
         return EventProcessStatus::Processed;
     }
 
-    fn on_mouse_leave(&mut self)-> EventProcessStatus {
+    fn on_mouse_leave(&mut self) -> EventProcessStatus {
         let cidx = self.decorators.get_current();
         self.decorators.set_current_item_pressed(false);
         if !cidx.is_valid() {
@@ -423,7 +423,7 @@ impl Window {
         return EventProcessStatus::Processed;
     }
 
-    fn on_mouse_pressed(&mut self, x: i32, y: i32)->EventProcessStatus {
+    fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
         self.decorators.set_current_item_pressed(false);
         self.drag_status = DragStatus::None;
         self.resize_move_mode = false;
@@ -432,7 +432,7 @@ impl Window {
             return menubar.on_mouse_pressed(x, y);
         }
 
-        if let Some(index) = self.decorators.get_index_from_position(x, y) {            
+        if let Some(index) = self.decorators.get_index_from_position(x, y) {
             self.decorators.set_current(VectorIndex::with_value(index));
             self.decorators.set_current_item_pressed(true);
             let decorator = self.decorators.get(index).unwrap();
@@ -449,7 +449,26 @@ impl Window {
             self.drag_start_point.x = x;
             self.drag_start_point.y = y;
         }
-        return EventProcessStatus::Processed;      
+        return EventProcessStatus::Processed;
+    }
+    fn on_mouse_drag(&mut self, x: i32, y: i32) -> EventProcessStatus {
+        self.resize_move_mode = false;
+        match self.drag_status {
+            DragStatus::None => EventProcessStatus::Ignored,
+            DragStatus::Move => {
+                let left = self.screen_clip.left;
+                let top = self.screen_clip.top;
+                let p = self.drag_start_point;
+                self.set_position(x + left - p.x, y + top - p.y);
+                EventProcessStatus::Processed
+            }
+            DragStatus::Resize => {
+                if (x > 0) && (y > 0) {
+                    self.set_size((x + 1) as u16, (y + 1) as u16);
+                }
+                EventProcessStatus::Processed
+            }
+        }
     }
 }
 impl OnPaint for Window {
@@ -728,11 +747,10 @@ impl OnMouseEvent for Window {
             MouseEvent::Over(point) => return self.on_mouse_over(point.x, point.y),
             MouseEvent::Pressed(event) => return self.on_mouse_pressed(event.x, event.y),
             MouseEvent::Released(_) => todo!(),
-            MouseEvent::DoubleClick(_) => todo!(),
-            MouseEvent::Drag(_) => todo!(),
-            MouseEvent::Wheel(_) => todo!(),
+            MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
+            MouseEvent::Drag(event) => return self.on_mouse_drag(event.x, event.y),
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }
-        
     }
 }
 
@@ -1311,22 +1329,7 @@ void Window::OnMouseReleased(int, int, Input::MouseButton)
 }
 bool Window::OnMouseDrag(int x, int y, Input::MouseButton)
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    Members->ResizeMoveMode = false;
-    if (Members->dragStatus == WindowDragStatus::Resize)
-    {
-        bool res = Resize(x + 1, y + 1);
-        UpdateWindowsButtonsPoz(Members);
-        return res;
-    }
-    if (Members->dragStatus == WindowDragStatus::Move)
-    {
-        this->MoveTo(
-              x + Members->ScreenClip.ScreenPosition.X - Members->dragOffsetX,
-              y + Members->ScreenClip.ScreenPosition.Y - Members->dragOffsetY);
-        return true;
-    }
-    return false;
+    // done
 }
 bool Window::OnMouseOver(int x, int y)
 {
