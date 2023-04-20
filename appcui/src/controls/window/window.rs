@@ -470,6 +470,21 @@ impl Window {
             }
         }
     }
+
+    fn on_mouse_release(&mut self) -> EventProcessStatus {
+        self.decorators.set_current_item_pressed(false);
+        self.resize_move_mode = false;
+        if self.drag_status != DragStatus::None {
+            self.drag_status = DragStatus::None;
+        } else {
+            let cdec = self.decorators.get_current();
+            if cdec.is_valid() {
+                // if (ProcessControlBarItem(Members->ControlBar.Current))
+                //     return;
+            }
+        }
+        return EventProcessStatus::Processed;
+    }
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -746,7 +761,7 @@ impl OnMouseEvent for Window {
             MouseEvent::Leave => return self.on_mouse_leave(),
             MouseEvent::Over(point) => return self.on_mouse_over(point.x, point.y),
             MouseEvent::Pressed(event) => return self.on_mouse_pressed(event.x, event.y),
-            MouseEvent::Released(_) => todo!(),
+            MouseEvent::Released(_) => return self.on_mouse_release(),
             MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
             MouseEvent::Drag(event) => return self.on_mouse_drag(event.x, event.y),
             MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
@@ -1306,26 +1321,7 @@ bool Window::ProcessControlBarItem(uint32 index)
 }
 void Window::OnMouseReleased(int, int, Input::MouseButton)
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, );
-    Members->ControlBar.IsCurrentItemPressed = false;
-    Members->ResizeMoveMode                  = false;
-    if (Members->dragStatus != WindowDragStatus::None)
-    {
-        Members->dragStatus = WindowDragStatus::None;
-        return;
-    }
-    if (Members->ControlBar.Current != NO_CONTROLBAR_ITEM)
-    {
-        if (ProcessControlBarItem(Members->ControlBar.Current))
-            return;
-    }
-
-    // if (Members->fnMouseReleaseHandler != nullptr)
-    //{
-    //	// daca vreau sa tratez eu evenimentul
-    //	if (Members->fnMouseReleaseHandler(this, x, y, butonState, Members->fnMouseHandlerContext))
-    //		return;
-    //}
+    // done
 }
 bool Window::OnMouseDrag(int x, int y, Input::MouseButton)
 {
