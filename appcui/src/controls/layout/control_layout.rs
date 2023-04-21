@@ -1,4 +1,4 @@
-use super::LayoutMode;
+use super::{point_and_size_layout::PointAndSizeLayout, LayoutMode};
 
 pub struct Layout<'a> {
     pub(in super::super) format: &'a str,
@@ -49,7 +49,7 @@ impl ControlLayout {
         max_width: u16,
         max_height: u16,
     ) {
-        if (min_width<=max_width) && (min_height<=max_height) {
+        if (min_width <= max_width) && (min_height <= max_height) {
             self.min_width = min_width;
             self.min_height = min_height;
             self.max_width = max_width;
@@ -106,5 +106,13 @@ impl ControlLayout {
                 layout_mode.update_control_layout(self, parent_width, parent_height)
             }
         }
+    }
+    pub(crate) fn convert_to_absolute(&mut self) {
+        self.mode = LayoutMode::PointAndSize(PointAndSizeLayout::new(
+            self.x,
+            self.y,
+            self.width,
+            self.height,
+        ));
     }
 }

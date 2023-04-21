@@ -16,6 +16,18 @@ pub(super) struct PointAndSizeLayout {
 }
 impl PointAndSizeLayout {
     #[inline]
+    pub(super) fn new(x: i32, y: i32, width: u16, height: u16) -> Self {
+        PointAndSizeLayout {
+            x: Coordonate::Absolute(x as i16),
+            y: Coordonate::Absolute(y as i16),
+            width: Size::Absolute(width),
+            height: Size::Absolute(height),
+            align: Alignament::Left,
+            anchor: Alignament::Left,
+        }
+    }
+    
+    #[inline]
     pub(super) fn new_docked(params: &LayoutParameters) -> Self {
         should_not_use!(
             params.x,

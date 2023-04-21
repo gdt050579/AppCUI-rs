@@ -71,7 +71,12 @@ impl ControlBase {
     }
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
+        let old_size = self.get_size();
         self.layout.resize(width, height);
+        self.layout.convert_to_absolute();
+        if old_size != self.get_size() {
+            RuntimeManager::get().request_recompute_layout();
+        }
     }
 
     #[inline(always)]
@@ -83,7 +88,7 @@ impl ControlBase {
     }
     pub fn set_position(&mut self, x: i32, y: i32) {
         self.layout.set_position(x, y);
-        //GDT: we should change the layout mode
+        self.layout.convert_to_absolute();
         RuntimeManager::get().request_recompute_layout();
     }
 
