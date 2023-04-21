@@ -109,6 +109,14 @@ impl Decorator {
         self.status.contains(StatusFlags::Checked)
     }
     #[inline(always)]
+    pub(super) fn set_checked(&mut self, value: bool) {
+        if value {
+            self.status |= StatusFlags::Checked;
+        } else {
+            self.status.remove(StatusFlags::Checked);
+        }
+    }
+    #[inline(always)]
     pub(super) fn center_x(&self) -> i32 {
         self.x + ((self.width / 2) as i32)
     }
@@ -160,6 +168,11 @@ impl Decorator {
         self.status.remove(
             StatusFlags::Visible | StatusFlags::LeftGroupMarker | StatusFlags::RightGroupMarker,
         );
+    }
+
+    #[inline(always)]
+    pub(super) fn get_id(&self) -> u32 {
+        self.id
     }
 
     #[inline(always)]

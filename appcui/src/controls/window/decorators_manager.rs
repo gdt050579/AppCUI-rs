@@ -40,8 +40,13 @@ impl DecoratorsManager {
     pub(super) fn add(&mut self, decorator: Decorator) {
         self.items.push(decorator);
     }
+    #[inline(always)]
     pub(super) fn get(&self, index: usize) -> Option<&Decorator> {
         self.items.get(index)
+    }
+    #[inline(always)]
+    pub(super) fn get_mut(&mut self, index: usize) -> Option<&mut Decorator> {
+        self.items.get_mut(index)
     }
     pub(super) fn position_to_decorator(&self, x: i32, y: i32) -> Option<usize> {
         for (index, item) in self.items.iter().enumerate() {
@@ -51,15 +56,15 @@ impl DecoratorsManager {
         }
         None
     }
-    pub(super) fn get_from_position(&self, x: i32, y: i32)-> Option<(usize,&Decorator)> {
+    pub(super) fn get_from_position(&self, x: i32, y: i32) -> Option<(usize, &Decorator)> {
         for (index, item) in self.items.iter().enumerate() {
             if item.contains(x, y) {
-                return Some((index,item));
+                return Some((index, item));
             }
         }
         None
     }
-    pub(super) fn get_index_from_position(&self, x: i32, y: i32)-> Option<usize> {
+    pub(super) fn get_index_from_position(&self, x: i32, y: i32) -> Option<usize> {
         for (index, item) in self.items.iter().enumerate() {
             if item.contains(x, y) {
                 return Some(index);
@@ -167,7 +172,7 @@ impl DecoratorsManager {
         if bottom_right.index.is_valid() {
             self.items[bottom_right.index.index()].set_left_marker();
         }
-        let title_x_pos = top_left.x+1;
+        let title_x_pos = top_left.x + 1;
         let title_space = (top_right.x - title_x_pos).max(0);
         (title_x_pos, title_space as u16)
     }
@@ -178,10 +183,10 @@ impl DecoratorsManager {
                     d.hide();
                     break;
                 }
-                if name.len()>MAX_TAG_CHARS {
-                    d.set_text(&name[..MAX_TAG_CHARS],false);
+                if name.len() > MAX_TAG_CHARS {
+                    d.set_text(&name[..MAX_TAG_CHARS], false);
                 } else {
-                    d.set_text(name,false);
+                    d.set_text(name, false);
                 }
                 d.set_tooltip(name);
                 d.unhide();
@@ -216,5 +221,36 @@ impl DecoratorsManager {
     pub(super) fn set_current_item_pressed(&mut self, pressed: bool) {
         self.pressed = pressed;
     }
+    pub(super) fn check_singlechoice(&mut self, idx: usize) {
+        if idx >= self.items.len() {
+            return;
+        }
+        if self.items[idx].get_type() != DecoratorType::SingleChoice {
+            return;
+        }
+        let count = self.items.len();
+        let mut end_index = idx;
+        while (end_index < count)
+            && (self.items[end_index].get_type() == DecoratorType::SingleChoice)
+        {
+            end_index += 1;
+        }
+        let mut start_index = idx;
+        while (start_index > 0)
+            && (self.items[start_index].get_type() == DecoratorType::SingleChoice)
+        {
+            start_index -= 1;
+        }
+        if start_index > 0 {
+            start_index += 1;
+        } else {
+            if self.items[start_index].get_type() != DecoratorType::SingleChoice {
+                start_index += 1;
+            }
+        }
+        for i in start_index..end_index {
+            self.items[i].set_checked(false);
+        }
+        self.items[idx].set_checked(true);
+    }
 }
-

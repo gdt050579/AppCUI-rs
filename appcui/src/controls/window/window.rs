@@ -479,11 +479,44 @@ impl Window {
         } else {
             let cdec = self.decorators.get_current();
             if cdec.is_valid() {
-                // if (ProcessControlBarItem(Members->ControlBar.Current))
-                //     return;
+                if self.on_click_on_decorator(cdec.index()) {
+                    return EventProcessStatus::Processed;
+                }
             }
         }
         return EventProcessStatus::Processed;
+    }
+    fn on_click_on_decorator(&mut self, index: usize) -> bool {
+        let dec = self.decorators.get(index).unwrap();
+        let btype = dec.get_type();
+        let id = dec.get_id();
+        match btype {
+            DecoratorType::CloseButton => {
+                self.raise_event(Event::WindowClose);
+                return true;
+            }
+            DecoratorType::MaximizeRestoreButton => {
+                self.maximize_restore();
+                return true;
+            }
+            DecoratorType::Button => {
+                // RaiseEvent(Event::Command, b.ID);
+                return true;
+            }
+            DecoratorType::SingleChoice => {
+                self.decorators.check_singlechoice(index);
+                // RaiseEvent(Event::Command, b.ID);
+                return true;
+            }
+            DecoratorType::CheckBox => {
+                let d = self.decorators.get_mut(index).unwrap();
+                d.set_checked(!d.is_checked());
+                // RaiseEvent(Event::Command, b.ID);
+                return true;
+            }
+            _ => {}
+        }
+        false     
     }
 }
 impl OnPaint for Window {
@@ -981,32 +1014,7 @@ bool ProcessHotKey(Control* ctrl, Input::Key KeyCode)
 
 void WindowRadioButtonClicked(WindowBarItem* start, WindowBarItem* end, WindowBarItem* current)
 {
-    // go back and disable check
-    auto p = current;
-    while (p >= start)
-    {
-        if (p->Layout == current->Layout)
-        {
-            if (p->Type == WindowBarItemType::SingleChoice)
-                p->RemoveFlag(WindowBarItemFlags::Checked);
-            else
-                break;
-        }
-        p--;
-    }
-    p = current;
-    while (p < end)
-    {
-        if (p->Layout == current->Layout)
-        {
-            if (p->Type == WindowBarItemType::SingleChoice)
-                p->RemoveFlag(WindowBarItemFlags::Checked);
-            else
-                break;
-        }
-        p++;
-    }
-    current->SetFlag(WindowBarItemFlags::Checked);
+    // done
 }
 void MoveWindowPosTo(Window* win, int addX, int addY, bool keepInDesktopBounderies)
 {
@@ -1288,36 +1296,7 @@ void Window::OnMousePressed(int x, int y, Input::MouseButton button)
 }
 bool Window::ProcessControlBarItem(uint32 index)
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    CHECK(index < Members->ControlBar.Count, false, "");
-    auto& b = Members->ControlBar.Items[index];
-    switch (b.Type)
-    {
-    case WindowBarItemType::CloseButton:
-        RaiseEvent(Event::WindowClose);
-        return true;
-    case WindowBarItemType::MaximizeRestoreButton:
-        MaximizeRestore();
-        return true;
-    case WindowBarItemType::Button:
-        RaiseEvent(Event::Command, b.ID);
-        return true;
-    case WindowBarItemType::SingleChoice:
-        WindowRadioButtonClicked(
-              Members->ControlBar.Items,
-              Members->ControlBar.Items + Members->ControlBar.Count,
-              &Members->ControlBar.Items[index]);
-        RaiseEvent(Event::Command, b.ID);
-        return true;
-    case WindowBarItemType::CheckBox:
-        if (b.IsChecked())
-            b.RemoveFlag(WindowBarItemFlags::Checked);
-        else
-            b.SetFlag(WindowBarItemFlags::Checked);
-        RaiseEvent(Event::Command, b.ID);
-        return true;
-    }
-    return false;
+    // done
 }
 void Window::OnMouseReleased(int, int, Input::MouseButton)
 {
