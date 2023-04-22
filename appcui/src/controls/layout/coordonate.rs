@@ -1,11 +1,17 @@
 use crate::utils::{KeyValuePair, ValueType};
 
-#[derive(Copy,Clone,PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) enum Coordonate {
     Absolute(i16),
     Percentage(i16),
 }
 impl Coordonate {
+    pub(super) fn is_absolute(&self) -> bool {
+        match self {
+            Coordonate::Absolute(_) => true,
+            Coordonate::Percentage(_) => false,
+        }
+    }
     pub(super) fn to_absolute_coordonate(&self, parent_size: u16) -> i32 {
         match self {
             Coordonate::Absolute(v) => {
@@ -19,10 +25,14 @@ impl Coordonate {
     pub(super) fn new(value: &KeyValuePair) -> Option<Self> {
         match value.value_type {
             ValueType::Number => {
-                return Some(Coordonate::Absolute(value.numerical_value.clamp(-30000, 30000) as i16));
+                return Some(Coordonate::Absolute(
+                    value.numerical_value.clamp(-30000, 30000) as i16,
+                ));
             }
             ValueType::Percentage => {
-                return Some(Coordonate::Percentage(value.numerical_value.clamp(-30000, 30000) as i16));
+                return Some(Coordonate::Percentage(
+                    value.numerical_value.clamp(-30000, 30000) as i16,
+                ));
             }
             _ => {
                 return None;

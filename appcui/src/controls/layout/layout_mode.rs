@@ -1,18 +1,19 @@
+use super::AbsoluteLayout;
 use super::Alignament;
+use super::AllAnchorsLayout;
 use super::Anchors;
 use super::LayoutParameters;
-use super::LeftRightAnchorsLayout;
-use super::TopBottomAnchorsLayout;
-use super::LeftTopRightAnchorsLayout;
 use super::LeftBottomRightAnchorsLayout;
+use super::LeftRightAnchorsLayout;
+use super::LeftTopRightAnchorsLayout;
+use super::PointAndSizeLayout;
+use super::TopBottomAnchorsLayout;
 use super::TopLeftBottomAnchorsLayout;
 use super::TopRightBottomAnchorsLayout;
-use super::PointAndSizeLayout;
-use super::AllAnchorsLayout;
-
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) enum LayoutMode {
+    Absolute(AbsoluteLayout),
     PointAndSize(PointAndSizeLayout),
     LeftRightAnchors(LeftRightAnchorsLayout),
     TopBottomAnchors(TopBottomAnchorsLayout),
@@ -35,6 +36,32 @@ impl LayoutMode {
         }
         // Step 2 ==> check (X,Y) + (W,H) + (optional align)
         if params_list.x.is_some() && params_list.y.is_some() {
+            // if all we have is (X,Y) + (W,H) check to see if it is an absolute layout
+            if (params_list.width.is_some())
+                && (params_list.height.is_some())
+                && (params_list.align.is_none())
+                && (params_list.a_top.is_none())
+                && (params_list.a_left.is_none())
+                && (params_list.a_bottom.is_none())
+                && (params_list.a_right.is_none())
+            {
+                let x = params_list.x.unwrap();
+                let y = params_list.y.unwrap();
+                let w = params_list.width.unwrap();
+                let h = params_list.height.unwrap();
+                if x.is_absolute() && y.is_absolute() && w.is_absolute() && h.is_absolute() {
+                    let w = w.to_absolute_size(0);
+                    let h = h.to_absolute_size(0);
+                    if (w > 0) && (h > 0) {
+                        return LayoutMode::Absolute(AbsoluteLayout::new(
+                            x.to_absolute_coordonate(0),
+                            y.to_absolute_coordonate(0),
+                            w,
+                            h,
+                        ));
+                    }
+                }
+            }
             return LayoutMode::PointAndSize(PointAndSizeLayout::new_XYWH(&params_list));
         }
 
@@ -71,16 +98,24 @@ impl LayoutMode {
                 return LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout::new(&params_list));
             }
             Anchors::LeftTopRight => {
-                return LayoutMode::LeftTopRightAnchors(LeftTopRightAnchorsLayout::new(&params_list));
+                return LayoutMode::LeftTopRightAnchors(LeftTopRightAnchorsLayout::new(
+                    &params_list,
+                ));
             }
             Anchors::LeftBottomRight => {
-                return LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout::new(&params_list));
+                return LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout::new(
+                    &params_list,
+                ));
             }
             Anchors::TopLeftBottom => {
-                return LayoutMode::TopLeftBottomAnchors(TopLeftBottomAnchorsLayout::new(&params_list));
+                return LayoutMode::TopLeftBottomAnchors(TopLeftBottomAnchorsLayout::new(
+                    &params_list,
+                ));
             }
             Anchors::TopRightBottom => {
-                return LayoutMode::TopRightBottomAnchors(TopRightBottomAnchorsLayout::new(&params_list));
+                return LayoutMode::TopRightBottomAnchors(TopRightBottomAnchorsLayout::new(
+                    &params_list,
+                ));
             }
             Anchors::All => {
                 return LayoutMode::AllAnchors(AllAnchorsLayout::new(&params_list));

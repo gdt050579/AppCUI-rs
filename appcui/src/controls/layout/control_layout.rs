@@ -81,6 +81,9 @@ impl ControlLayout {
     }
     pub(crate) fn update(&mut self, parent_width: u16, parent_height: u16) {
         match self.mode {
+            LayoutMode::Absolute(layout_mode) => {
+                layout_mode.update_control_layout(self)
+            }
             LayoutMode::PointAndSize(layout_mode) => {
                 layout_mode.update_control_layout(self, parent_width, parent_height)
             }

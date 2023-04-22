@@ -6,6 +6,12 @@ pub(super) enum Size {
     Percentage(u16),
 }
 impl Size {
+    pub(super) fn is_absolute(&self) -> bool {
+        match self {
+            Size::Absolute(_) => true,
+            Size::Percentage(_) => false,
+        }
+    }
     pub(super) fn to_absolute_size(&self, parent_size: u16) -> u16 {
         match self {
             Size::Absolute(v) => {
