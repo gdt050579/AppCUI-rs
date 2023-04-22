@@ -73,8 +73,7 @@ impl ControlBase {
     }
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
-        self.layout
-            .convert_to_absolute(self.layout.get_x(), self.layout.get_y(), width, height);
+        self.layout.layout_resize(width, height);
         RuntimeManager::get().request_recompute_layout();
     }
 
@@ -86,7 +85,7 @@ impl ControlBase {
         }
     }
     pub fn set_position(&mut self, x: i32, y: i32) {
-        self.layout.convert_to_absolute(x,y,self.layout.get_width(),self.layout.get_height());
+        self.layout.layout_set_position(x, y);
         RuntimeManager::get().request_recompute_layout();
     }
 

@@ -197,9 +197,7 @@ impl Window {
         let size = self.get_size();
         let new_width = ((size.width as i32) + add_to_width).clamp(0, 0xFFFF);
         let new_height = ((size.height as i32) + add_to_height).clamp(0, 0xFFFF);
-        /*
-        win->Resize(w, h);
-             */
+        self.set_size(new_width as u16, new_height as u16);
     }
     fn move_window_pos_to(&mut self, add_x: i32, add_y: i32, keep_in_desktop_bounderies: bool) {
         let size = self.get_size();

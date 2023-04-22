@@ -37,7 +37,7 @@ impl ControlLayout {
         }
     }
     #[inline]
-    pub(crate) fn resize(&mut self, width: u16, height: u16) {
+    pub(super) fn resize(&mut self, width: u16, height: u16) {
         self.width = width.clamp(self.min_width, self.max_width);
         self.height = height.clamp(self.min_height, self.max_height);
     }
@@ -59,7 +59,7 @@ impl ControlLayout {
     }
 
     #[inline]
-    pub(crate) fn set_position(&mut self, x: i32, y: i32) {
+    pub(super) fn set_position(&mut self, x: i32, y: i32) {
         self.x = x;
         self.y = y;
     }
@@ -108,16 +108,25 @@ impl ControlLayout {
             }
         }
     }
-    pub(crate) fn convert_to_absolute(&mut self, x: i32, y: i32, width: u16, height: u16) {
+    pub(crate) fn layout_resize(&mut self, width: u16, height: u16) {
         match &mut self.mode {
             LayoutMode::Absolute(layout) => {
-                layout.x = x;
-                layout.y = y;
                 layout.width = width;
                 layout.height = height;
             }
             _ => {
-                self.mode = LayoutMode::Absolute(AbsoluteLayout::new(x, y, width, height));
+                self.mode = LayoutMode::Absolute(AbsoluteLayout::new(self.x, self.y, width, height));
+            }
+        }
+    }
+    pub(crate) fn layout_set_position(&mut self, x: i32, y: i32) {
+        match &mut self.mode {
+            LayoutMode::Absolute(layout) => {
+                layout.x = x;
+                layout.y = y;
+            }
+            _ => {
+                self.mode = LayoutMode::Absolute(AbsoluteLayout::new(x, y, self.get_width(), self.get_height()));
             }
         }
     }
