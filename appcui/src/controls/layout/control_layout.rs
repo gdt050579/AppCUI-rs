@@ -1,4 +1,4 @@
-use super::{point_and_size_layout::PointAndSizeLayout, LayoutMode};
+use super::{AbsoluteLayout, LayoutMode};
 
 pub struct Layout<'a> {
     pub(in super::super) format: &'a str,
@@ -81,9 +81,7 @@ impl ControlLayout {
     }
     pub(crate) fn update(&mut self, parent_width: u16, parent_height: u16) {
         match self.mode {
-            LayoutMode::Absolute(layout_mode) => {
-                layout_mode.update_control_layout(self)
-            }
+            LayoutMode::Absolute(layout_mode) => layout_mode.update_control_layout(self),
             LayoutMode::PointAndSize(layout_mode) => {
                 layout_mode.update_control_layout(self, parent_width, parent_height)
             }
@@ -111,11 +109,21 @@ impl ControlLayout {
         }
     }
     pub(crate) fn convert_to_absolute(&mut self) {
-        self.mode = LayoutMode::PointAndSize(PointAndSizeLayout::new(
-            self.x,
-            self.y,
-            self.width,
-            self.height,
-        ));
+        match &mut self.mode {
+            LayoutMode::Absolute(layout) => {
+                layout.x = self.x;
+                layout.y = self.y;
+                layout.width = self.width;
+                layout.height = self.height;
+            }
+            _ => {
+                self.mode = LayoutMode::Absolute(AbsoluteLayout::new(
+                    self.x,
+                    self.y,
+                    self.width,
+                    self.height,
+                ));
+            }
+        }
     }
 }
