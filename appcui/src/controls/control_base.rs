@@ -1,6 +1,8 @@
 use super::control_manager::ParentLayout;
 use super::events::{Control, Event};
-use super::events::{OnDefaultAction, OnKeyPressed, OnMouseEvent, OnPaint, OnResize, OnFocus, OnEvent, OnCommand};
+use super::events::{
+    OnCommand, OnDefaultAction, OnEvent, OnFocus, OnKeyPressed, OnMouseEvent, OnPaint, OnResize,
+};
 use super::layout::ControlLayout;
 use super::{ControlHandle, ControlManager, Handle, Layout};
 use crate::graphics::*;
@@ -71,12 +73,9 @@ impl ControlBase {
     }
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
-        let old_size = self.get_size();
-        self.layout.resize(width, height);
-        self.layout.convert_to_absolute();
-        if old_size != self.get_size() {
-            RuntimeManager::get().request_recompute_layout();
-        }
+        self.layout
+            .convert_to_absolute(self.layout.get_x(), self.layout.get_y(), width, height);
+        RuntimeManager::get().request_recompute_layout();
     }
 
     #[inline(always)]
@@ -87,8 +86,7 @@ impl ControlBase {
         }
     }
     pub fn set_position(&mut self, x: i32, y: i32) {
-        self.layout.set_position(x, y);
-        self.layout.convert_to_absolute();
+        self.layout.convert_to_absolute(x,y,self.layout.get_width(),self.layout.get_height());
         RuntimeManager::get().request_recompute_layout();
     }
 

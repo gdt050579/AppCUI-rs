@@ -108,21 +108,16 @@ impl ControlLayout {
             }
         }
     }
-    pub(crate) fn convert_to_absolute(&mut self) {
+    pub(crate) fn convert_to_absolute(&mut self, x: i32, y: i32, width: u16, height: u16) {
         match &mut self.mode {
             LayoutMode::Absolute(layout) => {
-                layout.x = self.x;
-                layout.y = self.y;
-                layout.width = self.width;
-                layout.height = self.height;
+                layout.x = x;
+                layout.y = y;
+                layout.width = width;
+                layout.height = height;
             }
             _ => {
-                self.mode = LayoutMode::Absolute(AbsoluteLayout::new(
-                    self.x,
-                    self.y,
-                    self.width,
-                    self.height,
-                ));
+                self.mode = LayoutMode::Absolute(AbsoluteLayout::new(x, y, width, height));
             }
         }
     }
