@@ -69,7 +69,7 @@ impl ToolTip {
             let top = object_rect.get_top();
             let best_x = x;
             x = x.min((screen_width as i32) - (best_width as i32)).max(0);
-            self.arrow_pos = Point::new(((best_width / 2) as i32) + (best_x - x), top-1);
+            self.arrow_pos = Point::new(cx.clamp(0, (screen_width as i32)-1), top-1);
             self.arrow_char = SpecialChar::ArrowDown;
             self.text_pos = Point::new(x, top - ((nr_lines + 1) as i32));
             self.format.multi_line = nr_lines > 1;
@@ -92,7 +92,7 @@ impl ToolTip {
             let bottom = object_rect.get_bottom();
             let best_x = x;
             x = x.min((screen_width as i32) - (best_width as i32)).max(0);
-            self.arrow_pos = Point::new(((best_width / 2) as i32) + (best_x - x), bottom+1);
+            self.arrow_pos = Point::new(cx.clamp(0, (screen_width as i32)-1), bottom+1);
             self.arrow_char = SpecialChar::ArrowUp;
             self.text_pos = Point::new(x, bottom+2);
             self.format.multi_line = nr_lines > 1;
