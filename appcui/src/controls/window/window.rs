@@ -477,11 +477,10 @@ impl Window {
         } else {
             let cdec = self.decorators.get_current();
             if cdec.is_valid() {
-                if self.on_click_on_decorator(cdec.index()) {
-                    return EventProcessStatus::Processed;
-                }
+                self.on_click_on_decorator(cdec.index());
             }
         }
+        self.decorators.set_current(VectorIndex::Invalid);
         return EventProcessStatus::Processed;
     }
     fn on_click_on_decorator(&mut self, index: usize) -> bool {
