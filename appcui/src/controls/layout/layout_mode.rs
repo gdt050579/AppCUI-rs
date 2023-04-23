@@ -62,7 +62,7 @@ impl LayoutMode {
                     }
                 }
             }
-            return LayoutMode::PointAndSize(PointAndSizeLayout::new_XYWH(&params_list));
+            return LayoutMode::PointAndSize(PointAndSizeLayout::new_xy_width_height(&params_list));
         }
 
         let anchors = params_list.get_anchors();

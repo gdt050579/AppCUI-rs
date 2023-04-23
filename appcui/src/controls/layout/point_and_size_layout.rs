@@ -14,19 +14,7 @@ pub(super) struct PointAndSizeLayout {
     pub align: Alignament,
     pub anchor: Alignament,
 }
-impl PointAndSizeLayout {
-    #[inline]
-    pub(super) fn new(x: i32, y: i32, width: u16, height: u16) -> Self {
-        PointAndSizeLayout {
-            x: Coordonate::Absolute(x as i16),
-            y: Coordonate::Absolute(y as i16),
-            width: Size::Absolute(width),
-            height: Size::Absolute(height),
-            align: Alignament::Left,
-            anchor: Alignament::Left,
-        }
-    }
-    
+impl PointAndSizeLayout {    
     #[inline]
     pub(super) fn new_docked(params: &LayoutParameters) -> Self {
         should_not_use!(
@@ -69,7 +57,7 @@ impl PointAndSizeLayout {
     }
 
     #[inline]
-    pub(super) fn new_XYWH(params: &LayoutParameters) -> Self {
+    pub(super) fn new_xy_width_height(params: &LayoutParameters) -> Self {
         // it is assume that DOCK|D is not set (as it was process early in ProcessDockedLayout)
         // if X and Y are set --> Left, Right, Top and Bottom should not be set
         should_not_use!(
