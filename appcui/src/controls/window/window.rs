@@ -513,7 +513,7 @@ impl Window {
             }
             _ => {}
         }
-        false     
+        false
     }
 }
 impl OnPaint for Window {
@@ -533,13 +533,15 @@ impl OnPaint for Window {
         // initialization
         if self.has_focus() {
             color_title = theme.text.focused;
-            color_border = match self.drag_status {
-                DragStatus::None => theme.border.focused,
-                _ => theme.border.pressed_or_selectd,
+            color_border = if (self.drag_status == DragStatus::None) && (!self.resize_move_mode) {
+                theme.border.focused
+            } else {
+                theme.border.pressed_or_selectd
             };
-            line_type = match self.drag_status {
-                DragStatus::None => LineType::Double,
-                _ => LineType::Single,
+            line_type = if (self.drag_status == DragStatus::None) && (!self.resize_move_mode) {
+                LineType::Double
+            } else {
+                LineType::Single
             };
         } else {
             color_title = theme.text.normal;
@@ -675,6 +677,10 @@ impl OnKeyPressed for Window {
                     }
                     return EventProcessStatus::Processed;
                 }
+                key!("Ctrl+Alt+M") | key!("Ctrl+Alt+R") => {
+                    self.resize_move_mode = true;
+                    return EventProcessStatus::Processed;
+                }
                 _ => {}
             }
         }
@@ -695,21 +701,6 @@ impl OnKeyPressed for Window {
     {
         switch (KeyCode)
         {
-        case Key::Ctrl | Key::Alt | Key::M:
-        case Key::Ctrl | Key::Alt | Key::R:
-            Members->ResizeMoveMode = true;
-            return true;
-
-        case Key::Tab | Key::Shift:
-            tmp = FindNextControl(this, false, true, true, true);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Tab:
-            tmp = FindNextControl(this, true, true, true, true);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
         case Key::Left:
         case Key::Left | Key::Ctrl:
         case Key::Left | Key::Alt:
