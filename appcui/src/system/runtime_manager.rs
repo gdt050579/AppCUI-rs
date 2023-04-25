@@ -50,6 +50,7 @@ pub(crate) struct RuntimeManager {
     mouse_over_control: Option<Handle>,
     focus_chain: Vec<Handle>,
     events: Vec<EmittedEvent>,
+    commands: Vec<u32>,
     mouse_locked_object: MouseLockedObject,
 }
 
@@ -75,6 +76,7 @@ impl RuntimeManager {
             mouse_over_control: None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
+            commands: Vec::with_capacity(8),
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
@@ -145,6 +147,9 @@ impl RuntimeManager {
     }
     pub(crate) fn send_event(&mut self, event: Event, sender: Handle) {
         self.events.push(EmittedEvent { event, sender });
+    }
+    pub(crate) fn send_command(&mut self, command: u32) {
+        self.commands.push(command);
     }
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;

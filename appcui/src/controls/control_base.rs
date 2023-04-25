@@ -267,6 +267,11 @@ impl ControlBase {
             RuntimeManager::get().send_event(event, handle);
         }
     }
+    pub(crate) fn send_command(&self, id: u32) {
+        if let Some(handle) = self.handle {
+            RuntimeManager::get().send_command(id);
+        }
+    }
     pub(crate) fn show_tooltip_on_point(&self, txt: &str, x: i32, y: i32) {
         if self.is_visible() && self.screen_clip.is_visible() {
             let r = Rect::with_size(self.screen_clip.left + x, self.screen_clip.top + y, 1, 1);
