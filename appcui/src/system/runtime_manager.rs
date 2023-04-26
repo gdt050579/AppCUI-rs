@@ -177,6 +177,9 @@ impl RuntimeManager {
         self.recompute_layout = true;
         self.repaint = true;
         while self.loop_status == LoopStatus::Normal {
+            if !self.commands.is_empty() {
+                self.process_commands_queue();
+            }
             if !self.events.is_empty() {
                 self.process_events_queue();
             }
@@ -216,7 +219,30 @@ impl RuntimeManager {
             }
         }
     }
-
+    fn get_focused_control(&self) -> Handle {
+        let controls = unsafe { &mut *self.controls };
+        let mut parent = self.desktop_handler;
+        let mut ctrl = controls.get(parent).unwrap();
+        
+        loop {
+            let base = ctrl.get_base();
+            if base.focused_child_index.in_range(base.children.len()) {
+                let child_handle = base.children[base.focused_child_index.index()];
+                if let Some(child) = controls.get(child_handle) {
+                    if child.get_base().can_receive_input() {
+                        parent = child_handle;
+                        ctrl = child;
+                    } else {
+                        return parent;
+                    }
+                } else {
+                    return parent;
+                }
+            } else {
+                return parent;
+            }
+        }
+    }
     fn process_one_event(&mut self, evnt: EmittedEvent) {
         let mut h = evnt.sender;
         let controls = unsafe { &mut *self.controls };
@@ -246,9 +272,35 @@ impl RuntimeManager {
             self.process_one_event(evnt);
         }
     }
-
-    fn send_command(&mut self, _command: u32) {
-        todo!("send_command");
+    fn process_one_command(&mut self, handle: Handle, command: u32) {
+        let mut h = handle;
+        let controls = unsafe { &mut *self.controls };
+        while let Some(control) = controls.get(h) {
+            let result = control.get_control_mut().on_command(command);
+            match result {
+                EventProcessStatus::Processed => {
+                    return;
+                }
+                EventProcessStatus::Ignored => {}
+                EventProcessStatus::Update => {
+                    self.repaint = true;
+                }
+                EventProcessStatus::Cancel => {
+                    return;
+                }
+            }
+            if let Some(parent) = control.get_base().parent {
+                h = parent;
+            } else {
+                break;
+            }
+        }
+    }
+    fn process_commands_queue(&mut self) {
+        let focused_handle = self.get_focused_control();
+        while let Some(cmd) = self.commands.pop() {
+            self.process_one_command(focused_handle, cmd);
+        }
     }
 
     fn update_focus(&mut self, handle: Handle) {

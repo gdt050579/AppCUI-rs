@@ -1312,11 +1312,7 @@ bool Window::OnBeforeResize(int newWidth, int newHeight)
 }
 void Window::OnAfterResize(int, int)
 {
-    WindowControlContext* Members = (WindowControlContext*) this->Context;
-    if (Members)
-    {
-        UpdateWindowsButtonsPoz(Members);
-    }
+    // done
 }
 void Window::RemoveMe()
 {
