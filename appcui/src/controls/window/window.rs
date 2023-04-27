@@ -497,18 +497,18 @@ impl Window {
                 return true;
             }
             DecoratorType::Button => {
-                // RaiseEvent(Event::Command, b.ID);
+                self.send_command(id);
                 return true;
             }
             DecoratorType::SingleChoice => {
                 self.decorators.check_singlechoice(index);
-                // RaiseEvent(Event::Command, b.ID);
+                self.send_command(id);
                 return true;
             }
             DecoratorType::CheckBox => {
                 let d = self.decorators.get_mut(index).unwrap();
                 d.set_checked(!d.is_checked());
-                // RaiseEvent(Event::Command, b.ID);
+                self.send_command(id);
                 return true;
             }
             _ => {}

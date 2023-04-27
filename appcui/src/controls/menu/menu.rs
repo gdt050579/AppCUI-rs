@@ -9,7 +9,7 @@ use crate::{
         TextFormat, TextWrap,
     },
     input::{Key, KeyCode, MouseWheelDirection},
-    system::Theme,
+    system::{Theme, RuntimeManager},
     utils::{Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
@@ -25,6 +25,19 @@ pub struct Menu {
     pub(super) clip: ClipArea,
 }
 impl Menu {
+    pub fn new()-> Self {
+        Self {
+            items: Vec::with_capacity(4),
+            current: VectorIndex::Invalid,
+            width: 1,
+            text_width: 0,
+            first_visible_item: 0,
+            visible_items_count: 0,
+            button_up: MenuButtonState::Normal,
+            button_down: MenuButtonState::Normal,
+            clip: ClipArea::new(0, 0, 1, 1),
+        }
+    }
     pub fn add(&mut self, item: MenuItem) {
         self.items.push(item);
     }
@@ -364,7 +377,7 @@ impl Menu {
         self.items[index].checked = true;
     }
     fn send_command(&mut self, command_id: u32) {
-        todo!("to be added !");
+        RuntimeManager::get().send_command(command_id);
         /*
         Application::GetApplication()->CloseContextualMenu();
         Application::GetApplication()->SendCommand(commandID);

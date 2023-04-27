@@ -1,9 +1,12 @@
 use appcui::controls::*;
+use appcui::controls::menu::{Menu, MenuItem};
 use appcui::system::*;
+use appcui::terminal::TerminalType;
 
 fn main() -> Result<(), appcui::system::Error> {
     //let mut a = App::debug(60,20)?;
-    let mut a = App::default()?;
+    //let mut a = App::default()?;
+    let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
     let mut w = Window::new(
         "Simple window",
         Layout::new("d:c,w:40,h:10"),
@@ -24,6 +27,8 @@ fn main() -> Result<(), appcui::system::Error> {
         Layout::new("x:1,y:5,w:35"),
         true,
     ));
+    let mut m = Menu::new();
+    a.add_menu(m, "&File");
     a.add(w);
     a.run();
     Ok(())
