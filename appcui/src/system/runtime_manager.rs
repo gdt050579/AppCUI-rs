@@ -86,7 +86,7 @@ impl RuntimeManager {
                 None
             },
             menubar: if data.flags.contains(InitializationFlags::Menu) {
-                None
+                Some(MenuBar::new(width))
             } else {
                 None
             },
@@ -168,8 +168,8 @@ impl RuntimeManager {
         unsafe { &mut *self.controls }
     }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
-        if self.menubar.is_some() {
-            self.menubar.as_mut().unwrap().add(menu, caption);
+        if let Some(menubar) = self.menubar.as_mut() {
+            menubar.add(menu, caption);
         }
     }
     pub(crate) fn run(&mut self) {

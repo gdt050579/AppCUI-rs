@@ -18,12 +18,12 @@ pub(crate) struct MenuBar {
 }
 
 impl MenuBar {
-    pub (crate) fn new() -> Self {
+    pub (crate) fn new(width: u32) -> Self {
         Self {
             items: Vec::with_capacity(4),
             x: 0,
             y: 0,
-            width: 0,
+            width,
             opened_item: VectorIndex::Invalid,
             hovered_item: VectorIndex::Invalid
         }

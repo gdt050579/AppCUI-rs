@@ -146,7 +146,7 @@ impl Window {
         win.decorators.add(tag_decorator);
 
         if flags.contains(WindowFlags::Menu) {
-            win.menu = Some(MenuBar::new());
+            win.menu = Some(MenuBar::new(1));
             win.set_margins(1, 2, 1, 1);
         }
 
