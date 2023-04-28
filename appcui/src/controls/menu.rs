@@ -7,6 +7,8 @@ mod menu_button_state;
 mod mouse_position_info;
 mod menu_item_handle;
 mod menu_handle;
+mod utils;
+mod menu_command_item;
 
 pub use self::menu_item::MenuItem;
 pub use self::menu::Menu;

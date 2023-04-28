@@ -18,38 +18,6 @@ pub struct MenuItem {
 }
 
 impl MenuItem {
-    #[inline(always)]
-    fn get_text_attr(&self, current_item: bool, color: &MenuTheme) -> CharAttribute {
-        match () {
-            _ if self.enabled == false => color.text.inactive,
-            _ if current_item => color.text.hovered,
-            _ => color.text.normal,
-        }
-    }
-    #[inline(always)]
-    fn get_hotkey_attr(&self, current_item: bool, color: &MenuTheme) -> CharAttribute {
-        match () {
-            _ if self.enabled == false => color.hotkey.inactive,
-            _ if current_item => color.hotkey.hovered,
-            _ => color.hotkey.normal,
-        }
-    }
-    #[inline(always)]
-    fn get_shortcut_attr(&self, current_item: bool, color: &MenuTheme) -> CharAttribute {
-        match () {
-            _ if self.enabled == false => color.shortcut.inactive,
-            _ if current_item => color.shortcut.hovered,
-            _ => color.shortcut.normal,
-        }
-    }
-    #[inline(always)]
-    fn get_symbol_attr(&self, current_item: bool, color: &MenuTheme) -> CharAttribute {
-        match () {
-            _ if self.enabled == false => color.symbol.inactive,
-            _ if current_item => color.symbol.hovered,
-            _ => color.symbol.normal,
-        }
-    }
 
     #[inline(always)]
     fn paint_line(&self, surface: &mut Surface, format: &TextFormat, width: u16) {
