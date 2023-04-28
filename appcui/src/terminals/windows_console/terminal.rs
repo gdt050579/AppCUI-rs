@@ -4,18 +4,18 @@ use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::input::MouseWheelDirection;
 
-use super::system_event::KeyModifierChangedEvent;
-use super::CharFlags;
-use super::Color;
-use super::KeyPressedEvent;
-use super::MouseButtonDownEvent;
-use super::MouseButtonUpEvent;
-use super::MouseDoubleClickEvent;
-use super::MouseMoveEvent;
-use super::MouseWheelEvent;
-use super::Surface;
-use super::SystemEvent;
-use super::Terminal;
+use super::super::system_event::KeyModifierChangedEvent;
+use super::super::CharFlags;
+use super::super::Color;
+use super::super::KeyPressedEvent;
+use super::super::MouseButtonDownEvent;
+use super::super::MouseButtonUpEvent;
+use super::super::MouseDoubleClickEvent;
+use super::super::MouseMoveEvent;
+use super::super::MouseWheelEvent;
+use super::super::Surface;
+use super::super::SystemEvent;
+use super::super::Terminal;
 use crate::system::Error;
 
 type HANDLE = usize;
@@ -738,7 +738,7 @@ impl Terminal for WindowsTerminal {
         // resize
         if ir.event_type == WINDOW_BUFFER_SIZE_EVENT {
             unsafe {
-                return SystemEvent::Resize(super::Size::new(
+                return SystemEvent::Resize(super::super::Size::new(
                     ir.event.window_buffer_size_event.width as u32,
                     ir.event.window_buffer_size_event.height as u32,
                 ));

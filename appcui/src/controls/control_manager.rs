@@ -1,5 +1,5 @@
 use crate::graphics::{ClipArea, Point};
-use crate::terminal::Terminal;
+use crate::terminals::Terminal;
 
 use super::events::Control;
 use super::ControlBase;

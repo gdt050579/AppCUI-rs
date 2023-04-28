@@ -1,5 +1,5 @@
 pub mod graphics;
-pub mod terminal;
+pub mod terminals;
 pub mod input;
 pub mod controls;
 pub mod system;

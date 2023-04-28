@@ -8,7 +8,7 @@ use crate::controls::ControlManager;
 use crate::controls::*;
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
-use crate::terminal::*;
+use crate::terminals::*;
 use crate::utils::{Caption, Strategy, VectorIndex};
 
 #[repr(u8)]

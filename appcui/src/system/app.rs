@@ -6,7 +6,7 @@ use crate::controls::events::Control;
 use crate::controls::menu::Menu;
 use crate::controls::menu::MenuHandle;
 use crate::graphics::Size;
-use crate::terminal::TerminalType;
+use crate::terminals::TerminalType;
 use crate::utils::Caption;
 
 pub struct App {

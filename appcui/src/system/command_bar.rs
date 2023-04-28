@@ -1,7 +1,7 @@
 use crate::{
     graphics::{Character, Surface, Size},
     input::{Key, KeyCode, KeyModifier},
-    terminal::{MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent},
+    terminals::{MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent},
 };
 
 use super::Theme;

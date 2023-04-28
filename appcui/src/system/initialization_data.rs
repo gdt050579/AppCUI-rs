@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-use crate::{graphics::Size, terminal::TerminalType};
+use crate::{graphics::Size, terminals::TerminalType};
 
 #[EnumBitFlags(bits = 32)]
 pub enum InitializationFlags {

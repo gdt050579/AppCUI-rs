@@ -12,9 +12,9 @@ use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
-use crate::terminal::MouseButtonDownEvent;
-use crate::terminal::MouseButtonUpEvent;
-use crate::terminal::MouseMoveEvent;
+use crate::terminals::MouseButtonDownEvent;
+use crate::terminals::MouseButtonUpEvent;
+use crate::terminals::MouseMoveEvent;
 
 fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
     let mut tooltip = ToolTip::new();

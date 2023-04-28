@@ -1,6 +1,6 @@
-use super::Surface;
-use super::SystemEvent;
-use super::Terminal;
+use super::super::Surface;
+use super::super::SystemEvent;
+use super::super::Terminal;
 use crate::graphics::Color;
 use crate::system::Error;
 use crate::system::InitializationData;

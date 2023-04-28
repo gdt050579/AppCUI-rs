@@ -1,6 +1,5 @@
-mod windows_terminal;
-mod debug_terminal;
-mod null_terminal;
+mod windows_console;
+mod debug;
 mod system_event;
 
 use crate::system::InitializationData;
@@ -21,8 +20,8 @@ pub (crate) use self::system_event::MouseWheelEvent;
 pub (crate) use self::system_event::KeyPressedEvent;
 
 
-use self::windows_terminal::WindowsTerminal;
-use self::debug_terminal::DebugTerminal;
+use self::windows_console::WindowsTerminal;
+use self::debug::DebugTerminal;
 
 
 pub (crate) trait Terminal {
