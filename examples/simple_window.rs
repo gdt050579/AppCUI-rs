@@ -1,7 +1,7 @@
 use appcui::controls::*;
-use appcui::controls::menu::{Menu, MenuItem};
+use appcui::controls::menu::{Menu};
 use appcui::system::*;
-use appcui::terminal::TerminalType;
+use appcui::terminals::TerminalType;
 
 fn main() -> Result<(), appcui::system::Error> {
     //let mut a = App::debug(60,20)?;
