@@ -1,7 +1,4 @@
-use super::{
-    menu_button_state::MenuButtonState, menu_item_type::MenuItemType,
-    mouse_position_info::MousePositionInfo, MenuItem,
-};
+use super::{menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuItem};
 use crate::{
     controls::events::EventProcessStatus,
     graphics::{
@@ -38,9 +35,9 @@ impl Menu {
             clip: ClipArea::new(0, 0, 1, 1),
         }
     }
-    pub fn add(&mut self, item: MenuItem) {
-        self.items.push(item);
-    }
+    // pub fn add(&mut self, item: MenuItem) {
+    //     self.items.push(item);
+    // }
     fn is_on_menu(&self, x: i32, y: i32) -> bool {
         MousePositionInfo::new(x, y, &self).is_on_menu
     }
@@ -142,27 +139,30 @@ impl Menu {
                 if shortcut == key {
                     match item {
                         MenuItem::Command(item) => {
-                            self.send_command(item.commandID);
-                            return true;
-                        },
-                        MenuItem::CheckBox(item) => {
-                            item.checked = !item.checked;
-                            self.send_command(item.commandID);
-                            return true;
-                        },
-                        MenuItem::RadioBox(item) => {
-                            self.check_radio_item(index);
-                            self.send_command(item.commandID);
+                            let cmd_id = item.commandID;
+                            self.send_command(cmd_id);
                             return true;
                         }
-                        MenuItem::Line(_) => {},
+                        MenuItem::CheckBox(item) => {
+                            item.checked = !item.checked;
+                            let cmd_id = item.commandID;
+                            self.send_command(cmd_id);
+                            return true;
+                        }
+                        MenuItem::RadioBox(item) => {
+                            let cmd_id = item.commandID;
+                            self.check_radio_item(index);                            
+                            self.send_command(cmd_id);
+                            return true;
+                        }
+                        MenuItem::Line(_) => {}
                         MenuItem::SubMenu(item) => {
                             if let Some(submenu) = item.submenu.as_mut() {
                                 if submenu.process_shortcut(key) {
                                     return true;
                                 }
                             }
-                        },
+                        }
                     }
                 }
             }
@@ -374,7 +374,7 @@ impl Menu {
         }
         self.items[index].set_checked(true);
     }
-    fn send_command(&self, command_id: u32) {
+    fn send_command(&mut self, command_id: u32) {
         RuntimeManager::get().send_command(command_id);
         /*
         Application::GetApplication()->CloseContextualMenu();
@@ -394,18 +394,18 @@ impl Menu {
         if index >= self.items.len() {
             return;
         }
-        let mut item = &mut self.items[index];
-        match item {
-            MenuItem::Command(item) => self.send_command(item.commandID),
+        let command = match &mut self.items[index] {
+            MenuItem::Command(item) => Some(item.commandID),
             MenuItem::CheckBox(item) => {
                 item.checked = !item.checked;
-                self.send_command(item.commandID);
-            },
+                Some(item.commandID)
+            }
             MenuItem::RadioBox(item) => {
+                let cmd_id = item.commandID;
                 self.check_radio_item(index);
-                self.send_command(item.commandID);
-            },
-            MenuItem::Line(_) => {/* do nothing */ },
+                Some(cmd_id)
+            }
+            MenuItem::Line(_) => None,
             MenuItem::SubMenu(_) => {
                 todo!()
                 /*
@@ -415,6 +415,9 @@ impl Menu {
                 (reinterpret_cast<MenuContext*>(itm->SubMenu->Context))->Owner = this->Owner;
                     */
             }
+        };
+        if let Some(cmd) = command {
+            self.send_command(cmd);
         }
     }
 

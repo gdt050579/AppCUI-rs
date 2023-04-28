@@ -6,7 +6,7 @@ use crate::{
 
 use super::{MenuCheckBoxItem, MenuCommandItem, MenuLineItem, MenuRadioBoxItem, MenuSubMenuItem, Menu};
 
-pub enum MenuItem {
+pub(super) enum MenuItem {
     Command(MenuCommandItem),
     CheckBox(MenuCheckBoxItem),
     RadioBox(MenuRadioBoxItem),
@@ -118,7 +118,7 @@ impl MenuItem {
         }
     }
     #[inline(always)]
-    pub(super) fn set_checked(&self, value: bool) {
+    pub(super) fn set_checked(&mut self, value: bool) {
         match self {
             MenuItem::CheckBox(item) => item.checked = value,
             MenuItem::RadioBox(item) => item.checked = value,
