@@ -138,24 +138,32 @@ impl Menu {
             if !item.is_enabled() {
                 continue;
             }
-            if let Some(command) = item.get_command() {
-                if item.item_type == MenuItemType::Check {
-                    item.checked = !item.checked;
-                }
-                if item.is_radiobox() {
-                    self.check_radio_item(index);
-                }
-                /*
-                if (Items[tr]->CommandID >= 0)
-                {
-                    Application::GetApplication()->SendCommand(Items[tr]->CommandID);
-                }
-                */
-                return true; // key was processed
-            }
-            if let Some(submenu) = item.get_submenu() {
-                if submenu.process_shortcut(key) {
-                    return true;
+            if let Some(shortcut) = item.get_shortcut() {
+                if shortcut == key {
+                    match item {
+                        MenuItem::Command(item) => {
+                            self.send_command(item.commandID);
+                            return true;
+                        },
+                        MenuItem::CheckBox(item) => {
+                            item.checked = !item.checked;
+                            self.send_command(item.commandID);
+                            return true;
+                        },
+                        MenuItem::RadioBox(item) => {
+                            self.check_radio_item(index);
+                            self.send_command(item.commandID);
+                            return true;
+                        }
+                        MenuItem::Line(_) => {},
+                        MenuItem::SubMenu(item) => {
+                            if let Some(submenu) = item.submenu.as_mut() {
+                                if submenu.process_shortcut(key) {
+                                    return true;
+                                }
+                            }
+                        },
+                    }
                 }
             }
         }
@@ -366,7 +374,7 @@ impl Menu {
         }
         self.items[index].set_checked(true);
     }
-    fn send_command(&mut self, command_id: u32) {
+    fn send_command(&self, command_id: u32) {
         RuntimeManager::get().send_command(command_id);
         /*
         Application::GetApplication()->CloseContextualMenu();
@@ -387,31 +395,25 @@ impl Menu {
             return;
         }
         let mut item = &mut self.items[index];
-        if let Some(command_id) = item.get_command() {
-            
-            let item_type = item.item_type;
-            match item_type {
-                MenuItemType::Command => {
-                    self.send_command(command_id);
-                }
-                MenuItemType::Check => {
-                    item.checked = !item.checked;
-                    self.send_command(command_id);
-                }
-                MenuItemType::Radio => {
-                    self.check_radio_item(index);
-                    self.send_command(command_id);
-                }
-                MenuItemType::Line => { /* do nothing */ }
-                MenuItemType::SubMenu => {
-                    todo!()
-                    /*
-                                itm->SubMenu->Show(
-                          Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
-                    // transfer owner
-                    (reinterpret_cast<MenuContext*>(itm->SubMenu->Context))->Owner = this->Owner;
-                        */
-                }
+        match item {
+            MenuItem::Command(item) => self.send_command(item.commandID),
+            MenuItem::CheckBox(item) => {
+                item.checked = !item.checked;
+                self.send_command(item.commandID);
+            },
+            MenuItem::RadioBox(item) => {
+                self.check_radio_item(index);
+                self.send_command(item.commandID);
+            },
+            MenuItem::Line(_) => {/* do nothing */ },
+            MenuItem::SubMenu(_) => {
+                todo!()
+                /*
+                            itm->SubMenu->Show(
+                      Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
+                // transfer owner
+                (reinterpret_cast<MenuContext*>(itm->SubMenu->Context))->Owner = this->Owner;
+                    */
             }
         }
     }
