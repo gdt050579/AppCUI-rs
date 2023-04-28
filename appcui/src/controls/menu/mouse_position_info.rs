@@ -25,7 +25,7 @@ impl MousePositionInfo {
             let idx = item_index as usize;
             if idx < menu.items.len() {
                 let item = &menu.items[idx];
-                mpi.item_index = if (item.enabled) && (item.item_type != MenuItemType::Line) {
+                mpi.item_index = if (item.is_enabled()) && (item.is_line() == false) {
                     VectorIndex::with_value(item_index)
                 } else {
                     VectorIndex::Invalid
