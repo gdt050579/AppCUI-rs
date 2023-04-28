@@ -11,6 +11,7 @@ mod utils;
 mod menu_command_item;
 mod menu_checkbox_item;
 mod menu_radiobox_item;
+mod menu_line_item;
 
 pub use self::menu_item::MenuItem;
 pub use self::menu::Menu;
@@ -22,3 +23,4 @@ pub (self) use self::menu_bar_item::MenuBarItem;
 pub (self) use self::menu_command_item::MenuCommandItem;
 pub (self) use self::menu_checkbox_item::MenuCheckBoxItem;
 pub (self) use self::menu_radiobox_item::MenuRadioBoxItem;
+pub (self) use self::menu_line_item::MenuLineItem;
