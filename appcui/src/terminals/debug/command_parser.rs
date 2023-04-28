@@ -75,9 +75,10 @@ impl<'a> CommandParser<'a> {
         if buf[poz] != b'(' {
             return Err("Expecting '(' after the command !");
         }
+        poz += 1;
         loop {
             // skip some spaces
-            poz = CommandParser::skip(buf, poz + 1, CommandParser::is_space);
+            poz = CommandParser::skip(buf, poz, CommandParser::is_space);
             // if we reached the end of the code --> error
             if poz >= len {
                 return Err("Expecting ')' after the '(' ");
