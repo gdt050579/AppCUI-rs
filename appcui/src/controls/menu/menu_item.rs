@@ -126,6 +126,16 @@ impl MenuItem {
         }
     }
     #[inline(always)]
+    pub(super) fn get_caption_chars_count(&self)->usize {
+        match self {
+            MenuItem::Command(item) => item.caption.get_chars_count(),
+            MenuItem::CheckBox(item) => item.caption.get_chars_count(),
+            MenuItem::RadioBox(item) => item.caption.get_chars_count(),
+            MenuItem::Line(_) => 0,
+            MenuItem::SubMenu(item) => item.caption.get_chars_count(),
+        }
+    }
+    #[inline(always)]
     pub(super) fn get_submenu(&self) -> Option<&Menu> {
         match self {
             MenuItem::SubMenu(item) => { 

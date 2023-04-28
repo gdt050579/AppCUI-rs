@@ -388,6 +388,7 @@ impl Menu {
         }
         let mut item = &mut self.items[index];
         if let Some(command_id) = item.get_command() {
+            
             let item_type = item.item_type;
             match item_type {
                 MenuItemType::Command => {
@@ -506,7 +507,7 @@ impl Menu {
         let mut max_width_left = 0usize;
         let mut max_hot_key_width = 0usize;
         for item in &self.items {
-            let mut w_left = item.caption.get_chars_count() + 4;
+            let mut w_left = item.get_caption_chars_count() + 4;
             let mut w_right = 0usize;
             if item.is_checkable() {
                 w_left += 2;
