@@ -9,7 +9,7 @@ use crate::{
         TextFormat, TextWrap,
     },
     input::{Key, KeyCode, MouseWheelDirection},
-    system::{Theme, RuntimeManager},
+    system::{RuntimeManager, Theme},
     utils::{Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
@@ -25,7 +25,7 @@ pub struct Menu {
     pub(super) clip: ClipArea,
 }
 impl Menu {
-    pub fn new()-> Self {
+    pub fn new() -> Self {
         Self {
             items: Vec::with_capacity(4),
             current: VectorIndex::Invalid,
@@ -61,18 +61,12 @@ impl Menu {
         let items_count = self.items.len();
         for i in 0usize..items_count {
             let item = &self.items[i];
-            if !item.enabled {
+            if !item.is_enabled() {
                 continue;
             }
-            match item.item_type {
-                MenuItemType::Check
-                | MenuItemType::Command
-                | MenuItemType::Radio
-                | MenuItemType::SubMenu => {
-                    idx[idx_count] = i;
-                    idx_count += 1;
-                }
-                _ => {}
+            if item.can_be_selected() {
+                idx[idx_count] = i;
+                idx_count += 1;
             }
             if idx_count >= items_count {
                 break;
@@ -85,22 +79,21 @@ impl Menu {
         }
         // if CurrentItem is MenuItem::INVALID_INDEX ==> select the first available item
         if self.current.in_range(items_count) {
-            self.current.set(idx[0],self.items.len(),false);
+            self.current.set(idx[0], self.items.len(), false);
         } else {
             // make sure that this->CurrentItem is part of the list
             let mut current_idx = VectorIndex::Invalid;
             let mut best_diff = usize::MAX;
             for tr in 0..idx_count {
-
-                    let diff = if idx[tr] < self.current.index() {
-                        self.current.index() - idx[tr]
-                    } else {
-                        idx[tr] - self.current.index()
-                    };
-                    if diff < best_diff {
-                        best_diff = diff;
-                        current_idx = VectorIndex::with_value(tr);
-                    }
+                let diff = if idx[tr] < self.current.index() {
+                    self.current.index() - idx[tr]
+                } else {
+                    idx[tr] - self.current.index()
+                };
+                if diff < best_diff {
+                    best_diff = diff;
+                    current_idx = VectorIndex::with_value(tr);
+                }
             }
             // sanity check
             if !current_idx.in_range(idx_count) {
@@ -142,17 +135,14 @@ impl Menu {
 
     fn process_shortcut(&mut self, key: Key) -> bool {
         for (index, item) in self.items.iter_mut().enumerate() {
-            if !item.enabled {
+            if !item.is_enabled() {
                 continue;
             }
-            if (item.item_type == MenuItemType::Command)
-                || (item.item_type == MenuItemType::Check)
-                || (item.item_type == MenuItemType::Radio)
-            {
+            if let Some(command) = item.get_command() {
                 if item.item_type == MenuItemType::Check {
                     item.checked = !item.checked;
                 }
-                if item.item_type == MenuItemType::Radio {
+                if item.is_radiobox() {
                     self.check_radio_item(index);
                 }
                 /*
@@ -163,8 +153,8 @@ impl Menu {
                 */
                 return true; // key was processed
             }
-            if item.item_type == MenuItemType::SubMenu {
-                if item.submenu.as_mut().unwrap().process_shortcut(key) {
+            if let Some(submenu) = item.get_submenu() {
+                if submenu.process_shortcut(key) {
                     return true;
                 }
             }
@@ -358,23 +348,23 @@ impl Menu {
         if index >= count {
             return;
         }
-        if self.items[index].item_type != MenuItemType::Radio {
+        if self.items[index].is_radiobox() {
             return;
         }
         let mut idx = index;
-        while (idx > 0) && (self.items[idx].item_type == MenuItemType::Radio) {
-            self.items[idx].checked = false;
+        while (idx > 0) && (self.items[idx].is_radiobox()) {
+            self.items[idx].set_checked(false);
             idx -= 1;
         }
-        if (idx == 0) && (self.items[0].item_type == MenuItemType::Radio) {
-            self.items[0].checked = false;
+        if (idx == 0) && (self.items[0].is_radiobox()) {
+            self.items[0].set_checked(false);
         }
         idx = index;
-        while (idx < count) && (self.items[idx].item_type == MenuItemType::Radio) {
-            self.items[idx].checked = false;
+        while (idx < count) && (self.items[idx].is_radiobox()) {
+            self.items[idx].set_checked(false);
             idx += 1;
         }
-        self.items[index].checked = true;
+        self.items[index].set_checked(true);
     }
     fn send_command(&mut self, command_id: u32) {
         RuntimeManager::get().send_command(command_id);
@@ -397,29 +387,30 @@ impl Menu {
             return;
         }
         let mut item = &mut self.items[index];
-        let command_id = item.commandID;
-        let item_type = item.item_type;
-        match item_type {
-            MenuItemType::Command => {
-                self.send_command(command_id);
-            }
-            MenuItemType::Check => {
-                item.checked = !item.checked;
-                self.send_command(command_id);
-            }
-            MenuItemType::Radio => {
-                self.check_radio_item(index);
-                self.send_command(command_id);
-            }
-            MenuItemType::Line => { /* do nothing */ }
-            MenuItemType::SubMenu => {
-                todo!()
-                /*
-                            itm->SubMenu->Show(
-                      Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
-                // transfer owner
-                (reinterpret_cast<MenuContext*>(itm->SubMenu->Context))->Owner = this->Owner;
-                    */
+        if let Some(command_id) = item.get_command() {
+            let item_type = item.item_type;
+            match item_type {
+                MenuItemType::Command => {
+                    self.send_command(command_id);
+                }
+                MenuItemType::Check => {
+                    item.checked = !item.checked;
+                    self.send_command(command_id);
+                }
+                MenuItemType::Radio => {
+                    self.check_radio_item(index);
+                    self.send_command(command_id);
+                }
+                MenuItemType::Line => { /* do nothing */ }
+                MenuItemType::SubMenu => {
+                    todo!()
+                    /*
+                                itm->SubMenu->Show(
+                          Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
+                    // transfer owner
+                    (reinterpret_cast<MenuContext*>(itm->SubMenu->Context))->Owner = this->Owner;
+                        */
+                }
             }
         }
     }
@@ -457,7 +448,7 @@ impl Menu {
             KeyCode::Right => {
                 if self.current.in_range(self.items.len()) {
                     let item = &self.items[self.current.index()];
-                    if (item.enabled) && (item.item_type == MenuItemType::SubMenu) {
+                    if (item.is_enabled()) && (item.is_submenu()) {
                         self.run_item_action(self.current.index());
                         return EventProcessStatus::Processed;
                     }
@@ -471,11 +462,15 @@ impl Menu {
         let mut idx = 0usize;
         while idx < count {
             let item = &self.items[idx];
-            if (item.enabled) && (item.caption.get_hotkey() == key) {
-                self.current = VectorIndex::with_value(idx);
-                self.update_first_visible_item();
-                self.run_item_action(idx);
-                return EventProcessStatus::Processed;
+            if item.is_enabled() {
+                if let Some(hotkey) = item.get_hotkey() {
+                    if hotkey == key {
+                        self.current = VectorIndex::with_value(idx);
+                        self.update_first_visible_item();
+                        self.run_item_action(idx);
+                        return EventProcessStatus::Processed;
+                    }
+                }
             }
             idx += 1;
         }
@@ -513,12 +508,12 @@ impl Menu {
         for item in &self.items {
             let mut w_left = item.caption.get_chars_count() + 4;
             let mut w_right = 0usize;
-            if (item.item_type == MenuItemType::Radio) || (item.item_type == MenuItemType::Check) {
+            if item.is_checkable() {
                 w_left += 2;
             }
-            if item.shortcut.code != KeyCode::None {
-                w_right += item.shortcut.code.get_name().len();
-                w_right += item.shortcut.modifier.get_name().len();
+            if let Some(shortcut) = item.get_shortcut() {
+                w_right += shortcut.code.get_name().len();
+                w_right += shortcut.modifier.get_name().len();
                 if w_right > 0 {
                     w_right += 2;
                 }

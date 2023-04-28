@@ -1,9 +1,10 @@
 use crate::{
     graphics::{Surface, TextFormat},
+    input::{Key, KeyCode},
     system::MenuTheme,
 };
 
-use super::{MenuCheckBoxItem, MenuCommandItem, MenuLineItem, MenuRadioBoxItem, MenuSubMenuItem};
+use super::{MenuCheckBoxItem, MenuCommandItem, MenuLineItem, MenuRadioBoxItem, MenuSubMenuItem, Menu};
 
 pub enum MenuItem {
     Command(MenuCommandItem),
@@ -41,10 +42,100 @@ impl MenuItem {
         }
     }
     #[inline(always)]
-    pub(super) fn is_line(&self)-> bool {
+    pub(super) fn is_line(&self) -> bool {
         match self {
             MenuItem::Line(_) => true,
             _ => false,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn is_radiobox(&self) -> bool {
+        match self {
+            MenuItem::RadioBox(_) => true,
+            _ => false,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn can_be_selected(&self) -> bool {
+        match self {
+            MenuItem::Line(_) => false,
+            _ => true,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn is_checkable(&self) -> bool {
+        match self {
+            MenuItem::CheckBox(_) => true,
+            MenuItem::RadioBox(_) => true,
+            _ => false,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn is_submenu(&self) -> bool {
+        match self {
+            MenuItem::SubMenu(_) => true,
+            _ => false,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn get_command(&self) -> Option<u32> {
+        match self {
+            MenuItem::Command(item) => Some(item.commandID),
+            MenuItem::CheckBox(item) => Some(item.commandID),
+            MenuItem::RadioBox(item) => Some(item.commandID),
+            MenuItem::Line(_) => None,
+            MenuItem::SubMenu(_) => None,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn get_shortcut(&self) -> Option<Key> {
+        let key = match self {
+            MenuItem::Command(item) => item.shortcut,
+            MenuItem::CheckBox(item) => item.shortcut,
+            MenuItem::RadioBox(item) => item.shortcut,
+            MenuItem::Line(_) => Key::default(),
+            MenuItem::SubMenu(_) => Key::default(),
+        };
+        if key.code != KeyCode::None {
+            return Some(key);
+        } else {
+            None
+        }
+    }
+    #[inline(always)]
+    pub(super) fn get_hotkey(&self) -> Option<Key> {
+        let key = match self {
+            MenuItem::Command(item) => item.caption.get_hotkey(),
+            MenuItem::CheckBox(item) => item.caption.get_hotkey(),
+            MenuItem::RadioBox(item) => item.caption.get_hotkey(),
+            MenuItem::Line(_) => Key::default(),
+            MenuItem::SubMenu(item) => item.caption.get_hotkey(),
+        };
+        if key.code != KeyCode::None {
+            return Some(key);
+        } else {
+            None
+        }
+    }
+    #[inline(always)]
+    pub(super) fn set_checked(&self, value: bool) {
+        match self {
+            MenuItem::CheckBox(item) => item.checked = value,
+            MenuItem::RadioBox(item) => item.checked = value,
+            _ => {}
+        }
+    }
+    #[inline(always)]
+    pub(super) fn get_submenu(&self) -> Option<&Menu> {
+        match self {
+            MenuItem::SubMenu(item) => { 
+                if let Some(menu) = item.submenu.as_ref() {
+                    Some(menu)
+                } else {
+                    None
+                }
+             }
+            _ => None,
         }
     }
 }
