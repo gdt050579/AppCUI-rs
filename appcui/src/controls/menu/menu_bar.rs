@@ -170,10 +170,10 @@ impl MenuBar {
             self.x,
             self.y,
             self.width,
-            Character::with_attributes(' ', theme.text.normal),
+            Character::with_attributes(' ', theme.menu.text.normal),
         );
         let mut format =
-            TextFormat::single_line(0, self.y, theme.text.normal, TextAlignament::Left);
+            TextFormat::single_line(0, self.y, theme.menu.text.normal, TextAlignament::Left);
         let open_idx = self.opened_item.index();
         let hover_idx = self.hovered_item.index();
         for (index, item) in self.items.iter().enumerate() {
@@ -197,22 +197,3 @@ impl MenuBar {
         }
     }
 }
-
-/*
-
-MenuBar::MenuBar(Controls::Control* parent, int x, int y)
-{
-
-    this->Parent      = parent;
-}
-Menu* MenuBar::GetMenu(ItemHandle itemHandle)
-{
-    CHECK((uint32) itemHandle < this->ItemsCount,
-          nullptr,
-          "Invalid item handle (%08X)",
-          (uint32) itemHandle);
-    return &Items[(uint32) itemHandle]->Mnu;
-}
-
-
-*/
