@@ -3,7 +3,7 @@ use super::{
 };
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, Event, EventProcessStatus};
-use crate::controls::menu::{Menu, MenuBar};
+use crate::controls::menu::{Menu, MenuBar, MenuHandle};
 use crate::controls::ControlManager;
 use crate::controls::*;
 use crate::graphics::{Point, Rect, Size, Surface};
@@ -167,10 +167,11 @@ impl RuntimeManager {
     pub(crate) fn get_controls(&self) -> &mut ControlHandleManager {
         unsafe { &mut *self.controls }
     }
-    pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) {
+    pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption)->Option<MenuHandle> {
         if let Some(menubar) = self.menubar.as_mut() {
-            menubar.add(menu, caption);
+            return Some(menubar.add(menu, caption));
         }
+        None
     }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible

@@ -1,12 +1,12 @@
 use crate::{
     controls::events::EventProcessStatus,
-    graphics::{Character, Surface, TextFormat, TextAlignament},
+    graphics::{Character, Surface, TextAlignament, TextFormat},
     input::{Key, KeyCode, KeyModifier},
     system::Theme,
     utils::{Caption, Strategy, VectorIndex},
 };
 
-use super::{Menu, MenuBarItem};
+use super::{Menu, MenuBarItem, MenuHandle};
 
 pub(crate) struct MenuBar {
     items: Vec<MenuBarItem>,
@@ -18,14 +18,14 @@ pub(crate) struct MenuBar {
 }
 
 impl MenuBar {
-    pub (crate) fn new(width: u32) -> Self {
+    pub(crate) fn new(width: u32) -> Self {
         Self {
             items: Vec::with_capacity(4),
             x: 0,
             y: 0,
             width,
             opened_item: VectorIndex::Invalid,
-            hovered_item: VectorIndex::Invalid
+            hovered_item: VectorIndex::Invalid,
         }
     }
     fn update_positions(&mut self) {
@@ -49,19 +49,36 @@ impl MenuBar {
         }
         return None;
     }
-    pub (crate) fn set_position(&mut self, x: i32, y: i32, width: u32) {
+    pub(crate) fn set_position(&mut self, x: i32, y: i32, width: u32) {
         self.x = x;
         self.y = y;
         self.width = width;
         self.update_positions();
     }
-    pub(crate) fn add(&mut self, menu: Menu, caption: Caption) {
+    pub(crate) fn add(&mut self, menu: Menu, caption: Caption) -> MenuHandle {
+        let h = MenuHandle::new(self.items.len() as u32);
         self.items.push(MenuBarItem {
             caption,
             menu,
             x: 0,
+            handle: h,
         });
         self.update_positions();
+        return h;
+    }
+    pub(crate) fn get_menu(&self, handle: MenuHandle)->Option<&Menu> {
+        let idx = handle.get_index();
+        if (idx < self.items.len()) && (self.items[idx].handle == handle) {
+            return Some(&self.items[idx].menu);
+        }
+        None
+    }
+    pub(crate) fn get_menu_mut(&mut self, handle: MenuHandle)->Option<&mut Menu> {
+        let idx = handle.get_index();
+        if (idx < self.items.len()) && (self.items[idx].handle == handle) {
+            return Some(&mut self.items[idx].menu);
+        }
+        None
     }
 
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
@@ -157,21 +174,21 @@ impl MenuBar {
         );
         let mut format =
             TextFormat::single_line(0, self.y, theme.text.normal, TextAlignament::Left);
-            let open_idx = self.opened_item.index();
-            let hover_idx = self.hovered_item.index();
-        for (index,item) in self.items.iter().enumerate() {
+        let open_idx = self.opened_item.index();
+        let hover_idx = self.hovered_item.index();
+        for (index, item) in self.items.iter().enumerate() {
             format.x = self.x + item.x + 1;
             format.hotkey_pos = item.caption.get_hotkey_pos();
             format.chars_count = Some(item.caption.get_chars_count() as u16);
             format.char_attr = match () {
-                _ if index==open_idx => theme.menu.text.pressed_or_selectd,
-                _ if index==hover_idx => theme.menu.text.hovered,
+                _ if index == open_idx => theme.menu.text.pressed_or_selectd,
+                _ if index == hover_idx => theme.menu.text.hovered,
                 _ => theme.menu.text.normal,
             };
             if item.caption.has_hotkey() {
                 format.hotkey_attr = Some(match () {
-                    _ if index==open_idx => theme.menu.hotkey.pressed_or_selectd,
-                    _ if index==hover_idx => theme.menu.hotkey.hovered,
+                    _ if index == open_idx => theme.menu.hotkey.pressed_or_selectd,
+                    _ if index == hover_idx => theme.menu.hotkey.hovered,
                     _ => theme.menu.hotkey.normal,
                 });
             }
