@@ -173,6 +173,18 @@ impl RuntimeManager {
         }
         None
     }
+    pub (crate) fn get_menu(&self, handle: MenuHandle) -> Option<&Menu> {
+        if let Some(menubar) = self.menubar.as_ref() {
+            return menubar.get_menu(handle);
+        }
+        None
+    }
+    pub (crate) fn get_menu_mut(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
+        if let Some(menubar) = self.menubar.as_mut() {
+            return menubar.get_menu_mut(handle);
+        }
+        None
+    }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
         self.recompute_layout = true;

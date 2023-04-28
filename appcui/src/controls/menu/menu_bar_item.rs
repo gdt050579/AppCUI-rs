@@ -10,5 +10,5 @@ pub(super) struct MenuBarItem {
 }
 
 impl MenuBarItem {
-    pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme) {}
+    pub(super) fn paint(&self, _surface: &mut Surface, _theme: &Theme) {}
 }

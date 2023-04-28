@@ -27,8 +27,8 @@ fn main() -> Result<(), appcui::system::Error> {
         Layout::new("x:1,y:5,w:35"),
         true,
     ));
-    let mut m = Menu::new();
-    a.add_menu(m, "&File");
+    let mut m_file = Menu::new();
+    a.add_menu(m_file, "&File");
     a.add(w);
     a.run();
     Ok(())
