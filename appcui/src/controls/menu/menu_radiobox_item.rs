@@ -1,17 +1,18 @@
 use crate::{
-    graphics::{Surface, TextFormat, Character},
+    graphics::{Surface, TextFormat, Character, SpecialChar},
     input::{Key, KeyCode},
     system::MenuTheme,
     utils::Caption,
 };
 
-pub(super) struct MenuCommandItem {
+pub(super) struct MenuRadioBoxItem {
     pub(super) enabled: bool,
+    pub(super) checked: bool,
     pub(super) commandID: u32,
     pub(super) caption: Caption,
     pub(super) shortcut: Key,
 }
-impl MenuCommandItem {
+impl MenuRadioBoxItem {
     pub (super) fn paint(
         &self,
         surface: &mut Surface,
@@ -36,8 +37,15 @@ impl MenuCommandItem {
                 Character::with_attributes(' ', color.text.hovered),
             );
         }
-        format.x = 2;
+        format.x = 4;
         surface.write_text(self.caption.get_text(), format);
+        let attr = super::utils::get_symbol_attr(self.enabled, current_item, color);
+        let symbol = if self.checked {
+            SpecialChar::CircleFilled
+        } else {
+            SpecialChar::CircleEmpty
+        };
+        surface.write_char(2, format.y, Character::with_attributes(symbol, attr));
         if self.shortcut.code != KeyCode::None {
             super::utils::paint_shortcut(
                 self.shortcut,

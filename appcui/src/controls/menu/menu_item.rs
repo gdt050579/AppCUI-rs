@@ -5,16 +5,12 @@ use crate::{
     utils::Caption,
 };
 
-use super::{menu::Menu, menu_item_type::MenuItemType};
+use super::{menu::Menu, menu_item_type::MenuItemType, MenuCheckBoxItem, MenuCommandItem, MenuRadioBoxItem};
 
-pub struct MenuItem {
-    pub(super) checked: bool,
-    pub(super) enabled: bool,
-    pub(super) commandID: u32,
-    pub(super) caption: Caption,
-    pub(super) shortcut: Key,
-    pub(super) item_type: MenuItemType,
-    pub(super) submenu: Option<Box<Menu>>,
+pub enum MenuItem {
+    Command(MenuCommandItem),
+    CheckBox(MenuCheckBoxItem),
+    RadioBox(MenuRadioBoxItem),
 }
 
 impl MenuItem {
@@ -29,48 +25,7 @@ impl MenuItem {
             format.char_attr,
         );
     }
-    #[inline(always)]
-    fn paint_command(&self, surface: &mut Surface, format: &mut TextFormat) {
-        format.x = 2;
-        surface.write_text(self.caption.get_text(), format);
-    }
-    #[inline(always)]
-    fn paint_check(
-        &self,
-        surface: &mut Surface,
-        format: &mut TextFormat,
-        current_item: bool,
-        color: &MenuTheme,
-    ) {
-        format.x = 4;
-        surface.write_text(self.caption.get_text(), format);
-        if self.checked {
-            let attr = self.get_symbol_attr(current_item, color);
-            surface.write_char(
-                2,
-                format.y,
-                Character::with_attributes(SpecialChar::CheckMark, attr),
-            );
-        }
-    }
-    #[inline(always)]
-    fn paint_radio(
-        &self,
-        surface: &mut Surface,
-        format: &mut TextFormat,
-        current_item: bool,
-        color: &MenuTheme,
-    ) {
-        format.x = 4;
-        surface.write_text(self.caption.get_text(), format);
-        let attr = self.get_symbol_attr(current_item, color);
-        let symbol = if self.checked {
-            SpecialChar::CircleFilled
-        } else {
-            SpecialChar::CircleEmpty
-        };
-        surface.write_char(2, format.y, Character::with_attributes(symbol, attr));
-    }
+
     #[inline(always)]
     fn paint_submenu(&self, surface: &mut Surface, format: &mut TextFormat, width: u16) {
         format.x = 2;
@@ -89,43 +44,11 @@ impl MenuItem {
         current_item: bool,
         color: &MenuTheme,
     ) {
-        format.char_attr = self.get_text_attr(current_item, color);
-        format.hotkey_pos = self.caption.get_hotkey_pos();
-        if self.caption.has_hotkey() {
-            format.hotkey_attr = Some(self.get_hotkey_attr(current_item, color));
-        }
-        format.chars_count = Some(self.caption.get_chars_count() as u16);
-        if current_item && self.enabled {
-            // highlight current item
-            surface.fill_horizontal_line_with_size(
-                1,
-                format.y,
-                width as u32,
-                Character::with_attributes(' ', color.text.hovered),
-            );
-        }
 
-        match self.item_type {
-            MenuItemType::Command => self.paint_command(surface, format),
-            MenuItemType::Check => self.paint_check(surface, format, current_item, color),
-            MenuItemType::Radio => self.paint_check(surface, format, current_item, color),
-            MenuItemType::Line => self.paint_line(surface, format, width),
-            MenuItemType::SubMenu => self.paint_submenu(surface, format, width),
-        }
-
-        if self.shortcut.code != KeyCode::None {
-            let name = self.shortcut.code.get_name();
-            let modifier_name = self.shortcut.modifier.get_name();
-            let attr = self.get_shortcut_attr(current_item, color);
-            let x = (width as i32) - modifier_name.len() as i32;
-            surface.write_string(x, format.y, modifier_name, attr, false);
-            surface.write_string(
-                x + (modifier_name.len() as i32),
-                format.y,
-                name,
-                attr,
-                false,
-            );
+        match self {
+            MenuItem::Command(item) => item.paint(surface, format, width, current_item, color),
+            MenuItem::CheckBox(item) => item.paint(surface, format, width, current_item, color),
+            MenuItem::RadioBox(item) => item.paint(surface, format, width, current_item, color),
         }
     }
 }
