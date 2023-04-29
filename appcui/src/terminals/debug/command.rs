@@ -10,7 +10,7 @@ use super::{
     mouse_move_command::MouseMoveCommand,
     mouse_release_command::MouseReleaseCommand,
     mouse_wheel_command::MouseWheelCommand,
-    paint_command::PaintCommand,
+    paint_command::PaintCommand, resize_command::ResizeCommand,
 };
 
 pub(super) enum Command {
@@ -21,6 +21,7 @@ pub(super) enum Command {
     MouseDrag(MouseDragCommand),
     MouseWheel(MouseWheelCommand),
     Paint(PaintCommand),
+    Resize(ResizeCommand)
 }
 impl Command {
     pub(super) fn new(text: &str) -> Result<Command, ParserError> {
@@ -54,6 +55,10 @@ impl Command {
                 let variant = PaintCommand::new(&cp)?;
                 return Ok(Command::Paint(variant));
             }
+            "Resize" => {
+                let variant = ResizeCommand::new(&cp)?;
+                return Ok(Command::Resize(variant));
+            }
             _ => {
                 let mut s = String::from("Invalid/Unknwon command: ");
                 s += cp.get_command();
@@ -69,6 +74,7 @@ impl Command {
             Command::MouseMove(cmd) => cmd.generate_event(sys_events),
             Command::MouseDrag(cmd) => cmd.generate_event(sys_events),
             Command::MouseWheel(cmd) => cmd.generate_event(sys_events),
+            Command::Resize(cmd) => cmd.generate_event(sys_events),
             Command::Paint(_) => {}
         }
     }
