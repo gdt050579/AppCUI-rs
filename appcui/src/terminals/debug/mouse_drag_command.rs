@@ -25,10 +25,10 @@ impl MouseDragCommand {
             return Err(ParserError::new("Second parameter for Mouse.Drag command should an integer (y value) - starting point"));
         }
         if x2.is_none() {
-            return Err(ParserError::new("Third parameter for Mouse.Drag command should an integer (x value) - starting point"));
+            return Err(ParserError::new("Third parameter for Mouse.Drag command should an integer (x value) - ending point"));
         }
         if y2.is_none() {
-            return Err(ParserError::new("Fourth parameter for Mouse.Drag command should an integer (y value) - starting point"));
+            return Err(ParserError::new("Fourth parameter for Mouse.Drag command should an integer (y value) - ending point"));
         }
         Ok(Self {
             x1: x1.unwrap(),

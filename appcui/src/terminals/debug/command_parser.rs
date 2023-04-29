@@ -1,4 +1,4 @@
-use crate::input::MouseButton;
+use crate::input::{MouseButton, MouseWheelDirection};
 
 #[derive(Debug)]
 pub(super) struct ParserError {
@@ -128,6 +128,18 @@ impl<'a> CommandParser<'a> {
             "left" => Some(MouseButton::Left),
             "right" => Some(MouseButton::Right),
             "center" => Some(MouseButton::Center),
+            _ => None,
+        }
+    }
+    pub(super) fn get_mouse_wheel(&self, index: usize) -> Option<MouseWheelDirection> {
+        if index >= self.count {
+            return None;
+        }
+        match self.params[index] {
+            "left" => Some(MouseWheelDirection::Left),
+            "right" => Some(MouseWheelDirection::Right),
+            "up" => Some(MouseWheelDirection::Up),
+            "down" => Some(MouseWheelDirection::Down),
             _ => None,
         }
     }

@@ -3,7 +3,7 @@ use super::{
     mouse_click_command::MouseClickCommand,
     mouse_hold_command::MouseHoldCommand,
     mouse_move_command::MouseMoveCommand,
-    mouse_release_command::MouseReleaseCommand, mouse_drag_command::MouseDragCommand,
+    mouse_release_command::MouseReleaseCommand, mouse_drag_command::MouseDragCommand, mouse_wheel_command::MouseWheelCommand,
 };
 
 pub(super) enum Command {
@@ -11,7 +11,8 @@ pub(super) enum Command {
     MouseRelease(MouseReleaseCommand),
     MouseClick(MouseClickCommand),
     MouseMove(MouseMoveCommand),
-    MouseDrag(MouseDragCommand)
+    MouseDrag(MouseDragCommand),
+    MouseWheel(MouseWheelCommand)
 }
 impl Command {
     pub(super) fn new(text: &str) -> Result<Command, ParserError> {
@@ -36,6 +37,10 @@ impl Command {
             "Mouse.Drag" => {
                 let variant = MouseDragCommand::new(&cp)?;
                 return Ok(Command::MouseDrag(variant));
+            }
+            "Mouse.Wheel" => {
+                let variant = MouseWheelCommand::new(&cp)?;
+                return Ok(Command::MouseWheel(variant));
             }
             _ => {
                 let mut s = String::from("Invalid/Unknwon command: ");
