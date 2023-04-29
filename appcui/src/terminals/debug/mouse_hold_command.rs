@@ -9,7 +9,7 @@ pub(super) struct MouseHoldCommand {
 }
 
 impl MouseHoldCommand {
-    fn new(parser: &CommandParser)->Result<Self,ParserError> {
+    pub(super) fn new(parser: &CommandParser)->Result<Self,ParserError> {
         if parser.get_params_count()!=3 {
             return Err(ParserError::new("Mouse.Hold command requires 3 parameters"));
         }

@@ -55,14 +55,14 @@ impl ParserError {
 #[derive(Debug)]
 pub(super) struct CommandParser<'a> {
     command: &'a str,
-    params: [&'a str; 3],
+    params: [&'a str; 4],
     count: usize,
 }
 impl<'a> CommandParser<'a> {
     pub(super) fn new(command: &'a str) -> Result<Self, ParserError> {
         let mut cp = Self {
             command: "",
-            params: ["", "", ""],
+            params: ["", "", "", ""],
             count: 0,
         };
         cp.parse(command)?;
@@ -150,6 +150,7 @@ impl<'a> CommandParser<'a> {
         self.params[0] = "";
         self.params[1] = "";
         self.params[2] = "";
+        self.params[3] = "";
         // first the comman
         poz = CommandParser::skip(buf, poz, CommandParser::is_space);
 
@@ -197,9 +198,9 @@ impl<'a> CommandParser<'a> {
                     return Ok(());
                 }
                 b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'-' => {
-                    if self.count >= 3 {
+                    if self.count >= 4 {
                         return Err(ParserError::from_parser(
-                            "Too many parameters (max allowed is 3)",
+                            "Too many parameters (max allowed is 4)",
                             command,
                             None,
                             None,
@@ -234,9 +235,9 @@ impl<'a> CommandParser<'a> {
                             Some(len),
                         ));
                     }
-                    if self.count >= 3 {
+                    if self.count >= 4 {
                         return Err(ParserError::from_parser(
-                            "Too many parameters (max allowed is 3)",
+                            "Too many parameters (max allowed is 4)",
                             command,
                             None,
                             None,
@@ -268,7 +269,7 @@ impl<'a> Default for CommandParser<'a> {
     fn default() -> Self {
         Self {
             command: "",
-            params: ["", "", ""],
+            params: ["", "", "", ""],
             count: 0,
         }
     }

@@ -63,12 +63,12 @@ fn test_multiple_params() {
 
 #[test]
 fn test_too_many_params() {
-    let command = "update(id,name,age,location)";
+    let command = "update(id,name,age,location,size)";
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
     assert_eq!(
         parser.unwrap_err().get_error(),
-        "Too many parameters (max allowed is 3)"
+        "Too many parameters (max allowed is 4)"
     );
 }
 
