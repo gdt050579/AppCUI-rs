@@ -67,7 +67,7 @@ fn test_too_many_params() {
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
     assert_eq!(
-        parser.unwrap_err(),
+        parser.unwrap_err().get_error(),
         "Too many parameters (max allowed is 3)"
     );
 }
@@ -77,7 +77,7 @@ fn test_missing_command() {
     let command = "";
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
-    assert_eq!(parser.unwrap_err(), "Expecting a command !");
+    assert_eq!(parser.unwrap_err().get_error(), "Expecting a valid command (not an empty line)");
 }
 
 #[test]
@@ -97,7 +97,7 @@ fn test_invalid_syntax() {
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
     assert_eq!(
-        parser.unwrap_err(),
+        parser.unwrap_err().get_error(),
         "Expecting a word but found ',' separator !"
     );
 }
@@ -107,7 +107,7 @@ fn test_invalid_character() {
     let command = "create( #user)";
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
-    assert_eq!(parser.unwrap_err(), "Invalid character (expecting a word)");
+    assert_eq!(parser.unwrap_err().get_error(), "Invalid character (expecting a word)");
 }
 
 #[test]
@@ -116,7 +116,7 @@ fn test_invalid_string() {
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
     assert_eq!(
-        parser.unwrap_err(),
+        parser.unwrap_err().get_error(),
         "Invalid string (no ending '\"' character found)"
     );
 }

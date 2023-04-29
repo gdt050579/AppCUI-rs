@@ -1,11 +1,55 @@
 #[derive(Debug)]
+pub(super) struct ParserError {
+    error: String,
+    line: String,
+    start: Option<usize>,
+    end: Option<usize>,
+}
+impl ParserError {
+    pub(super) fn new(error: &str, line: &str, start: Option<usize>, end: Option<usize>) -> Self {
+        Self {
+            error: String::from(error),
+            line: String::from(line),
+            start,
+            end,
+        }
+    }
+    pub(super) fn get_error(&self)->&str {
+        return &self.error.as_str();
+    }
+    pub(super) fn to_string(&self)->String {
+        let mut err = String::with_capacity(256);
+        err.push_str("Command parsing error: ");
+        err.push_str(self.error.as_str());
+        err.push_str("\n for line: \"");
+        err.push_str(self.line.as_str());
+        err.push_str("\"\n");
+        if let (Some(s), Some(e)) = (self.start, self.end) {
+            // add 12 spaces
+            for _ in 0..12 {
+                err.push(' ');
+            }
+            for (index, _) in self.line.as_str().char_indices() {
+                if (index >= s) && (index < e) {
+                    err.push('^');
+                } else {
+                    err.push(' ');
+                }
+            }
+            err.push('\n');
+        }
+        err
+    }
+}
+
+#[derive(Debug)]
 pub(super) struct CommandParser<'a> {
     command: &'a str,
     params: [&'a str; 3],
     count: usize,
 }
 impl<'a> CommandParser<'a> {
-    pub(super) fn new(command: &'a str) -> Result<Self, &'static str> {
+    pub(super) fn new(command: &'a str) -> Result<Self, ParserError> {
         let mut cp = Self {
             command: "",
             params: ["", "", ""],
@@ -56,7 +100,7 @@ impl<'a> CommandParser<'a> {
         }
         return Some(self.params[index]);
     }
-    pub(super) fn parse(&mut self, command: &'a str) -> Result<(), &'static str> {
+    pub(super) fn parse(&mut self, command: &'a str) -> Result<(), ParserError> {
         let buf = command.as_bytes();
         let len = buf.len();
         let mut poz = 0usize;
@@ -70,7 +114,12 @@ impl<'a> CommandParser<'a> {
         poz = CommandParser::skip(buf, poz, CommandParser::is_space);
 
         if poz >= len {
-            return Err("Expecting a command !");
+            return Err(ParserError::new(
+                "Expecting a valid command (not an empty line)",
+                command,
+                None,
+                None,
+            ));
         }
         let next = CommandParser::skip(buf, poz, CommandParser::is_command);
         self.command = &command[poz..next];
@@ -81,15 +130,26 @@ impl<'a> CommandParser<'a> {
         }
         // we expect '('
         if buf[poz] != b'(' {
-            return Err("Expecting '(' after the command !");
+            return Err(ParserError::new(
+                "Expecting '(' after the command !",
+                command,
+                Some(poz),
+                Some(poz + 1),
+            ));
         }
+        let parantheze_poz = poz;
         poz += 1;
         loop {
             // skip some spaces
             poz = CommandParser::skip(buf, poz, CommandParser::is_space);
             // if we reached the end of the code --> error
             if poz >= len {
-                return Err("Expecting ')' after the '(' ");
+                return Err(ParserError::new(
+                    "Expecting ')' after the '(' ",
+                    command,
+                    Some(parantheze_poz),
+                    Some(parantheze_poz + 1),
+                ));
             }
             match buf[poz] {
                 b')' => {
@@ -98,7 +158,12 @@ impl<'a> CommandParser<'a> {
                 }
                 b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'-' => {
                     if self.count >= 3 {
-                        return Err("Too many parameters (max allowed is 3)");
+                        return Err(ParserError::new(
+                            "Too many parameters (max allowed is 3)",
+                            command,
+                            None,
+                            None,
+                        ));
                     }
                     let next = CommandParser::skip(buf, poz, CommandParser::is_word);
                     self.params[self.count] = &command[poz..next];
@@ -107,7 +172,12 @@ impl<'a> CommandParser<'a> {
                     self.count += 1;
                 }
                 b',' => {
-                    return Err("Expecting a word but found ',' separator !");
+                    return Err(ParserError::new(
+                        "Expecting a word but found ',' separator !",
+                        command,
+                        Some(poz),
+                        Some(poz + 1),
+                    ));
                 }
                 b'"' | b'\'' => {
                     // search for the first string end
@@ -117,10 +187,20 @@ impl<'a> CommandParser<'a> {
                         next += 1;
                     }
                     if next >= len {
-                        return Err("Invalid string (no ending '\"' character found)");
+                        return Err(ParserError::new(
+                            "Invalid string (no ending '\"' character found)",
+                            command,
+                            Some(poz),
+                            Some(len),
+                        ));
                     }
                     if self.count >= 3 {
-                        return Err("Too many parameters (max allowed is 3)");
+                        return Err(ParserError::new(
+                            "Too many parameters (max allowed is 3)",
+                            command,
+                            None,
+                            None,
+                        ));
                     }
                     self.params[self.count] = &command[poz + 1..next];
                     //println!("FOUND STRING: {}", self.params[self.count]);
@@ -128,7 +208,12 @@ impl<'a> CommandParser<'a> {
                     self.count += 1;
                 }
                 _ => {
-                    return Err("Invalid character (expecting a word)");
+                    return Err(ParserError::new(
+                        "Invalid character (expecting a word)",
+                        command,
+                        Some(poz),
+                        Some(poz + 1),
+                    ));
                 }
             }
             // skip some spaces
