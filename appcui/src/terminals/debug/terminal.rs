@@ -1,6 +1,7 @@
 use super::super::Surface;
 use super::super::SystemEvent;
 use super::super::Terminal;
+use super::command::Command;
 use crate::graphics::Color;
 use crate::system::Error;
 use crate::system::InitializationData;
@@ -9,8 +10,25 @@ pub(crate) struct DebugTerminal {
     width: u32,
     height: u32,
     temp_str: String,
+    commands: Vec<Command>,
 }
 impl DebugTerminal {
+    fn build_commands(script: &str)->Result<Vec<Command>,Error> {
+        let mut v: Vec<Command> = Vec::with_capacity(16);
+        for line in script.lines() {
+            // skip empty lines
+            if line.trim().len()==0 {
+                continue;
+            }
+            match Command::new(line.trim()) {
+                Ok(cmd) => v.push(cmd),
+                Err(_) => {
+                    return Err(Error::ScriptParsingError)
+                }
+            }
+        }
+        Ok(v)
+    }
     pub(crate) fn create(data: &InitializationData) -> Result<Box<dyn Terminal>, Error> {
         let mut w = if data.size.is_none() {
             80
@@ -24,10 +42,12 @@ impl DebugTerminal {
         };
         w = w.clamp(10, 1000);
         h = h.clamp(10, 1000);
+        let commands = DebugTerminal::build_commands(data.debug_script.as_str())?;
         Ok(Box::new(DebugTerminal {
             width: w,
             height: h,
             temp_str: String::with_capacity((w * h) as usize),
+            commands,
         }))
     }
 }

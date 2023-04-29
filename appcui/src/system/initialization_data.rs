@@ -12,6 +12,7 @@ pub(crate) struct InitializationData {
     pub(crate) flags: InitializationFlags,
     pub(crate) size: Option<Size>,
     pub(crate) terminal: TerminalType,
+    pub(crate) debug_script: String,
 }
 
 impl InitializationData {
@@ -20,6 +21,7 @@ impl InitializationData {
             flags,
             size,
             terminal,
+            debug_script: String::new()
         }
     }
     pub(crate) fn with_flags(flags: InitializationFlags) -> Self {
@@ -27,6 +29,7 @@ impl InitializationData {
             flags,
             size: None,
             terminal: TerminalType::Default,
+            debug_script: String::new()
         }
     }
 }
@@ -36,6 +39,7 @@ impl Default for InitializationData {
             flags: InitializationFlags::None,
             size: None,
             terminal: TerminalType::Default,
+            debug_script: String::new()
         }
     }
 }

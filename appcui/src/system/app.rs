@@ -28,14 +28,15 @@ impl App {
     pub fn default() -> Result<Self, Error> {
         App::create(InitializationData::default())
     }
-    pub fn debug(width: u16, height: u16) -> Result<Self, Error> {
+    pub fn debug(width: u16, height: u16, flags: InitializationFlags, script: &str) -> Result<Self, Error> {
         let i = InitializationData {
-            flags: InitializationFlags::None,
+            flags,
             size: Some(Size {
                 width: width as u32,
                 height: height as u32,
             }),
             terminal: TerminalType::Debug,
+            debug_script: String::from(script),
         };
         App::create(i)
     }
