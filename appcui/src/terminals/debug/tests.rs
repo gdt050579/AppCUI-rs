@@ -18,3 +18,12 @@ fn check_command_parser_spaced() {
     assert_eq!(cp.get_param(1),Some("left"));
     assert_eq!(cp.get_param(2),Some("-200"));
 }
+#[test]
+fn check_command_parser_string() {
+    let cp = CommandParser::new("  run     (    'some string '  ,   left  ,   -200   )    ").unwrap();
+    assert_eq!(cp.get_command(),"run");
+    assert_eq!(cp.get_params_count(),3);
+    assert_eq!(cp.get_param(0),Some("some string "));
+    assert_eq!(cp.get_param(1),Some("left"));
+    assert_eq!(cp.get_param(2),Some("-200"));
+}

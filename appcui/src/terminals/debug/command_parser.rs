@@ -101,11 +101,30 @@ impl<'a> CommandParser<'a> {
                     }
                     let next = CommandParser::skip(buf, poz, CommandParser::is_word);
                     self.params[self.count] = &command[poz..next];
+                    //println!("FOUND WORD: {}", self.params[self.count]);
                     poz = next;
                     self.count += 1;
                 }
                 b',' => {
                     return Err("Expecting a word but found ',' separator !");
+                }
+                b'"' | b'\'' => {
+                    // search for the first string end
+                    let string_char = buf[poz];
+                    let mut next = poz + 1;
+                    while (next < len) && (buf[next] != string_char) {
+                        next += 1;
+                    }
+                    if next >= len {
+                        return Err("Invalid string (no ending '\"' character found)");
+                    }
+                    if self.count >= 3 {
+                        return Err("Too many parameters (max allowed is 3)");
+                    }
+                    self.params[self.count] = &command[poz + 1..next];
+                    //println!("FOUND STRING: {}", self.params[self.count]);
+                    poz = next + 1;
+                    self.count += 1;
                 }
                 _ => {
                     return Err("Invalid character (expecting a word)");
