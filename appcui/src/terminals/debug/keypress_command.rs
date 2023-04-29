@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
-    input::Key,
+    input::{Key, KeyCode, KeyModifier},
     terminals::{KeyPressedEvent, SystemEvent},
 };
 
@@ -44,14 +44,30 @@ impl KeyPressedCommand {
                 times: t.unwrap() as u32,
             })
         } else {
-            Ok(Self { key: k.unwrap(), times: 1 })
+            Ok(Self {
+                key: k.unwrap(),
+                times: 1,
+            })
         }
     }
     pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {
+        let mut ch = '\0';
+        if self.key.modifier == KeyModifier::None {
+            if ((self.key.code as u8) >= (KeyCode::A as u8))
+                && ((self.key.code as u8) <= (KeyCode::Z as u8))
+            {
+                ch = ((('a' as u32) + (self.key.code as u32) - (KeyCode::A as u32)) as u8) as char;
+            }
+            if ((self.key.code as u8) >= (KeyCode::N0 as u8))
+                && ((self.key.code as u8) <= (KeyCode::N9 as u8))
+            {
+                ch = ((('0' as u32) + (self.key.code as u32) - (KeyCode::N0 as u32)) as u8) as char;
+            }
+        }
         for _ in 0..self.times {
             sys_events.push_back(SystemEvent::KeyPressed(KeyPressedEvent {
                 key: self.key,
-                character: '\0',
+                character: ch,
             }));
         }
     }
