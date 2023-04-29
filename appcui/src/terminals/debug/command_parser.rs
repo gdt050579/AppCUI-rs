@@ -8,12 +8,20 @@ pub(super) struct ParserError {
     end: Option<usize>,
 }
 impl ParserError {
-    pub(super) fn new(error: &str, line: &str, start: Option<usize>, end: Option<usize>) -> Self {
+    pub(super) fn from_parser(error: &str, line: &str, start: Option<usize>, end: Option<usize>) -> Self {
         Self {
             error: String::from(error),
             line: String::from(line),
             start,
             end,
+        }
+    }
+    pub(super) fn new(error: &str) -> Self {
+        Self {
+            error: String::from(error),
+            line: String::new(),
+            start: None,
+            end: None,
         }
     }
     pub(super) fn get_error(&self) -> &str {
@@ -146,7 +154,7 @@ impl<'a> CommandParser<'a> {
         poz = CommandParser::skip(buf, poz, CommandParser::is_space);
 
         if poz >= len {
-            return Err(ParserError::new(
+            return Err(ParserError::from_parser(
                 "Expecting a valid command (not an empty line)",
                 command,
                 None,
@@ -162,7 +170,7 @@ impl<'a> CommandParser<'a> {
         }
         // we expect '('
         if buf[poz] != b'(' {
-            return Err(ParserError::new(
+            return Err(ParserError::from_parser(
                 "Expecting '(' after the command !",
                 command,
                 Some(poz),
@@ -176,7 +184,7 @@ impl<'a> CommandParser<'a> {
             poz = CommandParser::skip(buf, poz, CommandParser::is_space);
             // if we reached the end of the code --> error
             if poz >= len {
-                return Err(ParserError::new(
+                return Err(ParserError::from_parser(
                     "Expecting ')' after the '(' ",
                     command,
                     Some(parantheze_poz),
@@ -190,7 +198,7 @@ impl<'a> CommandParser<'a> {
                 }
                 b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'-' => {
                     if self.count >= 3 {
-                        return Err(ParserError::new(
+                        return Err(ParserError::from_parser(
                             "Too many parameters (max allowed is 3)",
                             command,
                             None,
@@ -204,7 +212,7 @@ impl<'a> CommandParser<'a> {
                     self.count += 1;
                 }
                 b',' => {
-                    return Err(ParserError::new(
+                    return Err(ParserError::from_parser(
                         "Expecting a word but found ',' separator !",
                         command,
                         Some(poz),
@@ -219,7 +227,7 @@ impl<'a> CommandParser<'a> {
                         next += 1;
                     }
                     if next >= len {
-                        return Err(ParserError::new(
+                        return Err(ParserError::from_parser(
                             "Invalid string (no ending '\"' character found)",
                             command,
                             Some(poz),
@@ -227,7 +235,7 @@ impl<'a> CommandParser<'a> {
                         ));
                     }
                     if self.count >= 3 {
-                        return Err(ParserError::new(
+                        return Err(ParserError::from_parser(
                             "Too many parameters (max allowed is 3)",
                             command,
                             None,
@@ -240,7 +248,7 @@ impl<'a> CommandParser<'a> {
                     self.count += 1;
                 }
                 _ => {
-                    return Err(ParserError::new(
+                    return Err(ParserError::from_parser(
                         "Invalid character (expecting a word)",
                         command,
                         Some(poz),
