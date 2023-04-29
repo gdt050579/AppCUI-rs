@@ -50,6 +50,10 @@ impl Command {
                 let variant = MouseWheelCommand::new(&cp)?;
                 return Ok(Command::MouseWheel(variant));
             }
+            "Paint" => {
+                let variant = PaintCommand::new(&cp)?;
+                return Ok(Command::Paint(variant));
+            }
             _ => {
                 let mut s = String::from("Invalid/Unknwon command: ");
                 s += cp.get_command();
