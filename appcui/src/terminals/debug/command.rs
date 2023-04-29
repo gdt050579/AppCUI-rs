@@ -57,9 +57,9 @@ impl Command {
         match self {
             Command::MouseHold(cmd) => cmd.generate_event(sys_events),
             Command::MouseRelease(cmd) => cmd.generate_event(sys_events),
-            Command::MouseClick(_) => todo!(),
+            Command::MouseClick(cmd) => cmd.generate_event(sys_events),
             Command::MouseMove(cmd) => cmd.generate_event(sys_events),
-            Command::MouseDrag(_) => todo!(),
+            Command::MouseDrag(cmd) => cmd.generate_event(sys_events),
             Command::MouseWheel(cmd) => cmd.generate_event(sys_events),
         }
     }

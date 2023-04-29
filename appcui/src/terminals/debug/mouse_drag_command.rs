@@ -1,4 +1,6 @@
-use crate::input::MouseButton;
+use std::collections::VecDeque;
+
+use crate::{input::MouseButton, terminals::{SystemEvent, MouseButtonUpEvent, MouseButtonDownEvent, MouseMoveEvent}};
 
 use super::command_parser::{CommandParser, ParserError};
 
@@ -36,5 +38,22 @@ impl MouseDragCommand {
             x2: x2.unwrap(),
             y2: y2.unwrap(),
         })
+    }
+    pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {
+        sys_events.push_back(SystemEvent::MouseButtonDown(MouseButtonDownEvent {
+            x: self.x1,
+            y: self.y1,
+            button: MouseButton::Left,
+        }));
+        sys_events.push_back(SystemEvent::MouseMove(MouseMoveEvent {
+            x: self.x2,
+            y: self.y2,
+            button: MouseButton::Left,
+        }));
+        sys_events.push_back(SystemEvent::MouseButtonUp(MouseButtonUpEvent {
+            x: self.x2,
+            y: self.y2,
+            button: MouseButton::None,
+        }));
     }
 }
