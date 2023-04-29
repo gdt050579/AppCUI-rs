@@ -1,3 +1,5 @@
+use crate::input::MouseButton;
+
 #[derive(Debug)]
 pub(super) struct ParserError {
     error: String,
@@ -107,6 +109,17 @@ impl<'a> CommandParser<'a> {
         match self.params[index] {
             "true" => Some(true),
             "false" => Some(false),
+            _ => None,
+        }
+    }
+    pub(super) fn get_mouse_button(&self, index: usize) -> Option<MouseButton> {
+        if index >= self.count {
+            return None;
+        }
+        match self.params[index] {
+            "left" => Some(MouseButton::Left),
+            "right" => Some(MouseButton::Right),
+            "center" => Some(MouseButton::Center),
             _ => None,
         }
     }
