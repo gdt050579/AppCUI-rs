@@ -3,6 +3,7 @@ mod command_parser;
 mod mouse_hold_command;
 mod mouse_release_command;
 mod mouse_click_command;
+mod mouse_move_command;
 mod command;
 
 #[cfg(test)]

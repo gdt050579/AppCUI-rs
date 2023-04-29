@@ -20,7 +20,7 @@ impl MouseHoldCommand {
             return Err(ParserError::new("First parameter for Mouse.Hold command should an integer (x value)"));
         }
         if y.is_none() {
-            return Err(ParserError::new("Seconf parameter for Mouse.Hold command should an integer (y value)"));
+            return Err(ParserError::new("Second parameter for Mouse.Hold command should an integer (y value)"));
         }
         if b.is_none() {
             return Err(ParserError::new("Third parameter for Mouse.Hold command should an mouse button (left, right or cente)"));
