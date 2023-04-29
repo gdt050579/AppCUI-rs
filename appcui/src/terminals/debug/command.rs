@@ -60,7 +60,7 @@ impl Command {
             Command::MouseClick(_) => todo!(),
             Command::MouseMove(cmd) => cmd.generate_event(sys_events),
             Command::MouseDrag(_) => todo!(),
-            Command::MouseWheel(_) => todo!(),
+            Command::MouseWheel(cmd) => cmd.generate_event(sys_events),
         }
     }
 }
