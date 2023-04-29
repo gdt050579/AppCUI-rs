@@ -1,4 +1,6 @@
-use crate::input::MouseButton;
+use std::collections::VecDeque;
+
+use crate::{input::MouseButton, terminals::{SystemEvent, MouseMoveEvent}};
 
 use super::command_parser::{CommandParser, ParserError};
 
@@ -24,5 +26,12 @@ impl MouseMoveCommand {
             x: x.unwrap(),
             y: y.unwrap(),
         })
+    }
+    pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {
+        sys_events.push_back(SystemEvent::MouseMove(MouseMoveEvent {
+            x: self.x,
+            y: self.y,
+            button: MouseButton::None,
+        }));
     }
 }
