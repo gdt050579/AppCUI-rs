@@ -30,6 +30,7 @@ impl<'a> CommandParser<'a> {
             b'A'..=b'Z' => true,
             b'.' => true,
             b'_' => true,
+            b'-' => true,
             b'0'..=b'9' => true,
             _ => false,
         }
@@ -47,6 +48,12 @@ impl<'a> CommandParser<'a> {
     }
     pub(super) fn get_params_count(&self) -> usize {
         self.count
+    }
+    pub(super) fn get_param(&self, index: usize) -> Option<&'a str> {
+        if index >= self.count {
+            return None;
+        }
+        return Some(self.params[index]);
     }
     pub(super) fn parse(&mut self, command: &'a str) -> Result<(), &'static str> {
         let buf = command.as_bytes();
@@ -88,7 +95,7 @@ impl<'a> CommandParser<'a> {
                     // found the ending ')'
                     return Ok(());
                 }
-                b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' => {
+                b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'-' => {
                     if self.count >= 3 {
                         return Err("Too many parameters (max allowed is 3)");
                     }
