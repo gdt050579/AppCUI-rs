@@ -1,5 +1,6 @@
 use super::{
     command_parser::{CommandParser, ParserError},
+    mouse_click_command::MouseClickCommand,
     mouse_hold_command::MouseHoldCommand,
     mouse_release_command::MouseReleaseCommand,
 };
@@ -7,6 +8,7 @@ use super::{
 pub(super) enum Command {
     MouseHold(MouseHoldCommand),
     MouseRelease(MouseReleaseCommand),
+    MouseClick(MouseClickCommand),
 }
 impl Command {
     pub(super) fn new(text: &str) -> Result<Command, ParserError> {
@@ -15,10 +17,14 @@ impl Command {
             "Mouse.Hold" => {
                 let variant = MouseHoldCommand::new(&cp)?;
                 return Ok(Command::MouseHold(variant));
-            },
+            }
             "Mouse.Release" => {
                 let variant = MouseReleaseCommand::new(&cp)?;
                 return Ok(Command::MouseRelease(variant));
+            }
+            "Mouse.Click" => {
+                let variant = MouseClickCommand::new(&cp)?;
+                return Ok(Command::MouseClick(variant));
             }
             _ => {
                 let mut s = String::from("Invalid/Unknwon command: ");
