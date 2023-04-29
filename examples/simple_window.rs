@@ -4,9 +4,9 @@ use appcui::system::*;
 use appcui::terminals::TerminalType;
 
 fn main() -> Result<(), appcui::system::Error> {
-    //let mut a = App::debug(60,20)?;
+    let mut a = App::debug(60,20,InitializationFlags::None,"")?;
     //let mut a = App::default()?;
-    let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
+    //let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
     let mut w = Window::new(
         "Simple window",
         Layout::new("d:c,w:40,h:10"),

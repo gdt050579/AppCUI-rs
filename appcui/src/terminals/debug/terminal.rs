@@ -7,27 +7,28 @@ use super::command::Command;
 use crate::graphics::Color;
 use crate::system::Error;
 use crate::system::InitializationData;
+use crate::system::RuntimeManager;
 
 pub(crate) struct DebugTerminal {
     width: u32,
     height: u32,
     temp_str: String,
     commands: VecDeque<Command>,
-    sys_events: VecDeque<SystemEvent>,  
+    sys_events: VecDeque<SystemEvent>,
+    paint: bool,
+    paint_title: String,
 }
 impl DebugTerminal {
-    fn build_commands(script: &str)->Result<VecDeque<Command>,Error> {
+    fn build_commands(script: &str) -> Result<VecDeque<Command>, Error> {
         let mut v: VecDeque<Command> = VecDeque::with_capacity(16);
         for line in script.lines() {
             // skip empty lines
-            if line.trim().len()==0 {
+            if line.trim().len() == 0 {
                 continue;
             }
             match Command::new(line.trim()) {
                 Ok(cmd) => v.push_back(cmd),
-                Err(_) => {
-                    return Err(Error::ScriptParsingError)
-                }
+                Err(_) => return Err(Error::ScriptParsingError),
             }
         }
         Ok(v)
@@ -52,6 +53,8 @@ impl DebugTerminal {
             temp_str: String::with_capacity((w * h) as usize),
             commands,
             sys_events: VecDeque::with_capacity(8),
+            paint: false,
+            paint_title: String::new(),
         }))
     }
     fn forecolor_to_str(col: Color) -> &'static str {
@@ -72,7 +75,7 @@ impl DebugTerminal {
             Color::Pink => "95",
             Color::Aqua => "96",
             Color::White => "97",
-            _ => "37", /* default is white */          
+            _ => "37", /* default is white */
         }
     }
     fn backcolor_to_str(col: Color) -> &'static str {
@@ -93,19 +96,27 @@ impl DebugTerminal {
             Color::Pink => "105",
             Color::Aqua => "106",
             Color::White => "107",
-            _ => "40", /* default is black */          
+            _ => "40", /* default is black */
         }
     }
 }
 impl Terminal for DebugTerminal {
     fn update_screen(&mut self, surface: &Surface) {
+        // only paint if requested
+        if !self.paint {
+            return;
+        }
+        self.paint = false;
+        println!("\nPaint: {} -> Hash: {}",&self.paint_title,0);
         self.temp_str.clear();
         let mut x = 0u32;
         for ch in &surface.chars {
             self.temp_str.push_str("\x1b[");
-            self.temp_str.push_str(DebugTerminal::forecolor_to_str(ch.foreground));
+            self.temp_str
+                .push_str(DebugTerminal::forecolor_to_str(ch.foreground));
             self.temp_str.push(';');
-            self.temp_str.push_str(DebugTerminal::backcolor_to_str(ch.background));
+            self.temp_str
+                .push_str(DebugTerminal::backcolor_to_str(ch.background));
             self.temp_str.push_str("m");
             if ch.code < ' ' {
                 self.temp_str.push(' ');
@@ -140,7 +151,7 @@ impl Terminal for DebugTerminal {
                 SystemEvent::Resize(new_size) => {
                     self.width = new_size.width;
                     self.height = new_size.height;
-                },
+                }
                 _ => {}
             }
             return event;
@@ -148,6 +159,11 @@ impl Terminal for DebugTerminal {
         // if no events are in the event queue --> check if a command is present
         if let Some(cmd) = self.commands.pop_front() {
             cmd.generate_event(&mut self.sys_events);
+            if let Some(title) = cmd.get_paint_command_title() {
+                self.paint_title = title;
+                RuntimeManager::get().request_repaint();
+                self.paint = true;
+            }
             return SystemEvent::None;
         }
 
