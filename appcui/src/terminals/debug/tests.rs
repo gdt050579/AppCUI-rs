@@ -131,3 +131,13 @@ fn check_command_parser_bool_params() {
     assert_eq!(cp.get_bool(1), Some(true));
     assert_eq!(cp.get_bool(2), Some(false));
 }
+
+#[test]
+fn check_command_parser_i32_params() {
+    let cp = CommandParser::new("  validate(123,-1276,false)").unwrap();
+    assert_eq!(cp.get_command(), "validate");
+    assert_eq!(cp.get_params_count(), 3);
+    assert_eq!(cp.get_i32(0), Some(123));
+    assert_eq!(cp.get_i32(1), Some(-1276));
+    assert_eq!(cp.get_i32(2), None);
+}

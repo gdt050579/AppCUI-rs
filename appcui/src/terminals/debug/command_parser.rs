@@ -14,10 +14,10 @@ impl ParserError {
             end,
         }
     }
-    pub(super) fn get_error(&self)->&str {
+    pub(super) fn get_error(&self) -> &str {
         return &self.error.as_str();
     }
-    pub(super) fn to_string(&self)->String {
+    pub(super) fn to_string(&self) -> String {
         let mut err = String::with_capacity(256);
         err.push_str("Command parsing error: ");
         err.push_str(self.error.as_str());
@@ -100,15 +100,24 @@ impl<'a> CommandParser<'a> {
         }
         return Some(self.params[index]);
     }
-    pub(super) fn get_bool(&self, index:usize)->Option<bool> {
+    pub(super) fn get_bool(&self, index: usize) -> Option<bool> {
         if index >= self.count {
             return None;
         }
         match self.params[index] {
             "true" => Some(true),
             "false" => Some(false),
-            _ => None
-        }      
+            _ => None,
+        }
+    }
+    pub(super) fn get_i32(&self, index: usize) -> Option<i32> {
+        if index >= self.count {
+            return None;
+        }
+        if let Ok(value) = self.params[index].parse::<i32>() {
+            return Some(value);
+        }
+        return None;
     }
     pub(super) fn parse(&mut self, command: &'a str) -> Result<(), ParserError> {
         let buf = command.as_bytes();
