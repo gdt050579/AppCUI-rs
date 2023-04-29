@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
-    input::{MouseButton, MouseWheelDirection},
+    input::{MouseWheelDirection},
     terminals::{MouseWheelEvent, SystemEvent},
 };
 

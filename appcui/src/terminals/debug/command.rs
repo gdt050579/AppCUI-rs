@@ -1,4 +1,4 @@
-use std::collections::{VecDeque, btree_map::IterMut};
+use std::collections::{VecDeque};
 
 use crate::terminals::SystemEvent;
 
