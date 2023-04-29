@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub(super) struct CommandParser<'a> {
     command: &'a str,
     params: [&'a str; 3],
