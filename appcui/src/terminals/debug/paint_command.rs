@@ -6,7 +6,7 @@ pub(super) struct PaintCommand {
 
 impl PaintCommand {
     pub(super) fn new(parser: &CommandParser) -> Result<Self, ParserError> {
-        if parser.get_params_count() <= 1 {
+        if parser.get_params_count() > 1 {
             return Err(ParserError::new("Paint command has one or no parameters !"));
         }
         if parser.get_params_count() == 1 {

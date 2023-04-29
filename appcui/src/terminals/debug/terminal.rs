@@ -19,7 +19,7 @@ pub(crate) struct DebugTerminal {
     paint_title: String,
 }
 impl DebugTerminal {
-    fn build_commands(script: &str) -> Result<VecDeque<Command>, Error> {
+    fn build_commands(script: &str) -> VecDeque<Command> {
         let mut v: VecDeque<Command> = VecDeque::with_capacity(16);
         for line in script.lines() {
             // skip empty lines
@@ -28,10 +28,13 @@ impl DebugTerminal {
             }
             match Command::new(line.trim()) {
                 Ok(cmd) => v.push_back(cmd),
-                Err(_) => return Err(Error::ScriptParsingError),
+                Err(err) => {
+                    println!("{}",err.to_string());
+                    panic!()
+                },
             }
         }
-        Ok(v)
+        v
     }
     pub(crate) fn create(data: &InitializationData) -> Result<Box<dyn Terminal>, Error> {
         let mut w = if data.size.is_none() {
@@ -46,7 +49,7 @@ impl DebugTerminal {
         };
         w = w.clamp(10, 1000);
         h = h.clamp(10, 1000);
-        let commands = DebugTerminal::build_commands(data.debug_script.as_str())?;
+        let commands = DebugTerminal::build_commands(data.debug_script.as_str());
         Ok(Box::new(DebugTerminal {
             width: w,
             height: h,

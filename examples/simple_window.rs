@@ -4,7 +4,14 @@ use appcui::system::*;
 use appcui::terminals::TerminalType;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::debug(60,20,InitializationFlags::None,"")?;
+    let script = "
+        Key.Pressed(Tab)
+        Paint('all checkboxes are checked')
+        Key.Pressed(Enter)
+        Resize(50,16)
+        Paint('Checkbox is not checked')
+    ";
+    let mut a = App::debug(60,20,InitializationFlags::None,script)?;
     //let mut a = App::default()?;
     //let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
     let mut w = Window::new(
