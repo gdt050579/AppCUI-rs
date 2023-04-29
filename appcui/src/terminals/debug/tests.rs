@@ -120,3 +120,14 @@ fn test_invalid_string() {
         "Invalid string (no ending '\"' character found)"
     );
 }
+
+
+#[test]
+fn check_command_parser_bool_params() {
+    let cp = CommandParser::new("  validate(1,true,false)").unwrap();
+    assert_eq!(cp.get_command(), "validate");
+    assert_eq!(cp.get_params_count(), 3);
+    assert_eq!(cp.get_bool(0), None);
+    assert_eq!(cp.get_bool(1), Some(true));
+    assert_eq!(cp.get_bool(2), Some(false));
+}

@@ -100,6 +100,16 @@ impl<'a> CommandParser<'a> {
         }
         return Some(self.params[index]);
     }
+    pub(super) fn get_bool(&self, index:usize)->Option<bool> {
+        if index >= self.count {
+            return None;
+        }
+        match self.params[index] {
+            "true" => Some(true),
+            "false" => Some(false),
+            _ => None
+        }      
+    }
     pub(super) fn parse(&mut self, command: &'a str) -> Result<(), ParserError> {
         let buf = command.as_bytes();
         let len = buf.len();
