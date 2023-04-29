@@ -12,7 +12,7 @@ pub(super) struct ResizeCommand {
 impl ResizeCommand {
     pub(super) fn new(parser: &CommandParser) -> Result<Self, ParserError> {
         if parser.get_params_count() != 2 {
-            return Err(ParserError::new("Resize command requires 32 parameters"));
+            return Err(ParserError::new("Resize command requires 2 parameters (width and height)"));
         }
         let w = parser.get_i32(0);
         let h = parser.get_i32(1);

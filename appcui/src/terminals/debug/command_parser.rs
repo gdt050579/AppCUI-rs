@@ -1,4 +1,4 @@
-use crate::input::{MouseButton, MouseWheelDirection};
+use crate::input::{MouseButton, MouseWheelDirection, Key, KeyModifier, KeyCode};
 
 #[derive(Debug)]
 pub(super) struct ParserError {
@@ -119,6 +119,85 @@ impl<'a> CommandParser<'a> {
             "false" => Some(false),
             _ => None,
         }
+    }
+    pub(super) fn get_key(&self, index: usize) -> Option<Key> {
+        if index >= self.count {
+            return None;
+        }
+        let mut k = Key::default();
+        for part in self.params[index].split('+') {
+            match part {
+                "Ctrl" => k.modifier |= KeyModifier::Ctrl,
+                "Alt" => k.modifier |= KeyModifier::Alt,
+                "Shift" => k.modifier |= KeyModifier::Shift,
+                "F1" => k.code = KeyCode::F1,
+                "F2" => k.code = KeyCode::F2,
+                "F3" => k.code = KeyCode::F3,
+                "F4" => k.code = KeyCode::F4,
+                "F5" => k.code = KeyCode::F5,
+                "F6" => k.code = KeyCode::F6,
+                "F7" => k.code = KeyCode::F7,
+                "F8" => k.code = KeyCode::F8,
+                "F9" => k.code = KeyCode::F9,
+                "F10" => k.code = KeyCode::F10,
+                "F11" => k.code = KeyCode::F11,
+                "F12" => k.code = KeyCode::F12,
+                "Enter" => k.code = KeyCode::Enter,
+                "Escape" => k.code = KeyCode::Escape,
+                "Insert" => k.code = KeyCode::Insert,
+                "Delete" => k.code = KeyCode::Delete,
+                "Backspace" => k.code = KeyCode::Backspace,
+                "Tab" => k.code = KeyCode::Tab,
+                "Left" => k.code = KeyCode::Left,
+                "Up" => k.code = KeyCode::Up,
+                "Down" => k.code = KeyCode::Down,
+                "Right" => k.code = KeyCode::Right,
+                "PageUp" => k.code = KeyCode::PageUp,
+                "PageDown" => k.code = KeyCode::PageDown,
+                "Home" => k.code = KeyCode::Home,
+                "End" => k.code = KeyCode::End,
+                "Space" => k.code = KeyCode::Space,
+                "A" => k.code = KeyCode::A,
+                "B" => k.code = KeyCode::B,
+                "C" => k.code = KeyCode::C,
+                "D" => k.code = KeyCode::D,
+                "E" => k.code = KeyCode::E,
+                "F" => k.code = KeyCode::F,
+                "G" => k.code = KeyCode::G,
+                "H" => k.code = KeyCode::H,
+                "I" => k.code = KeyCode::I,
+                "J" => k.code = KeyCode::J,
+                "K" => k.code = KeyCode::K,
+                "L" => k.code = KeyCode::L,
+                "M" => k.code = KeyCode::M,
+                "N" => k.code = KeyCode::N,
+                "O" => k.code = KeyCode::O,
+                "P" => k.code = KeyCode::P,
+                "Q" => k.code = KeyCode::Q,
+                "R" => k.code = KeyCode::R,
+                "S" => k.code = KeyCode::S,
+                "T" => k.code = KeyCode::T,
+                "U" => k.code = KeyCode::U,
+                "V" => k.code = KeyCode::V,
+                "W" => k.code = KeyCode::W,
+                "X" => k.code = KeyCode::X,
+                "Y" => k.code = KeyCode::Y,
+                "Z" => k.code = KeyCode::Z,
+                "0" => k.code = KeyCode::N0,
+                "1" => k.code = KeyCode::N1,
+                "2" => k.code = KeyCode::N2,
+                "3" => k.code = KeyCode::N3,
+                "4" => k.code = KeyCode::N4,
+                "5" => k.code = KeyCode::N5,
+                "6" => k.code = KeyCode::N6,
+                "7" => k.code = KeyCode::N7,
+                "8" => k.code = KeyCode::N8,
+                "9" => k.code = KeyCode::N9,
+                _ => { return None; }
+            }
+
+        }   
+        Some(k)   
     }
     pub(super) fn get_mouse_button(&self, index: usize) -> Option<MouseButton> {
         if index >= self.count {
