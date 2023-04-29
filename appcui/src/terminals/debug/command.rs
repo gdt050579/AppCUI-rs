@@ -1,3 +1,7 @@
+use std::collections::{VecDeque, btree_map::IterMut};
+
+use crate::terminals::SystemEvent;
+
 use super::{
     command_parser::{CommandParser, ParserError},
     mouse_click_command::MouseClickCommand,
@@ -47,6 +51,16 @@ impl Command {
                 s += cp.get_command();
                 return Err(ParserError::new(&s));
             }
+        }
+    }
+    pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {
+        match self {
+            Command::MouseHold(cmd) => cmd.generate_event(sys_events),
+            Command::MouseRelease(cmd) => cmd.generate_event(sys_events),
+            Command::MouseClick(_) => todo!(),
+            Command::MouseMove(_) => todo!(),
+            Command::MouseDrag(_) => todo!(),
+            Command::MouseWheel(_) => todo!(),
         }
     }
 }

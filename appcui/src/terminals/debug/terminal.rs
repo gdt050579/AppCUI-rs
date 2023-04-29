@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use super::super::Surface;
 use super::super::SystemEvent;
 use super::super::Terminal;
@@ -10,18 +12,19 @@ pub(crate) struct DebugTerminal {
     width: u32,
     height: u32,
     temp_str: String,
-    commands: Vec<Command>,
+    commands: VecDeque<Command>,
+    sys_events: VecDeque<SystemEvent>,  
 }
 impl DebugTerminal {
-    fn build_commands(script: &str)->Result<Vec<Command>,Error> {
-        let mut v: Vec<Command> = Vec::with_capacity(16);
+    fn build_commands(script: &str)->Result<VecDeque<Command>,Error> {
+        let mut v: VecDeque<Command> = VecDeque::with_capacity(16);
         for line in script.lines() {
             // skip empty lines
             if line.trim().len()==0 {
                 continue;
             }
             match Command::new(line.trim()) {
-                Ok(cmd) => v.push(cmd),
+                Ok(cmd) => v.push_back(cmd),
                 Err(_) => {
                     return Err(Error::ScriptParsingError)
                 }
@@ -48,7 +51,50 @@ impl DebugTerminal {
             height: h,
             temp_str: String::with_capacity((w * h) as usize),
             commands,
+            sys_events: VecDeque::with_capacity(8),
         }))
+    }
+    fn forecolor_to_str(col: Color) -> &'static str {
+        match col {
+            Color::Black => "30",
+            Color::DarkRed => "31",
+            Color::DarkGreen => "32",
+            Color::Olive => "33",
+            Color::DarkBlue => "34",
+            Color::Magenta => "35",
+            Color::Teal => "36",
+            Color::Silver => "37",
+            Color::Gray => "90",
+            Color::Red => "91",
+            Color::Green => "92",
+            Color::Yellow => "93",
+            Color::Blue => "94",
+            Color::Pink => "95",
+            Color::Aqua => "96",
+            Color::White => "97",
+            _ => "37", /* default is white */          
+        }
+    }
+    fn backcolor_to_str(col: Color) -> &'static str {
+        match col {
+            Color::Black => "40",
+            Color::DarkRed => "41",
+            Color::DarkGreen => "42",
+            Color::Olive => "43",
+            Color::DarkBlue => "44",
+            Color::Magenta => "45",
+            Color::Teal => "46",
+            Color::Silver => "47",
+            Color::Gray => "100",
+            Color::Red => "101",
+            Color::Green => "102",
+            Color::Yellow => "103",
+            Color::Blue => "104",
+            Color::Pink => "105",
+            Color::Aqua => "106",
+            Color::White => "107",
+            _ => "40", /* default is black */          
+        }
     }
 }
 impl Terminal for DebugTerminal {
@@ -57,45 +103,9 @@ impl Terminal for DebugTerminal {
         let mut x = 0u32;
         for ch in &surface.chars {
             self.temp_str.push_str("\x1b[");
-            match ch.foreground {
-                Color::Black => self.temp_str.push_str("30"),
-                Color::DarkRed => self.temp_str.push_str("31"),
-                Color::DarkGreen => self.temp_str.push_str("32"),
-                Color::Olive => self.temp_str.push_str("33"),
-                Color::DarkBlue => self.temp_str.push_str("34"),
-                Color::Magenta => self.temp_str.push_str("35"),
-                Color::Teal => self.temp_str.push_str("36"),
-                Color::Silver => self.temp_str.push_str("37"),
-                Color::Gray => self.temp_str.push_str("90"),
-                Color::Red => self.temp_str.push_str("91"),
-                Color::Green => self.temp_str.push_str("92"),
-                Color::Yellow => self.temp_str.push_str("93"),
-                Color::Blue => self.temp_str.push_str("94"),
-                Color::Pink => self.temp_str.push_str("95"),
-                Color::Aqua => self.temp_str.push_str("96"),
-                Color::White => self.temp_str.push_str("97"),
-                _ => self.temp_str.push_str("37"), /* default is white */
-            }
+            self.temp_str.push_str(DebugTerminal::forecolor_to_str(ch.foreground));
             self.temp_str.push(';');
-            match ch.background {
-                Color::Black => self.temp_str.push_str("40"),
-                Color::DarkRed => self.temp_str.push_str("41"),
-                Color::DarkGreen => self.temp_str.push_str("42"),
-                Color::Olive => self.temp_str.push_str("43"),
-                Color::DarkBlue => self.temp_str.push_str("44"),
-                Color::Magenta => self.temp_str.push_str("45"),
-                Color::Teal => self.temp_str.push_str("46"),
-                Color::Silver => self.temp_str.push_str("47"),
-                Color::Gray => self.temp_str.push_str("100"),
-                Color::Red => self.temp_str.push_str("101"),
-                Color::Green => self.temp_str.push_str("102"),
-                Color::Yellow => self.temp_str.push_str("103"),
-                Color::Blue => self.temp_str.push_str("104"),
-                Color::Pink => self.temp_str.push_str("105"),
-                Color::Aqua => self.temp_str.push_str("106"),
-                Color::White => self.temp_str.push_str("107"),
-                _ => self.temp_str.push_str("40"), /* default is white */
-            }
+            self.temp_str.push_str(DebugTerminal::backcolor_to_str(ch.background));
             self.temp_str.push_str("m");
             if ch.code < ' ' {
                 self.temp_str.push(' ');
@@ -124,6 +134,24 @@ impl Terminal for DebugTerminal {
         self.height = new_size.height;
     }
     fn get_system_event(&mut self) -> SystemEvent {
-        SystemEvent::None
+        // if there is any event in the que --> return that event
+        if let Some(event) = self.sys_events.pop_front() {
+            match event {
+                SystemEvent::Resize(new_size) => {
+                    self.width = new_size.width;
+                    self.height = new_size.height;
+                },
+                _ => {}
+            }
+            return event;
+        }
+        // if no events are in the event queue --> check if a command is present
+        if let Some(cmd) = self.commands.pop_front() {
+            cmd.generate_event(&mut self.sys_events);
+            return SystemEvent::None;
+        }
+
+        // if nothing else works, close the app (script has finished)
+        return SystemEvent::AppClose;
     }
 }
