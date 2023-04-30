@@ -17,6 +17,7 @@ pub(crate) struct DebugTerminal {
     sys_events: VecDeque<SystemEvent>,
     paint: bool,
     paint_title: String,
+    suface_hash: u64,
 }
 impl DebugTerminal {
     fn build_commands(script: &str) -> VecDeque<Command> {
@@ -58,6 +59,7 @@ impl DebugTerminal {
             sys_events: VecDeque::with_capacity(8),
             paint: false,
             paint_title: String::new(),
+            suface_hash: 0
         }))
     }
     fn forecolor_to_str(col: Color) -> &'static str {
@@ -78,7 +80,7 @@ impl DebugTerminal {
             Color::Pink => "95",
             Color::Aqua => "96",
             Color::White => "97",
-            _ => "37", /* default is white */
+            _ => "37", /* default is silver */
         }
     }
     fn backcolor_to_str(col: Color) -> &'static str {
@@ -102,15 +104,36 @@ impl DebugTerminal {
             _ => "40", /* default is black */
         }
     }
+    fn update_surface_hash(&mut self, surface: &Surface)  {
+        // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+        let mut hash = 0xcbf29ce484222325u64;
+        let mut buf = [0u8; 8];
+        for ch in &surface.chars {
+            buf[0] = ((ch.code as u32) & 0xFF) as u8;
+            buf[1] = (((ch.code as u32) >> 8) & 0xFF) as u8;
+            buf[2] = (((ch.code as u32) >> 16) & 0xFF) as u8;
+            buf[3] = (((ch.code as u32) >> 24) & 0xFF) as u8;
+            buf[4] = ch.foreground as u8;
+            buf[5] = ch.background as u8;
+            buf[6] = ((ch.flags.get_value() >> 8) & 0xFF) as u8;
+            buf[7] = (ch.flags.get_value() & 0xFF) as u8;
+            for b in buf {
+                hash = hash ^ (b as u64);
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+            }
+        }
+        self.suface_hash = hash;
+    }
 }
 impl Terminal for DebugTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         // only paint if requested
+        self.update_surface_hash(surface);
         if !self.paint {
             return;
         }
         self.paint = false;
-        println!("\nPaint: {} -> Hash: {}",&self.paint_title,0);
+        println!("\nPaint: {} -> Hash: 0x{:X}",&self.paint_title,self.suface_hash);
         self.temp_str.clear();
         let mut x = 0u32;
         for ch in &surface.chars {
