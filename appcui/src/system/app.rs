@@ -54,10 +54,7 @@ impl App {
     pub fn add_menu(&mut self, menu: Menu, name: &str) {
         RuntimeManager::get().add_menu(menu, Caption::new(name, true));
     }
-    pub fn get_menu(&self, handle: MenuHandle) {
-        RuntimeManager::get().get_menu(handle);
-    }
-    pub fn get_menu_mut(&self, handle: MenuHandle) {
-        RuntimeManager::get().get_menu_mut(handle);
+    pub fn get_menu(&self, handle: MenuHandle)->Option<&mut Menu> {
+        RuntimeManager::get().get_menu(handle)
     }
 }

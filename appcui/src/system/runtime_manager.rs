@@ -1,5 +1,5 @@
 use super::{
-    CommandBar, ControlHandleManager, InitializationData, InitializationFlags, Theme, ToolTip, Handle,
+    CommandBar, ControlHandleManager, InitializationData, InitializationFlags, Theme, ToolTip, Handle, MenuHandleManager,
 };
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, Event, EventProcessStatus};
@@ -37,6 +37,7 @@ pub(crate) struct RuntimeManager {
     terminal: Box<dyn Terminal>,
     surface: Surface,
     controls: *mut ControlHandleManager,
+    menus: MenuHandleManager,
     desktop_handler: Handle,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
@@ -78,6 +79,7 @@ impl RuntimeManager {
             events: Vec::with_capacity(16),
             commands: Vec::with_capacity(8),
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
+            menus: MenuHandleManager::new(),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
@@ -167,23 +169,17 @@ impl RuntimeManager {
     pub(crate) fn get_controls(&self) -> &mut ControlHandleManager {
         unsafe { &mut *self.controls }
     }
+    pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {
+        &mut self.menus
+    }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption)->Option<MenuHandle> {
         if let Some(menubar) = self.menubar.as_mut() {
             return Some(menubar.add(menu, caption));
         }
         None
     }
-    pub (crate) fn get_menu(&self, handle: MenuHandle) -> Option<&Menu> {
-        if let Some(menubar) = self.menubar.as_ref() {
-            return menubar.get_menu(handle);
-        }
-        None
-    }
-    pub (crate) fn get_menu_mut(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
-        if let Some(menubar) = self.menubar.as_mut() {
-            return menubar.get_menu_mut(handle);
-        }
-        None
+    pub (crate) fn get_menu(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
+        self.menus.get(handle)
     }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible

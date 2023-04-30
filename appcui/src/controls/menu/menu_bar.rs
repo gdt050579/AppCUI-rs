@@ -2,7 +2,7 @@ use crate::{
     controls::events::EventProcessStatus,
     graphics::{Character, Surface, TextAlignament, TextFormat},
     input::{Key, KeyCode, KeyModifier},
-    system::Theme,
+    system::{Theme, RuntimeManager},
     utils::{Caption, Strategy, VectorIndex},
 };
 
@@ -56,29 +56,18 @@ impl MenuBar {
         self.update_positions();
     }
     pub(crate) fn add(&mut self, menu: Menu, caption: Caption) -> MenuHandle {
-        let h = MenuHandle::new(self.items.len() as u32);
+        let menus = RuntimeManager::get().get_menus();        
+        let h = menus.add(menu);
         self.items.push(MenuBarItem {
             caption,
-            menu,
             x: 0,
             handle: h,
         });
         self.update_positions();
         return h;
     }
-    pub(crate) fn get_menu(&self, handle: MenuHandle)->Option<&Menu> {
-        let idx = handle.get_index();
-        if (idx < self.items.len()) && (self.items[idx].handle == handle) {
-            return Some(&self.items[idx].menu);
-        }
-        None
-    }
-    pub(crate) fn get_menu_mut(&mut self, handle: MenuHandle)->Option<&mut Menu> {
-        let idx = handle.get_index();
-        if (idx < self.items.len()) && (self.items[idx].handle == handle) {
-            return Some(&mut self.items[idx].menu);
-        }
-        None
+    pub(crate) fn get_menu(&self, handle: MenuHandle)->Option<&mut Menu> {
+        RuntimeManager::get().get_menus().get(handle)
     }
 
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {

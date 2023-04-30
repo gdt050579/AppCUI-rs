@@ -1,4 +1,7 @@
-use super::{menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuItem};
+use super::{
+    menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuHandle,
+    MenuItem,
+};
 use crate::{
     controls::events::EventProcessStatus,
     graphics::{
@@ -20,6 +23,7 @@ pub struct Menu {
     pub(super) button_up: MenuButtonState,
     pub(super) button_down: MenuButtonState,
     pub(super) clip: ClipArea,
+    pub(super) handle: MenuHandle,
 }
 impl Menu {
     pub fn new() -> Self {
@@ -33,6 +37,7 @@ impl Menu {
             button_up: MenuButtonState::Normal,
             button_down: MenuButtonState::Normal,
             clip: ClipArea::new(0, 0, 1, 1),
+            handle: MenuHandle::default(),
         }
     }
     // pub fn add(&mut self, item: MenuItem) {
@@ -151,7 +156,7 @@ impl Menu {
                         }
                         MenuItem::RadioBox(item) => {
                             let cmd_id = item.commandID;
-                            self.check_radio_item(index);                            
+                            self.check_radio_item(index);
                             self.send_command(cmd_id);
                             return true;
                         }
@@ -620,6 +625,13 @@ impl Menu {
 
 
             */
+    }
+    #[inline(always)]
+    pub(crate) fn get_handle(&self) -> MenuHandle {
+        self.handle
+    }
+    pub(crate) fn set_handle(&mut self, handle: MenuHandle) {
+        self.handle = handle;
     }
 }
 /*
