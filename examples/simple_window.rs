@@ -10,9 +10,11 @@ fn main() -> Result<(), appcui::system::Error> {
         CheckHash(0xECEDF66E8A6A588C)
         Key.Pressed(Enter)
         Resize(50,16)
-        Paint('Checkbox is not checked')
+        //Paint('Checkbox is not checked')
+        CheckHash(0x9FADB347088D23A5)
         Mouse.Move(2,0)
-        Paint('After mouse move')
+        //Paint('After mouse move')
+        CheckHash(0x12D05703BE0F9EE5)
     ";
     let mut a = App::debug(60,20,InitializationFlags::Menu,script)?;
     //let mut a = App::default()?;

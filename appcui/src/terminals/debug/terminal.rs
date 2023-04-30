@@ -142,7 +142,6 @@ impl Terminal for DebugTerminal {
             }
             // no need to paint --> just a check hash command
             self.paint = false;
-            return;
         }
         self.hash_to_test = None;
         // only paint if requested
@@ -205,14 +204,14 @@ impl Terminal for DebugTerminal {
         // if no events are in the event queue --> check if a command is present
         if let Some(cmd) = self.commands.pop_front() {
             cmd.generate_event(&mut self.sys_events);
-            // check for paint
+            // check for paint command
             if let Some(title) = cmd.get_paint_command_title() {
                 self.paint_title = title;
                 RuntimeManager::get().request_repaint();
                 self.paint = true;
                 return SystemEvent::None;
             }
-            // check for CheckHash
+            // check for CheckHash command
             if let Some(hash) = cmd.get_screen_hash() {
                 self.paint = false; // I don't want to paint anything --> just store the hash
                 self.hash_to_test = Some(hash); // next time I paint --> I will check it
