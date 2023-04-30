@@ -231,6 +231,19 @@ impl<'a> CommandParser<'a> {
         }
         return None;
     }
+    pub(super) fn get_hash(&self, index: usize) -> Option<u64> {
+        if index >= self.count {
+            return None;
+        }
+        let txt = self.params[index];
+        if !txt.starts_with("0x") {
+            return None;
+        }
+        if let Ok(value) = u64::from_str_radix(&txt[2..],16) {
+            return Some(value);
+        }
+        return None;
+    }
     pub(super) fn parse(&mut self, command: &'a str) -> Result<(), ParserError> {
         let buf = command.as_bytes();
         let len = buf.len();

@@ -17,7 +17,7 @@ pub(crate) struct DebugTerminal {
     sys_events: VecDeque<SystemEvent>,
     paint: bool,
     paint_title: String,
-    suface_hash: u64,
+    hash_to_test: Option<u64>,
 }
 impl DebugTerminal {
     fn build_commands(script: &str) -> VecDeque<Command> {
@@ -30,9 +30,9 @@ impl DebugTerminal {
             match Command::new(line.trim()) {
                 Ok(cmd) => v.push_back(cmd),
                 Err(err) => {
-                    println!("{}",err.to_string());
+                    println!("{}", err.to_string());
                     panic!()
-                },
+                }
             }
         }
         v
@@ -59,7 +59,7 @@ impl DebugTerminal {
             sys_events: VecDeque::with_capacity(8),
             paint: false,
             paint_title: String::new(),
-            suface_hash: 0
+            suface_hash: 0,
         }))
     }
     fn forecolor_to_str(col: Color) -> &'static str {
@@ -104,7 +104,7 @@ impl DebugTerminal {
             _ => "40", /* default is black */
         }
     }
-    fn update_surface_hash(&mut self, surface: &Surface)  {
+    fn compute_surface_hash(surface: &Surface) -> u64 {
         // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
         let mut hash = 0xcbf29ce484222325u64;
         let mut buf = [0u8; 8];
@@ -122,18 +122,30 @@ impl DebugTerminal {
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
             }
         }
-        self.suface_hash = hash;
+        return hash;
     }
 }
 impl Terminal for DebugTerminal {
     fn update_screen(&mut self, surface: &Surface) {
+        let surface_hash = DebugTerminal::compute_surface_hash(surface);
+        if let Some(hash_to_test) = self.hash_to_test {
+            if hash_to_test != surface_hash {
+                panic!("Invalid hash for surface (expecting: 0x{:X} but found 0x{:X})",hash_to_test, surface_hash);
+            }
+            // no need to paint --> just a check hash command
+            self.paint = false;
+            return;
+        }
+        self.hash_to_test = None;
         // only paint if requested
-        self.update_surface_hash(surface);
         if !self.paint {
             return;
         }
         self.paint = false;
-        println!("\nPaint: {} -> Hash: 0x{:X}",&self.paint_title,self.suface_hash);
+        println!(
+            "\nPaint: {} -> Hash: 0x{:X}",
+            &self.paint_title, surface_hash
+        );
         self.temp_str.clear();
         let mut x = 0u32;
         for ch in &surface.chars {
@@ -185,10 +197,19 @@ impl Terminal for DebugTerminal {
         // if no events are in the event queue --> check if a command is present
         if let Some(cmd) = self.commands.pop_front() {
             cmd.generate_event(&mut self.sys_events);
+            // check for paint
             if let Some(title) = cmd.get_paint_command_title() {
                 self.paint_title = title;
                 RuntimeManager::get().request_repaint();
                 self.paint = true;
+                return SystemEvent::None;
+            }
+            // check for CheckHash
+            if let Some(hash) = cmd.get_screen_hash() {
+                self.paint = false; // I don't want to paint anything --> just store the hash
+                self.hash_to_test = Some(hash); // next time I paint --> I will check it
+                RuntimeManager::get().request_repaint();
+                return SystemEvent::None;
             }
             return SystemEvent::None;
         }

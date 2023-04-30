@@ -3,6 +3,7 @@ use std::collections::VecDeque;
 use crate::terminals::SystemEvent;
 
 use super::{
+    check_hash_command::CheckHashCommand,
     command_parser::{CommandParser, ParserError},
     keypress_command::KeyPressedCommand,
     mouse_click_command::MouseClickCommand,
@@ -23,6 +24,7 @@ pub(super) enum Command {
     MouseDrag(MouseDragCommand),
     MouseWheel(MouseWheelCommand),
     Paint(PaintCommand),
+    CheckHash(CheckHashCommand),
     Resize(ResizeCommand),
     KeyPresed(KeyPressedCommand),
 }
@@ -58,6 +60,10 @@ impl Command {
                 let variant = PaintCommand::new(&cp)?;
                 return Ok(Command::Paint(variant));
             }
+            "CheckHash" => {
+                let variant = CheckHashCommand::new(&cp)?;
+                return Ok(Command::CheckHash(variant));
+            }
             "Resize" => {
                 let variant = ResizeCommand::new(&cp)?;
                 return Ok(Command::Resize(variant));
@@ -84,11 +90,18 @@ impl Command {
             Command::Resize(cmd) => cmd.generate_event(sys_events),
             Command::KeyPresed(cmd) => cmd.generate_event(sys_events),
             Command::Paint(_) => {}
+            Command::CheckHash(_) => {}
         }
     }
     pub(super) fn get_paint_command_title(&self) -> Option<String> {
         match self {
             Command::Paint(cmd) => Some(String::from(cmd.get_title())),
+            _ => None,
+        }
+    }
+    pub(super) fn get_screen_hash(&self) -> Option<u64> {
+        match self {
+            Command::CheckHash(cmd) => Some(cmd.get_hash()),
             _ => None,
         }
     }

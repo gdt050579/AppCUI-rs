@@ -10,8 +10,10 @@ fn main() -> Result<(), appcui::system::Error> {
         Key.Pressed(Enter)
         Resize(50,16)
         Paint('Checkbox is not checked')
+        Mouse.Move(2,0)
+        Paint('After mouse move')
     ";
-    let mut a = App::debug(60,20,InitializationFlags::None,script)?;
+    let mut a = App::debug(60,20,InitializationFlags::Menu,script)?;
     //let mut a = App::default()?;
     //let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
     let mut w = Window::new(

@@ -7,6 +7,7 @@ mod mouse_move_command;
 mod mouse_drag_command;
 mod mouse_wheel_command;
 mod paint_command;
+mod check_hash_command;
 mod resize_command;
 mod keypress_command;
 mod command;
