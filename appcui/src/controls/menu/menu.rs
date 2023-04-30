@@ -488,10 +488,10 @@ impl Menu {
         return EventProcessStatus::Ignored;
     }
 
-    fn show(&mut self, x: i32, y: i32, max_size: Size, term_size: Size) {
+    pub(crate) fn compute_position(&mut self, x: i32, y: i32, max_size: Size, term_size: Size)->bool {
         if (term_size.width < 5) || (term_size.height < 5) {
             // can not display if terminal is less than 5 x 5
-            return;
+            return false;
         }
         /*
                 void MenuContext::Show(
@@ -617,6 +617,7 @@ impl Menu {
         self.button_up = MenuButtonState::Normal;
         self.button_down = MenuButtonState::Normal;
 
+        return true;
         // link to application
         /*
         auto* app = Application::GetApplication();
