@@ -6,7 +6,7 @@ use appcui::terminals::TerminalType;
 fn main() -> Result<(), appcui::system::Error> {
     let script = "
         Key.Pressed(Tab)
-        //Paint('all checkboxes are checked')
+        Paint('all checkboxes are checked')
         CheckHash(0xECEDF66E8A6A588C)
         Key.Pressed(Enter)
         Resize(50,16)

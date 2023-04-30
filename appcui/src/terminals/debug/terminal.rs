@@ -88,6 +88,27 @@ impl DebugTerminal {
             _ => "37", /* default is silver */
         }
     }
+    fn color_to_str(col: Color) -> &'static str {
+        match col {
+            Color::Black => "0;0;0",
+            Color::DarkRed => "128;0;0",
+            Color::DarkGreen => "0;128;0",
+            Color::Olive => "128;128;0",
+            Color::DarkBlue => "0;0;128",
+            Color::Magenta => "128;0;128",
+            Color::Teal => "0;128;128",
+            Color::Silver => "196;196;196",
+            Color::Gray => "128;128;128",
+            Color::Red => "255;0;0",
+            Color::Green => "0;255;0",
+            Color::Yellow => "255;255;0",
+            Color::Blue => "0;0;255",
+            Color::Pink => "255;0;255",
+            Color::Aqua => "0;255;255",
+            Color::White => "255;255;255",
+            _ => "255;255;255", /* default is white */
+        }
+    }
     fn backcolor_to_str(col: Color) -> &'static str {
         match col {
             Color::Black => "40",
@@ -156,19 +177,20 @@ impl Terminal for DebugTerminal {
         self.temp_str.clear();
         let mut x = 0u32;
         for ch in &surface.chars {
-            self.temp_str.push_str("\x1b[");
+            self.temp_str.push_str("\x1b[38;2;");
             self.temp_str
-                .push_str(DebugTerminal::forecolor_to_str(ch.foreground));
-            self.temp_str.push(';');
+                .push_str(DebugTerminal::color_to_str(ch.foreground));
+            //self.temp_str.push(';');
+            self.temp_str.push_str("m\x1b[48;2;");
             self.temp_str
-                .push_str(DebugTerminal::backcolor_to_str(ch.background));
+                .push_str(DebugTerminal::color_to_str(ch.background));
             self.temp_str.push_str("m");
             if ch.code < ' ' {
                 self.temp_str.push(' ');
             } else {
                 self.temp_str.push(ch.code);
             }
-            self.temp_str.push_str("\x1b[0m"); // reset to default color
+            //self.temp_str.push_str("\x1b[0m"); // reset to default color
             x += 1;
             if x == self.width {
                 println!("{}", &self.temp_str);
