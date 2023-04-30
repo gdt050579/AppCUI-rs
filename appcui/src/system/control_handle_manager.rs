@@ -1,4 +1,6 @@
-use crate::controls::{ControlManager, Handle};
+use crate::controls::ControlManager;
+
+use super::Handle;
 
 pub(crate) struct ControlHandleManager {
     controls: Vec<Option<ControlManager>>,

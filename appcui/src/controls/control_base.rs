@@ -4,10 +4,10 @@ use super::events::{
     OnCommand, OnDefaultAction, OnEvent, OnFocus, OnKeyPressed, OnMouseEvent, OnPaint, OnResize,
 };
 use super::layout::ControlLayout;
-use super::{ControlHandle, ControlManager, Handle, Layout};
+use super::{ControlHandle, ControlManager, Layout};
 use crate::graphics::*;
 use crate::input::*;
-use crate::system::RuntimeManager;
+use crate::system::{RuntimeManager, Handle};
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
 

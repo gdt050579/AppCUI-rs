@@ -1,6 +1,5 @@
 use std::ops::Deref;
-
-use crate::controls::Handle;
+use crate::system::Handle;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct MenuHandle {

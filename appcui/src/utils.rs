@@ -12,3 +12,4 @@ pub (crate) use self::caption::Caption;
 pub (crate) use self::vector_index::VectorIndex;
 pub (crate) use self::vector_index::Strategy;
 
+

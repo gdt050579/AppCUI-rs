@@ -5,7 +5,7 @@ use super::StatusFlags;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
-use crate::controls::Handle;
+use crate::controls::ControlHandle;
 
 use AppCUIProcMacro::*;
 

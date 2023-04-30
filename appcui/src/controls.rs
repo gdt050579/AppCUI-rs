@@ -8,7 +8,6 @@ pub (crate) mod control_manager;
 pub use layout::Layout;
 pub use control_base::ControlBase;
 pub use control_handle::ControlHandle;
-pub use control_handle::Handle;
 pub use control_char_attributes_state::ControlCharAttributesState;
 pub (crate) use control_manager::ControlManager;
 

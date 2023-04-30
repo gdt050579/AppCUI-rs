@@ -1,5 +1,5 @@
 use super::{
-    CommandBar, ControlHandleManager, InitializationData, InitializationFlags, Theme, ToolTip,
+    CommandBar, ControlHandleManager, InitializationData, InitializationFlags, Theme, ToolTip, Handle,
 };
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, Event, EventProcessStatus};

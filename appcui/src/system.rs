@@ -4,12 +4,14 @@ mod runtime_manager;
 mod tooltip;
 mod command_bar;
 mod error;
+mod handle;
 mod initialization_data;
 mod control_handle_manager;
 #[cfg(test)]
 mod tests;
 
 pub use self::theme::Theme;
+pub use self::handle::Handle;
 pub (crate) use self::theme::MenuTheme;
 pub (crate) use self::control_handle_manager::ControlHandleManager;
 
