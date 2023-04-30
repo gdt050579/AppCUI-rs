@@ -24,7 +24,12 @@ impl DebugTerminal {
         let mut v: VecDeque<Command> = VecDeque::with_capacity(16);
         for line in script.lines() {
             // skip empty lines
-            if line.trim().len() == 0 {
+            let trim_line = line.trim();
+            if (trim_line.len() == 0)
+                || (trim_line.starts_with(";"))
+                || (trim_line.starts_with("#"))
+                || (trim_line.starts_with("//"))
+            {
                 continue;
             }
             match Command::new(line.trim()) {
@@ -130,7 +135,10 @@ impl Terminal for DebugTerminal {
         let surface_hash = DebugTerminal::compute_surface_hash(surface);
         if let Some(hash_to_test) = self.hash_to_test {
             if hash_to_test != surface_hash {
-                panic!("Invalid hash for surface (expecting: 0x{:X} but found 0x{:X})",hash_to_test, surface_hash);
+                panic!(
+                    "Invalid hash for surface (expecting: 0x{:X} but found 0x{:X})",
+                    hash_to_test, surface_hash
+                );
             }
             // no need to paint --> just a check hash command
             self.paint = false;
