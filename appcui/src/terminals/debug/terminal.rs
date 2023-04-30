@@ -59,7 +59,7 @@ impl DebugTerminal {
             sys_events: VecDeque::with_capacity(8),
             paint: false,
             paint_title: String::new(),
-            suface_hash: 0,
+            hash_to_test: None,
         }))
     }
     fn forecolor_to_str(col: Color) -> &'static str {
