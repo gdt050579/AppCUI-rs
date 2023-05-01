@@ -1,6 +1,6 @@
 use crate::{graphics::Surface, system::Theme, utils::Caption};
 
-use super::{Menu, MenuHandle};
+use super::MenuHandle;
 
 pub(super) struct MenuBarItem {
     pub(super) caption: Caption,
