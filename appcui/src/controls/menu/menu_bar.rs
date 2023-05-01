@@ -1,6 +1,6 @@
 use crate::{
     controls::events::EventProcessStatus,
-    graphics::{Character, Surface, TextAlignament, TextFormat, Size},
+    graphics::{Character, Size, Surface, TextAlignament, TextFormat},
     input::{Key, KeyCode, KeyModifier},
     system::{RuntimeManager, Theme},
     utils::{Caption, Strategy, VectorIndex},
@@ -110,7 +110,7 @@ impl MenuBar {
                 self.items[index.index()].handle,
                 self.x + self.items[index.index()].x,
                 self.y + 1,
-                Size::new(0,0),
+                Size::new(0, 0),
             )
             // Items[menuIndex]->Mnu.Show(this->Parent, this->X + Items[menuIndex]->X, this->Y + 1);
             // // set the owner
@@ -186,6 +186,14 @@ impl MenuBar {
                     _ if index == hover_idx => theme.menu.hotkey.hovered,
                     _ => theme.menu.hotkey.normal,
                 });
+            }
+            if (index == open_idx) || (index == hover_idx) {
+                surface.fill_horizontal_line(
+                    format.x - 1,
+                    format.y,
+                    format.x + item.caption.get_chars_count() as i32,
+                    Character::with_attributes(' ', format.char_attr),
+                );
             }
             surface.write_text(item.caption.get_text(), &format);
             //GDT: spaces around the text are missing (to be fixed)

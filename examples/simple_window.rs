@@ -15,7 +15,7 @@ fn main() -> Result<(), appcui::system::Error> {
         CheckHash(0x9FADB347088D23A5)
         Mouse.Move(2,0)
         //Paint('After mouse move')
-        CheckHash(0x12D05703BE0F9EE5)
+        CheckHash(0x68FB99AFFF8F9CF5)
         Mouse.Click(2,0,left)
         Paint('After mouse click')
     ";
