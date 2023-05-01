@@ -189,7 +189,7 @@ impl Menu {
                         MenuItem::Line(_) => {}
                         MenuItem::SubMenu(item) => {
                             if let Some(submenu) =
-                                RuntimeManager::get().get_menus().get(item.submenu_handle)
+                                RuntimeManager::get().get_menus().get_mut(item.submenu_handle)
                             {
                                 if submenu.process_shortcut(key) {
                                     return true;

@@ -67,7 +67,7 @@ impl MenuBar {
         return h;
     }
     pub(crate) fn get_menu(&self, handle: MenuHandle)->Option<&mut Menu> {
-        RuntimeManager::get().get_menus().get(handle)
+        RuntimeManager::get().get_menus().get_mut(handle)
     }
 
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {

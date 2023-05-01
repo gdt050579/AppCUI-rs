@@ -37,7 +37,7 @@ pub(crate) struct RuntimeManager {
     terminal: Box<dyn Terminal>,
     surface: Surface,
     controls: *mut ControlHandleManager,
-    menus: MenuHandleManager,
+    menus: *mut MenuHandleManager,
     desktop_handler: Handle,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
@@ -81,7 +81,7 @@ impl RuntimeManager {
             events: Vec::with_capacity(16),
             commands: Vec::with_capacity(8),
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
-            menus: MenuHandleManager::new(),
+            menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
@@ -168,11 +168,13 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         controls.get_desktop().get_base_mut().add_child(obj)
     }
+    #[inline(always)]
     pub(crate) fn get_controls(&self) -> &mut ControlHandleManager {
         unsafe { &mut *self.controls }
     }
-    pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {
-        &mut self.menus
+    #[inline(always)]
+    pub(crate) fn get_menus(&self) -> &mut MenuHandleManager {
+        unsafe { &mut *self.menus }
     }
     pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption)->Option<MenuHandle> {
         if let Some(menubar) = self.menubar.as_mut() {
@@ -181,7 +183,8 @@ impl RuntimeManager {
         None
     }
     pub (crate) fn get_menu(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
-        self.menus.get_mut(handle)
+        let menus = unsafe { &mut *self.menus };
+        menus.get_mut(handle)
     }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
@@ -461,7 +464,8 @@ impl RuntimeManager {
         }
     }
     fn paint_menu(&mut self, handle: MenuHandle, activ: bool) {
-        if let Some(menu) = self.menus.get(handle) {
+        let menus = unsafe { &mut *self.menus };
+        if let Some(menu) = menus.get(handle) {
             if let Some(parent_menu_handle) = menu.get_parent_handle() {
                 self.paint_menu(parent_menu_handle, false);
             }
