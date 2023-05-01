@@ -47,6 +47,12 @@ fn main() -> Result<(), appcui::system::Error> {
     m_file.add_command("&Open", Key::new(KeyCode::O, KeyModifier::Ctrl), 101);
     m_file.add_command("&Save", Key::new(KeyCode::S, KeyModifier::Ctrl), 102);
     m_file.add_command("Save &as ...", Key::default(), 103);
+    m_file.add_separator();
+    m_file.add_checkbox("Option &1", Key::default(), 100, true);
+    m_file.add_checkbox("Option &2", Key::new(KeyCode::F10, KeyModifier::None), 101, false);
+    m_file.add_separator();
+    m_file.add_command("E&xit", Key::new(KeyCode::F4, KeyModifier::Alt), 100);
+
     a.add_menu(m_file, "&File");
     a.add(w);
     a.run();

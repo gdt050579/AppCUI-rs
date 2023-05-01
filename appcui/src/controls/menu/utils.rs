@@ -1,7 +1,8 @@
 use crate::{
     graphics::{CharAttribute, Surface, TextFormat},
     input::Key,
-    system::MenuTheme, utils::Caption,
+    system::MenuTheme,
+    utils::Caption,
 };
 
 #[inline(always)]
@@ -61,9 +62,12 @@ pub(super) fn paint_shortcut(
 ) {
     let name = shortcut.code.get_name();
     let modifier_name = shortcut.modifier.get_name();
+    let sz = name.len() + modifier_name.len();
     let attr = get_shortcut_attr(enabled, current_item, color);
-    let x = (width as i32) - modifier_name.len() as i32;
-    surface.write_string(x, format.y, modifier_name, attr, false);
+    let x = (width as i32) - (sz as i32);
+    if modifier_name.len() > 0 {
+        surface.write_string(x, format.y, modifier_name, attr, false);
+    }
     surface.write_string(
         x + (modifier_name.len() as i32),
         format.y,

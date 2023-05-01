@@ -69,6 +69,9 @@ impl Menu {
             checked,
         }));
     }
+    pub fn add_separator(&mut self) {
+        self.items.push(MenuItem::Line(super::MenuLineItem {  } ));      
+    }
     fn is_on_menu(&self, x: i32, y: i32) -> bool {
         MousePositionInfo::new(x, y, &self).is_on_menu
     }
