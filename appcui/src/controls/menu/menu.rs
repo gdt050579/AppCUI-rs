@@ -24,6 +24,7 @@ pub struct Menu {
     pub(super) button_down: MenuButtonState,
     pub(super) clip: ClipArea,
     pub(super) handle: MenuHandle,
+    pub(super) parent_handle: Option<MenuHandle>
 }
 impl Menu {
     pub fn new() -> Self {
@@ -38,11 +39,10 @@ impl Menu {
             button_down: MenuButtonState::Normal,
             clip: ClipArea::new(0, 0, 1, 1),
             handle: MenuHandle::default(),
+            parent_handle: None,
         }
     }
-    // pub fn add(&mut self, item: MenuItem) {
-    //     self.items.push(item);
-    // }
+
     pub fn add_command(&mut self, text: &str, shortcut: Key, command_id: u32) {
         self.items.push(MenuItem::Command(MenuCommandItem {
             enabled: true,
@@ -187,8 +187,8 @@ impl Menu {
                             return true;
                         }
                         MenuItem::Line(_) => {}
-                        MenuItem::SubMenu(item) => {
-                            if let Some(submenu) = item.submenu.as_mut() {
+                        MenuItem::SubMenu(item) => {                            
+                            if let Some(submenu) = RuntimeManager::get().get_menus().get(item.submenu_handle){
                                 if submenu.process_shortcut(key) {
                                     return true;
                                 }

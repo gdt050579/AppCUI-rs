@@ -135,17 +135,17 @@ impl MenuItem {
             MenuItem::SubMenu(item) => item.caption.get_chars_count(),
         }
     }
-    #[inline(always)]
-    pub(super) fn get_submenu(&self) -> Option<&Menu> {
-        match self {
-            MenuItem::SubMenu(item) => { 
-                if let Some(menu) = item.submenu.as_ref() {
-                    Some(menu)
-                } else {
-                    None
-                }
-             }
-            _ => None,
-        }
-    }
+    // #[inline(always)]
+    // pub(super) fn get_submenu(&self) -> Option<&Menu> {
+    //     match self {
+    //         MenuItem::SubMenu(item) => { 
+    //             if let Some(menu) = item.submenu.as_ref() {
+    //                 Some(menu)
+    //             } else {
+    //                 None
+    //             }
+    //          }
+    //         _ => None,
+    //     }
+    // }
 }

@@ -4,12 +4,12 @@ use crate::{
     utils::Caption,
 };
 
-use super::Menu;
+use super::MenuHandle;
 
 pub(super) struct MenuSubMenuItem {
     pub(super) enabled: bool,
     pub(super) caption: Caption,
-    pub(super) submenu: Box<Option<Menu>>
+    pub(super) submenu_handle: MenuHandle
 }
 impl MenuSubMenuItem {
     pub (super) fn paint(
