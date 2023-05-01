@@ -18,6 +18,8 @@ fn main() -> Result<(), appcui::system::Error> {
         CheckHash(0x68FB99AFFF8F9CF5)
         Mouse.Click(2,0,left)
         Paint('After mouse click')
+        Mouse.Move(3,3);
+        Paint('After mouse move')
     ";
     let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;

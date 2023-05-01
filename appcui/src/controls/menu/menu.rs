@@ -70,7 +70,7 @@ impl Menu {
         }));
     }
     pub fn add_separator(&mut self) {
-        self.items.push(MenuItem::Line(super::MenuLineItem {  } ));      
+        self.items.push(MenuItem::Line(super::MenuLineItem {}));
     }
     fn is_on_menu(&self, x: i32, y: i32) -> bool {
         MousePositionInfo::new(x, y, &self).is_on_menu
@@ -191,8 +191,9 @@ impl Menu {
                         }
                         MenuItem::Line(_) => {}
                         MenuItem::SubMenu(item) => {
-                            if let Some(submenu) =
-                                RuntimeManager::get().get_menus().get_mut(item.submenu_handle)
+                            if let Some(submenu) = RuntimeManager::get()
+                                .get_menus()
+                                .get_mut(item.submenu_handle)
                             {
                                 if submenu.process_shortcut(key) {
                                     return true;
@@ -212,7 +213,12 @@ impl Menu {
         } else {
             &theme.parent_menu
         };
-        surface.set_clip(self.clip.left, self.clip.top, self.clip.right, self.clip.bottom);
+        surface.set_clip(
+            self.clip.left,
+            self.clip.top,
+            self.clip.right,
+            self.clip.bottom,
+        );
         surface.set_origin(self.clip.left, self.clip.top);
         surface.clear(Character::with_attributes(' ', col.text.normal));
         surface.draw_rect(
@@ -268,7 +274,7 @@ impl Menu {
         }
         for idx in start..end {
             let item = &self.items[idx as usize];
-            format.y+=1;
+            format.y += 1;
             item.paint(
                 surface,
                 &mut format,
@@ -296,7 +302,9 @@ impl Menu {
         }
         EventProcessStatus::Ignored
     }
-    fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
+    pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
+        let x = x - self.clip.left;
+        let y = y - self.clip.top;
         let mpi = MousePositionInfo::new(x, y, self);
         let button_up_status = if mpi.is_on_up_button {
             MenuButtonState::Hovered

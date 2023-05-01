@@ -561,6 +561,16 @@ impl RuntimeManager {
         let mut processed = false;
         // Process event in the following order:
         // first the context menu and its owner, then the menu bar and then cmdbar
+        if let Some(open_menu_handle) = self.opened_menu {
+            let menus = self.get_menus();
+            if let Some(menu) = menus.get_mut(open_menu_handle) {
+                if menu.on_mouse_move(x, y).is_processed_or_update() {
+                    self.repaint = true;
+                    return true;
+                }
+            }
+        }
+
         /*
         if (this->VisibleMenu)
         {
