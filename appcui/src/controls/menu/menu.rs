@@ -1,6 +1,6 @@
 use super::{
-    menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuCommandItem,
-    MenuHandle, MenuItem, MenuItemHandle, MenuCheckBoxItem, MenuRadioBoxItem,
+    menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuCheckBoxItem,
+    MenuCommandItem, MenuHandle, MenuItem, MenuItemHandle, MenuRadioBoxItem,
 };
 use crate::{
     controls::events::EventProcessStatus,
@@ -24,7 +24,7 @@ pub struct Menu {
     pub(super) button_down: MenuButtonState,
     pub(super) clip: ClipArea,
     pub(super) handle: MenuHandle,
-    pub(super) parent_handle: Option<MenuHandle>
+    pub(super) parent_handle: Option<MenuHandle>,
 }
 impl Menu {
     pub fn new() -> Self {
@@ -57,7 +57,7 @@ impl Menu {
             commandID: command_id,
             caption: Caption::new(text, true),
             shortcut,
-            checked
+            checked,
         }));
     }
     pub fn add_radiobox(&mut self, text: &str, shortcut: Key, command_id: u32, checked: bool) {
@@ -66,7 +66,7 @@ impl Menu {
             commandID: command_id,
             caption: Caption::new(text, true),
             shortcut,
-            checked
+            checked,
         }));
     }
     fn is_on_menu(&self, x: i32, y: i32) -> bool {
@@ -187,8 +187,10 @@ impl Menu {
                             return true;
                         }
                         MenuItem::Line(_) => {}
-                        MenuItem::SubMenu(item) => {                            
-                            if let Some(submenu) = RuntimeManager::get().get_menus().get(item.submenu_handle){
+                        MenuItem::SubMenu(item) => {
+                            if let Some(submenu) =
+                                RuntimeManager::get().get_menus().get(item.submenu_handle)
+                            {
                                 if submenu.process_shortcut(key) {
                                     return true;
                                 }
@@ -201,7 +203,7 @@ impl Menu {
         return false;
     }
 
-    fn paint(&self, surface: &mut Surface, theme: &Theme, active: bool) {
+    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, active: bool) {
         let col = if active {
             &theme.menu
         } else {
@@ -665,6 +667,9 @@ impl Menu {
     }
     pub(crate) fn set_handle(&mut self, handle: MenuHandle) {
         self.handle = handle;
+    }
+    pub(crate) fn get_parent_handle(&self) -> Option<MenuHandle> {
+        self.parent_handle
     }
 }
 /*

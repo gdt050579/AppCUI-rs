@@ -53,6 +53,7 @@ pub(crate) struct RuntimeManager {
     events: Vec<EmittedEvent>,
     commands: Vec<u32>,
     mouse_locked_object: MouseLockedObject,
+    opened_menu: Option<MenuHandle>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -75,6 +76,7 @@ impl RuntimeManager {
             request_focus: None,
             current_focus: None,
             mouse_over_control: None,
+            opened_menu: None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
             commands: Vec::with_capacity(8),
@@ -179,7 +181,7 @@ impl RuntimeManager {
         None
     }
     pub (crate) fn get_menu(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
-        self.menus.get(handle)
+        self.menus.get_mut(handle)
     }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
@@ -439,6 +441,9 @@ impl RuntimeManager {
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);
         }
+        if let Some(opened_menu_handle) = self.opened_menu {
+            self.paint_menu(opened_menu_handle, true);
+        }
         self.terminal.update_screen(&self.surface);
     }
     fn paint_control(&mut self, handle: Handle) {
@@ -453,6 +458,14 @@ impl RuntimeManager {
                     self.paint_control(*child_handle);
                 }
             }
+        }
+    }
+    fn paint_menu(&mut self, handle: MenuHandle, activ: bool) {
+        if let Some(menu) = self.menus.get(handle) {
+            if let Some(parent_menu_handle) = menu.get_parent_handle() {
+                self.paint_menu(parent_menu_handle, false);
+            }
+            menu.paint(&mut self.surface, &self.theme, activ);
         }
     }
 

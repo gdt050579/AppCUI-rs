@@ -1,5 +1,6 @@
+use appcui::controls::menu::Menu;
 use appcui::controls::*;
-use appcui::controls::menu::{Menu};
+use appcui::input::{Key, KeyModifier, KeyCode};
 use appcui::system::*;
 use appcui::terminals::TerminalType;
 
@@ -17,7 +18,7 @@ fn main() -> Result<(), appcui::system::Error> {
         CheckHash(0x12D05703BE0F9EE5)
         //Mouse.Click(2,0,left)
     ";
-    let mut a = App::debug(60,20,InitializationFlags::Menu,script)?;
+    let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;
     //let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
     let mut w = Window::new(
@@ -41,6 +42,10 @@ fn main() -> Result<(), appcui::system::Error> {
         true,
     ));
     let mut m_file = Menu::new();
+    m_file.add_command("&New", Key::new(KeyCode::N, KeyModifier::Ctrl), 100);
+    m_file.add_command("&Open", Key::new(KeyCode::O, KeyModifier::Ctrl), 101);
+    m_file.add_command("&Save", Key::new(KeyCode::S, KeyModifier::Ctrl), 102);
+    m_file.add_command("Save &as ...", Key::default(), 103);
     a.add_menu(m_file, "&File");
     a.add(w);
     a.run();

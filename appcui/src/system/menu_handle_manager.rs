@@ -9,10 +9,22 @@ impl MenuHandleManager {
             items: Vec::with_capacity(64),
         }
     }
-    pub(crate) fn get(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
+    pub(crate) fn get_mut(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
         let idx = handle.get_index();
         if idx < self.items.len() {
             let m = self.items[idx].as_mut();
+            if m.is_some() {
+                if m.as_ref().unwrap().get_handle() == handle {
+                    return m;
+                }
+            }
+        }
+        None
+    }
+    pub(crate) fn get(&mut self, handle: MenuHandle) -> Option<&Menu> {
+        let idx = handle.get_index();
+        if idx < self.items.len() {
+            let m = self.items[idx].as_ref();
             if m.is_some() {
                 if m.as_ref().unwrap().get_handle() == handle {
                     return m;
