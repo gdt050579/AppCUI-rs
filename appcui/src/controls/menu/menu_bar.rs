@@ -1,8 +1,8 @@
 use crate::{
     controls::events::EventProcessStatus,
-    graphics::{Character, Surface, TextAlignament, TextFormat},
+    graphics::{Character, Surface, TextAlignament, TextFormat, Size},
     input::{Key, KeyCode, KeyModifier},
-    system::{Theme, RuntimeManager},
+    system::{RuntimeManager, Theme},
     utils::{Caption, Strategy, VectorIndex},
 };
 
@@ -56,7 +56,7 @@ impl MenuBar {
         self.update_positions();
     }
     pub(crate) fn add(&mut self, menu: Menu, caption: Caption) -> MenuHandle {
-        let menus = RuntimeManager::get().get_menus();        
+        let menus = RuntimeManager::get().get_menus();
         let h = menus.add(menu);
         self.items.push(MenuBarItem {
             caption,
@@ -66,7 +66,7 @@ impl MenuBar {
         self.update_positions();
         return h;
     }
-    pub(crate) fn get_menu(&self, handle: MenuHandle)->Option<&mut Menu> {
+    pub(crate) fn get_menu(&self, handle: MenuHandle) -> Option<&mut Menu> {
         RuntimeManager::get().get_menus().get_mut(handle)
     }
 
@@ -106,6 +106,12 @@ impl MenuBar {
     fn open(&mut self, index: VectorIndex) {
         self.opened_item = index;
         if index.in_range(self.items.len()) {
+            RuntimeManager::get().show_menu(
+                self.items[index.index()].handle,
+                self.x + self.items[index.index()].x,
+                self.y + 1,
+                Size::new(0,0),
+            )
             // Items[menuIndex]->Mnu.Show(this->Parent, this->X + Items[menuIndex]->X, this->Y + 1);
             // // set the owner
             // ((MenuContext*) (Items[menuIndex]->Mnu.Context))->Owner = this;

@@ -209,6 +209,8 @@ impl Menu {
         } else {
             &theme.parent_menu
         };
+        surface.set_clip(self.clip.left, self.clip.top, self.clip.right, self.clip.bottom);
+        surface.set_origin(self.clip.left, self.clip.top);
         surface.clear(Character::with_attributes(' ', col.text.normal));
         surface.draw_rect(
             Rect::new(
@@ -263,6 +265,7 @@ impl Menu {
         }
         for idx in start..end {
             let item = &self.items[idx as usize];
+            format.y+=1;
             item.paint(
                 surface,
                 &mut format,

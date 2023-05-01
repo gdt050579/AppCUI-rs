@@ -186,6 +186,14 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
+    pub (crate) fn show_menu(&mut self, handle: MenuHandle, x: i32, y: i32, max_size: Size) {
+        let menus = unsafe { &mut *self.menus };
+        if let Some(menu) = menus.get_mut(handle) {
+            let term_size = Size::new(self.terminal.get_width(),self.terminal.get_height());
+            menu.compute_position(x, y, max_size, term_size);
+            self.opened_menu = Some(handle);
+        }
+    }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
         self.recompute_layout = true;
@@ -445,6 +453,7 @@ impl RuntimeManager {
             self.tooltip.paint(&mut self.surface, &self.theme);
         }
         if let Some(opened_menu_handle) = self.opened_menu {
+            self.surface.reset();
             self.paint_menu(opened_menu_handle, true);
         }
         self.terminal.update_screen(&self.surface);
@@ -827,7 +836,12 @@ impl RuntimeManager {
                     self.repaint = true;
                 }
             }
-            MouseLockedObject::MenuBar => todo!(),
+            MouseLockedObject::MenuBar => {
+                if let Some(menubar) = self.menubar.as_mut() {
+                    menubar.on_mouse_pressed(event.x, event.y);
+                }
+                self.repaint = true;
+            },
         }
         self.mouse_locked_object = MouseLockedObject::None;
     }
