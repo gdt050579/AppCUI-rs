@@ -1,6 +1,6 @@
 use super::{
-    menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuHandle,
-    MenuItem,
+    menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuCommandItem,
+    MenuHandle, MenuItem, MenuItemHandle, MenuCheckBoxItem, MenuRadioBoxItem,
 };
 use crate::{
     controls::events::EventProcessStatus,
@@ -10,7 +10,7 @@ use crate::{
     },
     input::{Key, KeyCode, MouseWheelDirection},
     system::{RuntimeManager, Theme},
-    utils::{Strategy, VectorIndex},
+    utils::{Caption, Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
 pub struct Menu {
@@ -43,6 +43,32 @@ impl Menu {
     // pub fn add(&mut self, item: MenuItem) {
     //     self.items.push(item);
     // }
+    pub fn add_command(&mut self, text: &str, shortcut: Key, command_id: u32) {
+        self.items.push(MenuItem::Command(MenuCommandItem {
+            enabled: true,
+            commandID: command_id,
+            caption: Caption::new(text, true),
+            shortcut,
+        }));
+    }
+    pub fn add_checkbox(&mut self, text: &str, shortcut: Key, command_id: u32, checked: bool) {
+        self.items.push(MenuItem::CheckBox(MenuCheckBoxItem {
+            enabled: true,
+            commandID: command_id,
+            caption: Caption::new(text, true),
+            shortcut,
+            checked
+        }));
+    }
+    pub fn add_radiobox(&mut self, text: &str, shortcut: Key, command_id: u32, checked: bool) {
+        self.items.push(MenuItem::RadioBox(MenuRadioBoxItem {
+            enabled: true,
+            commandID: command_id,
+            caption: Caption::new(text, true),
+            shortcut,
+            checked
+        }));
+    }
     fn is_on_menu(&self, x: i32, y: i32) -> bool {
         MousePositionInfo::new(x, y, &self).is_on_menu
     }
@@ -488,7 +514,13 @@ impl Menu {
         return EventProcessStatus::Ignored;
     }
 
-    pub(crate) fn compute_position(&mut self, x: i32, y: i32, max_size: Size, term_size: Size)->bool {
+    pub(crate) fn compute_position(
+        &mut self,
+        x: i32,
+        y: i32,
+        max_size: Size,
+        term_size: Size,
+    ) -> bool {
         if (term_size.width < 5) || (term_size.height < 5) {
             // can not display if terminal is less than 5 x 5
             return false;
