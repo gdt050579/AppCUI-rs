@@ -28,7 +28,7 @@ impl MenuItem {
             MenuItem::CheckBox(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::RadioBox(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::SubMenu(item) => item.paint(surface, format, width, current_item, color),
-            MenuItem::Line(item) => item.paint(surface, format, width),
+            MenuItem::Line(item) => item.paint(surface, format.y, width,color),
         }
     }
     #[inline(always)]
