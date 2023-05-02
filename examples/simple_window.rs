@@ -20,6 +20,8 @@ fn main() -> Result<(), appcui::system::Error> {
         Paint('After mouse click')
         Mouse.Move(16,2);
         Paint('After mouse move')
+        Mouse.Click(16,2,left)
+        Paint('Show sub-menu')
     ";
     let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;

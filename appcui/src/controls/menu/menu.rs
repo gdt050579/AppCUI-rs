@@ -73,7 +73,7 @@ impl Menu {
         let handle = RuntimeManager::get().get_menus().add(menu);
         self.items.push(MenuItem::SubMenu(MenuSubMenuItem {
             enabled: true,
-            caption: Caption::new(text,true),
+            caption: Caption::new(text, true),
             submenu_handle: handle,
         }));
     }
@@ -461,8 +461,14 @@ impl Menu {
                 Some(cmd_id)
             }
             MenuItem::Line(_) => None,
-            MenuItem::SubMenu(_) => {
-                todo!()
+            MenuItem::SubMenu(item) => {
+                RuntimeManager::get().show_menu(
+                    item.submenu_handle,
+                    (self.width as i32) + self.clip.left,
+                    self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
+                    Size::new(0,0),
+                );
+                None
                 /*
                             itm->SubMenu->Show(
                       Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
