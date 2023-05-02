@@ -13,17 +13,17 @@ fn main() -> Result<(), appcui::system::Error> {
         Resize(50,16)
         //Paint('Checkbox is not checked')
         //CheckHash(0x9FADB347088D23A5)
-        Mouse.Move(2,0)
+        Mouse.Move(16,0)
         //Paint('After mouse move')
         //CheckHash(0x68FB99AFFF8F9CF5)
-        Mouse.Click(2,0,left)
+        Mouse.Click(16,0,left)
         Paint('After mouse click')
-        Mouse.Move(3,3);
+        Mouse.Move(16,2);
         Paint('After mouse move')
     ";
     let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;
-    let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
+    //let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
     let mut w = Window::new(
         "Simple window",
         Layout::new("d:c,w:40,h:10"),

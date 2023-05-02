@@ -39,7 +39,7 @@ impl MenuSubMenuItem {
         format.x = 2;
         surface.write_text(self.caption.get_text(), format);
         surface.write_char(
-            1 + width as i32,
+            width as i32,
             format.y,
             Character::with_attributes(SpecialChar::TriangleRight, format.char_attr),
         );
