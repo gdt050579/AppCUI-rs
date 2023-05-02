@@ -816,6 +816,14 @@ impl RuntimeManager {
     }
     fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
         // check contextual menus
+        if let Some(opened_menu_handle) = self.opened_menu {
+            let menus = unsafe { &mut * self.menus };
+            if let Some(menu) = menus.get_mut(opened_menu_handle) {
+                if menu.on_mouse_pressed(event.x, event.y).is_processed_or_update() {
+                    self.repaint = true;
+                }
+            }
+        }
         /*if (this->VisibleMenu)
         {
             ProcessMenuMouseReleased(this->VisibleMenu, x, y);

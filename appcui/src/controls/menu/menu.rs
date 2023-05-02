@@ -368,7 +368,9 @@ impl Menu {
         }
         return EventProcessStatus::Ignored;
     }
-    fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
+    pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
+        let x = x - self.clip.left;
+        let y = y - self.clip.top;
         let mpi = MousePositionInfo::new(x, y, self);
         // check buttons
         if (self.visible_items_count as usize) < self.items.len() {
