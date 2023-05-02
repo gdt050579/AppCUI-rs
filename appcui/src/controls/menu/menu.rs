@@ -1,6 +1,6 @@
 use super::{
     menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuCheckBoxItem,
-    MenuCommandItem, MenuHandle, MenuItem, MenuItemHandle, MenuRadioBoxItem,
+    MenuCommandItem, MenuHandle, MenuItem, MenuItemHandle, MenuRadioBoxItem, MenuSubMenuItem,
 };
 use crate::{
     controls::events::EventProcessStatus,
@@ -67,6 +67,14 @@ impl Menu {
             caption: Caption::new(text, true),
             shortcut,
             checked,
+        }));
+    }
+    pub fn add_submenu(&mut self, text: &str, menu: Menu) {
+        let handle = RuntimeManager::get().get_menus().add(menu);
+        self.items.push(MenuItem::SubMenu(MenuSubMenuItem {
+            enabled: true,
+            caption: Caption::new(text,true),
+            submenu_handle: handle,
         }));
     }
     pub fn add_separator(&mut self) {
@@ -666,14 +674,6 @@ impl Menu {
         self.button_down = MenuButtonState::Normal;
 
         return true;
-        // link to application
-        /*
-        auto* app = Application::GetApplication();
-        if (app)
-            app->ShowContextualMenu(me);
-
-
-            */
     }
     #[inline(always)]
     pub(crate) fn get_handle(&self) -> MenuHandle {

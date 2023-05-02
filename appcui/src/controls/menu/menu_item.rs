@@ -4,7 +4,9 @@ use crate::{
     system::MenuTheme,
 };
 
-use super::{MenuCheckBoxItem, MenuCommandItem, MenuLineItem, MenuRadioBoxItem, MenuSubMenuItem, Menu};
+use super::{
+    Menu, MenuCheckBoxItem, MenuCommandItem, MenuLineItem, MenuRadioBoxItem, MenuSubMenuItem,
+};
 
 pub(super) enum MenuItem {
     Command(MenuCommandItem),
@@ -28,7 +30,7 @@ impl MenuItem {
             MenuItem::CheckBox(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::RadioBox(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::SubMenu(item) => item.paint(surface, format, width, current_item, color),
-            MenuItem::Line(item) => item.paint(surface, format.y, width,color),
+            MenuItem::Line(item) => item.paint(surface, format.y, width, color),
         }
     }
     #[inline(always)]
@@ -126,7 +128,7 @@ impl MenuItem {
         }
     }
     #[inline(always)]
-    pub(super) fn get_caption_chars_count(&self)->usize {
+    pub(super) fn get_caption_chars_count(&self) -> usize {
         match self {
             MenuItem::Command(item) => item.caption.get_chars_count(),
             MenuItem::CheckBox(item) => item.caption.get_chars_count(),
@@ -138,7 +140,7 @@ impl MenuItem {
     // #[inline(always)]
     // pub(super) fn get_submenu(&self) -> Option<&Menu> {
     //     match self {
-    //         MenuItem::SubMenu(item) => { 
+    //         MenuItem::SubMenu(item) => {
     //             if let Some(menu) = item.submenu.as_ref() {
     //                 Some(menu)
     //             } else {
