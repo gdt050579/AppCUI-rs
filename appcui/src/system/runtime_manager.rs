@@ -185,7 +185,7 @@ impl RuntimeManager {
     pub (crate) fn get_menu(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
-    }
+    }    
     pub (crate) fn show_menu(&mut self, handle: MenuHandle, x: i32, y: i32, max_size: Size) {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
@@ -239,6 +239,14 @@ impl RuntimeManager {
                 SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
                 SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
             }
+        }
+    }
+    fn get_opened_menu(&mut self)->Option<&mut Menu> {
+        if let Some(opened_menu_handle) = self.opened_menu {
+            let menus = unsafe { &mut *self.menus };
+            return menus.get_mut(opened_menu_handle);
+        } else {
+            None
         }
     }
     fn get_focused_control(&self) -> Handle {
@@ -561,16 +569,12 @@ impl RuntimeManager {
         let mut processed = false;
         // Process event in the following order:
         // first the context menu and its owner, then the menu bar and then cmdbar
-        if let Some(open_menu_handle) = self.opened_menu {
-            let menus = self.get_menus();
-            if let Some(menu) = menus.get_mut(open_menu_handle) {
-                if menu.on_mouse_move(x, y).is_processed_or_update() {
-                    self.repaint = true;
-                    return true;
-                }
+        if let Some(menu) = self.get_opened_menu() {
+            if menu.on_mouse_move(x, y).is_processed_or_update() {
+                self.repaint = true;
+                return true;
             }
         }
-
         /*
         if (this->VisibleMenu)
         {
@@ -816,12 +820,9 @@ impl RuntimeManager {
     }
     fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
         // check contextual menus
-        if let Some(opened_menu_handle) = self.opened_menu {
-            let menus = unsafe { &mut * self.menus };
-            if let Some(menu) = menus.get_mut(opened_menu_handle) {
-                if menu.on_mouse_pressed(event.x, event.y).is_processed_or_update() {
-                    self.repaint = true;
-                }
+        if let Some(menu) = self.get_opened_menu() {
+            if menu.on_mouse_pressed(event.x, event.y).is_processed_or_update() {
+                self.repaint = true;
             }
         }
         /*if (this->VisibleMenu)
@@ -894,6 +895,7 @@ impl Drop for RuntimeManager {
     fn drop(&mut self) {
         unsafe {
             Box::from_raw(self.controls);
+            Box::from_raw(self.menus);
         }
     }
 }
