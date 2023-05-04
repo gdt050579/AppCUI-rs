@@ -149,6 +149,12 @@ impl RuntimeManager {
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
     }
+    pub(crate) fn close_opened_menu(&mut self) {
+        if self.opened_menu.is_some() {
+            self.opened_menu = None;
+            self.repaint = true;
+        }
+    }
     pub(crate) fn send_event(&mut self, event: Event, sender: Handle) {
         self.events.push(EmittedEvent { event, sender });
     }
