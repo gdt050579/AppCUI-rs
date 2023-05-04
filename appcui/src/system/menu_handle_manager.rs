@@ -36,6 +36,7 @@ impl MenuHandleManager {
     pub(crate) fn add(&mut self, mut menu: Menu)->MenuHandle {
         let h = MenuHandle::new(self.items.len() as u32);
         menu.set_handle(h);
+        menu.update_children_with_parent_handle();
         self.items.push(Some(menu));
         return h;
     }

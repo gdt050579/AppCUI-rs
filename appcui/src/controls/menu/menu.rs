@@ -69,13 +69,15 @@ impl Menu {
             checked,
         }));
     }
-    pub fn add_submenu(&mut self, text: &str, menu: Menu) {
+    pub fn add_submenu(&mut self, text: &str, mut menu: Menu) {
+        menu.parent_handle = Some(self.handle);
         let handle = RuntimeManager::get().get_menus().add(menu);
-        self.items.push(MenuItem::SubMenu(MenuSubMenuItem {
+        let item = MenuSubMenuItem {
             enabled: true,
             caption: Caption::new(text, true),
             submenu_handle: handle,
-        }));
+        };
+        self.items.push(MenuItem::SubMenu(item));
     }
     pub fn add_separator(&mut self) {
         self.items.push(MenuItem::Line(super::MenuLineItem {}));
@@ -292,7 +294,16 @@ impl Menu {
             );
         }
     }
-
+    pub(crate) fn update_children_with_parent_handle(&self) {
+        let menus = RuntimeManager::get().get_menus();
+        for item in self.items.iter() {
+            if let Some(child_handle) = item.get_submenu() {
+                if let Some(menu) = menus.get_mut(child_handle) {
+                    menu.parent_handle = Some(self.handle);
+                }                
+            }
+        }
+    }
     fn on_mouse_released(&mut self, x: i32, y: i32) -> EventProcessStatus {
         let mpi = MousePositionInfo::new(x, y, self);
         if (self.visible_items_count as usize) < self.items.len() {
