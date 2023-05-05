@@ -450,13 +450,7 @@ impl Menu {
         */
     }
     fn close(&mut self) {
-        todo!("must be implemented");
-        /*
-        if (this->Parent)
-            Application::GetApplication()->ShowContextualMenu(this->Parent);
-        else
-            Application::GetApplication()->CloseContextualMenu();
-            */
+        RuntimeManager::get().activate_opened_menu_parent();
     }
     fn run_item_action(&mut self, index: usize) {
         if index >= self.items.len() {

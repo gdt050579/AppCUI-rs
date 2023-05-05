@@ -200,6 +200,15 @@ impl RuntimeManager {
             self.opened_menu = Some(handle);
         }
     }
+    pub (crate) fn activate_opened_menu_parent(&mut self) {
+        let menus = unsafe { &mut *self.menus };
+        if let Some(menu) = menus.get_mut(handle) {
+            if let Some(parent) = menu.get_parent_handle() {
+
+            }
+        }
+        self.close_opened_menu();
+    }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
         self.recompute_layout = true;
