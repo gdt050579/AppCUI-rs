@@ -1,5 +1,6 @@
 use super::{
-    CommandBar, ControlHandleManager, InitializationData, InitializationFlags, Theme, ToolTip, Handle, MenuHandleManager,
+    CommandBar, ControlHandleManager, Handle, InitializationData, InitializationFlags,
+    MenuHandleManager, Theme, ToolTip,
 };
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, Event, EventProcessStatus};
@@ -182,29 +183,34 @@ impl RuntimeManager {
     pub(crate) fn get_menus(&self) -> &mut MenuHandleManager {
         unsafe { &mut *self.menus }
     }
-    pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption)->Option<MenuHandle> {
+    pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) -> Option<MenuHandle> {
         if let Some(menubar) = self.menubar.as_mut() {
             return Some(menubar.add(menu, caption));
         }
         None
     }
-    pub (crate) fn get_menu(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
+    pub(crate) fn get_menu(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
-    }    
-    pub (crate) fn show_menu(&mut self, handle: MenuHandle, x: i32, y: i32, max_size: Size) {
+    }
+    pub(crate) fn show_menu(&mut self, handle: MenuHandle, x: i32, y: i32, max_size: Size) {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
-            let term_size = Size::new(self.terminal.get_width(),self.terminal.get_height());
+            let term_size = Size::new(self.terminal.get_width(), self.terminal.get_height());
             menu.compute_position(x, y, max_size, term_size);
             self.opened_menu = Some(handle);
         }
     }
-    pub (crate) fn activate_opened_menu_parent(&mut self) {
+    pub(crate) fn activate_opened_menu_parent(&mut self) {
         let menus = unsafe { &mut *self.menus };
-        if let Some(menu) = menus.get_mut(handle) {
-            if let Some(parent) = menu.get_parent_handle() {
-
+        if let Some(curent_menu) = self.opened_menu {
+            if let Some(menu) = menus.get_mut(curent_menu) {
+                if let Some(parent_handle) = menu.get_parent_handle() {
+                    if let Some(_) = menus.get(parent_handle) {
+                        self.opened_menu = Some(parent_handle);
+                        return;
+                    }
+                }
             }
         }
         self.close_opened_menu();
@@ -256,7 +262,7 @@ impl RuntimeManager {
             }
         }
     }
-    fn get_opened_menu(&mut self)->Option<&mut Menu> {
+    fn get_opened_menu(&mut self) -> Option<&mut Menu> {
         if let Some(opened_menu_handle) = self.opened_menu {
             let menus = unsafe { &mut *self.menus };
             return menus.get_mut(opened_menu_handle);
@@ -268,7 +274,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         let mut parent = self.desktop_handler;
         let mut ctrl = controls.get(parent).unwrap();
-        
+
         loop {
             let base = ctrl.get_base();
             if base.focused_child_index.in_range(base.children.len()) {
@@ -836,7 +842,10 @@ impl RuntimeManager {
     fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
         // check contextual menus
         if let Some(menu) = self.get_opened_menu() {
-            if menu.on_mouse_pressed(event.x, event.y).is_processed_or_update() {
+            if menu
+                .on_mouse_pressed(event.x, event.y)
+                .is_processed_or_update()
+            {
                 self.repaint = true;
             }
         }
@@ -875,7 +884,7 @@ impl RuntimeManager {
                     menubar.on_mouse_pressed(event.x, event.y);
                 }
                 self.repaint = true;
-            },
+            }
         }
         self.mouse_locked_object = MouseLockedObject::None;
     }
