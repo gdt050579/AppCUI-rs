@@ -9,10 +9,10 @@ use super::WindowFlags;
 use crate::controls::events::*;
 use crate::controls::menu::Menu;
 use crate::controls::menu::MenuBar;
-use crate::system::Handle;
 use crate::controls::*;
 use crate::graphics::*;
 use crate::input::*;
+use crate::system::Handle;
 use crate::system::*;
 use crate::utils::Caption;
 use crate::utils::Strategy;
@@ -662,18 +662,14 @@ impl OnKeyPressed for Window {
         } else {
             match key.get_compact_code() {
                 key!("Tab") => {
-                    if let Some(my_handle) = self.handle {
-                        if let Some(new_child) = Window::find_next_control(my_handle, true, true) {
-                            RuntimeManager::get().request_focus_for_control(new_child);
-                        }
+                    if let Some(new_child) = Window::find_next_control(self.handle, true, true) {
+                        RuntimeManager::get().request_focus_for_control(new_child);
                     }
                     return EventProcessStatus::Processed;
                 }
                 key!("Shift+Tab") => {
-                    if let Some(my_handle) = self.handle {
-                        if let Some(new_child) = Window::find_next_control(my_handle, false, true) {
-                            RuntimeManager::get().request_focus_for_control(new_child);
-                        }
+                    if let Some(new_child) = Window::find_next_control(self.handle, false, true) {
+                        RuntimeManager::get().request_focus_for_control(new_child);
                     }
                     return EventProcessStatus::Processed;
                 }

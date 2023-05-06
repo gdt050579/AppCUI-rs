@@ -16,7 +16,7 @@ impl ControlHandleManager {
         if idx < self.controls.len() {
             let c = self.controls[idx].as_mut();
             if c.is_some() {
-                if c.as_ref().unwrap().get_base().handle.unwrap() == handle {
+                if c.as_ref().unwrap().get_base().handle == handle {
                     return c;
                 }
             }
@@ -30,11 +30,11 @@ impl ControlHandleManager {
     pub(crate) fn add(&mut self, mut manager: ControlManager) -> Handle {
         let idx = self.controls.len() as u32;
         let handle = Handle::new(idx);
-        manager.get_base_mut().handle = Some(handle);
+        manager.get_base_mut().handle = handle;
         // set the handle for all children
         for child in manager.get_base().children.iter() {
             if let Some(control) = self.get(*child) {
-                control.get_base_mut().parent = Some(handle);
+                control.get_base_mut().parent = handle;
             }
         }
         self.controls.push(Some(manager));

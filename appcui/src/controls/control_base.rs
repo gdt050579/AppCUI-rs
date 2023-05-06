@@ -32,8 +32,8 @@ struct Margins {
 pub struct ControlBase {
     layout: ControlLayout,
     margins: Margins,
-    pub(crate) handle: Option<Handle>,
-    pub(crate) parent: Option<Handle>,
+    pub(crate) handle: Handle,
+    pub(crate) parent: Handle,
     pub(crate) children: Vec<Handle>,
     pub(crate) focused_child_index: VectorIndex,
     pub(crate) parent_index: VectorIndex,
@@ -46,8 +46,8 @@ pub struct ControlBase {
 impl ControlBase {
     pub fn new(layout: Layout, status_flags: StatusFlags) -> Self {
         Self {
-            parent: None,
-            handle: None,
+            parent: Handle::None,
+            handle: Handle::None,
             children: Vec::new(),
             focused_child_index: VectorIndex::Invalid,
             parent_index: VectorIndex::Invalid,
@@ -121,8 +121,8 @@ impl ControlBase {
         // if yes, we shoudl request focus for it
         // if no, just request focus for the current control
 
-        if let Some(handle) = self.handle {
-            RuntimeManager::get().request_focus_for_control(handle);
+        if !self.handle.is_none() {
+            RuntimeManager::get().request_focus_for_control(self.handle);
             return true;
         }
         return false;
@@ -136,9 +136,7 @@ impl ControlBase {
         // if I am already registered, I will set the parent of my child
         let base = c.get_base_mut();
         let focusable = base.can_receive_input();
-        if let Some(handle) = self.handle {
-            base.parent = Some(handle);
-        }
+        base.parent = self.handle;
         let rm = RuntimeManager::get();
         let handle = rm.get_controls().add(c);
         self.children.push(handle);
@@ -263,12 +261,12 @@ impl ControlBase {
         return true;
     }
     pub(crate) fn raise_event(&self, event: Event) {
-        if let Some(handle) = self.handle {
-            RuntimeManager::get().send_event(event, handle);
+        if !self.handle.is_none() {
+            RuntimeManager::get().send_event(event, self.handle);
         }
     }
     pub(crate) fn send_command(&self, id: u32) {
-        if let Some(handle) = self.handle {
+        if !self.handle.is_none(){
             RuntimeManager::get().send_command(id);
         }
     }

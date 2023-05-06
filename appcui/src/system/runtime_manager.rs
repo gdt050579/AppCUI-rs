@@ -105,7 +105,7 @@ impl RuntimeManager {
             .get(manager.desktop_handler)
             .unwrap()
             .get_base_mut()
-            .handle = Some(manager.desktop_handler);
+            .handle = manager.desktop_handler;
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
@@ -307,9 +307,8 @@ impl RuntimeManager {
                     return;
                 }
             }
-            if let Some(parent) = control.get_base().parent {
-                h = parent;
-            } else {
+            h = control.get_base().parent;
+            if h.is_none() {
                 break;
             }
         }
@@ -336,9 +335,8 @@ impl RuntimeManager {
                     return;
                 }
             }
-            if let Some(parent) = control.get_base().parent {
-                h = parent;
-            } else {
+            h = control.get_base().parent;
+            if h.is_none() {
                 break;
             }
         }
@@ -362,9 +360,8 @@ impl RuntimeManager {
                 if !control.get_base_mut().mark_to_receive_focus() {
                     break true;
                 }
-                if let Some(parent) = control.get_base().parent {
-                    h = parent;
-                } else {
+                h = control.get_base().parent;
+                if h.is_none() {
                     break false; // all good, we reached the desktop
                 }
             } else {
@@ -386,11 +383,8 @@ impl RuntimeManager {
                 }
                 control.get_base_mut().update_focus_flag(false);
                 control.get_control_mut().on_lose_focus();
-                if let Some(parent) = control.get_base().parent {
-                    h = parent;
-                } else {
-                    break;
-                }
+                h = control.get_base().parent;
+                if h.is_none() { break; }
             }
         }
 
