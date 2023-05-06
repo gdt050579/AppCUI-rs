@@ -24,7 +24,7 @@ pub struct Menu {
     pub(super) button_down: MenuButtonState,
     pub(super) clip: ClipArea,
     pub(super) handle: MenuHandle,
-    pub(super) parent_handle: Option<MenuHandle>,
+    pub(super) parent_handle: MenuHandle,
 }
 impl Menu {
     pub fn new() -> Self {
@@ -38,8 +38,8 @@ impl Menu {
             button_up: MenuButtonState::Normal,
             button_down: MenuButtonState::Normal,
             clip: ClipArea::new(0, 0, 1, 1),
-            handle: MenuHandle::default(),
-            parent_handle: None,
+            handle: MenuHandle::None,
+            parent_handle: MenuHandle::None,
         }
     }
 
@@ -70,7 +70,7 @@ impl Menu {
         }));
     }
     pub fn add_submenu(&mut self, text: &str, mut menu: Menu) {
-        menu.parent_handle = Some(self.handle);
+        menu.parent_handle = self.handle;
         let handle = RuntimeManager::get().get_menus().add(menu);
         let item = MenuSubMenuItem {
             enabled: true,
@@ -693,7 +693,8 @@ impl Menu {
     pub(crate) fn set_handle(&mut self, handle: MenuHandle) {
         self.handle = handle;
     }
-    pub(crate) fn get_parent_handle(&self) -> Option<MenuHandle> {
+    #[inline(always)]
+    pub(crate) fn get_parent_handle(&self) -> MenuHandle {
         self.parent_handle
     }
 }

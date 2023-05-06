@@ -54,7 +54,7 @@ pub(crate) struct RuntimeManager {
     events: Vec<EmittedEvent>,
     commands: Vec<u32>,
     mouse_locked_object: MouseLockedObject,
-    opened_menu: Option<MenuHandle>,
+    opened_menu_handle: MenuHandle,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -77,7 +77,7 @@ impl RuntimeManager {
             request_focus: None,
             current_focus: None,
             mouse_over_control: None,
-            opened_menu: None,
+            opened_menu_handle: MenuHandle::None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
             commands: Vec::with_capacity(8),
@@ -151,8 +151,8 @@ impl RuntimeManager {
         self.tooltip.hide();
     }
     pub(crate) fn close_opened_menu(&mut self) {
-        if self.opened_menu.is_some() {
-            self.opened_menu = None;
+        if !self.opened_menu_handle.is_none() {
+            self.opened_menu_handle = MenuHandle::None;
             self.repaint = true;
         }
     }
@@ -198,21 +198,20 @@ impl RuntimeManager {
         if let Some(menu) = menus.get_mut(handle) {
             let term_size = Size::new(self.terminal.get_width(), self.terminal.get_height());
             menu.compute_position(x, y, max_size, term_size);
-            self.opened_menu = Some(handle);
+            self.opened_menu_handle = Some(handle);
         }
     }
     pub(crate) fn activate_opened_menu_parent(&mut self) {
         let menus = unsafe { &mut *self.menus };
-        if let Some(curent_menu) = self.opened_menu {
-            if let Some(menu) = menus.get_mut(curent_menu) {
-                if let Some(parent_handle) = menu.get_parent_handle() {
-                    if let Some(_) = menus.get(parent_handle) {
-                        self.opened_menu = Some(parent_handle);
-                        return;
-                    }
+        if let Some(menu) = menus.get_mut(self.opened_menu_handle) {
+            if let Some(parent_handle) = menu.get_parent_handle() {
+                if let Some(_) = menus.get(parent_handle) {
+                    self.opened_menu_handle = Some(parent_handle);
+                    return;
                 }
             }
         }
+
         self.close_opened_menu();
     }
     pub(crate) fn run(&mut self) {
@@ -263,12 +262,11 @@ impl RuntimeManager {
         }
     }
     fn get_opened_menu(&mut self) -> Option<&mut Menu> {
-        if let Some(opened_menu_handle) = self.opened_menu {
-            let menus = unsafe { &mut *self.menus };
-            return menus.get_mut(opened_menu_handle);
-        } else {
-            None
+        if self.opened_menu_handle.is_none() {
+            return None;
         }
+        let menus = unsafe { &mut *self.menus };
+        return menus.get_mut(self.opened_menu_handle);
     }
     fn get_focused_control(&self) -> Handle {
         let controls = unsafe { &mut *self.controls };
@@ -481,9 +479,9 @@ impl RuntimeManager {
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);
         }
-        if let Some(opened_menu_handle) = self.opened_menu {
+        if !self.opened_menu_handle.is_none() {
             self.surface.reset();
-            self.paint_menu(opened_menu_handle, true);
+            self.paint_menu(self.opened_menu_handle, true);
         }
         self.terminal.update_screen(&self.surface);
     }
@@ -651,7 +649,7 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
             parent_handle = menu.get_parent_handle();
-            if Some(handle) == self.opened_menu {
+            if handle == self.opened_menu_handle {
                 result = menu.on_mouse_pressed(x, y);
             } else {
                 result = if menu.is_on_menu(x, y) {
@@ -673,7 +671,7 @@ impl RuntimeManager {
             }
             MousePressedResult::Activate => {
                 self.repaint = true;
-                self.opened_menu = Some(handle);
+                self.opened_menu_handle = handle;
             }
         }
 
@@ -836,8 +834,8 @@ impl RuntimeManager {
         // Hide ToolTip
         self.hide_tooltip();
         // check contextual menu
-        if let Some(menu_handle) = self.opened_menu {
-            self.process_menu_mouse_click(menu_handle, event.x, event.y);
+        if !self.opened_menu_handle.is_none() {
+            self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y);
             return;
         }
         // check main menu
