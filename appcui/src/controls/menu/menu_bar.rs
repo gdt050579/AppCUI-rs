@@ -112,9 +112,6 @@ impl MenuBar {
                 self.y + 1,
                 Size::new(0, 0),
             )
-            // Items[menuIndex]->Mnu.Show(this->Parent, this->X + Items[menuIndex]->X, this->Y + 1);
-            // // set the owner
-            // ((MenuContext*) (Items[menuIndex]->Mnu.Context))->Owner = this;
         }
     }
     #[inline(always)]
@@ -196,7 +193,6 @@ impl MenuBar {
                 );
             }
             surface.write_text(item.caption.get_text(), &format);
-            //GDT: spaces around the text are missing (to be fixed)
         }
     }
 }

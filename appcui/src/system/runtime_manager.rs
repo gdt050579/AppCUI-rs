@@ -4,7 +4,7 @@ use super::{
 };
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, Event, EventProcessStatus};
-use crate::controls::menu::{Menu, MenuBar, MenuHandle};
+use crate::controls::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::controls::ControlManager;
 use crate::controls::*;
 use crate::graphics::{Point, Rect, Size, Surface};
@@ -645,6 +645,66 @@ impl RuntimeManager {
         return processed;
     }
 
+    fn process_menu_mouse_click(&mut self, handle: MenuHandle, x: i32, y: i32) {
+        let mut result = MousePressedResult::None;
+        let mut parent_handle = None;
+        let menus = unsafe { &mut *self.menus };
+        if let Some(menu) = menus.get_mut(handle) {
+            parent_handle = menu.get_parent_handle();
+            if Some(handle) == self.opened_menu {
+                result = menu.on_mouse_pressed(x, y);
+            } else {
+                result = if menu.is_on_menu(x, y) {
+                    MousePressedResult::Activate
+                } else {
+                    MousePressedResult::CheckParent
+                };
+            }
+        }
+        match result {
+            MousePressedResult::None => {}
+            MousePressedResult::Repaint => self.repaint = true,
+            MousePressedResult::CheckParent => {
+                if let Some(p_handle) = parent_handle {
+                    self.process_menu_mouse_click(p_handle, x, y);
+                } else {
+                    self.close_opened_menu();
+                }
+            }
+            MousePressedResult::Activate => {
+                self.repaint = true;
+                self.opened_menu = Some(handle);
+            }
+        }
+
+        /*
+        void ApplicationImpl::ProcessMenuMouseClick(Controls::Menu* mnu, int x, int y)
+        {
+
+            switch (result)
+            {
+            case MousePressedResult::None:
+                break;
+            case MousePressedResult::Repaint:
+                RepaintStatus |= REPAINT_STATUS_DRAW;
+                break;
+            case MousePressedResult::CheckParent:
+                if (mcx->Parent)
+                    ProcessMenuMouseClick(mcx->Parent, x, y);
+                else
+                    this->CloseContextualMenu();
+                break;
+            case MousePressedResult::Activate:
+                RepaintStatus |= REPAINT_STATUS_DRAW;
+                ShowContextualMenu(mnu);
+                break;
+            }
+        }
+
+
+        */
+    }
+
     fn process_terminal_resize_event(&mut self, new_size: Size) {
         // sanity checks
         if (new_size.width == 0) || (new_size.height == 0) {
@@ -776,13 +836,10 @@ impl RuntimeManager {
         // Hide ToolTip
         self.hide_tooltip();
         // check contextual menu
-        /*
-            if (this->VisibleMenu)
-            {
-                ProcessMenuMouseClick(this->VisibleMenu, x, y);
-                return;
-            }
-        */
+        if let Some(menu_handle) = self.opened_menu {
+            self.process_menu_mouse_click(menu_handle, event.x, event.y);
+            return;
+        }
         // check main menu
         if let Some(menu) = self.menubar.as_mut() {
             if menu.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
@@ -843,16 +900,12 @@ impl RuntimeManager {
         // check contextual menus
         if let Some(menu) = self.get_opened_menu() {
             if menu
-                .on_mouse_pressed(event.x, event.y)
+                .on_mouse_released(event.x, event.y)
                 .is_processed_or_update()
             {
                 self.repaint = true;
             }
         }
-        /*if (this->VisibleMenu)
-        {
-            ProcessMenuMouseReleased(this->VisibleMenu, x, y);
-        }*/
         match self.mouse_locked_object {
             MouseLockedObject::None => {}
             MouseLockedObject::Control(handle) => {
@@ -925,6 +978,14 @@ impl Drop for RuntimeManager {
 }
 
 /*
+void ApplicationImpl::ProcessMenuMouseReleased(Controls::Menu* mnu, int x, int y)
+{
+    auto* mcx   = reinterpret_cast<MenuContext*>(mnu->Context);
+    bool result = mcx->OnMouseReleased(x - mcx->ScreenClip.ScreenPosition.X, y - mcx->ScreenClip.ScreenPosition.Y);
+    if (result)
+        RepaintStatus |= REPAINT_STATUS_DRAW;
+}
+
 bool ApplicationImpl::ExecuteEventLoop(Control* ctrl, bool resetState)
 {
     CHECK(app->Inited, false, "Application has not been corectly initialized !");

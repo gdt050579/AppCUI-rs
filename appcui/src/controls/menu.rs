@@ -12,12 +12,14 @@ mod menu_checkbox_item;
 mod menu_radiobox_item;
 mod menu_line_item;
 mod menu_submenu_item;
+mod mouse_press_result;
 
 pub (self) use self::menu_item::MenuItem;
 pub use self::menu::Menu;
 pub use self::menu_item_handle::MenuItemHandle;
 pub use self::menu_handle::MenuHandle;
 pub (crate) use self::menu_bar::MenuBar;
+pub (crate) use self::mouse_press_result::MousePressedResult;
 pub (self) use self::menu_bar_item::MenuBarItem;
 
 pub (self) use self::menu_command_item::MenuCommandItem;

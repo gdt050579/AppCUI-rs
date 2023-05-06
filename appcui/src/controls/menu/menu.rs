@@ -1,6 +1,6 @@
 use super::{
     menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuCheckBoxItem,
-    MenuCommandItem, MenuHandle, MenuItem, MenuItemHandle, MenuRadioBoxItem, MenuSubMenuItem,
+    MenuCommandItem, MenuHandle, MenuItem, MenuRadioBoxItem, MenuSubMenuItem, MousePressedResult,
 };
 use crate::{
     controls::events::EventProcessStatus,
@@ -82,8 +82,8 @@ impl Menu {
     pub fn add_separator(&mut self) {
         self.items.push(MenuItem::Line(super::MenuLineItem {}));
     }
-    fn is_on_menu(&self, x: i32, y: i32) -> bool {
-        MousePositionInfo::new(x, y, &self).is_on_menu
+    pub(crate) fn is_on_menu(&self, x: i32, y: i32) -> bool {
+        MousePositionInfo::new(x - self.clip.left, y - self.clip.top, &self).is_on_menu
     }
     fn update_first_visible_item(&mut self) {
         if !self.current.in_range(self.items.len()) {
@@ -300,11 +300,13 @@ impl Menu {
             if let Some(child_handle) = item.get_submenu() {
                 if let Some(menu) = menus.get_mut(child_handle) {
                     menu.parent_handle = Some(self.handle);
-                }                
+                }
             }
         }
     }
-    fn on_mouse_released(&mut self, x: i32, y: i32) -> EventProcessStatus {
+    pub(crate) fn on_mouse_released(&mut self, x: i32, y: i32) -> EventProcessStatus {
+        let x = x - self.clip.left;
+        let y = y - self.clip.top;
         let mpi = MousePositionInfo::new(x, y, self);
         if (self.visible_items_count as usize) < self.items.len() {
             if (mpi.is_on_up_button) && (self.first_visible_item > 0) {
@@ -379,7 +381,7 @@ impl Menu {
         }
         return EventProcessStatus::Ignored;
     }
-    pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
+    pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> MousePressedResult {
         let x = x - self.clip.left;
         let y = y - self.clip.top;
         let mpi = MousePositionInfo::new(x, y, self);
@@ -388,8 +390,8 @@ impl Menu {
             if (mpi.is_on_up_button) && (self.first_visible_item > 0) {
                 self.button_up = MenuButtonState::Pressed;
                 self.on_mouse_wheel(MouseWheelDirection::Up);
-                return EventProcessStatus::Processed;
-                // return MousePressedResult::Repaint;
+                //return EventProcessStatus::Processed;
+                return MousePressedResult::Repaint;
             }
             if (mpi.is_on_down_button)
                 && ((self.visible_items_count + self.first_visible_item) as usize)
@@ -397,25 +399,21 @@ impl Menu {
             {
                 self.button_down = MenuButtonState::Pressed;
                 self.on_mouse_wheel(MouseWheelDirection::Down);
-                return EventProcessStatus::Processed;
-                // return MousePressedResult::Repaint;
+                return MousePressedResult::Repaint;
             }
         }
         // if click on a valid item, apply the action and close the menu
         if mpi.item_index.is_valid() {
             self.run_item_action(mpi.item_index.index());
-            return EventProcessStatus::Processed;
-            // return MousePressedResult::Repaint;
+            return MousePressedResult::Repaint;
         }
 
         // is it's on the menu -> do nothing
         if mpi.is_on_menu {
-            return EventProcessStatus::Cancel;
-            // return MousePressedResult::None;
+            return MousePressedResult::None;
         }
         // if it's outsize, check if mouse is on one of its parens
-        return EventProcessStatus::Ignored;
-        // return MousePressedResult::CheckParent;
+        return MousePressedResult::CheckParent;
     }
 
     fn check_radio_item(&mut self, index: usize) {
@@ -473,7 +471,7 @@ impl Menu {
                     item.submenu_handle,
                     (self.width as i32) + self.clip.left,
                     self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
-                    Size::new(0,0),
+                    Size::new(0, 0),
                 );
                 None
                 /*
