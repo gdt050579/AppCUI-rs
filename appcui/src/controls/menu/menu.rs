@@ -46,7 +46,7 @@ impl Menu {
     pub fn add_command(&mut self, text: &str, shortcut: Key, command_id: u32) {
         self.items.push(MenuItem::Command(MenuCommandItem {
             enabled: true,
-            commandID: command_id,
+            command_id,
             caption: Caption::new(text, true),
             shortcut,
         }));
@@ -54,7 +54,7 @@ impl Menu {
     pub fn add_checkbox(&mut self, text: &str, shortcut: Key, command_id: u32, checked: bool) {
         self.items.push(MenuItem::CheckBox(MenuCheckBoxItem {
             enabled: true,
-            commandID: command_id,
+            command_id,
             caption: Caption::new(text, true),
             shortcut,
             checked,
@@ -63,7 +63,7 @@ impl Menu {
     pub fn add_radiobox(&mut self, text: &str, shortcut: Key, command_id: u32, checked: bool) {
         self.items.push(MenuItem::RadioBox(MenuRadioBoxItem {
             enabled: true,
-            commandID: command_id,
+            command_id,
             caption: Caption::new(text, true),
             shortcut,
             checked,
@@ -183,18 +183,18 @@ impl Menu {
                 if shortcut == key {
                     match item {
                         MenuItem::Command(item) => {
-                            let cmd_id = item.commandID;
+                            let cmd_id = item.command_id;
                             self.send_command(cmd_id);
                             return true;
                         }
                         MenuItem::CheckBox(item) => {
                             item.checked = !item.checked;
-                            let cmd_id = item.commandID;
+                            let cmd_id = item.command_id;
                             self.send_command(cmd_id);
                             return true;
                         }
                         MenuItem::RadioBox(item) => {
-                            let cmd_id = item.commandID;
+                            let cmd_id = item.command_id;
                             self.check_radio_item(index);
                             self.send_command(cmd_id);
                             return true;
@@ -457,13 +457,13 @@ impl Menu {
             return;
         }
         let command = match &mut self.items[index] {
-            MenuItem::Command(item) => Some(item.commandID),
+            MenuItem::Command(item) => Some(item.command_id),
             MenuItem::CheckBox(item) => {
                 item.checked = !item.checked;
-                Some(item.commandID)
+                Some(item.command_id)
             }
             MenuItem::RadioBox(item) => {
-                let cmd_id = item.commandID;
+                let cmd_id = item.command_id;
                 self.check_radio_item(index);
                 Some(cmd_id)
             }

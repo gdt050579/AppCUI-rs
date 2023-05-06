@@ -83,9 +83,9 @@ impl MenuItem {
     #[inline(always)]
     pub(super) fn get_command(&self) -> Option<u32> {
         match self {
-            MenuItem::Command(item) => Some(item.commandID),
-            MenuItem::CheckBox(item) => Some(item.commandID),
-            MenuItem::RadioBox(item) => Some(item.commandID),
+            MenuItem::Command(item) => Some(item.command_id),
+            MenuItem::CheckBox(item) => Some(item.command_id),
+            MenuItem::RadioBox(item) => Some(item.command_id),
             MenuItem::Line(_) => None,
             MenuItem::SubMenu(_) => None,
         }

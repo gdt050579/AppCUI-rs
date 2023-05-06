@@ -8,7 +8,7 @@ use crate::{
 pub(super) struct MenuRadioBoxItem {
     pub(super) enabled: bool,
     pub(super) checked: bool,
-    pub(super) commandID: u32,
+    pub(super) command_id: u32,
     pub(super) caption: Caption,
     pub(super) shortcut: Key,
 }
