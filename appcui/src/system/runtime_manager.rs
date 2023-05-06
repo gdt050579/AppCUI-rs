@@ -198,20 +198,18 @@ impl RuntimeManager {
         if let Some(menu) = menus.get_mut(handle) {
             let term_size = Size::new(self.terminal.get_width(), self.terminal.get_height());
             menu.compute_position(x, y, max_size, term_size);
-            self.opened_menu_handle = Some(handle);
+            self.opened_menu_handle = handle;
         }
     }
     pub(crate) fn activate_opened_menu_parent(&mut self) {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(self.opened_menu_handle) {
-            if let Some(parent_handle) = menu.get_parent_handle() {
-                if let Some(_) = menus.get(parent_handle) {
-                    self.opened_menu_handle = Some(parent_handle);
-                    return;
-                }
+            let parent_handle = menu.get_parent_handle();
+            if let Some(_) = menus.get(parent_handle) {
+                self.opened_menu_handle = parent_handle;
+                return;
             }
         }
-
         self.close_opened_menu();
     }
     pub(crate) fn run(&mut self) {
@@ -500,11 +498,12 @@ impl RuntimeManager {
         }
     }
     fn paint_menu(&mut self, handle: MenuHandle, activ: bool) {
+        if handle.is_none() {
+            return;
+        }
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get(handle) {
-            if let Some(parent_menu_handle) = menu.get_parent_handle() {
-                self.paint_menu(parent_menu_handle, false);
-            }
+            self.paint_menu(menu.get_parent_handle(), false);
             menu.paint(&mut self.surface, &self.theme, activ);
         }
     }
@@ -645,7 +644,7 @@ impl RuntimeManager {
 
     fn process_menu_mouse_click(&mut self, handle: MenuHandle, x: i32, y: i32) {
         let mut result = MousePressedResult::None;
-        let mut parent_handle = None;
+        let mut parent_handle = MenuHandle::None;
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
             parent_handle = menu.get_parent_handle();
@@ -663,8 +662,8 @@ impl RuntimeManager {
             MousePressedResult::None => {}
             MousePressedResult::Repaint => self.repaint = true,
             MousePressedResult::CheckParent => {
-                if let Some(p_handle) = parent_handle {
-                    self.process_menu_mouse_click(p_handle, x, y);
+                if !parent_handle.is_none() {
+                    self.process_menu_mouse_click(parent_handle, x, y);
                 } else {
                     self.close_opened_menu();
                 }
@@ -951,7 +950,7 @@ impl RuntimeManager {
         } else {
             print!("?.");
         }
-        print!("[ID:{},Index:{}],", handle.get_id(), handle.get_index());
+        //print!("[ID:{},Index:{}],", handle.get_id(), handle.get_index());
         print!("  Children: {}", base.children.len());
         if base.focused_child_index.is_valid() {
             print!("  Idx:{}", base.focused_child_index.index());

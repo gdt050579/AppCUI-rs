@@ -299,7 +299,7 @@ impl Menu {
         for item in self.items.iter() {
             if let Some(child_handle) = item.get_submenu() {
                 if let Some(menu) = menus.get_mut(child_handle) {
-                    menu.parent_handle = Some(self.handle);
+                    menu.parent_handle = self.handle;
                 }
             }
         }
