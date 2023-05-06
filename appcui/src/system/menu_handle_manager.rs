@@ -10,6 +10,9 @@ impl MenuHandleManager {
         }
     }
     pub(crate) fn get_mut(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
+        if handle.is_none() {
+            return None;
+        }
         let idx = handle.get_index();
         if idx < self.items.len() {
             let m = self.items[idx].as_mut();
@@ -22,6 +25,9 @@ impl MenuHandleManager {
         None
     }
     pub(crate) fn get(&mut self, handle: MenuHandle) -> Option<&Menu> {
+        if handle.is_none() {
+            return None;
+        }
         let idx = handle.get_index();
         if idx < self.items.len() {
             let m = self.items[idx].as_ref();

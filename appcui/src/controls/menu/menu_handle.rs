@@ -6,6 +6,7 @@ pub struct MenuHandle {
     handle: Handle,
 }
 impl MenuHandle {
+    pub const None: MenuHandle = MenuHandle { handle: Handle::None };
     pub fn new(index: u32) -> Self {
         Self {
             handle: Handle::new(index),
