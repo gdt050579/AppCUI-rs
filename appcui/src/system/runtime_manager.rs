@@ -387,7 +387,9 @@ impl RuntimeManager {
                 control.get_base_mut().update_focus_flag(false);
                 control.get_control_mut().on_lose_focus();
                 h = control.get_base().parent;
-                if h.is_none() { break; }
+                if h.is_none() {
+                    break;
+                }
             }
         }
 
@@ -513,20 +515,34 @@ impl RuntimeManager {
     }
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
-        let processed = match self.process_control_keypressed_event(
-            self.desktop_handler,
-            event.key,
-            event.character,
-        ) {
-            EventProcessStatus::Processed | EventProcessStatus::Update => true,
-            _ => false
+        // check controls first
+        if self
+            .process_control_keypressed_event(self.desktop_handler, event.key, event.character)
+            .is_processed_or_update()
+        {
+            self.repaint = true;
+            return;
         };
-        self.repaint |= processed;
-        if !processed {
-            if let Some(menubar) = self.menubar.as_mut() {
-                if menubar.on_key_event(event.key).is_processed_or_update() {
-                    self.repaint = true;
-                }
+        // check for a menu on_key_event
+        if let Some(menu) = self.get_opened_menu() {
+            if menu.on_key_pressed(event.key).is_processed_or_update() {
+                self.repaint = true;
+                return;
+            }
+        }
+        // check the menubar
+        if let Some(menubar) = self.menubar.as_mut() {
+            if menubar.on_key_event(event.key).is_processed_or_update() {
+                self.repaint = true;
+                return;
+            }
+        }
+        // check cmdbar
+        if let Some(cmdbar) = self.commandbar.as_mut() {
+            if let Some(command_id) = cmdbar.get_command(event.key) {
+                self.send_command(command_id);
+                self.repaint = true;
+                return;
             }
         }
     }
@@ -729,7 +745,9 @@ impl RuntimeManager {
     }
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
         if let Some(menu) = self.get_opened_menu() {
-            self.repaint |= menu.on_mouse_wheel(event.direction).is_processed_or_update();
+            self.repaint |= menu
+                .on_mouse_wheel(event.direction)
+                .is_processed_or_update();
             return;
         }
         match self.mouse_locked_object {

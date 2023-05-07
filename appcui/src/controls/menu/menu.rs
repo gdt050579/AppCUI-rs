@@ -485,7 +485,7 @@ impl Menu {
         }
     }
 
-    fn on_key_pressed(&mut self, key: Key) -> EventProcessStatus {
+    pub(crate) fn on_key_pressed(&mut self, key: Key) -> EventProcessStatus {
         match key.code {
             KeyCode::Up
             | KeyCode::Down
