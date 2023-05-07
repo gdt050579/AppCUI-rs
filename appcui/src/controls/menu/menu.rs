@@ -3,7 +3,7 @@ use super::{
     MenuCommandItem, MenuHandle, MenuItem, MenuRadioBoxItem, MenuSubMenuItem, MousePressedResult,
 };
 use crate::{
-    controls::events::EventProcessStatus,
+    controls::events::{EventProcessStatus, Event},
     graphics::{
         Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
         TextFormat, TextWrap,
@@ -119,7 +119,7 @@ impl Menu {
             return;
         }
         // if CurrentItem is MenuItem::INVALID_INDEX ==> select the first available item
-        if self.current.in_range(items_count) {
+        if !self.current.in_range(items_count) {
             self.current.set(idx[0], self.items.len(), false);
         } else {
             // make sure that this->CurrentItem is part of the list
@@ -505,15 +505,11 @@ impl Menu {
                 return EventProcessStatus::Processed;
             }
             KeyCode::Left => {
-                todo!("not implemented yet");
-                /*
-                            if (this->Parent)
-                            {
-                                CloseMenu();
-                                return true;
-                            }
-                            return false;
-                */
+                if self.parent_handle.is_none() {
+                    return EventProcessStatus::Ignored;
+                }
+                RuntimeManager::get().activate_opened_menu_parent();
+                return EventProcessStatus::Processed;
             }
             KeyCode::Right => {
                 if self.current.in_range(self.items.len()) {
