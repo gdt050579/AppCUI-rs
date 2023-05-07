@@ -5,27 +5,31 @@ use appcui::system::*;
 use appcui::terminals::TerminalType;
 
 fn main() -> Result<(), appcui::system::Error> {
+    // let script = "
+    //     Key.Pressed(Tab)
+    //     Paint('all checkboxes are checked')
+    //     //CheckHash(0xECEDF66E8A6A588C)
+    //     Key.Pressed(Enter)
+    //     Resize(50,16)
+    //     //Paint('Checkbox is not checked')
+    //     //CheckHash(0x9FADB347088D23A5)
+    //     Mouse.Move(16,0)
+    //     //Paint('After mouse move')
+    //     //CheckHash(0x68FB99AFFF8F9CF5)
+    //     Mouse.Click(16,0,left)
+    //     Paint('After mouse click')
+    //     Mouse.Move(16,2);
+    //     Paint('After mouse move')
+    //     Mouse.Click(16,2,left)
+    //     Paint('Show sub-menu')
+    // ";
     let script = "
-        Key.Pressed(Tab)
-        Paint('all checkboxes are checked')
-        //CheckHash(0xECEDF66E8A6A588C)
-        Key.Pressed(Enter)
-        Resize(50,16)
-        //Paint('Checkbox is not checked')
-        //CheckHash(0x9FADB347088D23A5)
-        Mouse.Move(16,0)
-        //Paint('After mouse move')
-        //CheckHash(0x68FB99AFFF8F9CF5)
-        Mouse.Click(16,0,left)
-        Paint('After mouse click')
-        Mouse.Move(16,2);
-        Paint('After mouse move')
-        Mouse.Click(16,2,left)
-        Paint('Show sub-menu')
+        Key.Pressed(Alt+S)
+        Key.Pressed(Left)
     ";
-    //let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
+    let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;
-    let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
+    //let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
     let mut w = Window::new(
         "Simple window",
         Layout::new("d:c,w:40,h:10"),

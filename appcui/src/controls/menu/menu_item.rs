@@ -5,7 +5,7 @@ use crate::{
 };
 
 use super::{
-    Menu, MenuCheckBoxItem, MenuCommandItem, MenuHandle, MenuLineItem, MenuRadioBoxItem,
+    MenuCheckBoxItem, MenuCommandItem, MenuHandle, MenuLineItem, MenuRadioBoxItem,
     MenuSubMenuItem,
 };
 

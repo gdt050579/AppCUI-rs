@@ -86,6 +86,7 @@ impl<'a> CommandParser<'a> {
             b'.' => true,
             b'_' => true,
             b'-' => true,
+            b'+' => true,
             b'0'..=b'9' => true,
             _ => false,
         }
@@ -301,7 +302,7 @@ impl<'a> CommandParser<'a> {
                     // found the ending ')'
                     return Ok(());
                 }
-                b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'-' => {
+                b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'-' | b'+' => {
                     if self.count >= 4 {
                         return Err(ParserError::from_parser(
                             "Too many parameters (max allowed is 4)",
