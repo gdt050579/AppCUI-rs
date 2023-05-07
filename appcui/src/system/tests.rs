@@ -13,7 +13,6 @@ use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::terminals::MouseButtonDownEvent;
-use crate::terminals::MouseButtonUpEvent;
 use crate::terminals::MouseMoveEvent;
 
 fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
