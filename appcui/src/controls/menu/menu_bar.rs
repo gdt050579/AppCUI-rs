@@ -99,7 +99,7 @@ impl MenuBar {
         return EventProcessStatus::Ignored;
     }
 
-    fn close(&mut self) {
+    pub(crate) fn close(&mut self) {
         self.opened_item = VectorIndex::Invalid;
         self.hovered_item = VectorIndex::Invalid;
     }

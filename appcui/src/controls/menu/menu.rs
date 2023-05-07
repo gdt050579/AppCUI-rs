@@ -441,11 +441,9 @@ impl Menu {
         self.items[index].set_checked(true);
     }
     fn send_command(&mut self, command_id: u32) {
-        RuntimeManager::get().send_command(command_id);
-        /*
-        Application::GetApplication()->CloseContextualMenu();
-        Application::GetApplication()->SendCommand(commandID);
-        */
+        let rm = RuntimeManager::get();
+        rm.close_opened_menu();
+        rm.send_command(command_id);
     }
     fn close(&mut self) {
         RuntimeManager::get().activate_opened_menu_parent();
@@ -484,7 +482,6 @@ impl Menu {
         };
         if let Some(cmd) = command {
             self.send_command(cmd);
-            self.close();
         }
     }
 

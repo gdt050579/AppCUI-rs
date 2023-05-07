@@ -154,6 +154,9 @@ impl RuntimeManager {
         if !self.opened_menu_handle.is_none() {
             self.opened_menu_handle = MenuHandle::None;
             self.repaint = true;
+            if let Some(menubar) = self.menubar.as_mut() {
+                menubar.close();
+            }
         }
     }
     pub(crate) fn send_event(&mut self, event: Event, sender: Handle) {
