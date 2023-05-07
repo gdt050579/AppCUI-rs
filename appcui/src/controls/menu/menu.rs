@@ -422,7 +422,7 @@ impl Menu {
         if index >= count {
             return;
         }
-        if self.items[index].is_radiobox() {
+        if !self.items[index].is_radiobox() {
             return;
         }
         let mut idx = index;
