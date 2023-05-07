@@ -8,6 +8,7 @@ pub struct Handle {
 }
 
 impl Handle {
+    #[allow(non_upper_case_globals)]
     pub const None: Handle = Handle { value: u64::MAX };
     pub(crate) fn new(index: u32) -> Self {
         let id = ((GLOBAL_ID.fetch_add(1, Ordering::SeqCst) as u32) % 0xFFFF_FFFE) as u64;

@@ -6,6 +6,7 @@ pub struct MenuHandle {
     handle: Handle,
 }
 impl MenuHandle {
+    #[allow(non_upper_case_globals)]
     pub const None: MenuHandle = MenuHandle { handle: Handle::None };
     pub fn new(index: u32) -> Self {
         Self {
