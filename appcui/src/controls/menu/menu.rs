@@ -364,7 +364,7 @@ impl Menu {
             }
         }
     }
-    fn on_mouse_wheel(&mut self, direction: MouseWheelDirection) -> EventProcessStatus {
+    pub(crate) fn on_mouse_wheel(&mut self, direction: MouseWheelDirection) -> EventProcessStatus {
         if (self.visible_items_count as usize) >= self.items.len() {
             // nothing to scroll
             return EventProcessStatus::Ignored;
@@ -484,6 +484,7 @@ impl Menu {
         };
         if let Some(cmd) = command {
             self.send_command(cmd);
+            self.close();
         }
     }
 

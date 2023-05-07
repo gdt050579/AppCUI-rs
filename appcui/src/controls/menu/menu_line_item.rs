@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Surface, TextFormat, LineType}, system::MenuTheme,
+    graphics::{Surface, LineType}, system::MenuTheme,
 };
 
 pub(super) struct MenuLineItem {

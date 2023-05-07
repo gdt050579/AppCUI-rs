@@ -23,9 +23,9 @@ fn main() -> Result<(), appcui::system::Error> {
         Mouse.Click(16,2,left)
         Paint('Show sub-menu')
     ";
-    let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
+    //let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;
-    //let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
+    let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
     let mut w = Window::new(
         "Simple window",
         Layout::new("d:c,w:40,h:10"),

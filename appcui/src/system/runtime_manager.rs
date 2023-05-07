@@ -717,13 +717,10 @@ impl RuntimeManager {
         self.recompute_layout = true;
     }
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
-        // if (this->VisibleMenu)
-        // {
-        //     auto* mcx = reinterpret_cast<MenuContext*>(this->VisibleMenu->Context);
-        //     if (mcx->OnMouseWheel(x, y, direction))
-        //         RepaintStatus |= REPAINT_STATUS_DRAW;
-        //     return;
-        // }
+        if let Some(menu) = self.get_opened_menu() {
+            self.repaint |= menu.on_mouse_wheel(event.direction).is_processed_or_update();
+            return;
+        }
         match self.mouse_locked_object {
             MouseLockedObject::None => {}
             _ => return,
