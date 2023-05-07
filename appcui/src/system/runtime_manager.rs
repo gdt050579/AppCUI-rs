@@ -513,13 +513,21 @@ impl RuntimeManager {
     }
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
-        match self.process_control_keypressed_event(
+        let processed = match self.process_control_keypressed_event(
             self.desktop_handler,
             event.key,
             event.character,
         ) {
-            EventProcessStatus::Processed | EventProcessStatus::Update => self.repaint = true,
-            _ => {}
+            EventProcessStatus::Processed | EventProcessStatus::Update => true,
+            _ => false
+        };
+        self.repaint |= processed;
+        if !processed {
+            if let Some(menubar) = self.menubar.as_mut() {
+                if menubar.on_key_event(event.key).is_processed_or_update() {
+                    self.repaint = true;
+                }
+            }
         }
     }
     pub(crate) fn process_control_keypressed_event(

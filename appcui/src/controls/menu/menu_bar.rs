@@ -118,7 +118,7 @@ impl MenuBar {
     fn is_opened(&self) -> bool {
         return self.opened_item.is_valid();
     }
-    fn on_key_event(&mut self, key: Key) -> EventProcessStatus {
+    pub(crate) fn on_key_event(&mut self, key: Key) -> EventProcessStatus {
         if self.is_opened() {
             if (key.code == KeyCode::Left) && (key.modifier == KeyModifier::None) {
                 let mut idx = self.opened_item;
