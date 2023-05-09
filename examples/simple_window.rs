@@ -4,6 +4,35 @@ use appcui::input::{Key, KeyCode, KeyModifier};
 use appcui::system::*;
 use appcui::terminals::TerminalType;
 
+static keywods: [&str; 26] = [
+    "if",
+    "do",
+    "while",
+    "until",
+    "case",
+    "return",
+    "local",
+    "global",
+    "for",
+    "foreach",
+    "error",
+    "exit",
+    "repeat",
+    "class",
+    "struct",
+    "union",
+    "auto",
+    "try",
+    "catch",
+    "hrow",
+    "finally",
+    "extends",
+    "implements",
+    "public",
+    "private",
+    "protected",
+];
+
 fn main() -> Result<(), appcui::system::Error> {
     // let script = "
     //     Key.Pressed(Tab)
@@ -30,7 +59,7 @@ fn main() -> Result<(), appcui::system::Error> {
     ";
     //let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;
-    let mut a = App::new(TerminalType::Default,None,InitializationFlags::Menu)?;
+    let mut a = App::new(TerminalType::Default, None, InitializationFlags::Menu)?;
     let mut w = Window::new(
         "Simple window",
         Layout::new("d:c,w:40,h:10"),
@@ -78,16 +107,23 @@ fn main() -> Result<(), appcui::system::Error> {
 
     let mut m_sm = Menu::new();
     let mut m_colors = Menu::new();
-    m_colors.add_command("Red", Key::default(), 103);
-    m_colors.add_command("Green", Key::default(), 103);
-    m_colors.add_command("Blue", Key::default(), 103);
-    m_colors.add_command("White", Key::default(), 103);
-    m_colors.add_command("Teak", Key::default(), 103);
+    m_colors.add_command("Red", Key::None, 103);
+    m_colors.add_command("Green", Key::None, 103);
+    m_colors.add_command("Blue", Key::None, 103);
+    m_colors.add_command("White", Key::None, 103);
+    m_colors.add_command("Teak", Key::None, 103);
     m_sm.add_submenu("&Colors", m_colors);
     let mut m_size = Menu::new();
     m_size.add_radiobox("Km", Key::new(KeyCode::F1, KeyModifier::None), 123, false);
     m_size.add_radiobox("Cm", Key::new(KeyCode::F2, KeyModifier::None), 123, false);
     m_size.add_radiobox("Mm", Key::new(KeyCode::F3, KeyModifier::None), 123, true);
+    m_size.add_separator();
+    let mut m_keywords = Menu::new();
+    for k in &keywods {
+        m_keywords.add_command(k, Key::None, 1234);
+    }
+    m_size.add_submenu("&Keywords", m_keywords);
+
     m_sm.add_submenu("&Size in ...", m_size);
     a.add_menu(m_sm, "&Submenus");
 

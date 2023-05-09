@@ -692,6 +692,10 @@ impl RuntimeManager {
             MousePressedResult::Activate => {
                 self.repaint = true;
                 self.opened_menu_handle = handle;
+                if let Some(menu) = menus.get_mut(handle) {
+                    // trigger an on_mouse_move to force selection
+                    menu.on_mouse_move(x, y);
+                }
             }
         }
 

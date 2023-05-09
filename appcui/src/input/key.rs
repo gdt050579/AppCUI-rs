@@ -8,6 +8,8 @@ pub struct Key {
 }
 
 impl Key {
+    #[allow(non_upper_case_globals)]
+    pub const None: Key = Key{code: KeyCode::None, modifier: KeyModifier::None};
     pub fn new(code: KeyCode, modifier: KeyModifier) -> Key {
         Key {
             code: code,
