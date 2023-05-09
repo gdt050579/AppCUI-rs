@@ -39,7 +39,7 @@ impl MousePositionInfo {
             && (y < (menu.visible_items_count as i32) + 2);
         if (x >= center_x) && (x <= center_x + 2) {
             mpi.is_on_up_button = y == 0;
-            mpi.is_on_down_button = y == menu.clip.bottom;
+            mpi.is_on_down_button = y == (menu.clip.bottom - menu.clip.top);
         }
         mpi
     }

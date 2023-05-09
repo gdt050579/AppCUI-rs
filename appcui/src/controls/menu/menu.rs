@@ -255,7 +255,7 @@ impl Menu {
 
             // bottom button
             // this->FirstVisibleItem + this->VisibleItemsCount >= this->ItemsCount
-            let c = self.button_up.get_color(
+            let c = self.button_down.get_color(
                 (self.first_visible_item + self.visible_items_count) as usize > self.items.len(),
                 col,
             );
@@ -264,7 +264,7 @@ impl Menu {
             surface.write_char(
                 x + 1,
                 y,
-                Character::with_attributes(SpecialChar::TriangleUp, c),
+                Character::with_attributes(SpecialChar::TriangleDown, c),
             );
         }
         // write items

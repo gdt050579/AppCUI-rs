@@ -122,6 +122,10 @@ fn main() -> Result<(), appcui::system::Error> {
     for k in &keywods {
         m_keywords.add_command(k, Key::None, 1234);
     }
+    m_keywords.add_separator();
+    for k in &keywods {
+        m_keywords.add_command(k, Key::None, 1234);
+    }
     m_size.add_submenu("&Keywords", m_keywords);
 
     m_sm.add_submenu("&Size in ...", m_size);
