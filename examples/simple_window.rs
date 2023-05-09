@@ -56,10 +56,15 @@ fn main() -> Result<(), appcui::system::Error> {
         Key.Pressed(Alt+S)
         Key.Pressed(Down,2)
         Paint('Show sub-menu')
+        Key.Pressed(Enter)
+        Key.Pressed(Down,4)
+        Paint('Show sub-menu (2)')
+        Key.Pressed(Enter)
+        Paint('Show sub-menu (3)')
     ";
-    //let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
+    let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;
-    let mut a = App::new(TerminalType::Default, None, InitializationFlags::Menu)?;
+    //let mut a = App::new(TerminalType::Default, None, InitializationFlags::Menu)?;
     let mut w = Window::new(
         "Simple window",
         Layout::new("d:c,w:40,h:10"),
@@ -114,9 +119,9 @@ fn main() -> Result<(), appcui::system::Error> {
     m_colors.add_command("Teak", Key::None, 103);
     m_sm.add_submenu("&Colors", m_colors);
     let mut m_size = Menu::new();
-    m_size.add_radiobox("Km", Key::new(KeyCode::F1, KeyModifier::None), 123, false);
-    m_size.add_radiobox("Cm", Key::new(KeyCode::F2, KeyModifier::None), 123, false);
-    m_size.add_radiobox("Mm", Key::new(KeyCode::F3, KeyModifier::None), 123, true);
+    m_size.add_radiobox("Km", Key::from(KeyCode::F1), 123, false);
+    m_size.add_radiobox("Cm", Key::from(KeyCode::F2), 123, false);
+    m_size.add_radiobox("Mm", Key::from(KeyCode::F3), 123, true);
     m_size.add_separator();
     let mut m_keywords = Menu::new();
     for k in &keywods {

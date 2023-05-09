@@ -78,3 +78,11 @@ impl Default for Key {
         }
     }
 }
+impl From<KeyCode> for Key {
+    fn from(value: KeyCode) -> Self {
+        Self {
+            code: value,
+            modifier: KeyModifier::None
+        }
+    }
+}
