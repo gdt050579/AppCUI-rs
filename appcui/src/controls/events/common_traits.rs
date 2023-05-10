@@ -59,6 +59,12 @@ pub trait OnCommand {
     }
 }
 
+pub trait OnUpdateCommandBar {
+    fn on_update_command_bar(&self, _command_bar: u32) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+
 pub trait Control:
     OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + OnCommand
 {
