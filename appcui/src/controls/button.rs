@@ -7,6 +7,7 @@ use crate::input::*;
 use crate::system::*;
 use crate::utils::*;
 use AppCUIProcMacro::AppCUIControl;
+use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 8)]
 pub enum ButtonFlags {
@@ -17,16 +18,18 @@ pub enum ButtonFlags {
 pub struct Button {
     flags: ButtonFlags,
     caption: Caption,
+    pressed: bool,
 }
 impl Button {
     pub fn new(caption: &str, layout: Layout, flags: ButtonFlags) -> Self {
-        let mut button = CheckBox {
+        let mut but = Button {
             base: ControlBase::new(
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),
             caption: Caption::new(caption, true),
             flags,
+            pressed: false
         };
 
         if flags.contains(ButtonFlags::Flat) {
@@ -39,8 +42,44 @@ impl Button {
         but
     }
 }
+impl OnDefaultAction for Button {
+    fn on_default_action(&mut self) {
+        self.raise_event(Event::ButtonClicked);
+    }
+}
+impl OnKeyPressed for Button {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        if (key.modifier == KeyModifier::None)
+            && ((key.code == KeyCode::Space) || (key.code == KeyCode::Enter))
+        {
+            self.on_default_action();
+            return EventProcessStatus::Processed;
+        }
+        return EventProcessStatus::Ignored;
+    }
+}
+
 impl OnPaint for Button {
-    fn on_paint(&self, _surface: &mut Surface, _theme: &Theme) {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        let col_text = match () {
+            _ if !self.is_enabled() => theme.button.text.inactive,
+            _ if self.has_focus() => theme.button.text.focused,
+            _ if self.is_mouse_over() => theme.button.text.hovered,
+            _ => theme.button.text.normal,
+        };
+
+        let col_hot_key = match () {
+            _ if !self.is_enabled() => theme.button.hotkey.inactive,
+            _ if self.has_focus() => theme.button.hotkey.focused,
+            _ if self.is_mouse_over() => theme.button.hotkey.hovered,
+            _ => theme.button.hotkey.normal,
+        };
+
+        if self.flags.contains(ButtonFlags::Flat) {
+            surface.clear(Character::with_attributes(' ', col_text));
+        } else {
+
+        }
 /*
     WriteTextParams params(
           WriteTextFlags::SingleLine | WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey |
@@ -87,102 +126,32 @@ impl OnPaint for Button {
 */
     }
 }
-/*
-#include "ControlContext.hpp"
-
-namespace AppCUI::Controls
-{
-Button::Button(const ConstString& caption, string_view layout, int controlID, ButtonFlags flags)
-    : Control(new ControlContext(), caption, layout, true)
-{
-    auto Members = reinterpret_cast<ControlContext*>(this->Context);
-
-    if ((flags & ButtonFlags::Flat) != ButtonFlags::None)
-    {
-        Members->Layout.MinWidth  = 3;
-        Members->Layout.MinHeight = 1; // one character (flat button)
-        Members->Layout.MaxHeight = 1;
-        Members->Layout.Height    = 1;
-    }
-    else
-    {
-        Members->Layout.MinWidth  = 4;
-        Members->Layout.MinHeight = 2; // Exactly 2 characters
-        Members->Layout.MaxHeight = 2;
-        Members->Layout.Height    = 2;
-    }
-    Members->Flags = GATTR_ENABLE | GATTR_VISIBLE | GATTR_TABSTOP | flags;
-
-    this->SetControlID(controlID);
-}
-
-void Button::Paint(Graphics::Renderer& renderer)
-{
-    CREATE_CONTROL_CONTEXT(this, Members, );
-
-}
-void Button::OnHotKey()
-{
-    CREATE_CONTROL_CONTEXT(this, Members, );
-    if (Members->handlers)
-    {
-        auto bh = this->Handlers();
-        if (bh->OnButtonPressed.obj)
-        {
-            bh->OnButtonPressed.obj->OnButtonPressed(this);
-            return;
+impl OnMouseEvent for Button {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => {
+                if self.caption.get_chars_count() > (self.get_size().width - 2) as usize {
+                    self.show_tooltip(self.caption.get_text());
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Leave => EventProcessStatus::Processed,
+            MouseEvent::Released(data) => {
+                self.pressed = false;
+                if self.is_coord_in_control(data.x, data.y) {
+                    self.on_default_action();
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Drag(data) => {
+                if self.pressed && (!self.is_coord_in_control(data.x, data.y)) {
+                    self.pressed = false;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Pressed(_) => { self.pressed = true; EventProcessStatus::Processed }
+            _ => EventProcessStatus::Ignored,
         }
     }
-
-    // if no handler is present --> call RaiseEvent
-    RaiseEvent(Event::ButtonClicked);
 }
-bool Button::OnKeyEvent(Key KeyCode, char16)
-{
-    if ((KeyCode == Key::Space) || (KeyCode == Key::Enter))
-    {
-        OnHotKey();
-        return true;
-    }
-    return false;
-}
-bool Button::OnMouseDrag(int x, int y, Input::MouseButton)
-{
-    if (IsChecked() == false)
-        return false;
-    if (IsMouseInControl(x, y) == false)
-    {
-        SetChecked(false);
-        return true;
-    }
-    return false;
-}
-void Button::OnMouseReleased(int x, int y, Input::MouseButton)
-{
-    SetChecked(false);
-    if (IsMouseInControl(x, y))
-        OnHotKey();
-}
-void Button::OnMousePressed(int, int, Input::MouseButton)
-{
-    SetChecked(true);
-}
-bool Button::OnMouseEnter()
-{
-    CREATE_CONTROL_CONTEXT(this, Members, false);
-    if ((int) Members->Text.Len() >= Members->Layout.Width)
-        this->ShowToolTip(Members->Text);
-    return true;
-}
-bool Button::OnMouseLeave()
-{
-    return true;
-}
-Handlers::Button* Button::Handlers()
-{
-    GET_CONTROL_HANDLERS(Handlers::Button);
-}
-} // namespace AppCUI::Controls
-
-
-*/

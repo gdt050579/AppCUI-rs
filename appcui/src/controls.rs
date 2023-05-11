@@ -20,9 +20,12 @@ pub mod checkbox;
 pub mod label;
 pub mod menu;
 pub mod window;
+pub mod button;
 // re-export
 pub use desktop::Desktop;
 pub use checkbox::CheckBox;
 pub use label::Label;
 pub use window::Window;
 pub use window::WindowFlags;
+pub use button::Button;
+pub use button::ButtonFlags;

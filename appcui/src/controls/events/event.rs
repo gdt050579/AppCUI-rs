@@ -3,4 +3,5 @@
 pub enum Event {
     CheckedStatusChanged,
     WindowClose,
+    ButtonClicked
 }
