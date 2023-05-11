@@ -8,13 +8,13 @@ use crate::system::*;
 use crate::utils::*;
 use AppCUIProcMacro::AppCUIControl;
 
-#[EnumBitFlags(bits=8)]
+#[EnumBitFlags(bits = 8)]
 pub enum ButtonFlags {
-    Flat      = 0x01,
+    Flat = 0x01,
 }
 
 #[AppCUIControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
-pub struct Button { 
+pub struct Button {
     flags: ButtonFlags,
     caption: Caption,
 }
@@ -30,49 +30,18 @@ impl Button {
         };
 
         if flags.contains(ButtonFlags::Flat) {
-            but.set_size_bounds(3,1,u16::MAX,1);
+            but.set_size_bounds(3, 1, u16::MAX, 1);
         } else {
-            but.set_size_bounds(4,2,u16::MAX,2);
+            but.set_size_bounds(4, 2, u16::MAX, 2);
         }
         let hotkey = but.caption.get_hotkey();
         but.set_hotkey(hotkey);
         but
     }
-
 }
+impl OnPaint for Button {
+    fn on_paint(&self, _surface: &mut Surface, _theme: &Theme) {
 /*
-#include "ControlContext.hpp"
-
-namespace AppCUI::Controls
-{
-Button::Button(const ConstString& caption, string_view layout, int controlID, ButtonFlags flags)
-    : Control(new ControlContext(), caption, layout, true)
-{
-    auto Members = reinterpret_cast<ControlContext*>(this->Context);
-
-    if ((flags & ButtonFlags::Flat) != ButtonFlags::None)
-    {
-        Members->Layout.MinWidth  = 3;
-        Members->Layout.MinHeight = 1; // one character (flat button)
-        Members->Layout.MaxHeight = 1;
-        Members->Layout.Height    = 1;
-    }
-    else
-    {
-        Members->Layout.MinWidth  = 4;
-        Members->Layout.MinHeight = 2; // Exactly 2 characters
-        Members->Layout.MaxHeight = 2;
-        Members->Layout.Height    = 2;
-    }
-    Members->Flags = GATTR_ENABLE | GATTR_VISIBLE | GATTR_TABSTOP | flags;
-
-    this->SetControlID(controlID);
-}
-
-void Button::Paint(Graphics::Renderer& renderer)
-{
-    CREATE_CONTROL_CONTEXT(this, Members, );
-
     WriteTextParams params(
           WriteTextFlags::SingleLine | WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey |
           WriteTextFlags::ClipToWidth | WriteTextFlags::FitTextToWidth);
@@ -113,6 +82,44 @@ void Button::Paint(Graphics::Renderer& renderer)
                   Members->Layout.Width - 1, 0, SpecialChars::BlockLowerHalf, Members->Cfg->Button.ShadowColor);
         }
     }
+
+
+*/
+    }
+}
+/*
+#include "ControlContext.hpp"
+
+namespace AppCUI::Controls
+{
+Button::Button(const ConstString& caption, string_view layout, int controlID, ButtonFlags flags)
+    : Control(new ControlContext(), caption, layout, true)
+{
+    auto Members = reinterpret_cast<ControlContext*>(this->Context);
+
+    if ((flags & ButtonFlags::Flat) != ButtonFlags::None)
+    {
+        Members->Layout.MinWidth  = 3;
+        Members->Layout.MinHeight = 1; // one character (flat button)
+        Members->Layout.MaxHeight = 1;
+        Members->Layout.Height    = 1;
+    }
+    else
+    {
+        Members->Layout.MinWidth  = 4;
+        Members->Layout.MinHeight = 2; // Exactly 2 characters
+        Members->Layout.MaxHeight = 2;
+        Members->Layout.Height    = 2;
+    }
+    Members->Flags = GATTR_ENABLE | GATTR_VISIBLE | GATTR_TABSTOP | flags;
+
+    this->SetControlID(controlID);
+}
+
+void Button::Paint(Graphics::Renderer& renderer)
+{
+    CREATE_CONTROL_CONTEXT(this, Members, );
+
 }
 void Button::OnHotKey()
 {
