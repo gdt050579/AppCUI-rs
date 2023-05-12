@@ -459,6 +459,9 @@ impl RuntimeManager {
         }
     }
     fn paint(&mut self) {
+        // reset the surface clip and hide the cursor
+        self.surface.hide_cursor();
+        self.surface.reset();
         self.paint_control(self.desktop_handler);
         self.surface.reset();
         if self.commandbar.is_some() {

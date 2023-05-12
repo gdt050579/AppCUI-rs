@@ -105,7 +105,7 @@ impl OnPaint for Button {
                 surface.write_text(self.caption.get_text(), &format);
                 surface.fill_horizontal_line_with_size(
                     1,
-                    0,
+                    1,
                     w - 1,
                     Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow),
                 );

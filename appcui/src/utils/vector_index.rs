@@ -11,9 +11,9 @@ pub(crate) struct VectorIndex {
 
 impl VectorIndex {
     const INVALID_INDEX: usize = usize::MAX;
-    #[warn(non_upper_case_globals)]
+    #[allow(non_upper_case_globals)]
     pub(crate) const Invalid: VectorIndex = VectorIndex { value: usize::MAX };
-    #[warn(non_upper_case_globals)]
+    #[allow(non_upper_case_globals)]
     pub(crate) const First: VectorIndex = VectorIndex { value: 0 };
 
     #[inline(always)]
