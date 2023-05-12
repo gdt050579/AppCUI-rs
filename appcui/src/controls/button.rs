@@ -29,7 +29,7 @@ impl Button {
             ),
             caption: Caption::new(caption, true),
             flags,
-            pressed: false
+            pressed: false,
         };
 
         if flags.contains(ButtonFlags::Flat) {
@@ -67,63 +67,99 @@ impl OnPaint for Button {
             _ if self.is_mouse_over() => theme.button.text.hovered,
             _ => theme.button.text.normal,
         };
-
-        let col_hot_key = match () {
-            _ if !self.is_enabled() => theme.button.hotkey.inactive,
-            _ if self.has_focus() => theme.button.hotkey.focused,
-            _ if self.is_mouse_over() => theme.button.hotkey.hovered,
-            _ => theme.button.hotkey.normal,
-        };
-
+        let w = self.get_size().width;
+        let mut format =
+            TextFormat::single_line((w / 2) as i32, 0, col_text, TextAlignament::Center);
+        format.chars_count = Some(self.caption.get_chars_count() as u16);
+        if self.caption.has_hotkey() {
+            format.hotkey_attr = Some(match () {
+                _ if !self.is_enabled() => theme.button.hotkey.inactive,
+                _ if self.has_focus() => theme.button.hotkey.focused,
+                _ if self.is_mouse_over() => theme.button.hotkey.hovered,
+                _ => theme.button.hotkey.normal,
+            });
+            format.hotkey_pos = self.caption.get_hotkey_pos();
+        }
         if self.flags.contains(ButtonFlags::Flat) {
             surface.clear(Character::with_attributes(' ', col_text));
+            format.width = Some(w as u16);
+            surface.write_text(self.caption.get_text(), &format);
         } else {
-
+            format.width = Some((w - 1) as u16);
+            if self.pressed {
+                surface.fill_horizontal_line_with_size(
+                    1,
+                    0,
+                    w - 1,
+                    Character::with_attributes(' ', col_text),
+                );
+                format.x += 1;
+                surface.write_text(self.caption.get_text(), &format);
+            } else {
+                surface.fill_horizontal_line_with_size(
+                    0,
+                    0,
+                    w - 1,
+                    Character::with_attributes(' ', col_text),
+                );
+                surface.write_text(self.caption.get_text(), &format);
+                surface.fill_horizontal_line_with_size(
+                    1,
+                    0,
+                    w - 1,
+                    Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow),
+                );
+                surface.write_char(
+                    (w as i32) - 1,
+                    0,
+                    Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow),
+                );
+            }
         }
-/*
-    WriteTextParams params(
-          WriteTextFlags::SingleLine | WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey |
-          WriteTextFlags::ClipToWidth | WriteTextFlags::FitTextToWidth);
+        /*
+            WriteTextParams params(
+                  WriteTextFlags::SingleLine | WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey |
+                  WriteTextFlags::ClipToWidth | WriteTextFlags::FitTextToWidth);
 
-    const auto btnState   = Members->GetControlState(ControlStateFlags::All);
-    params.Color          = Members->Cfg->Button.Text.GetColor(btnState);
-    params.HotKeyColor    = Members->Cfg->Button.HotKey.GetColor(btnState);
-    bool pressed          = IsChecked();
-    params.Y              = 0;
-    params.HotKeyPosition = Members->HotKeyOffset;
-    params.Align          = TextAlignament::Center;
+            const auto btnState   = Members->GetControlState(ControlStateFlags::All);
+            params.Color          = Members->Cfg->Button.Text.GetColor(btnState);
+            params.HotKeyColor    = Members->Cfg->Button.HotKey.GetColor(btnState);
+            bool pressed          = IsChecked();
+            params.Y              = 0;
+            params.HotKeyPosition = Members->HotKeyOffset;
+            params.Align          = TextAlignament::Center;
 
-    if (Members->Flags && ButtonFlags::Flat)
-    {
-        params.X     = 0;
-        params.Width = Members->Layout.Width;
-        renderer.FillHorizontalLine(0, 0, Members->Layout.Width, ' ', params.Color);
-        renderer.WriteText(Members->Text, params);
-    }
-    else
-    {
-        params.Width = Members->Layout.Width - 1;
-        if (pressed)
-        {
-            renderer.FillHorizontalLine(1, 0, Members->Layout.Width, ' ', params.Color);
-            params.X = 1;
-            renderer.WriteText(Members->Text, params);
-        }
-        else
-        {
-            renderer.FillHorizontalLine(0, 0, Members->Layout.Width - 2, ' ', params.Color);
-            params.X = 0;
-            renderer.WriteText(Members->Text, params);
+            if (Members->Flags && ButtonFlags::Flat)
+            {
+                params.X     = 0;
+                params.Width = Members->Layout.Width;
+                renderer.FillHorizontalLine(0, 0, Members->Layout.Width, ' ', params.Color);
+                renderer.WriteText(Members->Text, params);
+            }
+            else
+            {
+                params.Width = Members->Layout.Width - 1;
+                if (pressed)
+                {
+                    renderer.FillHorizontalLine(1, 0, Members->Layout.Width, ' ', params.Color);
+                    params.X = 1;
+                    renderer.WriteText(Members->Text, params);
+                }
+                else
+                {
+                    renderer.FillHorizontalLine(0, 0, Members->Layout.Width - 2, ' ', params.Color);
+                    params.X = 0;
+                    renderer.WriteText(Members->Text, params);
 
-            renderer.FillHorizontalLineWithSpecialChar(
-                  1, 1, Members->Layout.Width, SpecialChars::BlockUpperHalf, Members->Cfg->Button.ShadowColor);
-            renderer.WriteSpecialCharacter(
-                  Members->Layout.Width - 1, 0, SpecialChars::BlockLowerHalf, Members->Cfg->Button.ShadowColor);
-        }
-    }
+                    renderer.FillHorizontalLineWithSpecialChar(
+                          1, 1, Members->Layout.Width, SpecialChars::BlockUpperHalf, Members->Cfg->Button.ShadowColor);
+                    renderer.WriteSpecialCharacter(
+                          Members->Layout.Width - 1, 0, SpecialChars::BlockLowerHalf, Members->Cfg->Button.ShadowColor);
+                }
+            }
 
 
-*/
+        */
     }
 }
 impl OnMouseEvent for Button {
@@ -150,7 +186,10 @@ impl OnMouseEvent for Button {
                 }
                 EventProcessStatus::Ignored
             }
-            MouseEvent::Pressed(_) => { self.pressed = true; EventProcessStatus::Processed }
+            MouseEvent::Pressed(_) => {
+                self.pressed = true;
+                EventProcessStatus::Processed
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
