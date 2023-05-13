@@ -21,6 +21,12 @@ pub struct Button {
     pressed: bool,
 }
 impl Button {
+    /// Creates a new button with the specified caption, layout and flags
+    /// # Examples
+    /// ```
+    /// use appcui::controls::*;
+    /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), ButtonFlags::None);
+    /// ```
     pub fn new(caption: &str, layout: Layout, flags: ButtonFlags) -> Self {
         let mut but = Button {
             base: ControlBase::new(
