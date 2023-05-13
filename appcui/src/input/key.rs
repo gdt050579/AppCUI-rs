@@ -86,3 +86,17 @@ impl From<KeyCode> for Key {
         }
     }
 }
+impl From<u16> for Key {
+    fn from(value: u16) -> Self {
+        let k = (value & 0xFF) as u8;
+        let m = (value >> 8) as u8;
+        if (k>=64) || (m>=8) {
+            Key::None
+        } else {
+            Self {
+                code: k.into(),
+                modifier: m.into()
+            }
+        }
+    }
+}

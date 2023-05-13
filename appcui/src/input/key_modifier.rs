@@ -29,3 +29,22 @@ impl KeyModifier {
         return if index < 8 { KEY_NAME[index] } else { "" };
     }
 }
+
+impl From<u8> for KeyModifier {
+    fn from(value: u8) -> Self {
+        if value < 8 {
+            let mut result = KeyModifier::None;
+            if (value & 1) != 0 {
+                result |= KeyModifier::Alt;
+            }
+            if (value & 2) != 0 {
+                result |= KeyModifier::Ctrl;
+            }
+            if (value & 4) != 0 {
+                result |= KeyModifier::Shift;
+            }
+            return result;
+        }
+        return KeyModifier::None;
+    }
+}
