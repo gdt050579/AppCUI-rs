@@ -76,7 +76,12 @@ impl ControlManager {
     {
         unsafe { &mut *(self.base as *mut T) }
     }
-
+    pub(crate) fn get<T>(&self) -> & T
+    where
+        T: Control + 'static,
+    {
+        unsafe { & *(self.base as *const T) }
+    }
 }
 
 impl Drop for ControlManager {

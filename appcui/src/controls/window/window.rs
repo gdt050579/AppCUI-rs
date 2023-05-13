@@ -174,6 +174,19 @@ impl Window {
     {
         return self.add_child(control);
     }
+    pub fn get_control<T>(&self, handle: ControlHandle<T>) -> Option<&T>
+    where
+        T: Control + 'static,
+    {
+        RuntimeManager::get().get_control(handle)
+    }
+    pub fn get_control_mut<T>(&mut self, handle: ControlHandle<T>) -> Option<&mut T>
+    where
+        T: Control + 'static,
+    {
+        RuntimeManager::get().get_control_mut(handle)
+    }
+
     pub fn set_title(&mut self, title: &str) {
         self.title.clear();
         self.title.push_str(title);
@@ -516,6 +529,7 @@ impl Window {
         false
     }
 }
+
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let color_window = match () {

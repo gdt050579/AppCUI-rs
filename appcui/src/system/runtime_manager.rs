@@ -178,6 +178,26 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         controls.get_desktop().get_base_mut().add_child(obj)
     }
+    pub(crate) fn get_control_mut<T>(&mut self, handle: ControlHandle<T>) -> Option<&mut T>
+    where
+        T: Control + 'static,
+    {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(cm) = controls.get(handle.get_handle()) {
+            return Some(cm.get_mut::<T>());
+        }
+        None
+    }
+    pub(crate) fn get_control<T>(&self, handle: ControlHandle<T>) -> Option<&T>
+    where
+        T: Control + 'static,
+    {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(cm) = controls.get(handle.get_handle()) {
+            return Some(cm.get::<T>());
+        }
+        None
+    }
     #[inline(always)]
     pub(crate) fn get_controls(&self) -> &mut ControlHandleManager {
         unsafe { &mut *self.controls }

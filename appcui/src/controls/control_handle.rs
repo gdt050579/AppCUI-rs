@@ -23,4 +23,8 @@ impl<T> ControlHandle<T> {
     pub(crate) fn get_index(&self) -> usize {
         self.handle.get_index()
     }
+    #[inline(always)]
+    pub(crate) fn get_handle(&self) -> Handle {
+        self.handle
+    }
 }
