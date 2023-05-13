@@ -156,6 +156,7 @@ fn main_2() -> Result<(), appcui::system::Error> {
 #[AppCUIControl(base=Window, overwrite=OnEvent)]
 pub struct MyWindow {
     h_button: ControlHandle<Button>,
+    h_label: ControlHandle<Label>,
 }
 impl MyWindow {
     fn new() -> Self {
@@ -166,12 +167,25 @@ impl MyWindow {
                 WindowFlags::None,
             ),
             h_button: ControlHandle::None,
+            h_label: ControlHandle::None,
         };
+        w.h_label = w.add(Label::new("", Layout::new("x:1,y:1,w: 30")));
+        w.h_button = w.add(Button::new(
+            "&Press me",
+            Layout::new("x:1,y:4,w:12"),
+            ButtonFlags::None,
+        ));
         w
     }
 }
 impl OnEvent for MyWindow {
-    fn on_event(&mut self, _event: Event, _sender: Handle) -> EventProcessStatus {
+    fn on_event(&mut self, event: Event, _sender: Handle) -> EventProcessStatus {
+        match event {
+            Event::ButtonClicked => {                
+                return EventProcessStatus::Processed;
+            },
+            _ => {}
+        }
         EventProcessStatus::Ignored
     }
 }
