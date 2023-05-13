@@ -20,6 +20,9 @@ impl Label {
             caption: Caption::new(caption, true),
         }
     }
+    pub fn set_text(&mut self, text: &str) {
+        self.caption.set_text(text, false);
+    }
 }
 impl OnPaint for Label {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
