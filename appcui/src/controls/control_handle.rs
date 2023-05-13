@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use crate::system::Handle;
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(PartialEq)]
 pub struct ControlHandle<T> {
     handle: Handle,
     _phantom: PhantomData<T>,
@@ -28,3 +28,12 @@ impl<T> ControlHandle<T> {
         self.handle
     }
 }
+impl<T> Clone for ControlHandle<T> {
+    fn clone(&self) -> Self {
+        Self {
+            handle: self.handle.clone(),
+            _phantom: self._phantom.clone(),
+        }
+    }
+}
+impl<T> Copy for ControlHandle<T> { }

@@ -183,8 +183,9 @@ impl OnEvent for MyWindow {
         match event {
             Event::ButtonClicked => {       
                 let h_label = self.h_label;
-                let label = self.get_control_mut(h_label);
-                label.set_text("Button pressed");
+                if let Some(label) = self.get_control_mut(h_label) {
+                    label.set_text("Button pressed");
+                }
                 return EventProcessStatus::Processed;
             },
             _ => {}
@@ -194,7 +195,8 @@ impl OnEvent for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::debug(60, 20, InitializationFlags::None, "Paint('print')")?;
+    //let mut a = App::debug(60, 20, InitializationFlags::None, "Paint('print')")?;
+    let mut a = App::default()?;
     a.add(MyWindow::new());
     a.run();
     Ok(())
