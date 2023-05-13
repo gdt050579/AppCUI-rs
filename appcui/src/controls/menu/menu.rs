@@ -3,7 +3,7 @@ use super::{
     MenuCommandItem, MenuHandle, MenuItem, MenuRadioBoxItem, MenuSubMenuItem, MousePressedResult,
 };
 use crate::{
-    controls::events::{EventProcessStatus, Event},
+    controls::events::{Event, EventProcessStatus},
     graphics::{
         Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
         TextFormat, TextWrap,
@@ -43,29 +43,38 @@ impl Menu {
         }
     }
 
-    pub fn add_command(&mut self, text: &str, shortcut: Key, command_id: u32) {
+    pub fn add_command<T>(&mut self, text: &str, shortcut: T, command_id: u32)
+    where
+        Key: From<T>,
+    {
         self.items.push(MenuItem::Command(MenuCommandItem {
             enabled: true,
             command_id,
             caption: Caption::new(text, true),
-            shortcut,
+            shortcut: Key::from(shortcut),
         }));
     }
-    pub fn add_checkbox(&mut self, text: &str, shortcut: Key, command_id: u32, checked: bool) {
+    pub fn add_checkbox<T>(&mut self, text: &str, shortcut: T, command_id: u32, checked: bool)
+    where
+        Key: From<T>,
+    {
         self.items.push(MenuItem::CheckBox(MenuCheckBoxItem {
             enabled: true,
             command_id,
             caption: Caption::new(text, true),
-            shortcut,
+            shortcut: Key::from(shortcut),
             checked,
         }));
     }
-    pub fn add_radiobox(&mut self, text: &str, shortcut: Key, command_id: u32, checked: bool) {
+    pub fn add_radiobox<T>(&mut self, text: &str, shortcut: T, command_id: u32, checked: bool)
+    where
+        Key: From<T>,
+    {
         self.items.push(MenuItem::RadioBox(MenuRadioBoxItem {
             enabled: true,
             command_id,
             caption: Caption::new(text, true),
-            shortcut,
+            shortcut: Key::from(shortcut),
             checked,
         }));
     }

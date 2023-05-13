@@ -181,12 +181,14 @@ impl MyWindow {
 impl OnEvent for MyWindow {
     fn on_event(&mut self, event: Event, _sender: Handle) -> EventProcessStatus {
         match event {
-            Event::ButtonClicked => {       
-                let h_label = self.h_label;
-                if let Some(label) = self.get_control_mut(h_label) {
-                    label.set_text("Button pressed");
-                }
-                return EventProcessStatus::Processed;
+            Event::ButtonClicked => {   
+                if self.h_button == _sender {
+                    let h_label = self.h_label;
+                    if let Some(label) = self.get_control_mut(h_label) {
+                        label.set_text("Button pressed");
+                    }
+                    return EventProcessStatus::Processed;
+                }    
             },
             _ => {}
         }

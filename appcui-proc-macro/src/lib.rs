@@ -143,7 +143,9 @@ pub fn key(input: TokenStream) -> TokenStream {
     }
 
     let value = parse_string_key_representation(&string_param[1..&string_param.len() - 1]);
-    TokenStream::from_str(value.to_string().as_str()).expect("Fail to convert key to token stream")
+    let mut string_repr = value.to_string();
+    string_repr.push_str("u16");
+    TokenStream::from_str(&string_repr).expect("Fail to convert key to token stream")
 }
 
 fn parse_string_key_representation(string: &str) -> u16 {

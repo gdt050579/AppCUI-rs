@@ -37,3 +37,8 @@ impl<T> Clone for ControlHandle<T> {
     }
 }
 impl<T> Copy for ControlHandle<T> { }
+impl<T> PartialEq<Handle> for ControlHandle<T> {
+    fn eq(&self, other: &Handle) -> bool {
+        self.handle == *other
+    }
+}
