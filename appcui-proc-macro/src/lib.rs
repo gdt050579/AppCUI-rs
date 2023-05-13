@@ -70,12 +70,9 @@ mod templates {
         fn on_command(&mut self, command: u32)->EventProcessStatus  { return self.base.on_command(command); }
     }
     ";
-
 }
-#[allow(non_snake_case)]
-#[proc_macro_attribute]
-pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
-    let mut a = Arguments::new();
+fn ParseTokenStream(args: TokenStream, input: TokenStream, base_control: &str) -> TokenStream {
+    let mut a = Arguments::new(base_control);
     a.parse(args);
     let mut base_definition = "{\n    base: ".to_string();
     base_definition.push_str(&a.base);
@@ -118,6 +115,16 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
     println!("{}", code);
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }
+#[allow(non_snake_case)]
+#[proc_macro_attribute]
+pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
+    ParseTokenStream(args, input, "ControlBase")
+}
+#[allow(non_snake_case)]
+#[proc_macro_attribute]
+pub fn AppCUIWindow(args: TokenStream, input: TokenStream) -> TokenStream {
+    ParseTokenStream(args, input, "Window")
+}
 
 #[proc_macro]
 pub fn key(input: TokenStream) -> TokenStream {
@@ -133,9 +140,9 @@ pub fn key(input: TokenStream) -> TokenStream {
     }
     if (!string_param.starts_with("\"")) || (!string_param.ends_with("\"")) {
         panic!("The parameter provided to the key macro must be a string literal.");
-    }   
+    }
 
-    let value = parse_string_key_representation(&string_param[1..&string_param.len()-1]);
+    let value = parse_string_key_representation(&string_param[1..&string_param.len() - 1]);
     TokenStream::from_str(value.to_string().as_str()).expect("Fail to convert key to token stream")
 }
 
@@ -168,9 +175,9 @@ fn parse_string_key_representation(string: &str) -> u16 {
         modifiers |= modifier;
         key_value = key_code;
     }
-    if (modifiers==0) && (key_value==0) {
+    if (modifiers == 0) && (key_value == 0) {
         panic!("Invalid key combination: {}", string);
-    }   
+    }
     modifiers | key_value
 }
 

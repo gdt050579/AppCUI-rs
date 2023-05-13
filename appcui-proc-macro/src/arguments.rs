@@ -27,9 +27,9 @@ pub struct Arguments {
 }
 
 impl Arguments {
-    pub fn new() -> Arguments {
+    pub fn new(base_control: &str) -> Arguments {
         Arguments {
-            base: String::from("ControlBase"),
+            base: String::from(base_control),
             state: State::ExpectKey,
             key: String::new(),
             values: Vec::with_capacity(8),
