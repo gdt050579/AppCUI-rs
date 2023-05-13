@@ -3,7 +3,7 @@ use appcui::controls::layout::Layout;
 use appcui::graphics::*;
 use appcui::input::*;
 use appcui::system::*;
-use AppCUIProcMacro::AppCUIControl;
+use AppCUIProcMacro::*;
 
 use appcui::controls::menu::Menu;
 use appcui::controls::*;
@@ -154,7 +154,7 @@ fn main_2() -> Result<(), appcui::system::Error> {
 }
 
 #[AppCUIWindow(overwrite=OnEvent)]
-pub struct MyWindow {
+struct MyWindow {
     h_button: ControlHandle<Button>,
     h_label: ControlHandle<Label>,
 }
