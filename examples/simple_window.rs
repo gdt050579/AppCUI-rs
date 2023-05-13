@@ -98,7 +98,7 @@ fn main_2() -> Result<(), appcui::system::Error> {
     ));
 
     let mut m_file = Menu::new();
-    m_file.add_command("&New", Key::new(KeyCode::N, KeyModifier::Ctrl), 100);
+    m_file.add_command("&New", key!("Ctrl+N"), 100);
     m_file.add_command("&Open", Key::new(KeyCode::O, KeyModifier::Ctrl), 101);
     m_file.add_command("&Save", Key::new(KeyCode::S, KeyModifier::Ctrl), 102);
     m_file.add_command("Save &as ...", Key::default(), 103);
@@ -131,7 +131,7 @@ fn main_2() -> Result<(), appcui::system::Error> {
     m_colors.add_command("Teak", Key::None, 103);
     m_sm.add_submenu("&Colors", m_colors);
     let mut m_size = Menu::new();
-    m_size.add_radiobox("Km", Key::from(KeyCode::F1), 123, false);
+    m_size.add_radiobox("Km", KeyCode::F1, 123, false);
     m_size.add_radiobox("Cm", Key::from(KeyCode::F2), 123, false);
     m_size.add_radiobox("Mm", Key::from(KeyCode::F3), 123, true);
     m_size.add_separator();
