@@ -71,7 +71,7 @@ mod templates {
     }
     ";
 }
-fn ParseTokenStream(args: TokenStream, input: TokenStream, base_control: &str) -> TokenStream {
+fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args);
     let mut base_definition = "{\n    base: ".to_string();
@@ -118,12 +118,12 @@ fn ParseTokenStream(args: TokenStream, input: TokenStream, base_control: &str) -
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
-    ParseTokenStream(args, input, "ControlBase")
+    parse_token_stream(args, input, "ControlBase")
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn AppCUIWindow(args: TokenStream, input: TokenStream) -> TokenStream {
-    ParseTokenStream(args, input, "Window")
+    parse_token_stream(args, input, "Window")
 }
 
 #[proc_macro]

@@ -153,7 +153,7 @@ fn main_2() -> Result<(), appcui::system::Error> {
     Ok(())
 }
 
-#[AppCUIControl(base=Window, overwrite=OnEvent)]
+#[AppCUIWindow(overwrite=OnEvent)]
 pub struct MyWindow {
     h_button: ControlHandle<Button>,
     h_label: ControlHandle<Label>,
