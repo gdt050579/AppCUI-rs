@@ -1,7 +1,13 @@
+use appcui::controls::events::*;
+use appcui::controls::layout::Layout;
+use appcui::graphics::*;
+use appcui::input::*;
+use appcui::system::*;
+use AppCUIProcMacro::AppCUIControl;
+
 use appcui::controls::menu::Menu;
 use appcui::controls::*;
 use appcui::input::{Key, KeyCode, KeyModifier};
-use appcui::system::*;
 use appcui::terminals::TerminalType;
 
 static keywods: [&str; 26] = [
@@ -33,7 +39,7 @@ static keywods: [&str; 26] = [
     "protected",
 ];
 
-fn main() -> Result<(), appcui::system::Error> {
+fn main_2() -> Result<(), appcui::system::Error> {
     // let script = "
     //     Key.Pressed(Tab)
     //     Paint('all checkboxes are checked')
@@ -85,7 +91,11 @@ fn main() -> Result<(), appcui::system::Error> {
         Layout::new("x:1,y:5,w:35"),
         true,
     ));
-    w.add(Button::new("&Press me",Layout::new("x:1,y:7,w:30"),ButtonFlags::None));
+    w.add(Button::new(
+        "&Press me",
+        Layout::new("x:1,y:7,w:30"),
+        ButtonFlags::None,
+    ));
 
     let mut m_file = Menu::new();
     m_file.add_command("&New", Key::new(KeyCode::N, KeyModifier::Ctrl), 100);
@@ -139,6 +149,36 @@ fn main() -> Result<(), appcui::system::Error> {
     a.add_menu(m_sm, "&Submenus");
 
     a.add(w);
+    a.run();
+    Ok(())
+}
+
+#[AppCUIControl(base=Window, overwrite=OnEvent)]
+pub struct MyWindow {
+    h_button: ControlHandle<Button>,
+}
+impl MyWindow {
+    fn new() -> Self {
+        let mut w = MyWindow {
+            base: Window::new(
+                "My Windows",
+                Layout::new("d:c,w:40,h:10"),
+                WindowFlags::None,
+            ),
+            h_button: ControlHandle::None,
+        };
+        w
+    }
+}
+impl OnEvent for MyWindow {
+    fn on_event(&mut self, _event: Event, _sender: Handle) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut a = App::debug(60, 20, InitializationFlags::None, "Paint('print')")?;
+    a.add(MyWindow::new());
     a.run();
     Ok(())
 }

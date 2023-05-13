@@ -8,6 +8,11 @@ pub struct ControlHandle<T> {
     _phantom: PhantomData<T>,
 }
 impl<T> ControlHandle<T> {
+    #[allow(non_upper_case_globals)]
+    pub const None: ControlHandle<T> = ControlHandle {
+        handle: Handle::None,
+        _phantom: PhantomData,
+    };
     pub(crate) fn new(handle: Handle) -> Self {
         ControlHandle {
             handle,
@@ -15,8 +20,7 @@ impl<T> ControlHandle<T> {
         }
     }
     #[inline(always)]
-    pub (crate) fn get_index(&self)->usize {
+    pub(crate) fn get_index(&self) -> usize {
         self.handle.get_index()
     }
-
 }
