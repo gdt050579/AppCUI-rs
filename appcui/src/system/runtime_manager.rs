@@ -383,11 +383,15 @@ impl RuntimeManager {
     }
 
     fn update_command_bar(&mut self) {
+        if self.commandbar.is_none() {
+            self.request_update_command_bar = false;
+            return;
+        }
+        let mut h = self.get_focused_control();
+        let controls = unsafe { &mut *self.controls };
         if let Some(cmdbar) = self.commandbar.as_mut() {
             cmdbar.clear();
-            // start from the focused control and call OnUpdateCommandBar for each control
-            let mut h = self.get_focused_control();
-            let controls = unsafe { &mut *self.controls };
+            // start from the focused control and call OnUpdateCommandBar for each control                        
             while let Some(control) = controls.get(h) {
                 let result = control.get_control_mut().on_update_command_bar(cmdbar);
                 match result {
@@ -406,6 +410,7 @@ impl RuntimeManager {
                 }
             }
         }
+        self.request_update_command_bar = false;
     }
 
     fn update_focus(&mut self, handle: Handle) {

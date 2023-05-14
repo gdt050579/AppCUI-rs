@@ -70,6 +70,12 @@ mod templates {
         fn on_command(&mut self, command: u32)->EventProcessStatus  { return self.base.on_command(command); }
     }
     ";
+
+    pub static ON_UPDATE_COMMANDBAR_TRAIT: &str = "
+    impl OnUpdateCommandBar for $STRUCT_NAME$ {
+        fn on_update_command_bar(&self, command_bar: &mut CommandBar)->EventProcessStatus  { return self.base.on_update_command_bar(command_bar); }
+    }
+    ";
 }
 fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str) -> TokenStream {
     let mut a = Arguments::new(base_control);
@@ -108,11 +114,14 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str)
     if !a.on_command {
         code.push_str(templates::ON_COMMAND_TRAIT);
     }
+    if !a.on_update_command_bar {
+        code.push_str(templates::ON_UPDATE_COMMANDBAR_TRAIT);
+    }
     // replace templates
     code = code
         .replace("$STRUCT_NAME$", &struct_name)
         .replace("$BASE$", &a.base);
-    println!("{}", code);
+    //println!("{}", code);
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }
 #[allow(non_snake_case)]
