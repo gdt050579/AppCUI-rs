@@ -270,6 +270,11 @@ impl ControlBase {
             RuntimeManager::get().send_command(id);
         }
     }
+    pub fn request_update(&self) {
+        if !self.handle.is_none(){
+            RuntimeManager::get().request_update();
+        }
+    }
     pub(crate) fn show_tooltip_on_point(&self, txt: &str, x: i32, y: i32) {
         if self.is_visible() && self.screen_clip.is_visible() {
             let r = Rect::with_size(self.screen_clip.left + x, self.screen_clip.top + y, 1, 1);
