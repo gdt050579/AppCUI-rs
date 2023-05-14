@@ -1,3 +1,4 @@
+use crate::system::CommandBar;
 use crate::system::Handle;
 use crate::graphics::*;
 use crate::input::*;
@@ -60,12 +61,12 @@ pub trait OnCommand {
 }
 
 pub trait OnUpdateCommandBar {
-    fn on_update_command_bar(&self, _command_bar: u32) -> EventProcessStatus {
+    fn on_update_command_bar(&self, command_bar: &mut CommandBar) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
 
 pub trait Control:
-    OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + OnCommand
+    OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + OnCommand + OnUpdateCommandBar
 {
 }

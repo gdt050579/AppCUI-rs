@@ -46,6 +46,7 @@ pub(crate) struct RuntimeManager {
     recompute_layout: bool,
     repaint: bool,
     recompute_parent_indexes: bool,
+    request_update_command_bar: bool,
     loop_status: LoopStatus,
     request_focus: Option<Handle>,
     current_focus: Option<Handle>,
@@ -73,6 +74,7 @@ impl RuntimeManager {
             tooltip: ToolTip::new(),
             recompute_layout: true,
             repaint: true,
+            request_update_command_bar: false,
             recompute_parent_indexes: true,
             request_focus: None,
             current_focus: None,
@@ -171,6 +173,11 @@ impl RuntimeManager {
     pub(crate) fn request_focus_for_control(&mut self, handle: Handle) {
         self.request_focus = Some(handle);
     }
+    pub(crate) fn request_update(&mut self) {
+        self.request_update_command_bar = true;
+        self.repaint = true;
+        self.recompute_layout = true;
+    }
     pub(crate) fn add<T>(&mut self, obj: T) -> ControlHandle<T>
     where
         T: Control + 'static,
@@ -254,9 +261,13 @@ impl RuntimeManager {
                 self.update_focus(handle);
                 self.request_focus = None;
                 self.repaint = true;
+                self.request_update_command_bar = true;
             }
             if self.recompute_layout {
                 self.recompute_layouts();
+            }
+            if self.request_update_command_bar {
+                self.update_command_bar();
             }
             if self.repaint | self.recompute_layout {
                 self.paint();
@@ -368,6 +379,32 @@ impl RuntimeManager {
         let focused_handle = self.get_focused_control();
         while let Some(cmd) = self.commands.pop() {
             self.process_one_command(focused_handle, cmd);
+        }
+    }
+
+    fn update_command_bar(&mut self) {
+        if let Some(cmdbar) = self.commandbar.as_mut() {
+            cmdbar.clear();
+            // start from the focused control and call OnUpdateCommandBar for each control
+            let mut h = self.get_focused_control();
+            let controls = unsafe { &mut *self.controls };
+            while let Some(control) = controls.get(h) {
+                let result = control.get_control_mut().on_update_command_bar(cmdbar);
+                match result {
+                    EventProcessStatus::Processed|EventProcessStatus::Update => {
+                        self.repaint = true;
+                        return;
+                    }
+                    EventProcessStatus::Ignored => {}
+                    EventProcessStatus::Cancel => {
+                        return;
+                    }
+                }
+                h = control.get_base().parent;
+                if h.is_none() {
+                    break;
+                }
+            }
         }
     }
 
