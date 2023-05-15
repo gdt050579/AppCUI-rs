@@ -50,12 +50,7 @@ pub trait OnFocus {
 }
 
 pub trait OnEvent {
-    fn on_event(&mut self, _event: Event, _sender: Handle) -> EventProcessStatus {
-        EventProcessStatus::Ignored
-    }
-}
-pub trait OnCommand {
-    fn on_command(&mut self, _command: u32) -> EventProcessStatus {
+    fn on_event(&mut self, _event: Event) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
@@ -67,6 +62,6 @@ pub trait OnUpdateCommandBar {
 }
 
 pub trait Control:
-    OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + OnCommand + OnUpdateCommandBar
+    OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + OnUpdateCommandBar
 {
 }

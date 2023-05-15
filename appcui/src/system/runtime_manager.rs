@@ -28,11 +28,6 @@ enum MouseLockedObject {
     MenuBar,
 }
 
-#[derive(Copy, Clone)]
-struct EmittedEvent {
-    event: Event,
-    sender: Handle,
-}
 pub(crate) struct RuntimeManager {
     theme: Theme,
     terminal: Box<dyn Terminal>,
@@ -52,8 +47,7 @@ pub(crate) struct RuntimeManager {
     current_focus: Option<Handle>,
     mouse_over_control: Option<Handle>,
     focus_chain: Vec<Handle>,
-    events: Vec<EmittedEvent>,
-    commands: Vec<u32>,
+    events: Vec<Event>,
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: MenuHandle,
 }
@@ -82,7 +76,6 @@ impl RuntimeManager {
             opened_menu_handle: MenuHandle::None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
-            commands: Vec::with_capacity(8),
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
@@ -161,11 +154,8 @@ impl RuntimeManager {
             }
         }
     }
-    pub(crate) fn send_event(&mut self, event: Event, sender: Handle) {
-        self.events.push(EmittedEvent { event, sender });
-    }
-    pub(crate) fn send_command(&mut self, command: u32) {
-        self.commands.push(command);
+    pub(crate) fn send_event(&mut self, event: Event) {
+        self.events.push(event);
     }
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
@@ -247,9 +237,6 @@ impl RuntimeManager {
         self.recompute_layout = true;
         self.repaint = true;
         while self.loop_status == LoopStatus::Normal {
-            if !self.commands.is_empty() {
-                self.process_commands_queue();
-            }
             if !self.events.is_empty() {
                 self.process_events_queue();
             }
@@ -324,11 +311,11 @@ impl RuntimeManager {
             }
         }
     }
-    fn process_one_event(&mut self, evnt: EmittedEvent) {
+    fn process_one_event(&mut self, evnt: Event) {
         let mut h = evnt.sender;
         let controls = unsafe { &mut *self.controls };
         while let Some(control) = controls.get(h) {
-            let result = control.get_control_mut().on_event(evnt.event, evnt.sender);
+            let result = control.get_control_mut().on_event(evnt);
             match result {
                 EventProcessStatus::Processed => {
                     return;
@@ -352,35 +339,7 @@ impl RuntimeManager {
             self.process_one_event(evnt);
         }
     }
-    fn process_one_command(&mut self, handle: Handle, command: u32) {
-        let mut h = handle;
-        let controls = unsafe { &mut *self.controls };
-        while let Some(control) = controls.get(h) {
-            let result = control.get_control_mut().on_command(command);
-            match result {
-                EventProcessStatus::Processed => {
-                    return;
-                }
-                EventProcessStatus::Ignored => {}
-                EventProcessStatus::Update => {
-                    self.repaint = true;
-                }
-                EventProcessStatus::Cancel => {
-                    return;
-                }
-            }
-            h = control.get_base().parent;
-            if h.is_none() {
-                break;
-            }
-        }
-    }
-    fn process_commands_queue(&mut self) {
-        let focused_handle = self.get_focused_control();
-        while let Some(cmd) = self.commands.pop() {
-            self.process_one_command(focused_handle, cmd);
-        }
-    }
+
 
     fn update_command_bar(&mut self) {
         if self.commandbar.is_none() {

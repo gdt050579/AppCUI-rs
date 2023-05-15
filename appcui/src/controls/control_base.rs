@@ -1,13 +1,13 @@
 use super::control_manager::ParentLayout;
 use super::events::{Control, Event, OnUpdateCommandBar};
 use super::events::{
-    OnCommand, OnDefaultAction, OnEvent, OnFocus, OnKeyPressed, OnMouseEvent, OnPaint, OnResize,
+    OnDefaultAction, OnEvent, OnFocus, OnKeyPressed, OnMouseEvent, OnPaint, OnResize,
 };
 use super::layout::ControlLayout;
 use super::{ControlHandle, ControlManager, Layout};
 use crate::graphics::*;
 use crate::input::*;
-use crate::system::{RuntimeManager, Handle};
+use crate::system::{Handle, RuntimeManager};
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
 
@@ -109,7 +109,7 @@ impl ControlBase {
         self.status_flags.remove(StatusFlags::MarkedForFocus);
     }
     #[inline(always)]
-    pub fn is_marked_to_receive_focus(&self) -> bool {
+    pub(crate) fn is_marked_to_receive_focus(&self) -> bool {
         self.status_flags.contains(StatusFlags::MarkedForFocus)
     }
 
@@ -189,6 +189,11 @@ impl ControlBase {
             .set_size_bounds(min_width, min_height, max_width, max_height);
     }
 
+    #[inline(always)]
+    pub fn get_handle(&self)->Handle {
+        self.handle
+    }
+
     #[inline]
     pub(crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
         self.margins.left = left;
@@ -262,16 +267,11 @@ impl ControlBase {
     }
     pub(crate) fn raise_event(&self, event: Event) {
         if !self.handle.is_none() {
-            RuntimeManager::get().send_event(event, self.handle);
-        }
-    }
-    pub(crate) fn send_command(&self, id: u32) {
-        if !self.handle.is_none(){
-            RuntimeManager::get().send_command(id);
+            RuntimeManager::get().send_event(event);
         }
     }
     pub fn request_update(&self) {
-        if !self.handle.is_none(){
+        if !self.handle.is_none() {
             RuntimeManager::get().request_update();
         }
     }
@@ -307,5 +307,4 @@ impl OnDefaultAction for ControlBase {}
 impl OnResize for ControlBase {}
 impl OnFocus for ControlBase {}
 impl OnEvent for ControlBase {}
-impl OnCommand for ControlBase {}
 impl OnUpdateCommandBar for ControlBase {}
