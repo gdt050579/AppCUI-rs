@@ -61,13 +61,7 @@ mod templates {
 
     pub static ON_EVENT_TRAIT: &str = "
     impl OnEvent for $STRUCT_NAME$ {
-        fn on_event(&mut self, event: Event, sender: Handle)->EventProcessStatus  { return self.base.on_event(event, sender); }
-    }
-    ";
-
-    pub static ON_COMMAND_TRAIT: &str = "
-    impl OnCommand for $STRUCT_NAME$ {
-        fn on_command(&mut self, command: u32)->EventProcessStatus  { return self.base.on_command(command); }
+        fn on_event(&mut self, event: Event) -> EventProcessStatus  { return self.base.on_event(event); }
     }
     ";
 
@@ -110,9 +104,6 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str)
     }
     if !a.on_event {
         code.push_str(templates::ON_EVENT_TRAIT);
-    }
-    if !a.on_command {
-        code.push_str(templates::ON_COMMAND_TRAIT);
     }
     if !a.on_update_command_bar {
         code.push_str(templates::ON_UPDATE_COMMANDBAR_TRAIT);
