@@ -15,6 +15,7 @@ pub struct Button {
     flags: ButtonFlags,
     caption: Caption,
     pressed: bool,
+    handler: Option<Box<dyn Fn(Handle)>>,
 }
 impl Button {
     /// Creates a new button with the specified caption, layout and flags
@@ -32,6 +33,7 @@ impl Button {
             caption: Caption::new(caption, true),
             flags,
             pressed: false,
+            handler: None,
         };
 
         if flags.contains(ButtonFlags::Flat) {
@@ -43,12 +45,19 @@ impl Button {
         but.set_hotkey(hotkey);
         but
     }
+    pub fn set_handler(&mut self, handler: impl Fn(Handle) + 'static) {
+        self.handler = Some(Box::new(handler));
+    }
 }
 impl OnDefaultAction for Button {
     fn on_default_action(&mut self) {
         self.raise_event(Event::ButtonClicked(ButtonClickedEvent {
             handle: self.handle,
         }));
+        let my_handler = self.handle;
+        if let Some(handler) = &mut self.handler {
+            handler(my_handler);
+        }
     }
 }
 impl OnKeyPressed for Button {
