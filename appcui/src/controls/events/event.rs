@@ -6,7 +6,7 @@ pub enum Event {
     CheckedStatusChanged,
     WindowClose(Handle),
     ButtonClicked(ButtonClickedEvent),
-    Command(u32),
+    TempCommand(u32),
 }
 
 impl Event {
@@ -15,7 +15,7 @@ impl Event {
             Event::CheckedStatusChanged => Handle::None,
             Event::WindowClose(_) => Handle::None,
             Event::ButtonClicked(event) => event.handle,
-            Event::Command(_) => Handle::None,
+            Event::TempCommand(_) => Handle::None,
         }
     }
 }

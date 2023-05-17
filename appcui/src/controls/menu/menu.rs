@@ -452,7 +452,7 @@ impl Menu {
     fn send_command(&mut self, command_id: u32) {
         let rm = RuntimeManager::get();
         rm.close_opened_menu();
-        rm.send_command(command_id);
+        rm.send_event(Event::TempCommand(command_id));
     }
     fn close(&mut self) {
         RuntimeManager::get().activate_opened_menu_parent();

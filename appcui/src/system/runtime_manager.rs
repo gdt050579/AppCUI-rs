@@ -567,7 +567,7 @@ impl RuntimeManager {
         // check cmdbar
         if let Some(cmdbar) = self.commandbar.as_mut() {
             if let Some(command_id) = cmdbar.get_command(event.key) {
-                self.send_command(command_id);
+                self.send_event(Event::TempCommand(command_id));
                 self.repaint = true;
                 return;
             }
@@ -975,7 +975,7 @@ impl RuntimeManager {
             MouseLockedObject::CommandBar => {
                 if let Some(cmdbar) = self.commandbar.as_mut() {
                     if let Some(command) = cmdbar.on_mouse_up() {
-                        self.send_command(command);
+                        self.send_event(Event::TempCommand(command));
                     }
                     self.repaint = true;
                 }

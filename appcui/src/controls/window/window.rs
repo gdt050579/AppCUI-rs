@@ -502,7 +502,7 @@ impl Window {
         let id = dec.get_id();
         match btype {
             DecoratorType::CloseButton => {
-                self.raise_event(Event::WindowClose);
+                self.raise_event(Event::WindowClose(self.handle));
                 return true;
             }
             DecoratorType::MaximizeRestoreButton => {
@@ -510,18 +510,18 @@ impl Window {
                 return true;
             }
             DecoratorType::Button => {
-                self.send_command(id);
+                self.raise_event(Event::TempCommand(id));
                 return true;
             }
             DecoratorType::SingleChoice => {
                 self.decorators.check_singlechoice(index);
-                self.send_command(id);
+                self.raise_event(Event::TempCommand(id));
                 return true;
             }
             DecoratorType::CheckBox => {
                 let d = self.decorators.get_mut(index).unwrap();
                 d.set_checked(!d.is_checked());
-                self.send_command(id);
+                self.raise_event(Event::TempCommand(id));
                 return true;
             }
             _ => {}

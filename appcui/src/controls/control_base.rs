@@ -190,7 +190,7 @@ impl ControlBase {
     }
 
     #[inline(always)]
-    pub fn get_handle(&self)->Handle {
+    pub fn get_handle(&self) -> Handle {
         self.handle
     }
 
