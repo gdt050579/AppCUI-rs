@@ -2,6 +2,7 @@ use super::super::events::*;
 use super::super::ControlBase;
 use super::super::Layout;
 use super::super::StatusFlags;
+use super::ButtonClickedEvent;
 use super::ButtonFlags;
 use crate::graphics::*;
 use crate::input::*;
@@ -45,7 +46,9 @@ impl Button {
 }
 impl OnDefaultAction for Button {
     fn on_default_action(&mut self) {
-        self.raise_event(Event::ButtonClicked(self.handle));
+        self.raise_event(Event::ButtonClicked(ButtonClickedEvent {
+            handle: self.handle,
+        }));
     }
 }
 impl OnKeyPressed for Button {
@@ -117,50 +120,6 @@ impl OnPaint for Button {
                 );
             }
         }
-        /*
-            WriteTextParams params(
-                  WriteTextFlags::SingleLine | WriteTextFlags::OverwriteColors | WriteTextFlags::HighlightHotKey |
-                  WriteTextFlags::ClipToWidth | WriteTextFlags::FitTextToWidth);
-
-            const auto btnState   = Members->GetControlState(ControlStateFlags::All);
-            params.Color          = Members->Cfg->Button.Text.GetColor(btnState);
-            params.HotKeyColor    = Members->Cfg->Button.HotKey.GetColor(btnState);
-            bool pressed          = IsChecked();
-            params.Y              = 0;
-            params.HotKeyPosition = Members->HotKeyOffset;
-            params.Align          = TextAlignament::Center;
-
-            if (Members->Flags && ButtonFlags::Flat)
-            {
-                params.X     = 0;
-                params.Width = Members->Layout.Width;
-                renderer.FillHorizontalLine(0, 0, Members->Layout.Width, ' ', params.Color);
-                renderer.WriteText(Members->Text, params);
-            }
-            else
-            {
-                params.Width = Members->Layout.Width - 1;
-                if (pressed)
-                {
-                    renderer.FillHorizontalLine(1, 0, Members->Layout.Width, ' ', params.Color);
-                    params.X = 1;
-                    renderer.WriteText(Members->Text, params);
-                }
-                else
-                {
-                    renderer.FillHorizontalLine(0, 0, Members->Layout.Width - 2, ' ', params.Color);
-                    params.X = 0;
-                    renderer.WriteText(Members->Text, params);
-
-                    renderer.FillHorizontalLineWithSpecialChar(
-                          1, 1, Members->Layout.Width, SpecialChars::BlockUpperHalf, Members->Cfg->Button.ShadowColor);
-                    renderer.WriteSpecialCharacter(
-                          Members->Layout.Width - 1, 0, SpecialChars::BlockLowerHalf, Members->Cfg->Button.ShadowColor);
-                }
-            }
-
-
-        */
     }
 }
 impl OnMouseEvent for Button {

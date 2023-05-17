@@ -312,7 +312,10 @@ impl RuntimeManager {
         }
     }
     fn process_one_event(&mut self, evnt: Event) {
-        let mut h = evnt.sender;
+        let mut h = evnt.get_sender();
+        if h.is_none() {
+            h = self.get_focused_control();
+        }
         let controls = unsafe { &mut *self.controls };
         while let Some(control) = controls.get(h) {
             let result = control.get_control_mut().on_event(evnt);
