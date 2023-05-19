@@ -1,3 +1,5 @@
+use crate::system::Handle;
+
 #[derive(Copy,Clone)]
 pub struct WindowDecoratorButtonPressedEvent
 {
@@ -14,4 +16,10 @@ pub struct WindowDecoratorCheckBoxStateChangedEvent
 pub struct WindowDecoratorSingleChoiceSelectedEvent
 {
     pub command_id: u32
+}
+
+#[derive(Copy,Clone)]
+pub struct WindowCloseEvent
+{
+    pub handle: Handle
 }

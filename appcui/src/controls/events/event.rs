@@ -1,9 +1,10 @@
 use crate::{
     controls::{
-        button::ButtonClickedEvent, checkbox::CheckedStatusChangedEvent,
-        window::WindowDecoratorButtonPressedEvent,
+        button::ButtonClickedEvent,
+        checkbox::CheckedStatusChangedEvent,
         window::WindowDecoratorCheckBoxStateChangedEvent,
         window::WindowDecoratorSingleChoiceSelectedEvent,
+        window::{WindowCloseEvent, WindowDecoratorButtonPressedEvent},
     },
     system::Handle,
 };
@@ -12,7 +13,7 @@ use crate::{
 #[derive(Copy, Clone)]
 pub enum Event {
     CheckedStatusChanged(CheckedStatusChangedEvent),
-    WindowClose(Handle),
+    WindowClose(WindowCloseEvent),
     ButtonClicked(ButtonClickedEvent),
     WindowDecoratorButtonPressed(WindowDecoratorButtonPressedEvent),
     WindowDecoratorCheckBoxStateChanged(WindowDecoratorCheckBoxStateChangedEvent),
@@ -24,7 +25,7 @@ impl Event {
     pub(crate) fn get_sender(&self) -> Handle {
         match self {
             Event::CheckedStatusChanged(event) => event.handle,
-            Event::WindowClose(_) => Handle::None,
+            Event::WindowClose(event) => event.handle,
             Event::ButtonClicked(event) => event.handle,
             Event::WindowDecoratorButtonPressed(_) => Handle::None,
             Event::WindowDecoratorCheckBoxStateChanged(_) => Handle::None,

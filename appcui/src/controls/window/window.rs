@@ -5,6 +5,7 @@ use super::Decorator;
 use super::DecoratorType;
 use super::DecoratorsManager;
 use super::DragStatus;
+use super::WindowCloseEvent;
 use super::WindowDecoratorButtonPressedEvent;
 use super::WindowDecoratorCheckBoxStateChangedEvent;
 use super::WindowDecoratorSingleChoiceSelectedEvent;
@@ -505,7 +506,9 @@ impl Window {
         let id = dec.get_id();
         match btype {
             DecoratorType::CloseButton => {
-                self.raise_event(Event::WindowClose(self.handle));
+                self.raise_event(Event::WindowClose(WindowCloseEvent {
+                    handle: self.handle,
+                }));
                 return true;
             }
             DecoratorType::MaximizeRestoreButton => {
@@ -521,7 +524,7 @@ impl Window {
             DecoratorType::SingleChoice => {
                 self.decorators.check_singlechoice(index);
                 self.raise_event(Event::WindowDecoratorSingleChoiceSelected(
-                    WindowDecoratorSingleChoiceSelectedEvent { command_id:id },
+                    WindowDecoratorSingleChoiceSelectedEvent { command_id: id },
                 ));
                 return true;
             }
@@ -530,7 +533,10 @@ impl Window {
                 let checked = !d.is_checked();
                 d.set_checked(checked);
                 self.raise_event(Event::WindowDecoratorCheckBoxStateChanged(
-                    WindowDecoratorCheckBoxStateChangedEvent { command_id: id, checked },
+                    WindowDecoratorCheckBoxStateChangedEvent {
+                        command_id: id,
+                        checked,
+                    },
                 ));
                 return true;
             }
