@@ -5,6 +5,9 @@ use super::Decorator;
 use super::DecoratorType;
 use super::DecoratorsManager;
 use super::DragStatus;
+use super::WindowDecoratorButtonPressedEvent;
+use super::WindowDecoratorCheckBoxStateChangedEvent;
+use super::WindowDecoratorSingleChoiceSelectedEvent;
 use super::WindowFlags;
 use crate::controls::events::*;
 use crate::controls::menu::Menu;
@@ -510,18 +513,25 @@ impl Window {
                 return true;
             }
             DecoratorType::Button => {
-                self.raise_event(Event::TempCommand(id));
+                self.raise_event(Event::WindowDecoratorButtonPressed(
+                    WindowDecoratorButtonPressedEvent { command_id: id },
+                ));
                 return true;
             }
             DecoratorType::SingleChoice => {
                 self.decorators.check_singlechoice(index);
-                self.raise_event(Event::TempCommand(id));
+                self.raise_event(Event::WindowDecoratorSingleChoiceSelected(
+                    WindowDecoratorSingleChoiceSelectedEvent { command_id:id },
+                ));
                 return true;
             }
             DecoratorType::CheckBox => {
                 let d = self.decorators.get_mut(index).unwrap();
-                d.set_checked(!d.is_checked());
-                self.raise_event(Event::TempCommand(id));
+                let checked = !d.is_checked();
+                d.set_checked(checked);
+                self.raise_event(Event::WindowDecoratorCheckBoxStateChanged(
+                    WindowDecoratorCheckBoxStateChangedEvent { command_id: id, checked },
+                ));
                 return true;
             }
             _ => {}
