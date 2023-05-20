@@ -3,6 +3,7 @@ mod app;
 mod runtime_manager;
 mod tooltip;
 mod command_bar;
+mod command_bar_event;
 mod error;
 mod handle;
 mod initialization_data;
@@ -19,6 +20,7 @@ pub (crate) use self::menu_handle_manager::MenuHandleManager;
 
 pub use self::app::App;
 pub use self::command_bar::CommandBar;
+pub use self::command_bar_event::CommandBarEvent;
 pub use self::error::Error;
 pub use self::initialization_data::InitializationFlags;
 pub (crate) use self::runtime_manager::RuntimeManager;

@@ -1,6 +1,6 @@
 use super::{
-    CommandBar, ControlHandleManager, Handle, InitializationData, InitializationFlags,
-    MenuHandleManager, Theme, ToolTip,
+    CommandBar, CommandBarEvent, ControlHandleManager, Handle, InitializationData,
+    InitializationFlags, MenuHandleManager, Theme, ToolTip,
 };
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{Control, Event, EventProcessStatus};
@@ -343,7 +343,6 @@ impl RuntimeManager {
         }
     }
 
-
     fn update_command_bar(&mut self) {
         if self.commandbar.is_none() {
             self.request_update_command_bar = false;
@@ -353,11 +352,11 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(cmdbar) = self.commandbar.as_mut() {
             cmdbar.clear();
-            // start from the focused control and call OnUpdateCommandBar for each control                        
+            // start from the focused control and call OnUpdateCommandBar for each control
             while let Some(control) = controls.get(h) {
                 let result = control.get_control_mut().on_update_command_bar(cmdbar);
                 match result {
-                    EventProcessStatus::Processed|EventProcessStatus::Update => {
+                    EventProcessStatus::Processed | EventProcessStatus::Update => {
                         self.repaint = true;
                         return;
                     }
@@ -567,7 +566,7 @@ impl RuntimeManager {
         // check cmdbar
         if let Some(cmdbar) = self.commandbar.as_mut() {
             if let Some(command_id) = cmdbar.get_command(event.key) {
-                self.send_event(Event::TempCommand(command_id));
+                self.send_event(Event::CommandBarCommand(CommandBarEvent { command_id }));
                 self.repaint = true;
                 return;
             }
@@ -975,7 +974,9 @@ impl RuntimeManager {
             MouseLockedObject::CommandBar => {
                 if let Some(cmdbar) = self.commandbar.as_mut() {
                     if let Some(command) = cmdbar.on_mouse_up() {
-                        self.send_event(Event::TempCommand(command));
+                        self.send_event(Event::CommandBarCommand(CommandBarEvent {
+                            command_id: command,
+                        }));
                     }
                     self.repaint = true;
                 }
