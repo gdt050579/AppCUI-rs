@@ -1,6 +1,7 @@
 use super::{
     menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuCheckBoxItem,
-    MenuCommandItem, MenuHandle, MenuItem, MenuRadioBoxItem, MenuSubMenuItem, MousePressedResult,
+    MenuCheckBoxStateChangedEvent, MenuCommandEvent, MenuCommandItem, MenuHandle, MenuItem,
+    MenuRadioBoxItem, MenuRadioBoxSelectedEvent, MenuSubMenuItem, MousePressedResult,
 };
 use crate::{
     controls::events::{Event, EventProcessStatus},
@@ -192,20 +193,31 @@ impl Menu {
                 if shortcut == key {
                     match item {
                         MenuItem::Command(item) => {
-                            let cmd_id = item.command_id;
-                            self.send_command(cmd_id);
+                            let evnt = Event::MenuCommand(MenuCommandEvent {
+                                command_id: item.command_id,
+                                menu: self.handle,
+                            });
+                            self.send_event(evnt);
                             return true;
                         }
                         MenuItem::CheckBox(item) => {
                             item.checked = !item.checked;
-                            let cmd_id = item.command_id;
-                            self.send_command(cmd_id);
+                            let evnt =
+                                Event::MenuCheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
+                                    command_id: item.command_id,
+                                    menu: self.handle,
+                                    checked: item.checked,
+                                });
+                            self.send_event(evnt);
                             return true;
                         }
                         MenuItem::RadioBox(item) => {
-                            let cmd_id = item.command_id;
+                            let evnt = Event::MenuRadioBoxSelected(MenuRadioBoxSelectedEvent {
+                                command_id: item.command_id,
+                                menu: self.handle,
+                            });
                             self.check_radio_item(index);
-                            self.send_command(cmd_id);
+                            self.send_event(evnt);
                             return true;
                         }
                         MenuItem::Line(_) => {}
@@ -449,10 +461,10 @@ impl Menu {
         }
         self.items[index].set_checked(true);
     }
-    fn send_command(&mut self, command_id: u32) {
+    fn send_event(&mut self, event: Event) {
         let rm = RuntimeManager::get();
         rm.close_opened_menu();
-        rm.send_event(Event::TempCommand(command_id));
+        rm.send_event(event);
     }
     fn close(&mut self) {
         RuntimeManager::get().activate_opened_menu_parent();
@@ -461,18 +473,35 @@ impl Menu {
         if index >= self.items.len() {
             return;
         }
-        let command = match &mut self.items[index] {
-            MenuItem::Command(item) => Some(item.command_id),
+        if !self.items[index].is_enabled() {
+            return;
+        }
+        match &mut self.items[index] {
+            MenuItem::Command(item) => {
+                let evnt = Event::MenuCommand(MenuCommandEvent {
+                    command_id: item.command_id,
+                    menu: self.handle,
+                });
+                self.send_event(evnt);
+            }
             MenuItem::CheckBox(item) => {
                 item.checked = !item.checked;
-                Some(item.command_id)
+                let evnt = Event::MenuCheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
+                    command_id: item.command_id,
+                    menu: self.handle,
+                    checked: item.checked,
+                });
+                self.send_event(evnt);
             }
             MenuItem::RadioBox(item) => {
-                let cmd_id = item.command_id;
+                let evnt = Event::MenuRadioBoxSelected(MenuRadioBoxSelectedEvent {
+                    command_id: item.command_id,
+                    menu: self.handle,
+                });
                 self.check_radio_item(index);
-                Some(cmd_id)
+                self.send_event(evnt);
             }
-            MenuItem::Line(_) => None,
+            MenuItem::Line(_) => {}
             MenuItem::SubMenu(item) => {
                 RuntimeManager::get().show_menu(
                     item.submenu_handle,
@@ -480,7 +509,7 @@ impl Menu {
                     self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
                     Size::new(0, 0),
                 );
-                None
+
                 /*
                             itm->SubMenu->Show(
                       Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
@@ -489,9 +518,6 @@ impl Menu {
                     */
             }
         };
-        if let Some(cmd) = command {
-            self.send_command(cmd);
-        }
     }
 
     pub(crate) fn on_key_pressed(&mut self, key: Key) -> EventProcessStatus {
