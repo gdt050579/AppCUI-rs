@@ -1,5 +1,4 @@
 use crate::system::CommandBar;
-use crate::system::Handle;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::Theme;
@@ -56,7 +55,7 @@ pub trait OnEvent {
 }
 
 pub trait OnUpdateCommandBar {
-    fn on_update_command_bar(&self, command_bar: &mut CommandBar) -> EventProcessStatus {
+    fn on_update_command_bar(&self, _command_bar: &mut CommandBar) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
