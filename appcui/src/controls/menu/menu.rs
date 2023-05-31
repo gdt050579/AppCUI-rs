@@ -15,6 +15,7 @@ use crate::{
 };
 const MAX_ITEMS: usize = 128;
 pub struct Menu {
+    pub(super) caption: Caption,
     pub(super) items: Vec<MenuItem>,
     pub(super) current: VectorIndex,
     pub(super) width: u16,
@@ -28,8 +29,13 @@ pub struct Menu {
     pub(super) parent_handle: MenuHandle,
 }
 impl Menu {
-    pub fn new() -> Self {
+    pub fn new(name: &str) -> Self {
         Self {
+            caption: if name.len() == 0 {
+                Caption::default()
+            } else {
+                Caption::new(name, true)
+            },
             items: Vec::with_capacity(4),
             current: VectorIndex::Invalid,
             width: 1,
