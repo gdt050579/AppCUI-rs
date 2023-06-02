@@ -9,8 +9,10 @@ pub use common_traits::OnResize;
 pub use common_traits::OnFocus;
 pub use common_traits::OnEvent;
 pub use common_traits::OnUpdateCommandBar;
+pub use common_traits::OnMenuEvents;
+pub use common_traits::OnCommandBarEvents;
+
 pub use common_traits::Control;
 pub use common_traits::EventProcessStatus;
-pub use common_traits::OnMenuEvents;
 pub use event::Event;
 pub use event::MenuEvent;

@@ -16,7 +16,7 @@ mod mouse_press_result;
 mod utils;
 
 pub use self::menu::Menu;
-pub(crate) use self::menu_bar::MenuBar;
+pub use self::menu_bar::MenuBar;
 pub(self) use self::menu_bar_item::MenuBarItem;
 pub use self::menu_events::MenuCheckBoxStateChangedEvent;
 pub use self::menu_events::MenuCommandEvent;

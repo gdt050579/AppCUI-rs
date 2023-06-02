@@ -150,7 +150,7 @@ fn main_2() -> Result<(), appcui::system::Error> {
 
     // a.add(w);
     // a.run();
-    // Ok(())
+    Ok(())
 }
 
 #[AppCUIWindow(overwrite=OnEvent)]
@@ -190,6 +190,21 @@ impl OnEvent for MyWindow {
             _ => {}
         }
         EventProcessStatus::Ignored
+    }
+}
+impl OnCommandBarEvents for MyWindow {
+    fn on_update_commandbar(&self, c: &mut CommandBar) {
+        c.set(key!("F2"), "Save", 100);
+        c.set(KeyCode::F3, "Load", 101);
+        c.set(Key::new(KeyCode::F1,KeyModifier::Alt), "New", 102);
+    }
+
+    fn on_event(&self, command_id: u32) {
+        match command_id {
+            100 => {},
+            101 => {},
+            _ => {}
+        }
     }
 }
 

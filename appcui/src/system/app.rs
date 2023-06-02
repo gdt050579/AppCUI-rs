@@ -1,13 +1,14 @@
+use std::sync::Mutex;
+
 use super::Error;
 use super::InitializationData;
 use super::InitializationFlags;
 use super::RuntimeManager;
 use crate::controls::events::Control;
-use crate::controls::menu::Menu;
-use crate::controls::menu::MenuHandle;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
-use crate::utils::Caption;
+
+static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
 pub struct App {
     _phantom: (),
@@ -15,7 +16,12 @@ pub struct App {
 
 impl App {
     fn create(data: InitializationData) -> Result<Self, Error> {
+        let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
+        if !(*app_created) {
+            return Err(Error::AppAlreadyStarted);
+        }
         RuntimeManager::create(data)?;
+        *app_created = true;
         Ok(App { _phantom: () })
     }
     pub fn new(
@@ -28,7 +34,12 @@ impl App {
     pub fn default() -> Result<Self, Error> {
         App::create(InitializationData::default())
     }
-    pub fn debug(width: u16, height: u16, flags: InitializationFlags, script: &str) -> Result<Self, Error> {
+    pub fn debug(
+        width: u16,
+        height: u16,
+        flags: InitializationFlags,
+        script: &str,
+    ) -> Result<Self, Error> {
         let i = InitializationData {
             flags,
             size: Some(Size {

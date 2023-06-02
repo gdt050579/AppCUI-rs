@@ -69,6 +69,12 @@ pub trait OnUpdateCommandBar {
     }
 }
 
+pub trait OnCommandBarEvents {
+    fn on_update_commandbar(&self, _commandbar: &mut CommandBar) {}
+    fn on_event(&self, _command_id: u32) {}
+}
+
+
 pub trait Control:
     OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + OnUpdateCommandBar + OnMenuEvents
 {

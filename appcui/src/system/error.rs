@@ -7,4 +7,5 @@ pub enum Error {
     SetConsoleModeFailed,
     GetConsoleScreenBufferInfoFailed,
     ScriptParsingError,
+    AppAlreadyStarted,
 }

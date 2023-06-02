@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, Surface, Size},
+    graphics::{Character, Size, Surface},
     input::{Key, KeyCode, KeyModifier},
     terminals::{MouseButtonDownEvent, MouseMoveEvent},
 };
@@ -87,7 +87,7 @@ impl CommandBar {
         self.pressed_index = INVALID_INDEX;
     }
 
-    pub fn set(&mut self, key: Key, text: &str, command: u32) -> bool {
+    fn set_with_key(&mut self, key: Key, text: &str, command: u32) -> bool {
         if key.code == KeyCode::None {
             return false;
         }
@@ -114,6 +114,13 @@ impl CommandBar {
         self.has_shifts[shift_state] = true;
 
         true
+    }
+    #[inline(always)]
+    pub fn set<T>(&mut self, key: T, text: &str, command: u32) -> bool
+    where
+        Key: From<T>,
+    {
+        self.set_with_key(Key::from(key), text, command)
     }
 
     pub(crate) fn get_command(&self, key: Key) -> Option<u32> {
@@ -233,9 +240,11 @@ impl CommandBar {
             return false;
         }
         // check if the current hovered index is not the actual index for current mouse pos
-        if (self.hovered_index != INVALID_INDEX) && ((self.hovered_index as usize) < self.items.len()) {
+        if (self.hovered_index != INVALID_INDEX)
+            && ((self.hovered_index as usize) < self.items.len())
+        {
             let item = &self.items[self.hovered_index as usize];
-            if (event.x>=item.left) && (event.x<item.right) {
+            if (event.x >= item.left) && (event.x < item.right) {
                 return true;
             }
         }
