@@ -1,5 +1,6 @@
 use crate::input::*;
 
+#[derive(Clone)]
 pub(crate) struct Caption {
     text: String,
     chars_count: usize,
@@ -74,6 +75,13 @@ impl Caption {
     #[inline]
     pub(crate) fn has_hotkey(&self) -> bool {
         self.hotkey.code != KeyCode::None
+    }
+    pub(crate) fn copy_from(&mut self, caption: &Caption) {
+        self.chars_count = caption.chars_count;
+        self.hotkey = caption.hotkey;
+        self.hotkey_pos = caption.hotkey_pos;
+        self.text.clear();
+        self.text.push_str(caption.text.as_str());
     }
 }
 
