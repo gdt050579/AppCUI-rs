@@ -1,5 +1,5 @@
 use super::control_manager::ParentLayout;
-use super::events::{Control, Event, OnUpdateCommandBar};
+use super::events::{Control, Event, OnUpdateCommandBar, MenuEvent, OnMenuEvents};
 use super::events::{
     OnDefaultAction, OnEvent, OnFocus, OnKeyPressed, OnMouseEvent, OnPaint, OnResize,
 };
@@ -308,3 +308,4 @@ impl OnResize for ControlBase {}
 impl OnFocus for ControlBase {}
 impl OnEvent for ControlBase {}
 impl OnUpdateCommandBar for ControlBase {}
+impl OnMenuEvents for ControlBase {}

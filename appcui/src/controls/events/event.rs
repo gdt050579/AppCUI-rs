@@ -24,6 +24,14 @@ pub enum Event {
     MenuRadioBoxSelected(MenuRadioBoxSelectedEvent),
 }
 
+#[repr(u8)]
+#[derive(Copy, Clone)]
+pub enum MenuEvent {
+    Command(MenuCommandEvent),
+    CheckBoxStateChanged(MenuCheckBoxStateChangedEvent),
+    RadioBoxSelected(MenuRadioBoxSelectedEvent),
+}
+
 impl Event {
     pub(crate) fn get_sender(&self) -> Handle {
         match self {

@@ -61,7 +61,9 @@ mod templates {
 
     pub static ON_EVENT_TRAIT: &str = "
     impl OnEvent for $STRUCT_NAME$ {
-        fn on_event(&mut self, event: Event) -> EventProcessStatus  { return self.base.on_event(event); }
+        fn on_event(&mut self, event: Event) -> EventProcessStatus  { 
+            return OnEvent::on_event(&mut self.base,event);
+        }
     }
     ";
 
@@ -70,6 +72,20 @@ mod templates {
         fn on_update_command_bar(&self, command_bar: &mut CommandBar)->EventProcessStatus  { return self.base.on_update_command_bar(command_bar); }
     }
     ";
+
+    pub static ON_MENU_EVENTS_TRAIT: &str = "
+    impl OnMenuEvents for $STRUCT_NAME$ {
+        fn on_menu_open(&self, menu: &mut Menu) {
+            self.base.on_menu_open(menu);
+        }
+        fn on_event(&self, event: MenuEvent) {
+            OnMenuEvents::on_event(&(self.base),event);
+        }
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            self.base.on_update_menubar(menubar);
+        }
+    }
+    ";    
 }
 fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str) -> TokenStream {
     let mut a = Arguments::new(base_control);
@@ -107,6 +123,9 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str)
     }
     if !a.on_update_command_bar {
         code.push_str(templates::ON_UPDATE_COMMANDBAR_TRAIT);
+    }
+    if !a.on_menu_events {
+        code.push_str(templates::ON_MENU_EVENTS_TRAIT);
     }
     // replace templates
     code = code
