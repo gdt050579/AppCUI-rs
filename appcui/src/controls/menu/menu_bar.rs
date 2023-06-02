@@ -6,23 +6,25 @@ use crate::{
     utils::{Caption, Strategy, VectorIndex},
 };
 
-use super::{Menu, MenuBarItem, MenuHandle};
+use super::{MenuBarItem, MenuHandle};
 
-pub(crate) struct MenuBar {
+pub struct MenuBar {
     items: Vec<MenuBarItem>,
     x: i32,
     y: i32,
     width: u32,
     opened_item: VectorIndex,
     hovered_item: VectorIndex,
+    count: usize,
 }
 
 impl MenuBar {
     pub(crate) fn new(width: u32) -> Self {
         Self {
-            items: Vec::with_capacity(4),
+            items: Vec::with_capacity(8),
             x: 0,
             y: 0,
+            count:0,
             width,
             opened_item: VectorIndex::Invalid,
             hovered_item: VectorIndex::Invalid,
@@ -30,9 +32,12 @@ impl MenuBar {
     }
     fn update_positions(&mut self) {
         let mut x = 0;
+        let mut idx = 0usize;
         for item in &mut self.items {
+            if idx>=self.count { break; }
             item.x = x;
             x += 2 + (item.caption.get_chars_count() as i32);
+            idx += 1;
         }
     }
     fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
@@ -43,6 +48,7 @@ impl MenuBar {
             return None;
         }
         for (index, item) in self.items.iter().enumerate() {
+            if index>=self.count { break; }
             if (x >= item.x) && (x < (item.x + 2 + (item.caption.get_chars_count() as i32))) {
                 return Some(index);
             }
@@ -55,19 +61,16 @@ impl MenuBar {
         self.width = width;
         self.update_positions();
     }
-    pub(crate) fn add(&mut self, menu: Menu, caption: Caption) -> MenuHandle {
-        let menus = RuntimeManager::get().get_menus();
-        let h = menus.add(menu);
-        self.items.push(MenuBarItem {
-            caption,
-            x: 0,
-            handle: h,
-        });
-        self.update_positions();
-        return h;
-    }
-    pub(crate) fn get_menu(&self, handle: MenuHandle) -> Option<&mut Menu> {
-        RuntimeManager::get().get_menus().get_mut(handle)
+    pub fn add(&mut self, handle: MenuHandle) {
+        if let Some(menu) = RuntimeManager::get().get_menu(handle) {
+            if self.count<self.items.len() {
+                // overwrite an existing item
+                self.items[self.count].set(handle, &menu.caption);
+            } else {
+                self.items.push(MenuBarItem::new(handle, &menu.caption));
+            }
+            self.count+=1;
+        }
     }
 
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
@@ -105,7 +108,7 @@ impl MenuBar {
     }
     fn open(&mut self, index: VectorIndex) {
         self.opened_item = index;
-        if index.in_range(self.items.len()) {
+        if index.in_range(self.count) {
             RuntimeManager::get().show_menu(
                 self.items[index.index()].handle,
                 self.x + self.items[index.index()].x,
@@ -122,7 +125,7 @@ impl MenuBar {
         if self.is_opened() {
             if (key.code == KeyCode::Left) && (key.modifier == KeyModifier::None) {
                 let mut idx = self.opened_item;
-                idx.sub(1, self.items.len(), Strategy::Rotate);
+                idx.sub(1, self.count, Strategy::Rotate);
                 if idx.is_valid() {
                     self.open(idx);
                 }
@@ -130,7 +133,7 @@ impl MenuBar {
             }
             if (key.code == KeyCode::Right) && (key.modifier == KeyModifier::None) {
                 let mut idx = self.opened_item;
-                idx.add(1, self.items.len(), Strategy::Rotate);
+                idx.add(1, self.count, Strategy::Rotate);
                 if idx.is_valid() {
                     self.open(idx);
                 }
@@ -138,6 +141,7 @@ impl MenuBar {
             }
         } else {
             for (index, item) in self.items.iter().enumerate() {
+                if index>=self.count { break; }
                 if item.caption.get_hotkey() == key {
                     self.open(VectorIndex::from(index));
                     return EventProcessStatus::Processed;
@@ -145,7 +149,7 @@ impl MenuBar {
             }
         }
         // check recursivelly if a shortcut key was not pressed
-        for item in &self.items {            
+        for item in &self.items {
             // if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
             // {
             //     Close();
@@ -169,6 +173,9 @@ impl MenuBar {
         let open_idx = self.opened_item.index();
         let hover_idx = self.hovered_item.index();
         for (index, item) in self.items.iter().enumerate() {
+            if index>=self.count {
+                break;
+            }
             format.x = self.x + item.x + 1;
             format.hotkey_pos = item.caption.get_hotkey_pos();
             format.chars_count = Some(item.caption.get_chars_count() as u16);

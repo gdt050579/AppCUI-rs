@@ -18,7 +18,6 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::Handle;
 use crate::system::*;
-use crate::utils::Caption;
 use crate::utils::Strategy;
 use crate::utils::VectorIndex;
 
@@ -35,7 +34,6 @@ enum MoveDirection {
 pub struct Window {
     title: String,
     flags: WindowFlags,
-    menu: Option<MenuBar>,
     decorators: DecoratorsManager,
     resize_move_mode: bool,
     maximized: bool,
@@ -99,7 +97,6 @@ impl Window {
             ),
             title: String::from(title),
             flags,
-            menu: None,
             resize_move_mode: false,
             maximized: false,
             decorators: DecoratorsManager::new(),
@@ -149,11 +146,6 @@ impl Window {
         tag_decorator.hide();
         win.decorators.add(tag_decorator);
 
-        if flags.contains(WindowFlags::Menu) {
-            win.menu = Some(MenuBar::new(1));
-            win.set_margins(1, 2, 1, 1);
-        }
-
         win
 
         /*
@@ -198,11 +190,7 @@ impl Window {
     pub fn get_title(&self) -> &str {
         &self.title
     }
-    pub fn add_menu(&mut self, menu: Menu, text: &str) {
-        if let Some(m) = &mut self.menu {
-            m.add(menu, Caption::new(text, true));
-        }
-    }
+
     fn center_to_screen(&mut self) {
         let screen_size = RuntimeManager::get().get_terminal_size();
         let win_size = self.get_size();
@@ -398,13 +386,6 @@ impl Window {
     }
 
     fn on_mouse_over(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        if let Some(menu) = self.menu.as_mut() {
-            let result = menu.on_mouse_move(x, y);
-            if result.is_processed_or_update() {
-                self.hide_tooltip();
-                return result;
-            }
-        }
         if let Some((index, decorator)) = self.decorators.get_from_position(x, y) {
             let cx = decorator.center_x();
             let y = decorator.get_y();
@@ -442,10 +423,6 @@ impl Window {
         self.decorators.set_current_item_pressed(false);
         self.drag_status = DragStatus::None;
         self.resize_move_mode = false;
-
-        if let Some(menubar) = self.menu.as_mut() {
-            return menubar.on_mouse_pressed(x, y);
-        }
 
         if let Some(index) = self.decorators.get_index_from_position(x, y) {
             self.decorators.set_current(VectorIndex::with_value(index));
@@ -602,10 +579,7 @@ impl OnPaint for Window {
             format.width = Some(self.title_max_width);
             surface.write_text(self.title.as_str(), &format);
         }
-        // paint the menu
-        if self.menu.is_some() {
-            self.menu.as_ref().unwrap().paint(surface, theme);
-        }
+
     }
 }
 
@@ -615,10 +589,6 @@ impl OnResize for Window {
         let (title_pos, title_width) = self.decorators.update_positions(new_size);
         self.title_left_margin = title_pos;
         self.title_max_width = title_width;
-        // recompute menu based on new size
-        if let Some(menu) = &mut self.menu {
-            menu.set_position(0, 0, new_size.width);
-        }
     }
 }
 

@@ -203,11 +203,8 @@ impl RuntimeManager {
     pub(crate) fn get_menus(&self) -> &mut MenuHandleManager {
         unsafe { &mut *self.menus }
     }
-    pub(crate) fn add_menu(&mut self, menu: Menu, caption: Caption) -> Option<MenuHandle> {
-        if let Some(menubar) = self.menubar.as_mut() {
-            return Some(menubar.add(menu, caption));
-        }
-        None
+    pub(crate) fn add_menu(&mut self, menu: Menu) -> MenuHandle {
+        self.get_menus().add(menu)
     }
     pub(crate) fn get_menu(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
         let menus = unsafe { &mut *self.menus };

@@ -85,12 +85,13 @@ impl Menu {
             checked,
         }));
     }
-    pub fn add_submenu(&mut self, text: &str, mut menu: Menu) {
+    pub fn add_submenu(&mut self, mut menu: Menu) {
         menu.parent_handle = self.handle;
+        let caption = menu.caption.clone();
         let handle = RuntimeManager::get().get_menus().add(menu);
         let item = MenuSubMenuItem {
             enabled: true,
-            caption: Caption::new(text, true),
+            caption: caption,
             submenu_handle: handle,
         };
         self.items.push(MenuItem::SubMenu(item));

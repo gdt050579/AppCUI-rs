@@ -9,6 +9,5 @@ pub enum WindowFlags {
     NoCloseButton = 0x0010,
     FixedPosition = 0x0040,
     Maximized     = 0x0080,
-    Menu          = 0x0100,
     ProcessReturn = 0x0200,
 }

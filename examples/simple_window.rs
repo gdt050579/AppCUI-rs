@@ -5,7 +5,7 @@ use appcui::input::*;
 use appcui::system::*;
 use AppCUIProcMacro::*;
 
-use appcui::controls::menu::Menu;
+use appcui::controls::menu::*;
 use appcui::controls::*;
 use appcui::input::{Key, KeyCode, KeyModifier};
 use appcui::terminals::TerminalType;
@@ -70,87 +70,87 @@ fn main_2() -> Result<(), appcui::system::Error> {
     ";
     //let mut a = App::debug(60, 20, InitializationFlags::Menu, script)?;
     //let mut a = App::default()?;
-    let mut a = App::new(TerminalType::Default, None, InitializationFlags::Menu)?;
-    let mut w = Window::new(
-        "Simple window",
-        Layout::new("d:c,w:40,h:10"),
-        WindowFlags::Sizeable,
-    );
-    w.add(CheckBox::new(
-        "This is a checkbox that &enables a certain property that is required by this program",
-        Layout::new("x:1,y:1,w:35,h:3"),
-        true,
-    ));
-    w.add(CheckBox::new(
-        "&Second check box",
-        Layout::new("x:1,y:4,w:35"),
-        true,
-    ));
-    w.add(CheckBox::new(
-        "&Third check box",
-        Layout::new("x:1,y:5,w:35"),
-        true,
-    ));
-    w.add(Button::new(
-        "&Press me",
-        Layout::new("x:1,y:7,w:30"),
-        ButtonFlags::None,
-    ));
+    // let mut a = App::new(TerminalType::Default, None, InitializationFlags::Menu)?;
+    // let mut w = Window::new(
+    //     "Simple window",
+    //     Layout::new("d:c,w:40,h:10"),
+    //     WindowFlags::Sizeable,
+    // );
+    // w.add(CheckBox::new(
+    //     "This is a checkbox that &enables a certain property that is required by this program",
+    //     Layout::new("x:1,y:1,w:35,h:3"),
+    //     true,
+    // ));
+    // w.add(CheckBox::new(
+    //     "&Second check box",
+    //     Layout::new("x:1,y:4,w:35"),
+    //     true,
+    // ));
+    // w.add(CheckBox::new(
+    //     "&Third check box",
+    //     Layout::new("x:1,y:5,w:35"),
+    //     true,
+    // ));
+    // w.add(Button::new(
+    //     "&Press me",
+    //     Layout::new("x:1,y:7,w:30"),
+    //     ButtonFlags::None,
+    // ));
 
-    let mut m_file = Menu::new();
-    m_file.add_command("&New", key!("Ctrl+N"), 100);
-    m_file.add_command("&Open", Key::new(KeyCode::O, KeyModifier::Ctrl), 101);
-    m_file.add_command("&Save", Key::new(KeyCode::S, KeyModifier::Ctrl), 102);
-    m_file.add_command("Save &as ...", Key::default(), 103);
-    m_file.add_separator();
-    m_file.add_checkbox("Option &1", Key::default(), 100, true);
-    m_file.add_checkbox(
-        "Option &2",
-        Key::new(KeyCode::F10, KeyModifier::None),
-        101,
-        false,
-    );
-    m_file.add_separator();
-    m_file.add_command("E&xit", Key::new(KeyCode::F4, KeyModifier::Alt), 100);
-    a.add_menu(m_file, "&File");
+    // let mut m_file = Menu::new("&File");
+    // m_file.add_command("&New", key!("Ctrl+N"), 100);
+    // m_file.add_command("&Open", Key::new(KeyCode::O, KeyModifier::Ctrl), 101);
+    // m_file.add_command("&Save", Key::new(KeyCode::S, KeyModifier::Ctrl), 102);
+    // m_file.add_command("Save &as ...", Key::default(), 103);
+    // m_file.add_separator();
+    // m_file.add_checkbox("Option &1", Key::default(), 100, true);
+    // m_file.add_checkbox(
+    //     "Option &2",
+    //     Key::new(KeyCode::F10, KeyModifier::None),
+    //     101,
+    //     false,
+    // );
+    // m_file.add_separator();
+    // m_file.add_command("E&xit", Key::new(KeyCode::F4, KeyModifier::Alt), 100);
+    // a.add_menu(m_file, "&File");
 
-    let mut m_opt = Menu::new();
-    m_opt.add_radiobox("Radio &1", Key::default(), 1000, false);
-    m_opt.add_radiobox("Radio &2", Key::default(), 1000, false);
-    m_opt.add_radiobox("Radio &3", Key::default(), 1000, true);
-    m_opt.add_radiobox("Radio &4", Key::default(), 1000, false);
-    m_opt.add_radiobox("Radio &5", Key::default(), 1000, false);
-    a.add_menu(m_opt, "&Radio");
+    // let mut m_opt = Menu::new("&Radio");
+    // m_opt.add_radiobox("Radio &1", Key::default(), 1000, false);
+    // m_opt.add_radiobox("Radio &2", Key::default(), 1000, false);
+    // m_opt.add_radiobox("Radio &3", Key::default(), 1000, true);
+    // m_opt.add_radiobox("Radio &4", Key::default(), 1000, false);
+    // m_opt.add_radiobox("Radio &5", Key::default(), 1000, false);
+    // a.add_menu(m_opt, "&Radio");
 
-    let mut m_sm = Menu::new();
-    let mut m_colors = Menu::new();
-    m_colors.add_command("Red", Key::None, 103);
-    m_colors.add_command("Green", Key::None, 103);
-    m_colors.add_command("Blue", Key::None, 103);
-    m_colors.add_command("White", Key::None, 103);
-    m_colors.add_command("Teak", Key::None, 103);
-    m_sm.add_submenu("&Colors", m_colors);
-    let mut m_size = Menu::new();
-    m_size.add_radiobox("Km", KeyCode::F1, 123, false);
-    m_size.add_radiobox("Cm", Key::from(KeyCode::F2), 123, false);
-    m_size.add_radiobox("Mm", Key::from(KeyCode::F3), 123, true);
-    m_size.add_separator();
-    let mut m_keywords = Menu::new();
-    for k in &keywods {
-        m_keywords.add_command(k, Key::None, 1234);
-    }
-    m_keywords.add_separator();
-    for k in &keywods {
-        m_keywords.add_command(k, Key::None, 1234);
-    }
-    m_size.add_submenu("&Keywords", m_keywords);
+    // let mut m_sm = Menu::new("&Submenus");
+    // let mut m_colors = Menu::new("&Colors");
+    // m_colors.add_command("Red", Key::None, 103);
+    // m_colors.add_command("Green", Key::None, 103);
+    // m_colors.add_command("Blue", Key::None, 103);
+    // m_colors.add_command("White", Key::None, 103);
+    // m_colors.add_command("Teak", Key::None, 103);
+    // m_sm.add_submenu(m_colors);
+    // let mut m_size = Menu::new("&Size in ...");
+    // m_size.add_radiobox("Km", KeyCode::F1, 123, false);
+    // m_size.add_radiobox("Cm", Key::from(KeyCode::F2), 123, false);
+    // m_size.add_radiobox("Mm", Key::from(KeyCode::F3), 123, true);
+    // m_size.add_separator();
+    // let mut m_keywords = Menu::new("&Keywords");
+    // for k in &keywods {
+    //     m_keywords.add_command(k, Key::None, 1234);
+    // }
+    // m_keywords.add_separator();
+    // for k in &keywods {
+    //     m_keywords.add_command(k, Key::None, 1234);
+    // }
+    // m_size.add_submenu(m_keywords);
 
-    m_sm.add_submenu("&Size in ...", m_size);
-    a.add_menu(m_sm, "&Submenus");
+    // m_sm.add_submenu(m_size);
+    // a.add_menu(m_sm, "&Submenus");
 
-    a.add(w);
-    a.run();
-    Ok(())
+    // a.add(w);
+    // a.run();
+    // Ok(())
 }
 
 #[AppCUIWindow(overwrite=OnEvent)]
@@ -170,11 +170,8 @@ impl MyWindow {
             h_label: ControlHandle::None,
         };
         w.h_label = w.add(Label::new("", Layout::new("x:1,y:1,w: 30")));
-        w.h_button = w.add(Button::new(
-            "&Press me",
-            Layout::new("x:1,y:4,w:12"),
-            ButtonFlags::None,
-        ));
+        let b = Button::new("&Press me", Layout::new("x:1,y:4,w:12"), ButtonFlags::None);
+        w.h_button = w.add(b);
         w
     }
 }
