@@ -4,7 +4,7 @@ use crate::{
     terminals::{MouseButtonDownEvent, MouseMoveEvent},
 };
 
-use super::Theme;
+use super::{CommandBarEvent, Handle, Theme};
 
 const MAX_KEYS: usize = 64; // no bigger than 255
 const MAX_SHIFT_STATES: usize = 8;
@@ -19,6 +19,7 @@ struct Item {
     command: u32,
     version: u32,
     size: u16,
+    receiver_control: Handle,
 }
 pub struct CommandBar {
     width: u32,
@@ -30,6 +31,7 @@ pub struct CommandBar {
     has_shifts: [bool; MAX_SHIFT_STATES],
     hovered_index: u32,
     pressed_index: u32,
+    receiver_control_handle: Handle,
 }
 
 impl CommandBar {
@@ -44,6 +46,7 @@ impl CommandBar {
             modifier: KeyModifier::None,
             hovered_index: INVALID_INDEX,
             pressed_index: INVALID_INDEX,
+            receiver_control_handle: Handle::None,
         };
         for vec in &mut obj.indexes {
             vec.reserve(MAX_KEYS);
@@ -57,6 +60,7 @@ impl CommandBar {
                 command: 0,
                 version: 0,
                 size: 0,
+                receiver_control: Handle::None,
             });
         }
         obj
@@ -85,6 +89,12 @@ impl CommandBar {
         }
         self.hovered_index = INVALID_INDEX;
         self.pressed_index = INVALID_INDEX;
+        self.receiver_control_handle = Handle::None;
+    }
+
+    #[inline(always)]
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle) {
+        self.receiver_control_handle = handle;
     }
 
     fn set_with_key(&mut self, key: Key, text: &str, command: u32) -> bool {
@@ -123,7 +133,7 @@ impl CommandBar {
         self.set_with_key(Key::from(key), text, command)
     }
 
-    pub(crate) fn get_command(&self, key: Key) -> Option<u32> {
+    pub(super) fn get_event(&self, key: Key) -> Option<CommandBarEvent> {
         if key.code == KeyCode::None {
             return None;
         }
@@ -139,7 +149,13 @@ impl CommandBar {
         if item.version != self.version {
             return None;
         }
-        return Some(item.command);
+        if item.receiver_control.is_none() {
+            return None;
+        }
+        return Some(CommandBarEvent {
+            command_id: item.command,
+            control_receiver_handle: item.receiver_control,
+        });
     }
     pub(crate) fn update_positions(&mut self) {
         // recompute all positions regardless of the shift state
@@ -266,13 +282,16 @@ impl CommandBar {
         }
         return false;
     }
-    pub(crate) fn on_mouse_up(&mut self) -> Option<u32> {
+    pub(super) fn on_mouse_up(&mut self) -> Option<CommandBarEvent> {
         let idx = self.pressed_index as u32;
         self.hovered_index = INVALID_INDEX;
         self.pressed_index = INVALID_INDEX;
 
         if (idx != INVALID_INDEX) && ((idx as usize) < self.items.len()) {
-            return Some(self.items[idx as usize].command);
+            return Some(CommandBarEvent {
+                command_id: self.items[idx as usize].command,
+                control_receiver_handle: self.items[idx as usize].receiver_control,
+            });
         }
         return None;
     }

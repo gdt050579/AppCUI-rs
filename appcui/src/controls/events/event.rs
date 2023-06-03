@@ -6,7 +6,7 @@ use crate::{
         window::WindowDecoratorSingleChoiceSelectedEvent,
         window::{WindowCloseEvent, WindowDecoratorButtonPressedEvent}, menu::{MenuCommandEvent, MenuCheckBoxStateChangedEvent, MenuRadioBoxSelectedEvent},
     },
-    system::{Handle, CommandBarEvent},
+    system::Handle,
 };
 
 #[repr(u8)]
@@ -18,7 +18,6 @@ pub enum Event {
     WindowDecoratorButtonPressed(WindowDecoratorButtonPressedEvent),
     WindowDecoratorCheckBoxStateChanged(WindowDecoratorCheckBoxStateChangedEvent),
     WindowDecoratorSingleChoiceSelected(WindowDecoratorSingleChoiceSelectedEvent),
-    CommandBarCommand(CommandBarEvent),
     MenuCommand(MenuCommandEvent),
     MenuCheckBoxStateChanged(MenuCheckBoxStateChangedEvent),
     MenuRadioBoxSelected(MenuRadioBoxSelectedEvent),
@@ -41,7 +40,6 @@ impl Event {
             Event::WindowDecoratorButtonPressed(_) => Handle::None,
             Event::WindowDecoratorCheckBoxStateChanged(_) => Handle::None,
             Event::WindowDecoratorSingleChoiceSelected(_) => Handle::None,
-            Event::CommandBarCommand(_) => Handle::None,
             Event::MenuCommand(_) => Handle::None,
             Event::MenuCheckBoxStateChanged(_) => Handle::None,
             Event::MenuRadioBoxSelected(_) => Handle::None,

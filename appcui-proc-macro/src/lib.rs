@@ -73,7 +73,7 @@ mod templates {
             CommandBarEvents::on_update_commandbar(&self.base, commandbar);
         }
         fn on_event(&mut self, command_id: u32) {
-            CommandBarEvents::on_event(&self.base, command_id);
+            CommandBarEvents::on_event(&mut self.base, command_id);
         }
     }
     ";

@@ -8,9 +8,8 @@ use AppCUIProcMacro::*;
 use appcui::controls::menu::*;
 use appcui::controls::*;
 use appcui::input::{Key, KeyCode, KeyModifier};
-use appcui::terminals::TerminalType;
 
-static keywods: [&str; 26] = [
+static keywords: [&str; 26] = [
     "if",
     "do",
     "while",
@@ -153,7 +152,7 @@ fn main_2() -> Result<(), appcui::system::Error> {
     Ok(())
 }
 
-#[AppCUIWindow(overwrite=OnEvent)]
+#[AppCUIWindow(overwrite=OnEvent+CommandBarEvents)]
 struct MyWindow {
     h_button: ControlHandle<Button>,
     h_label: ControlHandle<Label>,
@@ -192,14 +191,14 @@ impl OnEvent for MyWindow {
         EventProcessStatus::Ignored
     }
 }
-impl OnCommandBarEvents for MyWindow {
+impl CommandBarEvents for MyWindow {
     fn on_update_commandbar(&self, c: &mut CommandBar) {
         c.set(key!("F2"), "Save", 100);
         c.set(KeyCode::F3, "Load", 101);
         c.set(Key::new(KeyCode::F1,KeyModifier::Alt), "New", 102);
     }
 
-    fn on_event(&self, command_id: u32) {
+    fn on_event(&mut self, command_id: u32) {
         match command_id {
             100 => {},
             101 => {},
@@ -209,12 +208,12 @@ impl OnCommandBarEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    // let mut a = App::debug(60, 20, InitializationFlags::None, "
-    //     Paint('print')
-    //     Mouse.Move(12,10)
-    //     Paint('after move')
-    // ")?;
-    let mut a = App::default()?;
+    let mut a = App::debug(60, 20, InitializationFlags::CommandBar, "
+        Paint('print')
+        Mouse.Move(12,10)
+        Paint('after move')
+    ")?;
+    //let mut a = App::default()?;
     a.add(MyWindow::new());
     a.run();
     Ok(())

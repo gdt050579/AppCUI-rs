@@ -20,9 +20,9 @@ pub (crate) use self::menu_handle_manager::MenuHandleManager;
 
 pub use self::app::App;
 pub use self::command_bar::CommandBar;
-pub use self::command_bar_event::CommandBarEvent;
 pub use self::error::Error;
 pub use self::initialization_data::InitializationFlags;
+pub (self) use self::command_bar_event::CommandBarEvent;
 pub (crate) use self::runtime_manager::RuntimeManager;
 pub (crate) use self::tooltip::ToolTip;
 pub (crate) use self::initialization_data::InitializationData;

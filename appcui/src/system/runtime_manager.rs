@@ -3,7 +3,7 @@ use super::{
     InitializationFlags, MenuHandleManager, Theme, ToolTip,
 };
 use crate::controls::control_manager::ParentLayout;
-use crate::controls::events::{Control, Event, EventProcessStatus};
+use crate::controls::events::{Control, Event, EventProcessStatus, CommandBarEvents, OnEvent};
 use crate::controls::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::controls::ControlManager;
 use crate::controls::*;
@@ -48,6 +48,7 @@ pub(crate) struct RuntimeManager {
     mouse_over_control: Option<Handle>,
     focus_chain: Vec<Handle>,
     events: Vec<Event>,
+    commandbar_event: Option<CommandBarEvent>,
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: MenuHandle,
 }
@@ -76,6 +77,7 @@ impl RuntimeManager {
             opened_menu_handle: MenuHandle::None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
+            commandbar_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
@@ -234,6 +236,10 @@ impl RuntimeManager {
         self.recompute_layout = true;
         self.repaint = true;
         while self.loop_status == LoopStatus::Normal {
+            // first process all events (cmdbar, menu, controls)
+            if let Some(event) = self.commandbar_event {
+                self.process_commandbar_event(event);
+            }
             if !self.events.is_empty() {
                 self.process_events_queue();
             }
@@ -315,7 +321,7 @@ impl RuntimeManager {
         }
         let controls = unsafe { &mut *self.controls };
         while let Some(control) = controls.get(h) {
-            let result = control.get_control_mut().on_event(evnt);
+            let result = OnEvent::on_event(control.get_control_mut(), evnt);
             match result {
                 EventProcessStatus::Processed => {
                     return;
@@ -340,6 +346,13 @@ impl RuntimeManager {
         }
     }
 
+    fn process_commandbar_event(&mut self, event: CommandBarEvent) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(event.control_receiver_handle) {
+            CommandBarEvents::on_event(control.get_control_mut(), event.command_id);
+        }
+        self.commandbar_event = None;
+    }
     fn update_command_bar(&mut self) {
         if self.commandbar.is_none() {
             self.request_update_command_bar = false;
@@ -351,17 +364,8 @@ impl RuntimeManager {
             cmdbar.clear();
             // start from the focused control and call OnUpdateCommandBar for each control
             while let Some(control) = controls.get(h) {
-                let result = control.get_control_mut().on_update_command_bar(cmdbar);
-                match result {
-                    EventProcessStatus::Processed | EventProcessStatus::Update => {
-                        self.repaint = true;
-                        return;
-                    }
-                    EventProcessStatus::Ignored => {}
-                    EventProcessStatus::Cancel => {
-                        return;
-                    }
-                }
+                cmdbar.set_receiver_control_handle(h);
+                control.get_control_mut().on_update_commandbar(cmdbar);
                 h = control.get_base().parent;
                 if h.is_none() {
                     break;
@@ -562,11 +566,8 @@ impl RuntimeManager {
         }
         // check cmdbar
         if let Some(cmdbar) = self.commandbar.as_mut() {
-            if let Some(command_id) = cmdbar.get_command(event.key) {
-                self.send_event(Event::CommandBarCommand(CommandBarEvent { command_id }));
-                self.repaint = true;
-                return;
-            }
+            self.commandbar_event = cmdbar.get_event(event.key);
+            self.repaint |= self.commandbar_event.is_some();
         }
     }
     pub(crate) fn process_control_keypressed_event(
@@ -970,12 +971,8 @@ impl RuntimeManager {
             }
             MouseLockedObject::CommandBar => {
                 if let Some(cmdbar) = self.commandbar.as_mut() {
-                    if let Some(command) = cmdbar.on_mouse_up() {
-                        self.send_event(Event::CommandBarCommand(CommandBarEvent {
-                            command_id: command,
-                        }));
-                    }
-                    self.repaint = true;
+                    self.commandbar_event = cmdbar.on_mouse_up();
+                    self.repaint |= self.commandbar_event.is_some();
                 }
             }
             MouseLockedObject::MenuBar => {
