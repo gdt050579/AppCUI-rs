@@ -208,27 +208,31 @@ impl OnCommandBarEvents for MyWindow {
     }
 }
 
-fn main_3() -> Result<(), appcui::system::Error> {
-    //let mut a = App::debug(60, 20, InitializationFlags::None, "Paint('print')")?;
+fn main() -> Result<(), appcui::system::Error> {
+    // let mut a = App::debug(60, 20, InitializationFlags::None, "
+    //     Paint('print')
+    //     Mouse.Move(12,10)
+    //     Paint('after move')
+    // ")?;
     let mut a = App::default()?;
     a.add(MyWindow::new());
     a.run();
     Ok(())
 }
 
-fn main() -> Result<(), appcui::system::Error> {
-    //let mut a = App::debug(60, 20, InitializationFlags::None, "Paint('print')")?;
-    let mut a = App::default()?;
-    let mut w = Window::new("MyWin", Layout::new("d:c,w:60,h:10"), WindowFlags::None);
-    let l_handle = w.add(Label::new("A label", Layout::new("x:1,y:1,w:40")));
-    let mut b = Button::new("Press me", Layout::new("x:1,y:3,w:15"), ButtonFlags::None);
-    b.set_handler(move |handle| {
-        if l_handle == handle {
-            println!("label");
-        }
-    });
-    w.add(b);
-    a.add(w);
-    a.run();
-    Ok(())
-}
+// fn main() -> Result<(), appcui::system::Error> {
+//     //let mut a = App::debug(60, 20, InitializationFlags::None, "Paint('print')")?;
+//     let mut a = App::default()?;
+//     let mut w = Window::new("MyWin", Layout::new("d:c,w:60,h:10"), WindowFlags::None);
+//     let l_handle = w.add(Label::new("A label", Layout::new("x:1,y:1,w:40")));
+//     let mut b = Button::new("Press me", Layout::new("x:1,y:3,w:15"), ButtonFlags::None);
+//     b.set_handler(move |handle| {
+//         if l_handle == handle {
+//             println!("label");
+//         }
+//     });
+//     w.add(b);
+//     a.add(w);
+//     a.run();
+//     Ok(())
+// }

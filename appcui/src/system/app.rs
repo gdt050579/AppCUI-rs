@@ -17,7 +17,7 @@ pub struct App {
 impl App {
     fn create(data: InitializationData) -> Result<Self, Error> {
         let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
-        if !(*app_created) {
+        if *app_created {
             return Err(Error::AppAlreadyStarted);
         }
         RuntimeManager::create(data)?;

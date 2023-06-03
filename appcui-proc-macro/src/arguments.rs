@@ -18,7 +18,7 @@ pub struct Arguments {
     pub on_resize: bool,
     pub on_focus: bool,
     pub on_event: bool,
-    pub on_update_command_bar: bool,
+    pub command_bar_events: bool,
     pub on_menu_events: bool,
 
     // internal
@@ -43,7 +43,7 @@ impl Arguments {
             on_focus: false,
             on_event: false,
             on_menu_events: false,
-            on_update_command_bar: false,
+            command_bar_events: false,
         }
     }
 
@@ -84,7 +84,7 @@ impl Arguments {
                 "OnResize" => self.on_resize = true,
                 "OnFocus" => self.on_focus = true,
                 "OnEvent" => self.on_event = true,
-                "OnUpdateCommandBar" => self.on_update_command_bar = true,
+                "CommandBarEvents" => self.command_bar_events = true,
                 "OnMenuEvents" => self.on_menu_events = true,
                 other => {
                     panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed, OnMouseEvent, OnDefaultAction, OnResize, OnFocus, OnEvent, OnUpdateCommandBar");

@@ -67,9 +67,14 @@ mod templates {
     }
     ";
 
-    pub static ON_UPDATE_COMMANDBAR_TRAIT: &str = "
-    impl OnUpdateCommandBar for $STRUCT_NAME$ {
-        fn on_update_command_bar(&self, command_bar: &mut CommandBar)->EventProcessStatus  { return self.base.on_update_command_bar(command_bar); }
+    pub static COMMANDBAR_EVENTS_TRAIT: &str = "
+    impl CommandBarEvents for $STRUCT_NAME$ {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            CommandBarEvents::on_update_commandbar(&self.base, commandbar);
+        }
+        fn on_event(&mut self, command_id: u32) {
+            CommandBarEvents::on_event(&self.base, command_id);
+        }
     }
     ";
 
@@ -121,8 +126,8 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str)
     if !a.on_event {
         code.push_str(templates::ON_EVENT_TRAIT);
     }
-    if !a.on_update_command_bar {
-        code.push_str(templates::ON_UPDATE_COMMANDBAR_TRAIT);
+    if !a.command_bar_events {
+        code.push_str(templates::COMMANDBAR_EVENTS_TRAIT);
     }
     if !a.on_menu_events {
         code.push_str(templates::ON_MENU_EVENTS_TRAIT);

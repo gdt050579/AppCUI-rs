@@ -63,19 +63,14 @@ pub trait OnMenuEvents {
 	fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
 }
 
-pub trait OnUpdateCommandBar {
-    fn on_update_command_bar(&self, _command_bar: &mut CommandBar) -> EventProcessStatus {
-        EventProcessStatus::Ignored
-    }
-}
 
-pub trait OnCommandBarEvents {
+pub trait CommandBarEvents {
     fn on_update_commandbar(&self, _commandbar: &mut CommandBar) {}
-    fn on_event(&self, _command_id: u32) {}
+    fn on_event(&mut self, _command_id: u32) {}
 }
 
 
 pub trait Control:
-    OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + OnUpdateCommandBar + OnMenuEvents
+    OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + CommandBarEvents + OnMenuEvents
 {
 }
