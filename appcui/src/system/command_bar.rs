@@ -120,6 +120,7 @@ impl CommandBar {
         item.key = key.code.get_name_padded();
         item.version = self.version;
         item.size = (item.key.len() + item.text.chars().count()) as u16;
+        item.receiver_control = self.receiver_control_handle;
 
         self.has_shifts[shift_state] = true;
 

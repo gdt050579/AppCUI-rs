@@ -371,6 +371,7 @@ impl RuntimeManager {
                     break;
                 }
             }
+            cmdbar.update_positions();
         }
         self.request_update_command_bar = false;
     }
