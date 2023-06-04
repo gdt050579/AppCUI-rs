@@ -3,7 +3,9 @@ use super::{
     InitializationFlags, MenuHandleManager, Theme, ToolTip,
 };
 use crate::controls::control_manager::ParentLayout;
-use crate::controls::events::{Control, Event, EventProcessStatus, CommandBarEvents, OnEvent, MenuEvent};
+use crate::controls::events::{
+    CommandBarEvents, Control, Event, EventProcessStatus, MenuEvent, OnEvent, MenuEvents,
+};
 use crate::controls::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::controls::ControlManager;
 use crate::controls::*;
@@ -41,7 +43,7 @@ pub(crate) struct RuntimeManager {
     recompute_layout: bool,
     repaint: bool,
     recompute_parent_indexes: bool,
-    request_update_command_bar: bool,
+    request_update_command_and_menu_bars: bool,
     loop_status: LoopStatus,
     request_focus: Option<Handle>,
     current_focus: Option<Handle>,
@@ -70,7 +72,7 @@ impl RuntimeManager {
             tooltip: ToolTip::new(),
             recompute_layout: true,
             repaint: true,
-            request_update_command_bar: false,
+            request_update_command_and_menu_bars: false,
             recompute_parent_indexes: true,
             request_focus: None,
             current_focus: None,
@@ -171,7 +173,7 @@ impl RuntimeManager {
         self.request_focus = Some(handle);
     }
     pub(crate) fn request_update(&mut self) {
-        self.request_update_command_bar = true;
+        self.request_update_command_and_menu_bars = true;
         self.repaint = true;
         self.recompute_layout = true;
     }
@@ -217,11 +219,19 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn show_menu(&mut self, handle: MenuHandle, x: i32, y: i32, max_size: Size) {
+    pub(crate) fn show_menu(
+        &mut self,
+        handle: MenuHandle,
+        receiver_control_handle: Handle,
+        x: i32,
+        y: i32,
+        max_size: Size,
+    ) {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
             let term_size = Size::new(self.terminal.get_width(), self.terminal.get_height());
             menu.compute_position(x, y, max_size, term_size);
+            menu.set_receiver_control_handle(receiver_control_handle);
             self.opened_menu_handle = handle;
         }
     }
@@ -245,6 +255,9 @@ impl RuntimeManager {
             if let Some(event) = self.commandbar_event {
                 self.process_commandbar_event(event);
             }
+            if let Some(event) = self.menu_event {
+                self.process_menu_event(event);
+            }
             if !self.events.is_empty() {
                 self.process_events_queue();
             }
@@ -256,13 +269,13 @@ impl RuntimeManager {
                 self.update_focus(handle);
                 self.request_focus = None;
                 self.repaint = true;
-                self.request_update_command_bar = true;
+                self.request_update_command_and_menu_bars = true;
             }
             if self.recompute_layout {
                 self.recompute_layouts();
             }
-            if self.request_update_command_bar {
-                self.update_command_bar();
+            if self.request_update_command_and_menu_bars {
+                self.update_command_and_menu_bars();
             }
             if self.repaint | self.recompute_layout {
                 self.paint();
@@ -358,16 +371,25 @@ impl RuntimeManager {
         }
         self.commandbar_event = None;
     }
-    fn update_command_bar(&mut self) {
-        if self.commandbar.is_none() {
-            self.request_update_command_bar = false;
+    fn process_menu_event(&mut self, event: MenuEvent) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(event.get_control_receiver_handle()) {
+            MenuEvents::on_event(control.get_control_mut(), event);
+        }
+        self.menu_event = None;
+    }
+    fn update_command_and_menu_bars(&mut self) {
+        if self.commandbar.is_none() && self.menubar.is_none() {
+            self.request_update_command_and_menu_bars = false;
             return;
         }
-        let mut h = self.get_focused_control();
+        let focused_handle = self.get_focused_control();
         let controls = unsafe { &mut *self.controls };
+        // process cmdbar
         if let Some(cmdbar) = self.commandbar.as_mut() {
             cmdbar.clear();
-            // start from the focused control and call OnUpdateCommandBar for each control
+            // start from the focused control and call on_update_commandbar for each control
+            let mut h = focused_handle;
             while let Some(control) = controls.get(h) {
                 cmdbar.set_receiver_control_handle(h);
                 control.get_control_mut().on_update_commandbar(cmdbar);
@@ -378,7 +400,22 @@ impl RuntimeManager {
             }
             cmdbar.update_positions();
         }
-        self.request_update_command_bar = false;
+        // process menubar
+        if let Some(menubar) = self.menubar.as_mut() {
+            menubar.clear();
+            // start from the focused control and call on_update_menubar for each control
+            let mut h = focused_handle;
+            while let Some(control) = controls.get(h) {
+                menubar.set_receiver_control_handle(h);
+                control.get_control_mut().on_update_menubar(menubar);
+                h = control.get_base().parent;
+                if h.is_none() {
+                    break;
+                }
+            }
+            menubar.update_positions();
+        }
+        self.request_update_command_and_menu_bars = false;
     }
 
     fn update_focus(&mut self, handle: Handle) {

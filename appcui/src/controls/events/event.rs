@@ -2,9 +2,10 @@ use crate::{
     controls::{
         button::ButtonClickedEvent,
         checkbox::CheckedStatusChangedEvent,
+        menu::{MenuCheckBoxStateChangedEvent, MenuCommandEvent, MenuRadioBoxSelectedEvent},
         window::WindowDecoratorCheckBoxStateChangedEvent,
         window::WindowDecoratorSingleChoiceSelectedEvent,
-        window::{WindowCloseEvent, WindowDecoratorButtonPressedEvent}, menu::{MenuCommandEvent, MenuCheckBoxStateChangedEvent, MenuRadioBoxSelectedEvent},
+        window::{WindowCloseEvent, WindowDecoratorButtonPressedEvent},
     },
     system::Handle,
 };
@@ -20,14 +21,6 @@ pub enum Event {
     WindowDecoratorSingleChoiceSelected(WindowDecoratorSingleChoiceSelectedEvent),
 }
 
-#[repr(u8)]
-#[derive(Copy, Clone)]
-pub enum MenuEvent {
-    Command(MenuCommandEvent),
-    CheckBoxStateChanged(MenuCheckBoxStateChangedEvent),
-    RadioBoxSelected(MenuRadioBoxSelectedEvent),
-}
-
 impl Event {
     pub(crate) fn get_sender(&self) -> Handle {
         match self {
@@ -37,9 +30,25 @@ impl Event {
             Event::WindowDecoratorButtonPressed(_) => Handle::None,
             Event::WindowDecoratorCheckBoxStateChanged(_) => Handle::None,
             Event::WindowDecoratorSingleChoiceSelected(_) => Handle::None,
-            Event::MenuCommand(_) => Handle::None,
-            Event::MenuCheckBoxStateChanged(_) => Handle::None,
-            Event::MenuRadioBoxSelected(_) => Handle::None,
+        }
+    }
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone)]
+pub enum MenuEvent {
+    Command(MenuCommandEvent),
+    CheckBoxStateChanged(MenuCheckBoxStateChangedEvent),
+    RadioBoxSelected(MenuRadioBoxSelectedEvent),
+}
+
+impl MenuEvent {
+    #[inline(always)]
+    pub(crate) fn get_control_receiver_handle(&self) -> Handle {
+        match self {
+            MenuEvent::Command(event) => event.control_receiver_handle,
+            MenuEvent::CheckBoxStateChanged(event) => event.control_receiver_handle,
+            MenuEvent::RadioBoxSelected(event) => event.control_receiver_handle,
         }
     }
 }

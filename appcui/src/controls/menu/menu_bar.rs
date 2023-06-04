@@ -2,7 +2,7 @@ use crate::{
     controls::events::EventProcessStatus,
     graphics::{Character, Size, Surface, TextAlignament, TextFormat},
     input::{Key, KeyCode, KeyModifier},
-    system::{RuntimeManager, Theme},
+    system::{RuntimeManager, Theme, Handle},
     utils::{Caption, Strategy, VectorIndex},
 };
 
@@ -16,6 +16,7 @@ pub struct MenuBar {
     opened_item: VectorIndex,
     hovered_item: VectorIndex,
     count: usize,
+    receiver_control_handle: Handle,
 }
 
 impl MenuBar {
@@ -28,9 +29,10 @@ impl MenuBar {
             width,
             opened_item: VectorIndex::Invalid,
             hovered_item: VectorIndex::Invalid,
+            receiver_control_handle: Handle::None,
         }
     }
-    fn update_positions(&mut self) {
+    pub (crate) fn update_positions(&mut self) {
         let mut x = 0;
         let mut idx = 0usize;
         for item in &mut self.items {
@@ -62,12 +64,15 @@ impl MenuBar {
         self.update_positions();
     }
     pub fn add(&mut self, handle: MenuHandle) {
+        if self.receiver_control_handle.is_none() {
+            return;
+        }
         if let Some(menu) = RuntimeManager::get().get_menu(handle) {
             if self.count<self.items.len() {
                 // overwrite an existing item
-                self.items[self.count].set(handle, &menu.caption);
+                self.items[self.count].set(handle, self.receiver_control_handle, &menu.caption);
             } else {
-                self.items.push(MenuBarItem::new(handle, &menu.caption));
+                self.items.push(MenuBarItem::new(handle,self.receiver_control_handle, &menu.caption));
             }
             self.count+=1;
         }
@@ -102,6 +107,14 @@ impl MenuBar {
         return EventProcessStatus::Ignored;
     }
 
+    #[inline(always)]
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle) {
+        self.receiver_control_handle = handle;
+    }
+    pub(crate) fn clear(&mut self) {
+        self.count = 0;
+        self.receiver_control_handle = Handle::None;
+    }
     pub(crate) fn close(&mut self) {
         self.opened_item = VectorIndex::Invalid;
         self.hovered_item = VectorIndex::Invalid;
@@ -111,6 +124,7 @@ impl MenuBar {
         if index.in_range(self.count) {
             RuntimeManager::get().show_menu(
                 self.items[index.index()].handle,
+                self.items[index.index()].receiver_control_handle,
                 self.x + self.items[index.index()].x,
                 self.y + 1,
                 Size::new(0, 0),

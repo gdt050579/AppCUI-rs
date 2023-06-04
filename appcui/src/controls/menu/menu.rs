@@ -10,7 +10,7 @@ use crate::{
         TextFormat, TextWrap,
     },
     input::{Key, KeyCode, MouseWheelDirection},
-    system::{RuntimeManager, Theme},
+    system::{RuntimeManager, Theme, Handle},
     utils::{Caption, Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
@@ -27,6 +27,7 @@ pub struct Menu {
     pub(super) clip: ClipArea,
     pub(super) handle: MenuHandle,
     pub(super) parent_handle: MenuHandle,
+    pub(super) receiver_control_handle: Handle,
 }
 impl Menu {
     pub fn new(name: &str) -> Self {
@@ -47,6 +48,7 @@ impl Menu {
             clip: ClipArea::new(0, 0, 1, 1),
             handle: MenuHandle::None,
             parent_handle: MenuHandle::None,
+            receiver_control_handle: Handle::None,
         }
     }
 
@@ -102,6 +104,11 @@ impl Menu {
     pub(crate) fn is_on_menu(&self, x: i32, y: i32) -> bool {
         MousePositionInfo::new(x - self.clip.left, y - self.clip.top, &self).is_on_menu
     }
+    #[inline(always)]
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle) {
+        self.receiver_control_handle = handle;
+    }
+    
     fn update_first_visible_item(&mut self) {
         if !self.current.in_range(self.items.len()) {
             return;
@@ -203,6 +210,7 @@ impl Menu {
                             let evnt = MenuEvent::Command(MenuCommandEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
+                                control_receiver_handle: self.receiver_control_handle,                                
                             });
                             self.send_event(evnt);
                             return true;
@@ -214,6 +222,7 @@ impl Menu {
                                     command_id: item.command_id,
                                     menu: self.handle,
                                     checked: item.checked,
+                                    control_receiver_handle: self.receiver_control_handle,  
                                 });
                             self.send_event(evnt);
                             return true;
@@ -222,6 +231,7 @@ impl Menu {
                             let evnt = MenuEvent::RadioBoxSelected (MenuRadioBoxSelectedEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
+                                control_receiver_handle: self.receiver_control_handle,  
                             });
                             self.check_radio_item(index);
                             self.send_event(evnt);
@@ -488,6 +498,7 @@ impl Menu {
                 let evnt = MenuEvent::Command(MenuCommandEvent {
                     command_id: item.command_id,
                     menu: self.handle,
+                    control_receiver_handle: self.receiver_control_handle,  
                 });
                 self.send_event(evnt);
             }
@@ -497,6 +508,7 @@ impl Menu {
                     command_id: item.command_id,
                     menu: self.handle,
                     checked: item.checked,
+                    control_receiver_handle: self.receiver_control_handle,  
                 });
                 self.send_event(evnt);
             }
@@ -504,6 +516,7 @@ impl Menu {
                 let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
                     command_id: item.command_id,
                     menu: self.handle,
+                    control_receiver_handle: self.receiver_control_handle,  
                 });
                 self.check_radio_item(index);
                 self.send_event(evnt);
@@ -512,6 +525,7 @@ impl Menu {
             MenuItem::SubMenu(item) => {
                 RuntimeManager::get().show_menu(
                     item.submenu_handle,
+                    self.receiver_control_handle,                    
                     (self.width as i32) + self.clip.left,
                     self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
                     Size::new(0, 0),
