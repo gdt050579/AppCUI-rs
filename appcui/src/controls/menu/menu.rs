@@ -4,7 +4,7 @@ use super::{
     MenuRadioBoxItem, MenuRadioBoxSelectedEvent, MenuSubMenuItem, MousePressedResult,
 };
 use crate::{
-    controls::events::{Event, EventProcessStatus},
+    controls::events::{Event, EventProcessStatus, MenuEvent},
     graphics::{
         Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
         TextFormat, TextWrap,
@@ -200,7 +200,7 @@ impl Menu {
                 if shortcut == key {
                     match item {
                         MenuItem::Command(item) => {
-                            let evnt = Event::MenuCommand(MenuCommandEvent {
+                            let evnt = MenuEvent::Command(MenuCommandEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
                             });
@@ -210,7 +210,7 @@ impl Menu {
                         MenuItem::CheckBox(item) => {
                             item.checked = !item.checked;
                             let evnt =
-                                Event::MenuCheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
+                            MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
                                     command_id: item.command_id,
                                     menu: self.handle,
                                     checked: item.checked,
@@ -219,7 +219,7 @@ impl Menu {
                             return true;
                         }
                         MenuItem::RadioBox(item) => {
-                            let evnt = Event::MenuRadioBoxSelected(MenuRadioBoxSelectedEvent {
+                            let evnt = MenuEvent::RadioBoxSelected (MenuRadioBoxSelectedEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
                             });
@@ -468,10 +468,10 @@ impl Menu {
         }
         self.items[index].set_checked(true);
     }
-    fn send_event(&mut self, event: Event) {
+    fn send_event(&mut self, event: MenuEvent) {
         let rm = RuntimeManager::get();
         rm.close_opened_menu();
-        rm.send_event(event);
+        rm.set_menu_event(event);
     }
     fn close(&mut self) {
         RuntimeManager::get().activate_opened_menu_parent();
@@ -485,7 +485,7 @@ impl Menu {
         }
         match &mut self.items[index] {
             MenuItem::Command(item) => {
-                let evnt = Event::MenuCommand(MenuCommandEvent {
+                let evnt = MenuEvent::Command(MenuCommandEvent {
                     command_id: item.command_id,
                     menu: self.handle,
                 });
@@ -493,7 +493,7 @@ impl Menu {
             }
             MenuItem::CheckBox(item) => {
                 item.checked = !item.checked;
-                let evnt = Event::MenuCheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
+                let evnt = MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
                     command_id: item.command_id,
                     menu: self.handle,
                     checked: item.checked,
@@ -501,7 +501,7 @@ impl Menu {
                 self.send_event(evnt);
             }
             MenuItem::RadioBox(item) => {
-                let evnt = Event::MenuRadioBoxSelected(MenuRadioBoxSelectedEvent {
+                let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
                     command_id: item.command_id,
                     menu: self.handle,
                 });

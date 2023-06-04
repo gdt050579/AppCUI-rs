@@ -18,9 +18,6 @@ pub enum Event {
     WindowDecoratorButtonPressed(WindowDecoratorButtonPressedEvent),
     WindowDecoratorCheckBoxStateChanged(WindowDecoratorCheckBoxStateChangedEvent),
     WindowDecoratorSingleChoiceSelected(WindowDecoratorSingleChoiceSelectedEvent),
-    MenuCommand(MenuCommandEvent),
-    MenuCheckBoxStateChanged(MenuCheckBoxStateChangedEvent),
-    MenuRadioBoxSelected(MenuRadioBoxSelectedEvent),
 }
 
 #[repr(u8)]

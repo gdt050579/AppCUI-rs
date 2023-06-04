@@ -3,7 +3,7 @@ use super::{
     InitializationFlags, MenuHandleManager, Theme, ToolTip,
 };
 use crate::controls::control_manager::ParentLayout;
-use crate::controls::events::{Control, Event, EventProcessStatus, CommandBarEvents, OnEvent};
+use crate::controls::events::{Control, Event, EventProcessStatus, CommandBarEvents, OnEvent, MenuEvent};
 use crate::controls::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::controls::ControlManager;
 use crate::controls::*;
@@ -49,6 +49,7 @@ pub(crate) struct RuntimeManager {
     focus_chain: Vec<Handle>,
     events: Vec<Event>,
     commandbar_event: Option<CommandBarEvent>,
+    menu_event: Option<MenuEvent>,
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: MenuHandle,
 }
@@ -78,6 +79,7 @@ impl RuntimeManager {
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
             commandbar_event: None,
+            menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
@@ -158,6 +160,9 @@ impl RuntimeManager {
     }
     pub(crate) fn send_event(&mut self, event: Event) {
         self.events.push(event);
+    }
+    pub(crate) fn set_menu_event(&mut self, event: MenuEvent) {
+        self.menu_event = Some(event);
     }
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
