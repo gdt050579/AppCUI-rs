@@ -13,7 +13,7 @@ use AppCUIProcMacro::*;
 pub struct Desktop {}
 
 impl Desktop {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Desktop {
             base: ControlBase::new(
                 Layout::new("x:0,y:0,w:100%,h:100%"),
@@ -70,3 +70,5 @@ impl OnKeyPressed for Desktop {
         EventProcessStatus::Ignored
     }
 }
+
+impl DesktopControl for Desktop {}

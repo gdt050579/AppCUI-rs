@@ -208,7 +208,7 @@ impl CommandBarEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::debug(60, 20, InitializationFlags::CommandBar, "
+    let mut a = App::debug(60, 20, InitializationFlags::CommandBar, Desktop::new(), "
         Paint('print')
         Mouse.Move(12,10)
         Paint('after move')

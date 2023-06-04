@@ -81,3 +81,5 @@ pub trait Control:
     + MenuEvents
 {
 }
+
+pub trait DesktopControl {}

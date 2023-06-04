@@ -13,6 +13,8 @@ pub use common_traits::MenuEvents;
 pub use common_traits::CommandBarEvents;
 
 pub use common_traits::Control;
+pub use common_traits::DesktopControl;
+
 pub use common_traits::EventProcessStatus;
 pub use event::Event;
 pub use event::MenuEvent;

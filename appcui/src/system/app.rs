@@ -6,6 +6,7 @@ use super::InitializationFlags;
 use super::RuntimeManager;
 use crate::controls::events::Control;
 use crate::controls::ControlManager;
+use crate::controls::events::DesktopControl;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 
@@ -39,11 +40,11 @@ impl App {
         width: u16,
         height: u16,
         flags: InitializationFlags,
-        desktop: Option<T>,
+        desktop: T,
         script: &str,
     ) -> Result<Self, Error>
     where
-        T: Control + 'static,
+        T: Control + DesktopControl + 'static,
     {
         let i = InitializationData {
             flags,
@@ -51,11 +52,7 @@ impl App {
                 width: width as u32,
                 height: height as u32,
             }),
-            desktop_manager: if desktop.is_some() {
-                Some(ControlManager::new(desktop.unwrap()))
-            } else {
-                None
-            },
+            desktop_manager: ControlManager::new(desktop),
             terminal: TerminalType::Debug,
             debug_script: String::from(script),
         };
