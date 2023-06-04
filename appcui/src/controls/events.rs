@@ -9,7 +9,7 @@ pub use common_traits::OnResize;
 pub use common_traits::OnFocus;
 pub use common_traits::OnEvent;
 
-pub use common_traits::OnMenuEvents;
+pub use common_traits::MenuEvents;
 pub use common_traits::CommandBarEvents;
 
 pub use common_traits::Control;

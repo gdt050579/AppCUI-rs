@@ -78,16 +78,16 @@ mod templates {
     }
     ";
 
-    pub static ON_MENU_EVENTS_TRAIT: &str = "
-    impl OnMenuEvents for $STRUCT_NAME$ {
+    pub static MENU_EVENTS_TRAIT: &str = "
+    impl MenuEvents for $STRUCT_NAME$ {
         fn on_menu_open(&self, menu: &mut Menu) {
-            self.base.on_menu_open(menu);
+            MenuEvents::on_menu_open(&self.base, menu);
         }
-        fn on_event(&self, event: MenuEvent) {
-            OnMenuEvents::on_event(&(self.base),event);
+        fn on_event(&mut self, event: MenuEvent) {
+            MenuEvents::on_event(&mut self.base,event);
         }
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            self.base.on_update_menubar(menubar);
+            MenuEvents::on_update_menubar(&self.base, menubar);
         }
     }
     ";    
@@ -129,8 +129,8 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str)
     if !a.command_bar_events {
         code.push_str(templates::COMMANDBAR_EVENTS_TRAIT);
     }
-    if !a.on_menu_events {
-        code.push_str(templates::ON_MENU_EVENTS_TRAIT);
+    if !a.menu_events {
+        code.push_str(templates::MENU_EVENTS_TRAIT);
     }
     // replace templates
     code = code

@@ -1,8 +1,8 @@
 use crate::controls::menu::Menu;
 use crate::controls::menu::MenuBar;
-use crate::system::CommandBar;
 use crate::graphics::*;
 use crate::input::*;
+use crate::system::CommandBar;
 use crate::system::Theme;
 
 use super::Event;
@@ -21,7 +21,8 @@ impl EventProcessStatus {
         match self {
             EventProcessStatus::Processed => true,
             EventProcessStatus::Update => true,
-            _ => false, }
+            _ => false,
+        }
     }
 }
 
@@ -57,20 +58,26 @@ pub trait OnEvent {
     }
 }
 
-pub trait OnMenuEvents {
-	fn on_menu_open(&self, _menu: &mut Menu) {}
-	fn on_event(&self, _event: MenuEvent) {}
-	fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
+pub trait MenuEvents {
+    fn on_menu_open(&self, _menu: &mut Menu) {}
+    fn on_event(&mut self, _event: MenuEvent) {}
+    fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
 }
-
 
 pub trait CommandBarEvents {
     fn on_update_commandbar(&self, _commandbar: &mut CommandBar) {}
     fn on_event(&mut self, _command_id: u32) {}
 }
 
-
 pub trait Control:
-    OnPaint + OnKeyPressed + OnMouseEvent + OnDefaultAction + OnResize + OnFocus + OnEvent + CommandBarEvents + OnMenuEvents
+    OnPaint
+    + OnKeyPressed
+    + OnMouseEvent
+    + OnDefaultAction
+    + OnResize
+    + OnFocus
+    + OnEvent
+    + CommandBarEvents
+    + MenuEvents
 {
 }
