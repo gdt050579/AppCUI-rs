@@ -97,7 +97,7 @@ impl RuntimeManager {
                 None
             },
         };
-        let mut desktop = ControlManager::new(Desktop::new());
+        let mut desktop = data.desktop_manager.unwrap_or(ControlManager::new(Desktop::new()));
         let controls = unsafe { &mut *manager.controls };
         desktop.get_base_mut().update_focus_flag(true);
         manager.desktop_handler = controls.add(desktop);

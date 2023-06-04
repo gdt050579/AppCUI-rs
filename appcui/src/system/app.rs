@@ -5,6 +5,7 @@ use super::InitializationData;
 use super::InitializationFlags;
 use super::RuntimeManager;
 use crate::controls::events::Control;
+use crate::controls::ControlManager;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 
@@ -34,18 +35,27 @@ impl App {
     pub fn default() -> Result<Self, Error> {
         App::create(InitializationData::default())
     }
-    pub fn debug(
+    pub fn debug<T>(
         width: u16,
         height: u16,
         flags: InitializationFlags,
+        desktop: Option<T>,
         script: &str,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, Error>
+    where
+        T: Control + 'static,
+    {
         let i = InitializationData {
             flags,
             size: Some(Size {
                 width: width as u32,
                 height: height as u32,
             }),
+            desktop_manager: if desktop.is_some() {
+                Some(ControlManager::new(desktop.unwrap()))
+            } else {
+                None
+            },
             terminal: TerminalType::Debug,
             debug_script: String::from(script),
         };

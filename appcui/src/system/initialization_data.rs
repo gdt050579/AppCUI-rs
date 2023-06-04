@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-use crate::{graphics::Size, terminals::TerminalType};
+use crate::{graphics::Size, terminals::TerminalType, controls::ControlManager};
 
 #[EnumBitFlags(bits = 32)]
 pub enum InitializationFlags {
@@ -13,6 +13,7 @@ pub(crate) struct InitializationData {
     pub(crate) size: Option<Size>,
     pub(crate) terminal: TerminalType,
     pub(crate) debug_script: String,
+    pub(crate) desktop_manager: Option<ControlManager>,
 }
 
 impl InitializationData {
@@ -21,7 +22,8 @@ impl InitializationData {
             flags,
             size,
             terminal,
-            debug_script: String::new()
+            debug_script: String::new(),
+            desktop_manager: None,
         }
     }
     pub(crate) fn with_flags(flags: InitializationFlags) -> Self {
@@ -29,7 +31,8 @@ impl InitializationData {
             flags,
             size: None,
             terminal: TerminalType::Default,
-            debug_script: String::new()
+            debug_script: String::new(),
+            desktop_manager: None
         }
     }
 }
@@ -39,7 +42,8 @@ impl Default for InitializationData {
             flags: InitializationFlags::None,
             size: None,
             terminal: TerminalType::Default,
-            debug_script: String::new()
+            debug_script: String::new(),
+            desktop_manager: None
         }
     }
 }
