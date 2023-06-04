@@ -92,7 +92,7 @@ mod templates {
     }
     ";    
 }
-fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str) -> TokenStream {
+fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str, extra_code: &str) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args);
     let mut base_definition = "{\n    base: ".to_string();
@@ -132,6 +132,9 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str)
     if !a.menu_events {
         code.push_str(templates::MENU_EVENTS_TRAIT);
     }
+    // add the extra code
+    code.push_str("\n");
+    code.push_str(extra_code);
     // replace templates
     code = code
         .replace("$STRUCT_NAME$", &struct_name)
@@ -142,12 +145,17 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str)
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(args, input, "ControlBase")
+    parse_token_stream(args, input, "ControlBase", "")
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn AppCUIWindow(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(args, input, "Window")
+    parse_token_stream(args, input, "Window", "")
+}
+#[allow(non_snake_case)]
+#[proc_macro_attribute]
+pub fn AppCUIDesktop(args: TokenStream, input: TokenStream) -> TokenStream {
+    parse_token_stream(args, input, "Desktop", "impl DesktopControl for $STRUCT_NAME$ {}")
 }
 
 #[proc_macro]
