@@ -1,5 +1,6 @@
 use super::super::events::*;
 use super::super::menu::*;
+use super::super::command_bar::*;
 use super::super::ControlBase;
 use super::super::Layout;
 use super::super::StatusFlags;

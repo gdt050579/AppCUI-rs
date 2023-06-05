@@ -1,4 +1,4 @@
-use super::CommandBar;
+use crate::controls::command_bar::*;
 use super::Theme;
 use super::ToolTip;
 use crate::graphics::CharFlags;

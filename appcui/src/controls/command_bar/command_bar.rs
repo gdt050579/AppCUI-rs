@@ -1,10 +1,11 @@
 use crate::{
     graphics::{Character, Size, Surface},
     input::{Key, KeyCode, KeyModifier},
+    system::{Handle, Theme},
     terminals::{MouseButtonDownEvent, MouseMoveEvent},
 };
 
-use super::{CommandBarEvent, Handle, Theme};
+use super::CommandBarEvent;
 
 const MAX_KEYS: usize = 64; // no bigger than 255
 const MAX_SHIFT_STATES: usize = 8;
@@ -134,7 +135,7 @@ impl CommandBar {
         self.set_with_key(Key::from(key), text, command)
     }
 
-    pub(super) fn get_event(&self, key: Key) -> Option<CommandBarEvent> {
+    pub(crate) fn get_event(&self, key: Key) -> Option<CommandBarEvent> {
         if key.code == KeyCode::None {
             return None;
         }
@@ -283,7 +284,7 @@ impl CommandBar {
         }
         return false;
     }
-    pub(super) fn on_mouse_up(&mut self) -> Option<CommandBarEvent> {
+    pub(crate) fn on_mouse_up(&mut self) -> Option<CommandBarEvent> {
         let idx = self.pressed_index as u32;
         self.hovered_index = INVALID_INDEX;
         self.pressed_index = INVALID_INDEX;

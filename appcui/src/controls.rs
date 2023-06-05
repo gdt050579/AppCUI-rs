@@ -19,6 +19,7 @@ pub mod desktop;
 pub mod checkbox;
 pub mod label;
 pub mod menu;
+pub mod command_bar;
 pub mod window;
 pub mod button;
 // re-export
@@ -29,3 +30,4 @@ pub use window::Window;
 pub use window::WindowFlags;
 pub use button::Button;
 pub use button::ButtonFlags;
+pub use command_bar::CommandBar;

@@ -3,6 +3,7 @@ use super::super::menu::*;
 use super::super::ControlBase;
 use super::super::Layout;
 use super::super::StatusFlags;
+use super::super::command_bar::*;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;

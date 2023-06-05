@@ -1,7 +1,8 @@
 use super::{
-    CommandBar, CommandBarEvent, ControlHandleManager, Handle, InitializationData,
+    ControlHandleManager, Handle, InitializationData,
     InitializationFlags, MenuHandleManager, Theme, ToolTip,
 };
+use crate::controls::command_bar::{CommandBarEvent, CommandBar};
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{
     CommandBarEvents, Control, Event, EventProcessStatus, MenuEvent, OnEvent, MenuEvents,

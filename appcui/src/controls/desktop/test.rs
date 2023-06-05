@@ -1,5 +1,6 @@
 use crate::controls::events::*;
 use crate::controls::menu::*;
+use super::super::command_bar::*;
 use crate::controls::*;
 use crate::graphics::*;
 use crate::input::*;

@@ -1,8 +1,8 @@
 use crate::controls::menu::Menu;
 use crate::controls::menu::MenuBar;
+use crate::controls::command_bar::CommandBar;
 use crate::graphics::*;
 use crate::input::*;
-use crate::system::CommandBar;
 use crate::system::Theme;
 
 use super::Event;
