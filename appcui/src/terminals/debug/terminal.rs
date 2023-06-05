@@ -67,7 +67,7 @@ impl DebugTerminal {
             hash_to_test: None,
         }))
     }
-    fn forecolor_to_str(col: Color) -> &'static str {
+    fn _forecolor_to_str(col: Color) -> &'static str {
         match col {
             Color::Black => "30",
             Color::DarkRed => "31",
@@ -109,7 +109,7 @@ impl DebugTerminal {
             _ => "255;255;255", /* default is white */
         }
     }
-    fn backcolor_to_str(col: Color) -> &'static str {
+    fn _backcolor_to_str(col: Color) -> &'static str {
         match col {
             Color::Black => "40",
             Color::DarkRed => "41",
