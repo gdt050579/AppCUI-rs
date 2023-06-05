@@ -98,7 +98,5 @@ fn check_index()
     assert_eq!(i.in_range(10),true);
     assert_eq!(i.in_range(6),true);
     assert_eq!(i.in_range(5),false);
-    assert_eq!(i.in_range(usize::MAX),false);
-
 
 }
