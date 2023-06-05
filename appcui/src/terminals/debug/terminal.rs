@@ -170,12 +170,75 @@ impl Terminal for DebugTerminal {
             return;
         }
         self.paint = false;
-        println!(
-            "\nPaint: {} -> Hash: 0x{:X}",
-            &self.paint_title, surface_hash
-        );
+
+        // firt border
+        for _ in 0..=6 + self.width {
+            self.temp_str.push('=');
+        }
+        println!("+{}+", self.temp_str);
         self.temp_str.clear();
+        
+        // name
+        self.temp_str.push_str("| Name: \x1b[93;40m");
+        self.temp_str.push_str(&self.paint_title);
+        while self.temp_str.len() < (self.width + 16) as usize {
+            self.temp_str.push(' ');
+        }
+        self.temp_str.push_str("\x1b[0m|");
+        println!("{}", &self.temp_str);
+        self.temp_str.clear();
+        
+        // hash
+        self.temp_str.push_str("| Hash: \x1b[93;40m");
+        self.temp_str.push_str(format!("0x{:X}",surface_hash).as_str());
+        while self.temp_str.len() < (self.width + 16) as usize {
+            self.temp_str.push(' ');
+        }
+        self.temp_str.push_str("\x1b[0m|");
+        println!("{}", &self.temp_str);
+        self.temp_str.clear();
+        
+        // separator line
+        self.temp_str.push('|');
+        for _ in 0..=6 + self.width {
+            self.temp_str.push('-');
+        }
+        self.temp_str.push('|');
+        println!("{}", &self.temp_str);
+        self.temp_str.clear();
+        
+        // second digit
+        self.temp_str.push_str("|    | ");
+        for i in 0..self.width {
+            let digit = ((i % 100) / 10) as u8;
+            if digit == 0 {
+                self.temp_str.push(' ');
+            } else {
+                self.temp_str.push((48u8 + digit) as char);
+            }
+        }
+        println!("{} |", self.temp_str);
+        self.temp_str.clear();
+
+        // last digit
+        self.temp_str.push_str("|    | ");
+        for i in 0..self.width {
+            self.temp_str.push((48u8 + ((i % 10) as u8)) as char);
+        }
+        println!("{} |", self.temp_str);
+        self.temp_str.clear();
+
+        // separator line
+        self.temp_str.push('|');
+        for _ in 0..=6 + self.width {
+            self.temp_str.push('-');
+        }
+        self.temp_str.push('|');
+        println!("{}", &self.temp_str);
+        self.temp_str.clear();
+
         let mut x = 0u32;
+        let mut y = 0u32;
         for ch in &surface.chars {
             self.temp_str.push_str("\x1b[38;2;");
             self.temp_str
@@ -190,14 +253,22 @@ impl Terminal for DebugTerminal {
             } else {
                 self.temp_str.push(ch.code);
             }
-            //self.temp_str.push_str("\x1b[0m"); // reset to default color
+            self.temp_str.push_str("\x1b[0m"); // reset to default color
             x += 1;
             if x == self.width {
-                println!("{}", &self.temp_str);
+                println!("|{:>3} | {} |", y, &self.temp_str);
                 self.temp_str.clear();
                 x = 0;
+                y += 1;
             }
         }
+        // separator line
+        self.temp_str.push('|');
+        for _ in 0..=6 + self.width {
+            self.temp_str.push('-');
+        }
+        self.temp_str.push('|');
+        println!("{}", &self.temp_str);
     }
 
     fn get_width(&self) -> u32 {

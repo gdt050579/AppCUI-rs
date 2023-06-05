@@ -23,6 +23,6 @@ impl OnPaint for MyDesktop {
 
 #[test]
 fn check_custom_paint_for_desktop() {
-    let a = App::debug(60, 20, InitializationFlags::None, MyDesktop::new(), "Paint(desktop)").unwrap();
+    let a = App::debug(60, 10, InitializationFlags::None, MyDesktop::new(), "Paint(desktop)").unwrap();
     a.run();
 }
