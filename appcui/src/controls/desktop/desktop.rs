@@ -26,13 +26,6 @@ impl Desktop {
 impl OnPaint for Desktop {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.clear(theme.desktop.character);
-        surface.write_string(
-            0,
-            0,
-            "Desktop",
-            CharAttribute::with_color(Color::White, Color::Red),
-            false,
-        );
     }
 }
 impl OnKeyPressed for Desktop {
