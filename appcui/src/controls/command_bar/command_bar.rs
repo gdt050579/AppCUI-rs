@@ -286,7 +286,6 @@ impl CommandBar {
     }
     pub(crate) fn on_mouse_up(&mut self) -> Option<CommandBarEvent> {
         let idx = self.pressed_index as u32;
-        self.hovered_index = INVALID_INDEX;
         self.pressed_index = INVALID_INDEX;
 
         if (idx != INVALID_INDEX) && ((idx as usize) < self.items.len()) {
@@ -295,6 +294,7 @@ impl CommandBar {
                 control_receiver_handle: self.items[idx as usize].receiver_control,
             });
         }
+        self.hovered_index = INVALID_INDEX;
         return None;
     }
 }

@@ -1058,8 +1058,8 @@ impl RuntimeManager {
 impl Drop for RuntimeManager {
     fn drop(&mut self) {
         unsafe {
-            Box::from_raw(self.controls);
-            Box::from_raw(self.menus);
+            drop(Box::from_raw(self.controls));
+            drop(Box::from_raw(self.menus));
         }
     }
 }

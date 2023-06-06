@@ -57,7 +57,7 @@ fn check_command_bar_1() {
         CheckHash(0x2A98FF1D492AC6E2)
         Mouse.Click(29,9,left)
         //Paint('MyWin-1-CMD-2 clicked')
-        CheckHash(0x535586DC63DB3861)        
+        CheckHash(0x54C33AD8563BFD71)        
     ";
     let mut a = App::debug(
         60,
