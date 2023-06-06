@@ -171,6 +171,8 @@ impl Terminal for DebugTerminal {
         }
         self.paint = false;
 
+        println!("");
+        self.temp_str.clear();
         // firt border
         for _ in 0..=6 + self.width {
             self.temp_str.push('=');
