@@ -5,6 +5,8 @@ mod window_flags;
 mod window;
 mod drag_status;
 mod decorator_events;
+#[cfg(test)]
+mod tests;
 
 pub use window::Window;
 pub use window_flags::WindowFlags;
