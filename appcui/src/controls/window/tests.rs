@@ -13,7 +13,7 @@ fn check_window_1() {
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     a.add(Window::new(
-        "Title",
+        "1234567890A",
         Layout::new("d:c,w:20,h:10"),
         WindowFlags::None,
     ));
