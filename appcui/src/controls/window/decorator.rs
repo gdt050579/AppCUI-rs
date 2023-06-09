@@ -500,7 +500,7 @@ impl Decorator {
         self.y = y;
         self.x = (x - self.width as i32) + 1;
         self.x -= extra_space;
-        let next = self.x - 2;
+        let next = self.x - 1;
         if part_of_group && (self.decorator_type != last) {
             self.status |= StatusFlags::RightGroupMarker;
         }

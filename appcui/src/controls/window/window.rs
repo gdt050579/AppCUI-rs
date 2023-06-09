@@ -10,15 +10,16 @@ use super::WindowDecoratorButtonPressedEvent;
 use super::WindowDecoratorCheckBoxStateChangedEvent;
 use super::WindowDecoratorSingleChoiceSelectedEvent;
 use super::WindowFlags;
+use crate::controls::command_bar::*;
 use crate::controls::events::*;
 use crate::controls::menu::Menu;
 use crate::controls::menu::MenuBar;
-use crate::controls::command_bar::*;
 use crate::controls::*;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::Handle;
 use crate::system::*;
+use crate::utils::Caption;
 use crate::utils::Strategy;
 use crate::utils::VectorIndex;
 
@@ -33,7 +34,7 @@ enum MoveDirection {
 
 #[AppCUIControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent)]
 pub struct Window {
-    title: String,
+    title: Caption,
     flags: WindowFlags,
     decorators: DecoratorsManager,
     resize_move_mode: bool,
@@ -96,7 +97,7 @@ impl Window {
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),
-            title: String::from(title),
+            title: Caption::new(title, false),
             flags,
             resize_move_mode: false,
             maximized: false,
@@ -185,11 +186,10 @@ impl Window {
     }
 
     pub fn set_title(&mut self, title: &str) {
-        self.title.clear();
-        self.title.push_str(title);
+        self.title.set_text(title, false);
     }
     pub fn get_title(&self) -> &str {
-        &self.title
+        self.title.get_text()
     }
 
     fn center_to_screen(&mut self) {
@@ -570,26 +570,48 @@ impl OnPaint for Window {
             .paint(surface, theme, self.has_focus(), self.maximized);
 
         // paint title
-        if self.title_max_width >= 2 {
-            let mut format = TextFormat::single_line(
-                self.title_left_margin + ((self.title_max_width as i32) / 2),
+        if self.title_max_width > 0 {
+            // let mut format = TextFormat::single_line(
+            //     self.title_left_margin + ((self.title_max_width as i32) / 2),
+            //     0,
+            //     color_title,
+            //     TextAlignament::Center,
+            // );
+            // format.width = Some(self.title_max_width);
+            // surface.write_text(self.title.get_text(), &format);
+            surface.write_string(
+                self.title_left_margin,
                 0,
+                self.title.get_text(),
                 color_title,
-                TextAlignament::Center,
+                false,
             );
-            format.width = Some(self.title_max_width);
-            surface.write_text(self.title.as_str(), &format);
+            surface.write_char(
+                self.title_left_margin - 1,
+                0,
+                Character::with_attributes(' ', color_title),
+            );
+            surface.write_char(
+                self.title_left_margin + self.title.get_chars_count() as i32,
+                0,
+                Character::with_attributes(' ', color_title),
+            );
         }
-
     }
 }
 
 impl OnResize for Window {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         // recompute decorator based on the new size
-        let (title_pos, title_width) = self.decorators.update_positions(new_size);
-        self.title_left_margin = title_pos;
-        self.title_max_width = title_width;
+        let (left, right) = self.decorators.update_positions(new_size);
+        if left + 2 >= right {
+            self.title_left_margin = 0;
+            self.title_max_width = 0;
+        } else {
+            self.title_max_width =
+                (((right - (left + 2)) as u32).min(self.title.get_chars_count() as u32)) as u16;
+            self.title_left_margin = (left + right - (self.title_max_width as i32))/2;
+        }
     }
 }
 

@@ -125,7 +125,7 @@ impl DecoratorsManager {
             self.items[last_index.index()].set_left_marker();
         }
     }
-    pub(super) fn update_positions(&mut self, size: Size) -> (i32, u16) {
+    pub(super) fn update_positions(&mut self, size: Size) -> (i32, i32) {
         // clear all flags (visible & left|right marker)
         for d in &mut self.items {
             d.clear();
@@ -172,9 +172,10 @@ impl DecoratorsManager {
         if bottom_right.index.is_valid() {
             self.items[bottom_right.index.index()].set_left_marker();
         }
-        let title_x_pos = top_left.x + 1;
-        let title_space = (top_right.x - title_x_pos).max(0);
-        (title_x_pos, title_space as u16)
+        //let title_x_pos = top_left.x + 1;
+        //let title_space = (top_right.x - title_x_pos).max(0);
+        //(title_x_pos, title_space as u16)
+        (top_left.x+1,top_right.x)
     }
     pub(super) fn set_tag(&mut self, name: &str) {
         for d in &mut self.items {
