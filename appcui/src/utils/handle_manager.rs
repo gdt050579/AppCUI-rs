@@ -79,4 +79,11 @@ where
         }
         None
     }
+
+    pub(super) fn allocated_objects(&self)->usize {
+        self.objects.len()
+    }
+    pub(super) fn free_spaces(&self)->usize {
+        self.free.len()
+    }
 }
