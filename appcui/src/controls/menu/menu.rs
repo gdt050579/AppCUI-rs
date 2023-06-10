@@ -10,7 +10,7 @@ use crate::{
         TextFormat, TextWrap,
     },
     input::{Key, KeyCode, MouseWheelDirection},
-    system::{RuntimeManager, Theme, Handle},
+    system::{RuntimeManager, Theme, Handle, HandleSupport},
     utils::{Caption, Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
@@ -748,6 +748,18 @@ impl Menu {
         self.parent_handle
     }
 }
+
+impl HandleSupport for Menu {
+    fn get_handle(&self) -> Handle {
+        self.handle.handle
+    }
+
+    fn set_handle(&mut self, handle: Handle) {
+        self.handle = MenuHandle { handle };
+        self.update_children_with_parent_handle();
+    }
+}
+
 /*
 
 

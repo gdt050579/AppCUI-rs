@@ -3,12 +3,12 @@ use std::ops::Deref;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct MenuHandle {
-    handle: Handle,
+    pub (crate) handle: Handle,
 }
 impl MenuHandle {
     #[allow(non_upper_case_globals)]
     pub const None: MenuHandle = MenuHandle { handle: Handle::None };
-    pub fn new(index: u32) -> Self {
+    pub (crate) fn new(index: u32) -> Self {
         Self {
             handle: Handle::new(index),
         }
