@@ -131,7 +131,7 @@ impl Window {
         // hotkey
         let mut hotkey_decorator = Decorator::with_type(
             DecoratorType::HotKeY,
-            DecoratorLayout::TopRight,
+            DecoratorLayout::TopLeft,
             3,
             "Press Alt+xx to switch to this window",
         );
@@ -140,7 +140,7 @@ impl Window {
 
         // tag
         let mut tag_decorator =
-            Decorator::with_type(DecoratorType::Tag, DecoratorLayout::TopRight, 3, "");
+            Decorator::with_type(DecoratorType::Tag, DecoratorLayout::TopLeft, 3, "");
         tag_decorator.hide();
         win.decorators.add(tag_decorator);
 
@@ -181,11 +181,25 @@ impl Window {
         RuntimeManager::get().get_control_mut(handle)
     }
 
+    // title
     pub fn set_title(&mut self, title: &str) {
         self.title.set_text(title);
+        self.update_positions(self.get_size());
     }
     pub fn get_title(&self) -> &str {
         self.title.get_text()
+    }
+
+    pub fn set_tag(&mut self, name: &str) {
+        self.decorators.set_tag(name);
+        self.update_positions(self.get_size());
+    }
+    pub fn get_tag(&self) -> Option<&str> {
+        self.decorators.get_tag()
+    }
+    pub fn clear_tag(&mut self) {
+        self.decorators.set_tag("");
+        self.update_positions(self.get_size());
     }
 
     fn center_to_screen(&mut self) {
@@ -370,17 +384,14 @@ impl Window {
                  */
     }
 
-    pub fn set_tag(&mut self, name: &str) {
-        self.decorators.set_tag(name);
-        self.decorators.update_positions(self.get_size());
+    fn update_positions(&mut self, size: Size) {
+        // recompute decorator based on the new size
+        let (left, right) = self.decorators.update_positions(size);
+        // recompute title position
+        self.title.set_margin(left, right);        
     }
-    pub fn get_tag(&self) -> Option<&str> {
-        self.decorators.get_tag()
-    }
-    pub fn clear_tag(&mut self) {
-        self.decorators.set_tag("");
-        self.decorators.update_positions(self.get_size());
-    }
+
+
 
     fn on_mouse_over(&mut self, x: i32, y: i32) -> EventProcessStatus {
         if let Some((index, decorator)) = self.decorators.get_from_position(x, y) {
@@ -572,9 +583,7 @@ impl OnPaint for Window {
 
 impl OnResize for Window {
     fn on_resize(&mut self, _: Size, new_size: Size) {
-        // recompute decorator based on the new size
-        let (left, right) = self.decorators.update_positions(new_size);
-        self.title.set_margin(left, right);
+        self.update_positions(new_size);
     }
 }
 
