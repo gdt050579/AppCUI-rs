@@ -2,11 +2,15 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 static GLOBAL_ID: AtomicUsize = AtomicUsize::new(0);
 
+pub trait HandleSupport {
+    fn get_handle(&self) -> Handle;
+    fn set_handle(&mut self, handle: Handle);
+}
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Handle {
     value: u64,
 }
-
 impl Handle {
     #[allow(non_upper_case_globals)]
     pub const None: Handle = Handle { value: u64::MAX };
@@ -27,8 +31,6 @@ impl Handle {
 }
 impl Default for Handle {
     fn default() -> Self {
-        Handle{
-            value: u64::MAX
-        }
+        Handle { value: u64::MAX }
     }
 }

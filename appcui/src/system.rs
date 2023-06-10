@@ -12,6 +12,7 @@ mod tests;
 
 pub use self::theme::Theme;
 pub use self::handle::Handle;
+pub use self::handle::HandleSupport;
 pub (crate) use self::theme::MenuTheme;
 pub (crate) use self::control_handle_manager::ControlHandleManager;
 pub (crate) use self::menu_handle_manager::MenuHandleManager;
