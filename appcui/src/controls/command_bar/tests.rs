@@ -48,16 +48,16 @@ impl CommandBarEvents for MyWin1 {
 fn check_command_bar_1() {
     let script = "
         //Paint('initial state')
-        CheckHash(0xB2787B5805A5A554)
+        CheckHash(0x8F46035284DF4B04)
         Key.Pressed(F1)
         //Paint('MyWin-1-CMD-1 pressed')
-        CheckHash(0x582BA9780F7CE042)
+        CheckHash(0x4CDD9A1678E2E012)
         Mouse.Move(29,9);
         //Paint('MyWin-1-CMD-2 hovered')
-        CheckHash(0x2A98FF1D492AC6E2)
+        CheckHash(0x1EC6A227F348D572)
         Mouse.Click(29,9,left)
         //Paint('MyWin-1-CMD-2 clicked')
-        CheckHash(0x54C33AD8563BFD71)        
+        CheckHash(0xCF24F44D8821A501)        
     ";
     let mut a = App::debug(
         60,
