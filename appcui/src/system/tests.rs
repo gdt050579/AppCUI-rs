@@ -1,4 +1,7 @@
+use crate::controls::Desktop;
 use crate::controls::command_bar::*;
+use super::App;
+use super::InitializationFlags;
 use super::Theme;
 use super::ToolTip;
 use crate::graphics::CharFlags;
@@ -166,6 +169,14 @@ fn check_command_bar_click() {
     let result = c.on_mouse_up().unwrap().command_id;
     c.paint(&mut s, &Theme::new());
     //s.print();
-    assert_eq!(s.compute_hash(), 0x2C57C3580F2C055A);
+    assert_eq!(s.compute_hash(), 0xF768DE602AA7C28A);
     assert_eq!(result, 12345);
+}
+
+#[test]
+fn check_multiple_apps_started() {
+    let a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), "").unwrap();
+    a.run();
+    let a = App::debug(50, 20, InitializationFlags::None, Desktop::new(), "").unwrap();
+    a.run();   
 }

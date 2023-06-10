@@ -1053,6 +1053,10 @@ impl RuntimeManager {
             self.debug_print(*handle, depth + 2);
         }
     }
+
+    pub (super) fn destroy() {
+        unsafe { RUNTIME_MANAGER = None; }
+    }
 }
 
 impl Drop for RuntimeManager {

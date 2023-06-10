@@ -61,6 +61,10 @@ impl App {
     pub fn run(self) {
         // must pe self so that after a run a second call will not be possible
         RuntimeManager::get().run();
+        // clear the mutex so that other apps can be created after this step
+        RuntimeManager::destroy();
+        let mut app_created = APP_CREATED_MUTEX.lock().unwrap();        
+        *app_created = false;
     }
 
     pub fn add<T>(&mut self, window: T)
