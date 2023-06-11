@@ -186,6 +186,18 @@ impl Decorator {
 
     pub(super) fn set_text(&mut self, text: &str, process_hotkey: bool) {
         self.text.set_text(text, process_hotkey);
+        match self.decorator_type {
+            DecoratorType::None => {},
+            DecoratorType::HotKeY => self.width = 3,
+            DecoratorType::CloseButton => self.width = 3,
+            DecoratorType::MaximizeRestoreButton => self.width = 3,
+            DecoratorType::WindowResize => self.width = 1,
+            DecoratorType::Tag => self.width = self.text.get_chars_count() as u16 + 2,
+            DecoratorType::Button => self.width = self.text.get_chars_count() as u16,
+            DecoratorType::SingleChoice => self.width = self.text.get_chars_count() as u16 + 2,
+            DecoratorType::CheckBox => self.width = self.text.get_chars_count() as u16 + 2,
+            DecoratorType::Text => self.width = self.text.get_chars_count() as u16,
+        }
     }
     pub(super) fn get_text(&self) -> &str {
         self.text.get_text()
@@ -470,7 +482,7 @@ impl Decorator {
         }
         self.y = y;
         self.x = x + extra_space;
-        let next = self.x + (self.width as i32) + 1;
+        let next = self.x + (self.width as i32);
         if part_of_group && (self.decorator_type != last) {
             self.status |= StatusFlags::LeftGroupMarker;
         }

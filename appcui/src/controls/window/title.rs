@@ -1,9 +1,11 @@
-use crate::graphics::{CharAttribute, Character, Surface};
+use crate::graphics::{CharAttribute, Character, SpecialChar, Surface};
 
 enum TitleDrawMode {
     None,
     Full,
     SplitInMiddle,
+    SplitInMiddleWithOneSpace,
+    FirstLetter,
 }
 
 pub(crate) struct Title {
@@ -37,6 +39,35 @@ impl Title {
         self.text.push_str(text);
         self.count = text.chars().count() as u16;
     }
+    fn compute_middle_split_title(
+        &mut self,
+        width: i32,
+        middle_size: i32,
+        draw_mode: TitleDrawMode,
+    ) {
+        self.start_part_size = (width - middle_size) / 2;
+        let first_part_end = self.start_part_size as usize;
+        let second_part_start =
+            (self.count as usize) - (width as usize - (first_part_end + middle_size as usize));
+        let mut char_index = 0usize;
+        self.start_part_end = 0;
+        self.end_part_start = 0;
+        for (offset, _) in self.text.char_indices() {
+            if char_index == first_part_end {
+                self.start_part_end = offset;
+            }
+            if char_index == second_part_start {
+                self.end_part_start = offset;
+            }
+            char_index += 1;
+        }
+        if (self.start_part_end > 0) && (self.end_part_start > self.start_part_end) {
+            self.draw_mode = draw_mode;
+        } else {
+            // some error
+            self.draw_mode = TitleDrawMode::None;
+        }
+    }
     pub(super) fn set_margin(&mut self, left: i32, right: i32) {
         if left + 2 >= right {
             self.draw_mode = TitleDrawMode::None;
@@ -50,31 +81,24 @@ impl Title {
                 // we should split the string in the middle
                 // first part ... ending part
                 // this means that the size should be at least 5 characters (start,end, ...)
-                if width < 5 {
-                    self.draw_mode = TitleDrawMode::None;
-                } else {
-                    self.start_part_size = (width - 3) / 2;
-                    let first_part_end = self.start_part_size as usize;
-                    let second_part_start = (self.count as usize) - (width as usize - (first_part_end + 3));
-                    let mut char_index = 0usize;
-                    self.start_part_end = 0;
-                    self.end_part_start = 0;
-                    for (offset, _) in self.text.char_indices() {
-                        if char_index == first_part_end {
-                            self.start_part_end = offset;
-                        }
-                        if char_index == second_part_start {
-                            self.end_part_start = offset;
-                        }
-                        char_index += 1;
+                self.left = (left + right - width) / 2 - 1;
+                self.right = self.left + width + 1;
+                match width {
+                    0 => self.draw_mode = TitleDrawMode::None,
+                    1 => self.draw_mode = TitleDrawMode::None,
+                    2 => {
+                        self.draw_mode = TitleDrawMode::FirstLetter;
+                        self.start_part_end = self.text.char_indices().nth(1).unwrap().0;
                     }
-                    if (self.start_part_end > 0) && (self.end_part_start > self.start_part_end) {
-                        self.left = (left + right - width) / 2 - 1;
-                        self.right = self.left + width + 1;
-                        self.draw_mode = TitleDrawMode::SplitInMiddle;
-                    } else {
-                        // some error
-                        self.draw_mode = TitleDrawMode::None;
+                    3 | 4 => {
+                        self.compute_middle_split_title(
+                            width,
+                            1,
+                            TitleDrawMode::SplitInMiddleWithOneSpace,
+                        );
+                    }
+                    _ => {
+                        self.compute_middle_split_title(width, 3, TitleDrawMode::SplitInMiddle);
                     }
                 }
             }
@@ -108,6 +132,41 @@ impl Title {
                     &self.text[self.end_part_start..],
                     attr,
                     false,
+                );
+            }
+            TitleDrawMode::SplitInMiddleWithOneSpace => {
+                surface.write_string(
+                    self.left + 1,
+                    0,
+                    &self.text[..self.start_part_end],
+                    attr,
+                    false,
+                );
+                surface.write_char(
+                    self.left + 1 + self.start_part_size,
+                    0,
+                    Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr),
+                );
+                surface.write_string(
+                    self.left + 2 + self.start_part_size,
+                    0,
+                    &self.text[self.end_part_start..],
+                    attr,
+                    false,
+                );
+            }
+            TitleDrawMode::FirstLetter => {
+                surface.write_string(
+                    self.left + 1,
+                    0,
+                    &self.text[..self.start_part_end],
+                    attr,
+                    false,
+                );
+                surface.write_char(
+                    self.left + 2,
+                    0,
+                    Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr),
                 );
             }
         }
