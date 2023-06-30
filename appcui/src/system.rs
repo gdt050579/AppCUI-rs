@@ -7,12 +7,14 @@ mod handle;
 mod initialization_data;
 mod control_handle_manager;
 mod menu_handle_manager;
+mod reference;
 #[cfg(test)]
 mod tests;
 
 pub use self::theme::Theme;
 pub use self::handle::Handle;
 pub use self::handle::HandleSupport;
+pub use self::reference::Reference;
 pub (crate) use self::theme::MenuTheme;
 pub (crate) use self::control_handle_manager::ControlHandleManager;
 pub (crate) use self::menu_handle_manager::MenuHandleManager;
