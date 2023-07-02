@@ -1,5 +1,3 @@
-use std::ops::Index;
-
 use crate::system::{Handle, HandleSupport};
 
 pub(crate) struct HandleManager<T> {
@@ -94,7 +92,7 @@ where
         None   
     }
 
-    pub(super) fn allocated_objects(&self) -> usize {
+    pub(crate) fn allocated_objects(&self) -> usize {
         self.objects.len()
     }
     pub(super) fn free_spaces(&self) -> usize {
