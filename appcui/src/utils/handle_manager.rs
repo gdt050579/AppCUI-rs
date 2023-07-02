@@ -1,3 +1,5 @@
+use std::ops::Index;
+
 use crate::system::{Handle, HandleSupport};
 
 pub(crate) struct HandleManager<T> {
@@ -79,11 +81,23 @@ where
         }
         None
     }
+    pub(crate) fn get_element(&self, index: usize) -> Option<&T> {
+        if index < self.objects.len() {
+            return self.objects[index].as_ref();
+        }
+        None   
+    }
+    pub(crate) fn get_element_mut(&mut self, index: usize) -> Option<&mut T> {
+        if index < self.objects.len() {
+            return self.objects[index].as_mut();
+        }
+        None   
+    }
 
-    pub(super) fn allocated_objects(&self)->usize {
+    pub(super) fn allocated_objects(&self) -> usize {
         self.objects.len()
     }
-    pub(super) fn free_spaces(&self)->usize {
+    pub(super) fn free_spaces(&self) -> usize {
         self.free.len()
     }
 }
