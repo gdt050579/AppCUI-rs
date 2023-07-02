@@ -6,6 +6,7 @@ mod window;
 mod title;
 mod drag_status;
 mod decorator_events;
+mod toolbar;
 #[cfg(test)]
 mod tests;
 
