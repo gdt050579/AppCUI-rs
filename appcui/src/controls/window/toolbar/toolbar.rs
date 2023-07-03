@@ -4,7 +4,8 @@ use crate::{
     utils::{HandleManager, VectorIndex},
 };
 
-use super::{PositionHelper, ToolBarItem, ToolbarItemLayout, PaintData};
+use super::{PositionHelper, ToolBarItem, ToolbarItemLayout, PaintData, ToolBarItemHandle};
+
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
@@ -24,11 +25,11 @@ impl ToolBar {
             current: VectorIndex::default(),
         }
     }
-    pub fn add<T>(&mut self, item: T)
+    pub fn add<T>(&mut self, item: T)->ToolBarItemHandle<T>
     where
         T: AddToToolbar,
     {
-        let _h = AddToToolbar::add(item, self);
+        ToolBarItemHandle::new(AddToToolbar::add(item, self))
     }
     fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
         if let Some(d) = self.items.get_element_mut(index) {

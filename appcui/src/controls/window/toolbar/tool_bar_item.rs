@@ -1,19 +1,22 @@
 use crate::{system::{Handle, HandleSupport, Theme}, graphics::{Surface, Character}};
 
-use super::{position::Position, Label, PaintData, ToolbarItemLayout};
+use super::{position::Position, Label, PaintData, ToolbarItemLayout, HotKey};
 
 pub(super) enum ToolBarItem {
     Label(Label),
+    HotKey(HotKey),
 }
 impl ToolBarItem {
     pub(super) fn get_position(&self) -> &Position {
         match self {
             ToolBarItem::Label(item) => &item.position,
+            ToolBarItem::HotKey(item) => &item.position,
         }
     }
     pub(super) fn get_position_mut(&mut self) -> &mut Position {
         match self {
             ToolBarItem::Label(item) => &mut item.position,
+            ToolBarItem::HotKey(item) => &mut item.position,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
@@ -28,6 +31,7 @@ impl ToolBarItem {
         };
         match self {
             ToolBarItem::Label(item) => item.paint(surface, theme, data),
+            ToolBarItem::HotKey(item) => item.paint(surface, theme, data),
         };
         // separators
         if pos.is_part_of_group() {
@@ -65,12 +69,14 @@ impl HandleSupport for ToolBarItem {
     fn get_handle(&self) -> Handle {
         match self {
             ToolBarItem::Label(item) => item.handle,
+            ToolBarItem::HotKey(item) => item.handle,
         }
     }
 
     fn set_handle(&mut self, handle: Handle) {
         match self {
             ToolBarItem::Label(item) => item.handle = handle,
+            ToolBarItem::HotKey(item) => item.handle = handle,
         }
     }
 }

@@ -1,16 +1,17 @@
 use AppCUIProcMacro::*;
 
-use super::Title;
 use super::decorator::DecoratorLayout;
+use super::toolbar::ToolBar;
 use super::Decorator;
 use super::DecoratorType;
-use super::toolbar::ToolBar;
 use super::DragStatus;
+use super::Title;
 use super::WindowCloseEvent;
 use super::WindowDecoratorButtonPressedEvent;
 use super::WindowDecoratorCheckBoxStateChangedEvent;
 use super::WindowDecoratorSingleChoiceSelectedEvent;
 use super::WindowFlags;
+use super::toolbar::ToolbarItemLayout;
 use crate::controls::command_bar::*;
 use crate::controls::events::*;
 use crate::controls::menu::Menu;
@@ -36,7 +37,7 @@ enum MoveDirection {
 pub struct Window {
     title: Title,
     flags: WindowFlags,
-    toolbar: Tool,
+    toolbar: ToolBar,
     resize_move_mode: bool,
     maximized: bool,
     drag_status: DragStatus,
@@ -129,6 +130,7 @@ impl Window {
             ));
         }
         // hotkey
+        let hk = win.toolbar.add(super::toolbar::HotKey::new(ToolbarItemLayout::TopLeft));
         let mut hotkey_decorator = Decorator::with_type(
             DecoratorType::HotKeY,
             DecoratorLayout::TopLeft,
@@ -388,10 +390,8 @@ impl Window {
         // recompute decorator based on the new size
         let (left, right) = self.decorators.update_positions(size);
         // recompute title position
-        self.title.set_margin(left, right);        
+        self.title.set_margin(left, right);
     }
-
-
 
     fn on_mouse_over(&mut self, x: i32, y: i32) -> EventProcessStatus {
         if let Some((index, decorator)) = self.decorators.get_from_position(x, y) {
@@ -577,7 +577,7 @@ impl OnPaint for Window {
             .paint(surface, theme, self.has_focus(), self.maximized);
 
         // paint title
-        self.title.paint(surface, color_title);        
+        self.title.paint(surface, color_title);
     }
 }
 
