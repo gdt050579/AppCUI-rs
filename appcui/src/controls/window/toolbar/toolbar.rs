@@ -17,7 +17,7 @@ pub trait AddToToolbar {
 }
 
 impl ToolBar {
-    pub(super) fn new() -> Self {
+    pub(crate) fn new() -> Self {
         ToolBar {
             items: HandleManager::new(4),
             pressed: false,

@@ -13,3 +13,4 @@ pub (self) use self::toolbar::AddToToolbar;
 pub (self) use self::position_helper::PositionHelper;
 pub (self) use self::paint_data::PaintData;
 pub use self::label::Label; 
+pub (super) use self::toolbar::ToolBar;

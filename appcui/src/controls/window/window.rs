@@ -4,7 +4,7 @@ use super::Title;
 use super::decorator::DecoratorLayout;
 use super::Decorator;
 use super::DecoratorType;
-use super::DecoratorsManager;
+use super::toolbar::ToolBar;
 use super::DragStatus;
 use super::WindowCloseEvent;
 use super::WindowDecoratorButtonPressedEvent;
@@ -36,7 +36,7 @@ enum MoveDirection {
 pub struct Window {
     title: Title,
     flags: WindowFlags,
-    decorators: DecoratorsManager,
+    toolbar: Tool,
     resize_move_mode: bool,
     maximized: bool,
     drag_status: DragStatus,
@@ -99,7 +99,7 @@ impl Window {
             flags,
             resize_move_mode: false,
             maximized: false,
-            decorators: DecoratorsManager::new(),
+            toolbar: ToolBar::new(),
             drag_status: DragStatus::None,
             drag_start_point: Point::new(0, 0),
             old_rect: Rect::new(0, 0, 0, 0),
