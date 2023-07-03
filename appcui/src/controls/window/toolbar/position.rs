@@ -45,10 +45,24 @@ pub(super) struct Position {
     y: i32,
     width: u16,
     layout: ToolbarItemLayout,
-    status: StatusFlags,    
+    status: StatusFlags,
 }
 
 impl Position {
+    pub(super) fn new(layout: ToolbarItemLayout, part_of_group: bool) -> Position {
+        Position {
+            x: 0,
+            y: 0,
+            width: 0,
+            layout: layout,
+            status: if part_of_group {
+                StatusFlags::ParOfGroup | StatusFlags::Visible
+            } else {
+                StatusFlags::Visible
+            },
+        }
+    }
+
     #[inline(always)]
     pub(super) fn clear(&mut self) {
         self.status.remove(
@@ -72,12 +86,40 @@ impl Position {
         self.layout
     }
     #[inline(always)]
+    pub(super) fn has_right_group_marker(&self) -> bool {
+        self.status.contains(StatusFlags::RightGroupMarker)
+    }
+    #[inline(always)]
+    pub(super) fn has_left_group_marker(&self) -> bool {
+        self.status.contains(StatusFlags::LeftGroupMarker)
+    }
+    #[inline(always)]
     pub(super) fn set_right_marker(&mut self) {
         self.status |= StatusFlags::RightGroupMarker;
     }
     #[inline(always)]
     pub(super) fn set_left_marker(&mut self) {
         self.status |= StatusFlags::LeftGroupMarker;
+    }
+    #[inline(always)]
+    pub(super) fn get_x(&self) -> i32 {
+        self.x
+    }
+    #[inline(always)]
+    pub(super) fn get_y(&self) -> i32 {
+        self.y
+    }
+    #[inline(always)]
+    pub(super) fn get_width(&self) -> i32 {
+        self.width as i32
+    }
+    #[inline(always)]
+    pub(super) fn set_width(&mut self, value: u16) {
+        self.width = value;
+    }
+    #[inline(always)]
+    pub(super) fn is_part_of_group(&self) -> bool {
+        self.status.contains(StatusFlags::ParOfGroup)
     }
     pub(super) fn update_position_from_left(
         &mut self,
