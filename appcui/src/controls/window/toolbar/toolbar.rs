@@ -1,13 +1,15 @@
 use crate::{
-    graphics::Size,
-    system::Handle,
+    graphics::{Size, Surface},
+    system::{Handle, Theme},
     utils::{HandleManager, VectorIndex},
 };
 
-use super::{PositionHelper, ToolBarItem, ToolbarItemLayout};
+use super::{PositionHelper, ToolBarItem, ToolbarItemLayout, PaintData};
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
+    current: VectorIndex,
+    pressed: bool,
 }
 
 pub trait AddToToolbar {
@@ -18,6 +20,8 @@ impl ToolBar {
     pub(super) fn new() -> Self {
         ToolBar {
             items: HandleManager::new(4),
+            pressed: false,
+            current: VectorIndex::default(),
         }
     }
     pub fn add<T>(&mut self, item: T)
@@ -29,14 +33,15 @@ impl ToolBar {
     fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
         if let Some(d) = self.items.get_element_mut(index) {
             let pos = d.get_position_mut();
+            let my_variant = Some(std::mem::discriminant(d));
             let (next, add_flags) =
-                pos.update_position_from_left(helper.x, helper.y, helper.decoraror_type);
+                pos.update_position_from_left(helper.x, helper.y, my_variant, helper.variant);
             let last_index = helper.index;
             if next < right {
                 pos.set_visible();
                 helper.index = VectorIndex::with_value(index);
                 helper.x = next;
-                helper.decoraror_type = d.get_type();
+                helper.variant = my_variant;
             }
             if add_flags && last_index.is_valid() {
                 if let Some(last) = self.items.get_element_mut(last_index.index()) {
@@ -48,14 +53,15 @@ impl ToolBar {
     fn update_position_from_right(&mut self, index: usize, helper: &mut PositionHelper, left: i32) {
         if let Some(d) = self.items.get_element_mut(index) {
             let pos = d.get_position_mut();
+            let my_variant = Some(std::mem::discriminant(d));
             let (next, add_flags) =
-                pos.update_position_from_right(helper.x, helper.y, helper.decoraror_type);
+                pos.update_position_from_right(helper.x, helper.y,my_variant, helper.variant);
             let last_index = helper.index;
             if next > left {
                 pos.set_visible();
                 helper.index = VectorIndex::with_value(index);
                 helper.x = next;
-                helper.decoraror_type = d.get_type();
+                helper.variant = my_variant;
             }
             if add_flags && last_index.is_valid() {
                 if let Some(last) = self.items.get_element_mut(last_index.index()) {
@@ -127,5 +133,33 @@ impl ToolBar {
         //let title_space = (top_right.x - title_x_pos).max(0);
         //(title_x_pos, title_space as u16)
         (top_left.x + 1, top_right.x)
+    }
+    pub(super) fn paint(
+        &self,
+        surface: &mut Surface,
+        theme: &Theme,
+        focused: bool,
+        maximized: bool,
+    ) {
+        let mut paint_data = PaintData {
+            focused,
+            current: false,
+            maximized,
+            is_current_item_pressed: self.pressed,
+            sep_attr: if focused {
+                theme.lines.normal
+            } else {
+                theme.lines.inactive
+            },
+        };
+        let current_bar_index = self.current.index();
+        let count = self.items.allocated_objects();
+        // paint bar items
+        for index in 0..count {
+            if let Some(item) = self.items.get_element_mut(index) {
+                paint_data.current = index == current_bar_index;
+                item.paint(surface, theme, &paint_data);
+            }
+        }
     }
 }

@@ -6,6 +6,8 @@ use crate::{
     utils::Caption,
 };
 
+use super::ToolBarItem;
+
 // #[repr(u8)]
 // #[derive(Clone, Copy, PartialEq)]
 // pub(super) enum DecoratorType {
@@ -81,26 +83,26 @@ impl Position {
         &mut self,
         x: i32,
         y: i32,
-        last: DecoratorType,
+        my_variant: Option<std::mem::Discriminant<ToolBarItem>>,
+        last: Option<std::mem::Discriminant<ToolBarItem>>,
     ) -> (i32, bool) {
         let part_of_group = self.status.contains(StatusFlags::ParOfGroup);
         let mut extra_space = 0;
         let mut right_group_marker = false;
+
         if part_of_group {
             extra_space = 1;
-            if self.decorator_type != last {
+            if my_variant != last {
                 right_group_marker = true;
                 extra_space += 1;
             }
         } else {
-            if last != DecoratorType::None {
-                right_group_marker = true;
-            }
+            right_group_marker = last.is_some();
         }
         self.y = y;
         self.x = x + extra_space;
         let next = self.x + (self.width as i32);
-        if part_of_group && (self.decorator_type != last) {
+        if part_of_group && (my_variant != last) {
             self.status |= StatusFlags::LeftGroupMarker;
         }
 
@@ -110,27 +112,26 @@ impl Position {
         &mut self,
         x: i32,
         y: i32,
-        last: DecoratorType,
+        my_variant: Option<std::mem::Discriminant<ToolBarItem>>,
+        last: Option<std::mem::Discriminant<ToolBarItem>>,
     ) -> (i32, bool) {
         let part_of_group = self.status.contains(StatusFlags::ParOfGroup);
         let mut extra_space = 0;
         let mut left_group_marker = false;
         if part_of_group {
             extra_space = 1;
-            if self.decorator_type != last {
+            if my_variant != last {
                 left_group_marker = true;
                 extra_space += 1;
             }
         } else {
-            if last != DecoratorType::None {
-                left_group_marker = true;
-            }
+            left_group_marker = last.is_some();
         }
         self.y = y;
         self.x = (x - self.width as i32) + 1;
         self.x -= extra_space;
         let next = self.x - 1;
-        if part_of_group && (self.decorator_type != last) {
+        if part_of_group && (my_variant != last) {
             self.status |= StatusFlags::RightGroupMarker;
         }
 

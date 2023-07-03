@@ -1,21 +1,22 @@
-use crate::system::{HandleSupport, Handle};
+use crate::{system::{Handle, HandleSupport, Theme}, graphics::Surface};
 
-use super::{Label, position::Position};
+use super::{position::Position, Label, PaintData};
 
-pub (super) enum ToolBarItem {
-    Label(Label)
+pub(super) enum ToolBarItem {
+    Label(Label),
 }
 impl ToolBarItem {
-    pub (super) fn get_position(&self)->&Position {
+    pub(super) fn get_position(&self) -> &Position {
         match self {
             ToolBarItem::Label(item) => &item.position,
         }
     }
-    pub (super) fn get_position_mut(&mut self)->&mut Position {
+    pub(super) fn get_position_mut(&mut self) -> &mut Position {
         match self {
             ToolBarItem::Label(item) => &mut item.position,
         }
-    }  
+    }
+    pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {}
 }
 impl HandleSupport for ToolBarItem {
     fn get_handle(&self) -> Handle {
