@@ -4,7 +4,7 @@ use crate::system::Handle;
 
 #[derive(PartialEq)]
 pub struct ToolBarItemHandle<T> {
-    handle: Handle,
+    pub (crate) handle: Handle,
     _phantom: PhantomData<T>
 }
 

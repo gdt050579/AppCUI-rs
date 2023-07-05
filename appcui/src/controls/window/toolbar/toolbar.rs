@@ -4,8 +4,7 @@ use crate::{
     utils::{HandleManager, VectorIndex},
 };
 
-use super::{PositionHelper, ToolBarItem, ToolbarItemLayout, PaintData, ToolBarItemHandle};
-
+use super::{PaintData, PositionHelper, ToolBarItem, ToolBarItemHandle, ToolbarItemLayout, Label, HotKey};
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
@@ -25,11 +24,37 @@ impl ToolBar {
             current: VectorIndex::default(),
         }
     }
-    pub fn add<T>(&mut self, item: T)->ToolBarItemHandle<T>
+    pub fn add<T>(&mut self, item: T) -> ToolBarItemHandle<T>
     where
         T: AddToToolbar,
     {
         ToolBarItemHandle::new(AddToToolbar::add(item, self))
+    }
+    pub fn get<T>(&self, handle: ToolBarItemHandle<T>) -> Option<&T> {
+        if let Some(obj) = self.items.get(handle.handle) {
+            match obj {
+                ToolBarItem::Label(obj) => {
+                    return Some(unsafe { &(*((obj as *const Label) as *const T)) })
+                },
+                ToolBarItem::HotKey(obj) => {
+                    return Some(unsafe { &(*((obj as *const HotKey) as *const T)) })
+                }
+            }
+        }
+        None
+    }
+    pub fn get_mut<T>(&self, handle: ToolBarItemHandle<T>) -> Option<&mut T> {
+        if let Some(obj) = self.items.get_mut(handle.handle) {
+            match obj {
+                ToolBarItem::Label(obj) => {
+                    return Some(unsafe { &mut (*((obj as *mut Label) as *mut T)) })
+                },
+                ToolBarItem::HotKey(obj) => {
+                    return Some(unsafe { &mut (*((obj as *mut HotKey) as *mut T)) })
+                }
+            }
+        }
+        None
     }
     fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
         if let Some(d) = self.items.get_element_mut(index) {
@@ -56,7 +81,7 @@ impl ToolBar {
             let pos = d.get_position_mut();
             let my_variant = Some(std::mem::discriminant(d));
             let (next, add_flags) =
-                pos.update_position_from_right(helper.x, helper.y,my_variant, helper.variant);
+                pos.update_position_from_right(helper.x, helper.y, my_variant, helper.variant);
             let last_index = helper.index;
             if next > left {
                 pos.set_visible();
@@ -71,7 +96,7 @@ impl ToolBar {
             }
         }
     }
-    pub(super) fn update_positions(&mut self, size: Size) -> (i32, i32) {
+    pub(crate) fn update_positions(&mut self, size: Size) -> (i32, i32) {
         // clear all flags (visible & left|right marker)
         let count = self.items.allocated_objects();
         for index in 0..count {
@@ -135,7 +160,7 @@ impl ToolBar {
         //(title_x_pos, title_space as u16)
         (top_left.x + 1, top_right.x)
     }
-    pub(super) fn paint(
+    pub(crate) fn paint(
         &self,
         surface: &mut Surface,
         theme: &Theme,
