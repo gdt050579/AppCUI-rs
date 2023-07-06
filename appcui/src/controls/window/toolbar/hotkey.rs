@@ -4,7 +4,7 @@ use crate::{
     system::{Handle, Theme},
 };
 
-use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem};
+use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, ToolbarItemLayout};
 
 pub(crate) struct HotKey {
     pub(super) base: ItemBase,
@@ -19,12 +19,12 @@ impl AddToToolbar for HotKey {
 }
 
 impl HotKey {
-    pub fn new(key: Key) -> Self {
+    pub fn new(layout: ToolbarItemLayout, key: Key) -> Self {
         HotKey {
-            base: todo!(),
+            base: ItemBase::new(layout, false),
             handle: Handle::None,
             key,
-        };
+        }
     }
     pub fn set_key(&mut self, key: Key) {
         self.key = key;
