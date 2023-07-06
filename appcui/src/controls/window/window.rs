@@ -1,8 +1,8 @@
 use AppCUIProcMacro::*;
 
 use super::decorator::DecoratorLayout;
-use super::toolbar::ToolBar;
-use super::toolbar::ToolbarItemLayout;
+use super::toolbar;
+use super::toolbar::*;
 use super::Decorator;
 use super::DecoratorType;
 use super::DragStatus;
@@ -43,6 +43,7 @@ pub struct Window {
     drag_status: DragStatus,
     drag_start_point: Point,
     old_rect: Rect,
+    hotkey_handle: ToolbarItemHandle<toolbar::HotKeY>,
 }
 
 const MOVE_TO_LOWER_MARGIN: i32 = -100000;
@@ -104,6 +105,7 @@ impl Window {
             drag_status: DragStatus::None,
             drag_start_point: Point::new(0, 0),
             old_rect: Rect::new(0, 0, 0, 0),
+            hotkey_handle: ToolBarItemHandle::None,
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
@@ -130,18 +132,9 @@ impl Window {
             ));
         }
         // hotkey
-        let hk = win
+        win.hotkey_handle = win
             .toolbar
-            .add(super::toolbar::HotKey::new(ToolbarItemLayout::TopLeft));
-
-        let mut hotkey_decorator = Decorator::with_type(
-            DecoratorType::HotKeY,
-            DecoratorLayout::TopLeft,
-            3,
-            "Press Alt+xx to switch to this window",
-        );
-        hotkey_decorator.hide();
-        win.decorators.add(hotkey_decorator);
+            .add(toolbar::HotKey::new(super::toolbar::Gravity::TopLeft));
 
         // tag
         let mut tag_decorator =

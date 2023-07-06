@@ -1,6 +1,6 @@
 use crate::{system::{Handle, HandleSupport, Theme}, graphics::{Surface, Character}};
 
-use super::{item_base::ItemBase, Label, PaintData, ToolbarItemLayout, HotKey};
+use super::{item_base::ItemBase, Label, PaintData, HotKey};
 
 pub(super) enum ToolBarItem {
     Label(Label),
@@ -25,10 +25,7 @@ impl ToolBarItem {
             return;
         }
 
-        let from_left = match pos.get_layout() {
-            ToolbarItemLayout::TopLeft | ToolbarItemLayout::BottomLeft => true,
-            _ => false,
-        };
+        let from_left = pos.get_gravity().is_on_left_side();
         match self {
             ToolBarItem::Label(item) => item.paint(surface, theme, data),
             ToolBarItem::HotKey(item) => item.paint(surface, theme, data),

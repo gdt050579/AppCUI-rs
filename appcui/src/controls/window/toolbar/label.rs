@@ -3,7 +3,7 @@ use crate::{
     system::{Handle, Theme},
 };
 
-use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, ToolbarItemLayout};
+use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Gravity};
 
 pub struct Label {
     pub(super) base: ItemBase,
@@ -18,9 +18,9 @@ impl AddToToolbar for Label {
 }
 
 impl Label {
-    pub fn new(layout: ToolbarItemLayout, text: &str)->Self {
+    pub fn new(gravity: Gravity, text: &str)->Self {
         let mut obj = Label {
-            base: ItemBase::new(layout, true),
+            base: ItemBase::new(gravity, true, true),
             handle: Handle::None,
             text: String::new(),
         };

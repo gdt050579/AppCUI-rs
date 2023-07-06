@@ -4,7 +4,7 @@ use crate::{
     utils::{HandleManager, VectorIndex},
 };
 
-use super::{PaintData, PositionHelper, ToolBarItem, ToolBarItemHandle, ToolbarItemLayout, Label, HotKey};
+use super::{PaintData, PositionHelper, ToolBarItem, ToolBarItemHandle, Gravity, Label, HotKey};
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
@@ -116,18 +116,18 @@ impl ToolBar {
                 if pos.is_hidden() {
                     continue;
                 }
-                let layout = pos.get_layout();
-                match layout {
-                    ToolbarItemLayout::TopLeft => {
+                let gravity = pos.get_gravity();
+                match gravity {
+                    Gravity::TopLeft => {
                         self.update_position_from_left(index, &mut top_left, top_right.x);
                     }
-                    ToolbarItemLayout::BottomLeft => {
+                    Gravity::BottomLeft => {
                         self.update_position_from_left(index, &mut bottom_left, bottom_right.x)
                     }
-                    ToolbarItemLayout::TopRight => {
+                    Gravity::TopRight => {
                         self.update_position_from_right(index, &mut top_right, top_left.x);
                     }
-                    ToolbarItemLayout::BottomRight => {
+                    Gravity::BottomRight => {
                         self.update_position_from_right(index, &mut bottom_right, bottom_left.x);
                     }
                 }

@@ -6,7 +6,7 @@ use crate::{
     utils::Caption,
 };
 
-use super::ToolBarItem;
+use super::{ToolBarItem, Gravity};
 
 // #[repr(u8)]
 // #[derive(Clone, Copy, PartialEq)]
@@ -23,14 +23,7 @@ use super::ToolBarItem;
 //     Text,
 // }
 
-#[repr(u8)]
-#[derive(Clone, Copy)]
-pub(super) enum ToolbarItemLayout {
-    TopLeft,
-    BottomLeft,
-    TopRight,
-    BottomRight,
-}
+
 
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
@@ -44,21 +37,29 @@ pub(super) struct ItemBase {
     x: i32,
     y: i32,
     width: u16,
-    layout: ToolbarItemLayout,
+    gravity: Gravity,
     status: StatusFlags,
 }
 
 impl ItemBase {
-    pub(super) fn new(layout: ToolbarItemLayout, part_of_group: bool) -> ItemBase {
+    pub(super) fn new(gravity: Gravity, part_of_group: bool, visible: bool) -> ItemBase {
         ItemBase {
             x: 0,
             y: 0,
             width: 0,
-            layout: layout,
+            gravity,
             status: if part_of_group {
-                StatusFlags::ParOfGroup | StatusFlags::Visible
+                if visible {
+                    StatusFlags::ParOfGroup | StatusFlags::Visible
+                } else {
+                    StatusFlags::ParOfGroup
+                }
             } else {
-                StatusFlags::Visible
+                if visible {
+                    StatusFlags::Visible
+                } else {
+                    StatusFlags::None
+                }
             },
         }
     }
@@ -82,8 +83,8 @@ impl ItemBase {
         self.status.contains(StatusFlags::Hidden)
     }
     #[inline(always)]
-    pub(super) fn get_layout(&self) -> ToolbarItemLayout {
-        self.layout
+    pub(super) fn get_gravity(&self) -> Gravity {
+        self.gravity
     }
     #[inline(always)]
     pub(super) fn has_right_group_marker(&self) -> bool {
