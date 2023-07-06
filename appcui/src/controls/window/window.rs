@@ -44,6 +44,7 @@ pub struct Window {
     drag_start_point: Point,
     old_rect: Rect,
     hotkey_handle: ToolbarItemHandle<toolbar::HotKeY>,
+    tag_handle: ToolbarItemHandle<toolbar::Tag>,
 }
 
 const MOVE_TO_LOWER_MARGIN: i32 = -100000;
@@ -106,6 +107,7 @@ impl Window {
             drag_start_point: Point::new(0, 0),
             old_rect: Rect::new(0, 0, 0, 0),
             hotkey_handle: ToolBarItemHandle::None,
+            tag_handle: ToolBarItemHandle::None,
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
@@ -137,10 +139,9 @@ impl Window {
             .add(toolbar::HotKey::new(super::toolbar::Gravity::TopLeft));
 
         // tag
-        let mut tag_decorator =
-            Decorator::with_type(DecoratorType::Tag, DecoratorLayout::TopLeft, 3, "");
-        tag_decorator.hide();
-        win.decorators.add(tag_decorator);
+        win.tag_handle = win
+            .toolbar
+            .add(toolbar::Tag::new(super::toolbar::Gravity::TopLeft));
 
         win
 

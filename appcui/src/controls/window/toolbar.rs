@@ -6,6 +6,7 @@ mod position_helper;
 mod paint_data;
 mod label;
 mod hotkey;
+mod tag;
 mod toolbar_item_handle;
 
 
@@ -23,3 +24,4 @@ pub use self::label::Label;
 
 // tool bar items (internal)
 pub(super) use self::hotkey::HotKey;
+pub(super) use self::tag::Tag;

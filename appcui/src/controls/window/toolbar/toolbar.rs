@@ -4,7 +4,7 @@ use crate::{
     utils::{HandleManager, VectorIndex},
 };
 
-use super::{PaintData, PositionHelper, ToolBarItem, ToolBarItemHandle, Gravity, Label, HotKey};
+use super::{PaintData, PositionHelper, ToolBarItem, ToolBarItemHandle, Gravity, Label, HotKey, Tag};
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
@@ -38,6 +38,9 @@ impl ToolBar {
                 },
                 ToolBarItem::HotKey(obj) => {
                     return Some(unsafe { &(*((obj as *const HotKey) as *const T)) })
+                },
+                ToolBarItem::Tag(obj) => {
+                    return Some(unsafe { &(*((obj as *const Tag) as *const T)) })
                 }
             }
         }
@@ -51,6 +54,9 @@ impl ToolBar {
                 },
                 ToolBarItem::HotKey(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut HotKey) as *mut T)) })
+                },
+                ToolBarItem::Tag(obj) => {
+                    return Some(unsafe { &mut (*((obj as *mut Tag) as *mut T)) })
                 }
             }
         }

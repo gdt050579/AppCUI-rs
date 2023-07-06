@@ -1,22 +1,25 @@
 use crate::{system::{Handle, HandleSupport, Theme}, graphics::{Surface, Character}};
 
-use super::{item_base::ItemBase, Label, PaintData, HotKey};
+use super::{item_base::ItemBase, Label, PaintData, HotKey, Tag};
 
 pub(super) enum ToolBarItem {
     Label(Label),
     HotKey(HotKey),
+    Tag(Tag),
 }
 impl ToolBarItem {
     pub(super) fn get_base(&self) -> &ItemBase {
         match self {
             ToolBarItem::Label(item) => &item.base,
             ToolBarItem::HotKey(item) => &item.base,
+            ToolBarItem::Tag(item) => &item.base,
         }
     }
     pub(super) fn get_base_mut(&mut self) -> &mut ItemBase {
         match self {
             ToolBarItem::Label(item) => &mut item.base,
             ToolBarItem::HotKey(item) => &mut item.base,
+            ToolBarItem::Tag(item) => &mut item.base,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
@@ -29,6 +32,7 @@ impl ToolBarItem {
         match self {
             ToolBarItem::Label(item) => item.paint(surface, theme, data),
             ToolBarItem::HotKey(item) => item.paint(surface, theme, data),
+            ToolBarItem::Tag(item) => item.paint(surface, theme, data),
         };
         // separators
         if pos.is_part_of_group() {
@@ -67,6 +71,7 @@ impl HandleSupport for ToolBarItem {
         match self {
             ToolBarItem::Label(item) => item.handle,
             ToolBarItem::HotKey(item) => item.handle,
+            ToolBarItem::Tag(item) => item.handle,
         }
     }
 
@@ -74,6 +79,7 @@ impl HandleSupport for ToolBarItem {
         match self {
             ToolBarItem::Label(item) => item.handle = handle,
             ToolBarItem::HotKey(item) => item.handle = handle,
+            ToolBarItem::Tag(item) => item.handle = handle,
         }
     }
 }
