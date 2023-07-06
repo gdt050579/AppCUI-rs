@@ -112,12 +112,7 @@ impl Window {
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
         if flags.contains(WindowFlags::NoCloseButton) == false {
-            win.decorators.add(Decorator::with_type(
-                DecoratorType::CloseButton,
-                DecoratorLayout::TopRight,
-                3,
-                "Close window",
-            ));
+            win.toolbar.add(toolbar::CloseButton::new());
         }
         if flags.contains(WindowFlags::Sizeable) {
             win.decorators.add(Decorator::with_type(

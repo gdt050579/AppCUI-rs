@@ -37,8 +37,14 @@ pub(super) struct ItemBase {
 }
 
 impl ItemBase {
-    pub(super) fn with_super(gravity: Gravity, part_of_group: bool, tooltip: &str) -> ItemBase {
+    pub(super) fn with_tooltip(gravity: Gravity, part_of_group: bool, tooltip: &str) -> ItemBase {
         let mut base = ItemBase::new(gravity, part_of_group, true);
+        base.tooltip.push_str(tooltip);
+        base
+    }
+    pub(super) fn with_width(gravity: Gravity, width: u16,  tooltip: &str) -> ItemBase {
+        let mut base = ItemBase::new(gravity, false, true);
+        base.width = width;
         base.tooltip.push_str(tooltip);
         base
     }

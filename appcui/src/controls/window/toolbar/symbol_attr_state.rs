@@ -1,6 +1,6 @@
 use crate::{system::Theme, graphics::CharAttribute};
 
-use super::DecoratorPaintData;
+use super::PaintData;
 
 #[derive(PartialEq)]
 pub(super) enum SymbolAttrState {
@@ -10,7 +10,7 @@ pub(super) enum SymbolAttrState {
     Inactive,
 }
 impl SymbolAttrState {
-    pub(super) fn new(paint_data: &DecoratorPaintData) -> Self {
+    pub(super) fn new(paint_data: &PaintData) -> Self {
         if paint_data.current {
             if paint_data.is_current_item_pressed {
                 SymbolAttrState::Pressed

@@ -1,6 +1,5 @@
 mod decorator;
 mod decorators_manager;
-mod symbol_attr_state;
 mod window_flags;
 mod window;
 mod title;
@@ -21,5 +20,4 @@ pub (self) use decorator::Decorator;
 pub (self) use decorator::DecoratorPaintData;
 pub (self) use decorator::DecoratorType;
 pub (self) use decorators_manager::DecoratorsManager;
-pub (self) use symbol_attr_state::SymbolAttrState;
 pub (self) use title::Title;
