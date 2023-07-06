@@ -1,11 +1,5 @@
 use EnumBitFlags::EnumBitFlags;
 
-use crate::{
-    graphics::{CharAttribute, Character, SpecialChar, Surface, TextAlignament, TextFormat},
-    system::Theme,
-    utils::Caption,
-};
-
 use super::{ToolBarItem, Gravity};
 
 // #[repr(u8)]
@@ -39,15 +33,22 @@ pub(super) struct ItemBase {
     width: u16,
     gravity: Gravity,
     status: StatusFlags,
+    tooltip: String,
 }
 
 impl ItemBase {
+    pub(super) fn with_super(gravity: Gravity, part_of_group: bool, tooltip: &str) -> ItemBase {
+        let mut base = ItemBase::new(gravity, part_of_group, true);
+        base.tooltip.push_str(tooltip);
+        base
+    }
     pub(super) fn new(gravity: Gravity, part_of_group: bool, visible: bool) -> ItemBase {
         ItemBase {
             x: 0,
             y: 0,
             width: 0,
             gravity,
+            tooltip: String::new(),
             status: if part_of_group {
                 if visible {
                     StatusFlags::ParOfGroup | StatusFlags::Visible
