@@ -40,7 +40,7 @@ enum StatusFlags {
     LeftGroupMarker = 0x08,
     RightGroupMarker = 0x10,
 }
-pub(super) struct Position {
+pub(super) struct ItemBase {
     x: i32,
     y: i32,
     width: u16,
@@ -48,9 +48,9 @@ pub(super) struct Position {
     status: StatusFlags,
 }
 
-impl Position {
-    pub(super) fn new(layout: ToolbarItemLayout, part_of_group: bool) -> Position {
-        Position {
+impl ItemBase {
+    pub(super) fn new(layout: ToolbarItemLayout, part_of_group: bool) -> ItemBase {
+        ItemBase {
             x: 0,
             y: 0,
             width: 0,

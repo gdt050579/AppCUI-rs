@@ -2,6 +2,7 @@ use AppCUIProcMacro::*;
 
 use super::decorator::DecoratorLayout;
 use super::toolbar::ToolBar;
+use super::toolbar::ToolbarItemLayout;
 use super::Decorator;
 use super::DecoratorType;
 use super::DragStatus;
@@ -11,7 +12,6 @@ use super::WindowDecoratorButtonPressedEvent;
 use super::WindowDecoratorCheckBoxStateChangedEvent;
 use super::WindowDecoratorSingleChoiceSelectedEvent;
 use super::WindowFlags;
-use super::toolbar::ToolbarItemLayout;
 use crate::controls::command_bar::*;
 use crate::controls::events::*;
 use crate::controls::menu::Menu;
@@ -130,7 +130,10 @@ impl Window {
             ));
         }
         // hotkey
-        let hk = win.toolbar.add(super::toolbar::HotKey::new(ToolbarItemLayout::TopLeft));
+        let hk = win
+            .toolbar
+            .add(super::toolbar::HotKey::new(ToolbarItemLayout::TopLeft));
+
         let mut hotkey_decorator = Decorator::with_type(
             DecoratorType::HotKeY,
             DecoratorLayout::TopLeft,
@@ -388,7 +391,7 @@ impl Window {
 
     fn update_positions(&mut self, size: Size) {
         // recompute decorator based on the new size
-        let (left, right) = self.decorators.update_positions(size);
+        let (left, right) = self.toolbar.update_positions(size);
         // recompute title position
         self.title.set_margin(left, right);
     }
@@ -572,8 +575,8 @@ impl OnPaint for Window {
             color_border,
         );
 
-        // paint decorators
-        self.decorators
+        // paint toolbar
+        self.toolbar
             .paint(surface, theme, self.has_focus(), self.maximized);
 
         // paint title

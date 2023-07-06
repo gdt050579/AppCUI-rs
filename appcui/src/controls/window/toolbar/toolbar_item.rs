@@ -1,26 +1,26 @@
 use crate::{system::{Handle, HandleSupport, Theme}, graphics::{Surface, Character}};
 
-use super::{position::Position, Label, PaintData, ToolbarItemLayout, HotKey};
+use super::{item_base::ItemBase, Label, PaintData, ToolbarItemLayout, HotKey};
 
 pub(super) enum ToolBarItem {
     Label(Label),
     HotKey(HotKey),
 }
 impl ToolBarItem {
-    pub(super) fn get_position(&self) -> &Position {
+    pub(super) fn get_base(&self) -> &ItemBase {
         match self {
-            ToolBarItem::Label(item) => &item.position,
-            ToolBarItem::HotKey(item) => &item.position,
+            ToolBarItem::Label(item) => &item.base,
+            ToolBarItem::HotKey(item) => &item.base,
         }
     }
-    pub(super) fn get_position_mut(&mut self) -> &mut Position {
+    pub(super) fn get_base_mut(&mut self) -> &mut ItemBase {
         match self {
-            ToolBarItem::Label(item) => &mut item.position,
-            ToolBarItem::HotKey(item) => &mut item.position,
+            ToolBarItem::Label(item) => &mut item.base,
+            ToolBarItem::HotKey(item) => &mut item.base,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
-        let pos = self.get_position();
+        let pos = self.get_base();
         if (pos.is_visible() == false) || (pos.is_hidden()) {
             return;
         }

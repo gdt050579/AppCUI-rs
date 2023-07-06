@@ -58,7 +58,7 @@ impl ToolBar {
     }
     fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
         if let Some(d) = self.items.get_element_mut(index) {
-            let pos = d.get_position_mut();
+            let pos = d.get_base_mut();
             let my_variant = Some(std::mem::discriminant(d));
             let (next, add_flags) =
                 pos.update_position_from_left(helper.x, helper.y, my_variant, helper.variant);
@@ -71,14 +71,14 @@ impl ToolBar {
             }
             if add_flags && last_index.is_valid() {
                 if let Some(last) = self.items.get_element_mut(last_index.index()) {
-                    last.get_position_mut().set_right_marker();
+                    last.get_base_mut().set_right_marker();
                 }
             }
         }
     }
     fn update_position_from_right(&mut self, index: usize, helper: &mut PositionHelper, left: i32) {
         if let Some(d) = self.items.get_element_mut(index) {
-            let pos = d.get_position_mut();
+            let pos = d.get_base_mut();
             let my_variant = Some(std::mem::discriminant(d));
             let (next, add_flags) =
                 pos.update_position_from_right(helper.x, helper.y, my_variant, helper.variant);
@@ -91,7 +91,7 @@ impl ToolBar {
             }
             if add_flags && last_index.is_valid() {
                 if let Some(last) = self.items.get_element_mut(last_index.index()) {
-                    last.get_position_mut().set_left_marker();
+                    last.get_base_mut().set_left_marker();
                 }
             }
         }
@@ -101,7 +101,7 @@ impl ToolBar {
         let count = self.items.allocated_objects();
         for index in 0..count {
             if let Some(d) = self.items.get_element_mut(index) {
-                d.get_position_mut().clear();
+                d.get_base_mut().clear();
             }
         }
         let mut top_left = PositionHelper::new(1, 0);
@@ -112,7 +112,7 @@ impl ToolBar {
 
         for index in 0..count {
             if let Some(d) = self.items.get_element_mut(index) {
-                let pos = d.get_position();
+                let pos = d.get_base();
                 if pos.is_hidden() {
                     continue;
                 }
@@ -137,22 +137,22 @@ impl ToolBar {
         // last elements
         if top_left.index.is_valid() {
             if let Some(item) = self.items.get_element_mut(top_left.index.index()) {
-                item.get_position_mut().set_right_marker();
+                item.get_base_mut().set_right_marker();
             }
         }
         if bottom_left.index.is_valid() {
             if let Some(item) = self.items.get_element_mut(bottom_left.index.index()) {
-                item.get_position_mut().set_right_marker();
+                item.get_base_mut().set_right_marker();
             }
         }
         if top_right.index.is_valid() {
             if let Some(item) = self.items.get_element_mut(top_right.index.index()) {
-                item.get_position_mut().set_left_marker();
+                item.get_base_mut().set_left_marker();
             }
         }
         if bottom_right.index.is_valid() {
             if let Some(item) = self.items.get_element_mut(bottom_right.index.index()) {
-                item.get_position_mut().set_left_marker();
+                item.get_base_mut().set_left_marker();
             }
         }
         //let title_x_pos = top_left.x + 1;
