@@ -3,7 +3,7 @@ use crate::{system::Theme, graphics::CharAttribute};
 use super::PaintData;
 
 #[derive(PartialEq)]
-pub(super) enum SymbolAttrState {
+pub(crate) enum SymbolAttrState {
     Hovered,
     Normal,
     Pressed,

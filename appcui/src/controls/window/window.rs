@@ -1,10 +1,7 @@
 use AppCUIProcMacro::*;
 
-use super::decorator::DecoratorLayout;
-use super::toolbar;
-use super::toolbar::*;
-use super::Decorator;
-use super::DecoratorType;
+use super::toolbar::ToolBar;
+use super::toolbar::ToolBarItemHandle;
 use super::DragStatus;
 use super::Title;
 use super::WindowCloseEvent;
@@ -43,8 +40,8 @@ pub struct Window {
     drag_status: DragStatus,
     drag_start_point: Point,
     old_rect: Rect,
-    hotkey_handle: ToolbarItemHandle<toolbar::HotKeY>,
-    tag_handle: ToolbarItemHandle<toolbar::Tag>,
+    hotkey_handle: ToolBarItemHandle<super::toolbar::HotKey>,
+    tag_handle: ToolBarItemHandle<super::toolbar::Tag>,
 }
 
 const MOVE_TO_LOWER_MARGIN: i32 = -100000;
@@ -112,21 +109,21 @@ impl Window {
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
         if flags.contains(WindowFlags::NoCloseButton) == false {
-            win.toolbar.add(toolbar::CloseButton::new());
+            win.toolbar.add(super::toolbar::CloseButton::new());
         }
         if flags.contains(WindowFlags::Sizeable) {
-            win.toolbar.add(toolbar::MaximizeRestoreButton::new());
-            win.toolbar.add(toolbar::ResizeCorner::new());
+            win.toolbar.add(super::toolbar::MaximizeRestoreButton::new());
+            win.toolbar.add(super::toolbar::ResizeCorner::new());
         }
         // hotkey
         win.hotkey_handle = win
             .toolbar
-            .add(toolbar::HotKey::new(super::toolbar::Gravity::TopLeft));
+            .add(super::toolbar::HotKey::new(super::toolbar::Gravity::TopLeft));
 
         // tag
         win.tag_handle = win
             .toolbar
-            .add(toolbar::Tag::new(super::toolbar::Gravity::TopLeft));
+            .add(super::toolbar::Tag::new(super::toolbar::Gravity::TopLeft));
 
         win
 
@@ -179,8 +176,8 @@ impl Window {
         self.update_positions(self.get_size());
     }
     pub fn get_tag(&self) -> Option<&str> {
-        if let Some(item) = self.toolbar.get(self.tag_handle) {
-            return Some(&item.text);
+        if let Some(item) = self.toolbar.get(self.tag_handle) {            
+            return Some(item.get_text());
         }
         None
     }

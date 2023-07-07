@@ -30,6 +30,10 @@ impl Tag {
         self.text.push_str(text);
         self.base.set_width((text.chars().count() + 2) as u16);
     }
+    #[inline(always)]
+    pub fn get_text(&self) -> &str {
+        &self.text
+    }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         surface.write_char(
             self.base.get_x(),
