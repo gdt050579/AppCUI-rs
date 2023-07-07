@@ -116,12 +116,7 @@ impl Window {
         }
         if flags.contains(WindowFlags::Sizeable) {
             win.toolbar.add(toolbar::MaximizeRestoreButton::new());
-            win.decorators.add(Decorator::with_type(
-                DecoratorType::WindowResize,
-                DecoratorLayout::BottomRight,
-                1,
-                "Click and drag to resize this window",
-            ));
+            win.toolbar.add(toolbar::ResizeCorner::new());
         }
         // hotkey
         win.hotkey_handle = win

@@ -9,6 +9,7 @@ mod hotkey;
 mod tag;
 mod close_button;
 mod maximize_restore_button;
+mod resize_corner;
 mod toolbar_item_handle;
 mod symbol_attr_state;
 
@@ -31,3 +32,4 @@ pub(super) use self::hotkey::HotKey;
 pub(super) use self::tag::Tag;
 pub(super) use self::close_button::CloseButton;
 pub(super) use self::maximize_restore_button::MaximizeRestoreButton;
+pub(super) use self::resize_corner::ResizeCorner;

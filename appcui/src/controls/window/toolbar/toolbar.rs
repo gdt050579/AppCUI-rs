@@ -4,7 +4,10 @@ use crate::{
     utils::{HandleManager, VectorIndex},
 };
 
-use super::{PaintData, PositionHelper, ToolBarItem, ToolBarItemHandle, Gravity, Label, HotKey, Tag, CloseButton, MaximizeRestoreButton};
+use super::{
+    CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper,
+    ResizeCorner, Tag, ToolBarItem, ToolBarItemHandle,
+};
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
@@ -35,18 +38,21 @@ impl ToolBar {
             match obj {
                 ToolBarItem::Label(obj) => {
                     return Some(unsafe { &(*((obj as *const Label) as *const T)) })
-                },
+                }
                 ToolBarItem::HotKey(obj) => {
                     return Some(unsafe { &(*((obj as *const HotKey) as *const T)) })
-                },
+                }
                 ToolBarItem::Tag(obj) => {
                     return Some(unsafe { &(*((obj as *const Tag) as *const T)) })
-                },
+                }
                 ToolBarItem::CloseButton(obj) => {
                     return Some(unsafe { &(*((obj as *const CloseButton) as *const T)) })
-                },
+                }
                 ToolBarItem::MaximizeRestoreButton(obj) => {
                     return Some(unsafe { &(*((obj as *const MaximizeRestoreButton) as *const T)) })
+                }
+                ToolBarItem::ResizeCorner(obj) => {
+                    return Some(unsafe { &(*((obj as *const ResizeCorner) as *const T)) })
                 }
             }
         }
@@ -57,18 +63,21 @@ impl ToolBar {
             match obj {
                 ToolBarItem::Label(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut Label) as *mut T)) })
-                },
+                }
                 ToolBarItem::HotKey(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut HotKey) as *mut T)) })
-                },
+                }
                 ToolBarItem::Tag(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut Tag) as *mut T)) })
-                },
+                }
                 ToolBarItem::CloseButton(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut CloseButton) as *mut T)) })
-                },
+                }
                 ToolBarItem::MaximizeRestoreButton(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut MaximizeRestoreButton) as *mut T)) })
+                }
+                ToolBarItem::ResizeCorner(obj) => {
+                    return Some(unsafe { &mut (*((obj as *mut ResizeCorner) as *mut T)) })
                 }
             }
         }
