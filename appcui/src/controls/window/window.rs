@@ -115,12 +115,7 @@ impl Window {
             win.toolbar.add(toolbar::CloseButton::new());
         }
         if flags.contains(WindowFlags::Sizeable) {
-            win.decorators.add(Decorator::with_type(
-                DecoratorType::MaximizeRestoreButton,
-                DecoratorLayout::TopLeft,
-                3,
-                "Maximize or restore the size of this window",
-            ));
+            win.toolbar.add(toolbar::MaximizeRestoreButton::new());
             win.decorators.add(Decorator::with_type(
                 DecoratorType::WindowResize,
                 DecoratorLayout::BottomRight,
@@ -189,7 +184,10 @@ impl Window {
         self.update_positions(self.get_size());
     }
     pub fn get_tag(&self) -> Option<&str> {
-        self.decorators.get_tag()
+        if let Some(item) = self.toolbar.get(self.tag_handle) {
+            return Some(&item.text);
+        }
+        None
     }
     pub fn clear_tag(&mut self) {
         self.decorators.set_tag("");

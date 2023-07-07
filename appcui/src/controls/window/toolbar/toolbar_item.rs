@@ -1,12 +1,13 @@
 use crate::{system::{Handle, HandleSupport, Theme}, graphics::{Surface, Character}};
 
-use super::{item_base::ItemBase, Label, PaintData, HotKey, Tag, CloseButton};
+use super::{item_base::ItemBase, Label, PaintData, HotKey, Tag, CloseButton, MaximizeRestoreButton};
 
 pub(super) enum ToolBarItem {
     Label(Label),
     HotKey(HotKey),
     Tag(Tag),
-    CloseButton(CloseButton)
+    CloseButton(CloseButton),
+    MaximizeRestoreButton(MaximizeRestoreButton)
 }
 impl ToolBarItem {
     pub(super) fn get_base(&self) -> &ItemBase {
@@ -15,6 +16,7 @@ impl ToolBarItem {
             ToolBarItem::HotKey(item) => &item.base,
             ToolBarItem::Tag(item) => &item.base,
             ToolBarItem::CloseButton(item) => &item.base,
+            ToolBarItem::MaximizeRestoreButton(item) => &item.base,
         }
     }
     pub(super) fn get_base_mut(&mut self) -> &mut ItemBase {
@@ -23,6 +25,7 @@ impl ToolBarItem {
             ToolBarItem::HotKey(item) => &mut item.base,
             ToolBarItem::Tag(item) => &mut item.base,
             ToolBarItem::CloseButton(item) => &mut item.base,
+            ToolBarItem::MaximizeRestoreButton(item) => &mut item.base,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
@@ -37,6 +40,7 @@ impl ToolBarItem {
             ToolBarItem::HotKey(item) => item.paint(surface, theme, data),
             ToolBarItem::Tag(item) => item.paint(surface, theme, data),
             ToolBarItem::CloseButton(item) => item.paint(surface, theme, data),
+            ToolBarItem::MaximizeRestoreButton(item) => item.paint(surface, theme, data),
         };
         // separators
         if pos.is_part_of_group() {
@@ -77,6 +81,7 @@ impl HandleSupport for ToolBarItem {
             ToolBarItem::HotKey(item) => item.handle,
             ToolBarItem::Tag(item) => item.handle,
             ToolBarItem::CloseButton(item) => item.handle,
+            ToolBarItem::MaximizeRestoreButton(item) => item.handle,
         }
     }
 
@@ -86,6 +91,7 @@ impl HandleSupport for ToolBarItem {
             ToolBarItem::HotKey(item) => item.handle = handle,
             ToolBarItem::Tag(item) => item.handle = handle,
             ToolBarItem::CloseButton(item) => item.handle = handle,
+            ToolBarItem::MaximizeRestoreButton(item) => item.handle = handle,
         }
     }
 }

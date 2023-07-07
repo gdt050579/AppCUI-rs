@@ -4,7 +4,7 @@ use crate::{
     utils::{HandleManager, VectorIndex},
 };
 
-use super::{PaintData, PositionHelper, ToolBarItem, ToolBarItemHandle, Gravity, Label, HotKey, Tag, CloseButton};
+use super::{PaintData, PositionHelper, ToolBarItem, ToolBarItemHandle, Gravity, Label, HotKey, Tag, CloseButton, MaximizeRestoreButton};
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
@@ -44,6 +44,9 @@ impl ToolBar {
                 },
                 ToolBarItem::CloseButton(obj) => {
                     return Some(unsafe { &(*((obj as *const CloseButton) as *const T)) })
+                },
+                ToolBarItem::MaximizeRestoreButton(obj) => {
+                    return Some(unsafe { &(*((obj as *const MaximizeRestoreButton) as *const T)) })
                 }
             }
         }
@@ -63,6 +66,9 @@ impl ToolBar {
                 },
                 ToolBarItem::CloseButton(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut CloseButton) as *mut T)) })
+                },
+                ToolBarItem::MaximizeRestoreButton(obj) => {
+                    return Some(unsafe { &mut (*((obj as *mut MaximizeRestoreButton) as *mut T)) })
                 }
             }
         }
