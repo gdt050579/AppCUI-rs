@@ -172,8 +172,10 @@ impl Window {
     }
 
     pub fn set_tag(&mut self, name: &str) {
-        self.decorators.set_tag(name);
-        self.update_positions(self.get_size());
+        if let Some(item) = self.toolbar.get_mut(self.tag_handle) {            
+            item.set_text(name);
+            self.update_positions(self.get_size());
+        }
     }
     pub fn get_tag(&self) -> Option<&str> {
         if let Some(item) = self.toolbar.get(self.tag_handle) {            
@@ -182,8 +184,10 @@ impl Window {
         None
     }
     pub fn clear_tag(&mut self) {
-        self.decorators.set_tag("");
-        self.update_positions(self.get_size());
+        if let Some(item) = self.toolbar.get_mut(self.tag_handle) {            
+            item.set_text("");
+            self.update_positions(self.get_size());
+        }
     }
 
     fn center_to_screen(&mut self) {
