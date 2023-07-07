@@ -376,7 +376,7 @@ impl Window {
     }
 
     fn on_mouse_over(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        if let Some((index, decorator)) = self.decorators.get_from_position(x, y) {
+        if let Some((index, decorator)) = self.toolbar.get_from_position(x, y) {
             let cx = decorator.center_x();
             let y = decorator.get_y();
             let tooltip = decorator.get_tooltip();
@@ -385,16 +385,16 @@ impl Window {
             } else {
                 self.show_tooltip_on_point(tooltip, cx, y);
             }
-            self.decorators.set_current(VectorIndex::with_value(index));
+            self.toolbar.set_current(VectorIndex::with_value(index));
             return EventProcessStatus::Processed;
         }
         // if I reach this point - tool tip should not be shown and there is no win button selected
         self.hide_tooltip();
-        let cidx = self.decorators.get_current();
+        let cidx = self.toolbar.get_current();
         if !cidx.is_valid() {
             return EventProcessStatus::Ignored;
         }
-        self.decorators.set_current(VectorIndex::Invalid);
+        self.toolbar.set_current(VectorIndex::Invalid);
         return EventProcessStatus::Processed;
     }
 
@@ -410,20 +410,20 @@ impl Window {
     }
 
     fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        self.decorators.set_current_item_pressed(false);
+        self.toolbar.set_current_item_pressed(false);
         self.drag_status = DragStatus::None;
         self.resize_move_mode = false;
 
         if let Some(index) = self.decorators.get_index_from_position(x, y) {
-            self.decorators.set_current(VectorIndex::with_value(index));
-            self.decorators.set_current_item_pressed(true);
+            self.toolbar.set_current(VectorIndex::with_value(index));
+            self.toolbar.set_current_item_pressed(true);
             let decorator = self.decorators.get(index).unwrap();
             if decorator.get_type() == DecoratorType::WindowResize {
                 self.drag_status = DragStatus::Resize;
             }
             return EventProcessStatus::Processed;
         }
-        self.decorators.set_current(VectorIndex::Invalid);
+        self.toolbar.set_current(VectorIndex::Invalid);
         self.hide_tooltip();
 
         if !self.flags.contains(WindowFlags::FixedPosition) {

@@ -83,6 +83,18 @@ impl ToolBar {
         }
         None
     }
+    pub(crate) fn set_current(&mut self, idx: VectorIndex) {
+        self.current = idx;
+    }
+    pub(crate) fn get_current(&self) -> VectorIndex {
+        self.current
+    }
+    pub(crate) fn is_current_item_pressed(&self) -> bool {
+        self.pressed
+    }
+    pub(crate) fn set_current_item_pressed(&mut self, pressed: bool) {
+        self.pressed = pressed;
+    }
     fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
         if let Some(d) = self.items.get_element_mut(index) {
             let pos = d.get_base_mut();
