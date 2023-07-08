@@ -1,13 +1,11 @@
 use AppCUIProcMacro::*;
 
 use super::toolbar::ToolBar;
+use super::toolbar::ToolBarItem;
 use super::toolbar::ToolBarItemHandle;
 use super::DragStatus;
 use super::Title;
 use super::WindowCloseEvent;
-use super::WindowDecoratorButtonPressedEvent;
-use super::WindowDecoratorCheckBoxStateChangedEvent;
-use super::WindowDecoratorSingleChoiceSelectedEvent;
 use super::WindowFlags;
 use crate::controls::command_bar::*;
 use crate::controls::events::*;
@@ -380,35 +378,34 @@ impl Window {
     }
 
     fn on_mouse_over(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        if let Some((index, decorator)) = self.toolbar.get_from_position(x, y) {
-            let cx = decorator.center_x();
-            let y = decorator.get_y();
-            let tooltip = decorator.get_tooltip();
+        if let Some(item) = self.toolbar.get_from_position(x, y) {
+            let base = item.get_base();
+            let cx = base.center_x();
+            let y = base.get_y();
+            let tooltip = base.get_tooltip();
             if tooltip.is_empty() {
                 self.hide_tooltip();
             } else {
                 self.show_tooltip_on_point(tooltip, cx, y);
             }
-            self.toolbar.set_current(VectorIndex::with_value(index));
+            self.toolbar.set_current_item_handle(item.get_handle());
             return EventProcessStatus::Processed;
         }
         // if I reach this point - tool tip should not be shown and there is no win button selected
         self.hide_tooltip();
-        let cidx = self.toolbar.get_current();
-        if !cidx.is_valid() {
+        if self.toolbar.get_current_item().is_none() {
             return EventProcessStatus::Ignored;
         }
-        self.toolbar.set_current(VectorIndex::Invalid);
+        self.toolbar.clear_current_item_handle();
         return EventProcessStatus::Processed;
     }
 
     fn on_mouse_leave(&mut self) -> EventProcessStatus {
-        let cidx = self.decorators.get_current();
-        self.decorators.set_current_item_pressed(false);
-        if !cidx.is_valid() {
+        self.toolbar.set_current_item_pressed(false);        
+        if self.toolbar.get_current_item().is_none() {
             return EventProcessStatus::Ignored;
         }
-        self.decorators.set_current(VectorIndex::Invalid);
+        self.toolbar.clear_current_item_handle();
         self.hide_tooltip();
         return EventProcessStatus::Processed;
     }
@@ -418,16 +415,16 @@ impl Window {
         self.drag_status = DragStatus::None;
         self.resize_move_mode = false;
 
-        if let Some(index) = self.decorators.get_index_from_position(x, y) {
-            self.toolbar.set_current(VectorIndex::with_value(index));
+        if let Some(item) = self.toolbar.get_from_position(x, y) {
+            self.toolbar.set_current_item_handle(item.get_handle());
             self.toolbar.set_current_item_pressed(true);
-            let decorator = self.decorators.get(index).unwrap();
-            if decorator.get_type() == DecoratorType::WindowResize {
-                self.drag_status = DragStatus::Resize;
+            match item {
+                ToolBarItem::ResizeCorner(_) => self.drag_status = DragStatus::Resize,
+                _ => {}
             }
             return EventProcessStatus::Processed;
         }
-        self.toolbar.set_current(VectorIndex::Invalid);
+        self.toolbar.clear_current_item_handle();
         self.hide_tooltip();
 
         if !self.flags.contains(WindowFlags::FixedPosition) {
@@ -458,59 +455,55 @@ impl Window {
     }
 
     fn on_mouse_release(&mut self) -> EventProcessStatus {
-        self.decorators.set_current_item_pressed(false);
+        self.toolbar.set_current_item_pressed(false); 
         self.resize_move_mode = false;
         if self.drag_status != DragStatus::None {
             self.drag_status = DragStatus::None;
         } else {
-            let cdec = self.decorators.get_current();
-            if cdec.is_valid() {
-                self.on_click_on_decorator(cdec.index());
+            if let Some(item) = self.toolbar.get_current_item() {
+                self.on_toolbar_item_clicked(item);
             }
         }
-        self.decorators.set_current(VectorIndex::Invalid);
+        self.toolbar.clear_current_item_handle();
         return EventProcessStatus::Processed;
     }
-    fn on_click_on_decorator(&mut self, index: usize) -> bool {
-        let dec = self.decorators.get(index).unwrap();
-        let btype = dec.get_type();
-        let id = dec.get_id();
-        match btype {
-            DecoratorType::CloseButton => {
+    fn on_toolbar_item_clicked(&mut self, item: &ToolBarItem) -> bool {
+        match item {
+            ToolBarItem::CloseButton(_) => {
                 self.raise_event(Event::WindowClose(WindowCloseEvent {
                     handle: self.handle,
                 }));
                 return true;
             }
-            DecoratorType::MaximizeRestoreButton => {
+            ToolBarItem::ResizeCorner(_) => {
                 self.maximize_restore();
                 return true;
             }
-            DecoratorType::Button => {
-                self.raise_event(Event::WindowDecoratorButtonPressed(
-                    WindowDecoratorButtonPressedEvent { command_id: id },
-                ));
-                return true;
-            }
-            DecoratorType::SingleChoice => {
-                self.decorators.check_singlechoice(index);
-                self.raise_event(Event::WindowDecoratorSingleChoiceSelected(
-                    WindowDecoratorSingleChoiceSelectedEvent { command_id: id },
-                ));
-                return true;
-            }
-            DecoratorType::CheckBox => {
-                let d = self.decorators.get_mut(index).unwrap();
-                let checked = !d.is_checked();
-                d.set_checked(checked);
-                self.raise_event(Event::WindowDecoratorCheckBoxStateChanged(
-                    WindowDecoratorCheckBoxStateChangedEvent {
-                        command_id: id,
-                        checked,
-                    },
-                ));
-                return true;
-            }
+            // DecoratorType::Button => {
+            //     self.raise_event(Event::WindowDecoratorButtonPressed(
+            //         WindowDecoratorButtonPressedEvent { command_id: id },
+            //     ));
+            //     return true;
+            // }
+            // DecoratorType::SingleChoice => {
+            //     self.decorators.check_singlechoice(index);
+            //     self.raise_event(Event::WindowDecoratorSingleChoiceSelected(
+            //         WindowDecoratorSingleChoiceSelectedEvent { command_id: id },
+            //     ));
+            //     return true;
+            // }
+            // DecoratorType::CheckBox => {
+            //     let d = self.decorators.get_mut(index).unwrap();
+            //     let checked = !d.is_checked();
+            //     d.set_checked(checked);
+            //     self.raise_event(Event::WindowDecoratorCheckBoxStateChanged(
+            //         WindowDecoratorCheckBoxStateChangedEvent {
+            //             command_id: id,
+            //             checked,
+            //         },
+            //     ));
+            //     return true;
+            // }
             _ => {}
         }
         false

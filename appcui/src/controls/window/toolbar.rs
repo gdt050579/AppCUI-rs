@@ -15,7 +15,7 @@ mod symbol_attr_state;
 
 
 pub (self) use self::item_base::ItemBase;
-pub (self) use self::toolbar_item::ToolBarItem;
+pub (super) use self::toolbar_item::ToolBarItem;
 pub (self) use self::toolbar::AddToToolbar;
 pub (self) use self::position_helper::PositionHelper;
 pub (self) use self::paint_data::PaintData;

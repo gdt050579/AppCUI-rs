@@ -72,41 +72,41 @@ impl ItemBase {
     }
 
     #[inline(always)]
-    pub(super) fn clear(&mut self) {
+    pub(crate) fn clear(&mut self) {
         self.status.remove(
             StatusFlags::Visible | StatusFlags::LeftGroupMarker | StatusFlags::RightGroupMarker,
         );
     }
     #[inline(always)]
-    pub(super) fn set_visible(&mut self) {
+    pub(crate) fn set_visible(&mut self) {
         self.status |= StatusFlags::Visible;
     }
     #[inline(always)]
-    pub(super) fn is_visible(&self) -> bool {
+    pub(crate) fn is_visible(&self) -> bool {
         self.status.contains(StatusFlags::Visible)
     }
     #[inline(always)]
-    pub(super) fn is_hidden(&self) -> bool {
+    pub(crate) fn is_hidden(&self) -> bool {
         self.status.contains(StatusFlags::Hidden)
     }
     #[inline(always)]
-    pub(super) fn get_gravity(&self) -> Gravity {
+    pub(crate) fn get_gravity(&self) -> Gravity {
         self.gravity
     }
     #[inline(always)]
-    pub(super) fn has_right_group_marker(&self) -> bool {
+    pub(crate) fn has_right_group_marker(&self) -> bool {
         self.status.contains(StatusFlags::RightGroupMarker)
     }
     #[inline(always)]
-    pub(super) fn has_left_group_marker(&self) -> bool {
+    pub(crate) fn has_left_group_marker(&self) -> bool {
         self.status.contains(StatusFlags::LeftGroupMarker)
     }
     #[inline(always)]
-    pub(super) fn set_right_marker(&mut self) {
+    pub(crate) fn set_right_marker(&mut self) {
         self.status |= StatusFlags::RightGroupMarker;
     }
     #[inline(always)]
-    pub(super) fn set_left_marker(&mut self) {
+    pub(crate) fn set_left_marker(&mut self) {
         self.status |= StatusFlags::LeftGroupMarker;
     }
     #[inline(always)]
@@ -114,20 +114,36 @@ impl ItemBase {
         self.x
     }
     #[inline(always)]
-    pub(super) fn get_y(&self) -> i32 {
+    pub(crate) fn get_y(&self) -> i32 {
         self.y
     }
     #[inline(always)]
-    pub(super) fn get_width(&self) -> i32 {
+    pub(crate) fn center_x(&self) -> i32 {
+        self.x + ((self.width / 2) as i32)
+    }
+    #[inline(always)]
+    pub(crate) fn get_width(&self) -> i32 {
         self.width as i32
     }
     #[inline(always)]
-    pub(super) fn set_width(&mut self, value: u16) {
+    pub(crate) fn set_width(&mut self, value: u16) {
         self.width = value;
     }
     #[inline(always)]
-    pub(super) fn is_part_of_group(&self) -> bool {
+    pub(crate) fn is_part_of_group(&self) -> bool {
         self.status.contains(StatusFlags::ParOfGroup)
+    }
+    #[inline(always)]
+    pub(crate) fn contains(&self, x: i32, y: i32) -> bool {
+        (y == self.y)
+            && (x >= self.x)
+            && (x < (self.x + (self.width as i32)))
+            && ((self.status & (StatusFlags::Visible | StatusFlags::Hidden))
+                == StatusFlags::Visible)
+    }
+    #[inline(always)]
+    pub(crate) fn get_tooltip(&self) -> &str {
+        &self.tooltip
     }
     pub(super) fn update_position_from_left(
         &mut self,

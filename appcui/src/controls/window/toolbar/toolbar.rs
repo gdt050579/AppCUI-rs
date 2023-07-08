@@ -11,7 +11,7 @@ use super::{
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
-    current: VectorIndex,
+    current_handle: Handle,
     pressed: bool,
 }
 
@@ -24,7 +24,7 @@ impl ToolBar {
         ToolBar {
             items: HandleManager::new(4),
             pressed: false,
-            current: VectorIndex::default(),
+            current_handle: Handle::None,
         }
     }
     pub fn add<T>(&mut self, item: T) -> ToolBarItemHandle<T>
@@ -83,18 +83,44 @@ impl ToolBar {
         }
         None
     }
-    pub(crate) fn set_current(&mut self, idx: VectorIndex) {
-        self.current = idx;
+    #[inline(always)]
+    pub(crate) fn set_current_item_handle(&mut self, handle: Handle) {
+        self.current_handle = handle;
     }
-    pub(crate) fn get_current(&self) -> VectorIndex {
-        self.current
+    #[inline(always)]
+    pub(crate) fn clear_current_item_handle(&mut self) {
+        self.current_handle = Handle::None;
     }
+    #[inline(always)]
+    pub(crate) fn get_current_item_handle(&self) -> Handle {
+        self.current_handle
+    }
+    #[inline(always)]
+    pub(crate) fn get_current_item(&self) -> Option<&ToolBarItem> {
+        self.items.get(self.current_handle)
+    }
+
+    #[inline(always)]
     pub(crate) fn is_current_item_pressed(&self) -> bool {
         self.pressed
     }
+    #[inline(always)]
     pub(crate) fn set_current_item_pressed(&mut self, pressed: bool) {
         self.pressed = pressed;
     }
+
+    pub(crate) fn get_from_position(&self, x: i32, y: i32) -> Option<&ToolBarItem> {
+        let count = self.items.allocated_objects();
+        for index in 0..count {
+            if let Some(item) = self.items.get_element(index) {
+                if item.get_base().contains(x,y) {
+                    return Some(item);
+                }
+            }
+        }
+        None
+    }
+
     fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
         if let Some(d) = self.items.get_element_mut(index) {
             let pos = d.get_base_mut();
@@ -217,7 +243,7 @@ impl ToolBar {
                 theme.lines.inactive
             },
         };
-        let current_bar_index = self.current.index();
+        let current_bar_index = self.current_handle.get_index();
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {

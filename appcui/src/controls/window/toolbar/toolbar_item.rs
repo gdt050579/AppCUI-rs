@@ -8,7 +8,7 @@ use super::{
     ResizeCorner, Tag,
 };
 
-pub(super) enum ToolBarItem {
+pub(crate) enum ToolBarItem {
     Label(Label),
     HotKey(HotKey),
     Tag(Tag),
@@ -17,7 +17,7 @@ pub(super) enum ToolBarItem {
     ResizeCorner(ResizeCorner),
 }
 impl ToolBarItem {
-    pub(super) fn get_base(&self) -> &ItemBase {
+    pub(crate) fn get_base(&self) -> &ItemBase {
         match self {
             ToolBarItem::Label(item) => &item.base,
             ToolBarItem::HotKey(item) => &item.base,
@@ -27,7 +27,7 @@ impl ToolBarItem {
             ToolBarItem::ResizeCorner(item) => &item.base,
         }
     }
-    pub(super) fn get_base_mut(&mut self) -> &mut ItemBase {
+    pub(crate) fn get_base_mut(&mut self) -> &mut ItemBase {
         match self {
             ToolBarItem::Label(item) => &mut item.base,
             ToolBarItem::HotKey(item) => &mut item.base,
