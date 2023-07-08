@@ -110,13 +110,14 @@ impl Window {
             win.toolbar.add(super::toolbar::CloseButton::new());
         }
         if flags.contains(WindowFlags::Sizeable) {
-            win.toolbar.add(super::toolbar::MaximizeRestoreButton::new());
+            win.toolbar
+                .add(super::toolbar::MaximizeRestoreButton::new());
             win.toolbar.add(super::toolbar::ResizeCorner::new());
         }
         // hotkey
-        win.hotkey_handle = win
-            .toolbar
-            .add(super::toolbar::HotKey::new(super::toolbar::Gravity::TopLeft));
+        win.hotkey_handle = win.toolbar.add(super::toolbar::HotKey::new(
+            super::toolbar::Gravity::TopLeft,
+        ));
 
         // tag
         win.tag_handle = win
@@ -170,19 +171,19 @@ impl Window {
     }
 
     pub fn set_tag(&mut self, name: &str) {
-        if let Some(item) = self.toolbar.get_mut(self.tag_handle) {            
+        if let Some(item) = self.toolbar.get_mut(self.tag_handle) {
             item.set_text(name);
             self.update_positions(self.get_size());
         }
     }
     pub fn get_tag(&self) -> Option<&str> {
-        if let Some(item) = self.toolbar.get(self.tag_handle) {            
+        if let Some(item) = self.toolbar.get(self.tag_handle) {
             return Some(item.get_text());
         }
         None
     }
     pub fn clear_tag(&mut self) {
-        if let Some(item) = self.toolbar.get_mut(self.tag_handle) {            
+        if let Some(item) = self.toolbar.get_mut(self.tag_handle) {
             item.set_text("");
             self.update_positions(self.get_size());
         }
@@ -393,7 +394,7 @@ impl Window {
         }
         // if I reach this point - tool tip should not be shown and there is no win button selected
         self.hide_tooltip();
-        if self.toolbar.get_current_item().is_none() {
+        if self.toolbar.get_current_item_handle().is_none() {
             return EventProcessStatus::Ignored;
         }
         self.toolbar.clear_current_item_handle();
@@ -401,8 +402,8 @@ impl Window {
     }
 
     fn on_mouse_leave(&mut self) -> EventProcessStatus {
-        self.toolbar.set_current_item_pressed(false);        
-        if self.toolbar.get_current_item().is_none() {
+        self.toolbar.set_current_item_pressed(false);
+        if self.toolbar.get_current_item_handle().is_none() {
             return EventProcessStatus::Ignored;
         }
         self.toolbar.clear_current_item_handle();
@@ -455,56 +456,56 @@ impl Window {
     }
 
     fn on_mouse_release(&mut self) -> EventProcessStatus {
-        self.toolbar.set_current_item_pressed(false); 
+        self.toolbar.set_current_item_pressed(false);
         self.resize_move_mode = false;
         if self.drag_status != DragStatus::None {
             self.drag_status = DragStatus::None;
         } else {
-            if let Some(item) = self.toolbar.get_current_item_mut() {
-                self.on_toolbar_item_clicked(item);
-            }
+            self.on_toolbar_item_clicked(self.toolbar.get_current_item_handle());
         }
         self.toolbar.clear_current_item_handle();
         return EventProcessStatus::Processed;
     }
-    fn on_toolbar_item_clicked(&mut self, item: &ToolBarItem) -> bool {
-        match item {
-            ToolBarItem::CloseButton(_) => {
-                self.raise_event(Event::WindowClose(WindowCloseEvent {
-                    handle: self.handle,
-                }));
-                return true;
+    fn on_toolbar_item_clicked(&mut self, handle: Handle) -> bool {
+        if let Some(item) = self.toolbar.get_item(handle) {
+            match item {
+                ToolBarItem::CloseButton(_) => {
+                    self.raise_event(Event::WindowClose(WindowCloseEvent {
+                        handle: self.handle,
+                    }));
+                    return true;
+                }
+                ToolBarItem::ResizeCorner(_) => {
+                    self.maximize_restore();
+                    return true;
+                }
+                ToolBarItem::Button(button) => {
+                    // self.raise_event(Event::WindowDecoratorButtonPressed(
+                    //     WindowDecoratorButtonPressedEvent { command_id: button.get_command_id() },
+                    // ));
+                    return true;
+                }
+                // DecoratorType::SingleChoice => {
+                //     self.decorators.check_singlechoice(index);
+                //     self.raise_event(Event::WindowDecoratorSingleChoiceSelected(
+                //         WindowDecoratorSingleChoiceSelectedEvent { command_id: id },
+                //     ));
+                //     return true;
+                // }
+                // DecoratorType::CheckBox => {
+                //     let d = self.decorators.get_mut(index).unwrap();
+                //     let checked = !d.is_checked();
+                //     d.set_checked(checked);
+                //     self.raise_event(Event::WindowDecoratorCheckBoxStateChanged(
+                //         WindowDecoratorCheckBoxStateChangedEvent {
+                //             command_id: id,
+                //             checked,
+                //         },
+                //     ));
+                //     return true;
+                // }
+                _ => {}
             }
-            ToolBarItem::ResizeCorner(_) => {
-                self.maximize_restore();
-                return true;
-            }
-            ToolBarItem::Button(button) => {
-                // self.raise_event(Event::WindowDecoratorButtonPressed(
-                //     WindowDecoratorButtonPressedEvent { command_id: button.get_command_id() },
-                // ));
-                return true;
-            }
-            // DecoratorType::SingleChoice => {
-            //     self.decorators.check_singlechoice(index);
-            //     self.raise_event(Event::WindowDecoratorSingleChoiceSelected(
-            //         WindowDecoratorSingleChoiceSelectedEvent { command_id: id },
-            //     ));
-            //     return true;
-            // }
-            // DecoratorType::CheckBox => {
-            //     let d = self.decorators.get_mut(index).unwrap();
-            //     let checked = !d.is_checked();
-            //     d.set_checked(checked);
-            //     self.raise_event(Event::WindowDecoratorCheckBoxStateChanged(
-            //         WindowDecoratorCheckBoxStateChangedEvent {
-            //             command_id: id,
-            //             checked,
-            //         },
-            //     ));
-            //     return true;
-            // }
-            _ => {}
         }
         false
     }

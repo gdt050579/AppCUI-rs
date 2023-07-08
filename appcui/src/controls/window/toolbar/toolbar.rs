@@ -102,12 +102,12 @@ impl ToolBar {
         self.current_handle
     }
     #[inline(always)]
-    pub(crate) fn get_current_item(&self) -> Option<&ToolBarItem> {
-        self.items.get(self.current_handle)
+    pub(crate) fn get_item(&self, handle: Handle) -> Option<&ToolBarItem> {
+        self.items.get(handle)
     }
     #[inline(always)]
-    pub(crate) fn get_current_item_mut(&mut self) -> Option<&mut ToolBarItem> {
-        self.items.get_mut(self.current_handle)
+    pub(crate) fn get_item_mut(&mut self, handle: Handle) -> Option<&mut ToolBarItem> {
+        self.items.get_mut(handle)
     }
 
     #[inline(always)]
