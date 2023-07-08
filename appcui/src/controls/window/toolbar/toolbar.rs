@@ -61,7 +61,7 @@ impl ToolBar {
         }
         None
     }
-    pub fn get_mut<T>(&self, handle: ToolBarItemHandle<T>) -> Option<&mut T> {
+    pub fn get_mut<T>(&mut self, handle: ToolBarItemHandle<T>) -> Option<&mut T> {
         if let Some(obj) = self.items.get_mut(handle.handle) {
             match obj {
                 ToolBarItem::Label(obj) => {
@@ -105,6 +105,10 @@ impl ToolBar {
     pub(crate) fn get_current_item(&self) -> Option<&ToolBarItem> {
         self.items.get(self.current_handle)
     }
+    #[inline(always)]
+    pub(crate) fn get_current_item_mut(&mut self) -> Option<&mut ToolBarItem> {
+        self.items.get_mut(self.current_handle)
+    }
 
     #[inline(always)]
     pub(crate) fn is_current_item_pressed(&self) -> bool {
@@ -128,9 +132,9 @@ impl ToolBar {
     }
 
     fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
-        if let Some(d) = self.items.get_element_mut(index) {
-            let pos = d.get_base_mut();
-            let my_variant = Some(std::mem::discriminant(d));
+        if let Some(item) = self.items.get_element_mut(index) {
+            let my_variant = Some(std::mem::discriminant(item));
+            let pos = item.get_base_mut();            
             let (next, add_flags) =
                 pos.update_position_from_left(helper.x, helper.y, my_variant, helper.variant);
             let last_index = helper.index;
@@ -148,9 +152,9 @@ impl ToolBar {
         }
     }
     fn update_position_from_right(&mut self, index: usize, helper: &mut PositionHelper, left: i32) {
-        if let Some(d) = self.items.get_element_mut(index) {
-            let pos = d.get_base_mut();
-            let my_variant = Some(std::mem::discriminant(d));
+        if let Some(item) = self.items.get_element_mut(index) {
+            let my_variant = Some(std::mem::discriminant(item));
+            let pos = item.get_base_mut();
             let (next, add_flags) =
                 pos.update_position_from_right(helper.x, helper.y, my_variant, helper.variant);
             let last_index = helper.index;
@@ -253,7 +257,7 @@ impl ToolBar {
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {
-            if let Some(item) = self.items.get_element_mut(index) {
+            if let Some(item) = self.items.get_element(index) {
                 paint_data.current = index == current_bar_index;
                 item.paint(surface, theme, &paint_data);
             }

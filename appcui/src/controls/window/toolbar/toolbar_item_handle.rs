@@ -21,3 +21,12 @@ impl<T> ToolBarItemHandle<T> {
         }
     }
 }
+
+impl<T> Clone for ToolBarItemHandle<T> {
+    fn clone(&self) -> Self {
+        Self { handle: self.handle.clone(), _phantom: self._phantom.clone() }
+    }
+}
+impl<T> Copy for ToolBarItemHandle<T> {
+
+}

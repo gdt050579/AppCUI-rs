@@ -460,7 +460,7 @@ impl Window {
         if self.drag_status != DragStatus::None {
             self.drag_status = DragStatus::None;
         } else {
-            if let Some(item) = self.toolbar.get_current_item() {
+            if let Some(item) = self.toolbar.get_current_item_mut() {
                 self.on_toolbar_item_clicked(item);
             }
         }
