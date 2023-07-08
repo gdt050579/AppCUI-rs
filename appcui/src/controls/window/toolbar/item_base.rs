@@ -27,7 +27,7 @@ enum StatusFlags {
     LeftGroupMarker = 0x08,
     RightGroupMarker = 0x10,
 }
-pub(super) struct ItemBase {
+pub(crate) struct ItemBase {
     x: i32,
     y: i32,
     width: u16,

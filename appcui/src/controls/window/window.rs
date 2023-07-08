@@ -416,15 +416,22 @@ impl Window {
         self.drag_status = DragStatus::None;
         self.resize_move_mode = false;
 
-        if let Some(item) = self.toolbar.get_from_position(x, y) {
-            self.toolbar.set_current_item_handle(item.get_handle());
-            self.toolbar.set_current_item_pressed(true);
+        let item_handle = if let Some(item) = self.toolbar.get_from_position(x, y) {
             match item {
                 ToolBarItem::ResizeCorner(_) => self.drag_status = DragStatus::Resize,
                 _ => {}
             }
+            item.get_handle()
+        } else {
+            Handle::None
+        };
+
+        if !item_handle.is_none() {
+            self.toolbar.set_current_item_handle(item_handle);
+            self.toolbar.set_current_item_pressed(true);
             return EventProcessStatus::Processed;
         }
+
         self.toolbar.clear_current_item_handle();
         self.hide_tooltip();
 
