@@ -5,7 +5,7 @@ use crate::{
 };
 
 use super::{
-    CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper,
+    Button, CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper,
     ResizeCorner, Tag, ToolBarItem, ToolBarItemHandle,
 };
 
@@ -54,6 +54,9 @@ impl ToolBar {
                 ToolBarItem::ResizeCorner(obj) => {
                     return Some(unsafe { &(*((obj as *const ResizeCorner) as *const T)) })
                 }
+                ToolBarItem::Button(obj) => {
+                    return Some(unsafe { &(*((obj as *const Button) as *const T)) })
+                }
             }
         }
         None
@@ -78,6 +81,9 @@ impl ToolBar {
                 }
                 ToolBarItem::ResizeCorner(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut ResizeCorner) as *mut T)) })
+                }
+                ToolBarItem::Button(obj) => {
+                    return Some(unsafe { &mut (*((obj as *mut Button) as *mut T)) })
                 }
             }
         }
@@ -113,7 +119,7 @@ impl ToolBar {
         let count = self.items.allocated_objects();
         for index in 0..count {
             if let Some(item) = self.items.get_element(index) {
-                if item.get_base().contains(x,y) {
+                if item.get_base().contains(x, y) {
                     return Some(item);
                 }
             }

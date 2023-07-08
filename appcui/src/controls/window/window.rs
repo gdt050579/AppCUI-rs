@@ -479,12 +479,12 @@ impl Window {
                 self.maximize_restore();
                 return true;
             }
-            // DecoratorType::Button => {
-            //     self.raise_event(Event::WindowDecoratorButtonPressed(
-            //         WindowDecoratorButtonPressedEvent { command_id: id },
-            //     ));
-            //     return true;
-            // }
+            ToolBarItem::Button(button) => {
+                // self.raise_event(Event::WindowDecoratorButtonPressed(
+                //     WindowDecoratorButtonPressedEvent { command_id: button.get_command_id() },
+                // ));
+                return true;
+            }
             // DecoratorType::SingleChoice => {
             //     self.decorators.check_singlechoice(index);
             //     self.raise_event(Event::WindowDecoratorSingleChoiceSelected(

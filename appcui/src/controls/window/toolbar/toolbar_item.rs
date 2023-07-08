@@ -5,7 +5,7 @@ use crate::{
 
 use super::{
     item_base::ItemBase, CloseButton, HotKey, Label, MaximizeRestoreButton, PaintData,
-    ResizeCorner, Tag,
+    ResizeCorner, Tag, Button
 };
 
 pub(crate) enum ToolBarItem {
@@ -15,6 +15,7 @@ pub(crate) enum ToolBarItem {
     CloseButton(CloseButton),
     MaximizeRestoreButton(MaximizeRestoreButton),
     ResizeCorner(ResizeCorner),
+    Button(Button),
 }
 impl ToolBarItem {
     pub(crate) fn get_base(&self) -> &ItemBase {
@@ -25,6 +26,7 @@ impl ToolBarItem {
             ToolBarItem::CloseButton(item) => &item.base,
             ToolBarItem::MaximizeRestoreButton(item) => &item.base,
             ToolBarItem::ResizeCorner(item) => &item.base,
+            ToolBarItem::Button(item) => &item.base,
         }
     }
     pub(crate) fn get_base_mut(&mut self) -> &mut ItemBase {
@@ -35,6 +37,7 @@ impl ToolBarItem {
             ToolBarItem::CloseButton(item) => &mut item.base,
             ToolBarItem::MaximizeRestoreButton(item) => &mut item.base,
             ToolBarItem::ResizeCorner(item) => &mut item.base,
+            ToolBarItem::Button(item) => &mut item.base,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
@@ -51,6 +54,7 @@ impl ToolBarItem {
             ToolBarItem::CloseButton(item) => item.paint(surface, theme, data),
             ToolBarItem::MaximizeRestoreButton(item) => item.paint(surface, theme, data),
             ToolBarItem::ResizeCorner(item) => item.paint(surface, theme, data),
+            ToolBarItem::Button(item) => item.paint(surface, theme, data),
         };
         // separators
         if pos.is_part_of_group() {
@@ -92,6 +96,7 @@ impl HandleSupport for ToolBarItem {
             ToolBarItem::CloseButton(item) => item.handle,
             ToolBarItem::MaximizeRestoreButton(item) => item.handle,
             ToolBarItem::ResizeCorner(item) => item.handle,
+            ToolBarItem::Button(item) => item.handle,
         }
     }
 
@@ -103,6 +108,7 @@ impl HandleSupport for ToolBarItem {
             ToolBarItem::CloseButton(item) => item.handle = handle,
             ToolBarItem::MaximizeRestoreButton(item) => item.handle = handle,
             ToolBarItem::ResizeCorner(item) => item.handle = handle,
+            ToolBarItem::Button(item) => item.handle = handle,
         }
     }
 }
