@@ -29,6 +29,8 @@ impl Tag {
         self.text.clear();
         self.text.push_str(text);
         self.base.set_width((text.chars().count() + 2) as u16);
+        self.base.set_visible(text.len()>0);
+        self.base.request_recompute_layout();
     }
     #[inline(always)]
     pub fn get_text(&self) -> &str {

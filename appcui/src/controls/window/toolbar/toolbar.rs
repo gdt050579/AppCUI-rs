@@ -138,11 +138,12 @@ impl ToolBar {
             let (next, add_flags) =
                 pos.update_position_from_left(helper.x, helper.y, my_variant, helper.variant);
             let last_index = helper.index;
-            if next < right {
-                pos.set_visible();
+            if next < right {                
                 helper.index = VectorIndex::with_value(index);
                 helper.x = next;
                 helper.variant = my_variant;
+            } else {
+                pos.set_outside_drawing_area();
             }
             if add_flags && last_index.is_valid() {
                 if let Some(last) = self.items.get_element_mut(last_index.index()) {
@@ -158,11 +159,12 @@ impl ToolBar {
             let (next, add_flags) =
                 pos.update_position_from_right(helper.x, helper.y, my_variant, helper.variant);
             let last_index = helper.index;
-            if next > left {
-                pos.set_visible();
+            if next > left {                
                 helper.index = VectorIndex::with_value(index);
                 helper.x = next;
                 helper.variant = my_variant;
+            } else {
+                pos.set_outside_drawing_area();
             }
             if add_flags && last_index.is_valid() {
                 if let Some(last) = self.items.get_element_mut(last_index.index()) {

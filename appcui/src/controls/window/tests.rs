@@ -122,7 +122,7 @@ fn check_window_minimize_title_4() {
 #[test]
 fn check_window_tag_1() {
     let script = "
-        Paint('tags')
+        //Paint('tags')
         CheckHash(0xBB2962251DDB2240)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
@@ -182,8 +182,8 @@ fn check_window_tag_and_title_first_letter() {
 #[test]
 fn check_window_tag_and_title_not_visible() {
     let script = "
-        Paint('title not visible')
-        //CheckHash(0x6F914F802B3B7B5D)
+        //Paint('title not visible')
+        CheckHash(0xA2C91CB6A1484009)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);

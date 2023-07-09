@@ -83,16 +83,25 @@ impl ItemBase {
         );
     }
     #[inline(always)]
-    pub(crate) fn set_visible(&mut self) {
-        self.status |= StatusFlags::Visible;
+    pub(crate) fn set_visible(&mut self, value: bool) {
+        if value {
+            self.status |= StatusFlags::Visible;
+        } else {
+            self.status.remove(StatusFlags::Visible);
+        }
     }
     #[inline(always)]
     pub(crate) fn is_visible(&self) -> bool {
         self.status.contains(StatusFlags::Visible)
     }
     #[inline(always)]
+    pub(crate) fn set_outside_drawing_area(&mut self) {
+        self.status |= StatusFlags::OutsideDrawingArea;
+    }
+    #[inline(always)]
     pub(crate) fn can_be_drawn(&self) -> bool {
-        (self.status & (StatusFlags::Visible | StatusFlags::OutsideDrawingArea)) == StatusFlags::Visible
+        (self.status & (StatusFlags::Visible | StatusFlags::OutsideDrawingArea))
+            == StatusFlags::Visible
     }
     #[inline(always)]
     pub(crate) fn get_gravity(&self) -> Gravity {
@@ -150,6 +159,11 @@ impl ItemBase {
     pub(crate) fn get_tooltip(&self) -> &str {
         &self.tooltip
     }
+
+    pub(crate) fn request_recompute_layout(&mut self) {
+
+    }
+
     pub(super) fn update_position_from_left(
         &mut self,
         x: i32,
