@@ -19,7 +19,7 @@ impl AddToToolbar for MaximizeRestoreButton {
 impl MaximizeRestoreButton {
     pub fn new() -> Self {
         Self {
-            base: ItemBase::with_width(Gravity::TopLeft, 3, "Press to maximize or restore"),
+            base: ItemBase::with_width(Gravity::TopLeft, 3, "Press to maximize or restore", true),
             handle: Handle::None,
         }
     }

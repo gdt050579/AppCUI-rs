@@ -187,11 +187,11 @@ impl ToolBar {
 
         for index in 0..count {
             if let Some(d) = self.items.get_element_mut(index) {
-                let pos = d.get_base();
-                if pos.is_hidden() {
+                let base = d.get_base();
+                if !base.is_visible() {
                     continue;
                 }
-                let gravity = pos.get_gravity();
+                let gravity = base.get_gravity();
                 match gravity {
                     Gravity::TopLeft => {
                         self.update_position_from_left(index, &mut top_left, top_right.x);

@@ -41,12 +41,12 @@ impl ToolBarItem {
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
-        let pos = self.get_base();
-        if (pos.is_visible() == false) || (pos.is_hidden()) {
+        let base = self.get_base();
+        if !base.can_be_drawn() {
             return;
         }
 
-        let from_left = pos.get_gravity().is_on_left_side();
+        let from_left = base.get_gravity().is_on_left_side();
         match self {
             ToolBarItem::Label(item) => item.paint(surface, theme, data),
             ToolBarItem::HotKey(item) => item.paint(surface, theme, data),
@@ -57,30 +57,30 @@ impl ToolBarItem {
             ToolBarItem::Button(item) => item.paint(surface, theme, data),
         };
         // separators
-        if pos.is_part_of_group() {
-            if pos.has_left_group_marker() {
+        if base.is_part_of_group() {
+            if base.has_left_group_marker() {
                 surface.write_char(
-                    pos.get_x() - 1,
-                    pos.get_y(),
+                    base.get_x() - 1,
+                    base.get_y(),
                     Character::with_attributes('[', data.sep_attr),
                 );
             } else if from_left {
                 surface.write_char(
-                    pos.get_x() - 1,
-                    pos.get_y(),
+                    base.get_x() - 1,
+                    base.get_y(),
                     Character::with_attributes('|', data.sep_attr),
                 );
             }
-            if pos.has_right_group_marker() {
+            if base.has_right_group_marker() {
                 surface.write_char(
-                    pos.get_x() + pos.get_width(),
-                    pos.get_y(),
+                    base.get_x() + base.get_width(),
+                    base.get_y(),
                     Character::with_attributes(']', data.sep_attr),
                 );
             } else if !from_left {
                 surface.write_char(
-                    pos.get_x() + pos.get_width(),
-                    pos.get_y(),
+                    base.get_x() + base.get_width(),
+                    base.get_y(),
                     Character::with_attributes('|', data.sep_attr),
                 );
             }

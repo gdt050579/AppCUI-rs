@@ -19,7 +19,7 @@ impl AddToToolbar for CloseButton {
 impl CloseButton {
     pub fn new() -> Self {
         CloseButton {
-            base: ItemBase::with_width(Gravity::TopRight, 3, "Press to close this window"),
+            base: ItemBase::with_width(Gravity::TopRight, 3, "Press to close this window", true),
             handle: Handle::None,
         }
     }

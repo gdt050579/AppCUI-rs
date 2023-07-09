@@ -5,6 +5,21 @@ use crate::{
 
 use super::{Window, WindowFlags};
 
+
+#[test]
+fn check_window_title() {
+    let script = "
+        //Paint('title')
+        CheckHash(0xA0CFD68A45B1786C)
+    ";
+    let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    a.add(Window::new(
+        "Title",
+        Layout::new("d:c,w:20,h:10"),
+        WindowFlags::None,
+    ));
+    a.run();
+}
 #[test]
 fn check_window_full_title_1() {
     let script = "

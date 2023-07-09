@@ -1,5 +1,7 @@
 use AppCUIProcMacro::*;
 
+use super::toolbar;
+use super::toolbar::Gravity;
 use super::toolbar::ToolBar;
 use super::toolbar::ToolBarItem;
 use super::toolbar::ToolBarItemHandle;
@@ -107,22 +109,17 @@ impl Window {
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
         if flags.contains(WindowFlags::NoCloseButton) == false {
-            win.toolbar.add(super::toolbar::CloseButton::new());
+            win.toolbar.add(toolbar::CloseButton::new());
         }
         if flags.contains(WindowFlags::Sizeable) {
-            win.toolbar
-                .add(super::toolbar::MaximizeRestoreButton::new());
-            win.toolbar.add(super::toolbar::ResizeCorner::new());
+            win.toolbar.add(toolbar::MaximizeRestoreButton::new());
+            win.toolbar.add(toolbar::ResizeCorner::new());
         }
         // hotkey
-        win.hotkey_handle = win.toolbar.add(super::toolbar::HotKey::new(
-            super::toolbar::Gravity::TopLeft,
-        ));
+        win.hotkey_handle = win.toolbar.add(toolbar::HotKey::new(Gravity::TopLeft));
 
         // tag
-        win.tag_handle = win
-            .toolbar
-            .add(super::toolbar::Tag::new(super::toolbar::Gravity::TopLeft));
+        win.tag_handle = win.toolbar.add(toolbar::Tag::new(Gravity::TopLeft));
 
         win
 

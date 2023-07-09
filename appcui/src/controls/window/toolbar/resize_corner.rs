@@ -19,7 +19,7 @@ impl AddToToolbar for ResizeCorner {
 impl ResizeCorner {
     pub fn new() -> Self {
         Self {
-            base: ItemBase::with_width(Gravity::BottomRight, 1, "Drag to resize this window"),
+            base: ItemBase::with_width(Gravity::BottomRight, 1, "Drag to resize this window", true),
             handle: Handle::None,
         }
     }

@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-use super::{ToolBarItem, Gravity};
+use super::{Gravity, ToolBarItem};
 
 // #[repr(u8)]
 // #[derive(Clone, Copy, PartialEq)]
@@ -17,12 +17,10 @@ use super::{ToolBarItem, Gravity};
 //     Text,
 // }
 
-
-
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
     Visible = 0x01,
-    Hidden = 0x02,
+    OutsideDrawingArea = 0x02,
     ParOfGroup = 0x04,
     LeftGroupMarker = 0x08,
     RightGroupMarker = 0x10,
@@ -42,8 +40,13 @@ impl ItemBase {
         base.tooltip.push_str(tooltip);
         base
     }
-    pub(super) fn with_width(gravity: Gravity, width: u16,  tooltip: &str) -> ItemBase {
-        let mut base = ItemBase::new(gravity, false, true);
+    pub(super) fn with_width(
+        gravity: Gravity,
+        width: u16,
+        tooltip: &str,
+        visible: bool,
+    ) -> ItemBase {
+        let mut base = ItemBase::new(gravity, false, visible);
         base.width = width;
         base.tooltip.push_str(tooltip);
         base
@@ -74,7 +77,9 @@ impl ItemBase {
     #[inline(always)]
     pub(crate) fn clear(&mut self) {
         self.status.remove(
-            StatusFlags::Visible | StatusFlags::LeftGroupMarker | StatusFlags::RightGroupMarker,
+            StatusFlags::OutsideDrawingArea
+                | StatusFlags::LeftGroupMarker
+                | StatusFlags::RightGroupMarker,
         );
     }
     #[inline(always)]
@@ -86,8 +91,8 @@ impl ItemBase {
         self.status.contains(StatusFlags::Visible)
     }
     #[inline(always)]
-    pub(crate) fn is_hidden(&self) -> bool {
-        self.status.contains(StatusFlags::Hidden)
+    pub(crate) fn can_be_drawn(&self) -> bool {
+        (self.status & (StatusFlags::Visible | StatusFlags::OutsideDrawingArea)) == StatusFlags::Visible
     }
     #[inline(always)]
     pub(crate) fn get_gravity(&self) -> Gravity {
@@ -138,7 +143,7 @@ impl ItemBase {
         (y == self.y)
             && (x >= self.x)
             && (x < (self.x + (self.width as i32)))
-            && ((self.status & (StatusFlags::Visible | StatusFlags::Hidden))
+            && ((self.status & (StatusFlags::Visible | StatusFlags::OutsideDrawingArea))
                 == StatusFlags::Visible)
     }
     #[inline(always)]
