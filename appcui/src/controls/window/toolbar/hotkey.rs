@@ -4,7 +4,7 @@ use crate::{
     system::{Handle, Theme},
 };
 
-use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Gravity};
+use super::{AddToToolbar, Gravity, ItemBase, PaintData, ToolBarItem};
 
 pub(crate) struct HotKey {
     pub(super) base: ItemBase,
@@ -28,7 +28,14 @@ impl HotKey {
     }
     pub fn set_key(&mut self, key: Key) {
         self.key = key;
-        self.base.set_width(key.code.get_name().chars().count() as u16);
+        if key == Key::None {
+            self.base.set_visible(false);
+        } else {
+            self.base
+                .set_width(key.code.get_name().chars().count() as u16);
+            self.base.set_visible(true);
+            self.base.request_recompute_layout();
+        }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         surface.write_char(
