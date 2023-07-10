@@ -185,6 +185,12 @@ impl Window {
             self.update_positions(self.get_size());
         }
     }
+    pub fn set_hotkey<T>(&mut self, key: T) where Key: From<T> {
+        if let Some(item) = self.toolbar.get_mut(self.hotkey_handle) {
+            item.set_key(key.into());
+            self.update_positions(self.get_size());
+        }
+    }
 
     fn center_to_screen(&mut self) {
         let screen_size = RuntimeManager::get().get_terminal_size();

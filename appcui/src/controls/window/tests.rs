@@ -1,6 +1,9 @@
+use AppCUIProcMacro::key;
+
 use crate::{
     controls::{Desktop, Layout},
     system::{App, InitializationFlags},
+    input::{Key, KeyModifier, KeyCode}
 };
 
 use super::{Window, WindowFlags};
@@ -188,6 +191,46 @@ fn check_window_tag_and_title_not_visible() {
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
     w.set_tag("ABCDEFGH");
+    a.add(w);
+    a.run();
+}
+
+
+#[test]
+fn check_window_hotkey_1() {
+    let script = "
+        //Paint('hotkey')
+        CheckHash(0x4454159FD9AA73E9)
+    ";
+    let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    w.set_hotkey(key!("Alt+F1"));
+    a.add(w);
+    a.run();
+}
+#[test]
+fn check_window_hotkey_2() {
+    let script = "
+        //Paint('hotkey')
+        CheckHash(0xC9D2F0E450475385)
+    ";
+    let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    w.set_hotkey(KeyCode::Enter);
+    a.add(w);
+    a.run();
+}
+
+#[test]
+fn check_window_hotkey_and_tag() {
+    let script = "
+        Paint('hotkey & tag')
+        //CheckHash(0xC9D2F0E450475385)
+    ";
+    let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    w.set_hotkey(key!("Alt+1"));
+    w.set_tag("XYZ");
     a.add(w);
     a.run();
 }

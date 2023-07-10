@@ -32,7 +32,7 @@ impl HotKey {
             self.base.set_visible(false);
         } else {
             self.base
-                .set_width(key.code.get_name().chars().count() as u16);
+                .set_width(key.code.get_name().chars().count() as u16 + 2);
             self.base.set_visible(true);
             self.base.request_recompute_layout();
         }
