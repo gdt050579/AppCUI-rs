@@ -234,3 +234,33 @@ fn check_window_hotkey_and_tag() {
     a.add(w);
     a.run();
 }
+
+#[test]
+fn check_window_resize() {
+    let script = "
+        //Paint('initial state')
+        CheckHash(0xCA2429E8E2E892CE)
+        Mouse.Move(39,7)
+        //Paint('over the resize handler')
+        CheckHash(0xA36090DA42BA1E4)
+        Mouse.Hold(39,7,left)
+        //Paint('click on resize handler')
+        CheckHash(0x8A07C3A15BDC6726)
+        Mouse.Move(41,8)
+        //Paint('resized')
+        CheckHash(0x49D487762DD0A3F2)
+        Mouse.Move(51,8)
+        //Paint('even bigger')
+        CheckHash(0xB71562AEB43E3BCE)
+        Mouse.Move(47,6)
+        //Paint('smaller')
+        CheckHash(0x54A4BBBC93FEE)
+        Mouse.Release(47,6,left)
+        //Paint('after release of handle')
+        CheckHash(0x3002AE84BFE16A36)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), WindowFlags::Sizeable);
+    a.add(w);
+    a.run();
+}
