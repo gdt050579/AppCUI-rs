@@ -224,8 +224,8 @@ fn check_window_hotkey_2() {
 #[test]
 fn check_window_hotkey_and_tag() {
     let script = "
-        Paint('hotkey & tag')
-        //CheckHash(0xC9D2F0E450475385)
+        //Paint('hotkey & tag')
+        CheckHash(0x8F6D9DF3500A2D7A)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);

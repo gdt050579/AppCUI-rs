@@ -170,7 +170,7 @@ impl ItemBase {
         y: i32,
         my_variant: Option<std::mem::Discriminant<ToolBarItem>>,
         last: Option<std::mem::Discriminant<ToolBarItem>>,
-    ) -> (i32, bool) {
+    ) -> (i32, bool, bool) {
         let part_of_group = self.status.contains(StatusFlags::ParOfGroup);
         let mut extra_space = 0;
         let mut right_group_marker = false;
@@ -190,8 +190,7 @@ impl ItemBase {
         if part_of_group && (my_variant != last) {
             self.status |= StatusFlags::LeftGroupMarker;
         }
-
-        (next, right_group_marker)
+        (next, right_group_marker, !part_of_group)
     }
     pub(super) fn update_position_from_right(
         &mut self,
@@ -199,7 +198,7 @@ impl ItemBase {
         y: i32,
         my_variant: Option<std::mem::Discriminant<ToolBarItem>>,
         last: Option<std::mem::Discriminant<ToolBarItem>>,
-    ) -> (i32, bool) {
+    ) -> (i32, bool, bool) {
         let part_of_group = self.status.contains(StatusFlags::ParOfGroup);
         let mut extra_space = 0;
         let mut left_group_marker = false;
@@ -220,6 +219,6 @@ impl ItemBase {
             self.status |= StatusFlags::RightGroupMarker;
         }
 
-        (next, left_group_marker)
+        (next, left_group_marker, !part_of_group)
     }
 }

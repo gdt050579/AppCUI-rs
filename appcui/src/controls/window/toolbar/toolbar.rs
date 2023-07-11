@@ -134,14 +134,23 @@ impl ToolBar {
     fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
         if let Some(item) = self.items.get_element_mut(index) {
             let my_variant = Some(std::mem::discriminant(item));
-            let pos = item.get_base_mut();            
-            let (next, add_flags) =
-                pos.update_position_from_left(helper.x, helper.y, my_variant, helper.variant);
+            let pos = item.get_base_mut();
+            let (next, add_flags, add_space) = pos.update_position_from_left(
+                if helper.add_space_before_next {
+                    helper.x + 1
+                } else {
+                    helper.x
+                },
+                helper.y,
+                my_variant,
+                helper.variant,
+            );
             let last_index = helper.index;
-            if next < right {                
+            if next < right {
                 helper.index = VectorIndex::with_value(index);
                 helper.x = next;
                 helper.variant = my_variant;
+                helper.add_space_before_next = add_space;
             } else {
                 pos.set_outside_drawing_area();
             }
@@ -156,13 +165,22 @@ impl ToolBar {
         if let Some(item) = self.items.get_element_mut(index) {
             let my_variant = Some(std::mem::discriminant(item));
             let pos = item.get_base_mut();
-            let (next, add_flags) =
-                pos.update_position_from_right(helper.x, helper.y, my_variant, helper.variant);
+            let (next, add_flags, add_space) = pos.update_position_from_right(
+                if helper.add_space_before_next {
+                    helper.x - 1
+                } else {
+                    helper.x
+                },
+                helper.y,
+                my_variant,
+                helper.variant,
+            );
             let last_index = helper.index;
-            if next > left {                
+            if next > left {
                 helper.index = VectorIndex::with_value(index);
                 helper.x = next;
                 helper.variant = my_variant;
+                helper.add_space_before_next = add_space;
             } else {
                 pos.set_outside_drawing_area();
             }
@@ -232,9 +250,6 @@ impl ToolBar {
                 item.get_base_mut().set_left_marker();
             }
         }
-        //let title_x_pos = top_left.x + 1;
-        //let title_space = (top_right.x - title_x_pos).max(0);
-        //(title_x_pos, title_space as u16)
         (top_left.x + 1, top_right.x)
     }
     pub(crate) fn paint(
