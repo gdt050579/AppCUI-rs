@@ -5,6 +5,7 @@ use super::super::SystemEvent;
 use super::super::Terminal;
 use super::command::Command;
 use crate::graphics::Color;
+use crate::graphics::Point;
 use crate::system::Error;
 use crate::system::InitializationData;
 use crate::system::RuntimeManager;
@@ -18,6 +19,7 @@ pub(crate) struct DebugTerminal {
     paint: bool,
     paint_title: String,
     hash_to_test: Option<u64>,
+    mouse_pos: Point,
 }
 impl DebugTerminal {
     fn build_commands(script: &str) -> VecDeque<Command> {
@@ -65,6 +67,7 @@ impl DebugTerminal {
             paint: false,
             paint_title: String::new(),
             hash_to_test: None,
+            mouse_pos: Point::new(0,0),
         }))
     }
     fn _forecolor_to_str(col: Color) -> &'static str {
@@ -213,6 +216,12 @@ impl Terminal for DebugTerminal {
         self.temp_str.push_str("|    | ");
         for i in 0..self.width {
             let digit = ((i % 100) / 10) as u8;
+            if (i as i32) == self.mouse_pos.x {
+                self.temp_str.push_str("\x1b[97m");
+                self.temp_str.push_str("\x1b[41m");
+            } else {
+                self.temp_str.push_str("\x1b[0m");
+            }
             if digit == 0 {
                 self.temp_str.push(' ');
             } else {
@@ -225,6 +234,12 @@ impl Terminal for DebugTerminal {
         // last digit
         self.temp_str.push_str("|    | ");
         for i in 0..self.width {
+            if (i as i32) == self.mouse_pos.x {
+                self.temp_str.push_str("\x1b[97m");
+                self.temp_str.push_str("\x1b[41m");
+            } else {
+                self.temp_str.push_str("\x1b[0m");
+            }
             self.temp_str.push((48u8 + ((i % 10) as u8)) as char);
         }
         println!("{} |", self.temp_str);
@@ -258,7 +273,11 @@ impl Terminal for DebugTerminal {
             self.temp_str.push_str("\x1b[0m"); // reset to default color
             x += 1;
             if x == self.width {
-                println!("|{:>3} | {} |", y, &self.temp_str);
+                if (y as i32) == self.mouse_pos.y {
+                    println!("|\x1b[97m\x1b[41m{:>3} \x1b[0m| {} |", y, &self.temp_str);
+                } else {
+                    println!("|{:>3} | {} |", y, &self.temp_str);
+                }
                 self.temp_str.clear();
                 x = 0;
                 y += 1;
@@ -292,6 +311,26 @@ impl Terminal for DebugTerminal {
                     self.width = new_size.width;
                     self.height = new_size.height;
                 }
+                SystemEvent::MouseButtonDown(evnt) => {
+                    self.mouse_pos.x = evnt.x;
+                    self.mouse_pos.y = evnt.y;
+                },
+                SystemEvent::MouseButtonUp(evnt) => {
+                    self.mouse_pos.x = evnt.x;
+                    self.mouse_pos.y = evnt.y;
+                },
+                SystemEvent::MouseDoubleClick(evnt) => {
+                    self.mouse_pos.x = evnt.x;
+                    self.mouse_pos.y = evnt.y;
+                },
+                SystemEvent::MouseMove(evnt) => {
+                    self.mouse_pos.x = evnt.x;
+                    self.mouse_pos.y = evnt.y;
+                },
+                SystemEvent::MouseWheel(evnt) => {
+                    self.mouse_pos.x = evnt.x;
+                    self.mouse_pos.y = evnt.y;
+                },
                 _ => {}
             }
             return event;
