@@ -203,7 +203,7 @@ impl ToolBar {
         let mut top_right = PositionHelper::new((size.width as i32) - 2, 0);
         let mut bottom_left = PositionHelper::new(1, (size.height as i32) - 1);
         let mut bottom_right =
-            PositionHelper::new((size.width as i32) - 1, (size.height as i32) - 1);
+            PositionHelper::new((size.width as i32) - 2, (size.height as i32) - 1);
 
         for index in 0..count {
             if let Some(d) = self.items.get_element_mut(index) {

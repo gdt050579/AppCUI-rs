@@ -37,7 +37,7 @@ impl Label {
             true => theme.text.normal,
             false => theme.text.inactive,
         };
-        surface.write_string(self.base.get_x() + 1, self.base.get_y(), self.text.as_str(), attr, false);   
+        surface.write_string(self.base.get_x(), self.base.get_y(), self.text.as_str(), attr, false);   
     }
 
 }

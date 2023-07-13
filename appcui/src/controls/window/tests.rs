@@ -6,7 +6,7 @@ use crate::{
     input::{Key, KeyModifier, KeyCode}
 };
 
-use super::{Window, WindowFlags};
+use super::{Window, WindowFlags, toolbar::{Gravity, self}};
 
 
 #[test]
@@ -286,6 +286,21 @@ fn check_window_move() {
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), WindowFlags::Sizeable);
+    a.add(w);
+    a.run();
+}
+#[test]
+fn check_window_toolbar_label() {
+    let script = "
+        //Paint('multiple label')
+        CheckHash(0x7DF82A0072CCF28F)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
+    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomLeft,"Label 1"));
+    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomLeft,"Label 2"));
+    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomRight,"Label 3"));
+
     a.add(w);
     a.run();
 }

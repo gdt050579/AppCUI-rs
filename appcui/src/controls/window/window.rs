@@ -157,6 +157,9 @@ impl Window {
     {
         RuntimeManager::get().get_control_mut(handle)
     }
+    pub fn get_toolbar(&mut self) -> &mut ToolBar {
+        &mut self.toolbar
+    }
 
     // title
     pub fn set_title(&mut self, title: &str) {
