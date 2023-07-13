@@ -223,6 +223,10 @@ impl ToolBar {
                         self.update_position_from_right(index, &mut top_right, top_left.x);
                     }
                     Gravity::BottomRight => {
+                        match d {
+                            ToolBarItem::ResizeCorner(_) => bottom_right.x += 1,
+                            _ => {}
+                        }
                         self.update_position_from_right(index, &mut bottom_right, bottom_left.x);
                     }
                 }
