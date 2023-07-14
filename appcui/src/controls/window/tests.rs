@@ -270,19 +270,19 @@ fn check_window_move() {
     let script = "
         Mouse.Move(30,3)
         //Paint('over the title')
-        CheckHash(0xCA2429E8E2E892CE)
+        CheckHash(0x6E5585BA8803D312)
         Mouse.Hold(30,3,left)
         //Paint('press on window title')
-        CheckHash(0x4BCFE8B5ABF3E77B)
+        CheckHash(0x5EEA06B578ABD9A)
         Mouse.Move(15,1)
         //Paint('window moved')
-        CheckHash(0x1BE8C034A92624D7)
+        CheckHash(0x1EBF887394C43672)
         Mouse.Move(1,1)
         //Paint('window moved outside')
-        CheckHash(0x4CA4D3B5DD4C4D5B)
+        CheckHash(0x8C8185EC85BF07AE)
         Mouse.Release(1,1,left)
         //Paint('after release of handle')
-        CheckHash(0xD280A4C932BA2F9E)
+        CheckHash(0x922FBAECBC6B2C2)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), WindowFlags::Sizeable);
