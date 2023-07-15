@@ -304,3 +304,25 @@ fn check_window_toolbar_label() {
     a.add(w);
     a.run();
 }
+
+#[test]
+fn check_window_toolbar_button() {
+    let script = "
+        //Paint('buttons')
+        CheckHash(0x52243E492A4813E1)
+        Mouse.Move(16,8)
+        //Paint('Mouse on button start')
+        CheckHash(0x11C054FAECF9D51F)
+        Mouse.Move(21,8)
+        //Paint('Mouse on button stop')
+        CheckHash(0x63DCB4AE11E49B9)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft,"Start", 1));
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft,"Stop", 2));
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomRight,"Exit", 3));
+
+    a.add(w);
+    a.run();
+}
