@@ -316,6 +316,8 @@ fn check_window_toolbar_button() {
         Mouse.Move(21,8)
         //Paint('Mouse on button stop')
         CheckHash(0x63DCB4AE11E49B9)
+        Mouse.Hold(21,8,left)
+        Paint('Mouse press over stop button')
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
