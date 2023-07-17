@@ -37,6 +37,7 @@ impl Button {
     pub fn set_text(&mut self, text: &str) {
         self.caption.set_text(text, true);
         self.base.set_width(self.caption.get_chars_count() as u16);
+        self.base.request_recompute_layout();
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);

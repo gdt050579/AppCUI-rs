@@ -31,6 +31,7 @@ impl Label {
         self.text.clear();
         self.text.push_str(text);
         self.base.set_width(text.chars().count() as u16);
+        self.base.request_recompute_layout();
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let attr = match data.focused {
