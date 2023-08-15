@@ -67,6 +67,6 @@ fn check_command_bar_1() {
         script,
     )
     .unwrap();
-    a.add(MyWin1::new());
+    a.add_window(MyWin1::new());
     a.run();
 }

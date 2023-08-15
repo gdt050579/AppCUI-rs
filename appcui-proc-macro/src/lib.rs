@@ -150,7 +150,7 @@ pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn AppCUIWindow(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(args, input, "Window", "")
+    parse_token_stream(args, input, "Window", "impl WindowControl for $STRUCT_NAME$ {}")
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]

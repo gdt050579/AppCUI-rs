@@ -19,6 +19,7 @@ pub enum StatusFlags {
     Focused = 0x0008,
     MarkedForFocus = 0x0010,
     MouseOver = 0x0020,
+    EventProcessor = 0x0040,
 }
 #[derive(Copy, Clone)]
 struct Margins {
@@ -34,6 +35,7 @@ pub struct ControlBase {
     margins: Margins,
     pub(crate) handle: Handle,
     pub(crate) parent: Handle,
+    pub(crate) event_processor: Handle,
     pub(crate) children: Vec<Handle>,
     pub(crate) focused_child_index: VectorIndex,
     pub(crate) parent_index: VectorIndex,
@@ -48,6 +50,7 @@ impl ControlBase {
         Self {
             parent: Handle::None,
             handle: Handle::None,
+            event_processor: Handle::None,
             children: Vec::new(),
             focused_child_index: VectorIndex::Invalid,
             parent_index: VectorIndex::Invalid,
@@ -118,7 +121,7 @@ impl ControlBase {
             return false;
         }
         // we need to check if current child can receive focus
-        // if yes, we shoudl request focus for it
+        // if yes, we should request focus for it
         // if no, just request focus for the current control
 
         if !self.handle.is_none() {

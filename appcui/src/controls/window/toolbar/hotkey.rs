@@ -30,6 +30,7 @@ impl HotKey {
         self.key = key;
         if key == Key::None {
             self.base.set_visible(false);
+            self.base.request_recompute_layout();
         } else {
             self.base
                 .set_width(key.code.get_name().chars().count() as u16 + 2);

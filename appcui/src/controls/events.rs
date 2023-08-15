@@ -14,6 +14,7 @@ pub use common_traits::CommandBarEvents;
 
 pub use common_traits::Control;
 pub use common_traits::DesktopControl;
+pub use common_traits::WindowControl;
 
 pub use common_traits::EventProcessStatus;
 pub use event::Event;

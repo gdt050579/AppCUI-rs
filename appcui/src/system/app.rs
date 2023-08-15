@@ -7,6 +7,7 @@ use super::RuntimeManager;
 use crate::controls::events::Control;
 use crate::controls::ControlManager;
 use crate::controls::events::DesktopControl;
+use crate::controls::events::WindowControl;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 
@@ -67,9 +68,9 @@ impl App {
         *app_created = false;
     }
 
-    pub fn add<T>(&mut self, window: T)
+    pub fn add_window<T>(&mut self, window: T)
     where
-        T: Control + 'static,
+        T: Control + WindowControl + 'static,
     {
         RuntimeManager::get().add(window);
     }

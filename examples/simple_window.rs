@@ -214,7 +214,7 @@ fn main() -> Result<(), appcui::system::Error> {
         Paint('after move')
     ")?;
     //let mut a = App::default()?;
-    a.add(MyWindow::new());
+    a.add_window(MyWindow::new());
     a.run();
     Ok(())
 }
