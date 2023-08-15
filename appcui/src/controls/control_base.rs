@@ -140,6 +140,11 @@ impl ControlBase {
         let base = c.get_base_mut();
         let focusable = base.can_receive_input();
         base.parent = self.handle;
+        // I will use the same event_processor as my parent
+        // if my parent is not register , the event_processor handle will ne None
+        // and the first time the root window is registered all its childern will
+        // have the same event processor
+        base.event_processor = self.event_processor;
         let rm = RuntimeManager::get();
         let handle = rm.get_controls().add(c);
         self.children.push(handle);

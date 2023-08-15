@@ -5,9 +5,10 @@ use super::InitializationData;
 use super::InitializationFlags;
 use super::RuntimeManager;
 use crate::controls::events::Control;
-use crate::controls::ControlManager;
 use crate::controls::events::DesktopControl;
 use crate::controls::events::WindowControl;
+use crate::controls::ControlHandle;
+use crate::controls::ControlManager;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 
@@ -64,14 +65,14 @@ impl App {
         RuntimeManager::get().run();
         // clear the mutex so that other apps can be created after this step
         RuntimeManager::destroy();
-        let mut app_created = APP_CREATED_MUTEX.lock().unwrap();        
+        let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
         *app_created = false;
     }
 
-    pub fn add_window<T>(&mut self, window: T)
+    pub fn add_window<T>(&mut self, window: T) -> ControlHandle<T>
     where
         T: Control + WindowControl + 'static,
     {
-        RuntimeManager::get().add(window);
+        return RuntimeManager::get().add_window(window);
     }
 }

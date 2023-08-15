@@ -1,11 +1,12 @@
 use super::{
-    ControlHandleManager, Handle, InitializationData,
-    InitializationFlags, MenuHandleManager, Theme, ToolTip,
+    ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
+    Theme, ToolTip,
 };
-use crate::controls::command_bar::{CommandBarEvent, CommandBar};
+use crate::controls::command_bar::{CommandBar, CommandBarEvent};
 use crate::controls::control_manager::ParentLayout;
 use crate::controls::events::{
-    CommandBarEvents, Control, Event, EventProcessStatus, MenuEvent, OnEvent, MenuEvents,
+    CommandBarEvents, Control, Event, EventProcessStatus, MenuEvent, MenuEvents, OnEvent,
+    WindowControl,
 };
 use crate::controls::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::controls::ControlManager;
@@ -178,12 +179,31 @@ impl RuntimeManager {
         self.repaint = true;
         self.recompute_layout = true;
     }
-    pub(crate) fn add<T>(&mut self, obj: T) -> ControlHandle<T>
+    fn set_event_processors(
+        &mut self,
+        control_handle: Handle,
+        event_processor: Handle,
+    ) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get(control_handle) {
+            let base = control.get_base_mut();
+            base.event_processor = event_processor;
+            for child in &base.children {
+                self.set_event_processors(*child, event_processor);
+            }
+        }
+    }
+    pub(crate) fn add_window<T>(&mut self, obj: T) -> ControlHandle<T>
     where
-        T: Control + 'static,
+        T: Control + WindowControl + 'static,
     {
         let controls = unsafe { &mut *self.controls };
-        controls.get_desktop().get_base_mut().add_child(obj)
+        let handle = controls.get_desktop().get_base_mut().add_child(obj);
+        // since it is the first time I cregister this window
+        // I need to recursively set the event processor for all of its childern to
+        // this window current handle
+        self.set_event_processors(handle.get_handle(), handle.get_handle());
+        return handle;
     }
     pub(crate) fn get_control_mut<T>(&mut self, handle: ControlHandle<T>) -> Option<&mut T>
     where
@@ -1054,8 +1074,10 @@ impl RuntimeManager {
         }
     }
 
-    pub (super) fn destroy() {
-        unsafe { RUNTIME_MANAGER = None; }
+    pub(super) fn destroy() {
+        unsafe {
+            RUNTIME_MANAGER = None;
+        }
     }
 }
 
