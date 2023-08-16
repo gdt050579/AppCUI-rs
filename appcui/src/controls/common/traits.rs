@@ -2,7 +2,7 @@ use crate::{
     controls::{
         button::events::ButtonEvents, 
         command_bar::events::CommandBarEvents,
-        menu::events::MenuEvents,
+        menu::events::MenuEvents, checkbox::events::CheckBoxEvents,
     },
     graphics::{Size, Surface},
     input::{Key, MouseEvent},
@@ -62,6 +62,7 @@ pub trait Control:
     + OnFocus
     /* events from each control */
     + ButtonEvents
+    + CheckBoxEvents
     + CommandBarEvents
     + MenuEvents
 {

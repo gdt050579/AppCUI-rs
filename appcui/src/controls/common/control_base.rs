@@ -1,5 +1,6 @@
 use super::control_manager::ParentLayout;
 use crate::controls::button::events::ButtonEvents;
+use crate::controls::checkbox::events::CheckBoxEvents;
 use crate::controls::command_bar::events::CommandBarEvents;
 use crate::controls::common::traits::*;
 use crate::controls::common::*;
@@ -320,3 +321,4 @@ impl OnFocus for ControlBase {}
 impl CommandBarEvents for ControlBase {}
 impl MenuEvents for ControlBase {}
 impl ButtonEvents for ControlBase {}
+impl CheckBoxEvents for ControlBase {}

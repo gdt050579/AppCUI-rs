@@ -24,6 +24,7 @@ pub struct Arguments {
     pub command_bar_events: bool,
     pub menu_events: bool,
     pub button_events: bool,
+    pub checkbox_events: bool,
 
     // internal
     state: State,
@@ -52,7 +53,8 @@ impl Arguments {
             // control events
             menu_events: false,
             command_bar_events: false,
-            button_events: false
+            button_events: false,
+            checkbox_events: false,
         }
     }
 
@@ -123,6 +125,10 @@ impl Arguments {
                 }
                 "ButtonEvents" | "Button" => {
                     self.button_events = true;
+                    limited_to_event_processor = true;
+                }
+                "CheckBoxEvents" | "CheckBox" => {
+                    self.checkbox_events = true;
                     limited_to_event_processor = true;
                 }
                 other => {

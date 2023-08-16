@@ -2,6 +2,7 @@ use super::{
     ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
     Theme, ToolTip,
 };
+use crate::controls::common::ControlEventData;
 use crate::controls::command_bar::events::CommandBarEvents;
 use crate::controls::command_bar::{CommandBar, events::CommandBarEvent};
 use crate::controls::common::control_manager::ParentLayout;
@@ -350,35 +351,14 @@ impl RuntimeManager {
             }
         }
     }
-    fn process_one_event(&mut self, evnt: ControlEvent) {
-        let mut h = evnt.get_sender();
-        if h.is_none() {
-            h = self.get_focused_control();
-        }
-        let controls = unsafe { &mut *self.controls };
-        while let Some(control) = controls.get(h) {
-            let result = OnEvent::on_event(control.get_control_mut(), evnt);
-            match result {
-                EventProcessStatus::Processed => {
-                    return;
-                }
-                EventProcessStatus::Ignored => {}
-                EventProcessStatus::Update => {
-                    self.repaint = true;
-                }
-                EventProcessStatus::Cancel => {
-                    return;
-                }
-            }
-            h = control.get_base().parent;
-            if h.is_none() {
-                break;
-            }
-        }
-    }
+
     fn process_events_queue(&mut self) {
+        let controls = unsafe { &mut *self.controls };
         while let Some(evnt) = self.events.pop() {
-            self.process_one_event(evnt);
+            if let Some(receiver) = controls.get(evnt.receiver) {
+                let result = evnt.invoke(receiver.get_control_mut());
+                todo!("redraw data based on the result (to be analyzed if needed) - maybe a control when changed can automatically request an update");
+            }
         }
     }
 

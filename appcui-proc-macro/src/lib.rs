@@ -11,6 +11,7 @@ mod templates {
     use $(ROOT)::controls::*;
     use $(ROOT)::controls::common::traits::*;
     use $(ROOT)::controls::button::events::ButtonEvents;
+    use $(ROOT)::controls::checkbox::events::CheckBoxEvents;
     use $(ROOT)::controls::command_bar::events::CommandBarEvents;
     use $(ROOT)::controls::menu::events::MenuEvents;
     use $(ROOT)::controls::menu::*;
@@ -107,6 +108,14 @@ mod templates {
         }
     }
     ";
+
+    pub static CHECKBOX_EVENTS_TRAIT: &str = "
+    impl CheckBoxEvents for $(STRUCT_NAME) {
+        fn on_status_changed(&mut self, checbox_handle: Handle, checked: bool) {
+            CheckBoxEvents::on_status_changed(&mut self.base, checbox_handle, checked)
+        }
+    }
+    ";
 }
 fn parse_token_stream(
     args: TokenStream,
@@ -163,6 +172,9 @@ fn parse_token_stream(
     }
     if !a.button_events {
         code.push_str(templates::BUTTON_EVENTS_TRAIT);
+    }
+    if !a.checkbox_events {
+        code.push_str(templates::CHECKBOX_EVENTS_TRAIT);
     }
     // add the extra code
     code.push_str("\n");
