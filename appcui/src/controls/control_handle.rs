@@ -14,14 +14,10 @@ impl<T> ControlHandle<T> {
         _phantom: PhantomData,
     };
     pub(crate) fn new(handle: Handle) -> Self {
-        ControlHandle {
+        Self {
             handle,
             _phantom: PhantomData,
         }
-    }
-    #[inline(always)]
-    pub(crate) fn get_index(&self) -> usize {
-        self.handle.get_index()
     }
     #[inline(always)]
     pub(crate) fn get_handle(&self) -> Handle {
