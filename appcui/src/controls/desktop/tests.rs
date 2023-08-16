@@ -1,4 +1,4 @@
-use crate::controls::events::*;
+use crate::controls::common::*;
 use crate::controls::menu::*;
 use super::super::command_bar::*;
 use crate::controls::*;

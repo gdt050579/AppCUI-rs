@@ -4,7 +4,7 @@ use super::{
     MenuRadioBoxItem, MenuRadioBoxSelectedEvent, MenuSubMenuItem, MousePressedResult,
 };
 use crate::{
-    controls::events::{Event, EventProcessStatus, MenuEvent},
+    controls::common::{Event, EventProcessStatus, MenuEvent},
     graphics::{
         Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
         TextFormat, TextWrap,

@@ -1,4 +1,4 @@
-use super::super::events::*;
+use super::super::common::*;
 use super::super::menu::*;
 use super::super::ControlBase;
 use super::super::Layout;

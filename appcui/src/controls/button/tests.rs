@@ -1,25 +1,18 @@
-use super::super::command_bar::*;
-use super::super::common::traits::*;
-use super::super::menu::*;
-use super::super::Layout;
-use super::events::CommandBarEvents;
-use crate::controls::menu::events::MenuEvents;
-use crate::controls::menu::*;
-use crate::controls::*;
-use crate::graphics::*;
-use crate::input::*;
-use crate::system::*;
 use AppCUIProcMacro::*;
 
-#[Window(events = CommandBarEvents)]
-struct MyWin1 {
+#[Window(events = ButtonEvents)]
+struct MyWin {
     info: ControlHandle<Label>,
+    but1: ControlHandle<Button>,
+    but2: ControlHandle<Button>,
 }
-impl MyWin1 {
+impl MyWin {
     fn new() -> Self {
         let mut me = Self {
             base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), WindowFlags::None),
             info: ControlHandle::None,
+            but1: ControlHandle::None,
+            but2: ControlHAndle::None,
         };
         me.info = me.add(Label::new("<none>",Layout::new("x:1,y:1,w:18")));
         me
@@ -31,23 +24,12 @@ impl MyWin1 {
         }
     }
 }
-impl CommandBarEvents for MyWin1 {
-    fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("F1"), "MyWin-1-CMD-1", 1);
-        commandbar.set(key!("F2"), "MyWin-1-CMD-2", 2);
-    }
+impl ButtonEvents for MyWin {
 
-    fn on_event(&mut self, command_id: u32) {
-        match command_id {
-            1 => self.set_info("Command-1 pressed"),
-            2 => self.set_info("Command-2 pressed"),
-            _ => {}
-        }
-    }
 }
 
 #[test]
-fn check_command_bar_1() {
+fn check_button_control() {
     let script = "
         //Paint('initial state')
         CheckHash(0x8F46035284DF4B04)
