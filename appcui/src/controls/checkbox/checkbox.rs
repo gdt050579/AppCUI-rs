@@ -78,10 +78,13 @@ impl OnPaint for CheckBox {
 impl OnDefaultAction for CheckBox {
     fn on_default_action(&mut self) {
         self.checked = !self.checked;
-        self.raise_event(ControlEvent::CheckBoxEvent(EventData {
-            checbox_handle: self.handle,
-            checked: self.checked,
-        }));
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::CheckBoxEvent(EventData {
+                checked: self.checked,
+            }),
+        });
     }
 }
 impl OnKeyPressed for CheckBox {

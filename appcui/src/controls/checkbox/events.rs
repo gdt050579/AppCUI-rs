@@ -5,6 +5,5 @@ pub trait CheckBoxEvents {
 }
 #[derive(Copy,Clone)]
 pub(crate) struct EventData {
-    pub (crate) checbox_handle: Handle,
     pub (crate) checked: bool
 }

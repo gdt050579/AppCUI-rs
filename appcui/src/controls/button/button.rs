@@ -38,9 +38,11 @@ impl Button {
 }
 impl OnDefaultAction for Button {
     fn on_default_action(&mut self) {
-        self.raise_event(ControlEvent::ButtonEvent(EventData {
-            button_handle: self.handle,
-        }));
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::ButtonEvent(EventData{})
+        });
     }
 }
 impl OnKeyPressed for Button {
