@@ -486,9 +486,10 @@ impl Window {
         if let Some(item) = self.toolbar.get_item(handle) {
             match item {
                 ToolBarItem::CloseButton(_) => {
-                    self.raise_event(Event::WindowClose(WindowCloseEvent {
-                        handle: self.handle,
-                    }));
+                    todo!("Add window event for WindowClode");
+                    // self.raise_event(Event::WindowClose(WindowCloseEvent {
+                    //     handle: self.handle,
+                    // }));
                     return true;
                 }
                 ToolBarItem::ResizeCorner(_) => {
