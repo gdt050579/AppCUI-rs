@@ -10,6 +10,7 @@ enum State {
 pub struct Arguments {
     pub base: String,
     pub event_processor_list: String,
+    pub root: &'static str,
     pub debug_mode: bool,
     // overwritebles (common events)
     pub on_paint: bool,
@@ -34,6 +35,7 @@ impl Arguments {
         Arguments {
             base: String::from(base_control),
             state: State::ExpectKey,
+            root: "appcui",
             key: String::new(),
             values: Vec::with_capacity(8),
             event_processor_list: String::new(),
@@ -71,6 +73,14 @@ impl Arguments {
         self.base.push_str(self.values[0].as_str());
     }
 
+    fn validate_internal_attribute(&mut self) {
+        self.validate_one_value();
+        if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
+            self.root = if value { "crate" } else { "appcui" };
+        } else {
+            panic!("The value for `internal` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
+        }
+    }
     fn validate_debug_attribute(&mut self) {
         self.validate_one_value();
         if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
@@ -131,6 +141,7 @@ impl Arguments {
             "overwrite" => self.validate_overwrite_attribute(),
             "events" => self.validate_events_attribute(),
             "debug" => self.validate_debug_attribute(),
+            "internal" => self.validate_internal_attribute(),
             _ => {
                 panic!("Unknown attribute `{}` for AppCUI. Accepted attributes are 'base' , 'overwrite' and 'debug' !",self.key.as_str());
             }

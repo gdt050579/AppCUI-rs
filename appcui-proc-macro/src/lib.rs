@@ -8,59 +8,58 @@ extern crate proc_macro;
 
 mod templates {
     pub static DEREF_TRAIT: &str = "
-    impl std::ops::Deref for $STRUCT_NAME$ {
-        type Target = $BASE$;
+    impl std::ops::Deref for $(STRUCT_NAME) {
+        type Target = $(BASE);
         fn deref(&self) -> &Self::Target { return &self.base; }
     }
-    impl std::ops::DerefMut for $STRUCT_NAME$ {
+    impl std::ops::DerefMut for $(STRUCT_NAME) {
         fn deref_mut(&mut self) -> &mut Self::Target { return &mut self.base; }
     }
     ";
 
     pub static CONTROL_TRAIT: &str = "
-    impl Control for $STRUCT_NAME$ {
-    }
+    impl Control for $(STRUCT_NAME) { }
     ";
 
     pub static ON_PAINT_TRAIT: &str = "
-    impl OnPaint for $STRUCT_NAME$ {
+    impl OnPaint for $(STRUCT_NAME) {
         fn on_paint(&self, surface: &mut Surface, theme: &Theme)  { self.base.on_paint(surface, theme); }
     }
     ";
 
     pub static ON_KEY_PRESSED_TRAIT: &str = "
-    impl OnKeyPressed for $STRUCT_NAME$ {
+    impl OnKeyPressed for $(STRUCT_NAME) {
         fn on_key_pressed(&mut self, key: Key, character: char)->EventProcessStatus { return self.base.on_key_pressed(key, character); }
     }
     ";
 
     pub static ON_MOUSE_EVENT_TRAIT: &str = "
-    impl OnMouseEvent for $STRUCT_NAME$ {
+    impl OnMouseEvent for $(STRUCT_NAME) {
         fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus { return self.base.on_mouse_event(event); }
     }
     ";
 
     pub static ON_DEFAULT_ACTION_TRAIT: &str = "
-    impl OnDefaultAction for $STRUCT_NAME$ {
+    impl OnDefaultAction for $(STRUCT_NAME) {
         fn on_default_action(&mut self){ self.base.on_default_action(); }
     }
     ";
 
     pub static ON_RESIZE_TRAIT: &str = "
-    impl OnResize for $STRUCT_NAME$ {
+    impl OnResize for $(STRUCT_NAME) {
         fn on_resize(&mut self, old: Size, new: Size)  { self.base.on_resize(old, new); }
     }
     ";
 
     pub static ON_FOCUS_TRAIT: &str = "
-    impl OnFocus for $STRUCT_NAME$ {
+    impl OnFocus for $(STRUCT_NAME) {
         fn on_focus(&mut self)  { self.base.on_focus(); }
         fn on_lose_focus(&mut self)  { self.base.on_lose_focus(); }
     }
     ";
 
     pub static COMMANDBAR_EVENTS_TRAIT: &str = "
-    impl CommandBarEvents for $STRUCT_NAME$ {
+    impl CommandBarEvents for $(STRUCT_NAME) {
         fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
             CommandBarEvents::on_update_commandbar(&self.base, commandbar);
         }
@@ -71,7 +70,7 @@ mod templates {
     ";
 
     pub static MENU_EVENTS_TRAIT: &str = "
-    impl MenuEvents for $STRUCT_NAME$ {
+    impl MenuEvents for $(STRUCT_NAME) {
         fn on_menu_open(&self, menu: &mut Menu) {
             MenuEvents::on_menu_open(&self.base, menu);
         }
@@ -85,7 +84,7 @@ mod templates {
     ";
 
     pub static BUTTON_EVENTS_TRAIT: &str = "
-    impl ButtonEvents for $STRUCT_NAME$ {
+    impl ButtonEvents for $(STRUCT_NAME) {
         fn on_pressed(&mut self, button_handle: Handle) {
             ButtonEvents::on_pressed(&mut self.base, button_handle)
         }
@@ -149,8 +148,8 @@ fn parse_token_stream(
     code.push_str(extra_code);
     // replace templates
     code = code
-        .replace("$STRUCT_NAME$", &struct_name)
-        .replace("$BASE$", &a.base);
+        .replace("$(STRUCT_NAME)", &struct_name)
+        .replace("$(BASE)", &a.base);
     //println!("{}", code);
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }
@@ -166,7 +165,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
         args,
         input,
         "Window",
-        "impl WindowControl for $STRUCT_NAME$ {}",
+        "impl WindowControl for $(STRUCT_NAME) {}",
         true
     )
 }
@@ -177,7 +176,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
         args,
         input,
         "Desktop",
-        "impl DesktopControl for $STRUCT_NAME$ {}",
+        "impl DesktopControl for $(STRUCT_NAME) {}",
         false
     )
 }
