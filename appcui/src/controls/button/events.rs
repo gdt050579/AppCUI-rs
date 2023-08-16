@@ -1,3 +1,5 @@
+use crate::system::Handle;
+
 pub trait ButtonEvents {
     fn on_pressed(&mut self, button_handle: Handle) {}
 }

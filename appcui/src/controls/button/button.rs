@@ -1,10 +1,11 @@
-use crate::controls::common::*;
-use super::super::menu::*;
-use super::super::command_bar::*;
+use crate::controls::command_bar::events::*;
+use crate::controls::command_bar::*;
+use crate::controls::common::traits::*;
+use crate::controls::menu::events::*;
+
 use super::super::ControlBase;
 use super::super::Layout;
 use super::super::StatusFlags;
-use super::ButtonClickedEvent;
 use super::ButtonFlags;
 use crate::graphics::*;
 use crate::input::*;
@@ -17,7 +18,6 @@ pub struct Button {
     flags: ButtonFlags,
     caption: Caption,
     pressed: bool,
-    handler: Option<Box<dyn Fn(Handle)>>,
 }
 impl Button {
     /// Creates a new button with the specified caption, layout and flags
@@ -35,7 +35,6 @@ impl Button {
             caption: Caption::new(caption, true),
             flags,
             pressed: false,
-            handler: None,
         };
 
         if flags.contains(ButtonFlags::Flat) {

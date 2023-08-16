@@ -1,4 +1,9 @@
 use crate::{
+    controls::{
+        button::events::ButtonEvents, 
+        command_bar::events::CommandBarEvents,
+        menu::events::MenuEvents,
+    },
     graphics::{Size, Surface},
     input::{Key, MouseEvent},
     system::Theme,
@@ -48,18 +53,6 @@ pub trait OnFocus {
     fn on_lose_focus(&mut self) {}
 }
 
-pub trait OnEvent {
-    fn on_event(&mut self, _event: Event) -> EventProcessStatus {
-        EventProcessStatus::Ignored
-    }
-}
-
-pub trait MenuEvents {
-    fn on_menu_open(&self, _menu: &mut Menu) {}
-    fn on_event(&mut self, _event: MenuEvent) {}
-    fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
-}
-
 pub trait Control:
     OnPaint
     + OnKeyPressed
@@ -67,7 +60,6 @@ pub trait Control:
     + OnDefaultAction
     + OnResize
     + OnFocus
-    + OnEvent
     /* events from each control */
     + ButtonEvents
     + CommandBarEvents
