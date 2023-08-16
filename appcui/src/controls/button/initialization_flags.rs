@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 8)]
-pub enum ButtonFlags {
+pub enum Flags {
     Flat = 0x01,
 }

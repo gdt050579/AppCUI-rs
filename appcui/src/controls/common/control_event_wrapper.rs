@@ -1,3 +1,4 @@
-pub(crate) enum ControlEventWrapper {
-    ButtonEvent(ButtonEvents_OnPressed)
+use crate::controls::button;
+pub(crate) enum ControlEvent {
+    ButtonEvent(button::events::EventData)
 }

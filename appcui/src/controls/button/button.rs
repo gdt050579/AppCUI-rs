@@ -1,21 +1,24 @@
 use crate::controls::command_bar::events::*;
 use crate::controls::command_bar::*;
+use crate::controls::common::ControlEvent;
 use crate::controls::common::traits::*;
-use crate::controls::menu::events::*;
+use crate::controls::menu::events::MenuEvents;
+use crate::controls::menu::*;
+use crate::controls::button::Flags;
+use crate::controls::button::events::EventData;
 
 use super::super::ControlBase;
 use super::super::Layout;
 use super::super::StatusFlags;
-use super::ButtonFlags;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
 use crate::utils::*;
-use AppCUIProcMacro::AppCUIControl;
+use AppCUIProcMacro::*;
 
-#[AppCUIControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
+#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
 pub struct Button {
-    flags: ButtonFlags,
+    flags: Flags,
     caption: Caption,
     pressed: bool,
 }
@@ -26,7 +29,7 @@ impl Button {
     /// use appcui::controls::*;
     /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), ButtonFlags::None);
     /// ```
-    pub fn new(caption: &str, layout: Layout, flags: ButtonFlags) -> Self {
+    pub fn new(caption: &str, layout: Layout, flags: Flags) -> Self {
         let mut but = Button {
             base: ControlBase::new(
                 layout,
@@ -37,7 +40,7 @@ impl Button {
             pressed: false,
         };
 
-        if flags.contains(ButtonFlags::Flat) {
+        if flags.contains(super::Flags::Flat) {
             but.set_size_bounds(3, 1, u16::MAX, 1);
         } else {
             but.set_size_bounds(4, 2, u16::MAX, 2);
@@ -52,8 +55,8 @@ impl Button {
 }
 impl OnDefaultAction for Button {
     fn on_default_action(&mut self) {
-        self.raise_event(Event::ButtonClicked(ButtonClickedEvent {
-            handle: self.handle,
+        self.raise_event(ControlEvent::ButtonEvent( EventData {
+            button_handle: self.handle,
         }));
         let my_handler = self.handle;
         if let Some(handler) = &mut self.handler {
@@ -94,7 +97,7 @@ impl OnPaint for Button {
             });
             format.hotkey_pos = self.caption.get_hotkey_pos();
         }
-        if self.flags.contains(ButtonFlags::Flat) {
+        if self.flags.contains(Flags::Flat) {
             surface.clear(Character::with_attributes(' ', col_text));
             format.width = Some(w as u16);
             surface.write_text(self.caption.get_text(), &format);

@@ -1,4 +1,4 @@
-use super::super::events::*;
+use super::super::common::*;
 use super::super::menu::*;
 use super::super::command_bar::*;
 use super::super::ControlBase;
@@ -9,9 +9,9 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
 use crate::utils::*;
-use AppCUIProcMacro::AppCUIControl;
+use AppCUIProcMacro::*;
 
-#[AppCUIControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
+#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
 pub struct CheckBox {
     caption: Caption,
     checked: bool,

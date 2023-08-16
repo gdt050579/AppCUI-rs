@@ -6,10 +6,9 @@ use crate::controls::*;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
-use AppCUIProcMacro::AppCUIWindow;
 use AppCUIProcMacro::*;
 
-#[AppCUIWindow(overwrite = CommandBarEvents)]
+#[Window(overwrite = CommandBarEvents)]
 struct MyWin1 {
     info: ControlHandle<Label>,
 }

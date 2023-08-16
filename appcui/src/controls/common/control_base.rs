@@ -273,7 +273,7 @@ impl ControlBase {
         surface.reset_origin();
         return true;
     }
-    pub(crate) fn raise_event(&self, event: Event) {
+    pub(crate) fn raise_event(&self, event: ControlEvent) {
         if !self.handle.is_none() {
             RuntimeManager::get().send_event(event);
         }
