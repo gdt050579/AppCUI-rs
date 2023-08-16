@@ -1,6 +1,6 @@
 use AppCUIProcMacro::*;
 
-#[Window(events = ButtonEvents)]
+#[Window(events = ButtonEvents, internal=true)]
 struct MyWin {
     info: ControlHandle<Label>,
     but1: ControlHandle<Button>,
@@ -12,7 +12,7 @@ impl MyWin {
             base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), WindowFlags::None),
             info: ControlHandle::None,
             but1: ControlHandle::None,
-            but2: ControlHAndle::None,
+            but2: ControlHandle::None,
         };
         me.info = me.add(Label::new("<none>",Layout::new("x:1,y:1,w:18")));
         me
@@ -51,6 +51,6 @@ fn check_button_control() {
         script,
     )
     .unwrap();
-    a.add_window(MyWin1::new());
+    a.add_window(MyWin::new());
     a.run();
 }

@@ -1,23 +1,9 @@
-use crate::controls::command_bar::events::*;
-use crate::controls::command_bar::*;
-use crate::controls::common::ControlEvent;
-use crate::controls::common::traits::*;
-use crate::controls::menu::events::MenuEvents;
-use crate::controls::menu::*;
+use AppCUIProcMacro::*;
 use crate::controls::button::Flags;
 use crate::controls::button::events::EventData;
-use crate::controls::button::events::ButtonEvents;
 
-use super::super::ControlBase;
-use super::super::Layout;
-use super::super::StatusFlags;
-use crate::graphics::*;
-use crate::input::*;
-use crate::system::*;
-use crate::utils::*;
-use AppCUIProcMacro::*;
 
-#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
+#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Button {
     flags: Flags,
     caption: Caption,

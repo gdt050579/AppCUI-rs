@@ -7,6 +7,23 @@ use std::str::FromStr;
 extern crate proc_macro;
 
 mod templates {
+    pub static IMPORTS: &str = "
+    use $(ROOT)::controls::*;
+    use $(ROOT)::controls::common::traits::*;
+    use $(ROOT)::controls::button::events::ButtonEvents;
+    use $(ROOT)::controls::command_bar::events::CommandBarEvents;
+    use $(ROOT)::controls::menu::events::MenuEvents;
+    use $(ROOT)::controls::menu::*;
+    use $(ROOT)::graphics::*;
+    use $(ROOT)::system::*;
+    use $(ROOT)::input::*;
+    ";
+
+    pub static IMPORTS_INTERNAL: &str = "
+    use crate::utils::*;
+    use crate::controls::common::*;
+    ";
+
     pub static DEREF_TRAIT: &str = "
     impl std::ops::Deref for $(STRUCT_NAME) {
         type Target = $(BASE);
@@ -106,6 +123,10 @@ fn parse_token_stream(
     let mut code = input.to_string().replace("{", base_definition.as_str());
     let struct_name = utils::extract_structure_name(code.as_str());
     code.insert_str(0, "#[repr(C)]\n");
+    code.insert_str(0, templates::IMPORTS);
+    if a.internal_mode {
+        code.insert_str(0, templates::IMPORTS_INTERNAL);
+    }
     code.push_str(templates::DEREF_TRAIT);
     code.push_str(templates::CONTROL_TRAIT);
 
@@ -149,7 +170,8 @@ fn parse_token_stream(
     // replace templates
     code = code
         .replace("$(STRUCT_NAME)", &struct_name)
-        .replace("$(BASE)", &a.base);
+        .replace("$(BASE)", &a.base)
+        .replace("$(ROOT)", a.root);
     //println!("{}", code);
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }
@@ -166,7 +188,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
         input,
         "Window",
         "impl WindowControl for $(STRUCT_NAME) {}",
-        true
+        true,
     )
 }
 #[allow(non_snake_case)]
@@ -177,7 +199,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
         input,
         "Desktop",
         "impl DesktopControl for $(STRUCT_NAME) {}",
-        false
+        false,
     )
 }
 

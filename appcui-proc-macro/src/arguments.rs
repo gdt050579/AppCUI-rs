@@ -12,6 +12,7 @@ pub struct Arguments {
     pub event_processor_list: String,
     pub root: &'static str,
     pub debug_mode: bool,
+    pub internal_mode: bool,
     // overwritebles (common events)
     pub on_paint: bool,
     pub on_key_pressed: bool,
@@ -40,6 +41,7 @@ impl Arguments {
             values: Vec::with_capacity(8),
             event_processor_list: String::new(),
             debug_mode: false,
+            internal_mode: false,
             // overwritebles (common events)
             on_paint: false,
             on_key_pressed: false,
@@ -77,6 +79,7 @@ impl Arguments {
         self.validate_one_value();
         if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
             self.root = if value { "crate" } else { "appcui" };
+            self.internal_mode = value;
         } else {
             panic!("The value for `internal` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
         }
