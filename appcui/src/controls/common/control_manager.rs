@@ -1,7 +1,7 @@
 use crate::graphics::{ClipArea, Point};
 use crate::terminals::Terminal;
 
-use super::events::Control;
+use super::common::Control;
 use super::ControlBase;
 use std::ptr::NonNull;
 

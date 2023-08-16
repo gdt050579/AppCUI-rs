@@ -1,6 +1,6 @@
 use super::control_manager::ParentLayout;
-use super::events::{Control, Event, CommandBarEvents, MenuEvent, MenuEvents};
-use super::events::{
+use super::common::{Control, Event, CommandBarEvents, MenuEvent, MenuEvents};
+use super::common::{
     OnDefaultAction, OnEvent, OnFocus, OnKeyPressed, OnMouseEvent, OnPaint, OnResize,
 };
 use super::layout::ControlLayout;

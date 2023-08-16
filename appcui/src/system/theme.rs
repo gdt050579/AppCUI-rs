@@ -1,4 +1,4 @@
-use crate::{controls::ControlCharAttributesState, graphics::*};
+use crate::{controls::common::ControlCharAttributesState, graphics::*};
 
 #[derive(Default)]
 pub struct DesktopTheme {

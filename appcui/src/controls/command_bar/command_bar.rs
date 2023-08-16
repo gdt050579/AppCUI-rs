@@ -5,7 +5,8 @@ use crate::{
     terminals::{MouseButtonDownEvent, MouseMoveEvent},
 };
 
-use super::CommandBarEvent;
+use super::events::CommandBarEvent;
+
 
 const MAX_KEYS: usize = 64; // no bigger than 255
 const MAX_SHIFT_STATES: usize = 8;

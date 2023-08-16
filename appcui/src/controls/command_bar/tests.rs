@@ -1,5 +1,5 @@
 use super::super::command_bar::*;
-use super::super::events::*;
+use super::super::common::traits::*;
 use super::super::menu::*;
 use super::super::Layout;
 use crate::controls::*;
