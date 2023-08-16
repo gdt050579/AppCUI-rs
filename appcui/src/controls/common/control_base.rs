@@ -1,10 +1,10 @@
 use super::control_manager::ParentLayout;
-use super::common::{Control, Event, CommandBarEvents, MenuEvent, MenuEvents};
-use super::common::{
-    OnDefaultAction, OnEvent, OnFocus, OnKeyPressed, OnMouseEvent, OnPaint, OnResize,
-};
-use super::layout::ControlLayout;
-use super::{ControlHandle, ControlManager, Layout};
+use crate::controls::button::events::ButtonEvents;
+use crate::controls::command_bar::events::CommandBarEvents;
+use crate::controls::common::traits::*;
+use crate::controls::common::*;
+use crate::controls::layout::*;
+use crate::controls::menu::events::MenuEvents;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, RuntimeManager};
@@ -308,12 +308,15 @@ impl ControlBase {
         RuntimeManager::get().hide_tooltip();
     }
 }
+// default implementations
 impl OnPaint for ControlBase {}
 impl OnKeyPressed for ControlBase {}
 impl OnMouseEvent for ControlBase {}
 impl OnDefaultAction for ControlBase {}
 impl OnResize for ControlBase {}
 impl OnFocus for ControlBase {}
-impl OnEvent for ControlBase {}
+
+// default implementation for control events
 impl CommandBarEvents for ControlBase {}
 impl MenuEvents for ControlBase {}
+impl ButtonEvents for ControlBase {}

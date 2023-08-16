@@ -1,16 +1,16 @@
 use super::{
-    menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo, MenuCheckBoxItem,
-    MenuCheckBoxStateChangedEvent, MenuCommandEvent, MenuCommandItem, MenuHandle, MenuItem,
-    MenuRadioBoxItem, MenuRadioBoxSelectedEvent, MenuSubMenuItem, MousePressedResult,
+    events::*, menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo,
+    MenuCheckBoxItem, MenuCommandItem, MenuHandle, MenuItem, MenuRadioBoxItem, MenuSubMenuItem,
+    MousePressedResult,
 };
 use crate::{
-    controls::common::{Event, EventProcessStatus, MenuEvent},
+    controls::common::traits::EventProcessStatus,
     graphics::{
         Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
         TextFormat, TextWrap,
     },
     input::{Key, KeyCode, MouseWheelDirection},
-    system::{RuntimeManager, Theme, Handle, HandleSupport},
+    system::{Handle, HandleSupport, RuntimeManager, Theme},
     utils::{Caption, Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
@@ -108,7 +108,7 @@ impl Menu {
     pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle) {
         self.receiver_control_handle = handle;
     }
-    
+
     fn update_first_visible_item(&mut self) {
         if !self.current.in_range(self.items.len()) {
             return;
@@ -210,7 +210,7 @@ impl Menu {
                             let evnt = MenuEvent::Command(MenuCommandEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
-                                control_receiver_handle: self.receiver_control_handle,                                
+                                control_receiver_handle: self.receiver_control_handle,
                             });
                             self.send_event(evnt);
                             return true;
@@ -218,20 +218,20 @@ impl Menu {
                         MenuItem::CheckBox(item) => {
                             item.checked = !item.checked;
                             let evnt =
-                            MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
+                                MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
                                     command_id: item.command_id,
                                     menu: self.handle,
                                     checked: item.checked,
-                                    control_receiver_handle: self.receiver_control_handle,  
+                                    control_receiver_handle: self.receiver_control_handle,
                                 });
                             self.send_event(evnt);
                             return true;
                         }
                         MenuItem::RadioBox(item) => {
-                            let evnt = MenuEvent::RadioBoxSelected (MenuRadioBoxSelectedEvent {
+                            let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
-                                control_receiver_handle: self.receiver_control_handle,  
+                                control_receiver_handle: self.receiver_control_handle,
                             });
                             self.check_radio_item(index);
                             self.send_event(evnt);
@@ -498,7 +498,7 @@ impl Menu {
                 let evnt = MenuEvent::Command(MenuCommandEvent {
                     command_id: item.command_id,
                     menu: self.handle,
-                    control_receiver_handle: self.receiver_control_handle,  
+                    control_receiver_handle: self.receiver_control_handle,
                 });
                 self.send_event(evnt);
             }
@@ -508,7 +508,7 @@ impl Menu {
                     command_id: item.command_id,
                     menu: self.handle,
                     checked: item.checked,
-                    control_receiver_handle: self.receiver_control_handle,  
+                    control_receiver_handle: self.receiver_control_handle,
                 });
                 self.send_event(evnt);
             }
@@ -516,7 +516,7 @@ impl Menu {
                 let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
                     command_id: item.command_id,
                     menu: self.handle,
-                    control_receiver_handle: self.receiver_control_handle,  
+                    control_receiver_handle: self.receiver_control_handle,
                 });
                 self.check_radio_item(index);
                 self.send_event(evnt);
@@ -525,7 +525,7 @@ impl Menu {
             MenuItem::SubMenu(item) => {
                 RuntimeManager::get().show_menu(
                     item.submenu_handle,
-                    self.receiver_control_handle,                    
+                    self.receiver_control_handle,
                     (self.width as i32) + self.clip.left,
                     self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
                     Size::new(0, 0),

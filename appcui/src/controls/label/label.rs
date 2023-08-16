@@ -1,17 +1,6 @@
-use super::super::common::*;
-use super::super::menu::*;
-use super::super::command_bar::*;
-use super::super::ControlBase;
-use super::super::Layout;
-use super::super::StatusFlags;
-use crate::graphics::*;
-use crate::input::*;
-use crate::system::*;
-use crate::utils::*;
+use AppCUIProcMacro::*;
 
-use AppCUIProcMacro::AppCUIControl;
-
-#[AppCUIControl(overwrite=OnPaint)]
+#[CustomControl(overwrite=OnPaint, internal=true)]
 pub struct Label {
     caption: Caption,
 }

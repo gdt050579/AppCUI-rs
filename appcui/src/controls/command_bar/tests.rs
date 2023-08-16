@@ -1,17 +1,6 @@
-use super::super::command_bar::*;
-use super::super::common::traits::*;
-use super::super::menu::*;
-use super::super::Layout;
-use super::events::CommandBarEvents;
-use crate::controls::menu::events::MenuEvents;
-use crate::controls::menu::*;
-use crate::controls::*;
-use crate::graphics::*;
-use crate::input::*;
-use crate::system::*;
 use AppCUIProcMacro::*;
 
-#[Window(events = CommandBarEvents)]
+#[Window(events = CommandBarEvents, internal=true)]
 struct MyWin1 {
     info: ControlHandle<Label>,
 }

@@ -1,17 +1,7 @@
-use super::super::common::*;
-use super::super::menu::*;
-use super::super::command_bar::*;
-use super::super::ControlBase;
-use super::super::Layout;
-use super::super::StatusFlags;
-use super::CheckedStatusChangedEvent;
-use crate::graphics::*;
-use crate::input::*;
-use crate::system::*;
-use crate::utils::*;
+use crate::controls::checkbox::events::EventData;
 use AppCUIProcMacro::*;
 
-#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent)]
+#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent,internal=true)]
 pub struct CheckBox {
     caption: Caption,
     checked: bool,
@@ -88,8 +78,8 @@ impl OnPaint for CheckBox {
 impl OnDefaultAction for CheckBox {
     fn on_default_action(&mut self) {
         self.checked = !self.checked;
-        self.raise_event(Event::CheckedStatusChanged(CheckedStatusChangedEvent {
-            handle: self.handle,
+        self.raise_event(ControlEvent::CheckBoxEvent(EventData {
+            checbox_handle: self.handle,
             checked: self.checked,
         }));
     }

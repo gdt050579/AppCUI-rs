@@ -5,5 +5,5 @@ pub trait ButtonEvents {
 }
 #[derive(Copy,Clone)]
 pub(crate) struct EventData {
-    button_handle: Handle
+    pub (crate) button_handle: Handle
 }

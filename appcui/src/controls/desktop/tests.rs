@@ -1,13 +1,6 @@
-use crate::controls::common::*;
-use crate::controls::menu::*;
-use super::super::command_bar::*;
-use crate::controls::*;
-use crate::graphics::*;
-use crate::input::*;
-use crate::system::*;
-use AppCUIProcMacro::AppCUIDesktop;
+use AppCUIProcMacro::*;
 
-#[AppCUIDesktop(overwrite = OnPaint)]
+#[Desktop(overwrite = OnPaint, internal = true)]
 struct MyDesktop {}
 impl MyDesktop {
     fn new() -> Self {

@@ -2,19 +2,16 @@ use super::{
     ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
     Theme, ToolTip,
 };
+use crate::controls::command_bar::events::CommandBarEvents;
 use crate::controls::command_bar::{CommandBar, events::CommandBarEvent};
-use crate::controls::control_manager::ParentLayout;
-use crate::controls::common::{
-    CommandBarEvents, Control, Event, EventProcessStatus, MenuEvent, MenuEvents, OnEvent,
-    WindowControl,
-};
+use crate::controls::common::control_manager::ParentLayout;
+use crate::controls::common::{traits::*, ControlEvent, ControlHandle};
+use crate::controls::menu::events::{MenuEvent, MenuEvents};
 use crate::controls::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
-use crate::controls::ControlManager;
-use crate::controls::*;
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::terminals::*;
-use crate::utils::{Caption, Strategy, VectorIndex};
+use crate::utils::VectorIndex;
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -51,7 +48,7 @@ pub(crate) struct RuntimeManager {
     current_focus: Option<Handle>,
     mouse_over_control: Option<Handle>,
     focus_chain: Vec<Handle>,
-    events: Vec<Event>,
+    events: Vec<ControlEvent>,
     commandbar_event: Option<CommandBarEvent>,
     menu_event: Option<MenuEvent>,
     mouse_locked_object: MouseLockedObject,
@@ -162,7 +159,7 @@ impl RuntimeManager {
             }
         }
     }
-    pub(crate) fn send_event(&mut self, event: Event) {
+    pub(crate) fn send_event(&mut self, event: ControlEvent) {
         self.events.push(event);
     }
     pub(crate) fn set_menu_event(&mut self, event: MenuEvent) {
@@ -353,7 +350,7 @@ impl RuntimeManager {
             }
         }
     }
-    fn process_one_event(&mut self, evnt: Event) {
+    fn process_one_event(&mut self, evnt: ControlEvent) {
         let mut h = evnt.get_sender();
         if h.is_none() {
             h = self.get_focused_control();

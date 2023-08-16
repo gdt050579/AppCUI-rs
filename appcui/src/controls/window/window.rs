@@ -31,7 +31,7 @@ enum MoveDirection {
     ToBottom,
 }
 
-#[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent)]
+#[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Window {
     title: Title,
     flags: WindowFlags,

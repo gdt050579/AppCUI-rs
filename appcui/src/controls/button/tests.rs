@@ -9,12 +9,14 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut me = Self {
-            base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), WindowFlags::None),
+            base: Window::new("Win-1", Layout::new("x:1,y:1,w:40,h:7"), WindowFlags::None),
             info: ControlHandle::None,
             but1: ControlHandle::None,
             but2: ControlHandle::None,
         };
-        me.info = me.add(Label::new("<none>",Layout::new("x:1,y:1,w:18")));
+        me.info = me.add(Label::new("<none>",Layout::new("x:1,y:1,w:35")));
+        me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:5,w:12"),button::Flags::None));
+        me.but2 = me.add(Button::new("Button &2", Layout::new("x:20,y:5,w:12"),button::Flags::None));
         me
     }
     fn set_info(&mut self, txt: &str) {
@@ -25,7 +27,14 @@ impl MyWin {
     }
 }
 impl ButtonEvents for MyWin {
-
+    fn on_pressed(&mut self, button_handle: Handle) {
+        if self.but1 == button_handle {
+            self.set_info("Button 1 presed");
+        }
+        if self.but2 == button_handle {
+            self.set_info("Button 2 pressed");
+        }
+    }
 }
 
 #[test]

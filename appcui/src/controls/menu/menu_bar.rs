@@ -1,9 +1,9 @@
 use crate::{
-    controls::common::EventProcessStatus,
+    controls::common::traits::EventProcessStatus,
     graphics::{Character, Size, Surface, TextAlignament, TextFormat},
     input::{Key, KeyCode, KeyModifier},
     system::{RuntimeManager, Theme, Handle},
-    utils::{Caption, Strategy, VectorIndex},
+    utils::{Strategy, VectorIndex},
 };
 
 use super::{MenuBarItem, MenuHandle};

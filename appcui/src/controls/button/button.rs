@@ -1,7 +1,6 @@
-use AppCUIProcMacro::*;
-use crate::controls::button::Flags;
 use crate::controls::button::events::EventData;
-
+use crate::controls::button::Flags;
+use AppCUIProcMacro::*;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Button {
@@ -36,30 +35,23 @@ impl Button {
         but.set_hotkey(hotkey);
         but
     }
-    pub fn set_handler(&mut self, handler: impl Fn(Handle) + 'static) {
-        self.handler = Some(Box::new(handler));
-    }
 }
 impl OnDefaultAction for Button {
     fn on_default_action(&mut self) {
-        self.raise_event(ControlEvent::ButtonEvent( EventData {
+        self.raise_event(ControlEvent::ButtonEvent(EventData {
             button_handle: self.handle,
         }));
-        let my_handler = self.handle;
-        if let Some(handler) = &mut self.handler {
-            handler(my_handler);
-        }
     }
 }
 impl OnKeyPressed for Button {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        if (key.modifier == KeyModifier::None)
-            && ((key.code == KeyCode::Space) || (key.code == KeyCode::Enter))
-        {
-            self.on_default_action();
-            return EventProcessStatus::Processed;
+        match key.get_compact_code() {
+            key!("Space") | key!("Enter") => {
+                self.on_default_action();
+                return EventProcessStatus::Processed;
+            }
+            _ => return EventProcessStatus::Ignored,
         }
-        return EventProcessStatus::Ignored;
     }
 }
 
