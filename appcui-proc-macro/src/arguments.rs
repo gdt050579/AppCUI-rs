@@ -1,5 +1,5 @@
-use proc_macro::*;
 use super::utils;
+use proc_macro::*;
 
 enum State {
     ExpectKey,
@@ -9,6 +9,7 @@ enum State {
 }
 pub struct Arguments {
     pub base: String,
+    pub event_processor_list: String,
     pub debug_mode: bool,
     // overwritebles
     pub on_paint: bool,
@@ -17,7 +18,7 @@ pub struct Arguments {
     pub on_default_action: bool,
     pub on_resize: bool,
     pub on_focus: bool,
-    pub on_event: bool,
+    // control events
     pub command_bar_events: bool,
     pub menu_events: bool,
 
@@ -34,6 +35,7 @@ impl Arguments {
             state: State::ExpectKey,
             key: String::new(),
             values: Vec::with_capacity(8),
+            event_processor_list: String::new(),
             debug_mode: false,
             on_paint: false,
             on_key_pressed: false,
@@ -41,7 +43,6 @@ impl Arguments {
             on_default_action: false,
             on_resize: false,
             on_focus: false,
-            on_event: false,
             menu_events: false,
             command_bar_events: false,
         }
@@ -59,7 +60,7 @@ impl Arguments {
     }
     fn validate_base_attribute(&mut self) {
         self.validate_one_value();
-        if !utils::validate_struct_name (self.values[0].as_str()) {
+        if !utils::validate_struct_name(self.values[0].as_str()) {
             panic!("Invalid name for a base struct. A valid name should contains letters, numbers or underline and must not start with a number.");
         }
         self.base.clear();
@@ -83,9 +84,20 @@ impl Arguments {
                 "OnDefaultAction" => self.on_default_action = true,
                 "OnResize" => self.on_resize = true,
                 "OnFocus" => self.on_focus = true,
-                "OnEvent" => self.on_event = true,
-                "CommandBarEvents" => self.command_bar_events = true,
-                "MenuEvents" => self.menu_events = true,
+                "CommandBarEvents" => {
+                    self.command_bar_events = true;
+                    if self.event_processor_list.len()>0 {
+                        self.event_processor_list.push(',');
+                    }
+                    self.event_processor_list.push_str(&trait_name);
+                }
+                "MenuEvents" => {
+                    self.menu_events = true;
+                    if self.event_processor_list.len()>0 {
+                        self.event_processor_list.push(',');
+                    }
+                    self.event_processor_list.push_str(&trait_name);
+                }
                 other => {
                     panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed, OnMouseEvent, OnDefaultAction, OnResize, OnFocus, OnEvent, MenuEvents, CommandBarEvents");
                 }

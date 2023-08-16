@@ -59,14 +59,6 @@ mod templates {
     }
     ";
 
-    pub static ON_EVENT_TRAIT: &str = "
-    impl OnEvent for $STRUCT_NAME$ {
-        fn on_event(&mut self, event: Event) -> EventProcessStatus  { 
-            return OnEvent::on_event(&mut self.base,event);
-        }
-    }
-    ";
-
     pub static COMMANDBAR_EVENTS_TRAIT: &str = "
     impl CommandBarEvents for $STRUCT_NAME$ {
         fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
@@ -90,9 +82,15 @@ mod templates {
             MenuEvents::on_update_menubar(&self.base, menubar);
         }
     }
-    ";    
+    ";
 }
-fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str, extra_code: &str) -> TokenStream {
+fn parse_token_stream(
+    args: TokenStream,
+    input: TokenStream,
+    base_control: &str,
+    extra_code: &str,
+    allow_event_processor: bool,
+) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args);
     let mut base_definition = "{\n    base: ".to_string();
@@ -103,6 +101,11 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str,
     code.insert_str(0, "#[repr(C)]\n");
     code.push_str(templates::DEREF_TRAIT);
     code.push_str(templates::CONTROL_TRAIT);
+
+    // check for event processors
+    if (!allow_event_processor) && (!a.event_processor_list.is_empty()) {
+        panic!("Current control does not support event processing. This means that you can not overwrite the following: {}. Only Window based controls are allowed to overwrite event processing traits !",&a.event_processor_list);
+    }
 
     // defaults for various events
     if !a.on_paint {
@@ -123,9 +126,6 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str,
     if !a.on_focus {
         code.push_str(templates::ON_FOCUS_TRAIT);
     }
-    if !a.on_event {
-        code.push_str(templates::ON_EVENT_TRAIT);
-    }
     if !a.command_bar_events {
         code.push_str(templates::COMMANDBAR_EVENTS_TRAIT);
     }
@@ -144,18 +144,30 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str,
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
-pub fn AppCUIControl(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(args, input, "ControlBase", "")
+pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
+    parse_token_stream(args, input, "ControlBase", "", false)
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
-pub fn AppCUIWindow(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(args, input, "Window", "impl WindowControl for $STRUCT_NAME$ {}")
+pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
+    parse_token_stream(
+        args,
+        input,
+        "Window",
+        "impl WindowControl for $STRUCT_NAME$ {}",
+        true
+    )
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
-pub fn AppCUIDesktop(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(args, input, "Desktop", "impl DesktopControl for $STRUCT_NAME$ {}")
+pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
+    parse_token_stream(
+        args,
+        input,
+        "Desktop",
+        "impl DesktopControl for $STRUCT_NAME$ {}",
+        false
+    )
 }
 
 #[proc_macro]
