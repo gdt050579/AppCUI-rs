@@ -84,31 +84,44 @@ impl Arguments {
                 "OnDefaultAction" => self.on_default_action = true,
                 "OnResize" => self.on_resize = true,
                 "OnFocus" => self.on_focus = true,
-                "CommandBarEvents" => {
-                    self.command_bar_events = true;
-                    if self.event_processor_list.len()>0 {
-                        self.event_processor_list.push(',');
-                    }
-                    self.event_processor_list.push_str(&trait_name);
-                }
-                "MenuEvents" => {
-                    self.menu_events = true;
-                    if self.event_processor_list.len()>0 {
-                        self.event_processor_list.push(',');
-                    }
-                    self.event_processor_list.push_str(&trait_name);
-                }
                 other => {
-                    panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed, OnMouseEvent, OnDefaultAction, OnResize, OnFocus, OnEvent, MenuEvents, CommandBarEvents");
+                    panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed, OnMouseEvent, OnDefaultAction, OnResize, OnFocus");
                 }
             }
         }
     }
+    fn validate_events_attribute(&mut self) {
+        let mut limited_to_event_processor = true; // true = only event processor controls such as Window can process it
+                                                   // false = all controls can process it
 
+        for trait_name in &self.values {
+            match trait_name.as_str() {
+                "CommandBarEvents" | "CommandBar" => {
+                    self.command_bar_events = true;
+                    limited_to_event_processor = false;
+                }
+                "MenuEvents" | "Menu" => {
+                    self.menu_events = true;
+                    limited_to_event_processor = false;
+                }
+                other => {
+                    panic!("Unknown event/control: '{other}'. Events that could be process are from : CommandBar, Menu");
+                }
+            }
+            if limited_to_event_processor {
+                // add trait name
+                if self.event_processor_list.len() > 0 {
+                    self.event_processor_list.push(',');
+                }
+                self.event_processor_list.push_str(&trait_name);
+            }
+        }
+    }
     fn validate_key_value_pair(&mut self) {
         match self.key.as_str() {
             "base" => self.validate_base_attribute(),
             "overwrite" => self.validate_overwrite_attribute(),
+            "events" => self.validate_events_attribute(),
             "debug" => self.validate_debug_attribute(),
             _ => {
                 panic!("Unknown attribute `{}` for AppCUI. Accepted attributes are 'base' , 'overwrite' and 'debug' !",self.key.as_str());
