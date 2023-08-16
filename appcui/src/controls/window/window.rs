@@ -10,7 +10,8 @@ use super::Title;
 use super::WindowCloseEvent;
 use super::WindowFlags;
 use crate::controls::command_bar::*;
-use crate::controls::events::*;
+use crate::controls::common::*;
+use crate::controls::common::traits::*;
 use crate::controls::menu::Menu;
 use crate::controls::menu::MenuBar;
 use crate::controls::*;
@@ -30,7 +31,7 @@ enum MoveDirection {
     ToBottom,
 }
 
-#[AppCUIControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent)]
+#[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent)]
 pub struct Window {
     title: Title,
     flags: WindowFlags,

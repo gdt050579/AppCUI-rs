@@ -75,8 +75,8 @@ mod templates {
         fn on_menu_open(&self, menu: &mut Menu) {
             MenuEvents::on_menu_open(&self.base, menu);
         }
-        fn on_event(&mut self, event: MenuEvent) {
-            MenuEvents::on_event(&mut self.base,event);
+        fn on_item_clicked(&mut self, command: u32){
+            MenuEvents::on_item_clicked(&mut self.base, command);
         }
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
             MenuEvents::on_update_menubar(&self.base, menubar);
