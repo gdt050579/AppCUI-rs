@@ -83,6 +83,14 @@ mod templates {
         }
     }
     ";
+
+    pub static BUTTON_EVENTS_TRAIT: &str = "
+    impl ButtonEvents for $STRUCT_NAME$ {
+        fn on_pressed(&mut self, button_handle: Handle) {
+            ButtonEvents::on_pressed(&mut self.base, button_handle)
+        }
+    }
+    ";
 }
 fn parse_token_stream(
     args: TokenStream,
@@ -126,11 +134,15 @@ fn parse_token_stream(
     if !a.on_focus {
         code.push_str(templates::ON_FOCUS_TRAIT);
     }
+    // control events
     if !a.command_bar_events {
         code.push_str(templates::COMMANDBAR_EVENTS_TRAIT);
     }
     if !a.menu_events {
         code.push_str(templates::MENU_EVENTS_TRAIT);
+    }
+    if !a.button_events {
+        code.push_str(templates::BUTTON_EVENTS_TRAIT);
     }
     // add the extra code
     code.push_str("\n");

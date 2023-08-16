@@ -11,7 +11,7 @@ pub struct Arguments {
     pub base: String,
     pub event_processor_list: String,
     pub debug_mode: bool,
-    // overwritebles
+    // overwritebles (common events)
     pub on_paint: bool,
     pub on_key_pressed: bool,
     pub on_mouse_event: bool,
@@ -21,6 +21,7 @@ pub struct Arguments {
     // control events
     pub command_bar_events: bool,
     pub menu_events: bool,
+    pub button_events: bool,
 
     // internal
     state: State,
@@ -37,14 +38,17 @@ impl Arguments {
             values: Vec::with_capacity(8),
             event_processor_list: String::new(),
             debug_mode: false,
+            // overwritebles (common events)
             on_paint: false,
             on_key_pressed: false,
             on_mouse_event: false,
             on_default_action: false,
             on_resize: false,
             on_focus: false,
+            // control events
             menu_events: false,
             command_bar_events: false,
+            button_events: false
         }
     }
 
@@ -91,8 +95,8 @@ impl Arguments {
         }
     }
     fn validate_events_attribute(&mut self) {
-        let mut limited_to_event_processor = true; // true = only event processor controls such as Window can process it
-                                                   // false = all controls can process it
+        let mut limited_to_event_processor: bool;   // true = only event processor controls such as Window can process it
+                                                    // false = all controls can process it
 
         for trait_name in &self.values {
             match trait_name.as_str() {
@@ -103,6 +107,10 @@ impl Arguments {
                 "MenuEvents" | "Menu" => {
                     self.menu_events = true;
                     limited_to_event_processor = false;
+                }
+                "ButtonEvents" | "Button" => {
+                    self.button_events = true;
+                    limited_to_event_processor = true;
                 }
                 other => {
                     panic!("Unknown event/control: '{other}'. Events that could be process are from : CommandBar, Menu");

@@ -6,6 +6,7 @@ use crate::controls::menu::events::MenuEvents;
 use crate::controls::menu::*;
 use crate::controls::button::Flags;
 use crate::controls::button::events::EventData;
+use crate::controls::button::events::ButtonEvents;
 
 use super::super::ControlBase;
 use super::super::Layout;
