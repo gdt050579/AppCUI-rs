@@ -1,5 +1,5 @@
-use crate::controls::button::events::EventData;
-use crate::controls::button::Flags;
+use crate::ui::button::{events::EventData, Flags};
+
 use AppCUIProcMacro::*;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
@@ -41,7 +41,7 @@ impl OnDefaultAction for Button {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::ButtonEvent(EventData{})
+            data: ControlEventData::ButtonEvent(EventData {}),
         });
     }
 }
