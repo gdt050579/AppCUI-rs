@@ -490,13 +490,13 @@ impl Window {
                     // self.raise_event(Event::WindowClose(WindowCloseEvent {
                     //     handle: self.handle,
                     // }));
-                    return true;
+                    // return true;
                 }
                 ToolBarItem::ResizeCorner(_) => {
                     self.maximize_restore();
                     return true;
                 }
-                ToolBarItem::Button(button) => {
+                ToolBarItem::Button(_button) => {
                     // self.raise_event(Event::WindowDecoratorButtonPressed(
                     //     WindowDecoratorButtonPressedEvent { command_id: button.get_command_id() },
                     // ));
