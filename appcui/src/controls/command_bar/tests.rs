@@ -10,7 +10,7 @@ impl MyWin1 {
             base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), WindowFlags::None),
             info: ControlHandle::None,
         };
-        me.info = me.add(Label::new("<none>",Layout::new("x:1,y:1,w:18")));
+        me.info = me.add(Label::new("<none>",Layout::new("x:0,y:0,w:18")));
         me
     }
     fn set_info(&mut self, txt: &str) {
@@ -38,16 +38,17 @@ impl CommandBarEvents for MyWin1 {
 #[test]
 fn check_command_bar_1() {
     let script = "
-        //Paint('initial state')
+        Paint.Enable(false)
+        Paint('initial state')
         CheckHash(0x8F46035284DF4B04)
         Key.Pressed(F1)
-        //Paint('MyWin-1-CMD-1 pressed')
+        Paint('MyWin-1-CMD-1 pressed')
         CheckHash(0x4CDD9A1678E2E012)
         Mouse.Move(29,9);
-        //Paint('MyWin-1-CMD-2 hovered')
+        Paint('MyWin-1-CMD-2 hovered')
         CheckHash(0x1EC6A227F348D572)
         Mouse.Click(29,9,left)
-        //Paint('MyWin-1-CMD-2 clicked')
+        Paint('MyWin-1-CMD-2 clicked')
         CheckHash(0xCF24F44D8821A501)        
     ";
     let mut a = App::debug(
