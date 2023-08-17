@@ -1,9 +1,9 @@
 use AppCUIProcMacro::*;
 
 use crate::{
-    controls::{common::ControlHandle, Desktop, Layout},
     input::{Key, KeyCode, KeyModifier},
     system::{App, InitializationFlags},
+    ui::{common::ControlHandle, Desktop, Layout},
 };
 
 use super::{
