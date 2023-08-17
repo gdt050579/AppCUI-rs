@@ -14,12 +14,15 @@ pub(crate) struct ParentLayout {
 impl From<&mut ControlBase> for ParentLayout {
     fn from(base: &mut ControlBase) -> Self {
         let sz = base.get_size();
-        ParentLayout {
+        let mut pl = ParentLayout {
             clip: base.get_client_clip(),
             origin: base.screen_origin,
             width: sz.width as u16,
             height: sz.height as u16,
-        }
+        };
+        pl.origin.x += base.margins.left as i32;
+        pl.origin.y += base.margins.top as i32;
+        pl
     }
 }
 impl From<&Box<dyn Terminal>> for ParentLayout {

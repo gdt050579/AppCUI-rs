@@ -23,17 +23,17 @@ pub enum StatusFlags {
     EventProcessor = 0x0040,
 }
 #[derive(Copy, Clone)]
-struct Margins {
-    left: u8,
-    right: u8,
-    top: u8,
-    bottom: u8,
+pub(crate) struct Margins {
+    pub(crate) left: u8,
+    pub(crate) right: u8,
+    pub(crate) top: u8,
+    pub(crate) bottom: u8,
 }
 
 #[repr(C)]
 pub struct ControlBase {
     layout: ControlLayout,
-    margins: Margins,
+    pub(crate) margins: Margins,
     pub(crate) handle: Handle,
     pub(crate) parent: Handle,
     pub(crate) event_processor: Handle,
