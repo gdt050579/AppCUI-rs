@@ -4,13 +4,13 @@ use super::{
     MousePressedResult,
 };
 use crate::{
-    controls::common::traits::EventProcessStatus,
     graphics::{
         Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
         TextFormat, TextWrap,
     },
     input::{Key, KeyCode, MouseWheelDirection},
     system::{Handle, HandleSupport, RuntimeManager, Theme},
+    ui::common::traits::EventProcessStatus,
     utils::{Caption, Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
