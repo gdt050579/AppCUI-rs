@@ -1,4 +1,4 @@
-use crate::controls::checkbox::events::EventData;
+use crate::ui::checkbox::events::EventData;
 use AppCUIProcMacro::*;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent,internal=true)]
