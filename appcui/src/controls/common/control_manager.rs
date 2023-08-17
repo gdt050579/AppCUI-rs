@@ -8,17 +8,17 @@ use std::ptr::NonNull;
 pub(crate) struct ParentLayout {
     pub(super) clip: ClipArea,
     pub(super) origin: Point,
-    pub(super) width: u16,
-    pub(super) height: u16,
+    pub(super) client_width: u16,
+    pub(super) client_height: u16
 }
 impl From<&mut ControlBase> for ParentLayout {
     fn from(base: &mut ControlBase) -> Self {
-        let sz = base.get_size();
+        let client_sz = base.get_client_size();
         let mut pl = ParentLayout {
             clip: base.get_client_clip(),
             origin: base.screen_origin,
-            width: sz.width as u16,
-            height: sz.height as u16,
+            client_width: client_sz.width as u16,
+            client_height: client_sz.height as u16
         };
         pl.origin.x += base.margins.left as i32;
         pl.origin.y += base.margins.top as i32;
@@ -27,16 +27,18 @@ impl From<&mut ControlBase> for ParentLayout {
 }
 impl From<&Box<dyn Terminal>> for ParentLayout {
     fn from(terminal: &Box<dyn Terminal>) -> Self {
+        let term_width = terminal.get_width();
+        let term_height = terminal.get_height();
         ParentLayout {
             clip: ClipArea::new(
                 0,
                 0,
-                (terminal.get_width() as i32) - 1,
-                (terminal.get_height() as i32) - 1,
+                (term_width as i32) - 1,
+                (term_height as i32) - 1,
             ),
             origin: Point::default(),
-            width: terminal.get_width() as u16,
-            height: terminal.get_height() as u16,
+            client_width: term_width as u16,
+            client_height: term_height as u16,
         }
     }
 }

@@ -253,7 +253,7 @@ impl ControlBase {
     #[inline]
     pub(crate) fn update_control_layout_and_screen_origin(&mut self, parent_layout: &ParentLayout) {
         self.layout
-            .update(parent_layout.width, parent_layout.height);
+            .update(parent_layout.client_width, parent_layout.client_height);
         self.screen_origin.x = parent_layout.origin.x + self.layout.get_x();
         self.screen_origin.y = parent_layout.origin.y + self.layout.get_y();
         self.screen_clip.set_with_size(
