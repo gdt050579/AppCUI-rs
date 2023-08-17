@@ -80,6 +80,21 @@ impl ControlBase {
         self.layout.layout_resize(width, height);
         RuntimeManager::get().request_recompute_layout();
     }
+    #[inline(always)]
+    pub fn get_client_size(&self) -> Size {
+        let horizontal_margins = (self.margins.left as u32) + (self.margins.right as u32);
+        let vertical_margins = (self.margins.top as u32) + (self.margins.bottom as u32);
+        let width = self.layout.get_width() as u32;
+        let height = self.layout.get_height() as u32;
+        Size {
+            width: if horizontal_margins > width {
+                0
+            } else {
+                width - horizontal_margins
+            },
+            height: if vertical_margins>height { 0 } else { height - vertical_margins }
+        }
+    }
 
     #[inline(always)]
     pub fn get_position(&self) -> Point {
