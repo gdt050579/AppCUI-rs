@@ -94,6 +94,15 @@ impl ControlBase {
     }
 
     #[inline(always)]
+    pub fn set_enabled(&mut self, enabled: bool) {
+        if enabled {
+            self.status_flags.set(StatusFlags::Enabled);
+        } else {
+            self.status_flags.remove(StatusFlags::Enabled);
+        }
+    }
+
+    #[inline(always)]
     pub(crate) fn update_focus_flag(&mut self, has_focus: bool) {
         if has_focus {
             self.status_flags |= StatusFlags::Focused;

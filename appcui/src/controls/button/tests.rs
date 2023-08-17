@@ -5,18 +5,23 @@ struct MyWin {
     info: ControlHandle<Label>,
     but1: ControlHandle<Button>,
     but2: ControlHandle<Button>,
+    but3: ControlHandle<Button>,
 }
 impl MyWin {
     fn new() -> Self {
         let mut me = Self {
-            base: Window::new("Win-1", Layout::new("x:1,y:1,w:40,h:7"), WindowFlags::None),
+            base: Window::new("Win-1", Layout::new("d:c,w:41,h:7"), WindowFlags::None),
             info: ControlHandle::None,
             but1: ControlHandle::None,
             but2: ControlHandle::None,
+            but3: ControlHandle::None,
         };
-        me.info = me.add(Label::new("<none>",Layout::new("x:1,y:1,w:35")));
-        me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:4,w:12"),button::Flags::None));
-        me.but2 = me.add(Button::new("Button &2", Layout::new("x:20,y:4,w:12"),button::Flags::None));
+        me.info = me.add(Label::new("<none>",Layout::new("x:0,y:0,w:35")));
+        me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:3,w:11"),button::Flags::None));
+        me.but2 = me.add(Button::new("Button &2", Layout::new("x:14,y:3,w:11"),button::Flags::None));
+        let mut b3 = Button::new("Button &3", Layout::new("x:27,y:3,w:11"),button::Flags::None);
+        b3.set_enabled(false);
+        me.but3 = me.add(b3);
         me
     }
     fn set_info(&mut self, txt: &str) {
@@ -40,12 +45,17 @@ impl ButtonEvents for MyWin {
 #[test]
 fn check_button_control() {
     let script = "
-        Paint('initial state')      
+        Paint('initial state')   
+        //CheckHash(0xB838E6ABBF00B753)   
+        Key.Pressed(Tab)
+        Paint('After tab pressed') 
+        Key.Pressed(Enter)
+        Paint('After second button was pressed')
     ";
     let mut a = App::debug(
         60,
         10,
-        InitializationFlags::CommandBar,
+        InitializationFlags::None,
         Desktop::new(),
         script,
     )
