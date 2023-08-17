@@ -1,5 +1,5 @@
-use crate::controls::Desktop;
-use crate::controls::command_bar::*;
+use crate::ui::Desktop;
+use crate::ui::command_bar::*;
 use super::App;
 use super::InitializationFlags;
 use super::Theme;

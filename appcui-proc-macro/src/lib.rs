@@ -8,13 +8,13 @@ extern crate proc_macro;
 
 mod templates {
     pub static IMPORTS: &str = "
-    use $(ROOT)::controls::*;
-    use $(ROOT)::controls::common::traits::*;
-    use $(ROOT)::controls::button::events::ButtonEvents;
-    use $(ROOT)::controls::checkbox::events::CheckBoxEvents;
-    use $(ROOT)::controls::command_bar::events::CommandBarEvents;
-    use $(ROOT)::controls::menu::events::MenuEvents;
-    use $(ROOT)::controls::menu::*;
+    use $(ROOT)::ui::*;
+    use $(ROOT)::ui::common::traits::*;
+    use $(ROOT)::ui::button::events::ButtonEvents;
+    use $(ROOT)::ui::checkbox::events::CheckBoxEvents;
+    use $(ROOT)::ui::command_bar::events::CommandBarEvents;
+    use $(ROOT)::ui::menu::events::MenuEvents;
+    use $(ROOT)::ui::menu::*;
     use $(ROOT)::graphics::*;
     use $(ROOT)::system::*;
     use $(ROOT)::input::*;
@@ -22,7 +22,7 @@ mod templates {
 
     pub static IMPORTS_INTERNAL: &str = "
     use crate::utils::*;
-    use crate::controls::common::*;
+    use crate::ui::common::*;
     ";
 
     pub static DEREF_TRAIT: &str = "

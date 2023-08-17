@@ -2,13 +2,13 @@ use super::{
     ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
     Theme, ToolTip,
 };
-use crate::controls::common::ControlEventData;
-use crate::controls::command_bar::events::CommandBarEvents;
-use crate::controls::command_bar::{CommandBar, events::CommandBarEvent};
-use crate::controls::common::control_manager::ParentLayout;
-use crate::controls::common::{traits::*, ControlEvent, ControlHandle};
-use crate::controls::menu::events::{MenuEvent, MenuEvents};
-use crate::controls::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
+use crate::ui::common::ControlEventData;
+use crate::ui::command_bar::events::CommandBarEvents;
+use crate::ui::command_bar::{CommandBar, events::CommandBarEvent};
+use crate::ui::common::control_manager::ParentLayout;
+use crate::ui::common::{traits::*, ControlEvent, ControlHandle};
+use crate::ui::menu::events::{MenuEvent, MenuEvents};
+use crate::ui::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::terminals::*;

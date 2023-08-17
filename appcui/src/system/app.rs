@@ -4,8 +4,8 @@ use super::Error;
 use super::InitializationData;
 use super::InitializationFlags;
 use super::RuntimeManager;
-use crate::controls::common::traits::*;
-use crate::controls::common::*;
+use crate::ui::common::traits::*;
+use crate::ui::common::*;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 

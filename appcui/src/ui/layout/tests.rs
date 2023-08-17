@@ -1,4 +1,4 @@
-use crate::controls::layout::absolute_layout::AbsoluteLayout;
+use crate::ui::layout::absolute_layout::AbsoluteLayout;
 
 use super::Alignament;
 use super::Coordonate;

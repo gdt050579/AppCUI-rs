@@ -1,4 +1,4 @@
-use crate::{controls::menu::{Menu, MenuHandle}, utils::HandleManager};
+use crate::{ui::menu::{Menu, MenuHandle}, utils::HandleManager};
 
 pub(crate) struct MenuHandleManager {
     manager: HandleManager<Menu>
