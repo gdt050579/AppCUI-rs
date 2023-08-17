@@ -13,7 +13,7 @@ impl Button {
     /// # Examples
     /// ```
     /// use appcui::controls::*;
-    /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), ButtonFlags::None);
+    /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), button::Flags::None);
     /// ```
     pub fn new(caption: &str, layout: Layout, flags: Flags) -> Self {
         let mut but = Button {
