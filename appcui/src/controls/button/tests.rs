@@ -15,8 +15,8 @@ impl MyWin {
             but2: ControlHandle::None,
         };
         me.info = me.add(Label::new("<none>",Layout::new("x:1,y:1,w:35")));
-        me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:5,w:12"),button::Flags::None));
-        me.but2 = me.add(Button::new("Button &2", Layout::new("x:20,y:5,w:12"),button::Flags::None));
+        me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:4,w:12"),button::Flags::None));
+        me.but2 = me.add(Button::new("Button &2", Layout::new("x:20,y:4,w:12"),button::Flags::None));
         me
     }
     fn set_info(&mut self, txt: &str) {
