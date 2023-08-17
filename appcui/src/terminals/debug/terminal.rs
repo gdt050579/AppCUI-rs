@@ -17,6 +17,7 @@ pub(crate) struct DebugTerminal {
     commands: VecDeque<Command>,
     sys_events: VecDeque<SystemEvent>,
     paint: bool,
+    ignore_paint_command: bool,
     paint_title: String,
     hash_to_test: Option<u64>,
     mouse_pos: Point,
@@ -65,9 +66,10 @@ impl DebugTerminal {
             commands,
             sys_events: VecDeque::with_capacity(8),
             paint: false,
+            ignore_paint_command: false,
             paint_title: String::new(),
             hash_to_test: None,
-            mouse_pos: Point::new(0,0),
+            mouse_pos: Point::new(0, 0),
         }))
     }
     fn _forecolor_to_str(col: Color) -> &'static str {
@@ -182,7 +184,7 @@ impl Terminal for DebugTerminal {
         }
         println!("+{}+", self.temp_str);
         self.temp_str.clear();
-        
+
         // name
         self.temp_str.push_str("| Name: \x1b[93;40m");
         self.temp_str.push_str(&self.paint_title);
@@ -192,17 +194,18 @@ impl Terminal for DebugTerminal {
         self.temp_str.push_str("\x1b[0m|");
         println!("{}", &self.temp_str);
         self.temp_str.clear();
-        
+
         // hash
         self.temp_str.push_str("| Hash: \x1b[93;40m");
-        self.temp_str.push_str(format!("0x{:X}",surface_hash).as_str());
+        self.temp_str
+            .push_str(format!("0x{:X}", surface_hash).as_str());
         while self.temp_str.len() < (self.width + 16) as usize {
             self.temp_str.push(' ');
         }
         self.temp_str.push_str("\x1b[0m|");
         println!("{}", &self.temp_str);
         self.temp_str.clear();
-        
+
         // separator line
         self.temp_str.push('|');
         for _ in 0..=6 + self.width {
@@ -211,7 +214,7 @@ impl Terminal for DebugTerminal {
         self.temp_str.push('|');
         println!("{}", &self.temp_str);
         self.temp_str.clear();
-        
+
         // second digit
         self.temp_str.push_str("|    | ");
         for i in 0..self.width {
@@ -314,23 +317,23 @@ impl Terminal for DebugTerminal {
                 SystemEvent::MouseButtonDown(evnt) => {
                     self.mouse_pos.x = evnt.x;
                     self.mouse_pos.y = evnt.y;
-                },
+                }
                 SystemEvent::MouseButtonUp(evnt) => {
                     self.mouse_pos.x = evnt.x;
                     self.mouse_pos.y = evnt.y;
-                },
+                }
                 SystemEvent::MouseDoubleClick(evnt) => {
                     self.mouse_pos.x = evnt.x;
                     self.mouse_pos.y = evnt.y;
-                },
+                }
                 SystemEvent::MouseMove(evnt) => {
                     self.mouse_pos.x = evnt.x;
                     self.mouse_pos.y = evnt.y;
-                },
+                }
                 SystemEvent::MouseWheel(evnt) => {
                     self.mouse_pos.x = evnt.x;
                     self.mouse_pos.y = evnt.y;
-                },
+                }
                 _ => {}
             }
             return event;
@@ -339,17 +342,24 @@ impl Terminal for DebugTerminal {
         if let Some(cmd) = self.commands.pop_front() {
             cmd.generate_event(&mut self.sys_events);
             // check for paint command
-            if let Some(title) = cmd.get_paint_command_title() {
-                self.paint_title = title;
-                RuntimeManager::get().request_repaint();
-                self.paint = true;
-                return SystemEvent::None;
+            if !self.ignore_paint_command {
+                if let Some(title) = cmd.get_paint_command_title() {
+                    self.paint_title = title;
+                    RuntimeManager::get().request_repaint();
+                    self.paint = true;
+                    return SystemEvent::None;
+                }
             }
             // check for CheckHash command
             if let Some(hash) = cmd.get_screen_hash() {
                 self.paint = false; // I don't want to paint anything --> just store the hash
                 self.hash_to_test = Some(hash); // next time I paint --> I will check it
                 RuntimeManager::get().request_repaint();
+                return SystemEvent::None;
+            }
+            // check for PaintEnable command
+            if let Some(value) = cmd.get_paint_enable_status() {
+                self.ignore_paint_command = !value;
                 return SystemEvent::None;
             }
             return SystemEvent::None;

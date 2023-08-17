@@ -13,7 +13,7 @@ use super::{
     mouse_release_command::MouseReleaseCommand,
     mouse_wheel_command::MouseWheelCommand,
     paint_command::PaintCommand,
-    resize_command::ResizeCommand,
+    resize_command::ResizeCommand, paint_enable_command::PaintEnableCommand,
 };
 
 pub(super) enum Command {
@@ -24,6 +24,7 @@ pub(super) enum Command {
     MouseDrag(MouseDragCommand),
     MouseWheel(MouseWheelCommand),
     Paint(PaintCommand),
+    PaintEnable(PaintEnableCommand),
     CheckHash(CheckHashCommand),
     Resize(ResizeCommand),
     KeyPresed(KeyPressedCommand),
@@ -60,6 +61,10 @@ impl Command {
                 let variant = PaintCommand::new(&cp)?;
                 return Ok(Command::Paint(variant));
             }
+            "Paint.Enable" => {
+                let variant = PaintEnableCommand::new(&cp)?;
+                return Ok(Command::PaintEnable(variant));            
+            }
             "CheckHash" => {
                 let variant = CheckHashCommand::new(&cp)?;
                 return Ok(Command::CheckHash(variant));
@@ -90,6 +95,7 @@ impl Command {
             Command::Resize(cmd) => cmd.generate_event(sys_events),
             Command::KeyPresed(cmd) => cmd.generate_event(sys_events),
             Command::Paint(_) => {}
+            Command::PaintEnable(_) => {}
             Command::CheckHash(_) => {}
         }
     }
@@ -102,6 +108,12 @@ impl Command {
     pub(super) fn get_screen_hash(&self) -> Option<u64> {
         match self {
             Command::CheckHash(cmd) => Some(cmd.get_hash()),
+            _ => None,
+        }
+    }
+    pub(super) fn get_paint_enable_status(&self) -> Option<bool> {
+        match self {
+            Command::PaintEnable(cmd) => Some(cmd.is_paint_enabled()),
             _ => None,
         }
     }
