@@ -1,13 +1,15 @@
-use AppCUIProcMacro::key;
+use AppCUIProcMacro::*;
 
 use crate::{
-    controls::{Desktop, Layout},
+    controls::{common::ControlHandle, Desktop, Layout},
+    input::{Key, KeyCode, KeyModifier},
     system::{App, InitializationFlags},
-    input::{Key, KeyModifier, KeyCode}
 };
 
-use super::{Window, WindowFlags, toolbar::{Gravity, self}};
-
+use super::{
+    toolbar::{self, Gravity},
+    Window, WindowFlags,
+};
 
 #[test]
 fn check_window_title() {
@@ -195,7 +197,6 @@ fn check_window_tag_and_title_not_visible() {
     a.run();
 }
 
-
 #[test]
 fn check_window_hotkey_1() {
     let script = "
@@ -266,6 +267,57 @@ fn check_window_resize() {
 }
 
 #[test]
+fn check_window_size() {
+    #[Window(overwrite = OnResize,internal = true)]
+    struct MyWin {
+        info: ControlHandle<Label>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new("d:c,w:40,h:7"), WindowFlags::None),
+                info: ControlHandle::None,
+            };
+            me.info = me.add(Label::new("", Layout::new("x:1,y:1,w:36,h:3")));
+            me
+        }
+    }
+    impl OnResize for MyWin {
+        fn on_resize(&mut self, old_size: Size, new_size: Size) {
+            self.base.on_resize(old_size, new_size);
+            let label_handle = self.info;
+            let size = self.get_size();
+            let client_size = self.get_client_size();
+            if let Some(label) = self.get_control_mut(label_handle) {
+                label.set_text(
+                    format!(
+                        "Previous size : {}x{}\nNew size      : {}x{}\nClient size   : {}x{}",
+                        old_size.width,
+                        old_size.height,
+                        size.width,
+                        size.height,
+                        client_size.width,
+                        client_size.height
+                    )
+                    .as_str(),
+                );
+            }
+            assert!(size == new_size);
+            assert!(old_size.width == 12); // minim window width
+            assert!(old_size.height == 3); // minim window height (set by bounds)
+        }
+    }
+
+    let script = "
+        Paint('initial state')
+        CheckHash(0x8471BBDBD6D2B1E)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
 fn check_window_move() {
     let script = "
         Mouse.Move(30,3)
@@ -297,9 +349,12 @@ fn check_window_toolbar_label() {
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
-    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomLeft,"Label 1"));
-    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomLeft,"Label 2"));
-    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomRight,"Label 3"));
+    w.get_toolbar()
+        .add(toolbar::Label::new(Gravity::BottomLeft, "Label 1"));
+    w.get_toolbar()
+        .add(toolbar::Label::new(Gravity::BottomLeft, "Label 2"));
+    w.get_toolbar()
+        .add(toolbar::Label::new(Gravity::BottomRight, "Label 3"));
 
     a.add_window(w);
     a.run();
@@ -321,9 +376,12 @@ fn check_window_toolbar_button() {
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
-    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft,"Start", 1));
-    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft,"Stop", 2));
-    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomRight,"Exit", 3));
+    w.get_toolbar()
+        .add(toolbar::Button::new(Gravity::BottomLeft, "Start", 1));
+    w.get_toolbar()
+        .add(toolbar::Button::new(Gravity::BottomLeft, "Stop", 2));
+    w.get_toolbar()
+        .add(toolbar::Button::new(Gravity::BottomRight, "Exit", 3));
 
     a.add_window(w);
     a.run();
