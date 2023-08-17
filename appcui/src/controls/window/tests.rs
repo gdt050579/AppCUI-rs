@@ -309,7 +309,7 @@ fn check_window_size() {
     }
 
     let script = "
-        Paint('initial state')
+        //Paint('initial state')
         CheckHash(0x8471BBDBD6D2B1E)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
