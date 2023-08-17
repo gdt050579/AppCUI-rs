@@ -7,7 +7,7 @@ use crate::{
 fn check_label_position() {
     let script = "
         Paint.Enable(false)
-        Paint('initial state')   
+        Paint('nine labels across al corners and center')   
         CheckHash(0xF7D704CAB062ED5C)   
     ";
     let mut a = App::debug(60, 11, InitializationFlags::None, Desktop::new(), script).unwrap();
@@ -29,12 +29,25 @@ fn check_label_position() {
 fn check_label_multiline() {
     let script = "
         Paint.Enable(false)
-        Paint('initial state')   
+        Paint('a multi-line label')   
         CheckHash(0xD4FE75C904BD13F9)   
     ";
     let mut a = App::debug(60, 11, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), WindowFlags::None);
     w.add(Label::new("This is a multi-line label", Layout::new("d:tl,w:10,h:3")));
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_label_with_hotkey() {
+    let script = "
+        Paint.Enable(false)
+        Paint('label with a hot ket')   
+        CheckHash(0xD2356769850743E5)   
+    ";
+    let mut a = App::debug(60, 11, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), WindowFlags::None);
+    w.add(Label::new("A &hot ket label", Layout::new("d:tl,w:30")));
     a.add_window(w);
     a.run();
 }
