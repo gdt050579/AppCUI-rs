@@ -1,14 +1,12 @@
 use super::control_manager::ParentLayout;
-use crate::controls::button::events::ButtonEvents;
-use crate::controls::checkbox::events::CheckBoxEvents;
-use crate::controls::command_bar::events::CommandBarEvents;
-use crate::controls::common::traits::*;
-use crate::controls::common::*;
-use crate::controls::layout::*;
-use crate::controls::menu::events::MenuEvents;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, RuntimeManager};
+use crate::ui::{
+    button::events::ButtonEvents, checkbox::events::CheckBoxEvents,
+    command_bar::events::CommandBarEvents, common::traits::*, common::*, layout::*,
+    menu::events::MenuEvents,
+};
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
 
@@ -92,7 +90,11 @@ impl ControlBase {
             } else {
                 width - horizontal_margins
             },
-            height: if vertical_margins>height { 0 } else { height - vertical_margins }
+            height: if vertical_margins > height {
+                0
+            } else {
+                height - vertical_margins
+            },
         }
     }
 
