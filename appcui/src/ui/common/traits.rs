@@ -1,5 +1,5 @@
 use crate::{
-    controls::{
+    ui::{
         button::events::ButtonEvents, 
         command_bar::events::CommandBarEvents,
         menu::events::MenuEvents, checkbox::events::CheckBoxEvents,
