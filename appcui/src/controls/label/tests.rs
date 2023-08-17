@@ -6,7 +6,8 @@ use crate::{
 #[test]
 fn check_label_position() {
     let script = "
-        //Paint('initial state')   
+        Paint.Enable(false)
+        Paint('initial state')   
         CheckHash(0xF7D704CAB062ED5C)   
     ";
     let mut a = App::debug(60, 11, InitializationFlags::None, Desktop::new(), script).unwrap();
@@ -27,7 +28,8 @@ fn check_label_position() {
 #[test]
 fn check_label_multiline() {
     let script = "
-        //Paint('initial state')   
+        Paint.Enable(false)
+        Paint('initial state')   
         CheckHash(0xD4FE75C904BD13F9)   
     ";
     let mut a = App::debug(60, 11, InitializationFlags::None, Desktop::new(), script).unwrap();

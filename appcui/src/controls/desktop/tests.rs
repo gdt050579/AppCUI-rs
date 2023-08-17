@@ -23,7 +23,8 @@ impl OnPaint for MyDesktop {
 #[test]
 fn check_custom_paint_for_desktop() {
     let script = "
-        //Paint('desktop with red and green')
+        Paint.Enable(false)
+        Paint('desktop with red and green')
         CheckHash(0xD490E8FF2EC89965)
     ";
     let a = App::debug(60, 10, InitializationFlags::None, MyDesktop::new(), script).unwrap();
