@@ -12,7 +12,7 @@ impl Button {
     /// Creates a new button with the specified caption, layout and flags
     /// # Examples
     /// ```
-    /// use appcui::controls::*;
+    /// use appcui::ui::*;
     /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), button::Flags::None);
     /// ```
     pub fn new(caption: &str, layout: Layout, flags: Flags) -> Self {
