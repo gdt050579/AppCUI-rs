@@ -96,12 +96,12 @@ impl MenuBar {
                 return EventProcessStatus::Processed;
             } else {
                 // the same index (and a valid one)
-                return EventProcessStatus::Cancel;
+                return EventProcessStatus::Ignored;
             }
         } else {
             if self.hovered_item.is_valid() {
                 self.hovered_item = VectorIndex::Invalid;
-                return EventProcessStatus::Update;
+                return EventProcessStatus::Processed;
             }
         }
         return EventProcessStatus::Ignored;

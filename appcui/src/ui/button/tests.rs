@@ -32,13 +32,16 @@ impl MyWin {
     }
 }
 impl ButtonEvents for MyWin {
-    fn on_pressed(&mut self, button_handle: Handle) {
+    fn on_pressed(&mut self, button_handle: Handle)->EventProcessStatus {
         if self.but1 == button_handle {
             self.set_info("Button 1 presed");
+            return EventProcessStatus::Processed;
         }
         if self.but2 == button_handle {
             self.set_info("Button 2 pressed");
+            return EventProcessStatus::Processed;
         }
+        return EventProcessStatus::Ignored;
     }
 }
 

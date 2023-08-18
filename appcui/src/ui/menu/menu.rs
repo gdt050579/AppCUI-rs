@@ -389,17 +389,19 @@ impl Menu {
             need_repaint = true;
         }
         if need_repaint {
-            if mpi.is_on_menu {
-                return EventProcessStatus::Processed;
-            } else {
-                return EventProcessStatus::Update;
-            }
+            return EventProcessStatus::Processed;
+            // if mpi.is_on_menu {
+            //     return EventProcessStatus::Processed;
+            // } else {
+            //     return EventProcessStatus::Update;
+            // }
         } else {
-            if mpi.is_on_menu {
-                return EventProcessStatus::Cancel;
-            } else {
-                return EventProcessStatus::Ignored;
-            }
+            return EventProcessStatus::Ignored
+            // if mpi.is_on_menu {
+            //     return EventProcessStatus::Cancel;
+            // } else {
+            //     return EventProcessStatus::Ignored;
+            // }
         }
     }
     pub(crate) fn on_mouse_wheel(&mut self, direction: MouseWheelDirection) -> EventProcessStatus {

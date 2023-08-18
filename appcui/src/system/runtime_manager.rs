@@ -2,16 +2,16 @@ use super::{
     ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
     Theme, ToolTip,
 };
-use crate::ui::common::ControlEventData;
-use crate::ui::command_bar::events::CommandBarEvents;
-use crate::ui::command_bar::{CommandBar, events::CommandBarEvent};
-use crate::ui::common::control_manager::ParentLayout;
-use crate::ui::common::{traits::*, ControlEvent, ControlHandle};
-use crate::ui::menu::events::{MenuEvent, MenuEvents};
-use crate::ui::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::terminals::*;
+use crate::ui::command_bar::events::CommandBarEvents;
+use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
+use crate::ui::common::control_manager::ParentLayout;
+use crate::ui::common::ControlEventData;
+use crate::ui::common::{traits::*, ControlEvent, ControlHandle};
+use crate::ui::menu::events::{MenuEvent, MenuEvents};
+use crate::ui::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::utils::VectorIndex;
 
 #[repr(u8)]
@@ -177,11 +177,7 @@ impl RuntimeManager {
         self.repaint = true;
         self.recompute_layout = true;
     }
-    fn set_event_processors(
-        &mut self,
-        control_handle: Handle,
-        event_processor: Handle,
-    ) {
+    fn set_event_processors(&mut self, control_handle: Handle, event_processor: Handle) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(control_handle) {
             let base = control.get_base_mut();
@@ -585,23 +581,22 @@ impl RuntimeManager {
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
         // check controls first
-        if self
-            .process_control_keypressed_event(self.desktop_handler, event.key, event.character)
-            .is_processed_or_update()
+        if self.process_control_keypressed_event(self.desktop_handler, event.key, event.character)
+            == EventProcessStatus::Processed
         {
             self.repaint = true;
             return;
         };
         // check for a menu on_key_event
         if let Some(menu) = self.get_opened_menu() {
-            if menu.on_key_pressed(event.key).is_processed_or_update() {
+            if menu.on_key_pressed(event.key) == EventProcessStatus::Processed {
                 self.repaint = true;
                 return;
             }
         }
         // check the menubar
         if let Some(menubar) = self.menubar.as_mut() {
-            if menubar.on_key_event(event.key).is_processed_or_update() {
+            if menubar.on_key_event(event.key) == EventProcessStatus::Processed {
                 self.repaint = true;
                 return;
             }
@@ -675,7 +670,7 @@ impl RuntimeManager {
         // Process event in the following order:
         // first the context menu and its owner, then the menu bar and then cmdbar
         if let Some(menu) = self.get_opened_menu() {
-            if menu.on_mouse_move(x, y).is_processed_or_update() {
+            if menu.on_mouse_move(x, y) == EventProcessStatus::Processed {
                 self.repaint = true;
                 return true;
             }
@@ -692,18 +687,8 @@ impl RuntimeManager {
         */
 
         if let Some(menubar) = self.menubar.as_mut() {
-            processed = match menubar.on_mouse_move(x, y) {
-                EventProcessStatus::Processed => {
-                    self.repaint = true;
-                    true
-                }
-                EventProcessStatus::Ignored => false,
-                EventProcessStatus::Update => {
-                    self.repaint = true;
-                    true
-                }
-                EventProcessStatus::Cancel => false,
-            }
+            processed = menubar.on_mouse_move(x, y) == EventProcessStatus::Processed;
+            self.repaint |= processed;
         }
         if !processed {
             if let Some(cmdbar) = self.commandbar.as_mut() {
@@ -720,7 +705,7 @@ impl RuntimeManager {
             if let Some(c_handle) = self.mouse_over_control {
                 if let Some(control) = controls.get(c_handle) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
-                    self.repaint |= response.is_processed_or_update();
+                    self.repaint |= response == EventProcessStatus::Processed;
                     control.get_base_mut().update_mouse_over_flag(false);
                 }
                 self.mouse_over_control = None;
@@ -815,9 +800,7 @@ impl RuntimeManager {
     }
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
         if let Some(menu) = self.get_opened_menu() {
-            self.repaint |= menu
-                .on_mouse_wheel(event.direction)
-                .is_processed_or_update();
+            self.repaint |= menu.on_mouse_wheel(event.direction) == EventProcessStatus::Processed;
             return;
         }
         match self.mouse_locked_object {
@@ -827,15 +810,10 @@ impl RuntimeManager {
         if let Some(handle) = self.coordinates_to_control(self.desktop_handler, event.x, event.y) {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get(handle) {
-                match control
+                self.repaint |= control
                     .get_control_mut()
                     .on_mouse_event(&MouseEvent::Wheel(event.direction))
-                {
-                    EventProcessStatus::Processed | EventProcessStatus::Update => {
-                        self.repaint = true
-                    }
-                    _ => {}
-                }
+                    == EventProcessStatus::Processed;
             }
         }
     }
@@ -854,7 +832,7 @@ impl RuntimeManager {
                         y: event.y - scr_y,
                         button: event.button,
                     }));
-            let do_update = response.is_processed_or_update();
+            let do_update = response == EventProcessStatus::Processed;
             self.repaint |= do_update;
             self.recompute_layout |= do_update;
         }
@@ -870,7 +848,7 @@ impl RuntimeManager {
             if let Some(c_handle) = self.mouse_over_control {
                 if let Some(control) = controls.get(c_handle) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
-                    self.repaint |= response.is_processed_or_update();
+                    self.repaint |= response == EventProcessStatus::Processed;
                     control.get_base_mut().update_mouse_over_flag(false);
                 }
             }
@@ -882,7 +860,7 @@ impl RuntimeManager {
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Enter);
-                    self.repaint |= response.is_processed_or_update();
+                    self.repaint |= response == EventProcessStatus::Processed;
                     let response =
                         control
                             .get_control_mut()
@@ -890,7 +868,7 @@ impl RuntimeManager {
                                 event.x - scr_x,
                                 event.y - scr_y,
                             )));
-                    self.repaint |= response.is_processed_or_update();
+                    self.repaint |= response == EventProcessStatus::Processed;
                 }
             }
         } else {
@@ -906,7 +884,7 @@ impl RuntimeManager {
                                 event.x - scr_x,
                                 event.y - scr_y,
                             )));
-                    self.repaint |= response.is_processed_or_update();
+                    self.repaint |= response == EventProcessStatus::Processed;
                 }
             }
         }
@@ -986,12 +964,8 @@ impl RuntimeManager {
     fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
         // check contextual menus
         if let Some(menu) = self.get_opened_menu() {
-            if menu
-                .on_mouse_released(event.x, event.y)
-                .is_processed_or_update()
-            {
-                self.repaint = true;
-            }
+            self.repaint |=
+                menu.on_mouse_released(event.x, event.y) == EventProcessStatus::Processed;
         }
         match self.mouse_locked_object {
             MouseLockedObject::None => {}

@@ -14,17 +14,6 @@ use crate::{
 pub enum EventProcessStatus {
     Processed,
     Ignored,
-    Update,
-    Cancel,
-}
-impl EventProcessStatus {
-    pub(crate) fn is_processed_or_update(&self) -> bool {
-        match self {
-            EventProcessStatus::Processed => true,
-            EventProcessStatus::Update => true,
-            _ => false,
-        }
-    }
 }
 
 pub trait OnPaint {
