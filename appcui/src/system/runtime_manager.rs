@@ -353,7 +353,7 @@ impl RuntimeManager {
         while let Some(evnt) = self.events.pop() {
             if let Some(receiver) = controls.get(evnt.receiver) {
                 let result = evnt.invoke(receiver.get_control_mut());
-                todo!("redraw data based on the result (to be analyzed if needed) - maybe a control when changed can automatically request an update");
+                self.repaint = result == EventProcessStatus::Processed;
             }
         }
     }

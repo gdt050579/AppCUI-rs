@@ -1,4 +1,4 @@
-use super::traits::Control;
+use super::traits::{Control, EventProcessStatus};
 use crate::system::Handle;
 use crate::ui::{button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents};
 
@@ -14,13 +14,13 @@ pub(crate) struct ControlEvent {
 }
 
 impl ControlEvent {
-    pub(crate) fn invoke(&self, receiver: &mut dyn Control) {
-        let result = match &self.data {
+    pub(crate) fn invoke(&self, receiver: &mut dyn Control) -> EventProcessStatus {
+        match &self.data {
             ControlEventData::ButtonEvent(_) => {
-                ButtonEvents::on_pressed(receiver, self.emitter);
+                return ButtonEvents::on_pressed(receiver, self.emitter);
             }
             ControlEventData::CheckBoxEvent(data) => {
-                CheckBoxEvents::on_status_changed(receiver, self.emitter, data.checked);
+                return CheckBoxEvents::on_status_changed(receiver, self.emitter, data.checked);
             }
         };
     }
