@@ -8,5 +8,9 @@ pub trait WindowEvents {
         EventProcessStatus::Ignored
     }
 }
+#[repr(u8)]
 #[derive(Copy, Clone)]
-pub(crate) struct EventData;
+pub(crate) enum EventData {
+    OnActivate,
+    OnClose
+}

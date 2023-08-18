@@ -26,9 +26,14 @@ impl ControlEvent {
             ControlEventData::CheckBoxEvent(data) => {
                 return CheckBoxEvents::on_status_changed(receiver, self.emitter, data.checked);
             }
-            ControlEventData::WindowEvents(data) => {
-                return WindowEvents::on_close(receiver, self.emitter);
-            }
+            ControlEventData::WindowEvents(data) => match data {
+                window::events::EventData::OnActivate => {
+                    return WindowEvents::on_activate(receiver, self.emitter)
+                }
+                window::events::EventData::OnClose => {
+                    return WindowEvents::on_close(receiver, self.emitter)
+                }
+            },
         };
     }
 }

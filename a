@@ -1,0 +1,145 @@
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test test_const_get_value ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 101 tests
+test controls::button::tests::check_button_control ... ok
+test controls::command_bar::tests::check_command_bar_1 ... ok
+test controls::desktop::tests::check_custom_paint_for_desktop ... ok
+test controls::label::tests::check_label_multiline ... ok
+test controls::label::tests::check_label_position ... ok
+test controls::layout::tests::layout_mode_align_bottom ... ok
+test controls::layout::tests::layout_mode_align_bottom_left ... ok
+test controls::layout::tests::layout_mode_align_bottom_right ... ok
+test controls::layout::tests::layout_mode_align_center ... ok
+test controls::layout::tests::layout_mode_align_left ... ok
+test controls::layout::tests::layout_mode_align_right ... ok
+test controls::layout::tests::layout_mode_align_top ... ok
+test controls::layout::tests::layout_mode_align_top_left ... ok
+test controls::layout::tests::layout_mode_align_top_right ... ok
+test controls::layout::tests::layout_mode_xywh ... ok
+test controls::window::tests::check_window_full_title_1 ... ok
+test controls::window::tests::check_window_full_title_2 ... ok
+test controls::window::tests::check_window_full_title_3 ... ok
+test controls::window::tests::check_window_hotkey_1 ... ok
+test controls::window::tests::check_window_hotkey_2 ... ok
+test controls::window::tests::check_window_hotkey_and_tag ... ok
+test controls::window::tests::check_window_minimize_title_1 ... ok
+test controls::window::tests::check_window_minimize_title_2 ... ok
+test controls::window::tests::check_window_minimize_title_3 ... ok
+test controls::window::tests::check_window_minimize_title_4 ... ok
+test controls::window::tests::check_window_move ... ok
+test controls::window::tests::check_window_resize ... ok
+test controls::window::tests::check_window_size ... ok
+test controls::window::tests::check_window_tag_1 ... ok
+test controls::window::tests::check_window_tag_2 ... ok
+test controls::window::tests::check_window_tag_and_split_title_1 ... ok
+test controls::window::tests::check_window_tag_and_split_title_2 ... ok
+test controls::window::tests::check_window_tag_and_title_first_letter ... ok
+test controls::window::tests::check_window_tag_and_title_not_visible ... ok
+test controls::window::tests::check_window_title ... ok
+test controls::window::tests::check_window_toolbar_button ... ok
+test controls::window::tests::check_window_toolbar_label ... ok
+test graphics::tests::check_clear ... ok
+test graphics::tests::check_clear_with_clipping ... ok
+test graphics::tests::check_colors ... ok
+test graphics::tests::check_cursor ... ok
+test graphics::tests::check_draw_horizontal_line ... ok
+test graphics::tests::check_draw_horizontal_line_with_size ... ok
+test graphics::tests::check_draw_imge ... ok
+test graphics::tests::check_draw_rect ... ok
+test graphics::tests::check_draw_rect_with_size ... ok
+test graphics::tests::check_draw_surface ... ok
+test graphics::tests::check_draw_vertical_line ... ok
+test graphics::tests::check_draw_vertical_line_with_size ... ok
+test graphics::tests::check_fill_rect ... ok
+test graphics::tests::check_point ... ok
+test graphics::tests::check_rect_new ... ok
+test graphics::tests::check_rect_with_alignament ... ok
+test graphics::tests::check_rect_with_size ... ok
+test graphics::tests::check_resize ... ok
+test graphics::tests::check_write_string_multi_line ... ok
+test graphics::tests::check_write_string_single_line ... ok
+test graphics::tests::check_write_text_multi_line_character_wrap ... ok
+test graphics::tests::check_write_text_multi_line_character_wrap_new_lines ... ok
+test graphics::tests::check_write_text_multi_line_character_wrap_new_lines_hotkey ... ok
+test graphics::tests::check_write_text_multi_line_no_wrap ... ok
+test graphics::tests::check_write_text_multi_line_no_wrap_how_key ... ok
+test graphics::tests::check_write_text_multi_line_word_wrap_1 ... ok
+test graphics::tests::check_write_text_multi_line_word_wrap_2 ... ok
+test graphics::tests::check_write_text_multi_line_word_wrap_3 ... ok
+test graphics::tests::check_write_text_multi_line_word_wrap_4 ... ok
+test graphics::tests::check_write_text_multi_line_word_wrap_aligned ... ok
+test graphics::tests::check_write_text_multi_line_word_wrap_aligned_v2 ... ok
+test graphics::tests::check_write_text_single_line_hot_key ... ok
+test graphics::tests::check_write_text_single_line_simple ... ok
+test graphics::tests::check_write_text_single_line_width ... ok
+test system::tests::check_command_bar_1 ... ok
+test system::tests::check_command_bar_2 ... ok
+test system::tests::check_command_bar_click ... ok
+test system::tests::check_command_bar_hover ... ok
+test system::tests::check_multiple_apps_started ... ok
+test system::tests::check_tooltip_bottom_pos ... ok
+test system::tests::check_tooltip_bottom_pos_no_show ... ok
+test system::tests::check_tooltip_multi_line ... ok
+test system::tests::check_tooltip_multi_line_2 ... ok
+test system::tests::check_tooltip_multi_line_3 ... ok
+test system::tests::check_tooltip_single_line ... ok
+test terminals::debug::tests::check_command_parser_bool_params ... ok
+test terminals::debug::tests::check_command_parser_i32_params ... ok
+test terminals::debug::tests::check_command_parser_simple ... ok
+test terminals::debug::tests::check_command_parser_spaced ... ok
+test terminals::debug::tests::check_command_parser_string ... ok
+test terminals::debug::tests::test_command_only ... ok
+test terminals::debug::tests::test_invalid_character ... ok
+test terminals::debug::tests::test_invalid_string ... ok
+test terminals::debug::tests::test_invalid_syntax ... ok
+test terminals::debug::tests::test_missing_command ... ok
+test terminals::debug::tests::test_missing_param ... ok
+test terminals::debug::tests::test_multiple_params ... ok
+test terminals::debug::tests::test_single_param ... ok
+test terminals::debug::tests::test_too_many_params ... ok
+test utils::tests::check_hanlde_manager ... ok
+test utils::tests::check_index ... ok
+test utils::tests::check_key_value_parser_double ... ok
+test utils::tests::check_key_value_parser_single ... ok
+test utils::tests::check_key_value_parser_text ... ok
+
+test result: ok. 101 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test src\controls\button\button.rs - controls::button::button::Button::new (line 14) ... FAILED
+
+failures:
+
+---- src\controls\button\button.rs - controls::button::button::Button::new (line 14) stdout ----
+[0m[1m[38;5;9merror[E0433][0m[0m[1m[38;5;15m: failed to resolve: use of undeclared type `ButtonFlags`[0m
+[0m [0m[0m[1m[38;5;14m--> [0m[0msrc\controls\button\button.rs:17:72[0m
+[0m  [0m[0m[1m[38;5;14m|[0m
+[0m[1m[38;5;14m6[0m[0m [0m[0m[1m[38;5;14m|[0m[0m [0m[0mlet mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), ButtonFlags::None);[0m
+[0m  [0m[0m[1m[38;5;14m| [0m[0m                                                                       [0m[0m[1m[38;5;9m^^^^^^^^^^^[0m[0m [0m[0m[1m[38;5;9muse of undeclared type `ButtonFlags`[0m
+
+[0m[1m[38;5;9merror[0m[0m[1m[38;5;15m: aborting due to previous error[0m
+
+[0m[1m[38;5;15mFor more information about this error, try `rustc --explain E0433`.[0m
+Couldn't compile the test.
+
+failures:
+    src\controls\button\button.rs - controls::button::button::Button::new (line 14)
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
