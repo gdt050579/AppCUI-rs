@@ -7,13 +7,13 @@ use super::toolbar::ToolBarItem;
 use super::toolbar::ToolBarItemHandle;
 use super::DragStatus;
 use super::Title;
-use super::WindowCloseEvent;
 use super::WindowFlags;
 use crate::ui::command_bar::*;
 use crate::ui::common::*;
 use crate::ui::common::traits::*;
 use crate::ui::menu::Menu;
 use crate::ui::menu::MenuBar;
+use crate::ui::window::events::EventData;
 use crate::ui::*;
 use crate::graphics::*;
 use crate::input::*;
@@ -486,11 +486,12 @@ impl Window {
         if let Some(item) = self.toolbar.get_item(handle) {
             match item {
                 ToolBarItem::CloseButton(_) => {
-                    todo!("Add window event for WindowClode");
-                    // self.raise_event(Event::WindowClose(WindowCloseEvent {
-                    //     handle: self.handle,
-                    // }));
-                    // return true;
+                    self.raise_event(ControlEvent {
+                        emitter: self.handle,
+                        receiver: self.event_processor,
+                        data: ControlEventData::WindowEvents(EventData::OnClose),
+                    });
+                    return true;
                 }
                 ToolBarItem::ResizeCorner(_) => {
                     self.maximize_restore();
