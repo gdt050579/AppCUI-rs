@@ -25,6 +25,7 @@ pub struct Arguments {
     pub menu_events: bool,
     pub button_events: bool,
     pub checkbox_events: bool,
+    pub window_events: bool,
 
     // internal
     state: State,
@@ -55,6 +56,7 @@ impl Arguments {
             command_bar_events: false,
             button_events: false,
             checkbox_events: false,
+            window_events: false,
         }
     }
 
@@ -110,8 +112,8 @@ impl Arguments {
         }
     }
     fn validate_events_attribute(&mut self) {
-        let mut limited_to_event_processor: bool;   // true = only event processor controls such as Window can process it
-                                                    // false = all controls can process it
+        let mut limited_to_event_processor = true; // true = only event processor controls such as Window can process it
+                                                   // false = all controls can process it
 
         for trait_name in &self.values {
             match trait_name.as_str() {
@@ -123,14 +125,10 @@ impl Arguments {
                     self.menu_events = true;
                     limited_to_event_processor = false;
                 }
-                "ButtonEvents" | "Button" => {
-                    self.button_events = true;
-                    limited_to_event_processor = true;
-                }
-                "CheckBoxEvents" | "CheckBox" => {
-                    self.checkbox_events = true;
-                    limited_to_event_processor = true;
-                }
+                "ButtonEvents" | "Button" => self.button_events = true,
+                "CheckBoxEvents" | "CheckBox" => self.checkbox_events = true,
+                "WindowEvents" | "Window" => self.window_events = true,
+
                 other => {
                     panic!("Unknown event/control: '{other}'. Events that could be process are from : CommandBar, Menu");
                 }

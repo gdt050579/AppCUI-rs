@@ -1,10 +1,14 @@
 use super::traits::{Control, EventProcessStatus};
 use crate::system::Handle;
-use crate::ui::{button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents};
+use crate::ui::{
+    button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, window,
+    window::events::WindowEvents,
+};
 
 pub(crate) enum ControlEventData {
     ButtonEvent(button::events::EventData),
     CheckBoxEvent(checkbox::events::EventData),
+    WindowEvents(window::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -21,6 +25,9 @@ impl ControlEvent {
             }
             ControlEventData::CheckBoxEvent(data) => {
                 return CheckBoxEvents::on_status_changed(receiver, self.emitter, data.checked);
+            }
+            ControlEventData::WindowEvents(data) => {
+                return WindowEvents::on_close(receiver, self.emitter);
             }
         };
     }

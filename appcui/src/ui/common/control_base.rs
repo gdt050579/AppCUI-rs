@@ -3,8 +3,13 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, RuntimeManager};
 use crate::ui::{
-    button::events::ButtonEvents, checkbox::events::CheckBoxEvents,
-    command_bar::events::CommandBarEvents, common::traits::*, common::*, layout::*,
+    button::events::ButtonEvents, 
+    checkbox::events::CheckBoxEvents,
+    window::events::WindowEvents,
+    command_bar::events::CommandBarEvents, 
+    common::traits::*, 
+    common::*, 
+    layout::*,
     menu::events::MenuEvents,
 };
 use crate::utils::VectorIndex;
@@ -348,3 +353,4 @@ impl CommandBarEvents for ControlBase {}
 impl MenuEvents for ControlBase {}
 impl ButtonEvents for ControlBase {}
 impl CheckBoxEvents for ControlBase {}
+impl WindowEvents for ControlBase {}

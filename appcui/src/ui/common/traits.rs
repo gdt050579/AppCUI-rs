@@ -3,6 +3,7 @@ use crate::{
         button::events::ButtonEvents, 
         command_bar::events::CommandBarEvents,
         menu::events::MenuEvents, checkbox::events::CheckBoxEvents,
+        window::events::WindowEvents
     },
     graphics::{Size, Surface},
     input::{Key, MouseEvent},
@@ -53,6 +54,7 @@ pub trait Control:
     + ButtonEvents
     + CheckBoxEvents
     + CommandBarEvents
+    + WindowEvents
     + MenuEvents
 {
 }

@@ -12,6 +12,7 @@ mod templates {
     use $(ROOT)::ui::common::traits::*;
     use $(ROOT)::ui::button::events::ButtonEvents;
     use $(ROOT)::ui::checkbox::events::CheckBoxEvents;
+    use $(ROOT)::ui::window::events::WindowEvents;
     use $(ROOT)::ui::command_bar::events::CommandBarEvents;
     use $(ROOT)::ui::menu::events::MenuEvents;
     use $(ROOT)::ui::menu::*;
@@ -116,6 +117,17 @@ mod templates {
         }
     }
     ";
+
+    pub static WINDOW_EVENTS_TRAIT: &str = "
+    impl WindowEvents for $(STRUCT_NAME) {
+        fn on_activate(&mut self, window_handle: Handle) -> EventProcessStatus {
+            WindowEvents::on_activate(&mut self.base, window_handle)
+        }
+        fn on_close(&mut self, window_handle: Handle) -> EventProcessStatus {
+            WindowEvents::on_close(&mut self.base, window_handle)
+        }
+    }
+    ";
 }
 fn parse_token_stream(
     args: TokenStream,
@@ -175,6 +187,9 @@ fn parse_token_stream(
     }
     if !a.checkbox_events {
         code.push_str(templates::CHECKBOX_EVENTS_TRAIT);
+    }
+    if !a.window_events {
+        code.push_str(templates::WINDOW_EVENTS_TRAIT);
     }
     // add the extra code
     code.push_str("\n");
