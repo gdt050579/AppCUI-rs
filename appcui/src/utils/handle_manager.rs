@@ -1,4 +1,4 @@
-use crate::system::{Handle, HandleSupport};
+use crate::{system::{Handle, HandleSupport}, ui::common::UIElement};
 
 pub(crate) struct HandleManager<T> {
     objects: Vec<Option<T>>,
@@ -14,7 +14,7 @@ where
             free: Vec::with_capacity(8),
         }
     }
-    pub(crate) fn add(&mut self, mut object: T) -> Handle {
+    pub(crate) fn add(&mut self, mut object: T) -> Handle<UIElement> {
         if let Some(pos) = self.free.pop() {
             // add at pos
             let h = Handle::new(pos);
@@ -29,7 +29,7 @@ where
             return h;
         }
     }
-    pub(crate) fn remove(&mut self, handle: Handle) -> bool {
+    pub(crate) fn remove(&mut self, handle: Handle<UIElement> ) -> bool {
         if handle.is_none() {
             return false;
         }
@@ -49,7 +49,7 @@ where
         self.free.push(idx as u32);
         return true;
     }
-    pub(crate) fn get(&self, handle: Handle) -> Option<&T> {
+    pub(crate) fn get(&self, handle: Handle<UIElement>) -> Option<&T> {
         if handle.is_none() {
             return None;
         }
@@ -64,7 +64,7 @@ where
         }
         None
     }
-    pub(crate) fn get_mut(&mut self, handle: Handle) -> Option<&mut T> {
+    pub(crate) fn get_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut T> {
         if handle.is_none() {
             return None;
         }

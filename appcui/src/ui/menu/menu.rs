@@ -10,7 +10,7 @@ use crate::{
     },
     input::{Key, KeyCode, MouseWheelDirection},
     system::{Handle, HandleSupport, RuntimeManager, Theme},
-    ui::common::traits::EventProcessStatus,
+    ui::common::{traits::EventProcessStatus, UIElement},
     utils::{Caption, Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
@@ -27,7 +27,7 @@ pub struct Menu {
     pub(super) clip: ClipArea,
     pub(super) handle: MenuHandle,
     pub(super) parent_handle: MenuHandle,
-    pub(super) receiver_control_handle: Handle,
+    pub(super) receiver_control_handle: Handle<UIElement>,
 }
 impl Menu {
     pub fn new(name: &str) -> Self {
@@ -105,7 +105,7 @@ impl Menu {
         MousePositionInfo::new(x - self.clip.left, y - self.clip.top, &self).is_on_menu
     }
     #[inline(always)]
-    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle) {
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
         self.receiver_control_handle = handle;
     }
 
@@ -752,11 +752,11 @@ impl Menu {
 }
 
 impl HandleSupport for Menu {
-    fn get_handle(&self) -> Handle {
+    fn get_handle(&self) -> Handle<UIElement> {
         self.handle.handle
     }
 
-    fn set_handle(&mut self, handle: Handle) {
+    fn set_handle(&mut self, handle: Handle<UIElement>) {
         self.handle = MenuHandle { handle };
         self.update_children_with_parent_handle();
     }

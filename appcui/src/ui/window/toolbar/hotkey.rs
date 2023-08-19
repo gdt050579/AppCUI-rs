@@ -1,19 +1,19 @@
 use crate::{
     graphics::{Character, Surface},
     input::Key,
-    system::{Handle, Theme},
+    system::{Handle, Theme}, ui::common::UIElement,
 };
 
 use super::{AddToToolbar, Gravity, ItemBase, PaintData, ToolBarItem};
 
 pub(crate) struct HotKey {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle,
+    pub(super) handle: Handle<UIElement>,
     key: Key,
 }
 
 impl AddToToolbar for HotKey {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle {
+    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<UIElement> {
         toolbar.items.add(ToolBarItem::HotKey(self))
     }
 }

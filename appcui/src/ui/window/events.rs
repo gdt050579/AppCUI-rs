@@ -1,15 +1,15 @@
-use crate::{system::Handle, ui::common::traits::EventProcessStatus};
+use crate::{system::Handle, ui::common::{traits::EventProcessStatus, UIElement}};
 
 pub trait WindowEvents {
-    fn on_activate(&mut self, _window_handle: Handle) -> EventProcessStatus {
+    fn on_activate(&mut self, _window_handle: Handle<UIElement>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    fn on_close(&mut self, _window_handle: Handle) -> EventProcessStatus {
+    fn on_close(&mut self, _window_handle: Handle<UIElement>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
 pub trait ToolbarEvents {
-    fn on_button_clicked(&mut self, _item_handle: Handle) -> EventProcessStatus {
+    fn on_button_clicked(&mut self, _item_handle: Handle<UIElement>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }

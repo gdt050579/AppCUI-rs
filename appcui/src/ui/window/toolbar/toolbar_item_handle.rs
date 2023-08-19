@@ -1,10 +1,10 @@
 use std::marker::PhantomData;
 
-use crate::system::Handle;
+use crate::{system::Handle, ui::common::UIElement};
 
 #[derive(PartialEq)]
 pub struct ToolBarItemHandle<T> {
-    pub (crate) handle: Handle,
+    pub (crate) handle: Handle<UIElement>,
     _phantom: PhantomData<T>
 }
 
@@ -14,7 +14,7 @@ impl<T> ToolBarItemHandle<T> {
         handle: Handle::None,
         _phantom: PhantomData,
     };
-    pub (crate) fn new(handle: Handle)->Self {
+    pub (crate) fn new(handle: Handle<UIElement>)->Self {
         Self {
             handle,
             _phantom: PhantomData,

@@ -1,20 +1,20 @@
 use crate::{
     graphics::{Surface, TextAlignament, TextFormat},
     system::{Handle, Theme},
-    utils::Caption,
+    utils::Caption, ui::common::UIElement,
 };
 
 use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 pub struct Button {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle,
+    pub(super) handle: Handle<UIElement>,
     caption: Caption,
     command_id: u32,
 }
 
 impl AddToToolbar for Button {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle {
+    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<UIElement> {
         toolbar.items.add(ToolBarItem::Button(self))
     }
 }

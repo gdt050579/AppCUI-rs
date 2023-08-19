@@ -1,18 +1,18 @@
 use crate::{
     graphics::{Surface, Character},
-    system::{Handle, Theme},
+    system::{Handle, Theme}, ui::common::UIElement,
 };
 
 use super::{AddToToolbar, Gravity, ItemBase, PaintData, ToolBarItem};
 
 pub struct Tag {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle,
+    pub(super) handle: Handle<UIElement>,
     text: String,
 }
 
 impl AddToToolbar for Tag {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle {
+    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<UIElement> {
         toolbar.items.add(ToolBarItem::Tag(self))
     }
 }

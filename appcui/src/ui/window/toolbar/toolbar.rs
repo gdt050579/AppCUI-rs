@@ -1,7 +1,7 @@
 use crate::{
     graphics::{Size, Surface},
     system::{Handle, Theme},
-    utils::{HandleManager, VectorIndex},
+    utils::{HandleManager, VectorIndex}, ui::common::UIElement,
 };
 
 use super::{
@@ -11,12 +11,12 @@ use super::{
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
-    current_handle: Handle,
+    current_handle: Handle<UIElement>,
     pressed: bool,
 }
 
 pub trait AddToToolbar {
-    fn add(self, toolbar: &mut ToolBar) -> Handle;
+    fn add(self, toolbar: &mut ToolBar) -> Handle<UIElement>;
 }
 
 impl ToolBar {
@@ -90,7 +90,7 @@ impl ToolBar {
         None
     }
     #[inline(always)]
-    pub(crate) fn set_current_item_handle(&mut self, handle: Handle) {
+    pub(crate) fn set_current_item_handle(&mut self, handle: Handle<UIElement>) {
         self.current_handle = handle;
     }
     #[inline(always)]
@@ -98,15 +98,15 @@ impl ToolBar {
         self.current_handle = Handle::None;
     }
     #[inline(always)]
-    pub(crate) fn get_current_item_handle(&self) -> Handle {
+    pub(crate) fn get_current_item_handle(&self) -> Handle<UIElement> {
         self.current_handle
     }
     #[inline(always)]
-    pub(crate) fn get_item(&self, handle: Handle) -> Option<&ToolBarItem> {
+    pub(crate) fn get_item(&self, handle: Handle<UIElement>) -> Option<&ToolBarItem> {
         self.items.get(handle)
     }
     #[inline(always)]
-    pub(crate) fn get_item_mut(&mut self, handle: Handle) -> Option<&mut ToolBarItem> {
+    pub(crate) fn get_item_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut ToolBarItem> {
         self.items.get_mut(handle)
     }
 

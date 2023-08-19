@@ -1,4 +1,4 @@
-use crate::ui::common::ControlManager;
+use crate::ui::common::{ControlManager, UIElement};
 
 use super::Handle;
 
@@ -11,7 +11,7 @@ impl ControlHandleManager {
             controls: Vec::with_capacity(64),
         }
     }
-    pub(crate) fn get(&mut self, handle: Handle) -> Option<&mut ControlManager> {
+    pub(crate) fn get(&mut self, handle: Handle<UIElement>) -> Option<&mut ControlManager> {
         let idx = handle.get_index();
         if idx < self.controls.len() {
             let c = self.controls[idx].as_mut();
@@ -27,7 +27,7 @@ impl ControlHandleManager {
     pub(crate) fn get_desktop(&mut self) -> &mut ControlManager {
         return self.controls[0].as_mut().unwrap();
     }
-    pub(crate) fn add(&mut self, mut manager: ControlManager) -> Handle {
+    pub(crate) fn add(&mut self, mut manager: ControlManager) -> Handle<UIElement> {
         let idx = self.controls.len() as u32;
         let handle = Handle::new(idx);
         manager.get_base_mut().handle = handle;

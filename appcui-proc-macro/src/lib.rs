@@ -104,7 +104,7 @@ mod templates {
 
     pub static BUTTON_EVENTS_TRAIT: &str = "
     impl ButtonEvents for $(STRUCT_NAME) {
-        fn on_pressed(&mut self, button_handle: Handle)->EventProcessStatus {
+        fn on_pressed(&mut self, button_handle: Handle<UIElement>)->EventProcessStatus {
             ButtonEvents::on_pressed(&mut self.base, button_handle)
         }
     }
@@ -112,7 +112,7 @@ mod templates {
 
     pub static CHECKBOX_EVENTS_TRAIT: &str = "
     impl CheckBoxEvents for $(STRUCT_NAME) {
-        fn on_status_changed(&mut self, checbox_handle: Handle, checked: bool)->EventProcessStatus {
+        fn on_status_changed(&mut self, checbox_handle: Handle<UIElement>, checked: bool)->EventProcessStatus {
             CheckBoxEvents::on_status_changed(&mut self.base, checbox_handle, checked)
         }
     }
@@ -120,10 +120,10 @@ mod templates {
 
     pub static WINDOW_EVENTS_TRAIT: &str = "
     impl WindowEvents for $(STRUCT_NAME) {
-        fn on_activate(&mut self, window_handle: Handle) -> EventProcessStatus {
+        fn on_activate(&mut self, window_handle: Handle<UIElement>) -> EventProcessStatus {
             WindowEvents::on_activate(&mut self.base, window_handle)
         }
-        fn on_close(&mut self, window_handle: Handle) -> EventProcessStatus {
+        fn on_close(&mut self, window_handle: Handle<UIElement>) -> EventProcessStatus {
             WindowEvents::on_close(&mut self.base, window_handle)
         }
     }

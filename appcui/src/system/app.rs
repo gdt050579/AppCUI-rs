@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 
 use super::Error;
+use super::Handle;
 use super::InitializationData;
 use super::InitializationFlags;
 use super::RuntimeManager;
@@ -66,7 +67,7 @@ impl App {
         *app_created = false;
     }
 
-    pub fn add_window<T>(&mut self, window: T) -> ControlHandle<T>
+    pub fn add_window<T>(&mut self, window: T) -> Handle<T>
     where
         T: Control + WindowControl + 'static,
     {

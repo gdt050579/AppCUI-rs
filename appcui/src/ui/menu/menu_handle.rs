@@ -1,9 +1,9 @@
-use crate::system::Handle;
+use crate::{system::Handle, ui::common::UIElement};
 use std::ops::Deref;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct MenuHandle {
-    pub (crate) handle: Handle,
+    pub (crate) handle: Handle<UIElement>,
 }
 impl MenuHandle {
     #[allow(non_upper_case_globals)]
@@ -15,7 +15,7 @@ impl MenuHandle {
     }
 }
 impl Deref for MenuHandle {
-    type Target = Handle;
+    type Target = Handle<UIElement>;
     fn deref(&self) -> &Self::Target {
         &self.handle
     }

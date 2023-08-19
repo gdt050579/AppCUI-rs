@@ -1,10 +1,10 @@
-use crate::system::Handle;
+use crate::{system::Handle, ui::common::UIElement};
 use super::CommandBar;
 
 #[derive(Copy,Clone)]
 pub(crate) struct CommandBarEvent {
     pub (crate) command_id: u32,
-    pub (crate) control_receiver_handle: Handle,
+    pub (crate) control_receiver_handle: Handle<UIElement> ,
 }
 pub trait CommandBarEvents {
     fn on_update_commandbar(&self, _commandbar: &mut CommandBar) {}

@@ -1,5 +1,6 @@
 use crate::system::Handle;
 use crate::system::HandleSupport;
+use crate::ui::common::UIElement;
 use crate::utils::HandleManager;
 
 use super::KeyValueParser;
@@ -105,7 +106,7 @@ fn check_hanlde_manager() {
     struct MyData {
         text: String,
         value: i32,
-        handle: Handle,
+        handle: Handle<UIElement>,
     }
     impl MyData {
         fn new(text: &str, value: i32) -> Self {
@@ -117,11 +118,11 @@ fn check_hanlde_manager() {
         }
     }
     impl HandleSupport for MyData {
-        fn get_handle(&self) -> crate::system::Handle {
+        fn get_handle(&self) -> crate::system::Handle<UIElement> {
             self.handle
         }
 
-        fn set_handle(&mut self, handle: crate::system::Handle) {
+        fn set_handle(&mut self, handle: crate::system::Handle<UIElement>) {
             self.handle = handle;
         }
     }

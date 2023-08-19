@@ -1,6 +1,6 @@
 use super::{
-    ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
-    Theme, ToolTip,
+    ControlHandleManager, InitializationData, InitializationFlags, MenuHandleManager,
+    Theme, ToolTip, Handle,
 };
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
@@ -8,8 +8,8 @@ use crate::terminals::*;
 use crate::ui::command_bar::events::CommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
-use crate::ui::common::ControlEventData;
-use crate::ui::common::{traits::*, ControlEvent, ControlHandle};
+use crate::ui::common::{ControlEventData, UIElement};
+use crate::ui::common::{traits::*, ControlEvent};
 use crate::ui::menu::events::{MenuEvent, MenuEvents};
 use crate::ui::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
 use crate::utils::VectorIndex;
@@ -25,7 +25,7 @@ enum LoopStatus {
 #[derive(Clone, Copy)]
 enum MouseLockedObject {
     None,
-    Control(Handle),
+    Control(Handle<UIElement>),
     CommandBar,
     MenuBar,
 }
@@ -36,7 +36,7 @@ pub(crate) struct RuntimeManager {
     surface: Surface,
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
-    desktop_handler: Handle,
+    desktop_handler: Handle<UIElement>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
     menubar: Option<MenuBar>,
@@ -45,10 +45,10 @@ pub(crate) struct RuntimeManager {
     recompute_parent_indexes: bool,
     request_update_command_and_menu_bars: bool,
     loop_status: LoopStatus,
-    request_focus: Option<Handle>,
-    current_focus: Option<Handle>,
-    mouse_over_control: Option<Handle>,
-    focus_chain: Vec<Handle>,
+    request_focus: Option<Handle<UIElement>>,
+    current_focus: Option<Handle<UIElement>>,
+    mouse_over_control: Option<Handle<UIElement>>,
+    focus_chain: Vec<Handle<UIElement>>,
     events: Vec<ControlEvent>,
     commandbar_event: Option<CommandBarEvent>,
     menu_event: Option<MenuEvent>,
@@ -169,7 +169,7 @@ impl RuntimeManager {
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
-    pub(crate) fn request_focus_for_control(&mut self, handle: Handle) {
+    pub(crate) fn request_focus_for_control(&mut self, handle: Handle<UIElement>) {
         self.request_focus = Some(handle);
     }
     pub(crate) fn request_update(&mut self) {
@@ -177,7 +177,7 @@ impl RuntimeManager {
         self.repaint = true;
         self.recompute_layout = true;
     }
-    fn set_event_processors(&mut self, control_handle: Handle, event_processor: Handle) {
+    fn set_event_processors(&mut self, control_handle: Handle<UIElement>, event_processor: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(control_handle) {
             let base = control.get_base_mut();
@@ -187,7 +187,7 @@ impl RuntimeManager {
             }
         }
     }
-    pub(crate) fn add_window<T>(&mut self, obj: T) -> ControlHandle<T>
+    pub(crate) fn add_window<T>(&mut self, obj: T) -> Handle<T>
     where
         T: Control + WindowControl + 'static,
     {
@@ -196,25 +196,25 @@ impl RuntimeManager {
         // since it is the first time I cregister this window
         // I need to recursively set the event processor for all of its childern to
         // this window current handle
-        self.set_event_processors(handle.get_handle(), handle.get_handle());
+        self.set_event_processors(handle.cast(), handle.cast());
         return handle;
     }
-    pub(crate) fn get_control_mut<T>(&mut self, handle: ControlHandle<T>) -> Option<&mut T>
+    pub(crate) fn get_control_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T>
     where
         T: Control + 'static,
     {
         let controls = unsafe { &mut *self.controls };
-        if let Some(cm) = controls.get(handle.get_handle()) {
+        if let Some(cm) = controls.get(handle.cast()) {
             return Some(cm.get_mut::<T>());
         }
         None
     }
-    pub(crate) fn get_control<T>(&self, handle: ControlHandle<T>) -> Option<&T>
+    pub(crate) fn get_control<T>(&self, handle: Handle<T>) -> Option<&T>
     where
         T: Control + 'static,
     {
         let controls = unsafe { &mut *self.controls };
-        if let Some(cm) = controls.get(handle.get_handle()) {
+        if let Some(cm) = controls.get(handle.cast()) {
             return Some(cm.get::<T>());
         }
         None
@@ -237,7 +237,7 @@ impl RuntimeManager {
     pub(crate) fn show_menu(
         &mut self,
         handle: MenuHandle,
-        receiver_control_handle: Handle,
+        receiver_control_handle: Handle<UIElement>,
         x: i32,
         y: i32,
         max_size: Size,
@@ -323,7 +323,7 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         return menus.get_mut(self.opened_menu_handle);
     }
-    fn get_focused_control(&self) -> Handle {
+    fn get_focused_control(&self) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
         let mut parent = self.desktop_handler;
         let mut ctrl = controls.get(parent).unwrap();
@@ -413,7 +413,7 @@ impl RuntimeManager {
         self.request_update_command_and_menu_bars = false;
     }
 
-    fn update_focus(&mut self, handle: Handle) {
+    fn update_focus(&mut self, handle: Handle<UIElement>) {
         // 1. mark all controls from the path as preparing to received focus
         // we will use focuse_chain as a temporary value to hold the chain
         self.focus_chain.clear();
@@ -488,7 +488,7 @@ impl RuntimeManager {
         self.update_control_layout(self.desktop_handler, &term_layout);
     }
 
-    fn update_parent_indexes(&mut self, handle: Handle) {
+    fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
@@ -502,7 +502,7 @@ impl RuntimeManager {
         }
     }
 
-    pub(crate) fn update_control_layout(&mut self, handle: Handle, parent_layout: &ParentLayout) {
+    pub(crate) fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
@@ -547,7 +547,7 @@ impl RuntimeManager {
         }
         self.terminal.update_screen(&self.surface);
     }
-    fn paint_control(&mut self, handle: Handle) {
+    fn paint_control(&mut self, handle: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             if control.get_base().prepare_paint(&mut self.surface) {
@@ -609,7 +609,7 @@ impl RuntimeManager {
     }
     pub(crate) fn process_control_keypressed_event(
         &mut self,
-        handle: Handle,
+        handle: Handle<UIElement>,
         key: Key,
         character: char,
     ) -> EventProcessStatus {
@@ -634,7 +634,7 @@ impl RuntimeManager {
         return EventProcessStatus::Ignored;
     }
 
-    fn coordinates_to_control(&mut self, handle: Handle, x: i32, y: i32) -> Option<Handle> {
+    fn coordinates_to_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Option<Handle<UIElement>> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
@@ -817,7 +817,7 @@ impl RuntimeManager {
             }
         }
     }
-    fn process_mousedrag(&mut self, handle: Handle, event: MouseMoveEvent) {
+    fn process_mousedrag(&mut self, handle: Handle<UIElement>, event: MouseMoveEvent) {
         self.hide_tooltip();
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
@@ -1002,7 +1002,7 @@ impl RuntimeManager {
     }
     fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent) {}
 
-    fn debug_print(&self, handle: Handle, depth: i32) {
+    fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
         for _ in 0..depth {
             print!(" ");
         }

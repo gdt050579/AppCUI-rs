@@ -2,13 +2,13 @@ use AppCUIProcMacro::*;
 
 #[Window(events = CommandBarEvents, internal=true)]
 struct MyWin1 {
-    info: ControlHandle<Label>,
+    info: Handle<Label>,
 }
 impl MyWin1 {
     fn new() -> Self {
         let mut me = Self {
             base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), WindowFlags::None),
-            info: ControlHandle::None,
+            info: Handle::None,
         };
         me.info = me.add(Label::new("<none>",Layout::new("x:0,y:0,w:18")));
         me

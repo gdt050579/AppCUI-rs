@@ -1,7 +1,7 @@
-use crate::{system::Handle, ui::common::traits::EventProcessStatus};
+use crate::{system::Handle, ui::common::{traits::EventProcessStatus, UIElement}};
 
 pub trait ButtonEvents {
-    fn on_pressed(&mut self, _button_handle: Handle) -> EventProcessStatus {
+    fn on_pressed(&mut self, _button_handle: Handle<UIElement>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }

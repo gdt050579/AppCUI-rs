@@ -2,19 +2,19 @@ use AppCUIProcMacro::*;
 
 #[Window(events = ButtonEvents, internal=true)]
 struct MyWin {
-    info: ControlHandle<Label>,
-    but1: ControlHandle<Button>,
-    but2: ControlHandle<Button>,
-    but3: ControlHandle<Button>,
+    info: Handle<Label>,
+    but1: Handle<Button>,
+    but2: Handle<Button>,
+    but3: Handle<Button>,
 }
 impl MyWin {
     fn new() -> Self {
         let mut me = Self {
             base: Window::new("Win-1", Layout::new("d:c,w:41,h:7"), WindowFlags::None),
-            info: ControlHandle::None,
-            but1: ControlHandle::None,
-            but2: ControlHandle::None,
-            but3: ControlHandle::None,
+            info: Handle::None,
+            but1: Handle::None,
+            but2: Handle::None,
+            but3: Handle::None,
         };
         me.info = me.add(Label::new("<none>",Layout::new("x:0,y:0,w:35")));
         me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:3,w:11"),button::Flags::None));
@@ -32,7 +32,7 @@ impl MyWin {
     }
 }
 impl ButtonEvents for MyWin {
-    fn on_pressed(&mut self, button_handle: Handle)->EventProcessStatus {
+    fn on_pressed(&mut self, button_handle: Handle<UIElement>)->EventProcessStatus {
         if self.but1 == button_handle {
             self.set_info("Button 1 presed");
             return EventProcessStatus::Processed;

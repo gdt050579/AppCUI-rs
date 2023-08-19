@@ -1,5 +1,5 @@
 use crate::{
-    ui::common::traits::EventProcessStatus,
+    ui::common::{traits::EventProcessStatus, UIElement},
     graphics::{Character, Size, Surface, TextAlignament, TextFormat},
     input::{Key, KeyCode, KeyModifier},
     system::{RuntimeManager, Theme, Handle},
@@ -16,7 +16,7 @@ pub struct MenuBar {
     opened_item: VectorIndex,
     hovered_item: VectorIndex,
     count: usize,
-    receiver_control_handle: Handle,
+    receiver_control_handle: Handle<UIElement>,
 }
 
 impl MenuBar {
@@ -108,7 +108,7 @@ impl MenuBar {
     }
 
     #[inline(always)]
-    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle) {
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
         self.receiver_control_handle = handle;
     }
     pub(crate) fn clear(&mut self) {

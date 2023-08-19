@@ -37,10 +37,10 @@ pub(crate) struct Margins {
 pub struct ControlBase {
     layout: ControlLayout,
     pub(crate) margins: Margins,
-    pub(crate) handle: Handle,
-    pub(crate) parent: Handle,
-    pub(crate) event_processor: Handle,
-    pub(crate) children: Vec<Handle>,
+    pub(crate) handle: Handle<UIElement> ,
+    pub(crate) parent: Handle<UIElement> ,
+    pub(crate) event_processor: Handle<UIElement> ,
+    pub(crate) children: Vec<Handle<UIElement>>,
     pub(crate) focused_child_index: VectorIndex,
     pub(crate) parent_index: VectorIndex,
     status_flags: StatusFlags,
@@ -163,7 +163,7 @@ impl ControlBase {
         return false;
     }
 
-    pub(crate) fn add_child<T>(&mut self, control: T) -> ControlHandle<T>
+    pub(crate) fn add_child<T>(&mut self, control: T) -> Handle<T>
     where
         T: Control + 'static,
     {
@@ -184,7 +184,7 @@ impl ControlBase {
             rm.request_focus_for_control(handle);
             // si ar trebui sa setez si index-ul in lista de copii
         }
-        return ControlHandle::new(handle);
+        return handle.cast();
     }
 
     #[inline(always)]
@@ -230,7 +230,7 @@ impl ControlBase {
     }
 
     #[inline(always)]
-    pub fn get_handle(&self) -> Handle {
+    pub fn get_handle(&self) -> Handle<UIElement>  {
         self.handle
     }
 

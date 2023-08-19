@@ -1,6 +1,6 @@
 use crate::{
     graphics::{Character, Surface},
-    system::{Handle, HandleSupport, Theme},
+    system::{Handle, HandleSupport, Theme}, ui::common::UIElement,
 };
 
 use super::{
@@ -88,7 +88,7 @@ impl ToolBarItem {
     }
 }
 impl HandleSupport for ToolBarItem {
-    fn get_handle(&self) -> Handle {
+    fn get_handle(&self) -> Handle<UIElement> {
         match self {
             ToolBarItem::Label(item) => item.handle,
             ToolBarItem::HotKey(item) => item.handle,
@@ -100,7 +100,7 @@ impl HandleSupport for ToolBarItem {
         }
     }
 
-    fn set_handle(&mut self, handle: Handle) {
+    fn set_handle(&mut self, handle: Handle<UIElement>) {
         match self {
             ToolBarItem::Label(item) => item.handle = handle,
             ToolBarItem::HotKey(item) => item.handle = handle,

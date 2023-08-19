@@ -3,7 +3,7 @@ use AppCUIProcMacro::*;
 use crate::{
     input::{Key, KeyCode, KeyModifier},
     system::{App, InitializationFlags},
-    ui::{common::ControlHandle, Desktop, Layout},
+    ui::{Desktop, Layout},
 };
 
 use super::{
@@ -288,13 +288,13 @@ fn check_window_resize() {
 fn check_window_size() {
     #[Window(overwrite = OnResize,internal = true)]
     struct MyWin {
-        info: ControlHandle<Label>,
+        info: Handle<Label>,
     }
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
                 base: Window::new("Win", Layout::new("d:c,w:40,h:7"), WindowFlags::None),
-                info: ControlHandle::None,
+                info: Handle::None,
             };
             me.info = me.add(Label::new("", Layout::new("x:1,y:1,w:36,h:3")));
             me

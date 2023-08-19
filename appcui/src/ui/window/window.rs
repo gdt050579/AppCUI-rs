@@ -139,19 +139,19 @@ impl Window {
 
         */
     }
-    pub fn add<T>(&mut self, control: T) -> ControlHandle<T>
+    pub fn add<T>(&mut self, control: T) -> Handle<T>
     where
         T: Control + 'static,
     {
         return self.add_child(control);
     }
-    pub fn get_control<T>(&self, handle: ControlHandle<T>) -> Option<&T>
+    pub fn get_control<T>(&self, handle: Handle<T>) -> Option<&T>
     where
         T: Control + 'static,
     {
         RuntimeManager::get().get_control(handle)
     }
-    pub fn get_control_mut<T>(&mut self, handle: ControlHandle<T>) -> Option<&mut T>
+    pub fn get_control_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T>
     where
         T: Control + 'static,
     {
@@ -244,10 +244,10 @@ impl Window {
     }
 
     fn find_next_control(
-        handle: Handle,
+        handle: Handle<UIElement>,
         forward: bool,
         start_from_current: bool,
-    ) -> Option<Handle> {
+    ) -> Option<Handle<UIElement>> {
         let rm = RuntimeManager::get();
         if let Some(control) = rm.get_controls().get(handle) {
             let base = control.get_base();
@@ -479,7 +479,7 @@ impl Window {
         self.toolbar.clear_current_item_handle();
         return EventProcessStatus::Processed;
     }
-    fn on_toolbar_item_clicked(&mut self, handle: Handle) -> bool {
+    fn on_toolbar_item_clicked(&mut self, handle: Handle<UIElement>) -> bool {
         if let Some(item) = self.toolbar.get_item(handle) {
             match item {
                 ToolBarItem::CloseButton(_) => {

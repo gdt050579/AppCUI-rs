@@ -6,7 +6,7 @@ pub trait MenuEvents {
     fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
 }
 
-use crate::system::Handle;
+use crate::{system::Handle, ui::common::UIElement};
 
 use super::MenuHandle;
 
@@ -14,7 +14,7 @@ use super::MenuHandle;
 pub struct MenuCommandEvent {
     pub command_id: u32,
     pub menu: MenuHandle,
-    pub(crate) control_receiver_handle: Handle,
+    pub(crate) control_receiver_handle: Handle<UIElement>,
     // GDT I should also add a menu item handle or index
 }
 
@@ -23,7 +23,7 @@ pub struct MenuCheckBoxStateChangedEvent {
     pub command_id: u32,
     pub menu: MenuHandle,
     pub checked: bool,
-    pub(crate) control_receiver_handle: Handle,
+    pub(crate) control_receiver_handle: Handle<UIElement>,
     // GDT I should also add a menu item handle or index
 }
 
@@ -31,7 +31,7 @@ pub struct MenuCheckBoxStateChangedEvent {
 pub struct MenuRadioBoxSelectedEvent {
     pub command_id: u32,
     pub menu: MenuHandle,
-    pub(crate) control_receiver_handle: Handle,
+    pub(crate) control_receiver_handle: Handle<UIElement>,
     // GDT I should also add a menu item handle or index
 }
 

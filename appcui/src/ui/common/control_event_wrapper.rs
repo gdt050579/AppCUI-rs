@@ -1,3 +1,4 @@
+use super::UIElement;
 use super::traits::{Control, EventProcessStatus};
 use crate::system::Handle;
 use crate::ui::{
@@ -12,8 +13,8 @@ pub(crate) enum ControlEventData {
 }
 
 pub(crate) struct ControlEvent {
-    pub(crate) emitter: Handle,
-    pub(crate) receiver: Handle,
+    pub(crate) emitter: Handle<UIElement>,
+    pub(crate) receiver: Handle<UIElement>,
     pub(crate) data: ControlEventData,
 }
 
