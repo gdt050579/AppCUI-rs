@@ -1,10 +1,7 @@
-mod decorator;
-mod decorators_manager;
 mod window_flags;
 mod window;
 mod title;
 mod drag_status;
-mod decorator_events;
 mod toolbar;
 pub mod events;
 #[cfg(test)]
@@ -12,12 +9,5 @@ mod tests;
 
 pub use window::Window;
 pub use window_flags::WindowFlags;
-pub use decorator_events::WindowDecoratorButtonPressedEvent;
-pub use decorator_events::WindowDecoratorCheckBoxStateChangedEvent;
-pub use decorator_events::WindowDecoratorSingleChoiceSelectedEvent;
-pub use decorator_events::WindowCloseEvent;
 pub (self) use drag_status::DragStatus;
-pub (self) use decorator::Decorator;
-pub (self) use decorator::DecoratorPaintData;
-pub (self) use decorator::DecoratorType;
 pub (self) use title::Title;

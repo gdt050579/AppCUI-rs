@@ -8,9 +8,14 @@ pub trait WindowEvents {
         EventProcessStatus::Ignored
     }
 }
+pub trait ToolbarEvents {
+    fn on_button_clicked(&mut self, _item_handle: Handle) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
 #[repr(u8)]
 #[derive(Copy, Clone)]
 pub(crate) enum EventData {
     OnActivate,
-    OnClose
+    OnClose,
 }
