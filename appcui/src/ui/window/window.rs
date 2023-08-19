@@ -1,10 +1,7 @@
 use AppCUIProcMacro::*;
 
 use super::toolbar;
-use super::toolbar::Gravity;
-use super::toolbar::ToolBar;
-use super::toolbar::ToolBarItem;
-use super::toolbar::ToolBarItemHandle;
+use super::toolbar::*;
 use super::DragStatus;
 use super::Title;
 use super::WindowFlags;
