@@ -1,18 +1,18 @@
 use crate::{
     graphics::{Character, Surface},
-    system::{Handle, Theme}, ui::common::UIElement,
+    system::{Handle, Theme}
 };
 
 use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Gravity, SymbolAttrState};
 
 pub(crate) struct CloseButton {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<UIElement>,
+    pub(super) handle: Handle<CloseButton>,
 }
 
-impl AddToToolbar for CloseButton {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<UIElement> {
-        toolbar.items.add(ToolBarItem::CloseButton(self))
+impl AddToToolbar<CloseButton> for CloseButton {
+    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<CloseButton> {
+        toolbar.items.add(ToolBarItem::CloseButton(self)).cast()
     }
 }
 

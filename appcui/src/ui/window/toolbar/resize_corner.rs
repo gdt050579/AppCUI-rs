@@ -1,18 +1,18 @@
 use crate::{
     graphics::{Character, SpecialChar, Surface},
-    system::{Handle, Theme}, ui::common::UIElement,
+    system::{Handle, Theme}
 };
 
 use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 pub(crate) struct ResizeCorner {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<UIElement>,
+    pub(super) handle: Handle<ResizeCorner>,
 }
 
-impl AddToToolbar for ResizeCorner {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<UIElement> {
-        toolbar.items.add(ToolBarItem::ResizeCorner(self))
+impl AddToToolbar<ResizeCorner> for ResizeCorner {
+    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<ResizeCorner> {
+        toolbar.items.add(ToolBarItem::ResizeCorner(self)).cast()
     }
 }
 

@@ -6,7 +6,7 @@ use crate::{
 
 use super::{
     Button, CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper,
-    ResizeCorner, Tag, ToolBarItem, ToolBarItemHandle,
+    ResizeCorner, Tag, ToolBarItem, 
 };
 
 pub struct ToolBar {
@@ -15,8 +15,8 @@ pub struct ToolBar {
     pressed: bool,
 }
 
-pub(crate) trait AddToToolbar {
-    fn add(self, toolbar: &mut ToolBar) -> Handle<UIElement>;
+pub trait AddToToolbar<T> {
+    fn add(self, toolbar: &mut ToolBar) -> Handle<T>;
 }
 
 impl ToolBar {
@@ -27,14 +27,14 @@ impl ToolBar {
             current_handle: Handle::None,
         }
     }
-    pub fn add<T>(&mut self, item: T) -> ToolBarItemHandle<T>
+    pub fn add<T>(&mut self, item: T) -> Handle<T>
     where
-        T: AddToToolbar,
+        T: AddToToolbar<T>,
     {
-        ToolBarItemHandle::new(AddToToolbar::add(item, self))
+        AddToToolbar::add(item, self)
     }
-    pub fn get<T>(&self, handle: ToolBarItemHandle<T>) -> Option<&T> {
-        if let Some(obj) = self.items.get(handle.handle) {
+    pub fn get<T>(&self, handle: Handle<T>) -> Option<&T> {
+        if let Some(obj) = self.items.get(handle.cast()) {
             match obj {
                 ToolBarItem::Label(obj) => {
                     return Some(unsafe { &(*((obj as *const Label) as *const T)) })
@@ -61,8 +61,8 @@ impl ToolBar {
         }
         None
     }
-    pub fn get_mut<T>(&mut self, handle: ToolBarItemHandle<T>) -> Option<&mut T> {
-        if let Some(obj) = self.items.get_mut(handle.handle) {
+    pub fn get_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T> {
+        if let Some(obj) = self.items.get_mut(handle.cast()) {
             match obj {
                 ToolBarItem::Label(obj) => {
                     return Some(unsafe { &mut (*((obj as *mut Label) as *mut T)) })
@@ -103,11 +103,11 @@ impl ToolBar {
     }
     #[inline(always)]
     pub(crate) fn get_item(&self, handle: Handle<UIElement>) -> Option<&ToolBarItem> {
-        self.items.get(handle)
+        self.items.get(handle.cast())
     }
     #[inline(always)]
     pub(crate) fn get_item_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut ToolBarItem> {
-        self.items.get_mut(handle)
+        self.items.get_mut(handle.cast())
     }
 
     #[inline(always)]

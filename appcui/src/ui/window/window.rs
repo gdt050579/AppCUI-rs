@@ -38,8 +38,8 @@ pub struct Window {
     drag_status: DragStatus,
     drag_start_point: Point,
     old_rect: Rect,
-    hotkey_handle: ToolBarItemHandle<super::toolbar::HotKey>,
-    tag_handle: ToolBarItemHandle<super::toolbar::Tag>,
+    hotkey_handle: Handle<super::toolbar::HotKey>,
+    tag_handle: Handle<super::toolbar::Tag>,
 }
 
 impl WindowControl for Window {}
@@ -103,8 +103,8 @@ impl Window {
             drag_status: DragStatus::None,
             drag_start_point: Point::new(0, 0),
             old_rect: Rect::new(0, 0, 0, 0),
-            hotkey_handle: ToolBarItemHandle::None,
-            tag_handle: ToolBarItemHandle::None,
+            hotkey_handle: Handle::None,
+            tag_handle: Handle::None,
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
@@ -395,7 +395,7 @@ impl Window {
             } else {
                 self.show_tooltip_on_point(tooltip, cx, y);
             }
-            self.toolbar.set_current_item_handle(item.get_handle());
+            self.toolbar.set_current_item_handle(item.get_handle().cast());
             return EventProcessStatus::Processed;
         }
         // if I reach this point - tool tip should not be shown and there is no win button selected
@@ -433,7 +433,7 @@ impl Window {
         };
 
         if !item_handle.is_none() {
-            self.toolbar.set_current_item_handle(item_handle);
+            self.toolbar.set_current_item_handle(item_handle.cast());
             self.toolbar.set_current_item_pressed(true);
             return EventProcessStatus::Processed;
         }

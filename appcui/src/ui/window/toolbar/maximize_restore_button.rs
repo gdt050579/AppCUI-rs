@@ -1,18 +1,18 @@
 use crate::{
     graphics::{Character, Surface, SpecialChar},
-    system::{Handle, Theme}, ui::common::UIElement,
+    system::{Handle, Theme}
 };
 
 use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Gravity, SymbolAttrState};
 
 pub(crate) struct MaximizeRestoreButton {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<UIElement>,
+    pub(super) handle: Handle<MaximizeRestoreButton>,
 }
 
-impl AddToToolbar for MaximizeRestoreButton {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<UIElement> {
-        toolbar.items.add(ToolBarItem::MaximizeRestoreButton(self))
+impl AddToToolbar<MaximizeRestoreButton> for MaximizeRestoreButton {
+    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<MaximizeRestoreButton> {
+        toolbar.items.add(ToolBarItem::MaximizeRestoreButton(self)).cast()
     }
 }
 

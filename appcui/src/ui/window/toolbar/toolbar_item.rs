@@ -87,28 +87,28 @@ impl ToolBarItem {
         }
     }
 }
-impl HandleSupport for ToolBarItem {
-    fn get_handle(&self) -> Handle<UIElement> {
+impl HandleSupport<ToolBarItem> for ToolBarItem {
+    fn get_handle(&self) -> Handle<ToolBarItem> {
         match self {
-            ToolBarItem::Label(item) => item.handle,
-            ToolBarItem::HotKey(item) => item.handle,
-            ToolBarItem::Tag(item) => item.handle,
-            ToolBarItem::CloseButton(item) => item.handle,
-            ToolBarItem::MaximizeRestoreButton(item) => item.handle,
-            ToolBarItem::ResizeCorner(item) => item.handle,
-            ToolBarItem::Button(item) => item.handle,
+            ToolBarItem::Label(item) => item.handle.cast(),
+            ToolBarItem::HotKey(item) => item.handle.cast(),
+            ToolBarItem::Tag(item) => item.handle.cast(),
+            ToolBarItem::CloseButton(item) => item.handle.cast(),
+            ToolBarItem::MaximizeRestoreButton(item) => item.handle.cast(),
+            ToolBarItem::ResizeCorner(item) => item.handle.cast(),
+            ToolBarItem::Button(item) => item.handle.cast(),
         }
     }
 
-    fn set_handle(&mut self, handle: Handle<UIElement>) {
+    fn set_handle(&mut self, handle: Handle<ToolBarItem>) {
         match self {
-            ToolBarItem::Label(item) => item.handle = handle,
-            ToolBarItem::HotKey(item) => item.handle = handle,
-            ToolBarItem::Tag(item) => item.handle = handle,
-            ToolBarItem::CloseButton(item) => item.handle = handle,
-            ToolBarItem::MaximizeRestoreButton(item) => item.handle = handle,
-            ToolBarItem::ResizeCorner(item) => item.handle = handle,
-            ToolBarItem::Button(item) => item.handle = handle,
+            ToolBarItem::Label(item) => item.handle = handle.cast(),
+            ToolBarItem::HotKey(item) => item.handle = handle.cast(),
+            ToolBarItem::Tag(item) => item.handle = handle.cast(),
+            ToolBarItem::CloseButton(item) => item.handle = handle.cast(),
+            ToolBarItem::MaximizeRestoreButton(item) => item.handle = handle.cast(),
+            ToolBarItem::ResizeCorner(item) => item.handle = handle.cast(),
+            ToolBarItem::Button(item) => item.handle = handle.cast(),
         }
     }
 }

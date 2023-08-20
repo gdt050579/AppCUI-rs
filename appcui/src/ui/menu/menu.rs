@@ -751,13 +751,13 @@ impl Menu {
     }
 }
 
-impl HandleSupport for Menu {
-    fn get_handle(&self) -> Handle<UIElement> {
+impl HandleSupport<Menu> for Menu {
+    fn get_handle(&self) -> Handle<Menu> {
         self.handle.cast()
     }
 
-    fn set_handle(&mut self, handle: Handle<UIElement>) {
-        self.handle = handle.cast();
+    fn set_handle(&mut self, handle: Handle<Menu>) {
+        self.handle = handle;
         self.update_children_with_parent_handle();
     }
 }

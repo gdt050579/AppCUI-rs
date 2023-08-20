@@ -3,13 +3,11 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use crate::ui::common::UIElement;
-
 static GLOBAL_ID: AtomicUsize = AtomicUsize::new(0);
 
-pub(crate) trait HandleSupport {
-    fn get_handle(&self) -> Handle<UIElement>;
-    fn set_handle(&mut self, handle: Handle<UIElement>);
+pub(crate) trait HandleSupport<T> {
+    fn get_handle(&self) -> Handle<T>;
+    fn set_handle(&mut self, handle: Handle<T>);
 }
 
 pub struct Handle<T> {

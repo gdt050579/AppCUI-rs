@@ -11,7 +11,6 @@ mod close_button;
 mod maximize_restore_button;
 mod resize_corner;
 mod button;
-mod toolbar_item_handle;
 mod symbol_attr_state;
 
 
@@ -22,7 +21,6 @@ pub (self) use self::position_helper::PositionHelper;
 pub (self) use self::paint_data::PaintData;
 pub (self) use self::symbol_attr_state::SymbolAttrState;
 pub (super) use self::toolbar::ToolBar;
-pub use self::toolbar_item_handle::ToolBarItemHandle;
 pub use self::gravity::Gravity;
 
 // tool bar items (public)
