@@ -32,7 +32,7 @@ impl MyWin {
     }
 }
 impl ButtonEvents for MyWin {
-    fn on_pressed(&mut self, button_handle: Handle<UIElement>)->EventProcessStatus {
+    fn on_pressed(&mut self, button_handle: Handle<Button>)->EventProcessStatus {
         if self.but1 == button_handle {
             self.set_info("Button 1 presed");
             return EventProcessStatus::Processed;

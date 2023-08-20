@@ -1,2 +1,2 @@
 #[derive(Copy,Clone,Default)]
-pub struct UIElement;
+pub(crate) struct UIElement;
