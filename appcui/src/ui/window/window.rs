@@ -5,17 +5,17 @@ use super::toolbar::*;
 use super::DragStatus;
 use super::Title;
 use super::WindowFlags;
-use crate::ui::command_bar::*;
-use crate::ui::common::*;
-use crate::ui::common::traits::*;
-use crate::ui::menu::Menu;
-use crate::ui::menu::MenuBar;
-use crate::ui::window::events::EventData;
-use crate::ui::*;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::Handle;
 use crate::system::*;
+use crate::ui::command_bar::*;
+use crate::ui::common::traits::*;
+use crate::ui::common::*;
+use crate::ui::menu::Menu;
+use crate::ui::menu::MenuBar;
+use crate::ui::window::events::EventData;
+use crate::ui::*;
 use crate::utils::Strategy;
 use crate::utils::VectorIndex;
 
@@ -93,7 +93,10 @@ impl Window {
         let mut win = Window {
             base: ControlBase::new(
                 layout,
-                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
+                StatusFlags::Visible
+                    | StatusFlags::Enabled
+                    | StatusFlags::AcceptInput
+                    | StatusFlags::WindowControl,
             ),
             title: Title::new(title),
             flags,
@@ -188,7 +191,10 @@ impl Window {
             self.update_positions(self.get_size());
         }
     }
-    pub fn set_hotkey<T>(&mut self, key: T) where Key: From<T> {
+    pub fn set_hotkey<T>(&mut self, key: T)
+    where
+        Key: From<T>,
+    {
         if let Some(item) = self.toolbar.get_mut(self.hotkey_handle) {
             item.set_key(key.into());
             self.update_positions(self.get_size());
@@ -395,7 +401,8 @@ impl Window {
             } else {
                 self.show_tooltip_on_point(tooltip, cx, y);
             }
-            self.toolbar.set_current_item_handle(item.get_handle().cast());
+            self.toolbar
+                .set_current_item_handle(item.get_handle().cast());
             return EventProcessStatus::Processed;
         }
         // if I reach this point - tool tip should not be shown and there is no win button selected

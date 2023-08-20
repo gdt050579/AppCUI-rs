@@ -1,6 +1,6 @@
 use super::{
-    ControlHandleManager, InitializationData, InitializationFlags, MenuHandleManager,
-    Theme, ToolTip, Handle,
+    ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
+    Theme, ToolTip,
 };
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
@@ -8,10 +8,11 @@ use crate::terminals::*;
 use crate::ui::command_bar::events::CommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
-use crate::ui::common::{ControlEventData, UIElement};
 use crate::ui::common::{traits::*, ControlEvent};
+use crate::ui::common::{ControlEventData, UIElement};
 use crate::ui::menu::events::{MenuEvent, MenuEvents};
 use crate::ui::menu::{Menu, MenuBar, MousePressedResult};
+use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
 
 #[repr(u8)]
@@ -177,7 +178,11 @@ impl RuntimeManager {
         self.repaint = true;
         self.recompute_layout = true;
     }
-    fn set_event_processors(&mut self, control_handle: Handle<UIElement>, event_processor: Handle<UIElement>) {
+    fn set_event_processors(
+        &mut self,
+        control_handle: Handle<UIElement>,
+        event_processor: Handle<UIElement>,
+    ) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(control_handle) {
             let base = control.get_base_mut();
@@ -502,18 +507,34 @@ impl RuntimeManager {
         }
     }
 
-    pub(crate) fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout) {
+    pub(crate) fn update_control_layout(
+        &mut self,
+        handle: Handle<UIElement>,
+        parent_layout: &ParentLayout,
+    ) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
+            let window_control = base.is_window_control();
             let old_size = base.get_size();
+            let old_pos = base.get_position();
             base.update_control_layout_and_screen_origin(parent_layout);
             let new_size = base.get_size();
+            let new_pos = base.get_position();
             // process the same thing for its children
             let my_layout = ParentLayout::from(base);
             // if size has been changed --> call on_resize
             if new_size != old_size {
                 control.get_control_mut().on_resize(old_size, new_size);
+            }
+            // just for window
+            if window_control && ((new_size != old_size) || (old_pos != new_pos)) {
+                // call the window specific event
+                WindowEvents::on_layout_changed(
+                    control.get_control_mut(),
+                    Rect::with_point_and_size(old_pos, old_size),
+                    Rect::with_point_and_size(new_pos, new_size),
+                );
             }
             for child_handle in &control.get_base().children {
                 self.update_control_layout(*child_handle, &my_layout)
@@ -634,7 +655,12 @@ impl RuntimeManager {
         return EventProcessStatus::Ignored;
     }
 
-    fn coordinates_to_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Option<Handle<UIElement>> {
+    fn coordinates_to_control(
+        &mut self,
+        handle: Handle<UIElement>,
+        x: i32,
+        y: i32,
+    ) -> Option<Handle<UIElement>> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();

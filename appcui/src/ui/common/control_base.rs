@@ -23,7 +23,7 @@ pub enum StatusFlags {
     Focused = 0x0008,
     MarkedForFocus = 0x0010,
     MouseOver = 0x0020,
-    EventProcessor = 0x0040,
+    WindowControl = 0x0040,
 }
 #[derive(Copy, Clone)]
 pub(crate) struct Margins {
@@ -146,6 +146,11 @@ impl ControlBase {
     #[inline(always)]
     pub(crate) fn is_marked_to_receive_focus(&self) -> bool {
         self.status_flags.contains(StatusFlags::MarkedForFocus)
+    }
+
+    #[inline(always)]
+    pub(crate) fn is_window_control(&self) -> bool {
+        self.status_flags.contains(StatusFlags::WindowControl)
     }
 
     pub fn request_focus(&mut self) -> bool {

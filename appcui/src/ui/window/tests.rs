@@ -285,51 +285,53 @@ fn check_window_resize() {
 }
 
 #[test]
-fn check_window_size() {
-    #[Window(overwrite = OnResize,internal = true)]
+fn check_window_on_layout_changed() {
+    #[Window(events = WindowEvents,internal = true)]
     struct MyWin {
         info: Handle<Label>,
     }
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("d:c,w:40,h:7"), WindowFlags::None),
+                base: Window::new("Win", Layout::new("d:c,w:40,h:7"), WindowFlags::Sizeable),
                 info: Handle::None,
             };
             me.info = me.add(Label::new("", Layout::new("x:1,y:1,w:36,h:3")));
             me
         }
     }
-    impl OnResize for MyWin {
-        fn on_resize(&mut self, old_size: Size, new_size: Size) {
-            self.base.on_resize(old_size, new_size);
+    impl WindowEvents for MyWin {
+        fn on_layout_changed(&mut self, old_layout: Rect, new_layout: Rect) {
             let label_handle = self.info;
             let size = self.get_size();
             let client_size = self.get_client_size();
             if let Some(label) = self.get_control_mut(label_handle) {
                 label.set_text(
                     format!(
-                        "Previous size : {}x{}\nNew size      : {}x{}\nClient size   : {}x{}",
-                        old_size.width,
-                        old_size.height,
-                        size.width,
-                        size.height,
+                        "Previous rect : {},{} - {}x{}\nNew rect      : {},{} - {}x{}\nClient size   : {}x{}",
+                        old_layout.get_left(),
+                        old_layout.get_top(),
+                        old_layout.get_width(),
+                        old_layout.get_height(),
+                        new_layout.get_left(),
+                        new_layout.get_top(),
+                        new_layout.get_width(),
+                        new_layout.get_height(),
                         client_size.width,
                         client_size.height
                     )
                     .as_str(),
                 );
             }
-            assert!(size == new_size);
-            assert!(old_size.width == 12); // minim window width
-            assert!(old_size.height == 3); // minim window height (set by bounds)
+            assert!(size.width == new_layout.get_width());
+            assert!(size.height == new_layout.get_height());
         }
     }
 
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('initial state')
-        CheckHash(0x8471BBDBD6D2B1E)
+        CheckHash(0xDA18EF6A52B3C090)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     a.add_window(MyWin::new());
