@@ -229,10 +229,7 @@ impl ControlBase {
             .set_size_bounds(min_width, min_height, max_width, max_height);
     }
 
-    #[inline(always)]
-    pub(crate) fn get_handle(&self) -> Handle<UIElement>  {
-        self.handle
-    }
+
 
     #[inline]
     pub(crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {

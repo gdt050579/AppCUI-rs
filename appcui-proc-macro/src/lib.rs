@@ -159,6 +159,8 @@ fn parse_token_stream(
 /// 
 /// # Example
 /// ```
+/// use AppCUIProcMacro::*;
+/// 
 /// #[CustomControl(overwrite = OnPaint+OnKeyPressed)]
 /// struct MyCustomControl {
 ///     // custom data
