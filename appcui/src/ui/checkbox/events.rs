@@ -1,7 +1,8 @@
-use crate::{system::Handle, ui::common::{traits::EventProcessStatus, UIElement}};
+use crate::{system::Handle, ui::common::traits::EventProcessStatus};
+use super::CheckBox;
 
 pub trait CheckBoxEvents {
-    fn on_status_changed(&mut self, _checbox_handle: Handle<UIElement>, _checked: bool) -> EventProcessStatus {
+    fn on_status_changed(&mut self, _handle: Handle<CheckBox>, _checked: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }

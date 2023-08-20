@@ -1,15 +1,18 @@
-use crate::{system::Handle, ui::common::{traits::EventProcessStatus, UIElement}};
+use crate::{system::Handle, ui::common::traits::EventProcessStatus};
+use super::toolbar::Button;
 
+// Window events always go to the same window that triggers them --> we don't need a handle as
+// we already have &mut self
 pub trait WindowEvents {
-    fn on_activate(&mut self, _window_handle: Handle<UIElement>) -> EventProcessStatus {
+    fn on_activate(&mut self) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    fn on_close(&mut self, _window_handle: Handle<UIElement>) -> EventProcessStatus {
+    fn on_close(&mut self) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
 pub trait ToolbarEvents {
-    fn on_button_clicked(&mut self, _item_handle: Handle<UIElement>) -> EventProcessStatus {
+    fn on_button_clicked(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }

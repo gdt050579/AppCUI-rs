@@ -11,7 +11,7 @@ use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::{ControlEventData, UIElement};
 use crate::ui::common::{traits::*, ControlEvent};
 use crate::ui::menu::events::{MenuEvent, MenuEvents};
-use crate::ui::menu::{Menu, MenuBar, MenuHandle, MousePressedResult};
+use crate::ui::menu::{Menu, MenuBar, MousePressedResult};
 use crate::utils::VectorIndex;
 
 #[repr(u8)]
@@ -53,7 +53,7 @@ pub(crate) struct RuntimeManager {
     commandbar_event: Option<CommandBarEvent>,
     menu_event: Option<MenuEvent>,
     mouse_locked_object: MouseLockedObject,
-    opened_menu_handle: MenuHandle,
+    opened_menu_handle: Handle<Menu>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -77,7 +77,7 @@ impl RuntimeManager {
             request_focus: None,
             current_focus: None,
             mouse_over_control: None,
-            opened_menu_handle: MenuHandle::None,
+            opened_menu_handle: Handle::None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
             commandbar_event: None,
@@ -153,7 +153,7 @@ impl RuntimeManager {
     }
     pub(crate) fn close_opened_menu(&mut self) {
         if !self.opened_menu_handle.is_none() {
-            self.opened_menu_handle = MenuHandle::None;
+            self.opened_menu_handle = Handle::None;
             self.repaint = true;
             if let Some(menubar) = self.menubar.as_mut() {
                 menubar.close();
@@ -227,16 +227,16 @@ impl RuntimeManager {
     pub(crate) fn get_menus(&self) -> &mut MenuHandleManager {
         unsafe { &mut *self.menus }
     }
-    pub(crate) fn add_menu(&mut self, menu: Menu) -> MenuHandle {
+    pub(crate) fn add_menu(&mut self, menu: Menu) -> Handle<Menu> {
         self.get_menus().add(menu)
     }
-    pub(crate) fn get_menu(&mut self, handle: MenuHandle) -> Option<&mut Menu> {
+    pub(crate) fn get_menu(&mut self, handle: Handle<Menu>) -> Option<&mut Menu> {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
     pub(crate) fn show_menu(
         &mut self,
-        handle: MenuHandle,
+        handle: Handle<Menu>,
         receiver_control_handle: Handle<UIElement>,
         x: i32,
         y: i32,
@@ -561,7 +561,7 @@ impl RuntimeManager {
             }
         }
     }
-    fn paint_menu(&mut self, handle: MenuHandle, activ: bool) {
+    fn paint_menu(&mut self, handle: Handle<Menu>, activ: bool) {
         if handle.is_none() {
             return;
         }
@@ -714,9 +714,9 @@ impl RuntimeManager {
         return processed;
     }
 
-    fn process_menu_mouse_click(&mut self, handle: MenuHandle, x: i32, y: i32) {
+    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) {
         let mut result = MousePressedResult::None;
-        let mut parent_handle = MenuHandle::None;
+        let mut parent_handle = Handle::None;
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
             parent_handle = menu.get_parent_handle();

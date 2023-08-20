@@ -230,7 +230,7 @@ impl ControlBase {
     }
 
     #[inline(always)]
-    pub fn get_handle(&self) -> Handle<UIElement>  {
+    pub(crate) fn get_handle(&self) -> Handle<UIElement>  {
         self.handle
     }
 

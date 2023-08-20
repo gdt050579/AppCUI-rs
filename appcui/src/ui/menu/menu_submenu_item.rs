@@ -1,15 +1,15 @@
 use crate::{
     graphics::{Surface, TextFormat, Character, SpecialChar},
-    system::MenuTheme,
+    system::{MenuTheme, Handle},
     utils::Caption,
 };
 
-use super::MenuHandle;
+use super::Menu;
 
 pub(super) struct MenuSubMenuItem {
     pub(super) enabled: bool,
     pub(super) caption: Caption,
-    pub(super) submenu_handle: MenuHandle
+    pub(super) submenu_handle: Handle<Menu>
 }
 impl MenuSubMenuItem {
     pub (super) fn paint(

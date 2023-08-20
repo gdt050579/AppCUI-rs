@@ -15,7 +15,7 @@ pub struct ToolBar {
     pressed: bool,
 }
 
-pub trait AddToToolbar {
+pub(crate) trait AddToToolbar {
     fn add(self, toolbar: &mut ToolBar) -> Handle<UIElement>;
 }
 

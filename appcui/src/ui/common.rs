@@ -11,7 +11,7 @@ pub(crate) use control_event_wrapper::ControlEvent;
 pub(crate) use control_event_wrapper::ControlEventData;
 pub(crate) use control_manager::ControlManager;
 pub(crate) use control_base::StatusFlags;
+pub(crate) use ui_element::UIElement;
 pub use control_base::ControlBase;
-pub use ui_element::UIElement;
 
 

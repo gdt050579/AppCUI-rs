@@ -1,14 +1,15 @@
-use super::MenuHandle;
 use crate::{utils::Caption, system::Handle, ui::common::UIElement};
+
+use super::Menu;
 
 pub(super) struct MenuBarItem {
     pub(super) caption: Caption,
     pub(super) x: i32,
-    pub(super) handle: MenuHandle,
+    pub(super) handle: Handle<Menu>,
     pub(super) receiver_control_handle: Handle<UIElement>,
 }
 impl MenuBarItem {
-    pub(super) fn new(handle: MenuHandle, control_handle: Handle<UIElement>, caption: &Caption) -> Self {
+    pub(super) fn new(handle: Handle<Menu>, control_handle: Handle<UIElement>, caption: &Caption) -> Self {
         Self {
             x: 0,
             handle,
@@ -20,7 +21,7 @@ impl MenuBarItem {
             },
         }
     }
-    pub (super) fn set(&mut self, handle: MenuHandle, control_handle: Handle<UIElement>, caption: &Caption) {
+    pub (super) fn set(&mut self, handle: Handle<Menu>, control_handle: Handle<UIElement>, caption: &Caption) {
         self.x = 0;
         self.handle = handle;
         self.receiver_control_handle = control_handle;

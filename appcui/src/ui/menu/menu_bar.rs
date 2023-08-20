@@ -6,7 +6,7 @@ use crate::{
     utils::{Strategy, VectorIndex},
 };
 
-use super::{MenuBarItem, MenuHandle};
+use super::{MenuBarItem, Menu};
 
 pub struct MenuBar {
     items: Vec<MenuBarItem>,
@@ -63,7 +63,7 @@ impl MenuBar {
         self.width = width;
         self.update_positions();
     }
-    pub fn add(&mut self, handle: MenuHandle) {
+    pub fn add(&mut self, handle: Handle<Menu>) {
         if self.receiver_control_handle.is_none() {
             return;
         }

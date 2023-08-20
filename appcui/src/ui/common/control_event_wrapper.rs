@@ -22,17 +22,17 @@ impl ControlEvent {
     pub(crate) fn invoke(&self, receiver: &mut dyn Control) -> EventProcessStatus {
         match &self.data {
             ControlEventData::ButtonEvent(_) => {
-                return ButtonEvents::on_pressed(receiver, self.emitter);
+                return ButtonEvents::on_pressed(receiver, self.emitter.cast());
             }
             ControlEventData::CheckBoxEvent(data) => {
-                return CheckBoxEvents::on_status_changed(receiver, self.emitter, data.checked);
+                return CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked);
             }
             ControlEventData::WindowEvents(data) => match data {
                 window::events::EventData::OnActivate => {
-                    return WindowEvents::on_activate(receiver, self.emitter)
+                    return WindowEvents::on_activate(receiver)
                 }
                 window::events::EventData::OnClose => {
-                    return WindowEvents::on_close(receiver, self.emitter)
+                    return WindowEvents::on_close(receiver)
                 }
             },
         };

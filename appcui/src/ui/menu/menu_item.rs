@@ -1,12 +1,12 @@
 use crate::{
     graphics::{Surface, TextFormat},
     input::{Key, KeyCode},
-    system::MenuTheme,
+    system::{MenuTheme, Handle},
 };
 
 use super::{
-    MenuCheckBoxItem, MenuCommandItem, MenuHandle, MenuLineItem, MenuRadioBoxItem,
-    MenuSubMenuItem,
+    MenuCheckBoxItem, MenuCommandItem, MenuLineItem, MenuRadioBoxItem,
+    MenuSubMenuItem, Menu,
 };
 
 pub(super) enum MenuItem {
@@ -139,7 +139,7 @@ impl MenuItem {
         }
     }
     #[inline(always)]
-    pub(super) fn get_submenu(&self) -> Option<MenuHandle> {
+    pub(super) fn get_submenu(&self) -> Option<Handle<Menu>> {
         match self {
             MenuItem::SubMenu(item) => Some(item.submenu_handle),
             _ => None,

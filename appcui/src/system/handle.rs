@@ -7,7 +7,7 @@ use crate::ui::common::UIElement;
 
 static GLOBAL_ID: AtomicUsize = AtomicUsize::new(0);
 
-pub trait HandleSupport {
+pub(crate) trait HandleSupport {
     fn get_handle(&self) -> Handle<UIElement>;
     fn set_handle(&mut self, handle: Handle<UIElement>);
 }

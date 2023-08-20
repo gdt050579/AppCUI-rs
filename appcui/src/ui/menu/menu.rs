@@ -1,6 +1,6 @@
 use super::{
     events::*, menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo,
-    MenuCheckBoxItem, MenuCommandItem, MenuHandle, MenuItem, MenuRadioBoxItem, MenuSubMenuItem,
+    MenuCheckBoxItem, MenuCommandItem, MenuItem, MenuRadioBoxItem, MenuSubMenuItem,
     MousePressedResult,
 };
 use crate::{
@@ -25,8 +25,8 @@ pub struct Menu {
     pub(super) button_up: MenuButtonState,
     pub(super) button_down: MenuButtonState,
     pub(super) clip: ClipArea,
-    pub(super) handle: MenuHandle,
-    pub(super) parent_handle: MenuHandle,
+    pub(super) handle: Handle<Menu>,
+    pub(super) parent_handle: Handle<Menu>,
     pub(super) receiver_control_handle: Handle<UIElement>,
 }
 impl Menu {
@@ -46,8 +46,8 @@ impl Menu {
             button_up: MenuButtonState::Normal,
             button_down: MenuButtonState::Normal,
             clip: ClipArea::new(0, 0, 1, 1),
-            handle: MenuHandle::None,
-            parent_handle: MenuHandle::None,
+            handle: Handle::None,
+            parent_handle: Handle::None,
             receiver_control_handle: Handle::None,
         }
     }
@@ -739,25 +739,25 @@ impl Menu {
         return true;
     }
     #[inline(always)]
-    pub(crate) fn get_handle(&self) -> MenuHandle {
+    pub(crate) fn get_handle(&self) -> Handle<Menu> {
         self.handle
     }
-    pub(crate) fn set_handle(&mut self, handle: MenuHandle) {
+    pub(crate) fn set_handle(&mut self, handle: Handle<Menu>) {
         self.handle = handle;
     }
     #[inline(always)]
-    pub(crate) fn get_parent_handle(&self) -> MenuHandle {
+    pub(crate) fn get_parent_handle(&self) -> Handle<Menu> {
         self.parent_handle
     }
 }
 
 impl HandleSupport for Menu {
     fn get_handle(&self) -> Handle<UIElement> {
-        self.handle.handle
+        self.handle.cast()
     }
 
     fn set_handle(&mut self, handle: Handle<UIElement>) {
-        self.handle = MenuHandle { handle };
+        self.handle = handle.cast();
         self.update_children_with_parent_handle();
     }
 }
