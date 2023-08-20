@@ -66,3 +66,8 @@ impl<T> Default for Handle<T> {
         }
     }
 }
+impl<T> std::fmt::Debug for Handle<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Handle {{ index: {}, id: {} }}", self.get_index(), (self.value >> 32) & 0xFFFFFFFF)
+    }
+}
