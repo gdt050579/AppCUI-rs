@@ -6,6 +6,28 @@ use std::str::FromStr;
 
 extern crate proc_macro;
 
+macro_rules! impl_default_trait {
+    ($code:expr, $trait_name:expr, $skip_implementation:expr) => {
+        if !$skip_implementation {
+            $code.push_str("impl ");
+            $code.push_str($trait_name);
+            $code.push_str(" for $(STRUCT_NAME) { }\n");
+        }
+    };
+}
+macro_rules! impl_trait {
+    ($code:expr, $trait_name:expr, $pass_to_parent_impl:expr, $skip_implementation:expr, $use_default_trait:expr) => {
+        if !$skip_implementation {
+            if $use_default_trait {
+                impl_default_trait!($code, $trait_name, false);
+            } else {
+                $code.push_str($pass_to_parent_impl);
+                $code.push_str("\n");
+            }
+        }
+    };
+}
+
 mod templates {
     pub static IMPORTS: &str = "
     use $(ROOT)::ui::*;
@@ -34,10 +56,6 @@ mod templates {
     impl std::ops::DerefMut for $(STRUCT_NAME) {
         fn deref_mut(&mut self) -> &mut Self::Target { return &mut self.base; }
     }
-    ";
-
-    pub static CONTROL_TRAIT: &str = "
-    impl Control for $(STRUCT_NAME) { }
     ";
 
     pub static ON_PAINT_TRAIT: &str = "
@@ -76,65 +94,14 @@ mod templates {
         fn on_lose_focus(&mut self)  { self.base.on_lose_focus(); }
     }
     ";
-
-    pub static COMMANDBAR_EVENTS_TRAIT: &str = "
-    impl CommandBarEvents for $(STRUCT_NAME) {
-        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-            CommandBarEvents::on_update_commandbar(&self.base, commandbar);
-        }
-        fn on_event(&mut self, command_id: u32) {
-            CommandBarEvents::on_event(&mut self.base, command_id);
-        }
-    }
-    ";
-
-    pub static MENU_EVENTS_TRAIT: &str = "
-    impl MenuEvents for $(STRUCT_NAME) {
-        fn on_menu_open(&self, menu: &mut Menu) {
-            MenuEvents::on_menu_open(&self.base, menu);
-        }
-        fn on_item_clicked(&mut self, command: u32){
-            MenuEvents::on_item_clicked(&mut self.base, command);
-        }
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            MenuEvents::on_update_menubar(&self.base, menubar);
-        }
-    }
-    ";
-
-    pub static BUTTON_EVENTS_TRAIT: &str = "
-    impl ButtonEvents for $(STRUCT_NAME) {
-        fn on_pressed(&mut self, button_handle: Handle<UIElement>)->EventProcessStatus {
-            ButtonEvents::on_pressed(&mut self.base, button_handle)
-        }
-    }
-    ";
-
-    pub static CHECKBOX_EVENTS_TRAIT: &str = "
-    impl CheckBoxEvents for $(STRUCT_NAME) {
-        fn on_status_changed(&mut self, checbox_handle: Handle<UIElement>, checked: bool)->EventProcessStatus {
-            CheckBoxEvents::on_status_changed(&mut self.base, checbox_handle, checked)
-        }
-    }
-    ";
-
-    pub static WINDOW_EVENTS_TRAIT: &str = "
-    impl WindowEvents for $(STRUCT_NAME) {
-        fn on_activate(&mut self, window_handle: Handle<UIElement>) -> EventProcessStatus {
-            WindowEvents::on_activate(&mut self.base, window_handle)
-        }
-        fn on_close(&mut self, window_handle: Handle<UIElement>) -> EventProcessStatus {
-            WindowEvents::on_close(&mut self.base, window_handle)
-        }
-    }
-    ";
 }
 fn parse_token_stream(
     args: TokenStream,
     input: TokenStream,
     base_control: &str,
-    extra_code: &str,
+    extra_trait: &str,
     allow_event_processor: bool,
+    use_default_impl: bool
 ) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args);
@@ -149,51 +116,27 @@ fn parse_token_stream(
         code.insert_str(0, templates::IMPORTS_INTERNAL);
     }
     code.push_str(templates::DEREF_TRAIT);
-    code.push_str(templates::CONTROL_TRAIT);
-
     // check for event processors
     if (!allow_event_processor) && (!a.event_processor_list.is_empty()) {
         panic!("Current control does not support event processing. This means that you can not overwrite the following: {}. Only Window based controls are allowed to overwrite event processing traits !",&a.event_processor_list);
     }
+    impl_default_trait!(code, "Control", false);
+    impl_default_trait!(code, extra_trait, extra_trait.is_empty());
 
-    // defaults for various events
-    if !a.on_paint {
-        code.push_str(templates::ON_PAINT_TRAIT);
-    }
-    if !a.on_key_pressed {
-        code.push_str(templates::ON_KEY_PRESSED_TRAIT);
-    }
-    if !a.on_mouse_event {
-        code.push_str(templates::ON_MOUSE_EVENT_TRAIT);
-    }
-    if !a.on_default_action {
-        code.push_str(templates::ON_DEFAULT_ACTION_TRAIT);
-    }
-    if !a.on_resize {
-        code.push_str(templates::ON_RESIZE_TRAIT);
-    }
-    if !a.on_focus {
-        code.push_str(templates::ON_FOCUS_TRAIT);
-    }
+    // raw events
+    impl_trait!(code, "OnPaint", templates::ON_PAINT_TRAIT, a.on_paint, use_default_impl);
+    impl_trait!(code, "OnKeyPressed", templates::ON_KEY_PRESSED_TRAIT, a.on_key_pressed, use_default_impl);
+    impl_trait!(code, "OnMouseEvent", templates::ON_MOUSE_EVENT_TRAIT, a.on_mouse_event, use_default_impl);
+    impl_trait!(code, "OnDefaultAction", templates::ON_DEFAULT_ACTION_TRAIT, a.on_default_action, use_default_impl);
+    impl_trait!(code, "OnResize", templates::ON_RESIZE_TRAIT, a.on_resize, use_default_impl);
+    impl_trait!(code, "OnFocus", templates::ON_FOCUS_TRAIT, a.on_focus, use_default_impl);
     // control events
-    if !a.command_bar_events {
-        code.push_str(templates::COMMANDBAR_EVENTS_TRAIT);
-    }
-    if !a.menu_events {
-        code.push_str(templates::MENU_EVENTS_TRAIT);
-    }
-    if !a.button_events {
-        code.push_str(templates::BUTTON_EVENTS_TRAIT);
-    }
-    if !a.checkbox_events {
-        code.push_str(templates::CHECKBOX_EVENTS_TRAIT);
-    }
-    if !a.window_events {
-        code.push_str(templates::WINDOW_EVENTS_TRAIT);
-    }
-    // add the extra code
-    code.push_str("\n");
-    code.push_str(extra_code);
+    impl_default_trait!(code, "CommandBarEvents", a.command_bar_events);
+    impl_default_trait!(code, "MenuEvents", a.menu_events);
+    impl_default_trait!(code, "ButtonEvents", a.button_events);
+    impl_default_trait!(code, "CheckBoxEvents", a.checkbox_events);
+    impl_default_trait!(code, "WindowEvents", a.window_events);
+
     // replace templates
     code = code
         .replace("$(STRUCT_NAME)", &struct_name)
@@ -205,29 +148,17 @@ fn parse_token_stream(
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(args, input, "ControlBase", "", false)
+    parse_token_stream(args, input, "ControlBase", "", false, true)
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(
-        args,
-        input,
-        "Window",
-        "impl WindowControl for $(STRUCT_NAME) {}",
-        true,
-    )
+    parse_token_stream(args, input, "Window", "WindowControl", true, false)
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse_token_stream(
-        args,
-        input,
-        "Desktop",
-        "impl DesktopControl for $(STRUCT_NAME) {}",
-        false,
-    )
+    parse_token_stream(args, input, "Desktop", "DesktopControl", false, true)
 }
 
 #[proc_macro]

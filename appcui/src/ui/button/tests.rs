@@ -47,22 +47,22 @@ impl ButtonEvents for MyWin {
 
 #[test]
 fn check_button_control() {
-    // let script = "
-    //     Paint('initial state')   
-    //     //CheckHash(0xB838E6ABBF00B753)   
-    //     Key.Pressed(Tab)
-    //     Paint('After tab pressed') 
-    //     Key.Pressed(Enter)
-    //     Paint('After second button was pressed')
-    // ";
-    // let mut a = App::debug(
-    //     60,
-    //     10,
-    //     InitializationFlags::None,
-    //     Desktop::new(),
-    //     script,
-    // )
-    // .unwrap();
-    // a.add_window(MyWin::new());
-    //a.run();
+    let script = "
+        Paint('initial state')   
+        //CheckHash(0xB838E6ABBF00B753)   
+        Key.Pressed(Tab)
+        Paint('After tab pressed') 
+        Key.Pressed(Enter)
+        Paint('After second button was pressed')
+    ";
+    let mut a = App::debug(
+        60,
+        10,
+        InitializationFlags::None,
+        Desktop::new(),
+        script,
+    )
+    .unwrap();
+    a.add_window(MyWin::new());
+    a.run();
 }
