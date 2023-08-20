@@ -145,6 +145,40 @@ fn parse_token_stream(
     //println!("{}", code);
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }
+/// Use to create a custom control
+/// The general format is: `#[CustomControl(overwrite = ...)]`
+/// Where the overwrite parameter is a list of traits that can be overwritten that include:
+/// * OnPaint 
+/// * OnKeyPressed
+/// * OnMouseEvents
+/// * OnDefaultAction
+/// * OnResize
+/// * OnFocus
+/// 
+/// If not overwritten, a default implementation will be automatically added
+/// 
+/// # Example
+/// ```
+/// #[CustomControl(overwrite = OnPaint+OnKeyPressed)]
+/// struct MyCustomControl {
+///     // custom data
+/// }
+/// impl MyCustomControl { /* specific methods */}
+/// impl OnPaint for MyCustomControl {
+///     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+///         // add your code that draws that control here
+///         // clipping is already set
+///     }
+/// }
+/// impl OnKeyPressed for MyCustomControl {
+///     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+///         // do some actions based on the provided key
+///         // this method should return `EventProcessStatus::Processed` if 
+///         // the provided key was used, or `EventProcessStatus::Ignored` if 
+///         // the key should be send to the parent control.
+///     }
+/// }
+/// ```
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
