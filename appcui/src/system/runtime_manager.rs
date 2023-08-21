@@ -478,7 +478,7 @@ impl RuntimeManager {
                     let interface = control.get_control_mut();
                     interface.on_focus();
                     if window_control {
-                        interface.on_deactivate();
+                        interface.on_activate();
                     }
                 }
                 if parent_index.is_valid() {

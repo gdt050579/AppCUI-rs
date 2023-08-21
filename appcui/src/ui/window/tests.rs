@@ -409,25 +409,15 @@ fn check_window_on_activate_deactivate() {
     }
 
     let script = "
-        //Paint.Enable(false)
-        Paint('initial state')
+        Paint.Enable(false)
+        Paint('initial state (left=no-state,right=activated)')
+        CheckHash(0xAC18C0AB5493591E)
         Mouse.Click(10,1,left)
-        Paint('left window activated')
+        Paint('left=activated, right=deactivated')
+        CheckHash(0xCE0FE1E047B8B238)
         Mouse.Click(40,1,left)
-        Paint('right window activated')
-        // CheckHash(0xDA18EF6A52B3C090)
-        // Mouse.Move(49,8)
-        // Mouse.Hold(49,8,left)
-        // Mouse.Move(51,9)
-        // Mouse.Release(51,9,left)
-        // Paint('Resize to 42x8')
-        // CheckHash(0x99F321F831E005F6)
-        // Mouse.Move(28,2)
-        // Mouse.Hold(28,2,left)
-        // Mouse.Move(26,1)
-        // Mouse.Release(26,1,left)
-        // Paint('Move to 8,1 with 42x8 size')
-        // CheckHash(0x7123D2EB32E9E49A)
+        Paint('left=deactivated, right=activated')
+        CheckHash(0x5EBC9C1734091B4C)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     a.add_window(MyWin::new("x:1,y:1,w:25,h:6"));
