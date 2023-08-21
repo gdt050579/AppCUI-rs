@@ -453,6 +453,9 @@ impl RuntimeManager {
                 }
                 control.get_base_mut().update_focus_flag(false);
                 control.get_control_mut().on_lose_focus();
+                if control.get_base().is_window_control() {
+                    control.get_control_mut().on_deactivate();
+                }
                 h = control.get_base().parent;
                 if h.is_none() {
                     break;
@@ -468,10 +471,15 @@ impl RuntimeManager {
             if let Some(control) = child {
                 let base = control.get_base_mut();
                 let parent_index = base.parent_index;
+                let window_control = base.is_window_control();
                 base.clear_mark_to_receive_focus();
                 if !base.has_focus() {
                     base.update_focus_flag(true);
-                    control.get_control_mut().on_focus();
+                    let interface = control.get_control_mut();
+                    interface.on_focus();
+                    if window_control {
+                        interface.on_deactivate();
+                    }
                 }
                 if parent_index.is_valid() {
                     if let Some(p_handle) = parent_handle {

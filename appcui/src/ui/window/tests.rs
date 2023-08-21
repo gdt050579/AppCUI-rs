@@ -285,6 +285,32 @@ fn check_window_resize() {
 }
 
 #[test]
+fn check_window_move() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Move(30,3)
+        Paint('over the title')
+        CheckHash(0x6E5585BA8803D312)
+        Mouse.Hold(30,3,left)
+        Paint('press on window title')
+        CheckHash(0x5EEA06B578ABD9A)
+        Mouse.Move(15,1)
+        Paint('window moved')
+        CheckHash(0x1EBF887394C43672)
+        Mouse.Move(1,1)
+        Paint('window moved outside')
+        CheckHash(0x8C8185EC85BF07AE)
+        Mouse.Release(1,1,left)
+        Paint('after release of handle')
+        CheckHash(0x922FBAECBC6B2C2)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), WindowFlags::Sizeable);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_window_on_layout_changed() {
     #[Window(events = WindowEvents,internal = true)]
     struct MyWin {
@@ -351,30 +377,66 @@ fn check_window_on_layout_changed() {
 }
 
 #[test]
-fn check_window_move() {
+fn check_window_on_activate_deactivate() {
+    #[Window(events = WindowEvents,internal = true)]
+    struct MyWin {
+        info: Handle<Label>,
+    }
+    impl MyWin {
+        fn new(layout: &str) -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new(layout), WindowFlags::None),
+                info: Handle::None,
+            };
+            me.info = me.add(Label::new("<no-state>", Layout::new("x:1,y:1,w:16")));
+            me
+        }
+    }
+    impl WindowEvents for MyWin {
+        fn on_activate(&mut self) {
+            let h = self.info;
+            if let Some(label) = self.get_control_mut(h) {
+                label.set_text("Activated");
+            }
+        }
+
+        fn on_deactivate(&mut self) {
+            let h = self.info;
+            if let Some(label) = self.get_control_mut(h) {
+                label.set_text("Deactivated");
+            }
+        }
+    }
+
     let script = "
-        Paint.Enable(false)
-        Mouse.Move(30,3)
-        Paint('over the title')
-        CheckHash(0x6E5585BA8803D312)
-        Mouse.Hold(30,3,left)
-        Paint('press on window title')
-        CheckHash(0x5EEA06B578ABD9A)
-        Mouse.Move(15,1)
-        Paint('window moved')
-        CheckHash(0x1EBF887394C43672)
-        Mouse.Move(1,1)
-        Paint('window moved outside')
-        CheckHash(0x8C8185EC85BF07AE)
-        Mouse.Release(1,1,left)
-        Paint('after release of handle')
-        CheckHash(0x922FBAECBC6B2C2)
+        //Paint.Enable(false)
+        Paint('initial state')
+        Mouse.Click(10,1,left)
+        Paint('left window activated')
+        Mouse.Click(40,1,left)
+        Paint('right window activated')
+        // CheckHash(0xDA18EF6A52B3C090)
+        // Mouse.Move(49,8)
+        // Mouse.Hold(49,8,left)
+        // Mouse.Move(51,9)
+        // Mouse.Release(51,9,left)
+        // Paint('Resize to 42x8')
+        // CheckHash(0x99F321F831E005F6)
+        // Mouse.Move(28,2)
+        // Mouse.Hold(28,2,left)
+        // Mouse.Move(26,1)
+        // Mouse.Release(26,1,left)
+        // Paint('Move to 8,1 with 42x8 size')
+        // CheckHash(0x7123D2EB32E9E49A)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), WindowFlags::Sizeable);
-    a.add_window(w);
+    a.add_window(MyWin::new("x:1,y:1,w:25,h:6"));
+    a.add_window(MyWin::new("x:30,y:1,w:25,h:6"));
     a.run();
 }
+
+
+
 #[test]
 fn check_window_toolbar_label() {
     let script = "
