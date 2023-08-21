@@ -1,5 +1,5 @@
-use super::UIElement;
 use super::traits::{Control, EventProcessStatus};
+use super::UIElement;
 use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, window,
@@ -25,15 +25,15 @@ impl ControlEvent {
                 return ButtonEvents::on_pressed(receiver, self.emitter.cast());
             }
             ControlEventData::CheckBoxEvent(data) => {
-                return CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked);
+                return CheckBoxEvents::on_status_changed(
+                    receiver,
+                    self.emitter.cast(),
+                    data.checked,
+                );
             }
             ControlEventData::WindowEvents(data) => match data {
-                window::events::EventData::OnActivate => {
-                    return WindowEvents::on_activate(receiver)
-                }
-                window::events::EventData::OnClose => {
-                    return WindowEvents::on_close(receiver)
-                }
+                window::events::EventData::OnClose => return WindowEvents::on_close(receiver),
+                _ => return EventProcessStatus::Ignored,
             },
         };
     }

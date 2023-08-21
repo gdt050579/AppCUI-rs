@@ -28,7 +28,7 @@ enum MoveDirection {
     ToBottom,
 }
 
-#[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent+OnFocus, internal=true)]
 pub struct Window {
     title: Title,
     flags: WindowFlags,
@@ -780,6 +780,16 @@ impl OnMouseEvent for Window {
             MouseEvent::Drag(event) => return self.on_mouse_drag(event.x, event.y),
             MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }
+    }
+}
+
+impl OnFocus for Window {
+    fn on_focus(&mut self) {
+        self.on_activate();
+    }
+
+    fn on_lose_focus(&mut self) {
+        self.on_deactivate();
     }
 }
 
