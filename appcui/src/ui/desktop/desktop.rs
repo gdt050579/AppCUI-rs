@@ -1,6 +1,6 @@
 use AppCUIProcMacro::*;
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed, internal=true, desktop=true)]
 pub struct Desktop {}
 
 impl Desktop {

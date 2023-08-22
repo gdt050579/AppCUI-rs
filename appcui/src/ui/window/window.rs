@@ -28,7 +28,7 @@ enum MoveDirection {
     ToBottom,
 }
 
-#[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true, window=true)]
 pub struct Window {
     title: Title,
     flags: WindowFlags,
@@ -144,7 +144,7 @@ impl Window {
     }
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where
-        T: Control + 'static,
+        T: Control + NotWindow + NotDesktop + 'static,
     {
         return self.add_child(control);
     }

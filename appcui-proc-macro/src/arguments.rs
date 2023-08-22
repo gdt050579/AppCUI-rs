@@ -13,6 +13,8 @@ pub struct Arguments {
     pub root: &'static str,
     pub debug_mode: bool,
     pub internal_mode: bool,
+    pub window_control: bool,
+    pub desktop_control: bool,
     // overwritebles (common events)
     pub on_paint: bool,
     pub on_key_pressed: bool,
@@ -44,6 +46,8 @@ impl Arguments {
             event_processor_list: String::new(),
             debug_mode: false,
             internal_mode: false,
+            window_control: false,
+            desktop_control: false,
             // overwritebles (common events)
             on_paint: false,
             on_key_pressed: false,
@@ -86,6 +90,22 @@ impl Arguments {
             self.internal_mode = value;
         } else {
             panic!("The value for `internal` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
+        }
+    }
+    fn validate_window_control(&mut self) {
+        self.validate_one_value();
+        if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
+            self.window_control = value;
+        } else {
+            panic!("The value for `window` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
+        }
+    }
+    fn validate_desktop_control(&mut self) {
+        self.validate_one_value();
+        if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
+            self.desktop_control = value;
+        } else {
+            panic!("The value for `desktop` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
         }
     }
     fn validate_debug_attribute(&mut self) {
@@ -149,6 +169,8 @@ impl Arguments {
             "events" => self.validate_events_attribute(),
             "debug" => self.validate_debug_attribute(),
             "internal" => self.validate_internal_attribute(),
+            "window" => self.validate_window_control(),
+            "desktop" => self.validate_desktop_control(),
             _ => {
                 panic!("Unknown attribute `{}` for AppCUI. Accepted attributes are 'base' , 'overwrite' and 'debug' !",self.key.as_str());
             }

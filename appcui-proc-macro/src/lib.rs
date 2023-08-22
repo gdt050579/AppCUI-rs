@@ -101,7 +101,7 @@ fn parse_token_stream(
     base_control: &str,
     extra_trait: &str,
     allow_event_processor: bool,
-    use_default_impl: bool
+    use_default_impl: bool,
 ) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args);
@@ -122,6 +122,11 @@ fn parse_token_stream(
     }
     impl_default_trait!(code, "Control", false);
     impl_default_trait!(code, extra_trait, extra_trait.is_empty());
+    // for raw controls
+    if extra_trait.is_empty() {        
+        impl_default_trait!(code, "NotWindow", a.window_control);
+        impl_default_trait!(code, "NotDesktop", a.desktop_control);
+    }
 
     // raw events
     impl_trait!(code, "OnPaint", templates::ON_PAINT_TRAIT, a.on_paint, use_default_impl);

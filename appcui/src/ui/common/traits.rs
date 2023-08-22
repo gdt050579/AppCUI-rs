@@ -61,3 +61,5 @@ pub trait Control:
 
 pub trait DesktopControl {}
 pub trait WindowControl {}
+pub trait NotWindow {}
+pub trait NotDesktop {}
