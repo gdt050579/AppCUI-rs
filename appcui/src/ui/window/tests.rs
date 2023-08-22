@@ -11,18 +11,8 @@ use super::{
     Window, WindowFlags,
 };
 
-/// Window and desktops can not be added as a child one to another
-/// # Exemple
-/// ```compile_fail
-///     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), "").unwrap();
-///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
-///     w.add(Window::new("aaa",Layout::new("d:c,w:20,h:10"),WindowFlags::None));
-/// ```
-#[test]
-#[should_panic]
-fn check_not_allow_adding_a_window_to_a_window() {
 
-}
+
 
 #[test]
 fn check_window_title() {

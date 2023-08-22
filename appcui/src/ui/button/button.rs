@@ -1,6 +1,6 @@
 use crate::ui::button::{events::EventData, Flags};
+use crate::prelude::*;
 
-use AppCUIProcMacro::*;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Button {

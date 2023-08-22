@@ -163,9 +163,9 @@ fn parse_token_stream(
 /// If not overwritten, a default implementation will be automatically added
 /// 
 /// # Example
-/// ```
-/// use AppCUIProcMacro::*;
-/// 
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
 /// #[CustomControl(overwrite = OnPaint+OnKeyPressed)]
 /// struct MyCustomControl {
 ///     // custom data

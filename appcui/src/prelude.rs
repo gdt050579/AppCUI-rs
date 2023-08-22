@@ -11,3 +11,4 @@ pub use super::ui::menu::*;
 pub use super::graphics::*;
 pub use super::system::*;
 pub use super::input::*;
+pub use AppCUIProcMacro::*;

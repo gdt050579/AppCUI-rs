@@ -142,6 +142,29 @@ impl Window {
 
         */
     }
+    /// Adds a control to the current window. Once the control was added
+    /// a handle for that control wil be returned or `Handle::None` if some
+    /// error occured.
+    /// 
+    /// # Exemple
+    /// ```rust
+    ///     use appcui::prelude::*;
+    /// 
+    ///     let mut a = App::default().unwrap();
+    ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    ///     w.add(Button::new("Press me",Layout::new("x:1,y:1,w:10"),button::Flags::None));
+    /// ```    
+    /// 
+    /// You can not add a Window as a child to another Window nor can you add a Desktop
+    /// as a child for another Deskopt. The following example will not compile as we
+    /// try to add a Window as a child to another window.
+    /// ```rust,compile_fail
+    ///     use appcui::prelude::*;
+    /// 
+    ///     let mut a = App::default().unwrap();
+    ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    ///     w.add(Window::new("aaa",Layout::new("d:c,w:20,h:10"),WindowFlags::None));
+    /// ```    
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where
         T: Control + NotWindow + NotDesktop + 'static,
@@ -782,7 +805,6 @@ impl OnMouseEvent for Window {
         }
     }
 }
-
 
 /*
 
