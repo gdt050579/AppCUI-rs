@@ -8,7 +8,10 @@ impl Desktop {
         Desktop {
             base: ControlBase::new(
                 Layout::new("x:0,y:0,w:100%,h:100%"),
-                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
+                StatusFlags::Visible
+                    | StatusFlags::Enabled
+                    | StatusFlags::AcceptInput
+                    | StatusFlags::DesktopControl,
             ),
         }
     }
@@ -24,19 +27,19 @@ impl OnKeyPressed for Desktop {
             key!("Escape") => {
                 RuntimeManager::get().close();
                 return EventProcessStatus::Processed;
-            },
-            key!("Ctrl+Tab")=> {
+            }
+            key!("Ctrl+Tab") => {
                 // GoToNextWindow(Members, 1);
-                return  EventProcessStatus::Processed;
-            },
+                return EventProcessStatus::Processed;
+            }
             key!("Ctrl+Shift+Tab") => {
                 // GoToNextWindow(Members, -1);
                 return EventProcessStatus::Processed;
-            },
+            }
             key!("Alt+0") => {
                 // Dialogs::WindowManager::Show();
                 return EventProcessStatus::Processed;
-            },
+            }
             _ => {}
         }
         // check controls hot keys

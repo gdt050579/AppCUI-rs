@@ -24,6 +24,7 @@ pub enum StatusFlags {
     MarkedForFocus = 0x0010,
     MouseOver = 0x0020,
     WindowControl = 0x0040,
+    DesktopControl = 0x0080,
 }
 #[derive(Copy, Clone)]
 pub(crate) struct Margins {
@@ -152,6 +153,10 @@ impl ControlBase {
     pub(crate) fn is_window_control(&self) -> bool {
         self.status_flags.contains(StatusFlags::WindowControl)
     }
+    #[inline(always)]
+    pub(crate) fn is_desktop_control(&self) -> bool {
+        self.status_flags.contains(StatusFlags::DesktopControl)
+    }
 
     pub fn request_focus(&mut self) -> bool {
         if self.has_focus() || !self.can_receive_input() {
@@ -176,6 +181,7 @@ impl ControlBase {
         // if I am already registered, I will set the parent of my child
         let base = c.get_base_mut();
         let focusable = base.can_receive_input();
+        
         base.parent = self.handle;
         // I will use the same event_processor as my parent
         // if my parent is not register , the event_processor handle will be None
