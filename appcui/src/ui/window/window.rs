@@ -147,7 +147,7 @@ impl Window {
     /// error occured.
     /// 
     /// # Exemple
-    /// ```rust
+    /// ```rust,no_run
     ///     use appcui::prelude::*;
     /// 
     ///     let mut a = App::default().unwrap();
