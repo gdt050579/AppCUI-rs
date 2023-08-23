@@ -13,7 +13,7 @@ pub(crate) enum AppCUITrait {
     // raw events
     OnPaint = 6,
     OnKeyPressed = 7,
-    OnMouseEvents = 8,
+    OnMouseEvent = 8,
     OnDefaultAction = 9,
     OnResize = 10,
     OnFocus = 11,
@@ -61,7 +61,7 @@ impl AppCUITrait {
             // raw events
             AppCUITrait::OnPaint => "OnPaint",
             AppCUITrait::OnKeyPressed => "OnKeyPressed",
-            AppCUITrait::OnMouseEvents => "OnMouseEvents",
+            AppCUITrait::OnMouseEvent => "OnMouseEvent",
             AppCUITrait::OnDefaultAction => "OnDefaultAction",
             AppCUITrait::OnResize => "OnResize",
             AppCUITrait::OnFocus => "OnFocus",
@@ -85,7 +85,7 @@ impl AppCUITrait {
             // raw events
             AppCUITrait::OnPaint => TraitType::RawEvent,
             AppCUITrait::OnKeyPressed => TraitType::RawEvent,
-            AppCUITrait::OnMouseEvents => TraitType::RawEvent,
+            AppCUITrait::OnMouseEvent => TraitType::RawEvent,
             AppCUITrait::OnDefaultAction => TraitType::RawEvent,
             AppCUITrait::OnResize => TraitType::RawEvent,
             AppCUITrait::OnFocus => TraitType::RawEvent,
@@ -109,7 +109,7 @@ impl AppCUITrait {
             // raw events
             AppCUITrait::OnPaint => templates::ON_PAINT_TRAIT,
             AppCUITrait::OnKeyPressed => templates::ON_KEY_PRESSED_TRAIT,
-            AppCUITrait::OnMouseEvents => templates::ON_MOUSE_EVENT_TRAIT,
+            AppCUITrait::OnMouseEvent => templates::ON_MOUSE_EVENT_TRAIT,
             AppCUITrait::OnDefaultAction => templates::ON_DEFAULT_ACTION_TRAIT,
             AppCUITrait::OnResize => templates::ON_RESIZE_TRAIT,
             AppCUITrait::OnFocus => templates::ON_FOCUS_TRAIT,
@@ -133,7 +133,7 @@ impl AppCUITrait {
             // raw events
             AppCUITrait::OnPaint => "impl OnPaint for $(STRUCT_NAME) {}",
             AppCUITrait::OnKeyPressed => "impl OnKeyPressed for $(STRUCT_NAME) {}",
-            AppCUITrait::OnMouseEvents => "impl OnMouseEvent for $(STRUCT_NAME) {}",
+            AppCUITrait::OnMouseEvent => "impl OnMouseEvent for $(STRUCT_NAME) {}",
             AppCUITrait::OnDefaultAction => "impl OnDefaultAction for $(STRUCT_NAME) {}",
             AppCUITrait::OnResize => "impl OnResize for $(STRUCT_NAME) {}",
             AppCUITrait::OnFocus => "impl OnFocus for $(STRUCT_NAME) {}",
@@ -150,7 +150,7 @@ impl AppCUITrait {
             // raw events
             "OnPaint" => Some(AppCUITrait::OnPaint),
             "OnKeyPressed" => Some(AppCUITrait::OnKeyPressed),
-            "OnMouseEvents" => Some(AppCUITrait::OnMouseEvents),
+            "OnMouseEvent" => Some(AppCUITrait::OnMouseEvent),
             "OnDefaultAction" => Some(AppCUITrait::OnDefaultAction),
             "OnResize" => Some(AppCUITrait::OnResize),
             "OnFocus" => Some(AppCUITrait::OnFocus),
@@ -175,9 +175,9 @@ impl AppCUITrait {
             // raw events
             6 => Some(AppCUITrait::OnPaint),
             7 => Some(AppCUITrait::OnKeyPressed),
-            8 => Some(AppCUITrait::OnMouseEvents),
+            8 => Some(AppCUITrait::OnMouseEvent),
             9 => Some(AppCUITrait::OnDefaultAction),
-            10 => Some(AppCUITrait::OnDefaultAction),
+            10 => Some(AppCUITrait::OnResize),
             11 => Some(AppCUITrait::OnFocus),
             // control events
             12 => Some(AppCUITrait::ButtonEvents),

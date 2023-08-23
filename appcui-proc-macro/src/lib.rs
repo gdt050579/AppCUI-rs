@@ -104,7 +104,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnFocus, TraitImplementation::Default);
     config.set(AppCUITrait::OnDefaultAction, TraitImplementation::Default);
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::Default);
-    config.set(AppCUITrait::OnMouseEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::OnMouseEvent, TraitImplementation::Default);
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);   
@@ -128,7 +128,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnFocus, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnDefaultAction, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
-    config.set(AppCUITrait::OnMouseEvents, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);   
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);   
@@ -152,7 +152,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnFocus, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnDefaultAction, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
-    config.set(AppCUITrait::OnMouseEvents, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);   
