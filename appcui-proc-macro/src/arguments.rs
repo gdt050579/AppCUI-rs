@@ -1,4 +1,7 @@
-use crate::{traits_configuration::TraitsConfig, appcui_traits::{AppCUITrait, TraitType}};
+use crate::{
+    appcui_traits::{AppCUITrait, TraitType},
+    traits_configuration::TraitsConfig,
+};
 
 use super::utils;
 use proc_macro::*;
@@ -109,11 +112,17 @@ impl Arguments {
         for trait_name in &self.values {
             if let Some(appcui_trait) = AppCUITrait::new(&trait_name) {
                 if appcui_trait.get_trait_type() != TraitType::RawEvent {
-                    panic!("Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}")
+                    panic!(
+                        "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}", 
+                        AppCUITrait::traits_of_type(TraitType::RawEvent)
+                    );
                 }
                 // now try to update the trait
             } else {
-                panic!("Unknown trait to allow overwriting: '{trait_name}'. Allowed traits are: {}");
+                panic!(
+                    "Unknown trait to allow overwriting: '{trait_name}'. Allowed traits are: {}",
+                    AppCUITrait::traits_of_type(TraitType::RawEvent)
+                );
             }
         }
     }
@@ -205,7 +214,7 @@ impl Arguments {
             );
         }
     }
-    fn validate_expect_comma(&mut self, token: TokenTree) {
+    fn validate_expect_comma(&mut self, token: TokenTree, config: &mut TraitsConfig) {
         if let TokenTree::Punct(punctuation) = token {
             if punctuation.as_char() == '+' {
                 self.state = State::ExpectValue;
@@ -217,7 +226,7 @@ impl Arguments {
                     punctuation.as_char()
                 );
             }
-            self.validate_key_value_pair();
+            self.validate_key_value_pair(config);
             self.state = State::ExpectKey;
         } else {
             panic!(
@@ -233,7 +242,7 @@ impl Arguments {
                 State::ExpectKey => self.validate_expect_key(token),
                 State::ExpectEqual => self.validate_expect_equal(token),
                 State::ExpectValue => self.validate_expect_value(token),
-                State::ExpectComma => self.validate_expect_comma(token),
+                State::ExpectComma => self.validate_expect_comma(token, config),
             }
         }
         match self.state {
