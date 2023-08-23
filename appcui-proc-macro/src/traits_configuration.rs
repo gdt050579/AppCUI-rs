@@ -9,8 +9,21 @@ pub(crate) enum TraitImplementation {
     DefaultNonOverwritable,
     BaseFallbackNonOverwritable,
 }
+impl TraitImplementation {
+    #[inline(always)]
+    pub(crate) fn can_be_overwritten(&self) -> bool {
+        match self {
+            TraitImplementation::None => true,
+            TraitImplementation::Default => true,
+            TraitImplementation::BaseFallback => true,
+            TraitImplementation::DefaultNonOverwritable => false,
+            TraitImplementation::BaseFallbackNonOverwritable => false,
+        }
+    }
+}
 pub(crate) struct TraitsConfig {
     list: [TraitImplementation; TraitsConfig::MAX_ITEMS],
+    name: &'static str
 }
 pub(crate) struct TraitConfigIterator<'a> {
     config: &'a TraitsConfig,
@@ -18,9 +31,10 @@ pub(crate) struct TraitConfigIterator<'a> {
 }
 impl TraitsConfig {
     const MAX_ITEMS: usize = 64;
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(name: &'static str) -> Self {
         Self {
             list: [TraitImplementation::None; TraitsConfig::MAX_ITEMS],
+            name,
         }
     }
     pub(crate) fn set(
@@ -57,8 +71,12 @@ impl TraitsConfig {
             index: 0,
         }
     }
+    #[inline(always)]
+    pub(crate) fn get_name(&self) -> &'static str {
+        self.name
+    }
 }
-impl Iterator for TraitConfigIterator<'_>  {
+impl Iterator for TraitConfigIterator<'_> {
     type Item = (AppCUITrait, TraitImplementation);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -69,5 +87,4 @@ impl Iterator for TraitConfigIterator<'_>  {
             None
         }
     }
-    
 }

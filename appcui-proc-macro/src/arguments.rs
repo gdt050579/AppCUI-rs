@@ -1,6 +1,6 @@
 use crate::{
     appcui_traits::{AppCUITrait, TraitType},
-    traits_configuration::TraitsConfig,
+    traits_configuration::{TraitsConfig, TraitImplementation},
 };
 
 use super::utils;
@@ -118,6 +118,12 @@ impl Arguments {
                     );
                 }
                 // now try to update the trait
+                if config.get(appcui_trait).can_be_overwritten() {
+                    config.clear(appcui_trait);
+                } else {
+                    panic!(
+                        "Trait {trait_name} can not be overwritten (for proc macro: {})",config.get_name());
+                }
             } else {
                 panic!(
                     "Unknown trait to allow overwriting: '{trait_name}'. Allowed traits are: {}",

@@ -92,7 +92,7 @@ fn parse_token_stream(
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
-    let mut config = TraitsConfig::new();
+    let mut config = TraitsConfig::new("CustomControl");
     // Deref is mandatory
     config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
@@ -117,7 +117,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
-    let mut config = TraitsConfig::new();
+    let mut config = TraitsConfig::new("Window");
     // Deref is mandatory
     config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
@@ -141,7 +141,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
-    let mut config = TraitsConfig::new();
+    let mut config = TraitsConfig::new("Desktop");
     // Deref is mandatory
     config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
