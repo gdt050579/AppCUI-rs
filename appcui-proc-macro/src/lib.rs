@@ -109,8 +109,8 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);   
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);   
-    config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
-    config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
+    config.set(AppCUITrait::MenuEvents, TraitImplementation::DefaultNonOverwritable);   
+    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::DefaultNonOverwritable);   
 
     parse_token_stream(args, input, "ControlBase", &mut config)
 }
@@ -133,8 +133,8 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);   
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);   
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);   
-    config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);   
-    config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);   
+    config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);   
+    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);   
 
     parse_token_stream(args, input, "Window", &mut config)
 }
@@ -157,8 +157,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);   
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);   
-    config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
-    config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);  
+    config.set(AppCUITrait::MenuEvents, TraitImplementation::DefaultNonOverwritable);   
+    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::DefaultNonOverwritable);  
     parse_token_stream(args, input, "Desktop", &mut config)
 }
 

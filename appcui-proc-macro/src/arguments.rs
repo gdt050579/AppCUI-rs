@@ -14,19 +14,11 @@ enum State {
 }
 pub struct Arguments {
     pub base: String,
-    pub event_processor_list: String,
     pub root: &'static str,
     pub debug_mode: bool,
     pub internal_mode: bool,
     pub window_control: bool,
     pub desktop_control: bool,
-
-    // control events
-    pub command_bar_events: bool,
-    pub menu_events: bool,
-    pub button_events: bool,
-    pub checkbox_events: bool,
-    pub window_events: bool,
 
     // internal
     state: State,
@@ -42,17 +34,10 @@ impl Arguments {
             root: "appcui",
             key: String::new(),
             values: Vec::with_capacity(8),
-            event_processor_list: String::new(),
             debug_mode: false,
             internal_mode: false,
             window_control: false,
             desktop_control: false,
-            // control events
-            menu_events: false,
-            command_bar_events: false,
-            button_events: false,
-            checkbox_events: false,
-            window_events: false,
         }
     }
 
@@ -132,34 +117,27 @@ impl Arguments {
             }
         }
     }
-    fn validate_events_attribute(&mut self) {
-        let mut limited_to_event_processor = true; // true = only event processor controls such as Window can process it
-                                                   // false = all controls can process it
-
+    fn validate_events_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
-            match trait_name.as_str() {
-                "CommandBarEvents" | "CommandBar" => {
-                    self.command_bar_events = true;
-                    limited_to_event_processor = false;
+            if let Some(appcui_trait) = AppCUITrait::new(&trait_name) {
+                if appcui_trait.get_trait_type() != TraitType::ControlEvent {
+                    panic!(
+                        "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}", 
+                        AppCUITrait::traits_of_type(TraitType::ControlEvent)
+                    );
                 }
-                "MenuEvents" | "Menu" => {
-                    self.menu_events = true;
-                    limited_to_event_processor = false;
+                // now try to update the trait
+                if config.get(appcui_trait).can_be_overwritten() {
+                    config.clear(appcui_trait);
+                } else {
+                    panic!(
+                        "Trait {trait_name} can not be overwritten (for proc macro: {})",config.get_name());
                 }
-                "ButtonEvents" | "Button" => self.button_events = true,
-                "CheckBoxEvents" | "CheckBox" => self.checkbox_events = true,
-                "WindowEvents" | "Window" => self.window_events = true,
-
-                other => {
-                    panic!("Unknown event/control: '{other}'. Events that could be process are from : CommandBar, Menu");
-                }
-            }
-            if limited_to_event_processor {
-                // add trait name
-                if self.event_processor_list.len() > 0 {
-                    self.event_processor_list.push(',');
-                }
-                self.event_processor_list.push_str(&trait_name);
+            } else {
+                panic!(
+                    "Unknown trait to allow overwriting: '{trait_name}'. Allowed traits are: {}",
+                    AppCUITrait::traits_of_type(TraitType::ControlEvent)
+                );
             }
         }
     }
@@ -167,7 +145,7 @@ impl Arguments {
         match self.key.as_str() {
             "base" => self.validate_base_attribute(),
             "overwrite" => self.validate_overwrite_attribute(config),
-            "events" => self.validate_events_attribute(),
+            "events" => self.validate_events_attribute(config),
             "debug" => self.validate_debug_attribute(),
             "internal" => self.validate_internal_attribute(),
             "window" => self.validate_window_control(),
