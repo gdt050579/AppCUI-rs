@@ -2,7 +2,7 @@ use super::templates;
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub(crate) enum AppCUITraits {
+pub(crate) enum AppCUITrait {
     Deref = 0,
     // markers
     Control = 1,
@@ -34,143 +34,143 @@ pub(crate) enum TraitType {
     Other,
 }
 
-impl AppCUITraits {
+impl AppCUITrait {
     pub(crate) fn get_name(&self) -> &'static str {
         match self {
-            AppCUITraits::Deref => "Deref",
+            AppCUITrait::Deref => "Deref",
             // markers
-            AppCUITraits::Control => "Control",
-            AppCUITraits::DesktopControl => "DesktopControl",
-            AppCUITraits::WindowControl => "WindowControl",
-            AppCUITraits::NotDesktop => "NotDesktop",
-            AppCUITraits::NotWindow => "NotWindow",
+            AppCUITrait::Control => "Control",
+            AppCUITrait::DesktopControl => "DesktopControl",
+            AppCUITrait::WindowControl => "WindowControl",
+            AppCUITrait::NotDesktop => "NotDesktop",
+            AppCUITrait::NotWindow => "NotWindow",
             // raw events
-            AppCUITraits::OnPaint => "OnPaint",
-            AppCUITraits::OnKeyPressed => "OnKeyPressed",
-            AppCUITraits::OnMouseEvents => "OnMouseEvents",
-            AppCUITraits::OnDefaultAction => "OnDefaultAction",
-            AppCUITraits::OnResize => "OnResize",
-            AppCUITraits::OnFocus => "OnFocus",
+            AppCUITrait::OnPaint => "OnPaint",
+            AppCUITrait::OnKeyPressed => "OnKeyPressed",
+            AppCUITrait::OnMouseEvents => "OnMouseEvents",
+            AppCUITrait::OnDefaultAction => "OnDefaultAction",
+            AppCUITrait::OnResize => "OnResize",
+            AppCUITrait::OnFocus => "OnFocus",
             // control events
-            AppCUITraits::ButtonEvents => "ButtonEvents",
-            AppCUITraits::CheckBoxEvents => "CheckBoxEvents",
-            AppCUITraits::WindowEvents => "WindowEvents",
-            AppCUITraits::CommandBarEvents => "CommandBarEvents",
-            AppCUITraits::MenuEvents => "MenuEvents",
+            AppCUITrait::ButtonEvents => "ButtonEvents",
+            AppCUITrait::CheckBoxEvents => "CheckBoxEvents",
+            AppCUITrait::WindowEvents => "WindowEvents",
+            AppCUITrait::CommandBarEvents => "CommandBarEvents",
+            AppCUITrait::MenuEvents => "MenuEvents",
         }
     }
     pub(crate) fn get_trait_type(&self) -> TraitType {
         match self {
-            AppCUITraits::Deref => TraitType::Other,
+            AppCUITrait::Deref => TraitType::Other,
             // markers
-            AppCUITraits::Control => TraitType::Other,
-            AppCUITraits::DesktopControl => TraitType::Other,
-            AppCUITraits::WindowControl => TraitType::Other,
-            AppCUITraits::NotDesktop => TraitType::Other,
-            AppCUITraits::NotWindow => TraitType::Other,
+            AppCUITrait::Control => TraitType::Other,
+            AppCUITrait::DesktopControl => TraitType::Other,
+            AppCUITrait::WindowControl => TraitType::Other,
+            AppCUITrait::NotDesktop => TraitType::Other,
+            AppCUITrait::NotWindow => TraitType::Other,
             // raw events
-            AppCUITraits::OnPaint => TraitType::RawEvent,
-            AppCUITraits::OnKeyPressed => TraitType::RawEvent,
-            AppCUITraits::OnMouseEvents => TraitType::RawEvent,
-            AppCUITraits::OnDefaultAction => TraitType::RawEvent,
-            AppCUITraits::OnResize => TraitType::RawEvent,
-            AppCUITraits::OnFocus => TraitType::RawEvent,
+            AppCUITrait::OnPaint => TraitType::RawEvent,
+            AppCUITrait::OnKeyPressed => TraitType::RawEvent,
+            AppCUITrait::OnMouseEvents => TraitType::RawEvent,
+            AppCUITrait::OnDefaultAction => TraitType::RawEvent,
+            AppCUITrait::OnResize => TraitType::RawEvent,
+            AppCUITrait::OnFocus => TraitType::RawEvent,
             // control events
-            AppCUITraits::ButtonEvents => TraitType::ControlEvent,
-            AppCUITraits::CheckBoxEvents => TraitType::ControlEvent,
-            AppCUITraits::WindowEvents => TraitType::ControlEvent,
-            AppCUITraits::CommandBarEvents => TraitType::ControlEvent,
-            AppCUITraits::MenuEvents => TraitType::ControlEvent,
+            AppCUITrait::ButtonEvents => TraitType::ControlEvent,
+            AppCUITrait::CheckBoxEvents => TraitType::ControlEvent,
+            AppCUITrait::WindowEvents => TraitType::ControlEvent,
+            AppCUITrait::CommandBarEvents => TraitType::ControlEvent,
+            AppCUITrait::MenuEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn get_basefallback_implementation(&self) -> &'static str {
         match self {
-            AppCUITraits::Deref => templates::DEREF_TRAIT,
+            AppCUITrait::Deref => templates::DEREF_TRAIT,
             // markers
-            AppCUITraits::Control => "",
-            AppCUITraits::DesktopControl => "",
-            AppCUITraits::WindowControl => "",
-            AppCUITraits::NotDesktop => "",
-            AppCUITraits::NotWindow => "",
+            AppCUITrait::Control => "",
+            AppCUITrait::DesktopControl => "",
+            AppCUITrait::WindowControl => "",
+            AppCUITrait::NotDesktop => "",
+            AppCUITrait::NotWindow => "",
             // raw events
-            AppCUITraits::OnPaint => templates::ON_PAINT_TRAIT,
-            AppCUITraits::OnKeyPressed => templates::ON_KEY_PRESSED_TRAIT,
-            AppCUITraits::OnMouseEvents => templates::ON_MOUSE_EVENT_TRAIT,
-            AppCUITraits::OnDefaultAction => templates::ON_DEFAULT_ACTION_TRAIT,
-            AppCUITraits::OnResize => templates::ON_RESIZE_TRAIT,
-            AppCUITraits::OnFocus => templates::ON_FOCUS_TRAIT,
+            AppCUITrait::OnPaint => templates::ON_PAINT_TRAIT,
+            AppCUITrait::OnKeyPressed => templates::ON_KEY_PRESSED_TRAIT,
+            AppCUITrait::OnMouseEvents => templates::ON_MOUSE_EVENT_TRAIT,
+            AppCUITrait::OnDefaultAction => templates::ON_DEFAULT_ACTION_TRAIT,
+            AppCUITrait::OnResize => templates::ON_RESIZE_TRAIT,
+            AppCUITrait::OnFocus => templates::ON_FOCUS_TRAIT,
             // control events
-            AppCUITraits::ButtonEvents => "",
-            AppCUITraits::CheckBoxEvents => "",
-            AppCUITraits::WindowEvents => "",
-            AppCUITraits::CommandBarEvents => "",
-            AppCUITraits::MenuEvents => "",
+            AppCUITrait::ButtonEvents => "",
+            AppCUITrait::CheckBoxEvents => "",
+            AppCUITrait::WindowEvents => "",
+            AppCUITrait::CommandBarEvents => "",
+            AppCUITrait::MenuEvents => "",
         }
     }
     pub(crate) fn get_default_implementation(&self) -> &'static str {
         match self {
-            AppCUITraits::Deref => "",
+            AppCUITrait::Deref => "",
             // markers
-            AppCUITraits::Control => "impl Control for $(STRUCT_NAME) {}",
-            AppCUITraits::DesktopControl => "impl DesktopControl for $(STRUCT_NAME) {}",
-            AppCUITraits::WindowControl => "impl WindowControl for $(STRUCT_NAME) {}",
-            AppCUITraits::NotDesktop => "impl NotDesktop for $(STRUCT_NAME) {}",
-            AppCUITraits::NotWindow => "impl NotWindow for $(STRUCT_NAME) {}",
+            AppCUITrait::Control => "impl Control for $(STRUCT_NAME) {}",
+            AppCUITrait::DesktopControl => "impl DesktopControl for $(STRUCT_NAME) {}",
+            AppCUITrait::WindowControl => "impl WindowControl for $(STRUCT_NAME) {}",
+            AppCUITrait::NotDesktop => "impl NotDesktop for $(STRUCT_NAME) {}",
+            AppCUITrait::NotWindow => "impl NotWindow for $(STRUCT_NAME) {}",
             // raw events
-            AppCUITraits::OnPaint => "impl OnPaint for $(STRUCT_NAME) {}",
-            AppCUITraits::OnKeyPressed => "impl OnKeyPressed for $(STRUCT_NAME) {}",
-            AppCUITraits::OnMouseEvents => "impl OnMouseEvent for $(STRUCT_NAME) {}",
-            AppCUITraits::OnDefaultAction => "impl OnDefaultAction for $(STRUCT_NAME) {}",
-            AppCUITraits::OnResize => "impl OnResize for $(STRUCT_NAME) {}",
-            AppCUITraits::OnFocus => "impl OnFocus for $(STRUCT_NAME) {}",
+            AppCUITrait::OnPaint => "impl OnPaint for $(STRUCT_NAME) {}",
+            AppCUITrait::OnKeyPressed => "impl OnKeyPressed for $(STRUCT_NAME) {}",
+            AppCUITrait::OnMouseEvents => "impl OnMouseEvent for $(STRUCT_NAME) {}",
+            AppCUITrait::OnDefaultAction => "impl OnDefaultAction for $(STRUCT_NAME) {}",
+            AppCUITrait::OnResize => "impl OnResize for $(STRUCT_NAME) {}",
+            AppCUITrait::OnFocus => "impl OnFocus for $(STRUCT_NAME) {}",
             // control events
-            AppCUITraits::ButtonEvents => "impl ButtonEvents for $(STRUCT_NAME) {}",
-            AppCUITraits::CheckBoxEvents => "impl CheckBoxEvents for $(STRUCT_NAME) {}",
-            AppCUITraits::WindowEvents => "impl WindowEvents for $(STRUCT_NAME) {}",
-            AppCUITraits::CommandBarEvents => "impl CommandBarEvents for $(STRUCT_NAME) {}",
-            AppCUITraits::MenuEvents => "impl MenuEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::ButtonEvents => "impl ButtonEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::CheckBoxEvents => "impl CheckBoxEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::WindowEvents => "impl WindowEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::CommandBarEvents => "impl CommandBarEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::MenuEvents => "impl MenuEvents for $(STRUCT_NAME) {}",
         }
     }
-    pub(crate) fn new(name: &str) -> Option<AppCUITraits> {
+    pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
         match name {
             // raw events
-            "OnPaint" => Some(AppCUITraits::OnPaint),
-            "OnKeyPressed" => Some(AppCUITraits::OnKeyPressed),
-            "OnMouseEvents" => Some(AppCUITraits::OnMouseEvents),
-            "OnDefaultAction" => Some(AppCUITraits::OnDefaultAction),
-            "OnResize" => Some(AppCUITraits::OnResize),
-            "OnFocus" => Some(AppCUITraits::OnFocus),
+            "OnPaint" => Some(AppCUITrait::OnPaint),
+            "OnKeyPressed" => Some(AppCUITrait::OnKeyPressed),
+            "OnMouseEvents" => Some(AppCUITrait::OnMouseEvents),
+            "OnDefaultAction" => Some(AppCUITrait::OnDefaultAction),
+            "OnResize" => Some(AppCUITrait::OnResize),
+            "OnFocus" => Some(AppCUITrait::OnFocus),
             // control events
-            "ButtonEvents" | "Button" => Some(AppCUITraits::ButtonEvents),
-            "CheckBoxEvents" | "CheckBox" => Some(AppCUITraits::CheckBoxEvents),
-            "WindowEvents" | "Window" => Some(AppCUITraits::WindowEvents),
-            "CommandBarEvents" | "CommandBar" => Some(AppCUITraits::CommandBarEvents),
-            "MenuEvents" | "MenuBar" => Some(AppCUITraits::MenuEvents),
+            "ButtonEvents" | "Button" => Some(AppCUITrait::ButtonEvents),
+            "CheckBoxEvents" | "CheckBox" => Some(AppCUITrait::CheckBoxEvents),
+            "WindowEvents" | "Window" => Some(AppCUITrait::WindowEvents),
+            "CommandBarEvents" | "CommandBar" => Some(AppCUITrait::CommandBarEvents),
+            "MenuEvents" | "MenuBar" => Some(AppCUITrait::MenuEvents),
             _ => None,
         }
     }
-    pub(crate) fn with_discriminant(value: u8) -> Option<AppCUITraits> {
+    pub(crate) fn with_discriminant(value: u8) -> Option<AppCUITrait> {
         let result = match value {
-            0 => Some(AppCUITraits::Deref),
+            0 => Some(AppCUITrait::Deref),
             // markers
-            1 => Some(AppCUITraits::Control),
-            2 => Some(AppCUITraits::DesktopControl),
-            3 => Some(AppCUITraits::WindowControl),
-            4 => Some(AppCUITraits::NotWindow),
-            5 => Some(AppCUITraits::NotDesktop),
+            1 => Some(AppCUITrait::Control),
+            2 => Some(AppCUITrait::DesktopControl),
+            3 => Some(AppCUITrait::WindowControl),
+            4 => Some(AppCUITrait::NotWindow),
+            5 => Some(AppCUITrait::NotDesktop),
             // raw events
-            6 => Some(AppCUITraits::OnPaint),
-            7 => Some(AppCUITraits::OnKeyPressed),
-            8 => Some(AppCUITraits::OnMouseEvents),
-            9 => Some(AppCUITraits::OnDefaultAction),
-            10 => Some(AppCUITraits::OnDefaultAction),
-            11 => Some(AppCUITraits::OnFocus),
+            6 => Some(AppCUITrait::OnPaint),
+            7 => Some(AppCUITrait::OnKeyPressed),
+            8 => Some(AppCUITrait::OnMouseEvents),
+            9 => Some(AppCUITrait::OnDefaultAction),
+            10 => Some(AppCUITrait::OnDefaultAction),
+            11 => Some(AppCUITrait::OnFocus),
             // control events
-            12 => Some(AppCUITraits::ButtonEvents),
-            13 => Some(AppCUITraits::CheckBoxEvents),
-            14 => Some(AppCUITraits::WindowEvents),
-            15 => Some(AppCUITraits::CommandBarEvents),
-            16 => Some(AppCUITraits::MenuEvents),
+            12 => Some(AppCUITrait::ButtonEvents),
+            13 => Some(AppCUITrait::CheckBoxEvents),
+            14 => Some(AppCUITrait::WindowEvents),
+            15 => Some(AppCUITrait::CommandBarEvents),
+            16 => Some(AppCUITrait::MenuEvents),
 
             _ => None,
         };

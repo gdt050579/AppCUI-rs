@@ -1,3 +1,5 @@
+use crate::{traits_configuration::TraitsConfig, appcui_traits::{AppCUITrait, TraitType}};
+
 use super::utils;
 use proc_macro::*;
 
@@ -15,13 +17,7 @@ pub struct Arguments {
     pub internal_mode: bool,
     pub window_control: bool,
     pub desktop_control: bool,
-    // overwritebles (common events)
-    pub on_paint: bool,
-    pub on_key_pressed: bool,
-    pub on_mouse_event: bool,
-    pub on_default_action: bool,
-    pub on_resize: bool,
-    pub on_focus: bool,
+
     // control events
     pub command_bar_events: bool,
     pub menu_events: bool,
@@ -48,13 +44,6 @@ impl Arguments {
             internal_mode: false,
             window_control: false,
             desktop_control: false,
-            // overwritebles (common events)
-            on_paint: false,
-            on_key_pressed: false,
-            on_mouse_event: false,
-            on_default_action: false,
-            on_resize: false,
-            on_focus: false,
             // control events
             menu_events: false,
             command_bar_events: false,
@@ -116,18 +105,15 @@ impl Arguments {
             panic!("The value for `debug` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
         }
     }
-    fn validate_overwrite_attribute(&mut self) {
+    fn validate_overwrite_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
-            match trait_name.as_str() {
-                "OnPaint" => self.on_paint = true,
-                "OnKeyPressed" => self.on_key_pressed = true,
-                "OnMouseEvent" => self.on_mouse_event = true,
-                "OnDefaultAction" => self.on_default_action = true,
-                "OnResize" => self.on_resize = true,
-                "OnFocus" => self.on_focus = true,
-                other => {
-                    panic!("Unknown trait to allow overwriting: '{other}'. Allowed traits are: OnPaint, OnKeyPressed, OnMouseEvent, OnDefaultAction, OnResize, OnFocus");
+            if let Some(appcui_trait) = AppCUITrait::new(&trait_name) {
+                if appcui_trait.get_trait_type() != TraitType::RawEvent {
+                    panic!("Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}")
                 }
+                // now try to update the trait
+            } else {
+                panic!("Unknown trait to allow overwriting: '{trait_name}'. Allowed traits are: {}");
             }
         }
     }
@@ -162,10 +148,10 @@ impl Arguments {
             }
         }
     }
-    fn validate_key_value_pair(&mut self) {
+    fn validate_key_value_pair(&mut self, config: &mut TraitsConfig) {
         match self.key.as_str() {
             "base" => self.validate_base_attribute(),
-            "overwrite" => self.validate_overwrite_attribute(),
+            "overwrite" => self.validate_overwrite_attribute(config),
             "events" => self.validate_events_attribute(),
             "debug" => self.validate_debug_attribute(),
             "internal" => self.validate_internal_attribute(),
@@ -240,7 +226,7 @@ impl Arguments {
             );
         }
     }
-    pub fn parse(&mut self, input: TokenStream) {
+    pub(crate) fn parse(&mut self, input: TokenStream, config: &mut TraitsConfig) {
         for token in input.into_iter() {
             // println!("arg_token: {:?}", token);
             match self.state {
@@ -261,7 +247,7 @@ impl Arguments {
                     self.key.as_str()
                 );
             }
-            State::ExpectComma => self.validate_key_value_pair(),
+            State::ExpectComma => self.validate_key_value_pair(config),
         }
     }
 }
