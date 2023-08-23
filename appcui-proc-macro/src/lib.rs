@@ -2,6 +2,7 @@ mod arguments;
 mod templates;
 mod utils;
 mod appcui_traits;
+mod traits_configuration;
 use arguments::*;
 use proc_macro::*;
 use std::str::FromStr;

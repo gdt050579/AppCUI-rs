@@ -13,12 +13,12 @@ pub(crate) enum AppCUITraits {
 }
 
 #[repr(u8)]
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub(crate) enum TraitType {
     RawEvent,
     ControlEvent,
     TerminalEvent,
-    Other
+    Other,
 }
 
 impl AppCUITraits {
@@ -66,15 +66,35 @@ impl AppCUITraits {
             AppCUITraits::OnFocus => "impl OnFocus for $(STRUCT_NAME) {}",
         }
     }
-    pub(crate) fn new(name: &str)->Option<AppCUITraits> {
+    pub(crate) fn new(name: &str) -> Option<AppCUITraits> {
         match name {
             "OnPaint" => Some(AppCUITraits::OnPaint),
             "OnKeyPressed" => Some(AppCUITraits::OnKeyPressed),
             "OnMouseEvents" => Some(AppCUITraits::OnMouseEvents),
             "OnDefaultAction" => Some(AppCUITraits::OnDefaultAction),
             "OnResize" => Some(AppCUITraits::OnResize),
-            "OnFocus" => Some(AppCUITraits::OnFocus), 
-            _ => None        
+            "OnFocus" => Some(AppCUITraits::OnFocus),
+            _ => None,
         }
+    }
+    pub(crate) fn with_discriminant(value: u8) -> Option<AppCUITraits> {
+        let result = match value {
+            0 => Some(AppCUITraits::Deref),
+            1 => Some(AppCUITraits::OnPaint),
+            2 => Some(AppCUITraits::OnKeyPressed),
+            3 => Some(AppCUITraits::OnMouseEvents),
+            4 => Some(AppCUITraits::OnDefaultAction),
+            5 => Some(AppCUITraits::OnDefaultAction),
+            6 => Some(AppCUITraits::OnFocus),
+            _ => None,
+        };
+        if result.is_none() {
+            return None;
+        }
+        // double check
+        if value != (result.unwrap() as u8) {
+            panic!("Internal error: Conversion of discriminant {} to AppCUITraits failed !",value);
+        }
+        return result;
     }
 }
