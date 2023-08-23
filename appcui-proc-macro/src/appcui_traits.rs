@@ -12,6 +12,15 @@ pub(crate) enum AppCUITraits {
     OnFocus = 6,
 }
 
+#[repr(u8)]
+#[derive(Copy,Clone)]
+pub(crate) enum TraitType {
+    RawEvent,
+    ControlEvent,
+    TerminalEvent,
+    Other
+}
+
 impl AppCUITraits {
     pub(crate) fn get_name(&self) -> &'static str {
         match self {
@@ -24,6 +33,17 @@ impl AppCUITraits {
             AppCUITraits::OnFocus => "OnFocus",
         }
     }
+    pub(crate) fn get_trait_type(&self) -> TraitType {
+        match self {
+            AppCUITraits::Deref => TraitType::Other,
+            AppCUITraits::OnPaint => TraitType::RawEvent,
+            AppCUITraits::OnKeyPressed => TraitType::RawEvent,
+            AppCUITraits::OnMouseEvents => TraitType::RawEvent,
+            AppCUITraits::OnDefaultAction => TraitType::RawEvent,
+            AppCUITraits::OnResize => TraitType::RawEvent,
+            AppCUITraits::OnFocus => TraitType::RawEvent,
+        }
+    }
     pub(crate) fn get_basefallback_implementation(&self) -> &'static str {
         match self {
             AppCUITraits::Deref => templates::DEREF_TRAIT,
@@ -33,6 +53,17 @@ impl AppCUITraits {
             AppCUITraits::OnDefaultAction => templates::ON_DEFAULT_ACTION_TRAIT,
             AppCUITraits::OnResize => templates::ON_RESIZE_TRAIT,
             AppCUITraits::OnFocus => templates::ON_FOCUS_TRAIT,
+        }
+    }
+    pub(crate) fn get_default_implementation(&self) -> &'static str {
+        match self {
+            AppCUITraits::Deref => "",
+            AppCUITraits::OnPaint => "impl OnPaint for $(STRUCT_NAME) {}",
+            AppCUITraits::OnKeyPressed => "impl OnKeyPressed for $(STRUCT_NAME) {}",
+            AppCUITraits::OnMouseEvents => "impl OnMouseEvent for $(STRUCT_NAME) {}",
+            AppCUITraits::OnDefaultAction => "impl OnDefaultAction for $(STRUCT_NAME) {}",
+            AppCUITraits::OnResize => "impl OnResize for $(STRUCT_NAME) {}",
+            AppCUITraits::OnFocus => "impl OnFocus for $(STRUCT_NAME) {}",
         }
     }
     pub(crate) fn new(name: &str)->Option<AppCUITraits> {
