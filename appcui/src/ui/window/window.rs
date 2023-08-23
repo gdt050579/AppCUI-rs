@@ -42,8 +42,6 @@ pub struct Window {
     tag_handle: Handle<super::toolbar::Tag>,
 }
 
-impl WindowControl for Window {}
-
 const MOVE_TO_LOWER_MARGIN: i32 = -100000;
 const MOVE_TO_UPPER_MARGIN: i32 = 100000;
 

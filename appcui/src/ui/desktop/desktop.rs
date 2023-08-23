@@ -58,4 +58,3 @@ impl OnKeyPressed for Desktop {
     }
 }
 
-impl DesktopControl for Desktop {}
