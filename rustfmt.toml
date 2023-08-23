@@ -1,0 +1,2 @@
+struct_field_align_threshold = 150
+max_width = 150
