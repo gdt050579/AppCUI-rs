@@ -34,6 +34,16 @@ impl AppCUITraits {
             AppCUITraits::OnResize => templates::ON_RESIZE_TRAIT,
             AppCUITraits::OnFocus => templates::ON_FOCUS_TRAIT,
         }
-
+    }
+    pub(crate) fn new(name: &str)->Option<AppCUITraits> {
+        match name {
+            "OnPaint" => Some(AppCUITraits::OnPaint),
+            "OnKeyPressed" => Some(AppCUITraits::OnKeyPressed),
+            "OnMouseEvents" => Some(AppCUITraits::OnMouseEvents),
+            "OnDefaultAction" => Some(AppCUITraits::OnDefaultAction),
+            "OnResize" => Some(AppCUITraits::OnResize),
+            "OnFocus" => Some(AppCUITraits::OnFocus), 
+            _ => None        
+        }
     }
 }
