@@ -5,6 +5,11 @@ mod appcui_traits;
 mod traits_configuration;
 use arguments::*;
 use proc_macro::*;
+
+use traits_configuration::TraitsConfig;
+use traits_configuration::TraitImplementation;
+use appcui_traits::AppCUITraits;
+use appcui_traits::TraitType;
 use std::str::FromStr;
 
 extern crate proc_macro;
@@ -125,11 +130,50 @@ fn parse_token_stream(
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
+    let mut config = TraitsConfig::new();
+    // Deref is mandatory
+    config.set(AppCUITraits::Deref, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITraits::Control, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITraits::NotDesktop, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITraits::NotWindow, TraitImplementation::DefaultNonOverwritable);
+    // Raw events (implemente by default)
+    config.set(AppCUITraits::OnPaint, TraitImplementation::Default);
+    config.set(AppCUITraits::OnResize, TraitImplementation::Default);
+    config.set(AppCUITraits::OnFocus, TraitImplementation::Default);
+    config.set(AppCUITraits::OnDefaultAction, TraitImplementation::Default);
+    config.set(AppCUITraits::OnKeyPressed, TraitImplementation::Default);
+    config.set(AppCUITraits::OnMouseEvents, TraitImplementation::Default);
+    // control events
+    config.set(AppCUITraits::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
+    config.set(AppCUITraits::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);   
+    config.set(AppCUITraits::WindowEvents, TraitImplementation::DefaultNonOverwritable);   
+    config.set(AppCUITraits::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
+    config.set(AppCUITraits::ButtonEvents, TraitImplementation::DefaultNonOverwritable);   
+
     parse_token_stream(args, input, "ControlBase", "", false, true)
 }
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
+    let mut config = TraitsConfig::new();
+    // Deref is mandatory
+    config.set(AppCUITraits::Deref, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITraits::Control, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITraits::WindowControl, TraitImplementation::DefaultNonOverwritable);
+    // Raw events (implemente by default)
+    config.set(AppCUITraits::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITraits::OnResize, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITraits::OnFocus, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITraits::OnDefaultAction, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITraits::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITraits::OnMouseEvents, TraitImplementation::BaseFallbackNonOverwritable);
+    // control events
+    config.set(AppCUITraits::ButtonEvents, TraitImplementation::Default);   
+    config.set(AppCUITraits::CheckBoxEvents, TraitImplementation::Default);   
+    config.set(AppCUITraits::WindowEvents, TraitImplementation::Default);   
+    config.set(AppCUITraits::ButtonEvents, TraitImplementation::Default);   
+    config.set(AppCUITraits::ButtonEvents, TraitImplementation::Default);   
+
     parse_token_stream(args, input, "Window", "WindowControl", true, false)
 }
 #[allow(non_snake_case)]
