@@ -7,6 +7,7 @@ use crate::ui::{
     checkbox::events::CheckBoxEvents,
     window::events::WindowEvents,
     command_bar::events::CommandBarEvents, 
+    desktop::events::DesktopEvents,
     common::traits::*, 
     common::*, 
     layout::*,
@@ -362,3 +363,4 @@ impl MenuEvents for ControlBase {}
 impl ButtonEvents for ControlBase {}
 impl CheckBoxEvents for ControlBase {}
 impl WindowEvents for ControlBase {}
+impl DesktopEvents for ControlBase {}

@@ -2,6 +2,7 @@ use super::{
     ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
     Theme, ToolTip,
 };
+use crate::prelude::*;
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::terminals::*;
@@ -37,12 +38,13 @@ pub(crate) struct RuntimeManager {
     surface: Surface,
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
-    desktop_handler: Handle<UIElement>,
+    desktop_handle: Handle<UIElement>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
     menubar: Option<MenuBar>,
     recompute_layout: bool,
     repaint: bool,
+    desktop_os_start_called: bool,
     recompute_parent_indexes: bool,
     request_update_command_and_menu_bars: bool,
     loop_status: LoopStatus,
@@ -69,10 +71,11 @@ impl RuntimeManager {
             theme: Theme::new(),
             terminal: term,
             surface: surface,
-            desktop_handler: Handle::new(0),
+            desktop_handle: Handle::new(0),
             tooltip: ToolTip::new(),
             recompute_layout: true,
             repaint: true,
+            desktop_os_start_called: false,
             request_update_command_and_menu_bars: false,
             recompute_parent_indexes: true,
             request_focus: None,
@@ -101,13 +104,13 @@ impl RuntimeManager {
         let mut desktop = data.desktop_manager;
         let controls = unsafe { &mut *manager.controls };
         desktop.get_base_mut().update_focus_flag(true);
-        manager.desktop_handler = controls.add(desktop);
-        manager.current_focus = Some(manager.desktop_handler);
+        manager.desktop_handle = controls.add(desktop);
+        manager.current_focus = Some(manager.desktop_handle);
         controls
-            .get(manager.desktop_handler)
+            .get(manager.desktop_handle)
             .unwrap()
             .get_base_mut()
-            .handle = manager.desktop_handler;
+            .handle = manager.desktop_handle;
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
@@ -266,10 +269,21 @@ impl RuntimeManager {
         }
         self.close_opened_menu();
     }
+    pub(crate) fn process_desktop_on_start(&mut self) {
+        self.desktop_os_start_called = true;
+        let controls = unsafe { &mut *self.controls };
+        if let Some(desktop) = controls.get(self.desktop_handle.cast()) {
+            DesktopEvents::on_start(desktop.get_control_mut());
+        }
+    }
     pub(crate) fn run(&mut self) {
         // must pe self so that after a run a second call will not be possible
         self.recompute_layout = true;
         self.repaint = true;
+        // if first time an execution start
+        if !self.desktop_os_start_called {
+            self.process_desktop_on_start();            
+        }
         while self.loop_status == LoopStatus::Normal {
             // first process all events (cmdbar, menu, controls)
             if let Some(event) = self.commandbar_event {
@@ -282,7 +296,7 @@ impl RuntimeManager {
                 self.process_events_queue();
             }
             if self.recompute_parent_indexes {
-                self.update_parent_indexes(self.desktop_handler);
+                self.update_parent_indexes(self.desktop_handle);
                 self.recompute_parent_indexes = false;
             }
             if let Some(handle) = self.request_focus {
@@ -330,7 +344,7 @@ impl RuntimeManager {
     }
     fn get_focused_control(&self) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
-        let mut parent = self.desktop_handler;
+        let mut parent = self.desktop_handle;
         let mut ctrl = controls.get(parent).unwrap();
 
         loop {
@@ -498,7 +512,7 @@ impl RuntimeManager {
 
     fn recompute_layouts(&mut self) {
         let term_layout = ParentLayout::from(&self.terminal);
-        self.update_control_layout(self.desktop_handler, &term_layout);
+        self.update_control_layout(self.desktop_handle, &term_layout);
     }
 
     fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
@@ -553,7 +567,7 @@ impl RuntimeManager {
         // reset the surface clip and hide the cursor
         self.surface.hide_cursor();
         self.surface.reset();
-        self.paint_control(self.desktop_handler);
+        self.paint_control(self.desktop_handle);
         self.surface.reset();
         if self.commandbar.is_some() {
             self.commandbar
@@ -610,7 +624,7 @@ impl RuntimeManager {
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
         // check controls first
-        if self.process_control_keypressed_event(self.desktop_handler, event.key, event.character)
+        if self.process_control_keypressed_event(self.desktop_handle, event.key, event.character)
             == EventProcessStatus::Processed
         {
             self.repaint = true;
@@ -841,7 +855,7 @@ impl RuntimeManager {
             MouseLockedObject::None => {}
             _ => return,
         }
-        if let Some(handle) = self.coordinates_to_control(self.desktop_handler, event.x, event.y) {
+        if let Some(handle) = self.coordinates_to_control(self.desktop_handle, event.x, event.y) {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get(handle) {
                 self.repaint |= control
@@ -876,7 +890,7 @@ impl RuntimeManager {
             return;
         }
         let controls = unsafe { &mut *self.controls };
-        let handle = self.coordinates_to_control(self.desktop_handler, event.x, event.y);
+        let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
         if handle != self.mouse_over_control {
             self.hide_tooltip();
             if let Some(c_handle) = self.mouse_over_control {
@@ -956,7 +970,7 @@ impl RuntimeManager {
             }
         }
         // check for a control
-        if let Some(handle) = self.coordinates_to_control(self.desktop_handler, event.x, event.y) {
+        if let Some(handle) = self.coordinates_to_control(self.desktop_handle, event.x, event.y) {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get(handle) {
                 self.update_focus(handle);
