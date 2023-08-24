@@ -143,7 +143,7 @@ impl Arguments {
     }
     fn validate_key_value_pair(&mut self, config: &mut TraitsConfig) {
         match self.key.as_str() {
-            "base" => self.validate_base_attribute(),
+            //"base" => self.validate_base_attribute(),
             "overwrite" => self.validate_overwrite_attribute(config),
             "events" => self.validate_events_attribute(config),
             "debug" => self.validate_debug_attribute(),
