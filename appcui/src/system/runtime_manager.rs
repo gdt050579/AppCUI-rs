@@ -836,6 +836,7 @@ impl RuntimeManager {
         {
             return;
         }
+        let old_size = self.get_terminal_size();
         self.surface.resize(new_size);
         self.terminal.on_resize(new_size);
         if let Some(commandbar) = self.commandbar.as_mut() {
@@ -843,6 +844,10 @@ impl RuntimeManager {
         }
         if let Some(menubar) = self.menubar.as_mut() {
             menubar.set_position(0, 0, new_size.width);
+        }
+        // call on_resize for the desktop control
+        if let Some(desktop) = self.get_controls().get(self.desktop_handle.cast()) {
+            desktop.get_control_mut().on_resize(old_size, new_size);
         }
         self.recompute_layout = true;
     }
