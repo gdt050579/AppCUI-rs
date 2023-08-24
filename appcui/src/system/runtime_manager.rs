@@ -1,10 +1,7 @@
-use super::{
-    ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager,
-    Theme, ToolTip,
-};
-use crate::prelude::*;
+use super::{ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager, Theme, ToolTip};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
+use crate::prelude::*;
 use crate::terminals::*;
 use crate::ui::command_bar::events::CommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
@@ -106,11 +103,7 @@ impl RuntimeManager {
         desktop.get_base_mut().update_focus_flag(true);
         manager.desktop_handle = controls.add(desktop);
         manager.current_focus = Some(manager.desktop_handle);
-        controls
-            .get(manager.desktop_handle)
-            .unwrap()
-            .get_base_mut()
-            .handle = manager.desktop_handle;
+        controls.get(manager.desktop_handle).unwrap().get_base_mut().handle = manager.desktop_handle;
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
@@ -144,13 +137,8 @@ impl RuntimeManager {
         self.recompute_layout = true;
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
-        self.tooltip.show(
-            txt,
-            &rect,
-            self.terminal.get_width(),
-            self.terminal.get_height(),
-            &self.theme,
-        );
+        self.tooltip
+            .show(txt, &rect, self.terminal.get_width(), self.terminal.get_height(), &self.theme);
     }
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
@@ -181,11 +169,7 @@ impl RuntimeManager {
         self.repaint = true;
         self.recompute_layout = true;
     }
-    fn set_event_processors(
-        &mut self,
-        control_handle: Handle<UIElement>,
-        event_processor: Handle<UIElement>,
-    ) {
+    fn set_event_processors(&mut self, control_handle: Handle<UIElement>, event_processor: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(control_handle) {
             let base = control.get_base_mut();
@@ -242,14 +226,7 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn show_menu(
-        &mut self,
-        handle: Handle<Menu>,
-        receiver_control_handle: Handle<UIElement>,
-        x: i32,
-        y: i32,
-        max_size: Size,
-    ) {
+    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<UIElement>, x: i32, y: i32, max_size: Size) {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
             let term_size = Size::new(self.terminal.get_width(), self.terminal.get_height());
@@ -282,7 +259,11 @@ impl RuntimeManager {
         self.repaint = true;
         // if first time an execution start
         if !self.desktop_os_start_called {
-            self.process_desktop_on_start();            
+            self.process_terminal_resize_event(Size {
+                width: self.terminal.get_width(),
+                height: self.terminal.get_height(),
+            });
+            self.process_desktop_on_start();
         }
         while self.loop_status == LoopStatus::Normal {
             // first process all events (cmdbar, menu, controls)
@@ -323,9 +304,7 @@ impl RuntimeManager {
                 SystemEvent::None => {}
                 SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,
                 SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
-                SystemEvent::KeyModifierChanged(event) => {
-                    self.process_key_modifier_changed_event(event.new_state)
-                }
+                SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
                 SystemEvent::Resize(new_size) => self.process_terminal_resize_event(new_size),
                 SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
                 SystemEvent::MouseButtonUp(event) => self.process_mousebuttonup_event(event),
@@ -529,11 +508,7 @@ impl RuntimeManager {
         }
     }
 
-    pub(crate) fn update_control_layout(
-        &mut self,
-        handle: Handle<UIElement>,
-        parent_layout: &ParentLayout,
-    ) {
+    pub(crate) fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
@@ -570,16 +545,10 @@ impl RuntimeManager {
         self.paint_control(self.desktop_handle);
         self.surface.reset();
         if self.commandbar.is_some() {
-            self.commandbar
-                .as_ref()
-                .unwrap()
-                .paint(&mut self.surface, &self.theme);
+            self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
         }
         if self.menubar.is_some() {
-            self.menubar
-                .as_ref()
-                .unwrap()
-                .paint(&mut self.surface, &self.theme);
+            self.menubar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
         }
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);
@@ -595,9 +564,7 @@ impl RuntimeManager {
         if let Some(control) = controls.get(handle) {
             if control.get_base().prepare_paint(&mut self.surface) {
                 // paint is possible
-                control
-                    .get_control()
-                    .on_paint(&mut self.surface, &self.theme);
+                control.get_control().on_paint(&mut self.surface, &self.theme);
                 for child_handle in &control.get_base().children {
                     self.paint_control(*child_handle);
                 }
@@ -624,9 +591,7 @@ impl RuntimeManager {
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
         // check controls first
-        if self.process_control_keypressed_event(self.desktop_handle, event.key, event.character)
-            == EventProcessStatus::Processed
-        {
+        if self.process_control_keypressed_event(self.desktop_handle, event.key, event.character) == EventProcessStatus::Processed {
             self.repaint = true;
             return;
         };
@@ -650,12 +615,7 @@ impl RuntimeManager {
             self.repaint |= self.commandbar_event.is_some();
         }
     }
-    pub(crate) fn process_control_keypressed_event(
-        &mut self,
-        handle: Handle<UIElement>,
-        key: Key,
-        character: char,
-    ) -> EventProcessStatus {
+    pub(crate) fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
@@ -664,9 +624,7 @@ impl RuntimeManager {
             }
             if base.focused_child_index.in_range(base.children.len()) {
                 let handle_child = base.children[base.focused_child_index.index()];
-                if self.process_control_keypressed_event(handle_child, key, character)
-                    == EventProcessStatus::Processed
-                {
+                if self.process_control_keypressed_event(handle_child, key, character) == EventProcessStatus::Processed {
                     return EventProcessStatus::Processed;
                 }
             }
@@ -677,12 +635,7 @@ impl RuntimeManager {
         return EventProcessStatus::Ignored;
     }
 
-    fn coordinates_to_control(
-        &mut self,
-        handle: Handle<UIElement>,
-        x: i32,
-        y: i32,
-    ) -> Option<Handle<UIElement>> {
+    fn coordinates_to_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Option<Handle<UIElement>> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
@@ -831,12 +784,9 @@ impl RuntimeManager {
         if (new_size.width == 0) || (new_size.height == 0) {
             return;
         }
-        if (new_size.width == self.surface.get_width())
-            && (new_size.height == self.surface.get_height())
-        {
+        if (new_size.width == self.surface.get_width()) && (new_size.height == self.surface.get_height()) {
             return;
         }
-        let old_size = self.get_terminal_size();
         self.surface.resize(new_size);
         self.terminal.on_resize(new_size);
         if let Some(commandbar) = self.commandbar.as_mut() {
@@ -844,10 +794,6 @@ impl RuntimeManager {
         }
         if let Some(menubar) = self.menubar.as_mut() {
             menubar.set_position(0, 0, new_size.width);
-        }
-        // call on_resize for the desktop control
-        if let Some(desktop) = self.get_controls().get(self.desktop_handle.cast()) {
-            desktop.get_control_mut().on_resize(old_size, new_size);
         }
         self.recompute_layout = true;
     }
@@ -863,10 +809,7 @@ impl RuntimeManager {
         if let Some(handle) = self.coordinates_to_control(self.desktop_handle, event.x, event.y) {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get(handle) {
-                self.repaint |= control
-                    .get_control_mut()
-                    .on_mouse_event(&MouseEvent::Wheel(event.direction))
-                    == EventProcessStatus::Processed;
+                self.repaint |= control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) == EventProcessStatus::Processed;
             }
         }
     }
@@ -877,14 +820,11 @@ impl RuntimeManager {
             let base = control.get_base_mut();
             let scr_x = base.screen_clip.left;
             let scr_y = base.screen_clip.top;
-            let response =
-                control
-                    .get_control_mut()
-                    .on_mouse_event(&MouseEvent::Drag(MouseEventData {
-                        x: event.x - scr_x,
-                        y: event.y - scr_y,
-                        button: event.button,
-                    }));
+            let response = control.get_control_mut().on_mouse_event(&MouseEvent::Drag(MouseEventData {
+                x: event.x - scr_x,
+                y: event.y - scr_y,
+                button: event.button,
+            }));
             let do_update = response == EventProcessStatus::Processed;
             self.repaint |= do_update;
             self.recompute_layout |= do_update;
@@ -914,13 +854,9 @@ impl RuntimeManager {
                     let scr_y = base.screen_clip.top;
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Enter);
                     self.repaint |= response == EventProcessStatus::Processed;
-                    let response =
-                        control
-                            .get_control_mut()
-                            .on_mouse_event(&MouseEvent::Over(Point::new(
-                                event.x - scr_x,
-                                event.y - scr_y,
-                            )));
+                    let response = control
+                        .get_control_mut()
+                        .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
                     self.repaint |= response == EventProcessStatus::Processed;
                 }
             }
@@ -930,13 +866,9 @@ impl RuntimeManager {
                     let base = control.get_base();
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
-                    let response =
-                        control
-                            .get_control_mut()
-                            .on_mouse_event(&MouseEvent::Over(Point::new(
-                                event.x - scr_x,
-                                event.y - scr_y,
-                            )));
+                    let response = control
+                        .get_control_mut()
+                        .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
                     self.repaint |= response == EventProcessStatus::Processed;
                 }
             }
@@ -982,13 +914,11 @@ impl RuntimeManager {
                 let base = control.get_base();
                 let scr_x = base.screen_clip.left;
                 let scr_y = base.screen_clip.top;
-                control
-                    .get_control_mut()
-                    .on_mouse_event(&MouseEvent::Pressed(MouseEventData {
-                        x: event.x - scr_x,
-                        y: event.y - scr_y,
-                        button: event.button,
-                    }));
+                control.get_control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
+                    x: event.x - scr_x,
+                    y: event.y - scr_y,
+                    button: event.button,
+                }));
                 self.mouse_locked_object = MouseLockedObject::Control(handle);
                 self.repaint = true;
                 return;
@@ -1017,8 +947,7 @@ impl RuntimeManager {
     fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
         // check contextual menus
         if let Some(menu) = self.get_opened_menu() {
-            self.repaint |=
-                menu.on_mouse_released(event.x, event.y) == EventProcessStatus::Processed;
+            self.repaint |= menu.on_mouse_released(event.x, event.y) == EventProcessStatus::Processed;
         }
         match self.mouse_locked_object {
             MouseLockedObject::None => {}
@@ -1028,13 +957,11 @@ impl RuntimeManager {
                     let base = control.get_base();
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
-                    control
-                        .get_control_mut()
-                        .on_mouse_event(&MouseEvent::Released(MouseEventData {
-                            x: event.x - scr_x,
-                            y: event.y - scr_y,
-                            button: event.button,
-                        }));
+                    control.get_control_mut().on_mouse_event(&MouseEvent::Released(MouseEventData {
+                        x: event.x - scr_x,
+                        y: event.y - scr_y,
+                        button: event.button,
+                    }));
                     self.repaint = true;
                 }
             }
