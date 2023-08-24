@@ -1,4 +1,5 @@
 mod desktop;
+pub mod events;
 #[cfg(test)]
 mod tests;
 

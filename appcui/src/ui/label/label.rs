@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use crate::prelude::*;
 
 #[CustomControl(overwrite=OnPaint, internal=true)]
 pub struct Label {

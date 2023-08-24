@@ -1,23 +1,12 @@
-use AppCUIProcMacro::*;
+use crate::prelude::*;
 
 use super::toolbar;
 use super::toolbar::*;
 use super::DragStatus;
 use super::Title;
 use super::WindowFlags;
-use crate::graphics::*;
-use crate::input::*;
-use crate::system::Handle;
-use crate::system::*;
-use crate::ui::command_bar::*;
-use crate::ui::common::traits::*;
-use crate::ui::common::*;
-use crate::ui::menu::Menu;
-use crate::ui::menu::MenuBar;
-use crate::ui::window::events::EventData;
-use crate::ui::*;
-use crate::utils::Strategy;
-use crate::utils::VectorIndex;
+use super::events::EventData;
+
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]

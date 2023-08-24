@@ -23,6 +23,7 @@ pub(crate) enum AppCUITrait {
     WindowEvents = 14,
     CommandBarEvents = 15,
     MenuEvents = 16,
+    DesktopEvents = 17,
 }
 
 #[repr(u8)]
@@ -71,6 +72,7 @@ impl AppCUITrait {
             AppCUITrait::WindowEvents => "WindowEvents",
             AppCUITrait::CommandBarEvents => "CommandBarEvents",
             AppCUITrait::MenuEvents => "MenuEvents",
+            AppCUITrait::DesktopEvents => "DesktopEvents",
         }
     }
     pub(crate) fn get_trait_type(&self) -> TraitType {
@@ -95,6 +97,7 @@ impl AppCUITrait {
             AppCUITrait::WindowEvents => TraitType::ControlEvent,
             AppCUITrait::CommandBarEvents => TraitType::ControlEvent,
             AppCUITrait::MenuEvents => TraitType::ControlEvent,
+            AppCUITrait::DesktopEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn get_basefallback_implementation(&self) -> &'static str {
@@ -119,6 +122,7 @@ impl AppCUITrait {
             AppCUITrait::WindowEvents => "",
             AppCUITrait::CommandBarEvents => "",
             AppCUITrait::MenuEvents => "",
+            AppCUITrait::DesktopEvents => "",
         }
     }
     pub(crate) fn get_default_implementation(&self) -> &'static str {
@@ -143,6 +147,7 @@ impl AppCUITrait {
             AppCUITrait::WindowEvents => "impl WindowEvents for $(STRUCT_NAME) {}",
             AppCUITrait::CommandBarEvents => "impl CommandBarEvents for $(STRUCT_NAME) {}",
             AppCUITrait::MenuEvents => "impl MenuEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::DesktopEvents => "impl DesktopEvents for $(STRUCT_NAME) {}",
         }
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -160,6 +165,7 @@ impl AppCUITrait {
             "WindowEvents" | "Window" => Some(AppCUITrait::WindowEvents),
             "CommandBarEvents" | "CommandBar" => Some(AppCUITrait::CommandBarEvents),
             "MenuEvents" | "MenuBar" => Some(AppCUITrait::MenuEvents),
+            "DesktopEvents" | "Desktop" => Some(AppCUITrait::DesktopEvents),
             _ => None,
         }
     }
@@ -185,7 +191,7 @@ impl AppCUITrait {
             14 => Some(AppCUITrait::WindowEvents),
             15 => Some(AppCUITrait::CommandBarEvents),
             16 => Some(AppCUITrait::MenuEvents),
-
+            17 => Some(AppCUITrait::DesktopEvents),
             _ => None,
         };
         if result.is_none() {

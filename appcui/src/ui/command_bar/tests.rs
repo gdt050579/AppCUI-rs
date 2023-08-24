@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use crate::prelude::*;
 
 #[Window(events = CommandBarEvents, internal=true)]
 struct MyWin1 {

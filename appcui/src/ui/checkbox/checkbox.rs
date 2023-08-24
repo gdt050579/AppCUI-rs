@@ -1,5 +1,5 @@
 use crate::ui::checkbox::events::EventData;
-use AppCUIProcMacro::*;
+use crate::prelude::*;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent,internal=true)]
 pub struct CheckBox {

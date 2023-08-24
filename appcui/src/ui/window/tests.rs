@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use crate::prelude::*;
 
 use crate::{
     input::{Key, KeyCode, KeyModifier},

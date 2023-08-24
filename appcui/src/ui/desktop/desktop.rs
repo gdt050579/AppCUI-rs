@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use crate::prelude::*;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed, internal=true, desktop=true)]
 pub struct Desktop {}

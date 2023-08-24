@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["gavrilut.dragos@gmail.com"]
 description = "..."
 license = "MIT"
-#repository = "https://github.com/gdt050579/EnumBitFlags/"
+#repository = ""
 #readme = "README.md"
 
 [lib]

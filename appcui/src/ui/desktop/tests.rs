@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use crate::prelude::*;
 
 #[Desktop(overwrite = OnPaint, internal = true)]
 struct MyDesktop {}

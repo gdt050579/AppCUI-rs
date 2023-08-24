@@ -1,9 +1,9 @@
 mod appcui_traits;
 mod arguments;
+mod key_utils;
 mod templates;
 mod traits_configuration;
 mod utils;
-mod key_utils;
 use arguments::*;
 use proc_macro::*;
 
@@ -74,7 +74,7 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str,
 /// * CommandBarEvents
 /// * MenuEvents
 ///
-/// None of the **overwrite** or **events** parameters should be present. If not present, a 
+/// None of the **overwrite** or **events** parameters should be present. If not present, a
 /// default implementation will be provided.
 ///
 /// # Example
@@ -123,11 +123,11 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
+    // desktop
+    config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
     parse_token_stream(args, input, "ControlBase", &mut config)
 }
-
-
 
 /// Used to acustom desktop
 /// The general format is: `#[Window(events = ...)]`
@@ -173,6 +173,8 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
+    // desktop
+    config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
     parse_token_stream(args, input, "Window", &mut config)
 }
@@ -222,6 +224,9 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::DefaultNonOverwritable);
+    // desktop
+    config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
+
     parse_token_stream(args, input, "Desktop", &mut config)
 }
 
@@ -232,8 +237,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// * key!("Alt+F4")
 /// * key!("Ctrl+Alt+F")
 /// * key!("Ctrl+Shift+Alt+Tab")
-/// 
-/// The list of all keys supported by this macro is: 
+///
+/// The list of all keys supported by this macro is:
 /// * F-commands (`F1` to `F12`)
 /// * Letters (`A` to `Z`) - with apper case
 /// * Numbers (`0` to `9`)
@@ -242,12 +247,12 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// * Deletion and Insertions (`Delete` , `Backspace`, `Insert`)
 /// * White-spaces (`Space`, `Tab`)
 /// * Other (`Enter`, `Escape`)
-/// 
+///
 /// The supported modifiers are:
 /// * Shift
 /// * Ctrl
 /// * Alt
-/// 
+///
 /// Modifiers can be used in combination with the simple `+` between them.
 #[proc_macro]
 pub fn key(input: TokenStream) -> TokenStream {

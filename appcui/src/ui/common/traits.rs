@@ -1,13 +1,15 @@
 use crate::{
-    ui::{
-        button::events::ButtonEvents, 
-        command_bar::events::CommandBarEvents,
-        menu::events::MenuEvents, checkbox::events::CheckBoxEvents,
-        window::events::WindowEvents
-    },
     graphics::{Size, Surface},
     input::{Key, MouseEvent},
     system::Theme,
+    ui::{
+        button::events::ButtonEvents, 
+        checkbox::events::CheckBoxEvents, 
+        command_bar::events::CommandBarEvents, 
+        desktop::events::DesktopEvents,
+        menu::events::MenuEvents, 
+        window::events::WindowEvents,
+    },
 };
 
 #[repr(u8)]
@@ -55,6 +57,7 @@ pub trait Control:
     + CheckBoxEvents
     + CommandBarEvents
     + WindowEvents
+    + DesktopEvents
     + MenuEvents
 {
 }
