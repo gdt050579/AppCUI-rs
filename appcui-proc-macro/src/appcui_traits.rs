@@ -36,20 +36,6 @@ pub(crate) enum TraitType {
 }
 
 impl AppCUITrait {
-    pub(crate) fn traits_of_type(trait_type: TraitType) -> String {
-        let mut res = String::with_capacity(256);
-        for i in 0u8..255u8 {
-            if let Some(appcui_trait) = AppCUITrait::with_discriminant(i) {
-                if appcui_trait.get_trait_type() == trait_type {
-                    if !res.is_empty() {
-                        res.push(',');
-                    }
-                    res.push_str(appcui_trait.get_name());
-                }
-            }
-        }
-        res
-    }
     pub(crate) fn get_name(&self) -> &'static str {
         match self {
             AppCUITrait::Deref => "Deref",

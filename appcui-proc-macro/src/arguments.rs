@@ -99,7 +99,7 @@ impl Arguments {
                 if appcui_trait.get_trait_type() != TraitType::RawEvent {
                     panic!(
                         "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}", 
-                        AppCUITrait::traits_of_type(TraitType::RawEvent)
+                        config.traits_of_type(TraitType::RawEvent)
                     );
                 }
                 // now try to update the trait
@@ -112,7 +112,7 @@ impl Arguments {
             } else {
                 panic!(
                     "Unknown trait to allow overwriting: '{trait_name}'. Allowed traits are: {}",
-                    AppCUITrait::traits_of_type(TraitType::RawEvent)
+                    config.traits_of_type(TraitType::RawEvent)
                 );
             }
         }
@@ -123,7 +123,7 @@ impl Arguments {
                 if appcui_trait.get_trait_type() != TraitType::ControlEvent {
                     panic!(
                         "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}", 
-                        AppCUITrait::traits_of_type(TraitType::ControlEvent)
+                        config.traits_of_type(TraitType::ControlEvent)
                     );
                 }
                 // now try to update the trait
@@ -136,7 +136,7 @@ impl Arguments {
             } else {
                 panic!(
                     "Unknown trait to allow overwriting: '{trait_name}'. Allowed traits are: {}",
-                    AppCUITrait::traits_of_type(TraitType::ControlEvent)
+                    config.traits_of_type(TraitType::ControlEvent)
                 );
             }
         }
