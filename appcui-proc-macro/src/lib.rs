@@ -61,17 +61,21 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str,
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }
 
-/// Use to create a custom control
-/// The general format is: `#[CustomControl(overwrite = ...)]`
-/// Where the overwrite parameter is a list of traits that can be overwritten that include:
+/// Used to create a custom control
+/// The general format is: `#[CustomControl(overwrite = ..., events= ...)]`
+/// Where the **overwrite** parameter is a list of traits that can be overwritten that include:
 /// * OnPaint
 /// * OnKeyPressed
 /// * OnMouseEvents
 /// * OnDefaultAction
 /// * OnResize
 /// * OnFocus
+///and the **events** parameter is a list of events that could be received by the new control:
+/// * CommandBarEvents
+/// * MenuEvents
 ///
-/// If not overwritten, a default implementation will be automatically added
+/// None of the **overwrite** or **events** parameters should be present. If not present, a 
+/// default implementation will be provided.
 ///
 /// # Example
 /// ```rust,compile_fail
@@ -117,11 +121,37 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::MenuEvents, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
 
     parse_token_stream(args, input, "ControlBase", &mut config)
 }
+
+
+
+/// Used to acustom desktop
+/// The general format is: `#[Window(events = ...)]`
+/// Where the **events** parameter is a list of traits that can be overwritten:
+/// * WindowEvents
+/// * ButtonEvents
+/// * CheckBoxEvents
+/// * CommandBarEvents
+/// * MenuEvents
+///
+/// If not overwritten, a default implementation will be automatically added
+///
+/// # Example
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// #[Window(events = ButtonEvens+WindowEvents)]
+/// struct MyWindow {
+///     // custom data
+/// }
+/// impl MyWindow { /* specific methods */}
+/// impl ButtonEvens for MyWindow { /* ... */ }
+/// impl WindowEvents for MyWindow { /* ... */ }
+/// ```
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -146,6 +176,31 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
 
     parse_token_stream(args, input, "Window", &mut config)
 }
+
+/// Used to create window and intercepts/process events from children controls.
+/// The general format is: `#[Desktop(overwrite = ..., events= ...)]`
+/// Where the **overwrite** parameter is a list of traits that can be overwritten that include:
+/// * OnPaint
+/// * OnResize
+///and the **events** parameter is a list of events that could be received by the new control:
+/// * CommandBarEvents
+/// * MenuEvents
+/// * DesktopEvents
+///
+/// If not overwritten, a default implementation will be automatically added
+///
+/// # Example
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// #[Desktop(overwrite = OnPaint, events = DesktopEvents)]
+/// struct MyDesktop {
+///     // custom data
+/// }
+/// impl MyDesktop { /* specific methods */}
+/// impl OnPaint for MyDesktop { /* ... */ }
+/// impl DesktopEvents for MyDesktop { /* ... */ }
+/// ```
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
