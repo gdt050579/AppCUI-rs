@@ -10,16 +10,16 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut me = Self {
-            base: Window::new("Win-1", Layout::new("d:c,w:41,h:7"), WindowFlags::None),
+            base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), WindowFlags::None),
             info: Handle::None,
             but1: Handle::None,
             but2: Handle::None,
             but3: Handle::None,
         };
-        me.info = me.add(Label::new("<none>",Layout::new("x:0,y:0,w:35")));
-        me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:3,w:11"),button::Flags::None));
-        me.but2 = me.add(Button::new("Button &2", Layout::new("x:14,y:3,w:11"),button::Flags::None));
-        let mut b3 = Button::new("Button &3", Layout::new("x:27,y:3,w:11"),button::Flags::None);
+        me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:35")));
+        me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:3,w:13"), button::Flags::None));
+        me.but2 = me.add(Button::new("Button &2", Layout::new("x:16,y:3,w:13"), button::Flags::None));
+        let mut b3 = Button::new("Button &3", Layout::new("x:31,y:3,w:13"), button::Flags::None);
         b3.set_enabled(false);
         me.but3 = me.add(b3);
         me
@@ -32,7 +32,7 @@ impl MyWin {
     }
 }
 impl ButtonEvents for MyWin {
-    fn on_pressed(&mut self, button_handle: Handle<Button>)->EventProcessStatus {
+    fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
         if self.but1 == button_handle {
             self.set_info("Button 1 presed");
             return EventProcessStatus::Processed;
@@ -48,21 +48,23 @@ impl ButtonEvents for MyWin {
 #[test]
 fn check_button_control() {
     let script = "
-        Paint('initial state')   
-        //CheckHash(0xB838E6ABBF00B753)   
+        Paint.Enable(false)
+        Paint('Button 2 has focus (default)')   
+        CheckHash(0x97CC1CB50CE6FEFA)   
         Key.Pressed(Tab)
-        Paint('After tab pressed') 
+        Paint('Button 1 has focus (default)') 
+        CheckHash(0x3A1EB6A66DA94B6E) 
         Key.Pressed(Enter)
-        Paint('After second button was pressed')
+        Paint('After first button was pressed')
+        CheckHash(0xEC43B6AC3FC018C7) 
+        Mouse.Move(30,6)
+        Paint('Button 2 is hovered')
+        CheckHash(0x613549FDB8D88C1E) 
+        Mouse.Click(30,6,left)
+        Paint('Second first button was pressed')
+        CheckHash(0x82A77C0C9EB25128)
     ";
-    let mut a = App::debug(
-        60,
-        10,
-        InitializationFlags::None,
-        Desktop::new(),
-        script,
-    )
-    .unwrap();
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

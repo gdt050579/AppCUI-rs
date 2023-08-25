@@ -28,11 +28,7 @@ impl DebugTerminal {
         for line in script.lines() {
             // skip empty lines
             let trim_line = line.trim();
-            if (trim_line.len() == 0)
-                || (trim_line.starts_with(";"))
-                || (trim_line.starts_with("#"))
-                || (trim_line.starts_with("//"))
-            {
+            if (trim_line.len() == 0) || (trim_line.starts_with(";")) || (trim_line.starts_with("#")) || (trim_line.starts_with("//")) {
                 continue;
             }
             match Command::new(line.trim()) {
@@ -46,16 +42,8 @@ impl DebugTerminal {
         v
     }
     pub(crate) fn create(data: &InitializationData) -> Result<Box<dyn Terminal>, Error> {
-        let mut w = if data.size.is_none() {
-            80
-        } else {
-            data.size.unwrap().width as u32
-        };
-        let mut h = if data.size.is_none() {
-            40
-        } else {
-            data.size.unwrap().height as u32
-        };
+        let mut w = if data.size.is_none() { 80 } else { data.size.unwrap().width as u32 };
+        let mut h = if data.size.is_none() { 40 } else { data.size.unwrap().height as u32 };
         w = w.clamp(10, 1000);
         h = h.clamp(10, 1000);
         let commands = DebugTerminal::build_commands(data.debug_script.as_str());
@@ -197,8 +185,7 @@ impl Terminal for DebugTerminal {
 
         // hash
         self.temp_str.push_str("| Hash: \x1b[93;40m");
-        self.temp_str
-            .push_str(format!("0x{:X}", surface_hash).as_str());
+        self.temp_str.push_str(format!("0x{:X}", surface_hash).as_str());
         while self.temp_str.len() < (self.width + 16) as usize {
             self.temp_str.push(' ');
         }
@@ -261,14 +248,11 @@ impl Terminal for DebugTerminal {
         let mut y = 0u32;
         for ch in &surface.chars {
             self.temp_str.push_str("\x1b[38;2;");
-            self.temp_str
-                .push_str(DebugTerminal::color_to_str(ch.foreground));
-            //self.temp_str.push(';');
+            self.temp_str.push_str(DebugTerminal::color_to_str(ch.foreground));
             self.temp_str.push_str("m\x1b[48;2;");
-            self.temp_str
-                .push_str(DebugTerminal::color_to_str(ch.background));
+            self.temp_str.push_str(DebugTerminal::color_to_str(ch.background));
             self.temp_str.push_str("m");
-            if ch.code < ' ' {
+            if ch.code <= ' ' {
                 self.temp_str.push(' ');
             } else {
                 self.temp_str.push(ch.code);
