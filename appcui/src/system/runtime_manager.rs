@@ -411,7 +411,26 @@ impl RuntimeManager {
         self.request_update_command_and_menu_bars = false;
     }
 
+    fn find_last_leaf(&mut self, handle: Handle<UIElement>) -> Handle<UIElement> {
+        let controls = unsafe { &mut *self.controls };
+        let mut result = Handle::None;
+        let mut handle = handle;
+        while let Some(c) = controls.get(handle) {
+            let base = c.get_base();
+            if base.can_receive_input()==false {
+                break;
+            }            
+            // curent handle is a possible candidate for a valid child focused leaf
+            result = handle;
+            handle = base.get_focused_control();            
+        }
+        result
+    }
     fn update_focus(&mut self, handle: Handle<UIElement>) {
+        // even if we request a specific control, we will select its deepest inner child
+        // to receive a focus (this way a set focus over a window will preserve the focus
+        // we already have for one of its childern)
+        let handle = self.find_last_leaf(handle);
         // 1. mark all controls from the path as preparing to received focus
         // we will use focuse_chain as a temporary value to hold the chain
         self.focus_chain.clear();

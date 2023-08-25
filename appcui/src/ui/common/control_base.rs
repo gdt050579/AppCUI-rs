@@ -3,15 +3,8 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, RuntimeManager};
 use crate::ui::{
-    button::events::ButtonEvents, 
-    checkbox::events::CheckBoxEvents,
-    window::events::WindowEvents,
-    command_bar::events::CommandBarEvents, 
-    desktop::events::DesktopEvents,
-    common::traits::*, 
-    common::*, 
-    layout::*,
-    menu::events::MenuEvents,
+    button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::CommandBarEvents, common::traits::*, common::*,
+    desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
@@ -39,9 +32,9 @@ pub(crate) struct Margins {
 pub struct ControlBase {
     layout: ControlLayout,
     pub(crate) margins: Margins,
-    pub(crate) handle: Handle<UIElement> ,
-    pub(crate) parent: Handle<UIElement> ,
-    pub(crate) event_processor: Handle<UIElement> ,
+    pub(crate) handle: Handle<UIElement>,
+    pub(crate) parent: Handle<UIElement>,
+    pub(crate) event_processor: Handle<UIElement>,
     pub(crate) children: Vec<Handle<UIElement>>,
     pub(crate) focused_child_index: VectorIndex,
     pub(crate) parent_index: VectorIndex,
@@ -92,16 +85,8 @@ impl ControlBase {
         let width = self.layout.get_width() as u32;
         let height = self.layout.get_height() as u32;
         Size {
-            width: if horizontal_margins > width {
-                0
-            } else {
-                width - horizontal_margins
-            },
-            height: if vertical_margins > height {
-                0
-            } else {
-                height - vertical_margins
-            },
+            width: if horizontal_margins > width { 0 } else { width - horizontal_margins },
+            height: if vertical_margins > height { 0 } else { height - vertical_margins },
         }
     }
 
@@ -149,6 +134,14 @@ impl ControlBase {
     pub(crate) fn is_marked_to_receive_focus(&self) -> bool {
         self.status_flags.contains(StatusFlags::MarkedForFocus)
     }
+    #[inline(always)]
+    pub(crate) fn get_focused_control(&self)->Handle<UIElement> {
+        if self.focused_child_index.in_range(self.children.len()) {
+            return self.children[self.focused_child_index.index()];
+        }
+        Handle::None
+    }
+
 
     #[inline(always)]
     pub(crate) fn is_window_control(&self) -> bool {
@@ -182,7 +175,7 @@ impl ControlBase {
         // if I am already registered, I will set the parent of my child
         let base = c.get_base_mut();
         let focusable = base.can_receive_input();
-        
+
         base.parent = self.handle;
         // I will use the same event_processor as my parent
         // if my parent is not register , the event_processor handle will be None
@@ -194,7 +187,9 @@ impl ControlBase {
         self.children.push(handle);
         if focusable {
             rm.request_focus_for_control(handle);
-            // si ar trebui sa setez si index-ul in lista de copii
+            let children_count = self.children.len();
+            // since we have already pushed one handle, we know that children count > 0
+            self.focused_child_index.set(children_count - 1, children_count, false);
         }
         return handle.cast();
     }
@@ -230,18 +225,9 @@ impl ControlBase {
         }
     }
     #[inline]
-    pub fn set_size_bounds(
-        &mut self,
-        min_width: u16,
-        min_height: u16,
-        max_width: u16,
-        max_height: u16,
-    ) {
-        self.layout
-            .set_size_bounds(min_width, min_height, max_width, max_height);
+    pub fn set_size_bounds(&mut self, min_width: u16, min_height: u16, max_width: u16, max_height: u16) {
+        self.layout.set_size_bounds(min_width, min_height, max_width, max_height);
     }
-
-
 
     #[inline]
     pub(crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
@@ -260,16 +246,12 @@ impl ControlBase {
     }
     #[inline(always)]
     pub(crate) fn is_coord_in_control(&self, x: i32, y: i32) -> bool {
-        (x >= 0)
-            && (y >= 0)
-            && (x < (self.layout.get_width() as i32))
-            && (y < (self.layout.get_height() as i32))
+        (x >= 0) && (y >= 0) && (x < (self.layout.get_width() as i32)) && (y < (self.layout.get_height() as i32))
     }
 
     #[inline]
     pub(crate) fn update_control_layout_and_screen_origin(&mut self, parent_layout: &ParentLayout) {
-        self.layout
-            .update(parent_layout.client_width, parent_layout.client_height);
+        self.layout.update(parent_layout.client_width, parent_layout.client_height);
         self.screen_origin.x = parent_layout.origin.x + self.layout.get_x();
         self.screen_origin.y = parent_layout.origin.y + self.layout.get_y();
         self.screen_clip.set_with_size(
