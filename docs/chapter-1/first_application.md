@@ -26,6 +26,7 @@ fn main() -> Result<(), appcui::system::Error> {
 ```
 
 After compiling and executing this code you should see something like this:
+
 <img src="img/hello_world.png" width=300/>
 
 **OBS**: Keep in mind that depending on your terminal and other settings this image
