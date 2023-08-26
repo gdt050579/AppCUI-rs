@@ -5,7 +5,7 @@
 //! * Button
 //! * Checkbox 
 //!
-//! # Examples
+
 
 
 pub mod graphics;

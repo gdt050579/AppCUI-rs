@@ -1,0 +1,8 @@
+[book]
+authors = ["Gavrilut Dragos"]
+language = "en"
+multilingual = false
+src = "docs"
+
+[build]
+build-dir = "html"
