@@ -1,7 +1,4 @@
-use crate::{
-    ui::{Desktop, Label, Layout, Window, WindowFlags},
-    system::{App, InitializationFlags},
-};
+use crate::prelude::*;
 
 #[test]
 fn check_label_position() {
@@ -11,7 +8,7 @@ fn check_label_position() {
         CheckHash(0xF7D704CAB062ED5C)   
     ";
     let mut a = App::debug(60, 11, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("TopLeft", Layout::new("d:tl,w:7")));
     w.add(Label::new("Top", Layout::new("d:t,w:3")));
     w.add(Label::new("TopRight", Layout::new("d:tr,w:8")));
@@ -33,7 +30,7 @@ fn check_label_multiline() {
         CheckHash(0xD4FE75C904BD13F9)   
     ";
     let mut a = App::debug(60, 11, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("This is a multi-line label", Layout::new("d:tl,w:10,h:3")));
     a.add_window(w);
     a.run();
@@ -46,7 +43,7 @@ fn check_label_with_hotkey() {
         CheckHash(0xD2356769850743E5)   
     ";
     let mut a = App::debug(60, 11, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("A &hot ket label", Layout::new("d:tl,w:30")));
     a.add_window(w);
     a.run();

@@ -1,11 +1,12 @@
 use crate::prelude::*;
 
 use super::events::EventData;
+use super::Flags;
 use super::toolbar;
 use super::toolbar::*;
 use super::DragStatus;
 use super::Title;
-use super::WindowFlags;
+
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
@@ -19,7 +20,7 @@ enum MoveDirection {
 #[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true, window=true)]
 pub struct Window {
     title: Title,
-    flags: WindowFlags,
+    flags: Flags,
     toolbar: ToolBar,
     resize_move_mode: bool,
     maximized: bool,
@@ -74,7 +75,7 @@ impl Window {
         }
         return (((object.x - origin.x) * (object.x - origin.x)) as u32) + (((object.y - origin.y) * (object.y - origin.y)) as u32);
     }
-    pub fn new(title: &str, layout: Layout, flags: WindowFlags) -> Self {
+    pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
         let mut win = Window {
             base: ControlBase::new(
                 layout,
@@ -93,10 +94,10 @@ impl Window {
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
-        if flags.contains(WindowFlags::NoCloseButton) == false {
+        if flags.contains(Flags::NoCloseButton) == false {
             win.toolbar.add(toolbar::CloseButton::new());
         }
-        if flags.contains(WindowFlags::Sizeable) {
+        if flags.contains(Flags::Sizeable) {
             win.toolbar.add(toolbar::MaximizeRestoreButton::new());
             win.toolbar.add(toolbar::ResizeCorner::new());
         }
@@ -117,7 +118,7 @@ impl Window {
 
            UpdateWindowsButtonsPoz(Members);
 
-           if ((Flags & WindowFlags::Maximized) == WindowFlags::Maximized)
+           if ((Flags & Flags::Maximized) == Flags::Maximized)
            {
                ASSERT(Maxim izeRestore(), "Fail to maximize window !");
            }
@@ -133,7 +134,7 @@ impl Window {
     ///     use appcui::prelude::*;
     ///
     ///     let mut a = App::default().unwrap();
-    ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     ///     w.add(Button::new("Press me",Layout::new("x:1,y:1,w:10"),button::Flags::None));
     /// ```    
     ///
@@ -144,8 +145,8 @@ impl Window {
     ///     use appcui::prelude::*;
     ///
     ///     let mut a = App::default().unwrap();
-    ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
-    ///     w.add(Window::new("aaa",Layout::new("d:c,w:20,h:10"),WindowFlags::None));
+    ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
+    ///     w.add(Window::new("aaa",Layout::new("d:c,w:20,h:10"),window::Flags::None));
     /// ```    
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where
@@ -445,7 +446,7 @@ impl Window {
         self.toolbar.clear_current_item_handle();
         self.hide_tooltip();
 
-        if !self.flags.contains(WindowFlags::FixedPosition) {
+        if !self.flags.contains(Flags::FixedPosition) {
             self.drag_status = DragStatus::Move;
             self.drag_start_point.x = x;
             self.drag_start_point.y = y;
@@ -540,9 +541,9 @@ impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let color_window = match () {
             _ if !self.has_focus() => theme.window.inactive,
-            _ if self.flags.contains(WindowFlags::WarningWindow) => theme.window.warning,
-            _ if self.flags.contains(WindowFlags::ErrorWindow) => theme.window.error,
-            _ if self.flags.contains(WindowFlags::NotifyWindow) => theme.window.info,
+            _ if self.flags.contains(Flags::WarningWindow) => theme.window.warning,
+            _ if self.flags.contains(Flags::ErrorWindow) => theme.window.error,
+            _ if self.flags.contains(Flags::NotifyWindow) => theme.window.info,
             _ => theme.window.normal,
         };
         // set some colors
@@ -721,14 +722,14 @@ impl OnKeyPressed for Window {
                 tmp->SetFocus();
             return true;
         case Key::Escape:
-            if (!(Members->Flags && WindowFlags::NoCloseButton))
+            if (!(Members->Flags && Flags::NoCloseButton))
             {
                 RaiseEvent(Event::WindowClose);
                 return true;
             }
             return false;
         case Key::Enter:
-            if (Members->Flags && WindowFlags::ProcessReturn)
+            if (Members->Flags && Flags::ProcessReturn)
             {
                 RaiseEvent(Event::WindowAccept);
                 return true;
@@ -1251,7 +1252,7 @@ Window::~Window()
 {
     DELETE_CONTROL_CONTEXT(WindowControlContext);
 }
-Window::Window(const ConstString& caption, string_view layout, WindowFlags Flags)
+Window::Window(const ConstString& caption, string_view layout, Flags Flags)
     : Control(new WindowControlContext(), caption, layout, false)
 {
     // done
@@ -1296,7 +1297,7 @@ bool Window::OnMouseLeave()
 bool Window::OnBeforeResize(int newWidth, int newHeight)
 {
     CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    if ((Members->Flags & WindowFlags::Sizeable) == WindowFlags::None)
+    if ((Members->Flags & Flags::Sizeable) == Flags::None)
         return false;
     return (newWidth >= Members->Layout.MinWidth) && (newWidth <= Members->Layout.MaxWidth) &&
            (newHeight >= Members->Layout.MinHeight) && (newHeight <= Members->Layout.MaxHeight);

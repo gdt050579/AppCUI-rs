@@ -8,7 +8,7 @@ use crate::{
 
 use super::{
     toolbar::{self, Gravity},
-    Window, WindowFlags,
+    Window,
 };
 
 #[test]
@@ -19,7 +19,7 @@ fn check_window_title() {
         CheckHash(0xA0CFD68A45B1786C)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None));
+    a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None));
     a.run();
 }
 #[test]
@@ -30,7 +30,7 @@ fn check_window_full_title_1() {
         CheckHash(0xF410B9650F4ADF18)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new("1234567890A", Layout::new("d:c,w:20,h:10"), WindowFlags::None));
+    a.add_window(Window::new("1234567890A", Layout::new("d:c,w:20,h:10"), window::Flags::None));
     a.run();
 }
 #[test]
@@ -41,7 +41,7 @@ fn check_window_full_title_2() {
         CheckHash(0xA0CFD68A45B1786C)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None));
+    a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None));
     a.run();
 }
 #[test]
@@ -52,7 +52,7 @@ fn check_window_full_title_3() {
         CheckHash(0xEEBF652BB26E9C4C)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new("ABC", Layout::new("d:c,w:12,h:8"), WindowFlags::None));
+    a.add_window(Window::new("ABC", Layout::new("d:c,w:12,h:8"), window::Flags::None));
     a.run();
 }
 #[test]
@@ -63,7 +63,7 @@ fn check_window_minimize_title_1() {
         CheckHash(0x671DB3CA4AD392AE)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:20,h:10"), WindowFlags::None));
+    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:20,h:10"), window::Flags::None));
     a.run();
 }
 #[test]
@@ -74,7 +74,7 @@ fn check_window_minimize_title_2() {
         CheckHash(0x7F7F1F564130F50E)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:16,h:8"), WindowFlags::None));
+    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:16,h:8"), window::Flags::None));
     a.run();
 }
 #[test]
@@ -85,7 +85,7 @@ fn check_window_minimize_title_3() {
         CheckHash(0x6CB0EAB5DDA0E087)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:14,h:6"), WindowFlags::None));
+    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:14,h:6"), window::Flags::None));
     a.run();
 }
 #[test]
@@ -96,7 +96,7 @@ fn check_window_minimize_title_4() {
         CheckHash(0x3A1C142AE9968A2F)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:12,h:6"), WindowFlags::None));
+    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:12,h:6"), window::Flags::None));
     a.run();
 }
 
@@ -108,7 +108,7 @@ fn check_window_tag_1() {
         CheckHash(0xBB2962251DDB2240)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_tag("ABC");
     a.add_window(w);
     a.run();
@@ -121,7 +121,7 @@ fn check_window_tag_2() {
         CheckHash(0xE2CB87CCC6FD9E4A)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_tag("ABCD");
     a.add_window(w);
     a.run();
@@ -134,7 +134,7 @@ fn check_window_tag_and_split_title_1() {
         CheckHash(0x34902E0B6D58F035)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_tag("ABCDE");
     a.add_window(w);
     a.run();
@@ -147,7 +147,7 @@ fn check_window_tag_and_split_title_2() {
         CheckHash(0xA52995587B045766)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_tag("ABCDEF");
     a.add_window(w);
     a.run();
@@ -160,7 +160,7 @@ fn check_window_tag_and_title_first_letter() {
         CheckHash(0x6F914F802B3B7B5D)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_tag("ABCDEFG");
     a.add_window(w);
     a.run();
@@ -173,7 +173,7 @@ fn check_window_tag_and_title_not_visible() {
         CheckHash(0xA2C91CB6A1484009)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_tag("ABCDEFGH");
     a.add_window(w);
     a.run();
@@ -187,7 +187,7 @@ fn check_window_hotkey_1() {
         CheckHash(0x4454159FD9AA73E9)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_hotkey(key!("Alt+F1"));
     a.add_window(w);
     a.run();
@@ -200,7 +200,7 @@ fn check_window_hotkey_2() {
         CheckHash(0xC9D2F0E450475385)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_hotkey(KeyCode::Enter);
     a.add_window(w);
     a.run();
@@ -214,7 +214,7 @@ fn check_window_hotkey_and_tag() {
         CheckHash(0x8F6D9DF3500A2D7A)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     w.set_hotkey(key!("Alt+1"));
     w.set_tag("XYZ");
     a.add_window(w);
@@ -247,7 +247,7 @@ fn check_window_resize() {
         CheckHash(0x6A9DA986C039579A)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), WindowFlags::Sizeable);
+    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::Sizeable);
     a.add_window(w);
     a.run();
 }
@@ -273,7 +273,7 @@ fn check_window_move() {
         CheckHash(0x922FBAECBC6B2C2)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), WindowFlags::Sizeable);
+    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::Sizeable);
     a.add_window(w);
     a.run();
 }
@@ -287,7 +287,7 @@ fn check_window_on_layout_changed() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("d:c,w:40,h:7"), WindowFlags::Sizeable),
+                base: Window::new("Win", Layout::new("d:c,w:40,h:7"), window::Flags::Sizeable),
                 info: Handle::None,
             };
             me.info = me.add(Label::new("", Layout::new("x:1,y:1,w:36,h:3")));
@@ -353,7 +353,7 @@ fn check_window_on_activate_deactivate() {
     impl MyWin {
         fn new(layout: &str) -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new(layout), WindowFlags::None),
+                base: Window::new("Win", Layout::new(layout), window::Flags::None),
                 info: Handle::None,
             };
             me.info = me.add(Label::new("<no-state>", Layout::new("x:1,y:1,w:16")));
@@ -401,7 +401,7 @@ fn check_window_toolbar_label() {
         CheckHash(0x7DF82A0072CCF28F)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     w.get_toolbar().add(toolbar::Label::new(Gravity::BottomLeft, "Label 1"));
     w.get_toolbar().add(toolbar::Label::new(Gravity::BottomLeft, "Label 2"));
     w.get_toolbar().add(toolbar::Label::new(Gravity::BottomRight, "Label 3"));
@@ -426,7 +426,7 @@ fn check_window_toolbar_button() {
         Paint('Mouse press over stop button')
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "Start", 1));
     w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "Stop", 2));
     w.get_toolbar().add(toolbar::Button::new(Gravity::BottomRight, "Exit", 3));
@@ -447,7 +447,7 @@ fn check_window_toolbar_button_events() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("d:c,w:40,h:8"), WindowFlags::None),
+                base: Window::new("Win", Layout::new("d:c,w:40,h:8"), window::Flags::None),
                 info: Handle::None,
                 run_button: Handle::None,
                 stop_button: Handle::None,

@@ -7,7 +7,7 @@ struct MyWin1 {
 impl MyWin1 {
     fn new() -> Self {
         let mut me = Self {
-            base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), WindowFlags::None),
+            base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), window::Flags::None),
             info: Handle::None,
         };
         me.info = me.add(Label::new("<none>",Layout::new("x:0,y:0,w:18")));

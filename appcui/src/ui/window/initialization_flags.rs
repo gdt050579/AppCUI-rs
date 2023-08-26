@@ -1,7 +1,7 @@
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits=16)]
-pub enum WindowFlags {
+pub enum Flags {
     Sizeable      = 0x0001,
     NotifyWindow  = 0x0002,
     ErrorWindow   = 0x0004,
