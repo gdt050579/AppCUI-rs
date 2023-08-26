@@ -1,18 +1,3 @@
-# First Application
-
-Let's start by building a simple window that prints `Hello World` 
-on the screen.
-
-Firts, make sure that you have the following dependency added in your
-project `cargo.toml` file:
-
-```toml
-[dependencies]
-appcui = <version>
-```
-
-Then, replace your `main.rs` with the following snippet:
-```rs
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
@@ -23,4 +8,3 @@ fn main() -> Result<(), appcui::system::Error> {
     app.run();
     Ok(())
 }
-```

@@ -11,3 +11,7 @@ AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"}
 [[example]]
 name = "simple_window"
 path = "simple_window.rs"
+
+[[example]]
+name = "hello_world"
+path = "hello_world.rs"
