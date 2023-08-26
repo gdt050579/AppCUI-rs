@@ -9,7 +9,8 @@ use crate::{
         desktop::events::DesktopEvents,
         menu::events::MenuEvents, 
         window::events::WindowEvents,
-    },
+        window::events::ToolBarEvents,
+    }
 };
 
 #[repr(u8)]
@@ -57,6 +58,7 @@ pub trait Control:
     + CheckBoxEvents
     + CommandBarEvents
     + WindowEvents
+    + ToolBarEvents
     + DesktopEvents
     + MenuEvents
 {

@@ -123,6 +123,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -137,6 +138,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
 /// * CheckBoxEvents
 /// * CommandBarEvents
 /// * MenuEvents
+/// * ToolBarEvents
 ///
 /// If not overwritten, a default implementation will be automatically added
 ///
@@ -173,6 +175,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -224,6 +227,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
+
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
 

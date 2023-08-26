@@ -4,6 +4,7 @@ use $(ROOT)::ui::common::traits::*;
 use $(ROOT)::ui::button::events::ButtonEvents;
 use $(ROOT)::ui::checkbox::events::CheckBoxEvents;
 use $(ROOT)::ui::window::events::WindowEvents;
+use $(ROOT)::ui::window::events::ToolBarEvents;
 use $(ROOT)::ui::command_bar::events::CommandBarEvents;
 use $(ROOT)::ui::menu::events::MenuEvents;
 use $(ROOT)::ui::menu::*;

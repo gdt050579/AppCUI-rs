@@ -5,6 +5,7 @@ use crate::system::{Handle, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::CommandBarEvents, common::traits::*, common::*,
     desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::WindowEvents,
+    window::events::ToolBarEvents,
 };
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
@@ -345,4 +346,5 @@ impl MenuEvents for ControlBase {}
 impl ButtonEvents for ControlBase {}
 impl CheckBoxEvents for ControlBase {}
 impl WindowEvents for ControlBase {}
+impl ToolBarEvents for ControlBase {}
 impl DesktopEvents for ControlBase {}

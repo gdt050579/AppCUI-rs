@@ -12,7 +12,7 @@ pub trait WindowEvents {
     fn on_activate(&mut self) {}
     fn on_deactivate(&mut self) {}
 }
-pub trait ToolbarEvents {
+pub trait ToolBarEvents {
     fn on_button_clicked(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
