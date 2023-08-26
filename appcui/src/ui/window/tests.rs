@@ -11,9 +11,6 @@ use super::{
     Window, WindowFlags,
 };
 
-
-
-
 #[test]
 fn check_window_title() {
     let script = "
@@ -22,11 +19,7 @@ fn check_window_title() {
         CheckHash(0xA0CFD68A45B1786C)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new(
-        "Title",
-        Layout::new("d:c,w:20,h:10"),
-        WindowFlags::None,
-    ));
+    a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None));
     a.run();
 }
 #[test]
@@ -37,11 +30,7 @@ fn check_window_full_title_1() {
         CheckHash(0xF410B9650F4ADF18)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new(
-        "1234567890A",
-        Layout::new("d:c,w:20,h:10"),
-        WindowFlags::None,
-    ));
+    a.add_window(Window::new("1234567890A", Layout::new("d:c,w:20,h:10"), WindowFlags::None));
     a.run();
 }
 #[test]
@@ -52,11 +41,7 @@ fn check_window_full_title_2() {
         CheckHash(0xA0CFD68A45B1786C)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new(
-        "Title",
-        Layout::new("d:c,w:20,h:10"),
-        WindowFlags::None,
-    ));
+    a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None));
     a.run();
 }
 #[test]
@@ -67,11 +52,7 @@ fn check_window_full_title_3() {
         CheckHash(0xEEBF652BB26E9C4C)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new(
-        "ABC",
-        Layout::new("d:c,w:12,h:8"),
-        WindowFlags::None,
-    ));
+    a.add_window(Window::new("ABC", Layout::new("d:c,w:12,h:8"), WindowFlags::None));
     a.run();
 }
 #[test]
@@ -82,11 +63,7 @@ fn check_window_minimize_title_1() {
         CheckHash(0x671DB3CA4AD392AE)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new(
-        "ABCDEFGHIJKL",
-        Layout::new("d:c,w:20,h:10"),
-        WindowFlags::None,
-    ));
+    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:20,h:10"), WindowFlags::None));
     a.run();
 }
 #[test]
@@ -97,11 +74,7 @@ fn check_window_minimize_title_2() {
         CheckHash(0x7F7F1F564130F50E)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new(
-        "ABCDEFGHIJKL",
-        Layout::new("d:c,w:16,h:8"),
-        WindowFlags::None,
-    ));
+    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:16,h:8"), WindowFlags::None));
     a.run();
 }
 #[test]
@@ -112,11 +85,7 @@ fn check_window_minimize_title_3() {
         CheckHash(0x6CB0EAB5DDA0E087)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new(
-        "ABCDEFGHIJKL",
-        Layout::new("d:c,w:14,h:6"),
-        WindowFlags::None,
-    ));
+    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:14,h:6"), WindowFlags::None));
     a.run();
 }
 #[test]
@@ -127,11 +96,7 @@ fn check_window_minimize_title_4() {
         CheckHash(0x3A1C142AE9968A2F)
     ";
     let mut a = App::debug(20, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
-    a.add_window(Window::new(
-        "ABCDEFGHIJKL",
-        Layout::new("d:c,w:12,h:6"),
-        WindowFlags::None,
-    ));
+    a.add_window(Window::new("ABCDEFGHIJKL", Layout::new("d:c,w:12,h:6"), WindowFlags::None));
     a.run();
 }
 
@@ -437,12 +402,9 @@ fn check_window_toolbar_label() {
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
-    w.get_toolbar()
-        .add(toolbar::Label::new(Gravity::BottomLeft, "Label 1"));
-    w.get_toolbar()
-        .add(toolbar::Label::new(Gravity::BottomLeft, "Label 2"));
-    w.get_toolbar()
-        .add(toolbar::Label::new(Gravity::BottomRight, "Label 3"));
+    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomLeft, "Label 1"));
+    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomLeft, "Label 2"));
+    w.get_toolbar().add(toolbar::Label::new(Gravity::BottomRight, "Label 3"));
 
     a.add_window(w);
     a.run();
@@ -451,7 +413,7 @@ fn check_window_toolbar_label() {
 #[test]
 fn check_window_toolbar_button() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('buttons')
         CheckHash(0x52243E492A4813E1)
         Mouse.Move(16,8)
@@ -465,13 +427,82 @@ fn check_window_toolbar_button() {
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), WindowFlags::None);
-    w.get_toolbar()
-        .add(toolbar::Button::new(Gravity::BottomLeft, "Start", 1));
-    w.get_toolbar()
-        .add(toolbar::Button::new(Gravity::BottomLeft, "Stop", 2));
-    w.get_toolbar()
-        .add(toolbar::Button::new(Gravity::BottomRight, "Exit", 3));
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "Start", 1));
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "Stop", 2));
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomRight, "Exit", 3));
 
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_window_toolbar_button_events() {
+    #[Window(events = ToolBarEvents,internal = true)]
+    struct MyWin {
+        info: Handle<Label>,
+        run_button: Handle<toolbar::Button>,
+        stop_button: Handle<toolbar::Button>,
+        exit_button: Handle<toolbar::Button>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new("d:c,w:40,h:8"), WindowFlags::None),
+                info: Handle::None,
+                run_button: Handle::None,
+                stop_button: Handle::None,
+                exit_button: Handle::None
+            };
+            me.info = me.add(Label::new("<no-state>", Layout::new("x:1,y:1,w:16")));
+            me.run_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "&Run", 1));
+            me.stop_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "&Stop", 2));
+            me.exit_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "E&xit", 3));
+            me
+        }
+        fn set_info(&mut self, info: &str) {
+            let h = self.info;
+            if let Some(label) = self.get_control_mut(h) {
+                label.set_text(info);
+            }
+        }
+    }
+    impl ToolBarEvents for MyWin {
+        fn on_button_clicked(&mut self, handle: Handle<toolbar::Button>) -> EventProcessStatus {
+            if handle == self.run_button {
+                self.set_info("Run pressed");
+                return EventProcessStatus::Processed;
+            }
+            if handle == self.stop_button {
+                self.set_info("Stop pressed");
+                return EventProcessStatus::Processed;
+            }
+            if handle == self.exit_button {
+                self.set_info("Exit pressed");
+                return EventProcessStatus::Processed;
+            }
+
+            EventProcessStatus::Ignored
+        }
+    }
+
+    let script = "
+        //Paint.Enable(false)
+        Paint('initial state (no button pressed)')
+        CheckHash(0x95EE0B3C635338CD)
+        Mouse.Click(14,8,left)
+        Paint('Run button pressed')
+        //CheckHash(0)
+        Mouse.Click(18,8,left)
+        Paint('Stop button pressed')
+        //CheckHash(0)
+        Mouse.Click(22,8,left)
+        Paint('Exit button pressed')
+        //CheckHash(0)
+        Key.Pressed(Alt+R)
+        Paint('Run button pressed (with hotkey)')
+        //CheckHash(0)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }

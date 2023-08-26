@@ -1,12 +1,11 @@
 use crate::prelude::*;
 
+use super::events::EventData;
 use super::toolbar;
 use super::toolbar::*;
 use super::DragStatus;
 use super::Title;
 use super::WindowFlags;
-use super::events::EventData;
-
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
@@ -73,17 +72,13 @@ impl Window {
                 }
             }
         }
-        return (((object.x - origin.x) * (object.x - origin.x)) as u32)
-            + (((object.y - origin.y) * (object.y - origin.y)) as u32);
+        return (((object.x - origin.x) * (object.x - origin.x)) as u32) + (((object.y - origin.y) * (object.y - origin.y)) as u32);
     }
     pub fn new(title: &str, layout: Layout, flags: WindowFlags) -> Self {
         let mut win = Window {
             base: ControlBase::new(
                 layout,
-                StatusFlags::Visible
-                    | StatusFlags::Enabled
-                    | StatusFlags::AcceptInput
-                    | StatusFlags::WindowControl,
+                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
             ),
             title: Title::new(title),
             flags,
@@ -132,22 +127,22 @@ impl Window {
     /// Adds a control to the current window. Once the control was added
     /// a handle for that control wil be returned or `Handle::None` if some
     /// error occured.
-    /// 
+    ///
     /// # Exemple
     /// ```rust,no_run
     ///     use appcui::prelude::*;
-    /// 
+    ///
     ///     let mut a = App::default().unwrap();
     ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
     ///     w.add(Button::new("Press me",Layout::new("x:1,y:1,w:10"),button::Flags::None));
     /// ```    
-    /// 
+    ///
     /// You can not add a Window as a child to another Window nor can you add a Desktop
     /// as a child for another Deskopt. The following example will not compile as we
     /// try to add a Window as a child to another window.
     /// ```rust,compile_fail
     ///     use appcui::prelude::*;
-    /// 
+    ///
     ///     let mut a = App::default().unwrap();
     ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), WindowFlags::None);
     ///     w.add(Window::new("aaa",Layout::new("d:c,w:20,h:10"),WindowFlags::None));
@@ -243,10 +238,7 @@ impl Window {
             self.old_rect = Rect::with_point_and_size(self.get_position(), self.get_size());
             let desktop_rect = RuntimeManager::get().get_desktop_rect();
             self.set_position(desktop_rect.get_left(), desktop_rect.get_top());
-            self.set_size(
-                desktop_rect.get_width() as u16,
-                desktop_rect.get_height() as u16,
-            );
+            self.set_size(desktop_rect.get_width() as u16, desktop_rect.get_height() as u16);
             self.maximized = true;
         } else {
             let l = self.old_rect.get_left();
@@ -259,11 +251,7 @@ impl Window {
         }
     }
 
-    fn find_next_control(
-        handle: Handle<UIElement>,
-        forward: bool,
-        start_from_current: bool,
-    ) -> Option<Handle<UIElement>> {
+    fn find_next_control(handle: Handle<UIElement>, forward: bool, start_from_current: bool) -> Option<Handle<UIElement>> {
         let rm = RuntimeManager::get();
         if let Some(control) = rm.get_controls().get(handle) {
             let base = control.get_base();
@@ -411,8 +399,7 @@ impl Window {
             } else {
                 self.show_tooltip_on_point(tooltip, cx, y);
             }
-            self.toolbar
-                .set_current_item_handle(item.get_handle().cast());
+            self.toolbar.set_current_item_handle(item.get_handle().cast());
             return EventProcessStatus::Processed;
         }
         // if I reach this point - tool tip should not be shown and there is no win button selected
@@ -511,11 +498,11 @@ impl Window {
                     self.maximize_restore();
                     return true;
                 }
-                ToolBarItem::Button(_button) => {
-                    // self.raise_event(Event::WindowDecoratorButtonPressed(
-                    //     WindowDecoratorButtonPressedEvent { command_id: button.get_command_id() },
-                    // ));
-                    return true;
+                ToolBarItem::Button(_) => {
+                    if let Some(control) = self.get_interface() {
+                        return ToolBarEvents::on_button_clicked(control, handle.cast()) == EventProcessStatus::Processed;
+                    }
+                    return false;
                 }
                 // DecoratorType::SingleChoice => {
                 //     self.decorators.check_singlechoice(index);
@@ -540,6 +527,12 @@ impl Window {
             }
         }
         false
+    }
+    fn get_interface(&mut self) -> Option<&mut dyn Control> {
+        if let Some(control) = RuntimeManager::get().get_controls().get(self.handle.cast()) {
+            return Some(control.get_control_mut());
+        }
+        None
     }
 }
 
@@ -578,15 +571,10 @@ impl OnPaint for Window {
 
         let sz = self.get_size();
         surface.clear(Character::with_attributes(' ', color_window));
-        surface.draw_rect(
-            Rect::with_size(0, 0, sz.width as u16, sz.height as u16),
-            line_type,
-            color_border,
-        );
+        surface.draw_rect(Rect::with_size(0, 0, sz.width as u16, sz.height as u16), line_type, color_border);
 
         // paint toolbar
-        self.toolbar
-            .paint(surface, theme, self.has_focus(), self.maximized);
+        self.toolbar.paint(surface, theme, self.has_focus(), self.maximized);
 
         // paint title
         self.title.paint(surface, color_title);

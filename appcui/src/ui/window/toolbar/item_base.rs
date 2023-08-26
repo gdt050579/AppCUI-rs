@@ -2,21 +2,6 @@ use EnumBitFlags::EnumBitFlags;
 
 use super::{Gravity, ToolBarItem};
 
-// #[repr(u8)]
-// #[derive(Clone, Copy, PartialEq)]
-// pub(super) enum DecoratorType {
-//     None,
-//     HotKeY,
-//     CloseButton,
-//     MaximizeRestoreButton,
-//     WindowResize,
-//     Tag,
-//     Button,
-//     SingleChoice,
-//     CheckBox,
-//     Text,
-// }
-
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
     Visible = 0x01,
