@@ -1,3 +1,5 @@
+use std::mem::forget;
+
 use crate::prelude::*;
 
 use super::events::EventData;
@@ -507,27 +509,16 @@ impl Window {
                 }
                 ToolBarItem::CheckBox(checkbox) => {
                     checkbox.reverse_check();
-                    // if let Some(me) = self.get_interface() {
-                    //     return ToolBarEvents::on_button_clicked(me, handle.cast()) == EventProcessStatus::Processed;
-                    // }
+                    let is_checked = checkbox.is_checked();
+                    if let Some(me) = self.get_interface() {
+                        ToolBarEvents::on_checkbox_clicked(me, handle.cast(), is_checked);
+                    }
                     return true; // regardless on what we do in the interface
                 }
                 // DecoratorType::SingleChoice => {
                 //     self.decorators.check_singlechoice(index);
                 //     self.raise_event(Event::WindowDecoratorSingleChoiceSelected(
                 //         WindowDecoratorSingleChoiceSelectedEvent { command_id: id },
-                //     ));
-                //     return true;
-                // }
-                // DecoratorType::CheckBox => {
-                //     let d = self.decorators.get_mut(index).unwrap();
-                //     let checked = !d.is_checked();
-                //     d.set_checked(checked);
-                //     self.raise_event(Event::WindowDecoratorCheckBoxStateChanged(
-                //         WindowDecoratorCheckBoxStateChangedEvent {
-                //             command_id: id,
-                //             checked,
-                //         },
                 //     ));
                 //     return true;
                 // }

@@ -1,4 +1,4 @@
-use super::toolbar::Button;
+use super::toolbar::{Button,CheckBox};
 use crate::{graphics::Rect, system::Handle, ui::common::traits::EventProcessStatus};
 
 // Window events always go to the same window that triggers them --> we don't need a handle as
@@ -14,6 +14,9 @@ pub trait WindowEvents {
 }
 pub trait ToolBarEvents {
     fn on_button_clicked(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_checkbox_clicked(&mut self, _handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
