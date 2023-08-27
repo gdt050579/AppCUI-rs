@@ -427,9 +427,9 @@ fn check_window_toolbar_button() {
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
-    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "Start", 1));
-    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "Stop", 2));
-    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomRight, "Exit", 3));
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "Start"));
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "Stop"));
+    w.get_toolbar().add(toolbar::Button::new(Gravity::BottomRight, "Exit"));
 
     a.add_window(w);
     a.run();
@@ -454,9 +454,9 @@ fn check_window_toolbar_button_events() {
                 exit_button: Handle::None
             };
             me.info = me.add(Label::new("<no-state>", Layout::new("x:1,y:1,w:16")));
-            me.run_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "&Run", 1));
-            me.stop_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "&Stop", 2));
-            me.exit_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "E&xit", 3));
+            me.run_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "&Run"));
+            me.stop_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "&Stop"));
+            me.exit_button = me.get_toolbar().add(toolbar::Button::new(Gravity::BottomLeft, "E&xit"));
             me
         }
         fn set_info(&mut self, info: &str) {

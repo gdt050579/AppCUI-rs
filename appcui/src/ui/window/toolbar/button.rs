@@ -10,7 +10,6 @@ pub struct Button {
     pub(super) base: ItemBase,
     pub(super) handle: Handle<Button>,
     caption: Caption,
-    command_id: u32,
 }
 
 impl AddToToolbar<Button> for Button {
@@ -20,19 +19,14 @@ impl AddToToolbar<Button> for Button {
 }
 
 impl Button {
-    pub fn new(gravity: Gravity, text: &str, command_id: u32) -> Self {
+    pub fn new(gravity: Gravity, text: &str) -> Self {
         let mut obj = Button {
             base: ItemBase::new(gravity, true, true),
             handle: Handle::None,
             caption: Caption::new("", false),
-            command_id,
         };
         obj.set_text(text);
         obj
-    }
-    #[inline(always)]
-    pub fn get_command_id(&self)->u32 {
-        self.command_id
     }
     pub fn set_text(&mut self, text: &str) {
         self.caption.set_text(text, true);
