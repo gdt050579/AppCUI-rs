@@ -485,7 +485,7 @@ impl Window {
         return EventProcessStatus::Processed;
     }
     fn on_toolbar_item_clicked(&mut self, handle: Handle<UIElement>) -> bool {
-        if let Some(item) = self.toolbar.get_item(handle) {
+        if let Some(item) = self.toolbar.get_item_mut(handle) {
             match item {
                 ToolBarItem::CloseButton(_) => {
                     self.raise_event(ControlEvent {
@@ -500,10 +500,17 @@ impl Window {
                     return true;
                 }
                 ToolBarItem::Button(_) => {
-                    if let Some(control) = self.get_interface() {
-                        return ToolBarEvents::on_button_clicked(control, handle.cast()) == EventProcessStatus::Processed;
+                    if let Some(me) = self.get_interface() {
+                        return ToolBarEvents::on_button_clicked(me, handle.cast()) == EventProcessStatus::Processed;
                     }
                     return false;
+                }
+                ToolBarItem::CheckBox(checkbox) => {
+                    checkbox.reverse_check();
+                    // if let Some(me) = self.get_interface() {
+                    //     return ToolBarEvents::on_button_clicked(me, handle.cast()) == EventProcessStatus::Processed;
+                    // }
+                    return true; // regardless on what we do in the interface
                 }
                 // DecoratorType::SingleChoice => {
                 //     self.decorators.check_singlechoice(index);

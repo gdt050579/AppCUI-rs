@@ -39,6 +39,9 @@ impl CheckBox {
         self.checked = checked;
         self.base.request_recompute_layout();
     }
+    pub(crate) fn reverse_check(&mut self) {
+        self.set_checked(!self.checked);
+    }
     #[inline(always)]
     pub fn is_checked(&self) -> bool {
         self.checked

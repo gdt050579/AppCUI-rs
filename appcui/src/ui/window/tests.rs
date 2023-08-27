@@ -424,6 +424,7 @@ fn check_window_toolbar_button() {
         CheckHash(0x63DCB4AE11E49B9)
         Mouse.Hold(21,8,left)
         Paint('Mouse press over stop button')
+        CheckHash(0xEFCCAC14BDDC389)
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
@@ -504,5 +505,31 @@ fn check_window_toolbar_button_events() {
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_window_toolbar_checkbox() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('checkboxes')
+        CheckHash(0xE3AB27FF068AB418)
+        Mouse.Move(16,8)
+        Paint('Mouse over Task 1')
+        CheckHash(0xC0598DC79AC6EE95)
+        Mouse.Move(23,8)
+        Paint('Mouse over Task 2')
+        CheckHash(0x921CBA73AC67EB4C)
+        Mouse.Click(23,8,left)
+        Paint('Task 2 checked')
+        //CheckHash(0x11C054FAECF9D51F)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
+    w.get_toolbar().add(toolbar::CheckBox::new(Gravity::BottomLeft, "Task &1",true));
+    w.get_toolbar().add(toolbar::CheckBox::new(Gravity::BottomLeft, "Task &2", false));
+    w.get_toolbar().add(toolbar::CheckBox::new(Gravity::BottomRight, "Enable &All", false));
+
+    a.add_window(w);
     a.run();
 }
