@@ -16,6 +16,9 @@
 
 - [Controls](chapter-3/controls.md)
     - [Layout](chapter-3/layout.md)
+        - [Absolute position](chapter-3/layout/absolute_position.md)
+        - [Docking](chapter-3/layout/docking.md)
+        - [Andchors](chapter-3/layout/anchors.md)
     - [Event loop](chapter-3/event_loop.md)
     - [Stock controls](chapter-3/stock_controls.md)
         - [Button](chapter-3/stock-controls/button.md)
