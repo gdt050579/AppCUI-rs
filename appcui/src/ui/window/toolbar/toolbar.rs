@@ -1,12 +1,12 @@
 use crate::{
     graphics::{Size, Surface},
     system::{Handle, Theme},
-    utils::{HandleManager, VectorIndex}, ui::common::UIElement,
+    ui::common::UIElement,
+    utils::{HandleManager, VectorIndex},
 };
 
 use super::{
-    Button, CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper,
-    ResizeCorner, Tag, ToolBarItem, 
+    Button, CheckBox, CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner, Tag, ToolBarItem,
 };
 
 pub struct ToolBar {
@@ -36,27 +36,14 @@ impl ToolBar {
     pub fn get<T>(&self, handle: Handle<T>) -> Option<&T> {
         if let Some(obj) = self.items.get(handle.cast()) {
             match obj {
-                ToolBarItem::Label(obj) => {
-                    return Some(unsafe { &(*((obj as *const Label) as *const T)) })
-                }
-                ToolBarItem::HotKey(obj) => {
-                    return Some(unsafe { &(*((obj as *const HotKey) as *const T)) })
-                }
-                ToolBarItem::Tag(obj) => {
-                    return Some(unsafe { &(*((obj as *const Tag) as *const T)) })
-                }
-                ToolBarItem::CloseButton(obj) => {
-                    return Some(unsafe { &(*((obj as *const CloseButton) as *const T)) })
-                }
-                ToolBarItem::MaximizeRestoreButton(obj) => {
-                    return Some(unsafe { &(*((obj as *const MaximizeRestoreButton) as *const T)) })
-                }
-                ToolBarItem::ResizeCorner(obj) => {
-                    return Some(unsafe { &(*((obj as *const ResizeCorner) as *const T)) })
-                }
-                ToolBarItem::Button(obj) => {
-                    return Some(unsafe { &(*((obj as *const Button) as *const T)) })
-                }
+                ToolBarItem::Label(obj) => return Some(unsafe { &(*((obj as *const Label) as *const T)) }),
+                ToolBarItem::HotKey(obj) => return Some(unsafe { &(*((obj as *const HotKey) as *const T)) }),
+                ToolBarItem::Tag(obj) => return Some(unsafe { &(*((obj as *const Tag) as *const T)) }),
+                ToolBarItem::CloseButton(obj) => return Some(unsafe { &(*((obj as *const CloseButton) as *const T)) }),
+                ToolBarItem::MaximizeRestoreButton(obj) => return Some(unsafe { &(*((obj as *const MaximizeRestoreButton) as *const T)) }),
+                ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &(*((obj as *const ResizeCorner) as *const T)) }),
+                ToolBarItem::Button(obj) => return Some(unsafe { &(*((obj as *const Button) as *const T)) }),
+                ToolBarItem::CheckBox(obj) => return Some(unsafe { &(*((obj as *const CheckBox) as *const T)) }),
             }
         }
         None
@@ -64,27 +51,14 @@ impl ToolBar {
     pub fn get_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T> {
         if let Some(obj) = self.items.get_mut(handle.cast()) {
             match obj {
-                ToolBarItem::Label(obj) => {
-                    return Some(unsafe { &mut (*((obj as *mut Label) as *mut T)) })
-                }
-                ToolBarItem::HotKey(obj) => {
-                    return Some(unsafe { &mut (*((obj as *mut HotKey) as *mut T)) })
-                }
-                ToolBarItem::Tag(obj) => {
-                    return Some(unsafe { &mut (*((obj as *mut Tag) as *mut T)) })
-                }
-                ToolBarItem::CloseButton(obj) => {
-                    return Some(unsafe { &mut (*((obj as *mut CloseButton) as *mut T)) })
-                }
-                ToolBarItem::MaximizeRestoreButton(obj) => {
-                    return Some(unsafe { &mut (*((obj as *mut MaximizeRestoreButton) as *mut T)) })
-                }
-                ToolBarItem::ResizeCorner(obj) => {
-                    return Some(unsafe { &mut (*((obj as *mut ResizeCorner) as *mut T)) })
-                }
-                ToolBarItem::Button(obj) => {
-                    return Some(unsafe { &mut (*((obj as *mut Button) as *mut T)) })
-                }
+                ToolBarItem::Label(obj) => return Some(unsafe { &mut (*((obj as *mut Label) as *mut T)) }),
+                ToolBarItem::HotKey(obj) => return Some(unsafe { &mut (*((obj as *mut HotKey) as *mut T)) }),
+                ToolBarItem::Tag(obj) => return Some(unsafe { &mut (*((obj as *mut Tag) as *mut T)) }),
+                ToolBarItem::CloseButton(obj) => return Some(unsafe { &mut (*((obj as *mut CloseButton) as *mut T)) }),
+                ToolBarItem::MaximizeRestoreButton(obj) => return Some(unsafe { &mut (*((obj as *mut MaximizeRestoreButton) as *mut T)) }),
+                ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &mut (*((obj as *mut ResizeCorner) as *mut T)) }),
+                ToolBarItem::Button(obj) => return Some(unsafe { &mut (*((obj as *mut Button) as *mut T)) }),
+                ToolBarItem::CheckBox(obj) => return Some(unsafe { &mut (*((obj as *mut CheckBox) as *mut T)) }),
             }
         }
         None
@@ -136,11 +110,7 @@ impl ToolBar {
             let my_variant = Some(std::mem::discriminant(item));
             let pos = item.get_base_mut();
             let (next, add_flags, add_space) = pos.update_position_from_left(
-                if helper.add_space_before_next {
-                    helper.x + 1
-                } else {
-                    helper.x
-                },
+                if helper.add_space_before_next { helper.x + 1 } else { helper.x },
                 helper.y,
                 my_variant,
                 helper.variant,
@@ -166,11 +136,7 @@ impl ToolBar {
             let my_variant = Some(std::mem::discriminant(item));
             let pos = item.get_base_mut();
             let (next, add_flags, add_space) = pos.update_position_from_right(
-                if helper.add_space_before_next {
-                    helper.x - 1
-                } else {
-                    helper.x
-                },
+                if helper.add_space_before_next { helper.x - 1 } else { helper.x },
                 helper.y,
                 my_variant,
                 helper.variant,
@@ -202,8 +168,7 @@ impl ToolBar {
         let mut top_left = PositionHelper::new(1, 0);
         let mut top_right = PositionHelper::new((size.width as i32) - 2, 0);
         let mut bottom_left = PositionHelper::new(1, (size.height as i32) - 1);
-        let mut bottom_right =
-            PositionHelper::new((size.width as i32) - 2, (size.height as i32) - 1);
+        let mut bottom_right = PositionHelper::new((size.width as i32) - 2, (size.height as i32) - 1);
 
         for index in 0..count {
             if let Some(d) = self.items.get_element_mut(index) {
@@ -216,9 +181,7 @@ impl ToolBar {
                     Gravity::TopLeft => {
                         self.update_position_from_left(index, &mut top_left, top_right.x);
                     }
-                    Gravity::BottomLeft => {
-                        self.update_position_from_left(index, &mut bottom_left, bottom_right.x)
-                    }
+                    Gravity::BottomLeft => self.update_position_from_left(index, &mut bottom_left, bottom_right.x),
                     Gravity::TopRight => {
                         self.update_position_from_right(index, &mut top_right, top_left.x);
                     }
@@ -256,23 +219,13 @@ impl ToolBar {
         }
         (top_left.x + 1, top_right.x)
     }
-    pub(crate) fn paint(
-        &self,
-        surface: &mut Surface,
-        theme: &Theme,
-        focused: bool,
-        maximized: bool,
-    ) {
+    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, focused: bool, maximized: bool) {
         let mut paint_data = PaintData {
             focused,
             current: false,
             maximized,
             is_current_item_pressed: self.pressed,
-            sep_attr: if focused {
-                theme.lines.normal
-            } else {
-                theme.lines.inactive
-            },
+            sep_attr: if focused { theme.lines.normal } else { theme.lines.inactive },
         };
         let current_bar_index = self.current_handle.get_index();
         let count = self.items.allocated_objects();

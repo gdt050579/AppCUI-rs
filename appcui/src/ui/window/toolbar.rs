@@ -11,6 +11,7 @@ mod close_button;
 mod maximize_restore_button;
 mod resize_corner;
 mod button;
+mod checkbox;
 mod symbol_attr_state;
 
 
@@ -26,6 +27,7 @@ pub use self::gravity::Gravity;
 // tool bar items (public)
 pub use self::label::Label;
 pub use self::button::Button;
+pub use self::checkbox::CheckBox;
 
 // tool bar items (internal)
 pub(super) use self::hotkey::HotKey;

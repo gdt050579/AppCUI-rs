@@ -1,11 +1,11 @@
 use crate::{
     graphics::{Character, Surface},
-    system::{Handle, HandleSupport, Theme}, ui::common::UIElement,
+    system::{Handle, HandleSupport, Theme},
 };
 
 use super::{
     item_base::ItemBase, CloseButton, HotKey, Label, MaximizeRestoreButton, PaintData,
-    ResizeCorner, Tag, Button
+    ResizeCorner, Tag, Button, CheckBox
 };
 
 pub(crate) enum ToolBarItem {
@@ -16,6 +16,7 @@ pub(crate) enum ToolBarItem {
     MaximizeRestoreButton(MaximizeRestoreButton),
     ResizeCorner(ResizeCorner),
     Button(Button),
+    CheckBox(CheckBox)
 }
 impl ToolBarItem {
     pub(crate) fn get_base(&self) -> &ItemBase {
@@ -27,6 +28,7 @@ impl ToolBarItem {
             ToolBarItem::MaximizeRestoreButton(item) => &item.base,
             ToolBarItem::ResizeCorner(item) => &item.base,
             ToolBarItem::Button(item) => &item.base,
+            ToolBarItem::CheckBox(item) => &item.base,
         }
     }
     pub(crate) fn get_base_mut(&mut self) -> &mut ItemBase {
@@ -38,6 +40,7 @@ impl ToolBarItem {
             ToolBarItem::MaximizeRestoreButton(item) => &mut item.base,
             ToolBarItem::ResizeCorner(item) => &mut item.base,
             ToolBarItem::Button(item) => &mut item.base,
+            ToolBarItem::CheckBox(item) => &mut item.base,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
@@ -55,6 +58,7 @@ impl ToolBarItem {
             ToolBarItem::MaximizeRestoreButton(item) => item.paint(surface, theme, data),
             ToolBarItem::ResizeCorner(item) => item.paint(surface, theme, data),
             ToolBarItem::Button(item) => item.paint(surface, theme, data),
+            ToolBarItem::CheckBox(item) => item.paint(surface, theme, data),
         };
         // separators
         if base.is_part_of_group() {
@@ -97,6 +101,7 @@ impl HandleSupport<ToolBarItem> for ToolBarItem {
             ToolBarItem::MaximizeRestoreButton(item) => item.handle.cast(),
             ToolBarItem::ResizeCorner(item) => item.handle.cast(),
             ToolBarItem::Button(item) => item.handle.cast(),
+            ToolBarItem::CheckBox(item) => item.handle.cast(),
         }
     }
 
@@ -109,6 +114,7 @@ impl HandleSupport<ToolBarItem> for ToolBarItem {
             ToolBarItem::MaximizeRestoreButton(item) => item.handle = handle.cast(),
             ToolBarItem::ResizeCorner(item) => item.handle = handle.cast(),
             ToolBarItem::Button(item) => item.handle = handle.cast(),
+            ToolBarItem::CheckBox(item) => item.handle = handle.cast(),
         }
     }
 }
