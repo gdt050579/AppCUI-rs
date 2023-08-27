@@ -533,3 +533,55 @@ fn check_window_toolbar_checkbox() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_window_toolbar_checkbox_events() {
+    #[Window(events = ToolBarEvents,internal = true)]
+    struct MyWin {
+        cb: Handle<toolbar::CheckBox>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new("d:c,w:50,h:6"), window::Flags::None),
+                cb: Handle::None,
+            };
+            me.cb = me.get_toolbar().add(toolbar::CheckBox::new(Gravity::TopLeft, "No State", false));
+            me
+        }
+    }
+    impl ToolBarEvents for MyWin {
+        fn on_checkbox_clicked(&mut self, handle: Handle<toolbar::CheckBox>, checked: bool) -> EventProcessStatus {
+            if handle == self.cb {
+                let h = self.cb;
+                if let Some(checkbox) = self.get_toolbar().get_mut(h) {
+                    if checked {
+                        checkbox.set_text("&Checked");
+                    } else {
+                        checkbox.set_text("&Not checked");
+                    }
+                    return EventProcessStatus::Processed;
+                }
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+
+    let script = "
+        // Paint.Enable(false)
+        Paint('checbox = <No State>')
+        CheckHash(0x7A0F1259C3B555F4)
+        Mouse.Click(12,2,left)
+        Paint('checkbox = Checked')
+        CheckHash(0x33348CAE85FD1833)
+        Mouse.Click(12,2,left)
+        Paint('checkbox = Not checked')
+        CheckHash(0x3B3091F01E62C367)
+        Key.Pressed(Alt+N)
+        Paint('Checkbox is checked again')
+        CheckHash(0x33348CAE85FD1833)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
