@@ -2,8 +2,8 @@
 
 In this mode parameters ``x`` and ``y`` must be used to specify a point from where the control will be constructed. 
 When using this mode, parameters ``d``, ``left``, ``right``, ``top``, ``bottom`` can not be used. 
-If **width** or **height** are not specified , they will be defaulted to ``1 character`` (unless there is a minimum width or minumum height specified for that controls - in which case that limit will be applied).
-If **align** is not specified, it will be defaulted to ``topleft`` 
+If `width` or `height` are not specified , they will be defaulted to ``1 character`` (unless there is a minimum width or minumum height specified for that controls - in which case that limit will be applied).
+If `align` is not specified, it will be defaulted to ``topleft`` 
 
 If ``x``, ``y``, ``width`` or ``height`` are provided using percentages, the control will automatically adjust its size if its parent size changes. 
 

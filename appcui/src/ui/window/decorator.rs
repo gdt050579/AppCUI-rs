@@ -342,40 +342,40 @@ impl Decorator {
     //     surface.write_text(self.text.get_text(), &format);
     //     return true;
     // }
-    fn paint_checkbox(
-        &self,
-        surface: &mut Surface,
-        theme: &Theme,
-        paint_data: &DecoratorPaintData,
-    ) -> bool {
-        // let st = SymbolAttrState::new(paint_data);
-        // let text_attr = st.get_button_attr(theme);
-        // let mut format =
-        //     TextFormat::single_line(self.x + 2, self.y, text_attr, TextAlignament::Left);
-        // format.width = Some(self.text.get_chars_count() as u16);
-        // format.hotkey_pos = self.text.get_hotkey_pos();
-        // if self.text.has_hotkey() {
-        //     format.hotkey_attr = Some(st.get_hotkey_attr(theme));
-        // }
-        // surface.fill_horizontal_line(
-        //     self.x,
-        //     self.y,
-        //     self.x + 1,
-        //     Character::with_attributes(' ', text_attr),
-        // );
-        // surface.write_text(self.text.get_text(), &format);
-        // if self.is_checked() {
-        //     surface.write_char(
-        //         self.x,
-        //         self.y,
-        //         Character::with_attributes(
-        //             SpecialChar::CheckMark,
-        //             st.get_attr(theme, theme.symbol.checked),
-        //         ),
-        //     );
-        // }
-        return true;
-    }
+    // fn paint_checkbox(
+    //     &self,
+    //     surface: &mut Surface,
+    //     theme: &Theme,
+    //     paint_data: &DecoratorPaintData,
+    // ) -> bool {
+    //     // let st = SymbolAttrState::new(paint_data);
+    //     // let text_attr = st.get_button_attr(theme);
+    //     // let mut format =
+    //     //     TextFormat::single_line(self.x + 2, self.y, text_attr, TextAlignament::Left);
+    //     // format.width = Some(self.text.get_chars_count() as u16);
+    //     // format.hotkey_pos = self.text.get_hotkey_pos();
+    //     // if self.text.has_hotkey() {
+    //     //     format.hotkey_attr = Some(st.get_hotkey_attr(theme));
+    //     // }
+    //     // surface.fill_horizontal_line(
+    //     //     self.x,
+    //     //     self.y,
+    //     //     self.x + 1,
+    //     //     Character::with_attributes(' ', text_attr),
+    //     // );
+    //     // surface.write_text(self.text.get_text(), &format);
+    //     // if self.is_checked() {
+    //     //     surface.write_char(
+    //     //         self.x,
+    //     //         self.y,
+    //     //         Character::with_attributes(
+    //     //             SpecialChar::CheckMark,
+    //     //             st.get_attr(theme, theme.symbol.checked),
+    //     //         ),
+    //     //     );
+    //     // }
+    //     return true;
+    // }
     // pub(super) fn paint(
     //     &self,
     //     surface: &mut Surface,
