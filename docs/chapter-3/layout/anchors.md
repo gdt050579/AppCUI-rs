@@ -2,7 +2,7 @@
 
 Anchors (``left``, ``right``, ``top`` and ``bottom``) represent the distance between the object and its parent margins. When one of the anchors is present, the ``dock`` key can not be used. Depending on the combination of anchors used, other keys may be unusable.
 
-.. image:: pics/layout_anchors.png
+<img src="img/layout_anchors.png" width=300/>
 
 ## Corner anchors
 
@@ -13,7 +13,7 @@ If **width** or **height** are not specified , they will be defaulted to ``1 cha
 
 The combination of anchors also decides how (top,left) and (right,bottom) corners of a control are computed, as follows:
 
-| Combonation              | Top-Left corner                                       | Bottom-Right corner                      |
+| Combination              | Top-Left corner                                       | Bottom-Right corner                      |
 |--------------------------|-------------------------------------------------------|------------------------------------------|
 | ``top`` and ``left``     | (left, top)                                           | (left+width, top+height)                 |
 | ``top`` and ``right``    | (parentWidth-right-width, top)                        | (parentWidth-right, top+height)          |
