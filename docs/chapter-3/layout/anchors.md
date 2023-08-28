@@ -28,7 +28,7 @@ where:
 
 | Layout                     | Result                               |
 |----------------------------|--------------------------------------|
-| **t:10,r:20,w:50,h:20**    | .. image:: pics/layout_anchor_tl.png |
+| **t:10,r:20,w:50,h:20**    | <img src="img/layout_anchor_tr.png" width=500/> |
 | **b:10,r:20,w:25%,h:10**   | .. image:: pics/layout_anchor_br.png |
 | **b:10%,l:50%,w:25%,h:10** | .. image:: pics/layout_anchor_bl.png |
 
