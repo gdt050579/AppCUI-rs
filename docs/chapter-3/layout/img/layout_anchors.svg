@@ -195,7 +195,7 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="273.34618"
+     inkscape:cx="-213.46295"
      inkscape:cy="122.80116"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -228,7 +228,7 @@
      id="layer1"
      transform="translate(532.18749,75.416701)">
     <rect
-       style="fill:none;stroke:#ffffff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:8;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:none;stroke:#999999;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:8;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect815"
        width="240.39285"
        height="105.07738"
@@ -249,39 +249,41 @@
        ry="1.0303146" />
     <g
        id="g3037"
-       style="stroke:none;fill:#ffffff">
+       style="stroke:none;fill:#999999">
       <path
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
          d="m -388.03125,-13.5625 0,1 91.6875,0 0,-1 -91.6875,0 z"
          id="path907"
          inkscape:connector-curvature="0" />
       <path
          inkscape:connector-curvature="0"
-         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
+         style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
          d="m -384.0253,-13.05254 2,-2 -7,2 7,2 z"
          id="path3043" />
       <path
          inkscape:connector-curvature="0"
-         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
+         style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
          d="m -300.34406,-13.05254 -2,2 7,-2 -7,-2 z"
          id="path3045" />
     </g>
     <flowRoot
        xml:space="preserve"
        id="flowRoot817-9-9"
-       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.26458333,0,0,0.26458333,24.78985,-116.08476)"><flowRegion
+       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#999999;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       transform="matrix(0.26458333,0,0,0.26458333,24.78985,-116.08476)"
+       inkscape:export-xdpi="40.610001"
+       inkscape:export-ydpi="40.610001"><flowRegion
          id="flowRegion819-1-0"><rect
            id="rect821-13-3"
            width="465.71429"
            height="208.57143"
            x="-2045.7142"
            y="391.09113"
-           style="fill:#ffffff" /></flowRegion><flowPara
+           style="fill:#999999" /></flowRegion><flowPara
          id="flowPara823-5-5">left</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot817-9-9-3"
-       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#999999;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
        transform="matrix(0.26458333,0,0,0.26458333,109.64565,-156.63991)"><flowRegion
          id="flowRegion819-1-0-3"><rect
            id="rect821-13-3-3"
@@ -289,7 +291,7 @@
            height="208.57143"
            x="-2045.7142"
            y="391.09113"
-           style="fill:#ffffff" /></flowRegion><flowPara
+           style="fill:#999999" /></flowRegion><flowPara
          id="flowPara823-5-5-3">top</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot872"
@@ -321,19 +323,22 @@
          id="flowPara904"
          style="text-align:end;text-anchor:end;fill:#333333">Control</flowPara></flowRoot>    <g
        id="g3057"
-       style="fill:#ffffff;stroke:none">
+       style="fill:#999999;stroke:none"
+       inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\flowRoot817-9-9.png"
+       inkscape:export-xdpi="40.610001"
+       inkscape:export-ydpi="40.610001">
       <path
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
          d="m -526.875,-14.625 0,1 40.03125,0 0,-1 -40.03125,0 z"
          id="path907-3"
          inkscape:connector-curvature="0" />
       <path
-         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
+         style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
          d="m -522.86928,-14.110869 2,-2 -7,2 7,2 z"
          id="path3063"
          inkscape:connector-curvature="0" />
       <path
-         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
+         style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
          d="m -490.83392,-14.110869 -2,2 7,-2 -7,-2 z"
          id="path3065"
          inkscape:connector-curvature="0" />
@@ -341,7 +346,7 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot817-9-9-1"
-       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#999999;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
        transform="matrix(0.26458333,0,0,0.26458333,187.63417,-115.86565)"><flowRegion
          id="flowRegion819-1-0-6"><rect
            id="rect821-13-3-8"
@@ -349,41 +354,41 @@
            height="208.57143"
            x="-2045.7142"
            y="391.09113"
-           style="fill:#ffffff" /></flowRegion><flowPara
+           style="fill:#999999" /></flowRegion><flowPara
          id="flowPara823-5-5-8">right</flowPara></flowRoot>    <g
        id="g3047"
-       style="fill:#ffffff;stroke:none">
+       style="fill:#999999;stroke:none">
       <path
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
          d="m -435.90625,-60.0625 0,26.5 1,0 0,-26.5 -1,0 z"
          id="path907-3-5"
          inkscape:connector-curvature="0" />
       <path
-         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
+         style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
          d="m -435.41409,-37.578013 -2,-2 2,7 2,-7 z"
          id="path3053"
          inkscape:connector-curvature="0" />
       <path
-         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
+         style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40000000000000002pt;stroke-opacity:1"
          d="m -435.41409,-56.057715 2,2 -2,-7 -2,7 z"
          id="path3055"
          inkscape:connector-curvature="0" />
     </g>
     <g
        id="g3067"
-       style="fill:#ffffff;stroke:none">
+       style="fill:#999999;stroke:none">
       <path
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.02151203000000000;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.02151203000000000;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
          d="m -435.9375,9.5 0,27.65625 1.03125,0 0,-27.65625 -1.03125,0 z"
          id="path907-3-5-8"
          inkscape:connector-curvature="0" />
       <path
-         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40860480999999998pt;stroke-opacity:1"
+         style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40860480999999998pt;stroke-opacity:1"
          d="m -435.41409,33.057236 -2.04302,-2.043024 2.04302,7.150584 2.04302,-7.150584 z"
          id="path3073"
          inkscape:connector-curvature="0" />
       <path
-         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40860480999999998pt;stroke-opacity:1"
+         style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.40860480999999998pt;stroke-opacity:1"
          d="m -435.41409,13.59811 2.04302,2.043024 -2.04302,-7.1505839 -2.04302,7.1505839 z"
          id="path3075"
          inkscape:connector-curvature="0" />
@@ -391,7 +396,7 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot817-9-9-3-9"
-       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#999999;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
        transform="matrix(0.26458333,0,0,0.26458333,108.92322,-87.26998)"><flowRegion
          id="flowRegion819-1-0-3-6"><rect
            id="rect821-13-3-3-7"
@@ -399,6 +404,6 @@
            height="208.57143"
            x="-2045.7142"
            y="391.09113"
-           style="fill:#ffffff" /></flowRegion><flowPara
+           style="fill:#999999" /></flowRegion><flowPara
          id="flowPara823-5-5-3-5">bottom</flowPara></flowRoot>  </g>
 </svg>
