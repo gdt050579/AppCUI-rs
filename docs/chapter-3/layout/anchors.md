@@ -41,11 +41,11 @@ However, ``height`` parameter should be specified (if not specified it will be d
 
 **Examples**
 
-| Layout                         | Result                                 |
-|--------------------------------|----------------------------------------|
-| **l:10,r:20,h:20,y:80%,a:b**   | .. image:: pics/layout_anchor_lr_1.png |
-| **l:10,r:20,h:100%,y:50%,a:c** | .. image:: pics/layout_anchor_lr_2.png |
-| **l:10,r:20,h:50%,y:0,a:t**    | .. image:: pics/layout_anchor_lr_3.png |
+| Layout                         | Result                                   |
+|--------------------------------|------------------------------------------|
+| **l:10,r:20,h:20,y:80%,a:b**   | <img src="img/layout_anchor_lr_1.png" /> |
+| **l:10,r:20,h:100%,y:50%,a:c** | .. image:: pics/layout_anchor_lr_2.png   |
+| **l:10,r:20,h:50%,y:0,a:t**    | .. image:: pics/layout_anchor_lr_3.png   |
 
 ## Using Top-Bottom anchors
 
