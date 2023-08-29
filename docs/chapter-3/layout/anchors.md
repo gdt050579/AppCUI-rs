@@ -2,7 +2,7 @@
 
 Anchors (``left``, ``right``, ``top`` and ``bottom``) represent the distance between the object and its parent margins. When one of the anchors is present, the ``dock`` key can not be used. Depending on the combination of anchors used, other keys may be unusable.
 
-<img src="img/layout_anchors.png" width=100%/>
+<img src="img/layout_anchors.png"/>
 
 ## Corner anchors
 
@@ -26,11 +26,11 @@ where:
 
 **Examples**
 
-| Layout                     | Result                               |
-|----------------------------|--------------------------------------|
-| **t:10,r:20,w:50,h:20**    | <img src="img/layout_anchor_tr.png" width=100%/> |
-| **b:10,r:20,w:33%,h:10**   | <img src="img/layout_anchor_br.png" width=100%/> |
-| **b:10%,l:50%,w:25%,h:10** | .. image:: pics/layout_anchor_bl.png |
+| Layout                     | Result                                 |
+|----------------------------|----------------------------------------|
+| **t:10,r:20,w:50,h:20**    | <img src="img/layout_anchor_tr.png" /> |
+| **b:10,r:20,w:33%,h:10**   | <img src="img/layout_anchor_br.png" /> |
+| **b:10%,l:50%,w:25%,h:10** | <img src="img/layout_anchor_bl.png" /> |
 
 
 ## Using Left-Right anchors
