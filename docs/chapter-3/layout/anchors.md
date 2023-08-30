@@ -55,11 +55,11 @@ However, `width` parameter should be specified (if not specified it will be defa
 
 **Examples**
 
-| Layout                         | Result                                 |
-|--------------------------------|----------------------------------------|
-| **t:10,b:20,w:90,x:80%,a:r**   | .. image:: pics/layout_anchor_tb_1.png |
-| **t:10,b:20,w:100%,x:50%,a:c** | .. image:: pics/layout_anchor_tb_2.png |
-| **t:10,b:20,w:50%,x:0,a:l**    | .. image:: pics/layout_anchor_tb_3.png |
+| Layout                         | Result                                   |
+|--------------------------------|------------------------------------------|
+| **t:10,b:20,w:90,x:80%,a:r**   | <img src="img/layout_anchor_tb_1.png" /> |
+| **t:10,b:20,w:100%,x:50%,a:c** | .. image:: pics/layout_anchor_tb_2.png   |
+| **t:10,b:20,w:50%,x:0,a:l**    | .. image:: pics/layout_anchor_tb_3.png   |
 
 ## 3-margin anchors
 
@@ -73,7 +73,7 @@ The following table reflects these dependencies:
 | `top` and `left` and `bottom`<br>or<br>`top` and `right` and `bottom`     | `width` optional (see remarks)<br><br>`height` = parentHeight - (top+bottom)|
 
 **Remarks** 
-* if `height` or `width` are not present and can not be computed as a different betweem two margins, they are defaulted to value 1. If limits are present (min Width or min Height) those limits are applied. This is usually usefull for controls that have a fixed width or height (e.g. a button, a combobox).
+* if `height` or `width` are not present and can not be computed as a difference between two margins, they are defaulted to value 1. If limits are present (min Width or min Height) those limits are applied. This is usually usefull for controls that have a fixed width or height (e.g. a button, a combobox).
 
 The position of the control is also computed based on the combination of the 3 anchors selectd, as shown in the next table:
 
