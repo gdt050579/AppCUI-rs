@@ -58,7 +58,7 @@ However, `width` parameter should be specified (if not specified it will be defa
 | Layout                         | Result                                   |
 |--------------------------------|------------------------------------------|
 | **t:10,b:20,w:90,x:80%,a:r**   | <img src="img/layout_anchor_tb_1.png" /> |
-| **t:10,b:20,w:100%,x:50%,a:c** | .. image:: pics/layout_anchor_tb_2.png   |
+| **t:10,b:20,w:100%,x:50%,a:c** | <img src="img/layout_anchor_tb_2.png" /> |
 | **t:10,b:20,w:50%,x:0,a:l**    | .. image:: pics/layout_anchor_tb_3.png   |
 
 ## 3-margin anchors
