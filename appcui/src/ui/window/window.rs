@@ -3,12 +3,11 @@ use std::mem::forget;
 use crate::prelude::*;
 
 use super::events::EventData;
-use super::Flags;
 use super::toolbar;
 use super::toolbar::*;
 use super::DragStatus;
+use super::Flags;
 use super::Title;
-
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
@@ -515,13 +514,13 @@ impl Window {
                     }
                     return true; // regardless on what we do in the interface
                 }
-                // DecoratorType::SingleChoice => {
-                //     self.decorators.check_singlechoice(index);
-                //     self.raise_event(Event::WindowDecoratorSingleChoiceSelected(
-                //         WindowDecoratorSingleChoiceSelectedEvent { command_id: id },
-                //     ));
-                //     return true;
-                // }
+                ToolBarItem::SingleChoice(_) => {
+                    self.toolbar.check_singlechoice(handle);
+                    if let Some(me) = self.get_interface() {
+                        ToolBarEvents::on_choice_selected(me, handle.cast());
+                    }
+                    return true; // regardless on what we do in the interface
+                }
                 _ => {}
             }
         }

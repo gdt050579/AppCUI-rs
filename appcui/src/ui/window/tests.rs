@@ -585,3 +585,35 @@ fn check_window_toolbar_checkbox_events() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_window_toolbar_single_choice() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('checkboxes')
+        CheckHash(0x4C5631E5B117880C)
+        Mouse.Move(5,8)
+        Paint('Mouse over Opt 1')
+        CheckHash(0xFE6ED16B8C8DEC4A)
+        Mouse.Move(40,8)
+        Paint('Mouse over Opt C')
+        CheckHash(0x230896B85C5EDB2)
+        Mouse.Move(11,8)
+        Paint('Mouse over Opt 2')
+        CheckHash(0xB7BC6D5A47FA1902)
+        Mouse.Click(1,8,left)
+        Paint('Opt 2 selected')
+        //CheckHash(0x11C054FAECF9D51F)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:58,h:8"), window::Flags::None);
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &1"));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &2"));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &3"));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &A"));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &B"));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &C"));
+
+    a.add_window(w);
+    a.run();
+}
