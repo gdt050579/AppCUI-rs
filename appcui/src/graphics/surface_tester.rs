@@ -21,14 +21,14 @@ impl SurfaceTester {
         let mut y = 0u32;
 
         // firt border
-        for _ in 0..=6 + self.surface.width {
+        for _ in 0..=6 + self.surface.size.width {
             temp_buf.push('=');
         }
         println!("+{}+", temp_buf);
         temp_buf.clear();
         // second digit
         temp_buf.push_str("|    | ");
-        for i in 0..self.surface.width {
+        for i in 0..self.surface.size.width {
             let digit = ((i % 100) / 10) as u8;
             if digit == 0 {
                 temp_buf.push(' ');
@@ -41,7 +41,7 @@ impl SurfaceTester {
 
         // last digit
         temp_buf.push_str("|    | ");
-        for i in 0..self.surface.width {
+        for i in 0..self.surface.size.width {
             temp_buf.push((48u8 + ((i % 10) as u8)) as char);
         }
         println!("{} |", temp_buf);
@@ -49,7 +49,7 @@ impl SurfaceTester {
 
         // separator line
         temp_buf.push('|');
-        for _ in 0..=6 + self.surface.width {
+        for _ in 0..=6 + self.surface.size.width {
             temp_buf.push('-');
         }
         temp_buf.push('|');
@@ -105,7 +105,7 @@ impl SurfaceTester {
             }
             temp_buf.push_str("\x1b[0m"); // reset to default color
             x += 1;
-            if x == self.surface.width {
+            if x == self.surface.size.width {
                 println!("|{:>3} | {} |", y, temp_buf);
                 temp_buf.clear();
                 x = 0;
@@ -113,7 +113,7 @@ impl SurfaceTester {
             }
         }
         // last border
-        for _ in 0..=6 + self.surface.width {
+        for _ in 0..=6 + self.surface.size.width {
             temp_buf.push('=');
         }
         println!("+{}+", temp_buf);

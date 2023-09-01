@@ -460,8 +460,7 @@ fn check_resize() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xB015E3D08D4D238B);
     s.resize(Size::new(20, 5));
-    assert_eq!(s.get_width(), 20);
-    assert_eq!(s.get_height(), 5);
+    assert_eq!(s.get_size(), Size::new(20,5));
     s.write_string(
         1,
         1,

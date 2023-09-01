@@ -62,8 +62,7 @@ const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
 
 pub struct Surface {
-    pub(crate) width: u32,
-    pub(crate) height: u32,
+    pub(crate) size: Size,
     pub(crate) chars: Vec<Character>,
     pub(crate) cursor: Cursor,
     origin: Point,
@@ -80,8 +79,7 @@ impl Surface {
         let h = height.clamp(1, MAX_SURFACE_HEIGHT);
         let count = (w as usize) * (h as usize);
         let mut s = Surface {
-            width: w,
-            height: h,
+            size: Size::new(w,h),
             origin: Point::default(),
             base_origin: Point::default(),
             chars: Vec::<Character>::with_capacity(count),
@@ -94,20 +92,10 @@ impl Surface {
         s.chars.resize(count, Character::default());
         return s;
     }
-    #[inline]
-    pub fn get_width(&self) -> u32 {
-        self.width
-    }
-    #[inline]
-    pub fn get_height(&self) -> u32 {
-        self.height
-    }
+
     #[inline]
     pub fn get_size(&self) -> Size {
-        Size {
-            height: self.height,
-            width: self.width,
-        }
+        self.size
     }
     #[inline]
     fn coords_to_position(&self, x: i32, y: i32) -> Option<usize> {
@@ -118,7 +106,7 @@ impl Surface {
         }
         let x_p = x as usize;
         let y_p = y as usize;
-        let pos = (y_p as usize) * (self.width as usize) + (x_p as usize);
+        let pos = (y_p as usize) * (self.size.width as usize) + (x_p as usize);
         return Some(pos);
     }
     #[inline]
@@ -211,13 +199,13 @@ impl Surface {
             // only the clip must pe cleared
             let mut pos = self.clip.left as usize;
             let sz = (self.clip.right + 1 - self.clip.left) as usize;
-            pos += (self.clip.top as usize) * (self.width as usize);
+            pos += (self.clip.top as usize) * (self.size.width as usize);
 
             for _ in self.clip.top..=self.clip.bottom {
                 for c in &mut self.chars[pos..(pos + sz)] {
                     c.set(ch);
                 }
-                pos += self.width as usize;
+                pos += self.size.width as usize;
             }
         }
     }
@@ -690,8 +678,8 @@ impl Surface {
         self.chars.resize(count, Character::default());
         self.right_most = (w as i32) - 1;
         self.bottom_most = (h as i32) - 1;
-        self.width = w;
-        self.height = h;
+        self.size.width = w;
+        self.size.height = h;
         self.reset();
     }
 }

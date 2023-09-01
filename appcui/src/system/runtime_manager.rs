@@ -795,7 +795,7 @@ impl RuntimeManager {
         if (new_size.width == 0) || (new_size.height == 0) {
             return;
         }
-        if (new_size.width == self.surface.get_width()) && (new_size.height == self.surface.get_height()) {
+        if new_size == self.surface.size {
             return;
         }
         self.surface.resize(new_size);
