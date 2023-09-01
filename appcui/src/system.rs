@@ -10,6 +10,7 @@ mod menu_handle_manager;
 mod reference;
 #[cfg(test)]
 mod tests;
+mod builder;
 
 pub use self::theme::Theme;
 pub use self::handle::Handle;
@@ -25,3 +26,4 @@ pub use self::initialization_data::InitializationFlags;
 pub (crate) use self::runtime_manager::RuntimeManager;
 pub (crate) use self::tooltip::ToolTip;
 pub (crate) use self::initialization_data::InitializationData;
+pub use self::builder::Builder;

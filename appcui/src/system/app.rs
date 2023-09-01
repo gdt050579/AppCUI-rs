@@ -1,4 +1,5 @@
 use std::sync::Mutex;
+use std::thread::Builder;
 
 use super::Error;
 use super::Handle;
@@ -26,8 +27,13 @@ impl App {
         *app_created = true;
         Ok(App { _phantom: () })
     }
-    pub fn new(terminal: TerminalType, size: Option<Size>, flags: InitializationFlags) -> Result<Self, Error> {
-        App::create(InitializationData::new(terminal, size, flags))
+    pub fn new() -> crate::system::Builder {
+        crate::system::Builder::new()
+    }
+    pub fn with_terminal(terminal: TerminalType) -> crate::system::Builder {
+        let mut builder = crate::system::Builder::new();
+        builder.terminal = Some(terminal);
+        builder
     }
     pub fn default() -> Result<Self, Error> {
         App::create(InitializationData::default())
