@@ -619,3 +619,73 @@ fn check_window_toolbar_single_choice() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_window_toolbar_singlechoice_events() {
+    #[Window(events = ToolBarEvents,internal = true)]
+    struct MyWin {
+        opt1: Handle<toolbar::SingleChoice>,
+        opt2: Handle<toolbar::SingleChoice>,
+        opt3: Handle<toolbar::SingleChoice>,
+        optA: Handle<toolbar::SingleChoice>,
+        optB: Handle<toolbar::SingleChoice>,
+        optC: Handle<toolbar::SingleChoice>,        
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new("d:c,w:58,h:8"), window::Flags::None),
+                opt1: Handle::None,
+                opt2: Handle::None,
+                opt3: Handle::None,
+                optA: Handle::None,
+                optB: Handle::None,
+                optC: Handle::None,
+            };
+            me.opt1 = me.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &1", 1));
+            me.opt2 = me.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &2", 1));
+            me.opt3 = me.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &3", 1));
+            me.optA = me.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &A", 2));
+            me.optB = me.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &B", 2));
+            me.optC = me.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &C", 2));            
+            me
+        }
+    }
+    impl ToolBarEvents for MyWin {
+        fn on_choice_selected(&mut self, handle: Handle<toolbar::SingleChoice>) -> EventProcessStatus {
+            if handle == self.opt1 {
+                let h = self.optA;
+                if let Some(opt_a) = self.get_toolbar().get_mut(h)   {
+                    opt_a.select();
+                }
+                return EventProcessStatus::Processed;
+            }
+            if handle == self.opt2 {
+                let h = self.optB;
+                if let Some(opt_b) = self.get_toolbar().get_mut(h)   {
+                    opt_b.select();
+                }
+                return EventProcessStatus::Processed;
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+
+    let script = "
+        //Paint.Enable(false)
+        Paint('original status')
+        //CheckHash(0x4C5631E5B117880C)
+        Mouse.Move(5,8)
+        Paint('Mouse over Opt 1')
+        //CheckHash(0xFE6ED16B8C8DEC4A)
+        Mouse.Click(5,8,left)
+        Paint('Opt 1 selected => Opt A selected as a result')
+        //CheckHash(0x11C054FAECF9D51F)
+        Mouse.Click(10,8,left)
+        Paint('Opt 2 selected => Opt B selected as a result')
+        //CheckHash(0x11C054FAECF9D51F)
+    ";
+    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

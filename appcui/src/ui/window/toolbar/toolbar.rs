@@ -1,3 +1,5 @@
+use std::ptr::NonNull;
+
 use crate::{
     graphics::{Size, Surface},
     system::{Handle, Theme},
@@ -51,6 +53,7 @@ impl ToolBar {
         None
     }
     pub fn get_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T> {
+        let toolbar_ptr = unsafe { NonNull::new_unchecked(self as *mut ToolBar) } ; 
         if let Some(obj) = self.items.get_mut(handle.cast()) {
             match obj {
                 ToolBarItem::Label(obj) => return Some(unsafe { &mut (*((obj as *mut Label) as *mut T)) }),
@@ -61,7 +64,10 @@ impl ToolBar {
                 ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &mut (*((obj as *mut ResizeCorner) as *mut T)) }),
                 ToolBarItem::Button(obj) => return Some(unsafe { &mut (*((obj as *mut Button) as *mut T)) }),
                 ToolBarItem::CheckBox(obj) => return Some(unsafe { &mut (*((obj as *mut CheckBox) as *mut T)) }),
-                ToolBarItem::SingleChoice(obj) => return Some(unsafe { &mut (*((obj as *mut SingleChoice) as *mut T)) }),
+                ToolBarItem::SingleChoice(obj) => {
+                    obj.tooldbar = Some(toolbar_ptr);
+                    return Some(unsafe { &mut (*((obj as *mut SingleChoice) as *mut T)) });
+                }
             }
         }
         None
@@ -243,7 +249,7 @@ impl ToolBar {
 
     pub(crate) fn update_singlechoice_group_id(&mut self, group_id: u32, handle: Handle<UIElement>) {
         let count = self.items.allocated_objects();
-        // paint bar items        
+        // paint bar items
         for index in 0..count {
             if let Some(item) = self.items.get_element_mut(index) {
                 if let ToolBarItem::SingleChoice(sc) = item {
@@ -254,5 +260,4 @@ impl ToolBar {
             }
         }
     }
-
 }

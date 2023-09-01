@@ -1,10 +1,12 @@
+use std::ptr::NonNull;
+
 use crate::{
     graphics::{Surface, TextAlignament, TextFormat},
     system::{Handle, Theme},
     utils::Caption
 };
 
-use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
+use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBarItem, ToolBar};
 
 pub struct SingleChoice {
     pub(super) base: ItemBase,
@@ -12,6 +14,7 @@ pub struct SingleChoice {
     caption: Caption,
     group_id: u32,
     selected: bool,
+    pub(super) tooldbar: Option<NonNull<ToolBar>>
 }
 
 impl AddToToolbar<SingleChoice> for SingleChoice {
@@ -27,7 +30,8 @@ impl SingleChoice {
             handle: Handle::None,
             caption: Caption::new("", false),
             group_id,
-            selected: false,            
+            selected: false,  
+            tooldbar: None          
         };
         obj.set_text(text);
         obj
@@ -44,6 +48,15 @@ impl SingleChoice {
     #[inline(always)]
     pub fn get_group_id(&self)->u32 {
         self.group_id
+    }
+    #[inline(always)]
+    pub fn select(&mut self) {
+        if let Some(toolbar_ptr) = self.tooldbar.as_mut() {
+            let toolbar = unsafe { toolbar_ptr.as_mut() };
+            toolbar.update_singlechoice_group_id(self.group_id, self.handle.cast());
+        } else {
+            panic!("Attempt to use SingleChoice select without having the object added to a toolbar !");
+        }
     }
 
     pub(crate) fn update_select_status(&mut self, value: bool) {
