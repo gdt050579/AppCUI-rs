@@ -29,14 +29,13 @@ impl ToolTip {
         &mut self,
         text: &str,
         object_rect: &Rect,
-        screen_width: u32,
-        screen_height: u32,
+        screen_size: Size,
         theme: &Theme,
     ) -> bool {
         self.visible = false;
 
         let mut nr_lines = 0u32;
-        let max_width = screen_width / 2;
+        let max_width = screen_size.width / 2;
         let mut w = 0u32;
         let mut best_width = 0u32;
         let mut chars_count = 0usize;
@@ -59,7 +58,7 @@ impl ToolTip {
             best_width = best_width.max(w);
             nr_lines += 1;
         }
-        nr_lines = nr_lines.min(screen_height / 3).max(1);
+        nr_lines = nr_lines.min(screen_size.height / 3).max(1);
         best_width = best_width.max(5) + 2;
 
         // find best position  (prefer on-top)
@@ -68,8 +67,8 @@ impl ToolTip {
             let mut x = cx - ((best_width / 2) as i32);
             let top = object_rect.get_top();
             //let best_x = x;
-            x = x.min((screen_width as i32) - (best_width as i32)).max(0);
-            self.arrow_pos = Point::new(cx.clamp(0, (screen_width as i32)-1), top-1);
+            x = x.min((screen_size.width as i32) - (best_width as i32)).max(0);
+            self.arrow_pos = Point::new(cx.clamp(0, (screen_size.width as i32)-1), top-1);
             self.arrow_char = SpecialChar::ArrowDown;
             self.text_pos = Point::new(x, top - ((nr_lines + 1) as i32));
             self.format.multi_line = nr_lines > 1;
@@ -86,13 +85,13 @@ impl ToolTip {
             return true;
         }
         // bottom position
-        if (object_rect.get_bottom() + ((nr_lines + 1) as i32)) <= screen_height as i32 {
+        if (object_rect.get_bottom() + ((nr_lines + 1) as i32)) <= screen_size.height as i32 {
             let cx = object_rect.get_x_center();
             let mut x = cx - ((best_width / 2) as i32);
             let bottom = object_rect.get_bottom();
             //let best_x = x;
-            x = x.min((screen_width as i32) - (best_width as i32)).max(0);
-            self.arrow_pos = Point::new(cx.clamp(0, (screen_width as i32)-1), bottom+1);
+            x = x.min((screen_size.width as i32) - (best_width as i32)).max(0);
+            self.arrow_pos = Point::new(cx.clamp(0, (screen_size.width as i32)-1), bottom+1);
             self.arrow_char = SpecialChar::ArrowUp;
             self.text_pos = Point::new(x, bottom+2);
             self.format.multi_line = nr_lines > 1;

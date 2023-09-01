@@ -103,6 +103,13 @@ impl Surface {
         self.height
     }
     #[inline]
+    pub fn get_size(&self) -> Size {
+        Size {
+            height: self.height,
+            width: self.width,
+        }
+    }
+    #[inline]
     fn coords_to_position(&self, x: i32, y: i32) -> Option<usize> {
         let x = x + self.origin.x;
         let y = y + self.origin.y;
@@ -195,11 +202,7 @@ impl Surface {
         if !self.clip.is_visible() {
             return;
         }
-        if (self.clip.left == 0)
-            && (self.clip.top == 0)
-            && (self.clip.right == self.right_most)
-            && (self.clip.bottom == self.bottom_most)
-        {
+        if (self.clip.left == 0) && (self.clip.top == 0) && (self.clip.right == self.right_most) && (self.clip.bottom == self.bottom_most) {
             // the entire screen has to be cleared
             for c in &mut self.chars {
                 c.set(ch);
@@ -263,90 +266,42 @@ impl Surface {
         }
     }
 
-    pub fn draw_vertical_line(
-        &mut self,
-        x: i32,
-        top: i32,
-        bottom: i32,
-        line_type: LineType,
-        attr: CharAttribute,
-    ) {
+    pub fn draw_vertical_line(&mut self, x: i32, top: i32, bottom: i32, line_type: LineType, attr: CharAttribute) {
         self.fill_vertical_line(
             x,
             top,
             bottom,
-            Character::new(
-                line_type.get_chars().vertical,
-                attr.foreground,
-                attr.background,
-                attr.flags,
-            ),
+            Character::new(line_type.get_chars().vertical, attr.foreground, attr.background, attr.flags),
         );
     }
 
-    pub fn draw_vertical_line_with_size(
-        &mut self,
-        x: i32,
-        y: i32,
-        height: u32,
-        line_type: LineType,
-        attr: CharAttribute,
-    ) {
+    pub fn draw_vertical_line_with_size(&mut self, x: i32, y: i32, height: u32, line_type: LineType, attr: CharAttribute) {
         if height > 0 {
             self.fill_vertical_line(
                 x,
                 y,
                 y + ((height - 1) as i32),
-                Character::new(
-                    line_type.get_chars().vertical,
-                    attr.foreground,
-                    attr.background,
-                    attr.flags,
-                ),
+                Character::new(line_type.get_chars().vertical, attr.foreground, attr.background, attr.flags),
             );
         }
     }
 
-    pub fn draw_horizontal_line(
-        &mut self,
-        left: i32,
-        y: i32,
-        right: i32,
-        line_type: LineType,
-        attr: CharAttribute,
-    ) {
+    pub fn draw_horizontal_line(&mut self, left: i32, y: i32, right: i32, line_type: LineType, attr: CharAttribute) {
         self.fill_horizontal_line(
             left,
             y,
             right,
-            Character::new(
-                line_type.get_chars().horizontal,
-                attr.foreground,
-                attr.background,
-                attr.flags,
-            ),
+            Character::new(line_type.get_chars().horizontal, attr.foreground, attr.background, attr.flags),
         );
     }
 
-    pub fn draw_horizontal_line_with_size(
-        &mut self,
-        x: i32,
-        y: i32,
-        width: u32,
-        line_type: LineType,
-        attr: CharAttribute,
-    ) {
+    pub fn draw_horizontal_line_with_size(&mut self, x: i32, y: i32, width: u32, line_type: LineType, attr: CharAttribute) {
         if width > 0 {
             self.fill_horizontal_line(
                 x,
                 y,
                 x + ((width - 1) as i32),
-                Character::new(
-                    line_type.get_chars().horizontal,
-                    attr.foreground,
-                    attr.background,
-                    attr.flags,
-                ),
+                Character::new(line_type.get_chars().horizontal, attr.foreground, attr.background, attr.flags),
             );
         }
     }
@@ -390,14 +345,7 @@ impl Surface {
         }
     }
 
-    pub fn write_string(
-        &mut self,
-        x: i32,
-        y: i32,
-        text: &str,
-        attr: CharAttribute,
-        multi_line: bool,
-    ) {
+    pub fn write_string(&mut self, x: i32, y: i32, text: &str, attr: CharAttribute, multi_line: bool) {
         let mut c = Character::new(' ', attr.foreground, attr.background, attr.flags);
         if !multi_line {
             // single line support
@@ -430,14 +378,7 @@ impl Surface {
         }
     }
 
-    fn write_text_single_line(
-        &mut self,
-        text: &str,
-        y: i32,
-        chars_count: u16,
-        ch_index: usize,
-        format: &TextFormat,
-    ) {
+    fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormat) {
         if self.clip.contains_y(y + self.origin.y) == false {
             return; // no need to draw
         }
@@ -462,8 +403,7 @@ impl Surface {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
                         if cpos == hkpos {
-                            self.chars[pos]
-                                .set(Character::with_attributes(ch, format.hotkey_attr.unwrap()));
+                            self.chars[pos].set(Character::with_attributes(ch, format.hotkey_attr.unwrap()));
                         } else {
                             c.code = ch;
                             self.chars[pos].set(c);
@@ -493,13 +433,7 @@ impl Surface {
         for (index, ch) in text.char_indices() {
             if (ch == '\n') || (ch == '\r') {
                 if chars_count > 0 {
-                    self.write_text_single_line(
-                        &text[start_ofs..index],
-                        y,
-                        chars_count,
-                        ch_index,
-                        format,
-                    );
+                    self.write_text_single_line(&text[start_ofs..index], y, chars_count, ch_index, format);
                 }
                 y += 1;
                 ch_index += (chars_count as usize) + 1;
@@ -528,13 +462,7 @@ impl Surface {
         for (index, ch) in text.char_indices() {
             if (ch == '\n') || (ch == '\r') {
                 if chars_count > 0 {
-                    self.write_text_single_line(
-                        &text[start_ofs..index],
-                        y,
-                        chars_count,
-                        ch_index,
-                        format,
-                    );
+                    self.write_text_single_line(&text[start_ofs..index], y, chars_count, ch_index, format);
                 }
                 y += 1;
                 ch_index += (chars_count as usize) + 1;
@@ -543,13 +471,7 @@ impl Surface {
                 continue;
             }
             if chars_count == width {
-                self.write_text_single_line(
-                    &text[start_ofs..index],
-                    y,
-                    chars_count,
-                    ch_index,
-                    format,
-                );
+                self.write_text_single_line(&text[start_ofs..index], y, chars_count, ch_index, format);
                 y += 1;
                 ch_index += chars_count as usize;
                 chars_count = 1; // current character
@@ -599,16 +521,12 @@ impl Surface {
                 strip_spaces = false;
                 ch_index = current_char_index - 1;
             }
-            if ((last_char_type == CharacterType::Word) && (last_char_type != char_type))
-                || (last_char_type == CharacterType::Other)
-            {
+            if ((last_char_type == CharacterType::Word) && (last_char_type != char_type)) || (last_char_type == CharacterType::Other) {
                 // we have either a word or a punctuation mark that is finished
                 end_ofs = offset;
                 chars_count_end_ofs = chars_count;
             }
-            if ((char_type == CharacterType::Word) && (last_char_type != char_type))
-                || (char_type == CharacterType::Other)
-            {
+            if ((char_type == CharacterType::Word) && (last_char_type != char_type)) || (char_type == CharacterType::Other) {
                 // we have a possible new start (either an word or a punctuation mark)
                 next_ofs = offset;
                 chars_count_next_ofs = chars_count;
@@ -623,13 +541,7 @@ impl Surface {
                 }
                 // print the part
                 // println!("start={} end={} =>'{}' , next={} index={} =>'{}'",start_ofs,end_ofs,&text[start_ofs..end_ofs],next_ofs,index,&text[next_ofs..index]);
-                self.write_text_single_line(
-                    &text[start_ofs..end_ofs],
-                    y,
-                    chars_count_end_ofs,
-                    ch_index,
-                    format,
-                );
+                self.write_text_single_line(&text[start_ofs..end_ofs], y, chars_count_end_ofs, ch_index, format);
                 if char_type == CharacterType::NewLine {
                     start_ofs = offset + 1;
                     ch_index = current_char_index;
@@ -691,12 +603,8 @@ impl Surface {
                     cp.foreground = img.get_pixel_or_default(img_x, img_y).to_color();
                     cp.background = img.get_pixel_or_default(img_x, img_y + 1).to_color();
                 } else {
-                    cp.foreground = img
-                        .compute_square_average_color(img_x, img_y, rap)
-                        .to_color();
-                    cp.background = img
-                        .compute_square_average_color(img_x, img_y + rap, rap)
-                        .to_color();
+                    cp.foreground = img.compute_square_average_color(img_x, img_y, rap).to_color();
+                    cp.background = img.compute_square_average_color(img_x, img_y + rap, rap).to_color();
                 }
 
                 if cp.background == cp.foreground {
@@ -727,20 +635,9 @@ impl Surface {
             let mut img_x = 0u32;
             while img_x < w {
                 if rap == 1 {
-                    self.fill_horizontal_line(
-                        p_x,
-                        p_y,
-                        p_x + 1,
-                        img.get_pixel_or_default(img_x, img_y).to_character(),
-                    );
+                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).to_character());
                 } else {
-                    self.fill_horizontal_line(
-                        p_x,
-                        p_y,
-                        p_x + 1,
-                        img.compute_square_average_color(img_x, img_y, rap)
-                            .to_character(),
-                    );
+                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).to_character());
                 }
                 img_x += rap;
                 p_x += 2;
@@ -760,20 +657,9 @@ impl Surface {
             let mut img_x = 0u32;
             while img_x < w {
                 if rap == 1 {
-                    self.fill_horizontal_line(
-                        p_x,
-                        p_y,
-                        p_x + 1,
-                        img.get_pixel_or_default(img_x, img_y).to_gray_scale(),
-                    );
+                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).to_gray_scale());
                 } else {
-                    self.fill_horizontal_line(
-                        p_x,
-                        p_y,
-                        p_x + 1,
-                        img.compute_square_average_color(img_x, img_y, rap)
-                            .to_gray_scale(),
-                    );
+                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).to_gray_scale());
                 }
                 img_x += rap;
                 p_x += 2;
@@ -783,22 +669,11 @@ impl Surface {
         }
     }
 
-    pub fn draw_image(
-        &mut self,
-        x: i32,
-        y: i32,
-        image: &Image,
-        rendering_method: ImageRenderingMethod,
-        scale_method: ImageScaleMethod,
-    ) {
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: ImageRenderingMethod, scale_method: ImageScaleMethod) {
         let rap = scale_method as u32;
         match rendering_method {
-            ImageRenderingMethod::PixelTo16ColorsSmallBlock => {
-                self.paint_small_blocks(image, x, y, rap)
-            }
-            ImageRenderingMethod::PixelTo64ColorsLargeBlock => {
-                self.paint_large_blocks(image, x, y, rap)
-            }
+            ImageRenderingMethod::PixelTo16ColorsSmallBlock => self.paint_small_blocks(image, x, y, rap),
+            ImageRenderingMethod::PixelTo64ColorsLargeBlock => self.paint_large_blocks(image, x, y, rap),
             ImageRenderingMethod::GrayScale => self.paint_gray_scale(image, x, y, rap),
             _ => {
                 todo!()

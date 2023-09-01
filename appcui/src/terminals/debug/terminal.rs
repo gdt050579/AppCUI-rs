@@ -6,13 +6,13 @@ use super::super::Terminal;
 use super::command::Command;
 use crate::graphics::Color;
 use crate::graphics::Point;
+use crate::graphics::Size;
 use crate::system::Error;
 use crate::system::InitializationData;
 use crate::system::RuntimeManager;
 
 pub(crate) struct DebugTerminal {
-    width: u32,
-    height: u32,
+    size: Size,
     temp_str: String,
     commands: VecDeque<Command>,
     sys_events: VecDeque<SystemEvent>,
@@ -48,8 +48,7 @@ impl DebugTerminal {
         h = h.clamp(10, 1000);
         let commands = DebugTerminal::build_commands(data.debug_script.as_str());
         Ok(Box::new(DebugTerminal {
-            width: w,
-            height: h,
+            size: Size::new(w, h),
             temp_str: String::with_capacity((w * h) as usize),
             commands,
             sys_events: VecDeque::with_capacity(8),
@@ -167,7 +166,7 @@ impl Terminal for DebugTerminal {
         println!("");
         self.temp_str.clear();
         // firt border
-        for _ in 0..=6 + self.width {
+        for _ in 0..=6 + self.size.width {
             self.temp_str.push('=');
         }
         println!("+{}+", self.temp_str);
@@ -176,7 +175,7 @@ impl Terminal for DebugTerminal {
         // name
         self.temp_str.push_str("| Name: \x1b[93;40m");
         self.temp_str.push_str(&self.paint_title);
-        while self.temp_str.len() < (self.width + 16) as usize {
+        while self.temp_str.len() < (self.size.width + 16) as usize {
             self.temp_str.push(' ');
         }
         self.temp_str.push_str("\x1b[0m|");
@@ -186,7 +185,7 @@ impl Terminal for DebugTerminal {
         // hash
         self.temp_str.push_str("| Hash: \x1b[93;40m");
         self.temp_str.push_str(format!("0x{:X}", surface_hash).as_str());
-        while self.temp_str.len() < (self.width + 16) as usize {
+        while self.temp_str.len() < (self.size.width + 16) as usize {
             self.temp_str.push(' ');
         }
         self.temp_str.push_str("\x1b[0m|");
@@ -195,7 +194,7 @@ impl Terminal for DebugTerminal {
 
         // separator line
         self.temp_str.push('|');
-        for _ in 0..=6 + self.width {
+        for _ in 0..=6 + self.size.width {
             self.temp_str.push('-');
         }
         self.temp_str.push('|');
@@ -204,7 +203,7 @@ impl Terminal for DebugTerminal {
 
         // second digit
         self.temp_str.push_str("|    | ");
-        for i in 0..self.width {
+        for i in 0..self.size.width {
             let digit = ((i % 100) / 10) as u8;
             if (i as i32) == self.mouse_pos.x {
                 self.temp_str.push_str("\x1b[97m");
@@ -223,7 +222,7 @@ impl Terminal for DebugTerminal {
 
         // last digit
         self.temp_str.push_str("|    | ");
-        for i in 0..self.width {
+        for i in 0..self.size.width {
             if (i as i32) == self.mouse_pos.x {
                 self.temp_str.push_str("\x1b[97m");
                 self.temp_str.push_str("\x1b[41m");
@@ -237,7 +236,7 @@ impl Terminal for DebugTerminal {
 
         // separator line
         self.temp_str.push('|');
-        for _ in 0..=6 + self.width {
+        for _ in 0..=6 + self.size.width {
             self.temp_str.push('-');
         }
         self.temp_str.push('|');
@@ -259,7 +258,7 @@ impl Terminal for DebugTerminal {
             }
             self.temp_str.push_str("\x1b[0m"); // reset to default color
             x += 1;
-            if x == self.width {
+            if x == self.size.width {
                 if (y as i32) == self.mouse_pos.y {
                     println!("|\x1b[97m\x1b[41m{:>3} \x1b[0m| {} |", y, &self.temp_str);
                 } else {
@@ -272,31 +271,27 @@ impl Terminal for DebugTerminal {
         }
         // separator line
         self.temp_str.push('|');
-        for _ in 0..=6 + self.width {
+        for _ in 0..=6 + self.size.width {
             self.temp_str.push('-');
         }
         self.temp_str.push('|');
         println!("{}", &self.temp_str);
     }
 
-    fn get_width(&self) -> u32 {
-        self.width
-    }
-
-    fn get_height(&self) -> u32 {
-        self.height
+    fn get_size(&self) -> Size {
+        self.size
     }
     fn on_resize(&mut self, new_size: crate::graphics::Size) {
-        self.width = new_size.width;
-        self.height = new_size.height;
+        self.size.width = new_size.width;
+        self.size.height = new_size.height;
     }
     fn get_system_event(&mut self) -> SystemEvent {
         // if there is any event in the que --> return that event
         if let Some(event) = self.sys_events.pop_front() {
             match event {
                 SystemEvent::Resize(new_size) => {
-                    self.width = new_size.width;
-                    self.height = new_size.height;
+                    self.size.width = new_size.width;
+                    self.size.height = new_size.height;
                 }
                 SystemEvent::MouseButtonDown(evnt) => {
                     self.mouse_pos.x = evnt.x;

@@ -28,13 +28,12 @@ impl From<&mut ControlBase> for ParentLayout {
 }
 impl From<&Box<dyn Terminal>> for ParentLayout {
     fn from(terminal: &Box<dyn Terminal>) -> Self {
-        let term_width = terminal.get_width();
-        let term_height = terminal.get_height();
+        let sz = terminal.get_size();
         ParentLayout {
-            clip: ClipArea::new(0, 0, (term_width as i32) - 1, (term_height as i32) - 1),
+            clip: ClipArea::new(0, 0, (sz.width as i32) - 1, (sz.height as i32) - 1),
             origin: Point::default(),
-            client_width: term_width as u16,
-            client_height: term_height as u16,
+            client_width: sz.width as u16,
+            client_height: sz.height as u16,
         }
     }
 }

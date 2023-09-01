@@ -13,16 +13,14 @@ use super::super::MouseButtonUpEvent;
 use super::super::MouseDoubleClickEvent;
 use super::super::MouseMoveEvent;
 use super::super::MouseWheelEvent;
+use super::super::Size;
 use super::super::Surface;
 use super::super::SystemEvent;
 use super::super::Terminal;
-use super::structs::*;
 use super::constants::*;
+use super::structs::*;
 use super::winapi;
 use crate::system::Error;
-
-
-
 
 const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
@@ -283,8 +281,7 @@ const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
 ];
 
-
-fn get_stdin_handle() -> Result<HANDLE,Error> {
+fn get_stdin_handle() -> Result<HANDLE, Error> {
     unsafe {
         let h = winapi::GetStdHandle(STD_INPUT_HANDLE);
         if h == INVALID_HANDLE_VALUE {
@@ -293,7 +290,7 @@ fn get_stdin_handle() -> Result<HANDLE,Error> {
         return Ok(h);
     }
 }
-fn get_stdout_handle() -> Result<HANDLE,Error> {
+fn get_stdout_handle() -> Result<HANDLE, Error> {
     unsafe {
         let h = winapi::GetStdHandle(STD_OUTPUT_HANDLE);
         if h == INVALID_HANDLE_VALUE {
@@ -303,7 +300,7 @@ fn get_stdout_handle() -> Result<HANDLE,Error> {
     }
 }
 
-fn get_console_screen_buffer_info(handle: HANDLE) -> Result<CONSOLE_SCREEN_BUFFER_INFO,Error> {
+fn get_console_screen_buffer_info(handle: HANDLE) -> Result<CONSOLE_SCREEN_BUFFER_INFO, Error> {
     unsafe {
         let mut cbuf = CONSOLE_SCREEN_BUFFER_INFO::default();
         if winapi::GetConsoleScreenBufferInfo(handle, &mut cbuf) == FALSE {
@@ -316,8 +313,7 @@ fn get_console_screen_buffer_info(handle: HANDLE) -> Result<CONSOLE_SCREEN_BUFFE
 pub struct WindowsTerminal {
     stdin_handle: HANDLE,
     stdout_handle: HANDLE,
-    width: u32,
-    height: u32,
+    size: Size,
     chars: Vec<CHAR_INFO>,
     shift_state: KeyModifier,
     last_mouse_x: i32,
@@ -326,20 +322,16 @@ pub struct WindowsTerminal {
 }
 
 impl WindowsTerminal {
-    pub (crate) fn create() -> Result<Box<dyn Terminal>,Error> {
+    pub(crate) fn create() -> Result<Box<dyn Terminal>, Error> {
         let stdin = get_stdin_handle()?;
         let stdout = get_stdout_handle()?;
         let mut original_mode_flags = 0u32;
-        
+
         unsafe {
             if winapi::GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
                 return Err(Error::GetConsoleModeFailed);
             }
-            if winapi::SetConsoleMode(
-                stdin,
-                ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS,
-            ) == FALSE
-            {
+            if winapi::SetConsoleMode(stdin, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) == FALSE {
                 return Err(Error::SetConsoleModeFailed);
             }
         }
@@ -347,23 +339,21 @@ impl WindowsTerminal {
         if (info.size.x < 1) || (info.size.y < 1) {
             return Err(Error::InvalidSize);
         }
-        println!("{:?}",info);
-        panic!("exit");
+        let w = info.size.x as u32;
+        let h = info.size.y as u32;
+
         let mut term = Box::new(WindowsTerminal {
             stdin_handle: stdin,
             stdout_handle: stdout,
-            width: info.size.x as u32,
-            height: info.size.y as u32,
+            size: Size::new(w, h),
             chars: Vec::with_capacity(1024),
             shift_state: KeyModifier::None,
             last_mouse_x: i32::MAX,
             last_mouse_y: i32::MAX,
             original_mode_flags: original_mode_flags,
         });
-        term.chars.resize(
-            (term.width as usize) * (term.height as usize),
-            CHAR_INFO { code: 32, attr: 0 },
-        );
+        term.chars
+            .resize((term.size.width as usize) * (term.size.height as usize), CHAR_INFO { code: 32, attr: 0 });
         return Ok(term);
     }
 }
@@ -371,7 +361,7 @@ impl WindowsTerminal {
 impl Terminal for WindowsTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         // safety check --> surface size should be the same as self.width/height size
-        if (surface.width != self.width) || (surface.height != self.height) {
+        if (surface.width != self.size.width) || (surface.height != self.size.height) {
             return;
         }
 
@@ -398,8 +388,8 @@ impl Terminal for WindowsTerminal {
         }
         //
         let sz = COORD {
-            x: self.width as i16,
-            y: self.height as i16,
+            x: self.size.width as i16,
+            y: self.size.height as i16,
         };
         let start = COORD { x: 0, y: 0 };
         let region = SMALL_RECT {
@@ -417,40 +407,28 @@ impl Terminal for WindowsTerminal {
                 x: surface.cursor.x as i16,
                 y: surface.cursor.y as i16,
             };
-            let info = CONSOLE_CURSOR_INFO {
-                size: 10,
-                visible: TRUE,
-            };
+            let info = CONSOLE_CURSOR_INFO { size: 10, visible: TRUE };
             unsafe {
                 winapi::SetConsoleCursorPosition(self.stdout_handle, pos);
                 winapi::SetConsoleCursorInfo(self.stdout_handle, &info);
             }
         } else {
-            let info = CONSOLE_CURSOR_INFO {
-                size: 10,
-                visible: FALSE,
-            };
+            let info = CONSOLE_CURSOR_INFO { size: 10, visible: FALSE };
             unsafe {
                 winapi::SetConsoleCursorInfo(self.stdout_handle, &info);
             }
         }
     }
-    fn get_width(&self) -> u32 {
-        return self.width;
-    }
-    fn get_height(&self) -> u32 {
-        return self.height;
+    fn get_size(&self) -> Size {
+        self.size
     }
     fn on_resize(&mut self, new_size: crate::graphics::Size) {
-        if (self.width == new_size.width) && (self.height == new_size.height) {
+        if self.size == new_size {
             return;
-        }     
-        self.chars.resize(
-            (new_size.width as usize) * (new_size.height as usize),
-            CHAR_INFO { code: 32, attr: 0 },
-        );
-        self.width = new_size.width;
-        self.height = new_size.height;
+        }
+        self.chars
+            .resize((new_size.width as usize) * (new_size.height as usize), CHAR_INFO { code: 32, attr: 0 });
+        self.size = new_size;
     }
     fn get_system_event(&mut self) -> SystemEvent {
         let mut ir = INPUT_RECORD {
@@ -460,9 +438,7 @@ impl Terminal for WindowsTerminal {
         let mut nr_read = 0u32;
 
         unsafe {
-            if (winapi::ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE)
-                || (nr_read != 1)
-            {
+            if (winapi::ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE) || (nr_read != 1) {
                 return SystemEvent::None;
             }
             //println!("Event: {}",ir.event_type);
@@ -474,8 +450,7 @@ impl Terminal for WindowsTerminal {
             let mut key_modifier = KeyModifier::None;
             let mut character = '\0';
             unsafe {
-                if (ir.event.key_event.unicode_char >= 32) && (ir.event.key_event.key_down == TRUE)
-                {
+                if (ir.event.key_event.unicode_char >= 32) && (ir.event.key_event.key_down == TRUE) {
                     let res = char::from_u32(ir.event.key_event.unicode_char as u32);
                     if res.is_some() {
                         character = res.unwrap();
@@ -485,14 +460,10 @@ impl Terminal for WindowsTerminal {
                     key_code = TRANSLATION_MATRIX[ir.event.key_event.virtual_key_code as usize];
                 }
 
-                if (ir.event.key_event.control_key_state & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
-                    != 0
-                {
+                if (ir.event.key_event.control_key_state & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) != 0 {
                     key_modifier |= KeyModifier::Alt;
                 }
-                if (ir.event.key_event.control_key_state & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
-                    != 0
-                {
+                if (ir.event.key_event.control_key_state & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0 {
                     key_modifier |= KeyModifier::Ctrl;
                 }
                 if (ir.event.key_event.control_key_state & SHIFT_PRESSED) != 0 {
@@ -560,21 +531,13 @@ impl Terminal for WindowsTerminal {
                 match ir.event.mouse_event.event_flags {
                     0 => {
                         if ir.event.mouse_event.button_state != 0 {
-                            return SystemEvent::MouseButtonDown(MouseButtonDownEvent {
-                                x,
-                                y,
-                                button,
-                            });
+                            return SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button });
                         } else {
                             return SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button });
                         }
                     }
                     DOUBLE_CLICK => {
-                        return SystemEvent::MouseDoubleClick(MouseDoubleClickEvent {
-                            x,
-                            y,
-                            button,
-                        });
+                        return SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
                     }
                     MOUSE_MOVED => {
                         return SystemEvent::MouseMove(MouseMoveEvent { x, y, button });

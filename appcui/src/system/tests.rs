@@ -22,7 +22,8 @@ fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
     let mut tooltip = ToolTip::new();
     let theme = Theme::new();
     let mut s = SurfaceTester::new(size.width, size.height);
-    tooltip.show(txt, &rect, s.get_width(), s.get_height(), &theme);
+    
+    tooltip.show(txt, &rect, s.get_size(), &theme);
     s.clear(Character::new(
         ' ',
         Color::White,

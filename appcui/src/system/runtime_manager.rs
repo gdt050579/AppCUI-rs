@@ -61,9 +61,8 @@ static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 impl RuntimeManager {
     pub(super) fn create(data: InitializationData) -> Result<(), super::Error> {
         let term = TerminalType::new(&data)?;
-        let width = term.get_width();
-        let height = term.get_height();
-        let surface = Surface::new(width, height);
+        let term_sz = term.get_size();
+        let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
             theme: Theme::new(),
             terminal: term,
@@ -88,12 +87,12 @@ impl RuntimeManager {
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
             commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
-                Some(CommandBar::new(width, height))
+                Some(CommandBar::new(term_sz.width, term_sz.height))
             } else {
                 None
             },
             menubar: if data.flags.contains(InitializationFlags::Menu) {
-                Some(MenuBar::new(width))
+                Some(MenuBar::new(term_sz.width))
             } else {
                 None
             },
@@ -113,20 +112,18 @@ impl RuntimeManager {
         unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
     }
     pub(crate) fn get_terminal_size(&self) -> Size {
-        Size {
-            width: self.terminal.get_width(),
-            height: self.terminal.get_height(),
-        }
+        self.terminal.get_size()
     }
     pub(crate) fn get_desktop_rect(&self) -> Rect {
+        let sz = self.terminal.get_size();
         Rect::new(
             0,
             if self.menubar.is_some() { 1 } else { 0 },
-            (self.terminal.get_width() as i32) - 1,
+            (sz.width as i32) - 1,
             if self.commandbar.is_some() {
-                (self.terminal.get_height() as i32) - 2
+                (sz.height as i32) - 2
             } else {
-                (self.terminal.get_height() as i32) - 1
+                (sz.height as i32) - 1
             },
         )
     }
@@ -137,8 +134,7 @@ impl RuntimeManager {
         self.recompute_layout = true;
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
-        self.tooltip
-            .show(txt, &rect, self.terminal.get_width(), self.terminal.get_height(), &self.theme);
+        self.tooltip.show(txt, &rect, self.terminal.get_size(), &self.theme);
     }
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
@@ -229,8 +225,7 @@ impl RuntimeManager {
     pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<UIElement>, x: i32, y: i32, max_size: Size) {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
-            let term_size = Size::new(self.terminal.get_width(), self.terminal.get_height());
-            menu.compute_position(x, y, max_size, term_size);
+            menu.compute_position(x, y, max_size, self.terminal.get_size());
             menu.set_receiver_control_handle(receiver_control_handle);
             self.opened_menu_handle = handle;
         }
@@ -259,10 +254,7 @@ impl RuntimeManager {
         self.repaint = true;
         // if first time an execution start
         if !self.desktop_os_start_called {
-            self.process_terminal_resize_event(Size {
-                width: self.terminal.get_width(),
-                height: self.terminal.get_height(),
-            });
+            self.process_terminal_resize_event(self.terminal.get_size());
             self.process_desktop_on_start();
         }
         while self.loop_status == LoopStatus::Normal {
@@ -417,12 +409,12 @@ impl RuntimeManager {
         let mut handle = handle;
         while let Some(c) = controls.get(handle) {
             let base = c.get_base();
-            if base.can_receive_input()==false {
+            if base.can_receive_input() == false {
                 break;
-            }            
+            }
             // curent handle is a possible candidate for a valid child focused leaf
             result = handle;
-            handle = base.get_focused_control();            
+            handle = base.get_focused_control();
         }
         result
     }
