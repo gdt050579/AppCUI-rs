@@ -241,37 +241,18 @@ impl ToolBar {
         }
     }
 
-    pub(crate) fn check_singlechoice(&mut self, handle: Handle<UIElement>) {
-        // if idx >= self.items.len() {
-        //     return;
-        // }
-        // if self.items[idx].get_type() != DecoratorType::SingleChoice {
-        //     return;
-        // }
-        // let count = self.items.len();
-        // let mut end_index = idx;
-        // while (end_index < count)
-        //     && (self.items[end_index].get_type() == DecoratorType::SingleChoice)
-        // {
-        //     end_index += 1;
-        // }
-        // let mut start_index = idx;
-        // while (start_index > 0)
-        //     && (self.items[start_index].get_type() == DecoratorType::SingleChoice)
-        // {
-        //     start_index -= 1;
-        // }
-        // if start_index > 0 {
-        //     start_index += 1;
-        // } else {
-        //     if self.items[start_index].get_type() != DecoratorType::SingleChoice {
-        //         start_index += 1;
-        //     }
-        // }
-        // for i in start_index..end_index {
-        //     self.items[i].set_checked(false);
-        // }
-        // self.items[idx].set_checked(true);
+    pub(crate) fn update_singlechoice_group_id(&mut self, group_id: u32, handle: Handle<UIElement>) {
+        let count = self.items.allocated_objects();
+        // paint bar items        
+        for index in 0..count {
+            if let Some(item) = self.items.get_element_mut(index) {
+                if let ToolBarItem::SingleChoice(sc) = item {
+                    if sc.get_group_id() == group_id {
+                        sc.update_select_status(handle == sc.handle);
+                    }
+                }
+            }
+        }
     }
 
 }

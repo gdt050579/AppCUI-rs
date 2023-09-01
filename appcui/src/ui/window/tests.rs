@@ -607,12 +607,12 @@ fn check_window_toolbar_single_choice() {
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:58,h:8"), window::Flags::None);
-    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &1"));
-    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &2"));
-    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &3"));
-    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &A"));
-    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &B"));
-    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &C"));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &1", 1));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &2", 1));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomLeft, "Opt &3", 1));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &A", 2));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &B", 2));
+    w.get_toolbar().add(toolbar::SingleChoice::new(Gravity::BottomRight, "Opt &C", 2));
 
     a.add_window(w);
     a.run();

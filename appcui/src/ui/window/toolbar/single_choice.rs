@@ -10,6 +10,8 @@ pub struct SingleChoice {
     pub(super) base: ItemBase,
     pub(super) handle: Handle<SingleChoice>,
     caption: Caption,
+    group_id: u32,
+    selected: bool,
 }
 
 impl AddToToolbar<SingleChoice> for SingleChoice {
@@ -19,11 +21,13 @@ impl AddToToolbar<SingleChoice> for SingleChoice {
 }
 
 impl SingleChoice {
-    pub fn new(gravity: Gravity, text: &str) -> Self {
+    pub fn new(gravity: Gravity, text: &str, group_id: u32) -> Self {
         let mut obj = SingleChoice {
             base: ItemBase::new(gravity, true, true),
             handle: Handle::None,
             caption: Caption::new("", false),
+            group_id,
+            selected: false,            
         };
         obj.set_text(text);
         obj
@@ -33,6 +37,19 @@ impl SingleChoice {
         self.base.set_width(self.caption.get_chars_count() as u16);
         self.base.request_recompute_layout();
     }
+    #[inline(always)]
+    pub fn is_selected(&self) -> bool {
+        self.selected
+    }
+    #[inline(always)]
+    pub fn get_group_id(&self)->u32 {
+        self.group_id
+    }
+
+    pub(crate) fn update_select_status(&mut self, value: bool) {
+        self.selected = value;
+    }
+
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
         let mut format = TextFormat::single_line(
