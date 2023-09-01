@@ -26,19 +26,19 @@ impl Builder {
     pub fn build(self) -> Result<App, Error> {
         App::create(self)
     }
-    pub fn size(&mut self, terminal_size: Size) -> &mut Self {
+    pub fn size(mut self, terminal_size: Size) -> Self {
         self.size = Some(terminal_size);
         self
     }
-    pub fn menu(&mut self) -> &mut Self {
+    pub fn menu(mut self) -> Self {
         self.has_menu = true;
         self
     }
-    pub fn command_bar(&mut self) -> &mut Self {
+    pub fn command_bar(mut self) -> Self {
         self.has_command_bar = true;
         self
     }
-    pub fn desktop<T>(&mut self, desktop: T) -> &mut Self
+    pub fn desktop<T>(mut self, desktop: T) -> Self
     where
         T: Control + DesktopControl + 'static,
     {
