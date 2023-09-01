@@ -23,21 +23,26 @@ impl Builder {
             has_command_bar: false,
         }
     }
+    #[inline(always)]
     pub fn build(self) -> Result<App, Error> {
         App::create(self)
     }
+    #[inline(always)]
     pub fn size(mut self, terminal_size: Size) -> Self {
         self.size = Some(terminal_size);
         self
     }
+    #[inline(always)]
     pub fn menu(mut self) -> Self {
         self.has_menu = true;
         self
     }
+    #[inline(always)]
     pub fn command_bar(mut self) -> Self {
         self.has_command_bar = true;
         self
     }
+    #[inline(always)]
     pub fn desktop<T>(mut self, desktop: T) -> Self
     where
         T: Control + DesktopControl + 'static,
