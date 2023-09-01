@@ -5,10 +5,10 @@ use super::Handle;
 use super::InitializationData;
 use super::InitializationFlags;
 use super::RuntimeManager;
-use crate::ui::common::traits::*;
-use crate::ui::common::*;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
+use crate::ui::common::traits::*;
+use crate::ui::common::*;
 
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
@@ -26,23 +26,13 @@ impl App {
         *app_created = true;
         Ok(App { _phantom: () })
     }
-    pub fn new(
-        terminal: TerminalType,
-        size: Option<Size>,
-        flags: InitializationFlags,
-    ) -> Result<Self, Error> {
+    pub fn new(terminal: TerminalType, size: Option<Size>, flags: InitializationFlags) -> Result<Self, Error> {
         App::create(InitializationData::new(terminal, size, flags))
     }
     pub fn default() -> Result<Self, Error> {
         App::create(InitializationData::default())
     }
-    pub fn debug<T>(
-        width: u16,
-        height: u16,
-        flags: InitializationFlags,
-        desktop: T,
-        script: &str,
-    ) -> Result<Self, Error>
+    pub fn debug<T>(width: u16, height: u16, flags: InitializationFlags, desktop: T, script: &str) -> Result<Self, Error>
     where
         T: Control + DesktopControl + 'static,
     {

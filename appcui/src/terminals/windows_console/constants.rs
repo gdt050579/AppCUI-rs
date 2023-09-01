@@ -1,0 +1,23 @@
+
+pub(super) const INVALID_HANDLE_VALUE: usize = usize::MAX;
+pub(super) const STD_INPUT_HANDLE: i32 = -10;
+pub(super) const STD_OUTPUT_HANDLE: i32 = -11;
+pub(super) const FALSE: u32 = 0;
+pub(super) const TRUE: u32 = 1;
+pub(super) const COMMON_LVB_UNDERSCORE: u16 = 0x8000;
+pub(super) const KEY_EVENT: u16 = 0x0001;
+pub(super) const MOUSE_EVENT: u16 = 0x0002;
+pub(super) const WINDOW_BUFFER_SIZE_EVENT: u16 = 0x0004;
+pub(super) const FROM_LEFT_1ST_BUTTON_PRESSED: u32 = 0x0001;
+pub(super) const RIGHTMOST_BUTTON_PRESSED: u32 = 0x0002;
+pub(super) const RIGHT_ALT_PRESSED: u32 = 0x0001;
+pub(super) const DOUBLE_CLICK: u32 = 0x0002;
+pub(super) const MOUSE_MOVED: u32 = 0x0001;
+pub(super) const MOUSE_WHEELED: u32 = 0x0004;
+pub(super) const LEFT_ALT_PRESSED: u32 = 0x0002;
+pub(super) const RIGHT_CTRL_PRESSED: u32 = 0x0004;
+pub(super) const LEFT_CTRL_PRESSED: u32 = 0x0008;
+pub(super) const SHIFT_PRESSED: u32 = 0x0010;
+pub(super) const ENABLE_WINDOW_INPUT: u32 = 0x0008;
+pub(super) const ENABLE_MOUSE_INPUT: u32 = 0x0010;
+pub(super) const ENABLE_EXTENDED_FLAGS: u32 = 0x0080;

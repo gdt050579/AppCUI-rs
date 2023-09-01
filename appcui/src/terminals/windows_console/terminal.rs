@@ -16,33 +16,13 @@ use super::super::MouseWheelEvent;
 use super::super::Surface;
 use super::super::SystemEvent;
 use super::super::Terminal;
+use super::structs::*;
+use super::constants::*;
+use super::winapi;
 use crate::system::Error;
 
-type HANDLE = usize;
-type BOOL = u32;
 
-const INVALID_HANDLE_VALUE: usize = usize::MAX;
-const STD_INPUT_HANDLE: i32 = -10;
-const STD_OUTPUT_HANDLE: i32 = -11;
-const FALSE: u32 = 0;
-const TRUE: u32 = 1;
-const COMMON_LVB_UNDERSCORE: u16 = 0x8000;
-const KEY_EVENT: u16 = 0x0001;
-const MOUSE_EVENT: u16 = 0x0002;
-const WINDOW_BUFFER_SIZE_EVENT: u16 = 0x0004;
-const FROM_LEFT_1ST_BUTTON_PRESSED: u32 = 0x0001;
-const RIGHTMOST_BUTTON_PRESSED: u32 = 0x0002;
-const RIGHT_ALT_PRESSED: u32 = 0x0001;
-const DOUBLE_CLICK: u32 = 0x0002;
-const MOUSE_MOVED: u32 = 0x0001;
-const MOUSE_WHEELED: u32 = 0x0004;
-const LEFT_ALT_PRESSED: u32 = 0x0002;
-const RIGHT_CTRL_PRESSED: u32 = 0x0004;
-const LEFT_CTRL_PRESSED: u32 = 0x0008;
-const SHIFT_PRESSED: u32 = 0x0010;
-const ENABLE_WINDOW_INPUT: u32 = 0x0008;
-const ENABLE_MOUSE_INPUT: u32 = 0x0010;
-const ENABLE_EXTENDED_FLAGS: u32 = 0x0080;
+
 
 const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
@@ -303,138 +283,21 @@ const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
 ];
 
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Default, Copy, Clone, Debug)]
-struct SIZE {
-    width: u16,
-    height: u16,
-}
 
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Default, Copy, Clone, Debug)]
-struct COORD {
-    x: i16,
-    y: i16,
-}
-
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Default, Copy, Clone, Debug)]
-struct SMALL_RECT {
-    left: i16,
-    top: i16,
-    right: i16,
-    bottom: i16,
-}
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Default, Copy, Clone, Debug)]
-struct CONSOLE_SCREEN_BUFFER_INFO {
-    size: COORD,
-    cursor_pos: COORD,
-    _attributes: u16,
-    _window: SMALL_RECT,
-    _max_size: COORD,
-}
-
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Default, Copy, Clone, Debug)]
-struct CONSOLE_CURSOR_INFO {
-    size: u32,
-    visible: BOOL,
-}
-
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Default, Copy, Clone, Debug)]
-struct CHAR_INFO {
-    code: u16,
-    attr: u16,
-}
-
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Copy, Clone, Debug)]
-struct KEY_EVENT_RECORD {
-    key_down: BOOL,
-    repeat_count: u16,
-    virtual_key_code: u16,
-    virtual_scan_code: u16,
-    unicode_char: u16,
-    control_key_state: u32,
-}
-
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Copy, Clone, Debug)]
-struct MOUSE_EVENT_RECORD {
-    mouse_position: COORD,
-    button_state: u32,
-    control_key_state: u32,
-    event_flags: u32,
-}
-
-#[repr(C)]
-#[allow(non_camel_case_types)]
-#[derive(Copy, Clone)]
-union WindowsTerminalEvent {
-    key_event: KEY_EVENT_RECORD,
-    mouse_event: MOUSE_EVENT_RECORD,
-    window_buffer_size_event: SIZE,
-    extra: u32,
-}
-
-#[repr(C)]
-#[warn(non_camel_case_types)]
-#[derive(Copy, Clone)]
-struct INPUT_RECORD {
-    event_type: u16,
-    event: WindowsTerminalEvent,
-}
-
-extern "system" {
-    #[warn(non_camel_case_types)]
-    fn GetStdHandle(v: i32) -> HANDLE;
-    #[warn(non_camel_case_types)]
-    fn SetConsoleCursorPosition(handle: HANDLE, pos: COORD) -> BOOL;
-    #[warn(non_camel_case_types)]
-    fn SetConsoleCursorInfo(handle: HANDLE, info: &CONSOLE_CURSOR_INFO) -> BOOL;
-    #[warn(non_camel_case_types)]
-    fn GetConsoleMode(handle: HANDLE, mode_flags: &mut u32) -> BOOL;
-    #[warn(non_camel_case_types)]
-    fn SetConsoleMode(handle: HANDLE, mode_flags: u32) -> BOOL;
-    #[warn(non_camel_case_types)]
-    fn WriteConsoleOutputW(
-        handle: HANDLE,
-        lpBuffer: *const CHAR_INFO,
-        dwBufferSize: COORD,
-        dwBufferCoord: COORD,
-        lpWriteRegion: &SMALL_RECT,
-    );
-    #[warn(non_camel_case_types)]
-    fn GetConsoleScreenBufferInfo(
-        handle: HANDLE,
-        lpConsoleScreenBufferInfo: &mut CONSOLE_SCREEN_BUFFER_INFO,
-    ) -> BOOL;
-
-    #[warn(non_camel_case_types)]
-    fn ReadConsoleInputW(
-        handle: HANDLE,
-        lpBuffer: *mut INPUT_RECORD,
-        nLength: u32,
-        lpNumberOfEventsRead: &mut u32,
-    ) -> BOOL;
-
-}
-
-fn get_handle(handle_id: i32) -> Result<HANDLE,Error> {
+fn get_stdin_handle() -> Result<HANDLE,Error> {
     unsafe {
-        let h = GetStdHandle(handle_id);
+        let h = winapi::GetStdHandle(STD_INPUT_HANDLE);
         if h == INVALID_HANDLE_VALUE {
-            return Err(Error::FailToGetStdInOutHandler);
+            return Err(Error::FailToGetStdInHandle);
+        }
+        return Ok(h);
+    }
+}
+fn get_stdout_handle() -> Result<HANDLE,Error> {
+    unsafe {
+        let h = winapi::GetStdHandle(STD_OUTPUT_HANDLE);
+        if h == INVALID_HANDLE_VALUE {
+            return Err(Error::FailToGetStdOutHandle);
         }
         return Ok(h);
     }
@@ -443,7 +306,7 @@ fn get_handle(handle_id: i32) -> Result<HANDLE,Error> {
 fn get_console_screen_buffer_info(handle: HANDLE) -> Result<CONSOLE_SCREEN_BUFFER_INFO,Error> {
     unsafe {
         let mut cbuf = CONSOLE_SCREEN_BUFFER_INFO::default();
-        if GetConsoleScreenBufferInfo(handle, &mut cbuf) == FALSE {
+        if winapi::GetConsoleScreenBufferInfo(handle, &mut cbuf) == FALSE {
             return Err(Error::GetConsoleScreenBufferInfoFailed);
         }
         return Ok(cbuf);
@@ -464,14 +327,15 @@ pub struct WindowsTerminal {
 
 impl WindowsTerminal {
     pub (crate) fn create() -> Result<Box<dyn Terminal>,Error> {
-        let stdin = get_handle(STD_INPUT_HANDLE)?;
-        let stdout = get_handle(STD_OUTPUT_HANDLE)?;
+        let stdin = get_stdin_handle()?;
+        let stdout = get_stdout_handle()?;
         let mut original_mode_flags = 0u32;
+        
         unsafe {
-            if GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
+            if winapi::GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
                 return Err(Error::GetConsoleModeFailed);
             }
-            if SetConsoleMode(
+            if winapi::SetConsoleMode(
                 stdin,
                 ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS,
             ) == FALSE
@@ -483,6 +347,8 @@ impl WindowsTerminal {
         if (info.size.x < 1) || (info.size.y < 1) {
             return Err(Error::InvalidSize);
         }
+        println!("{:?}",info);
+        panic!("exit");
         let mut term = Box::new(WindowsTerminal {
             stdin_handle: stdin,
             stdout_handle: stdout,
@@ -543,7 +409,7 @@ impl Terminal for WindowsTerminal {
             bottom: sz.y - 1,
         };
         unsafe {
-            WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, start, &region);
+            winapi::WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, start, &region);
         }
         // update the cursor
         if surface.cursor.is_visible() {
@@ -556,8 +422,8 @@ impl Terminal for WindowsTerminal {
                 visible: TRUE,
             };
             unsafe {
-                SetConsoleCursorPosition(self.stdout_handle, pos);
-                SetConsoleCursorInfo(self.stdout_handle, &info);
+                winapi::SetConsoleCursorPosition(self.stdout_handle, pos);
+                winapi::SetConsoleCursorInfo(self.stdout_handle, &info);
             }
         } else {
             let info = CONSOLE_CURSOR_INFO {
@@ -565,7 +431,7 @@ impl Terminal for WindowsTerminal {
                 visible: FALSE,
             };
             unsafe {
-                SetConsoleCursorInfo(self.stdout_handle, &info);
+                winapi::SetConsoleCursorInfo(self.stdout_handle, &info);
             }
         }
     }
@@ -594,7 +460,7 @@ impl Terminal for WindowsTerminal {
         let mut nr_read = 0u32;
 
         unsafe {
-            if (ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE)
+            if (winapi::ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE)
                 || (nr_read != 1)
             {
                 return SystemEvent::None;

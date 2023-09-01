@@ -2,7 +2,8 @@
 #[derive(Debug,Copy,Clone)]
 pub enum Error {
     InvalidSize,
-    FailToGetStdInOutHandler,
+    FailToGetStdInHandle,
+    FailToGetStdOutHandle,
     GetConsoleModeFailed,
     SetConsoleModeFailed,
     GetConsoleScreenBufferInfoFailed,
