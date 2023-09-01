@@ -4,7 +4,6 @@ mod runtime_manager;
 mod tooltip;
 mod error;
 mod handle;
-mod initialization_data;
 mod control_handle_manager;
 mod menu_handle_manager;
 mod reference;
@@ -22,8 +21,6 @@ pub (crate) use self::menu_handle_manager::MenuHandleManager;
 
 pub use self::app::App;
 pub use self::error::Error;
-pub use self::initialization_data::InitializationFlags;
 pub (crate) use self::runtime_manager::RuntimeManager;
 pub (crate) use self::tooltip::ToolTip;
-pub (crate) use self::initialization_data::InitializationData;
 pub use self::builder::Builder;

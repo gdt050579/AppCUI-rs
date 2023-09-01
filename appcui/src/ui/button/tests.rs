@@ -64,7 +64,7 @@ fn check_button_control() {
         Paint('Second first button was pressed')
         CheckHash(0x82A77C0C9EB25128)
     ";
-    let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
+    let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

@@ -8,7 +8,6 @@ use crate::graphics::Color;
 use crate::graphics::Point;
 use crate::graphics::Size;
 use crate::system::Error;
-use crate::system::InitializationData;
 use crate::system::RuntimeManager;
 
 pub(crate) struct DebugTerminal {
@@ -41,12 +40,12 @@ impl DebugTerminal {
         }
         v
     }
-    pub(crate) fn create(data: &InitializationData) -> Result<Box<dyn Terminal>, Error> {
-        let mut w = if data.size.is_none() { 80 } else { data.size.unwrap().width as u32 };
-        let mut h = if data.size.is_none() { 40 } else { data.size.unwrap().height as u32 };
+    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        let mut w = if builder.size.is_none() { 80 } else { builder.size.unwrap().width as u32 };
+        let mut h = if builder.size.is_none() { 40 } else { builder.size.unwrap().height as u32 };
         w = w.clamp(10, 1000);
         h = h.clamp(10, 1000);
-        let commands = DebugTerminal::build_commands(data.debug_script.as_str());
+        let commands = DebugTerminal::build_commands(builder.debug_script.as_ref().unwrap().as_str());
         Ok(Box::new(DebugTerminal {
             size: Size::new(w, h),
             temp_str: String::with_capacity((w * h) as usize),

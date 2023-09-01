@@ -322,7 +322,7 @@ pub struct WindowsTerminal {
 }
 
 impl WindowsTerminal {
-    pub(crate) fn create() -> Result<Box<dyn Terminal>, Error> {
+    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
         let stdin = get_stdin_handle()?;
         let stdout = get_stdout_handle()?;
         let mut original_mode_flags = 0u32;

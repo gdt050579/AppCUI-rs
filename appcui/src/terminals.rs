@@ -2,8 +2,6 @@ mod debug;
 mod system_event;
 mod windows_console;
 
-use crate::system::InitializationData;
-
 use super::graphics::CharFlags;
 use super::graphics::Color;
 use super::graphics::Size;
@@ -29,20 +27,26 @@ pub(crate) trait Terminal {
 }
 
 #[repr(u8)]
+#[derive(Copy,Clone)]
 pub enum TerminalType {
-    Default,
-    Debug,
     WindowsConsole,
 }
 impl TerminalType {
-    pub(crate) fn new(data: &InitializationData) -> Result<Box<dyn Terminal>, Error> {
-        match data.terminal {
-            TerminalType::Default => {
-                // shold be different based on OS
-                return WindowsTerminal::create();
-            }
-            TerminalType::WindowsConsole => WindowsTerminal::create(),
-            TerminalType::Debug => DebugTerminal::create(data),
+    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        // check if we have a debug script present --> if so ... we will create a Debug terminal
+        if builder.debug_script.is_some() {
+            return DebugTerminal::new(builder);
+        }
+        // if no terminal is provided --> consider the default terminal (best approach)
+        // this depends on the OS
+        if builder.terminal.is_none() {
+            // based on OS we should choose a terminal
+            return WindowsTerminal::new(builder);
+        }
+        // finaly, based on the type, return a terminal
+        let terminal = *builder.terminal.as_ref().unwrap();
+        match terminal {
+            TerminalType::WindowsConsole => WindowsTerminal::new(builder),
         }
     }
 }

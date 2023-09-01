@@ -10,7 +10,7 @@ impl MyWin1 {
             base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), window::Flags::None),
             info: Handle::None,
         };
-        me.info = me.add(Label::new("<none>",Layout::new("x:0,y:0,w:18")));
+        me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:18")));
         me
     }
     fn set_info(&mut self, txt: &str) {
@@ -51,14 +51,7 @@ fn check_command_bar_1() {
         Paint('MyWin-1-CMD-2 clicked')
         CheckHash(0xCF24F44D8821A501)        
     ";
-    let mut a = App::debug(
-        60,
-        10,
-        InitializationFlags::CommandBar,
-        Desktop::new(),
-        script,
-    )
-    .unwrap();
+    let mut a = App::debug(60, 10, script).command_bar().build().unwrap();
     a.add_window(MyWin1::new());
     a.run();
 }

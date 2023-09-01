@@ -1,4 +1,4 @@
-use super::{ControlHandleManager, Handle, InitializationData, InitializationFlags, MenuHandleManager, Theme, ToolTip};
+use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::prelude::*;
@@ -7,7 +7,7 @@ use crate::ui::command_bar::events::CommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::{traits::*, ControlEvent};
-use crate::ui::common::{ControlEventData, UIElement};
+use crate::ui::common::{ControlManager, ControlEventData, UIElement};
 use crate::ui::menu::events::{MenuEvent, MenuEvents};
 use crate::ui::menu::{Menu, MenuBar, MousePressedResult};
 use crate::ui::window::events::WindowEvents;
@@ -59,8 +59,8 @@ pub(crate) struct RuntimeManager {
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
 impl RuntimeManager {
-    pub(super) fn create(data: InitializationData) -> Result<(), super::Error> {
-        let term = TerminalType::new(&data)?;
+    pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
+        let term = TerminalType::new(&builder)?;
         let term_sz = term.get_size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
@@ -86,18 +86,18 @@ impl RuntimeManager {
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
-            commandbar: if data.flags.contains(InitializationFlags::CommandBar) {
+            commandbar: if builder.has_command_bar {
                 Some(CommandBar::new(term_sz.width, term_sz.height))
             } else {
                 None
             },
-            menubar: if data.flags.contains(InitializationFlags::Menu) {
-                Some(MenuBar::new(term_sz.width))
-            } else {
-                None
-            },
+            menubar: if builder.has_menu { Some(MenuBar::new(term_sz.width)) } else { None },
         };
-        let mut desktop = data.desktop_manager;
+        let mut desktop = if let Some(desktop) = builder.desktop_manager.take() {
+            desktop
+        } else {
+            ControlManager::new(Desktop::new())
+        };
         let controls = unsafe { &mut *manager.controls };
         desktop.get_base_mut().update_focus_flag(true);
         manager.desktop_handle = controls.add(desktop);

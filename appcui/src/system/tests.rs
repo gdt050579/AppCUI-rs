@@ -1,5 +1,4 @@
 use super::App;
-use super::InitializationFlags;
 use super::Theme;
 use super::ToolTip;
 use crate::graphics::CharFlags;
@@ -16,7 +15,6 @@ use crate::input::MouseButton;
 use crate::terminals::MouseButtonDownEvent;
 use crate::terminals::MouseMoveEvent;
 use crate::ui::command_bar::*;
-use crate::ui::Desktop;
 
 fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
     let mut tooltip = ToolTip::new();
@@ -188,8 +186,8 @@ fn check_command_bar_click() {
 
 #[test]
 fn check_multiple_apps_started() {
-    let a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), "").unwrap();
+    let a = App::debug(60, 10, "").build().unwrap();
     a.run();
-    let a = App::debug(50, 20, InitializationFlags::None, Desktop::new(), "").unwrap();
+    let a = App::debug(50, 20, "").build().unwrap();
     a.run();
 }

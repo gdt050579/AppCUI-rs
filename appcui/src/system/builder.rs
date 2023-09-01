@@ -1,7 +1,8 @@
 use crate::graphics::*;
+use crate::system::*;
 use crate::terminals::*;
-use crate::ui::common::*;
 use crate::ui::common::traits::*;
+use crate::ui::common::*;
 
 pub struct Builder {
     pub(crate) size: Option<Size>,
@@ -21,6 +22,9 @@ impl Builder {
             has_menu: false,
             has_command_bar: false,
         }
+    }
+    pub fn build(self) -> Result<App, Error> {
+        App::create(self)
     }
     pub fn size(&mut self, terminal_size: Size) -> &mut Self {
         self.size = Some(terminal_size);

@@ -19,7 +19,7 @@ fn check_custom_paint_for_desktop() {
         Paint('desktop with red and green')
         CheckHash(0xD490E8FF2EC89965)
     ";
-    let a = App::debug(60, 10, InitializationFlags::None, MyDesktop::new(), script).unwrap();
+    let a = App::debug(60, 10, script).desktop(MyDesktop::new()).build().unwrap();
     a.run();
 }
 
@@ -59,7 +59,7 @@ fn check_on_start_for_desktop() {
         Paint('desktop with yellow dots and started written with red background')
         CheckHash(0x7B0B399907719797)
     ";
-    let a = App::debug(60, 10, InitializationFlags::None, MyDesktop::new(), script).unwrap();
+    let a = App::debug(60, 10, script).desktop(MyDesktop::new()).build().unwrap();
     a.run();
 }
 
@@ -109,6 +109,6 @@ fn check_on_resize_for_desktop() {
         Paint('Old: 30x10, New: 40x5')
         CheckHash(0x6CDE4060C8AB8E26)
     ";
-    let a = App::debug(30, 7, InitializationFlags::None, MyDesktop::new(), script).unwrap();
+    let a = App::debug(30, 7, script).desktop(MyDesktop::new()).build().unwrap();
     a.run();
 }
