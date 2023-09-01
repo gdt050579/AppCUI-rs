@@ -6,7 +6,8 @@ use crate::{
 };
 
 use super::{
-    Button, CheckBox, CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner, Tag, ToolBarItem,
+    Button, CheckBox, CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner, SingleChoice, Tag,
+    ToolBarItem,
 };
 
 pub struct ToolBar {
@@ -44,6 +45,7 @@ impl ToolBar {
                 ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &(*((obj as *const ResizeCorner) as *const T)) }),
                 ToolBarItem::Button(obj) => return Some(unsafe { &(*((obj as *const Button) as *const T)) }),
                 ToolBarItem::CheckBox(obj) => return Some(unsafe { &(*((obj as *const CheckBox) as *const T)) }),
+                ToolBarItem::SingleChoice(obj) => return Some(unsafe { &(*((obj as *const SingleChoice) as *const T)) }),
             }
         }
         None
@@ -59,6 +61,7 @@ impl ToolBar {
                 ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &mut (*((obj as *mut ResizeCorner) as *mut T)) }),
                 ToolBarItem::Button(obj) => return Some(unsafe { &mut (*((obj as *mut Button) as *mut T)) }),
                 ToolBarItem::CheckBox(obj) => return Some(unsafe { &mut (*((obj as *mut CheckBox) as *mut T)) }),
+                ToolBarItem::SingleChoice(obj) => return Some(unsafe { &mut (*((obj as *mut SingleChoice) as *mut T)) }),
             }
         }
         None

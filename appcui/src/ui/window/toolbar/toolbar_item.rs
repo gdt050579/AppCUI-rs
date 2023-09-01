@@ -5,7 +5,7 @@ use crate::{
 
 use super::{
     item_base::ItemBase, CloseButton, HotKey, Label, MaximizeRestoreButton, PaintData,
-    ResizeCorner, Tag, Button, CheckBox
+    ResizeCorner, Tag, Button, CheckBox, SingleChoice
 };
 
 pub(crate) enum ToolBarItem {
@@ -16,7 +16,8 @@ pub(crate) enum ToolBarItem {
     MaximizeRestoreButton(MaximizeRestoreButton),
     ResizeCorner(ResizeCorner),
     Button(Button),
-    CheckBox(CheckBox)
+    CheckBox(CheckBox),
+    SingleChoice(SingleChoice)
 }
 impl ToolBarItem {
     pub(crate) fn get_base(&self) -> &ItemBase {
@@ -29,6 +30,7 @@ impl ToolBarItem {
             ToolBarItem::ResizeCorner(item) => &item.base,
             ToolBarItem::Button(item) => &item.base,
             ToolBarItem::CheckBox(item) => &item.base,
+            ToolBarItem::SingleChoice(item) => &item.base,
         }
     }
     pub(crate) fn get_base_mut(&mut self) -> &mut ItemBase {
@@ -41,6 +43,7 @@ impl ToolBarItem {
             ToolBarItem::ResizeCorner(item) => &mut item.base,
             ToolBarItem::Button(item) => &mut item.base,
             ToolBarItem::CheckBox(item) => &mut item.base,
+            ToolBarItem::SingleChoice(item) => &mut item.base,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
@@ -59,6 +62,7 @@ impl ToolBarItem {
             ToolBarItem::ResizeCorner(item) => item.paint(surface, theme, data),
             ToolBarItem::Button(item) => item.paint(surface, theme, data),
             ToolBarItem::CheckBox(item) => item.paint(surface, theme, data),
+            ToolBarItem::SingleChoice(item) => item.paint(surface, theme, data),
         };
         // separators
         if base.is_part_of_group() {
@@ -102,6 +106,7 @@ impl HandleSupport<ToolBarItem> for ToolBarItem {
             ToolBarItem::ResizeCorner(item) => item.handle.cast(),
             ToolBarItem::Button(item) => item.handle.cast(),
             ToolBarItem::CheckBox(item) => item.handle.cast(),
+            ToolBarItem::SingleChoice(item) => item.handle.cast(),
         }
     }
 
@@ -115,6 +120,7 @@ impl HandleSupport<ToolBarItem> for ToolBarItem {
             ToolBarItem::ResizeCorner(item) => item.handle = handle.cast(),
             ToolBarItem::Button(item) => item.handle = handle.cast(),
             ToolBarItem::CheckBox(item) => item.handle = handle.cast(),
+            ToolBarItem::SingleChoice(item) => item.handle = handle.cast(),
         }
     }
 }
