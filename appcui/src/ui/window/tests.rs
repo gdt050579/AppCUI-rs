@@ -601,9 +601,11 @@ fn check_window_toolbar_single_choice() {
         Mouse.Move(11,8)
         Paint('Mouse over Opt 2')
         CheckHash(0xB7BC6D5A47FA1902)
-        Mouse.Click(1,8,left)
+        Mouse.Click(11,8,left)
         Paint('Opt 2 selected')
         //CheckHash(0x11C054FAECF9D51F)
+        Mouse.Click(6,8,left)
+        Paint('Opt 1 selected')
     ";
     let mut a = App::debug(60, 10, InitializationFlags::None, Desktop::new(), script).unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:58,h:8"), window::Flags::None);

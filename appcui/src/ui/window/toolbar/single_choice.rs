@@ -51,7 +51,10 @@ impl SingleChoice {
     }
 
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
-        let st = SymbolAttrState::new(data);
+        let mut st = SymbolAttrState::new(data);
+        if (self.selected) && (data.focused) {
+            st = SymbolAttrState::Pressed;
+        }
         let mut format = TextFormat::single_line(
             self.base.get_x(),
             self.base.get_y(),

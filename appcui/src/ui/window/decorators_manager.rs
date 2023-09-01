@@ -222,36 +222,36 @@ impl DecoratorsManager {
     // pub(super) fn set_current_item_pressed(&mut self, pressed: bool) {
     //     self.pressed = pressed;
     // }
-    pub(super) fn check_singlechoice(&mut self, idx: usize) {
-        if idx >= self.items.len() {
-            return;
-        }
-        if self.items[idx].get_type() != DecoratorType::SingleChoice {
-            return;
-        }
-        let count = self.items.len();
-        let mut end_index = idx;
-        while (end_index < count)
-            && (self.items[end_index].get_type() == DecoratorType::SingleChoice)
-        {
-            end_index += 1;
-        }
-        let mut start_index = idx;
-        while (start_index > 0)
-            && (self.items[start_index].get_type() == DecoratorType::SingleChoice)
-        {
-            start_index -= 1;
-        }
-        if start_index > 0 {
-            start_index += 1;
-        } else {
-            if self.items[start_index].get_type() != DecoratorType::SingleChoice {
-                start_index += 1;
-            }
-        }
-        for i in start_index..end_index {
-            self.items[i].set_checked(false);
-        }
-        self.items[idx].set_checked(true);
-    }
+    // pub(super) fn check_singlechoice(&mut self, idx: usize) {
+    //     if idx >= self.items.len() {
+    //         return;
+    //     }
+    //     if self.items[idx].get_type() != DecoratorType::SingleChoice {
+    //         return;
+    //     }
+    //     let count = self.items.len();
+    //     let mut end_index = idx;
+    //     while (end_index < count)
+    //         && (self.items[end_index].get_type() == DecoratorType::SingleChoice)
+    //     {
+    //         end_index += 1;
+    //     }
+    //     let mut start_index = idx;
+    //     while (start_index > 0)
+    //         && (self.items[start_index].get_type() == DecoratorType::SingleChoice)
+    //     {
+    //         start_index -= 1;
+    //     }
+    //     if start_index > 0 {
+    //         start_index += 1;
+    //     } else {
+    //         if self.items[start_index].get_type() != DecoratorType::SingleChoice {
+    //             start_index += 1;
+    //         }
+    //     }
+    //     for i in start_index..end_index {
+    //         self.items[i].set_checked(false);
+    //     }
+    //     self.items[idx].set_checked(true);
+    // }
 }
