@@ -13,13 +13,12 @@ use super::super::MouseButtonUpEvent;
 use super::super::MouseDoubleClickEvent;
 use super::super::MouseMoveEvent;
 use super::super::MouseWheelEvent;
-use super::super::Size;
-use super::super::Surface;
 use super::super::SystemEvent;
 use super::super::Terminal;
 use super::constants::*;
 use super::structs::*;
 use super::winapi;
+use crate::graphics::*;
 use crate::system::Error;
 
 const TRANSLATION_MATRIX: [KeyCode; 256] = [
@@ -316,12 +315,16 @@ pub struct WindowsTerminal {
     size: Size,
     chars: Vec<CHAR_INFO>,
     shift_state: KeyModifier,
-    last_mouse_x: i32,
-    last_mouse_y: i32,
+    last_mouse_pos: Point,
+    visible_region: SMALL_RECT,
     original_mode_flags: u32,
 }
 
 impl WindowsTerminal {
+    // if size is present -> resize
+    // if colors are present --> recolor
+    // if font is present --> apply font & size
+
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
         let stdin = get_stdin_handle()?;
         let stdout = get_stdout_handle()?;
@@ -339,8 +342,16 @@ impl WindowsTerminal {
         if (info.size.x < 1) || (info.size.y < 1) {
             return Err(Error::InvalidSize);
         }
-        let w = info.size.x as u32;
-        let h = info.size.y as u32;
+        // analyze the visible (window) part
+        if (info.window.left > info.window.right) || (info.window.left < 0) {
+            return Err(Error::InvalidSize);
+        }
+        if (info.window.top > info.window.bottom) || (info.window.top < 0) {
+            return Err(Error::InvalidSize);
+        }
+
+        let w = (info.window.right as u32) + 1 - (info.window.left as u32);
+        let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
 
         let mut term = Box::new(WindowsTerminal {
             stdin_handle: stdin,
@@ -348,8 +359,8 @@ impl WindowsTerminal {
             size: Size::new(w, h),
             chars: Vec::with_capacity(1024),
             shift_state: KeyModifier::None,
-            last_mouse_x: i32::MAX,
-            last_mouse_y: i32::MAX,
+            last_mouse_pos: Point::new(i32::MAX, i32::MAX),
+            visible_region: info.window,
             original_mode_flags: original_mode_flags,
         });
         term.chars
@@ -391,15 +402,8 @@ impl Terminal for WindowsTerminal {
             x: self.size.width as i16,
             y: self.size.height as i16,
         };
-        let start = COORD { x: 0, y: 0 };
-        let region = SMALL_RECT {
-            left: 0,
-            top: 0,
-            right: sz.x - 1,
-            bottom: sz.y - 1,
-        };
         unsafe {
-            winapi::WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, start, &region);
+            winapi::WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &self.visible_region);
         }
         // update the cursor
         if surface.cursor.is_visible() {
@@ -502,20 +506,18 @@ impl Terminal for WindowsTerminal {
         // mouse processing
         if ir.event_type == MOUSE_EVENT {
             unsafe {
+                let x = (ir.event.mouse_event.mouse_position.x as i32) - (self.visible_region.left as i32);
+                let y = (ir.event.mouse_event.mouse_position.y as i32) - (self.visible_region.top as i32);
                 // for Windows 11
                 if ir.event.mouse_event.event_flags == 0x01 {
-                    if ((ir.event.mouse_event.mouse_position.x as i32) == self.last_mouse_x)
-                        && ((ir.event.mouse_event.mouse_position.y as i32) == self.last_mouse_y)
-                    {
+                    if (x == self.last_mouse_pos.x) && (y == self.last_mouse_pos.y) {
                         return SystemEvent::None;
                     }
 
-                    self.last_mouse_x = ir.event.mouse_event.mouse_position.x as i32;
-                    self.last_mouse_y = ir.event.mouse_event.mouse_position.y as i32;
+                    self.last_mouse_pos.x = x;
+                    self.last_mouse_pos.y = y;
                 }
 
-                let x = ir.event.mouse_event.mouse_position.x as i32;
-                let y = ir.event.mouse_event.mouse_position.y as i32;
                 let button = {
                     if (ir.event.mouse_event.button_state & FROM_LEFT_1ST_BUTTON_PRESSED) != 0 {
                         MouseButton::Left
