@@ -7,6 +7,7 @@
 
 - [Basic concepts](chapter-2/basic_concepts.md)
     - [Application](chapter-2/application.md)
+        - [Debug scenarios](chapter-3/layout/debug_scenarious.md)
     - [Terminals](chapter-2/terminals.md)
     - [Screen area and sizes](chapter-2/screen.md)
     - [Surface](chapter-2/surface.md)
@@ -24,6 +25,7 @@
         - [ComboBox](chapter-3/stock-controls/combobox.md)
         - [Label](chapter-3/stock-controls/button.md)
         - [Panel](chapter-3/stock-controls/panel.md)
+        - [Splitter](chapter-3/stock-controls/splitter.md)
         - [Tab](chapter-3/stock-controls/tab.md)
         - [TextField](chapter-3/stock-controls/textfield.md)
         - [TextArea](chapter-3/stock-controls/textarea.md)
