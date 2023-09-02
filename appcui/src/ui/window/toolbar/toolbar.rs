@@ -5,6 +5,7 @@ use crate::{
     system::{Handle, Theme},
     ui::common::UIElement,
     utils::{HandleManager, VectorIndex},
+    input::Key
 };
 
 use super::{
@@ -259,5 +260,18 @@ impl ToolBar {
                 }
             }
         }
+    }
+
+    pub(crate) fn hotkey_to_item(&self, hotkey: Key) -> Option<Handle<UIElement>> {
+        let count = self.items.allocated_objects();
+        // paint bar items
+        for index in 0..count {
+            if let Some(item) = self.items.get_element(index) {
+                if item.get_hotkey() == hotkey {
+                    return Some(item.get_handle());
+                }
+            }
+        }
+        None     
     }
 }

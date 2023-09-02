@@ -673,6 +673,13 @@ impl OnKeyPressed for Window {
                 }
                 _ => {}
             }
+            if (key.modifier & (KeyModifier::Alt|KeyModifier::Ctrl|KeyModifier::Shift)) == KeyModifier::Alt {
+                // hotkey --> check
+                if let Some(handle) = self.toolbar.hotkey_to_item(key) {
+                    self.on_toolbar_item_clicked(handle);
+                    return EventProcessStatus::Processed;
+                }
+            }
         }
         EventProcessStatus::Ignored
     }

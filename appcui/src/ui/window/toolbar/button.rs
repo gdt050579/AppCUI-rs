@@ -9,7 +9,7 @@ use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBar
 pub struct Button {
     pub(super) base: ItemBase,
     pub(super) handle: Handle<Button>,
-    caption: Caption,
+    pub(super) caption: Caption,
 }
 
 impl AddToToolbar<Button> for Button {

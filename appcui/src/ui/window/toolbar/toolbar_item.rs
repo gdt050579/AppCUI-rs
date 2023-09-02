@@ -1,12 +1,11 @@
 use crate::{
     graphics::{Character, Surface},
+    input::Key,
+    prelude::common::UIElement,
     system::{Handle, HandleSupport, Theme},
 };
 
-use super::{
-    item_base::ItemBase, CloseButton, HotKey, Label, MaximizeRestoreButton, PaintData,
-    ResizeCorner, Tag, Button, CheckBox, SingleChoice
-};
+use super::{item_base::ItemBase, Button, CheckBox, CloseButton, HotKey, Label, MaximizeRestoreButton, PaintData, ResizeCorner, SingleChoice, Tag};
 
 pub(crate) enum ToolBarItem {
     Label(Label),
@@ -17,7 +16,7 @@ pub(crate) enum ToolBarItem {
     ResizeCorner(ResizeCorner),
     Button(Button),
     CheckBox(CheckBox),
-    SingleChoice(SingleChoice)
+    SingleChoice(SingleChoice),
 }
 impl ToolBarItem {
     pub(crate) fn get_base(&self) -> &ItemBase {
@@ -67,17 +66,9 @@ impl ToolBarItem {
         // separators
         if base.is_part_of_group() {
             if base.has_left_group_marker() {
-                surface.write_char(
-                    base.get_x() - 1,
-                    base.get_y(),
-                    Character::with_attributes('[', data.sep_attr),
-                );
+                surface.write_char(base.get_x() - 1, base.get_y(), Character::with_attributes('[', data.sep_attr));
             } else if from_left {
-                surface.write_char(
-                    base.get_x() - 1,
-                    base.get_y(),
-                    Character::with_attributes('|', data.sep_attr),
-                );
+                surface.write_char(base.get_x() - 1, base.get_y(), Character::with_attributes('|', data.sep_attr));
             }
             if base.has_right_group_marker() {
                 surface.write_char(
@@ -92,6 +83,32 @@ impl ToolBarItem {
                     Character::with_attributes('|', data.sep_attr),
                 );
             }
+        }
+    }
+    pub(super) fn get_hotkey(&self) -> Key {
+        match self {
+            ToolBarItem::Label(_) => Key::None,
+            ToolBarItem::HotKey(_) => Key::None,
+            ToolBarItem::Tag(_) => Key::None,
+            ToolBarItem::CloseButton(_) => Key::None,
+            ToolBarItem::MaximizeRestoreButton(_) => Key::None,
+            ToolBarItem::ResizeCorner(_) => Key::None,
+            ToolBarItem::Button(item) => item.caption.get_hotkey(),
+            ToolBarItem::CheckBox(item) => item.caption.get_hotkey(),
+            ToolBarItem::SingleChoice(item) => item.caption.get_hotkey(),
+        }
+    }
+    pub(super) fn get_handle(&self) -> Handle<UIElement> {
+        match self {
+            ToolBarItem::Label(item) => item.handle.cast(),
+            ToolBarItem::HotKey(item) => item.handle.cast(),
+            ToolBarItem::Tag(item) => item.handle.cast(),
+            ToolBarItem::CloseButton(item) => item.handle.cast(),
+            ToolBarItem::MaximizeRestoreButton(item) => item.handle.cast(),
+            ToolBarItem::ResizeCorner(item) => item.handle.cast(),
+            ToolBarItem::Button(item) => item.handle.cast(),
+            ToolBarItem::CheckBox(item) => item.handle.cast(),
+            ToolBarItem::SingleChoice(item) => item.handle.cast(),
         }
     }
 }

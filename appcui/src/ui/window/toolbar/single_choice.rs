@@ -11,7 +11,7 @@ use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBar
 pub struct SingleChoice {
     pub(super) base: ItemBase,
     pub(super) handle: Handle<SingleChoice>,
-    caption: Caption,
+    pub(super) caption: Caption,
     group_id: u32,
     selected: bool,
     pub(super) tooldbar: Option<NonNull<ToolBar>>

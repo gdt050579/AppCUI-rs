@@ -9,7 +9,7 @@ use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBar
 pub struct CheckBox {
     pub(super) base: ItemBase,
     pub(super) handle: Handle<CheckBox>,
-    caption: Caption,
+    pub(super) caption: Caption,
     checked: bool,
 }
 
