@@ -30,7 +30,7 @@ impl ParserError {
     pub(super) fn to_string(&self) -> String {
         let mut err = String::with_capacity(256);
         err.push_str("Command parsing error: ");
-        err.push_str(self.error.as_str());
+        err.push_str(self.get_error());
         err.push_str("\n for line: \"");
         err.push_str(self.line.as_str());
         err.push_str("\"\n");
