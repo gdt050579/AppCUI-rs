@@ -805,6 +805,11 @@ impl RuntimeManager {
         if let Some(menubar) = self.menubar.as_mut() {
             menubar.set_position(0, 0, new_size.width);
         }
+        // resize the desktop as well
+        let desktop = self.get_controls().get_desktop();
+        let original_size = desktop.get_base().get_size();
+        desktop.get_base_mut().set_size(new_size.width as u16, new_size.height as u16);
+        desktop.get_control_mut().on_resize(original_size, new_size);
         self.recompute_layout = true;
     }
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
