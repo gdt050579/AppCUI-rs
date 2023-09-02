@@ -12,6 +12,8 @@ extern "system" {
     #[warn(non_camel_case_types)]
     pub(super) fn SetConsoleMode(handle: HANDLE, mode_flags: u32) -> BOOL;
     #[warn(non_camel_case_types)]
+    pub(super) fn GetLastError() -> u32;
+    #[warn(non_camel_case_types)]
     pub(super) fn WriteConsoleOutputW(
         handle: HANDLE,
         lpBuffer: *const CHAR_INFO,

@@ -3,6 +3,7 @@ use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::input::MouseWheelDirection;
+use crate::prelude::ErrorKind;
 
 use super::super::system_event::KeyModifierChangedEvent;
 use super::super::CharFlags;
@@ -284,7 +285,10 @@ fn get_stdin_handle() -> Result<HANDLE, Error> {
     unsafe {
         let h = winapi::GetStdHandle(STD_INPUT_HANDLE);
         if h == INVALID_HANDLE_VALUE {
-            return Err(Error::FailToGetStdInHandle);
+            return Err(Error::new(
+                ErrorKind::InitializationFailure,
+                format!("Unable to get a valid stdin handle from GetStdHandle WinApi function !"),
+            ));
         }
         return Ok(h);
     }
@@ -293,7 +297,10 @@ fn get_stdout_handle() -> Result<HANDLE, Error> {
     unsafe {
         let h = winapi::GetStdHandle(STD_OUTPUT_HANDLE);
         if h == INVALID_HANDLE_VALUE {
-            return Err(Error::FailToGetStdOutHandle);
+            return Err(Error::new(
+                ErrorKind::InitializationFailure,
+                format!("Unable to get a valid stdout handle from GetStdHandle WinApi function !"),
+            ));
         }
         return Ok(h);
     }
@@ -303,7 +310,10 @@ fn get_console_screen_buffer_info(handle: HANDLE) -> Result<CONSOLE_SCREEN_BUFFE
     unsafe {
         let mut cbuf = CONSOLE_SCREEN_BUFFER_INFO::default();
         if winapi::GetConsoleScreenBufferInfo(handle, &mut cbuf) == FALSE {
-            return Err(Error::GetConsoleScreenBufferInfoFailed);
+            return Err(Error::new(
+                ErrorKind::InitializationFailure,
+                format!("GetConsoleScreenBufferInfo failed to get information on current console !\nWindow code error: {}",winapi::GetLastError()),
+            ));
         }
         return Ok(cbuf);
     }
@@ -332,22 +342,56 @@ impl WindowsTerminal {
 
         unsafe {
             if winapi::GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
-                return Err(Error::GetConsoleModeFailed);
+                return Err(Error::new(
+                    ErrorKind::InitializationFailure,
+                    format!("GetConsoleMode failed to aquire original mode for current console !"),
+                ));
             }
             if winapi::SetConsoleMode(stdin, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) == FALSE {
-                return Err(Error::SetConsoleModeFailed);
+                return Err(Error::new(
+                    ErrorKind::InitializationFailure,
+                    format!("Fail to set current console flags to 'ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS' via SetConsoleMode API.\nWindow code error: {} ",winapi::GetLastError()),
+                ));
             }
         }
         let info = get_console_screen_buffer_info(stdout)?;
         if (info.size.x < 1) || (info.size.y < 1) {
-            return Err(Error::InvalidSize);
+            return Err(Error::new(
+                ErrorKind::InitializationFailure,
+                format!(
+                    "Invalid console size returned by GetConsoleScreenBufferInfo: width={},height={}\nWindow code error: {}",
+                    info.size.x,
+                    info.size.y,
+                    unsafe { winapi::GetLastError() }
+                ),
+            ));
         }
         // analyze the visible (window) part
         if (info.window.left > info.window.right) || (info.window.left < 0) {
-            return Err(Error::InvalidSize);
+            return Err(Error::new(
+                ErrorKind::InitializationFailure,
+                format!(
+                    "Invalid console visible size returned by GetConsoleScreenBufferInfo: left={},top={},right={},bottom={}\nLeft value should be smaller tham the Right value\nWindow code error: {}",
+                    info.window.left,
+                    info.window.top,
+                    info.window.right,
+                    info.window.bottom,
+                    unsafe { winapi::GetLastError() }
+                )
+            ));
         }
         if (info.window.top > info.window.bottom) || (info.window.top < 0) {
-            return Err(Error::InvalidSize);
+            return Err(Error::new(
+                ErrorKind::InitializationFailure,
+                format!(
+                    "Invalid console visible size returned by GetConsoleScreenBufferInfo: left={},top={},right={},bottom={}\nTop value should be smaller tham the Bottom value\nWindow code error: {}",
+                    info.window.left,
+                    info.window.top,
+                    info.window.right,
+                    info.window.bottom,
+                    unsafe { winapi::GetLastError() }
+                )
+            ));
         }
 
         let w = (info.window.right as u32) + 1 - (info.window.left as u32);

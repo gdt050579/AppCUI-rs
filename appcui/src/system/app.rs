@@ -2,6 +2,7 @@ use std::sync::Mutex;
 use std::thread::Builder;
 
 use super::Error;
+use super::ErrorKind;
 use super::Handle;
 use super::HandleSupport;
 use super::RuntimeManager;
@@ -20,7 +21,10 @@ impl App {
     pub(super) fn create(builder: crate::system::Builder) -> Result<Self, Error> {
         let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
         if *app_created {
-            return Err(Error::AppAlreadyStarted);
+            return Err(Error::new(
+                ErrorKind::InitializationFailure,
+                format!("App has already been created ! There can only be one instance of an Application at one time. If you have more, make sure that you have only one !"),
+            ));
         }
         RuntimeManager::create(builder)?;
         *app_created = true;

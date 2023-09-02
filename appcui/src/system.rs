@@ -21,6 +21,7 @@ pub (crate) use self::menu_handle_manager::MenuHandleManager;
 
 pub use self::app::App;
 pub use self::error::Error;
+pub use self::error::ErrorKind;
 pub (crate) use self::runtime_manager::RuntimeManager;
 pub (crate) use self::tooltip::ToolTip;
 pub use self::builder::Builder;
