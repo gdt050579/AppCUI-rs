@@ -23,7 +23,6 @@ pub(crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
     fn get_size(&self) -> Size;
     fn get_system_event(&mut self) -> SystemEvent;
-    fn on_resize(&mut self, new_size: Size);
 }
 
 #[repr(u8)]

@@ -280,10 +280,10 @@ impl Terminal for DebugTerminal {
     fn get_size(&self) -> Size {
         self.size
     }
-    fn on_resize(&mut self, new_size: crate::graphics::Size) {
-        self.size.width = new_size.width;
-        self.size.height = new_size.height;
-    }
+    // fn on_resize(&mut self, new_size: crate::graphics::Size) {
+    //     self.size.width = new_size.width;
+    //     self.size.height = new_size.height;
+    // }
     fn get_system_event(&mut self) -> SystemEvent {
         // if there is any event in the que --> return that event
         if let Some(event) = self.sys_events.pop_front() {

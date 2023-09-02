@@ -799,7 +799,6 @@ impl RuntimeManager {
             return;
         }
         self.surface.resize(new_size);
-        self.terminal.on_resize(new_size);
         if let Some(commandbar) = self.commandbar.as_mut() {
             commandbar.set_desktop_size(new_size);
         }

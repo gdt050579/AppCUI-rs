@@ -365,7 +365,21 @@ impl WindowsTerminal {
         });
         term.chars
             .resize((term.size.width as usize) * (term.size.height as usize), CHAR_INFO { code: 32, attr: 0 });
+        //println!("Init(size:{:?},visible:{:?})", term.size, info.window);
         return Ok(term);
+    }
+    fn update_size(&mut self) {
+        if let Ok(info) = get_console_screen_buffer_info(self.stdout_handle) {
+            let w = (info.window.right as u32) + 1 - (info.window.left as u32);
+            let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
+            // println!(
+            //     "OnResize: \n - received:{:?}\n - actual:w={w},h={h}\n - visible:{:?}",
+            //     self.size, info.window
+            // );
+            self.visible_region = info.window;
+            self.chars.resize((w as usize) * (h as usize), CHAR_INFO { code: 32, attr: 0 });
+            self.size = Size::new(w, h);
+        }
     }
 }
 
@@ -426,14 +440,7 @@ impl Terminal for WindowsTerminal {
     fn get_size(&self) -> Size {
         self.size
     }
-    fn on_resize(&mut self, new_size: crate::graphics::Size) {
-        if self.size == new_size {
-            return;
-        }
-        self.chars
-            .resize((new_size.width as usize) * (new_size.height as usize), CHAR_INFO { code: 32, attr: 0 });
-        self.size = new_size;
-    }
+
     fn get_system_event(&mut self) -> SystemEvent {
         let mut ir = INPUT_RECORD {
             event_type: 0,
@@ -568,12 +575,8 @@ impl Terminal for WindowsTerminal {
 
         // resize
         if ir.event_type == WINDOW_BUFFER_SIZE_EVENT {
-            unsafe {
-                return SystemEvent::Resize(super::super::Size::new(
-                    ir.event.window_buffer_size_event.width as u32,
-                    ir.event.window_buffer_size_event.height as u32,
-                ));
-            }
+            self.update_size();
+            return SystemEvent::Resize(self.size);
         }
 
         return SystemEvent::None;
