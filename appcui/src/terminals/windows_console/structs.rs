@@ -2,7 +2,7 @@ pub(super) type HANDLE = usize;
 pub(super) type BOOL = u32;
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Default, Copy, Clone, Debug)]
 pub(super) struct SIZE {
     pub width: u16,
@@ -10,7 +10,7 @@ pub(super) struct SIZE {
 }
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Default, Copy, Clone, Debug)]
 pub(super) struct COORD {
     pub x: i16,
@@ -18,7 +18,7 @@ pub(super) struct COORD {
 }
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Default, Copy, Clone, Debug)]
 pub(super) struct SMALL_RECT {
     pub left: i16,
@@ -27,7 +27,7 @@ pub(super) struct SMALL_RECT {
     pub bottom: i16,
 }
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Default, Copy, Clone, Debug)]
 pub(super) struct CONSOLE_SCREEN_BUFFER_INFO {
     pub size: COORD,
@@ -38,7 +38,7 @@ pub(super) struct CONSOLE_SCREEN_BUFFER_INFO {
 }
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Default, Copy, Clone, Debug)]
 pub(super) struct CONSOLE_CURSOR_INFO {
     pub size: u32,
@@ -46,7 +46,7 @@ pub(super) struct CONSOLE_CURSOR_INFO {
 }
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Default, Copy, Clone, Debug)]
 pub(super) struct CHAR_INFO {
     pub code: u16,
@@ -54,7 +54,7 @@ pub(super) struct CHAR_INFO {
 }
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Copy, Clone, Debug)]
 pub(super) struct KEY_EVENT_RECORD {
     pub key_down: BOOL,
@@ -66,7 +66,7 @@ pub(super) struct KEY_EVENT_RECORD {
 }
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Copy, Clone, Debug)]
 pub(super) struct MOUSE_EVENT_RECORD {
     pub mouse_position: COORD,
@@ -86,7 +86,7 @@ pub(super) union WindowsTerminalEvent {
 }
 
 #[repr(C)]
-#[warn(non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Copy, Clone)]
 pub(super) struct INPUT_RECORD {
     pub event_type: u16,
