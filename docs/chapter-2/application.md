@@ -57,3 +57,25 @@ if let Err(error) = result {
     println!("Error: {}",error.description());
 }
 ```
+
+## Execution flows
+
+Usually, each AppCUI program consists in the following steps:
+1. create an application
+2. add on or multiple windows to that application (to do this use the `add_window` method from struct `App`)
+3. run the application via method `run`. This method consumes the object and as such you can not use the application anymore after this method ends.
+
+A typical `main.rs` file that uses `AppCUI` framework looks like this:
+```rs
+use appcui::prelude::*;
+
+fn main() -> Result<(), appcui::system::Error> {
+    // 1. build an application
+    let mut app = App::new().build()?;
+    // 2. add one or several windows
+    app.add_window(/* a window */);
+    // 3. run the aplication
+    app.run();
+    Ok(())
+}
+```
