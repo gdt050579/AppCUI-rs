@@ -15,3 +15,7 @@ path = "simple_window.rs"
 [[example]]
 name = "hello_world"
 path = "hello_world.rs"
+
+[[example]]
+name = "window_toolbar"
+path = "window_toolbar.rs"

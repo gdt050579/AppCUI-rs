@@ -2,7 +2,7 @@ mod initialization_flags;
 mod window;
 mod title;
 mod drag_status;
-mod toolbar;
+pub mod toolbar;
 pub mod events;
 #[cfg(test)]
 mod tests;
