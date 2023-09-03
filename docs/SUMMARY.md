@@ -7,7 +7,7 @@
 
 - [Basic concepts](chapter-2/basic_concepts.md)
     - [Application](chapter-2/application.md)
-        - [Debug scenarios](chapter-3/layout/debug_scenarious.md)
+        - [Debug scenarios](chapter-2/debug_scenarious.md)
     - [Terminals](chapter-2/terminals.md)
     - [Screen area and sizes](chapter-2/screen.md)
     - [Surface](chapter-2/surface.md)

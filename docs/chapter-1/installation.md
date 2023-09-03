@@ -1,7 +1,6 @@
 # Installation
 
-To install `AppCUI` just link it directly from cargo.toml
-as follows:
+To install `AppCUI` just link it directly from `cargo.toml` as follows:
 
 ```ini
 [dependencies]

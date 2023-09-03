@@ -1,1 +1,59 @@
 # Application
+
+An application in `AppCUI` is the **context** that holds all of the framework data together (it keeps all controls, passes messages between controls, manages terminals and system events). There can be only one application per program that uses `AppCUI` (this is enforced by the framework: subsequenct attempts to create an application will fail).
+
+To create an application three APIs can be used:
+1. `App::new()`. This will create an application and chose the best fit terminal available on the current operating system. The result of `new()` method is a `Builder` object that can further be used to configure how the terminal looks like.
+
+2. `App::with_terminal(terminal_type)`. This will create `Builder` object, but you will chose the terminal to be used instead of having one chosed for you automatically. You can check more on terminals availability and types on section [Terminals](terminals.md)
+
+3. `App::debug(width, height, script)`. This is designed to help you with unit testing (see more on this way of initializing `AppCUI` on section [Debug scenarios](debug_scenarious.md)) 
+
+**Example** (using the default terminal):
+```rs
+let mut a = App::new().build().unwrap();
+```
+
+**Example** (using the windows terminal):
+```rs
+let mut a = App::with_terminal(TerminalType::WindowsConsole).build().unwrap();
+```
+
+## Builder
+
+Using `App::new` or `App::with_terminal` creates a builder object that can further be used set up how the application will be constructed. For example, you can change the terminal size, colors, font, etc using this object. Keep in mind that not all settings apply for each terminal, and using the wrong configuration might led to an initialization error. Curently, the Builder supports the following methods:
+* `.size(terminal_size)` to set up a terminal size
+* `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one
+* `.menu()` to enable the application top menu
+* `.command_bar()` to enable the application command bar
+
+After setting up the configuration for an application, just call the `build()` method to create an application. This methods returns a result of type `Result<App,Error>` from where the appcui application can be obtained via several methods such as:
+* `unwrap()` method
+* `?` opertor
+* `if let` construct
+
+A typical example of using this settings is as follows:
+```rs
+let mut a = App::new().size(Size::new(80,40))  // size should be 80x25 chars
+                      .menu()                  // top menu should be enabled
+                      .command_bar()           // command bar should be enabled
+                      .build()
+                      .unwrap();
+```
+
+## Errors
+
+If the `.build()` method from the `Builder` object fails, an error is returned. You can use `.kind` member to identify the type of error. Curently, the following error class are provided:
+* `ErrorKind::InitializationFailure` a failure occured when initializing the terminal (this is usually due to some OS constranits). 
+* `ErrorKind::InvalidFeature` an invalid feature (configuration option) that is not compatible with the current terminal was used. For example, an attemp to set up DirectX for NCurses terminal will be invalid.
+* `ErrorKind::InvalidParameter` a valid feature but with invalid parameters was used. For example, an attempt to instantiate a terminal withe the size of **(0x0)** will trigger such an error.
+
+To get a more detailed description of the Error, use the `description()` method from class `Error` just like in the next snipped:
+```rs
+let result = App::new().size(Size::new(0,0)).build();
+if let Err(error) = result {
+    // we have an Error - let's print it
+    println!("Fail to instantiate AppCUI");
+    println!("Error: {}",error.description());
+}
+```
