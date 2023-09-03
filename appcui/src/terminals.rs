@@ -29,6 +29,7 @@ pub(crate) trait Terminal {
 #[repr(u8)]
 #[derive(Copy,Clone)]
 pub enum TerminalType {
+    #[cfg(target_os = "windows")]
     WindowsConsole,
 }
 impl TerminalType {
