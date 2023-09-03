@@ -30,14 +30,44 @@ impl App {
         *app_created = true;
         Ok(App { _phantom: () })
     }
+    /// Creates a new builder object using the default terminal for the current operating system
     pub fn new() -> crate::system::Builder {
         crate::system::Builder::new()
     }
+    /// Creates a new builder object using a specified terminal from the list of terminals available
+    /// for the current operating system.
     pub fn with_terminal(terminal: TerminalType) -> crate::system::Builder {
         let mut builder = crate::system::Builder::new();
         builder.terminal = Some(terminal);
         builder
     }
+    /// Creates a builder designed for unit testing.
+    /// The provided parameters indicated:
+    /// * `width` and `height` : the size of the simulated terminal 
+    /// * `script` : a script with multiple commands (one command per line) that will be executed one after another simulating events that could be send to the AppCUI. Once all commands are being executed, the application will end.
+    /// 
+    /// ## Debug commands
+    /// The following list of commands are supported for the script:
+    /// **Mouse related commands**
+    /// * `Mouse.Hold(x,y,button)` simulates an event where the mouse button is being pressed while the mouse is located at a specific position on screen. The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center`
+    /// * `Mouse.Release(x,y)` simulates the release of all mouse buttons while the mouse is located at a specific screen position.
+    /// * `Mouse.Click(x,y,button)` simulates a click (hold an release)
+    /// * `Mouse.Move(x,y)` simulates the movement of a mouse to coordonates (x,y). No mouse button are being pressed.
+    /// * `Mouse.Drag(x1,y1,x2,y2)` simulates the movement of a mouse from (x1,y1) to (x2,y2) while the left button is being pressed
+    /// * `Mouse.Wheel(x,y,direction,times)` simulates the wheel mouse being rotated into a direction (one of `top`, `bottom`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0.
+    /// 
+    /// **Key related commands**
+    /// * `Key.Pressed(key)` where key can be any combination of keys
+    /// 
+    /// **Paint related commands**
+    /// * `Paint(name)` paints the current virtual screen into the current screen using ANSI codes. 
+    /// * `Paint.Enable(value)` enables or disables printing. `value` is a boolean value (**true** or **false**). If set to **false** all subsequent calls to command `Print` will be ignored.
+    /// 
+    /// **System events**
+    /// * `Resize(width,height)` simulates a resize of the virtual terminal to the size represented by `width` and `height` parameters
+    /// 
+    /// **Validation commands**
+    /// * `CheckHash(hash)` checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing.
     pub fn debug(width: u16, height: u16, script: &str) -> crate::system::Builder {
         let mut builder = crate::system::Builder::new();
         builder.size = Some(Size::new(width as u32, height as u32));
@@ -45,6 +75,7 @@ impl App {
         builder
     }
 
+    /// Runs the current appcui application. This command will display all windows, and allow you to run the cod that perform the event logic for every control.
     pub fn run(self) {
         // must pe self so that after a run a second call will not be possible
         RuntimeManager::get().run();
@@ -54,6 +85,8 @@ impl App {
         *app_created = false;
     }
 
+    /// Adds a new window to AppCUI framework and returns a Handle towords it.
+    /// Later on you can use that handle to manipulate that window in a safe way.
     pub fn add_window<T>(&mut self, window: T) -> Handle<T>
     where
         T: Control + WindowControl + 'static,
