@@ -1,5 +1,6 @@
 mod debug;
 mod system_event;
+#[cfg(target_os = "windows")]
 mod windows_console;
 
 use super::graphics::CharFlags;
