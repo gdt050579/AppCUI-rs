@@ -48,6 +48,7 @@ impl App {
     /// 
     /// ## Debug commands
     /// The following list of commands are supported for the script:
+    /// 
     /// **Mouse related commands**
     /// * `Mouse.Hold(x,y,button)` simulates an event where the mouse button is being pressed while the mouse is located at a specific position on screen. The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center`
     /// * `Mouse.Release(x,y)` simulates the release of all mouse buttons while the mouse is located at a specific screen position.
