@@ -23,6 +23,10 @@ impl MyWin {
         me.lb1 = me.get_toolbar().add(toolbar::Label::new(toolbar::Gravity::TopLeft,"<None>"));
         me.cb1 = me.get_toolbar().add(toolbar::CheckBox::new(toolbar::Gravity::BottomLeft, "CheckBox &1", false));
         me.cb2 = me.get_toolbar().add(toolbar::CheckBox::new(toolbar::Gravity::BottomLeft, "CheckBox &2", false));
+        me.opt1 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::Gravity::BottomLeft, "Opy &A", 1));
+        me.opt2 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::Gravity::BottomLeft, "Opy &B", 1));
+        me.opt3 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::Gravity::BottomLeft, "Opy &C", 1));
+        
         me
     }
     fn set_info(&mut self, text: &str) {
@@ -47,8 +51,17 @@ impl ToolBarEvents for MyWin {
         EventProcessStatus::Processed
     }
 
-    fn on_choice_selected(&mut self, _handle: Handle<toolbar::SingleChoice>) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_choice_selected(&mut self, handle: Handle<toolbar::SingleChoice>) -> EventProcessStatus {
+        if handle == self.opt1 {
+            self.set_info("Option 1 is selected");
+        }
+        if handle == self.opt2 {
+            self.set_info("Option 2 is selected");
+        }
+        if handle == self.opt3 {
+            self.set_info("Option 3 is selected");
+        }
+        EventProcessStatus::Processed
     }
 }
 
