@@ -8,6 +8,7 @@ use super::graphics::Color;
 use super::graphics::Size;
 use super::graphics::Surface;
 use super::system::Error;
+use super::system::ErrorKind;
 
 pub(crate) use self::system_event::KeyPressedEvent;
 pub(crate) use self::system_event::MouseButtonDownEvent;
@@ -27,13 +28,22 @@ pub(crate) trait Terminal {
 }
 
 #[repr(u8)]
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub enum TerminalType {
     #[cfg(target_os = "windows")]
     WindowsConsole,
 }
 impl TerminalType {
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        // check if terminal size if valid (if present)
+        if let Some(sz) = builder.size.as_ref() {
+            if (sz.width == 0) || (sz.height == 0) {
+                return Err(Error::new(
+                    ErrorKind::InvalidParameter,
+                    format!("Invalid size for a terminal ({}x{}). Both width and height must be bigger than 0 !",sz.width,sz.height),
+                ));
+            }
+        }
         // check if we have a debug script present --> if so ... we will create a Debug terminal
         if builder.debug_script.is_some() {
             return DebugTerminal::new(builder);
