@@ -47,6 +47,7 @@ impl TerminalType {
         // finaly, based on the type, return a terminal
         let terminal = *builder.terminal.as_ref().unwrap();
         match terminal {
+            #[cfg(target_os = "windows")]
             TerminalType::WindowsConsole => WindowsTerminal::new(builder),
         }
     }

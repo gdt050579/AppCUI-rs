@@ -46,9 +46,9 @@ let mut a = App::new().size(Size::new(80,40))  // size should be 80x25 chars
 If the `.build()` method from the `Builder` object fails, an error is returned. You can use `.kind` member to identify the type of error. Curently, the following error class are provided:
 * `ErrorKind::InitializationFailure` a failure occured when initializing the terminal (this is usually due to some OS constranits). 
 * `ErrorKind::InvalidFeature` an invalid feature (configuration option) that is not compatible with the current terminal was used. For example, an attemp to set up DirectX for NCurses terminal will be invalid.
-* `ErrorKind::InvalidParameter` a valid feature but with invalid parameters was used. For example, an attempt to instantiate a terminal withe the size of **(0x0)** will trigger such an error.
+* `ErrorKind::InvalidParameter` a valid feature but with invalid parameters was used. For example, an attempt to instantiate a terminal with the size of **(0x0)** will trigger such an error.
 
-To get a more detailed description of the Error, use the `description()` method from class `Error` just like in the next snipped:
+To get a more detailed description of the Error, use the `description()` method from class `Error` just like in the next code snipped:
 ```rs
 let result = App::new().size(Size::new(0,0)).build();
 if let Err(error) = result {

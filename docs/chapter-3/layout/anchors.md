@@ -105,7 +105,6 @@ When all of the 4 anchors, the rest of the keys ( `x`, `y`, `width`, `height`, `
 
 **Example**
 
-
-| Layout                | Result                                 |
-|-----------------------|----------------------------------------|
-| **l:10,t:5,r:30,b:5** | .. image:: pics/layout_anchor_tlbr.png |
+| Layout                 | Result                                   |
+|------------------------|------------------------------------------|
+| **l:20,t:7,r:10,b:10** | <img src="img/layout_anchor_tlbr.png" /> |
