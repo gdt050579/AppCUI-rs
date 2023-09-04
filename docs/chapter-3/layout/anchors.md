@@ -91,12 +91,12 @@ where:
 **Examples**
 
 
-| Layout                     | Result                                |
-|----------------------------|---------------------------------------|
-| **l:10,t:5,r:30,h:50%**    | .. image:: pics/layout_anchor_ltr.png |
-| **l:10,b:10,r:30,h:30**    | .. image:: pics/layout_anchor_lbr.png |
-| **l:10,t:10,b:100,w:50%**  | .. image:: pics/layout_anchor_tlb.png |
-| **r:10%,t:10,b:100,w:75%** | .. image:: pics/layout_anchor_trb.png |
+| Layout                     | Result                                  |
+|----------------------------|-----------------------------------------|
+| **l:10,t:8,r:20,h:33%**    | <img src="img/layout_anchor_ltr.png" /> |
+| **l:10,b:10,r:30,h:30**    | .. image:: pics/layout_anchor_lbr.png   |
+| **l:10,t:10,b:100,w:50%**  | .. image:: pics/layout_anchor_tlb.png   |
+| **r:10%,t:10,b:100,w:75%** | .. image:: pics/layout_anchor_trb.png   |
 
 
 ## 4-margin anchors
