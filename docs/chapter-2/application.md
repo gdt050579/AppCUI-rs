@@ -11,12 +11,12 @@ To create an application three APIs can be used:
 
 **Example** (using the default terminal):
 ```rs
-let mut a = App::new().build().unwrap();
+let mut a = App::new().build().expect("Fail to create an AppCUI application");
 ```
 
 **Example** (using the windows terminal):
 ```rs
-let mut a = App::with_terminal(TerminalType::WindowsConsole).build().unwrap();
+let mut a = App::with_terminal(TerminalType::WindowsConsole).build().expect("Fail to create an AppCUI application with WindowsConsole terminal");
 ```
 
 ## Builder
@@ -28,7 +28,7 @@ Using `App::new` or `App::with_terminal` creates a builder object that can furth
 * `.command_bar()` to enable the application command bar
 
 After setting up the configuration for an application, just call the `build()` method to create an application. This methods returns a result of type `Result<App,Error>` from where the appcui application can be obtained via several methods such as:
-* `unwrap()` method
+* `unwrap()` or `expect(...)` methods
 * `?` opertor
 * `if let` construct
 
@@ -38,7 +38,7 @@ let mut a = App::new().size(Size::new(80,40))  // size should be 80x25 chars
                       .menu()                  // top menu should be enabled
                       .command_bar()           // command bar should be enabled
                       .build()
-                      .unwrap();
+                      .expect("Fail to create an AppCUI application");
 ```
 
 ## Errors
