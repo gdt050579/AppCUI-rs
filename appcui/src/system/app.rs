@@ -62,7 +62,7 @@ impl App {
     /// 
     /// **Paint related commands**
     /// * `Paint(name)` paints the current virtual screen into the current screen using ANSI codes. 
-    /// * `Paint.Enable(value)` enables or disables printing. `value` is a boolean value (**true** or **false**). If set to **false** all subsequent calls to command `Print` will be ignored.
+    /// * `Paint.Enable(value)` enables or disables painting. `value` is a boolean value (**true** or **false**). If set to **false** all subsequent calls to command `Paint` will be ignored.
     /// 
     /// **System events**
     /// * `Resize(width,height)` simulates a resize of the virtual terminal to the size represented by `width` and `height` parameters
