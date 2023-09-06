@@ -95,8 +95,8 @@ where:
 |----------------------------|-----------------------------------------|
 | **l:10,t:8,r:20,h:33%**    | <img src="img/layout_anchor_ltr.png" /> |
 | **l:20,b:5,r:10,h:33%**    | <img src="img/layout_anchor_lbr.png" /> |
-| **l:10,t:8,b:15,w:80%**    | <img src="img/layout_anchor_tlb.png" />  |
-| **r:10%,t:10,b:100,w:75%** | .. image:: pics/layout_anchor_trb.png   |
+| **l:10,t:8,b:15,w:80%**    | <img src="img/layout_anchor_tlb.png" /> |
+| **r:30,t:8,b:20%,w:50%%**  | <img src="img/layout_anchor_trb.png" /> |
 
 
 ## 4-margin anchors
