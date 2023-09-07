@@ -279,6 +279,22 @@ fn check_window_move() {
 }
 
 #[test]
+fn check_window_move_2() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0xB1471A30B30F5C6C)
+        Mouse.Drag(30,3,35,5)
+        Paint('window was moved')
+        CheckHash(0x419533D4BBEFE538)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::None);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_window_on_layout_changed() {
     #[Window(events = WindowEvents,internal = true)]
     struct MyWin {

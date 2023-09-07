@@ -9,7 +9,12 @@ Command-2()
 // comment
 ```
 
-**Remarks**: `App::debug(...)` will panic if the script with differnt commands is incorect (a command is not valid, the number of parameters is incorect, etc).
+**Remarks**: 
+* `App::debug(...)` will panic if the script is incorect (a command is not valid, the number of parameters is incorect, etc).
+* `AppCUI` allows only one instance at one time (this is done via a mutex object). If you have multiple unit test and you try to run them with `cargo test` command, you might get an error as **cargo** might try to use multiple threads to do this and it is likely that one thread might try to start an `AppCUI` application while another one is already running on another thread. The solution in this case is to run the tests using a single thread:
+```
+cargo test -- --test-threads=1
+```
 
      
 ## Mouse related commands
@@ -66,3 +71,108 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
 | Command            | Purpose |
 |--------------------|---------|  
 | `CheckHash(hash)`  | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing. |
+
+## Example
+
+Let's consider a scenario where we want to test if moving a window with a mouse works as expected. For this we will create a test function, with the following code:
+
+```rs
+#[test]
+fn check_if_window_can_be_moved() {
+    let script = "
+        Paint('initial state')
+        CheckHash(0xB1471A30B30F5C6C)
+        Mouse.Drag(30,3,35,5)
+        Paint('window was moved')
+        CheckHash(0x419533D4BBEFE538)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::None);
+    a.add_window(w);
+    a.run();
+}
+```
+
+Let's break the event script in pieces and see exactly what is supposed to happen:
+1. `Paint('initial state')` - this will print the virtual screen. It should look like the following (but with colors):
+```
+    +===================================================================+
+    | Name: initial state                                               |
+    | Hash: 0xB1471A30B30F5C6C                                          |
+    |-------------------------------------------------------------------|
+    |    |           11111111112222222222333333333344444444445555555555 |
+    |    | 012345678901234567890123456789012345678901234567890123456789 |
+    |-------------------------------------------------------------------|
+    |  0 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  1 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  2 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  3 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  4 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  5 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  6 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  7 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  8 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  9 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |-------------------------------------------------------------------|
+```
+We can inspect inspect if the position of the window is correct. We can also notice the hash compited for the entire virtual screen: `0xB1471A30B30F5C6C` (this could help us do further checks).
+
+2. `CheckHash(0xB1471A30B30F5C6C)` - this compute the hash for the entire virtual screen and then check it againts the expected one. The usual scenario here is that we firs apply a `Paint` command, validate it, and them write the `CheckHash` command with the hash obtained from the `Paint` command. This way, if something changes to the logic/code of the program, the new hash will be different. **If the hash for the virtual screen is not as expected the application will panic**. If used in a test, this behavior will fail the test.
+
+3. `Mouse.Drag(30,3,35,5)` this command does the following:
+    - moves the mouse to the **(30,3)** coordonate (over the title of the window)
+    - click and hold the left mouse button
+    - moves the mouse to a new position **(35,5)** (since we hold the mouse button, we expect the window to move as well)
+    - releases the left mouse button
+
+4. `Paint('window was moved')` now we should see something like the following. Notice that indeed, the window was moved to a new position. We also have a new hash for the virtual screen: `0x419533D4BBEFE538`
+
+```
+    +===================================================================+
+    | Name: window was moved                                            |
+    | Hash: 0x419533D4BBEFE538                                          |
+    |-------------------------------------------------------------------|
+    |    |           11111111112222222222333333333344444444445555555555 |
+    |    | 012345678901234567890123456789012345678901234567890123456789 |
+    |-------------------------------------------------------------------|
+    |  0 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  1 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  2 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  3 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  4 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  5 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  6 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  7 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  8 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |  9 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    |-------------------------------------------------------------------|
+```
+
+25. `CheckHash(0x419533D4BBEFE538)` - finally we check the new hash to see if it maches the one we expect.
+
+**Remarsk**: using unit tests (while it works with the `Paint` command activated) might look strange on the actual screen (especially if all you need is to validate an example). As such, it is best that after one example such as the previous one was validated, to add another command at the begining of the script: `Paint.Enable(false)`. This will not change the logic of the script, instead it will not print anything on the screen. As such, the final test function should look like this:
+
+```rs
+#[test]
+fn check_if_window_can_be_moved() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0xB1471A30B30F5C6C)
+        Mouse.Drag(30,3,35,5)
+        Paint('window was moved')
+        CheckHash(0x419533D4BBEFE538)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::None);
+    a.add_window(w);
+    a.run();
+}
+```
+
+and its execution should produce an output similar to the next one:
+
+```
+running 1 test
+test check_if_window_can_be_moved ... ok
+```
