@@ -134,7 +134,7 @@ impl Window {
     /// ```rust,no_run
     ///     use appcui::prelude::*;
     ///
-    ///     let mut a = App::default().unwrap();
+    ///     let mut a = App::new().build().unwrap();
     ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     ///     w.add(Button::new("Press me",Layout::new("x:1,y:1,w:10"),button::Flags::None));
     /// ```    
@@ -145,7 +145,7 @@ impl Window {
     /// ```rust,compile_fail
     ///     use appcui::prelude::*;
     ///
-    ///     let mut a = App::default().unwrap();
+    ///     let mut a = App::new().build().unwrap();
     ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
     ///     w.add(Window::new("aaa",Layout::new("d:c,w:20,h:10"),window::Flags::None));
     /// ```    
