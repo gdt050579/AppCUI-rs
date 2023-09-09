@@ -14,17 +14,11 @@ pub(super) struct PointAndSizeLayout {
     pub align: Alignament,
     pub anchor: Alignament,
 }
-impl PointAndSizeLayout {    
+impl PointAndSizeLayout {
     #[inline]
     pub(super) fn new_docked(params: &LayoutParameters) -> Self {
-        should_not_use!(
-            params.x,
-            "When ('dock' or 'd') parameter is used,'x' parameter can not be used !"
-        );
-        should_not_use!(
-            params.y,
-            "When ('dock' or 'd') parameter is used,'y' parameter can not be used !"
-        );
+        should_not_use!(params.x, "When ('dock' or 'd') parameter is used,'x' parameter can not be used !");
+        should_not_use!(params.y, "When ('dock' or 'd') parameter is used,'y' parameter can not be used !");
         should_not_use!(
             params.a_top,
             "When ('dock' or 'd') parameter is used,('top' or 't') parameters can not be used !"
@@ -49,8 +43,8 @@ impl PointAndSizeLayout {
         PointAndSizeLayout {
             x: Coordonate::Absolute(0),
             y: Coordonate::Absolute(0),
-            width: params.width.unwrap_or(Size::Percentage(1000)),
-            height: params.height.unwrap_or(Size::Percentage(1000)),
+            width: params.width.unwrap_or(Size::Percentage(10000)),
+            height: params.height.unwrap_or(Size::Percentage(10000)),
             align: params.dock.unwrap(),
             anchor: params.dock.unwrap(),
         }
@@ -68,10 +62,7 @@ impl PointAndSizeLayout {
             params.a_right,
             "When (x,y) parameters are used, ('right' or 'r') parameter can not be used !"
         );
-        should_not_use!(
-            params.a_top,
-            "When (x,y) parameters are used, ('top' or 't') parameter can not be used !"
-        );
+        should_not_use!(params.a_top, "When (x,y) parameters are used, ('top' or 't') parameter can not be used !");
         should_not_use!(
             params.a_bottom,
             "When (x,y) parameters are used, ('bottom' or 'b') parameter can not be used !"
@@ -117,16 +108,8 @@ impl PointAndSizeLayout {
     }
 
     #[inline]
-    pub(super) fn update_control_layout(
-        &self,
-        control_layout: &mut ControlLayout,
-        parent_width: u16,
-        parent_height: u16,
-    ) {
-        control_layout.resize(
-            self.width.to_absolute_size(parent_width),
-            self.height.to_absolute_size(parent_height),
-        );
+    pub(super) fn update_control_layout(&self, control_layout: &mut ControlLayout, parent_width: u16, parent_height: u16) {
+        control_layout.resize(self.width.to_absolute_size(parent_width), self.height.to_absolute_size(parent_height));
         let mut x = self.x.to_absolute_coordonate(parent_width);
         let mut y = self.y.to_absolute_coordonate(parent_height);
 
