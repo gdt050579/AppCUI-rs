@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-use super::{Gravity, ToolBarItem};
+use super::{GroupPosition, ToolBarItem};
 
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
@@ -14,19 +14,19 @@ pub(crate) struct ItemBase {
     x: i32,
     y: i32,
     width: u16,
-    gravity: Gravity,
+    gravity: GroupPosition,
     status: StatusFlags,
     tooltip: String,
 }
 
 impl ItemBase {
-    pub(super) fn with_tooltip(gravity: Gravity, part_of_group: bool, tooltip: &str) -> ItemBase {
+    pub(super) fn with_tooltip(gravity: GroupPosition, part_of_group: bool, tooltip: &str) -> ItemBase {
         let mut base = ItemBase::new(gravity, part_of_group, true);
         base.tooltip.push_str(tooltip);
         base
     }
     pub(super) fn with_width(
-        gravity: Gravity,
+        gravity: GroupPosition,
         width: u16,
         tooltip: &str,
         visible: bool,
@@ -36,7 +36,7 @@ impl ItemBase {
         base.tooltip.push_str(tooltip);
         base
     }
-    pub(super) fn new(gravity: Gravity, part_of_group: bool, visible: bool) -> ItemBase {
+    pub(super) fn new(gravity: GroupPosition, part_of_group: bool, visible: bool) -> ItemBase {
         ItemBase {
             x: 0,
             y: 0,
@@ -89,7 +89,7 @@ impl ItemBase {
             == StatusFlags::Visible
     }
     #[inline(always)]
-    pub(crate) fn get_gravity(&self) -> Gravity {
+    pub(crate) fn get_gravity(&self) -> GroupPosition {
         self.gravity
     }
     #[inline(always)]

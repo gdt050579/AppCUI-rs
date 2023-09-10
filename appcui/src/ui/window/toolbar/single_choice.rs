@@ -6,7 +6,7 @@ use crate::{
     utils::Caption
 };
 
-use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBarItem, ToolBar};
+use super::{AddToToolbar, GroupPosition, ItemBase, PaintData, SymbolAttrState, ToolBarItem, ToolBar};
 
 pub struct SingleChoice {
     pub(super) base: ItemBase,
@@ -24,7 +24,7 @@ impl AddToToolbar<SingleChoice> for SingleChoice {
 }
 
 impl SingleChoice {
-    pub fn new(gravity: Gravity, text: &str, group_id: u32) -> Self {
+    pub fn new(gravity: GroupPosition, text: &str, group_id: u32) -> Self {
         let mut obj = SingleChoice {
             base: ItemBase::new(gravity, true, true),
             handle: Handle::None,

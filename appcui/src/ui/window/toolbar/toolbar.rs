@@ -9,14 +9,21 @@ use crate::{
 };
 
 use super::{
-    Button, CheckBox, CloseButton, Gravity, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner, SingleChoice, Tag,
-    ToolBarItem,
+    Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner, SingleChoice, Tag,
+    ToolBarItem, group::Group,
 };
+
+pub struct ToolbarElementHandle {
+    pub(super) group: Group,
+    pub(super) handle: Handle<UIElement>
+}
 
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
     current_handle: Handle<UIElement>,
+    order: Vec<ToolbarElementHandle>,
     pressed: bool,
+    last_group_index: u8
 }
 
 pub trait AddToToolbar<T> {
@@ -28,7 +35,18 @@ impl ToolBar {
         ToolBar {
             items: HandleManager::new(4),
             pressed: false,
+            order: Vec::with_capacity(4),
             current_handle: Handle::None,
+            last_group_index: 0
+        }
+    }
+    pub fn create_group(&mut self, pos: GroupPosition) -> Group {
+        if self.last_group_index == 255 {
+            Group { pos, id: 255u8 }
+        } else {
+            let g = Group{pos, id: self.last_group_index};
+            self.last_group_index+=1;
+            g
         }
     }
     pub fn add<T>(&mut self, item: T) -> Handle<T>
@@ -188,14 +206,14 @@ impl ToolBar {
                 }
                 let gravity = base.get_gravity();
                 match gravity {
-                    Gravity::TopLeft => {
+                    GroupPosition::TopLeft => {
                         self.update_position_from_left(index, &mut top_left, top_right.x);
                     }
-                    Gravity::BottomLeft => self.update_position_from_left(index, &mut bottom_left, bottom_right.x),
-                    Gravity::TopRight => {
+                    GroupPosition::BottomLeft => self.update_position_from_left(index, &mut bottom_left, bottom_right.x),
+                    GroupPosition::TopRight => {
                         self.update_position_from_right(index, &mut top_right, top_left.x);
                     }
-                    Gravity::BottomRight => {
+                    GroupPosition::BottomRight => {
                         match d {
                             ToolBarItem::ResizeCorner(_) => bottom_right.x += 1,
                             _ => {}

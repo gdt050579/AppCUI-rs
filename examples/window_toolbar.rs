@@ -20,12 +20,12 @@ impl MyWin {
             opt2: Handle::None,
             opt3: Handle::None,
         };
-        me.lb1 = me.get_toolbar().add(toolbar::Label::new(toolbar::Gravity::TopLeft,"<None>"));
-        me.cb1 = me.get_toolbar().add(toolbar::CheckBox::new(toolbar::Gravity::BottomLeft, "CheckBox &1", false));
-        me.cb2 = me.get_toolbar().add(toolbar::CheckBox::new(toolbar::Gravity::BottomLeft, "CheckBox &2", false));
-        me.opt1 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::Gravity::BottomLeft, "Opy &A", 1));
-        me.opt2 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::Gravity::BottomLeft, "Opy &B", 1));
-        me.opt3 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::Gravity::BottomLeft, "Opy &C", 1));
+        me.lb1 = me.get_toolbar().add(toolbar::Label::new(toolbar::GroupPosition::TopLeft,"<None>"));
+        me.cb1 = me.get_toolbar().add(toolbar::CheckBox::new(toolbar::GroupPosition::BottomLeft, "CheckBox &1", false));
+        me.cb2 = me.get_toolbar().add(toolbar::CheckBox::new(toolbar::GroupPosition::BottomLeft, "CheckBox &2", false));
+        me.opt1 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &A", 1));
+        me.opt2 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &B", 1));
+        me.opt3 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &C", 1));
         
         me
     }

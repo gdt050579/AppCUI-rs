@@ -3,7 +3,7 @@ use crate::{
     system::{Handle, Theme}
 };
 
-use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
+use super::{AddToToolbar, GroupPosition, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 pub(crate) struct ResizeCorner {
     pub(super) base: ItemBase,
@@ -19,7 +19,7 @@ impl AddToToolbar<ResizeCorner> for ResizeCorner {
 impl ResizeCorner {
     pub fn new() -> Self {
         Self {
-            base: ItemBase::with_width(Gravity::BottomRight, 2, "Drag to resize this window", true),
+            base: ItemBase::with_width(GroupPosition::BottomRight, 2, "Drag to resize this window", true),
             handle: Handle::None,
         }
     }

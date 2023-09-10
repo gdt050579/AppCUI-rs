@@ -1,5 +1,5 @@
 mod item_base;
-mod gravity;
+mod group;
 mod toolbar_item;
 mod toolbar;
 mod position_helper;
@@ -23,7 +23,7 @@ pub (self) use self::position_helper::PositionHelper;
 pub (self) use self::paint_data::PaintData;
 pub (self) use self::symbol_attr_state::SymbolAttrState;
 pub (super) use self::toolbar::ToolBar;
-pub use self::gravity::Gravity;
+pub use self::group::GroupPosition;
 
 // tool bar items (public)
 pub use self::label::Label;

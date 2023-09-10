@@ -4,7 +4,7 @@ use crate::{
     utils::Caption,
 };
 
-use super::{AddToToolbar, Gravity, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
+use super::{AddToToolbar, GroupPosition, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 pub struct CheckBox {
     pub(super) base: ItemBase,
@@ -20,7 +20,7 @@ impl AddToToolbar<CheckBox> for CheckBox {
 }
 
 impl CheckBox {
-    pub fn new(gravity: Gravity, text: &str, checked: bool) -> Self {
+    pub fn new(gravity: GroupPosition, text: &str, checked: bool) -> Self {
         let mut obj = CheckBox {
             base: ItemBase::new(gravity, true, true),
             handle: Handle::None,

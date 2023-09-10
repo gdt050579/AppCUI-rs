@@ -103,10 +103,10 @@ impl Window {
             win.toolbar.add(toolbar::ResizeCorner::new());
         }
         // hotkey
-        win.hotkey_handle = win.toolbar.add(toolbar::HotKey::new(Gravity::TopLeft));
+        win.hotkey_handle = win.toolbar.add(toolbar::HotKey::new(GroupPosition::TopLeft));
 
         // tag
-        win.tag_handle = win.toolbar.add(toolbar::Tag::new(Gravity::TopLeft));
+        win.tag_handle = win.toolbar.add(toolbar::Tag::new(GroupPosition::TopLeft));
 
         win
 

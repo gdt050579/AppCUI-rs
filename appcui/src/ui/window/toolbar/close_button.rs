@@ -3,7 +3,7 @@ use crate::{
     system::{Handle, Theme}
 };
 
-use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Gravity, SymbolAttrState};
+use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, GroupPosition, SymbolAttrState};
 
 pub(crate) struct CloseButton {
     pub(super) base: ItemBase,
@@ -19,7 +19,7 @@ impl AddToToolbar<CloseButton> for CloseButton {
 impl CloseButton {
     pub fn new() -> Self {
         CloseButton {
-            base: ItemBase::with_width(Gravity::TopRight, 3, "Press to close this window", true),
+            base: ItemBase::with_width(GroupPosition::TopRight, 3, "Press to close this window", true),
             handle: Handle::None,
         }
     }
