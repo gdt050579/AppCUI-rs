@@ -135,24 +135,40 @@ fn layout_mode_align_bottom() {
 #[test]
 fn layout_mode_dock_center() {
     validate_dock!("d:c",50,30,0,0,50,30);
-    validate_dock!("d:c,w:20,h:10",50,30,15,10,20,10);
-    validate_dock!("d:c,w:20",50,30,15,0,20,30);    
-    validate_dock!("d:c,h:10",50,30,0,10,50,10);
-    validate_dock!("d:c,w:50%,h:25%",60,40,15,15,30,10);
+    validate_dock!("d:center,w:20,h:10",50,30,15,10,20,10);
+    validate_dock!("d:Center,w:20",50,30,15,0,20,30);    
+    validate_dock!("d:CENTER,h:10",50,30,0,10,50,10);
+    validate_dock!("d:cEnTeR,w:50%,h:25%",60,40,15,15,30,10);
 }
 #[test]
 fn layout_mode_dock_top_left() {
     validate_dock!("d:tl",50,30,0,0,50,30);
-    validate_dock!("d:tl,w:20,h:10",50,30,0,0,20,10);
-    validate_dock!("d:tl,w:20",50,30,0,0,20,30);    
-    validate_dock!("d:tl,h:10",50,30,0,0,50,10);
-    validate_dock!("d:tl,w:50%,h:25%",60,40,0,0,30,10);
+    validate_dock!("d:lt,w:20,h:10",50,30,0,0,20,10);
+    validate_dock!("d:topleft,w:20",50,30,0,0,20,30);    
+    validate_dock!("d:lefttop,h:10",50,30,0,0,50,10);
+    validate_dock!("d:TopLeft,w:50%,h:25%",60,40,0,0,30,10);
 }
 #[test]
-fn layout_mode_dock_left_bottom() {
+fn layout_mode_dock_bottom_left() {
     validate_dock!("d:lb",50,30,0,0,50,30);
-    validate_dock!("d:lb,w:20,h:10",50,30,0,20,20,10);
+    validate_dock!("d:bl,w:20,h:10",50,30,0,20,20,10);
     validate_dock!("d:lb,w:20",50,30,0,0,20,30);    
-    validate_dock!("d:lb,h:10",50,30,0,20,50,10);
-    validate_dock!("d:lb,w:50%,h:25%",60,40,0,30,30,10);
+    validate_dock!("d:bottomleft,h:10",50,30,0,20,50,10);
+    validate_dock!("d:leftbottom,w:50%,h:25%",60,40,0,30,30,10);
+}
+#[test]
+fn layout_mode_dock_bottom_right() {
+    validate_dock!("d:rb",50,30,0,0,50,30);
+    validate_dock!("d:br,w:20,h:10",50,30,30,20,20,10);
+    validate_dock!("d:rb,w:20",50,30,30,0,20,30);    
+    validate_dock!("d:bottomright,h:10",50,30,0,20,50,10);
+    validate_dock!("d:rightbottom,w:50%,h:25%",60,40,30,30,30,10);
+}
+#[test]
+fn layout_mode_dock_top_right() {
+    validate_dock!("d:tr",50,30,0,0,50,30);
+    validate_dock!("d:rt,w:20,h:10",50,30,30,0,20,10);
+    validate_dock!("d:TopRight,w:20",50,30,30,0,20,30);    
+    validate_dock!("d:rightTop,h:10",50,30,0,0,50,10);
+    validate_dock!("d:topright,w:50%,h:25%",60,40,30,0,30,10);
 }
