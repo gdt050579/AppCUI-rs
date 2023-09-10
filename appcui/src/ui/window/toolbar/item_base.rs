@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-use super::{GroupPosition, ToolBarItem};
+use super::{GroupPosition, ToolBarItem, Group};
 
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
@@ -14,34 +14,33 @@ pub(crate) struct ItemBase {
     x: i32,
     y: i32,
     width: u16,
-    gravity: GroupPosition,
+    group: Group,
     status: StatusFlags,
     tooltip: String,
 }
 
 impl ItemBase {
-    pub(super) fn with_tooltip(gravity: GroupPosition, part_of_group: bool, tooltip: &str) -> ItemBase {
-        let mut base = ItemBase::new(gravity, part_of_group, true);
+    pub(super) fn with_tooltip(part_of_group: bool, tooltip: &str) -> ItemBase {
+        let mut base = ItemBase::new(part_of_group, true);
         base.tooltip.push_str(tooltip);
         base
     }
     pub(super) fn with_width(
-        gravity: GroupPosition,
         width: u16,
         tooltip: &str,
         visible: bool,
     ) -> ItemBase {
-        let mut base = ItemBase::new(gravity, false, visible);
+        let mut base = ItemBase::new(false, visible);
         base.width = width;
         base.tooltip.push_str(tooltip);
         base
     }
-    pub(super) fn new(gravity: GroupPosition, part_of_group: bool, visible: bool) -> ItemBase {
+    pub(super) fn new(part_of_group: bool, visible: bool) -> ItemBase {
         ItemBase {
             x: 0,
             y: 0,
             width: 0,
-            gravity,
+            group: Group::default(),
             tooltip: String::new(),
             status: if part_of_group {
                 if visible {
@@ -58,7 +57,10 @@ impl ItemBase {
             },
         }
     }
-
+    #[inline(always)]
+    pub(crate) fn update_group(&mut self, group: Group) {
+        self.group = group;
+    }
     #[inline(always)]
     pub(crate) fn clear(&mut self) {
         self.status.remove(
@@ -90,7 +92,7 @@ impl ItemBase {
     }
     #[inline(always)]
     pub(crate) fn get_gravity(&self) -> GroupPosition {
-        self.gravity
+        self.group.pos
     }
     #[inline(always)]
     pub(crate) fn has_right_group_marker(&self) -> bool {

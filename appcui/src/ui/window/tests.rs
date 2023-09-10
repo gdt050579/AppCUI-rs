@@ -419,10 +419,10 @@ fn check_window_toolbar_label() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g,toolbar::Label::new(GroupPosition::BottomLeft, "Label 1"));
-    w.get_toolbar().add(g,toolbar::Label::new(GroupPosition::BottomLeft, "Label 2"));
+    w.get_toolbar().add(g, toolbar::Label::new("Label 1"));
+    w.get_toolbar().add(g, toolbar::Label::new("Label 2"));
     let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g,toolbar::Label::new(GroupPosition::BottomRight, "Label 3"));
+    w.get_toolbar().add(g, toolbar::Label::new("Label 3"));
 
     a.add_window(w);
     a.run();
@@ -447,10 +447,10 @@ fn check_window_toolbar_button() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::Button::new(GroupPosition::BottomLeft, "Start"));
-    w.get_toolbar().add(g, toolbar::Button::new(GroupPosition::BottomLeft, "Stop"));
+    w.get_toolbar().add(g, toolbar::Button::new( "Start"));
+    w.get_toolbar().add(g, toolbar::Button::new( "Stop"));
     let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::Button::new(GroupPosition::BottomRight, "Exit"));
+    w.get_toolbar().add(g, toolbar::Button::new("Exit"));
 
     a.add_window(w);
     a.run();
@@ -476,9 +476,9 @@ fn check_window_toolbar_button_events() {
             };
             me.info = me.add(Label::new("<no-state>", Layout::new("x:1,y:1,w:16")));
             let g = me.get_toolbar().create_group(GroupPosition::BottomLeft);
-            me.run_button = me.get_toolbar().add(g, toolbar::Button::new(GroupPosition::BottomLeft, "&Run"));
-            me.stop_button = me.get_toolbar().add(g, toolbar::Button::new(GroupPosition::BottomLeft, "&Stop"));
-            me.exit_button = me.get_toolbar().add(g, toolbar::Button::new(GroupPosition::BottomLeft, "E&xit"));
+            me.run_button = me.get_toolbar().add(g, toolbar::Button::new("&Run"));
+            me.stop_button = me.get_toolbar().add(g, toolbar::Button::new("&Stop"));
+            me.exit_button = me.get_toolbar().add(g, toolbar::Button::new("E&xit"));
             me
         }
         fn set_info(&mut self, info: &str) {
@@ -548,12 +548,10 @@ fn check_window_toolbar_checkbox() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::CheckBox::new(GroupPosition::BottomLeft, "Task &1", true));
-    w.get_toolbar()
-        .add(g, toolbar::CheckBox::new(GroupPosition::BottomLeft, "Task &2", false));
+    w.get_toolbar().add(g, toolbar::CheckBox::new("Task &1", true));
+    w.get_toolbar().add(g, toolbar::CheckBox::new("Task &2", false));
     let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar()
-        .add(g, toolbar::CheckBox::new(GroupPosition::BottomRight, "Enable &All", false));
+    w.get_toolbar().add(g, toolbar::CheckBox::new("Enable &All", false));
 
     a.add_window(w);
     a.run();
@@ -572,7 +570,7 @@ fn check_window_toolbar_checkbox_events() {
                 cb: Handle::None,
             };
             let g = me.get_toolbar().create_group(GroupPosition::TopLeft);
-            me.cb = me.get_toolbar().add(g, toolbar::CheckBox::new(GroupPosition::TopLeft, "No State", false));
+            me.cb = me.get_toolbar().add(g, toolbar::CheckBox::new("No State", false));
             me
         }
     }
@@ -636,13 +634,13 @@ fn check_window_toolbar_single_choice() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:58,h:8"), window::Flags::None);
     let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomLeft, "Opt &1", 1));
-    w.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomLeft, "Opt &2", 1));
-    w.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomLeft, "Opt &3", 1));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &1", 1));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &2", 1));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &3", 1));
     let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomRight, "Opt &A", 2));
-    w.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomRight, "Opt &B", 2));
-    w.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomRight, "Opt &C", 2));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &A", 2));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &B", 2));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &C", 2));
 
     a.add_window(w);
     a.run();
@@ -671,13 +669,13 @@ fn check_window_toolbar_singlechoice_events() {
                 optC: Handle::None,
             };
             let g = me.get_toolbar().create_group(GroupPosition::BottomLeft);
-            me.opt1 = me.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomLeft, "Opt &1", 1));
-            me.opt2 = me.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomLeft, "Opt &2", 1));
-            me.opt3 = me.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomLeft, "Opt &3", 1));
+            me.opt1 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &1", 1));
+            me.opt2 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &2", 1));
+            me.opt3 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &3", 1));
             let g = me.get_toolbar().create_group(GroupPosition::BottomRight);
-            me.optA = me.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomRight, "Opt &A", 2));
-            me.optB = me.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomRight, "Opt &B", 2));
-            me.optC = me.get_toolbar().add(g,toolbar::SingleChoice::new(GroupPosition::BottomRight, "Opt &C", 2));
+            me.optA = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &A", 2));
+            me.optB = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &B", 2));
+            me.optC = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &C", 2));
             me
         }
     }

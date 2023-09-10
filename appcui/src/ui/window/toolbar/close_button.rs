@@ -3,7 +3,7 @@ use crate::{
     system::{Handle, Theme}
 };
 
-use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, GroupPosition, SymbolAttrState};
+use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, SymbolAttrState, Group};
 
 pub(crate) struct CloseButton {
     pub(super) base: ItemBase,
@@ -11,7 +11,8 @@ pub(crate) struct CloseButton {
 }
 
 impl AddToToolbar<CloseButton> for CloseButton {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<CloseButton> {
+    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<CloseButton> {
+        self.base.update_group(group);
         toolbar.items.add(ToolBarItem::CloseButton(self)).cast()
     }
 }
@@ -19,7 +20,7 @@ impl AddToToolbar<CloseButton> for CloseButton {
 impl CloseButton {
     pub fn new() -> Self {
         CloseButton {
-            base: ItemBase::with_width(GroupPosition::TopRight, 3, "Press to close this window", true),
+            base: ItemBase::with_width(3, "Press to close this window", true),
             handle: Handle::None,
         }
     }

@@ -3,7 +3,7 @@ use crate::{
     system::{Handle, Theme}
 };
 
-use super::{AddToToolbar, GroupPosition, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
+use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 pub(crate) struct ResizeCorner {
     pub(super) base: ItemBase,
@@ -11,7 +11,8 @@ pub(crate) struct ResizeCorner {
 }
 
 impl AddToToolbar<ResizeCorner> for ResizeCorner {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<ResizeCorner> {
+    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<ResizeCorner> {
+        self.base.update_group(group);
         toolbar.items.add(ToolBarItem::ResizeCorner(self)).cast()
     }
 }
@@ -19,7 +20,7 @@ impl AddToToolbar<ResizeCorner> for ResizeCorner {
 impl ResizeCorner {
     pub fn new() -> Self {
         Self {
-            base: ItemBase::with_width(GroupPosition::BottomRight, 2, "Drag to resize this window", true),
+            base: ItemBase::with_width(2, "Drag to resize this window", true),
             handle: Handle::None,
         }
     }

@@ -27,7 +27,7 @@ pub struct ToolBar {
 }
 
 pub trait AddToToolbar<T> {
-    fn add(self, toolbar: &mut ToolBar) -> Handle<T>;
+    fn add(self, toolbar: &mut ToolBar, group: Group) -> Handle<T>;
 }
 
 impl ToolBar {
@@ -52,8 +52,8 @@ impl ToolBar {
     pub fn add<T>(&mut self, group: Group, item: T) -> Handle<T>
     where
         T: AddToToolbar<T>,
-    {
-        let h = AddToToolbar::add(item, self);
+    {        
+        let h = AddToToolbar::add(item, self, group);
         self.order.push(ToolbarElementHandle { group, handle: h.cast() });
         self.order.sort_by_key(|k| k.group.id);
         h

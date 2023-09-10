@@ -3,7 +3,7 @@ use crate::{
     system::{Handle, Theme}
 };
 
-use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, GroupPosition, SymbolAttrState};
+use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Group, SymbolAttrState};
 
 pub(crate) struct MaximizeRestoreButton {
     pub(super) base: ItemBase,
@@ -11,7 +11,8 @@ pub(crate) struct MaximizeRestoreButton {
 }
 
 impl AddToToolbar<MaximizeRestoreButton> for MaximizeRestoreButton {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<MaximizeRestoreButton> {
+    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<MaximizeRestoreButton> {
+        self.base.update_group(group);
         toolbar.items.add(ToolBarItem::MaximizeRestoreButton(self)).cast()
     }
 }
@@ -19,7 +20,7 @@ impl AddToToolbar<MaximizeRestoreButton> for MaximizeRestoreButton {
 impl MaximizeRestoreButton {
     pub fn new() -> Self {
         Self {
-            base: ItemBase::with_width(GroupPosition::TopLeft, 3, "Press to maximize or restore", true),
+            base: ItemBase::with_width(3, "Press to maximize or restore", true),
             handle: Handle::None,
         }
     }

@@ -8,7 +8,7 @@ pub enum GroupPosition {
 }
 
 impl GroupPosition {
-    pub (crate) fn is_on_left_side(&self)->bool {
+    pub(crate) fn is_on_left_side(&self) -> bool {
         match self {
             GroupPosition::TopLeft => true,
             GroupPosition::BottomLeft => true,
@@ -21,5 +21,13 @@ impl GroupPosition {
 #[derive(Clone, Copy)]
 pub struct Group {
     pub(super) pos: GroupPosition,
-    pub(super) id: u8
+    pub(super) id: u8,
+}
+impl Default for Group {
+    fn default() -> Self {
+        Self {
+            pos: GroupPosition::TopLeft,
+            id: 255,
+        }
+    }
 }

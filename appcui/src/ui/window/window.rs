@@ -107,11 +107,11 @@ impl Window {
         }
         // hotkey
         let g = win.toolbar.create_group(GroupPosition::TopLeft);
-        win.hotkey_handle = win.toolbar.add(g, toolbar::HotKey::new(GroupPosition::TopLeft));
+        win.hotkey_handle = win.toolbar.add(g, toolbar::HotKey::new());
 
         // tag
         let g = win.toolbar.create_group(GroupPosition::TopLeft);
-        win.tag_handle = win.toolbar.add(g, toolbar::Tag::new(GroupPosition::TopLeft));
+        win.tag_handle = win.toolbar.add(g, toolbar::Tag::new());
 
         win
 

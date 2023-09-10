@@ -3,7 +3,7 @@ use crate::{
     system::{Handle, Theme}, 
 };
 
-use super::{AddToToolbar, GroupPosition, ItemBase, PaintData, ToolBarItem};
+use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 
 pub struct Tag {
     pub(super) base: ItemBase,
@@ -12,15 +12,16 @@ pub struct Tag {
 }
 
 impl AddToToolbar<Tag> for Tag {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<Tag> {
+    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<Tag> {
+        self.base.update_group(group);
         toolbar.items.add(ToolBarItem::Tag(self)).cast()
     }
 }
 
 impl Tag {
-    pub fn new(gravity: GroupPosition) -> Self {
+    pub fn new() -> Self {
         Tag {
-            base: ItemBase::new(gravity, false, false),
+            base: ItemBase::new(false, false),
             handle: Handle::None,
             text: String::new(),
         }

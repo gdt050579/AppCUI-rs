@@ -4,7 +4,7 @@ use crate::{
     utils::Caption
 };
 
-use super::{AddToToolbar, GroupPosition, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
+use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Group};
 
 pub struct Button {
     pub(super) base: ItemBase,
@@ -13,15 +13,16 @@ pub struct Button {
 }
 
 impl AddToToolbar<Button> for Button {
-    fn add(self, toolbar: &mut super::toolbar::ToolBar) -> Handle<Button> {
+    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<Button> {
+        self.base.update_group(group);
         toolbar.items.add(ToolBarItem::Button(self)).cast()
     }
 }
 
 impl Button {
-    pub fn new(gravity: GroupPosition, text: &str) -> Self {
+    pub fn new(text: &str) -> Self {
         let mut obj = Button {
-            base: ItemBase::new(gravity, true, true),
+            base: ItemBase::new(true, true),
             handle: Handle::None,
             caption: Caption::new("", false),
         };
