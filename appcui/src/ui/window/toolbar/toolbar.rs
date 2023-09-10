@@ -14,8 +14,8 @@ use super::{
 };
 
 pub struct ToolbarElementHandle {
-    pub(super) group: Group,
-    pub(super) handle: Handle<UIElement>
+    group: Group,
+    handle: Handle<UIElement>
 }
 
 pub struct ToolBar {
@@ -49,11 +49,14 @@ impl ToolBar {
             g
         }
     }
-    pub fn add<T>(&mut self, item: T) -> Handle<T>
+    pub fn add<T>(&mut self, group: Group, item: T) -> Handle<T>
     where
         T: AddToToolbar<T>,
     {
-        AddToToolbar::add(item, self)
+        let h = AddToToolbar::add(item, self);
+        self.order.push(ToolbarElementHandle { group, handle: h.cast() });
+        self.order.sort_by_key(|k| k.group.id);
+        h
     }
     pub fn get<T>(&self, handle: Handle<T>) -> Option<&T> {
         if let Some(obj) = self.items.get(handle.cast()) {

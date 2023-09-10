@@ -20,13 +20,26 @@ impl MyWin {
             opt2: Handle::None,
             opt3: Handle::None,
         };
-        me.lb1 = me.get_toolbar().add(toolbar::Label::new(toolbar::GroupPosition::TopLeft,"<None>"));
-        me.cb1 = me.get_toolbar().add(toolbar::CheckBox::new(toolbar::GroupPosition::BottomLeft, "CheckBox &1", false));
-        me.cb2 = me.get_toolbar().add(toolbar::CheckBox::new(toolbar::GroupPosition::BottomLeft, "CheckBox &2", false));
-        me.opt1 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &A", 1));
-        me.opt2 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &B", 1));
-        me.opt3 = me.get_toolbar().add(toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &C", 1));
-        
+        let labels_group = me.get_toolbar().create_group(toolbar::GroupPosition::TopLeft);
+        me.lb1 = me.get_toolbar().add(labels_group, toolbar::Label::new(toolbar::GroupPosition::TopLeft, "<None>"));
+        let checkboxes_group = me.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+        me.cb1 = me
+            .get_toolbar()
+            .add(checkboxes_group, toolbar::CheckBox::new(toolbar::GroupPosition::BottomLeft, "CheckBox &1", false));
+        me.cb2 = me
+            .get_toolbar()
+            .add(checkboxes_group, toolbar::CheckBox::new(toolbar::GroupPosition::BottomLeft, "CheckBox &2", false));
+        let buttons_group = me.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+        me.opt1 = me
+            .get_toolbar()
+            .add(buttons_group, toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &A", 1));
+        me.opt2 = me
+            .get_toolbar()
+            .add(buttons_group, toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &B", 1));
+        me.opt3 = me
+            .get_toolbar()
+            .add(buttons_group, toolbar::SingleChoice::new(toolbar::GroupPosition::BottomLeft, "Opy &C", 1));
+
         me
     }
     fn set_info(&mut self, text: &str) {
@@ -43,10 +56,10 @@ impl ToolBarEvents for MyWin {
 
     fn on_checkbox_clicked(&mut self, handle: Handle<toolbar::CheckBox>, checked: bool) -> EventProcessStatus {
         if handle == self.cb1 {
-            self.set_info(format!{"CheckBox 1 is {checked}"}.as_str());
+            self.set_info(format! {"CheckBox 1 is {checked}"}.as_str());
         }
         if handle == self.cb2 {
-            self.set_info(format!{"CheckBox 2 is {checked}"}.as_str());
+            self.set_info(format! {"CheckBox 2 is {checked}"}.as_str());
         }
         EventProcessStatus::Processed
     }

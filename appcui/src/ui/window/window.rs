@@ -96,17 +96,22 @@ impl Window {
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
         if flags.contains(Flags::NoCloseButton) == false {
-            win.toolbar.add(toolbar::CloseButton::new());
+            let g = win.toolbar.create_group(GroupPosition::TopRight);
+            win.toolbar.add(g, toolbar::CloseButton::new());
         }
         if flags.contains(Flags::Sizeable) {
-            win.toolbar.add(toolbar::MaximizeRestoreButton::new());
-            win.toolbar.add(toolbar::ResizeCorner::new());
+            let g = win.toolbar.create_group(GroupPosition::TopLeft);
+            win.toolbar.add(g, toolbar::MaximizeRestoreButton::new());
+            let g = win.toolbar.create_group(GroupPosition::BottomRight);
+            win.toolbar.add(g, toolbar::ResizeCorner::new());
         }
         // hotkey
-        win.hotkey_handle = win.toolbar.add(toolbar::HotKey::new(GroupPosition::TopLeft));
+        let g = win.toolbar.create_group(GroupPosition::TopLeft);
+        win.hotkey_handle = win.toolbar.add(g, toolbar::HotKey::new(GroupPosition::TopLeft));
 
         // tag
-        win.tag_handle = win.toolbar.add(toolbar::Tag::new(GroupPosition::TopLeft));
+        let g = win.toolbar.create_group(GroupPosition::TopLeft);
+        win.tag_handle = win.toolbar.add(g, toolbar::Tag::new(GroupPosition::TopLeft));
 
         win
 
