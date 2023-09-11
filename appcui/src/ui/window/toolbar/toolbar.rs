@@ -2,20 +2,20 @@ use std::ptr::NonNull;
 
 use crate::{
     graphics::{Size, Surface},
+    input::Key,
     system::{Handle, Theme},
     ui::common::UIElement,
     utils::{HandleManager, VectorIndex},
-    input::Key
 };
 
 use super::{
-    Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner, SingleChoice, Tag,
-    ToolBarItem, group::Group,
+    group::Group, Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner,
+    SingleChoice, Tag, ToolBarItem,
 };
 
 pub struct ToolbarElementHandle {
     group: Group,
-    handle: Handle<UIElement>
+    handle: Handle<UIElement>,
 }
 
 pub struct ToolBar {
@@ -23,7 +23,7 @@ pub struct ToolBar {
     current_handle: Handle<UIElement>,
     order: Vec<ToolbarElementHandle>,
     pressed: bool,
-    last_group_index: u8
+    last_group_index: u8,
 }
 
 pub trait AddToToolbar<T> {
@@ -37,22 +37,24 @@ impl ToolBar {
             pressed: false,
             order: Vec::with_capacity(4),
             current_handle: Handle::None,
-            last_group_index: 0
+            last_group_index: 0,
         }
     }
     pub fn create_group(&mut self, pos: GroupPosition) -> Group {
         if self.last_group_index == 255 {
             Group { pos, id: 255u8 }
         } else {
-            let g = Group{pos, id: self.last_group_index};
-            self.last_group_index+=1;
-            g
+            self.last_group_index += 1;
+            Group {
+                pos,
+                id: self.last_group_index,
+            }
         }
     }
     pub fn add<T>(&mut self, group: Group, item: T) -> Handle<T>
     where
         T: AddToToolbar<T>,
-    {        
+    {
         let h = AddToToolbar::add(item, self, group);
         self.order.push(ToolbarElementHandle { group, handle: h.cast() });
         self.order.sort_by_key(|k| k.group.id);
@@ -75,7 +77,7 @@ impl ToolBar {
         None
     }
     pub fn get_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T> {
-        let toolbar_ptr = unsafe { NonNull::new_unchecked(self as *mut ToolBar) } ; 
+        let toolbar_ptr = unsafe { NonNull::new_unchecked(self as *mut ToolBar) };
         if let Some(obj) = self.items.get_mut(handle.cast()) {
             match obj {
                 ToolBarItem::Label(obj) => return Some(unsafe { &mut (*((obj as *mut Label) as *mut T)) }),
@@ -293,6 +295,6 @@ impl ToolBar {
                 }
             }
         }
-        None     
+        None
     }
 }
