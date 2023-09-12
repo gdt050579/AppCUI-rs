@@ -172,3 +172,11 @@ fn layout_mode_dock_top_right() {
     validate_dock!("d:rightTop,h:10",50,30,0,0,50,10);
     validate_dock!("d:topright,w:50%,h:25%",60,40,30,0,30,10);
 }
+#[test]
+fn layout_mode_dock_left() {
+    validate_dock!("d:l",50,30,0,0,50,30);
+    validate_dock!("d:left,w:20,h:10",50,30,0,10,20,10);
+    validate_dock!("d:Left,w:20",50,30,00,0,20,30);    
+    validate_dock!("d:l,h:10",50,30,0,10,50,10);
+    validate_dock!("d:LeFt,w:50%,h:25%",60,40,0,15,30,10);
+}
