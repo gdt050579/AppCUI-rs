@@ -189,3 +189,12 @@ fn layout_mode_dock_top() {
     validate_dock!("d:t,h:10",50,30,0,0,50,10);
     validate_dock!("d:ToP,w:50%,h:25%",60,40,15,0,30,10);
 }
+
+#[test]
+fn layout_mode_dock_right() {
+    validate_dock!("d:r",50,30,0,0,50,30);
+    validate_dock!("d:Right,w:20,h:10",50,30,30,10,20,10);
+    validate_dock!("d:right,w:20",50,30,30,0,20,30);    
+    validate_dock!("d:r,h:10",50,30,0,10,50,10);
+    validate_dock!("d:rIgHt,w:50%,h:25%",60,40,30,15,30,10);
+}
