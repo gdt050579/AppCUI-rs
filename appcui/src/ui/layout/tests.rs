@@ -24,7 +24,7 @@ macro_rules! validate_abs {
     };
 }
 
-macro_rules! validate_dock {
+macro_rules! validate_pos {
     ($text:literal, $parent_width:expr, $parent_height:expr, $x:expr,$y:expr,$w:expr,$h:expr) => {
         let mut cl = ControlLayout::new($text);
         cl.update($parent_width, $parent_height);
@@ -134,67 +134,75 @@ fn layout_mode_align_bottom() {
 }
 #[test]
 fn layout_mode_dock_center() {
-    validate_dock!("d:c",50,30,0,0,50,30);
-    validate_dock!("d:center,w:20,h:10",50,30,15,10,20,10);
-    validate_dock!("d:Center,w:20",50,30,15,0,20,30);    
-    validate_dock!("d:CENTER,h:10",50,30,0,10,50,10);
-    validate_dock!("d:cEnTeR,w:50%,h:25%",60,40,15,15,30,10);
+    validate_pos!("d:c",50,30,0,0,50,30);
+    validate_pos!("d:center,w:20,h:10",50,30,15,10,20,10);
+    validate_pos!("d:Center,w:20",50,30,15,0,20,30);    
+    validate_pos!("d:CENTER,h:10",50,30,0,10,50,10);
+    validate_pos!("d:cEnTeR,w:50%,h:25%",60,40,15,15,30,10);
 }
 #[test]
 fn layout_mode_dock_top_left() {
-    validate_dock!("d:tl",50,30,0,0,50,30);
-    validate_dock!("d:lt,w:20,h:10",50,30,0,0,20,10);
-    validate_dock!("d:topleft,w:20",50,30,0,0,20,30);    
-    validate_dock!("d:lefttop,h:10",50,30,0,0,50,10);
-    validate_dock!("d:TopLeft,w:50%,h:25%",60,40,0,0,30,10);
+    validate_pos!("d:tl",50,30,0,0,50,30);
+    validate_pos!("d:lt,w:20,h:10",50,30,0,0,20,10);
+    validate_pos!("d:topleft,w:20",50,30,0,0,20,30);    
+    validate_pos!("d:lefttop,h:10",50,30,0,0,50,10);
+    validate_pos!("d:TopLeft,w:50%,h:25%",60,40,0,0,30,10);
 }
 #[test]
 fn layout_mode_dock_bottom_left() {
-    validate_dock!("d:lb",50,30,0,0,50,30);
-    validate_dock!("d:bl,w:20,h:10",50,30,0,20,20,10);
-    validate_dock!("d:lb,w:20",50,30,0,0,20,30);    
-    validate_dock!("d:bottomleft,h:10",50,30,0,20,50,10);
-    validate_dock!("d:leftbottom,w:50%,h:25%",60,40,0,30,30,10);
+    validate_pos!("d:lb",50,30,0,0,50,30);
+    validate_pos!("d:bl,w:20,h:10",50,30,0,20,20,10);
+    validate_pos!("d:lb,w:20",50,30,0,0,20,30);    
+    validate_pos!("d:bottomleft,h:10",50,30,0,20,50,10);
+    validate_pos!("d:leftbottom,w:50%,h:25%",60,40,0,30,30,10);
 }
 #[test]
 fn layout_mode_dock_bottom_right() {
-    validate_dock!("d:rb",50,30,0,0,50,30);
-    validate_dock!("d:br,w:20,h:10",50,30,30,20,20,10);
-    validate_dock!("d:rb,w:20",50,30,30,0,20,30);    
-    validate_dock!("d:bottomright,h:10",50,30,0,20,50,10);
-    validate_dock!("d:rightbottom,w:50%,h:25%",60,40,30,30,30,10);
+    validate_pos!("d:rb",50,30,0,0,50,30);
+    validate_pos!("d:br,w:20,h:10",50,30,30,20,20,10);
+    validate_pos!("d:rb,w:20",50,30,30,0,20,30);    
+    validate_pos!("d:bottomright,h:10",50,30,0,20,50,10);
+    validate_pos!("d:rightbottom,w:50%,h:25%",60,40,30,30,30,10);
 }
 #[test]
 fn layout_mode_dock_top_right() {
-    validate_dock!("d:tr",50,30,0,0,50,30);
-    validate_dock!("d:rt,w:20,h:10",50,30,30,0,20,10);
-    validate_dock!("d:TopRight,w:20",50,30,30,0,20,30);    
-    validate_dock!("d:rightTop,h:10",50,30,0,0,50,10);
-    validate_dock!("d:topright,w:50%,h:25%",60,40,30,0,30,10);
+    validate_pos!("d:tr",50,30,0,0,50,30);
+    validate_pos!("d:rt,w:20,h:10",50,30,30,0,20,10);
+    validate_pos!("d:TopRight,w:20",50,30,30,0,20,30);    
+    validate_pos!("d:rightTop,h:10",50,30,0,0,50,10);
+    validate_pos!("d:topright,w:50%,h:25%",60,40,30,0,30,10);
 }
 #[test]
 fn layout_mode_dock_left() {
-    validate_dock!("d:l",50,30,0,0,50,30);
-    validate_dock!("d:left,w:20,h:10",50,30,0,10,20,10);
-    validate_dock!("d:Left,w:20",50,30,00,0,20,30);    
-    validate_dock!("d:l,h:10",50,30,0,10,50,10);
-    validate_dock!("d:LeFt,w:50%,h:25%",60,40,0,15,30,10);
+    validate_pos!("d:l",50,30,0,0,50,30);
+    validate_pos!("d:left,w:20,h:10",50,30,0,10,20,10);
+    validate_pos!("d:Left,w:20",50,30,00,0,20,30);    
+    validate_pos!("d:l,h:10",50,30,0,10,50,10);
+    validate_pos!("d:LeFt,w:50%,h:25%",60,40,0,15,30,10);
 }
 
 #[test]
 fn layout_mode_dock_top() {
-    validate_dock!("d:t",50,30,0,0,50,30);
-    validate_dock!("d:top,w:20,h:10",50,30,15,0,20,10);
-    validate_dock!("d:Top,w:20",50,30,15,0,20,30);    
-    validate_dock!("d:t,h:10",50,30,0,0,50,10);
-    validate_dock!("d:ToP,w:50%,h:25%",60,40,15,0,30,10);
+    validate_pos!("d:t",50,30,0,0,50,30);
+    validate_pos!("d:top,w:20,h:10",50,30,15,0,20,10);
+    validate_pos!("d:Top,w:20",50,30,15,0,20,30);    
+    validate_pos!("d:t,h:10",50,30,0,0,50,10);
+    validate_pos!("d:ToP,w:50%,h:25%",60,40,15,0,30,10);
 }
 
 #[test]
 fn layout_mode_dock_right() {
-    validate_dock!("d:r",50,30,0,0,50,30);
-    validate_dock!("d:Right,w:20,h:10",50,30,30,10,20,10);
-    validate_dock!("d:right,w:20",50,30,30,0,20,30);    
-    validate_dock!("d:r,h:10",50,30,0,10,50,10);
-    validate_dock!("d:rIgHt,w:50%,h:25%",60,40,30,15,30,10);
+    validate_pos!("d:r",50,30,0,0,50,30);
+    validate_pos!("d:Right,w:20,h:10",50,30,30,10,20,10);
+    validate_pos!("d:right,w:20",50,30,30,0,20,30);    
+    validate_pos!("d:r,h:10",50,30,0,10,50,10);
+    validate_pos!("d:rIgHt,w:50%,h:25%",60,40,30,15,30,10);
+}
+#[test]
+fn layout_mode_dock_bottom() {
+    validate_pos!("d:b",50,30,0,0,50,30);
+    validate_pos!("d:bottom,w:20,h:10",50,30,15,20,20,10);
+    validate_pos!("d:Bottom,w:20",50,30,15,0,20,30);    
+    validate_pos!("d:b,h:10",50,30,0,20,50,10);
+    validate_pos!("d:BoTtOm,w:50%,h:25%",60,40,15,30,30,10);
 }
