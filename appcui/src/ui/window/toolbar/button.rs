@@ -35,7 +35,7 @@ impl Button {
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
         let mut format = TextFormat::single_line(
-            self.base.get_x(),
+            self.base.get_left(),
             self.base.get_y(),
             st.get_button_attr(theme),
             TextAlignament::Left,

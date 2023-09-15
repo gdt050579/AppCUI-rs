@@ -87,6 +87,10 @@ impl ItemBase {
         self.status.contains(StatusFlags::LeftGroupMarker)
     }
     #[inline(always)]
+    pub(crate) fn has_separator(&self) -> bool {
+        self.status.contains(StatusFlags::Separator)
+    }
+    #[inline(always)]
     pub(crate) fn set_right_marker(&mut self) {
         self.status |= StatusFlags::RightGroupMarker;
     }
@@ -95,8 +99,12 @@ impl ItemBase {
         self.status |= StatusFlags::LeftGroupMarker;
     }
     #[inline(always)]
-    pub(super) fn get_x(&self) -> i32 {
+    pub(super) fn get_left(&self) -> i32 {
         self.x
+    }
+    #[inline(always)]
+    pub(super) fn get_right(&self) -> i32 {
+        self.x + (self.width as i32)
     }
     #[inline(always)]
     pub(crate) fn get_y(&self) -> i32 {
@@ -161,28 +169,11 @@ impl ItemBase {
         };
         helper.x += extra + (self.width as i32);
         helper.last_group = self.group.id;
+        helper.last_handle = self.handle;
         previous_handle
     }
-    pub(super) fn update_position_from_right(&mut self, helper: &mut PositionHelper, left: i32) {
-        // in case of new group `]=` ==> 2 chars
-        // in case of existing group `|` ==> 1 char
-        let extra = if self.group.id != helper.last_group { 2 } else { 1 };
-        // I need to check if there is space for: [extra][me][separator or final ']']
-        if extra + (self.width as i32) + 2 >= right {
-            // we can not add this to the view
-            self.status |= StatusFlags::OutsideDrawingArea;
-            return;
-        }
-        // can be added
-        self.x = helper.x + extra;
-        self.y = helper.y;
-        self.status |= if self.group.id != helper.last_group {
-            StatusFlags::LeftGroupMarker
-        } else {
-            StatusFlags::Separator
-        };
-        helper.x += extra;
-        helper.last_group = self.group.id;
+    pub(super) fn update_position_from_right(&mut self, helper: &mut PositionHelper, left: i32) -> Handle<UIElement> {
+        todo!()
     }
 
     // pub(super) fn update_position_from_left(

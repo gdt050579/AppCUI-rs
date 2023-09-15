@@ -1,7 +1,6 @@
 use crate::{
     graphics::{Character, Surface},
     input::Key,
-    prelude::common::UIElement,
     system::{Handle, HandleSupport, Theme},
 };
 
@@ -50,8 +49,6 @@ impl ToolBarItem {
         if !base.can_be_drawn() {
             return;
         }
-
-        let from_left = base.get_gravity().is_on_left_side();
         match self {
             ToolBarItem::Label(item) => item.paint(surface, theme, data),
             ToolBarItem::HotKey(item) => item.paint(surface, theme, data),
@@ -64,25 +61,14 @@ impl ToolBarItem {
             ToolBarItem::SingleChoice(item) => item.paint(surface, theme, data),
         };
         // separators
-        if base.is_part_of_group() {
-            if base.has_left_group_marker() {
-                surface.write_char(base.get_x() - 1, base.get_y(), Character::with_attributes('[', data.sep_attr));
-            } else if from_left {
-                surface.write_char(base.get_x() - 1, base.get_y(), Character::with_attributes('|', data.sep_attr));
-            }
-            if base.has_right_group_marker() {
-                surface.write_char(
-                    base.get_x() + base.get_width(),
-                    base.get_y(),
-                    Character::with_attributes(']', data.sep_attr),
-                );
-            } else if !from_left {
-                surface.write_char(
-                    base.get_x() + base.get_width(),
-                    base.get_y(),
-                    Character::with_attributes('|', data.sep_attr),
-                );
-            }
+        if base.has_left_group_marker() {
+            surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('[', data.sep_attr));
+        }
+        if base.has_separator() {
+            surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('|', data.sep_attr));
+        }
+        if base.has_right_group_marker() {
+            surface.write_char(base.get_right(), base.get_y(), Character::with_attributes(']', data.sep_attr));
         }
     }
     pub(super) fn get_hotkey(&self) -> Key {
@@ -98,46 +84,20 @@ impl ToolBarItem {
             ToolBarItem::SingleChoice(item) => item.caption.get_hotkey(),
         }
     }
-    pub(super) fn get_handle(&self) -> Handle<UIElement> {
+    #[inline(always)]
+    pub(super) fn is_resize_corner(&self) -> bool {
         match self {
-            ToolBarItem::Label(item) => item.handle.cast(),
-            ToolBarItem::HotKey(item) => item.handle.cast(),
-            ToolBarItem::Tag(item) => item.handle.cast(),
-            ToolBarItem::CloseButton(item) => item.handle.cast(),
-            ToolBarItem::MaximizeRestoreButton(item) => item.handle.cast(),
-            ToolBarItem::ResizeCorner(item) => item.handle.cast(),
-            ToolBarItem::Button(item) => item.handle.cast(),
-            ToolBarItem::CheckBox(item) => item.handle.cast(),
-            ToolBarItem::SingleChoice(item) => item.handle.cast(),
+            ToolBarItem::ResizeCorner(_) => true,
+            _ => false,
         }
     }
 }
 impl HandleSupport<ToolBarItem> for ToolBarItem {
     fn get_handle(&self) -> Handle<ToolBarItem> {
-        match self {
-            ToolBarItem::Label(item) => item.handle.cast(),
-            ToolBarItem::HotKey(item) => item.handle.cast(),
-            ToolBarItem::Tag(item) => item.handle.cast(),
-            ToolBarItem::CloseButton(item) => item.handle.cast(),
-            ToolBarItem::MaximizeRestoreButton(item) => item.handle.cast(),
-            ToolBarItem::ResizeCorner(item) => item.handle.cast(),
-            ToolBarItem::Button(item) => item.handle.cast(),
-            ToolBarItem::CheckBox(item) => item.handle.cast(),
-            ToolBarItem::SingleChoice(item) => item.handle.cast(),
-        }
+        self.get_base().get_handle().cast()
     }
 
     fn set_handle(&mut self, handle: Handle<ToolBarItem>) {
-        match self {
-            ToolBarItem::Label(item) => item.handle = handle.cast(),
-            ToolBarItem::HotKey(item) => item.handle = handle.cast(),
-            ToolBarItem::Tag(item) => item.handle = handle.cast(),
-            ToolBarItem::CloseButton(item) => item.handle = handle.cast(),
-            ToolBarItem::MaximizeRestoreButton(item) => item.handle = handle.cast(),
-            ToolBarItem::ResizeCorner(item) => item.handle = handle.cast(),
-            ToolBarItem::Button(item) => item.handle = handle.cast(),
-            ToolBarItem::CheckBox(item) => item.handle = handle.cast(),
-            ToolBarItem::SingleChoice(item) => item.handle = handle.cast(),
-        }
+        self.get_base_mut().set_handle(handle.cast())
     }
 }

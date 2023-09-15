@@ -205,48 +205,57 @@ impl ToolBar {
 
         for elem in &self.order {
             if let Some(d) = self.items.get_mut(elem.handle.cast()) {
-                let base = d.get_base();
+                let is_resize_corner = d.is_resize_corner();
+                let base = d.get_base_mut();
                 if !base.is_visible() {
                     continue;
                 }
-                let pos = elem.group.pos;
-                match pos {
+                let pos = base.get_gravity();
+                let (h,on_left) = match pos {
                     GroupPosition::TopLeft => {
-                        base.update_position_from_left(&mut top_left, top_right.x);
+                        (base.update_position_from_left(&mut top_left, top_right.x),true)
                     }
-                    GroupPosition::BottomLeft => self.update_position_from_left(index, &mut bottom_left, bottom_right.x),
+                    GroupPosition::BottomLeft => {
+                        (base.update_position_from_left(&mut bottom_left, bottom_right.x),true)
+                    }
                     GroupPosition::TopRight => {
-                        self.update_position_from_right(index, &mut top_right, top_left.x);
+                        (base.update_position_from_right(&mut top_right, top_left.x),false)
                     }
                     GroupPosition::BottomRight => {
-                        match d {
-                            ToolBarItem::ResizeCorner(_) => bottom_right.x += 1,
-                            _ => {}
+                        if is_resize_corner { bottom_right.x += 1; }                    
+                        (base.update_position_from_right(&mut bottom_right, bottom_left.x),false)
+                    }
+                };
+                if !h.is_none() {
+                    if let Some(prev) = self.items.get_mut(h.cast()) {
+                        if on_left {
+                            prev.get_base_mut().set_right_marker();
+                        } else {
+                            prev.get_base_mut().set_left_marker();
                         }
-                        self.update_position_from_right(index, &mut bottom_right, bottom_left.x);
                     }
                 }
             }
         }
 
         // last elements
-        if top_left.index.is_valid() {
-            if let Some(item) = self.items.get_element_mut(top_left.index.index()) {
+        if !top_left.last_handle.is_none() {
+            if let Some(item) = self.items.get_mut(top_left.last_handle.cast()) {
                 item.get_base_mut().set_right_marker();
             }
         }
-        if bottom_left.index.is_valid() {
-            if let Some(item) = self.items.get_element_mut(bottom_left.index.index()) {
+        if !bottom_left.last_handle.is_none() {
+            if let Some(item) = self.items.get_mut(bottom_left.last_handle.cast()) {
                 item.get_base_mut().set_right_marker();
             }
         }
-        if top_right.index.is_valid() {
-            if let Some(item) = self.items.get_element_mut(top_right.index.index()) {
+        if !top_right.last_handle.is_none() {
+            if let Some(item) = self.items.get_mut(top_right.last_handle.cast()) {
                 item.get_base_mut().set_left_marker();
             }
         }
-        if bottom_right.index.is_valid() {
-            if let Some(item) = self.items.get_element_mut(bottom_right.index.index()) {
+        if !bottom_right.last_handle.is_none() {
+            if let Some(item) = self.items.get_mut(bottom_right.last_handle.cast()) {
                 item.get_base_mut().set_left_marker();
             }
         }
@@ -340,7 +349,7 @@ impl ToolBar {
             if let Some(item) = self.items.get_element_mut(index) {
                 if let ToolBarItem::SingleChoice(sc) = item {
                     if sc.get_group_id() == group_id {
-                        sc.update_select_status(handle == sc.handle);
+                        sc.update_select_status(handle == sc.base.get_handle());
                     }
                 }
             }
@@ -353,7 +362,7 @@ impl ToolBar {
         for index in 0..count {
             if let Some(item) = self.items.get_element(index) {
                 if item.get_hotkey() == hotkey {
-                    return Some(item.get_handle());
+                    return Some(item.get_base().get_handle());
                 }
             }
         }

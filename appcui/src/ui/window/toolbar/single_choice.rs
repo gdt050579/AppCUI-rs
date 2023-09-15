@@ -68,7 +68,7 @@ impl SingleChoice {
             st = SymbolAttrState::Pressed;
         }
         let mut format = TextFormat::single_line(
-            self.base.get_x(),
+            self.base.get_left(),
             self.base.get_y(),
             st.get_button_attr(theme),
             TextAlignament::Left,

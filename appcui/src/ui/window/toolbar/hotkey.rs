@@ -39,7 +39,7 @@ impl HotKey {
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         surface.write_char(
-            self.base.get_x(),
+            self.base.get_left(),
             self.base.get_y(),
             Character::with_attributes('[', data.sep_attr),
         );
@@ -48,14 +48,14 @@ impl HotKey {
             false => theme.text.inactive,
         };
         surface.write_string(
-            self.base.get_x() + 1,
+            self.base.get_left() + 1,
             self.base.get_y(),
             self.key.code.get_name(),
             attr,
             false,
         );
         surface.write_char(
-            self.base.get_x() + self.base.get_width() - 1,
+            self.base.get_left() + self.base.get_width() - 1,
             self.base.get_y(),
             Character::with_attributes(']', data.sep_attr),
         );

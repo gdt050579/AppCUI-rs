@@ -48,7 +48,7 @@ impl CheckBox {
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
         let text_attr = st.get_button_attr(theme);
-        let x = self.base.get_x();
+        let x = self.base.get_left();
         let y = self.base.get_y();
         let mut format = TextFormat::single_line(x + 2, y, text_attr, TextAlignament::Left);
         format.width = Some(self.caption.get_chars_count() as u16);

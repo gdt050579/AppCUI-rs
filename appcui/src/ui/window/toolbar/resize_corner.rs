@@ -25,7 +25,7 @@ impl ResizeCorner {
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         if data.focused {
             let st = SymbolAttrState::new(data);
-            let x = self.base.get_x();
+            let x = self.base.get_left();
             let y = self.base.get_y();
             let a = st.get_attr(theme, theme.symbol.resize);
             surface.write_char(

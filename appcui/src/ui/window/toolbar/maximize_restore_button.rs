@@ -25,7 +25,7 @@ impl MaximizeRestoreButton {
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
         surface.write_string(
-            self.base.get_x(),
+            self.base.get_left(),
             self.base.get_y(),
             "[ ]",
             st.get_attr(theme, data.sep_attr),
@@ -36,7 +36,7 @@ impl MaximizeRestoreButton {
             false => SpecialChar::ArrowUp,
         };
         surface.write_char(
-            self.base.get_x() + 1,
+            self.base.get_left() + 1,
             self.base.get_y(),
             Character::with_attributes(ch, st.get_attr(theme, theme.symbol.maximized)),
         );
