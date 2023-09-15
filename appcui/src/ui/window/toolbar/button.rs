@@ -21,7 +21,7 @@ impl AddToToolbar<Button> for Button {
 impl Button {
     pub fn new(text: &str) -> Self {
         let mut obj = Button {
-            base: ItemBase::new(true, true),
+            base: ItemBase::new(true),
             caption: Caption::new("", false),
         };
         obj.set_text(text);

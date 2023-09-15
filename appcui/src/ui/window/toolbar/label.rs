@@ -20,7 +20,7 @@ impl AddToToolbar<Label> for Label {
 impl Label {
     pub fn new(text: &str)->Self {
         let mut obj = Label {
-            base: ItemBase::new(true, true),
+            base: ItemBase::new(true),
             text: String::new(),
         };
         obj.set_text(text);

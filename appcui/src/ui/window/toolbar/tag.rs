@@ -7,7 +7,6 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 
 pub struct Tag {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<Tag>,
     text: String,
 }
 
@@ -21,8 +20,7 @@ impl AddToToolbar<Tag> for Tag {
 impl Tag {
     pub fn new() -> Self {
         Tag {
-            base: ItemBase::new(false, false),
-            handle: Handle::None,
+            base: ItemBase::new(false),
             text: String::new(),
         }
     }

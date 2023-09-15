@@ -10,7 +10,6 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 
 pub struct SingleChoice {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<SingleChoice>,
     pub(super) caption: Caption,
     group_id: u32,
     selected: bool,
@@ -27,8 +26,7 @@ impl AddToToolbar<SingleChoice> for SingleChoice {
 impl SingleChoice {
     pub fn new(text: &str, group_id: u32) -> Self {
         let mut obj = SingleChoice {
-            base: ItemBase::new(true, true),
-            handle: Handle::None,
+            base: ItemBase::new(true),
             caption: Caption::new("", false),
             group_id,
             selected: false,  
@@ -54,7 +52,7 @@ impl SingleChoice {
     pub fn select(&mut self) {
         if let Some(toolbar_ptr) = self.tooldbar.as_mut() {
             let toolbar = unsafe { toolbar_ptr.as_mut() };
-            toolbar.update_singlechoice_group_id(self.group_id, self.handle.cast());
+            toolbar.update_singlechoice_group_id(self.group_id, self.base.get_handle());
         } else {
             panic!("Attempt to use SingleChoice select without having the object added to a toolbar !");
         }

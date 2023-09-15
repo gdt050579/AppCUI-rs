@@ -22,7 +22,7 @@ impl AddToToolbar<CheckBox> for CheckBox {
 impl CheckBox {
     pub fn new(text: &str, checked: bool) -> Self {
         let mut obj = CheckBox {
-            base: ItemBase::new(true, true),
+            base: ItemBase::new(true),
             caption: Caption::new("", false),
             checked,
         };

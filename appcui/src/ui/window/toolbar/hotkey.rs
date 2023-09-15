@@ -21,7 +21,7 @@ impl AddToToolbar<HotKey> for HotKey {
 impl HotKey {
     pub fn new() -> Self {
         HotKey {
-            base: ItemBase::new(false, false),
+            base: ItemBase::new(false),
             key: Key::None,
         }
     }

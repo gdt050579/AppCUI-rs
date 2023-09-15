@@ -23,18 +23,18 @@ pub(crate) struct ItemBase {
 }
 
 impl ItemBase {
-    pub(super) fn with_tooltip(part_of_group: bool, tooltip: &str) -> ItemBase {
-        let mut base = ItemBase::new(part_of_group, true);
-        base.tooltip.push_str(tooltip);
-        base
-    }
+    // pub(super) fn with_tooltip(part_of_group: bool, tooltip: &str) -> ItemBase {
+    //     let mut base = ItemBase::new(part_of_group, true);
+    //     base.tooltip.push_str(tooltip);
+    //     base
+    // }
     pub(super) fn with_width(width: u16, tooltip: &str, visible: bool) -> ItemBase {
-        let mut base = ItemBase::new(false, visible);
+        let mut base = ItemBase::new(visible);
         base.width = width;
         base.tooltip.push_str(tooltip);
         base
     }
-    pub(super) fn new(part_of_group: bool, visible: bool) -> ItemBase {
+    pub(super) fn new(visible: bool) -> ItemBase {
         ItemBase {
             x: 0,
             y: 0,
@@ -42,19 +42,7 @@ impl ItemBase {
             group: Group::default(),
             tooltip: String::new(),
             handle: Handle::None,
-            status: if part_of_group {
-                if visible {
-                    StatusFlags::ParOfGroup | StatusFlags::Visible
-                } else {
-                    StatusFlags::ParOfGroup
-                }
-            } else {
-                if visible {
-                    StatusFlags::Visible
-                } else {
-                    StatusFlags::None
-                }
-            },
+            status: if visible { StatusFlags::Visible } else { StatusFlags::None },
         }
     }
     #[inline(always)]
@@ -142,12 +130,12 @@ impl ItemBase {
         self.handle
     }
     #[inline(always)]
-    pub(crate) fn set_handle(&mut self, handle: Handle<UIElement>)  {
+    pub(crate) fn set_handle(&mut self, handle: Handle<UIElement>) {
         self.handle = handle;
     }
     pub(crate) fn request_recompute_layout(&mut self) {}
 
-    pub(super) fn update_position_from_left(&mut self, helper: &mut PositionHelper, right: i32)->Handle<UIElement> {
+    pub(super) fn update_position_from_left(&mut self, helper: &mut PositionHelper, right: i32) -> Handle<UIElement> {
         // in case of new group `[=` ==> 2 chars
         // in case of existing group `|` ==> 1 char
         let extra = if self.group.id != helper.last_group { 2 } else { 1 };
