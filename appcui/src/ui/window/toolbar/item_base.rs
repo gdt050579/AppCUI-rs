@@ -147,11 +147,22 @@ impl ItemBase {
 
     #[inline(always)]
     fn compute_extra_space(&self, helper: &mut PositionHelper) -> i32 {
-        if self.status.contains_one(StatusFlags::NoMarker) {
+        // marker size
+        let marker_size = if self.status.contains_one(StatusFlags::NoMarker) { 0 } else { 1 };
+        let group_space = if helper.last_handle.is_none() {
             0
         } else {
-            if self.group.id != helper.last_group { 2 } else { 1 }
-        }
+            if self.group.id != helper.last_group {
+                if helper.last_group_supports_markers {
+                    2
+                } else {
+                    1
+                }
+            } else {
+                0
+            }
+        };
+        marker_size + group_space
     }
     pub(super) fn update_position_from_left(&mut self, helper: &mut PositionHelper, right: i32) -> Handle<UIElement> {
         // in case of new group `[=` ==> 2 chars
@@ -180,6 +191,7 @@ impl ItemBase {
         helper.x += extra + (self.width as i32);
         helper.last_group = self.group.id;
         helper.last_handle = self.handle;
+        helper.last_group_supports_markers = self.supports_markers();
         previous_handle
     }
     pub(super) fn update_position_from_right(&mut self, helper: &mut PositionHelper, left: i32) -> Handle<UIElement> {
@@ -211,5 +223,4 @@ impl ItemBase {
         helper.last_handle = self.handle;
         previous_handle
     }
-
 }

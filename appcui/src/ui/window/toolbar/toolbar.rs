@@ -5,7 +5,7 @@ use crate::{
     input::Key,
     system::{Handle, Theme},
     ui::common::UIElement,
-    utils::HandleManager,
+    utils::HandleManager, prelude::{Character, Color, CharFlags},
 };
 
 use super::{
@@ -24,6 +24,8 @@ pub struct ToolBar {
     order: Vec<ToolbarElementHandle>,
     pressed: bool,
     last_group_index: u8,
+    temp_top_left: i32,
+    temp_top_right: i32,
 }
 
 pub trait AddToToolbar<T> {
@@ -38,6 +40,8 @@ impl ToolBar {
             order: Vec::with_capacity(4),
             current_handle: Handle::None,
             last_group_index: 0,
+            temp_top_left: 0,
+            temp_top_right: 0,
         }
     }
     pub fn create_group(&mut self, pos: GroupPosition) -> Group {
@@ -207,6 +211,8 @@ impl ToolBar {
                 item.get_base_mut().set_left_marker();
             }
         }
+        self.temp_top_left = top_left.x+1;
+        self.temp_top_right = top_right.x-1;
         (top_left.x + 1, top_right.x)
     }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, focused: bool, maximized: bool) {
@@ -226,6 +232,8 @@ impl ToolBar {
                 item.paint(surface, theme, &paint_data);
             }
         }
+        surface.write_char(self.temp_top_left, 0, Character::new('X',Color::Red,Color::Yellow, CharFlags::None));
+        surface.write_char(self.temp_top_right, 0, Character::new('X',Color::Red,Color::Yellow, CharFlags::None));
     }
 
     pub(crate) fn update_singlechoice_group_id(&mut self, group_id: u32, handle: Handle<UIElement>) {

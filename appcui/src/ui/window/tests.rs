@@ -14,7 +14,7 @@ use super::{
 #[test]
 fn check_window_title() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('title')
         CheckHash(0xA0CFD68A45B1786C)
     ";
@@ -101,9 +101,34 @@ fn check_window_minimize_title_4() {
 }
 
 #[test]
+fn check_multiple_items_top_bar() {
+    let script = "
+    //Paint.Enable(false)
+    Paint('tags')
+    //CheckHash(0xBB2962251DDB2240)
+    ";
+    let mut a = App::debug(80, 10, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:70,h:10"), window::Flags::Sizeable);
+    w.set_tag("ABC");
+    w.set_hotkey(key!("F1"));
+    let g = w.get_toolbar().create_group(GroupPosition::TopLeft);
+    w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
+    w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
+    let g = w.get_toolbar().create_group(GroupPosition::TopLeft);
+    w.get_toolbar().add(g, toolbar::Label::new("Single"));
+    let g = w.get_toolbar().create_group(GroupPosition::TopRight);
+    w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
+    w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
+    let g = w.get_toolbar().create_group(GroupPosition::TopRight);
+    w.get_toolbar().add(g, toolbar::Label::new("XX"));  
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_window_tag_1() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('tags')
         CheckHash(0xBB2962251DDB2240)
     ";
@@ -129,7 +154,7 @@ fn check_window_tag_2() {
 #[test]
 fn check_window_tag_and_split_title_1() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('title split with 3 special chars')
         CheckHash(0x34902E0B6D58F035)
     ";
@@ -447,8 +472,8 @@ fn check_window_toolbar_button() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::Button::new( "Start"));
-    w.get_toolbar().add(g, toolbar::Button::new( "Stop"));
+    w.get_toolbar().add(g, toolbar::Button::new("Start"));
+    w.get_toolbar().add(g, toolbar::Button::new("Stop"));
     let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
     w.get_toolbar().add(g, toolbar::Button::new("Exit"));
 
