@@ -5,7 +5,7 @@ use crate::{
     input::Key,
     system::{Handle, Theme},
     ui::common::UIElement,
-    utils::{HandleManager, VectorIndex},
+    utils::HandleManager,
 };
 
 use super::{
@@ -138,58 +138,6 @@ impl ToolBar {
         None
     }
 
-    // fn update_position_from_left(&mut self, index: usize, helper: &mut PositionHelper, right: i32) {
-    //     if let Some(item) = self.items.get_element_mut(index) {
-    //         let my_variant = Some(std::mem::discriminant(item));
-    //         let pos = item.get_base_mut();
-    //         let (next, add_flags, add_space) = pos.update_position_from_left(
-    //             if helper.add_space_before_next { helper.x + 1 } else { helper.x },
-    //             helper.y,
-    //             my_variant,
-    //             helper.variant,
-    //         );
-    //         let last_index = helper.index;
-    //         if next < right {
-    //             helper.index = VectorIndex::with_value(index);
-    //             helper.x = next;
-    //             helper.variant = my_variant;
-    //             helper.add_space_before_next = add_space;
-    //         } else {
-    //             pos.set_outside_drawing_area();
-    //         }
-    //         if add_flags && last_index.is_valid() {
-    //             if let Some(last) = self.items.get_element_mut(last_index.index()) {
-    //                 last.get_base_mut().set_right_marker();
-    //             }
-    //         }
-    //     }
-    // }
-    // fn update_position_from_right(&mut self, index: usize, helper: &mut PositionHelper, left: i32) {
-    //     if let Some(item) = self.items.get_element_mut(index) {
-    //         let my_variant = Some(std::mem::discriminant(item));
-    //         let pos = item.get_base_mut();
-    //         let (next, add_flags, add_space) = pos.update_position_from_right(
-    //             if helper.add_space_before_next { helper.x - 1 } else { helper.x },
-    //             helper.y,
-    //             my_variant,
-    //             helper.variant,
-    //         );
-    //         let last_index = helper.index;
-    //         if next > left {
-    //             helper.index = VectorIndex::with_value(index);
-    //             helper.x = next;
-    //             helper.variant = my_variant;
-    //             helper.add_space_before_next = add_space;
-    //         } else {
-    //             pos.set_outside_drawing_area();
-    //         }
-    //         if add_flags && last_index.is_valid() {
-    //             if let Some(last) = self.items.get_element_mut(last_index.index()) {
-    //                 last.get_base_mut().set_left_marker();
-    //             }
-    //         }
-    //     }
-    // }
     pub(crate) fn update_positions(&mut self, size: Size) -> (i32, i32) {
         // clear all flags (visible & left|right marker)
         let count = self.items.allocated_objects();
@@ -261,68 +209,6 @@ impl ToolBar {
         }
         (top_left.x + 1, top_right.x)
     }
-    // pub(crate) fn update_positions(&mut self, size: Size) -> (i32, i32) {
-    //     // clear all flags (visible & left|right marker)
-    //     let count = self.items.allocated_objects();
-    //     for index in 0..count {
-    //         if let Some(d) = self.items.get_element_mut(index) {
-    //             d.get_base_mut().clear();
-    //         }
-    //     }
-    //     let mut top_left = PositionHelper::new(1, 0);
-    //     let mut top_right = PositionHelper::new((size.width as i32) - 2, 0);
-    //     let mut bottom_left = PositionHelper::new(1, (size.height as i32) - 1);
-    //     let mut bottom_right = PositionHelper::new((size.width as i32) - 2, (size.height as i32) - 1);
-
-    //     for index in 0..count {
-    //         if let Some(d) = self.items.get_element_mut(index) {
-    //             let base = d.get_base();
-    //             if !base.is_visible() {
-    //                 continue;
-    //             }
-    //             let gravity = base.get_gravity();
-    //             match gravity {
-    //                 GroupPosition::TopLeft => {
-    //                     self.update_position_from_left(index, &mut top_left, top_right.x);
-    //                 }
-    //                 GroupPosition::BottomLeft => self.update_position_from_left(index, &mut bottom_left, bottom_right.x),
-    //                 GroupPosition::TopRight => {
-    //                     self.update_position_from_right(index, &mut top_right, top_left.x);
-    //                 }
-    //                 GroupPosition::BottomRight => {
-    //                     match d {
-    //                         ToolBarItem::ResizeCorner(_) => bottom_right.x += 1,
-    //                         _ => {}
-    //                     }
-    //                     self.update_position_from_right(index, &mut bottom_right, bottom_left.x);
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     // last elements
-    //     if top_left.index.is_valid() {
-    //         if let Some(item) = self.items.get_element_mut(top_left.index.index()) {
-    //             item.get_base_mut().set_right_marker();
-    //         }
-    //     }
-    //     if bottom_left.index.is_valid() {
-    //         if let Some(item) = self.items.get_element_mut(bottom_left.index.index()) {
-    //             item.get_base_mut().set_right_marker();
-    //         }
-    //     }
-    //     if top_right.index.is_valid() {
-    //         if let Some(item) = self.items.get_element_mut(top_right.index.index()) {
-    //             item.get_base_mut().set_left_marker();
-    //         }
-    //     }
-    //     if bottom_right.index.is_valid() {
-    //         if let Some(item) = self.items.get_element_mut(bottom_right.index.index()) {
-    //             item.get_base_mut().set_left_marker();
-    //         }
-    //     }
-    //     (top_left.x + 1, top_right.x)
-    // }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, focused: bool, maximized: bool) {
         let mut paint_data = PaintData {
             focused,

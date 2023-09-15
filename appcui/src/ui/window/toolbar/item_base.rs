@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-use super::{Group, GroupPosition, PositionHelper, ToolBarItem};
+use super::{Group, GroupPosition, PositionHelper};
 use crate::system::Handle;
 use crate::ui::common::UIElement;
 
@@ -65,10 +65,6 @@ impl ItemBase {
     #[inline(always)]
     pub(crate) fn is_visible(&self) -> bool {
         self.status.contains(StatusFlags::Visible)
-    }
-    #[inline(always)]
-    pub(crate) fn set_outside_drawing_area(&mut self) {
-        self.status |= StatusFlags::OutsideDrawingArea;
     }
     #[inline(always)]
     pub(crate) fn can_be_drawn(&self) -> bool {
@@ -173,7 +169,33 @@ impl ItemBase {
         previous_handle
     }
     pub(super) fn update_position_from_right(&mut self, helper: &mut PositionHelper, left: i32) -> Handle<UIElement> {
-        todo!()
+        // in case of new group `[=` ==> 2 chars
+        // in case of existing group `|` ==> 1 char
+        let extra = if self.group.id != helper.last_group { 2 } else { 1 };
+        // I need to check if there is space for: [extra][me][separator or final ']']
+        if helper.x - (extra + (self.width as i32) + 2) >= left {
+            // we can not add this to the view
+            self.status |= StatusFlags::OutsideDrawingArea;
+            return Handle::None;
+        }
+        // if all is good, send the last object handle is the group is different
+        let previous_handle = if self.group.id != helper.last_group {
+            helper.last_handle
+        } else {
+            Handle::None
+        };
+        // can be added
+        self.x = helper.x - (extra + (self.width as i32));
+        self.y = helper.y;
+        self.status |= if self.group.id != helper.last_group {
+            StatusFlags::RightGroupMarker
+        } else {
+            StatusFlags::Separator
+        };
+        helper.x = self.x;
+        helper.last_group = self.group.id;
+        helper.last_handle = self.handle;
+        previous_handle
     }
 
     // pub(super) fn update_position_from_left(
