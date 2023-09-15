@@ -146,10 +146,10 @@ impl ToolBar {
                 d.get_base_mut().clear();
             }
         }
-        let mut top_left = PositionHelper::new(0, 0);
-        let mut top_right = PositionHelper::new(size.width as i32, 0);
+        let mut top_left = PositionHelper::new(1, 0);
+        let mut top_right = PositionHelper::new((size.width as i32)-1, 0);
         let mut bottom_left = PositionHelper::new(1, (size.height as i32) - 1);
-        let mut bottom_right = PositionHelper::new((size.width as i32), (size.height as i32) - 1);
+        let mut bottom_right = PositionHelper::new((size.width as i32)-1, (size.height as i32) - 1);
 
         for elem in &self.order {
             if let Some(d) = self.items.get_mut(elem.handle.cast()) {

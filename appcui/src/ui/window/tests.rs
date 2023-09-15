@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::{
-    input::{Key, KeyCode, KeyModifier},
+    input::{KeyCode, KeyModifier},
     system::App,
     ui::{Desktop, Layout},
 };
