@@ -7,7 +7,6 @@ use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Group};
 
 pub struct Label {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<Label>,
     text: String
 }
 
@@ -22,7 +21,6 @@ impl Label {
     pub fn new(text: &str)->Self {
         let mut obj = Label {
             base: ItemBase::new(true, true),
-            handle: Handle::None,
             text: String::new(),
         };
         obj.set_text(text);

@@ -8,7 +8,6 @@ use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Gro
 
 pub struct Button {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<Button>,
     pub(super) caption: Caption,
 }
 
@@ -23,7 +22,6 @@ impl Button {
     pub fn new(text: &str) -> Self {
         let mut obj = Button {
             base: ItemBase::new(true, true),
-            handle: Handle::None,
             caption: Caption::new("", false),
         };
         obj.set_text(text);

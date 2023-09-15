@@ -7,7 +7,6 @@ use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Group, SymbolAttrSta
 
 pub(crate) struct MaximizeRestoreButton {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<MaximizeRestoreButton>,
 }
 
 impl AddToToolbar<MaximizeRestoreButton> for MaximizeRestoreButton {
@@ -21,7 +20,6 @@ impl MaximizeRestoreButton {
     pub fn new() -> Self {
         Self {
             base: ItemBase::with_width(3, "Press to maximize or restore", true),
-            handle: Handle::None,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {

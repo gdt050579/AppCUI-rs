@@ -7,7 +7,6 @@ use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, SymbolAttrState, Gro
 
 pub(crate) struct CloseButton {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<CloseButton>,
 }
 
 impl AddToToolbar<CloseButton> for CloseButton {
@@ -21,7 +20,6 @@ impl CloseButton {
     pub fn new() -> Self {
         CloseButton {
             base: ItemBase::with_width(3, "Press to close this window", true),
-            handle: Handle::None,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {

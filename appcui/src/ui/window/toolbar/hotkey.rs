@@ -8,7 +8,6 @@ use super::{AddToToolbar, ItemBase, PaintData, ToolBarItem, Group};
 
 pub(crate) struct HotKey {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<HotKey>,
     key: Key,
 }
 
@@ -23,7 +22,6 @@ impl HotKey {
     pub fn new() -> Self {
         HotKey {
             base: ItemBase::new(false, false),
-            handle: Handle::None,
             key: Key::None,
         }
     }

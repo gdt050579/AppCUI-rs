@@ -8,7 +8,6 @@ use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Gro
 
 pub struct CheckBox {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<CheckBox>,
     pub(super) caption: Caption,
     checked: bool,
 }
@@ -24,7 +23,6 @@ impl CheckBox {
     pub fn new(text: &str, checked: bool) -> Self {
         let mut obj = CheckBox {
             base: ItemBase::new(true, true),
-            handle: Handle::None,
             caption: Caption::new("", false),
             checked,
         };

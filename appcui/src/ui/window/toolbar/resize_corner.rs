@@ -7,7 +7,6 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 
 pub(crate) struct ResizeCorner {
     pub(super) base: ItemBase,
-    pub(super) handle: Handle<ResizeCorner>,
 }
 
 impl AddToToolbar<ResizeCorner> for ResizeCorner {
@@ -21,7 +20,6 @@ impl ResizeCorner {
     pub fn new() -> Self {
         Self {
             base: ItemBase::with_width(2, "Drag to resize this window", true),
-            handle: Handle::None,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
