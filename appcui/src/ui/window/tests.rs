@@ -121,6 +121,17 @@ fn check_multiple_items_top_bar() {
     w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
     let g = w.get_toolbar().create_group(GroupPosition::TopRight);
     w.get_toolbar().add(g, toolbar::Label::new("AB"));  
+    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
+    w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
+    w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
+    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
+    w.get_toolbar().add(g, toolbar::Label::new("Single"));
+    let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
+    w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
+    w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
+    let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
+    w.get_toolbar().add(g, toolbar::Label::new("AB"));  
+
     a.add_window(w);
     a.run();
 }
