@@ -3,9 +3,10 @@ use std::ptr::NonNull;
 use crate::{
     graphics::{Size, Surface},
     input::Key,
+    prelude::{CharFlags, Character, Color},
     system::{Handle, Theme},
     ui::common::UIElement,
-    utils::HandleManager, prelude::{Character, Color, CharFlags},
+    utils::HandleManager,
 };
 
 use super::{
@@ -151,9 +152,9 @@ impl ToolBar {
             }
         }
         let mut top_left = PositionHelper::new(1, 0);
-        let mut top_right = PositionHelper::new((size.width as i32)-1, 0);
+        let mut top_right = PositionHelper::new((size.width as i32) - 1, 0);
         let mut bottom_left = PositionHelper::new(1, (size.height as i32) - 1);
-        let mut bottom_right = PositionHelper::new((size.width as i32)-1, (size.height as i32) - 1);
+        let mut bottom_right = PositionHelper::new((size.width as i32) - 1, (size.height as i32) - 1);
 
         for elem in &self.order {
             if let Some(d) = self.items.get_mut(elem.handle.cast()) {
@@ -163,19 +164,15 @@ impl ToolBar {
                     continue;
                 }
                 let pos = base.get_position();
-                let (h,on_left) = match pos {
-                    GroupPosition::TopLeft => {
-                        (base.update_position_from_left(&mut top_left, top_right.x),true)
-                    }
-                    GroupPosition::BottomLeft => {
-                        (base.update_position_from_left(&mut bottom_left, bottom_right.x),true)
-                    }
-                    GroupPosition::TopRight => {
-                        (base.update_position_from_right(&mut top_right, top_left.x),false)
-                    }
+                let (h, on_left) = match pos {
+                    GroupPosition::TopLeft => (base.update_position_from_left(&mut top_left, top_right.x), true),
+                    GroupPosition::BottomLeft => (base.update_position_from_left(&mut bottom_left, bottom_right.x), true),
+                    GroupPosition::TopRight => (base.update_position_from_right(&mut top_right, top_left.x), false),
                     GroupPosition::BottomRight => {
-                        if is_resize_corner { bottom_right.x += 1; }                    
-                        (base.update_position_from_right(&mut bottom_right, bottom_left.x),false)
+                        if is_resize_corner {
+                            bottom_right.x += 1;
+                        }
+                        (base.update_position_from_right(&mut bottom_right, bottom_left.x), false)
                     }
                 };
                 if !h.is_none() {
@@ -204,15 +201,21 @@ impl ToolBar {
         if !top_right.last_handle.is_none() {
             if let Some(item) = self.items.get_mut(top_right.last_handle.cast()) {
                 item.get_base_mut().set_left_marker();
+                if item.get_base().supports_markers() {
+                    top_right.x -= 1;
+                }
             }
         }
         if !bottom_right.last_handle.is_none() {
             if let Some(item) = self.items.get_mut(bottom_right.last_handle.cast()) {
                 item.get_base_mut().set_left_marker();
+                if item.get_base().supports_markers() {
+                    bottom_right.x -= 1;
+                }
             }
         }
-        self.temp_top_left = top_left.x+1;
-        self.temp_top_right = top_right.x-1;
+        self.temp_top_left = top_left.x + 1;
+        self.temp_top_right = top_right.x - 1;
         (top_left.x + 1, top_right.x)
     }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, focused: bool, maximized: bool) {
@@ -232,8 +235,8 @@ impl ToolBar {
                 item.paint(surface, theme, &paint_data);
             }
         }
-        surface.write_char(self.temp_top_left, 0, Character::new('X',Color::Red,Color::Yellow, CharFlags::None));
-        surface.write_char(self.temp_top_right, 0, Character::new('X',Color::Red,Color::Yellow, CharFlags::None));
+        surface.write_char(self.temp_top_left, 0, Character::new('X', Color::Red, Color::Yellow, CharFlags::None));
+        surface.write_char(self.temp_top_right, 0, Character::new('X', Color::Red, Color::Yellow, CharFlags::None));
     }
 
     pub(crate) fn update_singlechoice_group_id(&mut self, group_id: u32, handle: Handle<UIElement>) {

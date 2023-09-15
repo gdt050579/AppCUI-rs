@@ -8,10 +8,11 @@ use crate::ui::common::UIElement;
 enum StatusFlags {
     Visible = 0x01,
     OutsideDrawingArea = 0x02,
-    Separator = 0x04,
-    LeftGroupMarker = 0x08,
-    RightGroupMarker = 0x10,
-    NoMarker = 0x20,
+    SeparatorOnLeft = 0x04,
+    SeparatorOnRight = 0x08,
+    LeftGroupMarker = 0x10,
+    RightGroupMarker = 0x20,
+    NoMarker = 0x40,
 }
 pub(crate) struct ItemBase {
     x: i32,
@@ -53,8 +54,13 @@ impl ItemBase {
     }
     #[inline(always)]
     pub(crate) fn clear(&mut self) {
-        self.status
-            .remove(StatusFlags::OutsideDrawingArea | StatusFlags::LeftGroupMarker | StatusFlags::RightGroupMarker | StatusFlags::Separator);
+        self.status.remove(
+            StatusFlags::OutsideDrawingArea
+                | StatusFlags::LeftGroupMarker
+                | StatusFlags::RightGroupMarker
+                | StatusFlags::SeparatorOnLeft
+                | StatusFlags::SeparatorOnRight,
+        );
     }
     #[inline(always)]
     pub(crate) fn set_visible(&mut self, value: bool) {
@@ -89,8 +95,12 @@ impl ItemBase {
         !self.status.contains(StatusFlags::NoMarker)
     }
     #[inline(always)]
-    pub(crate) fn has_separator(&self) -> bool {
-        self.status.contains(StatusFlags::Separator)
+    pub(crate) fn has_left_separator(&self) -> bool {
+        self.status.contains(StatusFlags::SeparatorOnLeft)
+    }
+    #[inline(always)]
+    pub(crate) fn has_right_separator(&self) -> bool {
+        self.status.contains(StatusFlags::SeparatorOnRight)
     }
     #[inline(always)]
     pub(crate) fn set_right_marker(&mut self) {
@@ -186,7 +196,7 @@ impl ItemBase {
         self.status |= if self.group.id != helper.last_group {
             StatusFlags::LeftGroupMarker
         } else {
-            StatusFlags::Separator
+            StatusFlags::SeparatorOnLeft
         };
         helper.x += extra + (self.width as i32);
         helper.last_group = self.group.id;
@@ -216,11 +226,12 @@ impl ItemBase {
         self.status |= if self.group.id != helper.last_group {
             StatusFlags::RightGroupMarker
         } else {
-            StatusFlags::Separator
+            StatusFlags::SeparatorOnRight
         };
         helper.x = self.x;
         helper.last_group = self.group.id;
         helper.last_handle = self.handle;
+        helper.last_group_supports_markers = self.supports_markers();
         previous_handle
     }
 }

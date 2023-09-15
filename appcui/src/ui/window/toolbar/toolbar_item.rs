@@ -65,8 +65,11 @@ impl ToolBarItem {
             if base.has_left_group_marker() {
                 surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('[', data.sep_attr));
             }
-            if base.has_separator() {
+            if base.has_left_separator() {
                 surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('|', data.sep_attr));
+            }
+            if base.has_right_separator() {
+                surface.write_char(base.get_right(), base.get_y(), Character::with_attributes('|', data.sep_attr));
             }
             if base.has_right_group_marker() {
                 surface.write_char(base.get_right(), base.get_y(), Character::with_attributes(']', data.sep_attr));

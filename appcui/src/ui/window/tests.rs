@@ -120,7 +120,7 @@ fn check_multiple_items_top_bar() {
     w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
     w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
     let g = w.get_toolbar().create_group(GroupPosition::TopRight);
-    w.get_toolbar().add(g, toolbar::Label::new("XX"));  
+    w.get_toolbar().add(g, toolbar::Label::new("AB"));  
     a.add_window(w);
     a.run();
 }
@@ -134,7 +134,7 @@ fn check_window_tag_1() {
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
-    w.set_tag("ABC");
+    w.set_tag("AB");
     a.add_window(w);
     a.run();
 }
