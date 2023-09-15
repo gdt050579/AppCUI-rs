@@ -61,14 +61,16 @@ impl ToolBarItem {
             ToolBarItem::SingleChoice(item) => item.paint(surface, theme, data),
         };
         // separators
-        if base.has_left_group_marker() {
-            surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('[', data.sep_attr));
-        }
-        if base.has_separator() {
-            surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('|', data.sep_attr));
-        }
-        if base.has_right_group_marker() {
-            surface.write_char(base.get_right(), base.get_y(), Character::with_attributes(']', data.sep_attr));
+        if base.supports_markers() {
+            if base.has_left_group_marker() {
+                surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('[', data.sep_attr));
+            }
+            if base.has_separator() {
+                surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('|', data.sep_attr));
+            }
+            if base.has_right_group_marker() {
+                surface.write_char(base.get_right(), base.get_y(), Character::with_attributes(']', data.sep_attr));
+            }
         }
     }
     pub(super) fn get_hotkey(&self) -> Key {

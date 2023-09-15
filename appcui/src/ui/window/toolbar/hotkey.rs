@@ -32,32 +32,32 @@ impl HotKey {
             self.base.request_recompute_layout();
         } else {
             self.base
-                .set_width(key.code.get_name().chars().count() as u16 + 2);
+                .set_width(key.code.get_name().chars().count() as u16);
             self.base.set_visible(true);
             self.base.request_recompute_layout();
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
-        surface.write_char(
-            self.base.get_left(),
-            self.base.get_y(),
-            Character::with_attributes('[', data.sep_attr),
-        );
+        // surface.write_char(
+        //     self.base.get_left(),
+        //     self.base.get_y(),
+        //     Character::with_attributes('[', data.sep_attr),
+        // );
         let attr = match data.focused {
             true => theme.text.normal,
             false => theme.text.inactive,
         };
         surface.write_string(
-            self.base.get_left() + 1,
+            self.base.get_left(),
             self.base.get_y(),
             self.key.code.get_name(),
             attr,
             false,
         );
-        surface.write_char(
-            self.base.get_left() + self.base.get_width() - 1,
-            self.base.get_y(),
-            Character::with_attributes(']', data.sep_attr),
-        );
+        // surface.write_char(
+        //     self.base.get_left() + self.base.get_width() - 1,
+        //     self.base.get_y(),
+        //     Character::with_attributes(']', data.sep_attr),
+        // );
     }
 }

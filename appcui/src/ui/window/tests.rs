@@ -58,7 +58,7 @@ fn check_window_full_title_3() {
 #[test]
 fn check_window_minimize_title_1() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('Title = ABCD...IJKL')
         CheckHash(0x671DB3CA4AD392AE)
     ";
@@ -195,7 +195,7 @@ fn check_window_hotkey_1() {
 #[test]
 fn check_window_hotkey_2() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('hotkey')
         CheckHash(0xC9D2F0E450475385)
     ";
@@ -224,7 +224,7 @@ fn check_window_hotkey_and_tag() {
 #[test]
 fn check_window_resize() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('initial state')
         CheckHash(0x6E5585BA8803D312)
         Mouse.Move(39,7)
@@ -412,7 +412,7 @@ fn check_window_on_activate_deactivate() {
 #[test]
 fn check_window_toolbar_label() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('multiple label')
         CheckHash(0x7DF82A0072CCF28F)
     ";

@@ -1,6 +1,6 @@
 use crate::{
-    graphics::{Surface, Character},
-    system::{Handle, Theme}, 
+    graphics::Surface,
+    system::{Handle, Theme},
 };
 
 use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
@@ -11,7 +11,7 @@ pub struct Tag {
 }
 
 impl AddToToolbar<Tag> for Tag {
-    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<Tag> {
+    fn add(mut self, toolbar: &mut super::toolbar::ToolBar, group: Group) -> Handle<Tag> {
         self.base.update_group(group);
         toolbar.items.add(ToolBarItem::Tag(self)).cast()
     }
@@ -27,8 +27,8 @@ impl Tag {
     pub fn set_text(&mut self, text: &str) {
         self.text.clear();
         self.text.push_str(text);
-        self.base.set_width((text.chars().count() + 2) as u16);
-        self.base.set_visible(text.len()>0);
+        self.base.set_width(text.chars().count() as u16);
+        self.base.set_visible(text.len() > 0);
         self.base.request_recompute_layout();
     }
     #[inline(always)]
@@ -36,26 +36,10 @@ impl Tag {
         &self.text
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
-        surface.write_char(
-            self.base.get_left(),
-            self.base.get_y(),
-            Character::with_attributes('[', data.sep_attr),
-        );
         let attr = match data.focused {
             true => theme.text.enphasized_2,
             false => theme.text.inactive,
         };
-        surface.write_string(
-            self.base.get_left() + 1,
-            self.base.get_y(),
-            self.text.as_str(),
-            attr,
-            false,
-        );
-        surface.write_char(
-            self.base.get_left() + self.base.get_width() - 1,
-            self.base.get_y(),
-            Character::with_attributes(']', data.sep_attr),
-        );
+        surface.write_string(self.base.get_left(), self.base.get_y(), self.text.as_str(), attr, false);
     }
 }

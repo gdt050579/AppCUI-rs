@@ -11,6 +11,7 @@ enum StatusFlags {
     Separator = 0x04,
     LeftGroupMarker = 0x08,
     RightGroupMarker = 0x10,
+    NoMarker = 0x20,
 }
 pub(crate) struct ItemBase {
     x: i32,
@@ -31,6 +32,7 @@ impl ItemBase {
     pub(super) fn with_width(width: u16, tooltip: &str, visible: bool) -> ItemBase {
         let mut base = ItemBase::new(visible);
         base.width = width;
+        base.status |= StatusFlags::NoMarker;
         base.tooltip.push_str(tooltip);
         base
     }
@@ -81,6 +83,10 @@ impl ItemBase {
     #[inline(always)]
     pub(crate) fn has_left_group_marker(&self) -> bool {
         self.status.contains(StatusFlags::LeftGroupMarker)
+    }
+    #[inline(always)]
+    pub(crate) fn supports_markers(&self) -> bool {
+        !self.status.contains(StatusFlags::NoMarker)
     }
     #[inline(always)]
     pub(crate) fn has_separator(&self) -> bool {
@@ -139,10 +145,18 @@ impl ItemBase {
     }
     pub(crate) fn request_recompute_layout(&mut self) {}
 
+    #[inline(always)]
+    fn compute_extra_space(&self, helper: &mut PositionHelper) -> i32 {
+        if self.status.contains_one(StatusFlags::NoMarker) {
+            0
+        } else {
+            if self.group.id != helper.last_group { 2 } else { 1 }
+        }
+    }
     pub(super) fn update_position_from_left(&mut self, helper: &mut PositionHelper, right: i32) -> Handle<UIElement> {
         // in case of new group `[=` ==> 2 chars
         // in case of existing group `|` ==> 1 char
-        let extra = if self.group.id != helper.last_group { 2 } else { 1 };
+        let extra = self.compute_extra_space(helper);
         // I need to check if there is space for: [extra][me][separator or final ']']
         if extra + (self.width as i32) + 2 + helper.x >= right {
             // we can not add this to the view
@@ -171,9 +185,9 @@ impl ItemBase {
     pub(super) fn update_position_from_right(&mut self, helper: &mut PositionHelper, left: i32) -> Handle<UIElement> {
         // in case of new group `[=` ==> 2 chars
         // in case of existing group `|` ==> 1 char
-        let extra = if self.group.id != helper.last_group { 2 } else { 1 };
+        let extra = self.compute_extra_space(helper);
         // I need to check if there is space for: [extra][me][separator or final ']']
-        if helper.x - (extra + (self.width as i32) + 2) >= left {
+        if helper.x - (extra + (self.width as i32) + 2) <= left {
             // we can not add this to the view
             self.status |= StatusFlags::OutsideDrawingArea;
             return Handle::None;
