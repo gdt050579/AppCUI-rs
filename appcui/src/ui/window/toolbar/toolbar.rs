@@ -158,7 +158,7 @@ impl ToolBar {
                 if !base.is_visible() {
                     continue;
                 }
-                let pos = base.get_gravity();
+                let pos = base.get_position();
                 let (h,on_left) = match pos {
                     GroupPosition::TopLeft => {
                         (base.update_position_from_left(&mut top_left, top_right.x),true)

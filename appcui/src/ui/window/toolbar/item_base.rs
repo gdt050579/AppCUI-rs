@@ -71,7 +71,7 @@ impl ItemBase {
         (self.status & (StatusFlags::Visible | StatusFlags::OutsideDrawingArea)) == StatusFlags::Visible
     }
     #[inline(always)]
-    pub(crate) fn get_gravity(&self) -> GroupPosition {
+    pub(crate) fn get_position(&self) -> GroupPosition {
         self.group.pos
     }
     #[inline(always)]
