@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, Surface},
+    graphics::Surface,
     input::Key,
     system::{Handle, Theme},
 };
