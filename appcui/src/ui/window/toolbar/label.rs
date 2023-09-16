@@ -10,13 +10,7 @@ pub struct Label {
     text: String
 }
 
-impl AddToToolbar<Label> for Label {
-    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<Label> {
-        self.base.update_group(group);
-        self.base.set_window_handle(toolbar.get_window_handle());
-        toolbar.items.add(ToolBarItem::Label(self)).cast()
-    }
-}
+crate::add_to_toolbar_impl!(Label);
 
 impl Label {
     pub fn new(text: &str)->Self {

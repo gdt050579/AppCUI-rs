@@ -37,6 +37,18 @@ pub struct ToolBar {
 pub trait AddToToolbar<T> {
     fn add(self, toolbar: &mut ToolBar, group: Group) -> Handle<T>;
 }
+#[macro_export]
+macro_rules! add_to_toolbar_impl {
+    ($type: tt) => {
+        impl AddToToolbar<$type> for $type {
+            fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<$type> {
+                self.base.update_group(group);
+                self.base.set_window_handle(toolbar.get_window_handle());
+                toolbar.items.add(ToolBarItem::$type(self)).cast()
+            }
+        }        
+    };
+}
 
 impl ToolBar {
     pub(crate) fn new() -> Self {

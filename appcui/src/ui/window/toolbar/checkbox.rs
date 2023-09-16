@@ -12,13 +12,7 @@ pub struct CheckBox {
     checked: bool,
 }
 
-impl AddToToolbar<CheckBox> for CheckBox {
-    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<CheckBox> {
-        self.base.update_group(group);
-        self.base.set_window_handle(toolbar.get_window_handle());
-        toolbar.items.add(ToolBarItem::CheckBox(self)).cast()
-    }
-}
+crate::add_to_toolbar_impl!(CheckBox);
 
 impl CheckBox {
     pub fn new(text: &str, checked: bool) -> Self {

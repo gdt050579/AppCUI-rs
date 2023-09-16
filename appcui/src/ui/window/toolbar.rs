@@ -10,6 +10,7 @@ mod tag;
 mod close_button;
 mod maximize_restore_button;
 mod resize_corner;
+#[macro_use]
 mod button;
 mod checkbox;
 mod single_choice;

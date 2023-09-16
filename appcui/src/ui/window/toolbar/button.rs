@@ -1,7 +1,7 @@
 use crate::{
     graphics::{Surface, TextAlignament, TextFormat},
     system::{Handle, Theme},
-    utils::Caption
+    utils::Caption, 
 };
 
 use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Group};
@@ -10,14 +10,7 @@ pub struct Button {
     pub(super) base: ItemBase,
     pub(super) caption: Caption,
 }
-
-impl AddToToolbar<Button> for Button {
-    fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<Button> {
-        self.base.update_group(group);
-        self.base.set_window_handle(toolbar.get_window_handle());
-        toolbar.items.add(ToolBarItem::Button(self)).cast()
-    }
-}
+crate::add_to_toolbar_impl!(Button);
 
 impl Button {
     pub fn new(text: &str) -> Self {
