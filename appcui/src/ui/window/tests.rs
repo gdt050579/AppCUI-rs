@@ -92,10 +92,10 @@ fn check_window_full_title_3() {
 #[test]
 fn check_window_title_close_button_and_minimize_button() {
     let script = "
-        //Paint.Enable(false)
-        //expect: 
+        Paint.Enable(false)
+        //expect: ╔[↑]══ 123456 ══[x]╗
         Paint('full title')
-        CheckHash(0xEEBF652BB26E9C4C)
+        CheckHash(0xEF7A5C3AFD21BD32)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
     a.add_window(Window::new("123456", Layout::new("d:c,w:20,h:8"), window::Flags::Sizeable));

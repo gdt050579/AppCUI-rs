@@ -196,6 +196,9 @@ impl ToolBar {
         if !top_left.last_handle.is_none() {
             if let Some(item) = self.items.get_mut(top_left.last_handle.cast()) {
                 item.get_base_mut().set_right_marker();
+                if item.get_base().supports_markers() {
+                    top_left.x += 1;
+                }
             }
         }
         if !bottom_left.last_handle.is_none() {
@@ -219,7 +222,7 @@ impl ToolBar {
                 }
             }
         }
-        let left_pos = top_left.x + if top_left.last_handle.is_none() { 0 } else { 1 };
+        let left_pos = top_left.x;
         let right_pos = top_right.x - 1;
         // for debug purposes
         #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
