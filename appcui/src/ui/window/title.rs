@@ -72,7 +72,7 @@ impl Title {
         if left + 2 >= right {
             self.draw_mode = TitleDrawMode::None;
         } else {
-            let width = (right - (left + 1)).min(self.count as i32);
+            let width = (right - (left + 3)).min(self.count as i32);
             if width == (self.count as i32) {
                 self.left = (left + right - width) / 2;
                 self.right = self.left + width + 1;

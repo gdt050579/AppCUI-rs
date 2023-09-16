@@ -1,11 +1,5 @@
 use crate::prelude::*;
 
-use crate::{
-    input::{KeyCode, KeyModifier},
-    system::App,
-    ui::{Desktop, Layout},
-};
-
 use super::{
     toolbar::{self, GroupPosition},
     Window,
@@ -98,7 +92,8 @@ fn check_window_full_title_3() {
 #[test]
 fn check_window_minimize_title_1() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
+        //expect: ╔═ ABCD...IJKL ═[x]╗
         Paint('Title = ABCD...IJKL')
         CheckHash(0x671DB3CA4AD392AE)
     ";
@@ -109,7 +104,8 @@ fn check_window_minimize_title_1() {
 #[test]
 fn check_window_minimize_title_2() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
+        //expect: ╔═ AB...KL ═[x]╗
         Paint('Title = AB...KL')
         CheckHash(0x7F7F1F564130F50E)
     ";
@@ -121,6 +117,7 @@ fn check_window_minimize_title_2() {
 fn check_window_minimize_title_3() {
     let script = "
         Paint.Enable(false)
+        //expect: ╔═ A...L ═[x]
         Paint('Title = A...L')
         CheckHash(0x6CB0EAB5DDA0E087)
     ";
@@ -131,8 +128,9 @@ fn check_window_minimize_title_3() {
 #[test]
 fn check_window_minimize_title_4() {
     let script = "
-        Paint.Enable(false)
-        Paint('Shorten title')
+        //Paint.Enable(false)
+        //expect: ╔═ A…L ═[x]╗
+        Paint('Short title')
         CheckHash(0x3A1C142AE9968A2F)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
