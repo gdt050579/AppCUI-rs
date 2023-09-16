@@ -28,7 +28,7 @@ impl MyWin {
         let buttons_group = me.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
         me.opt1 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &A", 1));
         me.opt2 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &B", 1));
-        me.opt3 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &C", 1));
+        me.opt3 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Optls &C", 1));
 
         me
     }

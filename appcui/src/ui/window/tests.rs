@@ -274,6 +274,52 @@ fn check_window_tag_and_title_not_visible() {
 }
 
 #[test]
+fn check_window_toolbar_title_pos_recompute() {
+    #[Window(events = ToolBarEvents,internal = true)]
+    struct MyWin {
+        info: Handle<toolbar::Label>,
+        change_info: Handle<toolbar::Button>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("12345678", Layout::new("d:c,w:30,h:8"), window::Flags::None),
+                info: Handle::None,
+                change_info: Handle::None,
+            };
+            let g = me.get_toolbar().create_group(GroupPosition::TopLeft);
+            me.info = me.get_toolbar().add(g, toolbar::Label::new("?"));
+            let g = me.get_toolbar().create_group(GroupPosition::BottomLeft);
+            me.change_info = me.get_toolbar().add(g, toolbar::Button::new("&Change Info Size"));
+            me
+        }
+    }
+    impl ToolBarEvents for MyWin {
+        fn on_button_clicked(&mut self, handle: Handle<toolbar::Button>) -> EventProcessStatus {
+            if handle == self.change_info {
+                let h = self.info;
+                self.get_toolbar().get_mut(h).unwrap().set_text("ABCDEFGH");
+                return EventProcessStatus::Processed;
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+
+    let script = "
+        //Paint.Enable(false)
+        // expect on top:    ╔[?]══════ 12345678 ══════[x]╗
+        // expect on bottom: ╚[Change Info Size]══════════╝ 
+        Paint('initial state')
+        CheckHash(0xB64C88B7BC1DE1B2)
+        Mouse.Click(20,8,left)
+        Paint('after click on button --> top info = ABCDEFGH')
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
 fn check_window_hotkey_1() {
     let script = "
         Paint.Enable(false)
