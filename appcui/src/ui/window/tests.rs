@@ -352,22 +352,22 @@ fn check_window_resize() {
 #[test]
 fn check_window_move() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Mouse.Move(30,3)
         Paint('over the title')
-        CheckHash(0x6E5585BA8803D312)
+        CheckHash(0xB13AACDBDB5FD18C)
         Mouse.Hold(30,3,left)
         Paint('press on window title')
-        CheckHash(0x5EEA06B578ABD9A)
+        CheckHash(0xA1C4D2F2B8B883A8)
         Mouse.Move(15,1)
         Paint('window moved')
-        CheckHash(0x1EBF887394C43672)
+        CheckHash(0x67671A5381A27E24)
         Mouse.Move(1,1)
         Paint('window moved outside')
-        CheckHash(0x8C8185EC85BF07AE)
+        CheckHash(0x31A5BA52AA70667B)
         Mouse.Release(1,1,left)
-        Paint('after release of handle')
-        CheckHash(0x922FBAECBC6B2C2)
+        Paint('after release of left mouse button')
+        CheckHash(0x22B329EC1888AB5E)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let w = Window::new("Title", Layout::new("d:c,w:21,h:5"), window::Flags::Sizeable);
@@ -438,19 +438,19 @@ fn check_window_on_layout_changed() {
     let script = "
         Paint.Enable(false)
         Paint('initial (pos=10,2 with 40x7)')
-        CheckHash(0xDA18EF6A52B3C090)
+        CheckHash(0x9D72A867C32120E0)
         Mouse.Move(49,8)
         Mouse.Hold(49,8,left)
         Mouse.Move(51,9)
         Mouse.Release(51,9,left)
         Paint('Resize to 42x8')
-        CheckHash(0x99F321F831E005F6)
+        CheckHash(0xDC271168ACB62E06)
         Mouse.Move(28,2)
         Mouse.Hold(28,2,left)
         Mouse.Move(26,1)
         Mouse.Release(26,1,left)
         Paint('Move to 8,1 with 42x8 size')
-        CheckHash(0x7123D2EB32E9E49A)
+        CheckHash(0xA79AF7FBE4808C6A)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
@@ -492,13 +492,13 @@ fn check_window_on_activate_deactivate() {
     let script = "
         Paint.Enable(false)
         Paint('initial state (left=no-state,right=activated)')
-        CheckHash(0xAC18C0AB5493591E)
+        CheckHash(0x28340BCAB3DD9C4E)
         Mouse.Click(10,1,left)
         Paint('left=activated, right=deactivated')
-        CheckHash(0xCE0FE1E047B8B238)
+        CheckHash(0x9D3DA7A748B1F238)
         Mouse.Click(40,1,left)
         Paint('left=deactivated, right=activated')
-        CheckHash(0x5EBC9C1734091B4C)
+        CheckHash(0xBFA2B90246E3753C)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new("x:1,y:1,w:25,h:6"));
@@ -509,9 +509,10 @@ fn check_window_on_activate_deactivate() {
 #[test]
 fn check_window_toolbar_label() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
+        //expect on bottom: ╚[Label 1|Label 2]════════════[Label 3]╝
         Paint('multiple label')
-        CheckHash(0x7DF82A0072CCF28F)
+        CheckHash(0xDF61C8FA80CF037F)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
@@ -528,18 +529,19 @@ fn check_window_toolbar_label() {
 #[test]
 fn check_window_toolbar_button() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
+        // expect on bottom: ╚[Start|Stop]════════════════════[Exit]╝
         Paint('buttons')
-        CheckHash(0x52243E492A4813E1)
+        CheckHash(0xDF332807DB1EA7F9)
         Mouse.Move(16,8)
         Paint('Mouse on button start')
-        CheckHash(0x11C054FAECF9D51F)
+        CheckHash(0x393CEF7541C6CAC3)
         Mouse.Move(21,8)
         Paint('Mouse on button stop')
-        CheckHash(0x63DCB4AE11E49B9)
+        CheckHash(0x79F3F04E3DCFA549)
         Mouse.Hold(21,8,left)
         Paint('Mouse press over stop button')
-        CheckHash(0xEFCCAC14BDDC389)
+        CheckHash(0x1128DAD41B3E99B9)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
@@ -606,8 +608,9 @@ fn check_window_toolbar_button_events() {
 
     let script = "
         //Paint.Enable(false)
+        // expect on bottom: ╚[Run|Stop|Exit]═══════════════════════╝
         Paint('initial state (no button pressed)')
-        CheckHash(0x95EE0B3C635338CD)
+        CheckHash(0xBA8D94B2CED24515)
         Mouse.Click(14,8,left)
         Paint('Run button pressed')
         //CheckHash(0)
@@ -630,14 +633,15 @@ fn check_window_toolbar_button_events() {
 fn check_window_toolbar_checkbox() {
     let script = "
         //Paint.Enable(false)
-        Paint('checkboxes')
-        CheckHash(0xE3AB27FF068AB418)
+        //expect: ╚[√ Task 1|  Task 2]═════[  Enable All]╝
+        Paint('Task1 is checkes, Task2 + Enable all are not')
+        CheckHash(0xF3733435595ED5E4)
         Mouse.Move(16,8)
         Paint('Mouse over Task 1')
-        CheckHash(0xC0598DC79AC6EE95)
+        CheckHash(0x9262823526914F49)
         Mouse.Move(23,8)
         Paint('Mouse over Task 2')
-        CheckHash(0x921CBA73AC67EB4C)
+        CheckHash(0xD7B160520844D260)
         Mouse.Click(23,8,left)
         Paint('Task 2 checked')
         //CheckHash(0x11C054FAECF9D51F)
@@ -689,18 +693,22 @@ fn check_window_toolbar_checkbox_events() {
     }
 
     let script = "
-        // Paint.Enable(false)
+        Paint.Enable(false)
+        //expect: ╔[  No State]══════════════ Win ══════════════[x]╗
         Paint('checbox = <No State>')
-        CheckHash(0x7A0F1259C3B555F4)
+        CheckHash(0x20443FB3C98F025C)
         Mouse.Click(12,2,left)
+        //expect: ╔[√ Checked]═══════════════ Win ══════════════[x]╗
         Paint('checkbox = Checked')
-        CheckHash(0x33348CAE85FD1833)
+        CheckHash(0x4BEB73AE53479ABF)
         Mouse.Click(12,2,left)
+        //expect: ╔[  Not checked]═══════════ Win ══════════════[x]╗
         Paint('checkbox = Not checked')
-        CheckHash(0x3B3091F01E62C367)
+        CheckHash(0x9FD32002770E13F7)
         Key.Pressed(Alt+N)
-        Paint('Checkbox is checked again')
-        CheckHash(0x33348CAE85FD1833)
+        //expect: ╔[√ Checked]═══════════════ Win ══════════════[x]╗
+        Paint('Checkbox is checked again (via Alt+N)')
+        CheckHash(0x4BEB73AE53479ABF)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
@@ -711,17 +719,18 @@ fn check_window_toolbar_checkbox_events() {
 fn check_window_toolbar_single_choice() {
     let script = "
         //Paint.Enable(false)
-        Paint('checkboxes')
-        CheckHash(0x4C5631E5B117880C)
+        //expect on bottom: ╚[Opt 1|Opt 2|Opt 3]══════════════════[Opt C|Opt B|Opt A]╝
+        Paint('2 groupse of options (opt 1,2,3) and (opt A,B,C)')
+        CheckHash(0x9A4788CCD67E31CC)
         Mouse.Move(5,8)
         Paint('Mouse over Opt 1')
-        CheckHash(0xFE6ED16B8C8DEC4A)
+        CheckHash(0x68D92FF00A40FDEE)
         Mouse.Move(40,8)
         Paint('Mouse over Opt C')
-        CheckHash(0x230896B85C5EDB2)
+        CheckHash(0xCEE59E5E54543176)
         Mouse.Move(11,8)
         Paint('Mouse over Opt 2')
-        CheckHash(0xB7BC6D5A47FA1902)
+        CheckHash(0x30F92AB21E82C25E)
         Mouse.Click(11,8,left)
         Paint('Opt 2 selected')
         //CheckHash(0x11C054FAECF9D51F)
