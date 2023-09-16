@@ -14,6 +14,7 @@ pub struct Button {
 impl AddToToolbar<Button> for Button {
     fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<Button> {
         self.base.update_group(group);
+        self.base.set_window_handle(toolbar.get_window_handle());
         toolbar.items.add(ToolBarItem::Button(self)).cast()
     }
 }

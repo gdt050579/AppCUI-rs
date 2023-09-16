@@ -19,6 +19,7 @@ pub struct SingleChoice {
 impl AddToToolbar<SingleChoice> for SingleChoice {
     fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<SingleChoice> {
         self.base.update_group(group);
+        self.base.set_window_handle(toolbar.get_window_handle());
         toolbar.items.add(ToolBarItem::SingleChoice(self)).cast()
     }
 }

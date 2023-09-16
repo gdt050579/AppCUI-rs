@@ -13,6 +13,7 @@ pub struct Label {
 impl AddToToolbar<Label> for Label {
     fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<Label> {
         self.base.update_group(group);
+        self.base.set_window_handle(toolbar.get_window_handle());
         toolbar.items.add(ToolBarItem::Label(self)).cast()
     }
 }

@@ -1,6 +1,7 @@
 use EnumBitFlags::EnumBitFlags;
 
 use super::{Group, GroupPosition, PositionHelper};
+use crate::prelude::RuntimeManager;
 use crate::system::Handle;
 use crate::ui::common::UIElement;
 
@@ -22,6 +23,7 @@ pub(crate) struct ItemBase {
     status: StatusFlags,
     tooltip: String,
     handle: Handle<UIElement>,
+    window: Handle<UIElement>,
 }
 
 impl ItemBase {
@@ -45,6 +47,7 @@ impl ItemBase {
             group: Group::default(),
             tooltip: String::new(),
             handle: Handle::None,
+            window: Handle::None,
             status: if visible { StatusFlags::Visible } else { StatusFlags::None },
         }
     }
@@ -149,7 +152,17 @@ impl ItemBase {
     pub(crate) fn set_handle(&mut self, handle: Handle<UIElement>) {
         self.handle = handle;
     }
-    pub(crate) fn request_recompute_layout(&mut self) {}
+    #[inline(always)]
+    pub(crate) fn set_window_handle(&mut self, handle: Handle<UIElement>) {
+        self.window = handle;
+    }
+    pub(crate) fn request_recompute_layout(&mut self) {
+        let controls = RuntimeManager::get().get_controls();
+        if let Some(win) = controls.get(self.window) {
+            let size = win.get_base().get_size();
+            win.get_control_mut().on_resize(size, size);
+        }
+    }
 
     #[inline(always)]
     fn compute_extra_space(&self, helper: &mut PositionHelper) -> i32 {

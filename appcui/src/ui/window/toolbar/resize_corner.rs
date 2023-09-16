@@ -12,6 +12,7 @@ pub(crate) struct ResizeCorner {
 impl AddToToolbar<ResizeCorner> for ResizeCorner {
     fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<ResizeCorner> {
         self.base.update_group(group);
+        self.base.set_window_handle(toolbar.get_window_handle());
         toolbar.items.add(ToolBarItem::ResizeCorner(self)).cast()
     }
 }

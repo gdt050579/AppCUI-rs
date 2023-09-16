@@ -12,6 +12,7 @@ pub(crate) struct CloseButton {
 impl AddToToolbar<CloseButton> for CloseButton {
     fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<CloseButton> {
         self.base.update_group(group);
+        self.base.set_window_handle(toolbar.get_window_handle());
         toolbar.items.add(ToolBarItem::CloseButton(self)).cast()
     }
 }

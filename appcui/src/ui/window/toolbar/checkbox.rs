@@ -15,6 +15,7 @@ pub struct CheckBox {
 impl AddToToolbar<CheckBox> for CheckBox {
     fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<CheckBox> {
         self.base.update_group(group);
+        self.base.set_window_handle(toolbar.get_window_handle());
         toolbar.items.add(ToolBarItem::CheckBox(self)).cast()
     }
 }

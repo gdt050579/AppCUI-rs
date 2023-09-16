@@ -3,11 +3,12 @@ use std::ptr::NonNull;
 use crate::{
     graphics::{Size, Surface},
     input::Key,
-    prelude::{CharFlags, Character, Color},
     system::{Handle, Theme},
     ui::common::UIElement,
     utils::HandleManager,
 };
+#[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
+use crate::graphics::*;
 
 use super::{
     group::Group, Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner,
@@ -25,6 +26,7 @@ pub struct ToolBar {
     order: Vec<ToolbarElementHandle>,
     pressed: bool,
     last_group_index: u8,
+    window: Handle<UIElement>,
     // for debug purposes
     #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
     debug_window_title_top_left_margin: i32,
@@ -43,6 +45,7 @@ impl ToolBar {
             pressed: false,
             order: Vec::with_capacity(4),
             current_handle: Handle::None,
+            window: Handle::None,
             last_group_index: 0,
             #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
             debug_window_title_top_left_margin: 0,
@@ -126,7 +129,10 @@ impl ToolBar {
     pub(crate) fn get_item_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut ToolBarItem> {
         self.items.get_mut(handle.cast())
     }
-
+    #[inline(always)]
+    pub(crate) fn get_window_handle(&self)->Handle<UIElement> {
+        self.window
+    }
     #[inline(always)]
     pub(crate) fn is_current_item_pressed(&self) -> bool {
         self.pressed

@@ -14,6 +14,7 @@ pub(crate) struct HotKey {
 impl AddToToolbar<HotKey> for HotKey {
     fn add(mut self, toolbar: &mut super::toolbar::ToolBar, group: Group) -> Handle<HotKey> {
         self.base.update_group(group);
+        self.base.set_window_handle(toolbar.get_window_handle());
         toolbar.items.add(ToolBarItem::HotKey(self)).cast()
     }
 }
