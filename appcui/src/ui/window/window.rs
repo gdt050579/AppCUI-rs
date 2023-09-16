@@ -538,7 +538,10 @@ impl Window {
     }
 }
 impl OnWindowRegistered for Window {
-
+    fn on_registered(&mut self) {
+        // propagate my handle to toolbar elements
+        self.toolbar.set_window_handle(self.handle);
+    }
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {

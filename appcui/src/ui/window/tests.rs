@@ -298,7 +298,7 @@ fn check_window_toolbar_title_pos_recompute() {
         fn on_button_clicked(&mut self, handle: Handle<toolbar::Button>) -> EventProcessStatus {
             if handle == self.change_info {
                 let h = self.info;
-                self.get_toolbar().get_mut(h).unwrap().set_text("ABCDEFGH");
+                self.get_toolbar().get_mut(h).unwrap().set_text("ABCDEFGHI");
                 return EventProcessStatus::Processed;
             }
             EventProcessStatus::Ignored
@@ -306,13 +306,15 @@ fn check_window_toolbar_title_pos_recompute() {
     }
 
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         // expect on top:    ╔[?]══════ 12345678 ══════[x]╗
         // expect on bottom: ╚[Change Info Size]══════════╝ 
         Paint('initial state')
         CheckHash(0xB64C88B7BC1DE1B2)
         Mouse.Click(20,8,left)
-        Paint('after click on button --> top info = ABCDEFGH')
+        // expect on top: ╔[ABCDEFGHI]══ 12345678 ══[x]╗
+        Paint('after click on button --> title move to right')
+        CheckHash(0x8843D0610D5CA85C)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
