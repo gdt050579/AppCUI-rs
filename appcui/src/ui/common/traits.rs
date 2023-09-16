@@ -46,7 +46,7 @@ pub trait OnFocus {
     fn on_lose_focus(&mut self) {}
 }
 
-pub trait OnRegistered {
+pub trait OnWindowRegistered {
     fn on_registered(&mut self) {}
 }
 
@@ -57,6 +57,7 @@ pub trait Control:
     + OnDefaultAction
     + OnResize
     + OnFocus
+    + OnWindowRegistered
     /* events from each control */
     + ButtonEvents
     + CheckBoxEvents
@@ -69,6 +70,6 @@ pub trait Control:
 }
 
 pub trait DesktopControl {}
-pub trait WindowControl: OnRegistered {}
+pub trait WindowControl {}
 pub trait NotWindow {}
 pub trait NotDesktop {}

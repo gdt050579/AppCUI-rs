@@ -30,6 +30,7 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str,
             // we need to overwrite NotWindow and make sure that WindowControl is set up
             config.clear(AppCUITrait::NotWindow);
             config.clear(AppCUITrait::WindowControl);
+            config.clear(AppCUITrait::OnWindowRegistered);
             config.set(AppCUITrait::WindowControl, TraitImplementation::Default);
         }
         if a.desktop_control {
@@ -110,6 +111,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::NotDesktop, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::NotWindow, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::DefaultNonOverwritable);
     // Raw events (implemente by default)
     config.set(AppCUITrait::OnPaint, TraitImplementation::Default);
     config.set(AppCUITrait::OnResize, TraitImplementation::Default);
@@ -162,7 +164,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowControl, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::OnRegistered, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::BaseFallbackNonOverwritable);
     // Raw events (implemente by default)
     config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnResize, TraitImplementation::BaseFallbackNonOverwritable);
@@ -215,6 +217,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DesktopControl, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::DefaultNonOverwritable);
     // Raw events (implemente by default)
     config.set(AppCUITrait::OnPaint, TraitImplementation::Default);
     config.set(AppCUITrait::OnResize, TraitImplementation::Default);

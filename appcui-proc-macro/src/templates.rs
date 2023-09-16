@@ -65,8 +65,8 @@ impl OnFocus for $(STRUCT_NAME) {
 }
 ";
 
-pub(crate) static ON_REGISTERED_TRAIT: &str = "
-impl OnRegistered for $(STRUCT_NAME) {
+pub(crate) static ON_WINDOW_REGISTERED_TRAIT: &str = "
+impl OnWindowRegistered for $(STRUCT_NAME) {
     fn on_registered(&mut self)  { self.base.on_registered(); }
 }
 ";

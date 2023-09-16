@@ -537,8 +537,8 @@ impl Window {
         None
     }
 }
-impl OnRegistered for Window {
-    
+impl OnWindowRegistered for Window {
+
 }
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {

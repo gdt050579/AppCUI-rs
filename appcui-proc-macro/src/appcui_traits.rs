@@ -10,7 +10,7 @@ pub(crate) enum AppCUITrait {
     WindowControl = 3,
     NotWindow = 4,
     NotDesktop = 5,
-    OnRegistered = 6,
+    OnWindowRegistered = 6,
     // raw events
     OnPaint = 7,
     OnKeyPressed = 8,
@@ -47,7 +47,7 @@ impl AppCUITrait {
             AppCUITrait::WindowControl => "WindowControl",
             AppCUITrait::NotDesktop => "NotDesktop",
             AppCUITrait::NotWindow => "NotWindow",
-            AppCUITrait::OnRegistered => "OnRegistered",
+            AppCUITrait::OnWindowRegistered => "OnWindowRegistered",
             // raw events
             AppCUITrait::OnPaint => "OnPaint",
             AppCUITrait::OnKeyPressed => "OnKeyPressed",
@@ -74,7 +74,7 @@ impl AppCUITrait {
             AppCUITrait::WindowControl => TraitType::Other,
             AppCUITrait::NotDesktop => TraitType::Other,
             AppCUITrait::NotWindow => TraitType::Other,
-            AppCUITrait::OnRegistered => TraitType::Other,
+            AppCUITrait::OnWindowRegistered => TraitType::Other,
             // raw events
             AppCUITrait::OnPaint => TraitType::RawEvent,
             AppCUITrait::OnKeyPressed => TraitType::RawEvent,
@@ -102,7 +102,7 @@ impl AppCUITrait {
             AppCUITrait::NotDesktop => "",
             AppCUITrait::NotWindow => "",
             // raw events
-            AppCUITrait::OnRegistered => templates::ON_REGISTERED_TRAIT,
+            AppCUITrait::OnWindowRegistered => templates::ON_WINDOW_REGISTERED_TRAIT,
             AppCUITrait::OnPaint => templates::ON_PAINT_TRAIT,
             AppCUITrait::OnKeyPressed => templates::ON_KEY_PRESSED_TRAIT,
             AppCUITrait::OnMouseEvent => templates::ON_MOUSE_EVENT_TRAIT,
@@ -128,7 +128,7 @@ impl AppCUITrait {
             AppCUITrait::WindowControl => "impl WindowControl for $(STRUCT_NAME) {}",
             AppCUITrait::NotDesktop => "impl NotDesktop for $(STRUCT_NAME) {}",
             AppCUITrait::NotWindow => "impl NotWindow for $(STRUCT_NAME) {}",
-            AppCUITrait::OnRegistered => "impl OnRegistered for $(STRUCT_NAME) {}",
+            AppCUITrait::OnWindowRegistered => "impl OnWindowRegistered for $(STRUCT_NAME) {}",
             // raw events
             AppCUITrait::OnPaint => "impl OnPaint for $(STRUCT_NAME) {}",
             AppCUITrait::OnKeyPressed => "impl OnKeyPressed for $(STRUCT_NAME) {}",
@@ -175,7 +175,7 @@ impl AppCUITrait {
             3 => Some(AppCUITrait::WindowControl),
             4 => Some(AppCUITrait::NotWindow),
             5 => Some(AppCUITrait::NotDesktop),
-            6 => Some(AppCUITrait::OnRegistered),
+            6 => Some(AppCUITrait::OnWindowRegistered),
             // raw events
             7 => Some(AppCUITrait::OnPaint),
             8 => Some(AppCUITrait::OnKeyPressed),

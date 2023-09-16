@@ -181,10 +181,14 @@ impl RuntimeManager {
     {
         let controls = unsafe { &mut *self.controls };
         let handle = controls.get_desktop().get_base_mut().add_child(obj);
-        // since it is the first time I cregister this window
+        // since it is the first time I register this window
         // I need to recursively set the event processor for all of its childern to
         // this window current handle
         self.set_event_processors(handle.cast(), handle.cast());
+        // all good --> the window has been registered
+        if let Some(win) = controls.get(handle.cast()) {
+            win.get_control_mut().on_registered();
+        }
         return handle;
     }
     pub(crate) fn get_control_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T>
