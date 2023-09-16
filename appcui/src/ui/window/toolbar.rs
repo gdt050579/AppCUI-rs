@@ -1,6 +1,7 @@
 mod item_base;
 mod group;
 mod toolbar_item;
+#[macro_use]
 mod toolbar;
 mod position_helper;
 mod paint_data;
@@ -10,7 +11,6 @@ mod tag;
 mod close_button;
 mod maximize_restore_button;
 mod resize_corner;
-#[macro_use]
 mod button;
 mod checkbox;
 mod single_choice;

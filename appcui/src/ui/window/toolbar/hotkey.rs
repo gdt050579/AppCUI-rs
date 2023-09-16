@@ -11,7 +11,7 @@ pub(crate) struct HotKey {
     key: Key,
 }
 
-crate::add_to_toolbar_impl!(HotKey);
+add_to_toolbar_impl!(HotKey);
 
 impl HotKey {
     pub fn new() -> Self {

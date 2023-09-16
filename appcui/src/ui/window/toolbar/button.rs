@@ -10,7 +10,7 @@ pub struct Button {
     pub(super) base: ItemBase,
     pub(super) caption: Caption,
 }
-crate::add_to_toolbar_impl!(Button);
+add_to_toolbar_impl!(Button);
 
 impl Button {
     pub fn new(text: &str) -> Self {

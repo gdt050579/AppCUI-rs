@@ -9,7 +9,7 @@ pub(crate) struct CloseButton {
     pub(super) base: ItemBase,
 }
 
-crate::add_to_toolbar_impl!(CloseButton);
+add_to_toolbar_impl!(CloseButton);
 
 impl CloseButton {
     pub fn new() -> Self {

@@ -10,7 +10,7 @@ pub struct Label {
     text: String
 }
 
-crate::add_to_toolbar_impl!(Label);
+add_to_toolbar_impl!(Label);
 
 impl Label {
     pub fn new(text: &str)->Self {

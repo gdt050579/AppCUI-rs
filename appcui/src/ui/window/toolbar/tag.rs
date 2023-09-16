@@ -10,7 +10,7 @@ pub struct Tag {
     text: String,
 }
 
-crate::add_to_toolbar_impl!(Tag);
+add_to_toolbar_impl!(Tag);
 
 impl Tag {
     pub fn new() -> Self {

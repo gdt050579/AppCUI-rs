@@ -9,7 +9,7 @@ pub(crate) struct ResizeCorner {
     pub(super) base: ItemBase,
 }
 
-crate::add_to_toolbar_impl!(ResizeCorner);
+add_to_toolbar_impl!(ResizeCorner);
 
 impl ResizeCorner {
     pub fn new() -> Self {

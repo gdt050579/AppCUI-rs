@@ -16,7 +16,7 @@ pub struct SingleChoice {
     pub(super) tooldbar: Option<NonNull<ToolBar>>
 }
 
-crate::add_to_toolbar_impl!(SingleChoice);
+add_to_toolbar_impl!(SingleChoice);
 
 impl SingleChoice {
     pub fn new(text: &str, group_id: u32) -> Self {

@@ -9,7 +9,7 @@ pub(crate) struct MaximizeRestoreButton {
     pub(super) base: ItemBase,
 }
 
-crate::add_to_toolbar_impl!(MaximizeRestoreButton);
+add_to_toolbar_impl!(MaximizeRestoreButton);
 
 impl MaximizeRestoreButton {
     pub fn new() -> Self {

@@ -12,7 +12,7 @@ pub struct CheckBox {
     checked: bool,
 }
 
-crate::add_to_toolbar_impl!(CheckBox);
+add_to_toolbar_impl!(CheckBox);
 
 impl CheckBox {
     pub fn new(text: &str, checked: bool) -> Self {
