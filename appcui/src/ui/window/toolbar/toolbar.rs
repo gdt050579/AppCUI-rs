@@ -165,6 +165,15 @@ impl ToolBar {
         None
     }
 
+    pub(crate) fn set_window_handle(&mut self, handle: Handle<UIElement>) {
+        self.window = handle;
+        let count = self.items.allocated_objects();
+        for index in 0..count {
+            if let Some(item) = self.items.get_element_mut(index) {
+                item.get_base_mut().set_window_handle(handle);
+            }
+        }
+    }
     pub(crate) fn update_positions(&mut self, size: Size) -> (i32, i32) {
         // clear all flags (visible & left|right marker)
         let count = self.items.allocated_objects();

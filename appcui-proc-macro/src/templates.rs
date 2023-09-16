@@ -64,3 +64,9 @@ impl OnFocus for $(STRUCT_NAME) {
     fn on_lose_focus(&mut self)  { self.base.on_lose_focus(); }
 }
 ";
+
+pub(crate) static ON_REGISTERED_TRAIT: &str = "
+impl OnRegistered for $(STRUCT_NAME) {
+    fn on_registered(&mut self)  { self.base.on_registered(); }
+}
+";

@@ -162,6 +162,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowControl, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnRegistered, TraitImplementation::BaseFallbackNonOverwritable);
     // Raw events (implemente by default)
     config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnResize, TraitImplementation::BaseFallbackNonOverwritable);

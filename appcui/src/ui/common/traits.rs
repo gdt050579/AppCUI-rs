@@ -46,6 +46,10 @@ pub trait OnFocus {
     fn on_lose_focus(&mut self) {}
 }
 
+pub trait OnRegistered {
+    fn on_registered(&mut self) {}
+}
+
 pub trait Control:
     OnPaint
     + OnKeyPressed
@@ -65,6 +69,6 @@ pub trait Control:
 }
 
 pub trait DesktopControl {}
-pub trait WindowControl {}
+pub trait WindowControl: OnRegistered {}
 pub trait NotWindow {}
 pub trait NotDesktop {}
