@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 EnumBitFlags = "1.0.7"
 AppCUIProcMacro = {path = "../appcui-proc-macro"}
+
+[features]
+default = []
+DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []

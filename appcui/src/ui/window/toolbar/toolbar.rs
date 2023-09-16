@@ -26,8 +26,10 @@ pub struct ToolBar {
     pressed: bool,
     last_group_index: u8,
     // for debug purposes
-    temp_top_left: i32,
-    temp_top_right: i32,
+    #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
+    debug_window_title_top_left_margin: i32,
+    #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
+    debug_window_title_top_right_margin: i32,
 }
 
 pub trait AddToToolbar<T> {
@@ -42,8 +44,10 @@ impl ToolBar {
             order: Vec::with_capacity(4),
             current_handle: Handle::None,
             last_group_index: 0,
-            temp_top_left: 0,
-            temp_top_right: 0,
+            #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
+            debug_window_title_top_left_margin: 0,
+            #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
+            debug_window_title_top_right_margin: 0,
         }
     }
     pub fn create_group(&mut self, pos: GroupPosition) -> Group {
@@ -218,8 +222,11 @@ impl ToolBar {
         let left_pos = top_left.x + if top_left.last_handle.is_none() { 0 } else { 1 };
         let right_pos = top_right.x - 1;
         // for debug purposes
-        self.temp_top_left = left_pos;
-        self.temp_top_right = right_pos;
+        #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
+        {
+            self.debug_window_title_top_left_margin = left_pos;
+            self.debug_window_title_top_right_margin = right_pos;
+        }
         (left_pos, right_pos)
     }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, focused: bool, maximized: bool) {
@@ -239,8 +246,19 @@ impl ToolBar {
                 item.paint(surface, theme, &paint_data);
             }
         }
-        surface.write_char(self.temp_top_left, 0, Character::new('X', Color::Red, Color::Yellow, CharFlags::None));
-        surface.write_char(self.temp_top_right, 0, Character::new('X', Color::Red, Color::Yellow, CharFlags::None));
+        #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
+        {
+            surface.write_char(
+                self.debug_window_title_top_left_margin,
+                0,
+                Character::new('<', Color::Red, Color::Yellow, CharFlags::None),
+            );
+            surface.write_char(
+                self.debug_window_title_top_right_margin,
+                0,
+                Character::new('>', Color::Red, Color::Yellow, CharFlags::None),
+            );
+        }
     }
 
     pub(crate) fn update_singlechoice_group_id(&mut self, group_id: u32, handle: Handle<UIElement>) {

@@ -14,9 +14,10 @@ use super::{
 #[test]
 fn check_window_just_title() {
     let script = "
-        //Paint.Enable(false)
-        Paint('title')
-        CheckHash(0xA0CFD68A45B1786C)
+        Paint.Enable(false)
+        // expect: ╔═════ 123456 ═════╗
+        Paint('123456 centered')
+        CheckHash(0x87AACF295BE859E6)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
     a.add_window(Window::new("123456", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
@@ -25,9 +26,10 @@ fn check_window_just_title() {
 #[test]
 fn check_window_just_large_title() {
     let script = "
-        //Paint.Enable(false)
-        Paint('title')
-        CheckHash(0xA0CFD68A45B1786C)
+        Paint.Enable(false)
+        //expect: ╔═ 0123456789ABCD ═╗
+        Paint('0123456789ABCD centered')
+        CheckHash(0x21339488E2980718)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
     a.add_window(Window::new("0123456789ABCD", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
@@ -36,9 +38,10 @@ fn check_window_just_large_title() {
 #[test]
 fn check_window_just_oversized_title() {
     let script = "
-        //Paint.Enable(false)
-        Paint('title')
-        CheckHash(0xA0CFD68A45B1786C)
+        Paint.Enable(false)
+        //expect: ╔ 012345...BCDEFGH ╗
+        Paint('012345...BCDEFGH')
+        CheckHash(0xBD308717519AFF27)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
     a.add_window(Window::new("0123456789ABCDEFGH", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
@@ -47,7 +50,8 @@ fn check_window_just_oversized_title() {
 #[test]
 fn check_window_title() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
+        //expect:  ╔════ Title ════[x]╗
         Paint('title')
         CheckHash(0xA0CFD68A45B1786C)
     ";
@@ -59,6 +63,7 @@ fn check_window_title() {
 fn check_window_full_title_1() {
     let script = "
         Paint.Enable(false)
+        // expect:  ╔═ 1234567890A ═[x]╗
         Paint('full title')
         CheckHash(0xF410B9650F4ADF18)
     ";
@@ -70,6 +75,7 @@ fn check_window_full_title_1() {
 fn check_window_full_title_2() {
     let script = "
         Paint.Enable(false)
+        //expect: ╔════ Title ════[x]
         Paint('full title')
         CheckHash(0xA0CFD68A45B1786C)
     ";
@@ -81,6 +87,7 @@ fn check_window_full_title_2() {
 fn check_window_full_title_3() {
     let script = "
         Paint.Enable(false)
+        //expect: ╔═ ABC ═[x]╗
         Paint('full title')
         CheckHash(0xEEBF652BB26E9C4C)
     ";
@@ -102,7 +109,7 @@ fn check_window_minimize_title_1() {
 #[test]
 fn check_window_minimize_title_2() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('Title = AB...KL')
         CheckHash(0x7F7F1F564130F50E)
     ";
