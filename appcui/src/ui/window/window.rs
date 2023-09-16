@@ -1,5 +1,3 @@
-use std::mem::forget;
-
 use crate::prelude::*;
 
 use super::events::EventData;

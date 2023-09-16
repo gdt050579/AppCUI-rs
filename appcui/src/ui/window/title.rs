@@ -72,16 +72,16 @@ impl Title {
         if left + 2 >= right {
             self.draw_mode = TitleDrawMode::None;
         } else {
-            let width = (right - (left + 2)).min(self.count as i32);
+            let width = (right - (left + 1)).min(self.count as i32);
             if width == (self.count as i32) {
-                self.left = (left + right - width) / 2 - 1;
+                self.left = (left + right - width) / 2;
                 self.right = self.left + width + 1;
                 self.draw_mode = TitleDrawMode::Full;
             } else {
                 // we should split the string in the middle
                 // first part ... ending part
                 // this means that the size should be at least 5 characters (start,end, ...)
-                self.left = (left + right - width) / 2 - 1;
+                self.left = (left + right - width) / 2;
                 self.right = self.left + width + 1;
                 match width {
                     0 => self.draw_mode = TitleDrawMode::None,

@@ -25,6 +25,7 @@ pub struct ToolBar {
     order: Vec<ToolbarElementHandle>,
     pressed: bool,
     last_group_index: u8,
+    // for debug purposes
     temp_top_left: i32,
     temp_top_right: i32,
 }
@@ -214,9 +215,12 @@ impl ToolBar {
                 }
             }
         }
-        self.temp_top_left = top_left.x + 1;
-        self.temp_top_right = top_right.x - 1;
-        (top_left.x + 1, top_right.x)
+        let left_pos = top_left.x + if top_left.last_handle.is_none() { 0 } else { 1 };
+        let right_pos = top_right.x - 1;
+        // for debug purposes
+        self.temp_top_left = left_pos;
+        self.temp_top_right = right_pos;
+        (left_pos, right_pos)
     }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, focused: bool, maximized: bool) {
         let mut paint_data = PaintData {

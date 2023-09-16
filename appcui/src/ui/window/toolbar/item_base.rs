@@ -127,10 +127,6 @@ impl ItemBase {
         self.x + ((self.width / 2) as i32)
     }
     #[inline(always)]
-    pub(crate) fn get_width(&self) -> i32 {
-        self.width as i32
-    }
-    #[inline(always)]
     pub(crate) fn set_width(&mut self, value: u16) {
         self.width = value;
     }

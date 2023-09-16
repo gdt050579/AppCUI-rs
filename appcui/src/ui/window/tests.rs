@@ -12,6 +12,39 @@ use super::{
 };
 
 #[test]
+fn check_window_just_title() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('title')
+        CheckHash(0xA0CFD68A45B1786C)
+    ";
+    let mut a = App::debug(20, 10, script).build().unwrap();
+    a.add_window(Window::new("123456", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
+    a.run();
+}
+#[test]
+fn check_window_just_large_title() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('title')
+        CheckHash(0xA0CFD68A45B1786C)
+    ";
+    let mut a = App::debug(20, 10, script).build().unwrap();
+    a.add_window(Window::new("0123456789ABCD", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
+    a.run();
+}
+#[test]
+fn check_window_just_oversized_title() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('title')
+        CheckHash(0xA0CFD68A45B1786C)
+    ";
+    let mut a = App::debug(20, 10, script).build().unwrap();
+    a.add_window(Window::new("0123456789ABCDEFGH", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
+    a.run();
+}
+#[test]
 fn check_window_title() {
     let script = "
         //Paint.Enable(false)
