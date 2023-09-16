@@ -69,7 +69,7 @@ fn check_window_full_title_1() {
 fn check_window_full_title_2() {
     let script = "
         Paint.Enable(false)
-        //expect: ╔════ Title ════[x]
+        //expect: ╔════ Title ════[x]╗
         Paint('full title')
         CheckHash(0xA0CFD68A45B1786C)
     ";
@@ -87,6 +87,18 @@ fn check_window_full_title_3() {
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
     a.add_window(Window::new("ABC", Layout::new("d:c,w:12,h:8"), window::Flags::None));
+    a.run();
+}
+#[test]
+fn check_window_title_close_button_and_minimize_button() {
+    let script = "
+        //Paint.Enable(false)
+        //expect: 
+        Paint('full title')
+        CheckHash(0xEEBF652BB26E9C4C)
+    ";
+    let mut a = App::debug(20, 10, script).build().unwrap();
+    a.add_window(Window::new("123456", Layout::new("d:c,w:20,h:8"), window::Flags::Sizeable));
     a.run();
 }
 #[test]
@@ -141,9 +153,11 @@ fn check_window_minimize_title_4() {
 #[test]
 fn check_multiple_items_top_bar() {
     let script = "
-    //Paint.Enable(false)
-    Paint('tags')
-    //CheckHash(0xBB2962251DDB2240)
+    Paint.Enable(false)
+    //expect on top   : ╔[↑]═[F1]═[ABC]═[Lb-1|Lb-2]═[Single]═══ Title ═══[AB]═[Lb-2|Lb-1]═[x]╗
+    //expect on bottom: ╚[Lb-1|Lb-2]═[Single]══════════════════════════════[AB]═[Lb-2|Lb-1]═─┘
+    Paint('Multiple items on top and bottom bar')
+    //CheckHash(0x3F0441B8433D629B)
     ";
     let mut a = App::debug(80, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:70,h:10"), window::Flags::Sizeable);
@@ -177,9 +191,10 @@ fn check_multiple_items_top_bar() {
 #[test]
 fn check_window_tag_1() {
     let script = "
-        //Paint.Enable(false)
-        Paint('tags')
-        CheckHash(0xBB2962251DDB2240)
+        Paint.Enable(false)
+        //expect: ╔[AB]══ Title ══[x]╗
+        Paint('Tag=AB + Title')
+        CheckHash(0x3A2846E4BAE2A1A1)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
@@ -191,6 +206,7 @@ fn check_window_tag_1() {
 fn check_window_tag_2() {
     let script = "
         Paint.Enable(false)
+        //expect: ╔[ABCD]═ Title ═[x]╗
         Paint('title should be visible')
         CheckHash(0xE2CB87CCC6FD9E4A)
     ";
@@ -203,7 +219,8 @@ fn check_window_tag_2() {
 #[test]
 fn check_window_tag_and_split_title_1() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
+        // expect: ╔[ABCDE]═ T…le ═[x]╗
         Paint('title split with 3 special chars')
         CheckHash(0x34902E0B6D58F035)
     ";
@@ -217,7 +234,8 @@ fn check_window_tag_and_split_title_1() {
 fn check_window_tag_and_split_title_2() {
     let script = "
         Paint.Enable(false)
-        Paint('title split with 3 special chars')
+        //expect: ╔[ABCDEF]═ T…e ═[x]╗
+        Paint('╔[ABCDEF]═ T…e ═[x]╗')
         CheckHash(0xA52995587B045766)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
@@ -229,7 +247,8 @@ fn check_window_tag_and_split_title_2() {
 #[test]
 fn check_window_tag_and_title_first_letter() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
+        //expect: ╔[ABCDEFG]═ T… ═[x]╗
         Paint('title first letter and special char with 3 points')
         CheckHash(0x6F914F802B3B7B5D)
     ";
@@ -243,6 +262,7 @@ fn check_window_tag_and_title_first_letter() {
 fn check_window_tag_and_title_not_visible() {
     let script = "
         Paint.Enable(false)
+        //expect: ╔[ABCDEFGH]═════[x]╗
         Paint('title not visible')
         CheckHash(0xA2C91CB6A1484009)
     ";
@@ -257,6 +277,7 @@ fn check_window_tag_and_title_not_visible() {
 fn check_window_hotkey_1() {
     let script = "
         Paint.Enable(false)
+        //expect: ╔[F1]══ Title ══[x]╗
         Paint('hotkey')
         CheckHash(0x4454159FD9AA73E9)
     ";
@@ -269,7 +290,8 @@ fn check_window_hotkey_1() {
 #[test]
 fn check_window_hotkey_2() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
+        //expect: ╔[Enter]═ T…le ═[x]╗
         Paint('hotkey')
         CheckHash(0xC9D2F0E450475385)
     ";
@@ -284,6 +306,7 @@ fn check_window_hotkey_2() {
 fn check_window_hotkey_and_tag() {
     let script = "
         Paint.Enable(false)
+        //expect: ╔[1]═[XYZ]═ T… ═[x]╗
         Paint('hotkey & tag')
         CheckHash(0x8F6D9DF3500A2D7A)
     ";
@@ -298,27 +321,27 @@ fn check_window_hotkey_and_tag() {
 #[test]
 fn check_window_resize() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('initial state')
-        CheckHash(0x6E5585BA8803D312)
+        CheckHash(0x4BA8D83661491642)
         Mouse.Move(39,7)
         Paint('over the resize handler')
-        CheckHash(0x18BDFDDEEC0AAC26)
+        CheckHash(0x4104D1AD861DF6F6)
         Mouse.Hold(39,7,left)
         Paint('click on resize handler')
-        CheckHash(0x1B338A6C37E2546A)
+        CheckHash(0x20EFD3353E8B662E)
         Mouse.Move(41,8)
         Paint('resized')
-        CheckHash(0x36E28C864436D546)
+        CheckHash(0xF03C109AE54A7CC2)
         Mouse.Move(51,8)
         Paint('even bigger')
-        CheckHash(0xF74E3A7D92E695E2)
+        CheckHash(0x33208E261BC024C6)
         Mouse.Move(47,6)
         Paint('smaller')
-        CheckHash(0x1628BC4542D3DC12)
+        CheckHash(0x1DEAE376D9FCDF6)
         Mouse.Release(47,6,left)
         Paint('after release of handle')
-        CheckHash(0x6A9DA986C039579A)
+        CheckHash(0x782EA1AC2D0C894A)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::Sizeable);
@@ -329,7 +352,7 @@ fn check_window_resize() {
 #[test]
 fn check_window_move() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Mouse.Move(30,3)
         Paint('over the title')
         CheckHash(0x6E5585BA8803D312)
@@ -347,7 +370,7 @@ fn check_window_move() {
         CheckHash(0x922FBAECBC6B2C2)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::Sizeable);
+    let w = Window::new("Title", Layout::new("d:c,w:21,h:5"), window::Flags::Sizeable);
     a.add_window(w);
     a.run();
 }
