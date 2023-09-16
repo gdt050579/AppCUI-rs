@@ -33,9 +33,9 @@ fn check_window_just_large_title() {
 fn check_window_just_oversized_title() {
     let script = "
         Paint.Enable(false)
-        //expect: ╔ 012345...BCDEFGH ╗
+        //expect: ╔═ 01234...CDEFGH ═╗
         Paint('012345...BCDEFGH')
-        CheckHash(0xBD308717519AFF27)
+        CheckHash(0x8AD5C306676ACF04)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
     a.add_window(Window::new("0123456789ABCDEFGH", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
@@ -140,7 +140,7 @@ fn check_window_minimize_title_3() {
 #[test]
 fn check_window_minimize_title_4() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         //expect: ╔═ A…L ═[x]╗
         Paint('Short title')
         CheckHash(0x3A1C142AE9968A2F)

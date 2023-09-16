@@ -48,21 +48,21 @@ impl ButtonEvents for MyWin {
 #[test]
 fn check_button_control() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         Paint('Button 2 has focus (default)')   
-        CheckHash(0x97CC1CB50CE6FEFA)   
+        CheckHash(0x2D08048B47432DA)   
         Key.Pressed(Tab)
         Paint('Button 1 has focus (default)') 
-        CheckHash(0x3A1EB6A66DA94B6E) 
+        CheckHash(0x4AC33C576575FD4E) 
         Key.Pressed(Enter)
         Paint('After first button was pressed')
-        CheckHash(0xEC43B6AC3FC018C7) 
+        CheckHash(0xC4D9433CFFBF4A67) 
         Mouse.Move(30,6)
         Paint('Button 2 is hovered')
-        CheckHash(0x613549FDB8D88C1E) 
+        CheckHash(0xA477C84D39481B3E) 
         Mouse.Click(30,6,left)
-        Paint('Second first button was pressed')
-        CheckHash(0x82A77C0C9EB25128)
+        Paint('Second button was pressed')
+        CheckHash(0x30D90A1046C4AC48)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
