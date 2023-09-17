@@ -1,5 +1,7 @@
 use std::ptr::NonNull;
 
+#[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
+use crate::graphics::*;
 use crate::{
     graphics::{Size, Surface},
     input::Key,
@@ -7,8 +9,6 @@ use crate::{
     ui::common::UIElement,
     utils::HandleManager,
 };
-#[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
-use crate::graphics::*;
 
 use super::{
     group::Group, Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner,
@@ -40,12 +40,12 @@ pub trait AddToToolbar<T> {
 macro_rules! add_to_toolbar_impl {
     ($type: tt) => {
         impl AddToToolbar<$type> for $type {
-            fn add(mut self, toolbar: &mut super::toolbar::ToolBar,  group: Group) -> Handle<$type> {
+            fn add(mut self, toolbar: &mut super::toolbar::ToolBar, group: Group) -> Handle<$type> {
                 self.base.update_group(group);
                 self.base.set_window_handle(toolbar.get_window_handle());
                 toolbar.items.add(ToolBarItem::$type(self)).cast()
             }
-        }        
+        }
     };
 }
 
@@ -141,7 +141,7 @@ impl ToolBar {
         self.items.get_mut(handle.cast())
     }
     #[inline(always)]
-    pub(crate) fn get_window_handle(&self)->Handle<UIElement> {
+    pub(crate) fn get_window_handle(&self) -> Handle<UIElement> {
         self.window
     }
     #[inline(always)]
@@ -290,13 +290,19 @@ impl ToolBar {
         }
     }
 
-    pub(crate) fn update_singlechoice_group_id(&mut self, group_id: u32, handle: Handle<UIElement>) {
+    pub(crate) fn update_singlechoice_group_id(&mut self, handle: Handle<UIElement>) {
+        // get the group ID for the handle
+        let group_id = if let Some(item) = self.items.get(handle.cast()) {
+            item.get_base().get_group_id()
+        } else {
+            0
+        };
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {
             if let Some(item) = self.items.get_element_mut(index) {
                 if let ToolBarItem::SingleChoice(sc) = item {
-                    if sc.get_group_id() == group_id {
+                    if sc.base.get_group_id() == group_id {
                         sc.update_select_status(handle == sc.base.get_handle());
                     }
                 }

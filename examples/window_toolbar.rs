@@ -26,9 +26,9 @@ impl MyWin {
         me.cb1 = me.get_toolbar().add(checkboxes_group, toolbar::CheckBox::new("CheckBox &1", false));
         me.cb2 = me.get_toolbar().add(checkboxes_group, toolbar::CheckBox::new("CheckBox &2", false));
         let buttons_group = me.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-        me.opt1 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &A", 1));
-        me.opt2 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &B", 1));
-        me.opt3 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Optls &C", 1));
+        me.opt1 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &A"));
+        me.opt2 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &B"));
+        me.opt3 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &C"));
 
         me
     }

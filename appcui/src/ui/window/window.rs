@@ -517,9 +517,8 @@ impl Window {
                     }
                     return true; // regardless on what we do in the interface
                 }
-                ToolBarItem::SingleChoice(sc) => {
-                    let gid: u32 = sc.get_group_id();
-                    self.toolbar.update_singlechoice_group_id(gid, handle);
+                ToolBarItem::SingleChoice(_) => {
+                    self.toolbar.update_singlechoice_group_id( handle);
                     if let Some(me) = self.get_interface() {
                         ToolBarEvents::on_choice_selected(me, handle.cast());
                     }

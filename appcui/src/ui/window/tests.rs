@@ -750,9 +750,9 @@ fn check_window_toolbar_checkbox_events() {
         Paint('checkbox = Checked')
         CheckHash(0x4BEB73AE53479ABF)
         Mouse.Click(12,2,left)
-        //expect: ╔[  Not checked]═══════════ Win ══════════════[x]╗
+        //expect: ╔[  Not checked]═════════════ Win ════════════[x]╗
         Paint('checkbox = Not checked')
-        CheckHash(0x9FD32002770E13F7)
+        CheckHash(0x61FF8060257820F7)
         Key.Pressed(Alt+N)
         //expect: ╔[√ Checked]═══════════════ Win ══════════════[x]╗
         Paint('Checkbox is checked again (via Alt+N)')
@@ -788,13 +788,13 @@ fn check_window_toolbar_single_choice() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:58,h:8"), window::Flags::None);
     let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &1", 1));
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &2", 1));
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &3", 1));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &1"));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &2"));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &3"));
     let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &A", 2));
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &B", 2));
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &C", 2));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &A"));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &B"));
+    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &C"));
 
     a.add_window(w);
     a.run();
@@ -823,13 +823,13 @@ fn check_window_toolbar_singlechoice_events() {
                 optC: Handle::None,
             };
             let g = me.get_toolbar().create_group(GroupPosition::BottomLeft);
-            me.opt1 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &1", 1));
-            me.opt2 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &2", 1));
-            me.opt3 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &3", 1));
+            me.opt1 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &1"));
+            me.opt2 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &2"));
+            me.opt3 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &3"));
             let g = me.get_toolbar().create_group(GroupPosition::BottomRight);
-            me.optA = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &A", 2));
-            me.optB = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &B", 2));
-            me.optC = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &C", 2));
+            me.optA = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &A"));
+            me.optB = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &B"));
+            me.optC = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &C"));
             me
         }
     }

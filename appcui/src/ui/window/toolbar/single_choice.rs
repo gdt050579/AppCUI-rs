@@ -11,7 +11,6 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 pub struct SingleChoice {
     pub(super) base: ItemBase,
     pub(super) caption: Caption,
-    group_id: u32,
     selected: bool,
     pub(super) tooldbar: Option<NonNull<ToolBar>>
 }
@@ -19,11 +18,10 @@ pub struct SingleChoice {
 add_to_toolbar_impl!(SingleChoice);
 
 impl SingleChoice {
-    pub fn new(text: &str, group_id: u32) -> Self {
+    pub fn new(text: &str) -> Self {
         let mut obj = SingleChoice {
             base: ItemBase::new(true),
             caption: Caption::new("", false),
-            group_id,
             selected: false,  
             tooldbar: None          
         };
@@ -40,14 +38,10 @@ impl SingleChoice {
         self.selected
     }
     #[inline(always)]
-    pub fn get_group_id(&self)->u32 {
-        self.group_id
-    }
-    #[inline(always)]
     pub fn select(&mut self) {
         if let Some(toolbar_ptr) = self.tooldbar.as_mut() {
             let toolbar = unsafe { toolbar_ptr.as_mut() };
-            toolbar.update_singlechoice_group_id(self.group_id, self.base.get_handle());
+            toolbar.update_singlechoice_group_id(self.base.get_handle());
         } else {
             panic!("Attempt to use SingleChoice select without having the object added to a toolbar !");
         }

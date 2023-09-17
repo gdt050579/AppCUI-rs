@@ -86,6 +86,10 @@ impl ItemBase {
         self.group.pos
     }
     #[inline(always)]
+    pub(crate) fn get_group_id(&self) -> u8 {
+        self.group.id
+    }
+    #[inline(always)]
     pub(crate) fn has_right_group_marker(&self) -> bool {
         self.status.contains(StatusFlags::RightGroupMarker)
     }
