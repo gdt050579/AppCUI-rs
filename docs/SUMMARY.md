@@ -23,7 +23,7 @@
         - [Button](chapter-3/stock-controls/button.md)
         - [CheckBox](chapter-3/stock-controls/checkbox.md)
         - [ComboBox](chapter-3/stock-controls/combobox.md)
-        - [Label](chapter-3/stock-controls/button.md)
+        - [Label](chapter-3/stock-controls/label.md)
         - [Panel](chapter-3/stock-controls/panel.md)
         - [Splitter](chapter-3/stock-controls/splitter.md)
         - [Tab](chapter-3/stock-controls/tab.md)

@@ -1,13 +1,20 @@
 # Button
 
-Represent a clickable button control. To create a button use `Button::new` method.
-
-**Example**:
+Represent a clickable button control. To create a button use `Button::new` method or the macro `button!`. 
 ```rs
-let b = Button::new("&Start", Layout::new("..."),botton::Flags::None);
+let b = Button::new("&Start", Layout::new("x:10,y:5,w:15"),botton::Flags::None);
+```
+or 
+```rs
+let b1 = button!("caption=&Start,x:10,y:5,w:15");
+let b2 = button!("&Start,x:10,y:5,w:15");
+let b3 = button!("caption=&Disabled,x:10,y:5,w:15,disabled");
+let b4 = button!("text='My Button',x=10,y:5,align:center,w:30,hidden");
 ```
 
 ## Events
+
+## Methods
 
 ## Example
 
@@ -16,7 +23,7 @@ The following code creates a window with two buttons (`Add` and `Reset`). When `
 ```rs
 use appcui::prelude::*;
 
-#[Window(events = ButtonEvents, internal=true)]
+#[Window(events = ButtonEvents)]
 struct MyWin {
     add: Handle<Button>,
     reset: Handle<Button>,
