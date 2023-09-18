@@ -206,3 +206,9 @@ fn layout_mode_dock_bottom() {
     validate_pos!("d:b,h:10",50,30,0,20,50,10);
     validate_pos!("d:BoTtOm,w:50%,h:25%",60,40,15,30,30,10);
 }
+#[test]
+fn layout_mode_anchor_lrtb() {
+    validate_pos!("l:5,t:6,r:7,b:8",50,30,5,6,38,16);
+    validate_pos!("left:5, top:6,  right:7,  bottom:8",50,30,5,6,38,16);
+    validate_pos!("l:10%,t:50%,r:20%,b:10%",50,30,5,15,35,12);
+}
