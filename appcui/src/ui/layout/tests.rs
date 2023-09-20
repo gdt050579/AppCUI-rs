@@ -218,3 +218,9 @@ fn layout_mode_anchor_ltr() {
     validate_pos!("l:10%,t:50%,r:20%,h:2",50,30,5,15,35,2);
     validate_pos!("l:10%,t:50%,r:20%,h:50%",50,30,5,15,35,15);
 }
+#[test]
+fn layout_mode_anchor_lbr() {
+    validate_pos!("l:5,b:6,r:7,h:10",50,30,5,14,38,10);
+    validate_pos!("l:10%,b:50%,r:20%,h:2",50,30,5,13,35,2);
+    validate_pos!("l:10%,bottom:50%,r:20%,h:50%",50,30,5,0,35,15);
+}
