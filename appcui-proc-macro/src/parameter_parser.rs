@@ -1,7 +1,12 @@
 mod tokenizer;
 mod error;
+#[cfg(test)]
+mod tests;
 
 pub (crate) use self::error::Error;
+pub (self) use self::tokenizer::Token;
+pub (self) use self::tokenizer::Tokenizer;
+pub (self) use self::tokenizer::TokenType;
 
 use std::collections::HashMap;
 

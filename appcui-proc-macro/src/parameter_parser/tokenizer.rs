@@ -36,6 +36,18 @@ impl Token {
             link,
         }
     }
+    #[inline(always)]
+    pub(super) fn get_type(&self) -> TokenType {
+        self.token_type
+    }
+    #[inline(always)]
+    pub(super) fn get_text<'a>(&self, text: &'a str) -> &'a str {
+        &text[self.start..self.end]
+    }
+    #[inline(always)]
+    pub(super) fn get_link(&self) -> usize {
+        if self.link == Token::NO_LINK { usize::MAX } else { self.link as usize }
+    }
 }
 pub(super) struct Tokenizer {
     tokens: Vec<Token>,
@@ -244,11 +256,11 @@ impl Tokenizer {
         Ok(t)
     }
     #[inline(always)]
-    fn len(&self) -> usize {
+    pub(super) fn count(&self) -> usize {
         self.tokens.len()
     }
     #[inline(always)]
-    fn get(&self, index: usize) -> &Token {
+    pub(super) fn get(&self, index: usize) -> &Token {
         &self.tokens[index]
     }
 }

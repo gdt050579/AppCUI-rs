@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub(crate) struct Error {
     data: String,
     start: usize,
