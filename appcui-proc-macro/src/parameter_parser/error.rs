@@ -5,7 +5,7 @@ pub(crate) struct Error {
     message: &'static str
 }
 impl Error {
-    fn new(param_list: &str, message: &'static str, start: usize, end: usize) -> Self {
+    pub(super) fn new(param_list: &str, message: &'static str, start: usize, end: usize) -> Self {
         Self {
             data: String::from(param_list),
             start,
