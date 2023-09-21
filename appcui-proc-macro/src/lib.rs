@@ -4,6 +4,7 @@ mod key_utils;
 mod templates;
 mod traits_configuration;
 mod utils;
+mod parameter_parser;
 use arguments::*;
 use proc_macro::*;
 
