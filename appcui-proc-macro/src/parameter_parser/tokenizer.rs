@@ -293,8 +293,8 @@ impl Tokenizer {
         }
         Ok(t)
     }
-    pub(super) fn analize(&self, text: &str, pos: usize, count: usize, allow_only_value: bool) -> Result<TokensFormat, Error> {
-        if pos >= count {
+    pub(super) fn analize(&self, text: &str, pos: usize, end: usize, allow_value: bool, allow_key: bool) -> Result<TokensFormat, Error> {
+        if pos >= end {
             return Err(Error::new(
                 text,
                 "Internal error - check parameter 'pos' for function Tokenizer::analyze(...)",
@@ -304,10 +304,10 @@ impl Tokenizer {
         }
         // check scenarios
         // 1. <key> <eq> <value> [separator]
-        if pos + 3 <= count {
+        if (pos + 3 <= end) && (allow_key) {
             if self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() && self.tokens[pos + 2].is_possible_value() {
                 // either KeyValue or KeyValueSep
-                if (pos + 4 <= count) && (self.tokens[pos + 3].is_separator()) {
+                if (pos + 4 <= end) && (self.tokens[pos + 3].is_separator()) {
                     return Ok(TokensFormat::KeyValueSeparator);
                 } else {
                     return Ok(TokensFormat::KeyValue);
@@ -315,22 +315,57 @@ impl Tokenizer {
             }
         }
         // 2. <value> [separator]
-        if allow_only_value && self.tokens[pos].is_possible_value() {
-            if (pos + 2 <= count) && (self.tokens[pos + 1].is_separator()) {
+        if allow_value && self.tokens[pos].is_possible_value() {
+            if (pos + 2 <= end) && (self.tokens[pos + 1].is_separator()) {
                 return Ok(TokensFormat::ValueAndSeparator);
             } else {
-                return Ok(TokensFormat::Value);
+                if pos + 1 == end {
+                    return Ok(TokensFormat::Value);
+                }
             }
         }
-        // if none of these --> error
-        let is_value = self.tokens[pos].is_possible_value();
-        let is_key = self.tokens[pos].is_possible_key();
+        // specific errors
+        if allow_key {
+            // key: <something else than a value>
+            if (pos + 3 <= end) && self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() {
+                return Err(Error::with_token(
+                    text,
+                    format!("Expecting a value for key '{}'", self.tokens[pos].get_text(text)).as_str(),
+                    &self.tokens[pos + 2],
+                ));
+            }
+            // key: <se termina>
+            if (pos + 2 == end) && self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() {
+                return Err(Error::new(
+                    text,
+                    format!(
+                        "Unexpected end of key:value syntax. Have you missed the value for key '{}'",
+                        self.tokens[pos].get_text(text)
+                    )
+                    .as_str(),
+                    self.tokens[pos].start,
+                    self.tokens[pos + 1].end,
+                ));
+            }
+        }
+        // for values
+        if allow_value {
+            if (pos + 2 <= end) && self.tokens[pos].is_possible_value() {
+                return Err(Error::with_token(
+                    text,
+                    format!("Expecting a separator ',' or ';' after value '{}'", self.tokens[pos].get_text(text)).as_str(),
+                    &self.tokens[pos + 1],
+                ));                
+            }
+        }
 
         // generic errors
-        if allow_only_value {
+        if allow_value && allow_key {
             return Err(Error::with_token(text, "Expecting a value or a key:value syntax !", &self.tokens[pos]));
-        } else {
+        } else if allow_key {
             return Err(Error::with_token(text, "Expecting a key:value syntax !", &self.tokens[pos]));
+        } else {
+            return Err(Error::with_token(text, "Expecting a value !", &self.tokens[pos]));
         }
     }
     #[inline(always)]
