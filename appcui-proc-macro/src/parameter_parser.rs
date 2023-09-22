@@ -3,6 +3,8 @@ mod error;
 mod utils;
 mod parser;
 mod signature;
+mod named_params_map;
+mod value;
 #[cfg(test)]
 mod tests;
 
