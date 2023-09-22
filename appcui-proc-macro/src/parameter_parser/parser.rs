@@ -17,10 +17,13 @@ fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index
             TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 1, next - 1)?),
             _ => ValueType::Undetermined,
         };
+        let tok = tokenizer.get(pos);
         v.push(Value {
-            raw_data: tokenizer.get(pos).get_text(text),
+            raw_data: tok.get_text(text),
             data_type,
-            validated: false
+            validated: false,
+            start: tok.get_start(),
+            end: tok.get_end()
         });
         pos = format.get_next_pos();
     }
@@ -56,7 +59,9 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
             r.ordered.push(Value {
                 raw_data: key_token.get_text(text),
                 data_type,
-                validated: false
+                validated: false,
+                start: key_token.get_start(),
+                end: key_token.get_end()
             });
             r.named.insert(key, (r.ordered.len() - 1) as u32);
         } else {
@@ -66,10 +71,13 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 1, next - 1)?),
                 _ => ValueType::Undetermined,
             };
+            let tok = tokenizer.get(pos);
             r.ordered.push(Value {
-                raw_data: tokenizer.get(pos).get_text(text),
+                raw_data: tok.get_text(text),
                 data_type,
-                validated: false
+                validated: false,
+                start: tok.get_start(),
+                end: tok.get_end()
             });
             r.non_named_count += 1;
         }

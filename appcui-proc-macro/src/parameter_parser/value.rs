@@ -14,6 +14,8 @@ pub(crate) struct Value<'a> {
     pub(super) raw_data: &'a str,
     pub(super) data_type: ValueType<'a>,
     pub(super) validated: bool,
+    pub(super) start: usize,
+    pub(super) end: usize,
 }
 impl<'a> Value<'a> {
     pub(crate) fn is_dict(&self) -> bool {

@@ -17,8 +17,8 @@ static SIGNATURE: &[ParamSignature] = &[
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let s = utils::token_stream_to_string("button", input);
     let mut p = parameter_parser::parse(&s).unwrap();
-    p.validate_signature(SIGNATURE);
-    p.validate_signature(common::SIGNATURE);
-    p.check_unkwnon_params();
+    p.validate_signature(&s, SIGNATURE);
+    p.validate_signature(&s, common::SIGNATURE);
+    p.check_unkwnon_params(&s).unwrap();
     utils::to_token_stream(s)
 }
