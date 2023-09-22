@@ -24,7 +24,23 @@ pub(crate) struct Value<'a> {
     data_type: ValueType<'a>,
 }
 fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index_end: usize) -> Result<Vec<Value<'a>>, Error> {
-    todo!("not implemeted yet")
+    let mut v: Vec<Value> = Vec::with_capacity(8);
+    let mut pos = index_start;
+    while pos < index_end {
+        let format = tokenizer.analyze(text, pos, index_end, true, false)?;
+        let next = tokenizer.get(pos).get_next(pos);
+        let data_type = match tokenizer.get(pos).get_type() {
+            TokenType::OpenBrace => ValueType::Dict(parse_dict(text, tokenizer, pos + 1, next - 1)?),
+            TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 1, next - 1)?),
+            _ => ValueType::new(tokenizer.get(pos).get_text(text)),
+        };
+        v.push(Value {
+            raw_data: tokenizer.get(pos).get_text(text),
+            data_type,
+        });
+        pos = format.get_next_pos();
+    }
+    Ok(v)
 }
 
 fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index_end: usize) -> Result<NamedParamsMap<'a>, Error> {
