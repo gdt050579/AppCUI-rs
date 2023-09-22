@@ -61,6 +61,18 @@ impl Token {
         }
     }
     #[inline(always)]
+    pub(super) fn has_link(&self) -> bool {
+        self.link != Token::NO_LINK
+    }
+    #[inline(always)]
+    pub(super) fn get_next(&self, my_id: usize) -> usize {
+        if self.link != Token::NO_LINK {
+            return my_id + self.link as usize + 1;
+        } else {
+            return my_id + 1;
+        }
+    }
+    #[inline(always)]
     fn is_possible_key(&self) -> bool {
         self.token_type == TokenType::Word
     }
@@ -90,6 +102,23 @@ pub(super) enum TokensFormat {
     KeyValue,
     KeyValueSeparator,
 }
+impl TokensFormat {
+    pub(super) fn count(&self) -> usize {
+        match self {
+            TokensFormat::Value => 1,             // value
+            TokensFormat::ValueAndSeparator => 2, // value,
+            TokensFormat::KeyValue => 3,          // key:value
+            TokensFormat::KeyValueSeparator => 4, // key:value,
+        }
+    }
+    pub(super) fn is_key_value(&self) -> bool {
+        match self {
+            TokensFormat::KeyValue | TokensFormat::KeyValueSeparator => true,
+            _ => false,
+        }
+    }
+}
+
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum CharType {
@@ -293,7 +322,7 @@ impl Tokenizer {
         }
         Ok(t)
     }
-    pub(super) fn analize(&self, text: &str, pos: usize, end: usize, allow_value: bool, allow_key: bool) -> Result<TokensFormat, Error> {
+    pub(super) fn analyze(&self, text: &str, pos: usize, end: usize, allow_value: bool, allow_key: bool) -> Result<TokensFormat, Error> {
         if pos >= end {
             return Err(Error::new(
                 text,
@@ -307,7 +336,9 @@ impl Tokenizer {
         if (pos + 3 <= end) && (allow_key) {
             if self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() && self.tokens[pos + 2].is_possible_value() {
                 // either KeyValue or KeyValueSep
-                if (pos + 4 <= end) && (self.tokens[pos + 3].is_separator()) {
+                let next_pos = self.tokens[pos + 2].get_next(pos+2);
+
+                if (next_pos < end) && (self.tokens[next_pos].is_separator()) {
                     return Ok(TokensFormat::KeyValueSeparator);
                 } else {
                     return Ok(TokensFormat::KeyValue);
@@ -355,7 +386,7 @@ impl Tokenizer {
                     text,
                     format!("Expecting a separator ',' or ';' after value '{}'", self.tokens[pos].get_text(text)).as_str(),
                     &self.tokens[pos + 1],
-                ));                
+                ));
             }
         }
 
