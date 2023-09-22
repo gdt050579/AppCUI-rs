@@ -5,24 +5,57 @@ pub(crate) struct NamedParamsMap<'a> {
     named: HashMap<u64, Value<'a>>,
     ordered: Vec<Value<'a>>,
 }
-pub(crate) enum ValueType<'a> {
+enum ValueType<'a> {
+    Undetermined,
     Bool(bool),
     Integer(i32),
-    String(&'a str),
-    Percentage(i32),
+    Percentage(f32),
     List(Vec<Value<'a>>),
     Dict(NamedParamsMap<'a>),
-}
-impl<'a> ValueType<'a> {
-    fn new(text: &'a str) -> Self {
-        ValueType::String(text)
-    }
 }
 
 pub(crate) struct Value<'a> {
     raw_data: &'a str,
     data_type: ValueType<'a>,
 }
+impl<'a> Value<'a> {
+    pub(crate) fn is_dict(&self) -> bool {
+        match self.data_type {
+            ValueType::Dict(_) => true,
+            _ => false,
+        }
+    }
+    pub(crate) fn is_list(&self) -> bool {
+        match self.data_type {
+            ValueType::List(_) => true,
+            _ => false,
+        }
+    }
+    pub(crate) fn is_value(&self) -> bool {
+        match self.data_type {
+            ValueType::List(_) | ValueType::Dict(_) => false,
+            _ => true,
+        }
+    }
+    pub(crate) fn get_bool(&mut self) -> Option<bool> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Bool(value) = &self.data_type {
+            return Some(*value);
+        }
+        if utils::equal_ignore_case("true", self.raw_data) {
+            self.data_type = ValueType::Bool(true);
+            return Some(true);
+        }
+        if utils::equal_ignore_case("false", self.raw_data) {
+            self.data_type = ValueType::Bool(false);
+            return Some(false);
+        }
+        None
+    }
+}
+
 fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index_end: usize) -> Result<Vec<Value<'a>>, Error> {
     let mut v: Vec<Value> = Vec::with_capacity(8);
     let mut pos = index_start;
@@ -32,7 +65,7 @@ fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index
         let data_type = match tokenizer.get(pos).get_type() {
             TokenType::OpenBrace => ValueType::Dict(parse_dict(text, tokenizer, pos + 1, next - 1)?),
             TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 1, next - 1)?),
-            _ => ValueType::new(tokenizer.get(pos).get_text(text)),
+            _ => ValueType::Undetermined,
         };
         v.push(Value {
             raw_data: tokenizer.get(pos).get_text(text),
@@ -54,7 +87,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
         let format = tokenizer.analyze(text, pos, index_end, allow_value, true)?;
         if format.is_key_value() {
             let key_token = tokenizer.get(pos);
-            let key = hash::compute(key_token.get_text(text));
+            let key = utils::compute_hash(key_token.get_text(text));
             if r.named.contains_key(&key) {
                 return Err(Error::with_token(
                     text,
@@ -66,7 +99,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
             let data_type = match tokenizer.get(pos + 2).get_type() {
                 TokenType::OpenBrace => ValueType::Dict(parse_dict(text, tokenizer, pos + 3, next - 1)?),
                 TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 3, next - 1)?),
-                _ => ValueType::new(tokenizer.get(pos + 2).get_text(text)),
+                _ => ValueType::Undetermined,
             };
             r.named.insert(
                 key,
@@ -80,7 +113,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
             let data_type = match tokenizer.get(pos).get_type() {
                 TokenType::OpenBrace => ValueType::Dict(parse_dict(text, tokenizer, pos + 1, next - 1)?),
                 TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 1, next - 1)?),
-                _ => ValueType::new(tokenizer.get(pos).get_text(text)),
+                _ => ValueType::Undetermined,
             };
             r.ordered.push(Value {
                 raw_data: tokenizer.get(pos).get_text(text),

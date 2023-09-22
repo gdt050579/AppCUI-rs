@@ -1,6 +1,6 @@
 mod tokenizer;
 mod error;
-mod hash;
+mod utils;
 mod parser;
 #[cfg(test)]
 mod tests;
