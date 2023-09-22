@@ -54,6 +54,44 @@ impl<'a> Value<'a> {
         }
         None
     }
+    pub(crate) fn get_i32(&mut self) -> Option<i32> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Integer(value) = &self.data_type {
+            return Some(*value);
+        }
+        if let Some(value) = utils::to_i32(self.raw_data) {
+            self.data_type = ValueType::Integer(value);
+            return Some(value);
+        }
+        None
+    }
+    pub(crate) fn get_percentage(&mut self) -> Option<f32> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Percentage(value) = &self.data_type {
+            return Some(*value);
+        }
+        if let Some(value) = utils::to_percentage(self.raw_data) {
+            self.data_type = ValueType::Percentage(value);
+            return Some(value);
+        }
+        None
+    }
+    pub(crate) fn get_dict(&mut self) -> Option<&mut NamedParamsMap<'a>> {
+        match &mut self.data_type {
+            ValueType::Dict(obj) => Some(obj),
+            _ => None
+        }
+    }
+    pub(crate) fn get_list(&mut self) -> Option<&mut Vec<Value<'a>>> {
+        match &mut self.data_type {
+            ValueType::List(obj) => Some(obj),
+            _ => None
+        }
+    }
 }
 
 fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index_end: usize) -> Result<Vec<Value<'a>>, Error> {
