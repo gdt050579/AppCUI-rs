@@ -20,6 +20,7 @@ fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index
         v.push(Value {
             raw_data: tokenizer.get(pos).get_text(text),
             data_type,
+            validated: false
         });
         pos = format.get_next_pos();
     }
@@ -30,6 +31,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
     let mut r = NamedParamsMap {
         named: HashMap::with_capacity(8),
         ordered: Vec::with_capacity(8),
+        non_named_count: 0,
     };
     let mut pos = index_start;
     let mut allow_value = true;
@@ -51,13 +53,12 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 3, next - 1)?),
                 _ => ValueType::Undetermined,
             };
-            r.named.insert(
-                key,
-                Value {
-                    raw_data: key_token.get_text(text),
-                    data_type,
-                },
-            );
+            r.ordered.push(Value {
+                raw_data: key_token.get_text(text),
+                data_type,
+                validated: false
+            });
+            r.named.insert(key, (r.ordered.len() - 1) as u32);
         } else {
             let next = tokenizer.get(pos).get_next(pos);
             let data_type = match tokenizer.get(pos).get_type() {
@@ -68,7 +69,9 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
             r.ordered.push(Value {
                 raw_data: tokenizer.get(pos).get_text(text),
                 data_type,
+                validated: false
             });
+            r.non_named_count += 1;
         }
         // first time a key:value is found, seding values in order is not possible anymore
         allow_value &= !format.is_key_value();

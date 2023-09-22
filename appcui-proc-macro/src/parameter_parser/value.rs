@@ -13,6 +13,7 @@ pub (super) enum ValueType<'a> {
 pub(crate) struct Value<'a> {
     pub(super) raw_data: &'a str,
     pub(super) data_type: ValueType<'a>,
+    pub(super) validated: bool,
 }
 impl<'a> Value<'a> {
     pub(crate) fn is_dict(&self) -> bool {
