@@ -41,16 +41,54 @@ impl Token {
         self.token_type
     }
     #[inline(always)]
+    pub(super) fn get_start(&self) -> usize {
+        self.start
+    }
+    #[inline(always)]
+    pub(super) fn get_end(&self) -> usize {
+        self.end
+    }
+    #[inline(always)]
     pub(super) fn get_text<'a>(&self, text: &'a str) -> &'a str {
         &text[self.start..self.end]
     }
     #[inline(always)]
     pub(super) fn get_link(&self) -> usize {
-        if self.link == Token::NO_LINK { usize::MAX } else { self.link as usize }
+        if self.link == Token::NO_LINK {
+            usize::MAX
+        } else {
+            self.link as usize
+        }
+    }
+    #[inline(always)]
+    fn is_possible_key(&self) -> bool {
+        self.token_type == TokenType::Word
+    }
+    #[inline(always)]
+    fn is_separator(&self) -> bool {
+        self.token_type == TokenType::Separator
+    }
+    #[inline(always)]
+    fn is_equal(&self) -> bool {
+        self.token_type == TokenType::Eq
+    }
+    #[inline(always)]
+    fn is_possible_value(&self) -> bool {
+        match self.token_type {
+            TokenType::Word | TokenType::OpenBrace | TokenType::OpenSquareBracket => true,
+            _ => false,
+        }
     }
 }
 pub(super) struct Tokenizer {
     tokens: Vec<Token>,
+}
+#[derive(Copy, Clone, Debug)]
+pub(super) enum TokensFormat {
+    Value,
+    ValueAndSeparator,
+    KeyValue,
+    KeyValueSeparator,
 }
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -254,6 +292,46 @@ impl Tokenizer {
             }
         }
         Ok(t)
+    }
+    pub(super) fn analize(&self, text: &str, pos: usize, count: usize, allow_only_value: bool) -> Result<TokensFormat, Error> {
+        if pos >= count {
+            return Err(Error::new(
+                text,
+                "Internal error - check parameter 'pos' for function Tokenizer::analyze(...)",
+                0,
+                text.len(),
+            ));
+        }
+        // check scenarios
+        // 1. <key> <eq> <value> [separator]
+        if pos + 3 <= count {
+            if self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() && self.tokens[pos + 2].is_possible_value() {
+                // either KeyValue or KeyValueSep
+                if (pos + 4 <= count) && (self.tokens[pos + 3].is_separator()) {
+                    return Ok(TokensFormat::KeyValueSeparator);
+                } else {
+                    return Ok(TokensFormat::KeyValue);
+                }
+            }
+        }
+        // 2. <value> [separator]
+        if allow_only_value && self.tokens[pos].is_possible_value() {
+            if (pos + 2 <= count) && (self.tokens[pos + 1].is_separator()) {
+                return Ok(TokensFormat::ValueAndSeparator);
+            } else {
+                return Ok(TokensFormat::Value);
+            }
+        }
+        // if none of these --> error
+        let is_value = self.tokens[pos].is_possible_value();
+        let is_key = self.tokens[pos].is_possible_key();
+
+        // generic errors
+        if allow_only_value {
+            return Err(Error::with_token(text, "Expecting a value or a key:value syntax !", &self.tokens[pos]));
+        } else {
+            return Err(Error::with_token(text, "Expecting a key:value syntax !", &self.tokens[pos]));
+        }
     }
     #[inline(always)]
     pub(super) fn count(&self) -> usize {
