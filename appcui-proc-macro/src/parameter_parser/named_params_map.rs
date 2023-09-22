@@ -1,9 +1,16 @@
 use std::collections::HashMap;
-
-use super::value::Value;
-
+use super::{value::Value, ParamSignature};
 
 pub(crate) struct NamedParamsMap<'a> {
     pub (super) named: HashMap<u64, Value<'a>>,
     pub (super) ordered: Vec<Value<'a>>,
+}
+
+impl<'a> NamedParamsMap<'a> {
+    pub (crate) fn validate_signature(&mut self, signature: &[ParamSignature]) {
+
+    }
+    pub (crate) fn check_unkwnon_params(&self) {
+        
+    }
 }
