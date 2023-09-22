@@ -27,7 +27,7 @@ fn parse_dict<'a>(text: &str, tokenizer: &Tokenizer, index_start: usize, index_e
 
         // first time a key:value is found, seding values in order is not possible anymore
         allow_value &= !format.is_key_value();
-        pos += format.count();
+        pos = format.get_next_pos();
     }
     Ok(r)
 }

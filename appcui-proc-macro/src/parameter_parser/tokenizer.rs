@@ -97,24 +97,20 @@ pub(super) struct Tokenizer {
 }
 #[derive(Copy, Clone, Debug)]
 pub(super) enum TokensFormat {
-    Value,
-    ValueAndSeparator,
-    KeyValue,
-    KeyValueSeparator,
+    Value(usize),
+    KeyValue(usize),
 }
 impl TokensFormat {
-    pub(super) fn count(&self) -> usize {
-        match self {
-            TokensFormat::Value => 1,             // value
-            TokensFormat::ValueAndSeparator => 2, // value,
-            TokensFormat::KeyValue => 3,          // key:value
-            TokensFormat::KeyValueSeparator => 4, // key:value,
-        }
-    }
     pub(super) fn is_key_value(&self) -> bool {
         match self {
-            TokensFormat::KeyValue | TokensFormat::KeyValueSeparator => true,
+            TokensFormat::KeyValue(_) => true,
             _ => false,
+        }
+    }
+    pub(super) fn get_next_pos(&self) -> usize {
+        match self {
+            TokensFormat::Value(value) => *value,
+            TokensFormat::KeyValue(value) => *value,
         }
     }
 }
@@ -336,24 +332,43 @@ impl Tokenizer {
         if (pos + 3 <= end) && (allow_key) {
             if self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() && self.tokens[pos + 2].is_possible_value() {
                 // either KeyValue or KeyValueSep
-                let next_pos = self.tokens[pos + 2].get_next(pos+2);
-
+                let next_pos = self.tokens[pos + 2].get_next(pos + 2);
                 if (next_pos < end) && (self.tokens[next_pos].is_separator()) {
-                    return Ok(TokensFormat::KeyValueSeparator);
-                } else {
-                    return Ok(TokensFormat::KeyValue);
+                    return Ok(TokensFormat::KeyValue(next_pos + 1));
                 }
+                if next_pos == end {
+                    return Ok(TokensFormat::KeyValue(next_pos));
+                }
+                // there is a next pos, but it is invalid (a separator is missing)
+                if next_pos < end {
+                    return Err(Error::with_token(
+                        text,
+                        format!("Expecting a separator (';' or ',') before '{}'", self.tokens[next_pos].get_text(text)).as_str(),
+                        &self.tokens[next_pos],
+                    ));
+                }
+                // else we have an internal error ==> in theory we should not reach this step
+                return Err(Error::new(text, "Internal error (1)", self.tokens[pos].start, self.tokens[pos + 2].end));
             }
         }
         // 2. <value> [separator]
         if allow_value && self.tokens[pos].is_possible_value() {
-            if (pos + 2 <= end) && (self.tokens[pos + 1].is_separator()) {
-                return Ok(TokensFormat::ValueAndSeparator);
-            } else {
-                if pos + 1 == end {
-                    return Ok(TokensFormat::Value);
-                }
+            let next_pos = self.tokens[pos].get_next(pos);
+            if (next_pos < end) && (self.tokens[next_pos].is_separator()) {
+                return Ok(TokensFormat::Value(next_pos + 1));
             }
+            if next_pos == end {
+                return Ok(TokensFormat::Value(next_pos));
+            }
+            if next_pos < end {
+                return Err(Error::with_token(
+                    text,
+                    format!("Expecting a separator (';' or ',') before '{}'", self.tokens[next_pos].get_text(text)).as_str(),
+                    &self.tokens[next_pos],
+                ));
+            }
+            // else we have an internal error ==> in theory we should not reach this step
+            return Err(Error::new(text, "Internal error (2)", self.tokens[pos].start, self.tokens[pos].end));
         }
         // specific errors
         if allow_key {
