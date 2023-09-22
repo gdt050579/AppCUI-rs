@@ -1,0 +1,18 @@
+use super::utils;
+use crate::parameter_parser::ParamSignature;
+use crate::parameter_parser::ParamType;
+use proc_macro::*;
+
+static SIGNATURE: &[ParamSignature] = &[
+    // mandatory
+    ParamSignature::mandatory("name", "caption", ParamType::String),
+    // optionals
+    ParamSignature::optional("caption", "caption", ParamType::String),
+    ParamSignature::optional("text", "caption", ParamType::String),
+    ParamSignature::optional("flags", "flags", ParamType::Flags),
+];
+
+pub(crate) fn create(input: TokenStream) -> TokenStream {
+    let s = utils::token_stream_to_string("button", input);
+    utils::to_token_stream(s)
+}

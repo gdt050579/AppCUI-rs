@@ -5,6 +5,7 @@ mod templates;
 mod traits_configuration;
 mod utils;
 mod parameter_parser;
+mod controls;
 use arguments::*;
 use proc_macro::*;
 
@@ -267,4 +268,10 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn key(input: TokenStream) -> TokenStream {
     key_utils::process_key_macro_tokens(input)
+}
+
+
+#[proc_macro]
+pub fn button(input: TokenStream) -> TokenStream {
+    crate::controls::button::create(input)
 }
