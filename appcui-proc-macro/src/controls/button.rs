@@ -6,7 +6,7 @@ use crate::parameter_parser;
 use proc_macro::*;
 
 static SIGNATURE: &[ParamSignature] = &[
-    // mandatory
+    // mandatory (positional)
     ParamSignature::mandatory("name", "caption", ParamType::String),
     // optionals
     ParamSignature::optional("caption", "caption", ParamType::String),
@@ -17,8 +17,8 @@ static SIGNATURE: &[ParamSignature] = &[
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let s = utils::token_stream_to_string("button", input);
     let mut p = parameter_parser::parse(&s).unwrap();
-    p.validate_signature(&s, SIGNATURE);
-    p.validate_signature(&s, common::SIGNATURE);
+    p.validate_signature(&s, SIGNATURE).unwrap();
+    p.validate_signature(&s, common::SIGNATURE).unwrap();
     p.check_unkwnon_params(&s).unwrap();
     utils::to_token_stream(s)
 }

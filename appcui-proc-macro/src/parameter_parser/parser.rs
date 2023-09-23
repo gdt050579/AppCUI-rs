@@ -33,8 +33,8 @@ fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index
 fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index_end: usize) -> Result<NamedParamsMap<'a>, Error> {
     let mut r = NamedParamsMap {
         named: HashMap::with_capacity(8),
-        ordered: Vec::with_capacity(8),
-        non_named_count: 0,
+        positional: Vec::with_capacity(8),
+        positional_count: 0,
     };
     let mut pos = index_start;
     let mut allow_value = true;
@@ -56,14 +56,14 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 3, next - 1)?),
                 _ => ValueType::Undetermined,
             };
-            r.ordered.push(Value {
+            r.positional.push(Value {
                 raw_data: key_token.get_text(text),
                 data_type,
                 validated: false,
                 start: key_token.get_start(),
                 end: key_token.get_end()
             });
-            r.named.insert(key, (r.ordered.len() - 1) as u32);
+            r.named.insert(key, (r.positional.len() - 1) as u32);
         } else {
             let next = tokenizer.get(pos).get_next(pos);
             let data_type = match tokenizer.get(pos).get_type() {
@@ -72,14 +72,14 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 _ => ValueType::Undetermined,
             };
             let tok = tokenizer.get(pos);
-            r.ordered.push(Value {
+            r.positional.push(Value {
                 raw_data: tok.get_text(text),
                 data_type,
                 validated: false,
                 start: tok.get_start(),
                 end: tok.get_end()
             });
-            r.non_named_count += 1;
+            r.positional_count += 1;
         }
         // first time a key:value is found, seding values in order is not possible anymore
         allow_value &= !format.is_key_value();
