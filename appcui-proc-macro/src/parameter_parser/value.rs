@@ -1,7 +1,7 @@
 use super::named_params_map::NamedParamsMap;
-use super::utils;
+use super::{utils, Error};
 
-pub (super) enum ValueType<'a> {
+pub(super) enum ValueType<'a> {
     Undetermined,
     Bool(bool),
     Integer(i32),
@@ -82,13 +82,40 @@ impl<'a> Value<'a> {
     pub(crate) fn get_dict(&mut self) -> Option<&mut NamedParamsMap<'a>> {
         match &mut self.data_type {
             ValueType::Dict(obj) => Some(obj),
-            _ => None
+            _ => None,
         }
     }
     pub(crate) fn get_list(&mut self) -> Option<&mut Vec<Value<'a>>> {
         match &mut self.data_type {
             ValueType::List(obj) => Some(obj),
-            _ => None
+            _ => None,
         }
+    }
+    fn validate_bool(&mut self, param_name: &str, param_list: &str) -> Result<(), Error> {
+        if let Some(_) = self.get_bool() {
+            return Ok(());
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting a bool value (true or false) for parameter '{}' but found '{}'",
+                param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }
+    pub(crate) fn validate(&mut self, param_name: &str, param_list: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
+        match expected_type {
+            super::ParamType::String => todo!(),
+            super::ParamType::Bool => self.validate_bool(param_name, param_list)?,
+            super::ParamType::Flags => todo!(),
+            super::ParamType::Alignament => todo!(),
+            super::ParamType::Layout => todo!(),
+        }
+        // all good
+        self.validated = true;
+        Ok(())
     }
 }
