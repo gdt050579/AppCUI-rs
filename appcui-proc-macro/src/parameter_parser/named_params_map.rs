@@ -110,4 +110,11 @@ impl<'a> NamedParamsMap<'a> {
         }
         None
     }
+    pub(crate) fn get_mut(&mut self, name: &str) -> Option<&mut Value<'a>> {
+        let k = super::utils::compute_hash(name);
+        if let Some(index) = self.all_params.get(&k) {
+            return Some(&mut self.values[*index as usize]);
+        }
+        None
+    }
 }

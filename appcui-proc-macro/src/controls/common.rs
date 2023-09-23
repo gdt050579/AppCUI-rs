@@ -1,8 +1,9 @@
 use crate::parameter_parser::NamedParameter;
+use crate::parameter_parser::NamedParamsMap;
 use crate::parameter_parser::ParamType;
 
-pub (super) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
-    // generic characteristics 
+pub(super) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
+    // generic characteristics
     NamedParameter::new("visible", "visible", ParamType::Bool),
     NamedParameter::new("enabled", "enabled", ParamType::Bool),
     NamedParameter::new("enable", "enabled", ParamType::Bool),
@@ -22,14 +23,33 @@ pub (super) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     NamedParameter::new("height", "height", ParamType::Layout),
     NamedParameter::new("h", "height", ParamType::Layout),
     NamedParameter::new("align", "align", ParamType::Alignament),
-    NamedParameter::new("a", "align", ParamType::Alignament),   
-    NamedParameter::new("alignament", "align", ParamType::Alignament),   
+    NamedParameter::new("a", "align", ParamType::Alignament),
+    NamedParameter::new("alignament", "align", ParamType::Alignament),
     NamedParameter::new("dock", "dock", ParamType::Alignament),
-    NamedParameter::new("d", "dock", ParamType::Alignament),   
+    NamedParameter::new("d", "dock", ParamType::Alignament),
 ];
 
 pub(super) fn add_string(s: &mut String, text: &str) {
     s.push('"');
     s.push_str(text);
     s.push('"');
+}
+
+fn get_bool_value(params: &mut NamedParamsMap, name: &str, value_if_not_found: bool) -> bool {
+    if let Some(value) = params.get_mut(name) {
+        if let Some(bvalue) = value.get_bool() {
+            return bvalue;
+        }
+    }
+    return value_if_not_found;
+}
+pub(super) fn add_basecontrol_operations(s: &mut String, name: &str, params: &mut NamedParamsMap) {
+    if get_bool_value(params, "enabled", true) == false {
+        s.push_str(name);
+        s.push_str(".set_enabled(false);\n\t");
+    }
+    if get_bool_value(params, "visible", true) == false {
+        s.push_str(name);
+        s.push_str(".set_visible(false);\n\t");
+    }
 }

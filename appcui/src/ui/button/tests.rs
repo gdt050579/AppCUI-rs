@@ -138,11 +138,12 @@ fn check_button_control_with_macro() {
     let script = "
         Paint.Enable(false)
         Paint('Initial focus => Add (0) and Reset')   
-        //CheckHash(0xBAE7A3089D249D76)
+        CheckHash(0x746D0405F182257F)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = Window::new("Macro Test",Layout::new("d:c:w,40,h:8"),window::Flags::None);
+    let mut w = Window::new("Macro Test",Layout::new("d:c,w:40,h:8"),window::Flags::None);
     w.add(button!("Start,x:2,y:3,w:15"));
+    w.add(button!("Disabled,x:20,y:3,w:15,enable:false"));
     a.add_window(w);
     a.run();
 }
