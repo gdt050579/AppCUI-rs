@@ -1,4 +1,4 @@
-use super::{value::Value, Error, ParamSignature};
+use super::{utils, value::Value, Error, ParamSignature};
 use std::collections::HashMap;
 
 pub(crate) struct NamedParamsMap<'a> {
@@ -52,10 +52,26 @@ impl<'a> NamedParamsMap<'a> {
         }
         // start validating parameters from signature
         for param_sig in signature {
-            let h = super::utils::compute_hash(param_sig.get_key());
+            let h = super::utils::compute_hash(param_sig.get_name());
             if let Some(index) = self.named.get(&h) {
                 let v = &mut self.positional[*index as usize];
+                let k = super::utils::compute_hash(param_sig.get_key());
+                if self.named.contains_key(&k) {
+                    // this means that two aliases were present
+                    return Err(Error::new(
+                        param_list,
+                        format!(
+                            "Parameters '{}' are aliases and can not be used at the same time. Keep only one of them !",
+                            utils::get_aliases_list(signature, param_sig.get_key()),
+                        )
+                        .as_str(),
+                        v.start,
+                        v.end,
+                    ));
+                }
                 v.validate(param_list, param_sig.get_key(), param_sig.get_param_type())?;
+                // since it was already validated --> add the key to map
+                self.named.insert(k, *index);
             }
         }
         Ok(())
