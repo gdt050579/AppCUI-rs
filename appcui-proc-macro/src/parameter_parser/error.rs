@@ -45,7 +45,7 @@ impl Error {
         }
         while (end<buf.len()) && (count_on_right<20)&& (buf[end]!=b'\n') && (buf[end]!=b'\r') {
             end+=1;
-            while (end>0) && (buf[end]>=128 /* skip utf-8 */) {
+            while (end<buf.len()) && (buf[end]>=128 /* skip utf-8 */) {
                 end += 1;
             } 
             count_on_right+=1;
