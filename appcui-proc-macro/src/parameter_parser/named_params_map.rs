@@ -90,4 +90,11 @@ impl<'a> NamedParamsMap<'a> {
         }
         Ok(())
     }
+    pub(crate) fn get(&self, name: &str) -> Option<&Value<'a>> {
+        let k = super::utils::compute_hash(name);
+        if let Some(index) = self.named.get(&k) {
+            return Some(&self.positional[*index as usize]);
+        }
+        None
+    }
 }

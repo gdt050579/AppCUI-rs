@@ -27,3 +27,9 @@ pub (super) static SIGNATURE: &[ParamSignature] = &[
     ParamSignature::optional("dock", "dock", ParamType::Alignament),
     ParamSignature::optional("d", "dock", ParamType::Alignament),   
 ];
+
+pub(super) fn add_string(s: &mut String, text: &str) {
+    s.push('"');
+    s.push_str(text);
+    s.push('"');
+}

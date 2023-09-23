@@ -1,5 +1,6 @@
 use super::common;
 use super::utils;
+use super::layout;
 use crate::parameter_parser::ParamSignature;
 use crate::parameter_parser::ParamType;
 use crate::parameter_parser;
@@ -25,8 +26,11 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     result.push_str("{\n\t");
     result.push_str("let but = Button::new(");
     // first add the caption
+    let caption = p.get("caption").expect("First parameter (caption) has to be provided !");
+    common::add_string(&mut result, caption.get_string());
     // second add the layout
-    result.push_str(" , Layout::new(");
+    result.push_str(" , ");
+    layout::add_layout(&mut result, &p);
     // lastly add the flags
     result.push_str(");\n\t");
     // finally close block

@@ -80,6 +80,10 @@ impl<'a> Value<'a> {
         }
         None
     }
+    #[inline(always)]
+    pub(crate) fn get_string(&self) -> &str {
+        self.raw_data
+    }
     pub(crate) fn get_dict(&mut self) -> Option<&mut NamedParamsMap<'a>> {
         match &mut self.data_type {
             ValueType::Dict(obj) => Some(obj),
