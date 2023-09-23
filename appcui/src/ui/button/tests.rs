@@ -142,7 +142,7 @@ fn check_button_control_with_macro() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Macro Test",Layout::new("d:c:w,40,h:8"),window::Flags::None);
-    //w.add(button!("Start,x:2,y:3,w:15"));
+    w.add(button!("Start,x:2,y:3,w:15"));
     a.add_window(w);
     a.run();
 }

@@ -54,7 +54,8 @@ impl<'a> NamedParamsMap<'a> {
                     // two posible errors
                     // 1. a positional parameter and a named one
                     // 2. two named parameters
-                    let other_parameter_name = &self.values[self.all_params[&k] as usize].param_name;
+                    let other_parameter_index = (*(self.all_params.get(&k).unwrap())) as usize;
+                    let other_parameter_name = &self.values[other_parameter_index].param_name;
                     let v = &self.values[*index as usize];
                     if other_parameter_name.len() > 0 {
                         return Err(Error::new(

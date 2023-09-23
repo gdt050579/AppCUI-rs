@@ -116,9 +116,9 @@ impl<'a> Value<'a> {
         match expected_type {
             super::ParamType::String => { /* always possible */ }
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
-            super::ParamType::Flags => todo!(),
-            super::ParamType::Alignament => todo!(),
-            super::ParamType::Layout => todo!(),
+            super::ParamType::Flags => todo!("validate flags"),
+            super::ParamType::Alignament => todo!("validate alignament"),
+            super::ParamType::Layout => todo!("validate layout"),
         }
         // all good
         self.validated = true;
