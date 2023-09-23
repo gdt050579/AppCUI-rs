@@ -111,6 +111,48 @@ impl<'a> Value<'a> {
             self.end,
         ));
     }
+    fn validate_layout(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if let Some(value) = self.get_i32() {
+            if (value < -30000) || (value > 30000) {
+                return Err(Error::new(
+                    param_list,
+                    format!(
+                        "The value for parameter '{}' should be between -30000 and 30000. Current value is {} !",
+                        display_param_name, value
+                    )
+                    .as_str(),
+                    self.start,
+                    self.end,
+                ));
+            }
+            return Ok(());
+        }
+        if let Some(value) = self.get_percentage() {
+            if (value < -300.0f32) || (value > 300.0f32) {
+                return Err(Error::new(
+                    param_list,
+                    format!(
+                        "The value for parameter '{}' should be between -300% and 300%. Current value is {}% !",
+                        display_param_name, value
+                    )
+                    .as_str(),
+                    self.start,
+                    self.end,
+                ));
+            }
+            return Ok(());           
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting an integer value or a percentage for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }
     pub(crate) fn validate(&mut self, key_name: &str, param_list: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
         match expected_type {
@@ -118,7 +160,7 @@ impl<'a> Value<'a> {
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
             super::ParamType::Flags => todo!("validate flags"),
             super::ParamType::Alignament => todo!("validate alignament"),
-            super::ParamType::Layout => todo!("validate layout"),
+            super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,
         }
         // all good
         self.validated = true;
