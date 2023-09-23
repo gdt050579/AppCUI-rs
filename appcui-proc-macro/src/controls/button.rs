@@ -20,5 +20,16 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     p.validate_signature(&s, SIGNATURE).unwrap();
     p.validate_signature(&s, common::SIGNATURE).unwrap();
     p.check_unkwnon_params(&s).unwrap();
-    utils::to_token_stream(s)
+    // all good --> lets build the query
+    let mut result = String::with_capacity(512);
+    result.push_str("{\n\t");
+    result.push_str("let but = Button::new(");
+    // first add the caption
+    // second add the layout
+    result.push_str(" , Layout::new(");
+    // lastly add the flags
+    result.push_str(");\n\t");
+    // finally close block
+    result.push_str("but\n}");
+    utils::to_token_stream(result)
 }

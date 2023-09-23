@@ -110,7 +110,7 @@ impl<'a> Value<'a> {
     pub(crate) fn validate(&mut self, key_name: &str, param_list: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
         match expected_type {
-            super::ParamType::String => todo!(),
+            super::ParamType::String => { /* always possible */ }
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
             super::ParamType::Flags => todo!(),
             super::ParamType::Alignament => todo!(),
