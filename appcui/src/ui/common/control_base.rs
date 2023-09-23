@@ -111,6 +111,14 @@ impl ControlBase {
             self.status_flags.remove(StatusFlags::Enabled);
         }
     }
+    #[inline(always)]
+    pub fn set_visible(&mut self, visible: bool) {
+        if visible {
+            self.status_flags.set(StatusFlags::Visible);
+        } else {
+            self.status_flags.remove(StatusFlags::Visible);
+        }
+    }
 
     #[inline(always)]
     pub(crate) fn update_focus_flag(&mut self, has_focus: bool) {
