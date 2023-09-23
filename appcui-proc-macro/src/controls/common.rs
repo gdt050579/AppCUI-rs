@@ -1,31 +1,31 @@
-use crate::parameter_parser::ParamSignature;
+use crate::parameter_parser::NamedParameter;
 use crate::parameter_parser::ParamType;
 
-pub (super) static SIGNATURE: &[ParamSignature] = &[
+pub (super) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     // generic characteristics 
-    ParamSignature::optional("visible", "visible", ParamType::Bool),
-    ParamSignature::optional("enabled", "enabled", ParamType::Bool),
-    ParamSignature::optional("enable", "enabled", ParamType::Bool),
+    NamedParameter::new("visible", "visible", ParamType::Bool),
+    NamedParameter::new("enabled", "enabled", ParamType::Bool),
+    NamedParameter::new("enable", "enabled", ParamType::Bool),
     // layout
-    ParamSignature::optional("x", "x", ParamType::Layout),
-    ParamSignature::optional("y", "y", ParamType::Layout),
-    ParamSignature::optional("left", "left", ParamType::Layout),
-    ParamSignature::optional("l", "left", ParamType::Layout),
-    ParamSignature::optional("right", "right", ParamType::Layout),
-    ParamSignature::optional("r", "right", ParamType::Layout),
-    ParamSignature::optional("top", "top", ParamType::Layout),
-    ParamSignature::optional("t", "top", ParamType::Layout),
-    ParamSignature::optional("bottom", "bottom", ParamType::Layout),
-    ParamSignature::optional("b", "bottom", ParamType::Layout),
-    ParamSignature::optional("width", "width", ParamType::Layout),
-    ParamSignature::optional("w", "width", ParamType::Layout),
-    ParamSignature::optional("height", "height", ParamType::Layout),
-    ParamSignature::optional("h", "height", ParamType::Layout),
-    ParamSignature::optional("align", "align", ParamType::Alignament),
-    ParamSignature::optional("a", "align", ParamType::Alignament),   
-    ParamSignature::optional("alignament", "align", ParamType::Alignament),   
-    ParamSignature::optional("dock", "dock", ParamType::Alignament),
-    ParamSignature::optional("d", "dock", ParamType::Alignament),   
+    NamedParameter::new("x", "x", ParamType::Layout),
+    NamedParameter::new("y", "y", ParamType::Layout),
+    NamedParameter::new("left", "left", ParamType::Layout),
+    NamedParameter::new("l", "left", ParamType::Layout),
+    NamedParameter::new("right", "right", ParamType::Layout),
+    NamedParameter::new("r", "right", ParamType::Layout),
+    NamedParameter::new("top", "top", ParamType::Layout),
+    NamedParameter::new("t", "top", ParamType::Layout),
+    NamedParameter::new("bottom", "bottom", ParamType::Layout),
+    NamedParameter::new("b", "bottom", ParamType::Layout),
+    NamedParameter::new("width", "width", ParamType::Layout),
+    NamedParameter::new("w", "width", ParamType::Layout),
+    NamedParameter::new("height", "height", ParamType::Layout),
+    NamedParameter::new("h", "height", ParamType::Layout),
+    NamedParameter::new("align", "align", ParamType::Alignament),
+    NamedParameter::new("a", "align", ParamType::Alignament),   
+    NamedParameter::new("alignament", "align", ParamType::Alignament),   
+    NamedParameter::new("dock", "dock", ParamType::Alignament),
+    NamedParameter::new("d", "dock", ParamType::Alignament),   
 ];
 
 pub(super) fn add_string(s: &mut String, text: &str) {

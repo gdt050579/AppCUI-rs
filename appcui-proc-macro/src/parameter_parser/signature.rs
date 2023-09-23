@@ -9,33 +9,40 @@ pub(crate) enum ParamType {
     Layout,
 }
 
-#[derive(Default)]
-pub(crate) struct ParamSignature {
-    name: &'static str,
+pub(crate) struct PositionalParameter {
     key: &'static str,
     param_type: ParamType,
-    optional: bool,
 }
-impl ParamSignature {
-    pub(crate) const fn optional(name: &'static str, key: &'static str, param_type: ParamType) -> Self {
+impl PositionalParameter {
+    #[inline(always)]
+    pub(crate) const fn new(key: &'static str, param_type: ParamType) -> Self {
         Self {
-            name,
             key,
             param_type,
-            optional: true,
-        }
-    }
-    pub(crate) const fn mandatory(name: &'static str, key: &'static str, param_type: ParamType) -> Self {
-        Self {
-            name,
-            key,
-            param_type,
-            optional: false,
         }
     }
     #[inline(always)]
-    pub(crate) fn is_mandatory(&self) -> bool {
-        self.optional == false
+    pub(crate) fn get_key(&self) -> &'static str {
+        self.key
+    }
+    #[inline(always)]
+    pub(crate) fn get_param_type(&self) -> ParamType {
+        self.param_type
+    }
+}
+pub(crate) struct NamedParameter {
+    name: &'static str,
+    key: &'static str,
+    param_type: ParamType,
+}
+impl NamedParameter {
+    #[inline(always)]
+    pub(crate) const fn new(name: &'static str, key: &'static str, param_type: ParamType) -> Self {
+        Self {
+            name,
+            key,
+            param_type,
+        }
     }
     #[inline(always)]
     pub(crate) fn get_key(&self) -> &'static str {
@@ -50,3 +57,4 @@ impl ParamSignature {
         self.param_type
     }
 }
+

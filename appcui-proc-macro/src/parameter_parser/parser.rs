@@ -34,7 +34,8 @@ fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index
 fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index_end: usize) -> Result<NamedParamsMap<'a>, Error> {
     let mut r = NamedParamsMap {
         named: HashMap::with_capacity(8),
-        positional: Vec::with_capacity(8),
+        values: Vec::with_capacity(8),
+        all_params: HashMap::with_capacity(8),
         positional_count: 0,
     };
     let mut pos = index_start;
@@ -57,7 +58,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 TokenType::OpenSquareBracket => ValueType::List(parse_vec(text, tokenizer, pos + 3, next - 1)?),
                 _ => ValueType::Undetermined,
             };
-            r.positional.push(Value {
+            r.values.push(Value {
                 param_name: key_token.get_text(text),
                 raw_data: tokenizer.get(pos + 2).get_text(text),
                 data_type,
@@ -65,7 +66,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 start: tokenizer.get(pos + 2).get_start(),
                 end: tokenizer.get(next - 1).get_end(),
             });
-            r.named.insert(key, (r.positional.len() - 1) as u32);
+            r.named.insert(key, (r.values.len() - 1) as u32);
         } else {
             let next = tokenizer.get(pos).get_next(pos);
             let data_type = match tokenizer.get(pos).get_type() {
@@ -74,7 +75,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 _ => ValueType::Undetermined,
             };
             let tok = tokenizer.get(pos);
-            r.positional.push(Value {
+            r.values.push(Value {
                 param_name: "",
                 raw_data: tok.get_text(text),
                 data_type,

@@ -1,88 +1,100 @@
-use super::{utils, value::Value, Error, ParamSignature};
+use super::{value::Value, Error, NamedParameter, PositionalParameter};
 use std::collections::HashMap;
 
 pub(crate) struct NamedParamsMap<'a> {
     pub(super) named: HashMap<u64, u32>,
-    pub(super) positional: Vec<Value<'a>>,
+    pub(super) values: Vec<Value<'a>>,
+    pub(super) all_params: HashMap<u64, u32>,
     pub(super) positional_count: usize,
 }
 
 impl<'a> NamedParamsMap<'a> {
-    fn validate_positional_parameters(&mut self, param_list: &str, signature: &[ParamSignature]) -> Result<(), Error> {
-        // first count how many positional parameters are defined in signature
-        let len = signature.len();
-        let mut pos_count = 0usize;
-        while (pos_count < len) && (signature[pos_count].is_mandatory()) {
-            pos_count += 1;
-        }
-        if self.positional_count > pos_count {
+    pub(crate) fn validate_positional_parameters(&mut self, param_list: &str, params: &[PositionalParameter]) -> Result<(), Error> {
+        if self.positional_count > params.len() {
             return Err(Error::new(
                 param_list,
-                format!("Too many positional parameters (max allowd are {})", pos_count).as_str(),
-                self.positional[pos_count].start,
-                self.positional[self.positional_count - 1].end,
+                format!("Too many positional parameters (max allowd are {})", params.len()).as_str(),
+                self.values[params.len()].start,
+                self.values[self.positional_count - 1].end,
             ));
         }
         // lets validate that they are in the right order
         for index in 0..self.positional_count {
-            let h = super::utils::compute_hash(signature[index].get_key());
-            if self.named.contains_key(&h) {
+            let h = super::utils::compute_hash(params[index].get_key());
+            if self.all_params.contains_key(&h) {
                 return Err(Error::new(
                     param_list,
                     format!(
                         "Positional parameter with index {} is duplicated. Check for '`{}`' or one of its aliases in the parameters lists",
-                        index,
-                        signature[index].get_name()
+                        index + 1,
+                        params[index].get_key()
                     )
                     .as_str(),
-                    self.positional[index].start,
-                    self.positional[index].end,
+                    self.values[index].start,
+                    self.values[index].end,
                 ));
             }
+            // validate
+            let v = &mut self.values[index];
+            v.validate(param_list, params[index].get_key(), params[index].get_param_type())?;
             // all good -> not use somewhere else --> add it to map
             self.named.insert(h, index as u32);
         }
-        // all good , all positiona parameters computed
-        self.positional_count = 0;
         Ok(())
     }
-    pub(crate) fn validate_signature(&mut self, param_list: &str, signature: &[ParamSignature]) -> Result<(), Error> {
-        if self.positional_count > 0 {
-            self.validate_positional_parameters(param_list, signature)?;
-        }
+    pub(crate) fn validate_names_parameters(&mut self, param_list: &str, signature: &[NamedParameter]) -> Result<(), Error> {
         // start validating parameters from signature
         for param_sig in signature {
             let h = super::utils::compute_hash(param_sig.get_name());
             if let Some(index) = self.named.get(&h) {
-                let v = &mut self.positional[*index as usize];
+                // if parameter with name "..." is present and has an index                
                 let k = super::utils::compute_hash(param_sig.get_key());
-                if self.named.contains_key(&k) {
+                if self.all_params.contains_key(&k) {
                     // this means that two aliases were present
-                    return Err(Error::new(
-                        param_list,
-                        format!(
-                            "Parameters '{}' are aliases and can not be used at the same time. Keep only one of them !",
-                            utils::get_aliases_list(signature, param_sig.get_key()),
-                        )
-                        .as_str(),
-                        v.start,
-                        v.end,
-                    ));
-                }
+                    // two posible errors
+                    // 1. a positional parameter and a named one
+                    // 2. two named parameters
+                    let other_parameter_name = &self.values[self.all_params[&k] as usize].param_name;
+                    let v = &self.values[*index as usize];
+                    if other_parameter_name.len() > 0 {
+                        return Err(Error::new(
+                            param_list,
+                            format!(
+                                "Parameter '{}' and '{}' are aliases and can not be used at the same time. Keep only one of them !",
+                                v.param_name, other_parameter_name
+                            )
+                            .as_str(),
+                            v.start,
+                            v.end,
+                        ));
+                    } else {
+                        return Err(Error::new(
+                            param_list,
+                            format!(
+                                "Parameter '{}' its the same with by the parameter with index '{}`. Keep only one of them !",
+                                v.param_name, self.all_params[&k]
+                            )
+                            .as_str(),
+                            v.start,
+                            v.end,
+                        ));
+                    }
+                }      
+                let v = &mut self.values[*index as usize];          
                 v.validate(param_list, param_sig.get_key(), param_sig.get_param_type())?;
                 // since it was already validated --> add the key to map
-                self.named.insert(k, *index);
+                self.all_params.insert(k, *index);
             }
         }
         Ok(())
     }
     pub(crate) fn check_unkwnon_params(&self, param_list: &str) -> Result<(), Error> {
         // all values must be validated
-        for value in &self.positional {
+        for value in &self.values {
             if value.validated == false {
                 return Err(Error::new(
                     param_list,
-                    format!("Unknwon key: '{}' !", value.raw_data).as_str(),
+                    format!("Unknwon parameter: '{}' !", value.param_name).as_str(),
                     value.start,
                     value.end,
                 ));
@@ -92,8 +104,8 @@ impl<'a> NamedParamsMap<'a> {
     }
     pub(crate) fn get(&self, name: &str) -> Option<&Value<'a>> {
         let k = super::utils::compute_hash(name);
-        if let Some(index) = self.named.get(&k) {
-            return Some(&self.positional[*index as usize]);
+        if let Some(index) = self.all_params.get(&k) {
+            return Some(&self.values[*index as usize]);
         }
         None
     }

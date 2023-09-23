@@ -1,5 +1,3 @@
-use super::ParamSignature;
-
 static LOWER_CASE_TABLE: [u8; 256] = [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
     39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 97, 98, 99, 100, 101, 102, 103, 104, 105,
@@ -87,16 +85,4 @@ pub(super) fn to_percentage(text: &str) -> Option<f32> {
         fvalue = -fvalue;
     }
     return Some(fvalue);
-}
-pub (crate) fn get_aliases_list(signature: &[ParamSignature], key: &str) -> String {
-    let mut s = String::with_capacity(64);
-    for p in signature {
-        if p.get_key() == key {
-            if s.len()>0 {
-                s.push(',');
-            }
-            s.push_str(p.get_name());
-        }
-    }
-    s
 }
