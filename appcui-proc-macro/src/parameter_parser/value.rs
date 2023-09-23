@@ -11,6 +11,7 @@ pub(super) enum ValueType<'a> {
 }
 
 pub(crate) struct Value<'a> {
+    pub(super) param_name: &'a str,
     pub(super) raw_data: &'a str,
     pub(super) data_type: ValueType<'a>,
     pub(super) validated: bool,
@@ -91,7 +92,7 @@ impl<'a> Value<'a> {
             _ => None,
         }
     }
-    fn validate_bool(&mut self, param_name: &str, param_list: &str) -> Result<(), Error> {
+    fn validate_bool(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if let Some(_) = self.get_bool() {
             return Ok(());
         }
@@ -99,17 +100,18 @@ impl<'a> Value<'a> {
             param_list,
             format!(
                 "Expecting a bool value (true or false) for parameter '{}' but found '{}'",
-                param_name, self.raw_data
+                display_param_name, self.raw_data
             )
             .as_str(),
             self.start,
             self.end,
         ));
     }
-    pub(crate) fn validate(&mut self, param_name: &str, param_list: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
+    pub(crate) fn validate(&mut self, key_name: &str, param_list: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
+        let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
         match expected_type {
             super::ParamType::String => todo!(),
-            super::ParamType::Bool => self.validate_bool(param_name, param_list)?,
+            super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
             super::ParamType::Flags => todo!(),
             super::ParamType::Alignament => todo!(),
             super::ParamType::Layout => todo!(),

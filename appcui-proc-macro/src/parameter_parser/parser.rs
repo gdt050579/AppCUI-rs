@@ -19,11 +19,12 @@ fn parse_vec<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, index
         };
         let tok = tokenizer.get(pos);
         v.push(Value {
+            param_name: "",
             raw_data: tok.get_text(text),
             data_type,
             validated: false,
             start: tok.get_start(),
-            end: tok.get_end()
+            end: tok.get_end(),
         });
         pos = format.get_next_pos();
     }
@@ -57,11 +58,12 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 _ => ValueType::Undetermined,
             };
             r.positional.push(Value {
-                raw_data: key_token.get_text(text),
+                param_name: key_token.get_text(text),
+                raw_data: tokenizer.get(pos + 2).get_text(text),
                 data_type,
                 validated: false,
-                start: key_token.get_start(),
-                end: key_token.get_end()
+                start: tokenizer.get(pos + 2).get_start(),
+                end: tokenizer.get(next - 1).get_end(),
             });
             r.named.insert(key, (r.positional.len() - 1) as u32);
         } else {
@@ -73,11 +75,12 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
             };
             let tok = tokenizer.get(pos);
             r.positional.push(Value {
+                param_name: "",
                 raw_data: tok.get_text(text),
                 data_type,
                 validated: false,
                 start: tok.get_start(),
-                end: tok.get_end()
+                end: tok.get_end(),
             });
             r.positional_count += 1;
         }
