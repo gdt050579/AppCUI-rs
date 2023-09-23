@@ -34,6 +34,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     result.push_str(" , ");
     layout::add_layout(&mut result, &p);
     // lastly add the flags
+    result.push_str(" , button::Flags::None ");
     result.push_str(");\n\t");
     // finally close block
     result.push_str("but\n}");
