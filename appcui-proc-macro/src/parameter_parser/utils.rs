@@ -86,3 +86,30 @@ pub(super) fn to_percentage(text: &str) -> Option<f32> {
     }
     return Some(fvalue);
 }
+pub(super) fn skip_spaces(buf: &[u8], start: usize) -> usize {
+    let len = buf.len();
+    let mut pos = start;
+    while (pos < len) && ((buf[pos] == b' ') || (buf[pos] == b'\n') || (buf[pos] == b'\r') || (buf[pos] == b'\t')) {
+        pos += 1;
+    }
+    pos
+}
+pub(super) fn is_word_character(value: u8) -> bool {
+    match value {
+        b'0'..=b'9' => true,
+        b'a'..=b'z' => true,
+        b'A'..=b'Z' => true,
+        b'_' => true,
+        128.. => true,
+        _ => false,
+    }
+}
+pub(super) fn skip_words(buf: &[u8], start: usize) -> usize {
+    let len = buf.len();
+    let mut pos = start;
+    while (pos < len) && is_word_character(buf[pos]) {
+        pos += 1;
+    }
+    pos   
+}
+

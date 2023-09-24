@@ -140,7 +140,7 @@ impl<'a> Value<'a> {
                     self.end,
                 ));
             }
-            return Ok(());           
+            return Ok(());
         }
         return Err(Error::new(
             param_list,
@@ -153,12 +153,66 @@ impl<'a> Value<'a> {
             self.end,
         ));
     }
+    fn validate_flags(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if self.is_list() {
+            return Ok(());
+        }
+        if self.is_dict() {
+            return Err(Error::new(
+                param_list,
+                format!(
+                    "Expecting a flag value for parameter '{}' (a string, a word or a list [...]), but got parameter list '{{...}}'",
+                    display_param_name
+                )
+                .as_str(),
+                self.start,
+                self.end,
+            ));
+        }
+        // parse th flag list
+        let buf = self.raw_data.as_bytes();
+        let mut v: Vec<Value> = Vec::with_capacity(8);
+        let mut pos = 0;
+        let len = buf.len();
+        while pos < len {
+            pos = utils::skip_spaces(buf, pos);
+            if !utils::is_word_character(buf[pos]) {
+                return Err(Error::new(
+                    param_list,
+                    format!(
+                        "Invalid flag format for parameter '{}'. Expecting a flags name formed out of th following characters: 0-9, a-z, A-Z and underline.",
+                        display_param_name
+                    )
+                    .as_str(),
+                    self.start+pos,
+                    self.start+pos+1,
+                ));
+            }
+            let next = utils::skip_words(buf, pos);
+            v.push(Value {
+                param_name: "",
+                raw_data: &self.raw_data[pos..next],
+                data_type: ValueType::Undetermined,
+                validated: false,
+                start: self.start + pos,
+                end: self.start + next,
+            });
+            pos = utils::skip_spaces(buf, next);
+            // skip any separator if any
+            if (pos < len) && ((buf[pos] == b'+') || (buf[pos] == b',') || (buf[pos] == b'|') || (buf[pos] == b';')) {
+                pos += 1;
+            }
+        }
+        // all good --> lets set up the vector
+        self.data_type = ValueType::List(v);
+        return Ok(());
+    }
     pub(crate) fn validate(&mut self, key_name: &str, param_list: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
         match expected_type {
             super::ParamType::String => { /* always possible */ }
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
-            super::ParamType::Flags => todo!("validate flags"),
+            super::ParamType::Flags => self.validate_flags(display_param_name, param_list)?,
             super::ParamType::Alignament => todo!("validate alignament"),
             super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,
         }

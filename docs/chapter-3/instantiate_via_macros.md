@@ -21,5 +21,10 @@ The values used as parameters can be:
 * **strings** - a string can be separated between douple quotes or single quotes and can contain new lines (ex: `"..."` or `'...'`). If both a single quote and a double quote has to be used in a string, three consecuitev double or single quotes can be used (ex: `"""..."""` or `'''...'''`)
 * **list of values** - obtained using `[` and `]` characters. The general format is `[value-1, value-2, ... value-n]` - ex: `[10,20,30]` is a list with three values 10,20 and 30.
 * **another parameter list** - obtained using `[` and `]` characters. The general format is `{parameter list}` - for example the following syntax `point={x:10,y:20}` translates into parameter `point` being defined as a set of two parameters `x` with value `10` and `y` with value `20`.
-
-## Examples
+* **flags** - flags are a meta interpretation for the previously described parameters. It can be a regular word / string or a list of values. If using a word you can separate flags using one of the following characters: `|` and `+`.  Aditionally when using a strings, spaces, `,` and `;` cand also be used as a separator. When using a list of values, each one of the values is a separate flag. For example the following declarations are equivalent: 
+    - `flags=[flag1,flag2]`
+    - `flags=flag1+flag2`
+    - `flags=flag1|flag2`
+    - `flags="flags1,flags2"`
+    - `flags="flags1;flags2"`
+    - `flags="flags1 flags2"`
