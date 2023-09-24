@@ -1,6 +1,7 @@
 use crate::parameter_parser::NamedParameter;
 use crate::parameter_parser::NamedParamsMap;
 use crate::parameter_parser::ParamType;
+use crate::parameter_parser::Value;
 
 pub(super) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     // generic characteristics
@@ -51,5 +52,12 @@ pub(super) fn add_basecontrol_operations(s: &mut String, name: &str, params: &mu
     if get_bool_value(params, "visible", true) == false {
         s.push_str(name);
         s.push_str(".set_visible(false);\n\t");
+    }
+}
+
+pub(super) fn add_flags(s: &mut String, flag_name: &str, values: &Vec<Value>) {
+    if values.len() == 0 {
+        s.push_str(flag_name);
+        s.push_str("::None");
     }
 }

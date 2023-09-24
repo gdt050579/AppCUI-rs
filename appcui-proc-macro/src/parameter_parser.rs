@@ -12,6 +12,7 @@ pub (crate) use self::error::Error;
 pub (crate) use self::parser::parse;
 pub (crate) use self::signature::*;
 pub (crate) use self::named_params_map::NamedParamsMap;
+pub (crate) use self::value::Value;
 pub (self) use self::tokenizer::Token;
 pub (self) use self::tokenizer::Tokenizer;
 pub (self) use self::tokenizer::TokenType;
