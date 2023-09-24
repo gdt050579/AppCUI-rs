@@ -96,7 +96,7 @@ impl<'a> Value<'a> {
         }
         if let ValueType::Alignament(value) = &self.data_type {
             return Some(*value);
-        }        
+        }
         if let Some(value) = Alignament::from_hash(utils::compute_hash(self.raw_data)) {
             self.data_type = ValueType::Alignament(value);
             return Some(value);
@@ -245,8 +245,8 @@ impl<'a> Value<'a> {
             self.end,
         ));
     }
-    
-    pub(crate) fn validate(&mut self, key_name: &str, param_list: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
+
+    pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
         match expected_type {
             super::ParamType::String => { /* always possible */ }
