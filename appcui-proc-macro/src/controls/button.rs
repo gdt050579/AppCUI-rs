@@ -5,7 +5,7 @@ use crate::parameter_parser;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static BUTTON_FLAGS: FlagsSignature = FlagsSignature::new(&["flat"]);
+static mut BUTTON_FLAGS: FlagsSignature = FlagsSignature::new(&["flat"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
@@ -35,7 +35,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     // lastly add the flags
     result.push_str(" , ");
     if let Some(flags) = p.get_mut("flags") {
-        common::add_flags(&s, &mut result, "button::Flags", flags.get_list().unwrap(), &BUTTON_FLAGS).unwrap();
+        common::add_flags(&s, &mut result, "button::Flags", flags.get_list().unwrap(), unsafe { &mut BUTTON_FLAGS }).unwrap();
     } else {
         result.push_str("button::Flags::None");
     }

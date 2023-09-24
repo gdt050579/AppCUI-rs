@@ -62,7 +62,7 @@ pub(super) fn add_flags(
     s: &mut String,
     flag_name: &str,
     values: &Vec<Value>,
-    available_flags: &FlagsSignature,
+    available_flags: &mut FlagsSignature,
 ) -> Result<(), Error> {
     if values.len() == 0 {
         s.push_str(flag_name);

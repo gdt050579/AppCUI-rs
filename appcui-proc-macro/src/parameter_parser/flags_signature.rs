@@ -10,7 +10,7 @@ impl FlagsSignature {
     pub(crate) const fn new(flags: &'static [&'static str]) -> Self {
         Self { flags, map: Mutex::new(None) }
     }
-    pub(crate) fn get(&self, name: &str)->Option<&'static str> {
+    pub(crate) fn get(&mut self, name: &str)->Option<&'static str> {
         let hash = utils::compute_hash(name);
         let map = self.map.get_mut().unwrap();
         if map.is_none() {
