@@ -1,4 +1,5 @@
 use super::common;
+use super::flags_signature::FlagsSignature;
 use super::layout;
 use super::utils;
 use crate::parameter_parser;
@@ -6,9 +7,9 @@ use crate::parameter_parser::ParamType;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
-    PositionalParameter::new("caption", ParamType::String)
-];
+static BUTTON_FLAGS: FlagsSignature = FlagsSignature::new(&["flat"]);
+
+static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("name", "caption", ParamType::String),
     NamedParameter::new("caption", "caption", ParamType::String),
@@ -34,7 +35,12 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     result.push_str(" , ");
     layout::add_layout(&mut result, &p);
     // lastly add the flags
-    result.push_str(" , button::Flags::None ");
+    result.push_str(" , ");
+    if let Some(flags) = p.get_mut("flags") {
+        common::add_flags(&s, &mut result, "button::Flags", flags.get_list().unwrap(), &BUTTON_FLAGS).unwrap();
+    } else {
+        result.push_str("button::Flags::None");
+    }
     result.push_str(");\n\t");
     // basic controls
     common::add_basecontrol_operations(&mut result, "but", &mut p);

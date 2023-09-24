@@ -1,7 +1,10 @@
+use crate::parameter_parser::Error;
 use crate::parameter_parser::NamedParameter;
 use crate::parameter_parser::NamedParamsMap;
 use crate::parameter_parser::ParamType;
 use crate::parameter_parser::Value;
+
+use super::flags_signature::FlagsSignature;
 
 pub(super) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     // generic characteristics
@@ -55,9 +58,37 @@ pub(super) fn add_basecontrol_operations(s: &mut String, name: &str, params: &mu
     }
 }
 
-pub(super) fn add_flags(s: &mut String, flag_name: &str, values: &Vec<Value>) {
+pub(super) fn add_flags(
+    parameters_list: &str,
+    s: &mut String,
+    flag_name: &str,
+    values: &Vec<Value>,
+    available_flags: &FlagsSignature,
+) -> Result<(), Error> {
     if values.len() == 0 {
         s.push_str(flag_name);
         s.push_str("::None");
+    } else {
+        let mut add_or_operator = false;
+        for name in values {
+            if let Some(flag) = available_flags.get(name.get_string()) {
+                if add_or_operator {
+                    s.push_str(" | ")
+                }
+                s.push_str(flag_name);
+                s.push_str("::");
+                s.push_str(flag);
+                add_or_operator = true;
+            } else {
+                // unknown
+                return Err(Error::new(
+                    parameters_list,
+                    format!("Unknwon flag: {} !", name.get_string()).as_str(),
+                    name.get_start_pos(),
+                    name.get_end_pos(),
+                ));
+            }
+        }
     }
+    Ok(())
 }

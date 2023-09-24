@@ -19,6 +19,14 @@ pub(crate) struct Value<'a> {
     pub(super) end: usize,
 }
 impl<'a> Value<'a> {
+    #[inline(always)]
+    pub(crate) fn get_start_pos(&self) -> usize {
+        self.start
+    }
+    #[inline(always)]
+    pub(crate) fn get_end_pos(&self) -> usize {
+        self.end
+    }
     pub(crate) fn is_dict(&self) -> bool {
         match self.data_type {
             ValueType::Dict(_) => true,
