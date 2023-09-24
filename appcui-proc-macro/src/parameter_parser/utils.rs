@@ -9,6 +9,7 @@ static LOWER_CASE_TABLE: [u8; 256] = [
     221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249,
     250, 251, 252, 253, 254, 255,
 ];
+
 pub(super) fn compute_hash(text: &str) -> u64 {
     let buf = text.as_bytes();
     // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function

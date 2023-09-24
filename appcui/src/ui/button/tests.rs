@@ -146,7 +146,7 @@ fn check_button_control_with_macro() {
     w.add(button!("Disabled,x:20,y:3,w:15,enable:false"));
     w.add(button!("caption:'Not Visible',x:0,y:0,w:100%,visible:false"));
     w.add(button!("Flat,x:2,y:5,w:15,flags:flat"));
-    w.add(button!("text:'Flat and disabled',x:2,y:7,w:30,flags:[flat],enable:false"));
+    w.add(button!("text:'Flat and disabled',x:2,y:7,w:30,a:tl,flags:[flat],enable:false"));
     a.add_window(w);
     a.run();
 }

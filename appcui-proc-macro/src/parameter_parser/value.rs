@@ -1,3 +1,4 @@
+use super::alignament::Alignament;
 use super::named_params_map::NamedParamsMap;
 use super::{utils, Error};
 
@@ -6,6 +7,7 @@ pub(super) enum ValueType<'a> {
     Bool(bool),
     Integer(i32),
     Percentage(f32),
+    Alignament(Alignament),
     List(Vec<Value<'a>>),
     Dict(NamedParamsMap<'a>),
 }
@@ -84,6 +86,19 @@ impl<'a> Value<'a> {
         }
         if let Some(value) = utils::to_percentage(self.raw_data) {
             self.data_type = ValueType::Percentage(value);
+            return Some(value);
+        }
+        None
+    }
+    pub(crate) fn get_alignament(&mut self) -> Option<Alignament> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Alignament(value) = &self.data_type {
+            return Some(*value);
+        }        
+        if let Some(value) = Alignament::from_hash(utils::compute_hash(self.raw_data)) {
+            self.data_type = ValueType::Alignament(value);
             return Some(value);
         }
         None
@@ -215,13 +230,29 @@ impl<'a> Value<'a> {
         self.data_type = ValueType::List(v);
         return Ok(());
     }
+    fn validate_alignament(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if let Some(_) = self.get_alignament() {
+            return Ok(());
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting an alignament constant (left,topleft,top,topright,right,bottomright,bottom,bottomleft,center) for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }
+    
     pub(crate) fn validate(&mut self, key_name: &str, param_list: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
         match expected_type {
             super::ParamType::String => { /* always possible */ }
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
             super::ParamType::Flags => self.validate_flags(display_param_name, param_list)?,
-            super::ParamType::Alignament => todo!("validate alignament"),
+            super::ParamType::Alignament => self.validate_alignament(display_param_name, param_list)?,
             super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,
         }
         // all good
