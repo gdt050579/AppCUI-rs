@@ -5,7 +5,7 @@ use crate::parameter_parser;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static mut BUTTON_FLAGS: FlagsSignature = FlagsSignature::new(&["flat"]);
+static mut BUTTON_FLAGS: FlagsSignature = FlagsSignature::new(&["Flat"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
