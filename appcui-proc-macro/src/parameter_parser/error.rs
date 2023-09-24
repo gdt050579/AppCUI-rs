@@ -31,34 +31,45 @@ impl Error {
         s.push_str(&self.message);
         s.push_str("\nCode : ");
         // compute intervale
-        let mut start = self.start;
-        let mut end = self.end;
-        let mut count_on_left = 0;
-        let mut count_on_right = 0;
-        let buf = self.data.as_bytes();
-        while (start>0) && (count_on_left<20) && (buf[start]!=b'\n') && (buf[start]!=b'\r') {
-            start -= 1;
-            while (start>0) && (buf[start]>=128 /* skip utf-8 */) {
+        // sanity check
+        if (self.start < self.end) && (self.end <= self.data.len()) {
+            let mut start = self.start;
+            let mut end = self.end;
+            let mut count_on_left = 0;
+            let mut count_on_right = 0;
+            let buf = self.data.as_bytes();
+            while (start > 0) && (count_on_left < 20) && (buf[start] != b'\n') && (buf[start] != b'\r') {
                 start -= 1;
-            } 
-            count_on_left+=1;
-        }
-        while (end<buf.len()) && (count_on_right<20)&& (buf[end]!=b'\n') && (buf[end]!=b'\r') {
-            end+=1;
-            while (end<buf.len()) && (buf[end]>=128 /* skip utf-8 */) {
+                while (start > 0) && (buf[start] >= 128/* skip utf-8 */) {
+                    start -= 1;
+                }
+                count_on_left += 1;
+            }
+            while (end < buf.len()) && (count_on_right < 20) && (buf[end] != b'\n') && (buf[end] != b'\r') {
                 end += 1;
-            } 
-            count_on_right+=1;
+                while (end < buf.len()) && (buf[end] >= 128/* skip utf-8 */) {
+                    end += 1;
+                }
+                count_on_right += 1;
+            }
+            s.push_str(&self.data[start..end]);
+            s.push_str("\n     : ");
+            for _ in 0..count_on_left {
+                s.push(' ');
+            }
+            for _ in self.start..self.end {
+                s.push('^');
+            }
+            s.push('\n');
+        } else {
+            s.push_str(
+                format!(
+                    "Internal error (invalid start/end parameter)\n - start={}\n = end={}\n - len={}\n - text='{}'\n ",
+                    self.start, self.end,self.data.len(),self.data
+                )
+                .as_str(),
+            );
         }
-        s.push_str(&self.data[start..end]);
-        s.push_str("\n     : ");
-        for _ in 0..count_on_left {
-            s.push(' ');
-        }
-        for _ in self.start..self.end {
-            s.push('^');
-        }
-        s.push('\n');
         s
     }
 }
