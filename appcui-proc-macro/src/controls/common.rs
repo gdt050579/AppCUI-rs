@@ -3,8 +3,7 @@ use crate::parameter_parser::NamedParameter;
 use crate::parameter_parser::NamedParamsMap;
 use crate::parameter_parser::ParamType;
 use crate::parameter_parser::Value;
-
-use super::flags_signature::FlagsSignature;
+use crate::parameter_parser::FlagsSignature;
 
 pub(super) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     // generic characteristics

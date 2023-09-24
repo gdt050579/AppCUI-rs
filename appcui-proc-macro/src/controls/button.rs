@@ -1,9 +1,7 @@
 use super::common;
-use super::flags_signature::FlagsSignature;
 use super::layout;
 use super::utils;
 use crate::parameter_parser;
-use crate::parameter_parser::ParamType;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
