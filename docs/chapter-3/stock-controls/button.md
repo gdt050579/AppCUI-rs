@@ -8,11 +8,21 @@ or
 ```rs
 let b1 = button!("caption=&Start,x:10,y:5,w:15");
 let b2 = button!("&Start,x:10,y:5,w:15");
-let b3 = button!("caption=&Disabled,x:10,y:5,w:15,disabled");
-let b4 = button!("text='My Button',x=10,y:5,align:center,w:30,hidden");
+```
+
+You can also add other parameters specific to all controls (such as `enable` or `visible`) when using macro instantiation:
+```rs
+let b3 = button!("caption=&Disabled,x:10,y:5,w:15,enable=false");
+let b4 = button!("text='My Button',x=10,y:5,align:center,w:30,visible=false");
 ```
 
 ## Events
+To intercept events from a button, the following trait has to be implemented to the Window that processes the event loop:
+```rs
+pub trait ButtonEvents {
+    fn on_pressed(&mut self, button: Handle<Button>) -> EventProcessStatus {...}
+}
+```
 
 ## Methods
 
