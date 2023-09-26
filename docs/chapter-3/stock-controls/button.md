@@ -10,10 +10,16 @@ let b1 = button!("caption=&Start,x:10,y:5,w:15");
 let b2 = button!("&Start,x:10,y:5,w:15");
 ```
 
-You can also add other parameters specific to all controls (such as `enable` or `visible`) when using macro instantiation:
+A button supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md)). Besides them, the following name parameters are also accepted:
+
+| Parameter name | Type | Positional parameter  | Purpose |
+|----------------|------|-----------------------|---------|
+| `name` or `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a button |
+
+Some examples that uses these paramateres:
 ```rs
-let b3 = button!("caption=&Disabled,x:10,y:5,w:15,enable=false");
-let b4 = button!("text='My Button',x=10,y:5,align:center,w:30,visible=false");
+let disabled_button = button!("caption=&Disabled,x:10,y:5,w:15,enable=false");
+let hidden_button = button!("text='&Hidden',x=9,y:1,align:center,w:9,visible=false");
 ```
 
 ## Events
