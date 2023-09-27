@@ -10,16 +10,23 @@ let b1 = button!("caption=&Start,x:10,y:5,w:15");
 let b2 = button!("&Start,x:10,y:5,w:15");
 ```
 
-A button supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md)). Besides them, the following name parameters are also accepted:
+The caption of a button may contain the special character `&` that indicates a hot-key. For example, constructing a button with the following caption `&Start` will set up the text of the button to `Start` and will set up character `S` as the hot key for that button (pressing `Alt+S` will be equivalent to pressing that button);
+
+A button supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following name parameters are also accepted:
 
 | Parameter name | Type | Positional parameter  | Purpose |
 |----------------|------|-----------------------|---------|
 | `name` or `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a button |
+| `flags` | String or List| **No** | Button initialization flags |
+
+A button supports the following initialization flags:
+* `button::Flags::Flat` or `flat` (for macro initialization) - thils will hide the shaddow of the button makeing it flat.
 
 Some examples that uses these paramateres:
 ```rs
 let disabled_button = button!("caption=&Disabled,x:10,y:5,w:15,enable=false");
 let hidden_button = button!("text='&Hidden',x=9,y:1,align:center,w:9,visible=false");
+let flat_button = button!("&flat,x:1,y:1,w:10,flags:flat");
 ```
 
 ## Events
