@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::terminals::SystemEvent;
+use crate::graphics::Point;
 
 use super::{
     check_hash_command::CheckHashCommand,
@@ -84,14 +85,14 @@ impl Command {
             }
         }
     }
-    pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {
+    pub(super) fn generate_event(&self, mouse_pos: Point, sys_events: &mut VecDeque<SystemEvent>) {
         match self {
-            Command::MouseHold(cmd) => cmd.generate_event(sys_events),
-            Command::MouseRelease(cmd) => cmd.generate_event(sys_events),
-            Command::MouseClick(cmd) => cmd.generate_event(sys_events),
+            Command::MouseHold(cmd) => cmd.generate_event(mouse_pos, sys_events),
+            Command::MouseRelease(cmd) => cmd.generate_event(mouse_pos, sys_events),
+            Command::MouseClick(cmd) => cmd.generate_event(mouse_pos, sys_events),
             Command::MouseMove(cmd) => cmd.generate_event(sys_events),
             Command::MouseDrag(cmd) => cmd.generate_event(sys_events),
-            Command::MouseWheel(cmd) => cmd.generate_event(sys_events),
+            Command::MouseWheel(cmd) => cmd.generate_event(mouse_pos, sys_events),
             Command::Resize(cmd) => cmd.generate_event(sys_events),
             Command::KeyPresed(cmd) => cmd.generate_event(sys_events),
             Command::Paint(_) => {}

@@ -315,7 +315,7 @@ impl Terminal for DebugTerminal {
         }
         // if no events are in the event queue --> check if a command is present
         if let Some(cmd) = self.commands.pop_front() {
-            cmd.generate_event(&mut self.sys_events);
+            cmd.generate_event(self.mouse_pos, &mut self.sys_events);
             // check for paint command
             if !self.ignore_paint_command {
                 if let Some(title) = cmd.get_paint_command_title() {

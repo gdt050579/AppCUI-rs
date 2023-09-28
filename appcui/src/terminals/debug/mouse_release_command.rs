@@ -1,6 +1,10 @@
 use std::collections::VecDeque;
 
-use crate::{input::MouseButton, terminals::{SystemEvent, MouseButtonUpEvent}};
+use crate::{
+    graphics::Point,
+    input::MouseButton,
+    terminals::{MouseButtonUpEvent, SystemEvent, MouseMoveEvent},
+};
 
 use super::command_parser::{CommandParser, ParserError};
 
@@ -10,8 +14,8 @@ pub(super) struct MouseReleaseCommand {
 }
 
 impl MouseReleaseCommand {
-    pub(super) fn new(parser: &CommandParser)->Result<Self,ParserError> {
-        if parser.get_params_count()!=3 {
+    pub(super) fn new(parser: &CommandParser) -> Result<Self, ParserError> {
+        if parser.get_params_count() != 2 {
             return Err(ParserError::new("Mouse.Release command requires 2 parameters"));
         }
         let x = parser.get_i32(0);
@@ -27,7 +31,15 @@ impl MouseReleaseCommand {
             y: y.unwrap(),
         })
     }
-    pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {
+    pub(super) fn generate_event(&self, mouse_pos: Point, sys_events: &mut VecDeque<SystemEvent>) {
+        //GDT: not sure it is completely correct --> the actual state is that a mouse button is clicked
+        if (mouse_pos.x != self.x) || (mouse_pos.y != self.y) {
+            sys_events.push_back(SystemEvent::MouseMove(MouseMoveEvent {
+                x: self.x,
+                y: self.y,
+                button: MouseButton::None,
+            }));
+        }
         sys_events.push_back(SystemEvent::MouseButtonUp(MouseButtonUpEvent {
             x: self.x,
             y: self.y,

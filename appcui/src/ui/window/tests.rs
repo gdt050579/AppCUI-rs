@@ -655,7 +655,7 @@ fn check_window_toolbar_button_events() {
     }
 
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         // expect on bottom: ╚[Run|Stop|Exit]═══════════════════════╝
         Paint('initial state (no button pressed)')
         CheckHash(0xBA8D94B2CED24515)

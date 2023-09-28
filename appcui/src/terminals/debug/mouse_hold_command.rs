@@ -1,8 +1,9 @@
 use std::collections::VecDeque;
 
 use crate::{
+    graphics::Point,
     input::MouseButton,
-    terminals::{MouseButtonDownEvent, SystemEvent},
+    terminals::{MouseButtonDownEvent, MouseMoveEvent, SystemEvent},
 };
 
 use super::command_parser::{CommandParser, ParserError};
@@ -22,17 +23,15 @@ impl MouseHoldCommand {
         let y = parser.get_i32(1);
         let b = parser.get_mouse_button(2);
         if x.is_none() {
-            return Err(ParserError::new(
-                "First parameter for Mouse.Hold command should an integer (x value)",
-            ));
+            return Err(ParserError::new("First parameter for Mouse.Hold command should an integer (x value)"));
         }
         if y.is_none() {
-            return Err(ParserError::new(
-                "Second parameter for Mouse.Hold command should an integer (y value)",
-            ));
+            return Err(ParserError::new("Second parameter for Mouse.Hold command should an integer (y value)"));
         }
         if b.is_none() {
-            return Err(ParserError::new("Third parameter for Mouse.Hold command should an mouse button (left, right or cente)"));
+            return Err(ParserError::new(
+                "Third parameter for Mouse.Hold command should an mouse button (left, right or cente)",
+            ));
         }
         Ok(Self {
             x: x.unwrap(),
@@ -40,7 +39,14 @@ impl MouseHoldCommand {
             button: b.unwrap(),
         })
     }
-    pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {
+    pub(super) fn generate_event(&self, mouse_pos: Point, sys_events: &mut VecDeque<SystemEvent>) {
+        if (mouse_pos.x != self.x) || (mouse_pos.y != self.y) {
+            sys_events.push_back(SystemEvent::MouseMove(MouseMoveEvent {
+                x: self.x,
+                y: self.y,
+                button: MouseButton::None,
+            }));
+        }
         sys_events.push_back(SystemEvent::MouseButtonDown(MouseButtonDownEvent {
             x: self.x,
             y: self.y,
