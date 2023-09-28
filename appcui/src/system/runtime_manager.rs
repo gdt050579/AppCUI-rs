@@ -47,7 +47,7 @@ pub(crate) struct RuntimeManager {
     loop_status: LoopStatus,
     request_focus: Option<Handle<UIElement>>,
     current_focus: Option<Handle<UIElement>>,
-    mouse_over_control: Option<Handle<UIElement>>,
+    mouse_over_control: Handle<UIElement>,
     focus_chain: Vec<Handle<UIElement>>,
     events: Vec<ControlEvent>,
     commandbar_event: Option<CommandBarEvent>,
@@ -76,7 +76,7 @@ impl RuntimeManager {
             recompute_parent_indexes: true,
             request_focus: None,
             current_focus: None,
-            mouse_over_control: None,
+            mouse_over_control: Handle::None,
             opened_menu_handle: Handle::None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
@@ -650,15 +650,15 @@ impl RuntimeManager {
         return EventProcessStatus::Ignored;
     }
 
-    fn coordinates_to_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Option<Handle<UIElement>> {
+    fn coordinates_to_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get(handle) {
             let base = control.get_base_mut();
             if base.can_receive_input() == false {
-                return None;
+                return Handle::None;
             }
             if !base.screen_clip.contains(x, y) {
-                return None;
+                return Handle::None;
             }
             let count = base.children.len();
             if count > 0 {
@@ -668,17 +668,17 @@ impl RuntimeManager {
                     0
                 };
                 for _ in 0..count {
-                    let handle_child = base.children[idx];
-                    if let Some(handle) = self.coordinates_to_control(handle_child, x, y) {
-                        return Some(handle);
+                    let handle_child = self.coordinates_to_control(base.children[idx], x, y);
+                    if !handle_child.is_none() {
+                        return handle_child;
                     }
                     idx = (idx + 1) % count;
                 }
             }
 
-            return Some(handle);
+            return handle;
         }
-        None
+        Handle::None
     }
 
     fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool {
@@ -718,13 +718,13 @@ impl RuntimeManager {
         }
         if processed {
             let controls = unsafe { &mut *self.controls };
-            if let Some(c_handle) = self.mouse_over_control {
-                if let Some(control) = controls.get(c_handle) {
+            if !self.mouse_over_control.is_none() {
+                if let Some(control) = controls.get(self.mouse_over_control) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
                     self.repaint |= response == EventProcessStatus::Processed;
                     control.get_base_mut().update_mouse_over_flag(false);
                 }
-                self.mouse_over_control = None;
+                self.mouse_over_control = Handle::None;
             }
         }
         return processed;
@@ -825,7 +825,8 @@ impl RuntimeManager {
             MouseLockedObject::None => {}
             _ => return,
         }
-        if let Some(handle) = self.coordinates_to_control(self.desktop_handle, event.x, event.y) {
+        let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
+        if !handle.is_none()  {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get(handle) {
                 self.repaint |= control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) == EventProcessStatus::Processed;
@@ -857,16 +858,16 @@ impl RuntimeManager {
         let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
         if handle != self.mouse_over_control {
             self.hide_tooltip();
-            if let Some(c_handle) = self.mouse_over_control {
-                if let Some(control) = controls.get(c_handle) {
+            if !self.mouse_over_control.is_none() {
+                if let Some(control) = controls.get(self.mouse_over_control) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
                     self.repaint |= response == EventProcessStatus::Processed;
                     control.get_base_mut().update_mouse_over_flag(false);
                 }
             }
             self.mouse_over_control = handle;
-            if let Some(c_handle) = self.mouse_over_control {
-                if let Some(control) = controls.get(c_handle) {
+            if !self.mouse_over_control.is_none() {
+                if let Some(control) = controls.get(self.mouse_over_control) {
                     let base = control.get_base_mut();
                     base.update_mouse_over_flag(true);
                     let scr_x = base.screen_clip.left;
@@ -880,7 +881,7 @@ impl RuntimeManager {
                 }
             }
         } else {
-            if let Some(handle) = self.mouse_over_control {
+            if !self.mouse_over_control.is_none() {
                 if let Some(control) = controls.get(handle) {
                     let base = control.get_base();
                     let scr_x = base.screen_clip.left;
@@ -926,7 +927,8 @@ impl RuntimeManager {
             }
         }
         // check for a control
-        if let Some(handle) = self.coordinates_to_control(self.desktop_handle, event.x, event.y) {
+        let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
+        if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get(handle) {
                 self.update_focus(handle);

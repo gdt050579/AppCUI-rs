@@ -485,11 +485,10 @@ impl Window {
         } else {
             self.on_toolbar_item_clicked(self.toolbar.get_current_item_handle());
         }
-        self.toolbar.clear_current_item_handle();
         return EventProcessStatus::Processed;
     }
     fn on_toolbar_item_clicked(&mut self, handle: Handle<UIElement>) -> bool {
-        if let Some(item) = self.toolbar.get_item_mut(handle) {
+        if let Some(item) = self.toolbar.get_item_mut(handle) {            
             match item {
                 ToolBarItem::CloseButton(_) => {
                     self.raise_event(ControlEvent {
