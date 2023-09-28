@@ -313,8 +313,8 @@ fn check_window_toolbar_title_pos_recompute() {
         CheckHash(0xB64C88B7BC1DE1B2)
         Mouse.Click(20,8,left)
         // expect on top: ╔[ABCDEFGHI]══ 12345678 ══[x]╗
-        Paint('after click on button --> title move to right')
-        CheckHash(0x8843D0610D5CA85C)
+        Paint('after click on button --> title move to right (MOUSE is OVER)')
+        CheckHash(0x2524C7C64CAF6368)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
@@ -388,8 +388,9 @@ fn check_window_resize() {
         Paint('smaller')
         CheckHash(0x1DEAE376D9FCDF6)
         Mouse.Release(47,6,left)
-        Paint('after release of handle')
-        CheckHash(0x782EA1AC2D0C894A)
+        Paint('after release of left button')
+        // since mouse is still over the window corner, the window corner should be selected after the left button is released
+        CheckHash(0x24D38D8CA6584432)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::Sizeable);
@@ -491,8 +492,8 @@ fn check_window_on_layout_changed() {
         Mouse.Hold(49,8,left)
         Mouse.Move(51,9)
         Mouse.Release(51,9,left)
-        Paint('Resize to 42x8')
-        CheckHash(0xDC271168ACB62E06)
+        Paint('Resize to 51x9')
+        CheckHash(0xEA3976FE4B283B6E)
         Mouse.Move(28,2)
         Mouse.Hold(28,2,left)
         Mouse.Move(26,1)
@@ -754,19 +755,24 @@ fn check_window_toolbar_checkbox_events() {
     let script = "
         Paint.Enable(false)
         //expect: ╔[  No State]══════════════ Win ══════════════[x]╗
-        Paint('checbox = <No State>')
+        Paint('checbox = <No State>, NOT hovered')
         CheckHash(0x20443FB3C98F025C)
         Mouse.Click(12,2,left)
         //expect: ╔[√ Checked]═══════════════ Win ══════════════[x]╗
-        Paint('checkbox = Checked')
-        CheckHash(0x4BEB73AE53479ABF)
+        Paint('checkbox = Checked (Mouse is OVER)')
+        CheckHash(0x30D2AC3FDE47AB74)
         Mouse.Click(12,2,left)
         //expect: ╔[  Not checked]═════════════ Win ════════════[x]╗
-        Paint('checkbox = Not checked')
-        CheckHash(0x61FF8060257820F7)
+        Paint('checkbox = Not checked (Mouse is OVER)')
+        CheckHash(0x3E2001B74B24EE81)
         Key.Pressed(Alt+N)
         //expect: ╔[√ Checked]═══════════════ Win ══════════════[x]╗
-        Paint('Checkbox is checked again (via Alt+N)')
+        Paint('Checkbox is checked again (via Alt+N) (Mouse is OVER)')
+        CheckHash(0x30D2AC3FDE47AB74)
+        Mouse.Move(0,0)
+        Key.Pressed(Alt+N)
+        //expect: ╔[  Not checked]═════════════ Win ════════════[x]╗
+        Paint('checkbox = Not checked (via Alt+N), NOT hovered')
         CheckHash(0x4BEB73AE53479ABF)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
