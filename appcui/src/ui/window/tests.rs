@@ -783,7 +783,7 @@ fn check_window_toolbar_checkbox_events() {
 #[test]
 fn check_window_toolbar_single_choice() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         //expect on bottom: ╚[Opt 1|Opt 2|Opt 3]══════════════════[Opt C|Opt B|Opt A]╝
         Paint('2 groupse of options (opt 1,2,3) and (opt A,B,C)')
         CheckHash(0x9A4788CCD67E31CC)
@@ -798,9 +798,10 @@ fn check_window_toolbar_single_choice() {
         CheckHash(0x30F92AB21E82C25E)
         Mouse.Click(11,8,left)
         Paint('Opt 2 selected')
-        //CheckHash(0x11C054FAECF9D51F)
+        CheckHash(0x94FB8F617FAAD206)
         Mouse.Click(6,8,left)
         Paint('Opt 1 selected')
+        CheckHash(0x55454B312AB9A1A6)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:58,h:8"), window::Flags::None);
@@ -871,18 +872,19 @@ fn check_window_toolbar_singlechoice_events() {
     }
 
     let script = "
-        //Paint.Enable(false)
-        Paint('original status')
-        //CheckHash(0x4C5631E5B117880C)
+        Paint.Enable(false)
+        // expect: ╚[Opt 1|Opt 2|Opt 3]══════════════════[Opt C|Opt B|Opt A]╝
+        Paint('original status - nothing set up')
+        CheckHash(0x5922FFDD9B712DD4)
         Mouse.Move(5,8)
         Paint('Mouse over Opt 1')
-        //CheckHash(0xFE6ED16B8C8DEC4A)
+        CheckHash(0x29A6F76CEBDB98B6)
         Mouse.Click(5,8,left)
         Paint('Opt 1 selected => Opt A selected as a result')
-        //CheckHash(0x11C054FAECF9D51F)
+        CheckHash(0x8C79B1ADB4DAA4EC)
         Mouse.Click(10,8,left)
         Paint('Opt 2 selected => Opt B selected as a result')
-        //CheckHash(0x11C054FAECF9D51F)
+        CheckHash(0xDD22A81F2349BD90)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
