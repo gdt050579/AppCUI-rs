@@ -890,3 +890,29 @@ fn check_window_toolbar_singlechoice_events() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_window_toolbar_maximize_restore() {
+    let script = "
+        Paint.Enable(false)
+        //expect on top: ╔[↑]═════════════ Title ════════════[x]╗▒
+        Paint('initial state')
+        CheckHash(0x85955D7DF379551A)
+        Mouse.Click(12,1,left)
+        Paint('Now it should be maximized')
+        CheckHash(0x5EFE0CAA67490E16)
+        Mouse.Move(2,0)
+        Paint('Mouse over Minimize Restore button')
+        // expect: ╔[↕]═══════════════════════ Title ══════════════════════[x]╗
+        // expect: ║ ↑                                                        ║
+        // expect:  Press to maximize or restore                              ║
+        CheckHash(0xBAA8B69A66EBB8ED)
+        Mouse.Click(2,0,left)
+        Paint('Now it should be restored')
+        CheckHash(0x85955D7DF379551A)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::Sizeable);
+    a.add_window(w);
+    a.run();
+}

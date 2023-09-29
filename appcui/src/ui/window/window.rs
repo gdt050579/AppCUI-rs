@@ -488,7 +488,7 @@ impl Window {
         return EventProcessStatus::Processed;
     }
     fn on_toolbar_item_clicked(&mut self, handle: Handle<UIElement>) -> bool {
-        if let Some(item) = self.toolbar.get_item_mut(handle) {            
+        if let Some(item) = self.toolbar.get_item_mut(handle) {
             match item {
                 ToolBarItem::CloseButton(_) => {
                     self.raise_event(ControlEvent {
@@ -517,13 +517,20 @@ impl Window {
                     return true; // regardless on what we do in the interface
                 }
                 ToolBarItem::SingleChoice(_) => {
-                    self.toolbar.update_singlechoice_group_id( handle);
+                    self.toolbar.update_singlechoice_group_id(handle);
                     if let Some(me) = self.get_interface() {
                         ToolBarEvents::on_choice_selected(me, handle.cast());
                     }
                     return true; // regardless on what we do in the interface
                 }
-                _ => {}
+                ToolBarItem::Label(_) => return false,
+                ToolBarItem::HotKey(_) => return false,
+                ToolBarItem::Tag(_) => return false,
+                ToolBarItem::MaximizeRestoreButton(_) => {
+                    self.maximize_restore();
+                    self.toolbar.clear_current_item_handle();
+                    return true;
+                }
             }
         }
         false
@@ -679,7 +686,7 @@ impl OnKeyPressed for Window {
                 }
                 _ => {}
             }
-            if (key.modifier & (KeyModifier::Alt|KeyModifier::Ctrl|KeyModifier::Shift)) == KeyModifier::Alt {
+            if (key.modifier & (KeyModifier::Alt | KeyModifier::Ctrl | KeyModifier::Shift)) == KeyModifier::Alt {
                 // hotkey --> check
                 if let Some(handle) = self.toolbar.hotkey_to_item(key) {
                     self.on_toolbar_item_clicked(handle);
