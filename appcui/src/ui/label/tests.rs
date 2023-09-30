@@ -39,7 +39,7 @@ fn check_label_multiline() {
 fn check_label_with_hotkey() {
     let script = "
         Paint.Enable(false)
-        Paint('label with a hot ket')   
+        Paint('label with a hot key')   
         CheckHash(0xD2356769850743E5)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();

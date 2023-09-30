@@ -47,7 +47,7 @@ fn check_button_control() {
     }
 
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Button 2 has focus (default)')   
         CheckHash(0x2D08048B47432DA)   
         Key.Pressed(Tab)
