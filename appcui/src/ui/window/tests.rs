@@ -916,3 +916,31 @@ fn check_window_toolbar_maximize_restore() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_window_move_and_resize_via_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0x85955D7DF379551A)
+        Key.Pressed(Ctrl+Alt+M)
+        Paint('moving state')
+        CheckHash(0xDC4029B447A8AA86)
+        Key.Pressed(Left)
+        Paint('Moved to left')
+        CheckHash(0xF7D7B25914F7C796)
+        Key.Pressed(Down)
+        Paint('Moved down')
+        CheckHash(0x30767E399BB306F6)
+        Key.Pressed(Ctrl+Right,3)
+        Paint('Increase with by 3')
+        CheckHash(0x923F6BE5676D333E)
+        Key.Pressed(Escape)
+        Paint('Exit resize mode')
+        CheckHash(0x477535899976906A)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::Sizeable);
+    a.add_window(w);
+    a.run();
+}
