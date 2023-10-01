@@ -16,7 +16,7 @@ let b2 = button!("&Start,x:10,y:5,w:15");
 
 The caption of a button may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a button with the following caption `&Start` will set up the text of the button to `Start` and will set up character `S` as the hot key for that button (pressing `Alt+S` will be equivalent to pressing that button).
 
-A button supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following name parameters are also accepted:
+A button supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
 | Parameter name | Type | Positional parameter  | Purpose |
 |----------------|------|-----------------------|---------|
