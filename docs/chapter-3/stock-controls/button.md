@@ -4,7 +4,7 @@ Represent a clickable button control:
 
 <img src="img/button.png" width=300/>
 
-To create a button use `Button::new` method 
+To create a button use `Button::new` method (with 3 parameters: a caption, a layout and initialization flags).
 ```rs
 let b = Button::new("&Start", Layout::new("x:10,y:5,w:15"),botton::Flags::None);
 ```
@@ -14,7 +14,7 @@ let b1 = button!("caption=&Start,x:10,y:5,w:15");
 let b2 = button!("&Start,x:10,y:5,w:15");
 ```
 
-The caption of a button may contain the special character `&` that indicates a hot-key. For example, constructing a button with the following caption `&Start` will set up the text of the button to `Start` and will set up character `S` as the hot key for that button (pressing `Alt+S` will be equivalent to pressing that button);
+The caption of a button may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a button with the following caption `&Start` will set up the text of the button to `Start` and will set up character `S` as the hot key for that button (pressing `Alt+S` will be equivalent to pressing that button).
 
 A button supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following name parameters are also accepted:
 
@@ -45,6 +45,15 @@ pub trait ButtonEvents {
 
 ## Key association
 
+The following keys are processed by a Button control if it has focus:
+
+| Key           | Purpose                                                                             |
+|---------------|-------------------------------------------------------------------------------------|
+| `Space`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action of pressing the button with a moud click.          |
+| `Enter`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action of pressing the button with a moud click.          |
+
+Aditionally, `Alt`+**letter or number** will have the same action (even if the Button does not have a focus) if that letter or nunber was set as a hot-key for a button via its caption. For example, creating a value with the following caption: `"My b&utton"` (notice the `&` character before letter `u`) will enable `Alt+U` to be a hot-key associated with this button. Pressing this combination while the button is enabled and part of the current focused window, will change the focus to that button and will emit the `ButtonEvents::on_pressed(...)` event.
+
 ## Example
 
 The following code creates a window with two buttons (`Add` and `Reset`). When `Add` button is pressed a number is incremented and set as the text of the `Add` button. When `Reset` button is being pressed, the counter is reset to 0.
@@ -68,14 +77,14 @@ impl MyWin {
             counter: 0,
         };
         win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Flags::None));
-        win.reset = win.add(Button::new("Reset", Layout::new("x:75%,y:2,w:13,a:c",), button::Flags::None));
+        win.reset = win.add(Button::new("&Reset", Layout::new("x:75%,y:2,w:13,a:c",), button::Flags::None));
         win
     }
-    fn update_add_button(&mut self) {
+    fn update_add_button_caption(&mut self) {
         let h = self.add;
         let new_text = format!("Add ({})",self.counter);
         if let Some(button) = self.get_control_mut(h) {
-            button.set_text(new_text.as_str());
+            button.set_caption(new_text.as_str());
         }
     }
 }
@@ -83,15 +92,18 @@ impl MyWin {
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
         if button_handle == self.add {
-            self.counter+=1;
-            self.update_add_button();
+            // 'Add' button was pressed - lets increment the counter
+            self.counter += 1;
+            self.update_add_button_caption();
             return EventProcessStatus::Processed;
         }
         if button_handle == self.reset {
+            // 'Reset` button was pressed - counter will become 0
             self.counter = 0;
-            self.update_add_button();
+            self.update_add_button_caption();
             return EventProcessStatus::Processed;
         }
+        // unknown handle - we'll ignore this event
         EventProcessStatus::Ignored
     }
 }
