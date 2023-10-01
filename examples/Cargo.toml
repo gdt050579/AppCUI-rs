@@ -9,6 +9,10 @@ appcui = { version = "1.0.0", path = "../appcui" }
 AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"} 
 
 [[example]]
+name = "buttons"
+path = "buttons.rs"
+
+[[example]]
 name = "simple_window"
 path = "simple_window.rs"
 
