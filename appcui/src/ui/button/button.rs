@@ -35,10 +35,13 @@ impl Button {
         but.set_hotkey(hotkey);
         but
     }
-    pub fn set_text(&mut self, caption: &str) {
+    pub fn set_caption(&mut self, caption: &str) {
         self.caption.set_text(caption, true);
         let hotkey = self.caption.get_hotkey();
         self.set_hotkey(hotkey);
+    }
+    pub fn get_caption(&self)->&str {
+        self.caption.get_text()
     }
 }
 impl OnDefaultAction for Button {

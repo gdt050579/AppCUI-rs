@@ -93,7 +93,7 @@ fn check_button_control_2() {
             let h = self.add;
             let new_text = format!("Add ({})",self.counter);
             if let Some(button) = self.get_control_mut(h) {
-                button.set_text(new_text.as_str());
+                button.set_caption(new_text.as_str());
             }
         }
     }
