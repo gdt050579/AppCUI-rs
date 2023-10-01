@@ -1,4 +1,5 @@
 use super::{AbsoluteLayout, LayoutMode};
+use crate::graphics::Size;
 
 pub struct Layout<'a> {
     pub(in super::super) format: &'a str,
@@ -63,14 +64,22 @@ impl ControlLayout {
         self.x = x;
         self.y = y;
     }
-    #[inline]
+    #[inline(always)]
     pub(crate) fn get_width(&self) -> u16 {
         self.width
     }
-    #[inline]
+    #[inline(always)]
     pub(crate) fn get_height(&self) -> u16 {
         self.height
     }
+    #[inline(always)]
+    pub(crate) fn get_size(&self) -> Size {
+        Size{
+            width: self.width as u32,
+            height: self.height as u32,
+        }
+    }
+
     #[inline]
     pub(crate) fn get_x(&self) -> i32 {
         self.x

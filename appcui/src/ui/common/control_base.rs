@@ -4,8 +4,7 @@ use crate::input::*;
 use crate::system::{Handle, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::CommandBarEvents, common::traits::*, common::*,
-    desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::WindowEvents,
-    window::events::ToolBarEvents,
+    desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::ToolBarEvents, window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
@@ -144,13 +143,12 @@ impl ControlBase {
         self.status_flags.contains(StatusFlags::MarkedForFocus)
     }
     #[inline(always)]
-    pub(crate) fn get_focused_control(&self)->Handle<UIElement> {
+    pub(crate) fn get_focused_control(&self) -> Handle<UIElement> {
         if self.focused_child_index.in_range(self.children.len()) {
             return self.children[self.focused_child_index.index()];
         }
         Handle::None
     }
-
 
     #[inline(always)]
     pub(crate) fn is_window_control(&self) -> bool {
@@ -289,6 +287,10 @@ impl ControlBase {
         c
     }
 
+    #[inline(always)]
+    pub(crate) fn get_absolute_rect(&self) -> Rect {
+        Rect::with_point_and_size(self.screen_origin, self.layout.get_size())
+    }
     pub(crate) fn prepare_paint(&self, surface: &mut Surface) -> bool {
         if (self.is_visible() == false) || (self.screen_clip.is_visible() == false) {
             return false; // nothing to draw

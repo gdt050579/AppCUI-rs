@@ -74,6 +74,37 @@ impl Window {
         }
         return (((object.x - origin.x) * (object.x - origin.x)) as u32) + (((object.y - origin.y) * (object.y - origin.y)) as u32);
     }
+    fn compute_closest_distance(ctrl: &ControlBase, rect: Rect, dir: MoveDirection) -> Handle<UIElement> {
+        Handle::None
+    }
+    fn find_closest_control(handle: Handle<UIElement>, dir: MoveDirection) -> Handle<UIElement> {
+        let rm = RuntimeManager::get();
+        let controls = rm.get_controls();
+        let mut h = handle;
+        let mut found = Handle::None;
+        while let Some(ctrl) = controls.get(h) {
+            let base = ctrl.get_base();
+            if base.can_receive_input() == false {
+                break;
+            }
+            // found a possible candidate
+            found = h;
+            if !base.focused_child_index.in_range(base.children.len()) {
+                break;
+            }
+            h = base.children[base.focused_child_index.index()];
+        }
+        if found.is_none() {
+            return Handle::None;
+        }
+        if let Some(ctrl) = controls.get(found) {
+            let rect = ctrl.get_base().get_absolute_rect();
+            if let Some(parent) = controls.get(handle) {
+                return Window::compute_closest_distance(parent.get_base(), rect, dir);
+            }
+        }
+        return Handle::None;
+    }
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
         let mut win = Window {
             base: ControlBase::new(
@@ -697,9 +728,6 @@ impl OnKeyPressed for Window {
         EventProcessStatus::Ignored
     }
     /*
-    Control* tmp;
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-
     if (Members->ResizeMoveMode)
     {
         switch (KeyCode)
@@ -954,40 +982,7 @@ Control* FindClosestControl(Control* parent, MoveDirection dir, const Rect& orig
 }
 Control* FindClosestControl(Control* parent, MoveDirection dir)
 {
-    if (parent == nullptr)
-        return nullptr;
-    CREATE_CONTROL_CONTEXT(parent, Members, nullptr);
-    // first search current control
-    auto child = parent;
-    while (child != nullptr)
-    {
-        auto ctx = ((ControlContext*) (child->Context));
-        if (ctx->CurrentControlIndex >= ctx->ControlsCount)
-            break;
-        auto prnt  = child;
-        child      = ctx->Controls[ctx->CurrentControlIndex];
-        auto flags = ((ControlContext*) child->Context)->Flags;
-        if ((flags & (GATTR_ENABLE | GATTR_VISIBLE)) != (GATTR_ENABLE | GATTR_VISIBLE))
-        {
-            // current control is unreacheable --> move to parent and stop
-            child = prnt;
-            break;
-        }
-    }
-    // if child is nullptr --> then we have an error (return)
-    CHECK(child, nullptr, "");
-    // now we have the current control --> create a center point
-    Rect currenChild = child->GetAbsoluteRectangle();
-    // Log info
-    // LOG_INFO(
-    //      "Current control (X=%d,Y=%d, Size=%dx%d)",
-    //      currenChild.GetLeft(),
-    //      currenChild.GetTop(),
-    //      currenChild.GetWidth(),
-    //      currenChild.GetHeight());
 
-    // now we need to search the first child that is closest to childPos
-    return FindClosestControl(parent, dir, currenChild);
 }
 bool ProcessHotKey(Control* ctrl, Input::Key KeyCode)
 {
