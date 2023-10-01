@@ -1,10 +1,14 @@
 # Button
 
-Represent a clickable button control. To create a button use `Button::new` method or the macro `button!`. 
+Represent a clickable button control:
+
+<img src="img/button.png" width=300/>
+
+To create a button use `Button::new` method 
 ```rs
 let b = Button::new("&Start", Layout::new("x:10,y:5,w:15"),botton::Flags::None);
 ```
-or 
+or the macro `button!`
 ```rs
 let b1 = button!("caption=&Start,x:10,y:5,w:15");
 let b2 = button!("&Start,x:10,y:5,w:15");
@@ -38,6 +42,8 @@ pub trait ButtonEvents {
 ```
 
 ## Methods
+
+## Key association
 
 ## Example
 
