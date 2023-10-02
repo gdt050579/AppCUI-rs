@@ -1,3 +1,5 @@
 # Controls
 
-Is this chapter we will discuss about the stock controls available in `AppCUI` and methods to create aand customize them.
+All controls from AppCUI follow a tree-like organization (a control has a `parent control` and may have multiple `children controls`).
+
+<img src="img/controls_architecture.png" />
