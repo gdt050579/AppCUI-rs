@@ -19,6 +19,7 @@
         - [Docking](chapter-3/layout/docking.md)
         - [Anchors](chapter-3/layout/anchors.md)
     - [Instantiate via Macros](chapter-3/instantiate_via_macros.md)
+    - [Common methods for all Controls](chapter-3/common_methods.md)
     - [Event loop](chapter-3/event_loop.md)
     - [Stock controls](chapter-3/stock_controls.md)
         - [Button](chapter-3/stock-controls/button.md)
