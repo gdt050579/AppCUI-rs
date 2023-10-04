@@ -107,6 +107,10 @@ impl ControlBase {
         if enabled {
             self.status_flags.set(StatusFlags::Enabled);
         } else {
+            // desktop and window controls can not be disabled
+            if self.status_flags.contains_one(StatusFlags::WindowControl | StatusFlags::DesktopControl) {
+                return;
+            }
             self.status_flags.remove(StatusFlags::Enabled);
         }
     }
@@ -115,6 +119,10 @@ impl ControlBase {
         if visible {
             self.status_flags.set(StatusFlags::Visible);
         } else {
+            // desktop controls can not be hidden
+            if self.status_flags.contains_one(StatusFlags::DesktopControl) {
+                return;
+            }
             self.status_flags.remove(StatusFlags::Visible);
         }
     }
@@ -153,10 +161,6 @@ impl ControlBase {
     #[inline(always)]
     pub(crate) fn is_window_control(&self) -> bool {
         self.status_flags.contains(StatusFlags::WindowControl)
-    }
-    #[inline(always)]
-    pub(crate) fn is_desktop_control(&self) -> bool {
-        self.status_flags.contains(StatusFlags::DesktopControl)
     }
 
     pub fn request_focus(&mut self) -> bool {
