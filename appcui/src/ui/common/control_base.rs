@@ -66,6 +66,8 @@ impl ControlBase {
             hotkey: Key::default(),
         }
     }
+    
+    /// Returns the size of a control
     #[inline(always)]
     pub fn get_size(&self) -> Size {
         Size {
@@ -73,11 +75,8 @@ impl ControlBase {
             height: self.layout.get_height() as u32,
         }
     }
-    #[inline(always)]
-    pub fn set_size(&mut self, width: u16, height: u16) {
-        self.layout.layout_resize(width, height);
-        RuntimeManager::get().request_recompute_layout();
-    }
+
+    /// Returns the client size of a control. In most cases it is the same as the size returned the method `.get_size()`. However, if the control has margins (for example in case of a Window) this size will be smaller.
     #[inline(always)]
     pub fn get_client_size(&self) -> Size {
         let horizontal_margins = (self.margins.left as u32) + (self.margins.right as u32);
@@ -90,6 +89,14 @@ impl ControlBase {
         }
     }
 
+    
+    #[inline(always)]
+    pub fn set_size(&mut self, width: u16, height: u16) {
+        self.layout.layout_resize(width, height);
+        RuntimeManager::get().request_recompute_layout();
+    }
+    
+    /// Returns the relatove position (x,y) of the current control to its parent.
     #[inline(always)]
     pub fn get_position(&self) -> Point {
         Point {
@@ -97,6 +104,8 @@ impl ControlBase {
             y: self.layout.get_y() as i32,
         }
     }
+    
+    
     pub fn set_position(&mut self, x: i32, y: i32) {
         self.layout.layout_set_position(x, y);
         RuntimeManager::get().request_recompute_layout();
@@ -114,6 +123,14 @@ impl ControlBase {
             self.status_flags.remove(StatusFlags::Enabled);
         }
     }
+
+    /// Can be used to make a control visible or not. This method has no effect on the Desktop control that will always be visible.
+    /// # Examples
+    /// ```
+    /// use appcui::prelude::*;
+    /// let mut button = button!("'Click me',x:1,y:1,w:15");
+    /// button.set_visible(false); // this will hide the button
+    /// ```
     #[inline(always)]
     pub fn set_visible(&mut self, visible: bool) {
         if visible {
@@ -205,24 +222,33 @@ impl ControlBase {
         return handle.cast();
     }
 
+    /// Returns `true` if the current control is visible or `false` otherwise
     #[inline(always)]
     pub fn is_visible(&self) -> bool {
         self.status_flags.contains(StatusFlags::Visible)
     }
+    
+    /// Returns `true` if the current control is enabled or `false` otherwise
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         self.status_flags.contains(StatusFlags::Enabled)
     }
+    
+    /// Returns `true` if the current control can receive focus or `false` otherwise. If the control is not visible or it is disable this function will return `false`.
     #[inline(always)]
     pub fn can_receive_input(&self) -> bool {
         // all 3 flags must be present for an object to be able to receive input (key or mouse)
         self.status_flags
             .contains(StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput)
     }
+    
+    /// Returns `true` if the current control has the focus or `false` otherwise
     #[inline(always)]
     pub fn has_focus(&self) -> bool {
         self.status_flags.contains(StatusFlags::Focused)
     }
+    
+    /// Returns `true` if the mouse cursor is over the current control or `false` otherwise
     #[inline]
     pub fn is_mouse_over(&self) -> bool {
         self.status_flags.contains(StatusFlags::MouseOver)

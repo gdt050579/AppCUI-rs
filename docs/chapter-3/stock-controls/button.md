@@ -43,14 +43,21 @@ pub trait ButtonEvents {
 
 ## Methods
 
+Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
+
+| Method             | Purpose                                                                             |
+|--------------------|-------------------------------------------------------------------------------------|
+| `set_caption(...)` | Set the new caption for a button. If the string provided contains the special character `&`, this method also sets the hotkey associated with a control. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any).<br>Example: `button.set_caption("&Start")` - this will set the caption of the button cu `Start` and the hotket to `Alt+S` |
+| `get_caption()`    | Returns the current caption of a button |
+
 ## Key association
 
 The following keys are processed by a Button control if it has focus:
 
 | Key           | Purpose                                                                             |
 |---------------|-------------------------------------------------------------------------------------|
-| `Space`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action of pressing the button with a moud click.          |
-| `Enter`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action of pressing the button with a moud click.          |
+| `Space`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action of pressing the button with a moud click.  |
+| `Enter`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action of pressing the button with a moud click.  |
 
 Aditionally, `Alt`+**letter or number** will have the same action (even if the Button does not have a focus) if that letter or nunber was set as a hot-key for a button via its caption. For example, creating a value with the following caption: `"My b&utton"` (notice the `&` character before letter `u`) will enable `Alt+U` to be a hot-key associated with this button. Pressing this combination while the button is enabled and part of the current focused window, will change the focus to that button and will emit the `ButtonEvents::on_pressed(...)` event.
 

@@ -35,11 +35,20 @@ impl Button {
         but.set_hotkey(hotkey);
         but
     }
+    /// Sets the caption of a button. Using `&` in the provided text followed by a letter or a number will automatically assign Alt+**<number|letter>** hotkey to that button.
+    /// # Examples
+    /// ```
+    /// use appcui::prelude::*;
+    /// let mut button = button!("one,x:1,y:1,w:15"); // the caption is `one`
+    /// button.set_caption("&two");   // now the caption is `two` and Alt+T is a hotkey
+    /// button.set_caption("three");  // caption is `three`, and no hot-key
+    /// ```
     pub fn set_caption(&mut self, caption: &str) {
         self.caption.set_text(caption, true);
         let hotkey = self.caption.get_hotkey();
         self.set_hotkey(hotkey);
     }
+    /// Returns the button caption.
     pub fn get_caption(&self)->&str {
         self.caption.get_text()
     }

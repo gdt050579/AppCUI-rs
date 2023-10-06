@@ -21,3 +21,11 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 |-----------------------|------------------------------------------------------------------------------|
 | `get_size()`          | Returns the size (**width**x**height**) for the current control              |
 | `get_client_size()`   | Returns the client size (the size minus the margins) for the current control |
+
+
+## Hotkey related methods
+
+| Method                | Purpose                                                                      |
+|-----------------------|------------------------------------------------------------------------------|
+| `get_hotkey()`        | Returns the hotkey associated witha control or `Key::None` otherwise         |
+| `set_hotkey()`        | Sets the hotkey for a control. To clear the hotkey call this function like this: `.set_hotkey(Key::None)` |
