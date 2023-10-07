@@ -1,6 +1,5 @@
-use crate::ui::button::{events::EventData, Flags};
 use crate::prelude::*;
-
+use crate::ui::button::{events::EventData, Flags};
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Button {
@@ -17,10 +16,7 @@ impl Button {
     /// ```
     pub fn new(caption: &str, layout: Layout, flags: Flags) -> Self {
         let mut but = Button {
-            base: ControlBase::new(
-                layout,
-                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
-            ),
+            base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             caption: Caption::new(caption, true),
             flags,
             pressed: false,
@@ -49,7 +45,7 @@ impl Button {
         self.set_hotkey(hotkey);
     }
     /// Returns the button caption.
-    pub fn get_caption(&self)->&str {
+    pub fn get_caption(&self) -> &str {
         self.caption.get_text()
     }
 }
@@ -82,10 +78,11 @@ impl OnPaint for Button {
             _ if self.is_mouse_over() => theme.button.text.hovered,
             _ => theme.button.text.normal,
         };
-        let w = self.get_size().width;
-        let mut format =
-            TextFormat::single_line((w / 2) as i32, 0, col_text, TextAlignament::Center);
+        let flat = self.flags.contains(Flags::Flat);
+        let w = if flat { self.get_size().width } else { self.get_size().width - 1 };
+        let mut format = TextFormat::single_line((w / 2) as i32, 0, col_text, TextAlignament::Center);
         format.chars_count = Some(self.caption.get_chars_count() as u16);
+        format.width = Some(w as u16);
         if self.caption.has_hotkey() {
             format.hotkey_attr = Some(match () {
                 _ if !self.is_enabled() => theme.button.hotkey.inactive,
@@ -95,37 +92,20 @@ impl OnPaint for Button {
             });
             format.hotkey_pos = self.caption.get_hotkey_pos();
         }
-        if self.flags.contains(Flags::Flat) {
+        if flat {
             surface.clear(Character::with_attributes(' ', col_text));
-            format.width = Some(w as u16);
             surface.write_text(self.caption.get_text(), &format);
         } else {
-            format.width = Some((w - 1) as u16);
             if self.pressed {
-                surface.fill_horizontal_line_with_size(
-                    1,
-                    0,
-                    w - 1,
-                    Character::with_attributes(' ', col_text),
-                );
+                surface.fill_horizontal_line_with_size(1, 0, w, Character::with_attributes(' ', col_text));
                 format.x += 1;
                 surface.write_text(self.caption.get_text(), &format);
             } else {
-                surface.fill_horizontal_line_with_size(
-                    0,
-                    0,
-                    w - 1,
-                    Character::with_attributes(' ', col_text),
-                );
+                surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
                 surface.write_text(self.caption.get_text(), &format);
-                surface.fill_horizontal_line_with_size(
-                    1,
-                    1,
-                    w - 1,
-                    Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow),
-                );
+                surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
                 surface.write_char(
-                    (w as i32) - 1,
+                    (w as i32),
                     0,
                     Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow),
                 );
