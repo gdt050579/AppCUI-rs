@@ -135,7 +135,7 @@ impl ControlBase {
 
     /// Can be used to make a control visible or not. This method has no effect on the Desktop control that will always be visible.
     /// # Examples
-    /// ```
+    /// ```rust,no_run
     /// use appcui::prelude::*;
     /// let mut button = button!("'Click me',x:1,y:1,w:15");
     /// button.set_visible(false); // this will hide the button

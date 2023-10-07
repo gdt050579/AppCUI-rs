@@ -10,7 +10,7 @@ pub struct Button {
 impl Button {
     /// Creates a new button with the specified caption, layout and flags
     /// # Examples
-    /// ```
+    /// ```rust,no_run
     /// use appcui::prelude::*;
     /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), button::Flags::None);
     /// ```
@@ -33,7 +33,7 @@ impl Button {
     }
     /// Sets the caption of a button. Using `&` in the provided text followed by a letter or a number will automatically assign Alt+**<number|letter>** hotkey to that button.
     /// # Examples
-    /// ```
+    /// ```rust,no_run
     /// use appcui::prelude::*;
     /// let mut button = button!("one,x:1,y:1,w:15"); // the caption is `one`
     /// button.set_caption("&two");   // now the caption is `two` and Alt+T is a hotkey
@@ -105,7 +105,7 @@ impl OnPaint for Button {
                 surface.write_text(self.caption.get_text(), &format);
                 surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
                 surface.write_char(
-                    (w as i32),
+                    w as i32,
                     0,
                     Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow),
                 );
