@@ -79,10 +79,10 @@ impl Window {
     }
     fn find_closest_control(handle: Handle<UIElement>, dir: MoveDirection) -> Handle<UIElement> {
         let rm = RuntimeManager::get();
-        let controls = rm.get_controls();
+        let controls = rm.get_controls_mut();
         let mut h = handle;
         let mut found = Handle::None;
-        while let Some(ctrl) = controls.get(h) {
+        while let Some(ctrl) = controls.get_mut(h) {
             let base = ctrl.get_base();
             if base.can_receive_input() == false {
                 break;
@@ -97,9 +97,9 @@ impl Window {
         if found.is_none() {
             return Handle::None;
         }
-        if let Some(ctrl) = controls.get(found) {
+        if let Some(ctrl) = controls.get_mut(found) {
             let rect = ctrl.get_base().get_absolute_rect();
-            if let Some(parent) = controls.get(handle) {
+            if let Some(parent) = controls.get_mut(handle) {
                 return Window::compute_closest_distance(parent.get_base(), rect, dir);
             }
         }
@@ -288,8 +288,8 @@ impl Window {
     }
 
     fn find_next_control(handle: Handle<UIElement>, forward: bool, start_from_current: bool) -> Option<Handle<UIElement>> {
-        let rm = RuntimeManager::get();
-        if let Some(control) = rm.get_controls().get(handle) {
+        let controls = RuntimeManager::get().get_controls();
+        if let Some(control) = controls.get(handle) {
             let base = control.get_base();
             // if I have any child --> check to see if I can move there
             if base.children.len() > 0 {
@@ -307,7 +307,7 @@ impl Window {
                     }
                     if idx.in_range(count) {
                         let child_handle = base.children[idx.index()];
-                        if let Some(child) = rm.get_controls().get(child_handle) {
+                        if let Some(child) = controls.get(child_handle) {
                             if child.get_base().can_receive_input() {
                                 return Window::find_next_control(child_handle, forward, false);
                             }
@@ -415,6 +415,10 @@ impl Window {
 
 
                  */
+    }
+
+    fn hotkey_to_handle(parent: Handle<UIElement>, hotkey: Key)->Handle<UIElement> {
+        Handle::None
     }
 
     fn update_positions(&mut self, size: Size) {
@@ -567,7 +571,7 @@ impl Window {
         false
     }
     fn get_interface(&mut self) -> Option<&mut dyn Control> {
-        if let Some(control) = RuntimeManager::get().get_controls().get(self.handle.cast()) {
+        if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
             return Some(control.get_control_mut());
         }
         None

@@ -11,7 +11,7 @@ impl ControlHandleManager {
             controls: Vec::with_capacity(64),
         }
     }
-    pub(crate) fn get(&mut self, handle: Handle<UIElement>) -> Option<&mut ControlManager> {
+    pub(crate) fn get_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut ControlManager> {
         let idx = handle.get_index();
         if idx < self.controls.len() {
             let c = self.controls[idx].as_mut();
@@ -23,6 +23,21 @@ impl ControlHandleManager {
         }
         None
     }
+    pub(crate) fn get(&self, handle: Handle<UIElement>) -> Option<&ControlManager> {
+        let idx = handle.get_index();
+        if idx < self.controls.len() {
+            let c = self.controls[idx].as_ref();
+            if c.is_some() {
+                if c.as_ref().unwrap().get_base().handle == handle {
+                    return c;
+                }
+            }
+        }
+        None
+    }
+
+
+
     #[inline(always)]
     pub(crate) fn get_desktop(&mut self) -> &mut ControlManager {
         return self.controls[0].as_mut().unwrap();
@@ -33,7 +48,7 @@ impl ControlHandleManager {
         manager.get_base_mut().handle = handle;
         // set the handle for all children
         for child in manager.get_base().children.iter() {
-            if let Some(control) = self.get(*child) {
+            if let Some(control) = self.get_mut(*child) {
                 control.get_base_mut().parent = handle;
             }
         }

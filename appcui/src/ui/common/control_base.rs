@@ -220,7 +220,7 @@ impl ControlBase {
         // have the same event processor
         base.event_processor = self.event_processor;
         let rm = RuntimeManager::get();
-        let handle = rm.get_controls().add(c);
+        let handle = rm.get_controls_mut().add(c);
         self.children.push(handle);
         if focusable {
             rm.request_focus_for_control(handle);

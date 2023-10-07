@@ -161,8 +161,8 @@ impl ItemBase {
         self.window = handle;
     }
     pub(crate) fn request_recompute_layout(&mut self) {
-        let controls = RuntimeManager::get().get_controls();
-        if let Some(win) = controls.get(self.window) {
+        let controls = RuntimeManager::get().get_controls_mut();
+        if let Some(win) = controls.get_mut(self.window) {
             let size = win.get_base().get_size();
             win.get_control_mut().on_resize(size, size);
         }

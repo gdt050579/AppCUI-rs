@@ -102,7 +102,7 @@ impl RuntimeManager {
         desktop.get_base_mut().update_focus_flag(true);
         manager.desktop_handle = controls.add(desktop);
         manager.current_focus = Some(manager.desktop_handle);
-        controls.get(manager.desktop_handle).unwrap().get_base_mut().handle = manager.desktop_handle;
+        controls.get_mut(manager.desktop_handle).unwrap().get_base_mut().handle = manager.desktop_handle;
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
@@ -167,7 +167,7 @@ impl RuntimeManager {
     }
     fn set_event_processors(&mut self, control_handle: Handle<UIElement>, event_processor: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get(control_handle) {
+        if let Some(control) = controls.get_mut(control_handle) {
             let base = control.get_base_mut();
             base.event_processor = event_processor;
             for child in &base.children {
@@ -186,7 +186,7 @@ impl RuntimeManager {
         // this window current handle
         self.set_event_processors(handle.cast(), handle.cast());
         // all good --> the window has been registered
-        if let Some(win) = controls.get(handle.cast()) {
+        if let Some(win) = controls.get_mut(handle.cast()) {
             win.get_control_mut().on_registered();
         }
         return handle;
@@ -196,7 +196,7 @@ impl RuntimeManager {
         T: Control + 'static,
     {
         let controls = unsafe { &mut *self.controls };
-        if let Some(cm) = controls.get(handle.cast()) {
+        if let Some(cm) = controls.get_mut(handle.cast()) {
             return Some(cm.get_mut::<T>());
         }
         None
@@ -206,14 +206,18 @@ impl RuntimeManager {
         T: Control + 'static,
     {
         let controls = unsafe { &mut *self.controls };
-        if let Some(cm) = controls.get(handle.cast()) {
+        if let Some(cm) = controls.get_mut(handle.cast()) {
             return Some(cm.get::<T>());
         }
         None
     }
     #[inline(always)]
-    pub(crate) fn get_controls(&self) -> &mut ControlHandleManager {
+    pub(crate) fn get_controls_mut(&mut self) -> &mut ControlHandleManager {
         unsafe { &mut *self.controls }
+    }
+    #[inline(always)]
+    pub(crate) fn get_controls(&self) -> &ControlHandleManager {
+        unsafe { &*self.controls }
     }
     #[inline(always)]
     pub(crate) fn get_menus(&self) -> &mut MenuHandleManager {
@@ -248,7 +252,7 @@ impl RuntimeManager {
     pub(crate) fn process_desktop_on_start(&mut self) {
         self.desktop_os_start_called = true;
         let controls = unsafe { &mut *self.controls };
-        if let Some(desktop) = controls.get(self.desktop_handle.cast()) {
+        if let Some(desktop) = controls.get_mut(self.desktop_handle.cast()) {
             DesktopEvents::on_start(desktop.get_control_mut());
         }
     }
@@ -320,13 +324,13 @@ impl RuntimeManager {
     fn get_focused_control(&self) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
         let mut parent = self.desktop_handle;
-        let mut ctrl = controls.get(parent).unwrap();
+        let mut ctrl = controls.get_mut(parent).unwrap();
 
         loop {
             let base = ctrl.get_base();
             if base.focused_child_index.in_range(base.children.len()) {
                 let child_handle = base.children[base.focused_child_index.index()];
-                if let Some(child) = controls.get(child_handle) {
+                if let Some(child) = controls.get_mut(child_handle) {
                     if child.get_base().can_receive_input() {
                         parent = child_handle;
                         ctrl = child;
@@ -345,7 +349,7 @@ impl RuntimeManager {
     fn process_events_queue(&mut self) {
         let controls = unsafe { &mut *self.controls };
         while let Some(evnt) = self.events.pop() {
-            if let Some(receiver) = controls.get(evnt.receiver) {
+            if let Some(receiver) = controls.get_mut(evnt.receiver) {
                 let result = evnt.invoke(receiver.get_control_mut());
                 self.repaint = result == EventProcessStatus::Processed;
             }
@@ -354,7 +358,7 @@ impl RuntimeManager {
 
     fn process_commandbar_event(&mut self, event: CommandBarEvent) {
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get(event.control_receiver_handle) {
+        if let Some(control) = controls.get_mut(event.control_receiver_handle) {
             CommandBarEvents::on_event(control.get_control_mut(), event.command_id);
         }
         self.commandbar_event = None;
@@ -379,7 +383,7 @@ impl RuntimeManager {
             cmdbar.clear();
             // start from the focused control and call on_update_commandbar for each control
             let mut h = focused_handle;
-            while let Some(control) = controls.get(h) {
+            while let Some(control) = controls.get_mut(h) {
                 cmdbar.set_receiver_control_handle(h);
                 control.get_control_mut().on_update_commandbar(cmdbar);
                 h = control.get_base().parent;
@@ -394,7 +398,7 @@ impl RuntimeManager {
             menubar.clear();
             // start from the focused control and call on_update_menubar for each control
             let mut h = focused_handle;
-            while let Some(control) = controls.get(h) {
+            while let Some(control) = controls.get_mut(h) {
                 menubar.set_receiver_control_handle(h);
                 control.get_control_mut().on_update_menubar(menubar);
                 h = control.get_base().parent;
@@ -411,7 +415,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         let mut result = Handle::None;
         let mut handle = handle;
-        while let Some(c) = controls.get(handle) {
+        while let Some(c) = controls.get_mut(handle) {
             let base = c.get_base();
             if base.can_receive_input() == false {
                 break;
@@ -433,7 +437,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         let mut h = handle;
         let invalid_chain_for_focus = loop {
-            if let Some(control) = controls.get(h) {
+            if let Some(control) = controls.get_mut(h) {
                 self.focus_chain.push(h);
                 if !control.get_base_mut().mark_to_receive_focus() {
                     break true;
@@ -455,7 +459,7 @@ impl RuntimeManager {
         // 2. if there is already an object with focus --> call on_focus_lost
         if let Some(focused) = self.current_focus {
             let mut h = focused;
-            while let Some(control) = controls.get(h) {
+            while let Some(control) = controls.get_mut(h) {
                 if control.get_base().is_marked_to_receive_focus() {
                     break;
                 }
@@ -475,7 +479,7 @@ impl RuntimeManager {
         let mut parent_handle = None;
         while let Some(handle) = self.focus_chain.pop() {
             //println!("Pop handle: {},{}",handle.get_id(),handle.get_index());
-            let child = controls.get(handle);
+            let child = controls.get_mut(handle);
             if let Some(control) = child {
                 let base = control.get_base_mut();
                 let parent_index = base.parent_index;
@@ -491,7 +495,7 @@ impl RuntimeManager {
                 }
                 if parent_index.is_valid() {
                     if let Some(p_handle) = parent_handle {
-                        if let Some(p) = controls.get(p_handle) {
+                        if let Some(p) = controls.get_mut(p_handle) {
                             let base = p.get_base_mut();
                             base.focused_child_index = parent_index;
                         }
@@ -511,11 +515,11 @@ impl RuntimeManager {
 
     fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get(handle) {
+        if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
             for i in 0..base.children.len() {
                 let child_handle = base.children[i];
-                if let Some(child) = unsafe { (&mut *self.controls).get(child_handle) } {
+                if let Some(child) = unsafe { (&mut *self.controls).get_mut(child_handle) } {
                     child.get_base_mut().parent_index = VectorIndex::with_value(i);
                     self.update_parent_indexes(child_handle);
                 }
@@ -525,7 +529,7 @@ impl RuntimeManager {
 
     pub(crate) fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout) {
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get(handle) {
+        if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
             let window_control = base.is_window_control();
             let old_size = base.get_size();
@@ -576,7 +580,7 @@ impl RuntimeManager {
     }
     fn paint_control(&mut self, handle: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get(handle) {
+        if let Some(control) = controls.get_mut(handle) {
             if control.get_base().prepare_paint(&mut self.surface) {
                 // paint is possible
                 control.get_control().on_paint(&mut self.surface, &self.theme);
@@ -632,7 +636,7 @@ impl RuntimeManager {
     }
     pub(crate) fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus {
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get(handle) {
+        if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
             if base.can_receive_input() == false {
                 return EventProcessStatus::Ignored;
@@ -652,7 +656,7 @@ impl RuntimeManager {
 
     fn coordinates_to_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get(handle) {
+        if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
             if base.can_receive_input() == false {
                 return Handle::None;
@@ -719,7 +723,7 @@ impl RuntimeManager {
         if processed {
             let controls = unsafe { &mut *self.controls };
             if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get(self.mouse_over_control) {
+                if let Some(control) = controls.get_mut(self.mouse_over_control) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
                     self.repaint |= response == EventProcessStatus::Processed;
                     control.get_base_mut().update_mouse_over_flag(false);
@@ -810,7 +814,7 @@ impl RuntimeManager {
             menubar.set_position(0, 0, new_size.width);
         }
         // resize the desktop as well
-        let desktop = self.get_controls().get_desktop();
+        let desktop = self.get_controls_mut().get_desktop();
         let original_size = desktop.get_base().get_size();
         desktop.get_base_mut().set_size(new_size.width as u16, new_size.height as u16);
         desktop.get_control_mut().on_resize(original_size, new_size);
@@ -828,7 +832,7 @@ impl RuntimeManager {
         let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
         if !handle.is_none()  {
             let controls = unsafe { &mut *self.controls };
-            if let Some(control) = controls.get(handle) {
+            if let Some(control) = controls.get_mut(handle) {
                 self.repaint |= control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) == EventProcessStatus::Processed;
             }
         }
@@ -836,7 +840,7 @@ impl RuntimeManager {
     fn process_mousedrag(&mut self, handle: Handle<UIElement>, event: MouseMoveEvent) {
         self.hide_tooltip();
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get(handle) {
+        if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
             let scr_x = base.screen_clip.left;
             let scr_y = base.screen_clip.top;
@@ -859,7 +863,7 @@ impl RuntimeManager {
         if handle != self.mouse_over_control {
             self.hide_tooltip();
             if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get(self.mouse_over_control) {
+                if let Some(control) = controls.get_mut(self.mouse_over_control) {
                     let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
                     self.repaint |= response == EventProcessStatus::Processed;
                     control.get_base_mut().update_mouse_over_flag(false);
@@ -867,7 +871,7 @@ impl RuntimeManager {
             }
             self.mouse_over_control = handle;
             if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get(self.mouse_over_control) {
+                if let Some(control) = controls.get_mut(self.mouse_over_control) {
                     let base = control.get_base_mut();
                     base.update_mouse_over_flag(true);
                     let scr_x = base.screen_clip.left;
@@ -882,7 +886,7 @@ impl RuntimeManager {
             }
         } else {
             if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get(handle) {
+                if let Some(control) = controls.get_mut(handle) {
                     let base = control.get_base();
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
@@ -930,7 +934,7 @@ impl RuntimeManager {
         let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
         if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
-            if let Some(control) = controls.get(handle) {
+            if let Some(control) = controls.get_mut(handle) {
                 self.update_focus(handle);
                 let base = control.get_base();
                 let scr_x = base.screen_clip.left;
@@ -974,7 +978,7 @@ impl RuntimeManager {
             MouseLockedObject::None => {}
             MouseLockedObject::Control(handle) => {
                 let controls = unsafe { &mut *self.controls };
-                if let Some(control) = controls.get(handle) {
+                if let Some(control) = controls.get_mut(handle) {
                     let base = control.get_base();
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
