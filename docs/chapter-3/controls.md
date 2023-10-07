@@ -14,6 +14,7 @@ Every control has a set of common characteristics:
 1. `Layout` (how it is position relative to its parent). The only exception in this case is the Desktop control that always takes the entire terminal space. More details on [Layout](layout.md) section.
 2. `Visibility` (a control can be visible or not). The only exception is the Desktop control that will always be visible. A hidden control does not receive any input events and it is not drawn.
 3. `Enabled` (a control can be enabled or not). The only exception are the Desktop and Window controls that are always enabled. If a control is not enabled, it will not receive any input events (key pressed or mouse events) but it will still be drawn.
+4. `HotKey` (a combination of keys usually at the following form: `Alt`+<Letter|Number> that will automatically change the focus to the current control and execute a default action for it - for example for a checkbox, pressing that combination will check or uncheck the checkbox)
 
-Besides this, a set of commonly available methods are available for all controls. These methods allow changing / accessing some attributes like visibility, loyout, etc. More deails can be found on [Common methods for all Controls](common_methods.md) section.
+Besides this, a set of commonly available methods are available for all controls. These methods allow changing / accessing some attributes like visibility, loyout, hotkeys, etc. More deails can be found on [Common methods for all Controls](common_methods.md) section.
 
