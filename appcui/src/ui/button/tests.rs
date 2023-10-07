@@ -86,12 +86,12 @@ fn check_button_control_2() {
                 counter: 0,
             };
             win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Flags::None));
-            win.reset = win.add(Button::new("Reset", Layout::new("x:75%,y:2,w:13,a:c",), button::Flags::None));
+            win.reset = win.add(Button::new("Reset", Layout::new("x:75%,y:2,w:13,a:c"), button::Flags::None));
             win
         }
         fn update_add_button(&mut self) {
             let h = self.add;
-            let new_text = format!("Add ({})",self.counter);
+            let new_text = format!("Add ({})", self.counter);
             if let Some(button) = self.get_control_mut(h) {
                 button.set_caption(new_text.as_str());
             }
@@ -101,7 +101,7 @@ fn check_button_control_2() {
     impl ButtonEvents for MyWin {
         fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
             if button_handle == self.add {
-                self.counter+=1;
+                self.counter += 1;
                 self.update_add_button();
                 return EventProcessStatus::Processed;
             }
@@ -141,12 +141,81 @@ fn check_button_control_with_macro() {
         CheckHash(0xC656986DBDA863BA)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = Window::new("Macro Test",Layout::new("d:c,w:40,h:10"),window::Flags::None);
+    let mut w = Window::new("Macro Test", Layout::new("d:c,w:40,h:10"), window::Flags::None);
     w.add(button!("Start,x:2,y:3,w:15"));
     w.add(button!("Disabled,x:20,y:3,w:15,enable:false"));
     w.add(button!("caption:'Not Visible',x:0,y:0,w:100%,visible:false"));
     w.add(button!("Flat,x:2,y:5,w:15,flags:flat"));
     w.add(button!("text:'Flat and disabled',x:2,y:7,w:30,a:tl,flags:[flat],enable:false"));
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_button_control_hotkey() {
+    #[Window(events = ButtonEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        but: Handle<Button>,
+        state: i32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new("d:c,w:40,h:7"), window::Flags::None),
+                info: Handle::None,
+                but: Handle::None,
+                state: 0,
+            };
+            me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:35")));
+            me.but = me.add(button!("&Press,x:2,y:2,w:20"));
+            me
+        }
+        fn set_info(&mut self, txt: &str) {
+            let h_label = self.info;
+            if let Some(label) = self.get_control_mut(h_label) {
+                label.set_text(txt);
+            }
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
+            if self.but == button_handle {
+                self.state += 1;
+                match self.state {
+                    1 => self.set_info("State: 1"),
+                    2 => {
+                        self.set_info("State: 2");
+                        self.get_control_mut(button_handle).unwrap().set_caption("Another &caption");
+                    }
+                    3 => {
+                        self.set_info("State: 3");
+                        self.get_control_mut(button_handle).unwrap().set_hotkey(Key::None);
+                    }
+                    _ => self.set_info("<none>"),
+                }
+                return EventProcessStatus::Processed;
+            }
+            return EventProcessStatus::Ignored;
+        }
+    }
+
+    let script = "
+        // Paint.Enable(false)
+        Paint('Initial state (button has focus)')   
+        CheckHash(0xC0D3A46EDB6311E4)   
+        Key.Pressed(Enter)
+        Paint('State 1') 
+        CheckHash(0x99D61A6329C6954C) 
+        Key.Pressed(Space)
+        Paint('State 2 (button now is Another caption)') 
+        CheckHash(0x6DD45A77377FB105) 
+        Key.Pressed(Alt+C)
+        Paint('State 3 (now the button has no hotkey)') 
+        // CheckHash(0x6DD45A77377FB105)
+        // first we must implement ProcessHotKey in Window (todo!)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
