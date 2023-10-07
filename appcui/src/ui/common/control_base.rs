@@ -90,8 +90,13 @@ impl ControlBase {
     }
 
     
+    /// Sets the new size for a control (to a specified size given by parameters `width` and `height`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by controls `x` and `y` coordonates) and the new provided size. Any dock or alignament properties will be removed.
+    /// This method has no effect on a Desktop control.
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
+        if self.status_flags.contains(StatusFlags::DesktopControl) {
+            return;
+        }
         self.layout.layout_resize(width, height);
         RuntimeManager::get().request_recompute_layout();
     }
@@ -105,8 +110,12 @@ impl ControlBase {
         }
     }
     
-    
+    /// Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignament properties will be removed.
+    /// This method has no effect on a Desktop control.
     pub fn set_position(&mut self, x: i32, y: i32) {
+        if self.status_flags.contains(StatusFlags::DesktopControl) {
+            return;
+        }
         self.layout.layout_set_position(x, y);
         RuntimeManager::get().request_recompute_layout();
     }
@@ -261,9 +270,15 @@ impl ControlBase {
             self.status_flags.remove(StatusFlags::MouseOver);
         }
     }
+    
+    /// Sets the bounds (minim and maxim sized allowed for a control). If the size of a control is outside its bounds, its size will be adjusted automatically. This method has no effect on a Desktop control.
     #[inline]
     pub fn set_size_bounds(&mut self, min_width: u16, min_height: u16, max_width: u16, max_height: u16) {
+        if self.status_flags.contains(StatusFlags::DesktopControl) {
+            return;
+        }
         self.layout.set_size_bounds(min_width, min_height, max_width, max_height);
+        RuntimeManager::get().request_recompute_layout();
     }
 
     #[inline]
@@ -273,10 +288,14 @@ impl ControlBase {
         self.margins.bottom = bottom;
         self.margins.right = right;
     }
+    
+    /// Sets the hot-key associated with a control. Use `Key::None` to clear an existing hotkey
     #[inline]
     pub fn set_hotkey(&mut self, hotkey: Key) {
         self.hotkey = hotkey
     }
+    
+    /// Returns the hotkey associated to a control or Key::None otherwise.
     #[inline]
     pub fn get_hotkey(&self) -> Key {
         self.hotkey
