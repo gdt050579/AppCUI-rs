@@ -66,7 +66,7 @@ impl ControlBase {
             hotkey: Key::default(),
         }
     }
-    
+
     /// Returns the size of a control
     #[inline(always)]
     pub fn get_size(&self) -> Size {
@@ -89,7 +89,6 @@ impl ControlBase {
         }
     }
 
-    
     /// Sets the new size for a control (to a specified size given by parameters `width` and `height`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by controls `x` and `y` coordonates) and the new provided size. Any dock or alignament properties will be removed.
     /// This method has no effect on a Desktop control.
     #[inline(always)]
@@ -100,7 +99,7 @@ impl ControlBase {
         self.layout.layout_resize(width, height);
         RuntimeManager::get().request_recompute_layout();
     }
-    
+
     /// Returns the relatove position (x,y) of the current control to its parent.
     #[inline(always)]
     pub fn get_position(&self) -> Point {
@@ -109,7 +108,7 @@ impl ControlBase {
             y: self.layout.get_y() as i32,
         }
     }
-    
+
     /// Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignament properties will be removed.
     /// This method has no effect on a Desktop control.
     pub fn set_position(&mut self, x: i32, y: i32) {
@@ -188,6 +187,10 @@ impl ControlBase {
     pub(crate) fn is_window_control(&self) -> bool {
         self.status_flags.contains(StatusFlags::WindowControl)
     }
+    #[inline(always)]
+    pub(crate) fn is_desktop_control(&self) -> bool {
+        self.status_flags.contains(StatusFlags::DesktopControl)
+    }
 
     pub fn request_focus(&mut self) -> bool {
         if self.has_focus() || !self.can_receive_input() {
@@ -236,13 +239,13 @@ impl ControlBase {
     pub fn is_visible(&self) -> bool {
         self.status_flags.contains(StatusFlags::Visible)
     }
-    
+
     /// Returns `true` if the current control is enabled or `false` otherwise
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
         self.status_flags.contains(StatusFlags::Enabled)
     }
-    
+
     /// Returns `true` if the current control can receive focus or `false` otherwise. If the control is not visible or it is disable this function will return `false`.
     #[inline(always)]
     pub fn can_receive_input(&self) -> bool {
@@ -250,13 +253,13 @@ impl ControlBase {
         self.status_flags
             .contains(StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput)
     }
-    
+
     /// Returns `true` if the current control has the focus or `false` otherwise
     #[inline(always)]
     pub fn has_focus(&self) -> bool {
         self.status_flags.contains(StatusFlags::Focused)
     }
-    
+
     /// Returns `true` if the mouse cursor is over the current control or `false` otherwise
     #[inline]
     pub fn is_mouse_over(&self) -> bool {
@@ -270,7 +273,7 @@ impl ControlBase {
             self.status_flags.remove(StatusFlags::MouseOver);
         }
     }
-    
+
     /// Sets the bounds (minim and maxim sized allowed for a control). If the size of a control is outside its bounds, its size will be adjusted automatically. This method has no effect on a Desktop control.
     #[inline]
     pub fn set_size_bounds(&mut self, min_width: u16, min_height: u16, max_width: u16, max_height: u16) {
@@ -288,13 +291,13 @@ impl ControlBase {
         self.margins.bottom = bottom;
         self.margins.right = right;
     }
-    
+
     /// Sets the hot-key associated with a control. Use `Key::None` to clear an existing hotkey
     #[inline]
     pub fn set_hotkey(&mut self, hotkey: Key) {
         self.hotkey = hotkey
     }
-    
+
     /// Returns the hotkey associated to a control or Key::None otherwise.
     #[inline]
     pub fn get_hotkey(&self) -> Key {

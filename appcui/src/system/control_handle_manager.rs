@@ -1,7 +1,46 @@
-use crate::ui::common::{ControlManager, UIElement};
+use crate::{
+    ui::common::{ControlManager, UIElement},
+    utils::HandleManager,
+};
 
 use super::Handle;
 
+pub(crate) struct ControlHandleManager {
+    manager: HandleManager<ControlManager>,
+}
+impl ControlHandleManager {
+    pub(crate) fn new() -> Self {
+        Self {
+            manager: HandleManager::new(64),
+        }
+    }
+    #[inline(always)]
+    pub(crate) fn get_mut(&mut self, menu_handle: Handle<UIElement>) -> Option<&mut ControlManager> {
+        self.manager.get_mut(menu_handle.cast())
+    }
+    #[inline(always)]
+    pub(crate) fn get(&self, menu_handle: Handle<UIElement>) -> Option<&ControlManager> {
+        self.manager.get(menu_handle.cast())
+    }
+    #[inline(always)]
+    pub(crate) fn get_desktop(&mut self) -> &mut ControlManager {
+        return self.manager.get_element_mut(0).unwrap();
+    }
+    pub(crate) fn clean_marked_for_focus(&mut self) {
+        let max_count = self.manager.allocated_objects();
+        for i in 0..max_count {
+            if let Some(c) = self.manager.get_element_mut(i) {
+                c.get_base_mut().clear_mark_to_receive_focus();
+            }
+        }
+    }
+    #[inline(always)]
+    pub(crate) fn add(&mut self, manager: ControlManager) -> Handle<UIElement> {
+        self.manager.add(manager).cast()
+    }
+}
+
+/*
 pub(crate) struct ControlHandleManager {
     controls: Vec<Option<ControlManager>>,
 }
@@ -63,3 +102,4 @@ impl ControlHandleManager {
         }
     }
 }
+*/

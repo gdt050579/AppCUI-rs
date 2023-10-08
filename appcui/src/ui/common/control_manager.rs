@@ -1,6 +1,8 @@
 use super::ControlBase;
 use crate::{
     graphics::{ClipArea, Point},
+    prelude::RuntimeManager,
+    system::{Handle, HandleSupport},
     terminals::Terminal,
     ui::common::traits::Control,
 };
@@ -87,5 +89,25 @@ impl ControlManager {
 impl Drop for ControlManager {
     fn drop(&mut self) {
         unsafe { Box::from_raw(self.interface.as_ptr()) };
+    }
+}
+
+impl HandleSupport<ControlManager> for ControlManager {
+    fn get_handle(&self) -> Handle<ControlManager> {
+        self.get_base().handle.cast()
+    }
+
+    fn set_handle(&mut self, handle: Handle<ControlManager>) {
+        // set the handle for all children - only for non desktop controls
+        if !self.get_base().is_desktop_control() {
+            let controls = RuntimeManager::get().get_controls_mut();
+            for child in self.get_base().children.iter() {
+                if let Some(control) = controls.get_mut(*child) {
+                    control.get_base_mut().parent = handle.cast();
+                }
+            }
+        }
+        // set my handle
+        self.get_base_mut().handle = handle.cast();
     }
 }
