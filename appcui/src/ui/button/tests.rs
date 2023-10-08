@@ -192,6 +192,11 @@ fn check_button_control_hotkey() {
                         self.set_info("State: 3");
                         self.get_control_mut(button_handle).unwrap().set_hotkey(Key::None);
                     }
+                    4 => {
+                        self.set_info("State: 4");
+                        self.get_control_mut(button_handle).unwrap().set_hotkey(key!("Alt+X"));
+                    }
+                    5 => self.set_info("State: 5 (after pressing Alt+X)"),
                     _ => self.set_info("<none>"),
                 }
                 return EventProcessStatus::Processed;
@@ -201,7 +206,7 @@ fn check_button_control_hotkey() {
     }
 
     let script = "
-        // Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Initial state (button has focus)')   
         CheckHash(0xC0D3A46EDB6311E4)   
         Key.Pressed(Enter)
@@ -212,8 +217,16 @@ fn check_button_control_hotkey() {
         CheckHash(0x6DD45A77377FB105) 
         Key.Pressed(Alt+C)
         Paint('State 3 (now the button has no hotkey)') 
-        // CheckHash(0x6DD45A77377FB105)
-        // first we must implement ProcessHotKey in Window (todo!)
+        CheckHash(0x25B2BA6AE6611BF4)
+        Key.Pressed(Alt+C)
+        Paint('State 3 (nothing should happen as Alt+C now has no effect)') 
+        CheckHash(0x25B2BA6AE6611BF4)
+        Key.Pressed(Enter)
+        Paint('State 4 (Alt+X should be the key)') 
+        CheckHash(0x2049CCD7BCF64567)
+        Key.Pressed(Alt+X)
+        Paint('State 5') 
+        CheckHash(0x328373FE7C3CF399)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
