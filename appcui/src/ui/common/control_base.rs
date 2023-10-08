@@ -294,8 +294,12 @@ impl ControlBase {
 
     /// Sets the hot-key associated with a control. Use `Key::None` to clear an existing hotkey
     #[inline]
-    pub fn set_hotkey(&mut self, hotkey: Key) {
-        self.hotkey = hotkey
+
+    pub fn set_hotkey<T>(&mut self, hotkey: T)
+    where
+        Key: From<T>,
+    {
+        self.hotkey = Key::from(hotkey)
     }
 
     /// Returns the hotkey associated to a control or Key::None otherwise.
