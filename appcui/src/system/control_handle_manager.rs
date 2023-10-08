@@ -15,12 +15,12 @@ impl ControlHandleManager {
         }
     }
     #[inline(always)]
-    pub(crate) fn get_mut(&mut self, menu_handle: Handle<UIElement>) -> Option<&mut ControlManager> {
-        self.manager.get_mut(menu_handle.cast())
+    pub(crate) fn get_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut ControlManager> {
+        self.manager.get_mut(handle.cast())
     }
     #[inline(always)]
-    pub(crate) fn get(&self, menu_handle: Handle<UIElement>) -> Option<&ControlManager> {
-        self.manager.get(menu_handle.cast())
+    pub(crate) fn get(&self, handle: Handle<UIElement>) -> Option<&ControlManager> {
+        self.manager.get(handle.cast())
     }
     #[inline(always)]
     pub(crate) fn get_desktop(&mut self) -> &mut ControlManager {

@@ -417,7 +417,25 @@ impl Window {
                  */
     }
 
-    fn hotkey_to_handle(parent: Handle<UIElement>, hotkey: Key)->Handle<UIElement> {
+    fn hotkey_to_handle(controls: &ControlHandleManager, parent: Handle<UIElement>, hotkey: Key) -> Handle<UIElement> {
+        if let Some(control) = controls.get(parent) {
+            let base = control.get_base();
+            // object has to be visible and enabled
+            if base.is_visible() && base.is_enabled() {
+                if base.can_receive_input() {
+                    if base.get_hotkey() == hotkey {
+                        // I hold te hotkey
+                        return parent;
+                    }
+                }
+                for child in base.children.iter() {
+                    let result = Window::hotkey_to_handle(controls, *child, hotkey);
+                    if !result.is_none() {
+                        return result;
+                    }
+                }
+            }
+        }
         Handle::None
     }
 
@@ -727,6 +745,18 @@ impl OnKeyPressed for Window {
                     self.on_toolbar_item_clicked(handle);
                     return EventProcessStatus::Processed;
                 }
+            }
+            // lets check if a key was associated with a control as a hotkey
+            let rm = RuntimeManager::get();
+            let control_handle = Window::hotkey_to_handle(rm.get_controls(), self.handle, key);
+            if !control_handle.is_none() {
+                // request focus for that control
+                rm.request_focus_for_control(control_handle);
+                // call the default method
+                if let Some(control) = rm.get_controls_mut().get_mut(control_handle) {
+                    OnDefaultAction::on_default_action(control.get_control_mut());
+                }
+                return EventProcessStatus::Processed; 
             }
         }
         EventProcessStatus::Ignored
