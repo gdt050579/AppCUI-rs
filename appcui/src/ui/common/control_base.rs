@@ -192,6 +192,7 @@ impl ControlBase {
         self.status_flags.contains(StatusFlags::DesktopControl)
     }
 
+    /// A control can use this method to request focus
     pub fn request_focus(&mut self) -> bool {
         if self.has_focus() || !self.can_receive_input() {
             return false;
@@ -294,7 +295,6 @@ impl ControlBase {
 
     /// Sets the hot-key associated with a control. Use `Key::None` to clear an existing hotkey
     #[inline]
-
     pub fn set_hotkey<T>(&mut self, hotkey: T)
     where
         Key: From<T>,
