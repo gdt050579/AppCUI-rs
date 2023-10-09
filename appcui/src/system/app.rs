@@ -1,15 +1,12 @@
 use std::sync::Mutex;
-use std::thread::Builder;
 
 use super::Error;
 use super::ErrorKind;
 use super::Handle;
-use super::HandleSupport;
 use super::RuntimeManager;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 use crate::ui::common::traits::*;
-use crate::ui::common::*;
 
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
