@@ -110,6 +110,10 @@ impl<'a> NamedParamsMap<'a> {
         }
         None
     }
+    pub(crate) fn contains(&self, name:&str) -> bool {
+        let k = super::utils::compute_hash(name);
+        self.all_params.contains_key(&k)
+    }
     pub(crate) fn get_mut(&mut self, name: &str) -> Option<&mut Value<'a>> {
         let k = super::utils::compute_hash(name);
         if let Some(index) = self.all_params.get(&k) {
