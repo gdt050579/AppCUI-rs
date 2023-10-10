@@ -5,7 +5,7 @@ mod parser;
 mod signature;
 mod named_params_map;
 mod flags_signature;
-mod alignament;
+pub(crate) mod alignament;
 mod value;
 #[cfg(test)]
 mod tests;

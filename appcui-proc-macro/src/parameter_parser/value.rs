@@ -90,6 +90,12 @@ impl<'a> Value<'a> {
         }
         None
     }
+    pub(crate) fn to_align(&self) -> Alignament {
+        if let ValueType::Alignament(value) = &self.data_type {
+            return *value;
+        }
+        panic!("Invalid alignament value: {}", self.raw_data);
+    }
     pub(crate) fn get_alignament(&mut self) -> Option<Alignament> {
         if !self.is_value() {
             return None;
