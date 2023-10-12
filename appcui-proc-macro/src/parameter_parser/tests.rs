@@ -1,4 +1,4 @@
-use super::{Error, Token, Tokenizer, TokenType};
+use super::{Tokenizer, TokenType};
 
 macro_rules! check_token {
     ($script:expr, $token: expr, $value: expr, $type: expr) => {
