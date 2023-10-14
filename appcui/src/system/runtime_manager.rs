@@ -54,6 +54,7 @@ pub(crate) struct RuntimeManager {
     menu_event: Option<MenuEvent>,
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: Handle<Menu>,
+    modal_windows: Vec<Handle<UIElement>>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -80,6 +81,7 @@ impl RuntimeManager {
             opened_menu_handle: Handle::None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
+            modal_windows: Vec::with_capacity(16),
             commandbar_event: None,
             menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),

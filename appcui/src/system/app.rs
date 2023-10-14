@@ -87,7 +87,7 @@ impl App {
     /// Later on you can use that handle to manipulate that window in a safe way.
     pub fn add_window<T>(&mut self, window: T) -> Handle<T>
     where
-        T: Control + WindowControl + 'static,
+        T: Control + WindowControl + NotModalWindow + 'static,
     {
         return RuntimeManager::get().add_window(window);
     }

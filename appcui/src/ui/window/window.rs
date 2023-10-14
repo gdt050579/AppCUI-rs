@@ -28,6 +28,7 @@ pub struct Window {
     old_rect: Rect,
     hotkey_handle: Handle<super::toolbar::HotKey>,
     tag_handle: Handle<super::toolbar::Tag>,
+    modal_loop_executed: bool,
 }
 
 const MOVE_TO_LOWER_MARGIN: i32 = -100000;
@@ -121,6 +122,7 @@ impl Window {
             old_rect: Rect::new(0, 0, 0, 0),
             hotkey_handle: Handle::None,
             tag_handle: Handle::None,
+            modal_loop_executed: false,
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
@@ -556,7 +558,7 @@ impl Window {
                     return true;
                 }
                 ToolBarItem::Button(_) => {
-                    if let Some(me) = self.get_interface() {
+                    if let Some(me) = self.get_interface_mut() {
                         return ToolBarEvents::on_button_clicked(me, handle.cast()) == EventProcessStatus::Processed;
                     }
                     return false;
@@ -564,14 +566,14 @@ impl Window {
                 ToolBarItem::CheckBox(checkbox) => {
                     checkbox.reverse_check();
                     let is_checked = checkbox.is_checked();
-                    if let Some(me) = self.get_interface() {
+                    if let Some(me) = self.get_interface_mut() {
                         ToolBarEvents::on_checkbox_clicked(me, handle.cast(), is_checked);
                     }
                     return true; // regardless on what we do in the interface
                 }
                 ToolBarItem::SingleChoice(_) => {
                     self.toolbar.update_singlechoice_group_id(handle);
-                    if let Some(me) = self.get_interface() {
+                    if let Some(me) = self.get_interface_mut() {
                         ToolBarEvents::on_choice_selected(me, handle.cast());
                     }
                     return true; // regardless on what we do in the interface
@@ -588,12 +590,28 @@ impl Window {
         }
         false
     }
-    fn get_interface(&mut self) -> Option<&mut dyn Control> {
+    fn get_interface_mut(&mut self) -> Option<&mut dyn Control> {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
             return Some(control.get_control_mut());
         }
         None
     }
+    fn get_interface(&self) -> Option<&dyn Control> {
+        if let Some(control) = RuntimeManager::get().get_controls().get(self.handle.cast()) {
+            return Some(control.get_control());
+        }
+        None
+    }
+    // pub fn _run_modal_loop(&mut self) -> bool {
+    //     // simple flag to make sure that you can only run this one time
+    //     if self.modal_loop_executed {
+    //         return false;
+    //     }
+    //     self.modal_loop_executed = true;
+    //     // run the loop in the runtime
+    //     let rm = RuntimeManager::get();
+    //     rm.run();
+    // }
 }
 impl OnWindowRegistered for Window {
     fn on_registered(&mut self) {
@@ -756,7 +774,7 @@ impl OnKeyPressed for Window {
                 if let Some(control) = rm.get_controls_mut().get_mut(control_handle) {
                     OnDefaultAction::on_default_action(control.get_control_mut());
                 }
-                return EventProcessStatus::Processed; 
+                return EventProcessStatus::Processed;
             }
         }
         EventProcessStatus::Ignored

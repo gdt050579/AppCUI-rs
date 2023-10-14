@@ -1,4 +1,4 @@
-use super::toolbar::{Button,CheckBox, SingleChoice};
+use super::toolbar::{Button, CheckBox, SingleChoice};
 use crate::{graphics::Rect, system::Handle, ui::common::traits::EventProcessStatus};
 
 // Window events always go to the same window that triggers them --> we don't need a handle as
