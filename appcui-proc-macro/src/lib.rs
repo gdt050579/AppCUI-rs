@@ -31,9 +31,11 @@ fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str,
         if a.window_control {
             // we need to overwrite NotWindow and make sure that WindowControl is set up
             config.clear(AppCUITrait::NotWindow);
+            config.clear(AppCUITrait::NotModalWindow);
             config.clear(AppCUITrait::WindowControl);
             config.clear(AppCUITrait::OnWindowRegistered);
             config.set(AppCUITrait::WindowControl, TraitImplementation::Default);
+            config.set(AppCUITrait::NotModalWindow, TraitImplementation::Default);
         }
         if a.desktop_control {
             // we need to overwrite NotDesktop and make sure that DesktopControl is set up
