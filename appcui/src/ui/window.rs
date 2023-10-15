@@ -1,5 +1,6 @@
 mod initialization_flags;
 mod window;
+mod modal_window;
 mod title;
 mod drag_status;
 pub mod toolbar;
@@ -8,6 +9,7 @@ pub mod events;
 mod tests;
 
 pub use window::Window;
+pub use modal_window::ModalWindow;
 pub use self::initialization_flags::Flags;
 pub (self) use drag_status::DragStatus;
 pub (self) use title::Title;
