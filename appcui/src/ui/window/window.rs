@@ -28,7 +28,6 @@ pub struct Window {
     old_rect: Rect,
     hotkey_handle: Handle<super::toolbar::HotKey>,
     tag_handle: Handle<super::toolbar::Tag>,
-    modal_loop_executed: bool,
 }
 
 const MOVE_TO_LOWER_MARGIN: i32 = -100000;
@@ -107,7 +106,7 @@ impl Window {
         return Handle::None;
     }
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
-        let mut win = Window {
+        let mut win: Window = Window {
             base: ControlBase::new(
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
@@ -122,7 +121,6 @@ impl Window {
             old_rect: Rect::new(0, 0, 0, 0),
             hotkey_handle: Handle::None,
             tag_handle: Handle::None,
-            modal_loop_executed: false,
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
@@ -602,16 +600,6 @@ impl Window {
         }
         None
     }
-    // pub fn _run_modal_loop(&mut self) -> bool {
-    //     // simple flag to make sure that you can only run this one time
-    //     if self.modal_loop_executed {
-    //         return false;
-    //     }
-    //     self.modal_loop_executed = true;
-    //     // run the loop in the runtime
-    //     let rm = RuntimeManager::get();
-    //     rm.run();
-    // }
 }
 impl OnWindowRegistered for Window {
     fn on_registered(&mut self) {
@@ -619,6 +607,7 @@ impl OnWindowRegistered for Window {
         self.toolbar.set_window_handle(self.handle);
     }
 }
+
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let color_window = match () {
