@@ -1,6 +1,6 @@
-use crate::{
+use super::{
     appcui_traits::{AppCUITrait, TraitType},
-    traits_configuration::{TraitsConfig, TraitImplementation},
+    traits_configuration::TraitsConfig, BaseControlType,
 };
 
 use super::utils;
@@ -12,24 +12,25 @@ enum State {
     ExpectValue,
     ExpectComma,
 }
-pub struct Arguments {
-    pub base: String,
+pub(crate) struct Arguments {
+    pub base_control_type: BaseControlType,
     pub root: &'static str,
     pub debug_mode: bool,
     pub internal_mode: bool,
     pub window_control: bool,
     pub desktop_control: bool,
-    pub modal_window: bool,
-    // internal
+    pub base: String,
+    // internal    
     state: State,
     key: String,
     values: Vec<String>,
 }
 
 impl Arguments {
-    pub fn new(base_control: &str, modal_window: bool) -> Arguments {
+    pub fn new(base_control_type: BaseControlType) -> Arguments {
         Arguments {
-            base: String::from(base_control),
+            base_control_type,
+            base: base_control_type.to_string(),
             state: State::ExpectKey,
             root: "appcui",
             key: String::new(),
@@ -38,7 +39,6 @@ impl Arguments {
             internal_mode: false,
             window_control: false,
             desktop_control: false,
-            modal_window,
         }
     }
 
@@ -52,16 +52,16 @@ impl Arguments {
             );
         }
     }
-    fn validate_base_attribute(&mut self) {
-        self.validate_one_value();
-        if !utils::validate_struct_name(self.values[0].as_str()) {
-            panic!("Invalid name for a base struct. A valid name should contains letters, numbers or underline and must not start with a number.");
-        }
-        self.base.clear();
-        self.base.push_str(self.values[0].as_str());
-    }
+    // fn validate_base_attribute(&mut self) {
+    //     self.validate_one_value();
+    //     if !utils::validate_struct_name(self.values[0].as_str()) {
+    //         panic!("Invalid name for a base struct. A valid name should contains letters, numbers or underline and must not start with a number.");
+    //     }
+    //     self.base.clear();
+    //     self.base.push_str(self.values[0].as_str());
+    // }
     fn validate_modal_response(&mut self) {
-        if !self.modal_window {
+        if self.base_control_type != BaseControlType::ModalWindow {
             panic!("Attribute 'response' is only available for ModalWindows !");
         }
         self.validate_one_value();

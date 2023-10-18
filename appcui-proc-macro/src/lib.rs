@@ -1,77 +1,19 @@
-mod appcui_traits;
-mod arguments;
+
 mod key_utils;
-mod templates;
-mod traits_configuration;
-mod utils;
+mod procmacro_builder;
 mod parameter_parser;
 mod controls;
-use arguments::*;
 use proc_macro::*;
 
-use appcui_traits::AppCUITrait;
-use std::str::FromStr;
-use traits_configuration::TraitImplementation;
-use traits_configuration::TraitsConfig;
+use procmacro_builder::{AppCUITrait, TraitImplementation, TraitsConfig, BaseControlType};
+
+
 
 extern crate proc_macro;
 
-enum BaseControlType {
-    Window,
-    Desktop,
-    ModalWindow,
-    CustomControl
-}
 
-fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
-    let mut a = Arguments::new(base_control);
-    a.parse(args, config);
-    let mut base_definition = "{\n    base: ".to_string();
-    base_definition.push_str(&a.base);
-    base_definition.push_str(", ");
-    let mut code = input.to_string().replace("{", base_definition.as_str());
-    let struct_name = utils::extract_structure_name(code.as_str());
-    code.insert_str(0, "#[repr(C)]\n");
-    code.insert_str(0, templates::IMPORTS);
-    if a.internal_mode {
-        code.insert_str(0, templates::IMPORTS_INTERNAL);
-        if a.window_control {
-            // we need to overwrite NotWindow and make sure that WindowControl is set up
-            config.clear(AppCUITrait::NotWindow);
-            config.clear(AppCUITrait::NotModalWindow);
-            config.clear(AppCUITrait::WindowControl);
-            config.clear(AppCUITrait::OnWindowRegistered);
-            config.set(AppCUITrait::WindowControl, TraitImplementation::Default);
-            config.set(AppCUITrait::NotModalWindow, TraitImplementation::Default);
-        }
-        if a.desktop_control {
-            // we need to overwrite NotDesktop and make sure that DesktopControl is set up
-            config.clear(AppCUITrait::NotDesktop);
-            config.clear(AppCUITrait::DesktopControl);
-            config.set(AppCUITrait::DesktopControl, TraitImplementation::Default);
-        }
-    }
-    for (appcui_trait, trait_impl) in config.iter() {
-        match trait_impl {
-            TraitImplementation::None => {}
-            TraitImplementation::Default | TraitImplementation::DefaultNonOverwritable => {
-                code.push_str(appcui_trait.get_default_implementation());
-            }
-            TraitImplementation::BaseFallback | TraitImplementation::BaseFallbackNonOverwritable => {
-                code.push_str(appcui_trait.get_basefallback_implementation());
-            }
-        }
-        code.push_str("\n");
-    }
 
-    // replace templates
-    code = code
-        .replace("$(STRUCT_NAME)", &struct_name)
-        .replace("$(BASE)", &a.base)
-        .replace("$(ROOT)", a.root);
-    //println!("{}", code);
-    TokenStream::from_str(&code).expect("Fail to convert string to token stream")
-}
+
 
 /// Used to create a custom control
 /// The general format is: `#[CustomControl(overwrite = ..., events= ...)]`
@@ -140,7 +82,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
-    parse_token_stream(args, input, "ControlBase", &mut config)
+    procmacro_builder::build(args, input, BaseControlType::CustomControl, &mut config)
 }
 
 /// Used to acustom desktop
@@ -194,7 +136,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
-    parse_token_stream(args, input, "Window", &mut config)
+    procmacro_builder::build(args, input, BaseControlType::Window, &mut config)
 }
 
 #[allow(non_snake_case)]
@@ -223,7 +165,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
-    parse_token_stream(args, input, "ModalWindow", &mut config)
+    procmacro_builder::build(args, input, BaseControlType::ModalWindow, &mut config)
 }
 
 
@@ -278,7 +220,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
 
-    parse_token_stream(args, input, "Desktop", &mut config)
+    procmacro_builder::build(args, input, BaseControlType::Desktop, &mut config)
 }
 
 /// Use to quickly identify a key or a combination via a string

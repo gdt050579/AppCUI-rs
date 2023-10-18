@@ -1,4 +1,4 @@
-use crate::appcui_traits::{AppCUITrait, TraitType};
+use super::appcui_traits::{AppCUITrait, TraitType};
 
 #[repr(u8)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
