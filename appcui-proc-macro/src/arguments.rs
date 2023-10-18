@@ -19,7 +19,7 @@ pub struct Arguments {
     pub internal_mode: bool,
     pub window_control: bool,
     pub desktop_control: bool,
-
+    pub modal_window: bool,
     // internal
     state: State,
     key: String,
@@ -27,7 +27,7 @@ pub struct Arguments {
 }
 
 impl Arguments {
-    pub fn new(base_control: &str) -> Arguments {
+    pub fn new(base_control: &str, modal_window: bool) -> Arguments {
         Arguments {
             base: String::from(base_control),
             state: State::ExpectKey,
@@ -38,6 +38,7 @@ impl Arguments {
             internal_mode: false,
             window_control: false,
             desktop_control: false,
+            modal_window,
         }
     }
 
@@ -58,6 +59,19 @@ impl Arguments {
         }
         self.base.clear();
         self.base.push_str(self.values[0].as_str());
+    }
+    fn validate_modal_response(&mut self) {
+        if !self.modal_window {
+            panic!("Attribute 'response' is only available for ModalWindows !");
+        }
+        self.validate_one_value();
+        if !utils::validate_struct_name(self.values[0].as_str()) {
+            panic!("Invalid name ('{}') for the modal resposne. A valid name should contains letters, numbers or underline and must not start with a number.", self.values[0].as_str());
+        }
+        self.base.clear();
+        self.base.push_str("ModalWindow<");
+        self.base.push_str(self.values[0].as_str());
+        self.base.push('>');
     }
 
     fn validate_internal_attribute(&mut self) {
@@ -149,6 +163,7 @@ impl Arguments {
             "debug" => self.validate_debug_attribute(),
             "internal" => self.validate_internal_attribute(),
             "window" => self.validate_window_control(),
+            "response" => self.validate_modal_response(),
             "desktop" => self.validate_desktop_control(),
             _ => {
                 panic!("Unknown attribute `{}` for AppCUI. Accepted attributes are 'base' , 'overwrite' and 'debug' !",self.key.as_str());

@@ -16,7 +16,14 @@ use traits_configuration::TraitsConfig;
 
 extern crate proc_macro;
 
-fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: &str, config: &mut TraitsConfig) -> TokenStream {
+enum BaseControlType {
+    Window,
+    Desktop,
+    ModalWindow,
+    CustomControl
+}
+
+fn parse_token_stream(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args, config);
     let mut base_definition = "{\n    base: ".to_string();
@@ -189,6 +196,36 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
 
     parse_token_stream(args, input, "Window", &mut config)
 }
+
+#[allow(non_snake_case)]
+#[proc_macro_attribute]
+pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
+    let mut config = TraitsConfig::new("ModalWindow");
+    // Deref is mandatory
+    config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::WindowControl, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::BaseFallbackNonOverwritable);
+    // Raw events (implemente by default)
+    config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnResize, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnFocus, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnDefaultAction, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
+    // control events
+    config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
+    // desktop
+    config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
+
+    parse_token_stream(args, input, "ModalWindow", &mut config)
+}
+
 
 /// Used to create window and intercepts/process events from children controls.
 /// The general format is: `#[Desktop(overwrite = ..., events= ...)]`
