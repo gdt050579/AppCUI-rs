@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-#[Window(events = ButtonEvents)]
+#[ModalWindow(events = ButtonEvents)]
 struct MyWin {
     b1: Handle<Button>,
 }
@@ -8,7 +8,7 @@ struct MyWin {
 impl MyWin {
     fn new(title: &str) -> Self {
         let mut win = MyWin {
-            base: Window::new(title, Layout::new("d:c,w:40,h:7"), window::Flags::None),
+            base: ModalWindow::new(title, Layout::new("d:c,w:40,h:7"), window::Flags::None),
             b1: Handle::None,
         };
         win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,a:c,w:30"));
