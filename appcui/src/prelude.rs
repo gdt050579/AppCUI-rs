@@ -6,6 +6,7 @@ pub use super::ui::checkbox::events::CheckBoxEvents;
 pub use super::ui::common::traits::*;
 pub use super::ui::window::events::WindowEvents;
 pub use super::ui::window::events::ToolBarEvents;
+pub use super::ui::window::events::ModalWindowMethods;
 pub use super::ui::window::toolbar;
 pub use super::ui::desktop::events::DesktopEvents;
 pub use super::ui::command_bar::events::CommandBarEvents;

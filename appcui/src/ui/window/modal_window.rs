@@ -1,4 +1,4 @@
-use super::{Flags, Window};
+use super::{Flags, Window, events::ModalWindowMethods};
 use crate::prelude::*;
 use std::ops::{Deref, DerefMut};
 
@@ -25,7 +25,9 @@ impl<T> ModalWindow<T> {
             result: None,
         }
     }
-    pub fn show(mut self) -> Option<T> {
+}
+impl<T> ModalWindowMethods<T> for ModalWindow<T> {
+    fn show(self) -> Option<T> {
         // simple flag to make sure that you can only run this one time
         // if self.modal_loop_executed {
         //     return None;
@@ -36,7 +38,12 @@ impl<T> ModalWindow<T> {
         // let h = rm.add_window(self);
         None
     }
-    pub fn exit_modal_window(&mut self, result: T) {
+
+    fn exit_with(&mut self, result: T) {
         self.result = Some(result);
+    }
+
+    fn exit(&mut self) {
+        self.result = None;
     }
 }

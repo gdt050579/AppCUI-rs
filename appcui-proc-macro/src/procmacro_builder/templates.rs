@@ -1,17 +1,3 @@
-// pub(crate) static IMPORTS_old: &str = "
-// use $(ROOT)::ui::*;
-// use $(ROOT)::ui::common::traits::*;
-// use $(ROOT)::ui::button::events::ButtonEvents;
-// use $(ROOT)::ui::checkbox::events::CheckBoxEvents;
-// use $(ROOT)::ui::window::events::WindowEvents;
-// use $(ROOT)::ui::window::events::ToolBarEvents;
-// use $(ROOT)::ui::command_bar::events::CommandBarEvents;
-// use $(ROOT)::ui::menu::events::MenuEvents;
-// use $(ROOT)::ui::menu::*;
-// use $(ROOT)::graphics::*;
-// use $(ROOT)::system::*;
-// use $(ROOT)::input::*;
-// ";
 pub(crate) static IMPORTS: &str = "
 use $(ROOT)::prelude::*;
 ";
@@ -19,6 +5,22 @@ use $(ROOT)::prelude::*;
 pub(crate) static IMPORTS_INTERNAL: &str = "
 use crate::utils::*;
 use crate::ui::common::*;
+";
+
+pub(crate) static MODAL_WINDOW_METHODS: &str = "
+impl ModalWindowMethods<$(MODAL_RESULT_TYPE)> for $(STRUCT_NAME) {
+    fn show(self) -> Option<$(MODAL_RESULT_TYPE)> {
+        self.base.show()
+    }
+
+    fn exit_with(&mut self, result: $(MODAL_RESULT_TYPE)) {
+        self.base.exit_with(result);
+    }
+
+    fn exit(&mut self) {
+        self.base.exit();
+    }
+}
 ";
 
 pub(crate) static DEREF_TRAIT: &str = "

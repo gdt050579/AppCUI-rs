@@ -47,7 +47,8 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     code = code
         .replace("$(STRUCT_NAME)", &struct_name)
         .replace("$(BASE)", &a.base)
-        .replace("$(ROOT)", a.root);
+        .replace("$(ROOT)", a.root)
+        .replace("$(MODAL_RESULT_TYPE)",&a.modal_result_type);
     //println!("{}", code);
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }

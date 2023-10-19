@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-#[ModalWindow(events = ButtonEvents)]
+#[ModalWindow(events = ButtonEvents,response=i32)]
 struct MyWin {
     b1: Handle<Button>,
 }
@@ -30,20 +30,26 @@ impl ButtonEvents for MyWin {
 
 #[Desktop(events=CommandBarEvents)]
 struct MyDesktop {}
+impl MyDesktop {
+    fn new() -> Self {
+        Self { base: Desktop::new() }
+    }
+}
 impl CommandBarEvents for MyDesktop {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
         commandbar.set(key!("F1"), "Create a modal window", 1);
     }
 
     fn on_event(&mut self, command_id: u32) {
-        if command_id==1 {
-
+        if command_id == 1 {
+            let modal_win = MyWin::new("ModalWin");
+            let _response = modal_win.show();
         }
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let app = App::new().desktop(MyDesktop::new()).command_bar().build()?;
     app.run();
     Ok(())
 }

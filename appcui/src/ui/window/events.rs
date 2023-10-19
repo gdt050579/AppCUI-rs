@@ -23,6 +23,13 @@ pub trait ToolBarEvents {
         EventProcessStatus::Ignored
     }
 }
+
+pub trait ModalWindowMethods<T> {
+    fn show(self) -> Option<T>;
+    fn exit_with(&mut self, result: T);
+    fn exit(&mut self);
+}
+
 #[repr(u8)]
 #[derive(Copy, Clone)]
 pub(crate) enum EventData {

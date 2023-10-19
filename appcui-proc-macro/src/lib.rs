@@ -148,6 +148,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowControl, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::ModalWindowMethods, TraitImplementation::BaseFallbackNonOverwritable);
     // Raw events (implemente by default)
     config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnResize, TraitImplementation::BaseFallbackNonOverwritable);
@@ -204,7 +205,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DesktopControl, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::DefaultNonOverwritable);
     // Raw events (implemente by default)
-    config.set(AppCUITrait::OnPaint, TraitImplementation::Default);
+    config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallback);
     config.set(AppCUITrait::OnResize, TraitImplementation::Default);
     config.set(AppCUITrait::OnFocus, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnDefaultAction, TraitImplementation::DefaultNonOverwritable);

@@ -20,6 +20,7 @@ pub(crate) struct Arguments {
     pub window_control: bool,
     pub desktop_control: bool,
     pub base: String,
+    pub modal_result_type: String,
     // internal    
     state: State,
     key: String,
@@ -31,6 +32,7 @@ impl Arguments {
         Arguments {
             base_control_type,
             base: base_control_type.to_string(),
+            modal_result_type: String::from("()"),
             state: State::ExpectKey,
             root: "appcui",
             key: String::new(),
@@ -72,6 +74,8 @@ impl Arguments {
         self.base.push_str("ModalWindow<");
         self.base.push_str(self.values[0].as_str());
         self.base.push('>');
+        self.modal_result_type.clear();
+        self.modal_result_type.push_str(self.values[0].as_str());
     }
 
     fn validate_internal_attribute(&mut self) {
