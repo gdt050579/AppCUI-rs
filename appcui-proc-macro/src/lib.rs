@@ -174,6 +174,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Where the **overwrite** parameter is a list of traits that can be overwritten that include:
 /// * OnPaint
 /// * OnResize
+/// 
 ///and the **events** parameter is a list of events that could be received by the new control:
 /// * CommandBarEvents
 /// * MenuEvents
@@ -214,7 +215,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
 
     // desktop

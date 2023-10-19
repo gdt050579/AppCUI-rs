@@ -28,9 +28,22 @@ impl ButtonEvents for MyWin {
     }
 }
 
+#[Desktop(events=CommandBarEvents)]
+struct MyDesktop {}
+impl CommandBarEvents for MyDesktop {
+    fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+        commandbar.set(key!("F1"), "Create a modal window", 1);
+    }
+
+    fn on_event(&mut self, command_id: u32) {
+        if command_id==1 {
+
+        }
+    }
+}
+
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    app.add_window(MyWin::new("Regular Window"));
     app.run();
     Ok(())
 }
