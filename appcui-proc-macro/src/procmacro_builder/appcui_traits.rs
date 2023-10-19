@@ -35,7 +35,6 @@ pub(crate) enum AppCUITrait {
 pub(crate) enum TraitType {
     RawEvent,
     ControlEvent,
-    TerminalEvent,
     Other,
 }
 
