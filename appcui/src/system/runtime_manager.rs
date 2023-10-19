@@ -73,7 +73,7 @@ impl RuntimeManager {
             recompute_layout: true,
             repaint: true,
             desktop_os_start_called: false,
-            request_update_command_and_menu_bars: false,
+            request_update_command_and_menu_bars: true,
             recompute_parent_indexes: true,
             request_focus: None,
             current_focus: None,
