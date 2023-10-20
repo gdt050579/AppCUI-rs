@@ -193,7 +193,7 @@ impl RuntimeManager {
         }
         return handle;
     }
-    pub(crate) fn add_modal_window<T,U>(&mut self, obj: T) -> Handle<T>
+    pub(crate) fn add_modal_window<T, U>(&mut self, obj: T) -> Handle<T>
     where
         T: Control + WindowControl + ModalWindowMethods<U> + 'static,
     {
@@ -201,7 +201,7 @@ impl RuntimeManager {
         let handle = controls.add(ControlManager::new(obj));
         // since it is the first time I register this window
         // I need to recursively set the event processor for all of its childern to
-        // this window current handle        
+        // this window current handle
         self.set_event_processors(handle.cast(), handle.cast());
         // all good --> the window has been registered
         if let Some(win) = controls.get_mut(handle.cast()) {
@@ -585,6 +585,16 @@ impl RuntimeManager {
         self.surface.hide_cursor();
         self.surface.reset();
         self.paint_control(self.desktop_handle);
+        if !self.modal_windows.is_empty() {
+            let count = self.modal_windows.len();
+            for index in 0..count {
+                self.surface.reset();
+                if index + 1 == count {
+                    self.surface.clear(Character::with_color(Color::Gray, Color::Black));
+                }
+                self.paint_control(self.modal_windows[index]);
+            }
+        }
         self.surface.reset();
         if self.commandbar.is_some() {
             self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
