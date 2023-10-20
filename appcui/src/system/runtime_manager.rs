@@ -198,14 +198,20 @@ impl RuntimeManager {
         T: Control + WindowControl + ModalWindowMethods<U> + 'static,
     {
         let controls = unsafe { &mut *self.controls };
-        let handle = controls.get_desktop().get_base_mut().add_child(obj);
+        let handle = controls.add(ControlManager::new(obj));
         // since it is the first time I register this window
         // I need to recursively set the event processor for all of its childern to
-        // this window current handle
+        // this window current handle        
         self.set_event_processors(handle.cast(), handle.cast());
         // all good --> the window has been registered
         if let Some(win) = controls.get_mut(handle.cast()) {
             win.get_control_mut().on_registered();
+        }
+        // add to modal stack
+        if !handle.is_none() {
+            self.modal_windows.push(handle);
+            self.request_focus(handle);
+            self.request_update();
         }
         return handle;
     }
