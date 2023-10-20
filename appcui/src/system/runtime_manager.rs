@@ -346,9 +346,17 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         return menus.get_mut(self.opened_menu_handle);
     }
+    #[inline(always)]
+    fn get_root_control_handle(&self)->Handle<UIElement> {
+        if self.modal_windows.is_empty() {
+            self.desktop_handle
+        } else {
+            self.modal_windows[self.modal_windows.len() - 1]
+        }
+    }
     fn get_focused_control(&self) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
-        let mut parent = self.desktop_handle;
+        let mut parent = self.get_root_control_handle();
         let mut ctrl = controls.get_mut(parent).unwrap();
 
         loop {
@@ -650,7 +658,7 @@ impl RuntimeManager {
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
         // check controls first
-        if self.process_control_keypressed_event(self.desktop_handle, event.key, event.character) == EventProcessStatus::Processed {
+        if self.process_control_keypressed_event(self.get_root_control_handle(), event.key, event.character) == EventProcessStatus::Processed {
             self.repaint = true;
             return;
         };
@@ -869,7 +877,7 @@ impl RuntimeManager {
             MouseLockedObject::None => {}
             _ => return,
         }
-        let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
+        let handle = self.coordinates_to_control(self.get_root_control_handle(), event.x, event.y);
         if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get_mut(handle) {
@@ -899,7 +907,7 @@ impl RuntimeManager {
             return;
         }
         let controls = unsafe { &mut *self.controls };
-        let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
+        let handle = self.coordinates_to_control(self.get_root_control_handle(), event.x, event.y);
         if handle != self.mouse_over_control {
             self.hide_tooltip();
             if !self.mouse_over_control.is_none() {
@@ -971,7 +979,7 @@ impl RuntimeManager {
             }
         }
         // check for a control
-        let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
+        let handle = self.coordinates_to_control(self.get_root_control_handle(), event.x, event.y);
         if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get_mut(handle) {
