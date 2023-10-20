@@ -2,6 +2,7 @@ use super::{Flags, Window, events::ModalWindowMethods};
 use crate::prelude::*;
 use std::ops::{Deref, DerefMut};
 
+
 pub struct ModalWindow<T: Sized> {
     base: Window,
     result: Option<T>,
@@ -26,16 +27,60 @@ impl<T> ModalWindow<T> {
         }
     }
 }
+impl<T> Control for ModalWindow<T> { }
+impl<T> MenuEvents for ModalWindow<T> {} 
+impl<T> DesktopEvents for ModalWindow<T> {} 
+impl<T> ToolBarEvents for ModalWindow<T> {} 
+impl<T> WindowEvents for ModalWindow<T> {} 
+impl<T> CommandBarEvents for ModalWindow<T> {} 
+impl<T> CheckBoxEvents for ModalWindow<T> {} 
+impl<T> ButtonEvents for ModalWindow<T> {} 
+impl<T> OnWindowRegistered for ModalWindow<T> {} 
+
+// events routed to base window
+impl<T> OnFocus for ModalWindow<T> {
+    fn on_focus(&mut self) {
+        OnFocus::on_focus(&mut self.base);
+    }
+
+    fn on_lose_focus(&mut self) {
+        OnFocus::on_lose_focus(&mut self.base);
+    }
+} 
+impl<T> OnPaint for ModalWindow<T> {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        OnPaint::on_paint(&self.base, surface, theme);
+    }
+}
+impl<T> OnResize for ModalWindow<T> {
+    fn on_resize(&mut self, old_size: Size, new_size: Size) {
+        OnResize::on_resize(&mut self.base, old_size, new_size);
+    }
+}
+impl<T> OnKeyPressed for ModalWindow<T> {
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        return OnKeyPressed::on_key_pressed(&mut self.base, key, character); 
+    }
+}
+impl<T> OnMouseEvent for OnMouseEvent<T> {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        return OnMouseEvent::on_mouse_event(&mut self.base, event);
+    }
+}
+
+
+
+
+
+
 impl<T> ModalWindowMethods<T> for ModalWindow<T> {
     fn show(self) -> Option<T> {
-        // simple flag to make sure that you can only run this one time
-        // if self.modal_loop_executed {
-        //     return None;
-        // }
-        // self.modal_loop_executed = true;
-        // // run the loop in the runtime
-        // let rm = RuntimeManager::get();
-        // let h = rm.add_window(self);
+        let handle = RuntimeManager::get().add_modal_window(self);
+        // run the loop in a modal way
+        if let Some(obj) = RuntimeManager::get().get_control_mut(handle) {
+            // mve the result
+            return obj.result.take();
+        }
         None
     }
 

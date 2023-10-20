@@ -7,7 +7,7 @@ use crate::ui::command_bar::events::CommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::{traits::*, ControlEvent};
-use crate::ui::common::{ControlManager, ControlEventData, UIElement};
+use crate::ui::common::{ControlEventData, ControlManager, UIElement};
 use crate::ui::menu::events::{MenuEvent, MenuEvents};
 use crate::ui::menu::{Menu, MenuBar, MousePressedResult};
 use crate::ui::window::events::WindowEvents;
@@ -180,6 +180,22 @@ impl RuntimeManager {
     pub(crate) fn add_window<T>(&mut self, obj: T) -> Handle<T>
     where
         T: Control + WindowControl + 'static,
+    {
+        let controls = unsafe { &mut *self.controls };
+        let handle = controls.get_desktop().get_base_mut().add_child(obj);
+        // since it is the first time I register this window
+        // I need to recursively set the event processor for all of its childern to
+        // this window current handle
+        self.set_event_processors(handle.cast(), handle.cast());
+        // all good --> the window has been registered
+        if let Some(win) = controls.get_mut(handle.cast()) {
+            win.get_control_mut().on_registered();
+        }
+        return handle;
+    }
+    pub(crate) fn add_modal_window<T,U>(&mut self, obj: T) -> Handle<T>
+    where
+        T: Control + WindowControl + ModalWindowMethods<U> + 'static,
     {
         let controls = unsafe { &mut *self.controls };
         let handle = controls.get_desktop().get_base_mut().add_child(obj);
@@ -832,7 +848,7 @@ impl RuntimeManager {
             _ => return,
         }
         let handle = self.coordinates_to_control(self.desktop_handle, event.x, event.y);
-        if !handle.is_none()  {
+        if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get_mut(handle) {
                 self.repaint |= control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) == EventProcessStatus::Processed;

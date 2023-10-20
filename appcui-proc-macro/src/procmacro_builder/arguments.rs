@@ -55,6 +55,9 @@ impl Arguments {
         }
     }
     // fn validate_base_attribute(&mut self) {
+    //     if self.internal_mode==false {
+    //         panic!("Base attribute is reserved for internal usage wuthin AppCUI framework !");
+    //     }
     //     self.validate_one_value();
     //     if !utils::validate_struct_name(self.values[0].as_str()) {
     //         panic!("Invalid name for a base struct. A valid name should contains letters, numbers or underline and must not start with a number.");

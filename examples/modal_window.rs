@@ -42,8 +42,7 @@ impl CommandBarEvents for MyDesktop {
 
     fn on_event(&mut self, command_id: u32) {
         if command_id == 1 {
-            let modal_win = MyWin::new("ModalWin");
-            let _response = modal_win.show();
+            let _response = MyWin::new("ModalWin").show();
         }
     }
 }
