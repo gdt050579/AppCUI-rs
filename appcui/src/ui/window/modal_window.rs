@@ -3,6 +3,7 @@ use crate::prelude::*;
 use std::ops::{Deref, DerefMut};
 
 
+#[repr(C)]
 pub struct ModalWindow<T: Sized> {
     base: Window,
     result: Option<T>,
@@ -75,7 +76,7 @@ impl<T> OnMouseEvent for ModalWindow<T> {
 
 
 
-impl<T> ModalWindowMethods<T> for ModalWindow<T> {
+impl<T: 'static> ModalWindowMethods<T> for ModalWindow<T> {
     fn show(self) -> Option<T> {
         let handle = RuntimeManager::get().add_modal_window(self);
         // safety check - if we did not manage to add the window

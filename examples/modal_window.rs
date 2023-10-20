@@ -49,6 +49,12 @@ impl CommandBarEvents for MyDesktop {
 
 fn main() -> Result<(), appcui::system::Error> {
     let app = App::new().desktop(MyDesktop::new()).command_bar().build()?;
+    // let script = "
+    // Paint('initial')
+    // Key.Pressed(F1);
+    // Paint()
+    // ";
+    // let app = App::debug(60, 10, script).desktop(MyDesktop::new()).command_bar().build()?;
     app.run();
     Ok(())
 }

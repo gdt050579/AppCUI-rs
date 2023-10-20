@@ -210,10 +210,10 @@ impl RuntimeManager {
         // add to modal stack
         if !handle.is_none() {
             self.modal_windows.push(handle);
-            self.request_focus(handle);
+            self.request_focus_for_control(handle);
             self.request_update();
         }
-        return handle;
+        return handle.cast();
     }
     pub(crate) fn get_control_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T>
     where
@@ -283,6 +283,8 @@ impl RuntimeManager {
     pub(crate) fn run(&mut self) {
         self.recompute_layout = true;
         self.repaint = true;
+        self.commandbar_event = None;
+        self.menu_event = None;
         // if first time an execution start
         if !self.desktop_os_start_called {
             self.process_terminal_resize_event(self.terminal.get_size());
@@ -534,6 +536,11 @@ impl RuntimeManager {
     fn recompute_layouts(&mut self) {
         let term_layout = ParentLayout::from(&self.terminal);
         self.update_control_layout(self.desktop_handle, &term_layout);
+        let count = self.modal_windows.len();
+        for index in 0..count {
+            let handle = self.modal_windows[index];
+            self.update_control_layout(handle, &term_layout);
+        }
     }
 
     fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
