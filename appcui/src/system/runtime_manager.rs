@@ -281,7 +281,6 @@ impl RuntimeManager {
         }
     }
     pub(crate) fn run(&mut self) {
-        // must pe self so that after a run a second call will not be possible
         self.recompute_layout = true;
         self.repaint = true;
         // if first time an execution start

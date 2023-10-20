@@ -76,7 +76,13 @@ impl<T> OnMouseEvent for OnMouseEvent<T> {
 impl<T> ModalWindowMethods<T> for ModalWindow<T> {
     fn show(self) -> Option<T> {
         let handle = RuntimeManager::get().add_modal_window(self);
-        // run the loop in a modal way
+        // safety check - if we did not manage to add the window
+        if handle.is_none() {
+            return None;
+        }        
+        // run the loop (the method will determine if it runs in a modal way or not)
+        RuntimeManager::get().run();
+        // the loop has ended , lets grab the results
         if let Some(obj) = RuntimeManager::get().get_control_mut(handle) {
             // mve the result
             return obj.result.take();
