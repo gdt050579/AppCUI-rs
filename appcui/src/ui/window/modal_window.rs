@@ -36,6 +36,8 @@ impl<T> CommandBarEvents for ModalWindow<T> {}
 impl<T> CheckBoxEvents for ModalWindow<T> {} 
 impl<T> ButtonEvents for ModalWindow<T> {} 
 impl<T> OnWindowRegistered for ModalWindow<T> {} 
+impl<T> OnDefaultAction for ModalWindow<T> {}
+impl<T> WindowControl for ModalWindow<T> {}
 
 // events routed to base window
 impl<T> OnFocus for ModalWindow<T> {
@@ -62,7 +64,7 @@ impl<T> OnKeyPressed for ModalWindow<T> {
         return OnKeyPressed::on_key_pressed(&mut self.base, key, character); 
     }
 }
-impl<T> OnMouseEvent for OnMouseEvent<T> {
+impl<T> OnMouseEvent for ModalWindow<T> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         return OnMouseEvent::on_mouse_event(&mut self.base, event);
     }
