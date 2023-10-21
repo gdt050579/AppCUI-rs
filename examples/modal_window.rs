@@ -1,4 +1,4 @@
-use appcui::prelude::*;
+use appcui::{prelude::*, ui::button::Flags};
 
 #[ModalWindow(events = ButtonEvents+WindowEvents,response=i32)]
 struct MyWin {
@@ -16,7 +16,11 @@ impl MyWin {
             counter,
         };
         win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,a:c,w:30"));
-        win.b2 = win.add(button!("caption:'',x:50%,y:4,a:c,w:30"));
+        win.b2 = win.add(Button::new(
+            format!("Counter = {}", counter).as_str(),
+            Layout::new("x:50%,y:4,a:c,w:30"),
+            button::Flags::None,
+        ));
         win
     }
     fn update_counter(&mut self) {
@@ -27,6 +31,7 @@ impl MyWin {
         }
     }
 }
+
 impl WindowEvents for MyWin {
     fn on_close(&mut self) -> EventProcessStatus {
         EventProcessStatus::Ignored

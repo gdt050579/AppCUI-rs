@@ -54,7 +54,6 @@ impl<T> WindowEvents for ModalWindow<T> {}
 impl<T> CommandBarEvents for ModalWindow<T> {}
 impl<T> CheckBoxEvents for ModalWindow<T> {}
 impl<T> ButtonEvents for ModalWindow<T> {}
-impl<T> OnWindowRegistered for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
 impl<T> WindowControl for ModalWindow<T> {}
 
@@ -88,7 +87,11 @@ impl<T> OnMouseEvent for ModalWindow<T> {
         return OnMouseEvent::on_mouse_event(&mut self.base, event);
     }
 }
-
+impl<T> OnWindowRegistered for ModalWindow<T> {
+    fn on_registered(&mut self) {
+        self.base.on_registered();
+    }
+}
 impl<T: 'static> ModalWindowMethods<T> for ModalWindow<T> {
     fn show(self) -> Option<T> {
         // do nothing
