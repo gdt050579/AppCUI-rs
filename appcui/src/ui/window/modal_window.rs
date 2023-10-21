@@ -1,7 +1,6 @@
-use super::{Flags, Window, events::ModalWindowMethods};
+use super::{events::ModalWindowMethods, Flags, Window};
 use crate::prelude::*;
 use std::ops::{Deref, DerefMut};
-
 
 #[repr(C)]
 pub struct ModalWindow<T: Sized> {
@@ -27,16 +26,35 @@ impl<T> ModalWindow<T> {
             result: None,
         }
     }
+    pub fn show<U>(object: U) -> Option<T>
+    where
+        U: Control + WindowControl + ModalWindowMethods<T> + 'static,
+        U: DerefMut<Target = ModalWindow<T>>,
+    {
+        let handle = RuntimeManager::get().add_modal_window(object);
+        // safety check - if we did not manage to add the window
+        if handle.is_none() {
+            return None;
+        }
+        // run the loop (the method will determine if it runs in a modal way or not)
+        RuntimeManager::get().run();
+        // the loop has ended , lets grab the results
+        if let Some(obj) = RuntimeManager::get().get_control_mut(handle) {
+            // move the result
+            return obj.result.take();
+        }
+        None
+    }
 }
-impl<T> Control for ModalWindow<T> { }
-impl<T> MenuEvents for ModalWindow<T> {} 
-impl<T> DesktopEvents for ModalWindow<T> {} 
-impl<T> ToolBarEvents for ModalWindow<T> {} 
-impl<T> WindowEvents for ModalWindow<T> {} 
-impl<T> CommandBarEvents for ModalWindow<T> {} 
-impl<T> CheckBoxEvents for ModalWindow<T> {} 
-impl<T> ButtonEvents for ModalWindow<T> {} 
-impl<T> OnWindowRegistered for ModalWindow<T> {} 
+impl<T> Control for ModalWindow<T> {}
+impl<T> MenuEvents for ModalWindow<T> {}
+impl<T> DesktopEvents for ModalWindow<T> {}
+impl<T> ToolBarEvents for ModalWindow<T> {}
+impl<T> WindowEvents for ModalWindow<T> {}
+impl<T> CommandBarEvents for ModalWindow<T> {}
+impl<T> CheckBoxEvents for ModalWindow<T> {}
+impl<T> ButtonEvents for ModalWindow<T> {}
+impl<T> OnWindowRegistered for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
 impl<T> WindowControl for ModalWindow<T> {}
 
@@ -49,7 +67,7 @@ impl<T> OnFocus for ModalWindow<T> {
     fn on_lose_focus(&mut self) {
         OnFocus::on_lose_focus(&mut self.base);
     }
-} 
+}
 impl<T> OnPaint for ModalWindow<T> {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         OnPaint::on_paint(&self.base, surface, theme);
@@ -62,7 +80,7 @@ impl<T> OnResize for ModalWindow<T> {
 }
 impl<T> OnKeyPressed for ModalWindow<T> {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
-        return OnKeyPressed::on_key_pressed(&mut self.base, key, character); 
+        return OnKeyPressed::on_key_pressed(&mut self.base, key, character);
     }
 }
 impl<T> OnMouseEvent for ModalWindow<T> {
@@ -71,25 +89,9 @@ impl<T> OnMouseEvent for ModalWindow<T> {
     }
 }
 
-
-
-
-
-
 impl<T: 'static> ModalWindowMethods<T> for ModalWindow<T> {
     fn show(self) -> Option<T> {
-        let handle = RuntimeManager::get().add_modal_window(self);
-        // safety check - if we did not manage to add the window
-        if handle.is_none() {
-            return None;
-        }        
-        // run the loop (the method will determine if it runs in a modal way or not)
-        RuntimeManager::get().run();
-        // the loop has ended , lets grab the results
-        if let Some(obj) = RuntimeManager::get().get_control_mut(handle) {
-            // mve the result
-            return obj.result.take();
-        }
+        // do nothing
         None
     }
 

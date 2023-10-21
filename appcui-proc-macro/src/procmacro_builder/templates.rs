@@ -10,7 +10,7 @@ use crate::ui::common::*;
 pub(crate) static MODAL_WINDOW_METHODS: &str = "
 impl ModalWindowMethods<$(MODAL_RESULT_TYPE)> for $(STRUCT_NAME) {
     fn show(self) -> Option<$(MODAL_RESULT_TYPE)> {
-        self.base.show()
+        ModalWindow::show(self)
     }
 
     fn exit_with(&mut self, result: $(MODAL_RESULT_TYPE)) {
