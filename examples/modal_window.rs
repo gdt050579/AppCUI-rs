@@ -4,6 +4,7 @@ use appcui::{prelude::*, ui::button::Flags};
 struct MyWin {
     b1: Handle<Button>,
     b2: Handle<Button>,
+    lb: Handle<Label>,
     counter: i32,
 }
 
@@ -13,6 +14,7 @@ impl MyWin {
             base: ModalWindow::new(title, Layout::new("d:c,w:40,h:7"), window::Flags::None),
             b1: Handle::None,
             b2: Handle::None,
+            lb: Handle::None,
             counter,
         };
         win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,a:c,w:30"));
@@ -21,6 +23,7 @@ impl MyWin {
             Layout::new("x:50%,y:4,a:c,w:30"),
             button::Flags::None,
         ));
+        win.lb = win.add(Label::new("", Layout::new("x:0,y:0,w:100%")));
         win
     }
     fn update_counter(&mut self) {
@@ -42,9 +45,11 @@ impl WindowEvents for MyWin {
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
         if button_handle == self.b1 {
-            // run a modal window
-            //let win = MyWin::new("Modal Window");
-            //win.show()
+            let response = MyWin::new("ModalWin", self.counter).show();
+            let handle = self.lb;
+            if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
+                lb.set_text(format!("Reponse from modal window: {}", r).as_str());
+            }
             return EventProcessStatus::Processed;
         }
         if button_handle == self.b2 {
@@ -76,15 +81,15 @@ impl CommandBarEvents for MyDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    //let app = App::new().desktop(MyDesktop::new()).command_bar().build()?;
-    let script = "
-    Paint('initial')
-    Key.Pressed(F1);
-    Paint()
-    Mouse.Click(30,6,left)
-    Paint()
-    ";
-    let app = App::debug(60, 10, script).desktop(MyDesktop::new()).command_bar().build()?;
+    let app = App::new().desktop(MyDesktop::new()).command_bar().build()?;
+    // let script = "
+    // Paint('initial')
+    // Key.Pressed(F1);
+    // Paint()
+    // Mouse.Click(30,6,left)
+    // Paint()
+    // ";
+    //let app = App::debug(60, 10, script).desktop(MyDesktop::new()).command_bar().build()?;
     app.run();
     Ok(())
 }
