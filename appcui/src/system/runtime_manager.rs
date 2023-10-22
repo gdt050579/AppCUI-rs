@@ -18,7 +18,7 @@ use crate::utils::VectorIndex;
 enum LoopStatus {
     Normal,
     StopApp,
-    StopCurrent,
+    ExitCurrentLoop,
 }
 
 #[derive(Clone, Copy)]
@@ -134,6 +134,9 @@ impl RuntimeManager {
     }
     pub(crate) fn request_recompute_layout(&mut self) {
         self.recompute_layout = true;
+    }
+    pub(crate) fn exit_execution_loop(&mut self) {
+        self.loop_status = LoopStatus::ExitCurrentLoop;
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
         self.tooltip.show(txt, &rect, self.terminal.get_size(), &self.theme);
@@ -337,6 +340,13 @@ impl RuntimeManager {
                 SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
                 SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
             }
+        }
+        // loop has ended
+        if self.loop_status == LoopStatus::ExitCurrentLoop {
+            // if we are in a modal loop --> we just need to change loop_statup
+            // and delete the window and its children (mark them for deleteion)
+            // also we need to change focus to the previous window in the loop or desktop
+            todo!("Implement exit from modal loop");
         }
     }
     fn get_opened_menu(&mut self) -> Option<&mut Menu> {

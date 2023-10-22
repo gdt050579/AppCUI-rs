@@ -100,9 +100,11 @@ impl<T: 'static> ModalWindowMethods<T> for ModalWindow<T> {
 
     fn exit_with(&mut self, result: T) {
         self.result = Some(result);
+        RuntimeManager::get().exit_execution_loop();
     }
 
     fn exit(&mut self) {
         self.result = None;
+        RuntimeManager::get().exit_execution_loop();
     }
 }
