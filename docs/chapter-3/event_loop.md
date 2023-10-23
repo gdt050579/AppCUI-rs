@@ -19,3 +19,5 @@ and an event trait can be one of the following
 * MenuEvents
 * ToolBarEvents
 
+This events can be implemented to receive notification on various actions that children controls are performing. 
+
