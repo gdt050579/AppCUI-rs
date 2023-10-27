@@ -530,6 +530,13 @@ impl Window {
         }
     }
 
+    fn on_close_request(&mut self) {
+        if let Some(interface) = self.get_interface_mut() {
+            interface.on_close();
+            // logic to remove me 
+            RuntimeManager::get().request_remove(self.handle);
+        }
+    }
     fn on_mouse_release(&mut self) -> EventProcessStatus {
         self.toolbar.set_current_item_pressed(false);
         self.resize_move_mode = false;
@@ -544,11 +551,7 @@ impl Window {
         if let Some(item) = self.toolbar.get_item_mut(handle) {
             match item {
                 ToolBarItem::CloseButton(_) => {
-                    self.raise_event(ControlEvent {
-                        emitter: self.handle,
-                        receiver: self.event_processor,
-                        data: ControlEventData::WindowEvents(EventData::OnClose),
-                    });
+                    self.on_close_request();
                     return true;
                 }
                 ToolBarItem::ResizeCorner(_) => {

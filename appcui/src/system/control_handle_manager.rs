@@ -1,6 +1,6 @@
 use crate::{
     ui::common::{ControlManager, UIElement},
-    utils::HandleManager,
+    utils::{HandleManager, VectorIndex},
 };
 
 use super::Handle;
@@ -11,7 +11,7 @@ pub(crate) struct ControlHandleManager {
 impl ControlHandleManager {
     pub(crate) fn new() -> Self {
         Self {
-            manager: HandleManager::new(64),
+            manager: HandleManager::with_capacity(64),
         }
     }
     #[inline(always)]
@@ -26,6 +26,10 @@ impl ControlHandleManager {
     pub(crate) fn get_desktop(&mut self) -> &mut ControlManager {
         return self.manager.get_element_mut(0).unwrap();
     }
+    #[inline(always)]
+    pub(crate) fn remove(&mut self, handle: Handle<UIElement>) -> bool {
+        self.manager.remove(handle.cast())
+    }
     pub(crate) fn clean_marked_for_focus(&mut self) {
         let max_count = self.manager.allocated_objects();
         for i in 0..max_count {
@@ -39,4 +43,3 @@ impl ControlHandleManager {
         self.manager.add(manager).cast()
     }
 }
-

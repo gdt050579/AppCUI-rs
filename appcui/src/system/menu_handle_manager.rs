@@ -8,7 +8,7 @@ pub(crate) struct MenuHandleManager {
 impl MenuHandleManager {
     pub(crate) fn new() -> MenuHandleManager {
         Self {
-            manager: HandleManager::new(8),
+            manager: HandleManager::with_capacity(8),
         }
     }
     #[inline(always)]

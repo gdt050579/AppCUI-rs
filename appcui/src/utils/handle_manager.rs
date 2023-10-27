@@ -8,7 +8,7 @@ impl<T> HandleManager<T>
 where
     T: HandleSupport<T>,
 {
-    pub(crate) fn new(capacity: usize) -> Self {
+    pub(crate) fn with_capacity(capacity: usize) -> Self {
         Self {
             objects: Vec::with_capacity(capacity),
             free: Vec::with_capacity(8),

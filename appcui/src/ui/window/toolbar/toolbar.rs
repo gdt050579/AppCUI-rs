@@ -52,7 +52,7 @@ macro_rules! add_to_toolbar_impl {
 impl ToolBar {
     pub(crate) fn new() -> Self {
         ToolBar {
-            items: HandleManager::new(4),
+            items: HandleManager::with_capacity(4),
             pressed: false,
             order: Vec::with_capacity(4),
             current_handle: Handle::None,

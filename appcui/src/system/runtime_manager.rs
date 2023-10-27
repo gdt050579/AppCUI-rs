@@ -55,6 +55,7 @@ pub(crate) struct RuntimeManager {
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: Handle<Menu>,
     modal_windows: Vec<Handle<UIElement>>,
+    to_remove_list: Vec<Handle<UIElement>>,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
@@ -82,6 +83,7 @@ impl RuntimeManager {
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
             modal_windows: Vec::with_capacity(16),
+            to_remove_list: Vec::with_capacity(4),
             commandbar_event: None,
             menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
@@ -169,6 +171,11 @@ impl RuntimeManager {
         self.request_update_command_and_menu_bars = true;
         self.repaint = true;
         self.recompute_layout = true;
+    }
+    pub(crate) fn request_remove(&mut self, handle: Handle<UIElement>) {
+        if !handle.is_none() {
+            self.to_remove_list.push(handle);
+        }
     }
     fn set_event_processors(&mut self, control_handle: Handle<UIElement>, event_processor: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
@@ -345,8 +352,53 @@ impl RuntimeManager {
         if self.loop_status == LoopStatus::ExitCurrentLoop {
             // if we are in a modal loop --> we just need to change loop_statup
             // and delete the window and its children (mark them for deleteion)
+            if let Some(modal_handle) = self.modal_windows.pop() {
+                self.request_remove(modal_handle);
+            }
             // also we need to change focus to the previous window in the loop or desktop
+            if let Some(previous_modal_handle) = self.modal_windows.pop() {
+                self.request_focus_for_control(previous_modal_handle);
+            } else {
+                self.request_focus_for_control(self.desktop_handle);
+            }
             todo!("Implement exit from modal loop");
+        }
+        // if there are any controls to delete --> delete them
+        self.remove_deleted_controls();
+    }
+    fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) {
+        if handle.is_none() {
+            return;
+        }
+        let controls = unsafe { &mut *self.controls };
+        // remove the link from its parent if requested
+        if unlink_from_parent {
+            if let Some(control) = controls.get(handle.cast()) {
+                let parent = control.get_base().parent;
+                if let Some(parent) = controls.get_mut(parent.cast()) {
+                    let base = parent.get_base_mut();
+                    if let Some(index) = base.children.iter().position(|&elem| elem == handle) {
+                        // if the index is bigger than the focused children index --> than all god
+                        // otherwise, we need to reset the index
+                        if index <= base.focused_child_index.index() {
+                            base.focused_child_index = VectorIndex::Invalid;
+                        }
+                    }
+                }
+            }
+        }
+        // first remove my children, then myself
+        if let Some(control) = controls.get_mut(handle.cast()) {
+            let base = control.get_base();
+            for child in &base.children {
+                self.remove_control(*child,false);
+            }
+        }
+        controls.remove(handle);
+    }
+    fn remove_deleted_controls(&mut self) {
+        while let Some(handle) = self.to_remove_list.pop() {
+            self.remove_control(handle, true);
         }
     }
     fn get_opened_menu(&mut self) -> Option<&mut Menu> {
@@ -357,7 +409,7 @@ impl RuntimeManager {
         return menus.get_mut(self.opened_menu_handle);
     }
     #[inline(always)]
-    fn get_root_control_handle(&self)->Handle<UIElement> {
+    fn get_root_control_handle(&self) -> Handle<UIElement> {
         if self.modal_windows.is_empty() {
             self.desktop_handle
         } else {

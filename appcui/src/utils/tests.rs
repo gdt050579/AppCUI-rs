@@ -126,7 +126,7 @@ fn check_hanlde_manager() {
         }
     }
 
-    let mut man: HandleManager<MyData> = HandleManager::new(16);
+    let mut man: HandleManager<MyData> = HandleManager::with_capacity(16);
     let h1_123 = man.add(MyData::new("handle1", 123));
     let habc_1 = man.add(MyData::new("abc", 1));
     let hgdt_2345 = man.add(MyData::new("GDT", 2345));
