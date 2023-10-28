@@ -1,6 +1,6 @@
 use appcui::{prelude::*, ui::button::Flags};
 
-#[ModalWindow(events = ButtonEvents+WindowEvents,response=i32)]
+#[ModalWindow(events = ButtonEvents,response=i32)]
 struct MyWin {
     b1: Handle<Button>,
     b2: Handle<Button>,
@@ -35,13 +35,6 @@ impl MyWin {
     }
 }
 
-impl WindowEvents for MyWin {
-    fn on_close(&mut self) -> EventProcessStatus {
-        EventProcessStatus::Ignored
-    }
-
-    fn on_activate(&mut self) {}
-}
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
         if button_handle == self.b1 {

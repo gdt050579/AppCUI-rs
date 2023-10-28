@@ -21,8 +21,10 @@ impl<T> DerefMut for ModalWindow<T> {
 }
 impl<T> ModalWindow<T> {
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
+        // a Modal Window does not have an implicit close button
+        // as exiting has to be done from either exit(...) or exit_with(...) method.
         Self {
-            base: Window::new(title, layout, flags),
+            base: Window::new(title, layout, flags | Flags::NoCloseButton),
             result: None,
         }
     }
