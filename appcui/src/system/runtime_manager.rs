@@ -301,16 +301,24 @@ impl RuntimeManager {
             self.process_desktop_on_start();
         }
         while self.loop_status == LoopStatus::Normal {
-            // first process all events (cmdbar, menu, controls)
+            // 1. Process events from command bar
             if let Some(event) = self.commandbar_event {
                 self.process_commandbar_event(event);
             }
+            // 2. Process events from menu
             if let Some(event) = self.menu_event {
                 self.process_menu_event(event);
             }
+            // 3. Process events from controls
             if !self.events.is_empty() {
                 self.process_events_queue();
             }
+            // 4. if there is a control that was removed (due to the previously fired events) remove it
+            if !self.to_remove_list.is_empty() {
+                self.remove_deleted_controls();
+            }
+
+            // If we reach this point, there should not be any change in the logic of controls
             if self.recompute_parent_indexes {
                 self.update_parent_indexes(self.desktop_handle);
                 self.recompute_parent_indexes = false;
@@ -327,7 +335,7 @@ impl RuntimeManager {
             if self.request_update_command_and_menu_bars {
                 self.update_command_and_menu_bars();
             }
-            if self.repaint | self.recompute_layout {
+            if self.repaint || self.recompute_layout {
                 self.paint();
             }
             self.recompute_layout = false;
@@ -364,8 +372,6 @@ impl RuntimeManager {
             self.loop_status = LoopStatus::Normal;
             self.request_update();
         }
-        // if there are any controls to delete --> delete them
-        self.remove_deleted_controls();
     }
     fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) {
         if handle.is_none() {
@@ -392,7 +398,7 @@ impl RuntimeManager {
         if let Some(control) = controls.get_mut(handle.cast()) {
             let base = control.get_base();
             for child in &base.children {
-                self.remove_control(*child,false);
+                self.remove_control(*child, false);
             }
         }
         controls.remove(handle);
