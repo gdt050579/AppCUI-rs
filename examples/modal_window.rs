@@ -1,9 +1,10 @@
-use appcui::{prelude::*, ui::button::Flags};
+use appcui::prelude::*;
 
 #[ModalWindow(events = ButtonEvents,response=i32)]
 struct MyWin {
     b1: Handle<Button>,
     b2: Handle<Button>,
+    b3: Handle<Button>,
     lb: Handle<Label>,
     counter: i32,
 }
@@ -11,9 +12,10 @@ struct MyWin {
 impl MyWin {
     fn new(title: &str, counter: i32) -> Self {
         let mut win = MyWin {
-            base: ModalWindow::new(title, Layout::new("d:c,w:40,h:7"), window::Flags::None),
+            base: ModalWindow::new(title, Layout::new("d:c,w:40,h:9"), window::Flags::None),
             b1: Handle::None,
             b2: Handle::None,
+            b3: Handle::None,
             lb: Handle::None,
             counter,
         };
@@ -23,6 +25,7 @@ impl MyWin {
             Layout::new("x:50%,y:4,a:c,w:30"),
             button::Flags::None,
         ));
+        win.b3 = win.add(button!("E&xit,x:50%,y:6,a:c,w:30"));
         win.lb = win.add(Label::new("", Layout::new("x:0,y:0,w:100%")));
         win
     }
@@ -38,7 +41,7 @@ impl MyWin {
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
         if button_handle == self.b1 {
-            let response = MyWin::new("ModalWin", self.counter).show();
+            let response = MyWin::new(format!("{}",self.counter).as_str(), self.counter).show();
             let handle = self.lb;
             if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
                 lb.set_text(format!("Reponse from modal window: {}", r).as_str());
@@ -48,6 +51,10 @@ impl ButtonEvents for MyWin {
         if button_handle == self.b2 {
             self.counter += 1;
             self.update_counter();
+            return EventProcessStatus::Processed;
+        }
+        if button_handle == self.b3 {
+            self.exit_with(self.counter * 2);
             return EventProcessStatus::Processed;
         }
         EventProcessStatus::Ignored
@@ -68,7 +75,7 @@ impl CommandBarEvents for MyDesktop {
 
     fn on_event(&mut self, command_id: u32) {
         if command_id == 1 {
-            let _response = MyWin::new("ModalWin", 1).show();
+            let _response = MyWin::new("1", 1).show();
         }
     }
 }
@@ -80,6 +87,11 @@ fn main() -> Result<(), appcui::system::Error> {
     // Key.Pressed(F1);
     // Paint()
     // Mouse.Click(30,6,left)
+    // Paint()
+    // Mouse.Click(30,4,left)
+    // Paint()
+    // Mouse.Click(30,6,left)
+    // Mouse.Click(30,8,left)
     // Paint()
     // ";
     //let app = App::debug(60, 10, script).desktop(MyDesktop::new()).command_bar().build()?;

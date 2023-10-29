@@ -356,12 +356,13 @@ impl RuntimeManager {
                 self.request_remove(modal_handle);
             }
             // also we need to change focus to the previous window in the loop or desktop
-            if let Some(previous_modal_handle) = self.modal_windows.pop() {
-                self.request_focus_for_control(previous_modal_handle);
+            if let Some(previous_modal_handle) = self.modal_windows.last() {
+                self.request_focus_for_control(*previous_modal_handle);
             } else {
                 self.request_focus_for_control(self.desktop_handle);
             }
-            todo!("Implement exit from modal loop");
+            self.loop_status = LoopStatus::Normal;
+            self.request_update();
         }
         // if there are any controls to delete --> delete them
         self.remove_deleted_controls();
