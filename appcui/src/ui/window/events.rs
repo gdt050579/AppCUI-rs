@@ -11,6 +11,15 @@ pub trait WindowEvents {
     fn on_layout_changed(&mut self, _old_layout: Rect, _new_layout: Rect) {}
     fn on_activate(&mut self) {}
     fn on_deactivate(&mut self) {}
+    /// called whenever the ENTER key is intercepted by the Window
+    /// For modal windows the behavior should be to use `.exit_with(...)` method to exit.
+    /// for a regular window there is no default behavior
+    fn on_accept(&mut self) {}
+
+    /// called whenever the ESC key is interpreted by the Window
+    /// For a modal window the default behavior should be use use .exit() method to exit
+    /// for a regular window there is no default behavior
+    fn on_cancel(&mut self) {}
 }
 pub trait ToolBarEvents {
     fn on_button_clicked(&mut self, _handle: Handle<Button>) -> EventProcessStatus {

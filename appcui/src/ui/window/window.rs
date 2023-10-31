@@ -747,6 +747,20 @@ impl OnKeyPressed for Window {
                     self.resize_move_mode = true;
                     return EventProcessStatus::Processed;
                 }
+                key!("Enter") => {
+                    if let Some(interface) = self.get_interface_mut() {
+                        WindowEvents::on_accept(interface);
+                    }
+                    todo!("Validate if this is the correct behavior");
+                    return true; // to be determine if this is the correct behavior
+                }
+                key!("Escape") => {
+                    if let Some(interface) = self.get_interface_mut() {
+                        WindowEvents::on_cancel(interface);
+                    }
+                    todo!("Validate if this is the correct behavior");
+                    return true; // to be determine if this is the correct behavior
+                }
                 _ => {}
             }
             if (key.modifier & (KeyModifier::Alt | KeyModifier::Ctrl | KeyModifier::Shift)) == KeyModifier::Alt {
