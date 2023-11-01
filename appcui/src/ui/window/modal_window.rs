@@ -81,7 +81,28 @@ impl<T> OnResize for ModalWindow<T> {
 }
 impl<T> OnKeyPressed for ModalWindow<T> {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
-        return OnKeyPressed::on_key_pressed(&mut self.base, key, character);
+        if self.base.is_in_resize_mode() {
+            match key.get_compact_code() {
+                key!("Enter") => {
+                    if let Some(interface) = self.get_interface_mut() {
+                        WindowEvents::on_accept(interface);
+                    }
+                    return EventProcessStatus::Processed; 
+                }
+                key!("Escape") => {
+                    if let Some(interface) = self.get_interface_mut() {
+                        WindowEvents::on_cancel(interface);
+                    }
+                    todo!("Validate if this is the correct behavior");
+                    return EventProcessStatus::Processed; 
+                }
+                _ => {
+                    return OnKeyPressed::on_key_pressed(&mut self.base, key, character); 
+                }
+            }
+        } else {        
+            return OnKeyPressed::on_key_pressed(&mut self.base, key, character);
+        }
     }
 }
 impl<T> OnMouseEvent for ModalWindow<T> {

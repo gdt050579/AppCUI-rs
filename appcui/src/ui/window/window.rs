@@ -242,6 +242,10 @@ impl Window {
         }
     }
 
+    pub(super) fn is_in_resize_mode(&self) -> bool {
+        self.resize_move_mode
+    }
+
     fn center_to_screen(&mut self) {
         let screen_size = RuntimeManager::get().get_terminal_size();
         let win_size = self.get_size();
@@ -591,13 +595,13 @@ impl Window {
         }
         false
     }
-    fn get_interface_mut(&mut self) -> Option<&mut dyn Control> {
+    pub(super) fn get_interface_mut(&mut self) -> Option<&mut dyn Control> {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
             return Some(control.get_control_mut());
         }
         None
     }
-    fn get_interface(&self) -> Option<&dyn Control> {
+    pub(super) fn get_interface(&self) -> Option<&dyn Control> {
         if let Some(control) = RuntimeManager::get().get_controls().get(self.handle.cast()) {
             return Some(control.get_control());
         }
@@ -746,20 +750,6 @@ impl OnKeyPressed for Window {
                 key!("Ctrl+Alt+M") | key!("Ctrl+Alt+R") => {
                     self.resize_move_mode = true;
                     return EventProcessStatus::Processed;
-                }
-                key!("Enter") => {
-                    if let Some(interface) = self.get_interface_mut() {
-                        WindowEvents::on_accept(interface);
-                    }
-                    todo!("Validate if this is the correct behavior");
-                    return true; // to be determine if this is the correct behavior
-                }
-                key!("Escape") => {
-                    if let Some(interface) = self.get_interface_mut() {
-                        WindowEvents::on_cancel(interface);
-                    }
-                    todo!("Validate if this is the correct behavior");
-                    return true; // to be determine if this is the correct behavior
                 }
                 _ => {}
             }
