@@ -48,7 +48,7 @@ impl<T> ModalWindow<T> {
         None
     }
 }
-impl<T> Control for ModalWindow<T> {}
+impl<T: 'static> Control for ModalWindow<T> {}
 impl<T> MenuEvents for ModalWindow<T> {}
 impl<T> DesktopEvents for ModalWindow<T> {}
 impl<T> ToolBarEvents for ModalWindow<T> {}
@@ -79,7 +79,7 @@ impl<T> OnResize for ModalWindow<T> {
         OnResize::on_resize(&mut self.base, old_size, new_size);
     }
 }
-impl<T> OnKeyPressed for ModalWindow<T> {
+impl<T: 'static> OnKeyPressed for ModalWindow<T> {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         if self.base.is_in_resize_mode() {
             match key.get_compact_code() {
@@ -91,9 +91,16 @@ impl<T> OnKeyPressed for ModalWindow<T> {
                 }
                 key!("Escape") => {
                     if let Some(interface) = self.get_interface_mut() {
-                        WindowEvents::on_cancel(interface);
+                        let result = WindowEvents::on_cancel(interface);
+                        if result == ActionRequest::Allow {
+                            // force the exit with None 
+                            self.exit();
+                        } else {
+                            // clean the result
+                            self.result = None;
+                            RuntimeManager::get().cancel_exit_from_execution_loop();
+                        }
                     }
-                    todo!("Validate if this is the correct behavior");
                     return EventProcessStatus::Processed; 
                 }
                 _ => {

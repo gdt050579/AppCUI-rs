@@ -140,6 +140,9 @@ impl RuntimeManager {
     pub(crate) fn exit_execution_loop(&mut self) {
         self.loop_status = LoopStatus::ExitCurrentLoop;
     }
+    pub(crate) fn cancel_exit_from_execution_loop(&mut self) {
+        self.loop_status = LoopStatus::Normal;
+    }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
         self.tooltip.show(txt, &rect, self.terminal.get_size(), &self.theme);
     }
