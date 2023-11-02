@@ -1,5 +1,5 @@
 use super::toolbar::{Button, CheckBox, SingleChoice};
-use crate::{graphics::Rect, system::Handle, ui::common::traits::EventProcessStatus};
+use crate::{graphics::Rect, prelude::ActionRequest, system::Handle, ui::common::traits::EventProcessStatus};
 
 // Window events always go to the same window that triggers them --> we don't need a handle as
 // we already have &mut self
@@ -17,9 +17,16 @@ pub trait WindowEvents {
     fn on_accept(&mut self) {}
 
     /// called whenever the ESC key is interpreted by the Window
-    /// For a modal window the default behavior should be use use .exit() method to exit
-    /// for a regular window there is no default behavior
-    fn on_cancel(&mut self) {}
+    /// ## For a modal window
+    /// 
+    /// If this function returns 'ActionRequest::Allow' it will translate into a call to `ModalWindow::exit()` method. 
+    /// If the returned value is `ActionRequest::Deny` the following nothing happens and any `exit()` or `exit_with(...)` methods call will be disregarded.
+    /// **OBS**: As a general rule, if should not attempt to close the modal window during this function
+    /// 
+    /// ## For a regula window
+    fn on_cancel(&mut self) -> ActionRequest {
+        ActionRequest::Allow
+    }
 }
 pub trait ToolBarEvents {
     fn on_button_clicked(&mut self, _handle: Handle<Button>) -> EventProcessStatus {

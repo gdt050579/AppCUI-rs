@@ -19,6 +19,12 @@ pub enum EventProcessStatus {
     Processed,
     Ignored,
 }
+#[repr(u8)]
+#[derive(Copy, Clone, PartialEq)]
+pub enum ActionRequest {
+    Allow,
+    Deny,
+}
 
 pub trait OnPaint {
     fn on_paint(&self, _surface: &mut Surface, _theme: &Theme) {}
