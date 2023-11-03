@@ -296,6 +296,7 @@ impl RuntimeManager {
     pub(crate) fn run(&mut self) {
         self.recompute_layout = true;
         self.repaint = true;
+        self.recompute_parent_indexes = true;
         self.commandbar_event = None;
         self.menu_event = None;
         // if first time an execution start
@@ -323,7 +324,7 @@ impl RuntimeManager {
 
             // If we reach this point, there should not be any change in the logic of controls
             if self.recompute_parent_indexes {
-                self.update_parent_indexes(self.desktop_handle);
+                self.update_parent_indexes(self.get_root_control_handle());
                 self.recompute_parent_indexes = false;
             }
             if let Some(handle) = self.request_focus {

@@ -50,6 +50,12 @@ impl ButtonEvents for MyWin {
             let handle = self.lb;
             if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
                 lb.set_text(format!("Reponse from modal window: {}", r).as_str());
+            } else {
+                if response.is_none() {
+                    if let Some(lb) = self.get_control_mut(handle) {
+                        lb.set_text("Exit with None from modal window !");
+                    }
+                }
             }
             return EventProcessStatus::Processed;
         }
@@ -97,9 +103,13 @@ fn main() -> Result<(), appcui::system::Error> {
     // Paint()
     // Mouse.Click(30,6,left)
     // Mouse.Click(30,8,left)
-    // Paint()
+    // Paint('Last modal closed')
+    // Key.Pressed(Tab)
+    // Paint('Focus on 1st button')
+    // Key.Pressed(Enter)
+    // Paint('Press enter on 1st button')
     // ";
-    //let app = App::debug(60, 10, script).desktop(MyDesktop::new()).command_bar().build()?;
+    // let app = App::debug(60, 10, script).desktop(MyDesktop::new()).command_bar().build()?;
     app.run();
     Ok(())
 }
