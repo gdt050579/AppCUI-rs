@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-#[ModalWindow(events = ButtonEvents,response=i32)]
+#[ModalWindow(events = ButtonEvents+WindowEvents,response=i32)]
 struct MyWin {
     b1: Handle<Button>,
     b2: Handle<Button>,
@@ -38,10 +38,15 @@ impl MyWin {
     }
 }
 
+impl WindowEvents for MyWin {
+    fn on_accept(&mut self) {
+        self.exit_with(self.counter * 3);
+    }
+}
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
         if button_handle == self.b1 {
-            let response = MyWin::new(format!("{}",self.counter).as_str(), self.counter).show();
+            let response = MyWin::new(format!("{}", self.counter + 1).as_str(), self.counter + 1).show();
             let handle = self.lb;
             if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
                 lb.set_text(format!("Reponse from modal window: {}", r).as_str());
