@@ -8,6 +8,6 @@ pub enum Flags {
     WarningWindow = 0x0008,
     NoCloseButton = 0x0010,
     FixedPosition = 0x0040,
-    Maximized     = 0x0080,
-    ProcessReturn = 0x0200,
+    //Maximized     = 0x0080,
+    //ProcessReturn = 0x0200,
 }
