@@ -1088,3 +1088,23 @@ fn check_modal_window() {
     let app = App::debug(60, 20, script).desktop(MyDesktop::new()).command_bar().build().unwrap();
     app.run();
 }
+
+
+#[test]
+fn check_window_fixed_pos() {
+    let script = "
+        Paint.Enable(false)
+        Paint('centered window')
+        CheckHash(0x47625E4DA1A7B38F)
+        Mouse.Drag(12,1,10,0)
+        Paint('Moveable window moved')
+        CheckHash(0xC3DDD1ED3F648A7)
+        Mouse.Drag(40,1,30,2)
+        Paint('Non-Moveable window not-moved, just focused')
+        CheckHash(0x9A7FCF55DCA77E9F)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(Window::new("Moveable", Layout::new("x:5,y:1,w:20,h:6"), window::Flags::None));
+    a.add_window(Window::new("Non-Moveable", Layout::new("x:30,y:1,w:25,h:6"), window::Flags::FixedPosition));
+    a.run();
+}

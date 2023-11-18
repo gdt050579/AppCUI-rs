@@ -22,3 +22,4 @@ A window supports the following initialization flags:
 * `window::Flags::None` - regular window (with a close button)
 * `window::Flags::Sizeable` - a window that has the resize grip and the maximize button
 * `window::Flags::NoCloseButton` - a window without a close button
+* `window::Flags::FixedPosition` - a window that can not be moved
