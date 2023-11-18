@@ -11,7 +11,8 @@ struct MyWindow {
 
 where the attribute `events` has the following form:
 * `events=EventTrait-1 + EventTrait-2 + EventTrait-3 + ... EventTrait-n`
-and an event trait can be one of the following
+
+and an `event trait` can be one of the following:
 * WindowEvents
 * ButtonEvents
 * CheckBoxEvents
@@ -19,5 +20,5 @@ and an event trait can be one of the following
 * MenuEvents
 * ToolBarEvents
 
-This events can be implemented to receive notification on various actions that children controls are performing. 
+These events can be implemented to receive notification on various actions that children controls are performing. 
 

@@ -21,6 +21,8 @@
     - [Instantiate via Macros](chapter-3/instantiate_via_macros.md)
     - [Common methods for all Controls](chapter-3/common_methods.md)
     - [Event loop](chapter-3/event_loop.md)
+        - [Window](chapter-3/event-loop/window.md)
+        - [Modal Window](chapter-3/event-loop/modal_window.md)
     - [Stock controls](chapter-3/stock_controls.md)
         - [Button](chapter-3/stock-controls/button.md)
         - [CheckBox](chapter-3/stock-controls/checkbox.md)
