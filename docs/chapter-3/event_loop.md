@@ -80,3 +80,40 @@ fn main() -> Result<(), appcui::system::Error> {
     Ok(())
 }
 ```
+
+## Intercepting events from a child control
+
+Usually, a window that processes events mentains a handle to various controls and enable event processing in the `#[Window(...)]` declaration.
+
+```rs
+use appcui::prelude::*;
+
+#[Window(events = /*Events specific to a control */)]
+struct MyWindow {
+    value1: i32,
+    control: Handle</*control type*/>
+}
+impl MyWindow {
+    fn new(/* parameters */) -> Self {
+        let mut mywin = MyWindow {
+            base: Window::new(/*...*/);
+            control: Handle::None
+        }
+        // now we create the control
+        mywin.control =  mywin.add(/* Code that creates a control */);
+
+        return mywin;
+    }
+}
+impl /*Control event*/ for MyWindow {
+    // add logic for event
+}
+fn main() -> Result<(), appcui::system::Error> {
+    let mut app = App::new().build()?;
+    app.add_window(MyWindow::new(/* parameters */));
+    app.run();
+    Ok(())
+}
+```
+
+For every control described in [Stock Controls](stock_controls.md) an example on how that control can be used with the event loop and the type of events it emits will be presented.
