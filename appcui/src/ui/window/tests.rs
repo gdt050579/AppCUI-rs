@@ -1064,14 +1064,26 @@ fn check_modal_window() {
     // we have the 3rd window created with Counter=5
     Paint('New window created')
     CheckHash(0x8EAEAD312FC57319)
-
-    Paint.Enable(true) 
-    Paint.Enable(false) 
-
-    Key.Pressed(Tab)
-    Paint('Focus on 1st button')
-    Key.Pressed(Enter)
+    Key.Pressed(Tab,2)
+    Key.Pressed(Enter,2)
     Paint('Press enter on 1st button')
+    // now we should have window 5 with counter = 7 and focus button on Counter button
+    CheckHash(0xD0AD1B5F86BCD962)
+    Key.Pressed(Tab)
+    Key.Pressed(Enter)
+    // the 3rd window is closed, the message received on the second window should be:
+    // Reponse from modal window: 14 
+    Paint('3rd window closed')
+    CheckHash(0xD17830D3177DAA48)
+    Key.Pressed(Escape)
+    Paint('2rd window closed')
+    // the 2nd window is closed, the message received on the first window should be None:
+    // Exit with None from modal window !
+    CheckHash(0x10E7726F51F0AA03)
+    Mouse.Click(30,13,left)
+    // we should expect the same desktop as with the initial state
+    Paint('1rd window closed')
+    CheckHash(0x172AA26FB2F2488C)
     ";
     let app = App::debug(60, 20, script).desktop(MyDesktop::new()).command_bar().build().unwrap();
     app.run();
