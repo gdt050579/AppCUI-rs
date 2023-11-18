@@ -38,7 +38,11 @@ fn check_window_just_oversized_title() {
         CheckHash(0x8AD5C306676ACF04)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
-    a.add_window(Window::new("0123456789ABCDEFGH", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
+    a.add_window(Window::new(
+        "0123456789ABCDEFGH",
+        Layout::new("d:c,w:20,h:10"),
+        window::Flags::NoCloseButton,
+    ));
     a.run();
 }
 #[test]
@@ -172,7 +176,7 @@ fn check_multiple_items_top_bar() {
     w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
     w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
     let g = w.get_toolbar().create_group(GroupPosition::TopRight);
-    w.get_toolbar().add(g, toolbar::Label::new("AB"));  
+    w.get_toolbar().add(g, toolbar::Label::new("AB"));
     let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
     w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
     w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
@@ -182,7 +186,7 @@ fn check_multiple_items_top_bar() {
     w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
     w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
     let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::Label::new("AB"));  
+    w.get_toolbar().add(g, toolbar::Label::new("AB"));
 
     a.add_window(w);
     a.run();
@@ -943,4 +947,132 @@ fn check_window_move_and_resize_via_keys() {
     let w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::Sizeable);
     a.add_window(w);
     a.run();
+}
+
+#[test]
+fn check_modal_window() {
+    #[ModalWindow(events = ButtonEvents+WindowEvents,response=i32,internal=true)]
+    struct MyWin {
+        b1: Handle<Button>,
+        b2: Handle<Button>,
+        b3: Handle<Button>,
+        lb: Handle<Label>,
+        counter: i32,
+    }
+
+    impl MyWin {
+        fn new(title: &str, counter: i32) -> Self {
+            let mut win = MyWin {
+                base: ModalWindow::new(title, Layout::new("d:c,w:40,h:9"), window::Flags::None),
+                b1: Handle::None,
+                b2: Handle::None,
+                b3: Handle::None,
+                lb: Handle::None,
+                counter,
+            };
+            win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,a:c,w:30"));
+            win.b2 = win.add(Button::new(
+                format!("Counter = {}", counter).as_str(),
+                Layout::new("x:50%,y:4,a:c,w:30"),
+                button::Flags::None,
+            ));
+            win.b3 = win.add(button!("E&xit,x:50%,y:6,a:c,w:30"));
+            win.lb = win.add(Label::new("", Layout::new("x:0,y:0,w:100%")));
+            win
+        }
+        fn update_counter(&mut self) {
+            let handle = self.b2;
+            let counter = self.counter;
+            if let Some(b2) = self.get_control_mut(handle) {
+                b2.set_caption(format!("Counter = {}", counter).as_str());
+            }
+        }
+    }
+
+    impl WindowEvents for MyWin {
+        fn on_accept(&mut self) {
+            self.exit_with(self.counter * 3);
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
+            if button_handle == self.b1 {
+                let response = MyWin::new(format!("{}", self.counter + 1).as_str(), self.counter + 1).show();
+                let handle = self.lb;
+                if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
+                    lb.set_text(format!("Reponse from modal window: {}", r).as_str());
+                } else {
+                    if response.is_none() {
+                        if let Some(lb) = self.get_control_mut(handle) {
+                            lb.set_text("Exit with None from modal window !");
+                        }
+                    }
+                }
+                return EventProcessStatus::Processed;
+            }
+            if button_handle == self.b2 {
+                self.counter += 1;
+                self.update_counter();
+                return EventProcessStatus::Processed;
+            }
+            if button_handle == self.b3 {
+                self.exit_with(self.counter * 2);
+                return EventProcessStatus::Processed;
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+
+    #[Desktop(events=CommandBarEvents,internal=true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl CommandBarEvents for MyDesktop {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Create a modal window", 1);
+        }
+
+        fn on_event(&mut self, command_id: u32) {
+            if command_id == 1 {
+                let _response = MyWin::new("1", 1).show();
+            }
+        }
+    }
+
+    let script = "
+    Paint.Enable(false)
+    Paint('initial state (no window)')
+    CheckHash(0x172AA26FB2F2488C)
+    Key.Pressed(F1);    
+    // we should see a window with Title '1' and Exit Button seleected
+    Paint('One Window, nothing on command bar')
+    CheckHash(0x7240CD633AEAD74C)
+    Mouse.Click(30,10,left)
+    Paint('Counter = 2')
+    CheckHash(0xF657C3966674A472)
+    Mouse.Click(30,8,left)
+    Mouse.Drag(30,6,20,1)
+    // we have two windows, second with title = 3
+    Paint('2 windows')
+    CheckHash(0xBDB15B3066946AFE)       
+    Mouse.Click(20,5,left)
+    Mouse.Click(20,3,left)
+    Mouse.Drag(30,6,40,0)
+    // we have the 3rd window created with Counter=5
+    Paint('New window created')
+    CheckHash(0x8EAEAD312FC57319)
+
+    Paint.Enable(true) 
+    Paint.Enable(false) 
+
+    Key.Pressed(Tab)
+    Paint('Focus on 1st button')
+    Key.Pressed(Enter)
+    Paint('Press enter on 1st button')
+    ";
+    let app = App::debug(60, 20, script).desktop(MyDesktop::new()).command_bar().build().unwrap();
+    app.run();
 }
