@@ -1108,3 +1108,43 @@ fn check_window_fixed_pos() {
     a.add_window(Window::new("Non-Moveable", Layout::new("x:30,y:1,w:25,h:6"), window::Flags::FixedPosition));
     a.run();
 }
+
+#[test]
+fn check_window_resize_mode_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('centered window')
+        CheckHash(0x7062D4CC2F7219DA)
+        Key.Pressed(Ctrl+Alt+M)
+        Paint('Resize mode')
+        CheckHash(0x609DD7B9237DC346)
+        Key.Pressed(Left,4)
+        Key.Pressed(Down,2)
+        Paint('After moving')
+        CheckHash(0x2BB68415887137A6)
+        Key.Pressed(Ctrl+Right,5)
+        Key.Pressed(Ctrl+Up,1)
+        Paint('After Resizing')
+        CheckHash(0x7B2E82058CE2E560)
+        Key.Pressed(M)
+        Paint('Maximizing')
+        CheckHash(0x34CC388C72DC662)
+        Key.Pressed(R)
+        Paint('Restored')
+        CheckHash(0x7B2E82058CE2E560)
+        Key.Pressed(Alt+Up)
+        Key.Pressed(Alt+Right)
+        Paint('Align to TopRight')
+        CheckHash(0x4DECC8DF7632F5EC)
+        Key.Pressed(Alt+Left)
+        Key.Pressed(Alt+Down)
+        Paint('Align to BottomRight')
+        CheckHash(0x9166F8D445C80E10)
+        Key.Pressed(Escape)
+        Paint('Exit from resize mode')
+        CheckHash(0x1D6AFE13EB1B0934)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:6"), window::Flags::Sizeable));
+    a.run();
+}

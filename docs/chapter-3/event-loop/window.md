@@ -50,10 +50,15 @@ In terms of key association, a Window has two modes:
 
 | Key                   | Purpose                                                                             |
 |-----------------------|-------------------------------------------------------------------------------------|
-| `Ctrl`+`Alt`+`M` or <br> `Ctrl`+`Alt`+`R` | Switch the window to resize/move mode                               |
+| `Ctrl`+`Alt`+`M` or <br> `Ctrl`+`Alt`+`R` | Switch the window to resize/move mode                           |
 
 ### For resize/move mode
 
 | Key                   | Purpose                                                                             |
 |-----------------------|-------------------------------------------------------------------------------------|
-| `Escape`              | Switch back to the normal mode                                                      |
+| `Escape` or `Enter` or `Tab` or `Space`   | Switch back to the normal mode                                  |
+| `Left`, `Up`, `Right`, `Down`             | Arrow keys can be used to move the window |
+| `C`                   | Centers the current window to the Desktop |
+| `M` or `R`            | Maximizes or Restores the size of the current Windows |
+| `Alt`+{`Left`, `Up`, `Right`, `Down`} | Moves the window towards one of the margins of the Desktop. For example `Alt`+`Up` will move current window to the top margin of the client space of the Desktop |
+| `Ctrl`+{`Left`, `Up`, `Right`, `Down`} | Increases or decreases the Width or Height of the current Window |
