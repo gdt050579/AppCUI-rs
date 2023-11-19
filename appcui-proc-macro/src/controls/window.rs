@@ -5,7 +5,14 @@ use crate::parameter_parser;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static mut WINDOW_FLAGS: FlagsSignature = FlagsSignature::new(&["Sizeable","NoCloseButton","FixedPosition"]);
+static mut WINDOW_FLAGS: FlagsSignature = FlagsSignature::new(&[
+    "Sizeable",
+    "NoCloseButton",
+    "FixedPosition",
+    "ErrorWindow",
+    "NotifyWindow",
+    "WarningWindow",
+]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("title", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[

@@ -1161,3 +1161,29 @@ fn check_window_resize_mode_keys() {
     a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:6"), window::Flags::Sizeable));
     a.run();
 }
+
+
+#[test]
+fn check_window_background() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(10,2,left)
+        Paint('Normal window enabled')
+        CheckHash(0xCB2510920C66FDB)
+        Mouse.Click(40,2,left)
+        Paint('Error window enabled')
+        CheckHash(0x1E3C6A9A4F7E2ED7)
+        Mouse.Click(10,7,left)
+        Paint('Notify window enabled')
+        CheckHash(0x6A9C490B34C3AA7B)
+        Mouse.Click(40,7,left)
+        Paint('Warning window enabled')
+        CheckHash(0x8786A6E5A142320F)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(window!("Normal,x:0,y:0,w:30,h:5"));
+    a.add_window(window!("Error,x:30,y:0,w:30,h:5,flags=ErrorWindow"));
+    a.add_window(window!("Notify,x:0,y:5,w:30,h:5,flags=NotifyWindow"));
+    a.add_window(window!("Warning,x:30,y:5,w:30,h:5,flags=WarningWindow"));
+    a.run();
+}

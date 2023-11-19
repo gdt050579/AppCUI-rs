@@ -32,6 +32,10 @@ A window supports the following initialization flags:
 * `window::Flags::Sizeable` or `Sizeable` (for **window!** macro) - a window that has the resize grip and the maximize button
 * `window::Flags::NoCloseButton` or `NoCloseButton` (for **window!** macro) - a window without a close button
 * `window::Flags::FixedPosition` or `FixedPosition` (for **window!** macro) - a window that can not be moved
+* `window::Flags::ErrorWindow` or `ErrorWindow` (for **window!** macro) - a window with a red background to indicate an error message
+* `window::Flags::NotifyWindow` or `NotifyWindow` (for **window!** macro) - a window with a different background designed for notification messages
+* `window::Flags::WarningWindow` or `WarningWindow` (for **window!** macro) - a window with a different background designed for Warning messages
+
 
 ## Methods
 
