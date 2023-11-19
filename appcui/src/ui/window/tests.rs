@@ -1110,6 +1110,19 @@ fn check_window_fixed_pos() {
 }
 
 #[test]
+fn check_window_macro() {
+    let script = "
+        Paint.Enable(false)
+        Paint('two windows')
+        CheckHash(0x88E8AE83D20D73A7)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(window!("First,x:5,y:2,w:20,h:6"));
+    a.add_window(window!("title='Test me',x:30,y:1,w:25,h:6,flags=[Sizeable,FixedPosition]"));
+    a.run();
+}
+
+#[test]
 fn check_window_resize_mode_keys() {
     let script = "
         Paint.Enable(false)

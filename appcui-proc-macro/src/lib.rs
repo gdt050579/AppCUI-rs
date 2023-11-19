@@ -259,3 +259,8 @@ pub fn key(input: TokenStream) -> TokenStream {
 pub fn button(input: TokenStream) -> TokenStream {
     crate::controls::button::create(input)
 }
+
+#[proc_macro]
+pub fn window(input: TokenStream) -> TokenStream {
+    crate::controls::window::create(input)
+}

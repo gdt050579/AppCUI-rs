@@ -4,10 +4,19 @@ A window is the core component of an application and it is the object where all 
 
 <img src="img/window.png"/>
 
-To create a Window use `Window::new` method (with 3 parameters: a title, a layout and initialization flags). Keep in mind that window will **NOT** handle any events from its children. 
+To create a Window use `Window::new` method (with 3 parameters: a title, a layout and initialization flags) or the macro `window!`. Keep in mind that window will **NOT** handle any events from its children. 
 ```rs
 let w = Window::new("Title", Layout::new("x:10,y:5,w:15,h:9"),window::Flags::None);
+let w2 = window!("Title,d:c,w:10,h:10");
+let w3 = window!("title='Some Title',d:c,w:30,h:10,flags=[Sizeable])");
 ```
+
+A window supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
+
+| Parameter name | Type | Positional parameter  | Purpose |
+|----------------|------|-----------------------|---------|
+| `title` or `text` or `caption` | String | **Yes** (first postional parameter) | The title (text) of the window |
+| `flags` | String or List| **No** | Window initialization flags |
 
 To create a window that will handle events from its children, use `#[Window(...)]` method:
 ```rs
@@ -20,9 +29,9 @@ struct MyWindow {
 
 A window supports the following initialization flags:
 * `window::Flags::None` - regular window (with a close button)
-* `window::Flags::Sizeable` - a window that has the resize grip and the maximize button
-* `window::Flags::NoCloseButton` - a window without a close button
-* `window::Flags::FixedPosition` - a window that can not be moved
+* `window::Flags::Sizeable` or `Sizeable` (for **window!** macro) - a window that has the resize grip and the maximize button
+* `window::Flags::NoCloseButton` or `NoCloseButton` (for **window!** macro) - a window without a close button
+* `window::Flags::FixedPosition` or `FixedPosition` (for **window!** macro) - a window that can not be moved
 
 ## Methods
 
