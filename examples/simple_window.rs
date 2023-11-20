@@ -1,3 +1,4 @@
+use appcui::prelude::*;
 // use appcui::controls::common::*;
 // use appcui::controls::layout::Layout;
 // use appcui::graphics::*;
@@ -235,4 +236,11 @@
 // //     a.run();
 // //     Ok(())
 // // }
-fn main() {}
+fn main() -> Result<(), appcui::system::Error> {
+    let mut app = App::new().build()?;
+    let mut win = window!("Title,d:c,w:40,h:9");
+    win.set_hotkey(key!("Alt+7"));
+    app.add_window(win);
+    app.run();
+    Ok(())
+}

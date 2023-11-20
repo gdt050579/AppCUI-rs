@@ -75,3 +75,38 @@ In terms of key association, a Window has two modes:
 | `M` or `R`            | Maximizes or Restores the size of the current Windows |
 | `Alt`+{`Left`, `Up`, `Right`, `Down`} | Moves the window towards one of the margins of the Desktop. For example `Alt`+`Up` will move current window to the top margin of the client space of the Desktop |
 | `Ctrl`+{`Left`, `Up`, `Right`, `Down`} | Increases or decreases the Width or Height of the current Window |
+
+## Window Tags
+
+For every window, a tag can be set for a window (a tag is a string associated with a Window that reflects its purpose). To set a tag use `.set_tag("<name")` method.
+For example, the following code:
+
+```rs
+fn main() -> Result<(), appcui::system::Error> {
+    let mut app = App::new().build()?;
+    let mut win = window!("Title,d:c,w:40,h:9");
+    win.set_tag("TAG");
+    app.add_window(win);
+    app.run();
+    Ok(())
+}
+```
+should generate a window that looks like the following:
+<img src="img/window_with_tag.png" width=400/>
+
+## Window Hot Key
+
+You can also associate a hot key to a window. A hot key allows you to quickly switch between windows. In the next example, we set up `Alt+7` as a hot key for a windows.
+
+```rs
+fn main() -> Result<(), appcui::system::Error> {
+    let mut app = App::new().build()?;
+    let mut win = window!("Title,d:c,w:40,h:9");
+    win.set_hotkey(key!("Alt+7"));
+    app.add_window(win);
+    app.run();
+    Ok(())
+}
+```
+should generate a window that looks like the following:
+<img src="img/window_with_key.png" width=400/>
