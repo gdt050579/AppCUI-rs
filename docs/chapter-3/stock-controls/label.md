@@ -49,7 +49,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("Hello world !", Layout::new("d:c,w:14")));
+    w.add(Label::new("Hello world !", Layout::new("d:c,w:14,h:1")));
     a.add_window(w);
     a.run();
     Ok(())
