@@ -16,8 +16,6 @@ let l2 = label!("MyLabel,x:10,y:5,w:15");
 
 The caption of a label may contain the special character `&` that indicates that the next character is a hot-key. 
 
-By default, a label has a height of one character. If the height is specified in the layout, and it is bigger than 1, then you cam use a label object to print multi-line texts as well.
-
 A label supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
 | Parameter name | Type | Positional parameter  | Purpose |
