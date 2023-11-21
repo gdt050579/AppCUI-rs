@@ -466,7 +466,7 @@ fn check_window_on_layout_changed() {
             let size = self.get_size();
             let client_size = self.get_client_size();
             if let Some(label) = self.get_control_mut(label_handle) {
-                label.set_text(
+                label.set_caption(
                     format!(
                         "Previous rect : {},{} - {}x{}\nNew rect      : {},{} - {}x{}\nClient size   : {}x{}",
                         old_layout.get_left(),
@@ -530,14 +530,14 @@ fn check_window_on_activate_deactivate() {
         fn on_activate(&mut self) {
             let h = self.info;
             if let Some(label) = self.get_control_mut(h) {
-                label.set_text("Activated");
+                label.set_caption("Activated");
             }
         }
 
         fn on_deactivate(&mut self) {
             let h = self.info;
             if let Some(label) = self.get_control_mut(h) {
-                label.set_text("Deactivated");
+                label.set_caption("Deactivated");
             }
         }
     }
@@ -636,7 +636,7 @@ fn check_window_toolbar_button_events() {
         fn set_info(&mut self, info: &str) {
             let h = self.info;
             if let Some(label) = self.get_control_mut(h) {
-                label.set_text(info);
+                label.set_caption(info);
             }
         }
     }
@@ -1000,11 +1000,11 @@ fn check_modal_window() {
                 let response = MyWin::new(format!("{}", self.counter + 1).as_str(), self.counter + 1).show();
                 let handle = self.lb;
                 if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
-                    lb.set_text(format!("Reponse from modal window: {}", r).as_str());
+                    lb.set_caption(format!("Reponse from modal window: {}", r).as_str());
                 } else {
                     if response.is_none() {
                         if let Some(lb) = self.get_control_mut(handle) {
-                            lb.set_text("Exit with None from modal window !");
+                            lb.set_caption("Exit with None from modal window !");
                         }
                     }
                 }

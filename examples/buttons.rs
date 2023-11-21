@@ -27,7 +27,7 @@ impl MyWin {
     fn set_label_text(&mut self, txt: &str) {
         let h = self.lb;            
         if let Some(label) = self.get_control_mut(h) {
-            label.set_text(txt);
+            label.set_caption(txt);
         }
     }
 }

@@ -11,8 +11,11 @@ impl Label {
             caption: Caption::new(caption, true),
         }
     }
-    pub fn set_text(&mut self, text: &str) {
+    pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, false);
+    }
+    pub fn get_caption(&self)->&str {
+        self.caption.get_text()
     }
 }
 impl OnPaint for Label {

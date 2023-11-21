@@ -28,7 +28,7 @@ fn check_button_control() {
         fn set_info(&mut self, txt: &str) {
             let h_label = self.info;
             if let Some(label) = self.get_control_mut(h_label) {
-                label.set_text(txt);
+                label.set_caption(txt);
             }
         }
     }
@@ -174,7 +174,7 @@ fn check_button_control_hotkey() {
         fn set_info(&mut self, txt: &str) {
             let h_label = self.info;
             if let Some(label) = self.get_control_mut(h_label) {
-                label.set_text(txt);
+                label.set_caption(txt);
             }
         }
     }

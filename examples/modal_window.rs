@@ -49,11 +49,11 @@ impl ButtonEvents for MyWin {
             let response = MyWin::new(format!("{}", self.counter + 1).as_str(), self.counter + 1).show();
             let handle = self.lb;
             if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
-                lb.set_text(format!("Reponse from modal window: {}", r).as_str());
+                lb.set_caption(format!("Reponse from modal window: {}", r).as_str());
             } else {
                 if response.is_none() {
                     if let Some(lb) = self.get_control_mut(handle) {
-                        lb.set_text("Exit with None from modal window !");
+                        lb.set_caption("Exit with None from modal window !");
                     }
                 }
             }
