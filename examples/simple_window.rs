@@ -239,7 +239,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
     let mut win = window!("Title,d:c,w:40,h:9");
-    win.set_hotkey(key!("Alt+7"));
+    win.add(label!("'label with a text',d:c,w:30,h:1"));
     app.add_window(win);
     app.run();
     Ok(())
