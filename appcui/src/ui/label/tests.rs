@@ -40,11 +40,26 @@ fn check_label_with_hotkey() {
     let script = "
         Paint.Enable(false)
         Paint('label with a hot key')   
-        CheckHash(0xD2356769850743E5)   
+        CheckHash(0xEC4CCF3D77022900)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("A &hot ket label", Layout::new("d:tl,w:30")));
+    w.add(Label::new("A &hot key label", Layout::new("d:tl,w:30")));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_label_with_nacro() {
+    let script = "
+        Paint.Enable(false)
+        Paint('label with a macro')   
+        CheckHash(0x9AC98702D1913E96)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:9");
+    w.add(label!("Caption='A label build with label! moacro',d:tl,w:30"));
+    w.add(label!("my_label,x:0,y:1,w:30"));
     a.add_window(w);
     a.run();
 }

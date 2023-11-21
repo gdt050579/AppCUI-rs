@@ -1,6 +1,6 @@
 use crate::{
     ui::common::{ControlManager, UIElement},
-    utils::{HandleManager, VectorIndex},
+    utils::HandleManager,
 };
 
 use super::Handle;
