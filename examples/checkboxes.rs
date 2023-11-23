@@ -11,15 +11,15 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("Checkboxes,d:c,w:40,h:12"),
+            base: window!("Checkboxes,d:c,w:40,h:10"),
             c1: Handle::None,
             c2: Handle::None,
             c3: Handle::None,
             lb: Handle::None,
         };
-        win.c1 = win.add(checkbox!("'&Single line',x:2,y:2,w:15"));
-        win.c2 = win.add(checkbox!("Caption='Inactive checkbox',x:2,y:3,w:15,enabled:false"));
-        win.c3 = win.add(checkbox!("Text='A multi line checkbox',x:2,y:4,w:20,h:3,checked:true"));
+        win.c1 = win.add(checkbox!("'A &Single line checkbox',x:2,y:2,w:40"));
+        win.c2 = win.add(checkbox!("Caption='&Inactive checkbox',x:2,y:3,w:15,enabled:false"));
+        win.c3 = win.add(checkbox!("Text='A &multi line checkbox that is enabled',x:2,y:4,w:20,h:3,checked:true"));
         win.lb = win.add(Label::new("", Layout::new("x:2,y:0,w:35")));
         win
     }

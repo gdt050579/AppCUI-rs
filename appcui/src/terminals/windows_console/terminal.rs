@@ -335,7 +335,7 @@ impl WindowsTerminal {
     // if colors are present --> recolor
     // if font is present --> apply font & size
 
-    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+    pub(crate) fn new(_builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
         let stdin = get_stdin_handle()?;
         let stdout = get_stdout_handle()?;
         let mut original_mode_flags = 0u32;
@@ -466,8 +466,8 @@ impl Terminal for WindowsTerminal {
         // update the cursor
         if surface.cursor.is_visible() {
             let pos = COORD {
-                x: surface.cursor.x as i16,
-                y: surface.cursor.y as i16,
+                x: (surface.cursor.x as i16) + self.visible_region.left,
+                y: (surface.cursor.y as i16) + self.visible_region.top,
             };
             let info = CONSOLE_CURSOR_INFO { size: 10, visible: TRUE };
             unsafe {
