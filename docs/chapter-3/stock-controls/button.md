@@ -56,8 +56,8 @@ The following keys are processed by a Button control if it has focus:
 
 | Key           | Purpose                                                                             |
 |---------------|-------------------------------------------------------------------------------------|
-| `Space`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action of pressing the button with a moud click.  |
-| `Enter`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action of pressing the button with a moud click.  |
+| `Space`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action clicking the checkbox with the mouse.  |
+| `Enter`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action clicking the checkbox with the mouse.  |
 
 Aditionally, `Alt`+**letter or number** will have the same action (even if the Button does not have a focus) if that letter or nunber was set as a hot-key for a button via its caption. For example, creating a value with the following caption: `"My b&utton"` (notice the `&` character before letter `u`) will enable `Alt+U` to be a hot-key associated with this button. Pressing this combination while the button is enabled and part of the current focused window, will change the focus to that button and will emit the `ButtonEvents::on_pressed(...)` event.
 
@@ -117,7 +117,7 @@ impl ButtonEvents for MyWin {
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    a.add_window(MyWin::new());
+    app.add_window(MyWin::new());
     app.run();
     Ok(())
 }

@@ -235,12 +235,43 @@ use appcui::prelude::*;
 // //     a.add(w);
 // //     a.run();
 // //     Ok(())
-// // }
+// // }use appcui::prelude::*;
+
+#[Window(events = CheckBoxEvents)]
+struct MyWin {
+    c: Handle<CheckBox>,
+    l: Handle<Label>,
+}
+
+impl MyWin {
+    fn new() -> Self {
+        let mut win = MyWin {
+            base: window!("'My Win',d:c,w:40,h:6"),
+            c: Handle::None,
+            l: Handle::None,
+        };
+        win.c = win.add(checkbox!("'My option',l:1,r:1,b:1"));
+        win.l = win.add(label!("'<no status>',l:1,r:1,t:1"));
+        win
+    }
+}
+
+impl CheckBoxEvents for MyWin {
+    fn on_status_changed(&mut self, _handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
+        let handle = self.l;
+        let l = self.get_control_mut(handle).unwrap();
+        if checked {
+            l.set_caption("Status: Checked");
+        } else {
+            l.set_caption("Status: Not-checked");
+        }
+        EventProcessStatus::Processed
+    }
+}
+
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut win = window!("Title,d:c,w:40,h:9");
-    win.add(label!("'label with a text',d:c,w:30,h:1"));
-    app.add_window(win);
+    app.add_window(MyWin::new());
     app.run();
     Ok(())
 }
