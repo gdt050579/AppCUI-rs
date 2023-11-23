@@ -47,7 +47,7 @@ impl<'a> NamedParamsMap<'a> {
         for param_sig in signature {
             let h = super::utils::compute_hash(param_sig.get_name());
             if let Some(index) = self.named.get(&h) {
-                // if parameter with name "..." is present and has an index                
+                // if parameter with name "..." is present and has an index
                 let k = super::utils::compute_hash(param_sig.get_key());
                 if self.all_params.contains_key(&k) {
                     // this means that two aliases were present
@@ -80,8 +80,8 @@ impl<'a> NamedParamsMap<'a> {
                             v.end,
                         ));
                     }
-                }      
-                let v = &mut self.values[*index as usize];          
+                }
+                let v = &mut self.values[*index as usize];
                 v.validate(param_list, param_sig.get_key(), param_sig.get_param_type())?;
                 // since it was already validated --> add the key to map
                 self.all_params.insert(k, *index);
@@ -110,7 +110,7 @@ impl<'a> NamedParamsMap<'a> {
         }
         None
     }
-    pub(crate) fn contains(&self, name:&str) -> bool {
+    pub(crate) fn contains(&self, name: &str) -> bool {
         let k = super::utils::compute_hash(name);
         self.all_params.contains_key(&k)
     }
@@ -120,5 +120,8 @@ impl<'a> NamedParamsMap<'a> {
             return Some(&mut self.values[*index as usize]);
         }
         None
+    }
+    pub(crate) fn get_bool(&mut self, name: &str) -> Option<bool> {
+        self.get_mut(name)?.get_bool()
     }
 }

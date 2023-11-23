@@ -4,7 +4,7 @@ use crate::prelude::*;
 fn check_checkbox_1() {
     let script = "
         Paint.Enable(false)
-        Paint('nine labels across al corners and center')   
+        Paint('some checkboxes')   
         CheckHash(0xAA393B73091205A4)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();

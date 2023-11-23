@@ -37,6 +37,13 @@ pub(super) fn add_string(s: &mut String, text: &str) {
     s.push_str(text);
     s.push('"');
 }
+pub(super) fn add_bool(s: &mut String, value: bool) {
+    if value {
+        s.push_str("true");
+    } else {
+        s.push_str("false");
+    }
+}
 
 fn get_bool_value(params: &mut NamedParamsMap, name: &str, value_if_not_found: bool) -> bool {
     if let Some(value) = params.get_mut(name) {

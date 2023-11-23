@@ -261,6 +261,11 @@ pub fn button(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn checkbox(input: TokenStream) -> TokenStream {
+    crate::controls::checkbox::create(input)
+}
+
+#[proc_macro]
 pub fn label(input: TokenStream) -> TokenStream {
     crate::controls::label::create(input)
 }
