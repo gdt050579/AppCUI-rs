@@ -1078,7 +1078,7 @@ bool WindowBarItem::Init(
 //=========================================================================================================================================================
 Window::~Window()
 {
-    DELETE_CONTROL_CONTEXT(WindowControlContext);
+    // Done (modal)
 }
 Window::Window(const ConstString& caption, string_view layout, Flags Flags)
     : Control(new WindowControlContext(), caption, layout, false)
@@ -1096,7 +1096,7 @@ bool Window::MaximizeRestore()
 }
 bool Window::CenterScreen()
 {
-//
+    //
 }
 void Window::OnMousePressed(int x, int y, Input::MouseButton button)
 {
@@ -1124,11 +1124,7 @@ bool Window::OnMouseLeave()
 }
 bool Window::OnBeforeResize(int newWidth, int newHeight)
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    if ((Members->Flags & Flags::Sizeable) == Flags::None)
-        return false;
-    return (newWidth >= Members->Layout.MinWidth) && (newWidth <= Members->Layout.MaxWidth) &&
-           (newHeight >= Members->Layout.MinHeight) && (newHeight <= Members->Layout.MaxHeight);
+    // Done (via layout)
 }
 void Window::OnAfterResize(int, int)
 {
@@ -1214,29 +1210,15 @@ const Graphics::CharacterBuffer& Window::GetTag()
 
 bool Window::Exit(Dialogs::Result dialogResult)
 {
-    //CHECK(dialogResult != Dialogs::Result::None, false, "Dialog result code must not be None !");
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, false);
-    Members->DialogResult                     = dialogResult;
-    Members->ResizeMoveMode                   = false;
-    Application::GetApplication()->loopStatus = Internal::LoopStatus::StopCurrent;
-    return true;
+    // Done (modal)
 }
 Dialogs::Result Window::Show()
 {
-    CHECK(GetParent() == nullptr,
-          Dialogs::Result::None,
-          "Unable to run modal window if it is attached to another control !");
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, Dialogs::Result::None);
-    CHECK(Members->RecomputeLayout(nullptr), Dialogs::Result::None, "Fail to recompute layout !");
-    this->RecomputeLayout();
-    CHECK(Application::GetApplication()->ExecuteEventLoop(this, true), Dialogs::Result::None, "Modal execution failed !");
-
-    return Members->DialogResult;
+    // Done (modal)
 }
 Dialogs::Result Window::GetDialogResult()
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, Dialogs::Result::None);
-    return Members->DialogResult;
+    // Done (modal)
 }
 bool Window::IsWindowInResizeMode()
 {
@@ -1252,19 +1234,11 @@ bool Window::EnableResizeMode()
 }
 Reference<Menu> Window::AddMenu(const ConstString& name)
 {
-    CREATE_TYPECONTROL_CONTEXT(WindowControlContext, Members, nullptr);
-    CHECK(Members->menu, nullptr, "Application was not initialized with Menu option set up !");
-    ItemHandle itm         = Members->menu->AddMenu(name);
-    Controls::Menu* result = Members->menu->GetMenu(itm);
-    CHECK(result, nullptr, "Fail to create menu !");
-    return Reference<Menu>(result);
+    // Done (mo need)
 }
 WindowControlsBar Window::GetControlBar(WindowControlsBarLayout layout)
 {
-    if ((this->Context) && (layout != WindowControlsBarLayout::None))
-        return WindowControlsBar(this->Context, layout);
-    else
-        return WindowControlsBar(nullptr, WindowControlsBarLayout::None);
+    // Done (modal)
 }
 } // namespace AppCUI
 
