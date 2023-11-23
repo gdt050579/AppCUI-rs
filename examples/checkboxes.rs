@@ -40,7 +40,7 @@ impl CheckBoxEvents for MyWin {
             _ => 0,
         };
         self.set_label_text(format!("Checkbox {} check status: {}", id, checked).as_str());
-        EventProcessStatus::Ignored
+        EventProcessStatus::Processed
     }
 }
 
