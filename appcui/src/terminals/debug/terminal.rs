@@ -19,6 +19,7 @@ pub(crate) struct DebugTerminal {
     ignore_paint_command: bool,
     paint_title: String,
     hash_to_test: Option<u64>,
+    cursor_point_to_check: Option<Point>,
     mouse_pos: Point,
 }
 impl DebugTerminal {
@@ -41,8 +42,16 @@ impl DebugTerminal {
         v
     }
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-        let mut w = if builder.size.is_none() { 80 } else { builder.size.unwrap().width as u32 };
-        let mut h = if builder.size.is_none() { 40 } else { builder.size.unwrap().height as u32 };
+        let mut w = if builder.size.is_none() {
+            80
+        } else {
+            builder.size.unwrap().width as u32
+        };
+        let mut h = if builder.size.is_none() {
+            40
+        } else {
+            builder.size.unwrap().height as u32
+        };
         w = w.clamp(10, 1000);
         h = h.clamp(10, 1000);
         let commands = DebugTerminal::build_commands(builder.debug_script.as_ref().unwrap().as_str());
@@ -55,6 +64,7 @@ impl DebugTerminal {
             ignore_paint_command: false,
             paint_title: String::new(),
             hash_to_test: None,
+            cursor_point_to_check: None,
             mouse_pos: Point::new(0, 0),
         }))
     }
@@ -155,7 +165,26 @@ impl Terminal for DebugTerminal {
             // no need to paint --> just a check hash command
             self.paint = false;
         }
+        let cursor = if !surface.cursor.is_visible() {
+            Point::new(-1, -1)
+        } else {
+            Point::new(surface.cursor.x as i32, surface.cursor.y as i32)
+        };
+        if let Some(point) = self.cursor_point_to_check {
+            if point != cursor {
+                let cursor_pos = format!("({},{})", cursor.x, cursor.y);
+                let cursor_repr = if cursor.x < 0 { "Hidden" } else { cursor_pos.as_str() };
+                let point_pos = format!("({},{})", point.x, point.y);
+                let point_repr = if point.x < 0 { "Hidden" } else { point_pos.as_str() };
+                panic!(
+                    "Invalid cursor position. Expectig the cursor to be {}, but found {}",
+                    cursor_repr, point_repr
+                );
+            }
+        }
+
         self.hash_to_test = None;
+        self.cursor_point_to_check = None;
         // only paint if requested
         if !self.paint {
             return;
@@ -172,7 +201,7 @@ impl Terminal for DebugTerminal {
         self.temp_str.clear();
 
         // name
-        self.temp_str.push_str("| Name: \x1b[93;40m");
+        self.temp_str.push_str("| Name  : \x1b[93;40m");
         self.temp_str.push_str(&self.paint_title);
         while self.temp_str.len() < (self.size.width + 16) as usize {
             self.temp_str.push(' ');
@@ -182,8 +211,22 @@ impl Terminal for DebugTerminal {
         self.temp_str.clear();
 
         // hash
-        self.temp_str.push_str("| Hash: \x1b[93;40m");
+        self.temp_str.push_str("| Hash  : \x1b[93;40m");
         self.temp_str.push_str(format!("0x{:X}", surface_hash).as_str());
+        while self.temp_str.len() < (self.size.width + 16) as usize {
+            self.temp_str.push(' ');
+        }
+        self.temp_str.push_str("\x1b[0m|");
+        println!("{}", &self.temp_str);
+        self.temp_str.clear();
+
+        // cursor
+        self.temp_str.push_str("| Cursor: \x1b[93;40m");
+        if !surface.cursor.is_visible() {
+            self.temp_str.push_str("Hidden");
+        } else {
+            self.temp_str.push_str(format!("{},{}", cursor.x, cursor.y).as_str());
+        }
         while self.temp_str.len() < (self.size.width + 16) as usize {
             self.temp_str.push(' ');
         }
@@ -245,10 +288,16 @@ impl Terminal for DebugTerminal {
         let mut x = 0u32;
         let mut y = 0u32;
         for ch in &surface.chars {
+            let mut fore = ch.foreground;
+            let mut back = ch.background;
+            if (x as i32 == cursor.x) && (y as i32 == cursor.y) {
+                fore = ch.background;
+                back = ch.foreground;
+            }
             self.temp_str.push_str("\x1b[38;2;");
-            self.temp_str.push_str(DebugTerminal::color_to_str(ch.foreground));
+            self.temp_str.push_str(DebugTerminal::color_to_str(fore));
             self.temp_str.push_str("m\x1b[48;2;");
-            self.temp_str.push_str(DebugTerminal::color_to_str(ch.background));
+            self.temp_str.push_str(DebugTerminal::color_to_str(back));
             self.temp_str.push_str("m");
             if ch.code <= ' ' {
                 self.temp_str.push(' ');
@@ -329,6 +378,13 @@ impl Terminal for DebugTerminal {
             if let Some(hash) = cmd.get_screen_hash() {
                 self.paint = false; // I don't want to paint anything --> just store the hash
                 self.hash_to_test = Some(hash); // next time I paint --> I will check it
+                RuntimeManager::get().request_repaint();
+                return SystemEvent::None;
+            }
+            // check for CheckCursor command
+            if let Some(pos) = cmd.get_cursor_pos() {
+                self.paint = false; // I don't want to paint anything --> just store the hash
+                self.cursor_point_to_check = Some(pos); // next time I paint --> I will check it
                 RuntimeManager::get().request_repaint();
                 return SystemEvent::None;
             }

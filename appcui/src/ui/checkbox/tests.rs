@@ -5,7 +5,8 @@ fn check_checkbox_1() {
     let script = "
         Paint.Enable(false)
         Paint('some checkboxes')   
-        CheckHash(0xAA393B73091205A4)   
+        CheckHash(0xAA393B73091205A4)  
+        CheckCursor(13,5) 
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);

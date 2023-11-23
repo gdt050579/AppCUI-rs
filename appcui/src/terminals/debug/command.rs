@@ -1,9 +1,10 @@
 use std::collections::VecDeque;
 
-use crate::terminals::SystemEvent;
 use crate::graphics::Point;
+use crate::terminals::SystemEvent;
 
 use super::{
+    check_cursor_command::CheckCursorCommand,
     check_hash_command::CheckHashCommand,
     command_parser::{CommandParser, ParserError},
     keypress_command::KeyPressedCommand,
@@ -14,7 +15,8 @@ use super::{
     mouse_release_command::MouseReleaseCommand,
     mouse_wheel_command::MouseWheelCommand,
     paint_command::PaintCommand,
-    resize_command::ResizeCommand, paint_enable_command::PaintEnableCommand,
+    paint_enable_command::PaintEnableCommand,
+    resize_command::ResizeCommand,
 };
 
 pub(super) enum Command {
@@ -27,6 +29,7 @@ pub(super) enum Command {
     Paint(PaintCommand),
     PaintEnable(PaintEnableCommand),
     CheckHash(CheckHashCommand),
+    CheckCursor(CheckCursorCommand),
     Resize(ResizeCommand),
     KeyPresed(KeyPressedCommand),
 }
@@ -64,11 +67,15 @@ impl Command {
             }
             "Paint.Enable" => {
                 let variant = PaintEnableCommand::new(&cp)?;
-                return Ok(Command::PaintEnable(variant));            
+                return Ok(Command::PaintEnable(variant));
             }
             "CheckHash" => {
                 let variant = CheckHashCommand::new(&cp)?;
                 return Ok(Command::CheckHash(variant));
+            }
+            "CheckCursor" => {
+                let variant = CheckCursorCommand::new(&cp)?;
+                return Ok(Command::CheckCursor(variant));
             }
             "Resize" => {
                 let variant = ResizeCommand::new(&cp)?;
@@ -98,6 +105,7 @@ impl Command {
             Command::Paint(_) => {}
             Command::PaintEnable(_) => {}
             Command::CheckHash(_) => {}
+            Command::CheckCursor(_) => {}
         }
     }
     pub(super) fn get_paint_command_title(&self) -> Option<String> {
@@ -109,6 +117,12 @@ impl Command {
     pub(super) fn get_screen_hash(&self) -> Option<u64> {
         match self {
             Command::CheckHash(cmd) => Some(cmd.get_hash()),
+            _ => None,
+        }
+    }
+    pub(super) fn get_cursor_pos(&self) -> Option<Point> {
+        match self {
+            Command::CheckCursor(cmd) => Some(cmd.get_point()),
             _ => None,
         }
     }

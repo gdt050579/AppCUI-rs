@@ -68,9 +68,11 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
 | `Resize(width,height)` | simulates a resize of the virtual terminal to the size represented by `width` and `height` parameters |
      
 ## Validation commands
-| Command            | Purpose |
-|--------------------|---------|  
-| `CheckHash(hash)`  | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing. |
+| Command               | Purpose |
+|-----------------------|---------|  
+| `CheckHash(hash)`     | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing. |
+| `CheckCursor(x,y)`    | checks if the cursor (caret) is at a specify position |
+| `CheckCursor(hidden)` | checks is the cursor (caret) is hidden (not visible). You cal also check this by using `false` instead of `hidded` |
 
 ## Example
 
