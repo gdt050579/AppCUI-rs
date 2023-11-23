@@ -13,6 +13,10 @@ name = "buttons"
 path = "buttons.rs"
 
 [[example]]
+name = "checkboxes"
+path = "checkboxes.rs"
+
+[[example]]
 name = "simple_window"
 path = "simple_window.rs"
 
