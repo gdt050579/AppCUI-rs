@@ -26,6 +26,10 @@ impl CheckBox {
     pub fn is_checked(&self) -> bool {
         self.checked
     }
+    #[inline]
+    pub fn set_checked(&mut self, checked: bool)  {
+        self.checked = checked;
+    }
 }
 impl OnPaint for CheckBox {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {

@@ -103,3 +103,50 @@ fn check_checkbox_events() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+
+#[test]
+fn check_checkbox_set_checked() {
+    #[Window(events = ButtonEvents, internal=true)]
+    struct MyWin {
+        b: Handle<Button>,
+        c: Handle<CheckBox>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Win-1,d:c,w:40,h:8"), 
+                b: Handle::None,
+                c: Handle::None,
+            };
+            me.b = me.add(button!("'Enable/Disable',l:1,r:1,b:1"));
+            me.c = me.add(checkbox!("'Inactive checkbox',l:1,r:1,t:1,enabled:false"));
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let handle = self.c;
+            let c = self.get_control_mut(handle).unwrap();
+            c.set_checked(!c.is_checked());
+            return EventProcessStatus::Processed;
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x4513048D3C5B3BE2)
+        Key.Pressed(Tab)
+        Key.Pressed(Space)
+        Paint('now checked')  
+        CheckHash(0x53F15D136C5350FE) 
+        Mouse.Move(30,5)
+        Mouse.Click(30,5,left)
+        Paint('now un-checked')  
+        CheckHash(0x4513048D3C5B3BE2) 
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run(); 
+}
