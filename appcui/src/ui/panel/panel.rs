@@ -49,13 +49,35 @@ impl Panel {
         }
     }
     #[inline]
-    fn paint_window(&self, surface: &mut Surface, theme: &Theme) {}
+    fn paint_window(&self, surface: &mut Surface, theme: &Theme) {
+        let sz = self.get_size();
+        let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
+        surface.clear(Character::with_char(' '));
+        surface.draw_rect(Rect::with_point_and_size(Point::ORIGIN, sz), LineType::Single, border_color);
+        if (self.caption.get_chars_count() > 0) && (sz.width > 7) {
+            let text_color = if self.is_enabled() { theme.text.normal } else { theme.text.inactive };
+            let mut format = TextFormat::new(3, 0, text_color, TextAlignament::Left, false);
+            format.width = Some((sz.width - 6) as u16);
+            let chars_count = self.caption.get_chars_count();
+            if chars_count > (sz.width - 6) as usize {
+                surface.write_text(self.caption.get_text(), &format);
+                surface.write_char(2, 0, Character::with_char(' '));
+                surface.write_char((sz.width - 3) as i32, 0, Character::with_char(' '));
+                surface.write_char((sz.width - 4) as i32, 0, Character::with_char(SpecialChar::ThreePointsHorizontal));
+            } else {
+                let x = ((sz.width / 2) as i32) - ((chars_count + 2) as i32) / 2;
+                format.x = x + 1;
+                surface.write_text(self.caption.get_text(), &format);
+                surface.write_char(x, 0, Character::with_char(' '));
+                surface.write_char(x + 1 + chars_count as i32, 0, Character::with_char(' '));
+            }
+        }
+    }
     #[inline]
     fn paint_page(&self, surface: &mut Surface, theme: &Theme) {
         // title si ignored
-        if self.is_enabled()
-        {
-            surface.clear(Character::with_attributes(' ',theme.tab.text.pressed_or_selectd));
+        if self.is_enabled() {
+            surface.clear(Character::with_attributes(' ', theme.tab.text.pressed_or_selectd));
         } else {
             surface.clear(Character::with_char(' '));
         }
