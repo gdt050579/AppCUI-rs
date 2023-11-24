@@ -141,7 +141,7 @@ impl<'a> ControlBuilder<'a> {
     pub(super) fn add_bool_parameter_with_default(&mut self, param_name: &str, default: bool) {
         self.add_comma();
         let value = self.parser.get_bool(param_name);
-        self.add_bool(value.unwrap_or(default));        
+        self.add_bool(value.unwrap_or(default));
     }
     pub(super) fn add_layout(&mut self) {
         self.add_comma();
@@ -159,7 +159,30 @@ impl<'a> ControlBuilder<'a> {
             }
         }
     }
-    pub(super) fn add_flags(&mut self, param_name: &str, flag_name: &str, available_flags: &mut FlagsSignature) {
+    pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &mut FlagsSignature, default: &str) {
+        self.add_comma();
+        if let Some(value) = self.parser.get(param_name) {
+            let variant = value.get_string();
+            if let Some(variant_name) = available_variants.get(variant) {
+                self.content.push_str(enum_name);
+                self.content.push_str("::");
+                self.content.push_str(variant_name);
+            } else {
+                Error::new(
+                    self.ref_str,
+                    format!("Unknwon enum variant: {} !", variant).as_str(),
+                    value.get_start_pos(),
+                    value.get_end_pos(),
+                )
+                .panic();
+            }
+        } else {
+            self.content.push_str(enum_name);
+            self.content.push_str("::");
+            self.content.push_str(default);
+        }
+    }
+    pub(super) fn add_flags_parameter(&mut self, param_name: &str, flag_name: &str, available_flags: &mut FlagsSignature) {
         self.add_comma();
         if let Some(value) = self.parser.get_mut(param_name) {
             if let Some(list) = value.get_list() {
