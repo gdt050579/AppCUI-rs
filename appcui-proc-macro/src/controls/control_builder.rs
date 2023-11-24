@@ -138,6 +138,11 @@ impl<'a> ControlBuilder<'a> {
             self.add_text(default);
         }
     }
+    pub(super) fn add_bool_parameter_with_default(&mut self, param_name: &str, default: bool) {
+        self.add_comma();
+        let value = self.parser.get_bool(param_name);
+        self.add_bool(value.unwrap_or(default));        
+    }
     pub(super) fn add_layout(&mut self) {
         self.add_comma();
         layout::add_layout(&mut self.content, &self.parser);
