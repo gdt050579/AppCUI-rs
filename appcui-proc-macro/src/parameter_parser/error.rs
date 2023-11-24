@@ -72,6 +72,9 @@ impl Error {
         }
         s
     }
+    pub(crate) fn panic(self) {
+        panic!("{}",self.get_description().as_str());
+    }
 }
 impl Debug for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

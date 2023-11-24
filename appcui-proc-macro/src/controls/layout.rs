@@ -223,5 +223,5 @@ pub(super) fn add_layout(s: &mut String, params: &NamedParamsMap) {
     s.push_str("Layout::new(\"");
     analyze_layout_validity(params);
     copy_layout_params(s, params);
-    s.push_str("\") ");
+    s.push_str("\")");
 }

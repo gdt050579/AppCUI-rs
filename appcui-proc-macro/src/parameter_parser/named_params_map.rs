@@ -9,6 +9,14 @@ pub(crate) struct NamedParamsMap<'a> {
 }
 
 impl<'a> NamedParamsMap<'a> {
+    pub(crate) fn empty()->Self {
+        NamedParamsMap {
+            named: HashMap::new(),
+            values: Vec::new(),
+            all_params: HashMap::new(),
+            positional_count: 0
+        }
+    }
     pub(crate) fn validate_positional_parameters(&mut self, param_list: &str, params: &[PositionalParameter]) -> Result<(), Error> {
         if self.positional_count > params.len() {
             return Err(Error::new(

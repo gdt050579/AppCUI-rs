@@ -1,0 +1,200 @@
+use crate::parameter_parser;
+use crate::parameter_parser::*;
+use proc_macro::*;
+use std::str::FromStr;
+
+use super::layout;
+
+static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
+    // generic characteristics
+    NamedParameter::new("visible", "visible", ParamType::Bool),
+    NamedParameter::new("enabled", "enabled", ParamType::Bool),
+    NamedParameter::new("enable", "enabled", ParamType::Bool),
+    // layout
+    NamedParameter::new("x", "x", ParamType::Layout),
+    NamedParameter::new("y", "y", ParamType::Layout),
+    NamedParameter::new("left", "left", ParamType::Layout),
+    NamedParameter::new("l", "left", ParamType::Layout),
+    NamedParameter::new("right", "right", ParamType::Layout),
+    NamedParameter::new("r", "right", ParamType::Layout),
+    NamedParameter::new("top", "top", ParamType::Layout),
+    NamedParameter::new("t", "top", ParamType::Layout),
+    NamedParameter::new("bottom", "bottom", ParamType::Layout),
+    NamedParameter::new("b", "bottom", ParamType::Layout),
+    NamedParameter::new("width", "width", ParamType::Layout),
+    NamedParameter::new("w", "width", ParamType::Layout),
+    NamedParameter::new("height", "height", ParamType::Layout),
+    NamedParameter::new("h", "height", ParamType::Layout),
+    NamedParameter::new("align", "align", ParamType::Alignament),
+    NamedParameter::new("a", "align", ParamType::Alignament),
+    NamedParameter::new("alignament", "align", ParamType::Alignament),
+    NamedParameter::new("dock", "dock", ParamType::Alignament),
+    NamedParameter::new("d", "dock", ParamType::Alignament),
+];
+
+pub(super) struct ControlBuilder<'a> {
+    name: &'static str,
+    content: String,
+    ref_str: &'a str,
+    string_representation: Box<String>,
+    parser: NamedParamsMap<'a>,
+}
+
+impl<'a> ControlBuilder<'a> {
+    fn token_stream_to_string(name: &str, input: TokenStream) -> String {
+        let mut tokens = input.into_iter().peekable();
+
+        let mut string_param = match tokens.next() {
+            Some(TokenTree::Literal(lit)) => lit.to_string(),
+            _ => panic!("The parameter provided to the '{}!' macro must be a string literal.", name),
+        };
+
+        if tokens.peek().is_some() {
+            panic!("Exactly one string must be provided as input.");
+        }
+        if (!string_param.starts_with("\"")) || (!string_param.ends_with("\"")) {
+            panic!("The parameter provided to the '{}!' macro must be a string literal.", name);
+        }
+        if string_param.len() == 2 {
+            panic!("You can not provide an empty string for '{}!' macro !", name);
+        }
+
+        string_param.remove(0);
+        string_param.remove(string_param.len() - 1);
+
+        string_param
+    }
+    pub(super) fn new(
+        name: &'static str,
+        input: TokenStream,
+        positional_parameters: &[PositionalParameter],
+        named_parameters: &[NamedParameter],
+    ) -> Self {
+        let string_repr = ControlBuilder::token_stream_to_string(name, input);
+        let mut builder = Self {
+            name,
+            string_representation: Box::new(string_repr),
+            content: String::with_capacity(512),
+            parser: NamedParamsMap::empty(),
+            ref_str: "",
+        };
+        unsafe {
+            let ref_str: &str = std::mem::transmute(builder.string_representation.as_str());
+            builder.parser = parameter_parser::parse(ref_str).unwrap();
+            builder.parser.validate_positional_parameters(ref_str, positional_parameters).unwrap();
+            builder.parser.validate_names_parameters(ref_str, named_parameters).unwrap();
+            builder.parser.validate_names_parameters(ref_str, CONTROL_NAMED_PARAMATERS).unwrap();
+            builder.parser.check_unkwnon_params(ref_str).unwrap();
+            builder.ref_str = ref_str;
+        }
+        builder.content.push_str("{\n\tlet mut control = ");
+
+        builder
+    }
+    fn add_comma(&mut self) {
+        if self.content.ends_with('(') == false {
+            self.content.push_str(", ");
+        }
+    }
+    fn add_text(&mut self, text: &str) {
+        self.content.push('"');
+        self.content.push_str(text);
+        self.content.push('"');
+    }
+    fn add_bool(&mut self, value: bool) {
+        if value {
+            self.content.push_str("true");
+        } else {
+            self.content.push_str("false");
+        }
+    }
+    pub(super) fn init_control(&mut self, method: &str) {
+        self.content.push_str(method);
+        self.content.push('(');
+    }
+    pub(super) fn finish_control_initialization(&mut self) {
+        self.content.push_str(");\n\t");
+    }
+    pub(super) fn add_strng_parameter(&mut self, param_name: &str) {
+        self.add_comma();
+        let value = self
+            .parser
+            .get(param_name)
+            .expect(format!("Missing parameter '{}' from initialization macro !", param_name).as_str());
+        unsafe {
+            let x = std::mem::transmute(value.get_string());
+            self.add_text(x);
+        }
+    }
+    pub(super) fn add_string_parameter_with_default(&mut self, param_name: &str, default: &str) {
+        self.add_comma();
+        let value = self.parser.get(param_name);
+        if let Some(str_value) = value {
+            unsafe {
+                let x = std::mem::transmute(str_value.get_string());
+                self.add_text(x);
+            }
+        } else {
+            self.add_text(default);
+        }
+    }
+    pub(super) fn add_layout(&mut self) {
+        self.add_comma();
+        layout::add_layout(&mut self.content, &self.parser);
+    }
+    pub(super) fn add_basecontrol_operations(&mut self) {
+        if let Some(is_enabled) = self.parser.get_bool("enabled") {
+            if is_enabled == false {
+                self.content.push_str("control.set_enabled(false);\n\t");
+            }
+        }
+        if let Some(is_visible) = self.parser.get_bool("visible") {
+            if is_visible == false {
+                self.content.push_str("control.set_visible(false);\n\t");
+            }
+        }
+    }
+    pub(super) fn add_flags(&mut self, param_name: &str, flag_name: &str, available_flags: &mut FlagsSignature) {
+        self.add_comma();
+        if let Some(value) = self.parser.get_mut(param_name) {
+            if let Some(list) = value.get_list() {
+                if list.len() == 0 {
+                    self.content.push_str(flag_name);
+                    self.content.push_str("::None");
+                } else {
+                    let mut add_or_operator = false;
+                    for name in list {
+                        if let Some(flag) = available_flags.get(name.get_string()) {
+                            if add_or_operator {
+                                self.content.push_str(" | ")
+                            }
+                            self.content.push_str(flag_name);
+                            self.content.push_str("::");
+                            self.content.push_str(flag);
+                            add_or_operator = true;
+                        } else {
+                            Error::new(
+                                self.ref_str,
+                                format!("Unknwon flag: {} !", name.get_string()).as_str(),
+                                name.get_start_pos(),
+                                name.get_end_pos(),
+                            )
+                            .panic();
+                        }
+                    }
+                }
+            } else {
+                panic!("Parameter '{}' should contain some flags !", param_name);
+            }
+        } else {
+            self.content.push_str(flag_name);
+            self.content.push_str("::None");
+        }
+    }
+}
+impl Into<TokenStream> for ControlBuilder<'_> {
+    fn into(mut self) -> TokenStream {
+        self.content.push_str("\n\tcontrol\n}");
+        TokenStream::from_str(self.content.as_str()).expect(format!("Fail to convert '{}!' macro content to token stream", self.name).as_str())
+    }
+}
