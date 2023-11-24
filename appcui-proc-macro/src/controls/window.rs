@@ -24,7 +24,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.init_control("Window::new");
     cb.add_strng_parameter("title");  
     cb.add_layout();
-    cb.add_flags("flags", "window::Flags", unsafe { &mut WINDOW_FLAGS });
+    cb.add_flags_parameter("flags", "window::Flags", unsafe { &mut WINDOW_FLAGS });
     cb.finish_control_initialization();
     cb.into()
 }

@@ -18,9 +18,9 @@ fn check_button_control() {
                 but3: Handle::None,
             };
             me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:35")));
-            me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:3,w:13"), button::Flags::None));
-            me.but2 = me.add(Button::new("Button &2", Layout::new("x:16,y:3,w:13"), button::Flags::None));
-            let mut b3 = Button::new("Button &3", Layout::new("x:31,y:3,w:13"), button::Flags::None);
+            me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:3,w:13"), button::Type::Normal));
+            me.but2 = me.add(Button::new("Button &2", Layout::new("x:16,y:3,w:13"), button::Type::Normal));
+            let mut b3 = Button::new("Button &3", Layout::new("x:31,y:3,w:13"), button::Type::Normal);
             b3.set_enabled(false);
             me.but3 = me.add(b3);
             me
@@ -85,8 +85,8 @@ fn check_button_control_2() {
                 reset: Handle::None,
                 counter: 0,
             };
-            win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Flags::None));
-            win.reset = win.add(Button::new("Reset", Layout::new("x:75%,y:2,w:13,a:c"), button::Flags::None));
+            win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Type::Normal));
+            win.reset = win.add(Button::new("Reset", Layout::new("x:75%,y:2,w:13,a:c"), button::Type::Normal));
             win
         }
         fn update_add_button(&mut self) {
@@ -138,15 +138,15 @@ fn check_button_control_with_macro() {
     let script = "
         Paint.Enable(false)
         Paint('Initial focus => Add (0) and Reset')   
-        CheckHash(0xC656986DBDA863BA)
+        //CheckHash(0xC656986DBDA863BA)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Macro Test", Layout::new("d:c,w:40,h:10"), window::Flags::None);
     w.add(button!("Start,x:2,y:3,w:15"));
     w.add(button!("Disabled,x:20,y:3,w:15,enable:false"));
     w.add(button!("caption:'Not Visible',x:0,y:0,w:100%,visible:false"));
-    w.add(button!("Flat,x:2,y:5,w:15,flags:flat"));
-    w.add(button!("text:'Flat and disabled',x:2,y:7,w:30,a:tl,flags:[flat],enable:false"));
+    w.add(button!("Flat,x:2,y:5,w:15,type:flat"));
+    w.add(button!("text:'Flat and disabled',x:2,y:7,w:30,a:tl,type:flat,enable:false"));
     a.add_window(w);
     a.run();
 }

@@ -170,7 +170,7 @@ impl Window {
     ///
     ///     let mut a = App::new().build().unwrap();
     ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
-    ///     w.add(Button::new("Press me",Layout::new("x:1,y:1,w:10"),button::Flags::None));
+    ///     w.add(Button::new("Press me",Layout::new("x:1,y:1,w:10"),button::Type::Normal));
     /// ```    
     ///
     /// You can not add a Window as a child to another Window nor can you add a Desktop

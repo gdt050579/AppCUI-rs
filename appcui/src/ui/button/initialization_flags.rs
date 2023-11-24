@@ -1,6 +1,8 @@
-use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits = 8)]
-pub enum Flags {
-    Flat = 0x01,
+
+#[repr(u8)]
+#[derive(Copy,Clone,PartialEq,Eq)]
+pub enum Type {
+    Normal,
+    Flat
 }

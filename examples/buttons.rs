@@ -20,7 +20,7 @@ impl MyWin {
         };
         win.b1 = win.add(button!("&Button,x:2,y:2,w:15"));
         win.b2 = win.add(button!("'&Inactive',x:19,y:2,w:15,enabled:false"));
-        win.b3 = win.add(button!("&Flat,x:2,y:4,w:32,flags:flat"));
+        win.b3 = win.add(button!("&Flat,x:2,y:4,w:32,type:flat"));
         win.lb = win.add(Label::new("",Layout::new("x:2,y:0,w:35")));
         win
     }

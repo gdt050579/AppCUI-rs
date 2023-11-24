@@ -1,9 +1,9 @@
 use crate::prelude::*;
-use crate::ui::button::{events::EventData, Flags};
+use crate::ui::button::{events::EventData, Type};
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Button {
-    flags: Flags,
+    button_type: Type,
     caption: Caption,
     pressed: bool,
 }
@@ -12,17 +12,17 @@ impl Button {
     /// # Examples
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), button::Flags::None);
+    /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), button::Type::Normal);
     /// ```
-    pub fn new(caption: &str, layout: Layout, flags: Flags) -> Self {
+    pub fn new(caption: &str, layout: Layout, button_type: Type) -> Self {
         let mut but = Button {
             base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             caption: Caption::new(caption, true),
-            flags,
+            button_type,
             pressed: false,
         };
 
-        if flags.contains(super::Flags::Flat) {
+        if button_type == super::Type::Flat {
             but.set_size_bounds(3, 1, u16::MAX, 1);
         } else {
             but.set_size_bounds(4, 2, u16::MAX, 2);
@@ -78,7 +78,7 @@ impl OnPaint for Button {
             _ if self.is_mouse_over() => theme.button.text.hovered,
             _ => theme.button.text.normal,
         };
-        let flat = self.flags.contains(Flags::Flat);
+        let flat = self.button_type == super::Type::Flat;
         let w = if flat { self.get_size().width } else { self.get_size().width - 1 };
         let mut format = TextFormat::single_line((w / 2) as i32, 0, col_text, TextAlignament::Center);
         format.chars_count = Some(self.caption.get_chars_count() as u16);

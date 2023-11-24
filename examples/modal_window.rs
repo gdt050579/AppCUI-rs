@@ -23,7 +23,7 @@ impl MyWin {
         win.b2 = win.add(Button::new(
             format!("Counter = {}", counter).as_str(),
             Layout::new("x:50%,y:4,a:c,w:30"),
-            button::Flags::None,
+            button::Type::Normal,
         ));
         win.b3 = win.add(button!("E&xit,x:50%,y:6,a:c,w:30"));
         win.lb = win.add(Label::new("", Layout::new("x:0,y:0,w:100%")));

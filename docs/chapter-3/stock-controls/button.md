@@ -21,16 +21,16 @@ A button supports all common parameters (as they are described in [Instantiate v
 | Parameter name | Type | Positional parameter  | Purpose |
 |----------------|------|-----------------------|---------|
 | `name` or `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a button |
-| `flags` | String or List| **No** | Button initialization flags |
+| `type`                        | String | **No** | Button initialization flags |
 
-A button supports the following initialization flags:
-* `button::Flags::Flat` or `flat` (for macro initialization) - thils will hide the shaddow of the button makeing it flat.
+A button supports the following initialization types:
+* `button::Type::Flat` or `flat` (for macro initialization) - thils will hide the shaddow of the button makeing it flat.
 
 Some examples that uses these paramateres:
 ```rs
 let disabled_button = button!("caption=&Disabled,x:10,y:5,w:15,enable=false");
 let hidden_button = button!("text='&Hidden',x=9,y:1,align:center,w:9,visible=false");
-let flat_button = button!("&flat,x:1,y:1,w:10,flags:flat");
+let flat_button = button!("&flat,x:1,y:1,w:10,type:flat");
 ```
 
 ## Events
@@ -83,8 +83,8 @@ impl MyWin {
             reset: Handle::None,
             counter: 0,
         };
-        win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Flags::None));
-        win.reset = win.add(Button::new("&Reset", Layout::new("x:75%,y:2,w:13,a:c",), button::Flags::None));
+        win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Type::Normal));
+        win.reset = win.add(Button::new("&Reset", Layout::new("x:75%,y:2,w:13,a:c",), button::Type::Normal));
         win
     }
     fn update_add_button_caption(&mut self) {

@@ -5,4 +5,4 @@ pub mod events;
 mod tests;
 
 pub use self::button::Button;
-pub use self::initialization_flags::Flags;
+pub use self::initialization_flags::Type;
