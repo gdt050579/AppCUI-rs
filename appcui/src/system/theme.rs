@@ -1,4 +1,4 @@
-use crate::{ui::common::ControlCharAttributesState, graphics::*};
+use crate::{graphics::*, ui::common::ControlCharAttributesState};
 
 #[derive(Default)]
 pub struct DesktopTheme {
@@ -58,6 +58,13 @@ pub struct ButtonTheme {
     pub shadow: CharAttribute,
 }
 #[derive(Default)]
+pub struct TabTheme {
+    pub text: ControlCharAttributesState,
+    pub hotkey: ControlCharAttributesState,
+    pub list: ControlCharAttributesState,
+    pub listhotkey: ControlCharAttributesState,
+}
+#[derive(Default)]
 pub struct Theme {
     pub desktop: DesktopTheme,
     pub text: TextTheme,
@@ -66,9 +73,10 @@ pub struct Theme {
     pub menu: MenuTheme,
     pub parent_menu: MenuTheme,
     pub window: WindowTheme,
-    pub border: ControlCharAttributesState,    
-    pub lines: ControlCharAttributesState,  
+    pub border: ControlCharAttributesState,
+    pub lines: ControlCharAttributesState,
     pub button: ButtonTheme,
+    pub tab: TabTheme,
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -77,12 +85,7 @@ impl Theme {
         return t;
     }
     fn set_regular_theme(&mut self) {
-        self.desktop.character = Character::new(
-            SpecialChar::Block50,
-            Color::Gray,
-            Color::Black,
-            CharFlags::None,
-        );
+        self.desktop.character = Character::new(SpecialChar::Block50, Color::Gray, Color::Black, CharFlags::None);
 
         self.text.normal = CharAttribute::with_fore_color(Color::Silver);
         self.text.error = CharAttribute::with_fore_color(Color::Red);
@@ -162,7 +165,6 @@ impl Theme {
         self.window.warning = CharAttribute::with_color(Color::Black, Color::Olive);
         self.window.info = CharAttribute::with_color(Color::Black, Color::DarkGreen);
 
-
         self.border = ControlCharAttributesState {
             normal: CharAttribute::with_fore_color(Color::Silver),
             focused: CharAttribute::with_fore_color(Color::White),
@@ -195,6 +197,24 @@ impl Theme {
         };
         self.button.shadow = CharAttribute::with_fore_color(Color::Black);
 
+        self.tab.text = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Black, Color::Gray),
+            focused: CharAttribute::with_color(Color::White, Color::Gray),
+            hovered: CharAttribute::with_color(Color::Black, Color::Silver),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Blue),
+        };
+        self.tab.hotkey = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Yellow, Color::Gray),
+            focused: CharAttribute::with_color(Color::DarkRed, Color::Gray),
+            hovered: CharAttribute::with_color(Color::DarkRed, Color::Silver),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Blue),
+        };
+        self.tab.list = self.tab.text;
+        self.tab.list.pressed_or_selectd = CharAttribute::with_color(Color::Black, Color::White);
+        self.tab.listhotkey = self.tab.hotkey;
+        self.tab.listhotkey.pressed_or_selectd = CharAttribute::with_color(Color::DarkRed, Color::White);
     }
 }
 //         inline void Set(focused, normal, inactive, hovered, pressedOrSelected)
