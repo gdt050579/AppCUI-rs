@@ -150,3 +150,45 @@ fn check_checkbox_set_checked() {
     a.add_window(MyWin::new());
     a.run(); 
 }
+
+#[test]
+fn check_checkbox_mouse_click() {
+    let script = "
+        Paint.Enable(false)
+        Paint('some checkboxes')   
+        CheckHash(0xAC58A676F4FD3979)  
+        CheckCursor(13,3) 
+        Mouse.Click(20,3,left)
+        Paint('checkbox-1 checked')  
+        CheckHash(0x274A7809D33F85E4)   
+        Mouse.Click(20,3,left)
+        Paint('checkbox-1 un-checked')  
+        CheckHash(0xAC58A676F4FD3979) 
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(CheckBox::new("Single line", Layout::new("x:1,y:1,w:20"), false));
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_checkbox_key_pressed() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0xA6C95C5C0E59C1BF)  
+        Key.Pressed(Space)
+        Paint('checkbox-1 un-checked')  
+        CheckHash(0x4225719E0F724212)  
+        Key.Pressed(Space)
+        Paint('checkbox-1 checked') 
+        CheckHash(0xA6C95C5C0E59C1BF)  
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:11");
+    w.add(checkbox!("'option outside panel',x:1,y:8,w:35,checked:true"));
+    a.add_window(w);
+    a.run();
+}
