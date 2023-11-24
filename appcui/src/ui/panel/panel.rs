@@ -51,7 +51,15 @@ impl Panel {
     #[inline]
     fn paint_window(&self, surface: &mut Surface, theme: &Theme) {}
     #[inline]
-    fn paint_page(&self, surface: &mut Surface, theme: &Theme) {}
+    fn paint_page(&self, surface: &mut Surface, theme: &Theme) {
+        // title si ignored
+        if self.is_enabled()
+        {
+            surface.clear(Character::with_attributes(' ',theme.tab.text.pressed_or_selectd));
+        } else {
+            surface.clear(Character::with_char(' '));
+        }
+    }
     #[inline]
     fn paint_topbar(&self, surface: &mut Surface, theme: &Theme) {}
 }
