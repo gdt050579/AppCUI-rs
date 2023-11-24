@@ -27,6 +27,12 @@ impl Panel {
     pub fn get_caption(&self) -> &str {
         self.caption.get_text()
     }
+    pub fn add<T>(&mut self, control: T) -> Handle<T>
+    where
+        T: Control + NotWindow + NotDesktop + 'static,
+    {
+        return self.add_child(control);
+    }
     #[inline]
     fn paint_border(&self, surface: &mut Surface, theme: &Theme) {
         let sz = self.get_size();
