@@ -83,7 +83,33 @@ impl Panel {
         }
     }
     #[inline]
-    fn paint_topbar(&self, surface: &mut Surface, theme: &Theme) {}
+    fn paint_topbar(&self, surface: &mut Surface, theme: &Theme) {
+        let sz = self.get_size();
+        if self.is_enabled() {
+            surface.clear(Character::with_attributes(' ', theme.tab.text.pressed_or_selectd));
+            surface.fill_horizontal_line(0, 0, sz.width as i32, Character::with_attributes(' ', theme.tab.text.normal))
+        } else {
+            surface.clear(Character::with_char(' '));
+        }
+        if (self.caption.get_chars_count() > 0) && (sz.width > 7) {
+            let text_color = if self.is_enabled() { theme.tab.text.normal } else { theme.text.inactive };
+            let mut format = TextFormat::new(3, 0, text_color, TextAlignament::Left, false);
+            format.width = Some((sz.width - 6) as u16);
+            let chars_count = self.caption.get_chars_count();
+            if chars_count > (sz.width - 6) as usize {
+                surface.write_text(self.caption.get_text(), &format);
+                surface.write_char(2, 0, Character::with_char(' '));
+                surface.write_char((sz.width - 3) as i32, 0, Character::with_char(' '));
+                surface.write_char((sz.width - 4) as i32, 0, Character::with_char(SpecialChar::ThreePointsHorizontal));
+            } else {
+                let x = ((sz.width / 2) as i32) - ((chars_count + 2) as i32) / 2;
+                format.x = x + 1;
+                surface.write_text(self.caption.get_text(), &format);
+                surface.write_char(x, 0, Character::with_char(' '));
+                surface.write_char(x + 1 + chars_count as i32, 0, Character::with_char(' '));
+            }
+        }
+    }
 }
 impl OnPaint for Panel {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
