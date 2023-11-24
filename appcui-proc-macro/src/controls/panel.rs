@@ -1,0 +1,23 @@
+use super::control_builder::ControlBuilder;
+use crate::parameter_parser::*;
+use proc_macro::*;
+
+static mut PANEL_TYPE: FlagsSignature = FlagsSignature::new(&["Border", "Window", "Page", "TopBar"]);
+static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
+static NAMED_PARAMETERS: &[NamedParameter] = &[
+    NamedParameter::new("title", "caption", ParamType::String),
+    NamedParameter::new("caption", "caption", ParamType::String),
+    NamedParameter::new("text", "caption", ParamType::String),
+    NamedParameter::new("type", "type", ParamType::String),
+];
+
+pub(crate) fn create(input: TokenStream) -> TokenStream {
+    let mut cb = ControlBuilder::new("panel", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
+    cb.init_control("Panel::new");
+    cb.add_strng_parameter("caption");
+    cb.add_layout();
+    cb.add_enum_parameter("type", "panel::Type", unsafe { &mut PANEL_TYPE }, "Border");
+    cb.finish_control_initialization();
+    cb.add_basecontrol_operations();
+    cb.into()
+}

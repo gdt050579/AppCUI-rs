@@ -270,6 +270,10 @@ pub fn label(input: TokenStream) -> TokenStream {
     crate::controls::label::create(input)
 }
 
+#[proc_macro]
+pub fn panel(input: TokenStream) -> TokenStream {
+    crate::controls::panel::create(input)
+}
 
 #[proc_macro]
 pub fn window(input: TokenStream) -> TokenStream {

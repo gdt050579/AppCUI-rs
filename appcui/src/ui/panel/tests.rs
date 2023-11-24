@@ -24,3 +24,17 @@ fn check_panel_with_border() {
     a.add_window(w);
     a.run();
 }
+#[test]
+fn check_panel_with_macro() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('Border panel')   
+        //CheckHash(0xDE639472091C422)   
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:78,h:11");
+    w.add(panel!("Options,x:1,y:1,w:16,h:4"));
+    w.add(panel!("caption:'Inactive panel',x:1,y:5,w:74,h:4,type:Border,enabled:false"));
+    a.add_window(w);
+    a.run();
+}
