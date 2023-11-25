@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 use super::events::EventData;
+use super::initialization_flags::*;
 use super::toolbar;
 use super::toolbar::*;
 use super::DragStatus;
@@ -20,6 +21,7 @@ enum MoveDirection {
 pub struct Window {
     title: Title,
     flags: Flags,
+    window_type: Type,
     toolbar: ToolBar,
     resize_move_mode: bool,
     maximized: bool,
@@ -105,7 +107,7 @@ impl Window {
         }
         return Handle::None;
     }
-    pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
+    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type) -> Self {
         let mut win: Window = Window {
             base: ControlBase::new(
                 layout,
@@ -113,6 +115,7 @@ impl Window {
             ),
             title: Title::new(title),
             flags,
+            window_type,
             resize_move_mode: false,
             maximized: false,
             toolbar: ToolBar::new(),
@@ -159,6 +162,10 @@ impl Window {
            }
 
         */
+    }
+    #[inline(always)]
+    pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
+        Window::with_type(title, layout, flags, Type::Normal)
     }
     /// Adds a control to the current window. Once the control was added
     /// a handle for that control wil be returned or `Handle::None` if some
@@ -540,7 +547,7 @@ impl Window {
     fn on_close_request(&mut self) {
         if let Some(interface) = self.get_interface_mut() {
             interface.on_close();
-            // logic to remove me 
+            // logic to remove me
             RuntimeManager::get().request_remove(self.handle);
         }
     }
@@ -620,12 +627,15 @@ impl OnWindowRegistered for Window {
 
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let color_window = match () {
-            _ if !self.has_focus() => theme.window.inactive,
-            _ if self.flags.contains(Flags::WarningWindow) => theme.window.warning,
-            _ if self.flags.contains(Flags::ErrorWindow) => theme.window.error,
-            _ if self.flags.contains(Flags::NotifyWindow) => theme.window.info,
-            _ => theme.window.normal,
+        let color_window = if self.has_focus() {
+            match self.window_type {
+                Type::Normal => theme.window.normal,
+                Type::Error => theme.window.error,
+                Type::Warning => theme.window.warning,
+                Type::Notification => theme.window.info,
+            }
+        } else {
+            theme.window.inactive
         };
         // set some colors
         let color_title: CharAttribute;

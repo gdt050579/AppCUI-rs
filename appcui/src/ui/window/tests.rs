@@ -1182,8 +1182,8 @@ fn check_window_background() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(window!("Normal,x:0,y:0,w:30,h:5"));
-    a.add_window(window!("Error,x:30,y:0,w:30,h:5,flags=ErrorWindow"));
-    a.add_window(window!("Notify,x:0,y:5,w:30,h:5,flags=NotifyWindow"));
-    a.add_window(window!("Warning,x:30,y:5,w:30,h:5,flags=WarningWindow"));
+    a.add_window(window!("Error,x:30,y:0,w:30,h:5,type=Error"));
+    a.add_window(window!("Notify,x:0,y:5,w:30,h:5,type=Notification"));
+    a.add_window(window!("Warning,x:30,y:5,w:30,h:5,type=Warning"));
     a.run();
 }

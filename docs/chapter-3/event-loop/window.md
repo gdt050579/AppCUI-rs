@@ -4,19 +4,25 @@ A window is the core component of an application and it is the object where all 
 
 <img src="img/window.png"/>
 
-To create a Window use `Window::new` method (with 3 parameters: a title, a layout and initialization flags) or the macro `window!`. Keep in mind that window will **NOT** handle any events from its children. 
+To create a Window use:
+* `Window::new` method (with 3 parameters: a title, a layout and initialization flags)
+* `Window::with_type` method (with 4 parameters: a title, a layout , initialization flags and a type)
+* macro `window!`. 
 ```rs
 let w = Window::new("Title", Layout::new("x:10,y:5,w:15,h:9"),window::Flags::None);
 let w2 = window!("Title,d:c,w:10,h:10");
 let w3 = window!("title='Some Title',d:c,w:30,h:10,flags=[Sizeable])");
 ```
 
+Keep in mind that window will **NOT** handle any events from its children. 
+
 A window supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name | Type | Positional parameter  | Purpose |
-|----------------|------|-----------------------|---------|
-| `title` or `text` or `caption` | String | **Yes** (first postional parameter) | The title (text) of the window |
-| `flags` | String or List| **No** | Window initialization flags |
+| Parameter name                 | Type           | Positional parameter                | Purpose |
+|--------------------------------|----------------|-------------------------------------|---------|
+| `title` or `text` or `caption` | String         | **Yes** (first postional parameter) | The title (text) of the window |
+| `flags`                        | String or List | **No**                              | Window initialization flags |
+| `type`                         | String         | **No**                              | Window type |
 
 To create a window that will handle events from its children, use `#[Window(...)]` method:
 ```rs
@@ -32,9 +38,12 @@ A window supports the following initialization flags:
 * `window::Flags::Sizeable` or `Sizeable` (for **window!** macro) - a window that has the resize grip and the maximize button
 * `window::Flags::NoCloseButton` or `NoCloseButton` (for **window!** macro) - a window without a close button
 * `window::Flags::FixedPosition` or `FixedPosition` (for **window!** macro) - a window that can not be moved
-* `window::Flags::ErrorWindow` or `ErrorWindow` (for **window!** macro) - a window with a red background to indicate an error message
-* `window::Flags::NotifyWindow` or `NotifyWindow` (for **window!** macro) - a window with a different background designed for notification messages
-* `window::Flags::WarningWindow` or `WarningWindow` (for **window!** macro) - a window with a different background designed for Warning messages
+
+and the following types:
+* `window::Type::Normal` or `Normal` (for **window!** macro) - a regular window
+* `window::Type::Error` or `Error` (for **window!** macro) - a window with a red background to indicate an error message
+* `window::Type::Notification` or `Notification` (for **window!** macro) - a window with a different background designed for notification messages
+* `window::Type::Warning` or `Warning` (for **window!** macro) - a window with a different background designed for Warning messages
 
 
 ## Methods

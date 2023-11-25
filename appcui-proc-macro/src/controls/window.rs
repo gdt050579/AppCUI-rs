@@ -10,6 +10,7 @@ static mut WINDOW_FLAGS: FlagsSignature = FlagsSignature::new(&[
     "NotifyWindow",
     "WarningWindow",
 ]);
+static mut WINDOW_TYPES: FlagsSignature = FlagsSignature::new(&["Normal", "Error", "Warning", "Notification"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("title", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
@@ -17,15 +18,16 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("caption", "title", ParamType::String),
     NamedParameter::new("text", "title", ParamType::String),
     NamedParameter::new("flags", "flags", ParamType::Flags),
+    NamedParameter::new("type", "type", ParamType::String),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("window", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
-    cb.init_control("Window::new");
-    cb.add_strng_parameter("title");  
+    cb.init_control("Window::with_type");
+    cb.add_strng_parameter("title");
     cb.add_layout();
     cb.add_flags_parameter("flags", "window::Flags", unsafe { &mut WINDOW_FLAGS });
+    cb.add_enum_parameter("type", "window::Type", unsafe { &mut WINDOW_TYPES }, "Normal");
     cb.finish_control_initialization();
     cb.into()
 }
-
