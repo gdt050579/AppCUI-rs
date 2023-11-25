@@ -457,7 +457,7 @@ impl RuntimeManager {
         while let Some(evnt) = self.events.pop() {
             if let Some(receiver) = controls.get_mut(evnt.receiver) {
                 let result = evnt.invoke(receiver.get_control_mut());
-                self.repaint = result == EventProcessStatus::Processed;
+                self.repaint |= result == EventProcessStatus::Processed;
             }
         }
     }

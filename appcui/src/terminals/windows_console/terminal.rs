@@ -431,6 +431,7 @@ impl Terminal for WindowsTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         // safety check --> surface size should be the same as self.width/height size
         if surface.size != self.size {
+            panic!("Invalid size !!!");
             return;
         }
 
