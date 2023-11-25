@@ -21,19 +21,25 @@ impl Panel {
         }
         panel
     }
-    pub fn set_caption(&mut self, text: &str) {
+    pub fn set_title(&mut self, text: &str) {
         self.caption.set_text(text, false);
     }
-    pub fn get_caption(&self) -> &str {
+    #[inline(always)]
+    pub fn get_title(&self) -> &str {
         self.caption.get_text()
     }
+    #[inline(always)]
+    pub fn get_type(&self) -> Type {
+        self.panel_type
+    }
+    #[inline(always)]
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where
         T: Control + NotWindow + NotDesktop + 'static,
     {
         return self.add_child(control);
     }
-    #[inline]
+    #[inline(always)]
     fn paint_border(&self, surface: &mut Surface, theme: &Theme) {
         let sz = self.get_size();
         let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
@@ -54,7 +60,7 @@ impl Panel {
             }
         }
     }
-    #[inline]
+    #[inline(always)]
     fn paint_window(&self, surface: &mut Surface, theme: &Theme) {
         let sz = self.get_size();
         let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
@@ -79,7 +85,7 @@ impl Panel {
             }
         }
     }
-    #[inline]
+    #[inline(always)]
     fn paint_page(&self, surface: &mut Surface, theme: &Theme) {
         // title si ignored
         if self.is_enabled() {
@@ -88,7 +94,7 @@ impl Panel {
             surface.clear(Character::with_char(' '));
         }
     }
-    #[inline]
+    #[inline(always)]
     fn paint_topbar(&self, surface: &mut Surface, theme: &Theme) {
         let sz = self.get_size();
         if self.is_enabled() {
