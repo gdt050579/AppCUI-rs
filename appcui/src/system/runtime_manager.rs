@@ -779,7 +779,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
-            if base.can_receive_input() == false {
+            if base.is_activ() == false {
                 return Handle::None;
             }
             if !base.screen_clip.contains(x, y) {
@@ -800,8 +800,11 @@ impl RuntimeManager {
                     idx = (idx + 1) % count;
                 }
             }
-
-            return handle;
+            if base.can_receive_input() {
+                return handle;
+            } else {
+                return Handle::None;
+            }
         }
         Handle::None
     }

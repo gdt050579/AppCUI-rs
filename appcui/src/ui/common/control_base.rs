@@ -4,8 +4,7 @@ use crate::input::*;
 use crate::system::{Handle, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::CommandBarEvents, common::traits::*, common::*,
-    desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::ToolBarEvents,
-    window::events::WindowEvents,
+    desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::ToolBarEvents, window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
@@ -248,6 +247,12 @@ impl ControlBase {
         self.status_flags.contains(StatusFlags::Enabled)
     }
 
+    /// Returns `true` if the current control is active (enabled and visible at the same time) or `false` otherwise
+    #[inline(always)]
+    pub fn is_activ(&self) -> bool {
+        self.status_flags.contains(StatusFlags::Enabled | StatusFlags::Visible)
+    }
+
     /// Returns `true` if the current control can receive focus or `false` otherwise. If the control is not visible or it is disable this function will return `false`.
     #[inline(always)]
     pub fn can_receive_input(&self) -> bool {
@@ -415,4 +420,3 @@ impl CheckBoxEvents for ControlBase {}
 impl WindowEvents for ControlBase {}
 impl ToolBarEvents for ControlBase {}
 impl DesktopEvents for ControlBase {}
-

@@ -312,8 +312,11 @@ impl Window {
                     if idx.in_range(count) {
                         let child_handle = base.children[idx.index()];
                         if let Some(child) = controls.get(child_handle) {
-                            if child.get_base().can_receive_input() {
-                                return Window::find_next_control(child_handle, forward, false);
+                            if child.get_base().is_activ() {
+                                let result = Window::find_next_control(child_handle, forward, false);
+                                if result.is_some() {
+                                    return result;
+                                }
                             }
                         }
                     } else {
