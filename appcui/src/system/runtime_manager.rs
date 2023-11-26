@@ -523,11 +523,15 @@ impl RuntimeManager {
         let mut handle = handle;
         while let Some(c) = controls.get_mut(handle) {
             let base = c.get_base();
-            if base.can_receive_input() == false {
+            if base.is_active() == false {
                 break;
             }
             // curent handle is a possible candidate for a valid child focused leaf
-            result = handle;
+            // if it can receive focus, let's make it the new leaf
+            if base.can_receive_input() {
+                result = handle;
+            }
+            // since we know it is active, let move towards its focused child
             handle = base.get_focused_control();
         }
         result
@@ -779,7 +783,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
-            if base.is_activ() == false {
+            if base.is_active() == false {
                 return Handle::None;
             }
             if !base.screen_clip.contains(x, y) {

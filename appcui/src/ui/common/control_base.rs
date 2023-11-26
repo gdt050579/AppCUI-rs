@@ -162,7 +162,8 @@ impl ControlBase {
     }
     #[inline(always)]
     pub(crate) fn mark_to_receive_focus(&mut self) -> bool {
-        if self.can_receive_input() {
+        //if self.can_receive_input() {
+        if self.is_active() {
             self.status_flags |= StatusFlags::MarkedForFocus;
             return true;
         }
@@ -249,7 +250,7 @@ impl ControlBase {
 
     /// Returns `true` if the current control is active (enabled and visible at the same time) or `false` otherwise
     #[inline(always)]
-    pub fn is_activ(&self) -> bool {
+    pub fn is_active(&self) -> bool {
         self.status_flags.contains(StatusFlags::Enabled | StatusFlags::Visible)
     }
 

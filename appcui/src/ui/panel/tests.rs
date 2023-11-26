@@ -109,10 +109,20 @@ fn check_panel_with_topbar() {
 fn check_panel_add_controls() {
     let script = "
         //Paint.Enable(false)
-        Paint('add controls')   
-        //CheckHash(0x77A2D12C49F335CE)
+        Paint('focus on checkbox')   
+        CheckHash(0xD719107CC4836D31)
         Key.Pressed(Tab)
         Paint('focus on but-1')   
+        CheckHash(0x333B7140835D2CDD)
+        Key.Pressed(Tab)
+        Paint('focus on <some option> checkbox')   
+        //CheckHash(0x333B7140835D2CDD)
+        Key.Pressed(Tab)
+        Paint('focus on but-2')   
+        //CheckHash(0x333B7140835D2CDD)
+        Key.Pressed(Tab)
+        Paint('focus on checkbox (again)')   
+        CheckHash(0xD719107CC4836D31)
     ";
     let mut a = App::debug(60, 13, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:11");
