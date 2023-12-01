@@ -2,6 +2,7 @@ pub enum Strategy {
     Clamp,
     Rotate,
     RotateWithInvalidState,
+    RotateFromInvalidState,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -88,6 +89,13 @@ impl VectorIndex {
                     self.value = 0; // first
                 }
             }
+            Strategy::RotateFromInvalidState => {
+                if self.value != Self::INVALID_INDEX {
+                    self.value = (self.value + value) % count;
+                } else {
+                    self.value = 0; // first
+                }
+            }
         }
     }
     #[inline(always)]
@@ -119,6 +127,14 @@ impl VectorIndex {
                     } else {
                         self.value = Self::INVALID_INDEX;
                     }
+                } else {
+                    self.value = count - 1;
+                }
+            }
+            Strategy::RotateFromInvalidState => {
+                if self.value != Self::INVALID_INDEX {
+                    let value = value % count;
+                    self.value = (self.value + count - value) % count;
                 } else {
                     self.value = count - 1;
                 }
