@@ -147,3 +147,130 @@ fn check_panel_add_controls() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_panel_navigate() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Focus: button (11) (initial state)')   
+        CheckHash(0x250A86FF5B2DE3B5)
+        Key.Pressed(Tab)
+        Paint('Focus: button (12)')   
+        CheckHash(0x6EFE19BE6FB9DAB9)
+        Key.Pressed(Tab)
+        // we will skip buttons 13,14 and 15 that are inactive
+        Paint('Focus: button (16)')   
+        CheckHash(0x40081ECFB94F6B1)
+        Key.Pressed(Tab)
+        Paint('Focus: button (17)')   
+        CheckHash(0x838352A7081D9CD1)
+        Key.Pressed(Tab)
+        Paint('Focus: button (1)')   
+        CheckHash(0xA6EEFE23A11FAE35)
+        Key.Pressed(Tab)
+        Paint('Focus: button (2)')   
+        CheckHash(0x14E5F43F047C86B1)
+        Key.Pressed(Tab)
+        Paint('Focus: button (3)')   
+        CheckHash(0xB1058BEE8BCB0171)
+        Key.Pressed(Tab)
+        Paint('Focus: button (4)')   
+        CheckHash(0xA7AC355CF0DF9B75)
+        Key.Pressed(Tab)
+        Paint('Focus: button (5)')   
+        CheckHash(0x832C9AB6555DB9D5)
+        Key.Pressed(Tab)
+        Paint('Focus: button (6)')   
+        CheckHash(0xA33577C3EBE688B1)
+        Key.Pressed(Tab)
+        Paint('Focus: button (7)')   
+        CheckHash(0xAF8A6C6B0936C4B9)
+        Key.Pressed(Tab)
+        Paint('Focus: button (8)')   
+        CheckHash(0x631DA185E82FF475)
+        Key.Pressed(Tab)
+        Paint('Focus: button (9)')   
+        CheckHash(0xFCDDDE9C513587A5)
+        Key.Pressed(Tab)
+        Paint('Focus: button (10)')   
+        CheckHash(0xBE87E6DF332D1125)
+        Key.Pressed(Tab)
+        Paint('Focus: button (11) - back to start')   
+        CheckHash(0x250A86FF5B2DE3B5)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (10)')   
+        CheckHash(0xBE87E6DF332D1125)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (9)')   
+        CheckHash(0xFCDDDE9C513587A5)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (8)')   
+        CheckHash(0x631DA185E82FF475)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (7)')   
+        CheckHash(0xAF8A6C6B0936C4B9)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (6)')   
+        CheckHash(0xA33577C3EBE688B1)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (5)')   
+        CheckHash(0x832C9AB6555DB9D5)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (4)')   
+        CheckHash(0xA7AC355CF0DF9B75)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (3)')   
+        CheckHash(0xB1058BEE8BCB0171)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (2)')   
+        CheckHash(0x14E5F43F047C86B1)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (1)')   
+        CheckHash(0xA6EEFE23A11FAE35)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (17)')   
+        CheckHash(0x838352A7081D9CD1)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (16)')   
+        CheckHash(0x40081ECFB94F6B1)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (12)')   
+        CheckHash(0x6EFE19BE6FB9DAB9)
+        Key.Pressed(Shift+Tab)
+        Paint('Backwards -> Focus: button (11) (initial state)')   
+        CheckHash(0x250A86FF5B2DE3B5)
+    ";
+    let mut a = App::debug(80, 22, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:70,h:20");
+    let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
+    let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
+    let mut p3 = panel!("Layer-3,l:46,t:0,r:1,b:0");
+    p2.add(button!("1,x:1,y:1,w:10,type:flat"));
+    p2.add(button!("2,x:1,y:3,w:10,type:flat"));
+    p2.add(button!("3,x:12,y:1,w:10,type:flat"));
+    p2.add(button!("4,x:12,y:3,w:10,type:flat"));
+    p1.add(p2);
+    p1.add(button!("5,x:35,y:1,w:10,type:flat"));
+    p1.add(button!("6,x:35,y:3,w:10,type:flat"));
+    p3.add(button!("7,x:1,y:1,w:10,type:flat"));
+    p3.add(button!("8,x:1,y:3,w:10,type:flat"));
+    p1.add(p3);
+    w.add(p1);
+    w.add(button!("9,x:1,y:10,w:10,type:flat"));
+    w.add(button!("10,x:1,y:12,w:10,type:flat"));
+    w.add(button!("11,x:1,y:14,w:10,type:flat"));
+    let mut p4 = panel!("Layer-4,l:12,t:10,r:1,b:0");
+    let mut p5 = panel!("Layer-5,l:1,t:0,w:14,b:0");
+    p5.add(button!("12,x:1,y:1,w:10,type:flat"));
+    p5.add(button!("13,x:1,y:3,w:10,type:flat,enabled:false"));   
+    p4.add(p5);
+    let mut p6 = panel!("Inactives,l:15,t:0,w:14,b:0");
+    p6.add(button!("14,x:1,y:1,w:10,type:flat,enabled:false"));
+    p6.add(button!("15,x:1,y:3,w:10,type:flat,enabled:false"));   
+    p4.add(p6);
+    p4.add(button!("16,x:32,y:1,w:10,type:flat"));
+    p4.add(button!("17,x:32,y:3,w:10,type:flat"));   
+    w.add(p4);
+    a.add_window(w);
+    a.run();    
+}
