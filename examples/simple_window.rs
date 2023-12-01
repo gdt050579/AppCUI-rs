@@ -280,5 +280,5 @@ fn main() -> Result<(), appcui::system::Error> {
     w.add(checkbox!("'option outside panel',x:1,y:8,w:35,checked:true"));
     a.add_window(w);
     a.run();
-    Ok(()) 
-}   
+    Ok(())      
+}       

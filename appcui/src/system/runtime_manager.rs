@@ -427,29 +427,64 @@ impl RuntimeManager {
             self.modal_windows[self.modal_windows.len() - 1]
         }
     }
-    fn get_focused_control(&self) -> Handle<UIElement> {
+    pub(crate) fn get_parent_handle(&self, handle: Handle<UIElement>) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
-        let mut parent = self.get_root_control_handle();
-        let mut ctrl = controls.get_mut(parent).unwrap();
-
-        loop {
+        if let Some(ctrl) = controls.get(handle) {
+            return ctrl.get_base().parent;
+        }
+        return Handle::None;
+    }
+    pub(crate) fn get_focused_control_for_parent(&self, parent_handle: Handle<UIElement>) -> Option<Handle<UIElement>> {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(ctrl) = controls.get(parent_handle) {
             let base = ctrl.get_base();
+            if base.is_active()==false {
+                return None;
+            }
             if base.focused_child_index.in_range(base.children.len()) {
                 let child_handle = base.children[base.focused_child_index.index()];
-                if let Some(child) = controls.get_mut(child_handle) {
-                    if child.get_base().can_receive_input() {
-                        parent = child_handle;
-                        ctrl = child;
-                    } else {
-                        return parent;
-                    }
-                } else {
-                    return parent;
+                let result = self.get_focused_control_for_parent(child_handle);
+                if result.is_some() {
+                    return result;
                 }
-            } else {
-                return parent;
+            }
+            if base.can_receive_input() {
+                return Some(parent_handle);
             }
         }
+        return None;
+    }
+    fn get_focused_control(&self) -> Handle<UIElement> {
+        return self.get_focused_control_for_parent(self.get_root_control_handle()).unwrap();
+        // let controls = unsafe { &mut *self.controls };
+        // if let Some(ctrl) = controls.get(parent_handle) {
+        //     // at least the parent must be active
+        //     if ctrl.get_base().is_active()==false {
+        //         return None;
+        //     }
+        //     let parent = parent_handle;
+        //     //let mut parent = self.get_root_control_handle();
+        //     //let mut ctrl = controls.get_mut(parent).unwrap();
+        //     loop {
+        //         let base = ctrl.get_base();
+        //         if base.focused_child_index.in_range(base.children.len()) {
+        //             let child_handle = base.children[base.focused_child_index.index()];
+        //             if let Some(child) = controls.get(child_handle) {
+        //                 if child.get_base().can_receive_input() {
+        //                     parent = child_handle;
+        //                     ctrl = child;
+        //                 } else {
+        //                     return parent;
+        //                 }
+        //             } else {
+        //                 return parent;
+        //             }
+        //         } else {
+        //             return parent;
+        //         }
+        //     }
+        // }
+        // return None;
     }
 
     fn process_events_queue(&mut self) {

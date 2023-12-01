@@ -298,53 +298,61 @@ impl Window {
         }
     }
 
-    fn find_next_control(handle: Handle<UIElement>, forward: bool, start_from_current: bool) -> Option<Handle<UIElement>> {
+    fn get_children_start_index(index: VectorIndex, count: usize, start_from_current: bool) -> VectorIndex {
+        if (start_from_current) && (index.in_range(count)) {
+            return index;
+        } else {
+            VectorIndex::Invalid
+        }
+    }
+    fn find_next_child_control(handle: Handle<UIElement>, forward: bool, start_from_current: bool, window_level: bool) -> Option<Handle<UIElement>> {
         let controls = RuntimeManager::get().get_controls();
         if let Some(control) = controls.get(handle) {
             let base = control.get_base();
-            // if I have any child --> check to see if I can move there
-            if base.children.len() > 0 {
-                let mut idx = if start_from_current {
-                    base.focused_child_index
-                } else {
-                    VectorIndex::Invalid
-                };
-                let count = base.children.len();
-                loop {
-                    if forward {
-                        idx.add(1, count, Strategy::RotateWithInvalidState);
-                    } else {
-                        idx.sub(1, count, Strategy::RotateWithInvalidState);
-                    }
-                    if idx.in_range(count) {
-                        let child_handle = base.children[idx.index()];
-                        if let Some(child) = controls.get(child_handle) {
-                            if child.get_base().is_active() {
-                                let result = Window::find_next_control(child_handle, forward, false);
-                                if result.is_some() {
-                                    return result;
-                                }
-                            }
-                        }
-                    } else {
-                        if start_from_current == false {
-                            break;
-                        }
-                    }
-                }
-                None
-            } else {
-                // no childrem --> see if I am a good fit
-                if base.can_receive_input() {
-                    return Some(handle);
-                }
+            if base.is_active() == false {
                 return None;
             }
-        } else {
-            return None; // invalid handle
+            let count = base.children.len();
+            if count > 0 {
+                let mut idx = Window::get_children_start_index(base.focused_child_index, count, start_from_current);
+                if idx.in_range(count) {
+                    let result = Window::find_next_child_control(base.children[idx.index()], forward, start_from_current,false);
+                    if result.is_some() {
+                        return result;
+                    }
+                }
+                let strategy = if window_level {
+                    Strategy::RotateFromInvalidState
+                } else {
+                    Strategy::RotateWithInvalidState
+                };
+                let mut steps = 0;
+                while steps < count {
+                    steps += 1;
+                    if forward {
+                        idx.add(1, count, strategy);
+                    } else {
+                        idx.sub(1, count, strategy);
+                    }
+                    if !idx.in_range(count) {
+                        return None;
+                    }
+                    let child_handle = base.children[idx.index()];
+                    if let Some(child) = controls.get(child_handle) {
+                        let result = Window::find_next_child_control(child_handle, forward, false,false);
+                        if result.is_some() {
+                            return result;
+                        }
+                        if child.get_base().can_receive_input() {
+                            return Some(child_handle);
+                        }
+                    }
+                }
+            }
         }
+        return None;
     }
-
+    
     fn hotkey_to_handle(controls: &ControlHandleManager, parent: Handle<UIElement>, hotkey: Key) -> Handle<UIElement> {
         if let Some(control) = controls.get(parent) {
             let base = control.get_base();
@@ -663,13 +671,13 @@ impl OnKeyPressed for Window {
         } else {
             match key.get_compact_code() {
                 key!("Tab") => {
-                    if let Some(new_child) = Window::find_next_control(self.handle, true, true) {
+                    if let Some(new_child) = Window::find_next_child_control(self.handle, true, true, true) {
                         RuntimeManager::get().request_focus_for_control(new_child);
                     }
                     return EventProcessStatus::Processed;
                 }
                 key!("Shift+Tab") => {
-                    if let Some(new_child) = Window::find_next_control(self.handle, false, true) {
+                    if let Some(new_child) = Window::find_next_child_control(self.handle, false, true, true) {
                         RuntimeManager::get().request_focus_for_control(new_child);
                     }
                     return EventProcessStatus::Processed;
