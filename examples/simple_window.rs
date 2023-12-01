@@ -271,7 +271,7 @@ impl CheckBoxEvents for MyWin {
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Title,d:c,w:40,h:11");
+    let mut w = window!("Title,d:c,w:70,h:20");
     let mut p = panel!("Controls,l:1,t:1,r:1,h:6");
     p.add(button!("but-1,x:1,y:1,w:10,type:flat"));
     p.add(checkbox!("'Some option',x:1,y:2,w:15"));
