@@ -279,3 +279,8 @@ pub fn panel(input: TokenStream) -> TokenStream {
 pub fn window(input: TokenStream) -> TokenStream {
     crate::controls::window::create(input)
 }
+
+#[proc_macro]
+pub fn toolbaritem(input: TokenStream) -> TokenStream {
+    crate::controls::toolbaritem::create(input)
+}
