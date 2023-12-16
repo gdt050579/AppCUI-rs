@@ -24,10 +24,10 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("window", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
     cb.init_control("Window::with_type");
-    cb.add_strng_parameter("title");
+    cb.add_string_parameter("title", None);
     cb.add_layout();
     cb.add_flags_parameter("flags", "window::Flags", unsafe { &mut WINDOW_FLAGS });
-    cb.add_enum_parameter("type", "window::Type", unsafe { &mut WINDOW_TYPES }, "Normal");
+    cb.add_enum_parameter("type", "window::Type", unsafe { &mut WINDOW_TYPES }, Some("Normal"));
     cb.finish_control_initialization();
     cb.into()
 }

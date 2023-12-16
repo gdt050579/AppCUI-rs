@@ -115,18 +115,7 @@ impl<'a> ControlBuilder<'a> {
     pub(super) fn finish_control_initialization(&mut self) {
         self.content.push_str(");\n\t");
     }
-    pub(super) fn add_strng_parameter(&mut self, param_name: &str) {
-        self.add_comma();
-        let value = self
-            .parser
-            .get(param_name)
-            .expect(format!("Missing parameter '{}' from initialization macro !", param_name).as_str());
-        unsafe {
-            let x = std::mem::transmute(value.get_string());
-            self.add_text(x);
-        }
-    }
-    pub(super) fn add_string_parameter_with_default(&mut self, param_name: &str, default: &str) {
+    pub(super) fn add_string_parameter(&mut self, param_name: &str, default: Option<&str>) {
         self.add_comma();
         let value = self.parser.get(param_name);
         if let Some(str_value) = value {
@@ -135,7 +124,14 @@ impl<'a> ControlBuilder<'a> {
                 self.add_text(x);
             }
         } else {
-            self.add_text(default);
+            if let Some(default_value) = default {
+                self.add_text(default_value);
+            } else {
+                panic!(
+                    "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                    param_name
+                );
+            }
         }
     }
     pub(super) fn add_bool_parameter_with_default(&mut self, param_name: &str, default: bool) {
@@ -159,7 +155,7 @@ impl<'a> ControlBuilder<'a> {
             }
         }
     }
-    pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &mut FlagsSignature, default: &str) {
+    pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &mut FlagsSignature, default: Option<&str>) {
         self.add_comma();
         if let Some(value) = self.parser.get(param_name) {
             let variant = value.get_string();
@@ -177,9 +173,16 @@ impl<'a> ControlBuilder<'a> {
                 .panic();
             }
         } else {
-            self.content.push_str(enum_name);
-            self.content.push_str("::");
-            self.content.push_str(default);
+            if let Some(default_value) = default {
+                self.content.push_str(enum_name);
+                self.content.push_str("::");
+                self.content.push_str(default_value);
+            } else {
+                panic!(
+                    "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                    param_name
+                );
+            }
         }
     }
     pub(super) fn add_flags_parameter(&mut self, param_name: &str, flag_name: &str, available_flags: &mut FlagsSignature) {

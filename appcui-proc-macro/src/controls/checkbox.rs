@@ -12,7 +12,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("checkbox", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
     cb.init_control("CheckBox::new");
-    cb.add_strng_parameter("caption");  
+    cb.add_string_parameter("caption", None);  
     cb.add_layout();
     cb.add_bool_parameter_with_default("checked", false);
     cb.finish_control_initialization();

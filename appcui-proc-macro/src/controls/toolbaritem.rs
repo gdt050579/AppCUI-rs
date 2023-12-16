@@ -2,7 +2,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static mut BUTTON_TYPE: FlagsSignature = FlagsSignature::new(&["Normal", "Flat"]);
+static mut TOOLBARITEM_TYPE: FlagsSignature = FlagsSignature::new(&["Label", "Button", "CheckBox", "SingleChoice"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
@@ -17,7 +17,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.init_control("Button::new");
     cb.add_string_parameter("caption", None);
     cb.add_layout();
-    cb.add_enum_parameter("type", "button::Type", unsafe { &mut BUTTON_TYPE }, Some("Normal"));
+    cb.add_enum_parameter("type", "button::Type", unsafe { &mut TOOLBARITEM_TYPE }, None);
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();
     cb.into()

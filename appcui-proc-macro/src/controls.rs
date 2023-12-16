@@ -6,3 +6,4 @@ pub (crate) mod label;
 pub (crate) mod panel;
 pub (crate) mod checkbox;
 pub (crate) mod window;
+pub (crate) mod toolbaritem;
