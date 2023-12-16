@@ -14,7 +14,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.init_control("CheckBox::new");
     cb.add_string_parameter("caption", None);  
     cb.add_layout();
-    cb.add_bool_parameter_with_default("checked", false);
+    cb.add_bool_parameter("checked", Some(false));
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();
     cb.into()

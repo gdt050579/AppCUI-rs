@@ -9,16 +9,22 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("name", "caption", ParamType::String),
     NamedParameter::new("caption", "caption", ParamType::String),
     NamedParameter::new("text", "caption", ParamType::String),
-    NamedParameter::new("type", "type", ParamType::String),
+    NamedParameter::new("checked", "checked", ParamType::Bool),
+    NamedParameter::new("check", "checked", ParamType::Bool),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
-    let mut cb = ControlBuilder::new("button", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
-    cb.init_control("Button::new");
-    cb.add_string_parameter("caption", None);
-    cb.add_layout();
-    cb.add_enum_parameter("type", "button::Type", unsafe { &mut TOOLBARITEM_TYPE }, None);
-    cb.finish_control_initialization();
-    cb.add_basecontrol_operations();
-    cb.into()
+    let mut cb = ControlBuilder::new("toolbaritem", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
+    if let Some(item_type) = cb.get_enum_value("typ", unsafe { &mut TOOLBARITEM_TYPE }) {
+        let init_type = format!("toolbar::{}::new", item_type);
+        cb.init_control(init_type.as_str());
+        cb.add_string_parameter("caption", None);
+        if init_type == "CheckBox" {
+            cb.add_bool_parameter("checked", Some(false));
+        }
+        cb.finish_control_initialization();
+        cb.into()
+    } else {
+        panic!("Parameter 'type' is mandatory (possible value for parameter type: 'Label', 'Button', 'Checkbox', 'SingleChoice')");
+    }
 }

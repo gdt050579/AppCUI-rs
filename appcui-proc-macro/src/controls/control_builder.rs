@@ -134,10 +134,21 @@ impl<'a> ControlBuilder<'a> {
             }
         }
     }
-    pub(super) fn add_bool_parameter_with_default(&mut self, param_name: &str, default: bool) {
+    pub(super) fn add_bool_parameter(&mut self, param_name: &str, default: Option<bool>) {
         self.add_comma();
         let value = self.parser.get_bool(param_name);
-        self.add_bool(value.unwrap_or(default));
+        if let Some(bool_value) = value {
+            self.add_bool(bool_value);
+        } else {
+            if let Some(default_value) = default {
+                self.add_bool(default_value);
+            } else {
+                panic!(
+                    "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                    param_name
+                );
+            }
+        }
     }
     pub(super) fn add_layout(&mut self) {
         self.add_comma();
@@ -153,6 +164,18 @@ impl<'a> ControlBuilder<'a> {
             if is_visible == false {
                 self.content.push_str("control.set_visible(false);\n\t");
             }
+        }
+    }
+    pub(super) fn get_enum_value(&mut self, param_name: &str, available_variants: &mut FlagsSignature)->Option<&str> {
+        if let Some(value) = self.parser.get(param_name) {
+            let variant = value.get_string();
+            if let Some(variant_name) = available_variants.get(variant) {
+                return Some(variant_name);
+            } else {
+                return None;
+            }
+        } else {
+            return None;
         }
     }
     pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &mut FlagsSignature, default: Option<&str>) {
