@@ -1,3 +1,4 @@
+#[macro_use]
 mod item_base;
 mod group;
 mod toolbar_item;

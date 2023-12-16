@@ -69,4 +69,5 @@ impl SingleChoice {
         }
         surface.write_text(self.caption.get_text(), &format);
     }
+    add_toolbaritem_basic_methods!();
 }

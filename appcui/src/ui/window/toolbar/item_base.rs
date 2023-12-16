@@ -253,3 +253,17 @@ impl ItemBase {
         previous_handle
     }
 }
+
+
+macro_rules! add_toolbaritem_basic_methods {
+    () => {
+        #[inline(always)]
+        pub fn set_tooltip(&mut self, text: &str) {
+            self.base.set_tooltip(text);
+        }
+        #[inline(always)]
+        pub fn get_tooltip(&self) -> &str {
+            self.base.get_tooltip()
+        }
+    };
+}

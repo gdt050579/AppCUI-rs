@@ -61,4 +61,5 @@ impl CheckBox {
             );
         }
     }
+    add_toolbaritem_basic_methods!();
 }

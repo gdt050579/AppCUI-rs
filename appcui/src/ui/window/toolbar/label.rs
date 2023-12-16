@@ -32,14 +32,6 @@ impl Label {
     pub fn get_content(&self) -> &str {
         &self.text
     }
-    #[inline(always)]
-    pub fn get_tooltip(&self)->&str {
-        self.base.get_tooltip()
-    }
-    #[inline(always)]
-    pub fn set_tooltip(&mut self, text: &str){
-        self.base.set_tooltip(text);
-    }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let attr = match data.focused {
             true => theme.text.normal,
@@ -47,5 +39,7 @@ impl Label {
         };
         surface.write_string(self.base.get_left(), self.base.get_y(), self.text.as_str(), attr, false);
     }
+
+    add_toolbaritem_basic_methods!();
 }
 
