@@ -149,6 +149,11 @@ impl ItemBase {
         &self.tooltip
     }
     #[inline(always)]
+    pub(crate) fn set_tooltip(&mut self, content: &str) {
+        self.tooltip.clear();
+        self.tooltip.push_str(content);
+    }
+    #[inline(always)]
     pub(crate) fn get_handle(&self) -> Handle<UIElement> {
         self.handle
     }

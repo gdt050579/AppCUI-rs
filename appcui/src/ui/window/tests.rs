@@ -580,6 +580,24 @@ fn check_window_toolbar_label() {
 }
 
 #[test]
+fn check_window_toolbar_label_tooltip() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Move(12,8)
+        Paint('label with tooltip')
+        CheckHash(0x7584C92A16380F0B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
+    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
+    let mut l = toolbaritem!("text,type:label");
+    l.set_tooltip("A toolbar label");
+    w.get_toolbar().add(g, l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_window_toolbar_button() {
     let script = "
         Paint.Enable(false)

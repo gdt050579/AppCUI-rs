@@ -30,3 +30,7 @@ The following methods are available for a toolbar label:
 |--------------------|------------------------------------------------------------------------------------------------------------------|
 | `set_caption(...)` | Set the new caption for a label. The size of the label is the considered the number of characters in its content |
 | `get_caption()`    | Returns the current caption of a label. |
+
+# Example
+
+The following example shows 3 lables that show a number writen in base 10, 16 and 2. The first two labels (for base 10 and base 16 are part of one group located on the bottom left part of the window); the last label is part of a separate group located on the top-right side of the window. In the center of the window, there is a button that when clicked increases the number and updates the values in each label.

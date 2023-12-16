@@ -237,45 +237,59 @@ use appcui::prelude::*;
 // //     Ok(())
 // // }use appcui::prelude::*;
 
-#[Window(events = CheckBoxEvents)]
+#[Window(events = ButtonEvents)]
 struct MyWin {
-    c: Handle<CheckBox>,
-    l: Handle<Label>,
+    increase_button: Handle<Button>,
+    dec: Handle<toolbar::Label>,
+    hex: Handle<toolbar::Label>,
+    bin: Handle<toolbar::Label>,
+    number: u32,
 }
 
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
             base: window!("'My Win',d:c,w:40,h:6"),
-            c: Handle::None,
-            l: Handle::None,
+            increase_button: Handle::None,
+            dec: Handle::None,
+            hex: Handle::None,
+            bin: Handle::None,
+            number: 24,
         };
-        win.c = win.add(checkbox!("'My option',l:1,r:1,b:1"));
-        win.l = win.add(label!("'<no status>',l:1,r:1,t:1"));
+        // add the button from the center
+        win.increase_button = win.add(button!("Increase,w:15,d:c"));
+        // add toolbar labels
+        let first_group = win.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+        let second_group = win.get_toolbar().create_group(toolbar::GroupPosition::TopRight);
+        win.dec = win.get_toolbar().add(first_group, toolbar::Label::new(""));
+        win.hex = win.get_toolbar().add(first_group, toolbar::Label::new(""));
+        win.bin = win.get_toolbar().add(second_group, toolbar::Label::new(""));
+        win.update_toolbar_labels();
         win
+    }
+    fn update_toolbale_label(&mut self, handle: Handle<toolbar::Label>, text: String) {
+        if let Some(label) = self.get_toolbar().get_mut(handle) {
+            label.set_content(text.as_str());
+        }     
+    }
+    fn update_toolbar_labels(&mut self) {
+        self.update_toolbale_label(self.dec, format!("Dec:{}",self.number));
+        self.update_toolbale_label(self.hex, format!("Hex:{:X}",self.number));
+        self.update_toolbale_label(self.bin, format!("Bin:{:b}",self.number));
     }
 }
 
-impl CheckBoxEvents for MyWin {
-    fn on_status_changed(&mut self, _handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
-        let handle = self.l;
-        let l = self.get_control_mut(handle).unwrap();
-        if checked {
-            l.set_caption("Status: Checked");
-        } else {
-            l.set_caption("Status: Not-checked");
-        }
-        EventProcessStatus::Processed
+impl ButtonEvents for MyWin {
+    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+        self.number += 1;
+        self.update_toolbar_labels();
+        return EventProcessStatus::Processed;
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("MyWindow,d:c,w:40,h:8");
-    let group = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-    w.get_toolbar().add(group, toolbar::Label::new("Second"));
-    w.get_toolbar().add(group, toolbaritem!("my_label,type:label"));
-    a.add_window(w);
+    a.add_window(MyWin::new());
     a.run();
     Ok(())
-}       
+}
