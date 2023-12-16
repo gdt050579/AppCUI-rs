@@ -271,37 +271,10 @@ impl CheckBoxEvents for MyWin {
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Title,d:c,w:70,h:20");
-    let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
-    let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
-    let mut p3 = panel!("Layer-3,l:46,t:0,r:1,b:0");
-    p2.add(button!("1,x:1,y:1,w:10,type:flat"));
-    p2.add(button!("2,x:1,y:3,w:10,type:flat"));
-    p2.add(button!("3,x:12,y:1,w:10,type:flat"));
-    p2.add(button!("4,x:12,y:3,w:10,type:flat"));
-    p1.add(p2);
-    p1.add(button!("5,x:35,y:1,w:10,type:flat"));
-    p1.add(button!("6,x:35,y:3,w:10,type:flat"));
-    p3.add(button!("7,x:1,y:1,w:10,type:flat"));
-    p3.add(button!("8,x:1,y:3,w:10,type:flat"));
-    p1.add(p3);
-    w.add(p1);
-    w.add(button!("9,x:1,y:10,w:10,type:flat"));
-    w.add(button!("10,x:1,y:12,w:10,type:flat"));
-    w.add(button!("11,x:1,y:14,w:10,type:flat"));
-    let mut p4 = panel!("Layer-4,l:12,t:10,r:1,b:0");
-    let mut p5 = panel!("Layer-5,l:1,t:0,w:14,b:0");
-    p5.add(button!("12,x:1,y:1,w:10,type:flat"));
-    p5.add(button!("13,x:1,y:3,w:10,type:flat,enabled:false"));   
-    p4.add(p5);
-    let mut p6 = panel!("Inactives,l:15,t:0,w:14,b:0");
-    p6.add(button!("14,x:1,y:1,w:10,type:flat,enabled:false"));
-    p6.add(button!("15,x:1,y:3,w:10,type:flat,enabled:false"));   
-    p4.add(p6);
-    p4.add(button!("16,x:32,y:1,w:10,type:flat"));
-    p4.add(button!("17,x:32,y:3,w:10,type:flat"));   
-    w.add(p4);
+    let mut w = window!("MyWindow,d:c,w:40,h:8");
+    let group = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+    w.get_toolbar().add(group, toolbar::Label::new("Label on toolbar"));
     a.add_window(w);
     a.run();
-    Ok(())      
+    Ok(())
 }       
