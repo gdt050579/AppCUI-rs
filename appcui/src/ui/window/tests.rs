@@ -302,7 +302,7 @@ fn check_window_toolbar_title_pos_recompute() {
         fn on_button_clicked(&mut self, handle: Handle<toolbar::Button>) -> EventProcessStatus {
             if handle == self.change_info {
                 let h = self.info;
-                self.get_toolbar().get_mut(h).unwrap().set_text("ABCDEFGHI");
+                self.get_toolbar().get_mut(h).unwrap().set_content("ABCDEFGHI");
                 return EventProcessStatus::Processed;
             }
             EventProcessStatus::Ignored

@@ -6,16 +6,16 @@ static mut TOOLBARITEM_TYPE: FlagsSignature = FlagsSignature::new(&["Label", "Bu
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
-    NamedParameter::new("name", "caption", ParamType::String),
     NamedParameter::new("caption", "caption", ParamType::String),
     NamedParameter::new("text", "caption", ParamType::String),
+    NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("checked", "checked", ParamType::Bool),
     NamedParameter::new("check", "checked", ParamType::Bool),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("toolbaritem", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
-    if let Some(item_type) = cb.get_enum_value("typ", unsafe { &mut TOOLBARITEM_TYPE }) {
+    if let Some(item_type) = cb.get_enum_value("type", unsafe { &mut TOOLBARITEM_TYPE }) {
         let init_type = format!("toolbar::{}::new", item_type);
         cb.init_control(init_type.as_str());
         cb.add_string_parameter("caption", None);
