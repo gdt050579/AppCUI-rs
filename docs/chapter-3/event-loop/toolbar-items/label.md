@@ -2,7 +2,7 @@
 
 A toolbar label is a text that can be written on the top or bottom part of a windows (like in the following image).
 
-<img src="img/label.png" width=300/>
+<img src="img/label.png" width=400/>
 
 To create a label toolbar use the `toolbar::Label::new(...)` method:
 
@@ -16,3 +16,17 @@ or the `toolbaritem!` macro:
 let toolbar_label_1 = toolbaritem!("content,type=label");
 let toolbal_label_2 = toolbaritem!("content='label text',type:label");
 ```
+
+The following parameters are supported for a toolbar label:
+
+| Parameter name      | Type   | Positional parameter                | Purpose |
+|---------------------|--------|-------------------------------------|---------|
+| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the label |
+| `type`              | String | **No**                              | For a label use: `type:Label` |
+
+The following methods are available for a toolbar label:
+
+| Method             | Purpose                                                                                                          |
+|--------------------|------------------------------------------------------------------------------------------------------------------|
+| `set_caption(...)` | Set the new caption for a label. The size of the label is the considered the number of characters in its content |
+| `get_caption()`    | Returns the current caption of a label. |

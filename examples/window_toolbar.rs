@@ -35,7 +35,7 @@ impl MyWin {
     fn set_info(&mut self, text: &str) {
         let h = self.lb1;
         if let Some(status) = self.get_toolbar().get_mut(h) {
-            status.set_text(text);
+            status.set_content(text);
         }
     }
 }

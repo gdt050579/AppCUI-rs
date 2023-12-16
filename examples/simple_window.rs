@@ -273,7 +273,8 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     let mut w = window!("MyWindow,d:c,w:40,h:8");
     let group = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-    w.get_toolbar().add(group, toolbar::Label::new("Label on toolbar"));
+    w.get_toolbar().add(group, toolbar::Label::new("Second"));
+    w.get_toolbar().add(group, toolbaritem!("my_label,type:label"));
     a.add_window(w);
     a.run();
     Ok(())
