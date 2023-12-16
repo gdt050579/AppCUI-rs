@@ -48,3 +48,12 @@ Curenly AppCUI supports the following toolbar item types:
 * [CheckBox](toolbar-items/checkbox.md)
 * [SingleChoice](toolbar-items/singlechoice.md)
 * [Button](toolbar-items/button.md)
+
+## Common methods
+
+All toolbar items have a set of common methods that can be used to modify their behavior:
+
+| Method              | Purpose                                                                                                          |
+|---------------------|------------------------------------------------------------------------------------------------------------------|
+| `set_toooltip(...)` | Set the tooltip for the current item. Using this method with an empty string clears the tooltip |
+| `get_tooltip()`     | Returns the current tooltip associated with an toolbar item |

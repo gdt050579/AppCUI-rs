@@ -24,7 +24,7 @@ The following parameters are supported for a toolbar label:
 | `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the label |
 | `type`              | String | **No**                              | For a label use: `type:Label` |
 
-The following methods are available for a toolbar label:
+Besides the default methods that every toolbar item has (as descrived in [here](../toolbar.md#common-methods) ), the following methods are available for a toolbar label:
 
 | Method             | Purpose                                                                                                          |
 |--------------------|------------------------------------------------------------------------------------------------------------------|
