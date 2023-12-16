@@ -584,15 +584,19 @@ fn check_window_toolbar_label_tooltip() {
     let script = "
         Paint.Enable(false)
         Mouse.Move(12,8)
-        Paint('label with tooltip')
-        CheckHash(0x7584C92A16380F0B)
+        Paint('Tooltip shown for the first label')
+        CheckHash(0xAA0FA9F4B624EF51)
+        Mouse.Move(22,8)
+        Paint('Tooltip shown for the second label')
+        CheckHash(0x1983A71F1BB817BD)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    let mut l = toolbaritem!("text,type:label");
+    let mut l = toolbaritem!("first,type:label");
     l.set_tooltip("A toolbar label");
     w.get_toolbar().add(g, l);
+    w.get_toolbar().add(g, toolbaritem!("second,type:label,tooltip:'second tooltip'"));
     a.add_window(w);
     a.run();
 }

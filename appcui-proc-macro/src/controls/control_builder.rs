@@ -154,6 +154,19 @@ impl<'a> ControlBuilder<'a> {
         self.add_comma();
         layout::add_layout(&mut self.content, &self.parser);
     }
+    pub(super) fn add_toolbaritem_operations(&mut self) {
+        if let Some(tooltip_value) = self.parser.get("tooltip") {
+            let txt = tooltip_value.get_string();
+            if txt.len()>0 {
+                self.content.push_str("control.set_tooltip(");
+                unsafe {
+                    let x = std::mem::transmute(txt);
+                    self.add_text(x);
+                }
+                self.content.push_str(");\n\t");
+            }
+        }       
+    }
     pub(super) fn add_basecontrol_operations(&mut self) {
         if let Some(is_enabled) = self.parser.get_bool("enabled") {
             if is_enabled == false {

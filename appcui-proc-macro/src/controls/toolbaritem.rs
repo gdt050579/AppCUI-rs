@@ -11,6 +11,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("checked", "checked", ParamType::Bool),
     NamedParameter::new("check", "checked", ParamType::Bool),
+    NamedParameter::new("tooltip", "tooltip", ParamType::String),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -23,6 +24,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             cb.add_bool_parameter("checked", Some(false));
         }
         cb.finish_control_initialization();
+        cb.add_toolbaritem_operations();
         cb.into()
     } else {
         panic!("Parameter 'type' is mandatory (possible value for parameter type: 'Label', 'Button', 'Checkbox', 'SingleChoice')");
