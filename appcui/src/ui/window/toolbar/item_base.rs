@@ -265,5 +265,14 @@ macro_rules! add_toolbaritem_basic_methods {
         pub fn get_tooltip(&self) -> &str {
             self.base.get_tooltip()
         }
+        #[inline(always)]
+        pub fn is_visible(&self) -> bool {
+            self.base.is_visible()
+        }   
+        #[inline(always)]
+        pub fn set_visible(&mut self, visible: bool) {
+            self.base.set_visible(visible);
+            self.base.request_recompute_layout();
+        }  
     };
 }

@@ -26,7 +26,7 @@ The following parameters are supported for a toolbar label:
 | `type`              | String | **No**                              | For a label use: `type:Label` |
 | `tooltip`           | String | **No**                              | The tooltip associated with the label |
 
-Besides the default methods that every toolbar item has (as descrived in [here](../toolbar.md#common-methods) ), the following methods are available for a toolbar label:
+Besides the default methods that every toolbar item has (as described [here](../toolbar.md#common-methods)), the following methods are available for a toolbar label:
 
 | Method             | Purpose                                                                                                          |
 |--------------------|------------------------------------------------------------------------------------------------------------------|
