@@ -165,7 +165,12 @@ impl<'a> ControlBuilder<'a> {
                 }
                 self.content.push_str(");\n\t");
             }
-        }       
+        }     
+        if let Some(is_visible) = self.parser.get_bool("visible") {
+            if is_visible == false {
+                self.content.push_str("control.set_visible(false);\n\t");
+            }
+        }  
     }
     pub(super) fn add_basecontrol_operations(&mut self) {
         if let Some(is_enabled) = self.parser.get_bool("enabled") {

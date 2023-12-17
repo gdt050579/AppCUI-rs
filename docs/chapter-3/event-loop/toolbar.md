@@ -57,3 +57,5 @@ All toolbar items have a set of common methods that can be used to modify their 
 |---------------------|------------------------------------------------------------------------------------------------------------------|
 | `set_toooltip(...)` | Set the tooltip for the current item. Using this method with an empty string clears the tooltip |
 | `get_tooltip()`     | Returns the current tooltip associated with an toolbar item |
+| `set_visible()`     | Changes the visibility settings for a selected toolbar item |
+| `is_visible()`      | Returns `true` if the current toolbar item is visible, or `false` otherwise |

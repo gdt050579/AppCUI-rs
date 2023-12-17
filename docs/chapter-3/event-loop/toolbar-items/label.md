@@ -16,6 +16,7 @@ or the `toolbaritem!` macro:
 let toolbar_label_1 = toolbaritem!("content,type=label");
 let toolbal_label_2 = toolbaritem!("content='label text',type:label");
 let toolbal_label_3 = toolbaritem!("content='label text',type:label,tooltip:'a tooltip'");
+let toolbal_label_4 = toolbaritem!("content='hidden label',type:label,visible:false");
 ```
 
 The following parameters are supported for a toolbar label:
@@ -25,6 +26,7 @@ The following parameters are supported for a toolbar label:
 | `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the label |
 | `type`              | String | **No**                              | For a label use: `type:Label` |
 | `tooltip`           | String | **No**                              | The tooltip associated with the label |
+| `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |
 
 Besides the default methods that every toolbar item has (as described [here](../toolbar.md#common-methods)), the following methods are available for a toolbar label:
 
