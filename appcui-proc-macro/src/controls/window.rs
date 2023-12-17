@@ -22,7 +22,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
-    let mut cb = ControlBuilder::new("window", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
+    let mut cb = ControlBuilder::new("window", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
     cb.init_control("Window::with_type");
     cb.add_string_parameter("title", None);
     cb.add_layout();

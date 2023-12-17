@@ -69,12 +69,12 @@ impl<'a> NamedParamsMap<'a> {
                         return Err(Error::new(
                             param_list,
                             format!(
-                                "Parameter '{}' and '{}' are aliases and can not be used at the same time. Keep only one of them !",
+                                "Parameters '{}' and '{}' are aliases and can not be used at the same time. Keep only one of them !",
                                 v.param_name, other_parameter_name
                             )
                             .as_str(),
-                            v.start,
-                            v.end,
+                            self.values[other_parameter_index].start,
+                            self.values[other_parameter_index].end,
                         ));
                     } else {
                         return Err(Error::new(

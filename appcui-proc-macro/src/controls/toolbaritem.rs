@@ -11,11 +11,12 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("checked", "checked", ParamType::Bool),
     NamedParameter::new("check", "checked", ParamType::Bool),
+    NamedParameter::new("visible", "visible", ParamType::Bool),
     NamedParameter::new("tooltip", "tooltip", ParamType::String),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
-    let mut cb = ControlBuilder::new("toolbaritem", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS);
+    let mut cb = ControlBuilder::new("toolbaritem", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, false);
     if let Some(item_type) = cb.get_enum_value("type", unsafe { &mut TOOLBARITEM_TYPE }) {
         let init_type = format!("toolbar::{}::new", item_type);
         cb.init_control(init_type.as_str());

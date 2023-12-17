@@ -69,6 +69,7 @@ impl<'a> ControlBuilder<'a> {
         input: TokenStream,
         positional_parameters: &[PositionalParameter],
         named_parameters: &[NamedParameter],
+        add_common_parameters: bool,
     ) -> Self {
         let string_repr = ControlBuilder::token_stream_to_string(name, input);
         let mut builder = Self {
@@ -83,7 +84,9 @@ impl<'a> ControlBuilder<'a> {
             builder.parser = parameter_parser::parse(ref_str).unwrap();
             builder.parser.validate_positional_parameters(ref_str, positional_parameters).unwrap();
             builder.parser.validate_names_parameters(ref_str, named_parameters).unwrap();
-            builder.parser.validate_names_parameters(ref_str, CONTROL_NAMED_PARAMATERS).unwrap();
+            if add_common_parameters {
+                builder.parser.validate_names_parameters(ref_str, CONTROL_NAMED_PARAMATERS).unwrap();
+            }
             builder.parser.check_unkwnon_params(ref_str).unwrap();
             builder.ref_str = ref_str;
         }
@@ -157,7 +160,7 @@ impl<'a> ControlBuilder<'a> {
     pub(super) fn add_toolbaritem_operations(&mut self) {
         if let Some(tooltip_value) = self.parser.get("tooltip") {
             let txt = tooltip_value.get_string();
-            if txt.len()>0 {
+            if txt.len() > 0 {
                 self.content.push_str("control.set_tooltip(");
                 unsafe {
                     let x = std::mem::transmute(txt);
@@ -165,12 +168,12 @@ impl<'a> ControlBuilder<'a> {
                 }
                 self.content.push_str(");\n\t");
             }
-        }     
+        }
         if let Some(is_visible) = self.parser.get_bool("visible") {
             if is_visible == false {
                 self.content.push_str("control.set_visible(false);\n\t");
             }
-        }  
+        }
     }
     pub(super) fn add_basecontrol_operations(&mut self) {
         if let Some(is_enabled) = self.parser.get_bool("enabled") {
@@ -184,7 +187,7 @@ impl<'a> ControlBuilder<'a> {
             }
         }
     }
-    pub(super) fn get_enum_value(&mut self, param_name: &str, available_variants: &mut FlagsSignature)->Option<&str> {
+    pub(super) fn get_enum_value(&mut self, param_name: &str, available_variants: &mut FlagsSignature) -> Option<&str> {
         if let Some(value) = self.parser.get(param_name) {
             let variant = value.get_string();
             if let Some(variant_name) = available_variants.get(variant) {

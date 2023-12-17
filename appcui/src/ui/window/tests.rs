@@ -597,6 +597,7 @@ fn check_window_toolbar_label_tooltip() {
     l.set_tooltip("A toolbar label");
     w.get_toolbar().add(g, l);
     w.get_toolbar().add(g, toolbaritem!("second,type:label,tooltip:'second tooltip'"));
+    w.get_toolbar().add(g, toolbaritem!("caption:hidden,type:label,visible:false"));
     a.add_window(w);
     a.run();
 }
