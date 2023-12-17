@@ -945,6 +945,135 @@ fn check_window_toolbar_maximize_restore() {
 }
 
 #[test]
+fn check_window_toolbar_item_visibility() {
+
+    #[Window(events = ButtonEvents+CheckBoxEvents, internal=true)]
+    struct MyWin {
+        increase_button: Handle<Button>,
+        dec: Handle<toolbar::Label>,
+        hex: Handle<toolbar::Label>,
+        bin: Handle<toolbar::Label>,
+        show_dec: Handle<CheckBox>,
+        show_hex: Handle<CheckBox>,
+        show_bin: Handle<CheckBox>,
+        number: u32,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: window!("'My Win',d:c,w:40,h:6"),
+                increase_button: Handle::None,
+                dec: Handle::None,
+                hex: Handle::None,
+                bin: Handle::None,
+                show_dec: Handle::None,
+                show_hex: Handle::None,
+                show_bin: Handle::None,
+                number: 24,
+            };
+            // add the increasebutton
+            win.increase_button = win.add(button!("Increase,w:15,d:l"));
+            // add checkboxes
+            win.show_dec = win.add(checkbox!("'Show decimal',x:20,y:1,w:16,checked:true"));
+            win.show_hex = win.add(checkbox!("'Show hex',x:20,y:2,w:16,checked:true"));
+            win.show_bin = win.add(checkbox!("'Show binary',x:20,y:3,w:16,checked:true"));
+            // add toolbar labels
+            let first_group = win.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+            let second_group = win.get_toolbar().create_group(toolbar::GroupPosition::TopRight);
+            win.dec = win.get_toolbar().add(first_group, toolbar::Label::new(""));
+            win.hex = win.get_toolbar().add(first_group, toolbar::Label::new(""));
+            win.bin = win.get_toolbar().add(second_group, toolbar::Label::new(""));
+            win.update_toolbar_labels();
+            win
+        }
+        fn update_toolbale_label(&mut self, handle: Handle<toolbar::Label>, text: String) {
+            if let Some(label) = self.get_toolbar().get_mut(handle) {
+                label.set_content(text.as_str());
+            }
+        }
+        fn update_visibility_status_for_label(&mut self, handle: Handle<toolbar::Label>, visible: bool) {
+            if let Some(label) = self.get_toolbar().get_mut(handle) {
+                label.set_visible(visible);
+            }
+        }
+        fn update_toolbar_labels(&mut self) {
+            self.update_toolbale_label(self.dec, format!("Dec:{}", self.number));
+            self.update_toolbale_label(self.hex, format!("Hex:{:X}", self.number));
+            self.update_toolbale_label(self.bin, format!("Bin:{:b}", self.number));
+        }
+    }
+
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+            self.number += 1;
+            self.update_toolbar_labels();
+            return EventProcessStatus::Processed;
+        }
+    }
+    impl CheckBoxEvents for MyWin {
+        fn on_status_changed(&mut self, handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
+            match () {
+                _ if handle == self.show_bin => self.update_visibility_status_for_label(self.bin, checked),
+                _ if handle == self.show_hex => self.update_visibility_status_for_label(self.hex, checked),
+                _ if handle == self.show_dec => self.update_visibility_status_for_label(self.dec, checked),
+                _ => {}
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        //expect on top    : ╔════════ My Win ═══════[Bin:11000]═[x]╗
+        //expect on bottom : ╚[Dec:24|Hex:18]═══════════════════════╝
+        Paint('initial state')
+        CheckHash(0xFA2B2E36B28A0050)
+        Mouse.Click(17,4,left)
+        Mouse.Click(17,4,left)
+        //expect on top    : ╔════════ My Win ═══════[Bin:11010]═[x]╗
+        //expect on bottom : ╚[Dec:26|Hex:1A]═══════════════════════╝
+        Paint('Number is 26')
+        CheckHash(0x8434D2F808AE0DA)
+        Mouse.Click(36,4,left)
+        //expect on top    : ╔════════ My Win ═══════[Bin:11010]═[x]╗
+        //expect on bottom : ╚[Hex:1A]══════════════════════════════╝
+        Paint('Decimal is missing')
+        CheckHash(0x3B1812AD5CF55031)
+        Mouse.Click(36,6,left)
+        //expect on top    : ╔══════════════ My Win ═════════════[x]╗
+        //expect on bottom : ╚[Hex:1A]══════════════════════════════╝
+        Paint('Bin & Dec are missing')
+        CheckHash(0xE403B3C292B3820F)
+        Mouse.Click(17,4,left)
+        //expect on top    : ╔══════════════ My Win ═════════════[x]╗
+        //expect on bottom : ╚[Hex:1B]══════════════════════════════╝
+        Paint('Number if nou 27')
+        CheckHash(0xC8A77483C0FAC0C4)
+        Mouse.Click(36,5,left)
+        //expect on top    : ╔══════════════ My Win ═════════════[x]╗
+        //expect on bottom : ╚══════════════════════════════════════╝
+        Paint('All are hidden')
+        CheckHash(0xD48F9939B3A922AF)
+        Mouse.Click(17,4,left)
+        Mouse.Click(36,4,left)
+        //expect on top    : ╔══════════════ My Win ═════════════[x]╗
+        //expect on bottom : ╚[Dec:28]══════════════════════════════╝
+        Paint('Dec is visible, number is 28')
+        CheckHash(0xA934C4B7914E03BA)
+        Mouse.Click(36,5,left)
+        Mouse.Click(36,6,left)
+        //expect on top    : ╔════════ My Win ═══════[Bin:11100]═[x]╗
+        //expect on bottom : ╚[Dec:28|Hex:1C]═══════════════════════╝
+        Paint('All are visible')
+        CheckHash(0xADA39D8995EA0606)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
 fn check_window_move_and_resize_via_keys() {
     let script = "
         Paint.Enable(false)
@@ -1112,7 +1241,6 @@ fn check_modal_window() {
     app.run();
 }
 
-
 #[test]
 fn check_window_fixed_pos() {
     let script = "
@@ -1128,7 +1256,11 @@ fn check_window_fixed_pos() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(Window::new("Moveable", Layout::new("x:5,y:1,w:20,h:6"), window::Flags::None));
-    a.add_window(Window::new("Non-Moveable", Layout::new("x:30,y:1,w:25,h:6"), window::Flags::FixedPosition));
+    a.add_window(Window::new(
+        "Non-Moveable",
+        Layout::new("x:30,y:1,w:25,h:6"),
+        window::Flags::FixedPosition,
+    ));
     a.run();
 }
 
@@ -1184,7 +1316,6 @@ fn check_window_resize_mode_keys() {
     a.add_window(Window::new("Title", Layout::new("d:c,w:20,h:6"), window::Flags::Sizeable));
     a.run();
 }
-
 
 #[test]
 fn check_window_background() {
