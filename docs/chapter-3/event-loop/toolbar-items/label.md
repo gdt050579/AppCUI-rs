@@ -69,7 +69,7 @@ impl MyWin {
             show_bin: Handle::None,
             number: 24,
         };
-        // add the increasebutton
+        // add the increase button
         win.increase_button = win.add(button!("Increase,w:15,d:l"));
         // add checkboxes
         win.show_dec = win.add(checkbox!("'Show decimal',x:20,y:1,w:16,checked:true"));
@@ -84,7 +84,7 @@ impl MyWin {
         win.update_toolbar_labels();
         win
     }
-    fn update_toolbale_label(&mut self, handle: Handle<toolbar::Label>, text: String) {
+    fn update_toolbar_label(&mut self, handle: Handle<toolbar::Label>, text: String) {
         if let Some(label) = self.get_toolbar().get_mut(handle) {
             label.set_content(text.as_str());
         }
@@ -95,9 +95,9 @@ impl MyWin {
         }        
     }
     fn update_toolbar_labels(&mut self) {
-        self.update_toolbale_label(self.dec, format!("Dec:{}", self.number));
-        self.update_toolbale_label(self.hex, format!("Hex:{:X}", self.number));
-        self.update_toolbale_label(self.bin, format!("Bin:{:b}", self.number));
+        self.update_toolbar_label(self.dec, format!("Dec:{}", self.number));
+        self.update_toolbar_label(self.hex, format!("Hex:{:X}", self.number));
+        self.update_toolbar_label(self.bin, format!("Bin:{:b}", self.number));
     }
 }
 
