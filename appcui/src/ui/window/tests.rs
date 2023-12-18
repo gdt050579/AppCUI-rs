@@ -632,6 +632,70 @@ fn check_window_toolbar_button() {
 }
 
 #[test]
+fn check_window_toolbar_button_click() {
+    #[Window(events = ToolBarEvents, internal = true)]
+    struct MyWin {
+        increase_button: Handle<toolbar::Button>,
+        decrease_button: Handle<toolbar::Button>,
+        text: Handle<Label>,
+        number: u32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: window!("'My Win',d:c,w:40,h:6"),
+                increase_button: Handle::None,
+                decrease_button: Handle::None,
+                text: Handle::None,
+                number: 10,
+            };
+            // create a group
+            let g = win.get_toolbar().create_group(toolbar::GroupPosition::BottomRight);
+            // add buttons
+            win.increase_button = win.get_toolbar().add(g, toolbaritem!("'+',type:button,tooltip:'Click to increase'"));
+            win.decrease_button = win.get_toolbar().add(g, toolbar::Button::new("-"));
+            // add a label
+            win.text = win.add(label!("10,d:c,w:2,h:1"));
+            win
+        }
+    }
+    impl ToolBarEvents for MyWin {
+        fn on_button_clicked(&mut self, handle: Handle<toolbar::Button>) -> EventProcessStatus {
+            match () {
+                _ if handle == self.increase_button => self.number += 1,
+                _ if handle == self.decrease_button => self.number -= 1,
+                _ => {}
+            }
+            let h = self.text;
+            let n = self.number;
+            if let Some(label) = self.get_control_mut(h) {
+                label.set_caption(format!("{}", n).as_str());
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('value = 10')
+        CheckHash(0x93866D3CDC262038)
+        Mouse.Move(47,7)
+        Paint('Mouse over increase button')
+        CheckHash(0x578BA3778B17CB87)
+        Mouse.Click(47,7,left)
+        Mouse.Click(47,7,left)
+        Paint('value = 12')
+        CheckHash(0x532FBC16FB8C9B08)
+        Mouse.Click(45,7,left)
+        Paint('value = 11')
+        CheckHash(0xD5FB8878CC6A03E3)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
 fn check_window_toolbar_button_events() {
     #[Window(events = ToolBarEvents,internal = true)]
     struct MyWin {
@@ -946,7 +1010,6 @@ fn check_window_toolbar_maximize_restore() {
 
 #[test]
 fn check_window_toolbar_item_visibility() {
-
     #[Window(events = ButtonEvents+CheckBoxEvents, internal=true)]
     struct MyWin {
         increase_button: Handle<Button>,
