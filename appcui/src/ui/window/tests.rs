@@ -832,9 +832,9 @@ fn check_window_toolbar_checkbox_events() {
                 let h = self.cb;
                 if let Some(checkbox) = self.get_toolbar().get_mut(h) {
                     if checked {
-                        checkbox.set_text("&Checked");
+                        checkbox.set_content("&Checked");
                     } else {
-                        checkbox.set_text("&Not checked");
+                        checkbox.set_content("&Not checked");
                     }
                     return EventProcessStatus::Processed;
                 }

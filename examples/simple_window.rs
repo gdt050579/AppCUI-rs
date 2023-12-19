@@ -239,8 +239,8 @@ use appcui::prelude::*;
 
 #[Window(events = ToolBarEvents)]
 struct MyWin {
-    increase_button: Handle<toolbar::Button>,
-    decrease_button: Handle<toolbar::Button>,
+    cb1: Handle<toolbar::CheckBox>,
+    cb2: Handle<toolbar::CheckBox>,
     text: Handle<Label>,
     number: u32,
 }
@@ -249,34 +249,33 @@ impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
             base: window!("'My Win',d:c,w:40,h:6"),
-            increase_button: Handle::None,
-            decrease_button: Handle::None,
+            cb1: Handle::None,
+            cb2: Handle::None,
             text: Handle::None,
             number: 10,
         };
         // create a group
         let g = win.get_toolbar().create_group(toolbar::GroupPosition::BottomRight);
         // add buttons
-        win.increase_button = win.get_toolbar().add(g, toolbar::Button::new("+"));
-        win.decrease_button = win.get_toolbar().add(g, toolbar::Button::new("-"));
+        win.cb1 = win.get_toolbar().add(g, toolbar::CheckBox::new("Opt-1",false));
+        win.cb2 = win.get_toolbar().add(g, toolbar::CheckBox::new("Opt-2",false));
         // add a label
-        win.text = win.add(label!("10,d:c,w:2,h:1"));
+        win.text = win.add(label!("'',d:c,w:20,h:1"));
         win
     }
 }
 impl ToolBarEvents for MyWin {
-    fn on_button_clicked(&mut self, handle: Handle<toolbar::Button>) -> EventProcessStatus {
-        match () {
-            _ if handle == self.increase_button => self.number += 1,
-            _ if handle == self.decrease_button => self.number -= 1,
-            _ => {}
-        }
+    fn on_checkbox_clicked(&mut self, handle: Handle<toolbar::CheckBox>, checked: bool) -> EventProcessStatus {
+        let txt = match () {
+            _ if handle == self.cb1 => format!("Opt-1 is {}",checked),
+            _ if handle == self.cb2 => format!("Opt-2 is {}",checked),
+            _ => String::new(),
+        };
         let h = self.text;
-        let n = self.number;
-        if let Some(label) = self.get_control_mut(h) {            
-            label.set_caption(format!("{}", n).as_str());
+        if let Some(label) = self.get_control_mut(h) {
+            label.set_caption(&txt);
         }
-        EventProcessStatus::Processed
+        EventProcessStatus::Ignored
     }
 }
 
@@ -284,7 +283,8 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     // let mut w = window!("Title,d:c,w:40,h:8");
     // let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-    // w.get_toolbar().add(g, toolbaritem!("'&Press Me',type=button"));
+    // w.get_toolbar().add(g, toolbaritem!("'&Check Box 1',type=checkbox, checked: true"));
+    // w.get_toolbar().add(g, toolbaritem!("'Check Box &2',type=CheckBox"));
     // a.add_window(w);
     a.add_window(MyWin::new());
     a.run();

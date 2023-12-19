@@ -19,9 +19,10 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("toolbaritem", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, false);
     if let Some(item_type) = cb.get_enum_value("type", unsafe { &mut TOOLBARITEM_TYPE }) {
         let init_type = format!("toolbar::{}::new", item_type);
+        let is_checkbox = item_type == "CheckBox";
         cb.init_control(init_type.as_str());
-        cb.add_string_parameter("caption", None);
-        if init_type == "CheckBox" {
+        cb.add_string_parameter("caption", None);        
+        if is_checkbox {
             cb.add_bool_parameter("checked", Some(false));
         }
         cb.finish_control_initialization();

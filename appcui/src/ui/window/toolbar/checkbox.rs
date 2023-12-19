@@ -21,13 +21,17 @@ impl CheckBox {
             caption: Caption::new("", false),
             checked,
         };
-        obj.set_text(text);
+        obj.set_content(text);
         obj
     }
-    pub fn set_text(&mut self, text: &str) {
+    pub fn set_content(&mut self, text: &str) {
         self.caption.set_text(text, true);
         self.base.set_width((self.caption.get_chars_count() + 2) as u16);
         self.base.request_recompute_layout();
+    }
+    #[inline(always)]
+    pub fn get_content(&self) -> &str {
+        &self.caption.get_text()
     }
     pub fn set_checked(&mut self, checked: bool) {
         self.checked = checked;
