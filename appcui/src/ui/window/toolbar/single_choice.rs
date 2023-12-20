@@ -25,13 +25,17 @@ impl SingleChoice {
             selected: false,  
             tooldbar: None          
         };
-        obj.set_text(text);
+        obj.set_caption(text);
         obj
     }
-    pub fn set_text(&mut self, text: &str) {
+    pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, true);
         self.base.set_width(self.caption.get_chars_count() as u16);
         self.base.request_recompute_layout();
+    }
+    #[inline(always)]
+    pub fn get_content(&self) -> &str {
+        &self.caption.get_text()
     }
     #[inline(always)]
     pub fn is_selected(&self) -> bool {

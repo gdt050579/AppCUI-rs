@@ -266,6 +266,14 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str("::None");
         }
     }
+    pub(super) fn add_line(&mut self, content: &str) {
+        if !self.content.ends_with("\n") {
+            self.content.push_str("\n");
+        }
+        self.content.push_str("\t");
+        self.content.push_str(content);
+        self.content.push_str("\n");
+    }
 }
 impl Into<TokenStream> for ControlBuilder<'_> {
     fn into(mut self) -> TokenStream {

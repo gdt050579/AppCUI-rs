@@ -16,7 +16,7 @@ or the `toolbaritem!` macro:
 let toolbar_checkbox_1 = toolbaritem!("content,type=checkbox");
 let toolbal_checkbox_2 = toolbaritem!("content='Start',type:checkbox,checked: true");
 let toolbal_checkbox_3 = toolbaritem!("content='&Stop',type:checkbox,tooltip:'a tooltip'");
-let toolbal_checkbox_4 = toolbaritem!("content='hidden button',type:checkbox,visible:false");
+let toolbal_checkbox_4 = toolbaritem!("content='hidden checkbox',type:checkbox,visible:false");
 ```
 
 
@@ -69,7 +69,6 @@ struct MyWin {
     cb1: Handle<toolbar::CheckBox>,
     cb2: Handle<toolbar::CheckBox>,
     text: Handle<Label>,
-    number: u32,
 }
 
 impl MyWin {
@@ -79,7 +78,6 @@ impl MyWin {
             cb1: Handle::None,
             cb2: Handle::None,
             text: Handle::None,
-            number: 10,
         };
         // create a group
         let g = win.get_toolbar().create_group(toolbar::GroupPosition::BottomRight);
@@ -102,7 +100,7 @@ impl ToolBarEvents for MyWin {
         if let Some(label) = self.get_control_mut(h) {
             label.set_caption(&txt);
         }
-        EventProcessStatus::Ignored
+        EventProcessStatus::Processed
     }
 }
 
