@@ -4,10 +4,10 @@ A toolbar checkbox is a item that can be positioned on the top or bottom part of
 
 <img src="img/checkbox.png" width=400/>
 
-To create a checkbox within a toolbar use the `toolbar::Checkbox::new(...)` method:
+To create a checkbox within a toolbar use the `toolbar::CheckBox::new(...)` method:
 
 ```rust
-let toolbar_checkbox = toolbar::Checkbox::new("content", true);
+let toolbar_checkbox = toolbar::CheckBox::new("content", true);
 ```
 
 or the `toolbaritem!` macro:
