@@ -468,9 +468,11 @@ impl Window {
 
     fn on_close_request(&mut self) {
         if let Some(interface) = self.get_interface_mut() {
-            interface.on_close();
-            // logic to remove me
-            RuntimeManager::get().request_remove(self.handle);
+            let result = WindowEvents::on_cancel(interface);
+            if result == ActionRequest::Allow {
+                // logic to remove me
+                RuntimeManager::get().request_remove(self.handle);
+            }
         }
     }
     fn on_mouse_release(&mut self) -> EventProcessStatus {
@@ -684,6 +686,10 @@ impl OnKeyPressed for Window {
                 }
                 key!("Ctrl+Alt+M") | key!("Ctrl+Alt+R") => {
                     self.resize_move_mode = true;
+                    return EventProcessStatus::Processed;
+                }
+                key!("Escape")=> {
+                    self.on_close_request();
                     return EventProcessStatus::Processed;
                 }
                 _ => {}

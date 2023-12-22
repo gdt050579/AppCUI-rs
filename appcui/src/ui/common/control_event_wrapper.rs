@@ -31,10 +31,7 @@ impl ControlEvent {
                     data.checked,
                 );
             }
-            ControlEventData::WindowEvents(data) => match data {
-                window::events::EventData::OnClose => return WindowEvents::on_close(receiver),
-                _ => return EventProcessStatus::Ignored,
-            },
-        };
+            ControlEventData::WindowEvents(_) => EventProcessStatus::Ignored,
+        }
     }
 }

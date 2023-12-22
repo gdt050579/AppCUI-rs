@@ -4,10 +4,6 @@ use crate::{graphics::Rect, prelude::ActionRequest, system::Handle, ui::common::
 // Window events always go to the same window that triggers them --> we don't need a handle as
 // we already have &mut self
 pub trait WindowEvents {
-    fn on_close(&mut self) -> EventProcessStatus {
-        EventProcessStatus::Ignored
-    }
-    
     // don't need to change anything --> since layout has been change, repaint wil be force automatically
     fn on_layout_changed(&mut self, _old_layout: Rect, _new_layout: Rect) {}
     
@@ -53,9 +49,7 @@ pub trait ModalWindowMethods<T> {
     fn exit(&mut self);
 }
 
-#[repr(u8)]
 #[derive(Copy, Clone)]
 pub(crate) enum EventData {
-    OnActivate,
-    OnClose,
+
 }
