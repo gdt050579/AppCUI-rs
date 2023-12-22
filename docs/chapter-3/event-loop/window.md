@@ -73,6 +73,7 @@ In terms of key association, a Window has two modes:
 | Key                   | Purpose                                                                             |
 |-----------------------|-------------------------------------------------------------------------------------|
 | `Ctrl`+`Alt`+`M` or <br> `Ctrl`+`Alt`+`R` | Switch the window to resize/move mode                           |
+| `Escape`              | Trigers a call cu `on_cancel(...)` method. By default this will close the window. Howeverm you can change the behavior and return `ActionRequest::Deny` from the `on_cancel` callback  |
 
 ### For resize/move mode
 
@@ -114,12 +115,11 @@ These methods are called under the following scenarious:
 
 | Method                   | Called when                                                                  |
 |--------------------------|------------------------------------------------------------------------------|
-| `on_close(...)`          | |
-| `on_layout_changed(...)` | |
-| `on_activate(...)`       | Called whenever a window or a modal window receives the focus |
-| `on_deactivate(...)`     | Called whenever a window or a modal window loses the focus    |
-| `on_accept(...)`         | |
-| `on_cancel(...)`         | Called when you press `Escape` in a modal window. You can use this method to disable closing via `Escape` key and for an exit with a value (via method `exit_with(...)` |
+| `on_layout_changed(...)` | Called whenever the size or position of a window changes.                    |
+| `on_activate(...)`       | Called whenever a window or a modal window receives the focus                |
+| `on_deactivate(...)`     | Called whenever a window or a modal window loses the focus                   |
+| `on_accept(...)`         | Called **only for modal windows** when you hit the `Enter` key               |
+| `on_cancel(...)`         | For a modal window this method is xalled when you press `Escape`. You can use this method to disable closing via `Escape` key and for an exit with a value (via method `exit_with(...)`<br><br>For a regular window (non-modal) this method can be called when you pressed `Esc` key or when you pressed the **close button** from a window. |
 
 ## Window Tags
 
