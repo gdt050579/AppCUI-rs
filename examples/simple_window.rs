@@ -237,41 +237,56 @@ use appcui::prelude::*;
 // //     Ok(())
 // // }use appcui::prelude::*;
 
-#[Window(events = ToolBarEvents)]
+#[ModalWindow(events=ButtonEvents,response=i32)]
+struct MyModalWin {
+    value: i32,
+}
+impl MyModalWin {
+    fn new(value: i32) -> Self {
+        let mut w = MyModalWin {
+            base: ModalWindow::new("Calc", Layout::new("d:c,w:40,h:12"), window::Flags::None),
+            value: value * 2,
+        };
+        w.add(Label::new(format!("{} x 2 = {}", value, value * 2).as_str(), Layout::new("d:c,w:16,h:1")));
+        w.add(button!("Close,d:b,w:15"));
+        w
+    }
+}
+impl ButtonEvents for MyModalWin {
+    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+        self.exit_with(self.value);
+        EventProcessStatus::Processed
+    }
+}
+
+#[Window(events = ButtonEvents)]
 struct MyWin {
-    opt1: Handle<toolbar::SingleChoice>,
-    opt2: Handle<toolbar::SingleChoice>,
     text: Handle<Label>,
+    value: i32,
 }
 
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'My Win',d:c,w:40,h:6"),
-            opt1: Handle::None,
-            opt2: Handle::None,
+            base: window!("'My Win',d:c,w:40,h:16"),
             text: Handle::None,
+            value: 1,
         };
-        // create a group
-        let g = win.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-        // add buttons
-        win.opt1 = win.get_toolbar().add(g, toolbar::SingleChoice::new("First Choice"));
-        win.opt2 = win.get_toolbar().add(g, toolbar::SingleChoice::new("Second Choice"));
-        // add a label
-        win.text = win.add(label!("'',d:c,w:22,h:1"));
+        win.text = win.add(label!("'Value=10',d:c,w:24,h:1"));
+        win.add(button!("Double,d:b,w:15"));
         win
     }
 }
-impl ToolBarEvents for MyWin {
-    fn on_choice_selected(&mut self, handle: Handle<toolbar::SingleChoice>) -> EventProcessStatus {
-        let txt = match () {
-            _ if handle == self.opt1 => "First choice selected",
-            _ if handle == self.opt2 => "Second choice selected",
-            _ => "",
-        };
-        let h = self.text;
-        if let Some(label) = self.get_control_mut(h) {
-            label.set_caption(txt);
+impl ButtonEvents for MyWin {
+    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+        // first run the modal window
+        if let Some(response) = MyModalWin::new(self.value).show() {
+            // set the new value
+            self.value = response;
+            let h = self.text;
+            if let Some(label) = self.get_control_mut(h) {
+                label.set_caption(format!("Valu={}", response).as_str());
+            }
         }
         EventProcessStatus::Processed
     }
