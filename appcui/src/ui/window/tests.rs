@@ -1404,3 +1404,81 @@ fn check_window_background() {
     a.add_window(window!("Warning,x:30,y:5,w:30,h:5,type=Warning"));
     a.run();
 }
+
+#[test]
+fn check_window_on_cancel_callback() {
+    #[Window(events=WindowEvents, internal = true)]
+    struct MyWin {
+        count: u32,
+        txt: Handle<Label>
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: window!("Test,d:c,w:30,h:6"),
+                txt: Handle::None,
+                count: 4,
+            };
+            win.txt = win.add(label!("'',x:1,y:1,w:10"));
+            win.update_count();
+            win
+        }
+        fn update_count(&mut self) {
+            let h = self.txt;
+            let c = self.count;
+            if let Some(label) = self.get_control_mut(h) {
+                label.set_caption(format!("tries: {}",c).as_str());
+            }
+        }
+    }
+    impl WindowEvents for MyWin {
+        fn on_cancel(&mut self) -> ActionRequest {
+            self.count -= 1;
+            self.update_count();
+            if self.count == 0 {
+                ActionRequest::Allow
+            } else {
+                ActionRequest::Deny
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('tries: 4')
+        CheckHash(0x37BC6BC2CBE19B06)
+        Mouse.Click(42,2,left)
+        Paint('tries: 3')
+        CheckHash(0x2E1FABC21167ED70)
+        Key.Pressed(Escape,2)
+        Paint('tries: 1')
+        CheckHash(0xC745411D9CC128DE)
+        Mouse.Click(42,2,left)
+        Paint('Windows is closed')
+        CheckHash(0x734FECAF52FDE955)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_window_on_close_default() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('Two windows')
+        CheckHash(0x782B90B5A3044A22)
+        Mouse.Click(57,0,left)
+        Paint('Win-2 is closed (only Win-1 exists)')
+        // CheckHash(0x1E3C6A9A4F7E2ED7)
+        // Mouse.Click(10,7,left)
+        // Paint('Notify window enabled')
+        // CheckHash(0x6A9C490B34C3AA7B)
+        // Mouse.Click(40,7,left)
+        // Paint('Warning window enabled')
+        // CheckHash(0x8786A6E5A142320F)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(window!("Win-1,x:0,y:0,w:30,h:5"));
+    a.add_window(window!("Win-2,x:30,y:0,w:30,h:5"));
+    a.run();
+}
