@@ -11,7 +11,7 @@ To create a modal window that will handle events from its children, use `#[Modal
 
 ```rs
 #[ModalWindow(events=..., response=...)]
-struct MyWindow {
+struct MyModalWindow {
     // specific fields
 }
 ```
@@ -26,6 +26,21 @@ Besides the normal [methods](./window.md#methods) that a regular Window has, the
 
 
 Pressing `Escape` key in a modal window will automatically call the `exit()` method and the modal window will be closed.
+To disable this behavior, you can add `WindowEvents` to the list of events and then return `ActionRequest::Deny` when implementing `on_cancel`.
+
+```rust,no_run
+#[ModalWindow(events=WindowEvents, response=...)]
+struct MyModalWindow {
+    // specific fields
+}
+impl WindowEvents for MyWindow {
+    fn on_cancel(&mut self) -> ActionRequest {
+        ActionRequest::Deny
+    }
+}
+
+```
+
 
 # Execution flow
 
