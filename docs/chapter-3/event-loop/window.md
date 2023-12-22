@@ -85,6 +85,42 @@ In terms of key association, a Window has two modes:
 | `Alt`+{`Left`, `Up`, `Right`, `Down`} | Moves the window towards one of the margins of the Desktop. For example `Alt`+`Up` will move current window to the top margin of the client space of the Desktop |
 | `Ctrl`+{`Left`, `Up`, `Right`, `Down`} | Increases or decreases the Width or Height of the current Window |
 
+## Events
+
+Window related events can be intercepted via `WindowEvents` trait. You will need to add `WindowEvents` in the list of events like in the following example:
+```rust
+#[Window(events=WindowEvents)]
+struct MyWindow { ... }
+impl WindowEvents for MyWindow { ... }
+```
+
+`WindowEvents` is defined in the following way:
+```rust
+pub trait WindowEvents {
+    fn on_close(&mut self) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_layout_changed(&mut self, old_layout: Rect, new_layout: Rect) {}
+    fn on_activate(&mut self) {}
+    fn on_deactivate(&mut self) {}
+    fn on_accept(&mut self) {}
+    fn on_cancel(&mut self) -> ActionRequest {
+        ActionRequest::Allow
+    }
+}
+```
+
+These methods are called under the following scenarious:
+
+| Method                   | Called when                                                                  |
+|--------------------------|------------------------------------------------------------------------------|
+| `on_close(...)`          | |
+| `on_layout_changed(...)` | |
+| `on_activate(...)`       | Called whenever a window or a modal window receives the focus |
+| `on_deactivate(...)`     | Called whenever a window or a modal window loses the focus    |
+| `on_accept(...)`         | |
+| `on_cancel(...)`         | Called when you press `Escape` in a modal window. You can use this method to disable closing via `Escape` key and for an exit with a value (via method `exit_with(...)` |
+
 ## Window Tags
 
 For every window, a tag can be set for a window (a tag is a string associated with a Window that reflects its purpose). To set a tag use `.set_tag("<name")` method.

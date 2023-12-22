@@ -7,10 +7,16 @@ pub trait WindowEvents {
     fn on_close(&mut self) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    
     // don't need to change anything --> since layout has been change, repaint wil be force automatically
     fn on_layout_changed(&mut self, _old_layout: Rect, _new_layout: Rect) {}
+    
+    /// called whenver the window receives focus
     fn on_activate(&mut self) {}
+
+    /// called whenever the window loses focus. 
     fn on_deactivate(&mut self) {}
+    
     /// called whenever the ENTER key is intercepted by the Window
     /// For modal windows the behavior should be to use `.exit_with(...)` method to exit.
     /// for a regular window there is no default behavior
@@ -23,7 +29,8 @@ pub trait WindowEvents {
     /// If the returned value is `ActionRequest::Deny` the following nothing happens and any `exit()` or `exit_with(...)` methods call will be disregarded.
     /// **OBS**: As a general rule, if should not attempt to close the modal window during this function
     /// 
-    /// ## For a regula window
+    /// ## For a regular window
+    /// This method is never called when you press `Escape` on a regular (non-modal) window
     fn on_cancel(&mut self) -> ActionRequest {
         ActionRequest::Allow
     }
