@@ -37,7 +37,7 @@ pub trait ToolBarEvents {
     fn on_button_clicked(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    fn on_checkbox_clicked(&mut self, _handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
+    fn on_checkbox_clicked(&mut self, _handle: Handle<CheckBox>, _checked: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
     fn on_choice_selected(&mut self, _handle: Handle<SingleChoice>) -> EventProcessStatus {
