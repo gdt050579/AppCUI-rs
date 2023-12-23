@@ -294,6 +294,14 @@ impl ButtonEvents for MyWin {
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
+    
+    // let script = "
+    //     Paint()
+    //     Key.Pressed(Up)
+    //     Paint()
+    // ";
+    // let mut a = App::debug(80, 20, script).build()?;
+
 
     let mut w = window!("Title,d:c,w:70,h:20");
     let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");

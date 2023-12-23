@@ -136,7 +136,7 @@ impl Window {
             }
             h = base.children[base.focused_child_index.index()];
         }
-        if found.is_none() {
+        if (found.is_none()) || (handle==found) {
             return Handle::None;
         }
         if let Some(ctrl) = controls.get_mut(found) {
@@ -145,6 +145,7 @@ impl Window {
                 if (result.value==u32::MAX) || (result.handle.is_none()) {
                     return Handle::None;
                 }
+                return result.handle;
             } else {
                 return Handle::None;
             }
@@ -727,28 +728,28 @@ impl OnKeyPressed for Window {
                     return EventProcessStatus::Processed;
                 }
                 key!("Left") | key!("Ctrl+Left") | key!("Alt+Left") => {
-                    let res = Window::find_closest_control(self.handle, MoveDirection::ToLeft);
-                    if !res.is_none() {
-                        RuntimeManager::get().request_focus_for_control(res);
-                    }
-                    return EventProcessStatus::Processed;
-                }
-                key!("Right") | key!("Ctrl+Right") | key!("Alt+Right") => {
                     let res = Window::find_closest_control(self.handle, MoveDirection::ToRight);
                     if !res.is_none() {
                         RuntimeManager::get().request_focus_for_control(res);
                     }
                     return EventProcessStatus::Processed;
                 }
+                key!("Right") | key!("Ctrl+Right") | key!("Alt+Right") => {
+                    let res = Window::find_closest_control(self.handle, MoveDirection::ToLeft);
+                    if !res.is_none() {
+                        RuntimeManager::get().request_focus_for_control(res);
+                    }
+                    return EventProcessStatus::Processed;
+                }
                 key!("Up") | key!("Ctrl+Up") | key!("Alt+Up") => {
-                    let res = Window::find_closest_control(self.handle, MoveDirection::ToTop);
+                    let res = Window::find_closest_control(self.handle, MoveDirection::ToBottom);
                     if !res.is_none() {
                         RuntimeManager::get().request_focus_for_control(res);
                     }
                     return EventProcessStatus::Processed;
                 }
                 key!("Down") | key!("Ctrl+Down") | key!("Alt+Down") => {
-                    let res = Window::find_closest_control(self.handle, MoveDirection::ToBottom);
+                    let res = Window::find_closest_control(self.handle, MoveDirection::ToTop);
                     if !res.is_none() {
                         RuntimeManager::get().request_focus_for_control(res);
                     }
