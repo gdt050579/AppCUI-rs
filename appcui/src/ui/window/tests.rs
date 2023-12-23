@@ -1462,6 +1462,45 @@ fn check_window_on_cancel_callback() {
 }
 
 #[test]
+fn check_window_enter_resize_mode() {
+    #[Window(events=ButtonEvents, internal = true)]
+    struct MyWin { }
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: window!("Test,d:c,w:30,h:6"),
+            };
+            win.add(button!("ResizeMe,d:c,w:16"));
+            win
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            self.enter_resize_mode();
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0x4CAC2CA20D555971)
+        Key.Pressed(Enter)
+        Paint('Windows in resize mode')
+        CheckHash(0xA09BD0005E903DE4)
+        Key.Pressed(Left,4)
+        Key.Pressed(Up,2)
+        Paint('Windows move')
+        CheckHash(0x2A18B451961FA2A4)
+        Key.Pressed(Escape)
+        Paint('Normal mode again')
+        CheckHash(0xC394FEBC8D729121)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
 fn check_window_on_close_default() {
     let script = "
         //Paint.Enable(false)

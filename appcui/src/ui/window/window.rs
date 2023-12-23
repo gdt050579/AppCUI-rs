@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use super::events::EventData;
 use super::initialization_flags::*;
 use super::toolbar;
 use super::toolbar::*;
@@ -233,6 +232,11 @@ impl Window {
         }
     }
 
+    pub fn enter_resize_mode(&mut self) {
+        if self.has_focus() {
+            self.resize_move_mode = true;
+        }
+    }
     pub(super) fn is_in_resize_mode(&self) -> bool {
         self.resize_move_mode
     }
@@ -526,6 +530,7 @@ impl Window {
         None
     }
 }
+
 impl OnWindowRegistered for Window {
     fn on_registered(&mut self) {
         // propagate my handle to toolbar elements

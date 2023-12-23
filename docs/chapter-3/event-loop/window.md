@@ -61,6 +61,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | `set_tag(...)`         | Sets the tag of Window.<br>Example: `win.set_tag("ABC")` - this will set the tag of the window to `ABC` |
 | `get_tag()`            | Returns the tag of the current window |
 | `clear_tag()`          | Clears the current tag. Its equivalent to `set_tag("")` |
+| `enter_resize_mode()`  | Enters the resize mode programatically |
 
 ## Key association
 
