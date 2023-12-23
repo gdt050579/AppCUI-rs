@@ -16,6 +16,12 @@ enum MoveDirection {
     ToBottom,
 }
 
+#[derive(Copy, Clone)]
+struct Distance {
+    value: u32,
+    handle: Handle<UIElement>,
+}
+
 #[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true, window=true)]
 pub struct Window {
     title: Title,
@@ -75,8 +81,41 @@ impl Window {
         }
         return (((object.x - origin.x) * (object.x - origin.x)) as u32) + (((object.y - origin.y) * (object.y - origin.y)) as u32);
     }
-    fn compute_closest_distance(ctrl: &ControlBase, rect: Rect, dir: MoveDirection) -> Handle<UIElement> {
-        Handle::None
+
+    fn compute_closest_distance(handle_parent: Handle<UIElement>, object_rect: Rect, dir: MoveDirection) -> Option<Distance> {
+        let controls = RuntimeManager::get().get_controls_mut();
+        if let Some(parent) = controls.get(handle_parent) {
+            let base = parent.get_base();
+            if !base.is_active() {
+                return None;
+            }
+            let mut best = Distance {
+                value: u32::MAX,
+                handle: Handle::None,
+            };
+            for child in &base.children {
+                if let Some(result) = Window::compute_closest_distance(*child, object_rect, dir) {
+                    if result.value < best.value {
+                        best = result;
+                    }
+                }
+            }
+            if best.handle.is_none() {
+                if base.can_receive_input() {
+                    let r = base.get_absolute_rect();
+                    let dist = Window::point_to_point_distance(r, object_rect, dir);
+                    if dist < best.value {
+                        best.value = dist;
+                        best.handle = handle_parent;
+                        return Some(best);
+                    }
+                }
+                return None;
+            }
+            return Some(best);
+        } else {
+            return None;
+        }
     }
     fn find_closest_control(handle: Handle<UIElement>, dir: MoveDirection) -> Handle<UIElement> {
         let rm = RuntimeManager::get();
@@ -85,11 +124,13 @@ impl Window {
         let mut found = Handle::None;
         while let Some(ctrl) = controls.get_mut(h) {
             let base = ctrl.get_base();
-            if base.can_receive_input() == false {
+            if base.is_active() == false {
                 break;
             }
             // found a possible candidate
-            found = h;
+            if base.can_receive_input() {
+                found = h;
+            }
             if !base.focused_child_index.in_range(base.children.len()) {
                 break;
             }
@@ -99,9 +140,13 @@ impl Window {
             return Handle::None;
         }
         if let Some(ctrl) = controls.get_mut(found) {
-            let rect = ctrl.get_base().get_absolute_rect();
-            if let Some(parent) = controls.get_mut(handle) {
-                return Window::compute_closest_distance(parent.get_base(), rect, dir);
+            let object_rect = ctrl.get_base().get_absolute_rect();
+            if let Some(result) = Window::compute_closest_distance(handle, object_rect, dir) {
+                if (result.value==u32::MAX) || (result.handle.is_none()) {
+                    return Handle::None;
+                }
+            } else {
+                return Handle::None;
             }
         }
         return Handle::None;
@@ -304,7 +349,7 @@ impl Window {
             if count > 0 {
                 let mut idx = Window::get_children_start_index(base.focused_child_index, count, start_from_current);
                 if idx.in_range(count) {
-                    let result = Window::find_next_child_control(base.children[idx.index()], forward, start_from_current,false);
+                    let result = Window::find_next_child_control(base.children[idx.index()], forward, start_from_current, false);
                     if result.is_some() {
                         return result;
                     }
@@ -327,7 +372,7 @@ impl Window {
                     }
                     let child_handle = base.children[idx.index()];
                     if let Some(child) = controls.get(child_handle) {
-                        let result = Window::find_next_child_control(child_handle, forward, false,false);
+                        let result = Window::find_next_child_control(child_handle, forward, false, false);
                         if result.is_some() {
                             return result;
                         }
@@ -340,7 +385,7 @@ impl Window {
         }
         return None;
     }
-    
+
     fn hotkey_to_handle(controls: &ControlHandleManager, parent: Handle<UIElement>, hotkey: Key) -> Handle<UIElement> {
         if let Some(control) = controls.get(parent) {
             let base = control.get_base();
@@ -677,8 +722,36 @@ impl OnKeyPressed for Window {
                     self.resize_move_mode = true;
                     return EventProcessStatus::Processed;
                 }
-                key!("Escape")=> {
+                key!("Escape") => {
                     self.on_close_request();
+                    return EventProcessStatus::Processed;
+                }
+                key!("Left") | key!("Ctrl+Left") | key!("Alt+Left") => {
+                    let res = Window::find_closest_control(self.handle, MoveDirection::ToLeft);
+                    if !res.is_none() {
+                        RuntimeManager::get().request_focus_for_control(res);
+                    }
+                    return EventProcessStatus::Processed;
+                }
+                key!("Right") | key!("Ctrl+Right") | key!("Alt+Right") => {
+                    let res = Window::find_closest_control(self.handle, MoveDirection::ToRight);
+                    if !res.is_none() {
+                        RuntimeManager::get().request_focus_for_control(res);
+                    }
+                    return EventProcessStatus::Processed;
+                }
+                key!("Up") | key!("Ctrl+Up") | key!("Alt+Up") => {
+                    let res = Window::find_closest_control(self.handle, MoveDirection::ToTop);
+                    if !res.is_none() {
+                        RuntimeManager::get().request_focus_for_control(res);
+                    }
+                    return EventProcessStatus::Processed;
+                }
+                key!("Down") | key!("Ctrl+Down") | key!("Alt+Down") => {
+                    let res = Window::find_closest_control(self.handle, MoveDirection::ToBottom);
+                    if !res.is_none() {
+                        RuntimeManager::get().request_focus_for_control(res);
+                    }
                     return EventProcessStatus::Processed;
                 }
                 _ => {}
@@ -717,49 +790,6 @@ impl OnKeyPressed for Window {
     {
         switch (KeyCode)
         {
-        case Key::Left:
-        case Key::Left | Key::Ctrl:
-        case Key::Left | Key::Alt:
-            tmp = FindClosestControl(this, MoveDirection::ToLeft);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Right:
-        case Key::Right | Key::Ctrl:
-        case Key::Right | Key::Alt:
-            tmp = FindClosestControl(this, MoveDirection::ToRight);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Up:
-        case Key::Up | Key::Ctrl:
-        case Key::Up | Key::Alt:
-            tmp = FindClosestControl(this, MoveDirection::ToTop);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Down:
-        case Key::Down | Key::Ctrl:
-        case Key::Down | Key::Alt:
-            tmp = FindClosestControl(this, MoveDirection::ToBottom);
-            if (tmp != nullptr)
-                tmp->SetFocus();
-            return true;
-        case Key::Escape:
-            if (!(Members->Flags && Flags::NoCloseButton))
-            {
-                RaiseEvent(Event::WindowClose);
-                return true;
-            }
-            return false;
-        case Key::Enter:
-            if (Members->Flags && Flags::ProcessReturn)
-            {
-                RaiseEvent(Event::WindowAccept);
-                return true;
-            }
-            return false;
-        }
         // first we check menu hot keys
         if (Members->menu)
         {
