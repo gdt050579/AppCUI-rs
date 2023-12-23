@@ -146,22 +146,6 @@ impl Window {
         win.tag_handle = win.toolbar.add(g, toolbar::Tag::new());
 
         win
-
-        /*
-
-           Members->DialogResult                    = Dialogs::Result::None;
-           Members->referalItemHandle               = InvalidItemHandle;
-           Members->windowItemHandle                = InvalidItemHandle;
-
-
-           UpdateWindowsButtonsPoz(Members);
-
-           if ((Flags & Flags::Maximized) == Flags::Maximized)
-           {
-               ASSERT(Maxim izeRestore(), "Fail to maximize window !");
-           }
-
-        */
     }
     #[inline(always)]
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
@@ -181,7 +165,7 @@ impl Window {
     /// ```    
     ///
     /// You can not add a Window as a child to another Window nor can you add a Desktop
-    /// as a child for another Deskopt. The following example will not compile as we
+    /// as a child for another Desktop. The following example will not compile as we
     /// try to add a Window as a child to another window.
     /// ```rust,compile_fail
     ///     use appcui::prelude::*;
@@ -819,25 +803,6 @@ impl OnMouseEvent for Window {
 
 /*
 
-#include "ControlContext.hpp"
-
-namespace AppCUI
-{
-constexpr uint8 NO_CONTROLBAR_ITEM   = 0xFF;
-constexpr uint32 MAX_TAG_CHARS       = 8U;
-constexpr int32 MOVE_TO_LOWER_MARGIN = -1000000;
-constexpr int32 MOVE_TO_UPPER_MARGIN = 1000000;
-constexpr uint32 INFINITE_DISTANCE   = 0xFFFFFFFF;
-
-const static CharacterBuffer tempReferenceChBuf;
-
-struct WindowControlBarLayoutData
-{
-    int Left, Right, Y;
-    WindowBarItem* LeftGroup;
-    WindowBarItem* RighGroup;
-};
-
 Control* FindNextControl(Control* parent, bool forward, bool startFromCurrentOne, bool rootLevel, bool noSteps)
 {
     // Done
@@ -996,39 +961,11 @@ void Window::OnAfterResize(int, int)
 }
 void Window::RemoveMe()
 {
-    auto app = Application::GetApplication();
-    if (!app)
-        return;
-    // check if I am part of the modal stack
-    for (auto i = 0U; i < app->ModalControlsCount; i++)
-        if (app->ModalControlsStack[i] == this)
-            return;
-    if (!app->AppDesktop)
-        return;
-    // all good -> I am a top level window --> remove me
-    app->AppDesktop->RemoveControl(this);
-    app->CheckIfAppShouldClose();
+    // done
 }
 bool Window::OnEvent(Reference<Control>, Event eventType, int)
 {
-    if ((eventType == Event::WindowClose) || (eventType == Event::WindowAccept))
-    {
-        // check if current win is a modal dialog
-        auto app = Application::GetApplication();
-        if ((app->ModalControlsCount > 0) && (app->ModalControlsStack[app->ModalControlsCount - 1] == this))
-        {
-            if (eventType == Event::WindowClose)
-                return Exit(Dialogs::Result::Cancel);
-            else
-                return Exit(Dialogs::Result::Ok);
-        }
-        else
-        {
-            RemoveMe();
-            return true;
-        }
-    }
-    return false;
+    // done
 }
 bool Window::OnKeyEvent(Input::Key KeyCode, char16)
 {
