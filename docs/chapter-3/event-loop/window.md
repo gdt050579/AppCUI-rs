@@ -75,6 +75,13 @@ In terms of key association, a Window has two modes:
 |-----------------------|-------------------------------------------------------------------------------------|
 | `Ctrl`+`Alt`+`M` or <br> `Ctrl`+`Alt`+`R` | Switch the window to resize/move mode                           |
 | `Escape`              | Trigers a call cu `on_cancel(...)` method. By default this will close the window. Howeverm you can change the behavior and return `ActionRequest::Deny` from the `on_cancel` callback  |
+| `Up` or <br> `Alt`+`Up` or <br> `Ctrl`+`Up` | Moves to the closes control on upper side the curent one.  |
+| `Down` or <br> `Alt`+`Down` or <br> `Ctrl`+`Down` | Moves to the closest control on the bottom side of the curent one |
+| `Left` or <br> `Alt`+`Left` or <br> `Ctrl`+`Left` | Moves to the closest control on the left side of the curent one |
+| `Right` or <br> `Alt`+`Right` or <br> `Ctrl`+`Right` | Moves to the closest control on the right side of the curent one |
+
+**OBS**: Keep in mind that if any of these keys (in particular `Left`, `Right`, `Up` and `Down`) are capture by one of the children of a window, they will not pe process by the window.
+
 
 ### For resize/move mode
 
