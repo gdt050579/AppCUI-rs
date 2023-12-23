@@ -377,15 +377,18 @@ impl RuntimeManager {
             self.request_update();
         }
     }
-    fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) {
+    fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> Handle<UIElement> {
         if handle.is_none() {
-            return;
+            return Handle::None;
         }
         let controls = unsafe { &mut *self.controls };
+        let mut parent: Handle<UIElement> = Handle::None;
+        let mut has_focus = false;
         // remove the link from its parent if requested
         if unlink_from_parent {
             if let Some(control) = controls.get(handle.cast()) {
-                let parent = control.get_base().parent;
+                parent = control.get_base().parent;
+                has_focus = control.get_base().has_focus();
                 if let Some(parent) = controls.get_mut(parent.cast()) {
                     let base = parent.get_base_mut();
                     if let Some(index) = base.children.iter().position(|&elem| elem == handle) {
@@ -406,10 +409,19 @@ impl RuntimeManager {
             }
         }
         controls.remove(handle);
+        if has_focus {
+            return parent;
+        } else {
+            return Handle::None;
+        };
     }
     fn remove_deleted_controls(&mut self) {
         while let Some(handle) = self.to_remove_list.pop() {
-            self.remove_control(handle, true);
+            let focused_parent = self.remove_control(handle, true);
+            // what if the current handle has focus (in this case we will need to change the focus to
+            // a different control). self.remove_control should return the handle to its parent only if
+            // the current object has focus
+            // if focused_parent != Handle::None, we are in this scenario
         }
     }
     fn get_opened_menu(&mut self) -> Option<&mut Menu> {
@@ -438,7 +450,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(ctrl) = controls.get(parent_handle) {
             let base = ctrl.get_base();
-            if base.is_active()==false {
+            if base.is_active() == false {
                 return None;
             }
             if base.focused_child_index.in_range(base.children.len()) {
