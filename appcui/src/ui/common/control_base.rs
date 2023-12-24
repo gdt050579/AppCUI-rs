@@ -19,6 +19,7 @@ pub enum StatusFlags {
     MouseOver = 0x0020,
     WindowControl = 0x0040,
     DesktopControl = 0x0080,
+    KeyInputBeforeChildren = 0x0100,
 }
 #[derive(Copy, Clone)]
 pub(crate) struct Margins {
@@ -191,6 +192,19 @@ impl ControlBase {
     #[inline(always)]
     pub(crate) fn is_desktop_control(&self) -> bool {
         self.status_flags.contains(StatusFlags::DesktopControl)
+    }
+
+    #[inline(always)]
+    pub(crate) fn should_receive_keyinput_before_children(&self) -> bool {
+        self.status_flags.contains(StatusFlags::KeyInputBeforeChildren)
+    }
+    #[inline(always)]
+    pub(crate) fn set_key_input_before_children_flag(&mut self, value: bool) {
+        if value {
+            self.status_flags.set(StatusFlags::KeyInputBeforeChildren);
+        } else {
+            self.status_flags.remove(StatusFlags::KeyInputBeforeChildren);
+        }
     }
 
     /// A control can use this method to request focus

@@ -281,6 +281,7 @@ impl Window {
     pub fn enter_resize_mode(&mut self) {
         if self.has_focus() {
             self.resize_move_mode = true;
+            self.base.set_key_input_before_children_flag(true);
         }
     }
     pub(super) fn is_in_resize_mode(&self) -> bool {
@@ -453,6 +454,8 @@ impl Window {
         self.toolbar.set_current_item_pressed(false);
         self.drag_status = DragStatus::None;
         self.resize_move_mode = false;
+        self.base.set_key_input_before_children_flag(false);
+
 
         let item_handle = if let Some(item) = self.toolbar.get_from_position(x, y) {
             match item {
@@ -482,6 +485,7 @@ impl Window {
     }
     fn on_mouse_drag(&mut self, x: i32, y: i32) -> EventProcessStatus {
         self.resize_move_mode = false;
+        self.base.set_key_input_before_children_flag(false);
         match self.drag_status {
             DragStatus::None => EventProcessStatus::Ignored,
             DragStatus::Move => {
@@ -512,6 +516,8 @@ impl Window {
     fn on_mouse_release(&mut self) -> EventProcessStatus {
         self.toolbar.set_current_item_pressed(false);
         self.resize_move_mode = false;
+        self.base.set_key_input_before_children_flag(false);
+
         if self.drag_status != DragStatus::None {
             self.drag_status = DragStatus::None;
         } else {
@@ -644,6 +650,7 @@ impl OnKeyPressed for Window {
             match key.get_compact_code() {
                 key!("Escape") | key!("Enter") | key!("Space") | key!("Tab") => {
                     self.resize_move_mode = false;
+                    self.base.set_key_input_before_children_flag(false);
                     return EventProcessStatus::Processed;
                 }
                 key!("Up") => {
@@ -721,6 +728,7 @@ impl OnKeyPressed for Window {
                 }
                 key!("Ctrl+Alt+M") | key!("Ctrl+Alt+R") => {
                     self.resize_move_mode = true;
+                    self.base.set_key_input_before_children_flag(false);
                     return EventProcessStatus::Processed;
                 }
                 key!("Escape") => {

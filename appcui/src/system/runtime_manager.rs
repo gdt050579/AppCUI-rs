@@ -809,18 +809,33 @@ impl RuntimeManager {
     pub(crate) fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
-            let base = control.get_base_mut();
-            if base.can_receive_input() == false {
+            let base = control.get_base();
+            if base.is_active() == false {
                 return EventProcessStatus::Ignored;
             }
-            if base.focused_child_index.in_range(base.children.len()) {
-                let handle_child = base.children[base.focused_child_index.index()];
-                if self.process_control_keypressed_event(handle_child, key, character) == EventProcessStatus::Processed {
-                    return EventProcessStatus::Processed;
+            if base.should_receive_keyinput_before_children() {
+                if base.can_receive_input() {
+                    if control.get_control_mut().on_key_pressed(key, character) == EventProcessStatus::Processed {
+                        return EventProcessStatus::Processed;
+                    }
+                }
+                let base = control.get_base();
+                if base.focused_child_index.in_range(base.children.len()) {
+                    let handle_child = base.children[base.focused_child_index.index()];
+                    return self.process_control_keypressed_event(handle_child, key, character);
+                }
+            } else {
+                if base.focused_child_index.in_range(base.children.len()) {
+                    let handle_child = base.children[base.focused_child_index.index()];
+                    if self.process_control_keypressed_event(handle_child, key, character) == EventProcessStatus::Processed {
+                        return EventProcessStatus::Processed;
+                    }
+                }
+                // else --> call it ourselves
+                if base.can_receive_input() {
+                    return control.get_control_mut().on_key_pressed(key, character);
                 }
             }
-            // else --> call it ourselves
-            return control.get_control_mut().on_key_pressed(key, character);
         }
 
         return EventProcessStatus::Ignored;
