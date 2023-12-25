@@ -28,6 +28,7 @@ pub(crate) enum AppCUITrait {
     MenuEvents = 19,
     DesktopEvents = 20,
     ToolBarEvents = 21,
+    ColorPickerEvents = 22,
 }
 
 #[repr(u8)]
@@ -65,7 +66,8 @@ impl AppCUITrait {
             AppCUITrait::CommandBarEvents => "CommandBarEvents",
             AppCUITrait::MenuEvents => "MenuEvents",
             AppCUITrait::DesktopEvents => "DesktopEvents",
-            AppCUITrait::ToolBarEvents => "ToolBarEvents",            
+            AppCUITrait::ToolBarEvents => "ToolBarEvents",  
+            AppCUITrait::ColorPickerEvents => "ColorPickerEvents",          
         }
     }
     pub(crate) fn get_trait_type(&self) -> TraitType {
@@ -94,7 +96,9 @@ impl AppCUITrait {
             AppCUITrait::CommandBarEvents => TraitType::ControlEvent,
             AppCUITrait::MenuEvents => TraitType::ControlEvent,
             AppCUITrait::DesktopEvents => TraitType::ControlEvent,
-            AppCUITrait::ToolBarEvents => TraitType::ControlEvent,           
+            AppCUITrait::ToolBarEvents => TraitType::ControlEvent,
+            AppCUITrait::ColorPickerEvents => TraitType::ControlEvent,  
+                     
         }
     }
     pub(crate) fn get_basefallback_implementation(&self) -> &'static str {
@@ -124,6 +128,7 @@ impl AppCUITrait {
             AppCUITrait::MenuEvents => "",
             AppCUITrait::DesktopEvents => "",
             AppCUITrait::ToolBarEvents => "",
+            AppCUITrait::ColorPickerEvents => "",            
         }
     }
     pub(crate) fn get_default_implementation(&self) -> &'static str {
@@ -153,6 +158,8 @@ impl AppCUITrait {
             AppCUITrait::MenuEvents => "impl MenuEvents for $(STRUCT_NAME) {}",
             AppCUITrait::DesktopEvents => "impl DesktopEvents for $(STRUCT_NAME) {}",
             AppCUITrait::ToolBarEvents => "impl ToolBarEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::ColorPickerEvents => "impl ColorPickerEvents for $(STRUCT_NAME) {}",
+            
         }
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -172,6 +179,7 @@ impl AppCUITrait {
             "MenuEvents" | "MenuBar" => Some(AppCUITrait::MenuEvents),
             "DesktopEvents" | "Desktop" => Some(AppCUITrait::DesktopEvents),
             "ToolBarEvents" | "ToolBar" => Some(AppCUITrait::ToolBarEvents),
+            "ColorPickerEvents" | "ColorPicker" => Some(AppCUITrait::ColorPickerEvents), 
             _ => None,
         }
     }
@@ -202,6 +210,7 @@ impl AppCUITrait {
             19 => Some(AppCUITrait::MenuEvents),
             20 => Some(AppCUITrait::DesktopEvents),
             21 => Some(AppCUITrait::ToolBarEvents),
+            22 => Some(AppCUITrait::ColorPickerEvents),
             _ => None,
         };
         if result.is_none() {

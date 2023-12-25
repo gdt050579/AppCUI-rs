@@ -4,6 +4,7 @@ use crate::ui::colorpicker::events::EventData;
 const MINSPACE_FOR_COLOR_DRAWING: u32 = 5;
 const MIN_WIDTH_FOR_COLOR_NAME: u32 = 8;
 const MINSPACE_FOR_DROPBUTTON_DRAWING: u32 = 3;
+const NUMBER_OF_COLORS: i32 = 16;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct ColorPicker {
@@ -27,6 +28,57 @@ impl ColorPicker {
     #[inline(always)]
     pub fn set_color(&mut self, color: Color) {
         self.color = color;
+    }
+
+    fn next_color(&mut self, expanded: bool, offset: i32) {
+        let mut result = ((self.color as u8) as i32) + offset;
+        if expanded {
+        } else {
+            result = result.clamp(0, NUMBER_OF_COLORS);
+        }
+        if let Some(col) = Color::from_value(result) {
+            self.color = col;
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::ColorPickerEvent(EventData { color: col }),
+            });
+        }
+        /*
+
+                if (colorObject == NO_COLOR_OBJECT)
+            colorObject = (uint32) Color::Black;
+
+        if (isExpanded)
+        {
+            auto result = (int32) colorObject + offset;
+            // specific cases
+            // when the cursor is on the first line (the first 4 colors), it should be able to move to transparent checkbox
+            // as well the logic below enphasize this
+            if ((result == COLOR_MATRIX_WIDTH) && (offset == ONE_POSITION_TO_RIGHT))
+                result = static_cast<int32>(Color::Transparent); // Move to the right with 1 position
+            else if ((result == static_cast<int32>(Color::Transparent) + 1) && (offset == ONE_POSITION_TO_RIGHT))
+                result = 0;
+            else if ((result == -1) && (offset == ONE_POSITION_TO_LEFT))
+                result = static_cast<int32>(Color::Transparent);
+            else if ((result == static_cast<int32>(Color::Transparent) - 1) && (offset == ONE_POSITION_TO_LEFT))
+                result = COLOR_MATRIX_WIDTH - 1;
+            else
+            {
+                if (result < 0)
+                    result += NUMBER_OF_COLORS;
+                if (result >= NUMBER_OF_COLORS)
+                    result -= NUMBER_OF_COLORS;
+            }
+            colorObject = (uint32) result;
+        }
+        else
+        {
+            auto result = (int32) this->color + offset;
+
+        }
+
+             */
     }
 }
 impl OnPaint for ColorPicker {
@@ -116,25 +168,7 @@ void ColorPickerContext::OnExpandView(Graphics::Clip& expandedClip)
 }
 void ColorPickerContext::PaintHeader(int x, int y, uint32 width, Graphics::Renderer& renderer)
 {
-    auto cbc = this->Cfg->Button.Text.GetColor(this->GetControlState(ControlStateFlags::ProcessHoverStatus));
-
-    if (width > MINSPACE_FOR_COLOR_DRAWING)
-    {
-        renderer.FillHorizontalLine(x, y, x + (int) width - (int) (MINSPACE_FOR_COLOR_DRAWING), ' ', cbc);
-        renderer.WriteSingleLineText(
-              x + COLOR_NAME_OFFSET,
-              y,
-              width - (int) (MINSPACE_FOR_COLOR_DRAWING - 1),
-              ColorUtils::GetColorName(this->color),
-              cbc);
-        renderer.WriteSpecialCharacter(
-              x + 1, y, SpecialChars::BlockCentered, ColorPair{ this->color, Color::Transparent });
-    }
-    if (width >= MINSPACE_FOR_DROPBUTTON_DRAWING)
-    {
-        renderer.WriteSingleLineText(x + (int) width - (int32) MINSPACE_FOR_DROPBUTTON_DRAWING, y, "   ", cbc);
-        renderer.WriteSpecialCharacter(x + (int) width - 2, y, SpecialChars::TriangleDown, cbc);
-    }
+// done
 }
 void ColorPickerContext::PaintColorBox(Graphics::Renderer& renderer)
 {

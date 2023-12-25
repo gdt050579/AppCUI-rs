@@ -1,15 +1,16 @@
 use super::traits::{Control, EventProcessStatus};
 use super::UIElement;
+use crate::prelude::colorpicker;
+use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, window,
-    window::events::WindowEvents,
 };
 
 pub(crate) enum ControlEventData {
     ButtonEvent(button::events::EventData),
     CheckBoxEvent(checkbox::events::EventData),
-    WindowEvents(window::events::EventData),
+    ColorPickerEvent(colorpicker::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -31,7 +32,14 @@ impl ControlEvent {
                     data.checked,
                 );
             }
-            ControlEventData::WindowEvents(_) => EventProcessStatus::Ignored,
+            ControlEventData::ColorPickerEvent(data) => {
+                return ColorPickerEvents::on_color_changed(
+                    receiver,
+                    self.emitter.cast(),
+                    data.color,
+                );
+            }
+            
         }
     }
 }

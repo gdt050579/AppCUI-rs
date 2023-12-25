@@ -20,6 +20,28 @@ pub enum Color {
     Transparent = 0x10,
 }
 impl Color {
+    pub fn from_value(value: i32)->Option<Color> {
+        match value {
+            0 => Some(Color::Black),
+            1 => Some(Color::DarkBlue),
+            2 => Some(Color::Green),
+            3 => Some(Color::Teal),
+            4 => Some(Color::DarkRed),
+            5 => Some(Color::Magenta),
+            6 => Some(Color::Olive),
+            7 => Some(Color::Silver),
+            8 => Some(Color::Gray),
+            9 => Some(Color::Blue),
+            10 => Some(Color::Green),
+            11 => Some(Color::Aqua),
+            12 => Some(Color::Red),
+            13 => Some(Color::Pink),
+            14 => Some(Color::Yellow),
+            15 => Some(Color::White),
+            16 => Some(Color::Transparent),
+            _ => None
+        }
+    }
     pub fn get_name(&self)->&str {
         match self {
             Color::Black => "Black",

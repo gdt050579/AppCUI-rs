@@ -1,6 +1,7 @@
 use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;
+use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::{Handle, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::CommandBarEvents, common::traits::*, common::*,
@@ -437,6 +438,7 @@ impl OnFocus for ControlBase {}
 impl CommandBarEvents for ControlBase {}
 impl MenuEvents for ControlBase {}
 impl ButtonEvents for ControlBase {}
+impl ColorPickerEvents for ControlBase {}
 impl CheckBoxEvents for ControlBase {}
 impl WindowEvents for ControlBase {}
 impl ToolBarEvents for ControlBase {}

@@ -10,7 +10,7 @@ use crate::{
         menu::events::MenuEvents, 
         window::events::WindowEvents,
         window::events::ToolBarEvents,
-    }
+    }, prelude::colorpicker::events::ColorPickerEvents
 };
 
 #[repr(u8)]
@@ -67,6 +67,7 @@ pub trait Control:
     /* events from each control */
     + ButtonEvents
     + CheckBoxEvents
+    + ColorPickerEvents
     + CommandBarEvents
     + WindowEvents
     + ToolBarEvents
