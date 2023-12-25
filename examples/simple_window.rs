@@ -237,60 +237,44 @@ use appcui::prelude::*;
 // //     Ok(())
 // // }use appcui::prelude::*;
 
-#[ModalWindow(events=ButtonEvents,response=i32)]
-struct MyModalWin {
-    value: i32,
-}
-impl MyModalWin {
-    fn new(value: i32) -> Self {
-        let mut w = MyModalWin {
-            base: ModalWindow::new("Calc", Layout::new("d:c,w:40,h:12"), window::Flags::None),
-            value: value * 2,
-        };
-        w.add(Label::new(format!("{} x 2 = {}", value, value * 2).as_str(), Layout::new("d:c,w:16,h:1")));
-        w.add(button!("Close,d:b,w:15"));
-        w
-    }
-}
-impl ButtonEvents for MyModalWin {
-    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
-        self.exit_with(self.value);
-        EventProcessStatus::Processed
-    }
-}
+// #[CustomControl(overwrite=OnPaint+OnKeyPressed)]
+// struct MyControl {}
+// impl MyControl {
+//     fn new()->Self { MyControl{base: ControlBase::new("d:c,w:10,h:1", StatusFlags::)}}
+// }
 
-#[Window(events = ButtonEvents)]
-struct MyWin {
-    text: Handle<Label>,
-    value: i32,
-}
+// #[Window(events = ButtonEvents)]
+// struct MyWin {
+//     text: Handle<Label>,
+//     value: i32,
+// }
 
-impl MyWin {
-    fn new() -> Self {
-        let mut win = MyWin {
-            base: window!("'My Win',d:c,w:40,h:16"),
-            text: Handle::None,
-            value: 1,
-        };
-        win.text = win.add(label!("'Value=10',d:c,w:24,h:1"));
-        win.add(button!("Double,d:b,w:15"));
-        win
-    }
-}
-impl ButtonEvents for MyWin {
-    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
-        // first run the modal window
-        if let Some(response) = MyModalWin::new(self.value).show() {
-            // set the new value
-            self.value = response;
-            let h = self.text;
-            if let Some(label) = self.get_control_mut(h) {
-                label.set_caption(format!("Valu={}", response).as_str());
-            }
-        }
-        EventProcessStatus::Processed
-    }
-}
+// impl MyWin {
+//     fn new() -> Self {
+//         let mut win = MyWin {
+//             base: window!("'My Win',d:c,w:40,h:16"),
+//             text: Handle::None,
+//             value: 1,
+//         };
+//         win.text = win.add(label!("'Value=10',d:c,w:24,h:1"));
+//         win.add(button!("Double,d:b,w:15"));
+//         win
+//     }
+// }
+// impl ButtonEvents for MyWin {
+//     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+//         // first run the modal window
+//         if let Some(response) = MyModalWin::new(self.value).show() {
+//             // set the new value
+//             self.value = response;
+//             let h = self.text;
+//             if let Some(label) = self.get_control_mut(h) {
+//                 label.set_caption(format!("Valu={}", response).as_str());
+//             }
+//         }
+//         EventProcessStatus::Processed
+//     }
+// }
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
@@ -302,48 +286,11 @@ fn main() -> Result<(), appcui::system::Error> {
     // ";
     // let mut a = App::debug(80, 20, script).build()?;
 
-
-    let mut w = window!("Title,d:c,w:70,h:20");
-    let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
-    let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
-    let mut p3 = panel!("Layer-3,l:46,t:0,r:1,b:0");
-    p2.add(button!("1,x:1,y:1,w:10,type:flat"));
-    p2.add(button!("2,x:1,y:3,w:10,type:flat"));
-    p2.add(button!("3,x:12,y:1,w:10,type:flat"));
-    p2.add(button!("4,x:12,y:3,w:10,type:flat"));
-    p1.add(p2);
-    p1.add(button!("5,x:35,y:1,w:10,type:flat"));
-    p1.add(button!("6,x:35,y:3,w:10,type:flat"));
-    p3.add(button!("7,x:1,y:1,w:10,type:flat"));
-    p3.add(button!("8,x:1,y:3,w:10,type:flat"));
-    p1.add(p3);
-    w.add(p1);
-    w.add(button!("9,x:1,y:10,w:10,type:flat"));
-    w.add(button!("10,x:1,y:12,w:10,type:flat"));
-    w.add(button!("11,x:1,y:14,w:10,type:flat"));
-    let mut p4 = panel!("Layer-4,l:12,t:10,r:1,b:0");
-    let mut p5 = panel!("Layer-5,l:1,t:0,w:14,b:0");
-    p5.add(button!("12,x:1,y:1,w:10,type:flat"));
-    p5.add(button!("13,x:1,y:3,w:10,type:flat,enabled:false"));   
-    p4.add(p5);
-    let mut p6 = panel!("Inactives,l:15,t:0,w:14,b:0");
-    p6.add(button!("14,x:1,y:1,w:10,type:flat,enabled:false"));
-    p6.add(button!("15,x:1,y:3,w:10,type:flat,enabled:false"));   
-    p4.add(p6);
-    p4.add(button!("16,x:32,y:1,w:10,type:flat"));
-    p4.add(button!("17,x:32,y:3,w:10,type:flat"));   
-    w.add(p4);
+    let mut w = window!("Title,d:c,w:40,h:8");
+    let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+    w.add(ColorPicker::new(Color::DarkRed,Layout::new("x:1,y:1,w:20")));
     a.add_window(w);
-    a.run();    
-
-    // let mut w = window!("Title,d:c,w:40,h:8");
-    // let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-    // let h = w.get_toolbar().add(g, toolbaritem!("'Choice &1',type=singlechoice"));
-    // w.get_toolbar().add(g, toolbaritem!("'Choice &2',type=singlechoice"));
-    // w.get_toolbar().add(g, toolbaritem!("'Choice &3',type=singlechoice"));
-    // w.get_toolbar().get_mut(h).unwrap().select();
-    // a.add_window(w);
     //a.add_window(MyWin::new());
-    //a.run();
+    a.run();
     Ok(())
 }

@@ -4,6 +4,7 @@ pub use super::ui::button::events::ButtonEvents;
 pub use super::ui::checkbox;
 pub use super::ui::checkbox::events::CheckBoxEvents;
 pub use super::ui::colorpicker;
+pub use super::ui::colorpicker::events::ColorPickerEvents;
 pub use super::ui::common::traits::*;
 pub use super::ui::window::events::WindowEvents;
 pub use super::ui::window::events::ToolBarEvents;

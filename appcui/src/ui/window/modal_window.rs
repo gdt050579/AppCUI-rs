@@ -56,6 +56,7 @@ impl<T> WindowEvents for ModalWindow<T> {}
 impl<T> CommandBarEvents for ModalWindow<T> {}
 impl<T> CheckBoxEvents for ModalWindow<T> {}
 impl<T> ButtonEvents for ModalWindow<T> {}
+impl<T> ColorPickerEvents for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
 impl<T> WindowControl for ModalWindow<T> {}
 

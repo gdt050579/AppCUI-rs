@@ -44,13 +44,13 @@ impl ColorPicker {
             if (result == COLOR_MATRIX_WIDTH) && (offset == ONE_POSITION_TO_RIGHT) {
                 result = transparent; // Move to the right with 1 position
             } else {
-                if ((result == transparent + 1) && (offset == ONE_POSITION_TO_RIGHT)) {
+                if (result == transparent + 1) && (offset == ONE_POSITION_TO_RIGHT) {
                     result = 0;
                 } else {
-                    if ((result == -1) && (offset == ONE_POSITION_TO_LEFT)) {
+                    if (result == -1) && (offset == ONE_POSITION_TO_LEFT) {
                         result = transparent;
                     } else {
-                        if ((result == transparent - 1) && (offset == ONE_POSITION_TO_LEFT)) {
+                        if (result == transparent - 1) && (offset == ONE_POSITION_TO_LEFT) {
                             result = COLOR_MATRIX_WIDTH - 1;
                         } else {
                             if result < 0 {
@@ -113,6 +113,7 @@ impl OnDefaultAction for ColorPicker {
 impl OnKeyPressed for ColorPicker {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         let expanded = self.is_expanded();
+
         match key.get_compact_code() {
             key!("Up") => {
                 self.next_color(expanded, if expanded { -COLOR_MATRIX_WIDTH } else { -1 });
@@ -130,6 +131,7 @@ impl OnKeyPressed for ColorPicker {
                 self.next_color(expanded, 1);
                 return EventProcessStatus::Processed;
             }
+            _ => {}
         }
         /*
                 bool isExpanded = (this->Flags & GATTR_EXPANDED) != 0;

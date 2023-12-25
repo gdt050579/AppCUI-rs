@@ -24,7 +24,7 @@ impl Color {
         match value {
             0 => Some(Color::Black),
             1 => Some(Color::DarkBlue),
-            2 => Some(Color::Green),
+            2 => Some(Color::DarkGreen),
             3 => Some(Color::Teal),
             4 => Some(Color::DarkRed),
             5 => Some(Color::Magenta),
