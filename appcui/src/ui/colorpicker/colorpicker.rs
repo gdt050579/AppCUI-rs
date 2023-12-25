@@ -5,6 +5,10 @@ const MINSPACE_FOR_COLOR_DRAWING: u32 = 5;
 const MIN_WIDTH_FOR_COLOR_NAME: u32 = 8;
 const MINSPACE_FOR_DROPBUTTON_DRAWING: u32 = 3;
 const NUMBER_OF_COLORS: i32 = 16;
+const COLOR_MATRIX_WIDTH: i32 = 4;
+const COLOR_MATRIX_HEIGHT: i32 = 4;
+const ONE_POSITION_TO_RIGHT: i32 = 1;
+const ONE_POSITION_TO_LEFT: i32 = -1;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct ColorPicker {
@@ -33,6 +37,32 @@ impl ColorPicker {
     fn next_color(&mut self, expanded: bool, offset: i32) {
         let mut result = ((self.color as u8) as i32) + offset;
         if expanded {
+            // specific cases
+            // when the cursor is on the first line (the first 4 colors), it should be able to move to transparent checkbox
+            // as well the logic below enphasize this
+            let transparent = (Color::Transparent as u8) as i32;
+            if (result == COLOR_MATRIX_WIDTH) && (offset == ONE_POSITION_TO_RIGHT) {
+                result = transparent; // Move to the right with 1 position
+            } else {
+                if ((result == transparent + 1) && (offset == ONE_POSITION_TO_RIGHT)) {
+                    result = 0;
+                } else {
+                    if ((result == -1) && (offset == ONE_POSITION_TO_LEFT)) {
+                        result = transparent;
+                    } else {
+                        if ((result == transparent - 1) && (offset == ONE_POSITION_TO_LEFT)) {
+                            result = COLOR_MATRIX_WIDTH - 1;
+                        } else {
+                            if result < 0 {
+                                result += NUMBER_OF_COLORS;
+                            }
+                            if result >= NUMBER_OF_COLORS {
+                                result -= NUMBER_OF_COLORS;
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             result = result.clamp(0, NUMBER_OF_COLORS);
         }
@@ -44,41 +74,6 @@ impl ColorPicker {
                 data: ControlEventData::ColorPickerEvent(EventData { color: col }),
             });
         }
-        /*
-
-                if (colorObject == NO_COLOR_OBJECT)
-            colorObject = (uint32) Color::Black;
-
-        if (isExpanded)
-        {
-            auto result = (int32) colorObject + offset;
-            // specific cases
-            // when the cursor is on the first line (the first 4 colors), it should be able to move to transparent checkbox
-            // as well the logic below enphasize this
-            if ((result == COLOR_MATRIX_WIDTH) && (offset == ONE_POSITION_TO_RIGHT))
-                result = static_cast<int32>(Color::Transparent); // Move to the right with 1 position
-            else if ((result == static_cast<int32>(Color::Transparent) + 1) && (offset == ONE_POSITION_TO_RIGHT))
-                result = 0;
-            else if ((result == -1) && (offset == ONE_POSITION_TO_LEFT))
-                result = static_cast<int32>(Color::Transparent);
-            else if ((result == static_cast<int32>(Color::Transparent) - 1) && (offset == ONE_POSITION_TO_LEFT))
-                result = COLOR_MATRIX_WIDTH - 1;
-            else
-            {
-                if (result < 0)
-                    result += NUMBER_OF_COLORS;
-                if (result >= NUMBER_OF_COLORS)
-                    result -= NUMBER_OF_COLORS;
-            }
-            colorObject = (uint32) result;
-        }
-        else
-        {
-            auto result = (int32) this->color + offset;
-
-        }
-
-             */
     }
 }
 impl OnPaint for ColorPicker {
@@ -116,7 +111,53 @@ impl OnDefaultAction for ColorPicker {
     fn on_default_action(&mut self) {}
 }
 impl OnKeyPressed for ColorPicker {
-    fn on_key_pressed(&mut self, _key: Key, _character: char) -> EventProcessStatus {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        let expanded = self.is_expanded();
+        match key.get_compact_code() {
+            key!("Up") => {
+                self.next_color(expanded, if expanded { -COLOR_MATRIX_WIDTH } else { -1 });
+                return EventProcessStatus::Processed;
+            }
+            key!("Down") => {
+                self.next_color(expanded, if expanded { COLOR_MATRIX_WIDTH } else { 1 });
+                return EventProcessStatus::Processed;
+            }
+            key!("Left") => {
+                self.next_color(expanded, -1);
+                return EventProcessStatus::Processed;
+            }
+            key!("Right") => {
+                self.next_color(expanded, 1);
+                return EventProcessStatus::Processed;
+            }
+        }
+        /*
+                bool isExpanded = (this->Flags & GATTR_EXPANDED) != 0;
+                switch (keyCode)
+                {
+                case Key::Space:
+                case Key::Enter:
+                    if ((isExpanded) && (colorObject != NO_COLOR_OBJECT))
+                    {
+                        this->color = static_cast<Color>((uint8) colorObject);
+                        host->RaiseEvent(Event::ColorPickerSelectedColorChanged);
+                    }
+                    return true;
+                case Key::Up:
+                    NextColor(isExpanded ? -(COLOR_MATRIX_WIDTH) : -1, isExpanded);
+                    return true;
+                case Key::Down:
+                    NextColor(isExpanded ? COLOR_MATRIX_WIDTH : 1, isExpanded);
+                    return true;
+                case Key::Left:
+                    NextColor(-1, isExpanded);
+                    return true;
+                case Key::Right:
+                    NextColor(1, isExpanded);
+                    return true;
+                }
+                return false;
+        */
         EventProcessStatus::Ignored
     }
 }
