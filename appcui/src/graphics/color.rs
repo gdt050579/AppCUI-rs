@@ -19,3 +19,26 @@ pub enum Color {
     White = 0x0F,
     Transparent = 0x10,
 }
+impl Color {
+    pub fn get_name(&self)->&str {
+        match self {
+            Color::Black => "Black",
+            Color::DarkBlue => "DarkBlue",
+            Color::DarkGreen => "DarkGreen",
+            Color::Teal => "Teal",
+            Color::DarkRed => "DarkRead",
+            Color::Magenta => "Magenta",
+            Color::Olive => "Olive",
+            Color::Silver => "Silver",
+            Color::Gray => "Gray",
+            Color::Blue => "Blue",
+            Color::Green => "Green",
+            Color::Aqua => "Aqua",
+            Color::Red => "Red",
+            Color::Pink => "Pink",
+            Color::Yellow => "Yellow",
+            Color::White => "White",
+            Color::Transparent => "Transparent",
+        }
+    }
+}
