@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::ui::colorpicker::events::EventData;
 
 const MINSPACE_FOR_COLOR_DRAWING: u32 = 5;
+const MIN_WIDTH_FOR_COLOR_NAME: u32 = 8;
 const MINSPACE_FOR_DROPBUTTON_DRAWING: u32 = 3;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
@@ -46,9 +47,11 @@ impl OnPaint for ColorPicker {
                 self.header_y_ofs,
                 Character::new(SpecialChar::BlockCentered, self.color, Color::Transparent, CharFlags::None),
             );
-            let mut format = TextFormat::single_line(3, self.header_y_ofs, col_text, TextAlignament::Left);
-            //format.width =
-            surface.write_text(self.color.get_name(), &format);
+            if size.width > MIN_WIDTH_FOR_COLOR_NAME {
+                let mut format = TextFormat::single_line(3, self.header_y_ofs, col_text, TextAlignament::Left);
+                format.width = Some((size.width - MIN_WIDTH_FOR_COLOR_NAME) as u16);
+                surface.write_text(self.color.get_name(), &format);
+            }
         }
         if size.width >= MINSPACE_FOR_DROPBUTTON_DRAWING {
             let px = (size.width - MINSPACE_FOR_DROPBUTTON_DRAWING) as i32;
