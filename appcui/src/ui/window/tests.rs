@@ -1410,7 +1410,7 @@ fn check_window_on_cancel_callback() {
     #[Window(events=WindowEvents, internal = true)]
     struct MyWin {
         count: u32,
-        txt: Handle<Label>
+        txt: Handle<Label>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -1427,7 +1427,7 @@ fn check_window_on_cancel_callback() {
             let h = self.txt;
             let c = self.count;
             if let Some(label) = self.get_control_mut(h) {
-                label.set_caption(format!("tries: {}",c).as_str());
+                label.set_caption(format!("tries: {}", c).as_str());
             }
         }
     }
@@ -1464,7 +1464,7 @@ fn check_window_on_cancel_callback() {
 #[test]
 fn check_window_enter_resize_mode() {
     #[Window(events=ButtonEvents, internal = true)]
-    struct MyWin { }
+    struct MyWin {}
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
@@ -1494,6 +1494,91 @@ fn check_window_enter_resize_mode() {
         Key.Pressed(Escape)
         Paint('Normal mode again')
         CheckHash(0xC394FEBC8D729121)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_window_keybeforechildren() {
+    #[CustomControl(overwrite=OnPaint+OnKeyPressed,internal=true)]
+    struct MyCustomControl {
+        text: String,
+    }
+    impl MyCustomControl {
+        fn new()->Self {
+            MyCustomControl {
+                base: ControlBase::new(Layout::new("d:c,w:100%,h:1"),StatusFlags::AcceptInput|StatusFlags::Enabled|StatusFlags::Visible),
+                text: String::new(),
+            }
+        }
+    }
+    impl OnPaint for MyCustomControl {
+        fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+            surface.clear(Character::new(' ',Color::White,Color::Black,CharFlags::None));
+            surface.write_string(1, 0, self.text.as_str(), CharAttribute::with_color(Color::White, Color::Black), false);
+        }
+    }
+    impl OnKeyPressed for MyCustomControl {
+        fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+            self.text = format!("Key = {:?}",key.code);
+            if key.code == KeyCode::Enter {
+                // this is not a safe practice as a custom control can not emmit a ButtonEvent
+                // not it is possible when using the crate.
+                // However, sa this is an internal implementation, we can access this type of
+                // data and we can emit such am event.
+                self.raise_event(ControlEvent {
+                    emitter: self.handle,
+                    receiver: self.event_processor,
+                    data: ControlEventData::ButtonEvent(button::events::EventData {}),
+                });
+            }
+            // all keys are processed
+            EventProcessStatus::Processed
+        }
+    }
+    #[Window(events=ButtonEvents, internal = true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: window!("Test,d:c,w:40,h:6"),
+            };
+            win.add(MyCustomControl::new());
+            win
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+            // the _handle is in fact the handle of the MyCustomControl 
+            // as such we will not check it here nor we will try to convert it into a Button
+            // as this will result in an undefine behavior (most likely a crash)
+            // However, as we just want to test if the event reaches this point, we can use it safely.
+            self.enter_resize_mode();
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0xB78356C77DB102B1)
+        Key.Pressed(Left)
+        Paint('Key = Left')
+        CheckHash(0xF64D6BBF7331F0F0)
+        Key.Pressed(Enter)
+        Paint('Key = Enter, Go to resize mode')
+        CheckHash(0x55A350BD025BC27A)
+        Key.Pressed(Left,4)
+        Paint('Key = Enter, Window is moved')
+        CheckHash(0x5E72A50367CD6A1A)
+        Key.Pressed(Escape)
+        Paint('Window is normal now (Key = Enter)')
+        CheckHash(0x4713697F6B3E4713)
+        // starting from this point, the keys are process by child and not by the window
+        Key.Pressed(Left)
+        Paint('Key = Left')
+        CheckHash(0x8A6D6218FD2656D0)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
