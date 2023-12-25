@@ -1,14 +1,19 @@
 use crate::prelude::*;
 use crate::ui::colorpicker::events::EventData;
 
+const MINSPACE_FOR_COLOR_DRAWING: u32 = 5;
+const MINSPACE_FOR_DROPBUTTON_DRAWING: u32 = 3;
+
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct ColorPicker {
     color: Color,
+    header_y_ofs: i32,
 }
 impl ColorPicker {
-    pub fn new(layout: Layout, color: Color) -> Self {
+    pub fn new(color: Color, layout: Layout) -> Self {
         let mut cp = ColorPicker {
             base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            header_y_ofs: 0,
             color,
         };
         cp.set_size_bounds(7, 1, u16::MAX, 1);
@@ -24,7 +29,33 @@ impl ColorPicker {
     }
 }
 impl OnPaint for ColorPicker {
-    fn on_paint(&self, _surface: &mut Surface, _theme: &Theme) {}
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        // first paint the header
+        let col_text = match () {
+            _ if !self.is_enabled() => theme.button.text.inactive,
+            _ if self.has_focus() => theme.button.text.focused,
+            _ if self.is_mouse_over() => theme.button.text.hovered,
+            _ => theme.button.text.normal,
+        };
+        let size = self.get_size();
+        let space_char = Character::with_attributes(' ', col_text);
+        if size.width > MINSPACE_FOR_COLOR_DRAWING {
+            surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_COLOR_DRAWING) as i32, space_char);
+            surface.write_char(
+                1,
+                self.header_y_ofs,
+                Character::new(SpecialChar::BlockCentered, self.color, Color::Transparent, CharFlags::None),
+            );
+            let mut format = TextFormat::single_line(3, self.header_y_ofs, col_text, TextAlignament::Left);
+            //format.width =
+            surface.write_text(self.color.get_name(), &format);
+        }
+        if size.width >= MINSPACE_FOR_DROPBUTTON_DRAWING {
+            let px = (size.width - MINSPACE_FOR_DROPBUTTON_DRAWING) as i32;
+            surface.fill_horizontal_line_with_size(px, self.header_y_ofs, 3, space_char);
+            surface.write_char(px + 1, self.header_y_ofs, Character::with_attributes(SpecialChar::TriangleDown, col_text));
+        }
+    }
 }
 impl OnDefaultAction for ColorPicker {
     fn on_default_action(&mut self) {}

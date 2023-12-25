@@ -20,6 +20,7 @@ pub enum StatusFlags {
     WindowControl = 0x0040,
     DesktopControl = 0x0080,
     KeyInputBeforeChildren = 0x0100,
+    Expanded = 0x0200,
 }
 #[derive(Copy, Clone)]
 pub(crate) struct Margins {
@@ -205,6 +206,11 @@ impl ControlBase {
         } else {
             self.status_flags.remove(StatusFlags::KeyInputBeforeChildren);
         }
+    }
+
+    #[inline(always)]
+    pub(crate) fn is_expanded(&self) -> bool {
+        self.status_flags.contains(StatusFlags::Expanded)
     }
 
     /// A control can use this method to request focus
