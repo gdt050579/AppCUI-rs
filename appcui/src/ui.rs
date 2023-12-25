@@ -11,6 +11,7 @@ pub mod menu;
 pub mod command_bar;
 pub mod window;
 pub mod button;
+pub mod colorpicker;
 
 // re-export
 pub use desktop::Desktop;
@@ -20,5 +21,6 @@ pub use panel::Panel;
 pub use window::Window;
 pub use window::ModalWindow;
 pub use button::Button;
+pub use colorpicker::ColorPicker;
 pub use command_bar::CommandBar;
 pub use layout::Layout;
