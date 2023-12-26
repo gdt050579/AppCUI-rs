@@ -1,3 +1,4 @@
+use super::runtime_manager_traits::*;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
@@ -133,12 +134,8 @@ impl RuntimeManager {
             },
         )
     }
-    pub(crate) fn request_repaint(&mut self) {
-        self.repaint = true;
-    }
-    pub(crate) fn request_recompute_layout(&mut self) {
-        self.recompute_layout = true;
-    }
+
+
     pub(crate) fn exit_execution_loop(&mut self) {
         self.loop_status = LoopStatus::ExitCurrentLoop;
     }
@@ -672,16 +669,6 @@ impl RuntimeManager {
         self.request_focus = None;
     }
 
-    fn recompute_layouts(&mut self) {
-        let term_layout = ParentLayout::from(&self.terminal);
-        self.update_control_layout(self.desktop_handle, &term_layout);
-        let count = self.modal_windows.len();
-        for index in 0..count {
-            let handle = self.modal_windows[index];
-            self.update_control_layout(handle, &term_layout);
-        }
-    }
-
     fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
@@ -693,101 +680,6 @@ impl RuntimeManager {
                     self.update_parent_indexes(child_handle);
                 }
             }
-        }
-    }
-
-    pub(crate) fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout) {
-        let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get_mut(handle) {
-            let base = control.get_base_mut();
-            let window_control = base.is_window_control();
-            let old_size = base.get_size();
-            let old_pos = base.get_position();
-            let expanded = base.is_expanded();
-            base.update_control_layout_and_screen_origin(parent_layout);
-            if expanded {
-                if handle != self.expanded_control {
-                    // need to pack myself as there is another expamded control
-                }
-            } else {
-                if handle == self.expanded_control {
-                    // need to compute my expended size
-                    // also I need to set my internal flags to expanded
-                }
-            }
-            let new_size = base.get_size();
-            let new_pos = base.get_position();
-            // process the same thing for its children
-            let my_layout = ParentLayout::from(base);
-            // if size has been changed --> call on_resize
-            if new_size != old_size {
-                control.get_control_mut().on_resize(old_size, new_size);
-            }
-            // just for window
-            if window_control && ((new_size != old_size) || (old_pos != new_pos)) {
-                // call the window specific event
-                WindowEvents::on_layout_changed(
-                    control.get_control_mut(),
-                    Rect::with_point_and_size(old_pos, old_size),
-                    Rect::with_point_and_size(new_pos, new_size),
-                );
-            }
-            for child_handle in &control.get_base().children {
-                self.update_control_layout(*child_handle, &my_layout)
-            }
-        }
-    }
-    fn paint(&mut self) {
-        // reset the surface clip and hide the cursor
-        self.surface.hide_cursor();
-        self.surface.reset();
-        self.paint_control(self.desktop_handle);
-        if !self.modal_windows.is_empty() {
-            let count = self.modal_windows.len();
-            for index in 0..count {
-                self.surface.reset();
-                if index + 1 == count {
-                    self.surface.clear(Character::with_color(Color::Gray, Color::Black));
-                }
-                self.paint_control(self.modal_windows[index]);
-            }
-        }
-        self.surface.reset();
-        if self.commandbar.is_some() {
-            self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
-        }
-        if self.menubar.is_some() {
-            self.menubar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
-        }
-        if self.tooltip.is_visible() {
-            self.tooltip.paint(&mut self.surface, &self.theme);
-        }
-        if !self.opened_menu_handle.is_none() {
-            self.surface.reset();
-            self.paint_menu(self.opened_menu_handle, true);
-        }
-        self.terminal.update_screen(&self.surface);
-    }
-    fn paint_control(&mut self, handle: Handle<UIElement>) {
-        let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get_mut(handle) {
-            if control.get_base().prepare_paint(&mut self.surface) {
-                // paint is possible
-                control.get_control().on_paint(&mut self.surface, &self.theme);
-                for child_handle in &control.get_base().children {
-                    self.paint_control(*child_handle);
-                }
-            }
-        }
-    }
-    fn paint_menu(&mut self, handle: Handle<Menu>, activ: bool) {
-        if handle.is_none() {
-            return;
-        }
-        let menus = unsafe { &mut *self.menus };
-        if let Some(menu) = menus.get(handle) {
-            self.paint_menu(menu.get_parent_handle(), false);
-            menu.paint(&mut self.surface, &self.theme, activ);
         }
     }
 
@@ -1243,6 +1135,120 @@ impl RuntimeManager {
         unsafe {
             RUNTIME_MANAGER = None;
         }
+    }
+}
+
+impl LayoutMethods for RuntimeManager {
+    fn recompute_layouts(&mut self) {
+        let term_layout = ParentLayout::from(&self.terminal);
+        self.update_control_layout(self.desktop_handle, &term_layout);
+        let count = self.modal_windows.len();
+        for index in 0..count {
+            let handle = self.modal_windows[index];
+            self.update_control_layout(handle, &term_layout);
+        }
+    }
+    fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get_mut(handle) {
+            let base = control.get_base_mut();
+            let window_control = base.is_window_control();
+            let old_size = base.get_size();
+            let old_pos = base.get_position();
+            let expanded = base.is_expanded();
+            base.update_control_layout_and_screen_origin(parent_layout);
+            if expanded {
+                if handle != self.expanded_control {
+                    // need to pack myself as there is another expamded control
+                }
+            } else {
+                if handle == self.expanded_control {
+                    // need to compute my expended size
+                    // also I need to set my internal flags to expanded
+                }
+            }
+            let new_size = base.get_size();
+            let new_pos = base.get_position();
+            // process the same thing for its children
+            let my_layout = ParentLayout::from(base);
+            // if size has been changed --> call on_resize
+            if new_size != old_size {
+                control.get_control_mut().on_resize(old_size, new_size);
+            }
+            // just for window
+            if window_control && ((new_size != old_size) || (old_pos != new_pos)) {
+                // call the window specific event
+                WindowEvents::on_layout_changed(
+                    control.get_control_mut(),
+                    Rect::with_point_and_size(old_pos, old_size),
+                    Rect::with_point_and_size(new_pos, new_size),
+                );
+            }
+            for child_handle in &control.get_base().children {
+                self.update_control_layout(*child_handle, &my_layout)
+            }
+        }
+    }
+    fn request_recompute_layout(&mut self) {
+        self.recompute_layout = true;
+    }
+}
+impl PaintMethods for RuntimeManager {
+    fn paint(&mut self) {
+        // reset the surface clip and hide the cursor
+        self.surface.hide_cursor();
+        self.surface.reset();
+        self.paint_control(self.desktop_handle);
+        if !self.modal_windows.is_empty() {
+            let count = self.modal_windows.len();
+            for index in 0..count {
+                self.surface.reset();
+                if index + 1 == count {
+                    self.surface.clear(Character::with_color(Color::Gray, Color::Black));
+                }
+                self.paint_control(self.modal_windows[index]);
+            }
+        }
+        self.surface.reset();
+        if self.commandbar.is_some() {
+            self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
+        }
+        if self.menubar.is_some() {
+            self.menubar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
+        }
+        if self.tooltip.is_visible() {
+            self.tooltip.paint(&mut self.surface, &self.theme);
+        }
+        if !self.opened_menu_handle.is_none() {
+            self.surface.reset();
+            self.paint_menu(self.opened_menu_handle, true);
+        }
+        self.terminal.update_screen(&self.surface);
+    }
+    fn paint_control(&mut self, handle: Handle<UIElement>) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get_mut(handle) {
+            if control.get_base().prepare_paint(&mut self.surface) {
+                // paint is possible
+                control.get_control().on_paint(&mut self.surface, &self.theme);
+                for child_handle in &control.get_base().children {
+                    self.paint_control(*child_handle);
+                }
+            }
+        }
+    }
+    fn paint_menu(&mut self, handle: Handle<Menu>, activ: bool) {
+        if handle.is_none() {
+            return;
+        }
+        let menus = unsafe { &mut *self.menus };
+        if let Some(menu) = menus.get(handle) {
+            self.paint_menu(menu.get_parent_handle(), false);
+            menu.paint(&mut self.surface, &self.theme, activ);
+        }
+    }
+    fn request_repaint(&mut self) {
+        self.repaint = true;
     }
 }
 

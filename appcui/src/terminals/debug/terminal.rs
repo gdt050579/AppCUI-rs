@@ -9,6 +9,7 @@ use crate::graphics::Point;
 use crate::graphics::Size;
 use crate::system::Error;
 use crate::system::RuntimeManager;
+use crate::system::PaintMethods;
 
 pub(crate) struct DebugTerminal {
     size: Size,

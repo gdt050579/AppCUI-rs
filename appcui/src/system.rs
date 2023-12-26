@@ -1,6 +1,7 @@
 mod theme;
 mod app;
 mod runtime_manager;
+mod runtime_manager_traits;
 mod tooltip;
 mod error;
 mod handle;
@@ -23,5 +24,7 @@ pub use self::app::App;
 pub use self::error::Error;
 pub use self::error::ErrorKind;
 pub (crate) use self::runtime_manager::RuntimeManager;
+pub (crate) use self::runtime_manager_traits::LayoutMethods;
+pub (crate) use self::runtime_manager_traits::PaintMethods;
 pub (crate) use self::tooltip::ToolTip;
 pub use self::builder::Builder;
