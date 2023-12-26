@@ -47,6 +47,7 @@ pub(crate) struct RuntimeManager {
     loop_status: LoopStatus,
     request_focus: Option<Handle<UIElement>>,
     current_focus: Option<Handle<UIElement>>,
+    expanded_control: Handle<UIElement>,
     mouse_over_control: Handle<UIElement>,
     focus_chain: Vec<Handle<UIElement>>,
     events: Vec<ControlEvent>,
@@ -80,6 +81,7 @@ impl RuntimeManager {
             current_focus: None,
             mouse_over_control: Handle::None,
             opened_menu_handle: Handle::None,
+            expanded_control: Handle::None,
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
             modal_windows: Vec::with_capacity(16),
@@ -169,6 +171,11 @@ impl RuntimeManager {
     }
     pub(crate) fn request_focus_for_control(&mut self, handle: Handle<UIElement>) {
         self.request_focus = Some(handle);
+    }
+    pub(crate) fn request_expand_for_control(&mut self, handle: Handle<UIElement>) {
+        self.expanded_control = handle;
+        self.request_recompute_layout();
+        self.request_repaint();
     }
     pub(crate) fn request_update(&mut self) {
         self.request_update_command_and_menu_bars = true;
@@ -696,7 +703,18 @@ impl RuntimeManager {
             let window_control = base.is_window_control();
             let old_size = base.get_size();
             let old_pos = base.get_position();
+            let expanded = base.is_expanded();
             base.update_control_layout_and_screen_origin(parent_layout);
+            if expanded {
+                if handle != self.expanded_control {
+                    // need to pack myself as there is another expamded control
+                }
+            } else {
+                if handle == self.expanded_control {
+                    // need to compute my expended size
+                    // also I need to set my internal flags to expanded
+                }
+            }
             let new_size = base.get_size();
             let new_pos = base.get_position();
             // process the same thing for its children

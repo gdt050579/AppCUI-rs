@@ -213,6 +213,14 @@ impl ControlBase {
     pub(crate) fn is_expanded(&self) -> bool {
         self.status_flags.contains(StatusFlags::Expanded)
     }
+    pub(crate) fn expand(&self) {
+        if self.has_focus() && self.children.is_empty() && (!self.is_expanded()) {
+            RuntimeManager::get().request_expand_for_control(self.handle);
+        }
+    }
+    pub(crate) fn pack(&self) {
+
+    }
 
     /// A control can use this method to request focus
     pub fn request_focus(&mut self) -> bool {

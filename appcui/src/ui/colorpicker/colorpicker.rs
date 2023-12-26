@@ -9,17 +9,22 @@ const COLOR_MATRIX_WIDTH: i32 = 4;
 const COLOR_MATRIX_HEIGHT: i32 = 4;
 const ONE_POSITION_TO_RIGHT: i32 = 1;
 const ONE_POSITION_TO_LEFT: i32 = -1;
+const SPACES_PER_COLOR: i32 = 3;
+const TRANSPARENT_CHECKBOX_X_OFFSET: i32 = 15;
+const TRANSPARENT_CHECKBOX_X_LAST_OFFSET: i32 = 29;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct ColorPicker {
     color: Color,
     header_y_ofs: i32,
+    expanded_panel_y: i32,
 }
 impl ColorPicker {
     pub fn new(color: Color, layout: Layout) -> Self {
         let mut cp = ColorPicker {
             base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             header_y_ofs: 0,
+            expanded_panel_y: 0,
             color,
         };
         cp.set_size_bounds(7, 1, u16::MAX, 1);
@@ -74,6 +79,23 @@ impl ColorPicker {
                 data: ControlEventData::ColorPickerEvent(EventData { color: col }),
             });
         }
+    }
+
+    fn mouse_to_color(&self, x: i32, y: i32) -> Option<Color> {
+        if !self.is_expanded() {
+            return None;
+        }
+        if (x > 0)
+            && (x < SPACES_PER_COLOR * COLOR_MATRIX_WIDTH + 1)
+            && (y > self.expanded_panel_y)
+            && (y < self.expanded_panel_y + COLOR_MATRIX_HEIGHT + 1)
+        {
+            return Color::from_value(((x - 1) / SPACES_PER_COLOR) + (y - (self.expanded_panel_y + 1)) * COLOR_MATRIX_WIDTH);
+        }
+        if (y == 1 + self.expanded_panel_y) && (x >= TRANSPARENT_CHECKBOX_X_OFFSET) && (x <= TRANSPARENT_CHECKBOX_X_LAST_OFFSET) {
+            return Some(Color::Transparent);
+        }
+        return None;
     }
 }
 impl OnPaint for ColorPicker {
@@ -285,14 +307,7 @@ void ColorPickerContext::Paint(Graphics::Renderer& renderer)
 }
 uint32 ColorPickerContext::MouseToObject(int x, int y)
 {
-    if (!(this->Flags & GATTR_EXPANDED))
-        return NO_COLOR_OBJECT;
-    if ((x > 0) && (x < SPACES_PER_COLOR * COLOR_MATRIX_WIDTH + 1) && (y > this->yOffset) &&
-        (y < this->yOffset + COLOR_MATRIX_HEIGHT + 1))
-        return (((x - 1) / SPACES_PER_COLOR) + (y - (this->yOffset + 1)) * COLOR_MATRIX_WIDTH);
-    if ((y == 1 + this->yOffset) && (x >= TRANSPARENT_CHECKBOX_X_OFFSET) && (x <= TRANSPARENT_CHECKBOX_X_LAST_OFFSET))
-        return (uint32) (Color::Transparent);
-    return NO_COLOR_OBJECT;
+    // done
 }
 bool ColorPickerContext::OnMouseOver(int x, int y)
 {
@@ -315,42 +330,7 @@ void ColorPickerContext::OnMousePressed(int x, int y, Input::MouseButton /*butto
 }
 void ColorPickerContext::NextColor(int32 offset, bool isExpanded)
 {
-    if (colorObject == NO_COLOR_OBJECT)
-        colorObject = (uint32) Color::Black;
-
-    if (isExpanded)
-    {
-        auto result = (int32) colorObject + offset;
-        // specific cases
-        // when the cursor is on the first line (the first 4 colors), it should be able to move to transparent checkbox
-        // as well the logic below enphasize this
-        if ((result == COLOR_MATRIX_WIDTH) && (offset == ONE_POSITION_TO_RIGHT))
-            result = static_cast<int32>(Color::Transparent); // Move to the right with 1 position
-        else if ((result == static_cast<int32>(Color::Transparent) + 1) && (offset == ONE_POSITION_TO_RIGHT))
-            result = 0;
-        else if ((result == -1) && (offset == ONE_POSITION_TO_LEFT))
-            result = static_cast<int32>(Color::Transparent);
-        else if ((result == static_cast<int32>(Color::Transparent) - 1) && (offset == ONE_POSITION_TO_LEFT))
-            result = COLOR_MATRIX_WIDTH - 1;
-        else
-        {
-            if (result < 0)
-                result += NUMBER_OF_COLORS;
-            if (result >= NUMBER_OF_COLORS)
-                result -= NUMBER_OF_COLORS;
-        }
-        colorObject = (uint32) result;
-    }
-    else
-    {
-        auto result = (int32) this->color + offset;
-        if (result < 0)
-            result = 0;
-        if (result >= NUMBER_OF_COLORS)
-            result = NUMBER_OF_COLORS;
-        color = static_cast<Color>((uint8) result);
-        host->RaiseEvent(Event::ColorPickerSelectedColorChanged);
-    }
+    // done
 }
 bool ColorPickerContext::OnKeyEvent(Input::Key keyCode)
 {
