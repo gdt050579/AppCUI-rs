@@ -25,6 +25,12 @@ pub enum ActionRequest {
     Allow,
     Deny,
 }
+#[repr(u8)]
+#[derive(Copy,Clone)]
+pub enum ExpandedDirection {
+    OnTop,
+    OnBottom
+}
 
 pub trait OnPaint {
     fn on_paint(&self, _surface: &mut Surface, _theme: &Theme) {}
@@ -52,6 +58,11 @@ pub trait OnFocus {
     fn on_lose_focus(&mut self) {}
 }
 
+pub trait OnExpand {
+    fn on_expand(&mut self, _direction: ExpandedDirection) {}
+    fn on_pack(&mut self) {}
+}
+
 pub trait OnWindowRegistered {
     fn on_registered(&mut self) {}
 }
@@ -63,6 +74,7 @@ pub trait Control:
     + OnDefaultAction
     + OnResize
     + OnFocus
+    + OnExpand
     + OnWindowRegistered
     /* events from each control */
     + ButtonEvents

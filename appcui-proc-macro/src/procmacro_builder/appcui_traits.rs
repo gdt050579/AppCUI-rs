@@ -20,15 +20,16 @@ pub(crate) enum AppCUITrait {
     OnDefaultAction = 12,
     OnResize = 13,
     OnFocus = 14,
+    OnExpand = 15,
     // control events
-    ButtonEvents = 15,
-    CheckBoxEvents = 16,
-    WindowEvents = 17,
-    CommandBarEvents = 18,
-    MenuEvents = 19,
-    DesktopEvents = 20,
-    ToolBarEvents = 21,
-    ColorPickerEvents = 22,
+    ButtonEvents = 16,
+    CheckBoxEvents = 17,
+    WindowEvents = 18,
+    CommandBarEvents = 19,
+    MenuEvents = 20,
+    DesktopEvents = 21,
+    ToolBarEvents = 22,
+    ColorPickerEvents = 23,
 }
 
 #[repr(u8)]
@@ -59,6 +60,7 @@ impl AppCUITrait {
             AppCUITrait::OnDefaultAction => "OnDefaultAction",
             AppCUITrait::OnResize => "OnResize",
             AppCUITrait::OnFocus => "OnFocus",
+            AppCUITrait::OnExpand => "OnExpand",
             // control events
             AppCUITrait::ButtonEvents => "ButtonEvents",
             AppCUITrait::CheckBoxEvents => "CheckBoxEvents",
@@ -89,6 +91,7 @@ impl AppCUITrait {
             AppCUITrait::OnDefaultAction => TraitType::RawEvent,
             AppCUITrait::OnResize => TraitType::RawEvent,
             AppCUITrait::OnFocus => TraitType::RawEvent,
+            AppCUITrait::OnExpand => TraitType::RawEvent,
             // control events
             AppCUITrait::ButtonEvents => TraitType::ControlEvent,
             AppCUITrait::CheckBoxEvents => TraitType::ControlEvent,
@@ -120,6 +123,7 @@ impl AppCUITrait {
             AppCUITrait::OnDefaultAction => templates::ON_DEFAULT_ACTION_TRAIT,
             AppCUITrait::OnResize => templates::ON_RESIZE_TRAIT,
             AppCUITrait::OnFocus => templates::ON_FOCUS_TRAIT,
+            AppCUITrait::OnExpand => templates::ON_EXPAND_TRAIT,
             // control events
             AppCUITrait::ButtonEvents => "",
             AppCUITrait::CheckBoxEvents => "",
@@ -150,6 +154,7 @@ impl AppCUITrait {
             AppCUITrait::OnDefaultAction => "impl OnDefaultAction for $(STRUCT_NAME) {}",
             AppCUITrait::OnResize => "impl OnResize for $(STRUCT_NAME) {}",
             AppCUITrait::OnFocus => "impl OnFocus for $(STRUCT_NAME) {}",
+            AppCUITrait::OnExpand => "impl OnExpand for $(STRUCT_NAME) {}",
             // control events
             AppCUITrait::ButtonEvents => "impl ButtonEvents for $(STRUCT_NAME) {}",
             AppCUITrait::CheckBoxEvents => "impl CheckBoxEvents for $(STRUCT_NAME) {}",
@@ -171,6 +176,7 @@ impl AppCUITrait {
             "OnDefaultAction" => Some(AppCUITrait::OnDefaultAction),
             "OnResize" => Some(AppCUITrait::OnResize),
             "OnFocus" => Some(AppCUITrait::OnFocus),
+            "OnExpand" => Some(AppCUITrait::OnExpand),
             // control events
             "ButtonEvents" | "Button" => Some(AppCUITrait::ButtonEvents),
             "CheckBoxEvents" | "CheckBox" => Some(AppCUITrait::CheckBoxEvents),
@@ -202,15 +208,16 @@ impl AppCUITrait {
             12 => Some(AppCUITrait::OnDefaultAction),
             13 => Some(AppCUITrait::OnResize),
             14 => Some(AppCUITrait::OnFocus),
+            15 => Some(AppCUITrait::OnExpand),
             // control events
-            15 => Some(AppCUITrait::ButtonEvents),
-            16 => Some(AppCUITrait::CheckBoxEvents),
-            17 => Some(AppCUITrait::WindowEvents),
-            18 => Some(AppCUITrait::CommandBarEvents),
-            19 => Some(AppCUITrait::MenuEvents),
-            20 => Some(AppCUITrait::DesktopEvents),
-            21 => Some(AppCUITrait::ToolBarEvents),
-            22 => Some(AppCUITrait::ColorPickerEvents),
+            16 => Some(AppCUITrait::ButtonEvents),
+            17 => Some(AppCUITrait::CheckBoxEvents),
+            18 => Some(AppCUITrait::WindowEvents),
+            19 => Some(AppCUITrait::CommandBarEvents),
+            20 => Some(AppCUITrait::MenuEvents),
+            21 => Some(AppCUITrait::DesktopEvents),
+            22 => Some(AppCUITrait::ToolBarEvents),
+            23 => Some(AppCUITrait::ColorPickerEvents),
             _ => None,
         };
         if result.is_none() {

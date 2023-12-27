@@ -37,6 +37,14 @@ struct ExpandedControlInfo {
     prefered_size: Size,
 }
 
+#[repr(u8)]
+enum ExpandStatus {
+    None,
+    Pack,
+    ExpandOnTop,
+    ExpandOnBottom,
+}
+
 pub(crate) struct RuntimeManager {
     theme: Theme,
     terminal: Box<dyn Terminal>,
@@ -1164,11 +1172,13 @@ impl LayoutMethods for RuntimeManager {
             let old_size = base.get_size();
             let old_pos = base.get_position();
             let expanded = base.is_expanded();
+            let mut expand_status = ExpandStatus::None;
             base.update_control_layout_and_screen_origin(parent_layout);
             if expanded {
                 if handle != self.expanded_control.handle {
                     // need to pack myself as there is another expamded control
                     base.set_expand_flag(false);
+                    expand_status = ExpandStatus::Pack;
                 }
             } else {
                 if handle == self.expanded_control.handle {
@@ -1179,29 +1189,47 @@ impl LayoutMethods for RuntimeManager {
                         self.expanded_control.prefered_size.width.max(self.expanded_control.min_size.width),
                         self.expanded_control.prefered_size.height.max(self.expanded_control.min_size.height),
                     );
-                    base.update_expanded_layout(sz, termsize);
-                    base.set_expand_flag(true);
+                    if let Some(dir) = base.update_expanded_layout(sz, termsize) {
+                        base.set_expand_flag(true);
+                        expand_status = match dir {
+                            ExpandedDirection::OnTop => ExpandStatus::ExpandOnTop,
+                            ExpandedDirection::OnBottom => ExpandStatus::ExpandOnBottom,
+                        };
+                    } else {
+                        self.expanded_control.handle = Handle::None; // clear expanded handle
+                    }
                 }
             }
             let new_size = base.get_size();
             let new_pos = base.get_position();
-            // process the same thing for its children
-            let my_layout = ParentLayout::from(base);
+            let interface = control.get_control_mut();
+            // expand events
+            match expand_status {
+                ExpandStatus::None => {},
+                ExpandStatus::Pack => interface.on_pack(),
+                ExpandStatus::ExpandOnTop => interface.on_expand(ExpandedDirection::OnTop),
+                ExpandStatus::ExpandOnBottom => interface.on_expand(ExpandedDirection::OnBottom),
+            }
             // if size has been changed --> call on_resize
             if new_size != old_size {
-                control.get_control_mut().on_resize(old_size, new_size);
+                interface.on_resize(old_size, new_size);
             }
             // just for window
             if window_control && ((new_size != old_size) || (old_pos != new_pos)) {
                 // call the window specific event
                 WindowEvents::on_layout_changed(
-                    control.get_control_mut(),
+                    interface,
                     Rect::with_point_and_size(old_pos, old_size),
                     Rect::with_point_and_size(new_pos, new_size),
                 );
             }
-            for child_handle in &control.get_base().children {
-                self.update_control_layout(*child_handle, &my_layout)
+            // process the same thing for its children
+            let base = control.get_base();
+            if !base.children.is_empty() {
+                let my_layout = ParentLayout::from(base);
+                for child_handle in &base.children {
+                    self.update_control_layout(*child_handle, &my_layout)
+                }
             }
         }
     }

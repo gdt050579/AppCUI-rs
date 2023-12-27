@@ -372,7 +372,7 @@ impl ControlBase {
     }
 
     #[inline]
-    pub(crate) fn update_expanded_layout(&mut self, size: Size, terminal_size: Size) {
+    pub(crate) fn update_expanded_layout(&mut self, size: Size, terminal_size: Size)->Option<ExpandedDirection> {
         // prefer on bottom, but if not then on top
         // leave one row on top and bottom if possible
         let space_on_bottom = (terminal_size.height as i32) - (2 + self.screen_origin.y);
@@ -382,6 +382,7 @@ impl ControlBase {
             // pun on button
             self.screen_clip
                 .set_with_size(self.screen_origin.x, self.screen_origin.y + 1, size.width as u16, size.height as u16);
+            return Some(ExpandedDirection::OnBottom);
         }
         if requested_height <= space_on_top {
             // pun on top
@@ -389,10 +390,12 @@ impl ControlBase {
                 self.screen_origin.x,
                 self.screen_origin.y - (requested_height + 1),
                 size.width as u16,
-                size.height as u16,
+                size.height as u16,                
             );
+            return Some(ExpandedDirection::OnTop);
         }
         // no expansion possible
+        return None;
     }
 
     #[inline]

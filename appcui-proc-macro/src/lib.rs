@@ -69,6 +69,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnPaint, TraitImplementation::Default);
     config.set(AppCUITrait::OnResize, TraitImplementation::Default);
     config.set(AppCUITrait::OnFocus, TraitImplementation::Default);
+    config.set(AppCUITrait::OnExpand, TraitImplementation::Default);
     config.set(AppCUITrait::OnDefaultAction, TraitImplementation::Default);
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::Default);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::Default);
@@ -124,6 +125,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnResize, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnFocus, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnExpand, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnDefaultAction, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
@@ -156,6 +158,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnResize, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnFocus, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::OnExpand, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnDefaultAction, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
@@ -213,6 +216,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnPaint, TraitImplementation::BaseFallback);
     config.set(AppCUITrait::OnResize, TraitImplementation::Default);
     config.set(AppCUITrait::OnFocus, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnExpand, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnDefaultAction, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
