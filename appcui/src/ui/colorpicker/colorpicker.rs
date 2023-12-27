@@ -12,8 +12,26 @@ const ONE_POSITION_TO_LEFT: i32 = -1;
 const SPACES_PER_COLOR: i32 = 3;
 const TRANSPARENT_CHECKBOX_X_OFFSET: i32 = 15;
 const TRANSPARENT_CHECKBOX_X_LAST_OFFSET: i32 = 29;
+static REVERSED_COLORS: [Color; 16] = [
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::White,
+    Color::Black,
+    Color::Black,
+    Color::White,
+    Color::Black,
+    Color::Black,
+    Color::White,
+    Color::White,
+    Color::Black,
+    Color::Black,
+];
 
-#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
 pub struct ColorPicker {
     color: Color,
     header_y_ofs: i32,
@@ -24,7 +42,7 @@ impl ColorPicker {
         let mut cp = ColorPicker {
             base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             header_y_ofs: 0,
-            expanded_panel_y: 0,
+            expanded_panel_y: 1,
             color,
         };
         cp.set_size_bounds(7, 1, u16::MAX, 1);
@@ -101,13 +119,14 @@ impl ColorPicker {
 impl OnPaint for ColorPicker {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         // first paint the header
+        let size = self.get_size();
         let col_text = match () {
             _ if !self.is_enabled() => theme.button.text.inactive,
             _ if self.has_focus() => theme.button.text.focused,
             _ if self.is_mouse_over() => theme.button.text.hovered,
             _ => theme.button.text.normal,
         };
-        let size = self.get_size();
+
         let space_char = Character::with_attributes(' ', col_text);
         if size.width > MINSPACE_FOR_COLOR_DRAWING {
             surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_COLOR_DRAWING) as i32, space_char);
@@ -127,16 +146,85 @@ impl OnPaint for ColorPicker {
             surface.fill_horizontal_line_with_size(px, self.header_y_ofs, 3, space_char);
             surface.write_char(px + 1, self.header_y_ofs, Character::with_attributes(SpecialChar::TriangleDown, col_text));
         }
+        // assuming the control is expanded
+        if self.is_expanded() {
+            let size = self.get_expanded_size();
+            let col = theme.menu.text.normal;
+            let mut space_char = Character::with_attributes(' ', col);
+            surface.fill_rect(
+                Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+                space_char,
+            );
+            for y in 0..COLOR_MATRIX_HEIGHT {
+                for x in 0..COLOR_MATRIX_WIDTH {
+                    space_char.background = Color::from_value(y * COLOR_MATRIX_WIDTH + x).unwrap();
+                    surface.fill_horizontal_line_with_size(
+                        x * SPACES_PER_COLOR + 1,
+                        y + 1 + self.expanded_panel_y,
+                        SPACES_PER_COLOR as u32,
+                        space_char,
+                    );
+                    if space_char.background == self.color {
+                        surface.write_char(
+                            x * SPACES_PER_COLOR + ((SPACES_PER_COLOR + 1) >> 1),
+                            y + 1 + self.expanded_panel_y,
+                            Character::new(
+                                SpecialChar::CheckMark,
+                                REVERSED_COLORS[(y * COLOR_MATRIX_WIDTH + x) as usize],
+                                space_char.background,
+                                CharFlags::None,
+                            ),
+                        );
+                    }
+                    // if (y * COLOR_MATRIX_WIDTH + x == colorObject)
+                    // {
+                    //     auto c2 = reverse_color[y * COLOR_MATRIX_WIDTH + x];
+                    //     renderer.WriteSpecialCharacter(
+                    //           x * SPACES_PER_COLOR + 1, y + 1 + this->yOffset, SpecialChars::TriangleRight, ColorPair{ c2, c });
+                    //     renderer.WriteSpecialCharacter(
+                    //           x * SPACES_PER_COLOR + SPACES_PER_COLOR,
+                    //           y + 1 + this->yOffset,
+                    //           SpecialChars::TriangleLeft,
+                    //           ColorPair{ c2, c });
+                    //     renderer.SetCursor(x * SPACES_PER_COLOR + ((SPACES_PER_COLOR + 1) >> 1), y + 1 + this->yOffset);
+                    // }
+                }
+            }
+        }
     }
 }
 impl OnDefaultAction for ColorPicker {
-    fn on_default_action(&mut self) {}
+    fn on_default_action(&mut self) {
+        if self.is_expanded() {
+            self.pack();
+        } else {
+            self.expand(Size::new(20, 7), Size::new(self.get_size().width, 7));
+        }
+    }
+}
+impl OnExpand for ColorPicker {
+    fn on_expand(&mut self, direction: ExpandedDirection) {
+        match direction {
+            ExpandedDirection::OnTop => {
+                self.expanded_panel_y = 0;
+                self.header_y_ofs = (self.get_size().height as i32) - 1;
+            }
+            ExpandedDirection::OnBottom => {
+                self.expanded_panel_y = 1;
+                self.header_y_ofs = 0;
+            }
+        }
+    }
 }
 impl OnKeyPressed for ColorPicker {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         let expanded = self.is_expanded();
 
         match key.get_compact_code() {
+            key!("Space") | key!("Enter") => {
+                self.on_default_action();
+                return EventProcessStatus::Processed;
+            }
             key!("Up") => {
                 self.next_color(expanded, if expanded { -COLOR_MATRIX_WIDTH } else { -1 });
                 return EventProcessStatus::Processed;
@@ -155,33 +243,6 @@ impl OnKeyPressed for ColorPicker {
             }
             _ => {}
         }
-        /*
-                bool isExpanded = (this->Flags & GATTR_EXPANDED) != 0;
-                switch (keyCode)
-                {
-                case Key::Space:
-                case Key::Enter:
-                    if ((isExpanded) && (colorObject != NO_COLOR_OBJECT))
-                    {
-                        this->color = static_cast<Color>((uint8) colorObject);
-                        host->RaiseEvent(Event::ColorPickerSelectedColorChanged);
-                    }
-                    return true;
-                case Key::Up:
-                    NextColor(isExpanded ? -(COLOR_MATRIX_WIDTH) : -1, isExpanded);
-                    return true;
-                case Key::Down:
-                    NextColor(isExpanded ? COLOR_MATRIX_WIDTH : 1, isExpanded);
-                    return true;
-                case Key::Left:
-                    NextColor(-1, isExpanded);
-                    return true;
-                case Key::Right:
-                    NextColor(1, isExpanded);
-                    return true;
-                }
-                return false;
-        */
         EventProcessStatus::Ignored
     }
 }

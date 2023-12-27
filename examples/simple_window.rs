@@ -286,11 +286,11 @@ fn main() -> Result<(), appcui::system::Error> {
     // ";
     // let mut a = App::debug(80, 20, script).build()?;
 
-    let mut w = window!("Title,d:c,w:40,h:8");
+    let mut w = window!("Title,d:c,w:40,h:6");
     let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
     w.add(ColorPicker::new(Color::DarkRed,Layout::new("x:1,y:1,w:20")));
     a.add_window(w);
     //a.add_window(MyWin::new());
     a.run();
     Ok(())
-}
+} 
