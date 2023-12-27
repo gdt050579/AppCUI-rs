@@ -232,7 +232,7 @@ impl OnExpand for ColorPicker {
         match direction {
             ExpandedDirection::OnTop => {
                 self.expanded_panel_y = 0;
-                self.header_y_ofs = (self.get_size().height as i32) - 1;
+                self.header_y_ofs = (self.get_expanded_size().height as i32) - 1;
             }
             ExpandedDirection::OnBottom => {
                 self.expanded_panel_y = 1;
@@ -240,6 +240,10 @@ impl OnExpand for ColorPicker {
             }
         }
         self.mouse_on_color_index = -1;
+    }
+    fn on_pack(&mut self) {
+        self.expanded_panel_y = 1;
+        self.header_y_ofs = 0;
     }
 }
 impl OnKeyPressed for ColorPicker {
@@ -286,35 +290,29 @@ impl OnMouseEvent for ColorPicker {
             MouseEvent::Enter => EventProcessStatus::Processed,
             MouseEvent::Leave => EventProcessStatus::Processed,
             MouseEvent::Over(p) => {
-                let idx = self.mouse_to_color_index(p.x,p.y);
+                let idx = self.mouse_to_color_index(p.x, p.y);
                 if idx != self.mouse_on_color_index {
                     self.mouse_on_color_index = idx;
                     return EventProcessStatus::Processed;
                 }
                 return EventProcessStatus::Ignored;
-            },
+            }
             MouseEvent::Pressed(data) => {
-                let idx = self.mouse_to_color_index(data.x,data.y);
-                if let Some(col) = Color::from_value(idx)
-                {
-                    if col!=self.color {
+                let idx = self.mouse_to_color_index(data.x, data.y);
+                if let Some(col) = Color::from_value(idx) {
+                    if col != self.color {
                         self.color = col;
                         self.raise_event(ControlEvent {
                             emitter: self.handle,
                             receiver: self.event_processor,
                             data: ControlEventData::ColorPickerEvent(EventData { color: col }),
                         });
-                        return EventProcessStatus::Processed;
-                    }
-                } else {
-                    if data.y == self.header_y_ofs {
-                        self.on_default_action();
-                        return EventProcessStatus::Processed;
                     }
                 }
-                return EventProcessStatus::Ignored;
-            },
-            _ => return EventProcessStatus::Ignored
+                self.on_default_action();
+                return EventProcessStatus::Processed;
+            }
+            _ => return EventProcessStatus::Ignored,
         }
     }
 }

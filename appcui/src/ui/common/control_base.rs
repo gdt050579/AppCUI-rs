@@ -390,19 +390,20 @@ impl ControlBase {
         let space_on_top = self.screen_origin.y - 1;
         let requested_height = size.height as i32;
         if requested_height <= space_on_bottom {
-            // pun on button
+            // on button
             self.screen_clip
                 .set_with_size(self.screen_origin.x, self.screen_origin.y, size.width as u16, size.height as u16);
             return Some(ExpandedDirection::OnBottom);
         }
         if requested_height <= space_on_top {
-            // pun on top
+            // on top
             self.screen_clip.set_with_size(
                 self.screen_origin.x,
-                self.screen_origin.y - (requested_height + 1),
+                self.screen_origin.y - (requested_height - 1),
                 size.width as u16,
                 size.height as u16,
             );
+            self.screen_origin.y -= requested_height - 1;
 
             return Some(ExpandedDirection::OnTop);
         }
