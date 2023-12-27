@@ -36,6 +36,7 @@ pub struct ColorPicker {
     color: Color,
     header_y_ofs: i32,
     expanded_panel_y: i32,
+    mouse_on_color_index: i32,
 }
 impl ColorPicker {
     pub fn new(color: Color, layout: Layout) -> Self {
@@ -43,6 +44,7 @@ impl ColorPicker {
             base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             header_y_ofs: 0,
             expanded_panel_y: 1,
+            mouse_on_color_index: -1,
             color,
         };
         cp.set_size_bounds(7, 1, u16::MAX, 1);
@@ -155,6 +157,11 @@ impl OnPaint for ColorPicker {
                 Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
                 space_char,
             );
+            surface.draw_rect(
+                Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+                LineType::Single,
+                col,
+            );
             for y in 0..COLOR_MATRIX_HEIGHT {
                 for x in 0..COLOR_MATRIX_WIDTH {
                     space_char.background = Color::from_value(y * COLOR_MATRIX_WIDTH + x).unwrap();
@@ -176,19 +183,34 @@ impl OnPaint for ColorPicker {
                             ),
                         );
                     }
-                    // if (y * COLOR_MATRIX_WIDTH + x == colorObject)
-                    // {
-                    //     auto c2 = reverse_color[y * COLOR_MATRIX_WIDTH + x];
-                    //     renderer.WriteSpecialCharacter(
-                    //           x * SPACES_PER_COLOR + 1, y + 1 + this->yOffset, SpecialChars::TriangleRight, ColorPair{ c2, c });
-                    //     renderer.WriteSpecialCharacter(
-                    //           x * SPACES_PER_COLOR + SPACES_PER_COLOR,
-                    //           y + 1 + this->yOffset,
-                    //           SpecialChars::TriangleLeft,
-                    //           ColorPair{ c2, c });
-                    //     renderer.SetCursor(x * SPACES_PER_COLOR + ((SPACES_PER_COLOR + 1) >> 1), y + 1 + this->yOffset);
-                    // }
+                    if self.mouse_on_color_index == (y * COLOR_MATRIX_WIDTH + x) {
+                        let x_p = x * SPACES_PER_COLOR + 1;
+                        let y_p = y + 1 + self.expanded_panel_y;
+                        let c_attr = CharAttribute::new(
+                            REVERSED_COLORS[(y * COLOR_MATRIX_WIDTH + x) as usize],
+                            space_char.background,
+                            CharFlags::None,
+                        );
+                        surface.write_char(x_p, y_p, Character::with_attributes(SpecialChar::TriangleLeft, c_attr));
+                        surface.write_char(x_p + 2, y_p, Character::with_attributes(SpecialChar::TriangleRight, c_attr));
+                    }
                 }
+            }
+
+            // transparent part
+            let attr = match () {
+                _ if self.color == Color::Transparent => theme.menu.text.focused,
+                _ if self.mouse_on_color_index == 16 => theme.menu.text.hovered,
+                _ => theme.menu.text.normal,
+            };
+            surface.write_string(TRANSPARENT_CHECKBOX_X_OFFSET, 1 + self.expanded_panel_y, "[ ] Transparent", attr, false);
+            if self.color == Color::Transparent {
+                surface.write_char(
+                    TRANSPARENT_CHECKBOX_X_OFFSET + 1,
+                    1 + self.expanded_panel_y,
+                    Character::with_attributes(SpecialChar::CheckMark, theme.menu.symbol.normal),
+                );
+                surface.set_cursor(TRANSPARENT_CHECKBOX_X_OFFSET + 1, 1 + self.expanded_panel_y);
             }
         }
     }
@@ -198,7 +220,10 @@ impl OnDefaultAction for ColorPicker {
         if self.is_expanded() {
             self.pack();
         } else {
-            self.expand(Size::new(20, 7), Size::new(self.get_size().width, 7));
+            self.expand(
+                Size::new((TRANSPARENT_CHECKBOX_X_LAST_OFFSET as u32) + 2, 7),
+                Size::new(self.get_size().width, 7),
+            );
         }
     }
 }
@@ -214,6 +239,7 @@ impl OnExpand for ColorPicker {
                 self.header_y_ofs = 0;
             }
         }
+        self.mouse_on_color_index = -1;
     }
 }
 impl OnKeyPressed for ColorPicker {
@@ -271,26 +297,9 @@ constexpr uint32 MINSPACE_FOR_COLOR_DRAWING        = 5;
 constexpr uint32 MINSPACE_FOR_DROPBUTTON_DRAWING   = 3;
 constexpr int32 COLOR_NAME_OFFSET                  = 3;
 
-constexpr static Color reverse_color[] = {
-    Color::White, Color::White, Color::White, Color::White, Color::White, Color::White, Color::White, Color::Black,
-    Color::Black, Color::White, Color::Black, Color::Black, Color::White, Color::White, Color::Black, Color::Black,
-};
 void ColorPickerContext::OnExpandView(Graphics::Clip& expandedClip)
 {
-    Size size;
-    if (!AppCUI::Application::GetApplicationSize(size))
-        return;
-    expandedClip.ClipRect.Height = COLORPICEKR_HEIGHT;
-    this->headerYOffset          = 0;
-    this->yOffset                = 1;
-    this->colorObject            = NO_COLOR_OBJECT;
-    if (expandedClip.ScreenPosition.Y + COLORPICEKR_HEIGHT >= (int32) size.Height)
-    {
-        this->headerYOffset = COLORPICEKR_HEIGHT - 1;
-        this->yOffset       = 0;
-        expandedClip.ScreenPosition.Y -= this->headerYOffset;
-        expandedClip.ClipRect.Y = expandedClip.ScreenPosition.Y;
-    }
+// done
 }
 void ColorPickerContext::PaintHeader(int x, int y, uint32 width, Graphics::Renderer& renderer)
 {
@@ -298,73 +307,11 @@ void ColorPickerContext::PaintHeader(int x, int y, uint32 width, Graphics::Rende
 }
 void ColorPickerContext::PaintColorBox(Graphics::Renderer& renderer)
 {
-    const auto col = Cfg->Menu.Text.Normal;
-    renderer.FillRect(0, this->yOffset, this->Layout.Width - 1, this->yOffset + COLORPICEKR_HEIGHT - 2, ' ', col);
-    // draw colors (4x4 matrix)
-    for (auto y = 0U; y < COLOR_MATRIX_HEIGHT; y++)
-    {
-        for (auto x = 0U; x < COLOR_MATRIX_WIDTH; x++)
-        {
-            auto c = static_cast<Color>(y * COLOR_MATRIX_WIDTH + x);
-            renderer.FillHorizontalLineSize(
-                  x * SPACES_PER_COLOR + 1, y + 1 + this->yOffset, SPACES_PER_COLOR, ' ', ColorPair{ Color::Black, c });
-            if (c == color)
-            {
-                auto c2 = reverse_color[y * COLOR_MATRIX_WIDTH + x];
-                renderer.WriteSpecialCharacter(
-                      x * SPACES_PER_COLOR + ((SPACES_PER_COLOR + 1) >> 1),
-                      y + 1 + this->yOffset,
-                      SpecialChars::CheckMark,
-                      ColorPair{ c2, c });
-            }
-            if (y * COLOR_MATRIX_WIDTH + x == colorObject)
-            {
-                auto c2 = reverse_color[y * COLOR_MATRIX_WIDTH + x];
-                renderer.WriteSpecialCharacter(
-                      x * SPACES_PER_COLOR + 1, y + 1 + this->yOffset, SpecialChars::TriangleRight, ColorPair{ c2, c });
-                renderer.WriteSpecialCharacter(
-                      x * SPACES_PER_COLOR + SPACES_PER_COLOR,
-                      y + 1 + this->yOffset,
-                      SpecialChars::TriangleLeft,
-                      ColorPair{ c2, c });
-                renderer.SetCursor(x * SPACES_PER_COLOR + ((SPACES_PER_COLOR + 1) >> 1), y + 1 + this->yOffset);
-            }
-        }
-    }
-    if (colorObject == (uint32) Color::Transparent)
-    {
-        renderer.WriteSingleLineText(
-              TRANSPARENT_CHECKBOX_X_OFFSET, 1 + this->yOffset, "[ ] Transparent", Cfg->Menu.Text.PressedOrSelected);
-        if (color == Color::Transparent)
-            renderer.WriteSpecialCharacter(
-                  TRANSPARENT_CHECKBOX_X_OFFSET + 1,
-                  1 + this->yOffset,
-                  SpecialChars::CheckMark,
-                  Cfg->Menu.Symbol.PressedOrSelected);
-        renderer.SetCursor(TRANSPARENT_CHECKBOX_X_OFFSET + 1, 1 + this->yOffset);
-    }
-    else
-    {
-        renderer.WriteSingleLineText(TRANSPARENT_CHECKBOX_X_OFFSET, 1 + this->yOffset, "[ ] Transparent", col);
-        if (color == Color::Transparent)
-            renderer.WriteSpecialCharacter(
-                  TRANSPARENT_CHECKBOX_X_OFFSET + 1,
-                  1 + this->yOffset,
-                  SpecialChars::CheckMark,
-                  Cfg->Menu.Symbol.Normal);
-    }
-
-
-    renderer.DrawVerticalLine(
-          SPACES_PER_COLOR * COLOR_MATRIX_WIDTH + 1, 1 + this->yOffset, COLOR_MATRIX_HEIGHT + this->yOffset, col, true);
-    renderer.DrawRect(
-          0, this->yOffset, this->Layout.Width - 1, this->yOffset + COLORPICEKR_HEIGHT - 2, col, LineType::Single);
+    // done
 }
 void ColorPickerContext::Paint(Graphics::Renderer& renderer)
 {
-    PaintHeader(0, this->headerYOffset, this->Layout.Width, renderer);
-    if (this->Flags & GATTR_EXPANDED)
-        PaintColorBox(renderer);
+    // done
 }
 uint32 ColorPickerContext::MouseToObject(int x, int y)
 {
@@ -395,77 +342,9 @@ void ColorPickerContext::NextColor(int32 offset, bool isExpanded)
 }
 bool ColorPickerContext::OnKeyEvent(Input::Key keyCode)
 {
-    bool isExpanded = (this->Flags & GATTR_EXPANDED) != 0;
-    switch (keyCode)
-    {
-    case Key::Space:
-    case Key::Enter:
-        if ((isExpanded) && (colorObject != NO_COLOR_OBJECT))
-        {
-            this->color = static_cast<Color>((uint8) colorObject);
-            host->RaiseEvent(Event::ColorPickerSelectedColorChanged);
-        }
-        return true;
-    case Key::Up:
-        NextColor(isExpanded ? -(COLOR_MATRIX_WIDTH) : -1, isExpanded);
-        return true;
-    case Key::Down:
-        NextColor(isExpanded ? COLOR_MATRIX_WIDTH : 1, isExpanded);
-        return true;
-    case Key::Left:
-        NextColor(-1, isExpanded);
-        return true;
-    case Key::Right:
-        NextColor(1, isExpanded);
-        return true;
-    }
-    return false;
+    // done
 }
 
-ColorPicker::ColorPicker(string_view layout, Graphics::Color _color)
-    : Control(new ColorPickerContext(), "", layout, false)
-{
-    auto Members              = reinterpret_cast<ColorPickerContext*>(this->Context);
-    Members->Layout.MinWidth  = 7;
-    Members->Layout.MinHeight = 1;
-    Members->Layout.MaxHeight = 1;
-    Members->Flags            = GATTR_ENABLE | GATTR_VISIBLE | GATTR_TABSTOP;
-    Members->color            = _color;
-    Members->headerYOffset    = 0;
-    Members->yOffset          = 1;
-    Members->colorObject      = NO_COLOR_OBJECT;
-    Members->host             = this;
-}
-ColorPicker::~ColorPicker()
-{
-}
-void ColorPicker::Paint(Graphics::Renderer& renderer)
-{
-    reinterpret_cast<ColorPickerContext*>(this->Context)->Paint(renderer);
-}
-bool ColorPicker::OnKeyEvent(Input::Key keyCode, char16 /*UnicodeChar*/)
-{
-    bool result = reinterpret_cast<ColorPickerContext*>(this->Context)->OnKeyEvent(keyCode);
-    switch (keyCode)
-    {
-    case Key::Space:
-    case Key::Enter:
-        OnHotKey();
-        return true;
-    }
-    return result;
-}
-void ColorPicker::OnHotKey()
-{
-    SetChecked(!IsChecked());
-    if (IsChecked())
-        this->ExpandView();
-    else
-    {
-        this->PackView();
-        RaiseEvent(Event::ColorPickerClosed);
-    }
-}
 bool ColorPicker::OnMouseLeave()
 {
     return true;
@@ -483,23 +362,4 @@ void ColorPicker::OnMousePressed(int x, int y, Input::MouseButton button)
     reinterpret_cast<ColorPickerContext*>(this->Context)->OnMousePressed(x, y, button);
     OnHotKey();
 }
-void ColorPicker::OnExpandView(Graphics::Clip& expandedClip)
-{
-    reinterpret_cast<ColorPickerContext*>(this->Context)->OnExpandView(expandedClip);
-}
-void ColorPicker::OnPackView()
-{
-    reinterpret_cast<ColorPickerContext*>(this->Context)->headerYOffset = 0; // reset position
-}
-void ColorPicker::SetColor(Graphics::Color color)
-{
-    reinterpret_cast<ColorPickerContext*>(this->Context)->color = color;
-}
-Graphics::Color ColorPicker::GetColor()
-{
-    return reinterpret_cast<ColorPickerContext*>(this->Context)->color;
-}
-} // namespace AppCUI
-
-
 */
