@@ -101,21 +101,21 @@ impl ColorPicker {
         }
     }
 
-    fn mouse_to_color(&self, x: i32, y: i32) -> Option<Color> {
+    fn mouse_to_color_index(&self, x: i32, y: i32) -> i32 {
         if !self.is_expanded() {
-            return None;
+            return -1;
         }
         if (x > 0)
             && (x < SPACES_PER_COLOR * COLOR_MATRIX_WIDTH + 1)
             && (y > self.expanded_panel_y)
             && (y < self.expanded_panel_y + COLOR_MATRIX_HEIGHT + 1)
         {
-            return Color::from_value(((x - 1) / SPACES_PER_COLOR) + (y - (self.expanded_panel_y + 1)) * COLOR_MATRIX_WIDTH);
+            return ((x - 1) / SPACES_PER_COLOR) + (y - (self.expanded_panel_y + 1)) * COLOR_MATRIX_WIDTH;
         }
         if (y == 1 + self.expanded_panel_y) && (x >= TRANSPARENT_CHECKBOX_X_OFFSET) && (x <= TRANSPARENT_CHECKBOX_X_LAST_OFFSET) {
-            return Some(Color::Transparent);
+            return (Color::Transparent as u8) as i32;
         }
-        return None;
+        return -1;
     }
 }
 impl OnPaint for ColorPicker {
@@ -247,6 +247,14 @@ impl OnKeyPressed for ColorPicker {
         let expanded = self.is_expanded();
 
         match key.get_compact_code() {
+            key!("Escape") => {
+                if expanded {
+                    self.pack();
+                    return EventProcessStatus::Processed;
+                } else {
+                    return EventProcessStatus::Ignored;
+                }
+            }
             key!("Space") | key!("Enter") => {
                 self.on_default_action();
                 return EventProcessStatus::Processed;
@@ -273,8 +281,41 @@ impl OnKeyPressed for ColorPicker {
     }
 }
 impl OnMouseEvent for ColorPicker {
-    fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => EventProcessStatus::Processed,
+            MouseEvent::Leave => EventProcessStatus::Processed,
+            MouseEvent::Over(p) => {
+                let idx = self.mouse_to_color_index(p.x,p.y);
+                if idx != self.mouse_on_color_index {
+                    self.mouse_on_color_index = idx;
+                    return EventProcessStatus::Processed;
+                }
+                return EventProcessStatus::Ignored;
+            },
+            MouseEvent::Pressed(data) => {
+                let idx = self.mouse_to_color_index(data.x,data.y);
+                if let Some(col) = Color::from_value(idx)
+                {
+                    if col!=self.color {
+                        self.color = col;
+                        self.raise_event(ControlEvent {
+                            emitter: self.handle,
+                            receiver: self.event_processor,
+                            data: ControlEventData::ColorPickerEvent(EventData { color: col }),
+                        });
+                        return EventProcessStatus::Processed;
+                    }
+                } else {
+                    if data.y == self.header_y_ofs {
+                        self.on_default_action();
+                        return EventProcessStatus::Processed;
+                    }
+                }
+                return EventProcessStatus::Ignored;
+            },
+            _ => return EventProcessStatus::Ignored
+        }
     }
 }
 
