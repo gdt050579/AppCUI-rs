@@ -767,7 +767,7 @@ impl RuntimeManager {
         return EventProcessStatus::Ignored;
     }
 
-    fn coordinates_to_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement> {
+    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
@@ -785,7 +785,7 @@ impl RuntimeManager {
                     0
                 };
                 for _ in 0..count {
-                    let handle_child = self.coordinates_to_control(base.children[idx], x, y);
+                    let handle_child = self.coordinates_to_child_control(base.children[idx], x, y);
                     if !handle_child.is_none() {
                         return handle_child;
                     }
@@ -799,6 +799,17 @@ impl RuntimeManager {
             }
         }
         Handle::None
+    }
+    fn coordinates_to_control(&mut self, x: i32, y: i32) -> Handle<UIElement> {
+        // if an expanded control exists --> check it first
+        if !self.expanded_control.handle.is_none() {
+            let result = self.coordinates_to_child_control(self.expanded_control.handle, x, y);
+            if !result.is_none() {
+                return result;
+            }
+        }
+        // check from root
+        return self.coordinates_to_child_control(self.get_root_control_handle(), x, y);
     }
 
     fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool {
@@ -945,7 +956,7 @@ impl RuntimeManager {
             MouseLockedObject::None => {}
             _ => return,
         }
-        let handle = self.coordinates_to_control(self.get_root_control_handle(), event.x, event.y);
+        let handle = self.coordinates_to_control(event.x, event.y);
         if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get_mut(handle) {
@@ -975,7 +986,7 @@ impl RuntimeManager {
             return;
         }
         let controls = unsafe { &mut *self.controls };
-        let handle = self.coordinates_to_control(self.get_root_control_handle(), event.x, event.y);
+        let handle = self.coordinates_to_control(event.x, event.y);
         if handle != self.mouse_over_control {
             self.hide_tooltip();
             if !self.mouse_over_control.is_none() {
@@ -1047,7 +1058,7 @@ impl RuntimeManager {
             }
         }
         // check for a control
-        let handle = self.coordinates_to_control(self.get_root_control_handle(), event.x, event.y);
+        let handle = self.coordinates_to_control(event.x, event.y);
         if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get_mut(handle) {
@@ -1205,7 +1216,7 @@ impl LayoutMethods for RuntimeManager {
             let interface = control.get_control_mut();
             // expand events
             match expand_status {
-                ExpandStatus::None => {},
+                ExpandStatus::None => {}
                 ExpandStatus::Pack => interface.on_pack(),
                 ExpandStatus::ExpandOnTop => interface.on_expand(ExpandedDirection::OnTop),
                 ExpandStatus::ExpandOnBottom => interface.on_expand(ExpandedDirection::OnBottom),
