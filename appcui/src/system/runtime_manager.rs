@@ -30,6 +30,13 @@ enum MouseLockedObject {
     MenuBar,
 }
 
+#[derive(Default)]
+struct ExpandedControlInfo {
+    handle: Handle<UIElement>,
+    min_size: Size,
+    prefered_size: Size,
+}
+
 pub(crate) struct RuntimeManager {
     theme: Theme,
     terminal: Box<dyn Terminal>,
@@ -48,7 +55,7 @@ pub(crate) struct RuntimeManager {
     loop_status: LoopStatus,
     request_focus: Option<Handle<UIElement>>,
     current_focus: Option<Handle<UIElement>>,
-    expanded_control: Handle<UIElement>,
+    expanded_control: ExpandedControlInfo,
     mouse_over_control: Handle<UIElement>,
     focus_chain: Vec<Handle<UIElement>>,
     events: Vec<ControlEvent>,
@@ -82,7 +89,7 @@ impl RuntimeManager {
             current_focus: None,
             mouse_over_control: Handle::None,
             opened_menu_handle: Handle::None,
-            expanded_control: Handle::None,
+            expanded_control: ExpandedControlInfo::default(),
             focus_chain: Vec::with_capacity(16),
             events: Vec::with_capacity(16),
             modal_windows: Vec::with_capacity(16),
@@ -135,7 +142,6 @@ impl RuntimeManager {
         )
     }
 
-
     pub(crate) fn exit_execution_loop(&mut self) {
         self.loop_status = LoopStatus::ExitCurrentLoop;
     }
@@ -169,8 +175,10 @@ impl RuntimeManager {
     pub(crate) fn request_focus_for_control(&mut self, handle: Handle<UIElement>) {
         self.request_focus = Some(handle);
     }
-    pub(crate) fn request_expand_for_control(&mut self, handle: Handle<UIElement>) {
-        self.expanded_control = handle;
+    pub(crate) fn request_expand_for_control(&mut self, handle: Handle<UIElement>, min_size: Size, prefered_size: Size) {
+        self.expanded_control.handle = handle;
+        self.expanded_control.min_size = min_size;
+        self.expanded_control.prefered_size = prefered_size;
         self.request_recompute_layout();
         self.request_repaint();
     }
@@ -1158,13 +1166,21 @@ impl LayoutMethods for RuntimeManager {
             let expanded = base.is_expanded();
             base.update_control_layout_and_screen_origin(parent_layout);
             if expanded {
-                if handle != self.expanded_control {
+                if handle != self.expanded_control.handle {
                     // need to pack myself as there is another expamded control
+                    base.set_expand_flag(false);
                 }
             } else {
-                if handle == self.expanded_control {
+                if handle == self.expanded_control.handle {
                     // need to compute my expended size
                     // also I need to set my internal flags to expanded
+                    let termsize = self.get_terminal_size();
+                    let sz = Size::new(
+                        self.expanded_control.prefered_size.width.max(self.expanded_control.min_size.width),
+                        self.expanded_control.prefered_size.height.max(self.expanded_control.min_size.height),
+                    );
+                    base.update_expanded_layout(sz, termsize);
+                    base.set_expand_flag(true);
                 }
             }
             let new_size = base.get_size();

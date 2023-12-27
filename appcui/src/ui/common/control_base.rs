@@ -2,7 +2,7 @@ use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
-use crate::system::{Handle, RuntimeManager, LayoutMethods};
+use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::CommandBarEvents, common::traits::*, common::*,
     desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::ToolBarEvents, window::events::WindowEvents,
@@ -213,13 +213,22 @@ impl ControlBase {
     pub(crate) fn is_expanded(&self) -> bool {
         self.status_flags.contains(StatusFlags::Expanded)
     }
-    pub(crate) fn expand(&self) {
+    pub(crate) fn set_expand_flag(&mut self, value: bool) {
+        if value {
+            self.status_flags.set(StatusFlags::Expanded)
+        } else {
+            self.status_flags.remove(StatusFlags::Expanded)
+        }
+    }
+    pub(crate) fn expand(&self, min_size: Size, prefered_size: Size) {
         if self.has_focus() && self.children.is_empty() && (!self.is_expanded()) {
-            RuntimeManager::get().request_expand_for_control(self.handle);
+            RuntimeManager::get().request_expand_for_control(self.handle, min_size, prefered_size);
         }
     }
     pub(crate) fn pack(&self) {
-
+        if self.has_focus() && self.is_expanded() {
+            RuntimeManager::get().request_expand_for_control(Handle::None, Size::default(), Size::default());
+        }
     }
 
     /// A control can use this method to request focus
@@ -361,6 +370,31 @@ impl ControlBase {
         );
         self.screen_clip.intersect_with(&parent_layout.clip);
     }
+
+    #[inline]
+    pub(crate) fn update_expanded_layout(&mut self, size: Size, terminal_size: Size) {
+        // prefer on bottom, but if not then on top
+        // leave one row on top and bottom if possible
+        let space_on_bottom = (terminal_size.height as i32) - (2 + self.screen_origin.y);
+        let space_on_top = self.screen_origin.y - 1;
+        let requested_height = size.height as i32;
+        if requested_height <= space_on_bottom {
+            // pun on button
+            self.screen_clip
+                .set_with_size(self.screen_origin.x, self.screen_origin.y + 1, size.width as u16, size.height as u16);
+        }
+        if requested_height <= space_on_top {
+            // pun on top
+            self.screen_clip.set_with_size(
+                self.screen_origin.x,
+                self.screen_origin.y - (requested_height + 1),
+                size.width as u16,
+                size.height as u16,
+            );
+        }
+        // no expansion possible
+    }
+
     #[inline]
     pub(crate) fn get_client_clip(&self) -> ClipArea {
         let mut c = ClipArea::with_size(

@@ -12,3 +12,9 @@ impl Size {
         }
     }
 }
+
+impl Default for Size {
+    fn default() -> Self {
+        Self { width: 0, height: 0 }
+    }
+}
