@@ -604,6 +604,10 @@ impl RuntimeManager {
         result
     }
     fn update_focus(&mut self, handle: Handle<UIElement>) {
+        // if an expanded control exists --> pack it
+        if !self.expanded_control.handle.is_none() {
+            self.request_expand_for_control(Handle::None, Size::default(), Size::default());
+        }
         // even if we request a specific control, we will select its deepest inner child
         // to receive a focus (this way a set focus over a window will preserve the focus
         // we already have for one of its childern)
@@ -1263,6 +1267,9 @@ impl PaintMethods for RuntimeManager {
                 }
                 self.paint_control(self.modal_windows[index]);
             }
+        }
+        if !self.expanded_control.handle.is_none() {
+            self.paint_control(self.expanded_control.handle);
         }
         self.surface.reset();
         if self.commandbar.is_some() {

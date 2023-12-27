@@ -289,6 +289,8 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut w = window!("Title,d:c,w:30,h:6");
     let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
     w.add(ColorPicker::new(Color::DarkRed,Layout::new("x:1,y:1,w:20")));
+    w.add(ColorPicker::new(Color::Red,Layout::new("x:1,y:3,w:7")));
+    w.add(ColorPicker::new(Color::Green,Layout::new("x:20,y:3,w:7")));
     a.add_window(w);
     //a.add_window(MyWin::new());
     a.run();
