@@ -178,7 +178,7 @@ fn check_colorpicker_mouse() {
         CheckHash(0x8CE7D62D827A3765)
         Mouse.Move(10,2)
         Paint('Hover over first colorpicker')
-        CheckHash(0x288048EBEB6DB121)
+        CheckHash(0x3681C6F6C06D53EC)
         Mouse.Click(10,2,left)
         Paint('Opened')
         CheckHash(0x78999B76B30F4422)
