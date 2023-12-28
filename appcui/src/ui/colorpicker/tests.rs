@@ -273,3 +273,53 @@ fn check_colorpicker_window_move() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_colorpicker_events() {
+    #[Window(events = ColorPickerEvents, internal=true)]
+    struct MyWin {
+        c: Handle<ColorPicker>,
+        l: Handle<Label>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: Window::new("Test", Layout::new("d:c,w:40,h:10"), window::Flags::None),
+                c: Handle::None,
+                l: Handle::None,
+            };
+            win.l = win.add(label!("'',x:1,y:1,w:30,h:1"));
+            win.c = win.add(colorpicker!("Black,x:1,y:3,w:30"));
+            win
+        }
+    }
+
+    impl ColorPickerEvents for MyWin {
+        fn on_color_changed(&mut self, _handle: Handle<ColorPicker>, color: Color) -> EventProcessStatus {
+            let h = self.l;
+            if let Some(label) = self.get_control_mut(h) {
+                label.set_caption(color.get_name());
+                return EventProcessStatus::Processed;
+            }
+            return EventProcessStatus::Ignored;
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0x578A8A4BE191708C)
+        Key.Pressed(Down)
+        Paint('1:Color=DarkBlue')
+        CheckHash(0xF4CF655EC7DBF9C6)
+        Key.Pressed(Down,4)
+        Paint('2:Color=Magenta')
+        CheckHash(0x6570C1F6240445A9)
+        Key.Pressed(Up,2)
+        Paint('3:Color=Teal')
+        CheckHash(0x59ADD9074A7194C0)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
