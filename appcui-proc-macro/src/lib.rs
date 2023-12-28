@@ -295,3 +295,8 @@ pub fn window(input: TokenStream) -> TokenStream {
 pub fn toolbaritem(input: TokenStream) -> TokenStream {
     crate::controls::toolbaritem::create(input)
 }
+
+#[proc_macro]
+pub fn colorpicker(input: TokenStream) -> TokenStream {
+    crate::controls::colorpicker::create(input)
+}
