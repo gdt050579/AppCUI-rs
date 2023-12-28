@@ -7,7 +7,7 @@ static mut COLORS_TYPE: FlagsSignature = FlagsSignature::new(&[
     "DarkBlue",
     "DarkGreen",
     "Teal",
-    "DarkRead",
+    "DarkRed",
     "Magenta",
     "Olive",
     "Silver",

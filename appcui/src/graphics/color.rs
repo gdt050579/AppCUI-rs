@@ -48,7 +48,7 @@ impl Color {
             Color::DarkBlue => "DarkBlue",
             Color::DarkGreen => "DarkGreen",
             Color::Teal => "Teal",
-            Color::DarkRed => "DarkRead",
+            Color::DarkRed => "DarkRed",
             Color::Magenta => "Magenta",
             Color::Olive => "Olive",
             Color::Silver => "Silver",
