@@ -31,6 +31,7 @@
     - [Stock controls](chapter-3/stock_controls.md)
         - [Button](chapter-3/stock-controls/button.md)
         - [CheckBox](chapter-3/stock-controls/checkbox.md)
+        - [ColorPicker](chapter-3/stock-controls/colorpicker.md)
         - [ComboBox](chapter-3/stock-controls/combobox.md)
         - [Label](chapter-3/stock-controls/label.md)
         - [Panel](chapter-3/stock-controls/panel.md)
