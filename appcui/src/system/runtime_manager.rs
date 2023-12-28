@@ -1200,11 +1200,7 @@ impl LayoutMethods for RuntimeManager {
                     // need to compute my expended size
                     // also I need to set my internal flags to expanded
                     let termsize = self.get_terminal_size();
-                    let sz = Size::new(
-                        self.expanded_control.prefered_size.width.max(self.expanded_control.min_size.width),
-                        self.expanded_control.prefered_size.height.max(self.expanded_control.min_size.height),
-                    );
-                    if let Some(dir) = base.update_expanded_layout(sz, termsize) {
+                    if let Some(dir) = base.update_expanded_layout(self.expanded_control.prefered_size, self.expanded_control.min_size, termsize) {
                         base.set_expand_flag(true);
                         expand_status = match dir {
                             ExpandedDirection::OnTop => ExpandStatus::ExpandOnTop,

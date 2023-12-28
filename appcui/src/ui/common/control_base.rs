@@ -383,27 +383,26 @@ impl ControlBase {
     }
 
     #[inline]
-    pub(crate) fn update_expanded_layout(&mut self, size: Size, terminal_size: Size) -> Option<ExpandedDirection> {
+    pub(crate) fn update_expanded_layout(&mut self, prefered_size: Size, min_size: Size, terminal_size: Size) -> Option<ExpandedDirection> {
         // prefer on bottom, but if not then on top
         // leave one row on top and bottom if possible
         let space_on_bottom = (terminal_size.height as i32) - (2 + self.screen_origin.y);
         let space_on_top = self.screen_origin.y - 1;
-        let requested_height = size.height as i32;
-        if requested_height <= space_on_bottom {
+        let min_height = min_size.height.max(1) as i32;
+        if (min_height <= space_on_bottom) && (space_on_bottom > 0) {
             // on button
-            self.screen_clip
-                .set_with_size(self.screen_origin.x, self.screen_origin.y, size.width as u16, size.height as u16);
+            let height = prefered_size.height.clamp(min_size.height, space_on_bottom as u32) as u16;
+            let width = (prefered_size.width.max(min_size.width) as u16).max(1);
+            self.screen_clip.set_with_size(self.screen_origin.x, self.screen_origin.y, width, height);
             return Some(ExpandedDirection::OnBottom);
         }
-        if requested_height <= space_on_top {
+        if (min_height <= space_on_top) && (space_on_top > 0) {
             // on top
-            self.screen_clip.set_with_size(
-                self.screen_origin.x,
-                self.screen_origin.y - (requested_height - 1),
-                size.width as u16,
-                size.height as u16,
-            );
-            self.screen_origin.y -= requested_height - 1;
+            let height = prefered_size.height.clamp(min_size.height, space_on_top as u32);
+            let width = (prefered_size.width.max(min_size.width) as u16).max(1);
+            self.screen_clip
+                .set_with_size(self.screen_origin.x, self.screen_origin.y - ((height - 1) as i32), width, height as u16);
+            self.screen_origin.y -= (height - 1) as i32;
 
             return Some(ExpandedDirection::OnTop);
         }
