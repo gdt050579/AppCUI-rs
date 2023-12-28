@@ -154,7 +154,7 @@ impl Window {
     }
     pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type) -> Self {
         let mut win: Window = Window {
-            base: ControlBase::new(
+            base: ControlBase::with_status_flags(
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
             ),

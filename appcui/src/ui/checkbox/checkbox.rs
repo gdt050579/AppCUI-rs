@@ -10,7 +10,7 @@ pub struct CheckBox {
 impl CheckBox {
     pub fn new(caption: &str, layout: Layout, checked: bool) -> Self {
         let mut cb = CheckBox {
-            base: ControlBase::new(
+            base: ControlBase::with_status_flags(
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),

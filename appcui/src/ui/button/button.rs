@@ -16,7 +16,7 @@ impl Button {
     /// ```
     pub fn new(caption: &str, layout: Layout, button_type: Type) -> Self {
         let mut but = Button {
-            base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             caption: Caption::new(caption, true),
             button_type,
             pressed: false,

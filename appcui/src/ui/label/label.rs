@@ -7,7 +7,7 @@ pub struct Label {
 impl Label {
     pub fn new(caption: &str, layout: Layout) -> Self {
         Label {
-            base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
             caption: Caption::new(caption, true),
         }
     }

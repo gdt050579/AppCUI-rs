@@ -9,7 +9,7 @@ pub struct Panel {
 impl Panel {
     pub fn new(caption: &str, layout: Layout, panel_type: Type) -> Self {
         let mut panel = Panel {
-            base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
             caption: Caption::new(caption, false),
             panel_type,
         };

@@ -41,7 +41,7 @@ pub struct ColorPicker {
 impl ColorPicker {
     pub fn new(color: Color, layout: Layout) -> Self {
         let mut cp = ColorPicker {
-            base: ControlBase::new(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             header_y_ofs: 0,
             expanded_panel_y: 1,
             mouse_on_color_index: -1,

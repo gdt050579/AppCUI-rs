@@ -1509,7 +1509,7 @@ fn check_window_keybeforechildren() {
     impl MyCustomControl {
         fn new()->Self {
             MyCustomControl {
-                base: ControlBase::new(Layout::new("d:c,w:100%,h:1"),StatusFlags::AcceptInput|StatusFlags::Enabled|StatusFlags::Visible),
+                base: ControlBase::with_status_flags(Layout::new("d:c,w:100%,h:1"),StatusFlags::AcceptInput|StatusFlags::Enabled|StatusFlags::Visible),
                 text: String::new(),
             }
         }

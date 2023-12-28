@@ -48,7 +48,17 @@ pub struct ControlBase {
 }
 
 impl ControlBase {
-    pub fn new(layout: Layout, status_flags: StatusFlags) -> Self {
+    pub fn new(layout: Layout, accept_input: bool) -> Self {
+        ControlBase::with_status_flags(
+            layout,
+            if accept_input {
+                StatusFlags::AcceptInput | StatusFlags::Enabled | StatusFlags::Visible
+            } else {
+                StatusFlags::Enabled | StatusFlags::Visible
+            },
+        )
+    }
+    pub(crate) fn with_status_flags(layout: Layout, status_flags: StatusFlags) -> Self {
         Self {
             parent: Handle::None,
             handle: Handle::None,

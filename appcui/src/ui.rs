@@ -14,6 +14,7 @@ pub mod button;
 pub mod colorpicker;
 
 // re-export
+pub use common::ControlBase;
 pub use desktop::Desktop;
 pub use checkbox::CheckBox;
 pub use label::Label;

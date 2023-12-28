@@ -6,7 +6,7 @@ pub struct Desktop {}
 impl Desktop {
     pub fn new() -> Self {
         Desktop {
-            base: ControlBase::new(
+            base: ControlBase::with_status_flags(
                 Layout::new("x:0,y:0,w:100%,h:100%"),
                 StatusFlags::Visible
                     | StatusFlags::Enabled
