@@ -286,9 +286,9 @@ fn main() -> Result<(), appcui::system::Error> {
     // ";
     // let mut a = App::debug(80, 20, script).build()?;
 
-    let mut w = window!("Title,d:c,w:30,h:6");
+    let mut w = window!("Title,d:c,w:50,h:14");
     let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-    w.add(ColorPicker::new(Color::DarkRed,Layout::new("x:1,y:1,w:20")));
+    w.add(ColorPicker::new(Color::DarkGreen,Layout::new("x:1,y:1,w:32")));
     w.add(colorpicker!("Red,x:1,y:3,w:7"));
     w.add(colorpicker!("color:green,x:20,y:3,w:7"));
     // w.add(ColorPicker::new(Color::Red,Layout::new("x:1,y:3,w:7")));

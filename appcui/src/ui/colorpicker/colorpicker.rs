@@ -287,8 +287,19 @@ impl OnKeyPressed for ColorPicker {
 impl OnMouseEvent for ColorPicker {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
-            MouseEvent::Enter => EventProcessStatus::Processed,
-            MouseEvent::Leave => EventProcessStatus::Processed,
+            MouseEvent::Enter => {
+                if self.is_expanded() == false {
+                    if self.color.get_name().len() as i32 > ((self.get_size().width as i32) - 8) {
+                        self.show_tooltip(self.color.get_name())
+                    }
+                }
+                return EventProcessStatus::Processed;
+            }
+
+            MouseEvent::Leave => {
+                self.hide_tooltip();
+                return EventProcessStatus::Processed;
+            }
             MouseEvent::Over(p) => {
                 let idx = self.mouse_to_color_index(p.x, p.y);
                 if idx != self.mouse_on_color_index {

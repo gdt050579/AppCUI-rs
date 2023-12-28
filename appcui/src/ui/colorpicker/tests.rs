@@ -323,3 +323,36 @@ fn check_colorpicker_events() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_colorpicker_tooltip() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0x69AC235869E0C834)   
+        Mouse.Move(44,8)
+        Paint('Tootip: Transparent')
+        CheckHash(0x118AC3FDECB5F099)   
+        Mouse.Move(10,2)
+        Paint('No tooltip')
+        CheckHash(0x901C15E081FB51F2)   
+        Mouse.Move(10,4)
+        Paint('No tooltip')
+        CheckHash(0x97D6830EF4A6417E)   
+        Mouse.Move(10,6)
+        Paint('Tooltip: Black')
+        CheckHash(0x8ADE2DD7A21CD097)   
+        Mouse.Move(10,8)
+        Paint('No tooltip')
+        CheckHash(0xD2E4C4A915F660B6)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:50,h:11");
+    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:1,w:46")));
+    w.add(colorpicker!("Red,x:1,y:3,w:12"));
+    w.add(colorpicker!("Black,x:1,y:5,w:7"));
+    w.add(colorpicker!("color:pink,x:1,y:7,w:20"));
+    w.add(colorpicker!("transparent,x:37,y:7,w:10"));
+    a.add_window(w);
+    a.run();
+}
