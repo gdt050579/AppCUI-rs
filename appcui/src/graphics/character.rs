@@ -3,13 +3,10 @@ use super::CharFlags;
 use super::Color;
 
 static UNICODE_CODES: [char; 44] = [
-    '\u{2554}', '\u{2557}', '\u{255D}', '\u{255A}', '\u{2550}', '\u{2551}',
-    '\u{256C}', // double line box
-    '\u{250C}', '\u{2510}', '\u{2518}', '\u{2514}', '\u{2500}', '\u{2502}',
-    '\u{253C}', // single line box
+    '\u{2554}', '\u{2557}', '\u{255D}', '\u{255A}', '\u{2550}', '\u{2551}', '\u{256C}', // double line box
+    '\u{250C}', '\u{2510}', '\u{2518}', '\u{2514}', '\u{2500}', '\u{2502}', '\u{253C}', // single line box
     '\u{2191}', '\u{2193}', '\u{2190}', '\u{2192}', '\u{2195}', '\u{2194}', // arrows
-    '\u{20}', '\u{2591}', '\u{2592}', '\u{2593}', '\u{2588}', '\u{2580}', '\u{2584}', '\u{258C}',
-    '\u{2590}', '\u{25A0}', // blocks
+    '\u{20}', '\u{2591}', '\u{2592}', '\u{2593}', '\u{2588}', '\u{2580}', '\u{2584}', '\u{258C}', '\u{2590}', '\u{25A0}', // blocks
     '\u{25B2}', '\u{25BC}', '\u{25C4}', '\u{25BA}', // Trangles
     '\u{25CF}', '\u{25CB}', '\u{221A}', '\u{2261}', '\u{205E}', '\u{2026}', // symbols
     '\u{251C}', '\u{252C}', '\u{2524}', '\u{2534}', // middle single line box
@@ -90,7 +87,7 @@ pub struct Character {
     pub flags: CharFlags,
 }
 impl Character {
-    #[inline]
+    #[inline(always)]
     pub fn new<T>(code: T, fore: Color, back: Color, flags: CharFlags) -> Self
     where
         char: From<T>,
@@ -102,7 +99,7 @@ impl Character {
             flags: flags,
         }
     }
-    #[inline]
+    #[inline(always)]
     pub fn with_char<T>(code: T) -> Self
     where
         char: From<T>,
@@ -114,7 +111,7 @@ impl Character {
             flags: CharFlags::None,
         }
     }
-    #[inline]
+    #[inline(always)]
     pub fn with_color(fore: Color, back: Color) -> Self {
         Character {
             code: 0 as char,
@@ -123,7 +120,7 @@ impl Character {
             flags: CharFlags::None,
         }
     }
-    #[inline]
+    #[inline(always)]
     pub fn with_attributes<T>(code: T, attr: CharAttribute) -> Self
     where
         char: From<T>,
@@ -135,7 +132,7 @@ impl Character {
             flags: attr.flags,
         }
     }
-    #[inline]
+    #[inline(always)]
     pub fn set(&mut self, ch: Character) {
         if ch.code != (0 as char) {
             self.code = ch.code;

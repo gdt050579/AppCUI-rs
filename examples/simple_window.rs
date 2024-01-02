@@ -287,10 +287,20 @@ fn main() -> Result<(), appcui::system::Error> {
     // let mut a = App::debug(80, 20, script).build()?;
 
     let mut w = window!("Title,d:c,w:50,h:14");
-    let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-    w.add(ColorPicker::new(Color::DarkGreen,Layout::new("x:1,y:1,w:32")));
-    w.add(colorpicker!("Red,x:1,y:3,w:7"));
-    w.add(colorpicker!("color:green,x:20,y:3,w:7"));
+    let mut c = Canvas::new(Size::new(40,40),Layout::new("x:1,y:1,w:32,h:9"),canvas::Flags::None);
+    let s = c.get_drawing_surface();
+    s.clear(Character::with_color(Color::White, Color::Black));
+    s.draw_rect(Rect::new(0, 0, 39, 39), LineType::Single, CharAttribute::with_color(Color::Aqua, Color::Black));
+    for x in 1..39 {
+        for y in 1..39 {
+            s.write_char(x, y, Character::with_char(((x.max(y)+48) as u8) as char));
+        }
+    }
+    w.add(c);
+    // let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+    // w.add(ColorPicker::new(Color::DarkGreen,Layout::new("x:1,y:1,w:32")));
+    // w.add(colorpicker!("Red,x:1,y:3,w:7"));
+    // w.add(colorpicker!("color:green,x:20,y:3,w:7"));
     // w.add(ColorPicker::new(Color::Red,Layout::new("x:1,y:3,w:7")));
     // w.add(ColorPicker::new(Color::Green,Layout::new("x:20,y:3,w:7")));
     a.add_window(w);
