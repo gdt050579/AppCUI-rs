@@ -13,6 +13,7 @@ pub mod window;
 pub mod button;
 pub mod colorpicker;
 pub mod canvas;
+pub mod components;
 
 // re-export
 pub use common::ControlBase;

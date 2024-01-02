@@ -286,7 +286,7 @@ fn main() -> Result<(), appcui::system::Error> {
     // ";
     // let mut a = App::debug(80, 20, script).build()?;
 
-    let mut w = window!("Title,d:c,w:50,h:14");
+    let mut w = window!("Title,d:c,w:60,h:14");
     let mut c = Canvas::new(Size::new(40,40),Layout::new("x:1,y:1,w:32,h:9"),canvas::Flags::None);
     let s = c.get_drawing_surface();
     s.clear(Character::with_color(Color::White, Color::Black));
@@ -297,6 +297,7 @@ fn main() -> Result<(), appcui::system::Error> {
         }
     }
     w.add(c);
+    w.add(button!("Test,x:50,y:1,w:8"));
     // let g = w.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
     // w.add(ColorPicker::new(Color::DarkGreen,Layout::new("x:1,y:1,w:32")));
     // w.add(colorpicker!("Red,x:1,y:3,w:7"));

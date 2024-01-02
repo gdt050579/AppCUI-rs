@@ -65,6 +65,12 @@ pub struct TabTheme {
     pub listhotkey: ControlCharAttributesState,
 }
 #[derive(Default)]
+pub struct ScrollBarTheme {
+    pub arrow: ControlCharAttributesState,
+    pub bar: ControlCharAttributesState,
+    pub position: ControlCharAttributesState,
+}
+#[derive(Default)]
 pub struct Theme {
     pub desktop: DesktopTheme,
     pub text: TextTheme,
@@ -77,6 +83,7 @@ pub struct Theme {
     pub lines: ControlCharAttributesState,
     pub button: ButtonTheme,
     pub tab: TabTheme,
+    pub scrollbar: ScrollBarTheme,
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -215,6 +222,28 @@ impl Theme {
         self.tab.list.pressed_or_selectd = CharAttribute::with_color(Color::Black, Color::White);
         self.tab.listhotkey = self.tab.hotkey;
         self.tab.listhotkey.pressed_or_selectd = CharAttribute::with_color(Color::DarkRed, Color::White);
+
+        self.scrollbar.arrow = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::White, Color::DarkBlue),
+            focused: CharAttribute::with_color(Color::White, Color::Teal),
+            hovered: CharAttribute::with_color(Color::Yellow, Color::DarkBlue),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Teal),
+        };
+        self.scrollbar.bar = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::White, Color::DarkBlue),
+            focused: CharAttribute::with_color(Color::White, Color::Teal),
+            hovered: CharAttribute::with_color(Color::Yellow, Color::DarkBlue),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Teal),
+        };
+        self.scrollbar.position = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Silver, Color::DarkBlue),
+            focused: CharAttribute::with_color(Color::Green, Color::Teal),
+            hovered: CharAttribute::with_color(Color::Yellow, Color::DarkBlue),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::with_color(Color::Green, Color::Teal),
+        };
     }
 }
 //         inline void Set(focused, normal, inactive, hovered, pressedOrSelected)
