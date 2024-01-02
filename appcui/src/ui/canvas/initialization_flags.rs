@@ -1,6 +1,7 @@
-use EnumBitFlags::EnumBitFlags;
-
-#[EnumBitFlags(bits=16)]
-pub enum Flags {
-    ScrollBars = 0x0001
+#[repr(u8)]
+#[derive(Eq,PartialEq)]
+pub enum ScrollBarType {
+    None,
+    Inside,
+    External
 }

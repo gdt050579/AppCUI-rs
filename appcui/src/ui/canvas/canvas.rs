@@ -1,30 +1,42 @@
 use crate::prelude::*;
-use crate::ui::canvas::initialization_flags::Flags;
+use crate::ui::canvas::initialization_flags::ScrollBarType;
+use crate::ui::components::ScrollBar;
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct Canvas {
     surface: Surface,
     x: i32,
     y: i32,
     background: Option<Character>,
-    flags: Flags,
+    scroll_bar_type: ScrollBarType,
     drag_point: Option<Point>,
+    horizontal_scroll: ScrollBar,
+    vertical_scroll: ScrollBar,
 }
 impl Canvas {
-    pub fn new(canvas_size: Size, layout: Layout, flags: Flags) -> Self {
+    pub fn new(canvas_size: Size, layout: Layout, scroll_bar_type: ScrollBarType) -> Self {
         let mut canvas = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             surface: Surface::new(canvas_size.width, canvas_size.height),
             x: 0,
             y: 0,
             background: None,
-            flags,
+            scroll_bar_type,
             drag_point: None,
+            horizontal_scroll: ScrollBar::default(),
+            vertical_scroll: ScrollBar::default(),
         };
+        let sz = canvas.surface.get_size();
+        canvas.horizontal_scroll.set_max_value(sz.width as u64);
+        canvas.vertical_scroll.set_max_value(sz.height as u64);
         canvas
     }
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
+        let sz = self.surface.get_size();
+        self.horizontal_scroll.set_max_value(sz.width as u64);
+        self.vertical_scroll.set_max_value(sz.height as u64);
+        self.move_scroll_to(self.x, self.y);
     }
     #[inline(always)]
     pub fn get_drawing_surface(&mut self) -> &mut Surface {
@@ -52,14 +64,58 @@ impl Canvas {
         };
         self.x = self.x.min(0);
         self.y = self.y.min(0);
+        self.horizontal_scroll.set_value((-self.x) as u64);
+        self.vertical_scroll.set_value((-self.y) as u64);
+    }
+}
+impl OnResize for Canvas {
+    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+        // reposition scroll bars
+        let w = new_size.width as i32;
+        let h = new_size.height as i32;
+        let paint_sz = self.surface.get_size();
+        self.horizontal_scroll.set_enabled((paint_sz.width as i32) <= w);
+        self.vertical_scroll.set_enabled((paint_sz.height as i32) <= h);
+
+        match self.scroll_bar_type {
+            ScrollBarType::None => {
+                self.horizontal_scroll.set_visible(false);
+                self.vertical_scroll.set_visible(false);
+            }
+            ScrollBarType::Inside => {
+                self.horizontal_scroll.set_visible(w >= 4);
+                self.vertical_scroll.set_visible(h >= 4);
+                self.horizontal_scroll.set_position(0, h - 1, (new_size.width as u16) - 1);
+                self.vertical_scroll.set_position(h - 1, 0, (new_size.height - 1) as u16);
+            }
+            ScrollBarType::External => {
+                self.horizontal_scroll.set_visible((paint_sz.width as i32) <= w);
+                self.vertical_scroll.set_visible((paint_sz.height as i32) <= h);
+            }
+        }
+
+        self.move_scroll_to(self.x, self.y);
     }
 }
 impl OnPaint for Canvas {
-    fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if let Some(back) = self.background {
             surface.clear(back);
         }
         surface.draw_surface(self.x, self.y, &self.surface);
+        match self.scroll_bar_type {
+            ScrollBarType::None => {},
+            ScrollBarType::Inside => {
+                self.vertical_scroll.paint(surface, theme);
+                self.horizontal_scroll.paint(surface, theme);
+            },
+            ScrollBarType::External => {
+                if self.has_focus() {
+                    self.vertical_scroll.paint(surface, theme);
+                    self.horizontal_scroll.paint(surface, theme);
+                }
+            },
+        }
     }
 }
 impl OnKeyPressed for Canvas {

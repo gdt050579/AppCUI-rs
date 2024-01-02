@@ -41,6 +41,10 @@ impl ScrollBar {
         self.visible = visible;
     }
     #[inline(always)]
+    pub fn set_enabled(&mut self, visible: bool) {
+        self.enabled = visible;
+    }
+    #[inline(always)]
     pub fn set_value(&mut self, value: u64) {
         self.value = value.min(self.max_value);
     }
@@ -56,6 +60,9 @@ impl ScrollBar {
         self.dimension = dimension.min(3);
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme) {
+        if !self.visible {
+            return;
+        }
         let col_minimize_arrow = theme.scrollbar.arrow.normal;
         let col_maximize_arrow = theme.scrollbar.arrow.normal;
         let col_bar = theme.scrollbar.bar.normal;
@@ -69,6 +76,21 @@ impl ScrollBar {
             surface.fill_horizontal_line(self.x, self.y, right_x, Character::with_attributes(SpecialChar::Block50, col_bar));
             surface.write_char(self.x, self.y, Character::with_attributes(SpecialChar::ArrowLeft, col_minimize_arrow));
             surface.write_char(right_x, self.y, Character::with_attributes(SpecialChar::ArrowRight, col_maximize_arrow));
+        }
+    }
+}
+impl Default for ScrollBar {
+    fn default() -> Self {
+        Self {
+            x: 0,
+            y: 0,
+            dimension: 0,
+            vertical: false,
+            enabled: false,
+            visible: false,
+            max_value: 0,
+            value: 0,
+            status: MouseOnScrollbarStatus::None,
         }
     }
 }
