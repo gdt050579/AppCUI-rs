@@ -287,13 +287,14 @@ fn main() -> Result<(), appcui::system::Error> {
     // let mut a = App::debug(80, 20, script).build()?;
 
     let mut w = window!("Title,d:c,w:60,h:14");
-    let mut c = Canvas::new(Size::new(40,40),Layout::new("x:1,y:1,w:32,h:9"),canvas::Flags::None);
+    let mut c = Canvas::new(Size::new(40,40),Layout::new("x:1,y:1,w:32,h:9"),canvas::ScrollBarType::Inside);
     let s = c.get_drawing_surface();
     s.clear(Character::with_color(Color::White, Color::Black));
     s.draw_rect(Rect::new(0, 0, 39, 39), LineType::Single, CharAttribute::with_color(Color::Aqua, Color::Black));
     for x in 1..39 {
         for y in 1..39 {
-            s.write_char(x, y, Character::with_char(((x.max(y)+48) as u8) as char));
+            let c = (((x+y)+30) as u8) as char;
+            s.write_char(x, y, Character::with_char(c));
         }
     }
     w.add(c);

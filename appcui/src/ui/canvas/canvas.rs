@@ -23,8 +23,8 @@ impl Canvas {
             background: None,
             scroll_bar_type,
             drag_point: None,
-            horizontal_scroll: ScrollBar::default(),
-            vertical_scroll: ScrollBar::default(),
+            horizontal_scroll: ScrollBar::new(0, 0, 1, false, 0, 1),
+            vertical_scroll: ScrollBar::new(0, 0, 1, true, 0, 1),
         };
         let sz = canvas.surface.get_size();
         canvas.horizontal_scroll.set_max_value(sz.width as u64);
@@ -71,11 +71,9 @@ impl Canvas {
 impl OnResize for Canvas {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         // reposition scroll bars
-        let w = new_size.width as i32;
-        let h = new_size.height as i32;
         let paint_sz = self.surface.get_size();
-        self.horizontal_scroll.set_enabled((paint_sz.width as i32) <= w);
-        self.vertical_scroll.set_enabled((paint_sz.height as i32) <= h);
+        self.horizontal_scroll.set_enabled(paint_sz.width < new_size.width);
+        self.vertical_scroll.set_enabled(paint_sz.height < new_size.height);
 
         match self.scroll_bar_type {
             ScrollBarType::None => {
@@ -83,14 +81,12 @@ impl OnResize for Canvas {
                 self.vertical_scroll.set_visible(false);
             }
             ScrollBarType::Inside => {
-                self.horizontal_scroll.set_visible(w >= 4);
-                self.vertical_scroll.set_visible(h >= 4);
-                self.horizontal_scroll.set_position(0, h - 1, (new_size.width as u16) - 1);
-                self.vertical_scroll.set_position(h - 1, 0, (new_size.height - 1) as u16);
+                self.horizontal_scroll.update_position(new_size, 0, 1, false);
+                self.vertical_scroll.update_position(new_size, 0, 1, false);
             }
             ScrollBarType::External => {
-                self.horizontal_scroll.set_visible((paint_sz.width as i32) <= w);
-                self.vertical_scroll.set_visible((paint_sz.height as i32) <= h);
+                self.horizontal_scroll.update_position(new_size, 0, 1, true);
+                self.vertical_scroll.update_position(new_size, 0, 1, true);
             }
         }
 
@@ -104,17 +100,17 @@ impl OnPaint for Canvas {
         }
         surface.draw_surface(self.x, self.y, &self.surface);
         match self.scroll_bar_type {
-            ScrollBarType::None => {},
+            ScrollBarType::None => {}
             ScrollBarType::Inside => {
                 self.vertical_scroll.paint(surface, theme);
                 self.horizontal_scroll.paint(surface, theme);
-            },
+            }
             ScrollBarType::External => {
                 if self.has_focus() {
                     self.vertical_scroll.paint(surface, theme);
                     self.horizontal_scroll.paint(surface, theme);
                 }
-            },
+            }
         }
     }
 }
