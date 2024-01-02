@@ -8,6 +8,7 @@ pub struct Canvas {
     y: i32,
     background: Option<Character>,
     flags: Flags,
+    drag_point: Option<Point>,
 }
 impl Canvas {
     pub fn new(canvas_size: Size, layout: Layout, flags: Flags) -> Self {
@@ -18,6 +19,7 @@ impl Canvas {
             y: 0,
             background: None,
             flags,
+            drag_point: None,
         };
         canvas
     }
@@ -79,19 +81,19 @@ impl OnKeyPressed for Canvas {
                 self.move_scroll_to(self.x, self.y - 1);
                 EventProcessStatus::Processed
             }
-            key!("Alt+Left") => {
+            key!("Shift+Left") => {
                 self.move_scroll_to(0, self.y);
                 EventProcessStatus::Processed
             }
-            key!("Alt+Right") => {
+            key!("Shift+Right") => {
                 self.move_scroll_to(i32::MIN, self.y);
                 EventProcessStatus::Processed
             }
-            key!("Alt+Up") => {
+            key!("Shift+Up") => {
                 self.move_scroll_to(self.x, 0);
                 EventProcessStatus::Processed
             }
-            key!("Alt+Down") => {
+            key!("Shift+Down") => {
                 self.move_scroll_to(self.x, i32::MIN);
                 EventProcessStatus::Processed
             }
@@ -124,7 +126,40 @@ impl OnKeyPressed for Canvas {
     }
 }
 impl OnMouseEvent for Canvas {
-    fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => EventProcessStatus::Ignored,
+            MouseEvent::Leave => EventProcessStatus::Ignored,
+            MouseEvent::Over(_) => EventProcessStatus::Ignored,
+            MouseEvent::Pressed(data) => {
+                self.drag_point = Some(Point::new(data.x, data.y));
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Released(data) => {
+                if let Some(p) = self.drag_point {
+                    self.move_scroll_to(self.x + data.x - p.x, self.y + data.y - p.y);
+                }
+                self.drag_point = None;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
+            MouseEvent::Drag(data) => {
+                if let Some(p) = self.drag_point {
+                    self.move_scroll_to(self.x + data.x - p.x, self.y + data.y - p.y);
+                }
+                self.drag_point = Some(Point::new(data.x, data.y));
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(dir) => {
+                match dir {
+                    MouseWheelDirection::None => {}
+                    MouseWheelDirection::Left => self.move_scroll_to(self.x + 1, self.y),
+                    MouseWheelDirection::Right => self.move_scroll_to(self.x - 1, self.y),
+                    MouseWheelDirection::Up => self.move_scroll_to(self.x, self.y + 1),
+                    MouseWheelDirection::Down => self.move_scroll_to(self.x, self.y - 1),
+                };
+                EventProcessStatus::Processed
+            }
+        }
     }
 }
