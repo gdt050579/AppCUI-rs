@@ -1,7 +1,9 @@
 use crate::graphics::*;
+use crate::prelude::ControlBase;
 use crate::system::Theme;
 
 #[repr(u8)]
+#[derive(Eq, PartialEq)]
 enum MouseOnScrollbarStatus {
     None,
     HoverOnMinimizeArrow,
@@ -54,6 +56,16 @@ impl ScrollBar {
         self.value = self.value.min(self.max_value);
     }
     #[inline(always)]
+    pub fn update_max_value(&mut self, visible_amount: u64, total_amount: u64) {
+        if visible_amount < total_amount {
+            self.max_value = total_amount - visible_amount;
+        } else {
+            self.max_value = 0;
+        }
+        self.value = self.value.min(self.max_value);
+        self.enabled = self.max_value > 0;
+    }
+    #[inline(always)]
     pub fn set_position(&mut self, x: i32, y: i32, dimension: u16) {
         self.x = x;
         self.y = y;
@@ -82,11 +94,19 @@ impl ScrollBar {
             self.visible = false;
         }
     }
-    pub fn paint(&self, surface: &mut Surface, theme: &Theme) {
+    pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         if !self.visible {
             return;
         }
-        let col_minimize_arrow = theme.scrollbar.arrow.normal;
+        let control_has_focus = control.has_focus();
+        let inactive = !(control.is_enabled() && self.enabled);
+        let col_minimize_arrow = match () {
+            _ if inactive => theme.scrollbar.arrow.inactive,
+            _ if self.status == MouseOnScrollbarStatus::HoverOnMinimizeArrow => theme.scrollbar.arrow.hovered,
+            _ if control_has_focus => theme.scrollbar.arrow.focused,
+            _ => theme.scrollbar.arrow.normal,
+        };
+
         let col_maximize_arrow = theme.scrollbar.arrow.normal;
         let col_bar = theme.scrollbar.bar.normal;
         if self.vertical {
@@ -98,6 +118,13 @@ impl ScrollBar {
                 bottom_y,
                 Character::with_attributes(SpecialChar::TriangleDown, col_maximize_arrow),
             );
+            if !inactive {
+                surface.write_char(
+                    self.x,
+                    self.y + 1 + self.value_to_offset(),
+                    Character::with_attributes(SpecialChar::BlockCentered, col_bar),
+                );
+            }
         } else {
             let right_x = self.x + (self.dimension as i32) - 1;
             surface.fill_horizontal_line(self.x, self.y, right_x, Character::with_attributes(SpecialChar::Block50, col_bar));
@@ -107,6 +134,25 @@ impl ScrollBar {
                 self.y,
                 Character::with_attributes(SpecialChar::TriangleRight, col_maximize_arrow),
             );
+            if !inactive {
+                surface.write_char(
+                    self.x + 1 + self.value_to_offset(),
+                    self.y,
+                    Character::with_attributes(SpecialChar::BlockCentered, col_bar),
+                );
+            }
+        }
+    }
+    #[inline(always)]
+    fn value_to_offset(&self) -> i32 {
+        if (self.max_value < 1) || (self.dimension <= 3) {
+            return 0;
+        }
+        let dim = (self.dimension as u64) - 2;
+        if self.max_value > 0x0000_0FFF_FFFF_FFFFu64 {
+            ((((self.value as u128) * (dim as u128)) / (self.max_value as u128)) as u16) as i32
+        } else {
+            (((self.value * dim) / self.max_value) as u16) as i32
         }
     }
 }

@@ -72,9 +72,8 @@ impl OnResize for Canvas {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         // reposition scroll bars
         let paint_sz = self.surface.get_size();
-        self.horizontal_scroll.set_enabled(paint_sz.width < new_size.width);
-        self.vertical_scroll.set_enabled(paint_sz.height < new_size.height);
-
+        self.horizontal_scroll.update_max_value(new_size.width as u64, paint_sz.width as u64);
+        self.vertical_scroll.update_max_value(new_size.height as u64, paint_sz.height as u64);
         match self.scroll_bar_type {
             ScrollBarType::None => {
                 self.horizontal_scroll.set_visible(false);
@@ -102,13 +101,13 @@ impl OnPaint for Canvas {
         match self.scroll_bar_type {
             ScrollBarType::None => {}
             ScrollBarType::Inside => {
-                self.vertical_scroll.paint(surface, theme);
-                self.horizontal_scroll.paint(surface, theme);
+                self.vertical_scroll.paint(surface, theme, self);
+                self.horizontal_scroll.paint(surface, theme, self);
             }
             ScrollBarType::External => {
                 if self.has_focus() {
-                    self.vertical_scroll.paint(surface, theme);
-                    self.horizontal_scroll.paint(surface, theme);
+                    self.vertical_scroll.paint(surface, theme, self);
+                    self.horizontal_scroll.paint(surface, theme, self);
                 }
             }
         }
