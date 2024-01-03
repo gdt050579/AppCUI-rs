@@ -58,7 +58,7 @@ impl ScrollBar {
     }
     #[inline(always)]
     pub fn update_count(&mut self, visible_indexes: u64, total_indexes: u64) {
-        if visible_indexes < total_indexes {
+        if (visible_indexes < total_indexes) || (visible_indexes == 0) {
             self.count = total_indexes - visible_indexes;
         } else {
             self.count = 0;

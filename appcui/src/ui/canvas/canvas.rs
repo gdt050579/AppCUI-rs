@@ -33,7 +33,7 @@ impl Canvas {
     }
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
-        let sz = self.surface.get_size();
+        let mut sz = self.surface.get_size();
         self.horizontal_scroll.set_count(sz.width as u64);
         self.vertical_scroll.set_count(sz.height as u64);
         self.move_scroll_to(self.x, self.y);
@@ -50,7 +50,9 @@ impl Canvas {
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
-        let sz = self.get_size();
+        let sz = self
+            .get_size()
+            .reduce_by(if self.scroll_bar_type == ScrollBarType::Inside { 1 } else { 0 });
         let surface_size = self.surface.get_size();
         self.x = if surface_size.width <= sz.width {
             0
@@ -72,8 +74,9 @@ impl OnResize for Canvas {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         // reposition scroll bars
         let paint_sz = self.surface.get_size();
-        self.horizontal_scroll.update_count(new_size.width as u64, paint_sz.width as u64);
-        self.vertical_scroll.update_count(new_size.height as u64, paint_sz.height as u64);
+        let visible_size = new_size.reduce_by(if self.scroll_bar_type == ScrollBarType::Inside { 1 } else { 0 });
+        self.horizontal_scroll.update_count(visible_size.width as u64, paint_sz.width as u64);
+        self.vertical_scroll.update_count(visible_size.height as u64, paint_sz.height as u64);
         match self.scroll_bar_type {
             ScrollBarType::None => {
                 self.horizontal_scroll.set_visible(false);
@@ -97,10 +100,14 @@ impl OnPaint for Canvas {
         if let Some(back) = self.background {
             surface.clear(back);
         }
+        if self.scroll_bar_type == ScrollBarType::Inside {
+            surface.reduce_clip_by(0, 0, 1, 1);
+        }
         surface.draw_surface(self.x, self.y, &self.surface);
         match self.scroll_bar_type {
             ScrollBarType::None => {}
             ScrollBarType::Inside => {
+                surface.reset_clip();
                 self.vertical_scroll.paint(surface, theme, self);
                 self.horizontal_scroll.paint(surface, theme, self);
             }

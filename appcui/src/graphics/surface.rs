@@ -79,7 +79,7 @@ impl Surface {
         let h = height.clamp(1, MAX_SURFACE_HEIGHT);
         let count = (w as usize) * (h as usize);
         let mut s = Surface {
-            size: Size::new(w,h),
+            size: Size::new(w, h),
             origin: Point::default(),
             base_origin: Point::default(),
             chars: Vec::<Character>::with_capacity(count),
@@ -125,7 +125,7 @@ impl Surface {
         self.base_origin.y = y;
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn set_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.clip.set(
             i32::max(self.base_clip.left, left),
@@ -134,7 +134,16 @@ impl Surface {
             i32::min(self.base_clip.bottom, bottom),
         );
     }
-    #[inline]
+    #[inline(always)]
+    pub fn reduce_clip_by(&mut self, left_margin: u32, top_margin: u32, right_margin: u32, bottom_margin: u32) {
+        self.set_clip(
+            self.base_clip.left + left_margin as i32,
+            self.base_clip.top + top_margin as i32,
+            self.base_clip.right - right_margin as i32,
+            self.base_clip.bottom - bottom_margin as i32,
+        );
+    }
+    #[inline(always)]
     pub fn reset_clip(&mut self) {
         self.clip = self.base_clip;
     }

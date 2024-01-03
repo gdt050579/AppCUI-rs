@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Eq,PartialEq)]
+#[derive(Eq,PartialEq, Copy, Clone)]
 pub enum ScrollBarType {
     None,
     Inside,

@@ -11,6 +11,12 @@ impl Size {
             height: height,
         }
     }
+    pub fn reduce_by(&self, value: u32) -> Size {
+        Size {
+            width: if self.width > value { self.width - value } else { 0 },
+            height: if self.height > value { self.height - value } else { 0 },
+        }
+    }
 }
 
 impl Default for Size {
