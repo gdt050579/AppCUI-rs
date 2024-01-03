@@ -2,6 +2,8 @@ use crate::graphics::*;
 use crate::prelude::{ControlBase, MouseEvent};
 use crate::system::Theme;
 
+use super::ProcessEventResult;
+
 #[repr(u8)]
 #[derive(Eq, PartialEq, Copy, Clone)]
 enum MouseOnScrollbarStatus {
@@ -12,6 +14,22 @@ enum MouseOnScrollbarStatus {
     PressedOnMaximizeArrow,
     HoverOnBar,
     PressedOnBar,
+}
+
+impl MouseOnScrollbarStatus {
+    #[inline(always)]
+    fn is_none(&self) -> bool {
+        *self == MouseOnScrollbarStatus::None
+    }
+    #[inline(always)]
+    fn is_pressed(&self) -> bool {
+        match self {
+            MouseOnScrollbarStatus::PressedOnMinimizeArrow => true,
+            MouseOnScrollbarStatus::PressedOnMaximizeArrow => true,
+            MouseOnScrollbarStatus::PressedOnBar => true,
+            _ => false,
+        }
+    }
 }
 
 #[repr(C)]
@@ -199,12 +217,12 @@ impl ScrollBar {
             }
         }
     }
-    fn update_hover_status(&mut self, x: i32, y: i32) {
+    fn get_hover_status(&mut self, x: i32, y: i32) -> MouseOnScrollbarStatus {
         match self.mouse_coords_to_scroll_pos(x, y) {
-            MousePosition::MinimizeArrow => self.status = MouseOnScrollbarStatus::HoverOnMinimizeArrow,
-            MousePosition::MaximizeArrow => self.status = MouseOnScrollbarStatus::HoverOnMaximizeArrow,
-            MousePosition::Bar => self.status = MouseOnScrollbarStatus::HoverOnBar,
-            MousePosition::OutsideScrollBar => self.status = MouseOnScrollbarStatus::None,
+            MousePosition::MinimizeArrow => MouseOnScrollbarStatus::HoverOnMinimizeArrow,
+            MousePosition::MaximizeArrow => MouseOnScrollbarStatus::HoverOnMaximizeArrow,
+            MousePosition::Bar => MouseOnScrollbarStatus::HoverOnBar,
+            MousePosition::OutsideScrollBar => MouseOnScrollbarStatus::None,
         }
     }
     fn get_press_status(&self, x: i32, y: i32) -> MouseOnScrollbarStatus {
@@ -231,32 +249,87 @@ impl ScrollBar {
             _ => {}
         }
     }
-    pub fn process_mouse_event(&mut self, event: &MouseEvent) -> bool {
+    pub fn process_mouse_event(&mut self, event: &MouseEvent) -> ProcessEventResult {
         if !(self.visible && self.enabled) {
-            return false;
+            // if scroll bar is invisible --> pass the event to control
+            return ProcessEventResult::PassToControl;
         }
         match event {
             MouseEvent::Over(data) => {
-                self.update_hover_status(data.x, data.y);
+                let new_status = self.get_hover_status(data.x, data.y);
+                if new_status != self.status {
+                    self.status = new_status;
+                    if new_status.is_none() {
+                        return ProcessEventResult::PassToControlAndRepaint;
+                    } else {
+                        return ProcessEventResult::Repaint;
+                    }
+                }
+                return ProcessEventResult::Processed;
             }
             MouseEvent::Pressed(data) => {
-                self.status = self.get_press_status(data.x, data.y);
-                if self.status != MouseOnScrollbarStatus::None {
+                let new_status = self.get_press_status(data.x, data.y);
+                if !new_status.is_none() {
+                    self.status = new_status;
                     self.update_index_for_mouse_pos(data.x, data.y, self.status);
+                    return ProcessEventResult::Update;
                 }
+                if self.status != MouseOnScrollbarStatus::None {
+                    self.status = new_status;
+                    return ProcessEventResult::PassToControlAndRepaint;
+                }
+                return ProcessEventResult::PassToControl;
             }
             MouseEvent::Released(data) => {
-                self.update_hover_status(data.x, data.y);
+                let new_status = self.get_hover_status(data.x, data.y);
+                if self.status.is_pressed() {
+                    self.status = new_status;
+                    return ProcessEventResult::Repaint;
+                } else {
+                    self.status = new_status;
+                    return ProcessEventResult::PassToControlAndRepaint;
+                }
             }
             MouseEvent::Drag(data) => {
                 let new_status = self.get_press_status(data.x, data.y);
-                if (new_status == self.status) && (new_status == MouseOnScrollbarStatus::PressedOnBar) {
-                    self.update_index_for_mouse_pos(data.x, data.y, MouseOnScrollbarStatus::PressedOnBar);
+                if self.status.is_pressed() {
+                    if (new_status == self.status) && (new_status == MouseOnScrollbarStatus::PressedOnBar) {
+                        self.update_index_for_mouse_pos(data.x, data.y, MouseOnScrollbarStatus::PressedOnBar);
+                        return ProcessEventResult::Update;
+                    } else {
+                        return ProcessEventResult::Processed;
+                    }
+                } else {
+                    return ProcessEventResult::PassToControl;
                 }
             }
-            _ => {}
+            MouseEvent::Enter => {
+                self.status = MouseOnScrollbarStatus::None;
+                return ProcessEventResult::PassToControlAndRepaint;
+            }
+            MouseEvent::Leave => {
+                if !self.status.is_none() {
+                    self.status = MouseOnScrollbarStatus::None;
+                    return ProcessEventResult::PassToControlAndRepaint;
+                } else {
+                    return ProcessEventResult::PassToControl;
+                }
+            }
+            MouseEvent::DoubleClick(data) => {
+                let new_status = self.get_press_status(data.x, data.y);
+                if !new_status.is_none() {
+                    self.status = new_status;
+                    self.update_index_for_mouse_pos(data.x, data.y, self.status);
+                    return ProcessEventResult::Update;
+                }
+                if self.status != MouseOnScrollbarStatus::None {
+                    self.status = new_status;
+                    return ProcessEventResult::PassToControlAndRepaint;
+                }
+                return ProcessEventResult::PassToControl;
+            }
+            MouseEvent::Wheel(_) => return ProcessEventResult::PassToControl,
         }
-        return self.status != MouseOnScrollbarStatus::None;
     }
     #[inline(always)]
     fn index_to_screen_offset(&self) -> i32 {

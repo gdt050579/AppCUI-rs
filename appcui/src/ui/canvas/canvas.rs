@@ -186,12 +186,11 @@ impl OnKeyPressed for Canvas {
 impl OnMouseEvent for Canvas {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if self.scroll_bar_type != ScrollBarType::None {
-            if self.vertical_scroll.process_mouse_event(event) {
-                return EventProcessStatus::Processed;
+            let res = self.vertical_scroll.process_mouse_event(event);
+            if res.should_pass_to_control() {
+                let res2 = self.horizontal_scroll.process_mouse_event(event);
             }
-            if self.horizontal_scroll.process_mouse_event(event) {
-                return EventProcessStatus::Processed;
-            }
+
         }
         match event {
             MouseEvent::Enter => EventProcessStatus::Ignored,
