@@ -20,20 +20,20 @@ pub struct ScrollBar {
     vertical: bool,
     enabled: bool,
     visible: bool,
-    max_value: u64,
-    value: u64,
+    count: u64,
+    index: u64,
     status: MouseOnScrollbarStatus,
 }
 impl ScrollBar {
-    pub fn new(x: i32, y: i32, dimension: u16, vertical: bool, value: u64, max_value: u64) -> Self {
+    pub fn new(x: i32, y: i32, dimension: u16, vertical: bool, count: u64) -> Self {
         Self {
             x,
             y,
             vertical,
-            enabled: max_value > 0,
-            value: value.min(max_value),
+            enabled: count > 0,
+            index: 0,
             visible: true,
-            max_value,
+            count,
             dimension: dimension.max(3),
             status: MouseOnScrollbarStatus::None,
         }
@@ -48,22 +48,23 @@ impl ScrollBar {
     }
     #[inline(always)]
     pub fn set_value(&mut self, value: u64) {
-        self.value = value.min(self.max_value);
+        self.index = if self.count > 0 { value.min(self.count - 1) } else { 0 };
     }
     #[inline(always)]
-    pub fn set_max_value(&mut self, value: u64) {
-        self.max_value = value;
-        self.value = self.value.min(self.max_value);
+    pub fn set_count(&mut self, count: u64) {
+        self.count = count;
+        self.index = if self.count > 0 { self.index.min(self.count - 1) } else { 0 };
+        self.enabled = self.count > 0;
     }
     #[inline(always)]
-    pub fn update_max_value(&mut self, visible_amount: u64, total_amount: u64) {
-        if visible_amount < total_amount {
-            self.max_value = total_amount - visible_amount;
+    pub fn update_count(&mut self, visible_indexes: u64, total_indexes: u64) {
+        if visible_indexes < total_indexes {
+            self.count = total_indexes - visible_indexes;
         } else {
-            self.max_value = 0;
+            self.count = 0;
         }
-        self.value = self.value.min(self.max_value);
-        self.enabled = self.max_value > 0;
+        self.index = if self.count > 0 { self.index.min(self.count - 1) } else { 0 };
+        self.enabled = self.count > 0;
     }
     #[inline(always)]
     pub fn set_position(&mut self, x: i32, y: i32, dimension: u16) {
@@ -106,9 +107,18 @@ impl ScrollBar {
             _ if control_has_focus => theme.scrollbar.arrow.focused,
             _ => theme.scrollbar.arrow.normal,
         };
-
-        let col_maximize_arrow = theme.scrollbar.arrow.normal;
-        let col_bar = theme.scrollbar.bar.normal;
+        let col_maximize_arrow = match () {
+            _ if inactive => theme.scrollbar.arrow.inactive,
+            _ if self.status == MouseOnScrollbarStatus::HoverOnMaximizeArrow => theme.scrollbar.arrow.hovered,
+            _ if control_has_focus => theme.scrollbar.arrow.focused,
+            _ => theme.scrollbar.arrow.normal,
+        };
+        let col_bar = match () {
+            _ if inactive => theme.scrollbar.arrow.inactive,
+            _ if self.status == MouseOnScrollbarStatus::HoverOnBar => theme.scrollbar.arrow.hovered,
+            _ if control_has_focus => theme.scrollbar.arrow.focused,
+            _ => theme.scrollbar.arrow.normal,
+        };
         if self.vertical {
             let bottom_y = self.y + (self.dimension as i32) - 1;
             surface.fill_vertical_line(self.x, self.y, bottom_y, Character::with_attributes(SpecialChar::Block50, col_bar));
@@ -121,7 +131,7 @@ impl ScrollBar {
             if !inactive {
                 surface.write_char(
                     self.x,
-                    self.y + 1 + self.value_to_offset(),
+                    self.y + 1 + self.index_to_screen_offset(),
                     Character::with_attributes(SpecialChar::BlockCentered, col_bar),
                 );
             }
@@ -136,7 +146,7 @@ impl ScrollBar {
             );
             if !inactive {
                 surface.write_char(
-                    self.x + 1 + self.value_to_offset(),
+                    self.x + 1 + self.index_to_screen_offset(),
                     self.y,
                     Character::with_attributes(SpecialChar::BlockCentered, col_bar),
                 );
@@ -144,15 +154,17 @@ impl ScrollBar {
         }
     }
     #[inline(always)]
-    fn value_to_offset(&self) -> i32 {
-        if (self.max_value < 1) || (self.dimension <= 3) {
+    fn index_to_screen_offset(&self) -> i32 {
+        if (self.count < 2) || (self.dimension <= 3) {
             return 0;
         }
-        let dim = (self.dimension as u64) - 2;
-        if self.max_value > 0x0000_0FFF_FFFF_FFFFu64 {
-            ((((self.value as u128) * (dim as u128)) / (self.max_value as u128)) as u16) as i32
+        let dim = (self.dimension as u64) - 3;
+        let cnt = self.count - 1;
+        let idx = self.index.min(cnt); // safety check
+        if self.count > 0x0000_0FFF_FFFF_FFFFu64 {
+            ((((idx as u128) * (dim as u128)) / (cnt as u128)) as u16) as i32
         } else {
-            (((self.value * dim) / self.max_value) as u16) as i32
+            (((idx * dim) / cnt) as u16) as i32
         }
     }
 }
@@ -165,8 +177,8 @@ impl Default for ScrollBar {
             vertical: false,
             enabled: false,
             visible: false,
-            max_value: 0,
-            value: 0,
+            count: 0,
+            index: 0,
             status: MouseOnScrollbarStatus::None,
         }
     }

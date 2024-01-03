@@ -23,19 +23,19 @@ impl Canvas {
             background: None,
             scroll_bar_type,
             drag_point: None,
-            horizontal_scroll: ScrollBar::new(0, 0, 1, false, 0, 1),
-            vertical_scroll: ScrollBar::new(0, 0, 1, true, 0, 1),
+            horizontal_scroll: ScrollBar::new(0, 0, 1, false, 1),
+            vertical_scroll: ScrollBar::new(0, 0, 1, true, 1),
         };
         let sz = canvas.surface.get_size();
-        canvas.horizontal_scroll.set_max_value(sz.width as u64);
-        canvas.vertical_scroll.set_max_value(sz.height as u64);
+        canvas.horizontal_scroll.set_count(sz.width as u64);
+        canvas.vertical_scroll.set_count(sz.height as u64);
         canvas
     }
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
         let sz = self.surface.get_size();
-        self.horizontal_scroll.set_max_value(sz.width as u64);
-        self.vertical_scroll.set_max_value(sz.height as u64);
+        self.horizontal_scroll.set_count(sz.width as u64);
+        self.vertical_scroll.set_count(sz.height as u64);
         self.move_scroll_to(self.x, self.y);
     }
     #[inline(always)]
@@ -72,8 +72,8 @@ impl OnResize for Canvas {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         // reposition scroll bars
         let paint_sz = self.surface.get_size();
-        self.horizontal_scroll.update_max_value(new_size.width as u64, paint_sz.width as u64);
-        self.vertical_scroll.update_max_value(new_size.height as u64, paint_sz.height as u64);
+        self.horizontal_scroll.update_count(new_size.width as u64, paint_sz.width as u64);
+        self.vertical_scroll.update_count(new_size.height as u64, paint_sz.height as u64);
         match self.scroll_bar_type {
             ScrollBarType::None => {
                 self.horizontal_scroll.set_visible(false);
