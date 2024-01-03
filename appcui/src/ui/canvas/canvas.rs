@@ -66,8 +66,8 @@ impl Canvas {
         };
         self.x = self.x.min(0);
         self.y = self.y.min(0);
-        self.horizontal_scroll.set_value((-self.x) as u64);
-        self.vertical_scroll.set_value((-self.y) as u64);
+        self.horizontal_scroll.set_index((-self.x) as u64);
+        self.vertical_scroll.set_index((-self.y) as u64);
     }
 }
 impl OnResize for Canvas {
@@ -185,6 +185,14 @@ impl OnKeyPressed for Canvas {
 }
 impl OnMouseEvent for Canvas {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.scroll_bar_type != ScrollBarType::None {
+            if self.vertical_scroll.process_mouse_event(event) {
+                return EventProcessStatus::Processed;
+            }
+            if self.horizontal_scroll.process_mouse_event(event) {
+                return EventProcessStatus::Processed;
+            }
+        }
         match event {
             MouseEvent::Enter => EventProcessStatus::Ignored,
             MouseEvent::Leave => EventProcessStatus::Ignored,
