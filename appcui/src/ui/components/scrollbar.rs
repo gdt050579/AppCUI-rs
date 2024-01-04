@@ -254,8 +254,13 @@ impl ScrollBar {
                 if (self.dimension > 3) && (self.count > 0) {
                     let dim = ((self.dimension as u64) - 3) as u128;
                     let cnt = (self.count - 1) as u128;
-                    let new_index = (poz.min(dim) * cnt) / dim;
+                    let mut new_index = (poz.min(dim) * cnt) / dim;
+                    let rest = (poz.min(dim) * cnt) % dim;
+                    if rest!=0{
+                        new_index += 1;
+                    }
                     self.set_index(new_index as u64);
+                    //eprintln!("new_poz={new_index},count={},dim={},y={y},self.y={}", self.count, self.dimension, self.y);
                 } else {
                     self.set_index(0);
                 }
