@@ -221,6 +221,24 @@ impl ScrollBar {
             }
         }
     }
+    fn mouse_coords_to_scroll_pos_for_dragging(&self, x: i32, y: i32) -> MousePosition {
+        // we will not force x to be equal cu self.x or y to self.y 
+        if self.vertical {
+            match () {
+                _ if self.y == y => MousePosition::MinimizeArrow,
+                _ if (self.y + (self.dimension as i32) - 1) == y => MousePosition::MaximizeArrow,
+                _ if (y > self.y) && (y < (self.y + (self.dimension as i32) - 1)) => MousePosition::Bar,
+                _ => MousePosition::OutsideScrollBar,
+            }
+        } else {
+            match () {
+                _ if self.x == x => MousePosition::MinimizeArrow,
+                _ if (self.x + (self.dimension as i32) - 1) == x => MousePosition::MaximizeArrow,
+                _ if (x > self.x) && (x < (self.x + (self.dimension as i32) - 1)) => MousePosition::Bar,
+                _ => MousePosition::OutsideScrollBar,
+            }
+        }
+    }
     fn get_hover_status(&mut self, x: i32, y: i32) -> MouseOnScrollbarStatus {
         match self.mouse_coords_to_scroll_pos(x, y) {
             MousePosition::MinimizeArrow => MouseOnScrollbarStatus::HoverOnMinimizeArrow,
@@ -231,6 +249,14 @@ impl ScrollBar {
     }
     fn get_press_status(&self, x: i32, y: i32) -> MouseOnScrollbarStatus {
         match self.mouse_coords_to_scroll_pos(x, y) {
+            MousePosition::MinimizeArrow => MouseOnScrollbarStatus::PressedOnMinimizeArrow,
+            MousePosition::MaximizeArrow => MouseOnScrollbarStatus::PressedOnMaximizeArrow,
+            MousePosition::Bar => MouseOnScrollbarStatus::PressedOnBar,
+            MousePosition::OutsideScrollBar => MouseOnScrollbarStatus::None,
+        }
+    }
+    fn get_drag_status(&self, x: i32, y: i32) -> MouseOnScrollbarStatus {
+        match self.mouse_coords_to_scroll_pos_for_dragging(x, y) {
             MousePosition::MinimizeArrow => MouseOnScrollbarStatus::PressedOnMinimizeArrow,
             MousePosition::MaximizeArrow => MouseOnScrollbarStatus::PressedOnMaximizeArrow,
             MousePosition::Bar => MouseOnScrollbarStatus::PressedOnBar,
@@ -310,7 +336,7 @@ impl ScrollBar {
                 }
             }
             MouseEvent::Drag(data) => {
-                let new_status = self.get_press_status(data.x, data.y);
+                let new_status = self.get_drag_status(data.x, data.y);
                 if self.status.is_pressed() {
                     if (new_status == self.status) && (new_status == MouseOnScrollbarStatus::PressedOnBar) {
                         self.update_index_for_mouse_pos(data.x, data.y, MouseOnScrollbarStatus::PressedOnBar);
