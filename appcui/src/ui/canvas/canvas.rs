@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::prelude::components::ProcessEventResult;
 use crate::ui::canvas::initialization_flags::ScrollBarType;
 use crate::ui::components::ScrollBar;
 
@@ -33,7 +34,7 @@ impl Canvas {
     }
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
-        let mut sz = self.surface.get_size();
+        let sz = self.surface.get_size();
         self.horizontal_scroll.set_count(sz.width as u64);
         self.vertical_scroll.set_count(sz.height as u64);
         self.move_scroll_to(self.x, self.y);
@@ -68,6 +69,11 @@ impl Canvas {
         self.y = self.y.min(0);
         self.horizontal_scroll.set_index((-self.x) as u64);
         self.vertical_scroll.set_index((-self.y) as u64);
+    }
+    fn update_scroll_pos_from_scrollbars(&mut self) {
+        let h = -(self.horizontal_scroll.get_index() as i32);
+        let v = -(self.vertical_scroll.get_index() as i32);
+        self.move_scroll_to(h, v);
     }
 }
 impl OnResize for Canvas {
@@ -185,14 +191,22 @@ impl OnKeyPressed for Canvas {
 }
 impl OnMouseEvent for Canvas {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        let mut res = ProcessEventResult::PassToControl;
         if self.scroll_bar_type != ScrollBarType::None {
-            let res = self.vertical_scroll.process_mouse_event(event);
-            if res.should_pass_to_control() {
-                let res2 = self.horizontal_scroll.process_mouse_event(event);
+            res |= self.vertical_scroll.process_mouse_event(event);
+            res |= self.horizontal_scroll.process_mouse_event(event);
+            if res.should_update() {
+                self.update_scroll_pos_from_scrollbars();
             }
-
+            if res.should_pass_to_control()==false {
+                if res.should_repaint() {
+                    return EventProcessStatus::Processed;
+                } else {
+                    return EventProcessStatus::Ignored;
+                }
+            }
         }
-        match event {
+        let response = match event {
             MouseEvent::Enter => EventProcessStatus::Ignored,
             MouseEvent::Leave => EventProcessStatus::Ignored,
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
@@ -225,6 +239,12 @@ impl OnMouseEvent for Canvas {
                 };
                 EventProcessStatus::Processed
             }
+        };
+        // if one of the components require a repaint, than we should repaint even if the canvas required us to ignore the event
+        if res.should_repaint() {
+            return EventProcessStatus::Processed
+        } else {
+            return response;
         }
     }
 }

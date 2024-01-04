@@ -79,6 +79,10 @@ impl ScrollBar {
         self.index = if self.count > 0 { value.min(self.count - 1) } else { 0 };
     }
     #[inline(always)]
+    pub fn get_index(&mut self) -> u64 {
+        self.index
+    }
+    #[inline(always)]
     pub fn set_count(&mut self, count: u64) {
         self.count = count;
         self.index = if self.count > 0 { self.index.min(self.count - 1) } else { 0 };
@@ -244,7 +248,17 @@ impl ScrollBar {
                 self.set_index(self.index + 1);
             }
             MouseOnScrollbarStatus::PressedOnBar => {
-                // compute the new index
+                let poz = if self.vertical { y - (self.y + 1) } else { x - (self.x + 1) };
+                // sanity check & shaddowing
+                let poz = poz.max(0) as u128;
+                if (self.dimension > 3) && (self.count > 0) {
+                    let dim = ((self.dimension as u64) - 3) as u128;
+                    let cnt = (self.count - 1) as u128;
+                    let new_index = (poz * cnt) / dim;
+                    self.set_index(new_index as u64);
+                } else {
+                    self.set_index(0);
+                }
             }
             _ => {}
         }
