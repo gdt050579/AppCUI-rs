@@ -90,8 +90,8 @@ impl ScrollBar {
     }
     #[inline(always)]
     pub fn update_count(&mut self, visible_indexes: u64, total_indexes: u64) {
-        if (visible_indexes < total_indexes) || (visible_indexes == 0) {
-            self.count = total_indexes - visible_indexes;
+        if (visible_indexes <= total_indexes) && (visible_indexes != 0) {
+            self.count = (total_indexes - visible_indexes) + 1;
         } else {
             self.count = 0;
         }
@@ -254,7 +254,7 @@ impl ScrollBar {
                 if (self.dimension > 3) && (self.count > 0) {
                     let dim = ((self.dimension as u64) - 3) as u128;
                     let cnt = (self.count - 1) as u128;
-                    let new_index = (poz * cnt) / dim;
+                    let new_index = (poz.min(dim) * cnt) / dim;
                     self.set_index(new_index as u64);
                 } else {
                     self.set_index(0);
