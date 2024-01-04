@@ -8,6 +8,13 @@ edition = "2021"
 appcui = { version = "1.0.0", path = "../appcui" }
 AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"} 
 
+
+[[example]]
+name = "test"
+path = "test.rs"
+
+
+
 [[example]]
 name = "buttons"
 path = "buttons.rs"
@@ -19,10 +26,6 @@ path = "checkboxes.rs"
 [[example]]
 name = "colorpicker"
 path = "colorpicker.rs"
-
-[[example]]
-name = "simple_window"
-path = "simple_window.rs"
 
 [[example]]
 name = "hello_world"
