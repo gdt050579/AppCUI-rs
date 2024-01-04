@@ -1,3 +1,5 @@
+use std::cell::Cell;
+use std::marker::PhantomData;
 use std::sync::Mutex;
 
 use super::Error;
@@ -11,7 +13,7 @@ use crate::ui::common::traits::*;
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
 pub struct App {
-    _phantom: (),
+    _phantom: PhantomData<Cell<i32>>,
 }
 
 impl App {
@@ -25,7 +27,7 @@ impl App {
         }
         RuntimeManager::create(builder)?;
         *app_created = true;
-        Ok(App { _phantom: () })
+        Ok(App { _phantom: Default::default() })
     }
     /// Creates a new builder object using the default terminal for the current operating system
     pub fn new() -> crate::system::Builder {
@@ -92,3 +94,4 @@ impl App {
         return RuntimeManager::get().add_window(window);
     }
 }
+
