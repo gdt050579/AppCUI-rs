@@ -22,6 +22,8 @@ pub enum StatusFlags {
     DesktopControl = 0x0080,
     KeyInputBeforeChildren = 0x0100,
     Expanded = 0x0200,
+    IncreaseRightMarginOnFocus = 0x0400,
+    IncreaseBottomMarginOnFocus = 0x0800,
 }
 #[derive(Copy, Clone)]
 pub(crate) struct Margins {
@@ -447,12 +449,31 @@ impl ControlBase {
             return false; // nothing to draw
         }
         // paint myself
-        surface.set_base_clip(
-            self.screen_clip.left,
-            self.screen_clip.top,
-            self.screen_clip.right,
-            self.screen_clip.bottom,
-        );
+        if self.has_focus() {
+            let add_right = if self.status_flags.contains_one(StatusFlags::IncreaseRightMarginOnFocus) {
+                1
+            } else {
+                0
+            };
+            let add_bottom = if self.status_flags.contains_one(StatusFlags::IncreaseBottomMarginOnFocus) {
+                1
+            } else {
+                0
+            };
+            surface.set_base_clip(
+                self.screen_clip.left,
+                self.screen_clip.top,
+                self.screen_clip.right + add_right,
+                self.screen_clip.bottom + add_bottom,
+            );
+        } else {
+            surface.set_base_clip(
+                self.screen_clip.left,
+                self.screen_clip.top,
+                self.screen_clip.right,
+                self.screen_clip.bottom,
+            );
+        }
         surface.set_base_origin(self.screen_origin.x, self.screen_origin.y);
         surface.reset_clip();
         surface.reset_origin();

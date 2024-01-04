@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::prelude::components::ProcessEventResult;
+use crate::prelude::*;
 use crate::ui::canvas::initialization_flags::ScrollBarType;
 use crate::ui::components::ScrollBar;
 
@@ -17,7 +17,15 @@ pub struct Canvas {
 impl Canvas {
     pub fn new(canvas_size: Size, layout: Layout, scroll_bar_type: ScrollBarType) -> Self {
         let mut canvas = Self {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(
+                layout,
+                (StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput)
+                    | if scroll_bar_type == ScrollBarType::External {
+                        StatusFlags::IncreaseBottomMarginOnFocus | StatusFlags::IncreaseRightMarginOnFocus
+                    } else {
+                        StatusFlags::None
+                    },
+            ),
             surface: Surface::new(canvas_size.width, canvas_size.height),
             x: 0,
             y: 0,
@@ -93,8 +101,8 @@ impl OnResize for Canvas {
                 self.vertical_scroll.update_position(new_size, 0, 1, false);
             }
             ScrollBarType::External => {
-                self.horizontal_scroll.update_position(new_size, 0, 1, true);
-                self.vertical_scroll.update_position(new_size, 0, 1, true);
+                self.horizontal_scroll.update_position(new_size, 5, 2, true);
+                self.vertical_scroll.update_position(new_size, 1, 2, true);
             }
         }
 
@@ -106,8 +114,15 @@ impl OnPaint for Canvas {
         if let Some(back) = self.background {
             surface.clear(back);
         }
-        if self.scroll_bar_type == ScrollBarType::Inside {
-            surface.reduce_clip_by(0, 0, 1, 1);
+        let focused = self.has_focus();
+        match self.scroll_bar_type {
+            ScrollBarType::None => {}
+            ScrollBarType::Inside => surface.reduce_clip_by(0, 0, 1, 1),
+            ScrollBarType::External => {
+                if focused {
+                    surface.reduce_clip_by(0, 0, 1, 1);
+                }
+            }
         }
         surface.draw_surface(self.x, self.y, &self.surface);
         match self.scroll_bar_type {
@@ -118,7 +133,8 @@ impl OnPaint for Canvas {
                 self.horizontal_scroll.paint(surface, theme, self);
             }
             ScrollBarType::External => {
-                if self.has_focus() {
+                if focused {
+                    surface.reset_clip();
                     self.vertical_scroll.paint(surface, theme, self);
                     self.horizontal_scroll.paint(surface, theme, self);
                 }
@@ -198,7 +214,7 @@ impl OnMouseEvent for Canvas {
             if res.should_update() {
                 self.update_scroll_pos_from_scrollbars();
             }
-            if res.should_pass_to_control()==false {
+            if res.should_pass_to_control() == false {
                 if res.should_repaint() {
                     return EventProcessStatus::Processed;
                 } else {
@@ -242,7 +258,7 @@ impl OnMouseEvent for Canvas {
         };
         // if one of the components require a repaint, than we should repaint even if the canvas required us to ignore the event
         if res.should_repaint() {
-            return EventProcessStatus::Processed
+            return EventProcessStatus::Processed;
         } else {
             return response;
         }

@@ -287,7 +287,7 @@ fn main() -> Result<(), appcui::system::Error> {
     // let mut a = App::debug(80, 20, script).build()?;
 
     let mut w = window!("Title,d:c,w:60,h:14,flags:Sizeable");
-    let mut c = Canvas::new(Size::new(40,40),Layout::new("l:1,t:1,b:1,r:15"),canvas::ScrollBarType::Inside);
+    let mut c = Canvas::new(Size::new(40,40),Layout::new("l:0,t:0,b:0,r:15"),canvas::ScrollBarType::External);
     let s = c.get_drawing_surface();
     s.clear(Character::with_color(Color::White, Color::Black));
     s.draw_rect(Rect::new(0, 0, 39, 39), LineType::Single, CharAttribute::with_color(Color::Aqua, Color::Black));
