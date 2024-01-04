@@ -278,7 +278,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-        
+
     // let script = "
     //     Paint()
     //     Key.Pressed(Up)

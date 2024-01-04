@@ -19,6 +19,7 @@ and an `event trait` can be one of the following:
 * CommandBarEvents
 * MenuEvents
 * ToolBarEvents
+* ColorPickerEvents
 
 These events can be implemented to receive notification on various actions that children controls are performing. 
 

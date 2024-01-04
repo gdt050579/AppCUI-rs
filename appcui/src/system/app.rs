@@ -1,4 +1,3 @@
-use std::cell::Cell;
 use std::marker::PhantomData;
 use std::sync::Mutex;
 
@@ -13,7 +12,7 @@ use crate::ui::common::traits::*;
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
 pub struct App {
-    _phantom: PhantomData<Cell<i32>>,
+    _phantom: PhantomData<*mut ()>,
 }
 
 impl App {

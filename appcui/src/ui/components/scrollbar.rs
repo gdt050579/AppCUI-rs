@@ -256,7 +256,7 @@ impl ScrollBar {
                     let cnt = (self.count - 1) as u128;
                     let mut new_index = (poz.min(dim) * cnt) / dim;
                     let rest = (poz.min(dim) * cnt) % dim;
-                    if rest!=0{
+                    if rest != 0 {
                         new_index += 1;
                     }
                     self.set_index(new_index as u64);
