@@ -343,6 +343,25 @@ impl ControlBase {
         }
     }
 
+    #[inline(always)]
+    pub(crate) fn should_increase_margins_on_focus(&self) -> Option<u8> {
+        if !self.has_focus() {
+            return None;
+        }
+        let res = self.status_flags & (StatusFlags::IncreaseBottomMarginOnFocus | StatusFlags::IncreaseRightMarginOnFocus);
+        if res.is_empty() {
+            return None;
+        }
+        let mut v = 0;
+        if self.status_flags.contains_one(StatusFlags::IncreaseRightMarginOnFocus) {
+            v |= 1;
+        }
+        if self.status_flags.contains_one(StatusFlags::IncreaseBottomMarginOnFocus) {
+            v |= 2;
+        }
+        return Some(v);
+    }
+
     /// Sets the bounds (minim and maxim sized allowed for a control). If the size of a control is outside its bounds, its size will be adjusted automatically. This method has no effect on a Desktop control.
     #[inline]
     pub fn set_size_bounds(&mut self, min_width: u16, min_height: u16, max_width: u16, max_height: u16) {

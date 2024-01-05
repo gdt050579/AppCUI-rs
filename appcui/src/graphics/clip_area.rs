@@ -34,17 +34,17 @@ impl ClipArea {
     pub fn set_with_size(&mut self, x: i32, y: i32, width: u16, height: u16) {
         self.set(x, y, x + (width as i32) - 1, y + (height as i32) - 1);
     }
-    #[inline]
+    #[inline(always)]
     pub fn is_visible(&self) -> bool {
         self.visible
     }
-    #[inline]
+    #[inline(always)]
     pub fn contains(&self, x: i32, y: i32) -> bool {
-        return self.visible
-            && (x >= self.left)
-            && (x <= self.right)
-            && (y >= self.top)
-            && (y <= self.bottom);
+        return self.visible && (x >= self.left) && (x <= self.right) && (y >= self.top) && (y <= self.bottom);
+    }
+    #[inline(always)]
+    pub(crate) fn contains_with_margins(&self, x: i32, y: i32, right_margin: i32, bottom_margin: i32) -> bool {
+        return self.visible && (x >= self.left) && (x <= self.right + right_margin) && (y >= self.top) && (y <= self.bottom + bottom_margin);
     }
     #[inline]
     pub fn contains_y(&self, y: i32) -> bool {

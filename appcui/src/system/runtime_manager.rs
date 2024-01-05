@@ -778,8 +778,16 @@ impl RuntimeManager {
             if base.is_active() == false {
                 return Handle::None;
             }
-            if !base.screen_clip.contains(x, y) {
-                return Handle::None;
+            if let Some(v) = base.should_increase_margins_on_focus() {
+                // if the control has focus, then check if the margins were not extended to include a 
+                // scrollbar or a different component
+                if !base.screen_clip.contains_with_margins(x, y, (v & 1) as i32, ((v >> 1) & 1) as i32) {
+                    return Handle::None;
+                }
+            } else {
+                if !base.screen_clip.contains(x, y) {
+                    return Handle::None;
+                }
             }
             let count = base.children.len();
             if count > 0 {
