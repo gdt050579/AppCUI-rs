@@ -9,9 +9,18 @@
     - [Application](chapter-2/application.md)
         - [Debug scenarios](chapter-2/debug_scenarious.md)
     - [Terminals](chapter-2/terminals.md)
+        - [Windows Console]()
+        - [NCurses]()
+        - [OpenGL]()
+        - [SDL]()
+        - [CrossTerm]()
+        - [Ansi]()
+        - [Web]()
     - [Screen area and sizes](chapter-2/screen.md)
-    - [Surface](chapter-2/surface.md)
-    - [Input](chapter-2/input.md)
+    - [Surface]() <!-- (chapter-2/surface.md) -->
+    - [Input]() <!-- (chapter-2/input.md) -->
+        - [Mouse]()
+        - [Keyboard]()
 
 - [Controls](chapter-3/controls.md)
     - [Layout](chapter-3/layout.md)
@@ -33,7 +42,7 @@
         - [Canvas]()
         - [CheckBox](chapter-3/stock-controls/checkbox.md)
         - [ColorPicker](chapter-3/stock-controls/colorpicker.md)
-        - [ComboBox](chapter-3/stock-controls/combobox.md)
+        - [ComboBox]() <!-- (chapter-3/stock-controls/combobox.md) -->
         - [DateTimePicker]()
         - [Label](chapter-3/stock-controls/label.md)
         - [Line]()
@@ -44,10 +53,16 @@
         - [Password]()
         - [PropertyView]()
         - [RadioBox]()
-        - [Splitter](chapter-3/stock-controls/splitter.md)
-        - [Tab](chapter-3/stock-controls/tab.md)
-        - [TextField](chapter-3/stock-controls/textfield.md)
-        - [TextArea](chapter-3/stock-controls/textarea.md)
+        - [Slider]()
+        - [Splitter]() <!-- (chapter-3/stock-controls/splitter.md) --> 
+        - [Tab]() <!-- (chapter-3/stock-controls/tab.md) -->
+        - [TextField]() <!-- (chapter-3/stock-controls/textfield.md) -->
+        - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox]()
         - [TreeView]()
     - [Custom controls](chapter-3/custom_controls.md)
+
+- [Dialogs]()
+    - [Open/Save dialog]()
+    - [Notifications dialogs]()
+    - [Window manager dialog]() 
