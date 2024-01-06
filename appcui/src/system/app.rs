@@ -94,3 +94,7 @@ impl App {
     }
 }
 
+impl Drop for App {
+    fn drop(&mut self) {
+    }
+}
