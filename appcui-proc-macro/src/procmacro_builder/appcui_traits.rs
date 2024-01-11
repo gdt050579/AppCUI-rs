@@ -30,10 +30,11 @@ pub(crate) enum AppCUITrait {
     DesktopEvents = 21,
     ToolBarEvents = 22,
     ColorPickerEvents = 23,
+    ThreeStateBoxEvents = 24,
 }
 
 #[repr(u8)]
-#[derive(Copy, Clone,PartialEq,Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub(crate) enum TraitType {
     RawEvent,
     ControlEvent,
@@ -68,8 +69,9 @@ impl AppCUITrait {
             AppCUITrait::CommandBarEvents => "CommandBarEvents",
             AppCUITrait::MenuEvents => "MenuEvents",
             AppCUITrait::DesktopEvents => "DesktopEvents",
-            AppCUITrait::ToolBarEvents => "ToolBarEvents",  
-            AppCUITrait::ColorPickerEvents => "ColorPickerEvents",          
+            AppCUITrait::ToolBarEvents => "ToolBarEvents",
+            AppCUITrait::ColorPickerEvents => "ColorPickerEvents",
+            AppCUITrait::ThreeStateBoxEvents => "ThreeStateBoxEvents",
         }
     }
     pub(crate) fn get_trait_type(&self) -> TraitType {
@@ -100,8 +102,8 @@ impl AppCUITrait {
             AppCUITrait::MenuEvents => TraitType::ControlEvent,
             AppCUITrait::DesktopEvents => TraitType::ControlEvent,
             AppCUITrait::ToolBarEvents => TraitType::ControlEvent,
-            AppCUITrait::ColorPickerEvents => TraitType::ControlEvent,  
-                     
+            AppCUITrait::ColorPickerEvents => TraitType::ControlEvent,
+            AppCUITrait::ThreeStateBoxEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn get_basefallback_implementation(&self) -> &'static str {
@@ -132,7 +134,8 @@ impl AppCUITrait {
             AppCUITrait::MenuEvents => "",
             AppCUITrait::DesktopEvents => "",
             AppCUITrait::ToolBarEvents => "",
-            AppCUITrait::ColorPickerEvents => "",            
+            AppCUITrait::ColorPickerEvents => "",
+            AppCUITrait::ThreeStateBoxEvents => "",
         }
     }
     pub(crate) fn get_default_implementation(&self) -> &'static str {
@@ -164,7 +167,7 @@ impl AppCUITrait {
             AppCUITrait::DesktopEvents => "impl DesktopEvents for $(STRUCT_NAME) {}",
             AppCUITrait::ToolBarEvents => "impl ToolBarEvents for $(STRUCT_NAME) {}",
             AppCUITrait::ColorPickerEvents => "impl ColorPickerEvents for $(STRUCT_NAME) {}",
-            
+            AppCUITrait::ThreeStateBoxEvents => "impl ThreeStateBoxEvents for $(STRUCT_NAME) {}",
         }
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -185,7 +188,8 @@ impl AppCUITrait {
             "MenuEvents" | "MenuBar" => Some(AppCUITrait::MenuEvents),
             "DesktopEvents" | "Desktop" => Some(AppCUITrait::DesktopEvents),
             "ToolBarEvents" | "ToolBar" => Some(AppCUITrait::ToolBarEvents),
-            "ColorPickerEvents" | "ColorPicker" => Some(AppCUITrait::ColorPickerEvents), 
+            "ColorPickerEvents" | "ColorPicker" => Some(AppCUITrait::ColorPickerEvents),
+            "ThreeStateBoxEvents" | "ThreeStateBox" => Some(AppCUITrait::ThreeStateBoxEvents),
             _ => None,
         }
     }
@@ -218,6 +222,7 @@ impl AppCUITrait {
             21 => Some(AppCUITrait::DesktopEvents),
             22 => Some(AppCUITrait::ToolBarEvents),
             23 => Some(AppCUITrait::ColorPickerEvents),
+            24 => Some(AppCUITrait::ThreeStateBoxEvents),
             _ => None,
         };
         if result.is_none() {
@@ -225,10 +230,7 @@ impl AppCUITrait {
         }
         // double check
         if value != (result.unwrap() as u8) {
-            panic!(
-                "Internal error: Conversion of discriminant {} to AppCUITraits failed !",
-                value
-            );
+            panic!("Internal error: Conversion of discriminant {} to AppCUITraits failed !", value);
         }
         return result;
     }

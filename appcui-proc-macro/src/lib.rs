@@ -81,6 +81,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::DefaultNonOverwritable);
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -137,6 +138,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::Default);
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
@@ -170,6 +172,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::Default);
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
@@ -228,6 +231,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // desktop
@@ -299,4 +303,9 @@ pub fn toolbaritem(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn colorpicker(input: TokenStream) -> TokenStream {
     crate::controls::colorpicker::create(input)
+}
+
+#[proc_macro]
+pub fn threestatebox(input: TokenStream) -> TokenStream {
+    crate::controls::threestatebox::create(input)
 }
