@@ -58,7 +58,7 @@
         - [Tab]() <!-- (chapter-3/stock-controls/tab.md) -->
         - [TextField]() <!-- (chapter-3/stock-controls/textfield.md) -->
         - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
-        - [ThreeStateBox]()
+        - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
         - [TreeView]()
     - [Custom controls](chapter-3/custom_controls.md)
 

@@ -12,17 +12,17 @@ fn check_three_state_box_simple() {
     w.add(ThreeStateBox::new(
         "Options",
         Layout::new("x:1,y:1,w:16,h:4"),
-        threestatebox::threestatebox::ThreeStateBoxSelection::Unchecked,
+        threestatebox::State::Unchecked,
     ));
     w.add(ThreeStateBox::new(
         "Options",
         Layout::new("x:1,y:2,w:16,h:4"),
-        threestatebox::threestatebox::ThreeStateBoxSelection::Checked,
+        threestatebox::State::Checked,
     ));
     w.add(ThreeStateBox::new(
         "Options",
         Layout::new("x:1,y:3,w:16,h:4"),
-        threestatebox::threestatebox::ThreeStateBoxSelection::Unknown,
+        threestatebox::State::Unknown,
     ));
     a.add_window(w);
     a.run();
@@ -61,17 +61,17 @@ impl MyWindow {
             lb:Handle::None,
         };
         w.lb = w.add(label!("xyz,x:1,y:1,w:30"));
-        w.ts = w.add(ThreeStateBox::new("smth", Layout::new("x:1,y:2,w:30"), threestatebox::ThreeStateBoxSelection::Unknown));
+        w.ts = w.add(ThreeStateBox::new("smth", Layout::new("x:1,y:2,w:30"), threestatebox::State::Unknown));
         w
     }
 }
 
 impl ThreeStateBoxEvents for MyWindow {
-    fn on_status_changed(&mut self, _handle: Handle<ThreeStateBox>, state: threestatebox::ThreeStateBoxSelection) -> EventProcessStatus {
+    fn on_status_changed(&mut self, _handle: Handle<ThreeStateBox>, state: threestatebox::State) -> EventProcessStatus {
         let s = match state {
-            threestatebox::ThreeStateBoxSelection::Checked => "check",
-            threestatebox::ThreeStateBoxSelection::Unchecked => "uncheck",
-            threestatebox::ThreeStateBoxSelection::Unknown => "unknown",
+            threestatebox::State::Checked => "check",
+            threestatebox::State::Unchecked => "uncheck",
+            threestatebox::State::Unknown => "unknown",
         };
         let h = self.lb;
         if let Some(label) = self.get_control_mut(h) {

@@ -11,8 +11,8 @@ let b = CheckBox::new("A checkbox", Layout::new("x:10,y:5,w:15"),true);
 or the macro `checkbox!`
 ```rs
 let c1 = checkbox!("caption='Some option',x:10,y:5,w:15,h:1");
-let c2 = checkbox!("Another &option',x:10,y:5,w:15,h:1,checked:true");
-let c3 = checkbox!("&Multi-line option\nthis a hot-key',x:10,y:5,w:15,h:3,checked:false");
+let c2 = checkbox!("'Another &option',x:10,y:5,w:15,h:1,checked:true");
+let c3 = checkbox!("'&Multi-line option\nthis a hot-key',x:10,y:5,w:15,h:3,checked:false");
 ```
 
 The caption of a checkbox may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a checkbox with the following caption `&Option number 1` will set up the text of the button to `Option number 1` and will set up character `O` as the hot key for that checkbox (pressing `Alt+O` will be equivalent to changing the status for that checkbox from checked to unchecked or vice-versa).
