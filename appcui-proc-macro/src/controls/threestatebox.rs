@@ -16,7 +16,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.init_control("ThreeStateBox::new");
     cb.add_string_parameter("caption", None);  
     cb.add_layout();
-    cb.add_enum_parameter("state", "threestatebox::ThreeStateBoxSelection", unsafe { &mut THREE_STATE_BOX_STATUS }, Some("Unknown"));
+    cb.add_enum_parameter("state", "threestatebox::State", unsafe { &mut THREE_STATE_BOX_STATUS }, Some("Unknown"));
     //cb.add_enum("s", Some(false));
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();

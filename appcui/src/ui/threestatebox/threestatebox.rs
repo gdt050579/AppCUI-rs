@@ -1,21 +1,14 @@
 use crate::prelude::*;
-use crate::ui::threestatebox::events::EventData;
-
-#[derive(Copy, Clone)]
-pub enum ThreeStateBoxSelection {
-    Checked,
-    Unchecked,
-    Unknown,
-}
+use crate::ui::threestatebox::{events::EventData, State};
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent,internal=true)]
 pub struct ThreeStateBox {
     caption: Caption,
-    state: ThreeStateBoxSelection,
+    state: State,
 }
 
 impl ThreeStateBox {
-    pub fn new(caption: &str, layout: Layout, state: ThreeStateBoxSelection) -> Self {
+    pub fn new(caption: &str, layout: Layout, state: State) -> Self {
         let mut cb = ThreeStateBox {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             caption: Caption::new(caption, true),
@@ -27,12 +20,22 @@ impl ThreeStateBox {
         cb
     }
     #[inline]
-    pub fn get_state(&self) -> ThreeStateBoxSelection {
+    pub fn get_state(&self) -> State {
         self.state
     }
     #[inline]
-    pub fn set_state(&mut self, new_state: ThreeStateBoxSelection) {
+    pub fn set_state(&mut self, new_state: State) {
         self.state = new_state;
+    }
+    #[inline]
+    pub fn set_caption(&mut self, caption: &str) {
+        self.caption.set_text(caption, true);
+        let hotkey = self.caption.get_hotkey();
+        self.set_hotkey(hotkey);
+    }
+    #[inline]
+    pub fn get_caption(&self) -> &str {
+        self.caption.get_text()
     }
 }
 impl OnPaint for ThreeStateBox {
@@ -64,7 +67,7 @@ impl OnPaint for ThreeStateBox {
         }
 
         match self.state {
-            ThreeStateBoxSelection::Checked => {
+            State::Checked => {
                 let col = if self.is_enabled() {
                     theme.symbol.checked
                 } else {
@@ -72,8 +75,8 @@ impl OnPaint for ThreeStateBox {
                 };
                 surface.write_char(1, 0, Character::with_attributes(SpecialChar::CheckMark, col));
             }
-            ThreeStateBoxSelection::Unchecked => {}
-            ThreeStateBoxSelection::Unknown => {
+            State::Unchecked => {}
+            State::Unknown => {
                 let col = if self.is_enabled() {
                     theme.symbol.unknown
                 } else {
@@ -91,9 +94,9 @@ impl OnPaint for ThreeStateBox {
 impl OnDefaultAction for ThreeStateBox {
     fn on_default_action(&mut self) {
         self.state = match self.state {
-            ThreeStateBoxSelection::Checked => ThreeStateBoxSelection::Unchecked,
-            ThreeStateBoxSelection::Unchecked => ThreeStateBoxSelection::Unknown,
-            ThreeStateBoxSelection::Unknown => ThreeStateBoxSelection::Checked,
+            State::Checked => State::Unchecked,
+            State::Unchecked => State::Unknown,
+            State::Unknown => State::Checked,
         };
         self.raise_event(ControlEvent {
             emitter: self.handle,
