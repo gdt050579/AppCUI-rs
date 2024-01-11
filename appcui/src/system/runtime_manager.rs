@@ -779,7 +779,7 @@ impl RuntimeManager {
                 return Handle::None;
             }
             if let Some(v) = base.should_increase_margins_on_focus() {
-                // if the control has focus, then check if the margins were not extended to include a 
+                // if the control has focus, then check if the margins were not extended to include a
                 // scrollbar or a different component
                 if !base.screen_clip.contains_with_margins(x, y, (v & 1) as i32, ((v >> 1) & 1) as i32) {
                     return Handle::None;
@@ -1078,35 +1078,21 @@ impl RuntimeManager {
                 let base = control.get_base();
                 let scr_x = base.screen_clip.left;
                 let scr_y = base.screen_clip.top;
-                control.get_control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
+                //let has_margins = base.should_increase_margins_on_focus().is_some();
+
+                let response = control.get_control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
                     x: event.x - scr_x,
                     y: event.y - scr_y,
                     button: event.button,
                 }));
-                self.mouse_locked_object = MouseLockedObject::Control(handle);
-                self.repaint = true;
-                return;
+                //if response == EventProcessStatus::Processed {
+                    self.mouse_locked_object = MouseLockedObject::Control(handle);
+                    self.repaint = true;
+                    return;
+                //}
             }
         }
         self.mouse_locked_object = MouseLockedObject::None;
-        /*
-        void ApplicationImpl::OnMouseDown(int x, int y, Input::MouseButton button)
-        {
-
-            // check controls
-            if (ModalControlsCount == 0)
-                MouseLockedControl = CoordinatesToControl(this->AppDesktop, x, y);
-            else
-                MouseLockedControl = CoordinatesToControl(ModalControlsStack[ModalControlsCount - 1], x, y);
-
-            if (MouseLockedControl != nullptr)
-            {
-                // done
-            }
-        }
-
-
-        */
     }
     fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
         // check contextual menus

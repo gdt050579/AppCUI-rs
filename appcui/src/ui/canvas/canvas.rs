@@ -227,6 +227,12 @@ impl OnMouseEvent for Canvas {
             MouseEvent::Leave => EventProcessStatus::Ignored,
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(data) => {
+                if (self.scroll_bar_type == ScrollBarType::External) && (self.has_focus()) {
+                    let sz = self.get_size();
+                    if (data.x == sz.width as i32) || (data.y == sz.height as i32) {
+                        return EventProcessStatus::Ignored;
+                    }
+                }
                 self.drag_point = Some(Point::new(data.x, data.y));
                 EventProcessStatus::Processed
             }
