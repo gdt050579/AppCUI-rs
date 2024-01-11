@@ -1,6 +1,6 @@
 use super::traits::{Control, EventProcessStatus};
 use super::UIElement;
-use crate::prelude::colorpicker;
+use crate::prelude::{colorpicker, threestatebox, ThreeStateBoxEvents};
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::Handle;
 use crate::ui::{
@@ -10,6 +10,7 @@ use crate::ui::{
 pub(crate) enum ControlEventData {
     ButtonEvent(button::events::EventData),
     CheckBoxEvent(checkbox::events::EventData),
+    ThreeStateBoxEvent(threestatebox::events::EventData),
     ColorPickerEvent(colorpicker::events::EventData),
 }
 
@@ -39,7 +40,13 @@ impl ControlEvent {
                     data.color,
                 );
             }
-            
+            ControlEventData::ThreeStateBoxEvent(data) => {
+                return ThreeStateBoxEvents::on_status_changed(
+                    receiver,
+                    self.emitter.cast(),
+                    data.state,
+                );
+            }
         }
     }
 }
