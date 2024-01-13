@@ -23,3 +23,16 @@ pub(crate) trait KeyboardMethods {
     fn process_keypressed_event(&mut self, event: KeyPressedEvent);
     fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus;
 }
+pub(crate) trait MouseMethods {
+    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement>;
+    fn coordinates_to_control(&mut self, x: i32, y: i32) -> Handle<UIElement>;
+    fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool;
+    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32);
+    fn process_mousewheel_event(&mut self, event: MouseWheelEvent);
+    fn process_mousedrag(&mut self, handle: Handle<UIElement>, event: MouseMoveEvent);
+    fn process_mousemove(&mut self, event: MouseMoveEvent);
+    fn process_mousemove_event(&mut self, event: MouseMoveEvent);
+    fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent);
+    fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent);
+    fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent);
+}

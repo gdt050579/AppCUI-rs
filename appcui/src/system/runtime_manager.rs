@@ -703,171 +703,6 @@ impl RuntimeManager {
         }
     }
 
-    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement> {
-        let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get_mut(handle) {
-            let base = control.get_base_mut();
-            if base.is_active() == false {
-                return Handle::None;
-            }
-            if let Some(v) = base.should_increase_margins_on_focus() {
-                // if the control has focus, then check if the margins were not extended to include a
-                // scrollbar or a different component
-                if !base.screen_clip.contains_with_margins(x, y, (v & 1) as i32, ((v >> 1) & 1) as i32) {
-                    return Handle::None;
-                }
-            } else {
-                if !base.screen_clip.contains(x, y) {
-                    return Handle::None;
-                }
-            }
-            let count = base.children.len();
-            if count > 0 {
-                let mut idx = if base.focused_child_index.in_range(count) {
-                    base.focused_child_index.index()
-                } else {
-                    0
-                };
-                for _ in 0..count {
-                    let handle_child = self.coordinates_to_child_control(base.children[idx], x, y);
-                    if !handle_child.is_none() {
-                        return handle_child;
-                    }
-                    idx = (idx + 1) % count;
-                }
-            }
-            if base.can_receive_input() {
-                return handle;
-            } else {
-                return Handle::None;
-            }
-        }
-        Handle::None
-    }
-    fn coordinates_to_control(&mut self, x: i32, y: i32) -> Handle<UIElement> {
-        // if an expanded control exists --> check it first
-        if !self.expanded_control.handle.is_none() {
-            let result = self.coordinates_to_child_control(self.expanded_control.handle, x, y);
-            if !result.is_none() {
-                return result;
-            }
-        }
-        // check from root
-        return self.coordinates_to_child_control(self.get_root_control_handle(), x, y);
-    }
-
-    fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool {
-        let mut processed = false;
-        // Process event in the following order:
-        // first the context menu and its owner, then the menu bar and then cmdbar
-        if let Some(menu) = self.get_opened_menu() {
-            if menu.on_mouse_move(x, y) == EventProcessStatus::Processed {
-                self.repaint = true;
-                return true;
-            }
-        }
-        /*
-        if (this->VisibleMenu)
-        {
-            auto* mnuC = ((MenuContext*) (this->VisibleMenu->Context));
-            processed =
-                  mnuC->OnMouseMove(x - mnuC->ScreenClip.ScreenPosition.X, y - mnuC->ScreenClip.ScreenPosition.Y, repaint);
-            if ((!processed) && (mnuC->Owner))
-                processed = mnuC->Owner->OnMouseMove(x, y, repaint);
-        }
-        */
-
-        if let Some(menubar) = self.menubar.as_mut() {
-            processed = menubar.on_mouse_move(x, y) == EventProcessStatus::Processed;
-            self.repaint |= processed;
-        }
-        if !processed {
-            if let Some(cmdbar) = self.commandbar.as_mut() {
-                processed = cmdbar.on_mouse_move(&MouseMoveEvent {
-                    x,
-                    y,
-                    button: MouseButton::Left,
-                });
-                self.repaint |= processed;
-            }
-        }
-        if processed {
-            let controls = unsafe { &mut *self.controls };
-            if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get_mut(self.mouse_over_control) {
-                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
-                    self.repaint |= response == EventProcessStatus::Processed;
-                    control.get_base_mut().update_mouse_over_flag(false);
-                }
-                self.mouse_over_control = Handle::None;
-            }
-        }
-        return processed;
-    }
-
-    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) {
-        let mut result = MousePressedResult::None;
-        let mut parent_handle = Handle::None;
-        let menus = unsafe { &mut *self.menus };
-        if let Some(menu) = menus.get_mut(handle) {
-            parent_handle = menu.get_parent_handle();
-            if handle == self.opened_menu_handle {
-                result = menu.on_mouse_pressed(x, y);
-            } else {
-                result = if menu.is_on_menu(x, y) {
-                    MousePressedResult::Activate
-                } else {
-                    MousePressedResult::CheckParent
-                };
-            }
-        }
-        match result {
-            MousePressedResult::None => {}
-            MousePressedResult::Repaint => self.repaint = true,
-            MousePressedResult::CheckParent => {
-                if !parent_handle.is_none() {
-                    self.process_menu_mouse_click(parent_handle, x, y);
-                } else {
-                    self.close_opened_menu();
-                }
-            }
-            MousePressedResult::Activate => {
-                self.repaint = true;
-                self.opened_menu_handle = handle;
-                if let Some(menu) = menus.get_mut(handle) {
-                    // trigger an on_mouse_move to force selection
-                    menu.on_mouse_move(x, y);
-                }
-            }
-        }
-
-        /*
-        void ApplicationImpl::ProcessMenuMouseClick(Controls::Menu* mnu, int x, int y)
-        {
-
-            switch (result)
-            {
-            case MousePressedResult::None:
-                break;
-            case MousePressedResult::Repaint:
-                RepaintStatus |= REPAINT_STATUS_DRAW;
-                break;
-            case MousePressedResult::CheckParent:
-                if (mcx->Parent)
-                    ProcessMenuMouseClick(mcx->Parent, x, y);
-                else
-                    this->CloseContextualMenu();
-                break;
-            case MousePressedResult::Activate:
-                RepaintStatus |= REPAINT_STATUS_DRAW;
-                ShowContextualMenu(mnu);
-                break;
-            }
-        }
-
-
-        */
-    }
 
     fn process_terminal_resize_event(&mut self, new_size: Size) {
         // sanity checks
@@ -891,178 +726,6 @@ impl RuntimeManager {
         desktop.get_control_mut().on_resize(original_size, new_size);
         self.recompute_layout = true;
     }
-    fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
-        if let Some(menu) = self.get_opened_menu() {
-            self.repaint |= menu.on_mouse_wheel(event.direction) == EventProcessStatus::Processed;
-            return;
-        }
-        match self.mouse_locked_object {
-            MouseLockedObject::None => {}
-            _ => return,
-        }
-        let handle = self.coordinates_to_control(event.x, event.y);
-        if !handle.is_none() {
-            let controls = unsafe { &mut *self.controls };
-            if let Some(control) = controls.get_mut(handle) {
-                self.repaint |= control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) == EventProcessStatus::Processed;
-            }
-        }
-    }
-    fn process_mousedrag(&mut self, handle: Handle<UIElement>, event: MouseMoveEvent) {
-        self.hide_tooltip();
-        let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get_mut(handle) {
-            let base = control.get_base_mut();
-            let scr_x = base.screen_clip.left;
-            let scr_y = base.screen_clip.top;
-            let response = control.get_control_mut().on_mouse_event(&MouseEvent::Drag(MouseEventData {
-                x: event.x - scr_x,
-                y: event.y - scr_y,
-                button: event.button,
-            }));
-            let do_update = response == EventProcessStatus::Processed;
-            self.repaint |= do_update;
-            self.recompute_layout |= do_update;
-        }
-    }
-    fn process_mousemove(&mut self, event: MouseMoveEvent) {
-        if self.process_menu_and_cmdbar_mousemove(event.x, event.y) {
-            return;
-        }
-        let controls = unsafe { &mut *self.controls };
-        let handle = self.coordinates_to_control(event.x, event.y);
-        if handle != self.mouse_over_control {
-            self.hide_tooltip();
-            if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get_mut(self.mouse_over_control) {
-                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
-                    self.repaint |= response == EventProcessStatus::Processed;
-                    control.get_base_mut().update_mouse_over_flag(false);
-                }
-            }
-            self.mouse_over_control = handle;
-            if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get_mut(self.mouse_over_control) {
-                    let base = control.get_base_mut();
-                    base.update_mouse_over_flag(true);
-                    let scr_x = base.screen_clip.left;
-                    let scr_y = base.screen_clip.top;
-                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Enter);
-                    self.repaint |= response == EventProcessStatus::Processed;
-                    let response = control
-                        .get_control_mut()
-                        .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
-                    self.repaint |= response == EventProcessStatus::Processed;
-                }
-            }
-        } else {
-            if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get_mut(handle) {
-                    let base = control.get_base();
-                    let scr_x = base.screen_clip.left;
-                    let scr_y = base.screen_clip.top;
-                    let response = control
-                        .get_control_mut()
-                        .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
-                    self.repaint |= response == EventProcessStatus::Processed;
-                }
-            }
-        }
-    }
-    fn process_mousemove_event(&mut self, event: MouseMoveEvent) {
-        match self.mouse_locked_object {
-            MouseLockedObject::None => self.process_mousemove(event),
-            MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
-            MouseLockedObject::CommandBar => {}
-            MouseLockedObject::MenuBar => todo!(),
-        }
-    }
-    fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
-        // Hide ToolTip
-        self.hide_tooltip();
-        // check contextual menu
-        if !self.opened_menu_handle.is_none() {
-            self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y);
-            return;
-        }
-        // check main menu
-        if let Some(menu) = self.menubar.as_mut() {
-            if menu.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
-                self.repaint = true;
-                self.mouse_locked_object = MouseLockedObject::MenuBar;
-                return;
-            }
-        }
-        // check command bar
-        if let Some(commandbar) = self.commandbar.as_mut() {
-            if commandbar.on_mouse_down(&event) {
-                self.repaint = true;
-                self.mouse_locked_object = MouseLockedObject::CommandBar;
-                return;
-            }
-        }
-        // check for a control
-        let handle = self.coordinates_to_control(event.x, event.y);
-        if !handle.is_none() {
-            let controls = unsafe { &mut *self.controls };
-            if let Some(control) = controls.get_mut(handle) {
-                self.update_focus(handle);
-                let base = control.get_base();
-                let scr_x = base.screen_clip.left;
-                let scr_y = base.screen_clip.top;
-                //let has_margins = base.should_increase_margins_on_focus().is_some();
-
-                let response = control.get_control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
-                    x: event.x - scr_x,
-                    y: event.y - scr_y,
-                    button: event.button,
-                }));
-                //if response == EventProcessStatus::Processed {
-                    self.mouse_locked_object = MouseLockedObject::Control(handle);
-                    self.repaint = true;
-                    return;
-                //}
-            }
-        }
-        self.mouse_locked_object = MouseLockedObject::None;
-    }
-    fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
-        // check contextual menus
-        if let Some(menu) = self.get_opened_menu() {
-            self.repaint |= menu.on_mouse_released(event.x, event.y) == EventProcessStatus::Processed;
-        }
-        match self.mouse_locked_object {
-            MouseLockedObject::None => {}
-            MouseLockedObject::Control(handle) => {
-                let controls = unsafe { &mut *self.controls };
-                if let Some(control) = controls.get_mut(handle) {
-                    let base = control.get_base();
-                    let scr_x = base.screen_clip.left;
-                    let scr_y = base.screen_clip.top;
-                    control.get_control_mut().on_mouse_event(&MouseEvent::Released(MouseEventData {
-                        x: event.x - scr_x,
-                        y: event.y - scr_y,
-                        button: event.button,
-                    }));
-                    self.repaint = true;
-                }
-            }
-            MouseLockedObject::CommandBar => {
-                if let Some(cmdbar) = self.commandbar.as_mut() {
-                    self.commandbar_event = cmdbar.on_mouse_up();
-                    self.repaint |= self.commandbar_event.is_some();
-                }
-            }
-            MouseLockedObject::MenuBar => {
-                if let Some(menubar) = self.menubar.as_mut() {
-                    menubar.on_mouse_pressed(event.x, event.y);
-                }
-                self.repaint = true;
-            }
-        }
-        self.mouse_locked_object = MouseLockedObject::None;
-    }
-    fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent) {}
 
     fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
         for _ in 0..depth {
@@ -1305,6 +968,349 @@ impl KeyboardMethods for RuntimeManager {
     }
 
 }
+impl MouseMethods for RuntimeManager {
+    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement> {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get_mut(handle) {
+            let base = control.get_base_mut();
+            if base.is_active() == false {
+                return Handle::None;
+            }
+            if let Some(v) = base.should_increase_margins_on_focus() {
+                // if the control has focus, then check if the margins were not extended to include a
+                // scrollbar or a different component
+                if !base.screen_clip.contains_with_margins(x, y, (v & 1) as i32, ((v >> 1) & 1) as i32) {
+                    return Handle::None;
+                }
+            } else {
+                if !base.screen_clip.contains(x, y) {
+                    return Handle::None;
+                }
+            }
+            let count = base.children.len();
+            if count > 0 {
+                let mut idx = if base.focused_child_index.in_range(count) {
+                    base.focused_child_index.index()
+                } else {
+                    0
+                };
+                for _ in 0..count {
+                    let handle_child = self.coordinates_to_child_control(base.children[idx], x, y);
+                    if !handle_child.is_none() {
+                        return handle_child;
+                    }
+                    idx = (idx + 1) % count;
+                }
+            }
+            if base.can_receive_input() {
+                return handle;
+            } else {
+                return Handle::None;
+            }
+        }
+        Handle::None
+    }
+    fn coordinates_to_control(&mut self, x: i32, y: i32) -> Handle<UIElement> {
+        // if an expanded control exists --> check it first
+        if !self.expanded_control.handle.is_none() {
+            let result = self.coordinates_to_child_control(self.expanded_control.handle, x, y);
+            if !result.is_none() {
+                return result;
+            }
+        }
+        // check from root
+        return self.coordinates_to_child_control(self.get_root_control_handle(), x, y);
+    }
+
+    fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool {
+        let mut processed = false;
+        // Process event in the following order:
+        // first the context menu and its owner, then the menu bar and then cmdbar
+        if let Some(menu) = self.get_opened_menu() {
+            if menu.on_mouse_move(x, y) == EventProcessStatus::Processed {
+                self.repaint = true;
+                return true;
+            }
+        }
+        /*
+        if (this->VisibleMenu)
+        {
+            auto* mnuC = ((MenuContext*) (this->VisibleMenu->Context));
+            processed =
+                  mnuC->OnMouseMove(x - mnuC->ScreenClip.ScreenPosition.X, y - mnuC->ScreenClip.ScreenPosition.Y, repaint);
+            if ((!processed) && (mnuC->Owner))
+                processed = mnuC->Owner->OnMouseMove(x, y, repaint);
+        }
+        */
+
+        if let Some(menubar) = self.menubar.as_mut() {
+            processed = menubar.on_mouse_move(x, y) == EventProcessStatus::Processed;
+            self.repaint |= processed;
+        }
+        if !processed {
+            if let Some(cmdbar) = self.commandbar.as_mut() {
+                processed = cmdbar.on_mouse_move(&MouseMoveEvent {
+                    x,
+                    y,
+                    button: MouseButton::Left,
+                });
+                self.repaint |= processed;
+            }
+        }
+        if processed {
+            let controls = unsafe { &mut *self.controls };
+            if !self.mouse_over_control.is_none() {
+                if let Some(control) = controls.get_mut(self.mouse_over_control) {
+                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
+                    self.repaint |= response == EventProcessStatus::Processed;
+                    control.get_base_mut().update_mouse_over_flag(false);
+                }
+                self.mouse_over_control = Handle::None;
+            }
+        }
+        return processed;
+    }
+
+    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) {
+        let mut result = MousePressedResult::None;
+        let mut parent_handle = Handle::None;
+        let menus = unsafe { &mut *self.menus };
+        if let Some(menu) = menus.get_mut(handle) {
+            parent_handle = menu.get_parent_handle();
+            if handle == self.opened_menu_handle {
+                result = menu.on_mouse_pressed(x, y);
+            } else {
+                result = if menu.is_on_menu(x, y) {
+                    MousePressedResult::Activate
+                } else {
+                    MousePressedResult::CheckParent
+                };
+            }
+        }
+        match result {
+            MousePressedResult::None => {}
+            MousePressedResult::Repaint => self.repaint = true,
+            MousePressedResult::CheckParent => {
+                if !parent_handle.is_none() {
+                    self.process_menu_mouse_click(parent_handle, x, y);
+                } else {
+                    self.close_opened_menu();
+                }
+            }
+            MousePressedResult::Activate => {
+                self.repaint = true;
+                self.opened_menu_handle = handle;
+                if let Some(menu) = menus.get_mut(handle) {
+                    // trigger an on_mouse_move to force selection
+                    menu.on_mouse_move(x, y);
+                }
+            }
+        }
+
+        /*
+        void ApplicationImpl::ProcessMenuMouseClick(Controls::Menu* mnu, int x, int y)
+        {
+
+            switch (result)
+            {
+            case MousePressedResult::None:
+                break;
+            case MousePressedResult::Repaint:
+                RepaintStatus |= REPAINT_STATUS_DRAW;
+                break;
+            case MousePressedResult::CheckParent:
+                if (mcx->Parent)
+                    ProcessMenuMouseClick(mcx->Parent, x, y);
+                else
+                    this->CloseContextualMenu();
+                break;
+            case MousePressedResult::Activate:
+                RepaintStatus |= REPAINT_STATUS_DRAW;
+                ShowContextualMenu(mnu);
+                break;
+            }
+        }
+
+
+        */
+    }
+
+    
+    fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
+        if let Some(menu) = self.get_opened_menu() {
+            self.repaint |= menu.on_mouse_wheel(event.direction) == EventProcessStatus::Processed;
+            return;
+        }
+        match self.mouse_locked_object {
+            MouseLockedObject::None => {}
+            _ => return,
+        }
+        let handle = self.coordinates_to_control(event.x, event.y);
+        if !handle.is_none() {
+            let controls = unsafe { &mut *self.controls };
+            if let Some(control) = controls.get_mut(handle) {
+                self.repaint |= control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) == EventProcessStatus::Processed;
+            }
+        }
+    }
+    fn process_mousedrag(&mut self, handle: Handle<UIElement>, event: MouseMoveEvent) {
+        self.hide_tooltip();
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get_mut(handle) {
+            let base = control.get_base_mut();
+            let scr_x = base.screen_clip.left;
+            let scr_y = base.screen_clip.top;
+            let response = control.get_control_mut().on_mouse_event(&MouseEvent::Drag(MouseEventData {
+                x: event.x - scr_x,
+                y: event.y - scr_y,
+                button: event.button,
+            }));
+            let do_update = response == EventProcessStatus::Processed;
+            self.repaint |= do_update;
+            self.recompute_layout |= do_update;
+        }
+    }
+    fn process_mousemove(&mut self, event: MouseMoveEvent) {
+        if self.process_menu_and_cmdbar_mousemove(event.x, event.y) {
+            return;
+        }
+        let controls = unsafe { &mut *self.controls };
+        let handle = self.coordinates_to_control(event.x, event.y);
+        if handle != self.mouse_over_control {
+            self.hide_tooltip();
+            if !self.mouse_over_control.is_none() {
+                if let Some(control) = controls.get_mut(self.mouse_over_control) {
+                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Leave);
+                    self.repaint |= response == EventProcessStatus::Processed;
+                    control.get_base_mut().update_mouse_over_flag(false);
+                }
+            }
+            self.mouse_over_control = handle;
+            if !self.mouse_over_control.is_none() {
+                if let Some(control) = controls.get_mut(self.mouse_over_control) {
+                    let base = control.get_base_mut();
+                    base.update_mouse_over_flag(true);
+                    let scr_x = base.screen_clip.left;
+                    let scr_y = base.screen_clip.top;
+                    let response = control.get_control_mut().on_mouse_event(&MouseEvent::Enter);
+                    self.repaint |= response == EventProcessStatus::Processed;
+                    let response = control
+                        .get_control_mut()
+                        .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
+                    self.repaint |= response == EventProcessStatus::Processed;
+                }
+            }
+        } else {
+            if !self.mouse_over_control.is_none() {
+                if let Some(control) = controls.get_mut(handle) {
+                    let base = control.get_base();
+                    let scr_x = base.screen_clip.left;
+                    let scr_y = base.screen_clip.top;
+                    let response = control
+                        .get_control_mut()
+                        .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
+                    self.repaint |= response == EventProcessStatus::Processed;
+                }
+            }
+        }
+    }
+    fn process_mousemove_event(&mut self, event: MouseMoveEvent) {
+        match self.mouse_locked_object {
+            MouseLockedObject::None => self.process_mousemove(event),
+            MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
+            MouseLockedObject::CommandBar => {}
+            MouseLockedObject::MenuBar => todo!(),
+        }
+    }
+    fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
+        // Hide ToolTip
+        self.hide_tooltip();
+        // check contextual menu
+        if !self.opened_menu_handle.is_none() {
+            self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y);
+            return;
+        }
+        // check main menu
+        if let Some(menu) = self.menubar.as_mut() {
+            if menu.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
+                self.repaint = true;
+                self.mouse_locked_object = MouseLockedObject::MenuBar;
+                return;
+            }
+        }
+        // check command bar
+        if let Some(commandbar) = self.commandbar.as_mut() {
+            if commandbar.on_mouse_down(&event) {
+                self.repaint = true;
+                self.mouse_locked_object = MouseLockedObject::CommandBar;
+                return;
+            }
+        }
+        // check for a control
+        let handle = self.coordinates_to_control(event.x, event.y);
+        if !handle.is_none() {
+            let controls = unsafe { &mut *self.controls };
+            if let Some(control) = controls.get_mut(handle) {
+                self.update_focus(handle);
+                let base = control.get_base();
+                let scr_x = base.screen_clip.left;
+                let scr_y = base.screen_clip.top;
+                //let has_margins = base.should_increase_margins_on_focus().is_some();
+
+                let response = control.get_control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
+                    x: event.x - scr_x,
+                    y: event.y - scr_y,
+                    button: event.button,
+                }));
+                //if response == EventProcessStatus::Processed {
+                    self.mouse_locked_object = MouseLockedObject::Control(handle);
+                    self.repaint = true;
+                    return;
+                //}
+            }
+        }
+        self.mouse_locked_object = MouseLockedObject::None;
+    }
+    fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
+        // check contextual menus
+        if let Some(menu) = self.get_opened_menu() {
+            self.repaint |= menu.on_mouse_released(event.x, event.y) == EventProcessStatus::Processed;
+        }
+        match self.mouse_locked_object {
+            MouseLockedObject::None => {}
+            MouseLockedObject::Control(handle) => {
+                let controls = unsafe { &mut *self.controls };
+                if let Some(control) = controls.get_mut(handle) {
+                    let base = control.get_base();
+                    let scr_x = base.screen_clip.left;
+                    let scr_y = base.screen_clip.top;
+                    control.get_control_mut().on_mouse_event(&MouseEvent::Released(MouseEventData {
+                        x: event.x - scr_x,
+                        y: event.y - scr_y,
+                        button: event.button,
+                    }));
+                    self.repaint = true;
+                }
+            }
+            MouseLockedObject::CommandBar => {
+                if let Some(cmdbar) = self.commandbar.as_mut() {
+                    self.commandbar_event = cmdbar.on_mouse_up();
+                    self.repaint |= self.commandbar_event.is_some();
+                }
+            }
+            MouseLockedObject::MenuBar => {
+                if let Some(menubar) = self.menubar.as_mut() {
+                    menubar.on_mouse_pressed(event.x, event.y);
+                }
+                self.repaint = true;
+            }
+        }
+        self.mouse_locked_object = MouseLockedObject::None;
+    }
+    fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent) {}
+
+}
+
 
 impl Drop for RuntimeManager {
     fn drop(&mut self) {
