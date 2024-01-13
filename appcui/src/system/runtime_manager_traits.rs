@@ -24,8 +24,8 @@ pub(crate) trait KeyboardMethods {
     fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus;
 }
 pub(crate) trait MouseMethods {
-    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement>;
-    fn coordinates_to_control(&mut self, x: i32, y: i32) -> Handle<UIElement>;
+    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32, ignore_expanded: bool) -> Handle<UIElement>;
+    fn coordinates_to_control(&mut self, x: i32, y: i32, ignore_expanded: bool) -> Handle<UIElement>;
     fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool;
     fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32);
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent);
