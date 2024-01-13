@@ -703,74 +703,6 @@ impl RuntimeManager {
         }
     }
 
-    fn process_key_modifier_changed_event(&mut self, new_state: KeyModifier) {
-        if let Some(commandbar) = self.commandbar.as_mut() {
-            commandbar.set_key_modifier(new_state);
-            self.repaint = true;
-        }
-    }
-
-    fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
-        // check controls first
-        if self.process_control_keypressed_event(self.get_root_control_handle(), event.key, event.character) == EventProcessStatus::Processed {
-            self.repaint = true;
-            return;
-        };
-        // check for a menu on_key_event
-        if let Some(menu) = self.get_opened_menu() {
-            if menu.on_key_pressed(event.key) == EventProcessStatus::Processed {
-                self.repaint = true;
-                return;
-            }
-        }
-        // check the menubar
-        if let Some(menubar) = self.menubar.as_mut() {
-            if menubar.on_key_event(event.key) == EventProcessStatus::Processed {
-                self.repaint = true;
-                return;
-            }
-        }
-        // check cmdbar
-        if let Some(cmdbar) = self.commandbar.as_mut() {
-            self.commandbar_event = cmdbar.get_event(event.key);
-            self.repaint |= self.commandbar_event.is_some();
-        }
-    }
-    pub(crate) fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus {
-        let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get_mut(handle) {
-            let base = control.get_base();
-            if base.is_active() == false {
-                return EventProcessStatus::Ignored;
-            }
-            if base.should_receive_keyinput_before_children() {
-                if base.can_receive_input() {
-                    if control.get_control_mut().on_key_pressed(key, character) == EventProcessStatus::Processed {
-                        return EventProcessStatus::Processed;
-                    }
-                }
-                let base = control.get_base();
-                if base.focused_child_index.in_range(base.children.len()) {
-                    let handle_child = base.children[base.focused_child_index.index()];
-                    return self.process_control_keypressed_event(handle_child, key, character);
-                }
-            } else {
-                if base.focused_child_index.in_range(base.children.len()) {
-                    let handle_child = base.children[base.focused_child_index.index()];
-                    if self.process_control_keypressed_event(handle_child, key, character) == EventProcessStatus::Processed {
-                        return EventProcessStatus::Processed;
-                    }
-                }
-                // else --> call it ourselves
-                if base.can_receive_input() {
-                    return control.get_control_mut().on_key_pressed(key, character);
-                }
-            }
-        }
-
-        return EventProcessStatus::Ignored;
-    }
-
     fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
@@ -1302,6 +1234,76 @@ impl PaintMethods for RuntimeManager {
     fn request_repaint(&mut self) {
         self.repaint = true;
     }
+}
+impl KeyboardMethods for RuntimeManager {
+    fn process_key_modifier_changed_event(&mut self, new_state: KeyModifier) {
+        if let Some(commandbar) = self.commandbar.as_mut() {
+            commandbar.set_key_modifier(new_state);
+            self.repaint = true;
+        }
+    }
+
+    fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
+        // check controls first
+        if self.process_control_keypressed_event(self.get_root_control_handle(), event.key, event.character) == EventProcessStatus::Processed {
+            self.repaint = true;
+            return;
+        };
+        // check for a menu on_key_event
+        if let Some(menu) = self.get_opened_menu() {
+            if menu.on_key_pressed(event.key) == EventProcessStatus::Processed {
+                self.repaint = true;
+                return;
+            }
+        }
+        // check the menubar
+        if let Some(menubar) = self.menubar.as_mut() {
+            if menubar.on_key_event(event.key) == EventProcessStatus::Processed {
+                self.repaint = true;
+                return;
+            }
+        }
+        // check cmdbar
+        if let Some(cmdbar) = self.commandbar.as_mut() {
+            self.commandbar_event = cmdbar.get_event(event.key);
+            self.repaint |= self.commandbar_event.is_some();
+        }
+    }
+    fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(control) = controls.get_mut(handle) {
+            let base = control.get_base();
+            if base.is_active() == false {
+                return EventProcessStatus::Ignored;
+            }
+            if base.should_receive_keyinput_before_children() {
+                if base.can_receive_input() {
+                    if control.get_control_mut().on_key_pressed(key, character) == EventProcessStatus::Processed {
+                        return EventProcessStatus::Processed;
+                    }
+                }
+                let base = control.get_base();
+                if base.focused_child_index.in_range(base.children.len()) {
+                    let handle_child = base.children[base.focused_child_index.index()];
+                    return self.process_control_keypressed_event(handle_child, key, character);
+                }
+            } else {
+                if base.focused_child_index.in_range(base.children.len()) {
+                    let handle_child = base.children[base.focused_child_index.index()];
+                    if self.process_control_keypressed_event(handle_child, key, character) == EventProcessStatus::Processed {
+                        return EventProcessStatus::Processed;
+                    }
+                }
+                // else --> call it ourselves
+                if base.can_receive_input() {
+                    return control.get_control_mut().on_key_pressed(key, character);
+                }
+            }
+        }
+
+        return EventProcessStatus::Ignored;
+    }
+
 }
 
 impl Drop for RuntimeManager {
