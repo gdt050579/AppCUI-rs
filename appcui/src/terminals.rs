@@ -1,4 +1,5 @@
 mod debug;
+mod ansi;
 mod system_event;
 #[cfg(target_os = "windows")]
 mod windows_console;
@@ -10,6 +11,7 @@ use super::graphics::Surface;
 use super::system::Error;
 use super::system::ErrorKind;
 
+use self::ansi::AnsiTerminal;
 pub(crate) use self::system_event::KeyPressedEvent;
 pub(crate) use self::system_event::MouseButtonDownEvent;
 pub(crate) use self::system_event::MouseButtonUpEvent;
@@ -32,6 +34,7 @@ pub(crate) trait Terminal {
 pub enum TerminalType {
     #[cfg(target_os = "windows")]
     WindowsConsole,
+    ANSI,
 }
 impl TerminalType {
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
@@ -52,13 +55,31 @@ impl TerminalType {
         // this depends on the OS
         if builder.terminal.is_none() {
             // based on OS we should choose a terminal
-            return WindowsTerminal::new(builder);
+            return TerminalType::build_default_terminal(builder);
         }
         // finaly, based on the type, return a terminal
         let terminal = *builder.terminal.as_ref().unwrap();
         match terminal {
             #[cfg(target_os = "windows")]
             TerminalType::WindowsConsole => WindowsTerminal::new(builder),
+            TerminalType::ANSI => AnsiTerminal::new(builder),            
         }
+    }
+    #[cfg(target_os = "windows")]
+    fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        WindowsTerminal::new(builder)
+    }
+    #[cfg(target_os = "linux")]
+    fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        AnsiTerminal::new(builder)
+    }
+    #[cfg(target_os = "macos")]
+    fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        AnsiTerminal::new(builder)
+    }
+    #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
+    fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        // anything else
+        AnsiTerminal::new(builder)
     }
 }
