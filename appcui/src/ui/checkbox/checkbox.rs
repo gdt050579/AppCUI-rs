@@ -22,13 +22,23 @@ impl CheckBox {
         cb.set_hotkey(hotkey);
         cb
     }
-    #[inline]
+    #[inline(always)]
     pub fn is_checked(&self) -> bool {
         self.checked
     }
-    #[inline]
+    #[inline(always)]
     pub fn set_checked(&mut self, checked: bool)  {
         self.checked = checked;
+    }
+    pub fn set_caption(&mut self, caption: &str) {
+        self.caption.set_text(caption, true);
+        let hotkey = self.caption.get_hotkey();
+        self.set_hotkey(hotkey);
+    }
+    /// Returns the checkbox caption.
+    #[inline(always)]
+    pub fn get_caption(&self) -> &str {
+        self.caption.get_text()
     }
 }
 impl OnPaint for CheckBox {

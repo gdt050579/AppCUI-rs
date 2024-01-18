@@ -4,7 +4,7 @@ Represent a control with two states (checked and unckehed):
 
 <img src="img/checkbox.png" width=300/>
 
-To create a button use `CheckBox::new` method (with 3 parameters: a caption, a layout and checked status (**true** or **false**)).
+To create a checkbox use `CheckBox::new` method (with 3 parameters: a caption, a layout and checked status (**true** or **false**)).
 ```rs
 let b = CheckBox::new("A checkbox", Layout::new("x:10,y:5,w:15"),true);
 ```
@@ -65,7 +65,7 @@ Aditionally, `Alt`+**letter or number** will have the same action (even if the c
 
 ## Example
 
-The following code creates a window a checkbox and a label. Whenever the checkbox status is being change, the label will print the new status (checked or not-checked).
+The following code creates a window with a checkbox and a label. Whenever the checkbox status is being change, the label will print the new status (checked or not-checked).
 ```rs
 #[Window(events = CheckBoxEvents)]
 struct MyWin {
