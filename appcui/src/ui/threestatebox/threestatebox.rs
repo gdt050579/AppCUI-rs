@@ -8,6 +8,11 @@ pub struct ThreeStateBox {
 }
 
 impl ThreeStateBox {
+    /// Creates a new threestatebox with the specified caption, layout and state.
+    /// The caption can contain a hotkey (e.g. "This is a &test").
+    /// The hotkey will be underlined and pressing ALT+T will trigger the default action.
+    /// The default action is to change the state of the threestatebox.
+    /// The state can be one of the following: Checked, Unchecked, Unknown.
     pub fn new(caption: &str, layout: Layout, state: State) -> Self {
         let mut cb = ThreeStateBox {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -19,20 +24,28 @@ impl ThreeStateBox {
         cb.set_hotkey(hotkey);
         cb
     }
+    
+    /// Returns the current state of the threestatebox.
     #[inline]
     pub fn get_state(&self) -> State {
         self.state
     }
+
+    /// Sets the state of the threestatebox.
     #[inline]
     pub fn set_state(&mut self, new_state: State) {
         self.state = new_state;
     }
+
+    /// Sets the caption of the threestatebox.
     #[inline]
     pub fn set_caption(&mut self, caption: &str) {
         self.caption.set_text(caption, true);
         let hotkey = self.caption.get_hotkey();
         self.set_hotkey(hotkey);
     }
+
+    /// Returns the caption of the threestatebox.
     #[inline]
     pub fn get_caption(&self) -> &str {
         self.caption.get_text()
