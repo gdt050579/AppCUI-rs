@@ -432,7 +432,6 @@ impl Terminal for WindowsTerminal {
         // safety check --> surface size should be the same as self.width/height size
         if surface.size != self.size {
             panic!("Invalid size !!!");
-            return;
         }
 
         // copy surface into CHAR_INFO

@@ -20,7 +20,7 @@ impl MenuHandleManager {
         self.manager.get(menu_handle.cast())
     }
     #[inline(always)]
-    pub(crate) fn add(&mut self, menu: Menu) -> Handle<Menu> {
+    pub(crate) fn add(&mut self, _menu: Menu) -> Handle<Menu> {
         Handle::None
         // MenuHandle { handle: self.manager.add(menu) }
         // let h = MenuHandle::new(self.items.len() as u32);

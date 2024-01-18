@@ -88,7 +88,9 @@ impl ControlManager {
 
 impl Drop for ControlManager {
     fn drop(&mut self) {
-        unsafe { Box::from_raw(self.interface.as_ptr()) };
+        unsafe {
+            let _ = Box::from_raw(self.interface.as_ptr());
+        };
     }
 }
 

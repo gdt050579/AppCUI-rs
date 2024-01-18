@@ -9,14 +9,19 @@ pub struct ProcessEventResult {
     value: u8,
 }
 impl ProcessEventResult {
+    #[allow(non_upper_case_globals)]
     pub const Repaint: ProcessEventResult = ProcessEventResult {
         value: REPAINT_BIT | PROCESSED_BY_COMPONENT_BIT,
     };
+    #[allow(non_upper_case_globals)]
     pub const Update: ProcessEventResult = ProcessEventResult {
         value: UPDATE_VALUE_BIT | PROCESSED_BY_COMPONENT_BIT,
     };
+    #[allow(non_upper_case_globals)]
     pub const PassToControl: ProcessEventResult = ProcessEventResult { value: 0 };
+    #[allow(non_upper_case_globals)]
     pub const PassToControlAndRepaint: ProcessEventResult = ProcessEventResult { value: REPAINT_BIT };
+    #[allow(non_upper_case_globals)]
     pub const Processed: ProcessEventResult = ProcessEventResult {
         value: PROCESSED_BY_COMPONENT_BIT,
     };
