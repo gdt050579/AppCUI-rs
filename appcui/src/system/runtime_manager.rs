@@ -983,7 +983,23 @@ impl MouseMethods for RuntimeManager {
                 } else {
                     // if the control has focus, then check if the margins were not extended to include a
                     // scrollbar or a different component
-                    if !base.screen_clip.contains_with_margins(x, y, (v & 1) as i32, ((v >> 1) & 1) as i32) {
+                    if !base.screen_clip.is_visible() {
+                        return Handle::None;
+                    }
+                    if base.can_receive_input() {
+                        let inc_right_margin = (v & 1) != 0;
+                        let inc_bottom_margin = (v & 2) != 0;
+                        if (inc_right_margin) && (x == base.screen_clip.right + 1) && (y >= base.screen_clip.top) && (y <= base.screen_clip.bottom) {
+                            // located on the external right margin
+                            return handle;
+                        }
+                        if (inc_bottom_margin) && (y == base.screen_clip.bottom + 1) && (x >= base.screen_clip.left) && (x <= base.screen_clip.right)
+                        {
+                            // located on the external bottom margin
+                            return handle;
+                        }
+                    }
+                    if !base.screen_clip.contains(x, y) {
                         return Handle::None;
                     }
                 }
