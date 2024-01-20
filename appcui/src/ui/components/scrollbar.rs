@@ -55,16 +55,16 @@ pub struct ScrollBar {
     pub(super) handle: Handle<UIElement>,
 }
 impl ScrollBar {
-    pub fn new(x: i32, y: i32, dimension: u16, vertical: bool, count: u64) -> Self {
+    pub fn new(count: u64, vertical: bool) -> Self {
         Self {
-            x,
-            y,
+            x: 0,
+            y: 0,
             vertical,
             enabled: count > 0,
             index: 0,
             visible: true,
             count,
-            dimension: dimension.max(3),
+            dimension: 3,
             status: MouseOnScrollbarStatus::None,
             handle: Handle::None,
         }

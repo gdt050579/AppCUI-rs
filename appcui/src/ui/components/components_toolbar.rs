@@ -11,6 +11,15 @@ pub struct ComponentsToolbar {
     items: HandleManager<ComponentToolbarItem>,
 }
 impl ComponentsToolbar {
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            items: if capacity > 0 {
+                HandleManager::with_capacity(capacity)
+            } else {
+                HandleManager::new()
+            },
+        }
+    }
     pub fn add<T>(&mut self, item: T) -> Handle<T>
     where
         T: Component,
