@@ -992,7 +992,7 @@ impl MouseMethods for RuntimeManager {
                         if (inc_right_margin)
                             && (x == base.screen_clip.right + 1)
                             && (y >= base.screen_clip.top + base.top_components_margin as i32)
-                            && (y <= base.screen_clip.bottom - 1)
+                            && (y <= base.screen_clip.bottom)
                         {
                             // located on the external right margin
                             return CoordToMouseInfo { handle, external_pos: true };
@@ -1000,7 +1000,7 @@ impl MouseMethods for RuntimeManager {
                         if (inc_bottom_margin)
                             && (y == base.screen_clip.bottom + 1)
                             && (x >= base.screen_clip.left + base.left_components_margin as i32)
-                            && (x <= base.screen_clip.right - 2)
+                            && (x <= base.screen_clip.right - 1)
                         {
                             // located on the external bottom margin
                             return CoordToMouseInfo { handle, external_pos: true };

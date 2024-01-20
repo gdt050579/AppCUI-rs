@@ -100,32 +100,15 @@ impl Canvas {
     }
 }
 impl OnResize for Canvas {
-    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
+    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.components.on_resize(&self.base);
-        //self.components.on_resize(new_size, 2, 2);
-        // reposition scroll bars
-        // let paint_sz = self.surface.get_size();
-
-
-
-        // let visible_size = new_size.reduce_by(if self.scroll_bar_type == Flags::Inside { 1 } else { 0 });
-        // self.horizontal_scroll.update_count(visible_size.width as u64, paint_sz.width as u64);
-        // self.vertical_scroll.update_count(visible_size.height as u64, paint_sz.height as u64);
-        // match self.scroll_bar_type {
-        //     Flags::None => {
-        //         self.horizontal_scroll.set_visible(false);
-        //         self.vertical_scroll.set_visible(false);
-        //     }
-        //     Flags::Inside => {
-        //         self.horizontal_scroll.update_position(new_size, 0, 1, false);
-        //         self.vertical_scroll.update_position(new_size, 0, 1, false);
-        //     }
-        //     Flags::External => {
-        //         self.horizontal_scroll.update_position(new_size, 5, 2, true);
-        //         self.vertical_scroll.update_position(new_size, 1, 2, true);
-        //     }
-        // }
-
+        let paint_sz = self.surface.get_size();
+        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
+            s.update_count(new_size.width as u64, paint_sz.width as u64)
+        }
+        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
+            s.update_count(new_size.height as u64, paint_sz.height as u64);
+        }
         self.move_scroll_to(self.x, self.y);
     }
 }

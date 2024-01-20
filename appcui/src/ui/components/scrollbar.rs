@@ -149,6 +149,7 @@ impl ScrollBar {
             self.x = pos;
             self.dimension = available_size as u16;
         }
+        self.visible = true;
         return available_size;
     }
 
@@ -416,7 +417,11 @@ impl ScrollBar {
         }
     }
 }
-impl Component for ScrollBar {}
+impl Component for ScrollBar {
+    fn into_toolbar(self)->super::component_toolbar_item::ComponentToolbarItem {
+        super::component_toolbar_item::ComponentToolbarItem::ScrollBar(self)
+    }
+}
 impl Default for ScrollBar {
     fn default() -> Self {
         Self {

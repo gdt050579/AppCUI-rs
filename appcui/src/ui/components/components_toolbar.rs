@@ -24,12 +24,7 @@ impl ComponentsToolbar {
     where
         T: Component,
     {
-        // self.items.
-        // let h = AddToToolbar::add(item, self, group);
-        // self.order.push(ToolbarElementHandle { group, handle: h.cast() });
-        // self.order.sort_by_key(|k| k.group.id);
-        // h
-        Handle::None
+        self.items.add(item.into_toolbar()).cast()
     }
     pub fn get<T>(&self, handle: Handle<T>) -> Option<&T> {
         if let Some(obj) = self.items.get(handle.cast()) {
@@ -71,8 +66,8 @@ impl ComponentsToolbar {
         let control_size = control.get_size();
         let left_margin = control.left_components_margin as i32;
         let top_margin = control.top_components_margin as i32;
-        let mut w = (control_size.width as i32) - (left_margin + 2); // 2 = space from right
-        let mut h = (control_size.height as i32) - (top_margin + 1); // 1 = space from bottom
+        let mut w = (control_size.width as i32) - (left_margin + 1); // 2 space from right
+        let mut h = (control_size.height as i32) - (top_margin + 0); // 1 space from bottom
         let mut x = left_margin;
         let mut y = top_margin;
         let count = self.items.allocated_objects();

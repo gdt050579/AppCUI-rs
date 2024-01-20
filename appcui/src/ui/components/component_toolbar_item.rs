@@ -5,7 +5,9 @@ use crate::prelude::HandleSupport;
 use crate::system::*;
 use crate::ui::ControlBase;
 
-pub trait Component {}
+pub(crate) trait Component {
+    fn into_toolbar(self)->ComponentToolbarItem;
+}
 
 pub(super) enum ComponentToolbarItem {
     ScrollBar(super::ScrollBar),
