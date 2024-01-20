@@ -57,7 +57,7 @@ impl ComponentsToolbar {
         }
         res
     }
-    pub fn resize(&mut self, new_size: Size, left_margin: i32, top_margin: i32) {
+    pub fn on_resize(&mut self, new_size: Size, left_margin: i32, top_margin: i32, control_size: Size) {
         let mut w = (new_size.width as i32) - (left_margin + 2); // 2 = space from right
         let mut h = (new_size.height as i32) - (top_margin + 1); // 1 = space from bottom
         let mut x = left_margin;
@@ -66,7 +66,15 @@ impl ComponentsToolbar {
         for index in 0..count {
             if let Some(item) = self.items.get_element_mut(index) {
                 let vertical = item.is_vertical();
-                // logic
+                if vertical {
+                    let height = item.recompute_pos(y, h, control_size);
+                    y += height;
+                    h -= height;
+                } else {
+                    let width = item.recompute_pos(x, w, control_size);
+                    x += width;
+                    w -= width;
+                }
             }
         }
     }

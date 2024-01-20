@@ -134,6 +134,24 @@ impl ScrollBar {
             self.visible = false;
         }
     }
+    #[inline(always)]
+    pub(super) fn recompute_position(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
+        if available_size <= 4 {
+            self.visible = false;
+            return 0;
+        }
+        if self.vertical {
+            self.x = control_size.width as i32;
+            self.y = pos;
+            self.dimension = available_size as u16;
+        } else {
+            self.y = control_size.height as i32;
+            self.x = pos;
+            self.dimension = available_size as u16;
+        }
+        return available_size;
+    }
+
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         if !self.visible {
             return;

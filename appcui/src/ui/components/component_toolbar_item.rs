@@ -1,9 +1,9 @@
-use crate::graphics::Surface;
+use super::ProcessEventResult;
+use crate::graphics::*;
 use crate::input::MouseEvent;
 use crate::prelude::HandleSupport;
 use crate::system::*;
 use crate::ui::ControlBase;
-use super::ProcessEventResult;
 
 pub trait Component {}
 
@@ -28,6 +28,12 @@ impl ComponentToolbarItem {
     pub(super) fn on_mouse_event(&mut self, event: &MouseEvent) -> ProcessEventResult {
         match self {
             ComponentToolbarItem::ScrollBar(item) => item.on_mouse_event(event),
+        }
+    }
+    #[inline(always)]
+    pub(super) fn recompute_pos(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
+        match self {
+            ComponentToolbarItem::ScrollBar(item) => item.recompute_position(pos, available_size, control_size),
         }
     }
 }
