@@ -989,11 +989,18 @@ impl MouseMethods for RuntimeManager {
                     if base.can_receive_input() {
                         let inc_right_margin = (v & 1) != 0;
                         let inc_bottom_margin = (v & 2) != 0;
-                        if (inc_right_margin) && (x == base.screen_clip.right + 1) && (y >= base.screen_clip.top) && (y <= base.screen_clip.bottom) {
+                        if (inc_right_margin)
+                            && (x == base.screen_clip.right + 1)
+                            && (y >= base.screen_clip.top + base.top_components_margin as i32)
+                            && (y <= base.screen_clip.bottom - 1)
+                        {
                             // located on the external right margin
                             return CoordToMouseInfo { handle, external_pos: true };
                         }
-                        if (inc_bottom_margin) && (y == base.screen_clip.bottom + 1) && (x >= base.screen_clip.left) && (x <= base.screen_clip.right)
+                        if (inc_bottom_margin)
+                            && (y == base.screen_clip.bottom + 1)
+                            && (x >= base.screen_clip.left + base.left_components_margin as i32)
+                            && (x <= base.screen_clip.right - 2)
                         {
                             // located on the external bottom margin
                             return CoordToMouseInfo { handle, external_pos: true };

@@ -172,7 +172,7 @@ impl ControlBase {
     }
 
     #[inline(always)]
-    pub fn set_components_margins(&mut self, left: u8, top: u8) {
+    pub fn set_components_toolbar_margins(&mut self, left: u8, top: u8) {
         self.left_components_margin = left;
         self.top_components_margin = top;
     }
