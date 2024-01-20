@@ -100,8 +100,9 @@ impl Canvas {
     }
 }
 impl OnResize for Canvas {
-    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
-        self.components.on_resize(new_size, 2, 2);
+    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
+        self.components.on_resize(&self.base);
+        //self.components.on_resize(new_size, 2, 2);
         // reposition scroll bars
         // let paint_sz = self.surface.get_size();
 

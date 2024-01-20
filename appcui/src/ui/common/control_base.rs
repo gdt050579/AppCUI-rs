@@ -47,6 +47,8 @@ pub struct ControlBase {
     pub(crate) screen_clip: ClipArea,
     pub(crate) screen_origin: Point,
     pub(crate) hotkey: Key,
+    pub(crate) left_components_margin: u8,
+    pub(crate) top_components_margin: u8
 }
 
 impl ControlBase {
@@ -79,6 +81,8 @@ impl ControlBase {
             screen_clip: ClipArea::default(),
             screen_origin: Point::default(),
             hotkey: Key::default(),
+            left_components_margin: 0,
+            top_components_margin: 0
         }
     }
 
@@ -165,6 +169,12 @@ impl ControlBase {
             }
             self.status_flags.remove(StatusFlags::Visible);
         }
+    }
+
+    #[inline(always)]
+    pub fn set_components_margins(&mut self, left: u8, top: u8) {
+        self.left_components_margin = left;
+        self.top_components_margin = top;
     }
 
     #[inline(always)]
