@@ -967,24 +967,24 @@ impl KeyboardMethods for RuntimeManager {
     }
 }
 impl MouseMethods for RuntimeManager {
-    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32, ignore_expanded: bool) -> CoordToMouseInfo {
+    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32, ignore_expanded: bool) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
             if base.is_active() == false {
-                return CoordToMouseInfo::None;
+                return Handle::None;
             }
 
             if let Some(v) = base.should_increase_margins_on_focus() {
                 if ignore_expanded {
                     if !base.screen_clip.contains(x, y) {
-                        return CoordToMouseInfo::None;
+                        return Handle::None;
                     }
                 } else {
                     // if the control has focus, then check if the margins were not extended to include a
                     // scrollbar or a different component
                     if !base.screen_clip.is_visible() {
-                        return CoordToMouseInfo::None;
+                        return Handle::None;
                     }
                     if base.can_receive_input() {
                         let inc_right_margin = (v & 1) != 0;
@@ -995,7 +995,7 @@ impl MouseMethods for RuntimeManager {
                             && (y <= base.screen_clip.bottom)
                         {
                             // located on the external right margin
-                            return CoordToMouseInfo { handle, external_pos: true };
+                            return handle;
                         }
                         if (inc_bottom_margin)
                             && (y == base.screen_clip.bottom + 1)
@@ -1003,16 +1003,16 @@ impl MouseMethods for RuntimeManager {
                             && (x <= base.screen_clip.right - 1)
                         {
                             // located on the external bottom margin
-                            return CoordToMouseInfo { handle, external_pos: true };
+                            return handle;
                         }
                     }
                     if !base.screen_clip.contains(x, y) {
-                        return CoordToMouseInfo::None;
+                        return Handle::None;
                     }
                 }
             } else {
                 if !base.screen_clip.contains(x, y) {
-                    return CoordToMouseInfo::None;
+                    return Handle::None;
                 }
             }
             let count = base.children.len();
@@ -1024,26 +1024,26 @@ impl MouseMethods for RuntimeManager {
                 };
                 for _ in 0..count {
                     let result = self.coordinates_to_child_control(base.children[idx], x, y, ignore_expanded);
-                    if !result.handle.is_none() {
+                    if !result.is_none() {
                         return result;
                     }
                     idx = (idx + 1) % count;
                 }
             }
             if base.can_receive_input() {
-                return CoordToMouseInfo { handle, external_pos: false };
+                return handle;
             } else {
-                return CoordToMouseInfo::None;
+                return Handle::None;
             }
         }
-        CoordToMouseInfo::None
+        Handle::None
     }
-    fn coordinates_to_control(&mut self, x: i32, y: i32, ignore_expanded: bool) -> CoordToMouseInfo {
+    fn coordinates_to_control(&mut self, x: i32, y: i32, ignore_expanded: bool) -> Handle<UIElement> {
         // if an expanded control exists --> check it first
         if !self.expanded_control.handle.is_none() {
-            let result = self.coordinates_to_child_control(self.expanded_control.handle, x, y, ignore_expanded);
-            if !result.handle.is_none() {
-                return result;
+            let handle = self.coordinates_to_child_control(self.expanded_control.handle, x, y, ignore_expanded);
+            if !handle.is_none() {
+                return handle;
             }
         }
         // check from root
@@ -1172,10 +1172,10 @@ impl MouseMethods for RuntimeManager {
             MouseLockedObject::None => {}
             _ => return,
         }
-        let coord = self.coordinates_to_control(event.x, event.y, false);
-        if !coord.handle.is_none() {
+        let handle = self.coordinates_to_control(event.x, event.y, false);
+        if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
-            if let Some(control) = controls.get_mut(coord.handle) {
+            if let Some(control) = controls.get_mut(handle) {
                 self.repaint |= control.get_control_mut().on_mouse_event(&MouseEvent::Wheel(event.direction)) == EventProcessStatus::Processed;
             }
         }
@@ -1202,8 +1202,8 @@ impl MouseMethods for RuntimeManager {
             return;
         }
         let controls = unsafe { &mut *self.controls };
-        let coord = self.coordinates_to_control(event.x, event.y, false);
-        if coord.handle != self.mouse_over_control {
+        let handle = self.coordinates_to_control(event.x, event.y, false);
+        if handle != self.mouse_over_control {
             self.hide_tooltip();
             if !self.mouse_over_control.is_none() {
                 if let Some(control) = controls.get_mut(self.mouse_over_control) {
@@ -1212,7 +1212,7 @@ impl MouseMethods for RuntimeManager {
                     control.get_base_mut().update_mouse_over_flag(false);
                 }
             }
-            self.mouse_over_control = coord.handle;
+            self.mouse_over_control = handle;
             if !self.mouse_over_control.is_none() {
                 if let Some(control) = controls.get_mut(self.mouse_over_control) {
                     let base = control.get_base_mut();
@@ -1229,7 +1229,7 @@ impl MouseMethods for RuntimeManager {
             }
         } else {
             if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get_mut(coord.handle) {
+                if let Some(control) = controls.get_mut(handle) {
                     let base = control.get_base();
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
@@ -1274,23 +1274,23 @@ impl MouseMethods for RuntimeManager {
             }
         }
         // check for a control
-        let coord = self.coordinates_to_control(event.x, event.y, false);
-        if !coord.handle.is_none() {
+        let handle = self.coordinates_to_control(event.x, event.y, false);
+        if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
-            if let Some(control) = controls.get_mut(coord.handle) {
-                self.update_focus(coord.handle);
+            if let Some(control) = controls.get_mut(handle) {
+                self.update_focus(handle);
                 let base = control.get_base();
                 let scr_x = base.screen_clip.left;
                 let scr_y = base.screen_clip.top;
                 //let has_margins = base.should_increase_margins_on_focus().is_some();
 
-                let response = control.get_control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
+                let _ = control.get_control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
                     x: event.x - scr_x,
                     y: event.y - scr_y,
                     button: event.button,
                 }));
                 //if response == EventProcessStatus::Processed {
-                self.mouse_locked_object = MouseLockedObject::Control(coord.handle);
+                self.mouse_locked_object = MouseLockedObject::Control(handle);
                 self.repaint = true;
                 return;
                 //}
