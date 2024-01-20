@@ -209,8 +209,8 @@ impl OnMouseEvent for Canvas {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         let mut res = ProcessEventResult::PassToControl;
         if self.scroll_bar_type != ScrollBarType::None {
-            res |= self.vertical_scroll.process_mouse_event(event);
-            res |= self.horizontal_scroll.process_mouse_event(event);
+            res |= self.vertical_scroll.on_mouse_event(event);
+            res |= self.horizontal_scroll.on_mouse_event(event);
             if res.should_update() {
                 self.update_scroll_pos_from_scrollbars();
             }

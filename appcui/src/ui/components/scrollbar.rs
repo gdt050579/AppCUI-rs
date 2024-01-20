@@ -1,6 +1,7 @@
 use crate::graphics::*;
 use crate::prelude::{ControlBase, MouseEvent};
-use crate::system::Theme;
+use crate::system::*;
+use crate::ui::common::*;
 
 use super::ProcessEventResult;
 
@@ -51,6 +52,7 @@ pub struct ScrollBar {
     count: u64,
     index: u64,
     status: MouseOnScrollbarStatus,
+    pub(super) handle: Handle<UIElement>,
 }
 impl ScrollBar {
     pub fn new(x: i32, y: i32, dimension: u16, vertical: bool, count: u64) -> Self {
@@ -64,6 +66,7 @@ impl ScrollBar {
             count,
             dimension: dimension.max(3),
             status: MouseOnScrollbarStatus::None,
+            handle: Handle::None,
         }
     }
     #[inline(always)]
@@ -106,6 +109,10 @@ impl ScrollBar {
         if self.dimension <= 3 {
             self.visible = false;
         }
+    }
+    #[inline(always)]
+    pub(super) fn is_vertical(&self) -> bool {
+        self.vertical
     }
     pub fn update_position(&mut self, control_size: Size, decrease_margin: i32, increase_margin: i32, outside_rectangle: bool) {
         let w = control_size.width as i32;
@@ -222,7 +229,7 @@ impl ScrollBar {
         }
     }
     fn mouse_coords_to_scroll_pos_for_dragging(&self, x: i32, y: i32) -> MousePosition {
-        // we will not force x to be equal cu self.x or y to self.y 
+        // we will not force x to be equal cu self.x or y to self.y
         if self.vertical {
             match () {
                 _ if self.y == y => MousePosition::MinimizeArrow,
@@ -294,7 +301,7 @@ impl ScrollBar {
             _ => {}
         }
     }
-    pub fn process_mouse_event(&mut self, event: &MouseEvent) -> ProcessEventResult {
+    pub fn on_mouse_event(&mut self, event: &MouseEvent) -> ProcessEventResult {
         if !(self.visible && self.enabled) {
             // if scroll bar is invisible --> pass the event to control
             return ProcessEventResult::PassToControl;
@@ -403,6 +410,7 @@ impl Default for ScrollBar {
             count: 0,
             index: 0,
             status: MouseOnScrollbarStatus::None,
+            handle: Handle::None,
         }
     }
 }
