@@ -3,7 +3,7 @@ use crate::prelude::{ControlBase, MouseEvent};
 use crate::system::*;
 use crate::ui::common::*;
 
-use super::ProcessEventResult;
+use super::{ProcessEventResult, Component};
 
 #[repr(u8)]
 #[derive(Eq, PartialEq, Copy, Clone)]
@@ -82,7 +82,7 @@ impl ScrollBar {
         self.index = if self.count > 0 { value.min(self.count - 1) } else { 0 };
     }
     #[inline(always)]
-    pub fn get_index(&mut self) -> u64 {
+    pub fn get_index(&self) -> u64 {
         self.index
     }
     #[inline(always)]
@@ -416,6 +416,7 @@ impl ScrollBar {
         }
     }
 }
+impl Component for ScrollBar {}
 impl Default for ScrollBar {
     fn default() -> Self {
         Self {

@@ -1,4 +1,4 @@
-use crate::prelude::components::{ComponentsToolbar, ProcessEventResult};
+use crate::prelude::components::ComponentsToolbar;
 use crate::prelude::*;
 use crate::ui::canvas::initialization_flags::Flags;
 use crate::ui::components::ScrollBar;
@@ -39,16 +39,20 @@ impl Canvas {
         };
         if flags == Flags::ScrollBars {
             let sz = canvas.surface.get_size();
-            canvas.horizontal_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64,false));
-            canvas.vertical_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64,true));
+            canvas.horizontal_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64, false));
+            canvas.vertical_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64, true));
         }
         canvas
     }
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
         let sz = self.surface.get_size();
-        self.horizontal_scroll.set_count(sz.width as u64);
-        self.vertical_scroll.set_count(sz.height as u64);
+        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
+            s.set_count(sz.width as u64);
+        }
+        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
+            s.set_count(sz.height as u64);
+        }
         self.move_scroll_to(self.x, self.y);
     }
     #[inline(always)]
@@ -63,7 +67,7 @@ impl Canvas {
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
-        let sz = self.get_size().reduce_by(if self.scroll_bar_type == Flags::Inside { 1 } else { 0 });
+        let sz = self.get_size();
         let surface_size = self.surface.get_size();
         self.x = if surface_size.width <= sz.width {
             0
@@ -77,36 +81,49 @@ impl Canvas {
         };
         self.x = self.x.min(0);
         self.y = self.y.min(0);
-        self.horizontal_scroll.set_index((-self.x) as u64);
-        self.vertical_scroll.set_index((-self.y) as u64);
+        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
+            s.set_index((-self.x) as u64);
+        }
+        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
+            s.set_index((-self.y) as u64);
+        }
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
-        let h = -(self.horizontal_scroll.get_index() as i32);
-        let v = -(self.vertical_scroll.get_index() as i32);
-        self.move_scroll_to(h, v);
+        if let (Some(horiz), Some(vert)) = (
+            self.components.get(self.horizontal_scrollbar),
+            self.components.get(self.vertical_scrollbar),
+        ) {
+            let h = -(horiz.get_index() as i32);
+            let v = -(vert.get_index() as i32);
+            self.move_scroll_to(h, v);
+        }
     }
 }
 impl OnResize for Canvas {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+        self.components.on_resize(new_size, 2, 2);
         // reposition scroll bars
-        let paint_sz = self.surface.get_size();
-        let visible_size = new_size.reduce_by(if self.scroll_bar_type == Flags::Inside { 1 } else { 0 });
-        self.horizontal_scroll.update_count(visible_size.width as u64, paint_sz.width as u64);
-        self.vertical_scroll.update_count(visible_size.height as u64, paint_sz.height as u64);
-        match self.scroll_bar_type {
-            Flags::None => {
-                self.horizontal_scroll.set_visible(false);
-                self.vertical_scroll.set_visible(false);
-            }
-            Flags::Inside => {
-                self.horizontal_scroll.update_position(new_size, 0, 1, false);
-                self.vertical_scroll.update_position(new_size, 0, 1, false);
-            }
-            Flags::External => {
-                self.horizontal_scroll.update_position(new_size, 5, 2, true);
-                self.vertical_scroll.update_position(new_size, 1, 2, true);
-            }
-        }
+        // let paint_sz = self.surface.get_size();
+
+
+
+        // let visible_size = new_size.reduce_by(if self.scroll_bar_type == Flags::Inside { 1 } else { 0 });
+        // self.horizontal_scroll.update_count(visible_size.width as u64, paint_sz.width as u64);
+        // self.vertical_scroll.update_count(visible_size.height as u64, paint_sz.height as u64);
+        // match self.scroll_bar_type {
+        //     Flags::None => {
+        //         self.horizontal_scroll.set_visible(false);
+        //         self.vertical_scroll.set_visible(false);
+        //     }
+        //     Flags::Inside => {
+        //         self.horizontal_scroll.update_position(new_size, 0, 1, false);
+        //         self.vertical_scroll.update_position(new_size, 0, 1, false);
+        //     }
+        //     Flags::External => {
+        //         self.horizontal_scroll.update_position(new_size, 5, 2, true);
+        //         self.vertical_scroll.update_position(new_size, 1, 2, true);
+        //     }
+        // }
 
         self.move_scroll_to(self.x, self.y);
     }
@@ -116,32 +133,11 @@ impl OnPaint for Canvas {
         if let Some(back) = self.background {
             surface.clear(back);
         }
-        let focused = self.has_focus();
-        match self.scroll_bar_type {
-            Flags::None => {}
-            Flags::Inside => surface.reduce_clip_by(0, 0, 1, 1),
-            Flags::External => {
-                if focused {
-                    surface.reduce_clip_by(0, 0, 1, 1);
-                }
-            }
+        if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
+            self.components.paint(surface, theme, self);
+            surface.reduce_clip_by(0,0,1,1);
         }
         surface.draw_surface(self.x, self.y, &self.surface);
-        match self.scroll_bar_type {
-            Flags::None => {}
-            Flags::Inside => {
-                surface.reset_clip();
-                self.vertical_scroll.paint(surface, theme, self);
-                self.horizontal_scroll.paint(surface, theme, self);
-            }
-            Flags::External => {
-                if focused {
-                    surface.reset_clip();
-                    self.vertical_scroll.paint(surface, theme, self);
-                    self.horizontal_scroll.paint(surface, theme, self);
-                }
-            }
-        }
     }
 }
 impl OnKeyPressed for Canvas {
@@ -209,19 +205,15 @@ impl OnKeyPressed for Canvas {
 }
 impl OnMouseEvent for Canvas {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        let mut res = ProcessEventResult::PassToControl;
-        if self.scroll_bar_type != Flags::None {
-            res |= self.vertical_scroll.on_mouse_event(event);
-            res |= self.horizontal_scroll.on_mouse_event(event);
-            if res.should_update() {
-                self.update_scroll_pos_from_scrollbars();
-            }
-            if res.should_pass_to_control() == false {
-                if res.should_repaint() {
-                    return EventProcessStatus::Processed;
-                } else {
-                    return EventProcessStatus::Ignored;
-                }
+        let res = self.components.on_mouse_event(event);
+        if res.should_update() {
+            self.update_scroll_pos_from_scrollbars();
+        }
+        if res.should_pass_to_control() == false {
+            if res.should_repaint() {
+                return EventProcessStatus::Processed;
+            } else {
+                return EventProcessStatus::Ignored;
             }
         }
         let response = match event {
@@ -229,7 +221,7 @@ impl OnMouseEvent for Canvas {
             MouseEvent::Leave => EventProcessStatus::Ignored,
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(data) => {
-                if (self.scroll_bar_type == Flags::External) && (self.has_focus()) {
+                if (self.flags == Flags::ScrollBars) && (self.has_focus()) {
                     let sz = self.get_size();
                     if (data.x == sz.width as i32) || (data.y == sz.height as i32) {
                         return EventProcessStatus::Ignored;
