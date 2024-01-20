@@ -1,7 +1,6 @@
 #[repr(u8)]
 #[derive(Eq,PartialEq, Copy, Clone)]
-pub enum ScrollBarType {
+pub enum Flags {
     None,
-    Inside,
-    External
+    ScrollBars,
 }

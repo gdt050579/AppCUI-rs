@@ -1,6 +1,6 @@
-use crate::prelude::components::ProcessEventResult;
+use crate::prelude::components::{ComponentsToolbar, ProcessEventResult};
 use crate::prelude::*;
-use crate::ui::canvas::initialization_flags::ScrollBarType;
+use crate::ui::canvas::initialization_flags::Flags;
 use crate::ui::components::ScrollBar;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
@@ -9,18 +9,19 @@ pub struct Canvas {
     x: i32,
     y: i32,
     background: Option<Character>,
-    scroll_bar_type: ScrollBarType,
+    flags: Flags,
     drag_point: Option<Point>,
-    horizontal_scroll: ScrollBar,
-    vertical_scroll: ScrollBar,
+    components: ComponentsToolbar,
+    horizontal_scrollbar: Handle<ScrollBar>,
+    vertical_scrollbar: Handle<ScrollBar>,
 }
 impl Canvas {
-    pub fn new(canvas_size: Size, layout: Layout, scroll_bar_type: ScrollBarType) -> Self {
+    pub fn new(canvas_size: Size, layout: Layout, flags: Flags) -> Self {
         let mut canvas = Self {
             base: ControlBase::with_status_flags(
                 layout,
                 (StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput)
-                    | if scroll_bar_type == ScrollBarType::External {
+                    | if flags == Flags::ScrollBars {
                         StatusFlags::IncreaseBottomMarginOnFocus | StatusFlags::IncreaseRightMarginOnFocus
                     } else {
                         StatusFlags::None
@@ -29,15 +30,18 @@ impl Canvas {
             surface: Surface::new(canvas_size.width, canvas_size.height),
             x: 0,
             y: 0,
+            flags,
             background: None,
-            scroll_bar_type,
             drag_point: None,
-            horizontal_scroll: ScrollBar::new(0, 0, 1, false, 1),
-            vertical_scroll: ScrollBar::new(0, 0, 1, true, 1),
+            components: ComponentsToolbar::with_capacity(if flags == Flags::ScrollBars { 2 } else { 0 }),
+            horizontal_scrollbar: Handle::None,
+            vertical_scrollbar: Handle::None,
         };
-        let sz = canvas.surface.get_size();
-        canvas.horizontal_scroll.set_count(sz.width as u64);
-        canvas.vertical_scroll.set_count(sz.height as u64);
+        if flags == Flags::ScrollBars {
+            let sz = canvas.surface.get_size();
+            canvas.horizontal_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64,false));
+            canvas.vertical_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64,true));
+        }
         canvas
     }
     pub fn resize_surface(&mut self, new_size: Size) {
@@ -59,9 +63,7 @@ impl Canvas {
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
-        let sz = self
-            .get_size()
-            .reduce_by(if self.scroll_bar_type == ScrollBarType::Inside { 1 } else { 0 });
+        let sz = self.get_size().reduce_by(if self.scroll_bar_type == Flags::Inside { 1 } else { 0 });
         let surface_size = self.surface.get_size();
         self.x = if surface_size.width <= sz.width {
             0
@@ -88,19 +90,19 @@ impl OnResize for Canvas {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         // reposition scroll bars
         let paint_sz = self.surface.get_size();
-        let visible_size = new_size.reduce_by(if self.scroll_bar_type == ScrollBarType::Inside { 1 } else { 0 });
+        let visible_size = new_size.reduce_by(if self.scroll_bar_type == Flags::Inside { 1 } else { 0 });
         self.horizontal_scroll.update_count(visible_size.width as u64, paint_sz.width as u64);
         self.vertical_scroll.update_count(visible_size.height as u64, paint_sz.height as u64);
         match self.scroll_bar_type {
-            ScrollBarType::None => {
+            Flags::None => {
                 self.horizontal_scroll.set_visible(false);
                 self.vertical_scroll.set_visible(false);
             }
-            ScrollBarType::Inside => {
+            Flags::Inside => {
                 self.horizontal_scroll.update_position(new_size, 0, 1, false);
                 self.vertical_scroll.update_position(new_size, 0, 1, false);
             }
-            ScrollBarType::External => {
+            Flags::External => {
                 self.horizontal_scroll.update_position(new_size, 5, 2, true);
                 self.vertical_scroll.update_position(new_size, 1, 2, true);
             }
@@ -116,9 +118,9 @@ impl OnPaint for Canvas {
         }
         let focused = self.has_focus();
         match self.scroll_bar_type {
-            ScrollBarType::None => {}
-            ScrollBarType::Inside => surface.reduce_clip_by(0, 0, 1, 1),
-            ScrollBarType::External => {
+            Flags::None => {}
+            Flags::Inside => surface.reduce_clip_by(0, 0, 1, 1),
+            Flags::External => {
                 if focused {
                     surface.reduce_clip_by(0, 0, 1, 1);
                 }
@@ -126,13 +128,13 @@ impl OnPaint for Canvas {
         }
         surface.draw_surface(self.x, self.y, &self.surface);
         match self.scroll_bar_type {
-            ScrollBarType::None => {}
-            ScrollBarType::Inside => {
+            Flags::None => {}
+            Flags::Inside => {
                 surface.reset_clip();
                 self.vertical_scroll.paint(surface, theme, self);
                 self.horizontal_scroll.paint(surface, theme, self);
             }
-            ScrollBarType::External => {
+            Flags::External => {
                 if focused {
                     surface.reset_clip();
                     self.vertical_scroll.paint(surface, theme, self);
@@ -208,7 +210,7 @@ impl OnKeyPressed for Canvas {
 impl OnMouseEvent for Canvas {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         let mut res = ProcessEventResult::PassToControl;
-        if self.scroll_bar_type != ScrollBarType::None {
+        if self.scroll_bar_type != Flags::None {
             res |= self.vertical_scroll.on_mouse_event(event);
             res |= self.horizontal_scroll.on_mouse_event(event);
             if res.should_update() {
@@ -227,7 +229,7 @@ impl OnMouseEvent for Canvas {
             MouseEvent::Leave => EventProcessStatus::Ignored,
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(data) => {
-                if (self.scroll_bar_type == ScrollBarType::External) && (self.has_focus()) {
+                if (self.scroll_bar_type == Flags::External) && (self.has_focus()) {
                     let sz = self.get_size();
                     if (data.x == sz.width as i32) || (data.y == sz.height as i32) {
                         return EventProcessStatus::Ignored;

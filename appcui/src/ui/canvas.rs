@@ -5,4 +5,4 @@ pub mod events;
 mod tests;
 
 pub use self::canvas::Canvas;
-pub use self::initialization_flags::ScrollBarType;
+pub use self::initialization_flags::Flags;
