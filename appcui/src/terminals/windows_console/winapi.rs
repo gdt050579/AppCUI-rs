@@ -33,4 +33,7 @@ extern "system" {
     #[warn(non_camel_case_types)]
     pub(super) fn SetConsoleScreenBufferSize(handle: HANDLE, new_size: COORD) -> BOOL;
 
+    #[warn(non_camel_case_types)]
+    pub(super) fn SetConsoleTitleW(lpConsoleTitle: *const u16) -> BOOL;
+
 }

@@ -1,3 +1,7 @@
+use std::ffi::CString;
+use std::ffi::OsStr;
+use std::string;
+
 use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
@@ -338,6 +342,44 @@ impl WindowsTerminal {
     // if colors are present --> recolor
     // if font is present --> apply font & size
 
+    fn string_to_wide(text: &str)->Result<Vec<u16>, Error>  {
+        let mut result: Vec<u16> = Vec::with_capacity(text.len()+1);
+        for c in text.chars() {
+            let unicode_id = c as u32;
+            if unicode_id>=0xFFFF {
+                return Err(Error::new(
+                    ErrorKind::InvalidParameter,
+                    format!("Fail convert the string '{}' to windows WTF-16", text),
+                ));
+            }
+            if unicode_id==0 {
+                return Err(Error::new(
+                    ErrorKind::InvalidParameter,
+                    format!("Found NULL (\\0 character) in title '{}'. This can not be accurately translated into windows WTF-16 that is NULL terminated !", text),
+                ));              
+            }
+            result.push(unicode_id as u16);
+        }
+        result.push(0);
+        Ok(result)
+    }
+    fn set_title(title: &str) -> Result<(), Error> {
+        let title_wtf16 = WindowsTerminal::string_to_wide(title)?;
+
+        unsafe {
+            if winapi::SetConsoleTitleW(title_wtf16.as_ptr())==FALSE {
+                return Err(Error::new(
+                    ErrorKind::InitializationFailure,
+                    format!(
+                        "SetConsoleTitleW failed while attemting change the title of the console to '{}'. Error Code = {} !",
+                        title,
+                        winapi::GetLastError()
+                    ),
+                ));
+            }
+        }
+        Ok(())
+    }
     fn resize(size: Size, stdout: HANDLE) -> Result<(), Error> {
         // sanity check
         if (size.width > 30000) || (size.width < 5) {
@@ -370,20 +412,25 @@ impl WindowsTerminal {
                     ErrorKind::InitializationFailure,
                     format!(
                         "SetConsoleWindowsInfo failed while attemting to resize console to {}x{}. Error Code = {} !",
-                        size.width, size.height,
+                        size.width,
+                        size.height,
                         winapi::GetLastError()
                     ),
                 ));
             }
         }
-        let buffer_size = COORD { x: size.width as i16, y: size.height as i16 };
+        let buffer_size = COORD {
+            x: size.width as i16,
+            y: size.height as i16,
+        };
         unsafe {
             if winapi::SetConsoleScreenBufferSize(stdout, buffer_size) == FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
                     format!(
                         "SetConsoleScreenBufferSize failed while attemting to resize console buttef to {}x{}. Error Code = {} !",
-                        size.width, size.height,
+                        size.width,
+                        size.height,
                         winapi::GetLastError()
                     ),
                 ));
@@ -398,6 +445,9 @@ impl WindowsTerminal {
 
         if let Some(new_size) = builder.size {
             WindowsTerminal::resize(new_size, stdout)?;
+        }
+        if let Some(title) = &builder.title {
+            WindowsTerminal::set_title(title)?;
         }
 
         unsafe {

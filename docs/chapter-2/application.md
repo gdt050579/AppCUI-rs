@@ -23,6 +23,7 @@ let mut a = App::with_terminal(TerminalType::WindowsConsole).build().expect("Fai
 
 Using `App::new` or `App::with_terminal` creates a builder object that can further be used set up how the application will be constructed. For example, you can change the terminal size, colors, font, etc using this object. Keep in mind that not all settings apply for each terminal, and using the wrong configuration might led to an initialization error. Curently, the Builder supports the following methods:
 * `.size(terminal_size)` to set up a terminal size
+* `.title(terminal_title)` to set up a terminal title
 * `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one
 * `.menu()` to enable the application top menu
 * `.command_bar()` to enable the application command bar
