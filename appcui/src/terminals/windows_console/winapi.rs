@@ -27,4 +27,10 @@ extern "system" {
     #[warn(non_camel_case_types)]
     pub(super) fn ReadConsoleInputW(handle: HANDLE, lpBuffer: *mut INPUT_RECORD, nLength: u32, lpNumberOfEventsRead: &mut u32) -> BOOL;
 
+    #[warn(non_camel_case_types)]
+    pub(super) fn SetConsoleWindowInfo(handle: HANDLE, bAbsolute: BOOL, lpConsoleWindow: *const SMALL_RECT)->BOOL;
+
+    #[warn(non_camel_case_types)]
+    pub(super) fn SetConsoleScreenBufferSize(handle: HANDLE, new_size: COORD) -> BOOL;
+
 }

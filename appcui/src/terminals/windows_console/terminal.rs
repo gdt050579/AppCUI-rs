@@ -312,7 +312,10 @@ fn get_console_screen_buffer_info(handle: HANDLE) -> Result<CONSOLE_SCREEN_BUFFE
         if winapi::GetConsoleScreenBufferInfo(handle, &mut cbuf) == FALSE {
             return Err(Error::new(
                 ErrorKind::InitializationFailure,
-                format!("GetConsoleScreenBufferInfo failed to get information on current console !\nWindow code error: {}",winapi::GetLastError()),
+                format!(
+                    "GetConsoleScreenBufferInfo failed to get information on current console !\nWindow code error: {}",
+                    winapi::GetLastError()
+                ),
             ));
         }
         return Ok(cbuf);
@@ -335,10 +338,67 @@ impl WindowsTerminal {
     // if colors are present --> recolor
     // if font is present --> apply font & size
 
-    pub(crate) fn new(_builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+    fn resize(size: Size, stdout: HANDLE) -> Result<(), Error> {
+        // sanity check
+        if (size.width > 30000) || (size.width < 5) {
+            return Err(Error::new(
+                ErrorKind::InvalidParameter,
+                format!(
+                    "The width paramater for console resize shoule be between 5 and 30000. Current value is invalid: 'width={}'",
+                    size.width
+                ),
+            ));
+        }
+        if (size.height > 30000) || (size.height < 5) {
+            return Err(Error::new(
+                ErrorKind::InvalidParameter,
+                format!(
+                    "The height paramater for console resize shoule be between 5 and 30000. Current value is invalid: 'height={}'",
+                    size.height
+                ),
+            ));
+        }
+        let window_size = SMALL_RECT {
+            left: 0,
+            top: 0,
+            right: size.width as i16 - 1,
+            bottom: size.height as i16 - 1,
+        };
+        unsafe {
+            if winapi::SetConsoleWindowInfo(stdout, TRUE, &window_size) == FALSE {
+                return Err(Error::new(
+                    ErrorKind::InitializationFailure,
+                    format!(
+                        "SetConsoleWindowsInfo failed while attemting to resize console to {}x{}. Error Code = {} !",
+                        size.width, size.height,
+                        winapi::GetLastError()
+                    ),
+                ));
+            }
+        }
+        let buffer_size = COORD { x: size.width as i16, y: size.height as i16 };
+        unsafe {
+            if winapi::SetConsoleScreenBufferSize(stdout, buffer_size) == FALSE {
+                return Err(Error::new(
+                    ErrorKind::InitializationFailure,
+                    format!(
+                        "SetConsoleScreenBufferSize failed while attemting to resize console buttef to {}x{}. Error Code = {} !",
+                        size.width, size.height,
+                        winapi::GetLastError()
+                    ),
+                ));
+            }
+        }
+        Ok(())
+    }
+    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
         let stdin = get_stdin_handle()?;
         let stdout = get_stdout_handle()?;
         let mut original_mode_flags = 0u32;
+
+        if let Some(new_size) = builder.size {
+            WindowsTerminal::resize(new_size, stdout)?;
+        }
 
         unsafe {
             if winapi::GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
