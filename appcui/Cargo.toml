@@ -12,3 +12,4 @@ AppCUIProcMacro = {path = "../appcui-proc-macro"}
 [features]
 default = []
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
+EVENT_RECORDER = []

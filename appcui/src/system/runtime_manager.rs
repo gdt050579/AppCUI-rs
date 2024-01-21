@@ -379,6 +379,8 @@ impl RuntimeManager {
                 SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
                 SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
             }
+            #[cfg(feature="EVENT_RECORDER")]
+            self.record_event(&sys_event)
         }
         // loop has ended
         if self.loop_status == LoopStatus::ExitCurrentLoop {
@@ -747,6 +749,22 @@ impl RuntimeManager {
         println!("");
         for handle in base.children.iter() {
             self.debug_print(*handle, depth + 2);
+        }
+    }
+
+    #[cfg(feature="EVENT_RECORDER")]
+    fn record_event(&mut self, sys_event: &SystemEvent) {
+        match sys_event {
+            SystemEvent::None => {}
+            SystemEvent::AppClose => {},
+            SystemEvent::KeyPressed(event) => {},
+            SystemEvent::KeyModifierChanged(event) => {},
+            SystemEvent::Resize(new_size) => {},
+            SystemEvent::MouseButtonDown(event) => {},
+            SystemEvent::MouseButtonUp(event) => {},
+            SystemEvent::MouseDoubleClick(event) => {},
+            SystemEvent::MouseMove(event) => {},
+            SystemEvent::MouseWheel(event) => {},
         }
     }
 
@@ -1346,164 +1364,3 @@ impl Drop for RuntimeManager {
     }
 }
 
-/*
-void ApplicationImpl::ProcessMenuMouseReleased(Controls::Menu* mnu, int x, int y)
-{
-    auto* mcx   = reinterpret_cast<MenuContext*>(mnu->Context);
-    bool result = mcx->OnMouseReleased(x - mcx->ScreenClip.ScreenPosition.X, y - mcx->ScreenClip.ScreenPosition.Y);
-    if (result)
-        RepaintStatus |= REPAINT_STATUS_DRAW;
-}
-
-bool ApplicationImpl::ExecuteEventLoop(Control* ctrl, bool resetState)
-{
-    CHECK(app->Inited, false, "Application has not been corectly initialized !");
-
-    Internal::SystemEvent evnt;
-    this->RepaintStatus      = REPAINT_STATUS_ALL;
-    this->MouseLockedControl = nullptr;
-    this->mouseLockedObject  = MouseLockedObject::None;
-
-    if (resetState)
-        this->loopStatus = LoopStatus::Normal;
-    // hide current hovered control when new dialog is opened.
-    if (this->MouseOverControl)
-    {
-        ((ControlContext*) (MouseOverControl->Context))->MouseIsOver = false;
-        this->MouseOverControl                                       = nullptr;
-    }
-
-    PackControl(true);
-    if (ctrl != nullptr)
-    {
-        CHECK(ModalControlsCount < MAX_MODAL_CONTROLS_STACK, false, "Too many modal calls !");
-        ModalControlsStack[ModalControlsCount] = ctrl;
-        ModalControlsCount++;
-    }
-    // update command bar
-    UpdateCommandBar();
-
-    while (loopStatus == LoopStatus::Normal)
-    {
-        if (!toDelete.empty())
-        {
-            for (auto c : toDelete)
-            {
-                // delete any potential references
-                if (this->MouseLockedControl == c)
-                    this->MouseLockedControl = nullptr;
-                if (this->MouseOverControl == c)
-                    this->MouseOverControl = nullptr;
-                if (this->ExpandedControl == c)
-                    this->ExpandedControl = nullptr;
-                delete c;
-            }
-            toDelete.clear();
-        }
-        if (this->cmdBarUpdate)
-        {
-            UpdateCommandBar();
-            RepaintStatus |= REPAINT_STATUS_DRAW;
-        }
-        if (RepaintStatus != REPAINT_STATUS_NONE)
-        {
-            if ((RepaintStatus & REPAINT_STATUS_COMPUTE_POSITION) != 0)
-                ComputePositions();
-            if ((RepaintStatus & REPAINT_STATUS_DRAW) != 0)
-            {
-                RepaintStatus = REPAINT_STATUS_NONE;
-                this->Paint();
-                // pentru cazul in care OnFocus sau OnLoseFocus schimba repaint status
-                if ((RepaintStatus & REPAINT_STATUS_COMPUTE_POSITION) != 0)
-                    ComputePositions();
-                if (this->cmdBarUpdate)
-                    UpdateCommandBar();
-                if ((RepaintStatus & REPAINT_STATUS_DRAW) != 0)
-                    this->Paint();
-                this->terminal->Update();
-            }
-            RepaintStatus = REPAINT_STATUS_NONE;
-        }
-        this->terminal->GetSystemEvent(evnt);
-        if (evnt.updateFrames)
-        {
-            if (ProcessUpdateFrameEvent(this->AppDesktop))
-                this->RepaintStatus |= REPAINT_STATUS_DRAW;
-            for (uint32 tr = 0; tr < ModalControlsCount; tr++)
-                if (ProcessUpdateFrameEvent(this->ModalControlsStack[tr]))
-                    this->RepaintStatus |= REPAINT_STATUS_DRAW;
-        }
-        switch (evnt.eventType)
-        {
-        case SystemEventType::AppClosed:
-            loopStatus = LoopStatus::StopApp;
-            break;
-        case SystemEventType::AppResized:
-            if (((evnt.newWidth != this->terminal->screenCanvas.GetWidth()) ||
-                 (evnt.newHeight != this->terminal->screenCanvas.GetHeight())) &&
-                (evnt.newWidth > 0) && (evnt.newHeight > 0))
-            {
-                LOG_INFO("New size for app: %dx%d", evnt.newWidth, evnt.newHeight);
-                this->terminal->screenCanvas.Resize(evnt.newWidth, evnt.newHeight);
-                this->AppDesktop->Resize(evnt.newWidth, evnt.newHeight);
-                if (this->cmdBar)
-                    this->cmdBar->SetDesktopSize(evnt.newWidth, evnt.newHeight);
-                if (this->menu)
-                    this->menu->SetWidth(evnt.newWidth);
-                this->RepaintStatus = REPAINT_STATUS_ALL;
-            }
-            break;
-        case SystemEventType::MouseDown:
-            OnMouseDown(evnt.mouseX, evnt.mouseY, evnt.mouseButton);
-            break;
-        case SystemEventType::MouseUp:
-            OnMouseUp(evnt.mouseX, evnt.mouseY, evnt.mouseButton);
-            break;
-        case SystemEventType::MouseMove:
-            OnMouseMove(evnt.mouseX, evnt.mouseY, evnt.mouseButton);
-            break;
-        case SystemEventType::MouseWheel:
-            OnMouseWheel(evnt.mouseX, evnt.mouseY, evnt.mouseWheel);
-            break;
-        case SystemEventType::KeyPressed:
-            ProcessKeyPress(evnt.keyCode, evnt.unicodeCharacter);
-            break;
-        case SystemEventType::ShiftStateChanged:
-            ProcessShiftState(evnt.keyCode);
-            break;
-        case SystemEventType::RequestRedraw:
-            this->RepaintStatus = REPAINT_STATUS_ALL;
-            break;
-        default:
-            break;
-        }
-    }
-    if (ctrl != nullptr)
-    {
-        if (ModalControlsCount > 0)
-            ModalControlsCount--;
-        UpdateCommandBar();
-        if (this->MouseOverControl)
-        {
-            ((ControlContext*) (MouseOverControl->Context))->MouseIsOver = false;
-            this->MouseOverControl                                       = nullptr;
-        }
-        this->MouseLockedControl = nullptr;
-        this->mouseLockedObject  = MouseLockedObject::None;
-        RepaintStatus            = REPAINT_STATUS_ALL;
-    }
-    // check if current loop should be stop
-    if (loopStatus == LoopStatus::StopCurrent)
-    {
-        loopStatus    = LoopStatus::Normal;
-        RepaintStatus = REPAINT_STATUS_ALL;
-        // check if desktop now has no children windows
-        CheckIfAppShouldClose();
-    }
-    // pack extended control
-    PackControl(true);
-    return true;
-}
-
-
- */
