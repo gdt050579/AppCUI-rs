@@ -53,6 +53,13 @@ AppCUI supports various terminals (but each one comes with advantages and drawba
 | Console Resize     | Yes                | -                   | 
 | Console closed     | Yes                | -                   |
 
+## Other capabilities
+
+| Keys               | Windows Console    | NCurses             |
+|--------------------|--------------------|---------------------|
+| Set dimension      | Yes                | -                   | 
+
+
 ## Defaults
 
 By default, when using initializing a terminal, the folowing will be used:
