@@ -11,6 +11,8 @@ mod reference;
 #[cfg(test)]
 mod tests;
 mod builder;
+#[cfg(feature="EVENT_RECORDER")]
+mod event_recorder;
 
 pub use self::theme::Theme;
 pub use self::handle::Handle;

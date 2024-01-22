@@ -73,9 +73,12 @@ pub(crate) struct RuntimeManager {
     opened_menu_handle: Handle<Menu>,
     modal_windows: Vec<Handle<UIElement>>,
     to_remove_list: Vec<Handle<UIElement>>,
+    #[cfg(feature="EVENT_RECORDER")]
+    event_recorder: super::event_recorder::EventRecorder,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
+
 
 impl RuntimeManager {
     pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
@@ -114,6 +117,8 @@ impl RuntimeManager {
                 None
             },
             menubar: if builder.has_menu { Some(MenuBar::new(term_sz.width)) } else { None },
+            #[cfg(feature="EVENT_RECORDER")]
+            event_recorder: super::event_recorder::EventRecorder::new(),
         };
         let mut desktop = if let Some(desktop) = builder.desktop_manager.take() {
             desktop
@@ -380,7 +385,7 @@ impl RuntimeManager {
                 SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
             }
             #[cfg(feature="EVENT_RECORDER")]
-            self.record_event(&sys_event)
+            self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
         }
         // loop has ended
         if self.loop_status == LoopStatus::ExitCurrentLoop {
@@ -749,22 +754,6 @@ impl RuntimeManager {
         println!("");
         for handle in base.children.iter() {
             self.debug_print(*handle, depth + 2);
-        }
-    }
-
-    #[cfg(feature="EVENT_RECORDER")]
-    fn record_event(&mut self, sys_event: &SystemEvent) {
-        match sys_event {
-            SystemEvent::None => {}
-            SystemEvent::AppClose => {},
-            SystemEvent::KeyPressed(event) => {},
-            SystemEvent::KeyModifierChanged(event) => {},
-            SystemEvent::Resize(new_size) => {},
-            SystemEvent::MouseButtonDown(event) => {},
-            SystemEvent::MouseButtonUp(event) => {},
-            SystemEvent::MouseDoubleClick(event) => {},
-            SystemEvent::MouseMove(event) => {},
-            SystemEvent::MouseWheel(event) => {},
         }
     }
 
