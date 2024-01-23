@@ -27,6 +27,11 @@ struct MouseWheel {
 struct PaintCommand {
     state_name: String,
 }
+struct MouseClick {
+    x: i32,
+    y: i32,
+    button: MouseButton,
+}
 enum Command {
     KeyPressed(KeyPressed),
     Resize(Size),
@@ -34,6 +39,7 @@ enum Command {
     MouseHold(MouseButtonDownEvent),
     MouseRelease(MouseButtonUpEvent),
     MouseWheel(MouseWheel),
+    MouseClick(MouseClick),
     Paint(PaintCommand),
     CheckHash(u64),
 }
@@ -51,6 +57,7 @@ impl Display for Command {
             Command::MouseMove(cmd) => write!(f, "Mouse.Move({},{})\n", cmd.x, cmd.y),
             Command::MouseHold(cmd) => write!(f, "Mouse.Hold({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
             Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{})\n", cmd.x, cmd.y),
+            Command::MouseClick(cmd) => write!(f, "Mouse.Click({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
             Command::MouseWheel(cmd) => {
                 if cmd.times > 1 {
                     write!(f, "Mouse.Wheel({},{},{},{})\n", cmd.x, cmd.y, cmd.dir.get_name(), cmd.times)
@@ -82,7 +89,7 @@ impl EventRecorder {
             step += cmd.to_string().as_str();
             match cmd {
                 Command::CheckHash(_) => {
-                    // we need at least one check hash 
+                    // we need at least one check hash
                     content += step.as_str();
                     step.clear();
                 }
@@ -131,7 +138,7 @@ impl EventRecorder {
         return hash;
     }
     fn add_keypressed(&mut self, key: Key) -> bool {
-        if key.get_compact_code() == key!("Ctrl+Alt+Shift+Space") {
+        if key.get_compact_code() == key!("Ctrl+Alt+Space") {
             // save state
             return true;
         }
@@ -179,7 +186,28 @@ impl EventRecorder {
         self.commands.push(Command::MouseHold(*evnt));
     }
     fn add_mouse_button_up(&mut self, evnt: &MouseButtonUpEvent) {
-        self.commands.push(Command::MouseRelease(*evnt));
+        let mut is_click = false;
+        if let Some(last) = self.commands.last_mut() {
+            match last {
+                Command::MouseHold(cmd) => {
+                    is_click = (cmd.x == evnt.x) && (cmd.y == evnt.y);
+                }
+                _ => {}
+            }
+        }
+        if is_click {
+            let button = match self.commands.pop().unwrap() {
+                Command::MouseHold(cmd) => cmd.button,
+                _ => MouseButton::None
+            };
+            self.commands.push(Command::MouseClick(MouseClick {
+                x: evnt.x,
+                y: evnt.y,
+                button,
+            }));
+        } else {
+            self.commands.push(Command::MouseRelease(*evnt));
+        }
     }
     fn add_mouse_wheel(&mut self, evnt: &MouseWheelEvent) {
         if let Some(last) = self.commands.last_mut() {
