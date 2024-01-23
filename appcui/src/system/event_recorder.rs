@@ -1,3 +1,8 @@
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result;
+use std::fs;
+
 use crate::graphics::*;
 use crate::input::*;
 use crate::terminals::{SystemEvent, Terminal};
@@ -10,16 +15,38 @@ struct KeyPressed {
 enum Command {
     KeyPressed(KeyPressed),
 }
+impl Display for Command {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        match self {
+            Command::KeyPressed(cmd) => {
+                if cmd.times > 1 {
+                    write!(f, "Key.Pressed({},{})\n", cmd.key, cmd.times)
+                } else {
+                    write!(f, "Key.Pressed({})\n", cmd.key)
+                }
+            }
+        }
+    }
+}
 pub(super) struct EventRecorder {
-    events: Vec<Command>,
+    commands: Vec<Command>,
 }
 impl EventRecorder {
     pub(super) fn new() -> Self {
         Self {
-            events: Vec::with_capacity(512),
+            commands: Vec::with_capacity(512),
         }
     }
-    pub(super) fn save() {}
+    pub(super) fn save(&self) {
+        let mut content = String::with_capacity(self.commands.len() * 32);
+        let mut step = String::with_capacity(256);
+        for cmd in &self.commands {
+            step += cmd.to_string().as_str();
+            content += step.as_str();
+            step.clear();
+        }
+        let _ = fs::write("events.txt", content);
+    }
     pub(super) fn add(&mut self, sys_event: &SystemEvent, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
         match sys_event {
             SystemEvent::None => todo!(),
@@ -43,9 +70,9 @@ impl EventRecorder {
             // save state
             return true;
         }
-        let count = self.events.len();
+        let count = self.commands.len();
         if count > 0 {
-            let cmd = &mut self.events[count - 1];
+            let cmd = &mut self.commands[count - 1];
             match cmd {
                 Command::KeyPressed(c) => {
                     if c.key == key {
@@ -56,10 +83,8 @@ impl EventRecorder {
                 _ => {}
             }
         }
-        self.events.push(Command::KeyPressed(KeyPressed { key, times: 1 }));
+        self.commands.push(Command::KeyPressed(KeyPressed { key, times: 1 }));
         return false;
     }
-    fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
-
-    }
+    fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {}
 }

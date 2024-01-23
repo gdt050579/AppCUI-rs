@@ -758,6 +758,10 @@ impl RuntimeManager {
     }
 
     pub(super) fn destroy() {
+        // save all records to a file
+        #[cfg(feature="EVENT_RECORDER")]
+        RuntimeManager::get().event_recorder.save();
+
         unsafe {
             RUNTIME_MANAGER = None;
         }

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use super::KeyCode;
 use super::KeyModifier;
 
@@ -9,7 +11,10 @@ pub struct Key {
 
 impl Key {
     #[allow(non_upper_case_globals)]
-    pub const None: Key = Key{code: KeyCode::None, modifier: KeyModifier::None};
+    pub const None: Key = Key {
+        code: KeyCode::None,
+        modifier: KeyModifier::None,
+    };
     pub fn new(code: KeyCode, modifier: KeyModifier) -> Key {
         Key {
             code: code,
@@ -65,7 +70,7 @@ impl Key {
             return Key { code, modifier };
         }
     }
-    pub fn get_compact_code(&self)->u16 {
+    pub fn get_compact_code(&self) -> u16 {
         ((self.code as u8) as u16) | ((self.modifier.get_value() as u16) << 8)
     }
 }
@@ -82,7 +87,7 @@ impl From<KeyCode> for Key {
     fn from(value: KeyCode) -> Self {
         Self {
             code: value,
-            modifier: KeyModifier::None
+            modifier: KeyModifier::None,
         }
     }
 }
@@ -90,13 +95,18 @@ impl From<u16> for Key {
     fn from(value: u16) -> Self {
         let k = (value & 0xFF) as u8;
         let m = (value >> 8) as u8;
-        if (k>=64) || (m>=8) {
+        if (k >= 64) || (m >= 8) {
             Key::None
         } else {
             Self {
                 code: k.into(),
-                modifier: m.into()
+                modifier: m.into(),
             }
         }
+    }
+}
+impl Display for Key {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{}", self.modifier.get_name(), self.code.get_name())
     }
 }
