@@ -7,3 +7,15 @@ pub enum MouseWheelDirection {
     Up,
     Down
 }
+
+impl MouseWheelDirection {
+    pub fn get_name(&self)->&str {
+        match self {
+            MouseWheelDirection::None => "",
+            MouseWheelDirection::Left => "left",
+            MouseWheelDirection::Right => "right",
+            MouseWheelDirection::Up => "up",
+            MouseWheelDirection::Down => "down",
+        }
+    }
+}

@@ -1,11 +1,14 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
-use std::fmt::write;
 use std::fs;
 
 use crate::graphics::*;
 use crate::input::*;
+use crate::terminals::MouseButtonDownEvent;
+use crate::terminals::MouseButtonUpEvent;
+use crate::terminals::MouseMoveEvent;
+use crate::terminals::MouseWheelEvent;
 use crate::terminals::{SystemEvent, Terminal};
 use AppCUIProcMacro::*;
 
@@ -16,6 +19,10 @@ struct KeyPressed {
 enum Command {
     KeyPressed(KeyPressed),
     Resize(Size),
+    MouseMove(MouseMoveEvent),
+    MouseHold(MouseButtonDownEvent),
+    MouseRelease(MouseButtonUpEvent),
+    MouseWheel(MouseWheelEvent),
 }
 impl Display for Command {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -27,7 +34,11 @@ impl Display for Command {
                     write!(f, "Key.Pressed({})\n", cmd.key)
                 }
             }
-            Command::Resize(sz) => write!(f, "Resize({},{})",sz.width,sz.height),            
+            Command::Resize(sz) => write!(f, "Resize({},{})\n", sz.width, sz.height),
+            Command::MouseMove(cmd) => write!(f, "Mouse.Move({},{})\n", cmd.x, cmd.y),
+            Command::MouseHold(cmd) => write!(f, "Mouse.Hold({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
+            Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
+            Command::MouseWheel(cmd) => write!(f, "Mouse.Wheel({},{},{})\n", cmd.x, cmd.y, cmd.direction.get_name()),
         }
     }
 }
@@ -43,6 +54,7 @@ impl EventRecorder {
     pub(super) fn save(&self) {
         let mut content = String::with_capacity(self.commands.len() * 32);
         let mut step = String::with_capacity(256);
+        content.push_str("Paint.Enable(false)\n");
         for cmd in &self.commands {
             step += cmd.to_string().as_str();
             content += step.as_str();
@@ -52,7 +64,7 @@ impl EventRecorder {
     }
     pub(super) fn add(&mut self, sys_event: &SystemEvent, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
         match sys_event {
-            SystemEvent::None => todo!(),
+            SystemEvent::None => {}
             SystemEvent::AppClose => todo!(),
             SystemEvent::KeyPressed(event) => {
                 if self.add_keypressed(event.key) {
@@ -61,11 +73,11 @@ impl EventRecorder {
             }
             SystemEvent::KeyModifierChanged(_) => todo!(),
             SystemEvent::Resize(new_size) => self.add_resize(*new_size),
-            SystemEvent::MouseButtonDown(_) => todo!(),
-            SystemEvent::MouseButtonUp(_) => todo!(),
+            SystemEvent::MouseButtonDown(evnt) => self.add_mouse_button_down(evnt),
+            SystemEvent::MouseButtonUp(evnt) => self.add_mouse_button_up(evnt),
             SystemEvent::MouseDoubleClick(_) => todo!(),
-            SystemEvent::MouseMove(_) => todo!(),
-            SystemEvent::MouseWheel(_) => todo!(),
+            SystemEvent::MouseMove(evnt) => self.add_mouse_move(evnt),
+            SystemEvent::MouseWheel(evnt) => self.add_mouse_wheel(evnt),
         }
     }
     fn add_keypressed(&mut self, key: Key) -> bool {
@@ -99,6 +111,28 @@ impl EventRecorder {
             }
         }
         self.commands.push(Command::Resize(new_size));
+    }
+    fn add_mouse_move(&mut self, evnt: &MouseMoveEvent) {
+        if let Some(last) = self.commands.last_mut() {
+            match last {
+                Command::MouseMove(cmd) => {
+                    cmd.x = evnt.x;
+                    cmd.y = evnt.y;
+                    return;
+                }
+                _ => {}
+            }
+        }
+        self.commands.push(Command::MouseMove(*evnt));
+    }
+    fn add_mouse_button_down(&mut self, evnt: &MouseButtonDownEvent) {
+        self.commands.push(Command::MouseHold(*evnt));
+    }
+    fn add_mouse_button_up(&mut self, evnt: &MouseButtonUpEvent) {
+        self.commands.push(Command::MouseRelease(*evnt));
+    }
+    fn add_mouse_wheel(&mut self, evnt: &MouseWheelEvent) {
+        self.commands.push(Command::MouseWheel(*evnt));
     }
     fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {}
 }
