@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
+use std::fmt::write;
 use std::fs;
 
 use crate::graphics::*;
@@ -14,6 +15,7 @@ struct KeyPressed {
 }
 enum Command {
     KeyPressed(KeyPressed),
+    Resize(Size),
 }
 impl Display for Command {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -25,6 +27,7 @@ impl Display for Command {
                     write!(f, "Key.Pressed({})\n", cmd.key)
                 }
             }
+            Command::Resize(sz) => write!(f, "Resize({},{})",sz.width,sz.height),            
         }
     }
 }
@@ -57,7 +60,7 @@ impl EventRecorder {
                 }
             }
             SystemEvent::KeyModifierChanged(_) => todo!(),
-            SystemEvent::Resize(_) => todo!(),
+            SystemEvent::Resize(new_size) => self.add_resize(*new_size),
             SystemEvent::MouseButtonDown(_) => todo!(),
             SystemEvent::MouseButtonUp(_) => todo!(),
             SystemEvent::MouseDoubleClick(_) => todo!(),
@@ -70,10 +73,8 @@ impl EventRecorder {
             // save state
             return true;
         }
-        let count = self.commands.len();
-        if count > 0 {
-            let cmd = &mut self.commands[count - 1];
-            match cmd {
+        if let Some(last) = self.commands.last_mut() {
+            match last {
                 Command::KeyPressed(c) => {
                     if c.key == key {
                         c.times += 1;
@@ -85,6 +86,19 @@ impl EventRecorder {
         }
         self.commands.push(Command::KeyPressed(KeyPressed { key, times: 1 }));
         return false;
+    }
+    fn add_resize(&mut self, new_size: Size) {
+        if let Some(last) = self.commands.last_mut() {
+            match last {
+                Command::Resize(sz) => {
+                    sz.width = new_size.width;
+                    sz.height = new_size.height;
+                    return;
+                }
+                _ => {}
+            }
+        }
+        self.commands.push(Command::Resize(new_size));
     }
     fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {}
 }
