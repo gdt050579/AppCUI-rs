@@ -16,13 +16,19 @@ struct KeyPressed {
     key: Key,
     times: u32,
 }
+struct MouseWheel {
+    x: i32,
+    y: i32,
+    dir: MouseWheelDirection,
+    times: u32,
+}
 enum Command {
     KeyPressed(KeyPressed),
     Resize(Size),
     MouseMove(MouseMoveEvent),
     MouseHold(MouseButtonDownEvent),
     MouseRelease(MouseButtonUpEvent),
-    MouseWheel(MouseWheelEvent),
+    MouseWheel(MouseWheel),
 }
 impl Display for Command {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -37,8 +43,14 @@ impl Display for Command {
             Command::Resize(sz) => write!(f, "Resize({},{})\n", sz.width, sz.height),
             Command::MouseMove(cmd) => write!(f, "Mouse.Move({},{})\n", cmd.x, cmd.y),
             Command::MouseHold(cmd) => write!(f, "Mouse.Hold({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
-            Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
-            Command::MouseWheel(cmd) => write!(f, "Mouse.Wheel({},{},{})\n", cmd.x, cmd.y, cmd.direction.get_name()),
+            Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{})\n", cmd.x, cmd.y),
+            Command::MouseWheel(cmd) => {
+                if cmd.times > 1 {
+                    write!(f, "Mouse.Wheel({},{},{},{})\n", cmd.x, cmd.y, cmd.dir.get_name(), cmd.times)
+                } else {
+                    write!(f, "Mouse.Wheel({},{},{})\n", cmd.x, cmd.y, cmd.dir.get_name())
+                }
+            }
         }
     }
 }
@@ -132,7 +144,23 @@ impl EventRecorder {
         self.commands.push(Command::MouseRelease(*evnt));
     }
     fn add_mouse_wheel(&mut self, evnt: &MouseWheelEvent) {
-        self.commands.push(Command::MouseWheel(*evnt));
+        if let Some(last) = self.commands.last_mut() {
+            match last {
+                Command::MouseWheel(cmd) => {
+                    if (cmd.x == evnt.x) && (cmd.y == evnt.y) && (cmd.dir == evnt.direction) {
+                        cmd.times += 1;
+                        return;
+                    }
+                }
+                _ => {}
+            }
+        }
+        self.commands.push(Command::MouseWheel(MouseWheel {
+            x: evnt.x,
+            y: evnt.y,
+            dir: evnt.direction,
+            times: 1,
+        }));
     }
     fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {}
 }
