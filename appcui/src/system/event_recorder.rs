@@ -12,6 +12,8 @@ use crate::terminals::MouseWheelEvent;
 use crate::terminals::{SystemEvent, Terminal};
 use AppCUIProcMacro::*;
 
+use super::RuntimeManager;
+
 struct KeyPressed {
     key: Key,
     times: u32,
@@ -22,6 +24,9 @@ struct MouseWheel {
     dir: MouseWheelDirection,
     times: u32,
 }
+struct PaintCommand {
+    state_name: String,
+}
 enum Command {
     KeyPressed(KeyPressed),
     Resize(Size),
@@ -29,6 +34,8 @@ enum Command {
     MouseHold(MouseButtonDownEvent),
     MouseRelease(MouseButtonUpEvent),
     MouseWheel(MouseWheel),
+    Paint(PaintCommand),
+    CheckHash(u64),
 }
 impl Display for Command {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -51,16 +58,20 @@ impl Display for Command {
                     write!(f, "Mouse.Wheel({},{},{})\n", cmd.x, cmd.y, cmd.dir.get_name())
                 }
             }
+            Command::Paint(cmd) => write!(f, "Paint('{}')\n", cmd.state_name),
+            Command::CheckHash(hash) => write!(f, "CheckHash(0x{:x})\n", hash),
         }
     }
 }
 pub(super) struct EventRecorder {
     commands: Vec<Command>,
+    state_id: u32,
 }
 impl EventRecorder {
     pub(super) fn new() -> Self {
         Self {
             commands: Vec::with_capacity(512),
+            state_id: 1,
         }
     }
     pub(super) fn save(&self) {
@@ -69,21 +80,28 @@ impl EventRecorder {
         content.push_str("Paint.Enable(false)\n");
         for cmd in &self.commands {
             step += cmd.to_string().as_str();
-            content += step.as_str();
-            step.clear();
+            match cmd {
+                Command::CheckHash(_) => {
+                    // we need at least one check hash 
+                    content += step.as_str();
+                    step.clear();
+                }
+                _ => {}
+            }
         }
         let _ = fs::write("events.txt", content);
     }
     pub(super) fn add(&mut self, sys_event: &SystemEvent, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
         match sys_event {
             SystemEvent::None => {}
-            SystemEvent::AppClose => todo!(),
+            SystemEvent::AppClose => {}
             SystemEvent::KeyPressed(event) => {
                 if self.add_keypressed(event.key) {
                     self.save_state(terminal, surface);
+                    RuntimeManager::get().request_update();
                 }
             }
-            SystemEvent::KeyModifierChanged(_) => todo!(),
+            SystemEvent::KeyModifierChanged(_) => {}
             SystemEvent::Resize(new_size) => self.add_resize(*new_size),
             SystemEvent::MouseButtonDown(evnt) => self.add_mouse_button_down(evnt),
             SystemEvent::MouseButtonUp(evnt) => self.add_mouse_button_up(evnt),
@@ -91,6 +109,26 @@ impl EventRecorder {
             SystemEvent::MouseMove(evnt) => self.add_mouse_move(evnt),
             SystemEvent::MouseWheel(evnt) => self.add_mouse_wheel(evnt),
         }
+    }
+    fn compute_surface_hash(surface: &Surface) -> u64 {
+        // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+        let mut hash = 0xcbf29ce484222325u64;
+        let mut buf = [0u8; 8];
+        for ch in &surface.chars {
+            buf[0] = ((ch.code as u32) & 0xFF) as u8;
+            buf[1] = (((ch.code as u32) >> 8) & 0xFF) as u8;
+            buf[2] = (((ch.code as u32) >> 16) & 0xFF) as u8;
+            buf[3] = (((ch.code as u32) >> 24) & 0xFF) as u8;
+            buf[4] = ch.foreground as u8;
+            buf[5] = ch.background as u8;
+            buf[6] = ((ch.flags.get_value() >> 8) & 0xFF) as u8;
+            buf[7] = (ch.flags.get_value() & 0xFF) as u8;
+            for b in buf {
+                hash = hash ^ (b as u64);
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+            }
+        }
+        return hash;
     }
     fn add_keypressed(&mut self, key: Key) -> bool {
         if key.get_compact_code() == key!("Ctrl+Alt+Shift+Space") {
@@ -162,5 +200,59 @@ impl EventRecorder {
             times: 1,
         }));
     }
-    fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {}
+    fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
+        let sz = surface.get_size();
+        let mut screen = Surface::new(sz.width, sz.height);
+        let mut state_name = format!("State_{}", self.state_id);
+        loop {
+            // paint
+            screen.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+            screen.draw_surface(0, 0, surface);
+            screen.clear(Character::with_color(Color::Gray, Color::Black));
+            screen.fill_rect(
+                Rect::new(0, 0, (sz.width as i32) - 1, 2),
+                Character::new(' ', Color::White, Color::DarkBlue, CharFlags::None),
+            );
+            screen.draw_rect(
+                Rect::new(0, 0, (sz.width as i32) - 1, 3),
+                LineType::Single,
+                CharAttribute::with_color(Color::White, Color::DarkBlue),
+            );
+            screen.write_string(1, 1, "State name:", CharAttribute::with_fore_color(Color::Silver), false);
+            screen.fill_horizontal_line(
+                12,
+                1,
+                (sz.width as i32) - 2,
+                Character::new(' ', Color::White, Color::Black, CharFlags::None),
+            );
+            screen.write_string(13, 1, &state_name, CharAttribute::with_fore_color(Color::White), false);
+            screen.set_cursor(13 + state_name.chars().count() as i32, 1);
+            terminal.update_screen(&screen);
+            // get the events
+            let sys_event = terminal.get_system_event();
+            match sys_event {
+                SystemEvent::KeyPressed(evnt) => match evnt.key.get_compact_code() {
+                    key!("Escape") => {
+                        return;
+                    }
+                    key!("Enter") => {
+                        self.state_id += 1;
+                        self.commands.push(Command::Paint(PaintCommand { state_name }));
+                        self.commands.push(Command::CheckHash(EventRecorder::compute_surface_hash(surface)));
+                        return;
+                    }
+                    key!("Backspace") => {
+                        // delete last character
+                        state_name.pop();
+                    }
+                    _ => {
+                        if evnt.character >= ' ' {
+                            state_name.push(evnt.character);
+                        }
+                    }
+                },
+                _ => {}
+            }
+        }
+    }
 }
