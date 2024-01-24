@@ -112,7 +112,7 @@ impl EventRecorder {
             SystemEvent::Resize(new_size) => self.add_resize(*new_size),
             SystemEvent::MouseButtonDown(evnt) => self.add_mouse_button_down(evnt),
             SystemEvent::MouseButtonUp(evnt) => self.add_mouse_button_up(evnt),
-            SystemEvent::MouseDoubleClick(_) => todo!(),
+            SystemEvent::MouseDoubleClick(_) => {},
             SystemEvent::MouseMove(evnt) => self.add_mouse_move(evnt),
             SystemEvent::MouseWheel(evnt) => self.add_mouse_wheel(evnt),
         }
