@@ -15,7 +15,7 @@ let c2 = checkbox!("'Another &option',x:10,y:5,w:15,h:1,checked:true");
 let c3 = checkbox!("'&Multi-line option\nthis a hot-key',x:10,y:5,w:15,h:3,checked:false");
 ```
 
-The caption of a checkbox may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a checkbox with the following caption `&Option number 1` will set up the text of the button to `Option number 1` and will set up character `O` as the hot key for that checkbox (pressing `Alt+O` will be equivalent to changing the status for that checkbox from checked to unchecked or vice-versa).
+The caption of a checkbox may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a checkbox with the following caption `&Option number 1` will set up the text of the checkbox to `Option number 1` and will set up character `O` as the hot key for that checkbox (pressing `Alt+O` will be equivalent to changing the status for that checkbox from checked to unchecked or vice-versa).
 
 A checkbox can contain a multi-line text but you will have to set the height parameter large enough to a larger value (bigger than 1).
 
@@ -55,7 +55,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a checkbox a
 
 ## Key association
 
-The following keys are processed by a Button control if it has focus:
+The following keys are processed by a Checkbox control if it has focus:
 
 | Key                | Purpose                                                                             |
 |--------------------|-------------------------------------------------------------------------------------|
