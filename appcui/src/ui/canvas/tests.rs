@@ -54,16 +54,44 @@ fn check_keyboard() {
 ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(20,10),Layout::new("x:1,y:1,w:15,h:4"),canvas::Flags::None);
+    let mut c = Canvas::new(Size::new(20, 10), Layout::new("x:1,y:1,w:15,h:4"), canvas::Flags::None);
     let s = c.get_drawing_surface();
-    s.write_string(0, 0, "         11111111112", CharAttribute::with_color(Color::White, Color::DarkRed), false);
-    s.write_string(0, 1, "12345678901234567890", CharAttribute::with_color(Color::White, Color::DarkRed), false);
-    s.fill_horizontal_line(0, 9, 20, Character::new('=',Color::White,Color::DarkRed,CharFlags::None));
+    s.write_string(
+        0,
+        0,
+        "         11111111112",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        false,
+    );
+    s.write_string(
+        0,
+        1,
+        "12345678901234567890",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        false,
+    );
+    s.fill_horizontal_line(0, 9, 20, Character::new('=', Color::White, Color::DarkRed, CharFlags::None));
     for i in 2..10 {
-        s.write_char(0, i, Character::new(((i+48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None));
-        s.write_char(7, i, Character::new(((i+48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None));
-        s.write_char(14, i, Character::new(((i+48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None));
-        s.write_char(19, i, Character::new(((i+48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None));
+        s.write_char(
+            0,
+            i,
+            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        );
+        s.write_char(
+            7,
+            i,
+            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        );
+        s.write_char(
+            14,
+            i,
+            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        );
+        s.write_char(
+            19,
+            i,
+            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        );
     }
     w.add(c);
     a.add_window(w);
@@ -110,16 +138,44 @@ fn check_keyboard_2() {
 ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(20,10),Layout::new("x:1,y:1,w:4,h:3"),canvas::Flags::None);
+    let mut c = Canvas::new(Size::new(20, 10), Layout::new("x:1,y:1,w:4,h:3"), canvas::Flags::None);
     let s = c.get_drawing_surface();
-    s.write_string(0, 0, "         11111111112", CharAttribute::with_color(Color::White, Color::DarkRed), false);
-    s.write_string(0, 1, "12345678901234567890", CharAttribute::with_color(Color::White, Color::DarkRed), false);
-    s.fill_horizontal_line(0, 9, 20, Character::new('=',Color::White,Color::DarkRed,CharFlags::None));
+    s.write_string(
+        0,
+        0,
+        "         11111111112",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        false,
+    );
+    s.write_string(
+        0,
+        1,
+        "12345678901234567890",
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+        false,
+    );
+    s.fill_horizontal_line(0, 9, 20, Character::new('=', Color::White, Color::DarkRed, CharFlags::None));
     for i in 2..10 {
-        s.write_char(0, i, Character::new(((i+48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None));
-        s.write_char(7, i, Character::new(((i+48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None));
-        s.write_char(14, i, Character::new(((i+48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None));
-        s.write_char(19, i, Character::new(((i+48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None));
+        s.write_char(
+            0,
+            i,
+            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        );
+        s.write_char(
+            7,
+            i,
+            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        );
+        s.write_char(
+            14,
+            i,
+            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        );
+        s.write_char(
+            19,
+            i,
+            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        );
     }
     w.add(c);
     a.add_window(w);
@@ -135,12 +191,116 @@ fn check_background_char() {
 ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(2,2),Layout::new("x:1,y:1,w:15,h:4"),canvas::Flags::None);
+    let mut c = Canvas::new(Size::new(2, 2), Layout::new("x:1,y:1,w:15,h:4"), canvas::Flags::None);
     let s = c.get_drawing_surface();
-    s.clear(Character::new('X',Color::Yellow,Color::DarkRed,CharFlags::None));
-    c.set_backgound(Character::new('.',Color::White,Color::Black,CharFlags::None));
+    s.clear(Character::new('X', Color::Yellow, Color::DarkRed, CharFlags::None));
+    c.set_backgound(Character::new('.', Color::White, Color::Black, CharFlags::None));
     w.add(c);
     a.add_window(w);
     a.run();
 }
 
+
+#[test]
+fn check_mouse_on_scrollbars() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x5482fcc49857230a)
+        Key.Pressed(Tab)
+        Paint('Canvas focused')
+        CheckHash(0x688773f2f69a827b)
+        Key.Pressed(Right,5)
+        Paint('bottom scrollbar moved with keys')
+        CheckHash(0x824c6aac59e00fc0)
+        Key.Pressed(Down,3)
+        Paint('vertical scrollbar moved with keys')
+        CheckHash(0x65f048227a2f5326)
+        Key.Pressed(Right,20)
+        Key.Pressed(Down,20)
+        Paint('Scrollbars on bottom-right')
+        CheckHash(0x2001b1a95626920f)
+        Mouse.Move(49,7)
+        Mouse.Click(49,7,left)
+        Mouse.Move(31,13)
+        Mouse.Click(31,13,left)
+        Mouse.Move(44,16)
+        Paint('scroll bars moved with mouse')
+        CheckHash(0x58c2e5881e384722)
+        Mouse.Move(31,13)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Paint('move even more through left')
+        CheckHash(0x94a715f8bdb37e60)
+        Mouse.Move(49,7)
+        Mouse.Click(49,7,left)
+        Mouse.Click(49,7,left)
+        Mouse.Click(49,7,left)
+        Mouse.Click(49,7,left)
+        Mouse.Click(49,7,left)
+        Mouse.Click(49,7,left)
+        Paint('move to top')
+        CheckHash(0xd602abd0107382d7)
+        Mouse.Move(31,13)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Mouse.Click(31,13,left)
+        Paint('Move to left')
+        CheckHash(0xda9461e4fdcc6780)
+        Mouse.Move(32,13)
+        Paint('Mouse hover over bottom scrollbar')
+        CheckHash(0xa8a93bbcfdf66b2d)
+        Mouse.Hold(32,13,left)
+        Mouse.Move(41,13)
+        Mouse.Release(41,13,left)
+        Paint('Scroll moved via drag')
+        CheckHash(0x4dc5e7857a64e487)
+        Mouse.Move(49,8)
+        Mouse.Hold(49,8,left)
+        Mouse.Move(49,10)
+        Mouse.Release(49,10,left)
+        Paint('Scroll move via drag (vertical)')
+        CheckHash(0xd70e2e289ca96e54)
+        Mouse.Move(48,13)
+        Paint('Hover over window with scroll enabled')
+        CheckHash(0x51e83736974739af)
+        Mouse.Move(40,9)
+        Mouse.Hold(40,9,left)
+        Mouse.Move(36,11)
+        Mouse.Release(36,11,left)
+        Paint('Move via direct drag from surface')
+        CheckHash(0xaf34cf74037cd71e)
+        Key.Pressed(Tab)
+        Mouse.Move(49,13)
+        Paint('Hover over window (but with focus on button)')
+        CheckHash(0x4e8b05d573a197ab)    
+";
+static text: &str = r"012345678901234567890123456789
+/- Some Text To Test -\
+\=====================/
+| () () () () () () ()| => 123
+|---------------------|
+\=-=-=-=-=-=-=-=-=-=-=/
+ \-=-=-=-=-=-=-=-=-=-/
+  \-=-=-=-=-=-=-=-=-/
+   \===============/
+    \ooooooooooooo/ => 1234567
+";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut c = Canvas::new(Size::new(30, 10), Layout::new("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+    let s = c.get_drawing_surface();
+    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+    w.add(c);
+    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
+    a.add_window(w);
+    a.run();
+}
