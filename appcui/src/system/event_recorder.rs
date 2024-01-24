@@ -14,6 +14,12 @@ use AppCUIProcMacro::*;
 
 use super::RuntimeManager;
 
+enum MouseUpPossibleCombineAction {
+    Up,
+    Click,
+    Drag,
+}
+
 struct KeyPressed {
     key: Key,
     times: u32,
@@ -32,6 +38,12 @@ struct MouseClick {
     y: i32,
     button: MouseButton,
 }
+struct MouseDrag {
+    x1: i32,
+    y1: i32,
+    x2: i32,
+    y2: i32,
+}
 enum Command {
     KeyPressed(KeyPressed),
     Resize(Size),
@@ -40,12 +52,13 @@ enum Command {
     MouseRelease(MouseButtonUpEvent),
     MouseWheel(MouseWheel),
     MouseClick(MouseClick),
+    MouseDrag(MouseDrag),
     Paint(PaintCommand),
     CheckHash(u64),
 }
 impl Display for Command {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
+        let var_name = match self {
             Command::KeyPressed(cmd) => {
                 if cmd.times > 1 {
                     write!(f, "Key.Pressed({},{})\n", cmd.key, cmd.times)
@@ -58,6 +71,8 @@ impl Display for Command {
             Command::MouseHold(cmd) => write!(f, "Mouse.Hold({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
             Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{})\n", cmd.x, cmd.y),
             Command::MouseClick(cmd) => write!(f, "Mouse.Click({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
+            Command::MouseDrag(cmd) => write!(f, "Mouse.Drag({},{},{},{})\n", cmd.x1, cmd.y1, cmd.x2, cmd.y2),
+
             Command::MouseWheel(cmd) => {
                 if cmd.times > 1 {
                     write!(f, "Mouse.Wheel({},{},{},{})\n", cmd.x, cmd.y, cmd.dir.get_name(), cmd.times)
@@ -67,7 +82,8 @@ impl Display for Command {
             }
             Command::Paint(cmd) => write!(f, "Paint('{}')\n", cmd.state_name),
             Command::CheckHash(hash) => write!(f, "CheckHash(0x{:x})\n", hash),
-        }
+        };
+        var_name
     }
 }
 pub(super) struct EventRecorder {
@@ -112,7 +128,7 @@ impl EventRecorder {
             SystemEvent::Resize(new_size) => self.add_resize(*new_size),
             SystemEvent::MouseButtonDown(evnt) => self.add_mouse_button_down(evnt),
             SystemEvent::MouseButtonUp(evnt) => self.add_mouse_button_up(evnt),
-            SystemEvent::MouseDoubleClick(_) => {},
+            SystemEvent::MouseDoubleClick(_) => {}
             SystemEvent::MouseMove(evnt) => self.add_mouse_move(evnt),
             SystemEvent::MouseWheel(evnt) => self.add_mouse_wheel(evnt),
         }
@@ -186,27 +202,55 @@ impl EventRecorder {
         self.commands.push(Command::MouseHold(*evnt));
     }
     fn add_mouse_button_up(&mut self, evnt: &MouseButtonUpEvent) {
-        let mut is_click = false;
-        if let Some(last) = self.commands.last_mut() {
+        let mut action = MouseUpPossibleCombineAction::Up;
+        if let Some(last) = self.commands.last() {
             match last {
                 Command::MouseHold(cmd) => {
-                    is_click = (cmd.x == evnt.x) && (cmd.y == evnt.y);
+                    if (cmd.x == evnt.x) && (cmd.y == evnt.y) {
+                        action = MouseUpPossibleCombineAction::Click;
+                    }
+                }
+                Command::MouseMove(_) => {
+                    if self.commands.len() >= 2 {
+                        match self.commands[self.commands.len() - 2] {
+                            Command::MouseHold(cmd) => {
+                                action = MouseUpPossibleCombineAction::Drag;
+                            }
+                            _ => {}
+                        }
+                    }
                 }
                 _ => {}
             }
         }
-        if is_click {
-            let button = match self.commands.pop().unwrap() {
-                Command::MouseHold(cmd) => cmd.button,
-                _ => MouseButton::None
-            };
-            self.commands.push(Command::MouseClick(MouseClick {
-                x: evnt.x,
-                y: evnt.y,
-                button,
-            }));
-        } else {
-            self.commands.push(Command::MouseRelease(*evnt));
+        match action {
+            MouseUpPossibleCombineAction::Up => {
+                self.commands.push(Command::MouseRelease(*evnt));
+            }
+            MouseUpPossibleCombineAction::Click => {
+                let button = match self.commands.pop().unwrap() {
+                    Command::MouseHold(cmd) => cmd.button,
+                    _ => MouseButton::None,
+                };
+                self.commands.push(Command::MouseClick(MouseClick {
+                    x: evnt.x,
+                    y: evnt.y,
+                    button,
+                }));
+            }
+            MouseUpPossibleCombineAction::Drag => {
+                let _ = self.commands.pop(); // remove the MouseMove
+                let (start_x, start_y) = match self.commands.pop().unwrap() {
+                    Command::MouseHold(cmd) => (cmd.x, cmd.y),
+                    _ => (0, 0),
+                };
+                self.commands.push(Command::MouseDrag(MouseDrag {
+                    x1: start_x,
+                    y1: start_y,
+                    x2: evnt.x,
+                    y2: evnt.y,
+                }));
+            }
         }
     }
     fn add_mouse_wheel(&mut self, evnt: &MouseWheelEvent) {
