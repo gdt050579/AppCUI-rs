@@ -90,7 +90,7 @@ const KEY_NAME: [&str; 64] = [
     "Left",
     "Up",
     "Down",
-    "Righ",
+    "Right",
     "PageUp",
     "PageDown",
     "Home",
