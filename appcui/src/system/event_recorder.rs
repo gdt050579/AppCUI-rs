@@ -213,7 +213,7 @@ impl EventRecorder {
                 Command::MouseMove(_) => {
                     if self.commands.len() >= 2 {
                         match self.commands[self.commands.len() - 2] {
-                            Command::MouseHold(cmd) => {
+                            Command::MouseHold(_) => {
                                 action = MouseUpPossibleCombineAction::Drag;
                             }
                             _ => {}
@@ -272,10 +272,25 @@ impl EventRecorder {
             times: 1,
         }));
     }
+    fn print_hot_key(key: &str, text: &str, x: i32, surface: &mut Surface) {
+        let y = 3;
+        surface.write_char(x, y, Character::new('[', Color::Gray, Color::DarkBlue, CharFlags::None));
+        surface.write_string(x + 1, y, key, CharAttribute::with_color(Color::Aqua, Color::DarkBlue), false);
+        let key_len = key.len() as i32;
+        surface.write_char(x + 1 + key_len, y, Character::new(' ', Color::Gray, Color::DarkBlue, CharFlags::None));
+        surface.write_string(x + 2 + key_len, y, text, CharAttribute::with_color(Color::Silver, Color::DarkBlue), false);
+        let text_len = text.len() as i32;
+        surface.write_char(
+            x + 2 + text_len + key_len,
+            y,
+            Character::new(']', Color::Gray, Color::DarkBlue, CharFlags::None),
+        );
+    }
     fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
         let sz = surface.get_size();
         let mut screen = Surface::new(sz.width, sz.height);
         let mut state_name = format!("State_{}", self.state_id);
+        let mut comands = format!("Commands: {}", self.commands.len());
         loop {
             // paint
             screen.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
@@ -291,6 +306,7 @@ impl EventRecorder {
                 CharAttribute::with_color(Color::White, Color::DarkBlue),
             );
             screen.write_string(1, 1, "State name:", CharAttribute::with_fore_color(Color::Silver), false);
+            screen.write_string(1, 2, &comands, CharAttribute::with_fore_color(Color::Gray), false);
             screen.fill_horizontal_line(
                 12,
                 1,
@@ -299,6 +315,10 @@ impl EventRecorder {
             );
             screen.write_string(13, 1, &state_name, CharAttribute::with_fore_color(Color::White), false);
             screen.set_cursor(13 + state_name.chars().count() as i32, 1);
+            EventRecorder::print_hot_key("Esc", "Exit", 2, &mut screen);
+            EventRecorder::print_hot_key("Enter", "Add", 13, &mut screen);
+            EventRecorder::print_hot_key("F8", "Clear All", 25, &mut screen);
+
             terminal.update_screen(&screen);
             // get the events
             let sys_event = terminal.get_system_event();
@@ -312,6 +332,10 @@ impl EventRecorder {
                         self.commands.push(Command::Paint(PaintCommand { state_name }));
                         self.commands.push(Command::CheckHash(EventRecorder::compute_surface_hash(surface)));
                         return;
+                    }
+                    key!("F8") => {
+                        self.commands.clear();
+                        comands = format!("Commands: {}", self.commands.len());
                     }
                     key!("Backspace") => {
                         // delete last character
