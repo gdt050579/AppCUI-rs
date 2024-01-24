@@ -200,7 +200,6 @@ fn check_background_char() {
     a.run();
 }
 
-
 #[test]
 fn check_mouse_on_scrollbars() {
     let script = "
@@ -283,7 +282,7 @@ fn check_mouse_on_scrollbars() {
         Paint('Hover over window (but with focus on button)')
         CheckHash(0x4e8b05d573a197ab)    
 ";
-static text: &str = r"012345678901234567890123456789
+    let text: &str = r"012345678901234567890123456789
 /- Some Text To Test -\
 \=====================/
 | () () () () () () ()| => 123
@@ -297,6 +296,82 @@ static text: &str = r"012345678901234567890123456789
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
     let mut c = Canvas::new(Size::new(30, 10), Layout::new("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+    let s = c.get_drawing_surface();
+    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+    w.add(c);
+    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_on_scrollbars_resize() {
+    let script = "
+    Paint.Enable(false)
+    Paint('Initial State')
+    CheckHash(0x5482fcc49857230a)
+    Key.Pressed(Tab)
+    Paint('Focus on Canvas')
+    CheckHash(0x966ee395984d4a52)
+    Mouse.Move(48,13)
+    Mouse.Drag(48,13,53,18)
+    Mouse.Move(56,18)
+    Paint('Right scroll bar disabled')
+    CheckHash(0x16c9777fb66b6367)
+    Mouse.Move(53,18)
+    Mouse.Drag(53,18,58,18)
+    Mouse.Move(34,6)
+    Mouse.Drag(34,6,27,1)
+    Mouse.Move(50,13)
+    Mouse.Drag(50,13,58,13)
+    Paint('Bottom scroll bar disabled')
+    CheckHash(0x8f9d0e2f5da48de2)
+    Mouse.Move(41,13)
+    Mouse.Click(41,13,left)
+    Mouse.Move(31,13)
+    Mouse.Click(31,13,left)
+    Mouse.Move(52,13)
+    Mouse.Click(52,13,left)
+    Mouse.Move(58,11)
+    Mouse.Click(58,11,left)
+    Mouse.Move(58,7)
+    Mouse.Click(58,7,left)
+    Mouse.Move(58,4)
+    Mouse.Click(58,4,left)
+    Mouse.Move(28,13)
+    Mouse.Click(28,13,left)
+    Paint('Nothing hapens after click on scrollbars')
+    CheckHash(0x41f0bfa8a7682c72)
+    Mouse.Move(58,13)
+    Mouse.Drag(58,13,38,7)
+    Mouse.Move(41,10)
+    Paint('right scrollbar is hidden')
+    CheckHash(0xc5fbc8e124456a4c)
+    Mouse.Move(38,7)
+    Mouse.Drag(38,7,38,9)
+    Mouse.Move(39,12)
+    Paint('right scrollbar visible')
+    CheckHash(0xc7827de70d4271d4)
+    Mouse.Move(37,9)
+    Mouse.Drag(37,9,31,9)
+    Paint('bottom scollbar hidden')
+    CheckHash(0x78790845f2cd8e40)        
+";
+    let text: &str = r"012345678901234567890123456789
+/- Some Text To Test -\
+\=====================/
+| () () () () () () ()| => 123
+|---------------------|
+\=-=-=-=-=-=-=-=-=-=-=/
+ \-=-=-=-=-=-=-=-=-=-/
+  \-=-=-=-=-=-=-=-=-/
+   \===============/
+    \ooooooooooooo/ => 1234567
+";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut c = Canvas::new(Size::new(30, 10), Layout::new("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+    c.set_components_toolbar_margins(2, 1);
     let s = c.get_drawing_surface();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
