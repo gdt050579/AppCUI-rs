@@ -1,4 +1,5 @@
 use super::alignament::Alignament;
+use super::color::Color;
 use super::named_params_map::NamedParamsMap;
 use super::{utils, Error};
 
@@ -8,6 +9,7 @@ pub(super) enum ValueType<'a> {
     Integer(i32),
     Percentage(f32),
     Alignament(Alignament),
+    Color(Color),
     List(Vec<Value<'a>>),
     Dict(NamedParamsMap<'a>),
 }
@@ -105,6 +107,19 @@ impl<'a> Value<'a> {
         }
         if let Some(value) = Alignament::from_hash(utils::compute_hash(self.raw_data)) {
             self.data_type = ValueType::Alignament(value);
+            return Some(value);
+        }
+        None
+    }
+    pub(crate) fn get_color(&mut self) -> Option<Color> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Color(value) = &self.data_type {
+            return Some(*value);
+        }
+        if let Some(value) = Color::from_hash(utils::compute_hash(self.raw_data)) {
+            self.data_type = ValueType::Color(value);
             return Some(value);
         }
         None
@@ -251,6 +266,21 @@ impl<'a> Value<'a> {
             self.end,
         ));
     }
+    fn validate_color(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if let Some(_) = self.get_color() {
+            return Ok(());
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting an color name (Black,DarkBlue,DarkGreen,Teal,DarkRed,Magenta,Olive,Silver,Gray,Blue,Green,Aqua,Red,Pink,Yellow,White,Transparent) for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }
 
     pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
@@ -259,6 +289,7 @@ impl<'a> Value<'a> {
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
             super::ParamType::Flags => self.validate_flags(display_param_name, param_list)?,
             super::ParamType::Alignament => self.validate_alignament(display_param_name, param_list)?,
+            super::ParamType::Color => self.validate_color(display_param_name, param_list)?,
             super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,
         }
         // all good

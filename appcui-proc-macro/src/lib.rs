@@ -1,4 +1,5 @@
-
+mod token_stream_to_string;
+mod char_utils;
 mod key_utils;
 mod procmacro_builder;
 mod parameter_parser;
@@ -6,8 +7,6 @@ mod controls;
 use proc_macro::*;
 
 use procmacro_builder::{AppCUITrait, TraitImplementation, TraitsConfig, BaseControlType};
-
-
 
 extern crate proc_macro;
 
@@ -266,9 +265,13 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Modifiers can be used in combination with the simple `+` between them.
 #[proc_macro]
 pub fn key(input: TokenStream) -> TokenStream {
-    key_utils::process_key_macro_tokens(input)
+    key_utils::create(input)
 }
 
+#[proc_macro]
+pub fn char(input: TokenStream) -> TokenStream {
+    char_utils::create(input)
+}
 
 #[proc_macro]
 pub fn button(input: TokenStream) -> TokenStream {

@@ -6,6 +6,7 @@ pub(crate) enum ParamType {
     Bool,
     Flags,
     Alignament,
+    Color,
     Layout,
 }
 

@@ -6,6 +6,7 @@ mod signature;
 mod named_params_map;
 mod flags_signature;
 pub(crate) mod alignament;
+pub(crate) mod color;
 mod value;
 #[cfg(test)]
 mod tests;

@@ -24,6 +24,7 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 | `set_size(...)`       | Sets the new size for a control (to a specified size given by parameters `width` and `height`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by controls `x` and `y` coordonates) and the new provided size. Any dock or alignament properties will be removed.<br>This method has no effect on a Desktop control. |
 | `get_position()`      | Returns the relatove position (x,y) of the current control to its parent.    |
 | `set_position(...)`   | Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignament properties will be removed.<br>This method has no effect on a Desktop control. |
+| `set_components_toolbar_margins(...)` | Sets the left and top components margins - for scrollbars, filters, etc |
 
 
 

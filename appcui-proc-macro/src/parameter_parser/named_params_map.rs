@@ -1,4 +1,4 @@
-use super::{value::Value, Error, NamedParameter, PositionalParameter};
+use super::{value::Value, Error, NamedParameter, PositionalParameter, color::Color};
 use std::collections::HashMap;
 
 pub(crate) struct NamedParamsMap<'a> {

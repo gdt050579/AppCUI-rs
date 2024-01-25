@@ -1,22 +1,11 @@
 use proc_macro::*;
 use std::str::FromStr;
 
-pub fn process_key_macro_tokens(input: TokenStream) -> TokenStream {
-    let mut tokens = input.into_iter().peekable();
+use crate::token_stream_to_string::TokenStreamToString;
 
-    let string_param = match tokens.next() {
-        Some(TokenTree::Literal(lit)) => lit.to_string(),
-        _ => panic!("The parameter provided to the key macro must be a string literal."),
-    };
-
-    if tokens.peek().is_some() {
-        panic!("Exactly one string must be provided as input.");
-    }
-    if (!string_param.starts_with("\"")) || (!string_param.ends_with("\"")) {
-        panic!("The parameter provided to the key macro must be a string literal.");
-    }
-
-    let value = parse_string_key_representation(&string_param[1..&string_param.len() - 1]);
+pub fn create(input: TokenStream) -> TokenStream {
+    let s = input.validate_one_string_parameter("key");
+    let value = parse_string_key_representation(&s);
     let mut string_repr = value.to_string();
     string_repr.push_str("u16");
     TokenStream::from_str(&string_repr).expect("Fail to convert key to token stream")

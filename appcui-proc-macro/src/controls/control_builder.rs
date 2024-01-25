@@ -1,5 +1,6 @@
 use crate::parameter_parser;
 use crate::parameter_parser::*;
+use crate::token_stream_to_string::TokenStreamToString;
 use proc_macro::*;
 use std::str::FromStr;
 
@@ -42,27 +43,7 @@ pub(super) struct ControlBuilder<'a> {
 
 impl<'a> ControlBuilder<'a> {
     fn token_stream_to_string(name: &str, input: TokenStream) -> String {
-        let mut tokens = input.into_iter().peekable();
-
-        let mut string_param = match tokens.next() {
-            Some(TokenTree::Literal(lit)) => lit.to_string(),
-            _ => panic!("The parameter provided to the '{}!' macro must be a string literal.", name),
-        };
-
-        if tokens.peek().is_some() {
-            panic!("Exactly one string must be provided as input.");
-        }
-        if (!string_param.starts_with("\"")) || (!string_param.ends_with("\"")) {
-            panic!("The parameter provided to the '{}!' macro must be a string literal.", name);
-        }
-        if string_param.len() == 2 {
-            panic!("You can not provide an empty string for '{}!' macro !", name);
-        }
-
-        string_param.remove(0);
-        string_param.remove(string_param.len() - 1);
-
-        string_param
+        input.validate_one_string_parameter(name)
     }
     pub(super) fn new(
         name: &'static str,
