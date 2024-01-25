@@ -15,7 +15,7 @@ static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("value", "value", ParamType::String),
     NamedParameter::new("char", "value", ParamType::String),
-    NamedParameter::new("ch", "value", ParamType::Color),
+    NamedParameter::new("ch", "value", ParamType::String),
     NamedParameter::new("fore", "fore", ParamType::Color),
     NamedParameter::new("foreground", "fore", ParamType::Color),
     NamedParameter::new("forecolor", "fore", ParamType::Color),
