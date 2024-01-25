@@ -181,19 +181,19 @@ The following values can be used as color parameters for `foreground` and `backg
 
 You can also specify special characters by either using their specific name from the enum `SpecialChars` or by using certaing adnotations as presented in the following table:
 
-| Value                                | Variant <br>(appcui::graphics::**SpecialCharacter** enum) | Visual Representation                                                                                                  |
-| ------------------------------------ | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `up` or `/\|\`                       | `SpecialCharacter::ArrowUp`                               | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2191;</td></tr></table> |
-| `down` or `\\|/`                     | `SpecialCharacter::ArrowDown`                             | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2193;</td></tr></table> |
-| `left` or `<-`                       | `SpecialCharacter::ArrowLeft`                             | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2190;</td></tr></table> |
-| `right` or `->`                      | `SpecialCharacter::ArrowRight`                            | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2192;</td></tr></table> |
-| `updown` or `up-down`                | `SpecialCharacter::ArrowUpDown`                           | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2195;</td></tr></table> |
-| `leftright` or `left-right` or `<->` | `SpecialCharacter::ArrowLeftRight`                        | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2194;</td></tr></table> |
-| `/\`                                 | `SpecialCharacter::TriangleUp`                            | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25B2;</td></tr></table> |
-| `\/`                                 | `SpecialCharacter::TriangleDown`                          | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25BC;</td></tr></table> |
-| `<\|`                                | `SpecialCharacter::TriangleLeft`                          | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25C4;</td></tr></table> |
-| `\|>`                                | `SpecialCharacter::TriangleRight`                         | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25BA;</td></tr></table> |
-| `...`                                | `SpecialCharacter::ThreePointsHorizontal`                 | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2026;</td></tr></table> |
+| Value                                    | Variant <br>(appcui::graphics::**SpecialCharacter** enum) | Visual Representation                                                                                                  |
+| ---------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `up` or &#x2f;&#x7c;&#x5c;               | `SpecialCharacter::ArrowUp`                               | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2191;</td></tr></table> |
+| `down` or &#x5c;&#x7c;&#x2f;             | `SpecialCharacter::ArrowDown`                             | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2193;</td></tr></table> |
+| `left` or `<-`                           | `SpecialCharacter::ArrowLeft`                             | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2190;</td></tr></table> |
+| `right` or `->`                          | `SpecialCharacter::ArrowRight`                            | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2192;</td></tr></table> |
+| `updown` or `up-down`                    | `SpecialCharacter::ArrowUpDown`                           | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2195;</td></tr></table> |
+| `leftright` or `left-right` or <br>`<->` | `SpecialCharacter::ArrowLeftRight`                        | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2194;</td></tr></table> |
+| `/\`                                     | `SpecialCharacter::TriangleUp`                            | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25B2;</td></tr></table> |
+| `\/`                                     | `SpecialCharacter::TriangleDown`                          | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25BC;</td></tr></table> |
+| <&#x7c;                                  | `SpecialCharacter::TriangleLeft`                          | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25C4;</td></tr></table> |
+| &#x7c;>                                  | `SpecialCharacter::TriangleRight`                         | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25BA;</td></tr></table> |
+| `...`                                    | `SpecialCharacter::ThreePointsHorizontal`                 | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2026;</td></tr></table> |
 
 
 # Examples
@@ -220,6 +220,7 @@ or
 ```rs
 char!("A,fore=White,back=DarkBlue,attr=[Bold,Underline]")
 ```
+or
 ```rs
 char!("A,w,db,attr=Bold+Underline")
 ```
