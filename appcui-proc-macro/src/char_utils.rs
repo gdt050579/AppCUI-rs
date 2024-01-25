@@ -25,6 +25,8 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("backcolor", "back", ParamType::Color),
     NamedParameter::new("attr", "attr", ParamType::Flags),
     NamedParameter::new("attributes", "attr", ParamType::Flags),
+    NamedParameter::new("code", "code", ParamType::String),
+    NamedParameter::new("unicode", "code", ParamType::String),
 ];
 
 fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {
@@ -40,24 +42,48 @@ fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {
         param_name
     );
 }
+fn unicode_number_to_value(text: &str) -> u32 {
+    let mut value = 0;
+    for ch in text.chars() {
+        if ch >= '0' && ch <= '9' {
+            value = value * 16 + (ch as u32 - '0' as u32);
+            continue;
+        }
+        if ch >= 'a' && ch <= 'f' {
+            value = value * 16 + ((ch as u32 - 'a' as u32) + 10);
+            continue;
+        }
+        if ch >= 'A' && ch <= 'F' {
+            value = value * 16 + ((ch as u32 - 'A' as u32) + 10);
+            continue;
+        }
+        panic!("Invalid hexadecimal number: {} for character code !",text);
+    }
+    value
+}
 fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
     dict.validate_positional_parameters(param_list, POSILITIONAL_PARAMETERS).unwrap();
     dict.validate_names_parameters(param_list, NAMED_PARAMETERS).unwrap();
     let mut res = String::with_capacity(64);
     res.push_str("Character::new(");
-    let val = dict
-        .get("value")
-        .expect("Missing first positional parameter or the parameter 'value' (the character code)");
-    let char_value = val.get_string();
-    let count = char_value.chars().count();
-    match count {
-        0 => res.push_str("0"),
-        1 => {
-            res.push_str("'");
-            res.push_str(char_value);
-            res.push_str("'")
+    if let Some(value) = dict.get("code") {
+        let code_value = unicode_number_to_value(value.get_string());
+        res.push_str(format!{"'\\u{{{:x}}}'",code_value}.as_str());
+    } else {
+        let val = dict
+            .get("value")
+            .expect("Missing first positional parameter or the parameter 'value' (the character code)");
+        let char_value = val.get_string();
+        let count = char_value.chars().count();
+        match count {
+            0 => res.push_str("0"),
+            1 => {
+                res.push_str("'");
+                res.push_str(char_value);
+                res.push_str("'")
+            }
+            _ => todo!("special chars not implemented"),
         }
-        _ => todo!("special chars not implemented"),
     }
     res.push_str(", ");
     let fore = get_color("fore", dict);
