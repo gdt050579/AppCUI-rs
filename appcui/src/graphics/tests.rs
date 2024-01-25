@@ -1,3 +1,5 @@
+use AppCUIProcMacro::*;
+
 use crate::graphics::Size;
 use crate::graphics::TextWrap;
 use crate::graphics::Point;
@@ -1152,4 +1154,13 @@ fn check_rect_with_alignament() {
     assert_eq!(r.get_bottom(), 12);
     assert_eq!(r.get_width(), 4);
     assert_eq!(r.get_height(), 6);
+}
+
+#[test]
+fn check_char_macro() {
+    let c = char!("X,Red,Green");
+    assert_eq!(c.code,'X');
+    assert_eq!(c.foreground, Color::Red);
+    assert_eq!(c.background, Color::Green);
+    assert_eq!(c.flags, CharFlags::None);
 }

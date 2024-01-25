@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Color {
     Black = 0x00,
     DarkBlue = 0x01,
