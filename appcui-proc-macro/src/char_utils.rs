@@ -1,4 +1,7 @@
-use crate::{parameter_parser::{self, color::Color, *}, token_stream_to_string::TokenStreamToString};
+use crate::{
+    parameter_parser::{self, color::Color, *},
+    token_stream_to_string::TokenStreamToString,
+};
 use proc_macro::*;
 use std::str::FromStr;
 
@@ -22,19 +25,20 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("attributes", "attr", ParamType::Flags),
 ];
 
-fn test() {
-    let parser = parameter_parser::parse("kjhskjhfsdk").unwrap();
-}
-fn get_color(param_name: &str, param_list: &str, dict: &mut NamedParamsMap) -> Color {
+fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {
     if !dict.contains(param_name) {
         return Color::Transparent;
     }
     if let Some(color) = dict.get_mut(param_name).unwrap().get_color() {
         return color;
     }
-    panic!("Invalid color value {} for parameter '{}'",dict.get(param_name).unwrap().get_string(), param_name);
+    panic!(
+        "Invalid color value {} for parameter '{}'",
+        dict.get(param_name).unwrap().get_string(),
+        param_name
+    );
 }
-fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap)->String {
+fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
     dict.validate_positional_parameters(param_list, POSILITIONAL_PARAMETERS).unwrap();
     dict.validate_names_parameters(param_list, NAMED_PARAMETERS).unwrap();
     let mut res = String::with_capacity(64);
@@ -54,8 +58,8 @@ fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap)->String {
         _ => todo!("special chars not implemented"),
     }
     res.push_str(", ");
-    let fore = get_color("fore", param_list, dict);
-    let back = get_color("back", param_list, dict);
+    let fore = get_color("fore", dict);
+    let back = get_color("back", dict);
     res.push_str("Color::");
     res.push_str(fore.get_name());
     res.push_str(", ");
@@ -63,7 +67,7 @@ fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap)->String {
     res.push_str(back.get_name());
     res.push_str(", ");
     res.push_str("CharFlags::None)");
-    
+
     res
 }
 pub(crate) fn create(input: TokenStream) -> TokenStream {
