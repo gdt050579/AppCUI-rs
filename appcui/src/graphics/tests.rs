@@ -1165,4 +1165,7 @@ fn check_char_macro() {
     assert_eq!(char!("'',fore=w"),Character::new(0,Color::White, Color::Transparent,CharFlags::None));
     assert_eq!(char!("char=X,fore=Olive,back=Aqua"),Character::new('X',Color::Olive, Color::Aqua,CharFlags::None));
     assert_eq!(char!("B"),Character::new('B',Color::Transparent, Color::Transparent,CharFlags::None));
+    assert_eq!(char!("B,attr=Bold"),Character::new('B',Color::Transparent, Color::Transparent,CharFlags::Bold));
+    assert_eq!(char!("X,attr=Italic+Bold"),Character::new('X',Color::Transparent, Color::Transparent,CharFlags::Bold|CharFlags::Italic));
+    assert_eq!(char!("Y,attr=[Italic,Underline]"),Character::new('Y',Color::Transparent, Color::Transparent,CharFlags::Underline|CharFlags::Italic));
 }

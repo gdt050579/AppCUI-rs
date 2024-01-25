@@ -5,6 +5,8 @@ use crate::{
 use proc_macro::*;
 use std::str::FromStr;
 
+static mut CHAR_ATTR: FlagsSignature = FlagsSignature::new(&["Bold", "Italic", "Underline"]);
+
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("value", ParamType::String),
     PositionalParameter::new("fore", ParamType::Color),
@@ -66,8 +68,39 @@ fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
     res.push_str("Color::");
     res.push_str(back.get_name());
     res.push_str(", ");
-    res.push_str("CharFlags::None)");
 
+    if let Some(value) = dict.get_mut("attr") {
+        if let Some(list) = value.get_list() {
+            if list.len() == 0 {
+                res.push_str("CharFlags::None)");
+            } else {
+                let mut add_or_operator = false;
+                for name in list {
+                    if let Some(flag) = unsafe { CHAR_ATTR.get(name.get_string()) } {
+                        if add_or_operator {
+                            res.push_str(" | ")
+                        }
+                        res.push_str("CharFlags::");
+                        res.push_str(flag);
+                        add_or_operator = true;
+                    } else {
+                        Error::new(
+                            param_list,
+                            format!("Unknwon character attribute: {} !", name.get_string()).as_str(),
+                            name.get_start_pos(),
+                            name.get_end_pos(),
+                        )
+                        .panic();
+                    }
+                }
+                res.push_str(")")
+            }
+        } else {
+            panic!("Parameter 'attr' should contain some flags !");
+        }
+    } else {
+        res.push_str("CharFlags::None)");
+    }
     res
 }
 pub(crate) fn create(input: TokenStream) -> TokenStream {
