@@ -79,7 +79,7 @@ impl From<SpecialChar> for char {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct Character {
     pub code: char,
     pub foreground: Color,

@@ -1158,9 +1158,11 @@ fn check_rect_with_alignament() {
 
 #[test]
 fn check_char_macro() {
-    let c = char!("X,Red,Green");
-    assert_eq!(c.code,'X');
-    assert_eq!(c.foreground, Color::Red);
-    assert_eq!(c.background, Color::Green);
-    assert_eq!(c.flags, CharFlags::None);
+    assert_eq!(char!("X,Red,Green"),Character::new('X',Color::Red, Color::Green,CharFlags::None));
+    assert_eq!(char!("'+',white,pinK"),Character::new('+',Color::White, Color::Pink,CharFlags::None));
+    assert_eq!(char!("A,g,r"),Character::new('A',Color::Green, Color::Red,CharFlags::None));
+    assert_eq!(char!("'!',back=dr"),Character::new('!',Color::Transparent, Color::DarkRed,CharFlags::None));
+    assert_eq!(char!("'',fore=w"),Character::new(0,Color::White, Color::Transparent,CharFlags::None));
+    assert_eq!(char!("char=X,fore=Olive,back=Aqua"),Character::new('X',Color::Olive, Color::Aqua,CharFlags::None));
+    assert_eq!(char!("B"),Character::new('B',Color::Transparent, Color::Transparent,CharFlags::None));
 }
