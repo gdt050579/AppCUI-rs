@@ -4,6 +4,7 @@ use crate::graphics::Size;
 use crate::graphics::TextWrap;
 use crate::graphics::Point;
 use crate::graphics::Rect;
+use crate::prelude::SpecialChar;
 
 use super::CharAttribute;
 use super::CharFlags;
@@ -1169,4 +1170,11 @@ fn check_char_macro() {
     assert_eq!(char!("X,attr=Italic+Bold"),Character::new('X',Color::Transparent, Color::Transparent,CharFlags::Bold|CharFlags::Italic));
     assert_eq!(char!("Y,attr=[Italic,Underline]"),Character::new('Y',Color::Transparent, Color::Transparent,CharFlags::Underline|CharFlags::Italic));
     assert_eq!(char!("code=41"),Character::new('A',Color::Transparent, Color::Transparent,CharFlags::None));
+    assert_eq!(char!("->"),Character::with_char(SpecialChar::ArrowRight));
+    assert_eq!(char!("<->"),Character::with_char(SpecialChar::ArrowLeftRight));
+    assert_eq!(char!("<-"),Character::with_char(SpecialChar::ArrowLeft));
+    assert_eq!(char!("'=='"),Character::with_char(SpecialChar::BoxHorizontalDoubleLine));
+    assert_eq!(char!("||"),Character::with_char(SpecialChar::BoxVerticalDoubleLine));
+    assert_eq!(char!("|_"),Character::with_char(SpecialChar::BoxBottomLeftCornerSingleLine));
+    assert_eq!(char!("_|"),Character::with_char(SpecialChar::BoxBottomRightCornerSingleLine));
 }
