@@ -14,12 +14,12 @@ let l1 = label!("caption='a caption for the label',x:10,y:5,w:15");
 let l2 = label!("MyLabel,x:10,y:5,w:15");
 ```
 
-The caption of a label may contain the special character `&` that indicates that the next character is a hot-key. 
+The caption of a label may contain the special character `&` that indicates that the next character is a hot-key. However, as a label can not receive any input, the hotkey is meant to be for display only.
 
 A label supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name | Type | Positional parameter  | Purpose |
-|----------------|------|-----------------------|---------|
+| Parameter name                | Type   | Positional parameter                | Purpose                                 |
+| ----------------------------- | ------ | ----------------------------------- | --------------------------------------- |
 | `name` or `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the label |
 
 
@@ -29,12 +29,12 @@ A label emits no events.
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a label also has the following aditional methods:
 
-| Method             | Purpose                                                                             |
-|--------------------|-------------------------------------------------------------------------------------|
-| `set_caption(...)` | Set the new caption for a button. If the string provided contains the special character `&`, this method also sets the hotkey associated with a control. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any).<br>Example: `button.set_caption("&Start")` - this will set the caption of the button cu `Start` and the hotket to `Alt+S` |
-| `get_caption()`    | Returns the current caption of a button |
+| Method             | Purpose                                                                                                                                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `set_caption(...)` | Set the new caption for a label. If the string provided contains the special character `&`, this method will highlight the next character just like a hotkey does. <br>Example: `label.set_caption("&Start")` - this will set the caption of the label to `Start` and highlight the first letter (`S`) |
+| `get_caption()`    | Returns the current caption of a label                                                                                                                                                                                                                                                                 |
 
 ## Key association
 
