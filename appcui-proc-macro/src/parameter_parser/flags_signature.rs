@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Mutex};
 
-use super::utils;
+use crate::utils;
 
 pub(crate) struct FlagsSignature {
     flags: &'static [&'static str],

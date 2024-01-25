@@ -44,7 +44,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
         let format = tokenizer.analyze(text, pos, index_end, allow_value, true)?;
         if format.is_key_value() {
             let key_token = tokenizer.get(pos);
-            let key = utils::compute_hash(key_token.get_text(text));
+            let key = crate::utils::compute_hash(key_token.get_text(text));
             if r.named.contains_key(&key) {
                 return Err(Error::with_token(
                     text,

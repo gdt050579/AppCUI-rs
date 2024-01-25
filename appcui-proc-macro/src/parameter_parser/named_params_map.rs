@@ -1,4 +1,4 @@
-use super::{value::Value, Error, NamedParameter, PositionalParameter, color::Color};
+use super::{value::Value, Error, NamedParameter, PositionalParameter};
 use std::collections::HashMap;
 
 pub(crate) struct NamedParamsMap<'a> {
@@ -28,7 +28,7 @@ impl<'a> NamedParamsMap<'a> {
         }
         // lets validate that they are in the right order
         for index in 0..self.positional_count {
-            let h = super::utils::compute_hash(params[index].get_key());
+            let h = crate::utils::compute_hash(params[index].get_key());
             if self.all_params.contains_key(&h) {
                 return Err(Error::new(
                     param_list,
@@ -53,10 +53,10 @@ impl<'a> NamedParamsMap<'a> {
     pub(crate) fn validate_names_parameters(&mut self, param_list: &str, signature: &[NamedParameter]) -> Result<(), Error> {
         // start validating parameters from signature
         for param_sig in signature {
-            let h = super::utils::compute_hash(param_sig.get_name());
+            let h = crate::utils::compute_hash(param_sig.get_name());
             if let Some(index) = self.named.get(&h) {
                 // if parameter with name "..." is present and has an index
-                let k = super::utils::compute_hash(param_sig.get_key());
+                let k = crate::utils::compute_hash(param_sig.get_key());
                 if self.all_params.contains_key(&k) {
                     // this means that two aliases were present
                     // two posible errors
@@ -112,18 +112,18 @@ impl<'a> NamedParamsMap<'a> {
         Ok(())
     }
     pub(crate) fn get(&self, name: &str) -> Option<&Value<'a>> {
-        let k = super::utils::compute_hash(name);
+        let k = crate::utils::compute_hash(name);
         if let Some(index) = self.all_params.get(&k) {
             return Some(&self.values[*index as usize]);
         }
         None
     }
     pub(crate) fn contains(&self, name: &str) -> bool {
-        let k = super::utils::compute_hash(name);
+        let k = crate::utils::compute_hash(name);
         self.all_params.contains_key(&k)
     }
     pub(crate) fn get_mut(&mut self, name: &str) -> Option<&mut Value<'a>> {
-        let k = super::utils::compute_hash(name);
+        let k = crate::utils::compute_hash(name);
         if let Some(index) = self.all_params.get(&k) {
             return Some(&mut self.values[*index as usize]);
         }

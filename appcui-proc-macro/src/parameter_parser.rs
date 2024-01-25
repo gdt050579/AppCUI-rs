@@ -1,6 +1,5 @@
 mod tokenizer;
 mod error;
-mod utils;
 mod parser;
 mod signature;
 mod named_params_map;

@@ -10,7 +10,7 @@ static LOWER_CASE_TABLE: [u8; 256] = [
     250, 251, 252, 253, 254, 255,
 ];
 
-pub(super) fn compute_hash(text: &str) -> u64 {
+pub(crate) fn compute_hash(text: &str) -> u64 {
     let buf = text.as_bytes();
     // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
     if buf.len() == 0 {
@@ -25,7 +25,7 @@ pub(super) fn compute_hash(text: &str) -> u64 {
     }
     return hash;
 }
-pub(super) fn equal_ignore_case(text1: &str, text2: &str) -> bool {
+pub(crate) fn equal_ignore_case(text1: &str, text2: &str) -> bool {
     if text1.len() != text2.len() {
         return false;
     }
@@ -39,13 +39,13 @@ pub(super) fn equal_ignore_case(text1: &str, text2: &str) -> bool {
     }
     return true;
 }
-pub(super) fn to_i32(text: &str) -> Option<i32> {
+pub(crate) fn to_i32(text: &str) -> Option<i32> {
     if let Ok(value) = text.parse::<i32>() {
         return Some(value);
     }
     None
 }
-pub(super) fn to_percentage(text: &str) -> Option<f32> {
+pub(crate) fn to_percentage(text: &str) -> Option<f32> {
     let buf = text.as_bytes();
     let len = buf.len();
     if len == 0 {
@@ -87,7 +87,7 @@ pub(super) fn to_percentage(text: &str) -> Option<f32> {
     }
     return Some(fvalue);
 }
-pub(super) fn skip_spaces(buf: &[u8], start: usize) -> usize {
+pub(crate) fn skip_spaces(buf: &[u8], start: usize) -> usize {
     let len = buf.len();
     let mut pos = start;
     while (pos < len) && ((buf[pos] == b' ') || (buf[pos] == b'\n') || (buf[pos] == b'\r') || (buf[pos] == b'\t')) {
@@ -95,7 +95,7 @@ pub(super) fn skip_spaces(buf: &[u8], start: usize) -> usize {
     }
     pos
 }
-pub(super) fn is_word_character(value: u8) -> bool {
+pub(crate) fn is_word_character(value: u8) -> bool {
     match value {
         b'0'..=b'9' => true,
         b'a'..=b'z' => true,
@@ -105,7 +105,7 @@ pub(super) fn is_word_character(value: u8) -> bool {
         _ => false,
     }
 }
-pub(super) fn skip_words(buf: &[u8], start: usize) -> usize {
+pub(crate) fn skip_words(buf: &[u8], start: usize) -> usize {
     let len = buf.len();
     let mut pos = start;
     while (pos < len) && is_word_character(buf[pos]) {

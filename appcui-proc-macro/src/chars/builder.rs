@@ -82,7 +82,15 @@ fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
                 res.push_str(char_value);
                 res.push_str("'")
             }
-            _ => todo!("special chars not implemented"),
+            _ => {
+                let hash = crate::utils::compute_hash(char_value);
+                if let Some(special_char) = super::SpecialCharacter::from_hash(hash) {
+                    res.push_str("SpecialChar::");
+                    res.push_str(special_char.get_name());
+                } else {
+                    panic!("Unknown representation '{}' for a special character !",char_value);
+                }
+            },
         }
     }
     res.push_str(", ");

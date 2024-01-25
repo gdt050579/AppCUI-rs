@@ -1,9 +1,10 @@
 mod token_stream_to_string;
-mod char_utils;
+mod chars;
 mod key_utils;
 mod procmacro_builder;
 mod parameter_parser;
 mod controls;
+mod utils;
 use proc_macro::*;
 
 use procmacro_builder::{AppCUITrait, TraitImplementation, TraitsConfig, BaseControlType};
@@ -270,7 +271,7 @@ pub fn key(input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn char(input: TokenStream) -> TokenStream {
-    char_utils::create(input)
+    chars::create(input)
 }
 
 #[proc_macro]

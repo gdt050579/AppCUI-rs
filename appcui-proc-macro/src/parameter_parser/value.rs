@@ -1,7 +1,8 @@
 use super::alignament::Alignament;
 use super::color::Color;
 use super::named_params_map::NamedParamsMap;
-use super::{utils, Error};
+use super::Error;
+use crate::utils;
 
 pub(super) enum ValueType<'a> {
     Undetermined,
