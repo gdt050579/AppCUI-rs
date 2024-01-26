@@ -58,7 +58,7 @@ AppCUI supports various terminals (but each one comes with advantages and drawba
 | Keys               | Windows Console    | NCurses             |
 |--------------------|--------------------|---------------------|
 | Set dimension      | Yes                | -                   | 
-
+| Set title          | Yes                | -                   |
 
 ## Defaults
 
