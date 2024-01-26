@@ -379,3 +379,57 @@ fn check_mouse_on_scrollbars_resize() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_macro_init_1() {
+    let script = "
+    Paint.Enable(false)
+    Paint('Initial State')
+    CheckHash(0x5482fcc49857230a)
+    Key.Pressed(Tab)
+    Paint('Focus')
+    CheckHash(0x966EE395984D4A52)
+";
+    let text: &str = r"012345678901234567890123456789
+/- Some Text To Test -\
+\=====================/
+| () () () () () () ()| => 123
+|---------------------|
+\=-=-=-=-=-=-=-=-=-=-=/
+ \-=-=-=-=-=-=-=-=-=-/
+  \-=-=-=-=-=-=-=-=-/
+   \===============/
+    \ooooooooooooo/ => 1234567
+";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut c = canvas!("'30 x 10',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=2,tsm=1");
+    let s = c.get_drawing_surface();
+    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+    w.add(c);
+    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_macro_init_2() {
+    let script = "
+    Paint.Enable(false)
+    Paint('Initial State')
+    CheckHash(0x30DC80BF114CEFBE)     
+    Key.Pressed(Tab)
+    Paint('With focus')
+    CheckHash(0x4709CADE1C0994D3)
+";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut c = canvas!("'4 x 2',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=3,tsm=1,back={X,fore:Green,Back:Yellow}");
+    let s = c.get_drawing_surface();
+    s.clear(char!("<->,r,black"));
+    w.add(c);
+    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
+    a.add_window(w);
+    a.run();
+}

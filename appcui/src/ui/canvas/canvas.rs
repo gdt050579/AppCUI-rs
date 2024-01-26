@@ -114,12 +114,12 @@ impl OnResize for Canvas {
 }
 impl OnPaint for Canvas {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        if let Some(back) = self.background {
-            surface.clear(back);
-        }
         if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
             self.components.paint(surface, theme, self);
             surface.reduce_clip_by(0,0,1,1);
+        }
+        if let Some(back) = self.background {
+            surface.clear(back);
         }
         surface.draw_surface(self.x, self.y, &self.surface);
     }
