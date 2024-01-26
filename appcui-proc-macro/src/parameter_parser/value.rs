@@ -327,6 +327,21 @@ impl<'a> Value<'a> {
             self.end,
         ));
     }
+    fn validate_i32(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if let Some(_) = self.get_i32() {
+            return Ok(());
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting a numerical value (integer) for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }
     pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
         match expected_type {
@@ -338,6 +353,8 @@ impl<'a> Value<'a> {
             super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,
             super::ParamType::Size => self.validate_size(display_param_name, param_list)?,
             super::ParamType::Dict => self.validate_dict(display_param_name, param_list)?,
+            super::ParamType::Integer => self.validate_i32(display_param_name, param_list)?,
+            
         }
         // all good
         self.validated = true;
