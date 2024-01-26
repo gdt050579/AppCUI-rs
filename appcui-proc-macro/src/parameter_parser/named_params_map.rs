@@ -1,4 +1,4 @@
-use super::{value::Value, Error, NamedParameter, PositionalParameter};
+use super::{value::Value, Error, NamedParameter, PositionalParameter, size::Size};
 use std::collections::HashMap;
 
 pub(crate) struct NamedParamsMap<'a> {
@@ -131,5 +131,8 @@ impl<'a> NamedParamsMap<'a> {
     }
     pub(crate) fn get_bool(&mut self, name: &str) -> Option<bool> {
         self.get_mut(name)?.get_bool()
+    }
+    pub(crate) fn get_size(&mut self, name: &str) -> Option<Size> {
+        self.get_mut(name)?.get_size()
     }
 }

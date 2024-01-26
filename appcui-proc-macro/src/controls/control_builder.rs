@@ -1,4 +1,5 @@
 use crate::parameter_parser;
+use crate::parameter_parser::size::Size;
 use crate::parameter_parser::*;
 use crate::token_stream_to_string::TokenStreamToString;
 use proc_macro::*;
@@ -92,6 +93,9 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str("false");
         }
     }
+    fn add_size(&mut self, value: Size) {
+        self.content.push_str(format!("Size::new({},{})", value.width, value.height).as_str());
+    }
     pub(super) fn init_control(&mut self, method: &str) {
         self.content.push_str(method);
         self.content.push('(');
@@ -126,6 +130,22 @@ impl<'a> ControlBuilder<'a> {
         } else {
             if let Some(default_value) = default {
                 self.add_bool(default_value);
+            } else {
+                panic!(
+                    "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                    param_name
+                );
+            }
+        }
+    }
+    pub(super) fn add_size_parameter(&mut self, param_name: &str, default: Option<Size>) {
+        self.add_comma();
+        let value = self.parser.get_size(param_name);
+        if let Some(size_value) = value {
+            self.add_size(size_value);
+        } else {
+            if let Some(default_value) = default {
+                self.add_size(default_value);
             } else {
                 panic!(
                     "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
@@ -254,6 +274,18 @@ impl<'a> ControlBuilder<'a> {
         self.content.push_str("\t");
         self.content.push_str(content);
         self.content.push_str("\n");
+    }
+    #[inline(always)]
+    pub(super) fn get_dict(&mut self, name: &str) -> Option<&mut NamedParamsMap<'a>> {
+        self.parser.get_mut(name)?.get_dict()
+    }
+    #[inline(always)]
+    pub(super) fn get_string_representation(&self) -> &str {
+        &self.string_representation
+    }
+    #[inline(always)]
+    pub(super) fn has_parameter(&self, name: &str) -> bool {
+        self.parser.contains(name)
     }
 }
 impl Into<TokenStream> for ControlBuilder<'_> {

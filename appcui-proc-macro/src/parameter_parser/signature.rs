@@ -7,7 +7,9 @@ pub(crate) enum ParamType {
     Flags,
     Alignament,
     Color,
+    Size,
     Layout,
+    Dict,
 }
 
 pub(crate) struct PositionalParameter {

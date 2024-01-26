@@ -9,3 +9,4 @@ pub (crate) mod threestatebox;
 pub (crate) mod window;
 pub (crate) mod toolbaritem;
 pub (crate) mod colorpicker;
+pub (crate) mod canvas;

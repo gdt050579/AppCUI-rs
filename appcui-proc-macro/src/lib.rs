@@ -313,3 +313,8 @@ pub fn colorpicker(input: TokenStream) -> TokenStream {
 pub fn threestatebox(input: TokenStream) -> TokenStream {
     crate::controls::threestatebox::create(input)
 }
+
+#[proc_macro]
+pub fn canvas(input: TokenStream) -> TokenStream {
+    crate::controls::canvas::create(input)
+}

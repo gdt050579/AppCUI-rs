@@ -61,7 +61,7 @@ fn unicode_number_to_value(text: &str) -> u32 {
     }
     value
 }
-fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
+pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
     dict.validate_positional_parameters(param_list, POSILITIONAL_PARAMETERS).unwrap();
     dict.validate_names_parameters(param_list, NAMED_PARAMETERS).unwrap();
     let mut res = String::with_capacity(64);
