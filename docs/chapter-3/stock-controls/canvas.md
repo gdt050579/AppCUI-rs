@@ -1,6 +1,6 @@
 # Canvas
 
-Represent a surface that can be drawn and scrolled as part of a control:
+Represent a surface that can be drawn under a view-port:
 
 <img src="img/control.png" width=300/>
 
@@ -63,6 +63,7 @@ The following keys are processed by a canvas control if it has focus:
 | `Shift+Right`                       | Moves the horizontal view port coordonate so that the right side of the inner surface is displayed                                     |
 | `Shift+Down`                        | Moves the vertical view port coordonate so that the bottom side of the inner surface is displayed                                      |
 | `Ctrl`+{`Left`,`Right`,`Up`,`Down`} | Move the view port to a specified direction by a number of characters that is equal to the width for Left/Right or height for Up/Down. |
+| `PageUp`, `PageDown`                | has the same effect as `Ctrl`+{`Up` or `Down`}                                                                                         |
 | `Home`                              | Moves the view port to the coordonates (0,0)                                                                                           |
 | `End`                               | Moves the view port so that the bottom-right part of the inner surface is visible                                                      |
 

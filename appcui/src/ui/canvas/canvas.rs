@@ -167,11 +167,11 @@ impl OnKeyPressed for Canvas {
                 self.move_scroll_to(self.x - self.get_size().width as i32, self.y);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Up") => {
+            key!("Ctrl+Up") | key!("PageUp")=> {
                 self.move_scroll_to(self.x, self.y + self.get_size().height as i32);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Down") => {
+            key!("Ctrl+Down") | key!("PageDown")=> {
                 self.move_scroll_to(self.x, self.y - self.get_size().height as i32);
                 EventProcessStatus::Processed
             }
@@ -248,3 +248,4 @@ impl OnMouseEvent for Canvas {
         }
     }
 }
+

@@ -433,3 +433,52 @@ fn check_macro_init_2() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_pageup_pagedown() {
+    let text = r"--- From Wiki ----
+Rust is a multi-paradigm, general-purpose 
+programming language that emphasizes performance, 
+type safety, and concurrency. It enforces memory 
+safety—meaning that all references point to valid 
+memory—without a garbage collector. To 
+simultaneously enforce memory safety and prevent 
+data races, its 'borrow checker' tracks the object 
+lifetime of all references in a program during 
+compilation. Rust was influenced by ideas from 
+functional programming, including immutability, 
+higher-order functions, and algebraic data types. 
+It is popular for systems programming.
+
+From: https://en.wikipedia.org/wiki/Rust_(programming_language)
+";
+let script = "
+Paint.Enable(false)
+Resize(60,20)
+Paint('Initial state')
+CheckHash(0xc9196f52d863ff88)
+Key.Pressed(PageDown)
+Paint('Page down (first line: simultabeously ...)')
+CheckHash(0x27f6cbecd53c03f8)
+Key.Pressed(PageDown)
+Paint('Page Down (first line: compilation. ....)')
+CheckHash(0xe1527c32d87dfd3b)
+Key.Pressed(PageDown)
+Paint('Another page down (nothing changes)')
+CheckHash(0xe1527c32d87dfd3b)
+Key.Pressed(PageUp)
+Paint('Page Up (first line: type safety, and ...)')
+CheckHash(0x9e29d2f1826c129)
+Key.Pressed(PageUp)
+Paint('Back to the initial state')
+CheckHash(0xc9196f52d863ff88)
+";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut c = canvas!("'60x15',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let s = c.get_drawing_surface();
+    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
