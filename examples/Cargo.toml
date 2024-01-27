@@ -20,6 +20,10 @@ name = "buttons"
 path = "buttons.rs"
 
 [[example]]
+name = "canvas"
+path = "canvas.rs"
+
+[[example]]
 name = "checkboxes"
 path = "checkboxes.rs"
 
