@@ -2,7 +2,7 @@
 
 Represent a surface that can be drawn under a view-port:
 
-<img src="img/control.png" width=300/>
+<img src="img/canvas.png" width=300/>
 
 To create a canvas use `Canvas::new` method (with 3 parameters: a size, a layout and initialization flags).
 ```rs
@@ -69,62 +69,36 @@ The following keys are processed by a canvas control if it has focus:
 
 ## Example
 
-The following code creates a window with two canvass (`Add` and `Reset`). When `Add` canvas is pressed a number is incremented and set as the text of the `Add` canvas. When `Reset` canvas is being pressed, the counter is reset to 0.
+The following code uses a canvas to create a viewer over the Rust language definition from wikipedia:
 
 ```rs
 use appcui::prelude::*;
 
-#[Window(events = canvasEvents)]
-struct MyWin {
-    add: Handle<canvas>,
-    reset: Handle<canvas>,
-    counter: i32,
-}
+static text: &str = r"--- From Wiki ----
+Rust is a multi-paradigm, general-purpose 
+programming language that emphasizes performance, 
+type safety, and concurrency. It enforces memory 
+safety—meaning that all references point to valid 
+memory—without a garbage collector. To 
+simultaneously enforce memory safety and prevent 
+data races, its 'borrow checker' tracks the object 
+lifetime of all references in a program during 
+compilation. Rust was influenced by ideas from 
+functional programming, including immutability, 
+higher-order functions, and algebraic data types. 
+It is popular for systems programming.
 
-impl MyWin {
-    fn new() -> Self {
-        let mut win = MyWin {
-            base: Window::new("My Win", Layout::new("d:c,w:40,h:6"), window::Flags::None),
-            add: Handle::None,
-            reset: Handle::None,
-            counter: 0,
-        };
-        win.add = win.add(canvas::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), canvas::Type::Normal));
-        win.reset = win.add(canvas::new("&Reset", Layout::new("x:75%,y:2,w:13,a:c",), canvas::Type::Normal));
-        win
-    }
-    fn update_add_canvas_caption(&mut self) {
-        let h = self.add;
-        let new_text = format!("Add ({})",self.counter);
-        if let Some(canvas) = self.get_control_mut(h) {
-            canvas.set_caption(new_text.as_str());
-        }
-    }
-}
-
-impl canvasEvents for MyWin {
-    fn on_pressed(&mut self, canvas_handle: Handle<canvas>) -> EventProcessStatus {
-        if canvas_handle == self.add {
-            // 'Add' canvas was pressed - lets increment the counter
-            self.counter += 1;
-            self.update_add_canvas_caption();
-            return EventProcessStatus::Processed;
-        }
-        if canvas_handle == self.reset {
-            // 'Reset` canvas was pressed - counter will become 0
-            self.counter = 0;
-            self.update_add_canvas_caption();
-            return EventProcessStatus::Processed;
-        }
-        // unknown handle - we'll ignore this event
-        EventProcessStatus::Ignored
-    }
-}
-
+From: https://en.wikipedia.org/wiki/Rust_(programming_language)
+";
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    app.add_window(MyWin::new());
-    app.run();
+    let mut a = App::new().size(Size::new(60,20)).build()?;
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut c = canvas!("'60x15',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let s = c.get_drawing_surface();
+    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+    w.add(c);
+    a.add_window(w);
+    a.run();
     Ok(())
 }
 ```
