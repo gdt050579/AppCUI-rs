@@ -380,7 +380,6 @@ fn check_mouse_on_scrollbars_resize() {
     a.run();
 }
 
-
 #[test]
 fn check_macro_init_1() {
     let script = "
@@ -452,7 +451,7 @@ It is popular for systems programming.
 
 From: https://en.wikipedia.org/wiki/Rust_(programming_language)
 ";
-let script = "
+    let script = "
 Paint.Enable(false)
 Resize(60,20)
 Paint('Initial state')
@@ -480,5 +479,69 @@ CheckHash(0xc9196f52d863ff88)
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_resize_surface() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x98D5E1882902B363)
+        Key.Pressed(Enter)
+        Paint('Resized')
+        CheckHash(0xE8ACC85E3F652EA2)
+    ";
+    const text: &str = r"--- From Wiki ----
+    Rust is a multi-paradigm, general-purpose 
+    programming language that emphasizes performance, 
+    type safety, and concurrency. It enforces memory 
+    safety—meaning that all references point to valid 
+    memory—without a garbage collector. To 
+    simultaneously enforce memory safety and prevent 
+    data races, its 'borrow checker' tracks the object 
+    lifetime of all references in a program during 
+    compilation. Rust was influenced by ideas from 
+    functional programming, including immutability, 
+    higher-order functions, and algebraic data types. 
+    It is popular for systems programming.
+    
+    From: https://en.wikipedia.org/wiki/Rust_(programming_language)
+    ";
+
+    #[Window(events = ButtonEvents, internal: true)]
+    struct MyWin {
+        viewer: Handle<Canvas>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: window!("'My Win',d:c,w:40,h:16"),
+                viewer: Handle::None,
+            };
+            let mut c = Canvas::new(Size::new(6, 3), Layout::new("l:15,t:0,b:0,r:0"), canvas::Flags::ScrollBars);
+            let s = c.get_drawing_surface();
+            s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+            win.viewer = win.add(c);
+            win.add(button!("Test,l:1,t:1,a:tl,w:10"));
+            win
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+            let h = self.viewer;
+            if let Some(canvas) = self.get_control_mut(h) {
+                canvas.resize_surface(Size::new(60, 15));
+                canvas
+                    .get_drawing_surface()
+                    .write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
