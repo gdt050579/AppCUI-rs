@@ -1,6 +1,5 @@
 mod canvas;
 mod initialization_flags;
-pub mod events;
 #[cfg(test)]
 mod tests;
 
