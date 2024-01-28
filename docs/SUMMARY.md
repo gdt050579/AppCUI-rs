@@ -53,6 +53,7 @@
         - [Line]()
         - [ListView]()
         - [ImageViewer]()
+        - [KeySelector]()
         - [NumericSelector]()
         - [Panel](chapter-3/stock-controls/panel.md)
         - [Password]()
