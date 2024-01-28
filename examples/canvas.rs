@@ -4,7 +4,7 @@ use appcui::prelude::*;
 // link: https://www.gutenberg.org/cache/epub/1342/pg1342.txt
 //     : https://www.gutenberg.org/ebooks/1342
 
-static book: &str="
+static BOOK: &str="
 The Project Gutenberg eBook of Pride and Prejudice
     
 This ebook is for the use of anyone anywhere in the United States and
@@ -303,7 +303,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut win = window!("Title:'Pride and Prejudice',d:c,w:80,h:20,flags:Sizeable");
     let mut c = canvas!("'80x300',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
     let s = c.get_drawing_surface();
-    s.write_string(0, 0, book, CharAttribute::with_color(Color::White, Color::Black), true);
+    s.write_string(0, 0, BOOK, CharAttribute::with_color(Color::White, Color::Black), true);
     win.add(c);
     app.add_window(win);
     app.run();

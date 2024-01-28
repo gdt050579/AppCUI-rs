@@ -33,7 +33,7 @@
     - [Components]() <!-- (chapter-3/components.md) -->
         - [ScrollBar]()
         - [Options button]()
-        - [Text]
+        - [Text]()
     - [Event loop](chapter-3/event_loop.md)
         - [Window](chapter-3/event-loop/window.md)
         - [Toolbar](chapter-3/event-loop/toolbar.md)
