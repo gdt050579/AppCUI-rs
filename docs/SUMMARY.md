@@ -30,7 +30,10 @@
         - [Anchors](chapter-3/layout/anchors.md)
     - [Instantiate via Macros](chapter-3/instantiate_via_macros.md)
     - [Common methods for all Controls](chapter-3/common_methods.md)
-    - [Components](chapter-3/components.md)
+    - [Components]() <!-- (chapter-3/components.md) -->
+        - [ScrollBar]()
+        - [Options button]()
+        - [Text]
     - [Event loop](chapter-3/event_loop.md)
         - [Window](chapter-3/event-loop/window.md)
         - [Toolbar](chapter-3/event-loop/toolbar.md)
@@ -68,3 +71,8 @@
     - [Open/Save dialog]()
     - [Notifications dialogs]()
     - [Window manager dialog]() 
+
+- [Desktop]()
+    - [Custom desktops]()
+    - [Menus]()
+    - [Command bar]()
