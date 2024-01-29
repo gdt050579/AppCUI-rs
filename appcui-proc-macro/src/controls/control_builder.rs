@@ -65,9 +65,9 @@ impl<'a> ControlBuilder<'a> {
             let ref_str: &str = std::mem::transmute(builder.string_representation.as_str());
             builder.parser = parameter_parser::parse(ref_str).unwrap();
             builder.parser.validate_positional_parameters(ref_str, positional_parameters).unwrap();
-            builder.parser.validate_names_parameters(ref_str, named_parameters).unwrap();
+            builder.parser.validate_named_parameters(ref_str, named_parameters).unwrap();
             if add_common_parameters {
-                builder.parser.validate_names_parameters(ref_str, CONTROL_NAMED_PARAMATERS).unwrap();
+                builder.parser.validate_named_parameters(ref_str, CONTROL_NAMED_PARAMATERS).unwrap();
             }
             builder.parser.check_unkwnon_params(ref_str).unwrap();
             builder.ref_str = ref_str;

@@ -1,5 +1,6 @@
 mod token_stream_to_string;
 mod chars;
+mod menu;
 mod key_utils;
 mod procmacro_builder;
 mod parameter_parser;

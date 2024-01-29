@@ -50,7 +50,7 @@ impl<'a> NamedParamsMap<'a> {
         }
         Ok(())
     }
-    pub(crate) fn validate_names_parameters(&mut self, param_list: &str, signature: &[NamedParameter]) -> Result<(), Error> {
+    pub(crate) fn validate_named_parameters(&mut self, param_list: &str, signature: &[NamedParameter]) -> Result<(), Error> {
         // start validating parameters from signature
         for param_sig in signature {
             let h = crate::utils::compute_hash(param_sig.get_name());
