@@ -243,59 +243,58 @@ use appcui::prelude::*;
 //     fn new()->Self { MyControl{base: ControlBase::new("d:c,w:10,h:1", StatusFlags::)}}
 // }
 
-// #[Window(events = ButtonEvents)]
-// struct MyWin {
-//     text: Handle<Label>,
-//     value: i32,
-// }
+static text: &str = r"--- From Wiki ----
+Rust is a multi-paradigm, general-purpose 
+programming language that emphasizes performance, 
+type safety, and concurrency. It enforces memory 
+safety—meaning that all references point to valid 
+memory—without a garbage collector. To 
+simultaneously enforce memory safety and prevent 
+data races, its 'borrow checker' tracks the object 
+lifetime of all references in a program during 
+compilation. Rust was influenced by ideas from 
+functional programming, including immutability, 
+higher-order functions, and algebraic data types. 
+It is popular for systems programming.
 
-// impl MyWin {
-//     fn new() -> Self {
-//         let mut win = MyWin {
-//             base: window!("'My Win',d:c,w:40,h:16"),
-//             text: Handle::None,
-//             value: 1,
-//         };
-//         win.text = win.add(label!("'Value=10',d:c,w:24,h:1"));
-//         win.add(button!("Double,d:b,w:15"));
-//         win
-//     }
-// }
-// impl ButtonEvents for MyWin {
-//     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
-//         // first run the modal window
-//         if let Some(response) = MyModalWin::new(self.value).show() {
-//             // set the new value
-//             self.value = response;
-//             let h = self.text;
-//             if let Some(label) = self.get_control_mut(h) {
-//                 label.set_caption(format!("Valu={}", response).as_str());
-//             }
-//         }
-//         EventProcessStatus::Processed
-//     }
-// }
-static text: &str = r"012345678901234567890123456789
-/- Some Text To Test -\
-\=====================/
-| () () () () () () ()| => 123
-|---------------------|
-\=-=-=-=-=-=-=-=-=-=-=/
- \-=-=-=-=-=-=-=-=-=-/
-  \-=-=-=-=-=-=-=-=-/
-   \===============/
-    \ooooooooooooo/ => 1234567
+From: https://en.wikipedia.org/wiki/Rust_(programming_language)
 ";
+
+#[Window(events = ButtonEvents)]
+struct MyWin {
+    viewer: Handle<Canvas>,
+}
+
+impl MyWin {
+    fn new() -> Self {
+        let mut win = MyWin {
+            base: window!("'My Win',d:c,w:40,h:16"),
+            viewer: Handle::None,
+        };
+        let mut c = Canvas::new(Size::new(6, 3), Layout::new("l:15,t:0,b:0,r:0"), canvas::Flags::ScrollBars);
+        let s = c.get_drawing_surface();
+        s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+        win.viewer = win.add(c);
+        win.add(button!("Test,l:1,t:1,a:tl,w:10"));
+        win
+    }
+}
+impl ButtonEvents for MyWin {
+    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+        // first run the modal window
+        let h = self.viewer;
+        if let Some(canvas) = self.get_control_mut(h) {
+            canvas.resize_surface(Size::new(60, 15));
+            canvas
+                .get_drawing_surface()
+                .write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+        }
+        EventProcessStatus::Processed
+    }
+}
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(60,20)).build()?;
-    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
-    let mut c = Canvas::new(Size::new(30, 10), Layout::new("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
-    c.set_components_toolbar_margins(2, 1);
-    let s = c.get_drawing_surface();
-    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
-    w.add(c);
-    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
-    a.add_window(w);
+    let mut a = App::new().size(Size::new(60, 20)).build()?;
+    a.add_window(MyWin::new());
     a.run();
     Ok(())
 
@@ -303,7 +302,7 @@ fn main() -> Result<(), appcui::system::Error> {
     // // let script = "
     // //     Paint()
     // //     Key.Pressed(Up)
-    // //     Paint()   
+    // //     Paint()
     // // ";
     // // let mut a = App::debug(80, 20, script).build()?;
 
@@ -330,4 +329,4 @@ fn main() -> Result<(), appcui::system::Error> {
     // //a.add_window(MyWin::new());
     // a.run();
     // Ok(())
-} 
+}

@@ -135,4 +135,7 @@ impl<'a> NamedParamsMap<'a> {
     pub(crate) fn get_size(&mut self, name: &str) -> Option<Size> {
         self.get_mut(name)?.get_size()
     }
+    pub(crate) fn get_parameters_count(&self)->usize {
+        self.all_params.len()
+    }
 }
