@@ -9,7 +9,7 @@ pub(crate) enum MenuItemType {
 }
 
 static HASH_TO_ALIGNAMENT: [Option<MenuItemType>; 45] = [
-    None,
+    Some(MenuItemType::Line),
     Some(MenuItemType::SingleChoice),
     Some(MenuItemType::SubMenu),
     None,
@@ -33,7 +33,7 @@ static HASH_TO_ALIGNAMENT: [Option<MenuItemType>; 45] = [
     None,
     Some(MenuItemType::SingleChoice),
     None,
-    None,
+    Some(MenuItemType::Line),
     Some(MenuItemType::SubMenu),
     None,
     None,
@@ -57,7 +57,7 @@ static HASH_TO_ALIGNAMENT: [Option<MenuItemType>; 45] = [
 ];
 
 static HASH_COLISION_VALIDATOR: [u64; 45] = [
-    0x0,
+    0x823B8B195CE214EF,
     0x722B5C4B1B0B8CBD,
     0x61C886171CC4D9CA,
     0x0,
@@ -81,7 +81,7 @@ static HASH_COLISION_VALIDATOR: [u64; 45] = [
     0x0,
     0xD5DC35DCB7E762A9,
     0x0,
-    0x0,
+    0xA9568C2DDFE55A5C,
     0x42FF01A2E311EE9A,
     0x0,
     0x0,
