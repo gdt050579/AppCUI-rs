@@ -1,6 +1,7 @@
 use super::{
     appcui_traits::{AppCUITrait, TraitType},
-    traits_configuration::TraitsConfig, BaseControlType,
+    traits_configuration::TraitsConfig,
+    BaseControlType,
 };
 
 use super::utils;
@@ -21,7 +22,7 @@ pub(crate) struct Arguments {
     pub desktop_control: bool,
     pub base: String,
     pub modal_result_type: String,
-    // internal    
+    // internal
     state: State,
     key: String,
     values: Vec<String>,
@@ -87,7 +88,10 @@ impl Arguments {
             self.root = if value { "crate" } else { "appcui" };
             self.internal_mode = value;
         } else {
-            panic!("The value for `internal` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
+            panic!(
+                "The value for `internal` attribute can only be 'true' or 'false'. Provided value was: {}",
+                self.values[0].as_str()
+            );
         }
     }
     fn validate_window_control(&mut self) {
@@ -95,7 +99,10 @@ impl Arguments {
         if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
             self.window_control = value;
         } else {
-            panic!("The value for `window` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
+            panic!(
+                "The value for `window` attribute can only be 'true' or 'false'. Provided value was: {}",
+                self.values[0].as_str()
+            );
         }
     }
     fn validate_desktop_control(&mut self) {
@@ -103,7 +110,10 @@ impl Arguments {
         if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
             self.desktop_control = value;
         } else {
-            panic!("The value for `desktop` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
+            panic!(
+                "The value for `desktop` attribute can only be 'true' or 'false'. Provided value was: {}",
+                self.values[0].as_str()
+            );
         }
     }
     fn validate_debug_attribute(&mut self) {
@@ -111,7 +121,10 @@ impl Arguments {
         if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
             self.debug_mode = value;
         } else {
-            panic!("The value for `debug` attribute can only be 'true' or 'false'. Provided value was: {}",self.values[0].as_str());
+            panic!(
+                "The value for `debug` attribute can only be 'true' or 'false'. Provided value was: {}",
+                self.values[0].as_str()
+            );
         }
     }
     fn validate_overwrite_attribute(&mut self, config: &mut TraitsConfig) {
@@ -119,7 +132,7 @@ impl Arguments {
             if let Some(appcui_trait) = AppCUITrait::new(&trait_name) {
                 if appcui_trait.get_trait_type() != TraitType::RawEvent {
                     panic!(
-                        "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}", 
+                        "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}",
                         config.traits_of_type(TraitType::RawEvent)
                     );
                 }
@@ -127,8 +140,7 @@ impl Arguments {
                 if config.get(appcui_trait).can_be_overwritten() {
                     config.clear(appcui_trait);
                 } else {
-                    panic!(
-                        "Trait {trait_name} can not be overwritten (for proc macro: {})",config.get_name());
+                    panic!("Trait {trait_name} can not be overwritten (for proc macro: {})", config.get_name());
                 }
             } else {
                 panic!(
@@ -143,7 +155,7 @@ impl Arguments {
             if let Some(appcui_trait) = AppCUITrait::new(&trait_name) {
                 if appcui_trait.get_trait_type() != TraitType::ControlEvent {
                     panic!(
-                        "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}", 
+                        "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}",
                         config.traits_of_type(TraitType::ControlEvent)
                     );
                 }
@@ -151,8 +163,7 @@ impl Arguments {
                 if config.get(appcui_trait).can_be_overwritten() {
                     config.clear(appcui_trait);
                 } else {
-                    panic!(
-                        "Trait {trait_name} can not be overwritten (for proc macro: {})",config.get_name());
+                    panic!("Trait {trait_name} can not be overwritten (for proc macro: {})", config.get_name());
                 }
             } else {
                 panic!(
@@ -173,7 +184,10 @@ impl Arguments {
             "response" => self.validate_modal_response(),
             "desktop" => self.validate_desktop_control(),
             _ => {
-                panic!("Unknown attribute `{}` for AppCUI. Accepted attributes are 'base' , 'overwrite' and 'debug' !",self.key.as_str());
+                panic!(
+                    "Unknown attribute `{}` for AppCUI. Accepted attributes are 'base' , 'overwrite' and 'debug' !",
+                    self.key.as_str()
+                );
             }
         }
     }
@@ -184,40 +198,60 @@ impl Arguments {
             self.values.clear();
             self.state = State::ExpectEqual;
         } else {
-            panic!(
-                "Expecting a key (a-zA-Z0-9) but got: `{}`",
-                token.to_string()
-            );
+            panic!("Expecting a key (a-zA-Z0-9) but got: `{}`", token.to_string());
         }
     }
     fn validate_expect_equal(&mut self, token: TokenTree) {
         if let TokenTree::Punct(punctuation) = token {
             if (punctuation.as_char() != '=') && (punctuation.as_char() != ':') {
-                panic!(
-                    "Expecting asign ('=' or ':') symbol but got: {}",
-                    punctuation.as_char()
-                );
+                panic!("Expecting asign ('=' or ':') symbol but got: {}", punctuation.as_char());
             }
             self.state = State::ExpectValue;
         } else {
-            panic!(
-                "Expecting asign ('=' or ':') symbol but got: {}",
-                token.to_string()
-            );
+            panic!("Expecting asign ('=' or ':') symbol but got: {}", token.to_string());
         }
     }
     fn validate_expect_value(&mut self, token: TokenTree) {
-        if let TokenTree::Ident(ident) = token {
-            self.values.push(ident.to_string());
-            self.state = State::ExpectComma;
-        } else if let TokenTree::Literal(literal) = token {
-            self.values.push(literal.to_string());
-            self.state = State::ExpectComma;
-        } else {
-            panic!(
-                "Expecting a value (a-zA-Z0-9) but got: `{}`",
-                token.to_string()
-            );
+        match token {
+            TokenTree::Group(group) => {
+                if group.delimiter() != Delimiter::Bracket {
+                    panic!(
+                        "Expecting a value or a list of value [value-1, value-2, ... value-n] for key: {}",
+                        self.key
+                    );
+                }
+                let mut expect_value = true;
+                for inner_token in group.stream() {
+                    if expect_value {
+                        if let TokenTree::Ident(val) = inner_token {
+                            self.values.push(val.to_string());
+                        } else {
+                            panic!("Expecting a proper format for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token.to_string())
+                        }
+                    } else {
+                        if let TokenTree::Punct(p) = inner_token {
+                            if p.as_char() != ',' {
+                                panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,p.to_string())
+                            }
+                        } else {
+                            panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token.to_string())
+                        }
+                    }
+                    expect_value = !expect_value;
+                }
+                self.state = State::ExpectComma;
+            }
+            TokenTree::Ident(ident) => {
+                self.values.push(ident.to_string());
+                self.state = State::ExpectComma;
+            }
+            TokenTree::Literal(literal) => {
+                self.values.push(literal.to_string());
+                self.state = State::ExpectComma;
+            }
+            _ => {
+                panic!("Expecting a value (a-zA-Z0-9) but got: `{}`", token.to_string());
+            }
         }
     }
     fn validate_expect_comma(&mut self, token: TokenTree, config: &mut TraitsConfig) {
@@ -227,18 +261,12 @@ impl Arguments {
                 return;
             }
             if punctuation.as_char() != ',' {
-                panic!(
-                    "Expecting delimiter (',' comma) symbol but got: {}",
-                    punctuation.as_char()
-                );
+                panic!("Expecting delimiter (',' comma) symbol but got: {}", punctuation.as_char());
             }
             self.validate_key_value_pair(config);
             self.state = State::ExpectKey;
         } else {
-            panic!(
-                "Expecting delimiter (',' comma) symbol but got:{}",
-                token.to_string()
-            );
+            panic!("Expecting delimiter (',' comma) symbol but got:{}", token.to_string());
         }
     }
     pub(crate) fn parse(&mut self, input: TokenStream, config: &mut TraitsConfig) {
@@ -254,7 +282,10 @@ impl Arguments {
         match self.state {
             State::ExpectKey => {}
             State::ExpectEqual => {
-                panic!("Unexpected end of procedural macro attribute (expecting an asignament character ':' or '=') after key: '{}'", self.key.as_str());
+                panic!(
+                    "Unexpected end of procedural macro attribute (expecting an asignament character ':' or '=') after key: '{}'",
+                    self.key.as_str()
+                );
             }
             State::ExpectValue => {
                 panic!(
