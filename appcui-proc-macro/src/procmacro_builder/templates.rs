@@ -82,3 +82,31 @@ impl OnWindowRegistered for $(STRUCT_NAME) {
     fn on_registered(&mut self)  { self.base.on_registered(); }
 }
 ";
+
+pub(crate) static COMMANDS_TEMPLATE: &str = "
+mod $(MOD_NAME)
+{
+    #[repr(u32)]
+    #[derive(Copy,Clone,Eq,PartialEq,Debug)]
+    pub enum Commands {
+        $(COMMANDS_IDS)
+    }
+    impl TryFrom<u32> for Commands {
+        type Error = ();
+
+        fn try_from(value: u32) -> Result<Self, Self::Error> {
+            match value {
+                $(U32_TO_COMMANDS)
+                _ => Err(())
+            }
+        }
+    }
+    impl From<Commands> for u32 {
+        fn from(value: Commands)->u32 {
+            match value {
+                $(COMMANDS_TO_U32)
+            }
+        }
+    }
+}
+";

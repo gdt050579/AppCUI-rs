@@ -1,6 +1,51 @@
 use super::{arguments::Arguments, templates, utils, AppCUITrait, BaseControlType, TraitImplementation, TraitsConfig};
 use proc_macro::TokenStream;
+use std::fmt::Write;
 use std::str::FromStr;
+
+fn generate_commands(code: &mut String, a: &Arguments, struct_name: &str) -> String {
+    let mut cmd_code = String::with_capacity(1024);
+    cmd_code.push_str(templates::COMMANDS_TEMPLATE);
+    let mut temp = String::with_capacity(256);
+
+    // step 1 --> build the module name
+    temp.clear();
+    for mut ch in struct_name.chars() {
+        if (ch >= 'A') && (ch <= 'Z') {
+            ch = (((ch as u32) as u8) | 0x20) as char;
+        }
+        temp.push(ch);
+    }
+    cmd_code = cmd_code.replace("$(MOD_NAME)", &temp);
+
+    // step 2 --> generate the list of enum variants
+    temp.clear();
+    let mut idx = 0u32;
+    for cmd in &a.commands {
+        let _ = write!(temp, "{} = {}, ", &cmd, idx).unwrap();
+        idx += 1;
+    }
+    cmd_code = cmd_code.replace("$(COMMANDS_IDS)", &temp);
+
+    // step 3 --> generate the conversion code (from u32 to commands)
+    temp.clear();
+    let mut idx = 0u32;
+    for cmd in &a.commands {
+        let _ = writeln!(temp, "{} => Ok(Commands::{}),", idx, &cmd).unwrap();
+        idx += 1;
+    }
+    cmd_code = cmd_code.replace("$(U32_TO_COMMANDS)", &temp);
+
+    // step 2 --> generate the conversion code (from commands to u32)
+    temp.clear();
+    let mut idx = 0u32;
+    for cmd in &a.commands {
+        let _ = writeln!(temp, "Commands::{} => {},", &cmd, idx).unwrap();
+        idx += 1;
+    }
+    cmd_code = cmd_code.replace("$(COMMANDS_TO_U32)", &temp);
+    cmd_code
+}
 
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
@@ -44,29 +89,15 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     }
     // add commands
     if !a.commands.is_empty() {
-        code.push_str("mod ");
-        for mut ch in struct_name.chars() {
-            if (ch>='A') && (ch<='Z') {
-                ch = (((ch as u32) as u8) | 0x20) as char;
-            }
-            code.push(ch);
-        }
-        code.push_str(" {\n");
-        code.push_str("\t#[repr(u32)]\n\tpub enum Commands {\n");
-        for cmd in &a.commands {
-            code.push_str("\t\t");
-            code.push_str(cmd.as_str());
-            code.push_str(", \n");
-        }
-        code.push_str("\t}\n");
-        code.push_str("}\n");
+        let cmd_gen_code = generate_commands(&mut code, &a, &struct_name);
+        code.push_str(&cmd_gen_code);
     }
     // replace templates
     code = code
         .replace("$(STRUCT_NAME)", &struct_name)
         .replace("$(BASE)", &a.base)
         .replace("$(ROOT)", a.root)
-        .replace("$(MODAL_RESULT_TYPE)",&a.modal_result_type);
+        .replace("$(MODAL_RESULT_TYPE)", &a.modal_result_type);
     //println!("{}", code);
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }
