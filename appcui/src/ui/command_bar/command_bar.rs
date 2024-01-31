@@ -129,11 +129,12 @@ impl CommandBar {
         true
     }
     #[inline(always)]
-    pub fn set<T>(&mut self, key: T, text: &str, command: u32) -> bool
+    pub fn set<T,U>(&mut self, key: T, text: &str, command: U) -> bool
     where
         Key: From<T>,
+        u32: From<U>,
     {
-        self.set_with_key(Key::from(key), text, command)
+        self.set_with_key(Key::from(key), text, u32::from(command))
     }
 
     pub(crate) fn get_event(&self, key: Key) -> Option<CommandBarEvent> {

@@ -22,8 +22,8 @@ impl MyWin1 {
 }
 impl CommandBarEvents for MyWin1 {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("F1"), "MyWin-1-CMD-1", 1);
-        commandbar.set(key!("F2"), "MyWin-1-CMD-2", 2);
+        commandbar.set(key!("F1"), "MyWin-1-CMD-1", 1u32);
+        commandbar.set(key!("F2"), "MyWin-1-CMD-2", 2u32);
     }
 
     fn on_event(&mut self, command_id: u32) {

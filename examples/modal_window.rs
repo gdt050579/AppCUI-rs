@@ -81,7 +81,7 @@ impl MyDesktop {
 }
 impl CommandBarEvents for MyDesktop {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("F1"), "Create a modal window", 1);
+        commandbar.set(key!("F1"), "Create a modal window", 1u32);
     }
 
     fn on_event(&mut self, command_id: u32) {

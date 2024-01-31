@@ -84,12 +84,12 @@ fn check_tooltip_bottom_pos_no_show() {
 
 fn prepare_command_bar(size: Size) -> CommandBar {
     let mut c = CommandBar::new(size.width, size.height);
-    c.set(Key::new(KeyCode::F2, KeyModifier::None), "Save", 1);
-    c.set(Key::new(KeyCode::F3, KeyModifier::None), "Open", 2);
-    c.set(Key::new(KeyCode::F5, KeyModifier::None), "Run", 3);
-    c.set(Key::new(KeyCode::F7, KeyModifier::None), "Compile", 4);
-    c.set(Key::new(KeyCode::F8, KeyModifier::None), "Delete", 5);
-    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", 12345);
+    c.set(Key::new(KeyCode::F2, KeyModifier::None), "Save", 1u32);
+    c.set(Key::new(KeyCode::F3, KeyModifier::None), "Open", 2u32);
+    c.set(Key::new(KeyCode::F5, KeyModifier::None), "Run", 3u32);
+    c.set(Key::new(KeyCode::F7, KeyModifier::None), "Compile", 4u32);
+    c.set(Key::new(KeyCode::F8, KeyModifier::None), "Delete", 5u32);
+    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", 12345u32);
     c.update_positions();
     c
 }
