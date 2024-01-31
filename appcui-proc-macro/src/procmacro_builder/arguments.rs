@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::{
     appcui_traits::{AppCUITrait, TraitType},
     traits_configuration::TraitsConfig,
@@ -22,6 +24,7 @@ pub(crate) struct Arguments {
     pub desktop_control: bool,
     pub base: String,
     pub modal_result_type: String,
+    pub commands: Vec<String>,
     // internal
     state: State,
     key: String,
@@ -38,6 +41,7 @@ impl Arguments {
             root: "appcui",
             key: String::new(),
             values: Vec::with_capacity(8),
+            commands: Vec::new(),
             debug_mode: false,
             internal_mode: false,
             window_control: false,
@@ -84,7 +88,7 @@ impl Arguments {
 
     fn validate_internal_attribute(&mut self) {
         self.validate_one_value();
-        if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
+        if let Some(value) = crate::utils::to_bool(self.values[0].as_str()) {
             self.root = if value { "crate" } else { "appcui" };
             self.internal_mode = value;
         } else {
@@ -96,7 +100,7 @@ impl Arguments {
     }
     fn validate_window_control(&mut self) {
         self.validate_one_value();
-        if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
+        if let Some(value) = crate::utils::to_bool(self.values[0].as_str()) {
             self.window_control = value;
         } else {
             panic!(
@@ -107,7 +111,7 @@ impl Arguments {
     }
     fn validate_desktop_control(&mut self) {
         self.validate_one_value();
-        if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
+        if let Some(value) = crate::utils::to_bool(self.values[0].as_str()) {
             self.desktop_control = value;
         } else {
             panic!(
@@ -118,7 +122,7 @@ impl Arguments {
     }
     fn validate_debug_attribute(&mut self) {
         self.validate_one_value();
-        if let Some(value) = utils::string_to_bool(self.values[0].as_str()) {
+        if let Some(value) = crate::utils::to_bool(self.values[0].as_str()) {
             self.debug_mode = value;
         } else {
             panic!(
@@ -149,6 +153,24 @@ impl Arguments {
                 );
             }
         }
+    }
+    fn validate_commands(&mut self) {
+        let mut h = HashSet::with_capacity(self.values.len() * 2);
+        for command_name in &self.values {
+            if !super::utils::validate_struct_name(&command_name.as_str()) {
+                panic!(
+                    "Invalid ID: '{}'. An ID should start with a letter and may contain letter and numbers !",
+                    command_name
+                );
+            }
+            let hash = crate::utils::compute_hash(&command_name);
+            if h.contains(&hash) {
+                panic!("Commands must be unique. Duplicate command: {}", command_name);
+            }
+            h.insert(hash);
+        }
+        // all good --> move current value vector into commands and create a new one for values
+        self.commands = std::mem::replace(&mut self.values, Vec::new());
     }
     fn validate_events_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
@@ -183,9 +205,10 @@ impl Arguments {
             "window" => self.validate_window_control(),
             "response" => self.validate_modal_response(),
             "desktop" => self.validate_desktop_control(),
+            "commands" => self.validate_commands(),
             _ => {
                 panic!(
-                    "Unknown attribute `{}` for AppCUI. Accepted attributes are 'base' , 'overwrite' and 'debug' !",
+                    "Unknown attribute `{}` for AppCUI. Accepted attributes are 'overwrite', 'events', 'debug', 'response', 'commands' !",
                     self.key.as_str()
                 );
             }

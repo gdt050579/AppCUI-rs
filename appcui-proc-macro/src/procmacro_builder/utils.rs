@@ -1,16 +1,3 @@
-pub fn string_to_bool(text: &str) -> Option<bool> {
-    match text {
-        "true" | "yes" => {
-            return Some(true);
-        }
-        "false" | "no" => {
-            return Some(false);
-        }
-        _ => {
-            return None;
-        }
-    }
-}
 pub fn validate_struct_name(name: &str) -> bool {
     if name.len() == 0 {
         return false;

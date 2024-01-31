@@ -45,6 +45,19 @@ pub(crate) fn to_i32(text: &str) -> Option<i32> {
     }
     None
 }
+pub(crate) fn to_bool(text: &str) -> Option<bool> {
+    match text {
+        "true" | "yes" => {
+            return Some(true);
+        }
+        "false" | "no" => {
+            return Some(false);
+        }
+        _ => {
+            return None;
+        }
+    }
+}
 pub(crate) fn to_percentage(text: &str) -> Option<f32> {
     let buf = text.as_bytes();
     let len = buf.len();
