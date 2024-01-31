@@ -260,11 +260,10 @@ It is popular for systems programming.
 From: https://en.wikipedia.org/wiki/Rust_(programming_language)
 ";
 
-#[Window(events = ButtonEvents)]
+#[Window(events = ButtonEvents, commands=Save+Open+New)]
 struct MyWin {
     viewer: Handle<Canvas>,
 }
-
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
@@ -275,7 +274,8 @@ impl MyWin {
         let s = c.get_drawing_surface();
         s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
         win.viewer = win.add(c);
-        win.add(button!("Test,l:1,t:1,a:tl,w:10"));
+        win.add(button!("Test,l:1,t:1,a:tl,w:10"));     
+                           
         win
     }
 }

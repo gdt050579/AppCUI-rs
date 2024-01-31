@@ -42,7 +42,25 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         }
         code.push_str("\n");
     }
-
+    // add commands
+    if !a.commands.is_empty() {
+        code.push_str("mod ");
+        for mut ch in struct_name.chars() {
+            if (ch>='A') && (ch<='Z') {
+                ch = (((ch as u32) as u8) | 0x20) as char;
+            }
+            code.push(ch);
+        }
+        code.push_str(" {\n");
+        code.push_str("\t#[repr(u32)]\n\tpub enum Commands {\n");
+        for cmd in &a.commands {
+            code.push_str("\t\t");
+            code.push_str(cmd.as_str());
+            code.push_str(", \n");
+        }
+        code.push_str("\t}\n");
+        code.push_str("}\n");
+    }
     // replace templates
     code = code
         .replace("$(STRUCT_NAME)", &struct_name)
