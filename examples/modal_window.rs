@@ -72,20 +72,20 @@ impl ButtonEvents for MyWin {
     }
 }
 
-#[Desktop(events=CommandBarEvents)]
+#[Desktop(events=CommandBarEvents, commands=ShowModal)]
 struct MyDesktop {}
 impl MyDesktop {
     fn new() -> Self {
         Self { base: Desktop::new() }
     }
 }
-impl GenericCommandBarEvents for MyDesktop {
+impl CommandBarEvents for MyDesktop {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("F1"), "Create a modal window", 1u32);
+        commandbar.set(key!("F1"), "Create a modal window", mydesktop::Commands::ShowModal);
     }
 
-    fn on_event(&mut self, command_id: u32) {
-        if command_id == 1 {
+    fn on_event(&mut self, command_id: mydesktop::Commands) {
+        if command_id == mydesktop::Commands::ShowModal {
             let _response = MyWin::new("1", 1).show();
         }
     }

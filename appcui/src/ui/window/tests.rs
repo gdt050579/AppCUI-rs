@@ -1238,20 +1238,20 @@ fn check_modal_window() {
         }
     }
 
-    #[Desktop(events=CommandBarEvents,internal=true)]
+    #[Desktop(events=CommandBarEvents,internal=true, commands=CreateModal)]
     struct MyDesktop {}
     impl MyDesktop {
         fn new() -> Self {
             Self { base: Desktop::new() }
         }
     }
-    impl GenericCommandBarEvents for MyDesktop {
+    impl CommandBarEvents for MyDesktop {
         fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-            commandbar.set(key!("F1"), "Create a modal window", 1u32);
+            commandbar.set(key!("F1"), "Create a modal window", mydesktop::Commands::CreateModal);
         }
 
-        fn on_event(&mut self, command_id: u32) {
-            if command_id == 1 {
+        fn on_event(&mut self, command_id: mydesktop::Commands) {
+            if command_id == mydesktop::Commands::CreateModal {
                 let _response = MyWin::new("1", 1).show();
             }
         }

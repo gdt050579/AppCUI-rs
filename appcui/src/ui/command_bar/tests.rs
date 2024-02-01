@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[Window(events = CommandBarEvents, internal=true)]
+#[Window(events = CommandBarEvents, internal=true,commands=[Command1,Command2])]
 struct MyWin1 {
     info: Handle<Label>,
 }
@@ -20,17 +20,16 @@ impl MyWin1 {
         }
     }
 }
-impl GenericCommandBarEvents for MyWin1 {
+impl CommandBarEvents for MyWin1 {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("F1"), "MyWin-1-CMD-1", 1u32);
-        commandbar.set(key!("F2"), "MyWin-1-CMD-2", 2u32);
+        commandbar.set(key!("F1"), "MyWin-1-CMD-1", mywin1::Commands::Command1);
+        commandbar.set(key!("F2"), "MyWin-1-CMD-2", mywin1::Commands::Command2);
     }
 
-    fn on_event(&mut self, command_id: u32) {
+    fn on_event(&mut self, command_id: mywin1::Commands) {
         match command_id {
-            1 => self.set_info("Command-1 pressed"),
-            2 => self.set_info("Command-2 pressed"),
-            _ => {}
+            mywin1::Commands::Command1 => self.set_info("Command-1 pressed"),
+            mywin1::Commands::Command2 => self.set_info("Command-2 pressed"),
         }
     }
 }

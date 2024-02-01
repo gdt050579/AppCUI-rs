@@ -162,7 +162,7 @@ impl AppCUITrait {
             AppCUITrait::ButtonEvents => "impl ButtonEvents for $(STRUCT_NAME) {}",
             AppCUITrait::CheckBoxEvents => "impl CheckBoxEvents for $(STRUCT_NAME) {}",
             AppCUITrait::WindowEvents => "impl WindowEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::CommandBarEvents => "impl CommandBarEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::CommandBarEvents => "impl GenericCommandBarEvents for $(STRUCT_NAME) {}",
             AppCUITrait::MenuEvents => "impl MenuEvents for $(STRUCT_NAME) {}",
             AppCUITrait::DesktopEvents => "impl DesktopEvents for $(STRUCT_NAME) {}",
             AppCUITrait::ToolBarEvents => "impl ToolBarEvents for $(STRUCT_NAME) {}",

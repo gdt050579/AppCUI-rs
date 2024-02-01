@@ -110,3 +110,21 @@ mod $(MOD_NAME)
     }
 }
 ";
+pub(crate) static COMMANDBAR_EVENTS: &str = "
+trait CommandBarEvents {
+    fn on_update_commandbar(&self, commandbar: &mut CommandBar);
+    fn on_event(&mut self, command_id: $(MOD_NAME)::Commands);
+}
+impl GenericCommandBarEvents for $(STRUCT_NAME) {
+    fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+        CommandBarEvents::on_update_commandbar(self, commandbar);
+    }
+    fn on_event(&mut self, command_id: u32) {
+        if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
+            CommandBarEvents::on_event(self, command);
+        } else {
+            panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
+        }
+    }
+}
+";

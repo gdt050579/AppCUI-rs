@@ -8,17 +8,7 @@ fn generate_commands(code: &mut String, a: &Arguments, struct_name: &str) -> Str
     cmd_code.push_str(templates::COMMANDS_TEMPLATE);
     let mut temp = String::with_capacity(256);
 
-    // step 1 --> build the module name
-    temp.clear();
-    for mut ch in struct_name.chars() {
-        if (ch >= 'A') && (ch <= 'Z') {
-            ch = (((ch as u32) as u8) | 0x20) as char;
-        }
-        temp.push(ch);
-    }
-    cmd_code = cmd_code.replace("$(MOD_NAME)", &temp);
-
-    // step 2 --> generate the list of enum variants
+    // step 1 --> generate the list of enum variants
     temp.clear();
     let mut idx = 0u32;
     for cmd in &a.commands {
@@ -27,7 +17,7 @@ fn generate_commands(code: &mut String, a: &Arguments, struct_name: &str) -> Str
     }
     cmd_code = cmd_code.replace("$(COMMANDS_IDS)", &temp);
 
-    // step 3 --> generate the conversion code (from u32 to commands)
+    // step 2 --> generate the conversion code (from u32 to commands)
     temp.clear();
     let mut idx = 0u32;
     for cmd in &a.commands {
@@ -36,7 +26,7 @@ fn generate_commands(code: &mut String, a: &Arguments, struct_name: &str) -> Str
     }
     cmd_code = cmd_code.replace("$(U32_TO_COMMANDS)", &temp);
 
-    // step 2 --> generate the conversion code (from commands to u32)
+    // step 3 --> generate the conversion code (from commands to u32)
     temp.clear();
     let mut idx = 0u32;
     for cmd in &a.commands {
@@ -107,10 +97,15 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         }
         let cmd_gen_code = generate_commands(&mut code, &a, &struct_name);
         code.push_str(&cmd_gen_code);
+        // add the CommandBar events wrapper if needed
+        if config.get(AppCUITrait::CommandBarEvents) == TraitImplementation::None {
+            code.push_str(templates::COMMANDBAR_EVENTS);
+        }
     }
     // replace templates
     code = code
         .replace("$(STRUCT_NAME)", &struct_name)
+        .replace("$(MOD_NAME)", struct_name.to_lowercase().as_str())
         .replace("$(BASE)", &a.base)
         .replace("$(ROOT)", a.root)
         .replace("$(MODAL_RESULT_TYPE)", &a.modal_result_type);
