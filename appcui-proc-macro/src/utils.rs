@@ -39,6 +39,7 @@ pub(crate) fn equal_ignore_case(text1: &str, text2: &str) -> bool {
     }
     return true;
 }
+
 pub(crate) fn to_i32(text: &str) -> Option<i32> {
     if let Ok(value) = text.parse::<i32>() {
         return Some(value);

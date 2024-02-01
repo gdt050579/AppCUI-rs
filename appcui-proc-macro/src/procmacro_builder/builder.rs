@@ -88,7 +88,23 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         code.push_str("\n");
     }
     // add commands
-    if !a.commands.is_empty() {
+    if a.commands.is_empty() {
+        // if CommandBarEvents is present, we should add commands as well
+        if config.get(AppCUITrait::CommandBarEvents) == TraitImplementation::None {
+            panic!("Overwriting `CommandBarEvents` implies you should also define the `commands` attribute with possible values !");
+        }
+        // if MenuEvents is present, we should add commands as well
+        if config.get(AppCUITrait::MenuEvents) == TraitImplementation::None {
+            panic!("Overwriting `MenuEvents` implies you should also define the `commands` attribute with possible values !");
+        }
+    } else {
+        if (config.get(AppCUITrait::CommandBarEvents) != TraitImplementation::None)
+            && (config.get(AppCUITrait::MenuEvents) != TraitImplementation::None)
+        {
+            panic!(
+                "The 'commands` attribute can only be used if one of the CommandBarEvents or MenuEvents is overwritten (via `events` attributie) !"
+            );
+        }
         let cmd_gen_code = generate_commands(&mut code, &a, &struct_name);
         code.push_str(&cmd_gen_code);
     }

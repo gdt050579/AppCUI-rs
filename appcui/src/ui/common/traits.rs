@@ -5,7 +5,7 @@ use crate::{
     ui::{
         button::events::ButtonEvents, 
         checkbox::events::CheckBoxEvents, 
-        command_bar::events::CommandBarEvents, 
+        command_bar::events::GenericCommandBarEvents, 
         desktop::events::DesktopEvents,
         menu::events::MenuEvents, 
         window::events::WindowEvents,
@@ -81,7 +81,7 @@ pub trait Control:
     + CheckBoxEvents
     + ThreeStateBoxEvents
     + ColorPickerEvents
-    + CommandBarEvents
+    + GenericCommandBarEvents
     + WindowEvents
     + ToolBarEvents
     + DesktopEvents

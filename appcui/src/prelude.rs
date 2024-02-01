@@ -14,7 +14,7 @@ pub use super::ui::window::events::ToolBarEvents;
 pub use super::ui::window::events::ModalWindowMethods;
 pub use super::ui::window::toolbar;
 pub use super::ui::desktop::events::DesktopEvents;
-pub use super::ui::command_bar::events::CommandBarEvents;
+pub use super::ui::command_bar::events::GenericCommandBarEvents;
 pub use super::ui::menu::events::MenuEvents;
 pub use super::ui::menu::*;
 pub use super::graphics::*;

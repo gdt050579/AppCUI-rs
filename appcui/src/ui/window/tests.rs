@@ -1245,7 +1245,7 @@ fn check_modal_window() {
             Self { base: Desktop::new() }
         }
     }
-    impl CommandBarEvents for MyDesktop {
+    impl GenericCommandBarEvents for MyDesktop {
         fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
             commandbar.set(key!("F1"), "Create a modal window", 1u32);
         }

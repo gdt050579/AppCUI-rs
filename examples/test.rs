@@ -260,6 +260,7 @@ It is popular for systems programming.
 From: https://en.wikipedia.org/wiki/Rust_(programming_language)
 ";
 
+
 #[Window(events = ButtonEvents, commands=Save+Open+New)]
 struct MyWin {
     viewer: Handle<Canvas>,

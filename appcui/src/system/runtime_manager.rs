@@ -4,7 +4,7 @@ use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::prelude::*;
 use crate::terminals::*;
-use crate::ui::command_bar::events::CommandBarEvents;
+use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::{traits::*, ControlEvent};
@@ -539,7 +539,7 @@ impl RuntimeManager {
     fn process_commandbar_event(&mut self, event: CommandBarEvent) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(event.control_receiver_handle) {
-            CommandBarEvents::on_event(control.get_control_mut(), event.command_id);
+            GenericCommandBarEvents::on_event(control.get_control_mut(), event.command_id);
         }
         self.commandbar_event = None;
     }

@@ -4,7 +4,7 @@ use crate::input::*;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
-    button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::CommandBarEvents, common::traits::*, common::*,
+    button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
     desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::ToolBarEvents, window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
@@ -552,7 +552,7 @@ impl OnResize for ControlBase {}
 impl OnFocus for ControlBase {}
 
 // default implementation for control events
-impl CommandBarEvents for ControlBase {}
+impl GenericCommandBarEvents for ControlBase {}
 impl MenuEvents for ControlBase {}
 impl ButtonEvents for ControlBase {}
 impl ColorPickerEvents for ControlBase {}
