@@ -2,11 +2,12 @@ use crate::{
     graphics::{Character, Size, Surface},
     input::{Key, KeyCode, KeyModifier},
     system::{Handle, Theme},
-    terminals::{MouseButtonDownEvent, MouseMoveEvent}, ui::common::UIElement,
+    terminals::{MouseButtonDownEvent, MouseMoveEvent},
+    ui::common::traits::CommandID,
+    ui::common::UIElement,
 };
 
 use super::events::CommandBarEvent;
-
 
 const MAX_KEYS: usize = 64; // no bigger than 255
 const MAX_SHIFT_STATES: usize = 8;
@@ -95,7 +96,7 @@ impl CommandBar {
     }
 
     #[inline(always)]
-    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement> ) {
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
         self.receiver_control_handle = handle;
     }
 
@@ -129,10 +130,11 @@ impl CommandBar {
         true
     }
     #[inline(always)]
-    pub fn set<T,U>(&mut self, key: T, text: &str, command: U) -> bool
+    pub fn set<T, U>(&mut self, key: T, text: &str, command: U) -> bool
     where
         Key: From<T>,
         u32: From<U>,
+        U: CommandID,
     {
         self.set_with_key(Key::from(key), text, u32::from(command))
     }
@@ -195,12 +197,7 @@ impl CommandBar {
     }
 
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
-        surface.fill_horizontal_line(
-            0,
-            self.y,
-            self.width as i32,
-            Character::with_attributes(' ', theme.menu.text.normal),
-        );
+        surface.fill_horizontal_line(0, self.y, self.width as i32, Character::with_attributes(' ', theme.menu.text.normal));
         let modifier_name = self.modifier.get_name();
         if modifier_name.len() > 0 {
             surface.write_string(0, self.y, modifier_name, theme.menu.text.inactive, false);
@@ -226,13 +223,7 @@ impl CommandBar {
                 _ if (*idx) == self.hovered_index => theme.menu.text.hovered,
                 _ => theme.menu.text.normal,
             };
-            surface.write_string(
-                item.left + (item.key.len() as i32),
-                self.y,
-                &item.text,
-                col_text,
-                false,
-            );
+            surface.write_string(item.left + (item.key.len() as i32), self.y, &item.text, col_text, false);
         }
     }
 
@@ -260,9 +251,7 @@ impl CommandBar {
             return false;
         }
         // check if the current hovered index is not the actual index for current mouse pos
-        if (self.hovered_index != INVALID_INDEX)
-            && ((self.hovered_index as usize) < self.items.len())
-        {
+        if (self.hovered_index != INVALID_INDEX) && ((self.hovered_index as usize) < self.items.len()) {
             let item = &self.items[self.hovered_index as usize];
             if (event.x >= item.left) && (event.x < item.right) {
                 return true;

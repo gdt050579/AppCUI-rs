@@ -94,3 +94,4 @@ pub trait WindowControl {}
 pub trait NotWindow {}
 pub trait NotDesktop {}
 pub trait NotModalWindow {}
+pub trait CommandID {}

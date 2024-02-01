@@ -91,6 +91,7 @@ mod $(MOD_NAME)
     pub enum Commands {
         $(COMMANDS_IDS)
     }
+    impl CommandID for Commands {}
     impl TryFrom<u32> for Commands {
         type Error = ();
 
