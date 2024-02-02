@@ -134,7 +134,7 @@ impl CommandBar {
     where
         Key: From<T>,
         u32: From<U>,
-        U: CommandID,
+        U: CommandID + Copy,
     {
         self.set_with_key(Key::from(key), text, u32::from(command))
     }

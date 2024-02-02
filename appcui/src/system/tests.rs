@@ -15,6 +15,7 @@ use crate::input::MouseButton;
 use crate::terminals::MouseButtonDownEvent;
 use crate::terminals::MouseMoveEvent;
 use crate::ui::command_bar::*;
+use crate::ui::common::traits::*;
 
 fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
     let mut tooltip = ToolTip::new();
@@ -81,15 +82,37 @@ fn check_tooltip_bottom_pos_no_show() {
     //s.print();
     assert_eq!(s.compute_hash(), 0x9F6184450761DB25);
 }
+#[derive(Copy,Clone)]
+struct Command {
+    value: u32,
+}
+impl TryFrom<u32> for Command {
+    type Error = ();
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        Ok(Self { value })
+    }
+}
+impl From<Command> for u32 {
+    fn from(value: Command) -> Self {
+        value.value
+    }
+}
+impl CommandID for Command {}
+impl Command {
+    fn new(value: u32) -> Self {
+        Self { value }
+    }
+}
 
 fn prepare_command_bar(size: Size) -> CommandBar {
     let mut c = CommandBar::new(size.width, size.height);
-    c.set(Key::new(KeyCode::F2, KeyModifier::None), "Save", 1u32);
-    c.set(Key::new(KeyCode::F3, KeyModifier::None), "Open", 2u32);
-    c.set(Key::new(KeyCode::F5, KeyModifier::None), "Run", 3u32);
-    c.set(Key::new(KeyCode::F7, KeyModifier::None), "Compile", 4u32);
-    c.set(Key::new(KeyCode::F8, KeyModifier::None), "Delete", 5u32);
-    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", 12345u32);
+    c.set(Key::new(KeyCode::F2, KeyModifier::None), "Save", Command::new(1));
+    c.set(Key::new(KeyCode::F3, KeyModifier::None), "Open", Command::new(2));
+    c.set(Key::new(KeyCode::F5, KeyModifier::None), "Run", Command::new(3));
+    c.set(Key::new(KeyCode::F7, KeyModifier::None), "Compile", Command::new(4));
+    c.set(Key::new(KeyCode::F8, KeyModifier::None), "Delete", Command::new(5));
+    c.set(Key::new(KeyCode::F2, KeyModifier::Alt), "Save As ...", Command::new(12345));
     c.update_positions();
     c
 }

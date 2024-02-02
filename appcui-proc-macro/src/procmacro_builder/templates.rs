@@ -86,6 +86,8 @@ impl OnWindowRegistered for $(STRUCT_NAME) {
 pub(crate) static COMMANDS_TEMPLATE: &str = "
 mod $(MOD_NAME)
 {
+    use $(ROOT)::prelude::*;
+    
     #[repr(u32)]
     #[derive(Copy,Clone,Eq,PartialEq,Debug)]
     pub enum Commands {
