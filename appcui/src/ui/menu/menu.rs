@@ -1,6 +1,6 @@
 use super::{
     events::*, menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo,
-    MenuCheckBoxItem, MenuCommandItem, MenuItem, MenuRadioBoxItem, MenuSubMenuItem,
+    CheckBox, Command, MenuItem, SingleChoice, SubMenu,
     MousePressedResult, menu_item::IntoMenuItem,
 };
 use crate::{
@@ -56,55 +56,6 @@ impl Menu {
         self.items.push(menuitem.into_menuitem());
     }
 
-    pub fn add_command<T>(&mut self, text: &str, shortcut: T, command_id: u32)
-    where
-        Key: From<T>,
-    {
-        self.items.push(MenuItem::Command(MenuCommandItem {
-            enabled: true,
-            command_id,
-            caption: Caption::new(text, true),
-            shortcut: Key::from(shortcut),
-        }));
-    }
-    pub fn add_checkbox<T>(&mut self, text: &str, shortcut: T, command_id: u32, checked: bool)
-    where
-        Key: From<T>,
-    {
-        self.items.push(MenuItem::CheckBox(MenuCheckBoxItem {
-            enabled: true,
-            command_id,
-            caption: Caption::new(text, true),
-            shortcut: Key::from(shortcut),
-            checked,
-        }));
-    }
-    pub fn add_radiobox<T>(&mut self, text: &str, shortcut: T, command_id: u32, checked: bool)
-    where
-        Key: From<T>,
-    {
-        self.items.push(MenuItem::RadioBox(MenuRadioBoxItem {
-            enabled: true,
-            command_id,
-            caption: Caption::new(text, true),
-            shortcut: Key::from(shortcut),
-            checked,
-        }));
-    }
-    pub fn add_submenu(&mut self, mut menu: Menu) {
-        menu.parent_handle = self.handle;
-        let caption = menu.caption.clone();
-        let handle = RuntimeManager::get().get_menus().add(menu);
-        let item = MenuSubMenuItem {
-            enabled: true,
-            caption: caption,
-            submenu_handle: handle,
-        };
-        self.items.push(MenuItem::SubMenu(item));
-    }
-    pub fn add_separator(&mut self) {
-        self.items.push(MenuItem::Separator(super::Separator {}));
-    }
     pub(crate) fn is_on_menu(&self, x: i32, y: i32) -> bool {
         MousePositionInfo::new(x - self.clip.left, y - self.clip.top, &self).is_on_menu
     }
@@ -231,7 +182,7 @@ impl Menu {
                             self.send_event(evnt);
                             return true;
                         }
-                        MenuItem::RadioBox(item) => {
+                        MenuItem::SingleChoice(item) => {
                             let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
@@ -518,7 +469,7 @@ impl Menu {
                 });
                 self.send_event(evnt);
             }
-            MenuItem::RadioBox(item) => {
+            MenuItem::SingleChoice(item) => {
                 let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
                     command_id: item.command_id,
                     menu: self.handle,

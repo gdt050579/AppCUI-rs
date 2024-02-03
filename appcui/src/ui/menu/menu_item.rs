@@ -5,8 +5,8 @@ use crate::{
 };
 
 use super::{
-    MenuCheckBoxItem, MenuCommandItem, Separator, MenuRadioBoxItem,
-    MenuSubMenuItem, Menu,
+    CheckBox, Command, Separator, SingleChoice,
+    SubMenu, Menu,
 };
 
 pub(super) trait IntoMenuItem {
@@ -14,11 +14,11 @@ pub(super) trait IntoMenuItem {
 }
 
 pub(super) enum MenuItem {
-    Command(MenuCommandItem),
-    CheckBox(MenuCheckBoxItem),
-    RadioBox(MenuRadioBoxItem),
+    Command(Command),
+    CheckBox(CheckBox),
+    SingleChoice(SingleChoice),
     Separator(Separator),
-    SubMenu(MenuSubMenuItem),
+    SubMenu(SubMenu),
 }
 
 impl MenuItem {
@@ -33,7 +33,7 @@ impl MenuItem {
         match self {
             MenuItem::Command(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::CheckBox(item) => item.paint(surface, format, width, current_item, color),
-            MenuItem::RadioBox(item) => item.paint(surface, format, width, current_item, color),
+            MenuItem::SingleChoice(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::SubMenu(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::Separator(item) => item.paint(surface, format.y, width, color),
         }
@@ -43,7 +43,7 @@ impl MenuItem {
         match self {
             MenuItem::Command(item) => item.enabled,
             MenuItem::CheckBox(item) => item.enabled,
-            MenuItem::RadioBox(item) => item.enabled,
+            MenuItem::SingleChoice(item) => item.enabled,
             MenuItem::Separator(_) => true,
             MenuItem::SubMenu(item) => item.enabled,
         }
@@ -58,7 +58,7 @@ impl MenuItem {
     #[inline(always)]
     pub(super) fn is_radiobox(&self) -> bool {
         match self {
-            MenuItem::RadioBox(_) => true,
+            MenuItem::SingleChoice(_) => true,
             _ => false,
         }
     }
@@ -73,7 +73,7 @@ impl MenuItem {
     pub(super) fn is_checkable(&self) -> bool {
         match self {
             MenuItem::CheckBox(_) => true,
-            MenuItem::RadioBox(_) => true,
+            MenuItem::SingleChoice(_) => true,
             _ => false,
         }
     }
@@ -89,7 +89,7 @@ impl MenuItem {
         match self {
             MenuItem::Command(item) => Some(item.command_id),
             MenuItem::CheckBox(item) => Some(item.command_id),
-            MenuItem::RadioBox(item) => Some(item.command_id),
+            MenuItem::SingleChoice(item) => Some(item.command_id),
             MenuItem::Separator(_) => None,
             MenuItem::SubMenu(_) => None,
         }
@@ -99,7 +99,7 @@ impl MenuItem {
         let key = match self {
             MenuItem::Command(item) => item.shortcut,
             MenuItem::CheckBox(item) => item.shortcut,
-            MenuItem::RadioBox(item) => item.shortcut,
+            MenuItem::SingleChoice(item) => item.shortcut,
             MenuItem::Separator(_) => Key::default(),
             MenuItem::SubMenu(_) => Key::default(),
         };
@@ -114,7 +114,7 @@ impl MenuItem {
         let key = match self {
             MenuItem::Command(item) => item.caption.get_hotkey(),
             MenuItem::CheckBox(item) => item.caption.get_hotkey(),
-            MenuItem::RadioBox(item) => item.caption.get_hotkey(),
+            MenuItem::SingleChoice(item) => item.caption.get_hotkey(),
             MenuItem::Separator(_) => Key::default(),
             MenuItem::SubMenu(item) => item.caption.get_hotkey(),
         };
@@ -128,7 +128,7 @@ impl MenuItem {
     pub(super) fn set_checked(&mut self, value: bool) {
         match self {
             MenuItem::CheckBox(item) => item.checked = value,
-            MenuItem::RadioBox(item) => item.checked = value,
+            MenuItem::SingleChoice(item) => item.selected = value,
             _ => {}
         }
     }
@@ -137,7 +137,7 @@ impl MenuItem {
         match self {
             MenuItem::Command(item) => item.caption.get_chars_count(),
             MenuItem::CheckBox(item) => item.caption.get_chars_count(),
-            MenuItem::RadioBox(item) => item.caption.get_chars_count(),
+            MenuItem::SingleChoice(item) => item.caption.get_chars_count(),
             MenuItem::Separator(_) => 0,
             MenuItem::SubMenu(item) => item.caption.get_chars_count(),
         }
