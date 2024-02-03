@@ -68,12 +68,12 @@
         - [TreeView]()
     - [Custom controls](chapter-3/custom_controls.md)
 
+- [Desktop](chapter-4/desktop.md)
+    - [Custom desktops]()
+    - [Menus]()
+    - [Command bar](chapter-4/command_bar.md)
+
 - [Dialogs]()
     - [Open/Save dialog]()
     - [Notifications dialogs]()
     - [Window manager dialog]() 
-
-- [Desktop]()
-    - [Custom desktops]()
-    - [Menus]()
-    - [Command bar]()
