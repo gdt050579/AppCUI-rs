@@ -6,7 +6,7 @@ mod menu_checkbox_item;
 mod menu_command_item;
 mod menu_item;
 mod menu_item_handle;
-mod menu_line_item;
+mod separator;
 mod menu_radiobox_item;
 mod menu_submenu_item;
 mod mouse_position_info;
@@ -23,6 +23,6 @@ pub(crate) use self::mouse_press_result::MousePressedResult;
 
 pub(self) use self::menu_checkbox_item::MenuCheckBoxItem;
 pub(self) use self::menu_command_item::MenuCommandItem;
-pub(self) use self::menu_line_item::MenuLineItem;
+pub(self) use self::separator::Separator;
 pub(self) use self::menu_radiobox_item::MenuRadioBoxItem;
 pub(self) use self::menu_submenu_item::MenuSubMenuItem;

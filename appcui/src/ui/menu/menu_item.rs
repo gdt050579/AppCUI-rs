@@ -5,15 +5,19 @@ use crate::{
 };
 
 use super::{
-    MenuCheckBoxItem, MenuCommandItem, MenuLineItem, MenuRadioBoxItem,
+    MenuCheckBoxItem, MenuCommandItem, Separator, MenuRadioBoxItem,
     MenuSubMenuItem, Menu,
 };
+
+pub(super) trait IntoMenuItem {
+    fn into_menuitem(self)->MenuItem;
+}
 
 pub(super) enum MenuItem {
     Command(MenuCommandItem),
     CheckBox(MenuCheckBoxItem),
     RadioBox(MenuRadioBoxItem),
-    Line(MenuLineItem),
+    Separator(Separator),
     SubMenu(MenuSubMenuItem),
 }
 
@@ -31,7 +35,7 @@ impl MenuItem {
             MenuItem::CheckBox(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::RadioBox(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::SubMenu(item) => item.paint(surface, format, width, current_item, color),
-            MenuItem::Line(item) => item.paint(surface, format.y, width, color),
+            MenuItem::Separator(item) => item.paint(surface, format.y, width, color),
         }
     }
     #[inline(always)]
@@ -40,14 +44,14 @@ impl MenuItem {
             MenuItem::Command(item) => item.enabled,
             MenuItem::CheckBox(item) => item.enabled,
             MenuItem::RadioBox(item) => item.enabled,
-            MenuItem::Line(_) => true,
+            MenuItem::Separator(_) => true,
             MenuItem::SubMenu(item) => item.enabled,
         }
     }
     #[inline(always)]
     pub(super) fn is_line(&self) -> bool {
         match self {
-            MenuItem::Line(_) => true,
+            MenuItem::Separator(_) => true,
             _ => false,
         }
     }
@@ -61,7 +65,7 @@ impl MenuItem {
     #[inline(always)]
     pub(super) fn can_be_selected(&self) -> bool {
         match self {
-            MenuItem::Line(_) => false,
+            MenuItem::Separator(_) => false,
             _ => true,
         }
     }
@@ -86,7 +90,7 @@ impl MenuItem {
             MenuItem::Command(item) => Some(item.command_id),
             MenuItem::CheckBox(item) => Some(item.command_id),
             MenuItem::RadioBox(item) => Some(item.command_id),
-            MenuItem::Line(_) => None,
+            MenuItem::Separator(_) => None,
             MenuItem::SubMenu(_) => None,
         }
     }
@@ -96,7 +100,7 @@ impl MenuItem {
             MenuItem::Command(item) => item.shortcut,
             MenuItem::CheckBox(item) => item.shortcut,
             MenuItem::RadioBox(item) => item.shortcut,
-            MenuItem::Line(_) => Key::default(),
+            MenuItem::Separator(_) => Key::default(),
             MenuItem::SubMenu(_) => Key::default(),
         };
         if key.code != KeyCode::None {
@@ -111,7 +115,7 @@ impl MenuItem {
             MenuItem::Command(item) => item.caption.get_hotkey(),
             MenuItem::CheckBox(item) => item.caption.get_hotkey(),
             MenuItem::RadioBox(item) => item.caption.get_hotkey(),
-            MenuItem::Line(_) => Key::default(),
+            MenuItem::Separator(_) => Key::default(),
             MenuItem::SubMenu(item) => item.caption.get_hotkey(),
         };
         if key.code != KeyCode::None {
@@ -134,7 +138,7 @@ impl MenuItem {
             MenuItem::Command(item) => item.caption.get_chars_count(),
             MenuItem::CheckBox(item) => item.caption.get_chars_count(),
             MenuItem::RadioBox(item) => item.caption.get_chars_count(),
-            MenuItem::Line(_) => 0,
+            MenuItem::Separator(_) => 0,
             MenuItem::SubMenu(item) => item.caption.get_chars_count(),
         }
     }

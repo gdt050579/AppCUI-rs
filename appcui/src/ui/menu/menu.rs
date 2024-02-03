@@ -1,7 +1,7 @@
 use super::{
     events::*, menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo,
     MenuCheckBoxItem, MenuCommandItem, MenuItem, MenuRadioBoxItem, MenuSubMenuItem,
-    MousePressedResult,
+    MousePressedResult, menu_item::IntoMenuItem,
 };
 use crate::{
     graphics::{
@@ -52,6 +52,10 @@ impl Menu {
         }
     }
 
+    pub fn add<T>(&mut self, menuitem: T) where T: IntoMenuItem {
+        self.items.push(menuitem.into_menuitem());
+    }
+
     pub fn add_command<T>(&mut self, text: &str, shortcut: T, command_id: u32)
     where
         Key: From<T>,
@@ -99,7 +103,7 @@ impl Menu {
         self.items.push(MenuItem::SubMenu(item));
     }
     pub fn add_separator(&mut self) {
-        self.items.push(MenuItem::Line(super::MenuLineItem {}));
+        self.items.push(MenuItem::Separator(super::Separator {}));
     }
     pub(crate) fn is_on_menu(&self, x: i32, y: i32) -> bool {
         MousePositionInfo::new(x - self.clip.left, y - self.clip.top, &self).is_on_menu
@@ -237,7 +241,7 @@ impl Menu {
                             self.send_event(evnt);
                             return true;
                         }
-                        MenuItem::Line(_) => {}
+                        MenuItem::Separator(_) => {}
                         MenuItem::SubMenu(item) => {
                             if let Some(submenu) = RuntimeManager::get()
                                 .get_menus()
@@ -523,7 +527,7 @@ impl Menu {
                 self.check_radio_item(index);
                 self.send_event(evnt);
             }
-            MenuItem::Line(_) => {}
+            MenuItem::Separator(_) => {}
             MenuItem::SubMenu(item) => {
                 RuntimeManager::get().show_menu(
                     item.submenu_handle,
