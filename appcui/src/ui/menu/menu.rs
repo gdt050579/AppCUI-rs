@@ -52,7 +52,8 @@ impl Menu {
         }
     }
 
-    pub fn add<T>(&mut self, menuitem: T) where T: IntoMenuItem {
+    pub fn add<T>(&mut self, mut menuitem: T) where T: IntoMenuItem {
+        menuitem.update_parent_handle(self.handle);
         self.items.push(menuitem.into_menuitem());
     }
 

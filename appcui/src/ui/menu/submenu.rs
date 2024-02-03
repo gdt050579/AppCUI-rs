@@ -1,6 +1,6 @@
 use crate::{
     graphics::{Character, SpecialChar, Surface, TextFormat},
-    system::{Handle, MenuTheme},
+    system::{Handle, MenuTheme, RuntimeManager},
     utils::Caption,
 };
 
@@ -13,16 +13,14 @@ pub struct SubMenu {
     pub(super) submenu_handle: Handle<Menu>,
 }
 impl SubMenu {
-    pub fn new(&mut self, mut menu: Menu) {
-        menu.parent_handle = self.handle;
+    pub fn new(&mut self, mut menu: Menu) -> Self {        
         let caption = menu.caption.clone();
         let handle = RuntimeManager::get().get_menus().add(menu);
-        let item = SubMenu {
+        SubMenu {
             enabled: true,
             caption: caption,
             submenu_handle: handle,
-        };
-        self.items.push(MenuItem::SubMenu(item));
+        }
     }
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
@@ -42,5 +40,10 @@ impl SubMenu {
 impl IntoMenuItem for SubMenu {
     fn into_menuitem(self) -> MenuItem {
         MenuItem::SubMenu(self)
+    }
+    fn update_parent_handle(&mut self, parent: Handle<Menu>) {
+        if let Some(menu) = RuntimeManager::get().get_menu(self.submenu_handle) {
+            menu.parent_handle = parent;
+        }
     }
 }

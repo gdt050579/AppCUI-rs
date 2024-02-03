@@ -1,16 +1,14 @@
 use crate::{
     graphics::{Surface, TextFormat},
     input::{Key, KeyCode},
-    system::{MenuTheme, Handle},
+    system::{Handle, MenuTheme},
 };
 
-use super::{
-    CheckBox, Command, Separator, SingleChoice,
-    SubMenu, Menu,
-};
+use super::{CheckBox, Command, Menu, Separator, SingleChoice, SubMenu};
 
 pub(super) trait IntoMenuItem {
-    fn into_menuitem(self)->MenuItem;
+    fn into_menuitem(self) -> MenuItem;
+    fn update_parent_handle(&mut self, parent: Handle<Menu>) {}
 }
 
 pub(super) enum MenuItem {
@@ -22,14 +20,7 @@ pub(super) enum MenuItem {
 }
 
 impl MenuItem {
-    pub(super) fn paint(
-        &self,
-        surface: &mut Surface,
-        format: &mut TextFormat,
-        width: u16,
-        current_item: bool,
-        color: &MenuTheme,
-    ) {
+    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         match self {
             MenuItem::Command(item) => item.paint(surface, format, width, current_item, color),
             MenuItem::CheckBox(item) => item.paint(surface, format, width, current_item, color),
