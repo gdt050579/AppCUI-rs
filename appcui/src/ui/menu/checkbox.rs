@@ -14,7 +14,7 @@ pub struct CheckBox {
     pub(super) shortcut: Key,
 }
 impl CheckBox {
-    pub fn new<T, U>(&mut self, text: &str, shortcut: T, command_id: U, checked: bool) -> Self
+    pub fn new<T, U>(text: &str, shortcut: T, command_id: U, checked: bool) -> Self
     where
         Key: From<T>,
         u32: From<U>,

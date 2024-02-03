@@ -13,7 +13,7 @@ pub struct SubMenu {
     pub(super) submenu_handle: Handle<Menu>,
 }
 impl SubMenu {
-    pub fn new(&mut self, mut menu: Menu) -> Self {        
+    pub fn new(mut menu: Menu) -> Self {        
         let caption = menu.caption.clone();
         let handle = RuntimeManager::get().get_menus().add(menu);
         SubMenu {

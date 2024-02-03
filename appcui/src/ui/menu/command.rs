@@ -15,7 +15,7 @@ pub struct Command {
     pub(super) shortcut: Key,
 }
 impl Command {
-    pub fn new<T,U>(&mut self, text: &str, shortcut: T, command_id: U) -> Self
+    pub fn new<T,U>(text: &str, shortcut: T, command_id: U) -> Self
     where
         Key: From<T>,
         u32: From<U>,
