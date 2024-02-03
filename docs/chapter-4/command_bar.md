@@ -75,7 +75,7 @@ impl CommandBarEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(60, 20)).command_bar().build()?;
+    let mut a = App::new().command_bar().build()?;
     a.add_window(MyWin::new());
     a.run();
     Ok(())
