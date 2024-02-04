@@ -5,7 +5,7 @@ use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
-    desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, window::events::ToolBarEvents, window::events::WindowEvents,
+    desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, menu::Menu, window::events::ToolBarEvents, window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
@@ -48,7 +48,7 @@ pub struct ControlBase {
     pub(crate) screen_origin: Point,
     pub(crate) hotkey: Key,
     pub(crate) left_components_margin: u8,
-    pub(crate) top_components_margin: u8
+    pub(crate) top_components_margin: u8,
 }
 
 impl ControlBase {
@@ -82,7 +82,7 @@ impl ControlBase {
             screen_origin: Point::default(),
             hotkey: Key::default(),
             left_components_margin: 0,
-            top_components_margin: 0
+            top_components_margin: 0,
         }
     }
 
@@ -541,6 +541,10 @@ impl ControlBase {
     }
     pub(crate) fn hide_tooltip(&self) {
         RuntimeManager::get().hide_tooltip();
+    }
+
+    pub fn register_menu(&mut self, menu: Menu) -> Handle<Menu> {
+        RuntimeManager::get().add_menu(menu)
     }
 }
 // default implementations
