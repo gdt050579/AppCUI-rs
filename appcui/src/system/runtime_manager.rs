@@ -9,7 +9,7 @@ use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::{traits::*, ControlEvent};
 use crate::ui::common::{ControlEventData, ControlManager, UIElement};
-use crate::ui::menu::events::{MenuEvent, MenuEvents};
+use crate::ui::menu::events::{MenuEvent, GenericMenuEvents};
 use crate::ui::menu::{Menu, MenuBar, MousePressedResult};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;

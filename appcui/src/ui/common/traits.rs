@@ -7,7 +7,7 @@ use crate::{
         checkbox::events::CheckBoxEvents, 
         command_bar::events::GenericCommandBarEvents, 
         desktop::events::DesktopEvents,
-        menu::events::MenuEvents, 
+        menu::events::GenericMenuEvents, 
         window::events::WindowEvents,
         window::events::ToolBarEvents,
     }, prelude::{colorpicker::events::ColorPickerEvents, ThreeStateBoxEvents}
@@ -85,7 +85,7 @@ pub trait Control:
     + WindowEvents
     + ToolBarEvents
     + DesktopEvents
-    + MenuEvents
+    + GenericMenuEvents
 {
 }
 

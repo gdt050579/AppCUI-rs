@@ -87,7 +87,7 @@ pub(crate) static COMMANDS_TEMPLATE: &str = "
 mod $(MOD_NAME)
 {
     use $(ROOT)::prelude::*;
-    
+
     #[repr(u32)]
     #[derive(Copy,Clone,Eq,PartialEq,Debug)]
     pub enum Commands {
@@ -125,6 +125,28 @@ impl GenericCommandBarEvents for $(STRUCT_NAME) {
     fn on_event(&mut self, command_id: u32) {
         if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
             CommandBarEvents::on_event(self, command);
+        } else {
+            panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
+        }
+    }
+}
+";
+pub(crate) static MENU_EVENTS: &str = "
+trait MenuEvents {
+    fn on_menu_open(&self, menu: &mut Menu) {}
+    fn on_command(&mut self, command: $(MOD_NAME)::Commands) {}
+    fn on_update_menubar(&self, menubar: &mut MenuBar) {}
+}
+impl GenericMenuEvents for $(STRUCT_NAME) {
+    fn on_menu_open(&self, menu: &mut Menu) {
+        MenuEvents::on_menu_open(self, menu);
+    }
+    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        MenuEvents::on_update_menubar(self, menubar);
+    }
+    fn on_command(&mut self, command_id: u32) {
+        if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
+            MenuEvents::on_command(self, command);
         } else {
             panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
         }

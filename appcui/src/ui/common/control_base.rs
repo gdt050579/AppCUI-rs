@@ -5,7 +5,7 @@ use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
-    desktop::events::DesktopEvents, layout::*, menu::events::MenuEvents, menu::Menu, window::events::ToolBarEvents, window::events::WindowEvents,
+    desktop::events::DesktopEvents, layout::*, menu::events::GenericMenuEvents, menu::Menu, window::events::ToolBarEvents, window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
@@ -557,7 +557,7 @@ impl OnFocus for ControlBase {}
 
 // default implementation for control events
 impl GenericCommandBarEvents for ControlBase {}
-impl MenuEvents for ControlBase {}
+impl GenericMenuEvents for ControlBase {}
 impl ButtonEvents for ControlBase {}
 impl ColorPickerEvents for ControlBase {}
 impl CheckBoxEvents for ControlBase {}

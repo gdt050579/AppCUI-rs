@@ -101,6 +101,10 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         if config.get(AppCUITrait::CommandBarEvents) == TraitImplementation::None {
             code.push_str(templates::COMMANDBAR_EVENTS);
         }
+        // add the MenudBar events wrapper if needed
+        if config.get(AppCUITrait::MenuEvents) == TraitImplementation::None {
+            code.push_str(templates::MENU_EVENTS);
+        }
     }
     // replace templates
     code = code
