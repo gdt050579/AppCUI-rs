@@ -1,14 +1,14 @@
 use crate::{
     graphics::{Surface, TextFormat},
     input::{Key, KeyCode},
-    system::{Handle, MenuTheme},
+    system::{Handle, MenuTheme}, prelude::common::UIElement,
 };
 
 use super::{CheckBox, Command, Menu, Separator, SingleChoice, SubMenu};
 
 pub(super) trait IntoMenuItem {
     fn into_menuitem(self) -> MenuItem;
-    fn update_parent_handle(&mut self, parent: Handle<Menu>) {}
+    fn update_handles(&mut self, parent: Handle<Menu>, me: Handle<UIElement>);
 }
 
 pub(super) enum MenuItem {

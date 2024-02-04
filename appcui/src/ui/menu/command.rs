@@ -1,9 +1,11 @@
 use crate::{
     graphics::{Character, Surface, TextFormat},
     input::{Key, KeyCode},
+    system::Handle,
     system::MenuTheme,
-    utils::Caption,
     ui::common::traits::CommandID,
+    ui::menu::Menu,
+    utils::Caption,
 };
 
 use super::{menu_item::IntoMenuItem, MenuItem};
@@ -13,9 +15,11 @@ pub struct Command {
     pub(super) command_id: u32,
     pub(super) caption: Caption,
     pub(super) shortcut: Key,
+    pub(super) menu_handle: Handle<Menu>,
+    pub(super) handle: Handle<Command>,
 }
 impl Command {
-    pub fn new<T,U>(text: &str, shortcut: T, command_id: U) -> Self
+    pub fn new<T, U>(text: &str, shortcut: T, command_id: U) -> Self
     where
         Key: From<T>,
         u32: From<U>,
@@ -26,6 +30,8 @@ impl Command {
             command_id: u32::from(command_id),
             caption: Caption::new(text, true),
             shortcut: Key::from(shortcut),
+            handle: Handle::None,
+            menu_handle: Handle::None,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
@@ -44,5 +50,9 @@ impl Command {
 impl IntoMenuItem for Command {
     fn into_menuitem(self) -> MenuItem {
         MenuItem::Command(self)
+    }
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+        self.menu_handle = parent;
+        self.handle = me.cast();
     }
 }

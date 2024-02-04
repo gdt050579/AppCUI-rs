@@ -11,6 +11,8 @@ pub struct SubMenu {
     pub(super) enabled: bool,
     pub(super) caption: Caption,
     pub(super) submenu_handle: Handle<Menu>,
+    pub(super) menu_handle: Handle<Menu>,
+    pub(super) handle: Handle<SubMenu>,    
 }
 impl SubMenu {
     pub fn new(menu: Menu) -> Self {        
@@ -20,6 +22,8 @@ impl SubMenu {
             enabled: true,
             caption: caption,
             submenu_handle: handle,
+            handle: Handle::None,
+            menu_handle: Handle::None,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
@@ -41,7 +45,9 @@ impl IntoMenuItem for SubMenu {
     fn into_menuitem(self) -> MenuItem {
         MenuItem::SubMenu(self)
     }
-    fn update_parent_handle(&mut self, parent: Handle<Menu>) {
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+        self.menu_handle = parent;
+        self.handle = me.cast();
         if let Some(menu) = RuntimeManager::get().get_menu(self.submenu_handle) {
             menu.parent_handle = parent;
         }

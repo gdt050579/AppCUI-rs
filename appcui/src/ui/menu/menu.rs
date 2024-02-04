@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicUsize, Ordering};
+
 use super::{
     events::*, menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo,
     CheckBox, Command, MenuItem, SingleChoice, SubMenu,
@@ -14,6 +16,7 @@ use crate::{
     utils::{Caption, Strategy, VectorIndex},
 };
 const MAX_ITEMS: usize = 128;
+static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 pub struct Menu {
     pub(super) caption: Caption,
     pub(super) items: Vec<MenuItem>,
@@ -52,9 +55,12 @@ impl Menu {
         }
     }
 
-    pub fn add<T>(&mut self, mut menuitem: T) where T: IntoMenuItem {
-        menuitem.update_parent_handle(self.handle);
+    pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T> where T: IntoMenuItem {
+        let id = (GLOBAL_MENUITEM_ID.fetch_add(1, Ordering::SeqCst) as u32) % 0xFFFF_FFFE;
+        let h: Handle<T> = Handle::with_id(id, self.items.len() as u32);
+        menuitem.update_handles(self.handle, h.cast());
         self.items.push(menuitem.into_menuitem());
+        h
     }
 
     pub(crate) fn is_on_menu(&self, x: i32, y: i32) -> bool {

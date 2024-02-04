@@ -4,7 +4,9 @@ use crate::{
     input::{Key, KeyCode},
     system::MenuTheme,
     ui::common::traits::CommandID,
+    ui::menu::Menu,
     utils::Caption,
+    system::Handle
 };
 pub struct CheckBox {
     pub(super) enabled: bool,
@@ -12,6 +14,8 @@ pub struct CheckBox {
     pub(super) command_id: u32,
     pub(super) caption: Caption,
     pub(super) shortcut: Key,
+    pub(super) menu_handle: Handle<Menu>,
+    pub(super) handle: Handle<CheckBox>
 }
 impl CheckBox {
     pub fn new<T, U>(text: &str, shortcut: T, command_id: U, checked: bool) -> Self
@@ -26,6 +30,8 @@ impl CheckBox {
             caption: Caption::new(text, true),
             shortcut: Key::from(shortcut),
             checked,
+            handle: Handle::None,
+            menu_handle: Handle::None,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
@@ -49,4 +55,10 @@ impl IntoMenuItem for CheckBox {
     fn into_menuitem(self) -> MenuItem {
         MenuItem::CheckBox(self)
     }
+
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+        self.menu_handle = parent;
+        self.handle = me.cast();
+    }
+    
 }

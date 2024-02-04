@@ -5,6 +5,8 @@ use crate::{
     system::MenuTheme,
     ui::common::traits::CommandID,
     utils::Caption,
+    ui::menu::Menu,
+    system::Handle
 };
 pub struct SingleChoice {
     pub(super) enabled: bool,
@@ -12,6 +14,8 @@ pub struct SingleChoice {
     pub(super) command_id: u32,
     pub(super) caption: Caption,
     pub(super) shortcut: Key,
+    pub(super) menu_handle: Handle<Menu>,
+    pub(super) handle: Handle<SingleChoice>
 }
 impl SingleChoice {
     pub fn new<T, U>(text: &str, shortcut: T, command_id: U, selected: bool) -> Self
@@ -26,6 +30,8 @@ impl SingleChoice {
             caption: Caption::new(text, true),
             shortcut: Key::from(shortcut),
             selected: selected,
+            handle: Handle::None,
+            menu_handle: Handle::None,
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
@@ -51,5 +57,9 @@ impl SingleChoice {
 impl IntoMenuItem for SingleChoice {
     fn into_menuitem(self) -> MenuItem {
         MenuItem::SingleChoice(self)
+    }
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+        self.menu_handle = parent;
+        self.handle = me.cast();
     }
 }

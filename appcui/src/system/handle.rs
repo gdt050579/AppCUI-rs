@@ -20,6 +20,12 @@ impl<T> Handle<T> {
         value: u64::MAX,
         _phantom: PhantomData,
     };
+    pub(crate) fn with_id(id: u32, index:u32)-> Self {
+        Self {
+            value: (index as u64) | ((id as u64) << 32),
+            _phantom: PhantomData,
+        }        
+    }
     pub(crate) fn new(index: u32) -> Self {
         let id = ((GLOBAL_ID.fetch_add(1, Ordering::SeqCst) as u32) % 0xFFFF_FFFE) as u64;
         Self {
