@@ -9,7 +9,7 @@ use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::{traits::*, ControlEvent};
 use crate::ui::common::{ControlEventData, ControlManager, UIElement};
-use crate::ui::menu::events::{MenuEvent, GenericMenuEvents};
+use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar, MousePressedResult};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
@@ -73,12 +73,11 @@ pub(crate) struct RuntimeManager {
     opened_menu_handle: Handle<Menu>,
     modal_windows: Vec<Handle<UIElement>>,
     to_remove_list: Vec<Handle<UIElement>>,
-    #[cfg(feature="EVENT_RECORDER")]
+    #[cfg(feature = "EVENT_RECORDER")]
     event_recorder: super::event_recorder::EventRecorder,
 }
 
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
-
 
 impl RuntimeManager {
     pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
@@ -117,7 +116,7 @@ impl RuntimeManager {
                 None
             },
             menubar: if builder.has_menu { Some(MenuBar::new(term_sz.width)) } else { None },
-            #[cfg(feature="EVENT_RECORDER")]
+            #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
         };
         let mut desktop = if let Some(desktop) = builder.desktop_manager.take() {
@@ -384,7 +383,7 @@ impl RuntimeManager {
                 SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
                 SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
             }
-            #[cfg(feature="EVENT_RECORDER")]
+            #[cfg(feature = "EVENT_RECORDER")]
             self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
         }
         // loop has ended
@@ -543,13 +542,29 @@ impl RuntimeManager {
         }
         self.commandbar_event = None;
     }
-    fn process_menu_event(&mut self, _event: MenuEvent) {
-        todo!("call the MenuEvents with the current event -> to be discussed !");
-        // let controls = unsafe { &mut *self.controls };
-        // if let Some(control) = controls.get(event.get_control_receiver_handle()) {
-        //     MenuEvents::on_event(control.get_control_mut(), event);
-        // }
-        // self.menu_event = None;
+    fn process_menu_event(&mut self, event: MenuEvent) {
+        let controls = unsafe { &mut *self.controls };
+        match event {
+            MenuEvent::Command(cmd) => {
+                if let Some(control) = controls.get_mut(cmd.control_receiver_handle) {
+                    GenericMenuEvents::on_command(control.get_control_mut(), cmd.menu, cmd.item, cmd.command_id);
+                    self.repaint = true;
+                }
+            }
+            MenuEvent::CheckBoxStateChanged(cmd) => {
+                if let Some(control) = controls.get_mut(cmd.control_receiver_handle) {
+                    GenericMenuEvents::on_check(control.get_control_mut(), cmd.menu, cmd.item, cmd.command_id, cmd.checked);
+                    self.repaint = true;
+                }
+            }
+            MenuEvent::SingleChoiceSelected(cmd) => {
+                if let Some(control) = controls.get_mut(cmd.control_receiver_handle) {
+                    GenericMenuEvents::on_select(control.get_control_mut(), cmd.menu, cmd.item, cmd.command_id);
+                    self.repaint = true;
+                }              
+            },
+        }
+        self.menu_event = None;
     }
     fn update_command_and_menu_bars(&mut self) {
         if self.commandbar.is_none() && self.menubar.is_none() {
@@ -759,7 +774,7 @@ impl RuntimeManager {
 
     pub(super) fn destroy() {
         // save all records to a file
-        #[cfg(feature="EVENT_RECORDER")]
+        #[cfg(feature = "EVENT_RECORDER")]
         RuntimeManager::get().event_recorder.save();
 
         unsafe {
@@ -1356,4 +1371,3 @@ impl Drop for RuntimeManager {
         }
     }
 }
-

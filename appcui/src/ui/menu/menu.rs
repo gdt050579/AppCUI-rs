@@ -172,6 +172,7 @@ impl Menu {
                             let evnt = MenuEvent::Command(MenuCommandEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
+                                item: item.handle,
                                 control_receiver_handle: self.receiver_control_handle,
                             });
                             self.send_event(evnt);
@@ -183,6 +184,7 @@ impl Menu {
                                 MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
                                     command_id: item.command_id,
                                     menu: self.handle,
+                                    item: item.handle,
                                     checked: item.checked,
                                     control_receiver_handle: self.receiver_control_handle,
                                 });
@@ -190,9 +192,10 @@ impl Menu {
                             return true;
                         }
                         MenuItemWrapper::SingleChoice(item) => {
-                            let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
+                            let evnt = MenuEvent::SingleChoiceSelected(MenuRadioBoxSelectedEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
+                                item: item.handle,
                                 control_receiver_handle: self.receiver_control_handle,
                             });
                             self.check_radio_item(index);
@@ -424,19 +427,19 @@ impl Menu {
         if index >= count {
             return;
         }
-        if !self.items[index].is_radiobox() {
+        if !self.items[index].is_singlechoice() {
             return;
         }
         let mut idx = index;
-        while (idx > 0) && (self.items[idx].is_radiobox()) {
+        while (idx > 0) && (self.items[idx].is_singlechoice()) {
             self.items[idx].set_checked(false);
             idx -= 1;
         }
-        if (idx == 0) && (self.items[0].is_radiobox()) {
+        if (idx == 0) && (self.items[0].is_singlechoice()) {
             self.items[0].set_checked(false);
         }
         idx = index;
-        while (idx < count) && (self.items[idx].is_radiobox()) {
+        while (idx < count) && (self.items[idx].is_singlechoice()) {
             self.items[idx].set_checked(false);
             idx += 1;
         }
@@ -462,6 +465,7 @@ impl Menu {
                 let evnt = MenuEvent::Command(MenuCommandEvent {
                     command_id: item.command_id,
                     menu: self.handle,
+                    item: item.handle,
                     control_receiver_handle: self.receiver_control_handle,
                 });
                 self.send_event(evnt);
@@ -471,15 +475,17 @@ impl Menu {
                 let evnt = MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
                     command_id: item.command_id,
                     menu: self.handle,
+                    item: item.handle,
                     checked: item.checked,
                     control_receiver_handle: self.receiver_control_handle,
                 });
                 self.send_event(evnt);
             }
             MenuItemWrapper::SingleChoice(item) => {
-                let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
+                let evnt = MenuEvent::SingleChoiceSelected(MenuRadioBoxSelectedEvent {
                     command_id: item.command_id,
                     menu: self.handle,
+                    item: item.handle,
                     control_receiver_handle: self.receiver_control_handle,
                 });
                 self.check_radio_item(index);

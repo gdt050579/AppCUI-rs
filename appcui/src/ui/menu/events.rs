@@ -1,42 +1,44 @@
-use super::{MenuBar, Menu};
+use super::{MenuBar, Menu, CheckBox, Command, SingleChoice};
 
 pub trait GenericMenuEvents {
     fn on_menu_open(&self, _menu: &mut Menu) {}
-    fn on_command(&mut self, _command: u32) {}
+    fn on_command(&mut self, menu: Handle<Menu>, item: Handle<Command>, command: u32) {}
+    fn on_check(&mut self, menu: Handle<Menu>, item: Handle<CheckBox>, command: u32, checked: bool) {}
+    fn on_select(&mut self, menu: Handle<Menu>, item: Handle<SingleChoice>, command: u32) {}
     fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
 }
 
 use crate::{system::Handle, ui::common::UIElement};
 
 #[derive(Copy,Clone)]
-pub struct MenuCommandEvent {
-    pub command_id: u32,
-    pub menu: Handle<Menu>,
+pub(crate) struct MenuCommandEvent {
+    pub(crate) command_id: u32,
+    pub(crate) menu: Handle<Menu>,
+    pub(crate) item: Handle<Command>,
     pub(crate) control_receiver_handle: Handle<UIElement>,
-    // GDT I should also add a menu item handle or index
 }
 
 #[derive(Copy,Clone)]
-pub struct MenuCheckBoxStateChangedEvent {
-    pub command_id: u32,
-    pub menu: Handle<Menu>,
-    pub checked: bool,
+pub(crate) struct MenuCheckBoxStateChangedEvent {
+    pub(crate) command_id: u32,
+    pub(crate) menu: Handle<Menu>,
+    pub(crate) item: Handle<CheckBox>,
+    pub(crate) checked: bool,
     pub(crate) control_receiver_handle: Handle<UIElement>,
-    // GDT I should also add a menu item handle or index
 }
 
 #[derive(Copy,Clone)]
-pub struct MenuRadioBoxSelectedEvent {
-    pub command_id: u32,
-    pub menu: Handle<Menu>,
+pub(crate) struct MenuRadioBoxSelectedEvent {
+    pub(crate) command_id: u32,
+    pub(crate) menu: Handle<Menu>,
+    pub(crate) item: Handle<SingleChoice>,
     pub(crate) control_receiver_handle: Handle<UIElement>,
-    // GDT I should also add a menu item handle or index
 }
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
-pub enum MenuEvent {
+pub(crate) enum MenuEvent {
     Command(MenuCommandEvent),
     CheckBoxStateChanged(MenuCheckBoxStateChangedEvent),
-    RadioBoxSelected(MenuRadioBoxSelectedEvent),
+    SingleChoiceSelected(MenuRadioBoxSelectedEvent),
 }

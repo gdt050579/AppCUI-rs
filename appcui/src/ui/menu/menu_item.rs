@@ -47,7 +47,7 @@ impl MenuItemWrapper {
         }
     }
     #[inline(always)]
-    pub(super) fn is_radiobox(&self) -> bool {
+    pub(super) fn is_singlechoice(&self) -> bool {
         match self {
             MenuItemWrapper::SingleChoice(_) => true,
             _ => false,
