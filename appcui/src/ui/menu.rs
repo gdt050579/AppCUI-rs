@@ -19,7 +19,7 @@ pub mod submenu;
 pub use self::menu::Menu;
 pub use self::menu_bar::MenuBar;
 pub(self) use self::menu_bar_item::MenuBarItem;
-pub(self) use self::menu_item::MenuItem;
+pub(self) use self::menu_item::MenuItemWrapper;
 pub use self::menu_item_handle::MenuItemHandle;
 pub(crate) use self::mouse_press_result::MousePressedResult;
 

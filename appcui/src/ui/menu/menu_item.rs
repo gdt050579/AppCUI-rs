@@ -6,12 +6,12 @@ use crate::{
 
 use super::{CheckBox, Command, Menu, Separator, SingleChoice, SubMenu};
 
-pub(super) trait IntoMenuItem {
-    fn into_menuitem(self) -> MenuItem;
+pub(super) trait MenuItem {
+    fn into_menuitem(self) -> MenuItemWrapper;
     fn update_handles(&mut self, parent: Handle<Menu>, me: Handle<UIElement>);
 }
 
-pub(super) enum MenuItem {
+pub(super) enum MenuItemWrapper {
     Command(Command),
     CheckBox(CheckBox),
     SingleChoice(SingleChoice),
@@ -19,80 +19,80 @@ pub(super) enum MenuItem {
     SubMenu(SubMenu),
 }
 
-impl MenuItem {
+impl MenuItemWrapper {
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         match self {
-            MenuItem::Command(item) => item.paint(surface, format, width, current_item, color),
-            MenuItem::CheckBox(item) => item.paint(surface, format, width, current_item, color),
-            MenuItem::SingleChoice(item) => item.paint(surface, format, width, current_item, color),
-            MenuItem::SubMenu(item) => item.paint(surface, format, width, current_item, color),
-            MenuItem::Separator(item) => item.paint(surface, format.y, width, color),
+            MenuItemWrapper::Command(item) => item.paint(surface, format, width, current_item, color),
+            MenuItemWrapper::CheckBox(item) => item.paint(surface, format, width, current_item, color),
+            MenuItemWrapper::SingleChoice(item) => item.paint(surface, format, width, current_item, color),
+            MenuItemWrapper::SubMenu(item) => item.paint(surface, format, width, current_item, color),
+            MenuItemWrapper::Separator(item) => item.paint(surface, format.y, width, color),
         }
     }
     #[inline(always)]
     pub(super) fn is_enabled(&self) -> bool {
         match self {
-            MenuItem::Command(item) => item.enabled,
-            MenuItem::CheckBox(item) => item.enabled,
-            MenuItem::SingleChoice(item) => item.enabled,
-            MenuItem::Separator(_) => true,
-            MenuItem::SubMenu(item) => item.enabled,
+            MenuItemWrapper::Command(item) => item.enabled,
+            MenuItemWrapper::CheckBox(item) => item.enabled,
+            MenuItemWrapper::SingleChoice(item) => item.enabled,
+            MenuItemWrapper::Separator(_) => true,
+            MenuItemWrapper::SubMenu(item) => item.enabled,
         }
     }
     #[inline(always)]
     pub(super) fn is_line(&self) -> bool {
         match self {
-            MenuItem::Separator(_) => true,
+            MenuItemWrapper::Separator(_) => true,
             _ => false,
         }
     }
     #[inline(always)]
     pub(super) fn is_radiobox(&self) -> bool {
         match self {
-            MenuItem::SingleChoice(_) => true,
+            MenuItemWrapper::SingleChoice(_) => true,
             _ => false,
         }
     }
     #[inline(always)]
     pub(super) fn can_be_selected(&self) -> bool {
         match self {
-            MenuItem::Separator(_) => false,
+            MenuItemWrapper::Separator(_) => false,
             _ => true,
         }
     }
     #[inline(always)]
     pub(super) fn is_checkable(&self) -> bool {
         match self {
-            MenuItem::CheckBox(_) => true,
-            MenuItem::SingleChoice(_) => true,
+            MenuItemWrapper::CheckBox(_) => true,
+            MenuItemWrapper::SingleChoice(_) => true,
             _ => false,
         }
     }
     #[inline(always)]
     pub(super) fn is_submenu(&self) -> bool {
         match self {
-            MenuItem::SubMenu(_) => true,
+            MenuItemWrapper::SubMenu(_) => true,
             _ => false,
         }
     }
     #[inline(always)]
     pub(super) fn get_command(&self) -> Option<u32> {
         match self {
-            MenuItem::Command(item) => Some(item.command_id),
-            MenuItem::CheckBox(item) => Some(item.command_id),
-            MenuItem::SingleChoice(item) => Some(item.command_id),
-            MenuItem::Separator(_) => None,
-            MenuItem::SubMenu(_) => None,
+            MenuItemWrapper::Command(item) => Some(item.command_id),
+            MenuItemWrapper::CheckBox(item) => Some(item.command_id),
+            MenuItemWrapper::SingleChoice(item) => Some(item.command_id),
+            MenuItemWrapper::Separator(_) => None,
+            MenuItemWrapper::SubMenu(_) => None,
         }
     }
     #[inline(always)]
     pub(super) fn get_shortcut(&self) -> Option<Key> {
         let key = match self {
-            MenuItem::Command(item) => item.shortcut,
-            MenuItem::CheckBox(item) => item.shortcut,
-            MenuItem::SingleChoice(item) => item.shortcut,
-            MenuItem::Separator(_) => Key::default(),
-            MenuItem::SubMenu(_) => Key::default(),
+            MenuItemWrapper::Command(item) => item.shortcut,
+            MenuItemWrapper::CheckBox(item) => item.shortcut,
+            MenuItemWrapper::SingleChoice(item) => item.shortcut,
+            MenuItemWrapper::Separator(_) => Key::default(),
+            MenuItemWrapper::SubMenu(_) => Key::default(),
         };
         if key.code != KeyCode::None {
             return Some(key);
@@ -103,11 +103,11 @@ impl MenuItem {
     #[inline(always)]
     pub(super) fn get_hotkey(&self) -> Option<Key> {
         let key = match self {
-            MenuItem::Command(item) => item.caption.get_hotkey(),
-            MenuItem::CheckBox(item) => item.caption.get_hotkey(),
-            MenuItem::SingleChoice(item) => item.caption.get_hotkey(),
-            MenuItem::Separator(_) => Key::default(),
-            MenuItem::SubMenu(item) => item.caption.get_hotkey(),
+            MenuItemWrapper::Command(item) => item.caption.get_hotkey(),
+            MenuItemWrapper::CheckBox(item) => item.caption.get_hotkey(),
+            MenuItemWrapper::SingleChoice(item) => item.caption.get_hotkey(),
+            MenuItemWrapper::Separator(_) => Key::default(),
+            MenuItemWrapper::SubMenu(item) => item.caption.get_hotkey(),
         };
         if key.code != KeyCode::None {
             return Some(key);
@@ -118,25 +118,25 @@ impl MenuItem {
     #[inline(always)]
     pub(super) fn set_checked(&mut self, value: bool) {
         match self {
-            MenuItem::CheckBox(item) => item.checked = value,
-            MenuItem::SingleChoice(item) => item.selected = value,
+            MenuItemWrapper::CheckBox(item) => item.checked = value,
+            MenuItemWrapper::SingleChoice(item) => item.selected = value,
             _ => {}
         }
     }
     #[inline(always)]
     pub(super) fn get_caption_chars_count(&self) -> usize {
         match self {
-            MenuItem::Command(item) => item.caption.get_chars_count(),
-            MenuItem::CheckBox(item) => item.caption.get_chars_count(),
-            MenuItem::SingleChoice(item) => item.caption.get_chars_count(),
-            MenuItem::Separator(_) => 0,
-            MenuItem::SubMenu(item) => item.caption.get_chars_count(),
+            MenuItemWrapper::Command(item) => item.caption.get_chars_count(),
+            MenuItemWrapper::CheckBox(item) => item.caption.get_chars_count(),
+            MenuItemWrapper::SingleChoice(item) => item.caption.get_chars_count(),
+            MenuItemWrapper::Separator(_) => 0,
+            MenuItemWrapper::SubMenu(item) => item.caption.get_chars_count(),
         }
     }
     #[inline(always)]
     pub(super) fn get_submenu(&self) -> Option<Handle<Menu>> {
         match self {
-            MenuItem::SubMenu(item) => Some(item.submenu_handle),
+            MenuItemWrapper::SubMenu(item) => Some(item.submenu_handle),
             _ => None,
         }
     }

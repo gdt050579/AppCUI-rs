@@ -5,7 +5,7 @@ use crate::{
     system::Handle
 };
 
-use super::{menu_item::IntoMenuItem, MenuItem};
+use super::{menu_item::MenuItem, MenuItemWrapper};
 
 pub struct Separator {
     pub(super) menu_handle: Handle<Menu>,
@@ -22,9 +22,9 @@ impl Separator {
         surface.draw_horizontal_line_with_size(1, y, width as u32, LineType::Single, color.text.normal);
     }
 }
-impl IntoMenuItem for Separator {
-    fn into_menuitem(self) -> super::MenuItem {
-        MenuItem::Separator(self)
+impl MenuItem for Separator {
+    fn into_menuitem(self) -> super::MenuItemWrapper {
+        MenuItemWrapper::Separator(self)
     }
     fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
         self.menu_handle = parent;

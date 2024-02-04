@@ -1,4 +1,4 @@
-use super::{menu_item::IntoMenuItem, MenuItem};
+use super::{menu_item::MenuItem, MenuItemWrapper};
 use crate::{
     graphics::{Character, SpecialChar, Surface, TextFormat},
     input::{Key, KeyCode},
@@ -54,9 +54,9 @@ impl SingleChoice {
         }
     }
 }
-impl IntoMenuItem for SingleChoice {
-    fn into_menuitem(self) -> MenuItem {
-        MenuItem::SingleChoice(self)
+impl MenuItem for SingleChoice {
+    fn into_menuitem(self) -> MenuItemWrapper {
+        MenuItemWrapper::SingleChoice(self)
     }
     fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
         self.menu_handle = parent;

@@ -5,7 +5,7 @@ use crate::{
 };
 
 use super::Menu;
-use super::{menu_item::IntoMenuItem, MenuItem};
+use super::{menu_item::MenuItem, MenuItemWrapper};
 
 pub struct SubMenu {
     pub(super) enabled: bool,
@@ -41,9 +41,9 @@ impl SubMenu {
         );
     }
 }
-impl IntoMenuItem for SubMenu {
-    fn into_menuitem(self) -> MenuItem {
-        MenuItem::SubMenu(self)
+impl MenuItem for SubMenu {
+    fn into_menuitem(self) -> MenuItemWrapper {
+        MenuItemWrapper::SubMenu(self)
     }
     fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
         self.menu_handle = parent;

@@ -8,7 +8,7 @@ use crate::{
     utils::Caption,
 };
 
-use super::{menu_item::IntoMenuItem, MenuItem};
+use super::{menu_item::MenuItem, MenuItemWrapper};
 
 pub struct Command {
     pub(super) enabled: bool,
@@ -47,9 +47,9 @@ impl Command {
         }
     }
 }
-impl IntoMenuItem for Command {
-    fn into_menuitem(self) -> MenuItem {
-        MenuItem::Command(self)
+impl MenuItem for Command {
+    fn into_menuitem(self) -> MenuItemWrapper {
+        MenuItemWrapper::Command(self)
     }
     fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
         self.menu_handle = parent;

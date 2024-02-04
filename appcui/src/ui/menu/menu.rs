@@ -2,8 +2,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use super::{
     events::*, menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo,
-    CheckBox, Command, MenuItem, SingleChoice, SubMenu,
-    MousePressedResult, menu_item::IntoMenuItem,
+    CheckBox, Command, MenuItemWrapper, SingleChoice, SubMenu,
+    MousePressedResult, menu_item::MenuItem,
 };
 use crate::{
     graphics::{
@@ -19,7 +19,7 @@ const MAX_ITEMS: usize = 128;
 static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 pub struct Menu {
     pub(super) caption: Caption,
-    pub(super) items: Vec<MenuItem>,
+    pub(super) items: Vec<MenuItemWrapper>,
     pub(super) current: VectorIndex,
     pub(super) width: u16,
     pub(super) text_width: u16,
@@ -55,7 +55,7 @@ impl Menu {
         }
     }
 
-    pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T> where T: IntoMenuItem {
+    pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T> where T: MenuItem {
         let id = (GLOBAL_MENUITEM_ID.fetch_add(1, Ordering::SeqCst) as u32) % 0xFFFF_FFFE;
         let h: Handle<T> = Handle::with_id(id, self.items.len() as u32);
         menuitem.update_handles(self.handle, h.cast());
@@ -168,7 +168,7 @@ impl Menu {
             if let Some(shortcut) = item.get_shortcut() {
                 if shortcut == key {
                     match item {
-                        MenuItem::Command(item) => {
+                        MenuItemWrapper::Command(item) => {
                             let evnt = MenuEvent::Command(MenuCommandEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
@@ -177,7 +177,7 @@ impl Menu {
                             self.send_event(evnt);
                             return true;
                         }
-                        MenuItem::CheckBox(item) => {
+                        MenuItemWrapper::CheckBox(item) => {
                             item.checked = !item.checked;
                             let evnt =
                                 MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
@@ -189,7 +189,7 @@ impl Menu {
                             self.send_event(evnt);
                             return true;
                         }
-                        MenuItem::SingleChoice(item) => {
+                        MenuItemWrapper::SingleChoice(item) => {
                             let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
                                 command_id: item.command_id,
                                 menu: self.handle,
@@ -199,8 +199,8 @@ impl Menu {
                             self.send_event(evnt);
                             return true;
                         }
-                        MenuItem::Separator(_) => {}
-                        MenuItem::SubMenu(item) => {
+                        MenuItemWrapper::Separator(_) => {}
+                        MenuItemWrapper::SubMenu(item) => {
                             if let Some(submenu) = RuntimeManager::get()
                                 .get_menus()
                                 .get_mut(item.submenu_handle)
@@ -458,7 +458,7 @@ impl Menu {
             return;
         }
         match &mut self.items[index] {
-            MenuItem::Command(item) => {
+            MenuItemWrapper::Command(item) => {
                 let evnt = MenuEvent::Command(MenuCommandEvent {
                     command_id: item.command_id,
                     menu: self.handle,
@@ -466,7 +466,7 @@ impl Menu {
                 });
                 self.send_event(evnt);
             }
-            MenuItem::CheckBox(item) => {
+            MenuItemWrapper::CheckBox(item) => {
                 item.checked = !item.checked;
                 let evnt = MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
                     command_id: item.command_id,
@@ -476,7 +476,7 @@ impl Menu {
                 });
                 self.send_event(evnt);
             }
-            MenuItem::SingleChoice(item) => {
+            MenuItemWrapper::SingleChoice(item) => {
                 let evnt = MenuEvent::RadioBoxSelected(MenuRadioBoxSelectedEvent {
                     command_id: item.command_id,
                     menu: self.handle,
@@ -485,8 +485,8 @@ impl Menu {
                 self.check_radio_item(index);
                 self.send_event(evnt);
             }
-            MenuItem::Separator(_) => {}
-            MenuItem::SubMenu(item) => {
+            MenuItemWrapper::Separator(_) => {}
+            MenuItemWrapper::SubMenu(item) => {
                 RuntimeManager::get().show_menu(
                     item.submenu_handle,
                     self.receiver_control_handle,
@@ -723,93 +723,3 @@ impl HandleSupport<Menu> for Menu {
         self.update_children_with_parent_handle();
     }
 }
-
-/*
-
-
-MenuContext::MenuContext()
-{
-    this->Parent            = nullptr;
-    this->Owner             = nullptr;
-    this->Cfg               = Application::GetAppConfig();
-    this->FirstVisibleItem  = 0;
-    this->VisibleItemsCount = 0;
-    this->CurrentItem       = NO_MENUITEM_SELECTED;
-    this->Width             = 0;
-    this->TextWidth         = 0;
-    this->ItemsCount        = 0;
-    this->ButtonUp          = MenuButtonState::Normal;
-    this->ButtonDown        = MenuButtonState::Normal;
-}
-
-
-//=====================================================================================[Menu]====
-Menu::Menu()
-{
-    this->Context = new MenuContext();
-}
-
-ItemHandle Menu::AddCommandItem(const ConstString& text, int CommandID, Input::Key shortcutKey)
-{
-    return CTX->AddItem(std::make_unique<MenuItem>(MenuItemType::Command, text, CommandID, false, shortcutKey));
-}
-ItemHandle Menu::AddCheckItem(const ConstString& text, int CommandID, bool checked, Input::Key shortcutKey)
-{
-    return CTX->AddItem(std::make_unique<MenuItem>(MenuItemType::Check, text, CommandID, checked, shortcutKey));
-}
-ItemHandle Menu::AddRadioItem(const ConstString& text, int CommandID, bool checked, Input::Key shortcutKey)
-{
-    return CTX->AddItem(std::make_unique<MenuItem>(MenuItemType::Radio, text, CommandID, checked, shortcutKey));
-}
-ItemHandle Menu::AddSeparator()
-{
-    return CTX->AddItem(std::make_unique<MenuItem>());
-}
-ItemHandle Menu::AddSubMenu(const ConstString& text)
-{
-    try
-    {
-        Menu* SubMenu                               = new Menu();
-        ((MenuContext*) (SubMenu->Context))->Parent = this;
-        return CTX->AddItem(std::make_unique<MenuItem>(text, SubMenu));
-    }
-    catch (...)
-    {
-        return InvalidItemHandle; // could not allocate
-    }
-}
-bool Menu::SetEnable(ItemHandle menuItem, bool status)
-{
-    CHECK_VALID_ITEM(false);
-    CTX->Items[(uint32) menuItem]->Enabled = status;
-    return true;
-}
-bool Menu::SetChecked(ItemHandle menuItem, bool status)
-{
-    CHECK_VALID_ITEM(false);
-    return CTX->SetChecked((uint32) menuItem, status);
-}
-
-Reference<Menu> Menu::GetSubMenu(ItemHandle menuItem)
-{
-    CHECK_VALID_ITEM(nullptr);
-    return Reference<Menu>(CTX->Items[(uint32) menuItem]->SubMenu);
-}
-
-void Menu::Show(int x, int y, const Graphics::Size& maxSize)
-{
-    CTX->Show(this, nullptr, x, y, maxSize);
-}
-void Menu::Show(Reference<Control> parent, int relativeX, int relativeY, const Graphics::Size& maxSize)
-{
-    CTX->Show(this, parent, relativeX, relativeY, maxSize);
-}
-
-bool Menu::ProcessShortcutKey(Input::Key keyCode)
-{
-    return CTX->ProcessShortCut(keyCode);
-}
-} // namespace AppCUI
-
-#undef CTX
-*/
