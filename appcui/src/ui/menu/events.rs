@@ -2,9 +2,9 @@ use super::{MenuBar, Menu, CheckBox, Command, SingleChoice};
 
 pub trait GenericMenuEvents {
     fn on_menu_open(&self, _menu: &mut Menu) {}
-    fn on_command(&mut self, menu: Handle<Menu>, item: Handle<Command>, command: u32) {}
-    fn on_check(&mut self, menu: Handle<Menu>, item: Handle<CheckBox>, command: u32, checked: bool) {}
-    fn on_select(&mut self, menu: Handle<Menu>, item: Handle<SingleChoice>, command: u32) {}
+    fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<Command>, _command: u32) {}
+    fn on_check(&mut self, _menu: Handle<Menu>, _item: Handle<CheckBox>, _command: u32, _checked: bool) {}
+    fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<SingleChoice>, _command: u32) {}
     fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
 }
 

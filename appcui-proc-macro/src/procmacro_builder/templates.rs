@@ -134,7 +134,9 @@ impl GenericCommandBarEvents for $(STRUCT_NAME) {
 pub(crate) static MENU_EVENTS: &str = "
 trait MenuEvents {
     fn on_menu_open(&self, menu: &mut Menu) {}
-    fn on_command(&mut self, command: $(MOD_NAME)::Commands) {}
+    fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: $(MOD_NAME)::Commands) {}
+    fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, command: $(MOD_NAME)::Commands, checked: bool) {}
+    fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, command: $(MOD_NAME)::Commands) {}
     fn on_update_menubar(&self, menubar: &mut MenuBar) {}
 }
 impl GenericMenuEvents for $(STRUCT_NAME) {
@@ -144,9 +146,23 @@ impl GenericMenuEvents for $(STRUCT_NAME) {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
         MenuEvents::on_update_menubar(self, menubar);
     }
-    fn on_command(&mut self, command_id: u32) {
+    fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command_id: u32) {
         if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
-            MenuEvents::on_command(self, command);
+            MenuEvents::on_command(self, menu, item, command);
+        } else {
+            panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
+        }
+    }
+    fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, command_id: u32, checked: bool) {
+        if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
+            MenuEvents::on_check(self, menu, item, command, checked);
+        } else {
+            panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
+        }
+    }
+    fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, command_id: u32) {
+        if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
+            MenuEvents::on_select(self, menu, item, command);
         } else {
             panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
         }
