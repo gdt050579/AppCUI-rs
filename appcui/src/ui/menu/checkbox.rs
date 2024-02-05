@@ -34,6 +34,11 @@ impl CheckBox {
             menu_handle: Handle::None,
         }
     }
+    #[inline(always)]
+    pub fn set_caption(&mut self, text: &str) {
+        self.caption.set_text(text, true);
+    }
+
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
         if current_item && self.enabled {
