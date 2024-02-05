@@ -70,7 +70,11 @@
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops]()
+    - [Commands]()
     - [Menus]()
+      - [Menu items]()
+      - [Menu bar]()
+      - [Popup menus]()
     - [Command bar](chapter-4/command_bar.md)
 
 - [Dialogs]()
