@@ -12,10 +12,10 @@ pub struct SubMenu {
     pub(super) caption: Caption,
     pub(super) submenu_handle: Handle<Menu>,
     pub(super) menu_handle: Handle<Menu>,
-    pub(super) handle: Handle<SubMenu>,    
+    pub(super) handle: Handle<SubMenu>,
 }
 impl SubMenu {
-    pub fn new(menu: Menu) -> Self {        
+    pub fn new(menu: Menu) -> Self {
         let caption = menu.caption.clone();
         let handle = RuntimeManager::get().get_menus().add(menu);
         SubMenu {
@@ -29,6 +29,10 @@ impl SubMenu {
     #[inline(always)]
     pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, true);
+    }
+    #[inline(always)]
+    pub fn get_caption(&self) -> &str {
+        self.caption.get_text()
     }
 
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
