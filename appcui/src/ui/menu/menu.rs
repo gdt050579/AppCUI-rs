@@ -1,15 +1,11 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use super::{
-    events::*, menu_button_state::MenuButtonState, mouse_position_info::MousePositionInfo,
-    CheckBox, Command, MenuItemWrapper, SingleChoice, SubMenu,
-    MousePressedResult, menu_item::MenuItem,
+    events::*, menu_button_state::MenuButtonState, menu_item::MenuItem, mouse_position_info::MousePositionInfo, CheckBox, Command, MenuItemWrapper,
+    MousePressedResult, SingleChoice, SubMenu, Separator,
 };
 use crate::{
-    graphics::{
-        Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament,
-        TextFormat, TextWrap,
-    },
+    graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament, TextFormat, TextWrap},
     input::{Key, KeyCode, MouseWheelDirection},
     system::{Handle, HandleSupport, RuntimeManager, Theme},
     ui::common::{traits::EventProcessStatus, UIElement},
@@ -35,11 +31,7 @@ pub struct Menu {
 impl Menu {
     pub fn new(name: &str) -> Self {
         Self {
-            caption: if name.len() == 0 {
-                Caption::default()
-            } else {
-                Caption::new(name, true)
-            },
+            caption: if name.len() == 0 { Caption::default() } else { Caption::new(name, true) },
             items: Vec::with_capacity(4),
             current: VectorIndex::Invalid,
             width: 1,
@@ -55,12 +47,57 @@ impl Menu {
         }
     }
 
-    pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T> where T: MenuItem {
+    pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T>
+    where
+        T: MenuItem,
+    {
         let id = (GLOBAL_MENUITEM_ID.fetch_add(1, Ordering::SeqCst) as u32) % 0xFFFF_FFFE;
         let h: Handle<T> = Handle::with_id(id, self.items.len() as u32);
         menuitem.update_handles(self.handle, h.cast());
         self.items.push(menuitem.into_menuitem());
         h
+    }
+    #[allow(private_bounds)]
+    pub fn get<T>(&self, menuitem_hamdle: Handle<T>) -> Option<&T>
+    where
+        T: MenuItem,
+    {
+        let idx = menuitem_hamdle.get_index();
+        if idx>=self.items.len() {
+            return None;
+        }
+        let item = &self.items[idx];
+        if item.get_handle() != menuitem_hamdle {
+            return None;
+        }
+        match item {
+            MenuItemWrapper::Command(obj) => Some(unsafe { &(*((obj as *const Command) as *const T)) }),
+            MenuItemWrapper::CheckBox(obj) => Some(unsafe { &(*((obj as *const CheckBox) as *const T)) }),
+            MenuItemWrapper::SingleChoice(obj) => Some(unsafe { &(*((obj as *const SingleChoice) as *const T)) }),
+            MenuItemWrapper::Separator(obj) => Some(unsafe { &(*((obj as *const Separator) as *const T)) }),
+            MenuItemWrapper::SubMenu(obj) => Some(unsafe { &(*((obj as *const SubMenu) as *const T)) }),
+        }
+    }
+    #[allow(private_bounds)]
+    pub fn get_mut<T>(&mut self, menuitem_hamdle: Handle<T>) -> Option<&mut T>
+    where
+        T: MenuItem,
+    {
+        let idx = menuitem_hamdle.get_index();
+        if idx>=self.items.len() {
+            return None;
+        }
+        let item = &mut self.items[idx];
+        if item.get_handle() != menuitem_hamdle {
+            return None;
+        }
+        match item {
+            MenuItemWrapper::Command(obj) => Some(unsafe { &mut (*((obj as *mut Command) as *mut T)) }),
+            MenuItemWrapper::CheckBox(obj) => Some(unsafe { &mut (*((obj as *mut CheckBox) as *mut T)) }),
+            MenuItemWrapper::SingleChoice(obj) => Some(unsafe { &mut (*((obj as *mut SingleChoice) as *mut T)) }),
+            MenuItemWrapper::Separator(obj) => Some(unsafe { &mut (*((obj as *mut Separator) as *mut T)) }),
+            MenuItemWrapper::SubMenu(obj) => Some(unsafe { &mut (*((obj as *mut SubMenu) as *mut T)) }),
+        }
     }
 
     pub(crate) fn is_on_menu(&self, x: i32, y: i32) -> bool {
@@ -136,25 +173,16 @@ impl Menu {
                     current_idx.add(1, idx_count, Strategy::Rotate);
                 }
                 KeyCode::PageUp => {
-                    current_idx.sub(
-                        self.visible_items_count as usize,
-                        idx_count,
-                        Strategy::Clamp,
-                    );
+                    current_idx.sub(self.visible_items_count as usize, idx_count, Strategy::Clamp);
                 }
                 KeyCode::PageDown => {
-                    current_idx.add(
-                        self.visible_items_count as usize,
-                        idx_count,
-                        Strategy::Clamp,
-                    );
+                    current_idx.add(self.visible_items_count as usize, idx_count, Strategy::Clamp);
                 }
                 KeyCode::Home => current_idx = VectorIndex::First,
                 KeyCode::End => current_idx = VectorIndex::last(idx_count),
                 _ => {}
             }
-            self.current
-                .set(idx[current_idx.index()] as usize, self.items.len(), false);
+            self.current.set(idx[current_idx.index()] as usize, self.items.len(), false);
         }
 
         self.update_first_visible_item();
@@ -180,14 +208,13 @@ impl Menu {
                         }
                         MenuItemWrapper::CheckBox(item) => {
                             item.checked = !item.checked;
-                            let evnt =
-                                MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
-                                    command_id: item.command_id,
-                                    menu: self.handle,
-                                    item: item.handle,
-                                    checked: item.checked,
-                                    control_receiver_handle: self.receiver_control_handle,
-                                });
+                            let evnt = MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
+                                command_id: item.command_id,
+                                menu: self.handle,
+                                item: item.handle,
+                                checked: item.checked,
+                                control_receiver_handle: self.receiver_control_handle,
+                            });
                             self.send_event(evnt);
                             return true;
                         }
@@ -204,10 +231,7 @@ impl Menu {
                         }
                         MenuItemWrapper::Separator(_) => {}
                         MenuItemWrapper::SubMenu(item) => {
-                            if let Some(submenu) = RuntimeManager::get()
-                                .get_menus()
-                                .get_mut(item.submenu_handle)
-                            {
+                            if let Some(submenu) = RuntimeManager::get().get_menus().get_mut(item.submenu_handle) {
                                 if submenu.process_shortcut(key) {
                                     return true;
                                 }
@@ -221,26 +245,12 @@ impl Menu {
     }
 
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, active: bool) {
-        let col = if active {
-            &theme.menu
-        } else {
-            &theme.parent_menu
-        };
-        surface.set_clip(
-            self.clip.left,
-            self.clip.top,
-            self.clip.right,
-            self.clip.bottom,
-        );
+        let col = if active { &theme.menu } else { &theme.parent_menu };
+        surface.set_clip(self.clip.left, self.clip.top, self.clip.right, self.clip.bottom);
         surface.set_origin(self.clip.left, self.clip.top);
         surface.clear(Character::with_attributes(' ', col.text.normal));
         surface.draw_rect(
-            Rect::new(
-                0,
-                0,
-                self.clip.right - self.clip.left,
-                self.clip.bottom - self.clip.top,
-            ),
+            Rect::new(0, 0, self.clip.right - self.clip.left, self.clip.bottom - self.clip.top),
             LineType::Single,
             col.text.normal,
         );
@@ -250,25 +260,16 @@ impl Menu {
             let c = self.button_up.get_color(self.first_visible_item == 0, col);
             let x = (self.width >> 1) as i32;
             surface.fill_horizontal_line(x, 0, x + 2, Character::with_attributes(' ', c));
-            surface.write_char(
-                x + 1,
-                0,
-                Character::with_attributes(SpecialChar::TriangleUp, c),
-            );
+            surface.write_char(x + 1, 0, Character::with_attributes(SpecialChar::TriangleUp, c));
 
             // bottom button
             // this->FirstVisibleItem + this->VisibleItemsCount >= this->ItemsCount
-            let c = self.button_down.get_color(
-                (self.first_visible_item + self.visible_items_count) as usize > self.items.len(),
-                col,
-            );
+            let c = self
+                .button_down
+                .get_color((self.first_visible_item + self.visible_items_count) as usize > self.items.len(), col);
             let y = self.clip.bottom - self.clip.top;
             surface.fill_horizontal_line(x, y, x + 2, Character::with_attributes(' ', c));
-            surface.write_char(
-                x + 1,
-                y,
-                Character::with_attributes(SpecialChar::TriangleDown, c),
-            );
+            surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::TriangleDown, c));
         }
         // write items
         let mut format = TextFormat::default();
@@ -278,23 +279,14 @@ impl Menu {
         format.width = Some(self.text_width);
 
         let start = self.first_visible_item as usize;
-        let end = self
-            .items
-            .len()
-            .min((self.first_visible_item + self.visible_items_count) as usize);
+        let end = self.items.len().min((self.first_visible_item + self.visible_items_count) as usize);
         if end <= start {
             return;
         }
         for idx in start..end {
             let item = &self.items[idx as usize];
             format.y += 1;
-            item.paint(
-                surface,
-                &mut format,
-                self.width,
-                idx == self.current.index(),
-                col,
-            );
+            item.paint(surface, &mut format, self.width, idx == self.current.index(), col);
         }
     }
     pub(crate) fn update_children_with_parent_handle(&self) {
@@ -316,10 +308,7 @@ impl Menu {
                 self.button_up = MenuButtonState::Hovered;
                 return EventProcessStatus::Processed;
             }
-            if (mpi.is_on_down_button)
-                && ((self.visible_items_count + self.first_visible_item) as usize)
-                    < self.items.len()
-            {
+            if (mpi.is_on_down_button) && ((self.visible_items_count + self.first_visible_item) as usize) < self.items.len() {
                 self.button_down = MenuButtonState::Hovered;
                 return EventProcessStatus::Processed;
             }
@@ -361,7 +350,7 @@ impl Menu {
             //     return EventProcessStatus::Update;
             // }
         } else {
-            return EventProcessStatus::Ignored
+            return EventProcessStatus::Ignored;
             // if mpi.is_on_menu {
             //     return EventProcessStatus::Cancel;
             // } else {
@@ -378,9 +367,7 @@ impl Menu {
             self.first_visible_item -= 1;
             return EventProcessStatus::Processed;
         }
-        if (direction == MouseWheelDirection::Down)
-            && (((self.visible_items_count + self.first_visible_item) as usize) < self.items.len())
-        {
+        if (direction == MouseWheelDirection::Down) && (((self.visible_items_count + self.first_visible_item) as usize) < self.items.len()) {
             self.first_visible_item += 1;
             return EventProcessStatus::Processed;
         }
@@ -398,10 +385,7 @@ impl Menu {
                 //return EventProcessStatus::Processed;
                 return MousePressedResult::Repaint;
             }
-            if (mpi.is_on_down_button)
-                && ((self.visible_items_count + self.first_visible_item) as usize)
-                    < self.items.len()
-            {
+            if (mpi.is_on_down_button) && ((self.visible_items_count + self.first_visible_item) as usize) < self.items.len() {
                 self.button_down = MenuButtonState::Pressed;
                 self.on_mouse_wheel(MouseWheelDirection::Down);
                 return MousePressedResult::Repaint;
@@ -513,12 +497,7 @@ impl Menu {
 
     pub(crate) fn on_key_pressed(&mut self, key: Key) -> EventProcessStatus {
         match key.code {
-            KeyCode::Up
-            | KeyCode::Down
-            | KeyCode::Home
-            | KeyCode::End
-            | KeyCode::PageUp
-            | KeyCode::PageDown => {
+            KeyCode::Up | KeyCode::Down | KeyCode::Home | KeyCode::End | KeyCode::PageUp | KeyCode::PageDown => {
                 self.move_currentitem_to(key);
                 return EventProcessStatus::Processed;
             }
@@ -569,13 +548,7 @@ impl Menu {
         return EventProcessStatus::Ignored;
     }
 
-    pub(crate) fn compute_position(
-        &mut self,
-        x: i32,
-        y: i32,
-        max_size: Size,
-        term_size: Size,
-    ) -> bool {
+    pub(crate) fn compute_position(&mut self, x: i32, y: i32, max_size: Size, term_size: Size) -> bool {
         if (term_size.width < 5) || (term_size.height < 5) {
             // can not display if terminal is less than 5 x 5
             return false;
@@ -670,24 +643,15 @@ impl Menu {
         // set the actual clip
         if to_left {
             if to_bottom {
-                self.clip
-                    .set_with_size(x, y, menu_width as u16, menu_height as u16);
+                self.clip.set_with_size(x, y, menu_width as u16, menu_height as u16);
             } else {
-                self.clip.set_with_size(
-                    x,
-                    y + 1 - (menu_height as i32),
-                    menu_width as u16,
-                    menu_height as u16,
-                );
+                self.clip
+                    .set_with_size(x, y + 1 - (menu_height as i32), menu_width as u16, menu_height as u16);
             }
         } else {
             if to_bottom {
-                self.clip.set_with_size(
-                    x + 1 - (menu_width as i32),
-                    y,
-                    menu_width as u16,
-                    menu_height as u16,
-                );
+                self.clip
+                    .set_with_size(x + 1 - (menu_width as i32), y, menu_width as u16, menu_height as u16);
             } else {
                 self.clip.set_with_size(
                     x + 1 - (menu_width as i32),

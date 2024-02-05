@@ -5,7 +5,8 @@ use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
-    desktop::events::DesktopEvents, layout::*, menu::events::GenericMenuEvents, menu::Menu, window::events::ToolBarEvents, window::events::WindowEvents,
+    desktop::events::DesktopEvents, layout::*, menu::events::GenericMenuEvents, menu::Menu, menu::MenuItem, window::events::ToolBarEvents,
+    window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
@@ -545,6 +546,26 @@ impl ControlBase {
 
     pub fn register_menu(&mut self, menu: Menu) -> Handle<Menu> {
         RuntimeManager::get().add_menu(menu)
+    }
+    #[allow(private_bounds)]
+    pub fn get_menuitem<T>(&self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&T>
+    where
+        T: MenuItem,
+    {
+        if let Some(menu) = RuntimeManager::get().get_menu(menu_handle) {
+            return menu.get(menuitem_handle);
+        }
+        return None;
+    }
+    #[allow(private_bounds)]
+    pub fn get_menuitem_mut<T>(&mut self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&mut T>
+    where
+        T: MenuItem,
+    {
+        if let Some(menu) = RuntimeManager::get().get_menu(menu_handle) {
+            return menu.get_mut(menuitem_handle);
+        }
+        return None;
     }
 }
 // default implementations
