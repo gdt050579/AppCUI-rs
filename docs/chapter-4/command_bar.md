@@ -43,7 +43,7 @@ The following example shows a window that associates three keys: `F1`, `F2` and 
 ```rust
 use appcui::prelude::*;
 
-#[Window(events = CommandBarEvents, commands=[Help, Save,Load])]
+#[Window(events = CommandBarEvents, commands=[Help, Save, Load])]
 struct MyWin { }
 impl MyWin {
     fn new() -> Self {
@@ -54,7 +54,7 @@ impl MyWin {
 }
 impl CommandBarEvents for MyWin {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("F1"), "Help", mywin::Commands::Save);
+        commandbar.set(key!("F1"), "Help", mywin::Commands::Help);
         commandbar.set(key!("F2"), "Save", mywin::Commands::Save);
         commandbar.set(key!("F3"), "Load", mywin::Commands::Load);
     }
