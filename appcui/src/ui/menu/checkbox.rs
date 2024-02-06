@@ -2,11 +2,11 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 use crate::{
     graphics::{Character, SpecialChar, Surface, TextFormat},
     input::{Key, KeyCode},
+    system::Handle,
     system::MenuTheme,
     ui::common::traits::CommandID,
     ui::menu::Menu,
     utils::Caption,
-    system::Handle
 };
 pub struct CheckBox {
     pub(super) enabled: bool,
@@ -15,7 +15,7 @@ pub struct CheckBox {
     pub(super) caption: Caption,
     pub(super) shortcut: Key,
     pub(super) menu_handle: Handle<Menu>,
-    pub(super) handle: Handle<CheckBox>
+    pub(super) handle: Handle<CheckBox>,
 }
 impl CheckBox {
     pub fn new<T, U>(text: &str, shortcut: T, command_id: U, checked: bool) -> Self
@@ -41,6 +41,22 @@ impl CheckBox {
     #[inline(always)]
     pub fn get_caption(&self) -> &str {
         self.caption.get_text()
+    }
+    #[inline(always)]
+    pub fn is_checked(&self) -> bool {
+        self.checked
+    }
+    #[inline(always)]
+    pub fn set_checked(&mut self, value: bool) {
+        self.checked = value;
+    }
+    #[inline(always)]
+    pub fn is_enabled(&self) -> bool {
+        self.enabled
+    }
+    #[inline(always)]
+    pub fn set_enabled(&mut self, value: bool) {
+        self.enabled = value;
     }
 
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
@@ -69,5 +85,4 @@ impl MenuItem for CheckBox {
         self.menu_handle = parent;
         self.handle = me.cast();
     }
-    
 }
