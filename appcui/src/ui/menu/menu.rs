@@ -225,7 +225,7 @@ impl Menu {
                                 item: item.handle,
                                 control_receiver_handle: self.receiver_control_handle,
                             });
-                            self.check_radio_item(index);
+                            self.select_single_choice(index);
                             self.send_event(evnt);
                             return true;
                         }
@@ -405,7 +405,7 @@ impl Menu {
         return MousePressedResult::CheckParent;
     }
 
-    fn check_radio_item(&mut self, index: usize) {
+    pub(super) fn select_single_choice(&mut self, index: usize) {
         // safety checks
         let count = self.items.len();
         if index >= count {
@@ -472,7 +472,7 @@ impl Menu {
                     item: item.handle,
                     control_receiver_handle: self.receiver_control_handle,
                 });
-                self.check_radio_item(index);
+                self.select_single_choice(index);
                 self.send_event(evnt);
             }
             MenuItemWrapper::Separator(_) => {}

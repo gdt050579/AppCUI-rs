@@ -58,7 +58,15 @@ impl CheckBox {
     pub fn set_enabled(&mut self, value: bool) {
         self.enabled = value;
     }
-
+    #[inline(always)]
+    pub fn get_shortcut(&self) -> Key {
+        self.shortcut
+    }
+    #[inline(always)]
+    pub fn set_shortcut<T>(&mut self, shortcut: T) where Key: From<T>, {
+        self.shortcut = Key::from(shortcut)
+    }
+    
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
         if current_item && self.enabled {

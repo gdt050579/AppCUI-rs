@@ -6,7 +6,7 @@ use crate::{
     ui::common::traits::CommandID,
     utils::Caption,
     ui::menu::Menu,
-    system::Handle
+    system::Handle, prelude::RuntimeManager
 };
 pub struct SingleChoice {
     pub(super) enabled: bool,
@@ -54,7 +54,28 @@ impl SingleChoice {
     pub fn is_selected(&self) -> bool {
         self.selected
     }
-
+    #[inline(always)]
+    pub fn set_selected(&mut self) {
+        if self.handle.is_none() {
+            panic!("`set_selected` method should only be called after a sigle choice item was added to a registered menu !");
+        }
+        if self.menu_handle.is_none() {
+            panic!("`set_selected` method should only be called after a sigle choice item was added to a registered menu !");
+        }
+        let index = self.handle.get_index();
+        if let Some(menu) = RuntimeManager::get().get_menu(self.menu_handle) {
+            menu.select_single_choice(index);
+        }
+    }
+    #[inline(always)]
+    pub fn get_shortcut(&self) -> Key {
+        self.shortcut
+    }
+    #[inline(always)]
+    pub fn set_shortcut<T>(&mut self, shortcut: T) where Key: From<T>, {
+        self.shortcut = Key::from(shortcut)
+    }
+    
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
         if current_item && self.enabled {
