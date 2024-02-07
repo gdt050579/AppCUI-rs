@@ -47,6 +47,7 @@ impl Menu {
         }
     }
 
+    #[allow(private_bounds)]
     pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T>
     where
         T: MenuItem,

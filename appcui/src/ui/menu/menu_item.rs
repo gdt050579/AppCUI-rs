@@ -76,16 +76,6 @@ impl MenuItemWrapper {
         }
     }
     #[inline(always)]
-    pub(super) fn get_command(&self) -> Option<u32> {
-        match self {
-            MenuItemWrapper::Command(item) => Some(item.command_id),
-            MenuItemWrapper::CheckBox(item) => Some(item.command_id),
-            MenuItemWrapper::SingleChoice(item) => Some(item.command_id),
-            MenuItemWrapper::Separator(_) => None,
-            MenuItemWrapper::SubMenu(_) => None,
-        }
-    }
-    #[inline(always)]
     pub(super) fn get_shortcut(&self) -> Option<Key> {
         let key = match self {
             MenuItemWrapper::Command(item) => item.shortcut,
