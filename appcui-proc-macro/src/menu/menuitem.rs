@@ -7,7 +7,11 @@ use proc_macro::*;
 use std::str::FromStr;
 use std::fmt::Write;
 
-static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
+static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
+    PositionalParameter::new("caption", ParamType::String),
+    PositionalParameter::new("shortcut", ParamType::String),
+    PositionalParameter::new("cmd", ParamType::String),
+];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("caption", "caption", ParamType::String),
     NamedParameter::new("text", "caption", ParamType::String),
