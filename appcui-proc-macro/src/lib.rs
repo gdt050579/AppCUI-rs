@@ -1,7 +1,7 @@
 mod token_stream_to_string;
 mod chars;
+mod key;
 mod menu;
-mod key_utils;
 mod procmacro_builder;
 mod parameter_parser;
 mod controls;
@@ -267,7 +267,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Modifiers can be used in combination with the simple `+` between them.
 #[proc_macro]
 pub fn key(input: TokenStream) -> TokenStream {
-    key_utils::create(input)
+    key::create(input)
 }
 
 #[proc_macro]

@@ -78,8 +78,8 @@ fn add_caption(s: &mut String, dict: &mut NamedParamsMap) {
 }
 fn add_shortcut(s: &mut String, dict: &mut NamedParamsMap) {
     if let Some(value) = dict.get("shortcut") {
-        s.push_str("Key::from(");
-        write!(s, "{}u16)", crate::key_utils::parse_string_key_representation(value.get_string())).unwrap();
+        let r = crate::key::builder::create_string(value.get_string());
+        s.push_str(&r);
     } else {
         s.push_str("Key::None");
     }
@@ -175,16 +175,16 @@ fn build_menuitem_command(_param_list: &str, dict: &mut NamedParamsMap, class: O
     s
 }
 fn build_menuitem_checkbox(_param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
-    let mut s = String::from("{\nlet mut item = menu::Checkbox::new(");
+    let mut s = String::from("{\nlet mut item = menu::CheckBox::new(");
     add_caption(&mut s, dict);
     s.push_str(", ");
     add_shortcut(&mut s, dict);
     s.push_str(", ");
     add_command_id(&mut s, dict, class);
     if dict.get_bool("checked").unwrap_or(false)  {
-        s.push_str("true");
+        s.push_str(",true");
     } else {
-        s.push_str("false");
+        s.push_str(",false");
     }
     s.push_str(");\n");
     add_enable_status(&mut s, dict);
@@ -199,9 +199,9 @@ fn build_menuitem_singlechoice(param_list: &str, dict: &mut NamedParamsMap, clas
     s.push_str(", ");
     add_command_id(&mut s, dict, class);
     if dict.get_bool("select").unwrap_or(false)  {
-        s.push_str("true");
+        s.push_str(",true");
     } else {
-        s.push_str("false");
+        s.push_str(",false");
     }
     s.push_str(");\n");
     add_enable_status(&mut s, dict);
