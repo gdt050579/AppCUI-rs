@@ -5,11 +5,11 @@ pub(crate) enum MenuItemType {
     CheckBox = 1,
     SingleChoice = 2,
     SubMenu = 3,
-    Line = 4,
+    Separator = 4,
 }
 
 static HASH_TO_ALIGNAMENT: [Option<MenuItemType>; 45] = [
-    Some(MenuItemType::Line),
+    Some(MenuItemType::Separator),
     Some(MenuItemType::SingleChoice),
     Some(MenuItemType::SubMenu),
     None,
@@ -33,7 +33,7 @@ static HASH_TO_ALIGNAMENT: [Option<MenuItemType>; 45] = [
     None,
     Some(MenuItemType::SingleChoice),
     None,
-    Some(MenuItemType::Line),
+    Some(MenuItemType::Separator),
     Some(MenuItemType::SubMenu),
     None,
     None,
@@ -53,7 +53,7 @@ static HASH_TO_ALIGNAMENT: [Option<MenuItemType>; 45] = [
     Some(MenuItemType::Command),
     None,
     None,
-    Some(MenuItemType::Line),
+    Some(MenuItemType::Separator),
 ];
 
 static HASH_COLISION_VALIDATOR: [u64; 45] = [
@@ -118,7 +118,7 @@ impl MenuItemType {
             MenuItemType::CheckBox => "CheckBox",
             MenuItemType::SingleChoice => "SingleChoice",
             MenuItemType::SubMenu => "SubMenu",
-            MenuItemType::Line => "Line",
+            MenuItemType::Separator => "Line",
         }
     }
 }

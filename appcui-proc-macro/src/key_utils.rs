@@ -11,7 +11,7 @@ pub fn create(input: TokenStream) -> TokenStream {
     TokenStream::from_str(&string_repr).expect("Fail to convert key to token stream")
 }
 
-fn parse_string_key_representation(string: &str) -> u16 {
+pub(crate) fn parse_string_key_representation(string: &str) -> u16 {
     let mut key_value = 0u16;
     let mut modifiers = 0u16;
 
