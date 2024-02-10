@@ -42,3 +42,16 @@ pub(crate) enum MenuEvent {
     CheckBoxStateChanged(MenuCheckBoxStateChangedEvent),
     SingleChoiceSelected(MenuRadioBoxSelectedEvent),
 }
+
+pub (crate) enum MousePressedMenuResult {
+    None,
+    Repaint,
+    CheckParent,    
+    Activate
+}
+pub (crate) enum MouseMoveMenuResult {
+    ProcessedAndRepaint,
+    RepaintAndPass,
+    ProcessWithoutRepaint,    
+    Ignored
+}

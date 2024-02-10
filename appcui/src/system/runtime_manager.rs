@@ -1,3 +1,5 @@
+use self::menu::events::MousePressedMenuResult;
+
 use super::runtime_manager_traits::*;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
 use crate::graphics::{Point, Rect, Size, Surface};
@@ -10,7 +12,7 @@ use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::{traits::*, ControlEvent};
 use crate::ui::common::{ControlEventData, ControlManager, UIElement};
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
-use crate::ui::menu::{Menu, MenuBar, MousePressedResult};
+use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
 
@@ -1081,9 +1083,11 @@ impl MouseMethods for RuntimeManager {
         // Process event in the following order:
         // first the context menu and its owner, then the menu bar and then cmdbar
         if let Some(menu) = self.get_opened_menu() {
-            if menu.on_mouse_move(x, y) == EventProcessStatus::Processed {
-                self.repaint = true;
-                return true;
+            match menu.on_mouse_move(x, y) {
+                menu::events::MouseMoveMenuResult::ProcessedAndRepaint => { self.repaint = true; return true; },
+                menu::events::MouseMoveMenuResult::RepaintAndPass => self.repaint = true,
+                menu::events::MouseMoveMenuResult::ProcessWithoutRepaint => return true, // process it but no repaint needed.
+                menu::events::MouseMoveMenuResult::Ignored => { },
             }
         }
         /*
@@ -1126,7 +1130,7 @@ impl MouseMethods for RuntimeManager {
     }
 
     fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) {
-        let mut result = MousePressedResult::None;
+        let mut result = MousePressedMenuResult::None;
         let mut parent_handle = Handle::None;
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
@@ -1135,23 +1139,23 @@ impl MouseMethods for RuntimeManager {
                 result = menu.on_mouse_pressed(x, y);
             } else {
                 result = if menu.is_on_menu(x, y) {
-                    MousePressedResult::Activate
+                    MousePressedMenuResult::Activate
                 } else {
-                    MousePressedResult::CheckParent
+                    MousePressedMenuResult::CheckParent
                 };
             }
         }
         match result {
-            MousePressedResult::None => {}
-            MousePressedResult::Repaint => self.repaint = true,
-            MousePressedResult::CheckParent => {
+            MousePressedMenuResult::None => {}
+            MousePressedMenuResult::Repaint => self.repaint = true,
+            MousePressedMenuResult::CheckParent => {
                 if !parent_handle.is_none() {
                     self.process_menu_mouse_click(parent_handle, x, y);
                 } else {
                     self.close_opened_menu();
                 }
             }
-            MousePressedResult::Activate => {
+            MousePressedMenuResult::Activate => {
                 self.repaint = true;
                 self.opened_menu_handle = handle;
                 if let Some(menu) = menus.get_mut(handle) {

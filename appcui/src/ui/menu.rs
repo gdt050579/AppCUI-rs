@@ -4,9 +4,10 @@ mod menu_bar_item;
 mod menu_button_state;
 pub(crate) mod menu_item;
 mod mouse_position_info;
-mod mouse_press_result;
 mod utils;
 pub mod events;
+#[cfg(test)]
+mod tests;
 
 pub mod checkbox;
 pub mod command;
@@ -19,7 +20,6 @@ pub use self::menu::Menu;
 pub use self::menu_bar::MenuBar;
 pub(self) use self::menu_bar_item::MenuBarItem;
 pub(self) use self::menu_item::MenuItemWrapper;
-pub(crate) use self::mouse_press_result::MousePressedResult;
 pub(crate) use self::menu_item::MenuItem;
 
 pub use self::checkbox::CheckBox;

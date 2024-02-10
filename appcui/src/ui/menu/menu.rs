@@ -2,7 +2,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use super::{
     events::*, menu_button_state::MenuButtonState, menu_item::MenuItem, mouse_position_info::MousePositionInfo, CheckBox, Command, MenuItemWrapper,
-    MousePressedResult, SingleChoice, SubMenu, Separator,
+    Separator, SingleChoice, SubMenu,
 };
 use crate::{
     graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament, TextFormat, TextWrap},
@@ -64,7 +64,7 @@ impl Menu {
         T: MenuItem,
     {
         let idx = menuitem_hamdle.get_index();
-        if idx>=self.items.len() {
+        if idx >= self.items.len() {
             return None;
         }
         let item = &self.items[idx];
@@ -85,7 +85,7 @@ impl Menu {
         T: MenuItem,
     {
         let idx = menuitem_hamdle.get_index();
-        if idx>=self.items.len() {
+        if idx >= self.items.len() {
             return None;
         }
         let item = &mut self.items[idx];
@@ -316,7 +316,7 @@ impl Menu {
         }
         EventProcessStatus::Ignored
     }
-    pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
+    pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> MouseMoveMenuResult {
         let x = x - self.clip.left;
         let y = y - self.clip.top;
         let mpi = MousePositionInfo::new(x, y, self);
@@ -344,19 +344,17 @@ impl Menu {
             need_repaint = true;
         }
         if need_repaint {
-            return EventProcessStatus::Processed;
-            // if mpi.is_on_menu {
-            //     return EventProcessStatus::Processed;
-            // } else {
-            //     return EventProcessStatus::Update;
-            // }
+            if mpi.is_on_menu {
+                return MouseMoveMenuResult::ProcessedAndRepaint;
+            } else {
+                return MouseMoveMenuResult::RepaintAndPass;
+            }
         } else {
-            return EventProcessStatus::Ignored;
-            // if mpi.is_on_menu {
-            //     return EventProcessStatus::Cancel;
-            // } else {
-            //     return EventProcessStatus::Ignored;
-            // }
+            if mpi.is_on_menu {
+                return MouseMoveMenuResult::ProcessWithoutRepaint;
+            } else {
+                return MouseMoveMenuResult::Ignored;
+            }
         }
     }
     pub(crate) fn on_mouse_wheel(&mut self, direction: MouseWheelDirection) -> EventProcessStatus {
@@ -374,7 +372,7 @@ impl Menu {
         }
         return EventProcessStatus::Ignored;
     }
-    pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> MousePressedResult {
+    pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> MousePressedMenuResult {
         let x = x - self.clip.left;
         let y = y - self.clip.top;
         let mpi = MousePositionInfo::new(x, y, self);
@@ -384,26 +382,26 @@ impl Menu {
                 self.button_up = MenuButtonState::Pressed;
                 self.on_mouse_wheel(MouseWheelDirection::Up);
                 //return EventProcessStatus::Processed;
-                return MousePressedResult::Repaint;
+                return MousePressedMenuResult::Repaint;
             }
             if (mpi.is_on_down_button) && ((self.visible_items_count + self.first_visible_item) as usize) < self.items.len() {
                 self.button_down = MenuButtonState::Pressed;
                 self.on_mouse_wheel(MouseWheelDirection::Down);
-                return MousePressedResult::Repaint;
+                return MousePressedMenuResult::Repaint;
             }
         }
         // if click on a valid item, apply the action and close the menu
         if mpi.item_index.is_valid() {
             self.run_item_action(mpi.item_index.index());
-            return MousePressedResult::Repaint;
+            return MousePressedMenuResult::Repaint;
         }
 
         // is it's on the menu -> do nothing
         if mpi.is_on_menu {
-            return MousePressedResult::None;
+            return MousePressedMenuResult::None;
         }
         // if it's outsize, check if mouse is on one of its parens
-        return MousePressedResult::CheckParent;
+        return MousePressedMenuResult::CheckParent;
     }
 
     pub(super) fn select_single_choice(&mut self, index: usize) {
