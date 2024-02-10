@@ -6,7 +6,6 @@ use super::{
     BaseControlType,
 };
 
-use super::utils;
 use proc_macro::*;
 
 enum State {

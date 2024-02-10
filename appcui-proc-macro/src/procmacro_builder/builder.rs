@@ -3,7 +3,7 @@ use proc_macro::TokenStream;
 use std::fmt::Write;
 use std::str::FromStr;
 
-fn generate_commands(code: &mut String, a: &Arguments, struct_name: &str) -> String {
+fn generate_commands(a: &Arguments) -> String {
     let mut cmd_code = String::with_capacity(1024);
     cmd_code.push_str(templates::COMMANDS_TEMPLATE);
     let mut temp = String::with_capacity(256);
@@ -95,7 +95,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                 "The 'commands` attribute can only be used if one of the CommandBarEvents or MenuEvents is overwritten (via `events` attributie) !"
             );
         }
-        let cmd_gen_code = generate_commands(&mut code, &a, &struct_name);
+        let cmd_gen_code = generate_commands(&a);
         code.push_str(&cmd_gen_code);
         // add the CommandBar events wrapper if needed
         if config.get(AppCUITrait::CommandBarEvents) == TraitImplementation::None {
