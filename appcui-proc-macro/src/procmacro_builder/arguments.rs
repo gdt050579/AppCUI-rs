@@ -75,8 +75,8 @@ impl Arguments {
             panic!("Attribute 'response' is only available for ModalWindows !");
         }
         self.validate_one_value();
-        if !utils::validate_struct_name(self.values[0].as_str()) {
-            panic!("Invalid name ('{}') for the modal resposne. A valid name should contains letters, numbers or underline and must not start with a number.", self.values[0].as_str());
+        if let Err(desc) = crate::utils::validate_name(self.values[0].as_str(), false) {
+            panic!("Invalid name ('{}') for the modal response => {}", self.values[0].as_str(), desc);
         }
         self.base.clear();
         self.base.push_str("ModalWindow<");
@@ -157,11 +157,8 @@ impl Arguments {
     fn validate_commands(&mut self) {
         let mut h = HashSet::with_capacity(self.values.len() * 2);
         for command_name in &self.values {
-            if !super::utils::validate_struct_name(&command_name.as_str()) {
-                panic!(
-                    "Invalid ID: '{}'. An ID should start with a letter and may contain letter and numbers !",
-                    command_name
-                );
+            if let Err(desc) = crate::utils::validate_name(&command_name.as_str(), false) {
+                panic!("Invalid ID: '{}' => {}", command_name, desc);
             }
             let hash = crate::utils::compute_hash(&command_name);
             if h.contains(&hash) {

@@ -127,4 +127,35 @@ pub(crate) fn skip_words(buf: &[u8], start: usize) -> usize {
     }
     pos   
 }
-
+pub(crate)  fn validate_name(name: &str, force_one_capilat_letter: bool) -> Result<(),&'static str> {
+    if name.len() == 0 {
+        return Err("Empty names are not allowed !");
+    }
+    let mut one_capital_letter = false;
+    let mut idx = 0;
+    for ch in name.chars() {
+        idx += 1;
+        if (ch >= 'A') && (ch <= 'Z') {
+            one_capital_letter = true;
+            continue;
+        }
+        if (ch >= 'a') && (ch <= 'z') {
+            continue;
+        }
+        if (ch >= '0') && (ch <= '9') {
+            if idx == 1 {
+                return Err("First character must be a letter");
+            } else {
+                continue;
+            }
+        }
+        if ch == '_' {
+            continue;
+        }
+        return Err("Invalid character (valid characters are letters (A-Z,a-z), numbers (0-9) and underscore symbol (_)");
+    }
+    if force_one_capilat_letter && (!one_capital_letter) {
+        return Err("At least one capital letter [A-Z] (preferably the first) should be present in the name !");
+    }
+    Ok(())
+}

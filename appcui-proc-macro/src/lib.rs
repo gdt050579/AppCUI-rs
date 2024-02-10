@@ -322,5 +322,5 @@ pub fn canvas(input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn menuitem(input: TokenStream) -> TokenStream {
-    crate::menu::menuitem::create(input)
+    crate::menu::menuitem::create(input, None)
 }

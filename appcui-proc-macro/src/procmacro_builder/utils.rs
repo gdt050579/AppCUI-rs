@@ -1,28 +1,5 @@
-pub fn validate_struct_name(name: &str) -> bool {
-    if name.len() == 0 {
-        return false;
-    }
-    for (index, ch) in name.char_indices() {
-        if ((ch >= 'A') && (ch <= 'Z')) || ((ch >= 'a') && (ch <= 'z')) {
-            continue;
-        }
-        if (ch >= '0') && (ch <= '9') {
-            if index == 0 {
-                return false;
-            } else {
-                continue;
-            }
-        }
-        if ch == '_' {
-            continue;
-        }
-        // else --> invalid character --> exit
-        return false;
-    }
-    return true;
-}
 #[inline]
-pub fn is_name_char(value: u8) -> bool {
+pub(crate)  fn is_name_char(value: u8) -> bool {
     match value {
         b'a'..=b'z' => return true,
         b'A'..=b'Z' => return true,
