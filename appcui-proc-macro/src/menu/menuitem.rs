@@ -174,17 +174,45 @@ fn build_menuitem_command(_param_list: &str, dict: &mut NamedParamsMap, class: O
     s.push_str("\nitem\n}");
     s
 }
-fn build_menuitem_checkbox(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
-    String::new()
+fn build_menuitem_checkbox(_param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
+    let mut s = String::from("{\nlet mut item = menu::Checkbox::new(");
+    add_caption(&mut s, dict);
+    s.push_str(", ");
+    add_shortcut(&mut s, dict);
+    s.push_str(", ");
+    add_command_id(&mut s, dict, class);
+    if dict.get_bool("checked").unwrap_or(false)  {
+        s.push_str("true");
+    } else {
+        s.push_str("false");
+    }
+    s.push_str(");\n");
+    add_enable_status(&mut s, dict);
+    s.push_str("\nitem\n}");
+    s
 }
 fn build_menuitem_singlechoice(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
-    String::new()
+    let mut s = String::from("{\nlet mut item = menu::SingleChoice::new(");
+    add_caption(&mut s, dict);
+    s.push_str(", ");
+    add_shortcut(&mut s, dict);
+    s.push_str(", ");
+    add_command_id(&mut s, dict, class);
+    if dict.get_bool("select").unwrap_or(false)  {
+        s.push_str("true");
+    } else {
+        s.push_str("false");
+    }
+    s.push_str(");\n");
+    add_enable_status(&mut s, dict);
+    s.push_str("\nitem\n}");
+    s
 }
 fn build_menuitem_submenu(param_list: &str, dict: &mut NamedParamsMap) -> String {
     String::new()
 }
 fn build_menuitem_separator() -> String {
-    String::from("menu::Separat::new()")
+    String::from("menu::Separator::new()")
 }
 fn menuitem_from_dict(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
     dict.validate_positional_parameters(param_list, POSILITIONAL_PARAMETERS).unwrap();
