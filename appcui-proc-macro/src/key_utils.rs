@@ -44,6 +44,7 @@ pub(crate) fn parse_string_key_representation(string: &str) -> u16 {
 
 fn parse_key_name(key: &str) -> u16 {
     match key {
+        "None" => 0,
         "F1" => 1,
         "F2" => 2,
         "F3" => 3,
