@@ -89,3 +89,85 @@ fn check_view() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_scroll_button_activation() {
+    #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
+    struct MyWin {
+        m_file: Handle<Menu>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:40,h:8"),
+                m_file: Handle::None,
+            };
+            let m = menu!(
+                "&Keywords, class:MyWin, items=[
+                    {1,cmd:A},
+                    {2,cmd:A},
+                    {3,cmd:A},
+                    {4,cmd:A},
+                    {5,cmd:A},
+                    {6,cmd:A},
+                    {7,cmd:A},
+                    {8,cmd:A},
+                    {9,cmd:A},
+                    {10,cmd:A},
+                    {11,cmd:A},
+                    {12,cmd:A},
+                ]"
+            );
+            w.m_file = w.register_menu(m);
+            w
+        }
+    }
+    impl MenuEvents for MyWin {
+        fn on_menu_open(&self, menu: &mut Menu) {}
+
+        fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: mywin::Commands) {}
+
+        fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, command: mywin::Commands, checked: bool) {}
+
+        fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, command: mywin::Commands) {}
+
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.m_file);
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x8a3517e84f3258c3)
+        Mouse.Move(3,0)
+        Mouse.Click(3,0,left)
+        Paint('Meniu opened')
+        CheckHash(0x49de03a8810dbb75)
+        Mouse.Move(4,11)
+        Mouse.Click(4,11,left)
+        Paint('2 to 10')
+        CheckHash(0xd6509540ca0c1de1)
+        Mouse.Click(4,11,left)
+        Paint('3 to 11')
+        CheckHash(0x44283c0cfe0beadb)
+        Mouse.Click(4,11,left)
+        Paint('4 to 12 (down button disabled)')
+        CheckHash(0x3359a06bc50d8ae3)
+        Mouse.Move(3,1)
+        Paint('hover over top scroll button')
+        CheckHash(0xc8508353e83bddcb)
+        Mouse.Click(3,1,left)
+        Mouse.Move(4,1)
+        Mouse.Click(4,1,left)
+        Mouse.Move(9,2)
+        Paint('2 to 10 (both butons are enabled)')
+        CheckHash(0x8a69f56b56a4ee59)
+        Mouse.Move(4,1)
+        Mouse.Click(4,1,left)
+        Paint('top button is disabled')
+        CheckHash(0x49de03a8810dbb75)
+    ";
+    let mut a = App::debug(60, 15, script).menu().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
