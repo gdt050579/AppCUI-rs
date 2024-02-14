@@ -10,6 +10,7 @@ pub(crate) enum ParamType {
     Size,
     Layout,
     Dict,
+    List,
     Integer,
 }
 

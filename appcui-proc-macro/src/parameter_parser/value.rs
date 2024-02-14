@@ -327,6 +327,21 @@ impl<'a> Value<'a> {
             self.end,
         ));
     }
+    fn validate_list(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if let Some(_) = self.get_list() {
+            return Ok(());
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting a list with values `[]..]` for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }
     fn validate_i32(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if let Some(_) = self.get_i32() {
             return Ok(());
@@ -353,6 +368,7 @@ impl<'a> Value<'a> {
             super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,
             super::ParamType::Size => self.validate_size(display_param_name, param_list)?,
             super::ParamType::Dict => self.validate_dict(display_param_name, param_list)?,
+            super::ParamType::List => self.validate_list(display_param_name, param_list)?,
             super::ParamType::Integer => self.validate_i32(display_param_name, param_list)?,
             
         }
