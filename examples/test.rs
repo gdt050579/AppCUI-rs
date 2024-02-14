@@ -26,7 +26,7 @@ impl MyWin {
                 {Feature_3,None,B,checked:true},
                 {Feature_4,None,B,checked:true},
                 {---},
-                {'Color', items=[
+                {'Color', enabled: false, items=[
                     {Red,None,C,selected: false},
                     {Green,None,C,selected: false},
                     {Blue,None,C,selected: true},

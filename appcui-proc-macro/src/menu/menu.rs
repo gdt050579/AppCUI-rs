@@ -11,8 +11,6 @@ static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("caption", "caption", ParamType::String),
     NamedParameter::new("text", "caption", ParamType::String),
-    NamedParameter::new("enable", "enable", ParamType::Bool),
-    NamedParameter::new("enabled", "enable", ParamType::Bool),
     NamedParameter::new("items", "items", ParamType::List),    
     NamedParameter::new("subitems", "items", ParamType::List),
     NamedParameter::new("class", "class", ParamType::String),

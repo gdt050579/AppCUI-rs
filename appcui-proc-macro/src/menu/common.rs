@@ -157,7 +157,7 @@ fn add_command_id(s: &mut String, dict: &mut NamedParamsMap, class: Option<&str>
 fn add_enable_status(s: &mut String, dict: &mut NamedParamsMap) {
     if let Some(value) = dict.get_bool("enable") {
         if !value {
-            s.push_str("item.set_enable(false);\n");
+            s.push_str("item.set_enabled(false);\n");
         }
     }
 }
@@ -242,8 +242,7 @@ pub(super) fn build_menu(param_list: &str, dict: &mut NamedParamsMap, class: Opt
             }
             s.push_str(");\n");
         }
-    }
-    add_enable_status(&mut s, dict);
+    }    
     s.push_str("\nmenu\n}");
     s
 }
@@ -253,8 +252,9 @@ fn build_menuitem_submenu(param_list: &str, dict: &mut NamedParamsMap, class: Op
     // the class that I provive as a key takes priority.
     let class_name = get_class(dict, class);
     let m = build_menu(param_list, dict, class_name.as_ref().map(|s| s.as_str()));
-    s.push_str(&m);
+    s.push_str(&m);    
     s.push_str(");\n");
+    add_enable_status(&mut s, dict);
     s.push_str("\nitem\n}");
     s
 }
