@@ -267,7 +267,7 @@ impl Menu {
             // this->FirstVisibleItem + this->VisibleItemsCount >= this->ItemsCount
             let c = self
                 .button_down
-                .get_color((self.first_visible_item + self.visible_items_count) as usize > self.items.len(), col);
+                .get_color((self.first_visible_item + self.visible_items_count) as usize >= self.items.len(), col);
             let y = self.clip.bottom - self.clip.top;
             surface.fill_horizontal_line(x, y, x + 2, Character::with_attributes(' ', c));
             surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::TriangleDown, c));
