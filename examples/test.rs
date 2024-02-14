@@ -14,34 +14,32 @@ impl MyWin {
             m_help: Handle::None,
             m_edit: Handle::None,
         };
-        let mut m = Menu::new("&File");
-        m.add(menuitem!("&New,F1,'mywin::A'"));
-        m.add(menuitem!("&Save,F2,'mywin::A'"));
-        m.add(menuitem!("&Open,F2,'mywin::A'"));
-        m.add(menuitem!("---"));
-        m.add(menu::Command::new("E&xit", key!("Alt+F4"), mywin::Commands::A));
-        m.add(menuitem!("---"));
-        m.add(menuitem!("Feature_1,None,B,class:myWin,checked: true"));
-        m.add(menuitem!("Feature_2,None,B,class:myWin,checked: true"));
-        m.add(menuitem!("Feature_3,None,B,class:myWin,checked: false"));
-        m.add(menuitem!("Feature_4,None,B,class:myWin,checked: true"));
-        m.add(menuitem!("---"));
-        m.add(menuitem!("
-        Sub-menu,items=[
-            {cmd1,None,'mywin::A'},
-            {cmd2,None,'mywin::A'},
-            {cmd3,None,'mywin::A'},
+        let m = menu!("&File,class:MyWin,items=[
+            {&New,F1,A},
+            {&Open,F3,B},
+            {&Save,F2,C},
+            {'Save &as...',None,A},
             {---},
-            {cmd1,None,'mywin::A'},
+            {Options,items=[
+                {Feature_1,None,B,checked:true},
+                {Feature_2,None,B,checked:true},
+                {Feature_3,None,B,checked:true},
+                {Feature_4,None,B,checked:true},
+                {---},
+                {'Color', items=[
+                    {Red,None,C,selected: false},
+                    {Green,None,C,selected: false},
+                    {Blue,None,C,selected: true},
+                    {--},
+                    {Km,None,C,selected: false},
+                    {Inch,None,C,selected: true},
+                    {Giga,None,C,selected: false},
+                ]}
+            ]},
             {---},
-            {Colors,items=[
-                {Red,None,'mywin::B'},
-                {Green,None,'mywin::B'},
-                {Blue,None,'mywin::B'},
-            ]}
+            {'Exit',Alt+F4,A}
         ]
-        "));
-
+        ");
         w.m_file = w.register_menu(m);
 
         let mut m = Menu::new("&Edit");
