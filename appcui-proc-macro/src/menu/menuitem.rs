@@ -208,8 +208,27 @@ fn build_menuitem_singlechoice(param_list: &str, dict: &mut NamedParamsMap, clas
     s.push_str("\nitem\n}");
     s
 }
-fn build_menu(param_list: &str, dict: &mut NamedParamsMap) -> String {
+fn get_class(dict: &mut NamedParamsMap, inherit: Option<&str>)->Option<String> {
+    if let Some(value) = dict.get("class") {
+        let c = value.get_string();
+        if c.is_empty() {
+            panic!("Unknwon class nane (or empty) for command. Either specify it in the `class` attribute (e.g. class=MyWin) or specify the command with its full qualifier (e.g. command='mywin::Command::<name>').");
+        }
+        if let Err(desc) = crate::utils::validate_name(c, true) {
+            panic!("Invalid class name '{}' => {}", c, desc);
+        }
+        return Some(String::from(c));
+    } else {
+        if let Some(name) = inherit {
+            return Some(String::from(name));
+        } else {
+            return None;
+        }
+    }
+}
+fn build_menu<'a>(param_list: &str, dict: &'a mut NamedParamsMap, class: Option<&str>) -> String {
     let mut s = String::from("{\nlet mut menu = Menu::new(");
+    let class_name = get_class(dict, class);
     add_caption(&mut s, dict);
     s.push_str(");\n");
     // we should add menu items
@@ -217,7 +236,7 @@ fn build_menu(param_list: &str, dict: &mut NamedParamsMap) -> String {
         for subitem in value {
             s.push_str("menu.add(");
             if let Some(d) = subitem.get_dict() {
-                let result = menuitem_from_dict(param_list, d, None);
+                let result = menuitem_from_dict(param_list, d, class_name.as_ref().map(|s| s.as_str()));
                 s.push_str(&result);
             } else {
                 panic!("Invalid format for a menu subitems. Within the `items` attribute all items must be declared within `{{..}}` !");
@@ -229,9 +248,12 @@ fn build_menu(param_list: &str, dict: &mut NamedParamsMap) -> String {
     s.push_str("\nmenu\n}");
     s
 }
-fn build_menuitem_submenu(param_list: &str, dict: &mut NamedParamsMap) -> String {
+fn build_menuitem_submenu(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
     let mut s = String::from("{\nlet mut item = menu::SubMenu::new(");
-    let m = build_menu(param_list, dict);
+    // check to see if I provide the class or if I have to use the provded one
+    // the class that I provive as a key takes priority.
+    let class_name = get_class(dict, class);
+    let m = build_menu(param_list, dict, class_name.as_ref().map(|s| s.as_str()));
     s.push_str(&m);
     s.push_str(");\n");
     s.push_str("\nitem\n}");
@@ -249,7 +271,7 @@ fn menuitem_from_dict(param_list: &str, dict: &mut NamedParamsMap, class: Option
         MenuItemType::Command => build_menuitem_command(param_list, dict, class),
         MenuItemType::CheckBox => build_menuitem_checkbox(param_list, dict, class),
         MenuItemType::SingleChoice => build_menuitem_singlechoice(param_list, dict, class),
-        MenuItemType::SubMenu => build_menuitem_submenu(param_list, dict),
+        MenuItemType::SubMenu => build_menuitem_submenu(param_list, dict, class),
         MenuItemType::Separator => build_menuitem_separator(),
     }
 }
