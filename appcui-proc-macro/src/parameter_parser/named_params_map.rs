@@ -132,6 +132,9 @@ impl<'a> NamedParamsMap<'a> {
     pub(crate) fn get_bool(&mut self, name: &str) -> Option<bool> {
         self.get_mut(name)?.get_bool()
     }
+    pub(crate) fn get_list(&mut self, name: &str) -> Option<&mut Vec<Value<'a>>> {
+        self.get_mut(name)?.get_list()
+    }
     pub(crate) fn get_size(&mut self, name: &str) -> Option<Size> {
         self.get_mut(name)?.get_size()
     }

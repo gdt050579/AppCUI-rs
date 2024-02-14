@@ -28,8 +28,8 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("checked", "checked", ParamType::Bool),
     NamedParameter::new("select", "select", ParamType::Bool),
     NamedParameter::new("selected", "select", ParamType::Bool),
-    NamedParameter::new("items", "items", ParamType::Dict),    // should be LIST
-    NamedParameter::new("subitems", "items", ParamType::Dict), // should be LIST
+    NamedParameter::new("items", "items", ParamType::List),    
+    NamedParameter::new("subitems", "items", ParamType::List),
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("class", "class", ParamType::String),
 ];
@@ -208,8 +208,34 @@ fn build_menuitem_singlechoice(param_list: &str, dict: &mut NamedParamsMap, clas
     s.push_str("\nitem\n}");
     s
 }
+fn build_menu(param_list: &str, dict: &mut NamedParamsMap) -> String {
+    let mut s = String::from("{\nlet mut menu = Menu::new(");
+    add_caption(&mut s, dict);
+    s.push_str(");\n");
+    // we should add menu items
+    if let Some(value) = dict.get_list("items") {
+        for subitem in value {
+            s.push_str("menu.add(");
+            if let Some(d) = subitem.get_dict() {
+                let result = menuitem_from_dict(param_list, d, None);
+                s.push_str(&result);
+            } else {
+                panic!("Invalid format for a menu subitems. Within the `items` attribute all items must be declared within `{{..}}` !");
+            }
+            s.push_str(");\n");
+        }
+    }
+    add_enable_status(&mut s, dict);
+    s.push_str("\nmenu\n}");
+    s
+}
 fn build_menuitem_submenu(param_list: &str, dict: &mut NamedParamsMap) -> String {
-    String::new()
+    let mut s = String::from("{\nlet mut item = menu::SubMenu::new(");
+    let m = build_menu(param_list, dict);
+    s.push_str(&m);
+    s.push_str(");\n");
+    s.push_str("\nitem\n}");
+    s
 }
 fn build_menuitem_separator() -> String {
     String::from("menu::Separator::new()")
