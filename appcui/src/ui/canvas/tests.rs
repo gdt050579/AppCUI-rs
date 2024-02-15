@@ -492,7 +492,7 @@ fn check_resize_surface() {
         Paint('Resized')
         CheckHash(0xE8ACC85E3F652EA2)
     ";
-    const text: &str = r"--- From Wiki ----
+    const TEXT: &str = r"--- From Wiki ----
     Rust is a multi-paradigm, general-purpose 
     programming language that emphasizes performance, 
     type safety, and concurrency. It enforces memory 
@@ -522,7 +522,7 @@ fn check_resize_surface() {
             };
             let mut c = Canvas::new(Size::new(6, 3), Layout::new("l:15,t:0,b:0,r:0"), canvas::Flags::ScrollBars);
             let s = c.get_drawing_surface();
-            s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+            s.write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
             win.viewer = win.add(c);
             win.add(button!("Test,l:1,t:1,a:tl,w:10"));
             win
@@ -535,7 +535,7 @@ fn check_resize_surface() {
                 canvas.resize_surface(Size::new(60, 15));
                 canvas
                     .get_drawing_surface()
-                    .write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+                    .write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
             }
             EventProcessStatus::Processed
         }
