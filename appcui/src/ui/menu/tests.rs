@@ -243,14 +243,6 @@ fn check_submenus_open() {
         }
     }
     impl MenuEvents for MyWin {
-        fn on_menu_open(&self, menu: &mut Menu) {}
-
-        fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: mywin::Commands) {}
-
-        fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, command: mywin::Commands, checked: bool) {}
-
-        fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, command: mywin::Commands) {}
-
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
             menubar.add(self.m_file);
         }
