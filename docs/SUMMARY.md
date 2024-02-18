@@ -78,6 +78,7 @@
         - [SingleChoice]()
         - [Separator]()
         - [Sub menu]()
+      - [Build a menu with macros]()
       - [Menu bar]()
       - [Popup menus]()
     - [Command bar](chapter-4/command_bar.md)
