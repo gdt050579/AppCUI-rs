@@ -2,7 +2,7 @@ use crate::{
     graphics::{LineType, Surface},
     system::MenuTheme,
     ui::menu::Menu,
-    system::Handle
+    system::Handle, prelude::{TextFormat, CharAttribute, TextAlignament}
 };
 
 use super::{menu_item::MenuItem, MenuItemWrapper};

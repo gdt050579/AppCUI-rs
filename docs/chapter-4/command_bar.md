@@ -2,7 +2,7 @@
 
 A command bar is a bar (on the bottom part of a desktop and on top of every window) that contains key associations with commands. All associations are checked first - meaning that if you associate the key `F1` with a command, when you press `F1` you will not receive the key event, but the command associated with it.
 
-<img src="img/command_bar.png" width=300/>
+<img src="img/command_bar.png" width=400/>
 
 The command bar is unique per application. This means, that you need to enable it when a new application is created. A tipical way to do this is by using `.command_bar()` method when building an application, like in the following snippet:
 

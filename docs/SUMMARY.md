@@ -70,8 +70,8 @@
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops]()
-    - [Commands]()
-    - [Menus]()
+    - [Commands](chapter-4/commands.md)
+    - [Menus](chapter-4/menu.md)
       - [Menu items]()
         - [Command]()
         - [Checbox]()

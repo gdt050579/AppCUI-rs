@@ -41,3 +41,11 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | `request_focus()`  | Request the framework to assign the focus to the current control                                                        |
 | `request_update()` | Request the framework to update itself. This actian will update the commandbar, menus and the position of the controls. |
+
+## Menu related methods
+
+| Method                  | Purpose                                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `register_menu(...)`    | Register a menu into `AppCUI` framework and returns a Handle for it                                             |
+| `get_menuitem(...)`     | Returns an immutable reference to a menu item based on two handles: one for the menu, and one for the menu item |
+| `get_menuitem_mut(...)` | Returns an mutable reference to a menu item based on two handles: one for the menu, and one for the menu item   |
