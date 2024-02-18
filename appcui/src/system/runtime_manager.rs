@@ -563,8 +563,8 @@ impl RuntimeManager {
                 if let Some(control) = controls.get_mut(cmd.control_receiver_handle) {
                     GenericMenuEvents::on_select(control.get_control_mut(), cmd.menu, cmd.item, cmd.command_id);
                     self.repaint = true;
-                }              
-            },
+                }
+            }
         }
         self.menu_event = None;
     }
@@ -934,29 +934,29 @@ impl KeyboardMethods for RuntimeManager {
     }
 
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
-        // check controls first
-        if self.process_control_keypressed_event(self.get_root_control_handle(), event.key, event.character) == EventProcessStatus::Processed {
-            self.repaint = true;
-            return;
-        };
-        // check for a menu on_key_event
+        // 1. check for a menu on_key_event
         if let Some(menu) = self.get_opened_menu() {
             if menu.on_key_pressed(event.key) == EventProcessStatus::Processed {
                 self.repaint = true;
                 return;
             }
         }
-        // check the menubar
+        // 2. check controls
+        if self.process_control_keypressed_event(self.get_root_control_handle(), event.key, event.character) == EventProcessStatus::Processed {
+            self.repaint = true;
+            return;
+        };
+        // 3. check cmdbar
+        if let Some(cmdbar) = self.commandbar.as_mut() {
+            self.commandbar_event = cmdbar.get_event(event.key);
+            self.repaint |= self.commandbar_event.is_some();
+        }
+        // 4. check the menubar
         if let Some(menubar) = self.menubar.as_mut() {
             if menubar.on_key_event(event.key) == EventProcessStatus::Processed {
                 self.repaint = true;
                 return;
             }
-        }
-        // check cmdbar
-        if let Some(cmdbar) = self.commandbar.as_mut() {
-            self.commandbar_event = cmdbar.get_event(event.key);
-            self.repaint |= self.commandbar_event.is_some();
         }
     }
     fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus {
@@ -1084,10 +1084,13 @@ impl MouseMethods for RuntimeManager {
         // first the context menu and its owner, then the menu bar and then cmdbar
         if let Some(menu) = self.get_opened_menu() {
             match menu.on_mouse_move(x, y) {
-                menu::events::MouseMoveMenuResult::ProcessedAndRepaint => { self.repaint = true; return true; },
+                menu::events::MouseMoveMenuResult::ProcessedAndRepaint => {
+                    self.repaint = true;
+                    return true;
+                }
                 menu::events::MouseMoveMenuResult::RepaintAndPass => self.repaint = true,
                 menu::events::MouseMoveMenuResult::ProcessWithoutRepaint => return true, // process it but no repaint needed.
-                menu::events::MouseMoveMenuResult::Ignored => { },
+                menu::events::MouseMoveMenuResult::Ignored => {}
             }
         }
         /*
