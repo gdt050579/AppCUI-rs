@@ -72,7 +72,7 @@
     - [Custom desktops]()
     - [Commands](chapter-4/commands.md)
     - [Menus](chapter-4/menu.md)
-      - [Menu items]()
+      - [Menu items](chapter-4/menu/items.md)
         - [Command]()
         - [Checbox]()
         - [SingleChoice]()
