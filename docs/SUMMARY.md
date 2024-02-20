@@ -73,7 +73,7 @@
     - [Commands](chapter-4/commands.md)
     - [Menus](chapter-4/menu.md)
       - [Menu items](chapter-4/menu/items.md)
-        - [Command]()
+        - [Command](chapter-4/menu/command.md)
         - [Checbox]()
         - [SingleChoice]()
         - [Separator]()
