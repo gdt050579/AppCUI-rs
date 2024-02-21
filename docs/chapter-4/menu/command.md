@@ -32,4 +32,76 @@ The following parameters are accepted by `menuitem!` when building a command men
 | `key` or `shortcut` or `shortcutket`           | String | **Yes** (second positional parameter) | The shortcut associated with the command. If not specified it will be considered `Key::None`                                                                                                                                                       |
 | `cmd` or `cmd-id` or `command` or `command-id` | String | **Yes** (third positional parameter)  | The associated command id for this item                                                                                                                                                                                                            |
 | `type`                                         | String | **No**                                | The type of the item (for a command item if this filed is being specified its value must be `command`)                                                                                                                                             |
-| `class`                                        | String | **No**                                | The name of the class where the menu is being implements (see **Remarks** for more details)                                                                                                                                                        |
+| `class`                                        | String | **No**                                | The name of the class where the menu is being implements                                                                                                                                                                                           |
+| `enable` or `enabled`                          | Bool   | **No**                                | Use this to disable or enable a menu item                                                                                                                                                                                                          |
+
+## Events
+To intercept events this item, the following trait and method have to be implemented to the Window that processes the event loop:
+```rs
+trait MenuEvents {
+    fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: <module>::Commands) {
+        // add logic here
+    }
+}
+```
+
+## Methods
+
+The following methods are availble for a `menu::Command` object:
+
+| Method              | Purpose                                                                                                                                                                                                                                                               |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `set_caption(...)`  | Set the new caption for the item. If the string provided contains the special character `&`, this method also sets the hotkey associated with an item. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any). |
+| `get_caption()`     | Returns the current caption of an item                                                                                                                                                                                                                                |
+| `set_enables(...)`  | Enables or disables current item                                                                                                                                                                                                                                      |
+| `is_enabled()`      | `true` if the item is enables, `false` otherwise                                                                                                                                                                                                                      |
+| `set_shortcut(...)` | Sets a new shortcut for the current item                                                                                                                                                                                                                              |
+| `get_shortcu()`     | Returns the shortcut for the current item                                                                                                                                                                                                                             |
+
+## Example
+
+The following code creates a mnu with 3 menu items (of type command). Notice that we had to initialize the application with support for menus.
+
+```rs
+use appcui::prelude::*;
+
+#[Window(events = MenuEvents, commands=Cmd1+Cmd2+Cmd3)]
+struct MyWin {
+    m_commands: Handle<Menu>,
+}
+impl MyWin {
+    fn new() -> Self {
+        let mut w = MyWin {
+            base: window!("Test,d:c,w:40,h:8"),
+            m_commands: Handle::None,
+        };
+        let mut m = Menu::new("Commands");
+        m.add(menu::Command::new("Command-1", Key::None, mywin::Commands::Cmd1));
+        m.add(menu::Command::new("Command-2", Key::None, mywin::Commands::Cmd2));
+        m.add(menuitem!("Command-3,F1,cmd:Cmd3,class:MyWin"));
+        w.m_commands = w.register_menu(m);
+
+        w
+    }
+}
+impl MenuEvents for MyWin {
+
+    fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: mywin::Commands) {
+        match command {
+            mywin::Commands::Cmd1 => { /* do something with command 1 */ },
+            mywin::Commands::Cmd2 => { /* do something with command 1 */ },
+            mywin::Commands::Cmd3 => { /* do something with command 1 */ },
+        }
+    }
+    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        menubar.add(self.m_commands);
+    }
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut a = App::new().menu().build()?;
+    a.add_window(MyWin::new());
+    a.run();
+    Ok(())
+}
+```
