@@ -52,6 +52,7 @@ impl Token {
     pub(super) fn get_text<'a>(&self, text: &'a str) -> &'a str {
         &text[self.start..self.end]
     }
+    #[cfg(test)]
     #[inline(always)]
     pub(super) fn get_link(&self) -> usize {
         if self.link == Token::NO_LINK {
@@ -61,7 +62,7 @@ impl Token {
         }
     }
     #[inline(always)]
-    pub(super) fn has_link(&self) -> bool {
+    pub(super) fn _has_link(&self) -> bool {
         self.link != Token::NO_LINK
     }
     #[inline(always)]

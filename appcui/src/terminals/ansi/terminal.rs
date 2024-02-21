@@ -1,5 +1,3 @@
-use std::thread::sleep;
-
 use super::super::SystemEvent;
 use super::super::Terminal;
 use crate::graphics::*;

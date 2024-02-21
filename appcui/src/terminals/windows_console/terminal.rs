@@ -330,7 +330,7 @@ pub struct WindowsTerminal {
     shift_state: KeyModifier,
     last_mouse_pos: Point,
     visible_region: SMALL_RECT,
-    original_mode_flags: u32,
+    _original_mode_flags: u32,
 }
 
 impl WindowsTerminal {
@@ -511,7 +511,7 @@ impl WindowsTerminal {
             shift_state: KeyModifier::None,
             last_mouse_pos: Point::new(i32::MAX, i32::MAX),
             visible_region: info.window,
-            original_mode_flags: original_mode_flags,
+            _original_mode_flags: original_mode_flags,
         });
         term.chars
             .resize((term.size.width as usize) * (term.size.height as usize), CHAR_INFO { code: 32, attr: 0 });

@@ -41,7 +41,7 @@ impl KeyModifier {
         }
         return HASH_TO_ALIGNAMENT[entry_index];
     }
-    pub fn get_name(&self) -> &'static str {
+    pub fn _get_name(&self) -> &'static str {
         match self {
             KeyModifier::None => "None",
             KeyModifier::Alt => "Alt",

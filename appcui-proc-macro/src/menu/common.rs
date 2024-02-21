@@ -1,10 +1,5 @@
 use super::menuitem_type::MenuItemType;
-use crate::{
-    parameter_parser::{self, *},
-    token_stream_to_string::TokenStreamToString,
-};
-use proc_macro::*;
-use std::str::FromStr;
+use crate::parameter_parser::*;
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("caption", ParamType::String),
@@ -27,7 +22,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("checked", "checked", ParamType::Bool),
     NamedParameter::new("select", "select", ParamType::Bool),
     NamedParameter::new("selected", "select", ParamType::Bool),
-    NamedParameter::new("items", "items", ParamType::List),    
+    NamedParameter::new("items", "items", ParamType::List),
     NamedParameter::new("subitems", "items", ParamType::List),
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("class", "class", ParamType::String),
@@ -180,7 +175,7 @@ fn build_menuitem_checkbox(_param_list: &str, dict: &mut NamedParamsMap, class: 
     add_shortcut(&mut s, dict);
     s.push_str(", ");
     add_command_id(&mut s, dict, class);
-    if dict.get_bool("checked").unwrap_or(false)  {
+    if dict.get_bool("checked").unwrap_or(false) {
         s.push_str(",true");
     } else {
         s.push_str(",false");
@@ -190,14 +185,14 @@ fn build_menuitem_checkbox(_param_list: &str, dict: &mut NamedParamsMap, class: 
     s.push_str("\nitem\n}");
     s
 }
-fn build_menuitem_singlechoice(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
+fn build_menuitem_singlechoice(_param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
     let mut s = String::from("{\nlet mut item = menu::SingleChoice::new(");
     add_caption(&mut s, dict);
     s.push_str(", ");
     add_shortcut(&mut s, dict);
     s.push_str(", ");
     add_command_id(&mut s, dict, class);
-    if dict.get_bool("select").unwrap_or(false)  {
+    if dict.get_bool("select").unwrap_or(false) {
         s.push_str(",true");
     } else {
         s.push_str(",false");
@@ -207,7 +202,7 @@ fn build_menuitem_singlechoice(param_list: &str, dict: &mut NamedParamsMap, clas
     s.push_str("\nitem\n}");
     s
 }
-fn get_class(dict: &mut NamedParamsMap, inherit: Option<&str>)->Option<String> {
+fn get_class(dict: &mut NamedParamsMap, inherit: Option<&str>) -> Option<String> {
     if let Some(value) = dict.get("class") {
         let c = value.get_string();
         if c.is_empty() {
@@ -242,7 +237,7 @@ pub(super) fn build_menu(param_list: &str, dict: &mut NamedParamsMap, class: Opt
             }
             s.push_str(");\n");
         }
-    }    
+    }
     s.push_str("\nmenu\n}");
     s
 }
@@ -252,7 +247,7 @@ fn build_menuitem_submenu(param_list: &str, dict: &mut NamedParamsMap, class: Op
     // the class that I provive as a key takes priority.
     let class_name = get_class(dict, class);
     let m = build_menu(param_list, dict, class_name.as_ref().map(|s| s.as_str()));
-    s.push_str(&m);    
+    s.push_str(&m);
     s.push_str(");\n");
     add_enable_status(&mut s, dict);
     s.push_str("\nitem\n}");
@@ -274,4 +269,3 @@ pub(super) fn menuitem_from_dict(param_list: &str, dict: &mut NamedParamsMap, cl
         MenuItemType::Separator => build_menuitem_separator(),
     }
 }
-
