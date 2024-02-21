@@ -74,7 +74,7 @@
     - [Menus](chapter-4/menu.md)
       - [Menu items](chapter-4/menu/items.md)
         - [Command](chapter-4/menu/command.md)
-        - [Checbox]()
+        - [Checbox](chapter-4/menu/checkbox.md)
         - [SingleChoice]()
         - [Separator]()
         - [Sub menu]()
