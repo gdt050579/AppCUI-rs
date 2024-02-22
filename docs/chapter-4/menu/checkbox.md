@@ -26,15 +26,15 @@
 
 The following parameters are accepted by `menuitem!` when building a checkbox menu item:
 
-| Parameter name                                 | Type   | Positional parameter                  | Purpose                                                                                                                                                                                                                                            |
-| ---------------------------------------------- | ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parameter name                                 | Type   | Positional parameter                  | Purpose                                                                                                                                                                                                                                             |
+| ---------------------------------------------- | ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `text` or `caption`                            | String | **Yes** (first postional parameter)   | The caption (text) of the checkbox. If the caption contains the special character `&` the next character after that will act as a short key (meaning that pressing that character while that menu is opened is equivalent to clicking on that item) |
 | `key` or `shortcut` or `shortcutket`           | String | **Yes** (second positional parameter) | The shortcut associated with the checkbox. If not specified it will be considered `Key::None`                                                                                                                                                       |
-| `cmd` or `cmd-id` or `command` or `command-id` | String | **Yes** (third positional parameter)  | The associated command id for this item                                                                                                                                                                                                            |
-| `check` or `checked`                           | Bool   | **No**                                | `true` if the item is checked, `false` otherwise                                                                                                                                                                                                   |
+| `cmd` or `cmd-id` or `command` or `command-id` | String | **Yes** (third positional parameter)  | The associated command id for this item                                                                                                                                                                                                             |
+| `check` or `checked`                           | Bool   | **No**                                | `true` if the item is checked, `false` otherwise                                                                                                                                                                                                    |
 | `type`                                         | String | **No**                                | The type of the item (for a checbox item if this filed is being specified its value must be `checkbox`)                                                                                                                                             |
-| `class`                                        | String | **No**                                | The name of the class where the menu is being implements                                                                                                                                                                                           |
-| `enable` or `enabled`                          | Bool   | **No**                                | Use this to disable or enable a menu item                                                                                                                                                                                                          |
+| `class`                                        | String | **No**                                | The name of the class where the menu is being implemented                                                                                                                                                                                           |
+| `enable` or `enabled`                          | Bool   | **No**                                | Use this to disable or enable a menu item                                                                                                                                                                                                           |
 
 ## Events
 To intercept events this item, the following trait and method have to be implemented to the Window that processes the event loop:
@@ -50,13 +50,13 @@ trait MenuEvents {
 
 ## Methods
 
-The following methods are availble for a `menu::Command` object:
+The following methods are availble for a `menu::CheckBox` object:
 
 | Method              | Purpose                                                                                                                                                                                                                                                               |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)`  | Set the new caption for the item. If the string provided contains the special character `&`, this method also sets the hotkey associated with an item. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any). |
 | `get_caption()`     | Returns the current caption of an item                                                                                                                                                                                                                                |
-| `set_checked(...)`  | Checkes or uncheckes current ite,                                                                                                                                                                                                                                      |
+| `set_checked(...)`  | Checkes or uncheckes current ite,                                                                                                                                                                                                                                     |
 | `is_checked()`      | `true` if the item is checked, `false` otherwise                                                                                                                                                                                                                      |
 | `set_enables(...)`  | Enables or disables current item                                                                                                                                                                                                                                      |
 | `is_enabled()`      | `true` if the item is enables, `false` otherwise                                                                                                                                                                                                                      |
@@ -65,7 +65,7 @@ The following methods are availble for a `menu::Command` object:
 
 ## Example
 
-The following code creates a mnu with 3 menu items (of type checkbox). Notice that we had to initialize the application with support for menus.
+The following code creates a menu with 3 menu items (of type checkbox). Notice that we had to initialize the application with support for menus.
 
 ```rs
 use appcui::prelude::*;
