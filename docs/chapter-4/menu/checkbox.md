@@ -15,7 +15,7 @@
  ```
  or
  ```rs
- let cbox = menuitem!("Option,F1,'<module>::Command::Content',type:Checkbox);
+ let cbox = menuitem!("Option,F1,'<module>::Command::Content',type:Checkbox");
  ```
  or
  ```rs

@@ -15,7 +15,7 @@
  ```
  or
  ```rs
- let sc = menuitem!("Choice,F1,'<module>::Command::Content',type:SinghleChoice);
+ let sc = menuitem!("Choice,F1,'<module>::Command::Content',type:SinghleChoice");
  ```
  or
  ```rs

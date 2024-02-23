@@ -77,7 +77,7 @@
         - [Checbox](chapter-4/menu/checkbox.md)
         - [SingleChoice](chapter-4/menu/single_choice.md)
         - [Separator](chapter-4/menu/separator.md)
-        - [Sub menu]()
+        - [Sub menu](chapter-4/menu/submenu.md)
       - [Build a menu with macros]()
       - [Menu bar]()
       - [Popup menus]()
