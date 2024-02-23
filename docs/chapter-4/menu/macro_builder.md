@@ -71,3 +71,74 @@ m.add(menu::Command::new("Exit",
 Notice that the code is correct but is quite bloated and hard to read.
 
 ## Build this menu using menuitem! macro
+
+```rs
+let mut m = Menu::new("Test");
+// build the color submenu
+let mut m_colors = Menu::new("Colors");
+m_colors.add(menuitem!("Red,selected:true,cmd:Red,class:MyWin"));
+m_colors.add(menuitem!("Green,selected:true,cmd:Green,class:MyWin"));
+m_colors.add(menuitem!("Blue,selected:true,cmd:Blue,class:MyWin"));
+m.add(menu::SubMenu::new(m_colors));
+
+// build the clipboard submenu
+let mut m_clipboard = Menu::new("&Clipboard");
+m_clipboard.add(menuitem!("Copy,Ctrl+C,cmd:Copy,class:MyWin"));
+m_clipboard.add(menuitem!("Cut,Ctrl+X,cmd:Cut,class:MyWin"));
+m_clipboard.add(menuitem!("Paste,Ctrl+V,cmd:Paste,class:MyWin"));
+m_clipboard.add(menuitem!("---"));
+m_clipboard.add(menuitem!("'Paste Special',None,cmd:PasteSpecial,class:MyWin"));
+m.add(menu::SubMenu::new(m_clipboard));
+
+// add the last items
+m.add(menuitem!("---"));
+m.add(menuitem!("Exit,cmd:Exit,class:MyWin"));
+```
+
+The code is more readable, but we can make it even more smaller.
+
+## Building a menu using the menu! macro
+
+In this case we will use the `menu!` macro to condense the code even more:
+
+```rs
+let m = menu!("Test,items=[
+    { Colors,items=[
+        { Red,selected:true,cmd:Red,class:MyWin },
+        { Green,selected:true,cmd:Green,class:MyWin },
+        { Blue,selected:true,cmd:Blue,class:MyWin }
+    ]},
+    { &Clipboard,items=[
+        { Copy,Ctrl+C,cmd:Copy,class:MyWin },
+        { Cut,Ctrl+X,cmd:Cut,class:MyWin },
+        { Paste,Ctrl+V,cmd:Paste,class:MyWin },
+        { --- },
+        { 'Paste Special',None,cmd:PasteSpecial,class:MyWin }
+    ]},
+    { --- },
+    { Exit,cmd:Exit,class:MyWin }
+]");
+```
+Notice that in this case, the description of a menu item looks is more condense (and easier to read) and it looks like a JSON files.
+
+However, there are still some duplicate data in this form (for example: attribute `class` with value `MyWin` is present for each of the actionable items). In this case we can use the inherit properties of a menu, an specify this item only once and reduce the code even more by adding the `class` attribute to the top level menu description and we get the most compressed way of quickly creating a menu.
+
+```rs
+let m = menu!("Test,class:MyWin,items=[
+    { Colors,items=[
+        { Red,selected:true,cmd:Red },
+        { Green,selected:true,cmd:Green },
+        { Blue,selected:true,cmd:Blue }
+    ]},
+    { &Clipboard,items=[
+        { Copy,Ctrl+C,cmd:Copy },
+        { Cut,Ctrl+X,cmd:Cut },
+        { Paste,Ctrl+V,cmd:Paste },
+        { --- },
+        { 'Paste Special',None,cmd:PasteSpecial }
+    ]},
+    { --- },
+    { Exit,cmd:Exit }
+]");
+```
+**Remarks**: Keep in mind that this method will not allow you obtain any menu item handle. If they are neccesary to change some attributes (like enable/disable status) you will not be able to do so. However, if your menu only has commands, or checboxes and assigning a command is enough for you to react to an event, this is the prefered way to create a menu.
