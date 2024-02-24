@@ -79,7 +79,7 @@
         - [Separator](chapter-4/menu/separator.md)
         - [Sub menu](chapter-4/menu/submenu.md)
       - [Build a menu with macros](chapter-4/menu/macro_builder.md)
-      - [Menu bar]()
+      - [Menu bar](chapter-4/menu_bar.md)
       - [Popup menus]()
     - [Command bar](chapter-4/command_bar.md)
 
