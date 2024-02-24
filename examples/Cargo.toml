@@ -42,3 +42,7 @@ path = "window_toolbar.rs"
 [[example]]
 name = "modal_window"
 path = "modal_window.rs"
+
+[[example]]
+name = "change_menu_status"
+path = "change_menu_status.rs"
