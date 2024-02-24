@@ -43,20 +43,20 @@ A menu bar has only one method:
 pub fn add(&mut self, handle: Handle<Menu>) { ... }
 ```
 
-This method is typically used to link a menu to a menu bar. This also implies that you have to register a menu first, save its handle and only then add it to the menu bar. A typical template of these flows look like this:
+This method is typically used to link a menu handle to a menu bar. This also implies that you have to register a menu first, save its handle and only then add it to the menu bar. A typical template of these flows look like this:
 
 ```rust
 #[Window(events = MenuEvents, ...)]
 struct MyWin { 
-    menu_1: Handle<Menu>,
-    menu_2: Handle<Menu>,
+    menu_handle_1: Handle<Menu>,
+    menu_handle_2: Handle<Menu>,
     // other menu handles or data members
  }
 impl MyWin { 
     fn new()->Self {
         let mut w = MyWin { /* code to instantiate the structure */ };
-        w.menu_1 = Menu::new(...); // code to create and populate first menu
-        w.menu_2 = Menu::new(...); // code to create and populate second menu
+        w.menu_handle_1 = w.register_menu(Menu::new(...)); 
+        w.menu_handle_2 = w.register_menu(Menu::new(...)); 
         // other initialization methods
         w
     }
