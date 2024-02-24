@@ -79,7 +79,8 @@ The following example shows a window that creates 3 menus: `File`, `Edit` and `H
 ```rust
 use appcui::prelude::*;
 
-#[Window(events = MenuEvents, commands=New+Save+Open+Exit+Copy+Paste+Delete+Cut+CheckUpdate+Help+About)]
+#[Window(events   = MenuEvents, 
+         commands = New+Save+Open+Exit+Copy+Paste+Delete+Cut+CheckUpdate+Help+About)]
 struct MyWin {
     m_file: Handle<Menu>,
     m_edit: Handle<Menu>,
