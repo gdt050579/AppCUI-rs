@@ -1,5 +1,5 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
-
+use AppCUIProcMacro::key;
 use super::{
     events::*, menu_button_state::MenuButtonState, menu_item::MenuItem, mouse_position_info::MousePositionInfo, CheckBox, Command, MenuItemWrapper,
     Separator, SingleChoice, SubMenu,
@@ -495,27 +495,27 @@ impl Menu {
     }
 
     pub(crate) fn on_key_pressed(&mut self, key: Key) -> EventProcessStatus {
-        match key.code {
-            KeyCode::Up | KeyCode::Down | KeyCode::Home | KeyCode::End | KeyCode::PageUp | KeyCode::PageDown => {
+        match key.get_compact_code() {
+            key!("Up") | key!("Down") | key!("Home") | key!("End") | key!("PageUp") | key!("PageDown") => {
                 self.move_currentitem_to(key);
                 return EventProcessStatus::Processed;
             }
-            KeyCode::Enter | KeyCode::Space => {
+            key!("Enter") | key!("Space") => {
                 self.run_item_action(self.current.index());
                 return EventProcessStatus::Processed;
             }
-            KeyCode::Escape => {
+            key!("Escape") => {
                 self.close();
                 return EventProcessStatus::Processed;
             }
-            KeyCode::Left => {
+            key!("Left") => {
                 if self.parent_handle.is_none() {
                     return EventProcessStatus::Ignored;
                 }
                 RuntimeManager::get().activate_opened_menu_parent();
                 return EventProcessStatus::Processed;
             }
-            KeyCode::Right => {
+            key!("Right")  => {
                 if self.current.in_range(self.items.len()) {
                     let item = &self.items[self.current.index()];
                     if (item.is_enabled()) && (item.is_submenu()) {
