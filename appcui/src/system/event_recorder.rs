@@ -89,12 +89,14 @@ impl Display for Command {
 pub(super) struct EventRecorder {
     commands: Vec<Command>,
     state_id: u32,
+    auto_mode: bool,
 }
 impl EventRecorder {
     pub(super) fn new() -> Self {
         Self {
             commands: Vec::with_capacity(512),
             state_id: 1,
+            auto_mode: false,
         }
     }
     pub(super) fn save(&self) {
@@ -225,7 +227,7 @@ impl EventRecorder {
         }
         match action {
             MouseUpPossibleCombineAction::Up => {
-                // we should never add a MouseRelease command 
+                // we should never add a MouseRelease command
                 // because in reality we should have either a Mouse.Click or a Mouse.Drag scenario
                 //self.commands.push(Command::MouseRelease(*evnt));
             }
@@ -293,6 +295,7 @@ impl EventRecorder {
         let mut screen = Surface::new(sz.width, sz.height);
         let mut state_name = format!("State_{}", self.state_id);
         let mut comands = format!("Commands: {}", self.commands.len());
+        let mut auto = String::from(if self.auto_mode { "Auto:ON" } else { "Auto:OFF" });
         loop {
             // paint
             screen.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
@@ -320,6 +323,7 @@ impl EventRecorder {
             EventRecorder::print_hot_key("Esc", "Exit", 2, &mut screen);
             EventRecorder::print_hot_key("Enter", "Add", 13, &mut screen);
             EventRecorder::print_hot_key("F8", "Clear All", 25, &mut screen);
+            EventRecorder::print_hot_key("F9", &auto, 40, &mut screen);
 
             terminal.update_screen(&screen);
             // get the events
@@ -338,6 +342,11 @@ impl EventRecorder {
                     key!("F8") => {
                         self.commands.clear();
                         comands = format!("Commands: {}", self.commands.len());
+                    }
+                    key!("F9") => {
+                        self.auto_mode = !self.auto_mode;
+                        auto.clear();
+                        auto.push_str(if self.auto_mode { "Auto:ON" } else { "Auto:OFF" });                        
                     }
                     key!("Backspace") => {
                         // delete last character
