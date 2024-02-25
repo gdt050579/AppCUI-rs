@@ -90,6 +90,7 @@ pub(super) struct EventRecorder {
     commands: Vec<Command>,
     state_id: u32,
     auto_mode: bool,
+    last_hash: u64,
 }
 impl EventRecorder {
     pub(super) fn new() -> Self {
@@ -97,6 +98,7 @@ impl EventRecorder {
             commands: Vec::with_capacity(512),
             state_id: 1,
             auto_mode: false,
+            last_hash: 0,
         }
     }
     pub(super) fn save(&self) {
@@ -133,6 +135,21 @@ impl EventRecorder {
             SystemEvent::MouseDoubleClick(_) => {}
             SystemEvent::MouseMove(evnt) => self.add_mouse_move(evnt),
             SystemEvent::MouseWheel(evnt) => self.add_mouse_wheel(evnt),
+        }
+    }
+    pub(super) fn auto_update(&mut self, surface: &Surface) {
+        if !self.auto_mode {
+            return;
+        }
+        let hash = EventRecorder::compute_surface_hash(surface);
+        if hash != self.last_hash {
+            self.last_hash = hash;
+            self.state_id += 1;
+            let state_id = self.state_id;
+            self.commands.push(Command::Paint(PaintCommand {
+                state_name: format!("State_{}", state_id),
+            }));
+            self.commands.push(Command::CheckHash(hash));
         }
     }
     fn compute_surface_hash(surface: &Surface) -> u64 {
@@ -346,7 +363,7 @@ impl EventRecorder {
                     key!("F9") => {
                         self.auto_mode = !self.auto_mode;
                         auto.clear();
-                        auto.push_str(if self.auto_mode { "Auto:ON" } else { "Auto:OFF" });                        
+                        auto.push_str(if self.auto_mode { "Auto:ON" } else { "Auto:OFF" });
                     }
                     key!("Backspace") => {
                         // delete last character
