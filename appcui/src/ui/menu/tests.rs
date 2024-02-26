@@ -371,3 +371,141 @@ fn check_dynamic_change_menu() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_dynamic_change_menu_2() {
+    #[Window(events = MenuEvents, commands=Increment, internal: true)]
+    struct MyWin {
+        m_counter: Handle<menu::Command>,
+        some_menu: Handle<Menu>,
+        counter: u32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:40,h:8"),
+                m_counter: Handle::None,
+                some_menu: Handle::None,
+                counter: 0,
+            };
+            let mut m = Menu::new("Some menu");
+            w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
+            w.some_menu = w.register_menu(m);
+
+            w
+        }
+    }
+    impl MenuEvents for MyWin {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.some_menu);
+        }
+        fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
+            if item == self.m_counter {
+                self.counter += 1;
+                let new_text = format!("Increment ({})", self.counter);
+                if let Some(menuitem) = self.get_menuitem_mut(menu, item) {
+                    menuitem.set_caption(&new_text.as_str());
+                }
+            }
+        }
+    }
+    let script = "
+            //Paint.Enable(false)
+            Paint('State_2')
+            CheckHash(0xf788ef470502e34a)
+            Mouse.Move(5,0)
+            Paint('State_3')
+            CheckHash(0x3d94307e4fc9bd2)
+            Mouse.Hold(5,0,left)
+            Paint('State_4')
+            CheckHash(0x288a35a870df748e)
+            Mouse.Release(5,0,left)
+            Mouse.Move(6,2)
+            Paint('State_5')
+            CheckHash(0x1ec2bf22389e4636)
+            Mouse.Hold(6,2,left)
+            Paint('State_6')
+            CheckHash(0xf788ef470502e34a)
+            Mouse.Release(6,2,left)
+            Mouse.Move(6,0)
+            Paint('State_7')
+            CheckHash(0x3d94307e4fc9bd2)
+            Mouse.Hold(6,0,left)
+            Paint('State_8')
+            CheckHash(0xe93455b60e606693)
+            Mouse.Release(6,0,left)
+            Mouse.Move(6,2)
+            Paint('State_9')
+            CheckHash(0xf24b54cf300890fb)
+            Mouse.Move(7,2)
+            Mouse.Hold(7,2,left)
+            Paint('State_10')
+            CheckHash(0xf788ef470502e34a)
+            Mouse.Release(7,2,left)
+            Mouse.Move(27,8)
+            Mouse.Hold(27,8,left)
+            Paint('State_11')
+            CheckHash(0xd450c0ed0c207903)
+            Mouse.Move(26,8)
+            Paint('State_12')
+            CheckHash(0x4ad39e8322170c33)
+            Mouse.Move(26,7)
+            Paint('State_13')
+            CheckHash(0xb4910b018c89ecd3)
+            Mouse.Move(25,7)
+            Paint('State_14')
+            CheckHash(0x3057a1de4971a143)
+            Mouse.Move(24,7)
+            Paint('State_15')
+            CheckHash(0xe7433e46723ac883)
+            Mouse.Move(24,6)
+            Paint('State_16')
+            CheckHash(0xe3fc949366a39c3)
+            Mouse.Move(23,6)
+            Paint('State_17')
+            CheckHash(0x653fabf98a7ac023)
+            Mouse.Move(22,5)
+            Paint('State_18')
+            CheckHash(0xeffa5205aa4cd3b3)
+            Mouse.Move(21,5)
+            Paint('State_19')
+            CheckHash(0x754ad1aa27d31a3)
+            Mouse.Move(21,4)
+            Paint('State_20')
+            CheckHash(0xe67813564aa69c43)
+            Mouse.Move(20,4)
+            Paint('State_21')
+            CheckHash(0xcdd22f80e181b343)
+            Mouse.Move(19,4)
+            Paint('State_22')
+            CheckHash(0xc4d5e36fe9d637c3)
+            Mouse.Move(19,3)
+            Paint('State_23')
+            CheckHash(0x7954fdc89a730463)
+            Mouse.Release(19,3,left)
+            Paint('State_24')
+            CheckHash(0xe2a5511bab6d8d1a)
+            Mouse.Move(8,0)
+            Paint('State_25')
+            CheckHash(0xc0e18c69137d13e2)
+            Mouse.Move(6,0)
+            Mouse.Hold(6,0,left)
+            Paint('State_26')
+            CheckHash(0xda8c2e3d9ced61a5)
+            Mouse.Release(6,0,left)
+            Mouse.Move(7,2)
+            Paint('State_27')
+            CheckHash(0x27f040ba302e5f9d)
+            Mouse.Hold(7,2,left)
+            Paint('State_28')
+            CheckHash(0xe2a5511bab6d8d1a)
+            Mouse.Release(7,2,left)
+            Mouse.Move(24,10)
+            Key.Pressed(Escape)
+            Paint('State_29')
+            CheckHash(0x86cfc913da83fa16)
+        ";
+    let mut a = App::debug(60, 24, script).menu().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

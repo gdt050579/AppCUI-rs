@@ -246,7 +246,7 @@ impl EventRecorder {
             MouseUpPossibleCombineAction::Up => {
                 // we should never add a MouseRelease command
                 // because in reality we should have either a Mouse.Click or a Mouse.Drag scenario
-                //self.commands.push(Command::MouseRelease(*evnt));
+                self.commands.push(Command::MouseRelease(*evnt));
             }
             MouseUpPossibleCombineAction::Click => {
                 let button = match self.commands.pop().unwrap() {
