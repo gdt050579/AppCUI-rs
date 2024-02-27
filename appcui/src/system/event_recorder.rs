@@ -69,7 +69,7 @@ impl Display for Command {
             Command::Resize(sz) => write!(f, "Resize({},{})\n", sz.width, sz.height),
             Command::MouseMove(cmd) => write!(f, "Mouse.Move({},{})\n", cmd.x, cmd.y),
             Command::MouseHold(cmd) => write!(f, "Mouse.Hold({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
-            Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{})\n", cmd.x, cmd.y),
+            Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{},left)\n", cmd.x, cmd.y),
             Command::MouseClick(cmd) => write!(f, "Mouse.Click({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
             Command::MouseDrag(cmd) => write!(f, "Mouse.Drag({},{},{},{})\n", cmd.x1, cmd.y1, cmd.x2, cmd.y2),
 
