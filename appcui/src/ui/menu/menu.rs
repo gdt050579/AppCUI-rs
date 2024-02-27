@@ -13,6 +13,7 @@ use crate::{
 };
 const MAX_ITEMS: usize = 128;
 static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
+
 pub struct Menu {
     pub(super) caption: Caption,
     pub(super) items: Vec<MenuItemWrapper>,
@@ -28,6 +29,7 @@ pub struct Menu {
     pub(super) parent_handle: Handle<Menu>,
     pub(super) receiver_control_handle: Handle<UIElement>,
 }
+
 impl Menu {
     pub fn new(name: &str) -> Self {
         Self {
@@ -47,8 +49,7 @@ impl Menu {
         }
     }
 
-    #[allow(private_bounds)]
-    pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T>
+    pub(crate) fn _add<T>(&mut self, mut menuitem: T) -> Handle<T>
     where
         T: MenuItem,
     {
@@ -58,8 +59,8 @@ impl Menu {
         self.items.push(menuitem.into_menuitem());
         h
     }
-    #[allow(private_bounds)]
-    pub fn get<T>(&self, menuitem_hamdle: Handle<T>) -> Option<&T>
+
+    pub(crate) fn get<T>(&self, menuitem_hamdle: Handle<T>) -> Option<&T>
     where
         T: MenuItem,
     {
@@ -79,8 +80,8 @@ impl Menu {
             MenuItemWrapper::SubMenu(obj) => Some(unsafe { &(*((obj as *const SubMenu) as *const T)) }),
         }
     }
-    #[allow(private_bounds)]
-    pub fn get_mut<T>(&mut self, menuitem_hamdle: Handle<T>) -> Option<&mut T>
+
+    pub(crate) fn get_mut<T>(&mut self, menuitem_hamdle: Handle<T>) -> Option<&mut T>
     where
         T: MenuItem,
     {
@@ -670,14 +671,14 @@ impl Menu {
         return true;
     }
     #[inline(always)]
-    pub(crate) fn get_handle(&self) -> Handle<Menu> {
+    pub fn handle(&self) -> Handle<Menu> {
         self.handle
     }
-    pub(crate) fn set_handle(&mut self, handle: Handle<Menu>) {
+    pub fn set_handle(&mut self, handle: Handle<Menu>) {
         self.handle = handle;
     }
     #[inline(always)]
-    pub(crate) fn get_parent_handle(&self) -> Handle<Menu> {
+    pub fn parent_handle(&self) -> Handle<Menu> {
         self.parent_handle
     }
 }

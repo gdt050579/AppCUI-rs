@@ -1,11 +1,9 @@
+pub(crate) mod ansi;
 mod debug;
-mod ansi;
 mod system_event;
 #[cfg(target_os = "windows")]
 mod windows_console;
 
-use super::graphics::CharFlags;
-use super::graphics::Color;
 use super::graphics::Size;
 use super::graphics::Surface;
 use super::system::Error;
@@ -21,6 +19,8 @@ pub(crate) use self::system_event::MouseWheelEvent;
 pub(crate) use self::system_event::SystemEvent;
 
 use self::debug::DebugTerminal;
+
+#[cfg(target_os = "windows")]
 use self::windows_console::WindowsTerminal;
 
 pub(crate) trait Terminal {
@@ -43,7 +43,10 @@ impl TerminalType {
             if (sz.width == 0) || (sz.height == 0) {
                 return Err(Error::new(
                     ErrorKind::InvalidParameter,
-                    format!("Invalid size for a terminal ({}x{}). Both width and height must be bigger than 0 !",sz.width,sz.height),
+                    format!(
+                        "Invalid size for a terminal ({}x{}). Both width and height must be bigger than 0 !",
+                        sz.width, sz.height
+                    ),
                 ));
             }
         }
@@ -62,7 +65,7 @@ impl TerminalType {
         match terminal {
             #[cfg(target_os = "windows")]
             TerminalType::WindowsConsole => WindowsTerminal::new(builder),
-            TerminalType::ANSI => AnsiTerminal::new(builder),            
+            TerminalType::ANSI => AnsiTerminal::new(builder),
         }
     }
     #[cfg(target_os = "windows")]

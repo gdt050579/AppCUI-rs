@@ -2,7 +2,7 @@
 resolver = "2"
 
 members = [
-  "appcui", 
+  "appcui",
   "appcui-proc-macro",
-  "examples"
+  "examples",
 ]

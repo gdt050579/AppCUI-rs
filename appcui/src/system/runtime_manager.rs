@@ -304,7 +304,7 @@ impl RuntimeManager {
     pub(crate) fn activate_opened_menu_parent(&mut self) {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(self.opened_menu_handle) {
-            let parent_handle = menu.get_parent_handle();
+            let parent_handle = menu.parent_handle();
             if let Some(_) = menus.get(parent_handle) {
                 self.opened_menu_handle = parent_handle;
                 return;
@@ -445,7 +445,7 @@ impl RuntimeManager {
     }
     fn remove_deleted_controls(&mut self) {
         while let Some(handle) = self.to_remove_list.pop() {
-            let focused_parent = self.remove_control(handle, true);
+            let _focused_parent = self.remove_control(handle, true);
             // what if the current handle has focus (in this case we will need to change the focus to
             // a different control). self.remove_control should return the handle to its parent only if
             // the current object has focus
@@ -467,7 +467,7 @@ impl RuntimeManager {
             self.modal_windows[self.modal_windows.len() - 1]
         }
     }
-    pub(crate) fn get_parent_handle(&self, handle: Handle<UIElement>) -> Handle<UIElement> {
+    pub(crate) fn _get_parent_handle(&self, handle: Handle<UIElement>) -> Handle<UIElement> {
         let controls = unsafe { &mut *self.controls };
         if let Some(ctrl) = controls.get(handle) {
             return ctrl.get_base().parent;
@@ -750,7 +750,7 @@ impl RuntimeManager {
         self.recompute_layout = true;
     }
 
-    fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
+    pub fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
         for _ in 0..depth {
             print!(" ");
         }
@@ -917,7 +917,7 @@ impl PaintMethods for RuntimeManager {
         }
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get(handle) {
-            self.paint_menu(menu.get_parent_handle(), false);
+            self.paint_menu(menu.parent_handle(), false);
             menu.paint(&mut self.surface, &self.theme, activ);
         }
     }
@@ -1137,7 +1137,7 @@ impl MouseMethods for RuntimeManager {
         let mut parent_handle = Handle::None;
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
-            parent_handle = menu.get_parent_handle();
+            parent_handle = menu.parent_handle();
             if handle == self.opened_menu_handle {
                 result = menu.on_mouse_pressed(x, y);
             } else {

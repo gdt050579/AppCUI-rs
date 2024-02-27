@@ -163,7 +163,7 @@ impl MenuBar {
             }
         }
         // check recursivelly if a shortcut key was not pressed
-        for item in &self.items {
+        for _item in &self.items {
             // if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
             // {
             //     Close();

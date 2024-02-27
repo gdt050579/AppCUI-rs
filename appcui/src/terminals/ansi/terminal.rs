@@ -1,53 +1,37 @@
-use super::super::SystemEvent;
-use super::super::Terminal;
-use crate::graphics::*;
-use crate::system::Error;
+//! Module representing an `AnsiTerminal` abstraction over the ANSI protocol
+use super::super::{ SystemEvent, Terminal };
+use crate::{ graphics::*, system::Error, prelude::{Key, KeyModifier}, terminals::KeyPressedEvent };
+use super::termios::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios};
 
+/// Represents a terminal interface that has support for ANSI escape codes and receives input from
+/// the standard input descriptor
 pub struct AnsiTerminal {
+    // Size of the window created
     size: Size,
+    // We keep the original `Termios` structure, such that before the application exits, we return
+    // the terminal as the user had it initially.
+    _orig_termios: Termios,
 }
+
 impl AnsiTerminal {
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-        let mut t = AnsiTerminal { size: Size::new(80, 30) };
+        let _orig_termios = Termios::enable_raw_mode()?;
+
+        let mut t = AnsiTerminal { size: Size::new(80, 30), _orig_termios };
         if let Some(sz) = builder.size {
             t.size = sz;
 
-            // if the terminal size is invalid, we will return an error
+            // If the terminal size is invalid, we will return an error
+            // However, we are returning an `Err` without checking that :-?
             return Err(Error::new(
                 crate::prelude::ErrorKind::InvalidFeature,
                 "AnsiTerminal is not yet implemented to support custom sizes".to_owned(),
             ));
-        } else {
-            // t.size = Size::new(80, 30); //default value - to be adjusted to the screen
-            // //find out the size of the terminal
-            // let mut s = String::new();
-            // s.push_str("\x1b[18t");
-            // print!("{}", s);
-            // let mut buffer = [0u8; 32];
-            // let mut i = 0;
-            // while i < 32 {
-            //     let c = std::io::stdin().bytes().next().unwrap().unwrap();
-            //     if c == b'c' {
-            //         break;
-            //     }
-            //     buffer[i] = c;
-            //     i += 1;
-            // }
-            // let s = std::str::from_utf8(&buffer[2..i]).unwrap();
-            // let mut parts = s.split(';');
-            // if let Some(w) = parts.next() {
-            //     if let Some(h) = parts.next() {
-            //         if let Ok(w) = w.parse::<u16>() {
-            //             if let Ok(h) = h.parse::<u16>() {
-            //                 t.size = Size::new(w, h);
-            //             }
-            //         }
-            //     }
-            // }
         }
         Ok(Box::new(t))
     }
 }
+
 impl Terminal for AnsiTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         let mut s = String::new();
@@ -88,7 +72,37 @@ impl Terminal for AnsiTerminal {
     }
 
     fn get_system_event(&mut self) -> SystemEvent {
-        //sleep(std::time::Duration::from_secs(5));
-        SystemEvent::None
+        let maybe_ansi_key = TermiosReader::read_key();
+
+        match maybe_ansi_key {
+            Ok(ansi_key) => {
+                // If the key pressed was `Ctrl-Q` we quit the application
+                if ansi_key.modifier() == KeyModifier::Ctrl
+                    && ansi_key.code() == AnsiKeyCode::Letter(Letter::Q) {
+                    return SystemEvent::AppClose;
+                }
+
+                // We take the initial 4 bytes an we try to convert them into an `u32`
+                let Some(bytes) = ansi_key.bytes().get(0..4) else {
+                    return SystemEvent::None;
+                };
+                let value = u32::from_le_bytes(bytes.try_into().unwrap_or([0; 4]));
+
+                let Some(character) = char::from_u32(value) else {
+                    return SystemEvent::None;
+                };
+
+                // We convert our ANSI key to the system's `Key` known key type
+                let key: Key = ansi_key.into();
+                SystemEvent::KeyPressed(KeyPressedEvent {
+                    key,
+                    character,
+                })
+            }
+            Err(_) => SystemEvent::None,
+        }
     }
 }
+
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct UnsupportedCode([u8; 5]);

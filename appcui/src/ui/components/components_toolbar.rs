@@ -20,8 +20,8 @@ impl ComponentsToolbar {
             },
         }
     }
-    #[allow(private_bounds)]
-    pub fn add<T>(&mut self, item: T) -> Handle<T>
+
+    pub(crate) fn add<T>(&mut self, item: T) -> Handle<T>
     where
         T: Component,
     {
