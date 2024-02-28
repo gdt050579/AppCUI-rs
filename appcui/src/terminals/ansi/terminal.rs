@@ -1,6 +1,8 @@
 //! Module representing an `AnsiTerminal` abstraction over the ANSI protocol
 use super::super::{ SystemEvent, Terminal };
 use crate::{ graphics::*, system::Error, prelude::{Key, KeyModifier}, terminals::KeyPressedEvent };
+
+#[cfg(target_family = "unix")]
 use super::termios::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios};
 
 /// Represents a terminal interface that has support for ANSI escape codes and receives input from
@@ -10,14 +12,18 @@ pub struct AnsiTerminal {
     size: Size,
     // We keep the original `Termios` structure, such that before the application exits, we return
     // the terminal as the user had it initially.
+    #[cfg(target_family = "unix")]
     _orig_termios: Termios,
 }
 
 impl AnsiTerminal {
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-        let _orig_termios = Termios::enable_raw_mode()?;
 
-        let mut t = AnsiTerminal { size: Size::new(80, 30), _orig_termios };
+        let mut t = AnsiTerminal {
+            size: Size::new(80, 30),
+            #[cfg(target_family = "unix")]
+            _orig_termios: Termios::enable_raw_mode()?,
+        };
         if let Some(sz) = builder.size {
             t.size = sz;
 
@@ -72,9 +78,8 @@ impl Terminal for AnsiTerminal {
     }
 
     fn get_system_event(&mut self) -> SystemEvent {
-        let maybe_ansi_key = TermiosReader::read_key();
-
-        match maybe_ansi_key {
+        #[cfg(target_family = "unix")]
+        match TermiosReader::read_key() {
             Ok(ansi_key) => {
                 // If the key pressed was `Ctrl-Q` we quit the application
                 if ansi_key.modifier() == KeyModifier::Ctrl
@@ -101,6 +106,11 @@ impl Terminal for AnsiTerminal {
             }
             Err(_) => SystemEvent::None,
         }
+
+        // Currently the way we handle raw terminal input is not available on windows through
+        // termios
+        #[cfg(target_family = "windows")]
+        SystemEvent::None
     }
 }
 

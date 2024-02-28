@@ -1,4 +1,5 @@
 use std::fmt::Display;
+#[cfg(target_family = "unix")]
 use crate::terminals::ansi::TermiosError;
 
 #[repr(u8)]

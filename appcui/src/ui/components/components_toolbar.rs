@@ -21,7 +21,7 @@ impl ComponentsToolbar {
         }
     }
 
-    pub(crate) fn add<T>(&mut self, item: T) -> Handle<T>
+    pub fn add<T>(&mut self, item: T) -> Handle<T>
     where
         T: Component,
     {

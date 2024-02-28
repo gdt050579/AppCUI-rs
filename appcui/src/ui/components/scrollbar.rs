@@ -418,6 +418,7 @@ impl ScrollBar {
     }
 }
 impl Component for ScrollBar {
+    #[allow(private_interfaces)]
     fn into_toolbar(self)->super::component_toolbar_item::ComponentToolbarItem {
         super::component_toolbar_item::ComponentToolbarItem::ScrollBar(self)
     }

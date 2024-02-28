@@ -674,14 +674,14 @@ impl Menu {
         return true;
     }
     #[inline(always)]
-    pub(crate) fn handle(&self) -> Handle<Menu> {
+    pub(crate) fn get_handle(&self) -> Handle<Menu> {
         self.handle
     }
     pub(crate) fn set_handle(&mut self, handle: Handle<Menu>) {
         self.handle = handle;
     }
     #[inline(always)]
-    pub(crate) fn parent_handle(&self) -> Handle<Menu> {
+    pub(crate) fn get_parent_handle(&self) -> Handle<Menu> {
         self.parent_handle
     }
 }

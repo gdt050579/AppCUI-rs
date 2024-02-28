@@ -102,7 +102,7 @@ where
         self.objects.len()
     }
 
-    pub fn free_spaces(&self) -> usize {
+    pub(super) fn free_spaces(&self) -> usize {
         self.free.len()
     }
 }
