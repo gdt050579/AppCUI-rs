@@ -49,7 +49,8 @@ impl Menu {
         }
     }
 
-    pub(crate) fn _add<T>(&mut self, mut menuitem: T) -> Handle<T>
+    #[allow(private_bounds)]
+    pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T>
     where
         T: MenuItem,
     {
@@ -60,7 +61,8 @@ impl Menu {
         h
     }
 
-    pub(crate) fn get<T>(&self, menuitem_hamdle: Handle<T>) -> Option<&T>
+    #[allow(private_bounds)]
+    pub fn get<T>(&self, menuitem_hamdle: Handle<T>) -> Option<&T>
     where
         T: MenuItem,
     {
@@ -81,7 +83,8 @@ impl Menu {
         }
     }
 
-    pub(crate) fn get_mut<T>(&mut self, menuitem_hamdle: Handle<T>) -> Option<&mut T>
+    #[allow(private_bounds)]
+    pub fn get_mut<T>(&mut self, menuitem_hamdle: Handle<T>) -> Option<&mut T>
     where
         T: MenuItem,
     {
@@ -671,14 +674,14 @@ impl Menu {
         return true;
     }
     #[inline(always)]
-    pub fn handle(&self) -> Handle<Menu> {
+    pub(crate) fn handle(&self) -> Handle<Menu> {
         self.handle
     }
-    pub fn set_handle(&mut self, handle: Handle<Menu>) {
+    pub(crate) fn set_handle(&mut self, handle: Handle<Menu>) {
         self.handle = handle;
     }
     #[inline(always)]
-    pub fn parent_handle(&self) -> Handle<Menu> {
+    pub(crate) fn parent_handle(&self) -> Handle<Menu> {
         self.parent_handle
     }
 }

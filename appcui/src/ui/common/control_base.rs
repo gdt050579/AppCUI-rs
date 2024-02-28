@@ -548,7 +548,8 @@ impl ControlBase {
         RuntimeManager::get().add_menu(menu)
     }
 
-    pub(crate) fn _menu_item<T>(
+    #[allow(private_bounds)]
+    pub fn get_menuitem<T>(
         &self,
         menu_handle: Handle<Menu>,
         menuitem_handle: Handle<T>,
@@ -562,7 +563,8 @@ impl ControlBase {
         return None;
     }
 
-    pub(crate) fn _menu_item_mut<T>(
+    #[allow(private_bounds)]
+    pub fn get_menuitem_mut<T>(
         &mut self,
         menu_handle: Handle<Menu>,
         menuitem_handle: Handle<T>,
