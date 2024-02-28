@@ -8,6 +8,7 @@ pub enum ErrorKind {
     InitializationFailure,
     InvalidFeature,
     InvalidParameter,
+    #[cfg(target_family = "unix")]
     TermiosError(TermiosError),
 }
 
@@ -36,6 +37,7 @@ impl Display for Error {
     }
 }
 
+#[cfg(target_family = "unix")]
 impl From<TermiosError> for Error {
     fn from(err: TermiosError) -> Self {
         Self {
