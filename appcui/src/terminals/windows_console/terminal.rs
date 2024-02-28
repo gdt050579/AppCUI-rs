@@ -6,8 +6,6 @@ use crate::input::MouseWheelDirection;
 use crate::prelude::ErrorKind;
 
 use super::super::system_event::KeyModifierChangedEvent;
-use super::super::CharFlags;
-use super::super::Color;
 use super::super::KeyPressedEvent;
 use super::super::MouseButtonDownEvent;
 use super::super::MouseButtonUpEvent;
