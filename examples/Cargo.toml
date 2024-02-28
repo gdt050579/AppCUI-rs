@@ -46,3 +46,7 @@ path = "modal_window.rs"
 [[example]]
 name = "change_menu_status"
 path = "change_menu_status.rs"
+
+[[example]]
+name = "multiple_menus"
+path = "multiple_menus/main.rs"
