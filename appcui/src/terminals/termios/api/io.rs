@@ -55,7 +55,7 @@ pub enum AnsiKeyCode {
     _PageDown,
     _Home,
     _End,
-    _Delete,
+    Delete,
     _Backspace,
     Space,
     _Enter,
@@ -217,7 +217,7 @@ impl Into<Key> for AnsiKey {
             AnsiKeyCode::_Enter => KeyCode::Enter,
             AnsiKeyCode::_Escape => KeyCode::Escape,
             AnsiKeyCode::_Insert => KeyCode::Insert,
-            AnsiKeyCode::_Delete => KeyCode::Delete,
+            AnsiKeyCode::Delete => KeyCode::Delete,
             AnsiKeyCode::_Backspace => KeyCode::Backspace,
             AnsiKeyCode::_Tab => KeyCode::Tab,
             AnsiKeyCode::_Left => KeyCode::Left,
@@ -389,11 +389,363 @@ impl TermiosReader {
                 124 => ([c, 0, 0, 0, 0], AnsiKeyCode::BackSlash, KeyModifier::Shift),
                 125 => ([c, 0, 0, 0, 0], AnsiKeyCode::RightBracket, KeyModifier::Shift),
                 126 => ([c, 0, 0, 0, 0], AnsiKeyCode::AngleQuote, KeyModifier::Shift),
-                127 => ([c, 0, 0, 0, 0], AnsiKeyCode::AngleQuote, KeyModifier::Shift),
-                195 => ([c, 0, 0, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
-                194 => ([c, 0, 0, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
+                127 => ([c, 0, 0, 0, 0], AnsiKeyCode::Delete, KeyModifier::Shift),
+                194 => {
+                    // Currently, all the character that we know with this key code, are pressed
+                    // using an `Alt-Key` combination.
+                    let modifier = KeyModifier::Alt;
+                    // We read the next character to see what this is about
+                    let byte_2 = checked_stdin_read()?;
+                    match byte_2 {
+                        // `Alt-Space`
+                        160 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Space, modifier)
+                        }
+                        // `Alt-1` (Alt, one)
+                        161 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N1, modifier)
+                        }
+                        // `Alt-4`
+                        162 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N4, modifier)
+                        }
+                        // `Alt-3`
+                        163 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N3, modifier)
+                        }
+                        // `Alt-6`
+                        167 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N6, modifier)
+                        }
+                        // `Alt-u`
+                        168 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::U), modifier)
+                        }
+                        // `Alt-g`
+                        169 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::G), modifier)
+                        }
+                        // `Alt-8`
+                        170 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N9, modifier)
+                        }
+                        // `Alt-\` (Alt-backslash)
+                        171 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::BackSlash, modifier)
+                        }
+                        // `Alt-l`
+                        172 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::L), modifier)
+                        }
+                        // `Alt-r`
+                        174 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::R), modifier)
+                        }
+                        // `Alt-e`
+                        180 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::E), modifier)
+                        }
+                        // `Alt-m`
+                        181 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::M), modifier)
+                        }
+                        // `Alt-7`
+                        182 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N7, modifier)
+                        }
+                        // `Alt-0`
+                        186 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N0, modifier)
+                        }
+                        // If we do not know the key, we log it in case we might want to have
+                        // support for it.
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                    }
+                }
+                195 => {
+                    // Currently, all the character that we know with this key code, are pressed
+                    // using an `Alt-Key` combination.
+                    let modifier = KeyModifier::Alt;
+                    // We read the next character to see what this is about
+                    let byte_2 = checked_stdin_read()?;
+                    match byte_2 {
+                        // `Alt-s`
+                        159 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::S), modifier)
+                        }
+                        // `Alt-a`
+                        165 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::A), modifier)
+                        }
+                        // `Alt-'` (Alt-quote)
+                        166 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Quote, modifier)
+                        }
+                        // `Alt-c`
+                        167 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::C), modifier)
+                        }
+                        // `Alt-o`
+                        184 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::O), modifier)
+                        }
+                        // If we do not know the key, we log it in case we might want to have
+                        // support for it.
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                    }
+                }
+                197 => {
+                    // Currently, all the character that we know with this key code, are pressed
+                    // using an `Alt-Key` combination.
+                    let modifier = KeyModifier::Alt;
+                    // We read the next character to see what this is about
+                    let byte_2 = checked_stdin_read()?;
+                    match byte_2 {
+                        // `Alt-q`
+                        147 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::Q), modifier)
+                        }
+                        // If we do not know the key, we log it in case we might want to have
+                        // support for it.
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                    }
+                }
+                198 => {
+                    // Currently, all the character that we know with this key code, are pressed
+                    // using an `Alt-Key` combination.
+                    let modifier = KeyModifier::Alt;
+                    // We read the next character to see what this is about
+                    let byte_2 = checked_stdin_read()?;
+                    match byte_2 {
+                        // `Alt-f`
+                        146 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::F), modifier)
+                        }
+                        // If we do not know the key, we log it in case we might want to have
+                        // support for it.
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                    }
+                }
+                203 => {
+                    // Currently, all the character that we know with this key code, are pressed
+                    // using an `Alt-Key` combination.
+                    let modifier = KeyModifier::Alt;
+                    // We read the next character to see what this is about
+                    let byte_2 = checked_stdin_read()?;
+                    match byte_2 {
+                        // `Alt-i`
+                        134 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::I), modifier)
+                        }
+                        // `Alt-h`
+                        153 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::H), modifier)
+                        }
+                        // `Alt-k`
+                        154 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::K), modifier)
+                        }
+                        // `Alt-n`
+                        156 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::N), modifier)
+                        }
+                        // If we do not know the key, we log it in case we might want to have
+                        // support for it.
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                    }
+                }
+                206 => {
+                    // Currently, all the character that we know with this key code, are pressed
+                    // using an `Alt-Key` combination.
+                    let modifier = KeyModifier::Alt;
+                    // We read the next character to see what this is about
+                    let byte_2 = checked_stdin_read()?;
+                    match byte_2 {
+                        // `Alt-z`
+                        169 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::Z), modifier)
+                        }
+                        // If we do not know the key, we log it in case we might want to have
+                        // support for it.
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                    }
+                }
+                207 => {
+                    // Currently, all the character that we know with this key code, are pressed
+                    // using an `Alt-Key` combination.
+                    let modifier = KeyModifier::Alt;
+                    // We read the next character to see what this is about
+                    let byte_2 = checked_stdin_read()?;
+                    match byte_2 {
+                        // `Alt-p`
+                        128 => {
+                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::P), modifier)
+                        }
+                        // If we do not know the key, we log it in case we might want to have
+                        // support for it.
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                    }
+                }
+                226 => {
+                    // We read the next character to see what this is about
+                    let byte_2 = checked_stdin_read()?;
+                    match byte_2 {
+                        128 => {
+                            // Currently, all the character that we know with this key code, are
+                            // pressed using an `Alt-Key` combination.
+                            let modifier = KeyModifier::Alt;
+                            // At this point we know we should read a 3rd byte
+                            let byte_3 = checked_stdin_read()?;
+                            match byte_3 {
+                                // `Alt-]` (Alt-dash)
+                                147 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Dash, modifier)
+                                }
+                                // `Alt-]` (Alt-right bracket)
+                                152 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::RightBracket, modifier)
+                                }
+                                // `Alt-[` (Alt-left bracket)
+                                156 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::LeftBracket, modifier)
+                                }
+                                // `Alt-t`
+                                160 => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Letter(Letter::T),
+                                    modifier,
+                                ),
+                                // `Alt-8`
+                                162 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::N8, modifier)
+                                }
+                                // `Alt-;` (Alt-semicolon)
+                                166 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::SemiColon, modifier)
+                                }
+                                // If we do not know the key, we log it in case we might want to
+                                // have support for it.
+                                _ => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Unknown,
+                                    KeyModifier::None
+                                ),
+                            }
+                        }
+                        132 => {
+                            // Currently, all the character that we know with this key code, are
+                            // pressed using an `Alt-Key` combination.
+                            let modifier = KeyModifier::Alt;
+                            // At this point we know we should read a 3rd byte
+                            let byte_3 = checked_stdin_read()?;
+                            match byte_3 {
+                                // `Alt-2`
+                                162 => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::N2,
+                                    modifier,
+                                ),
+                                // If we do not know the key, we log it in case we might want to
+                                // have support for it.
+                                _ => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Unknown,
+                                    KeyModifier::None
+                                ),
+                            }
+                        }
+                        136 => {
+                            // Currently, all the character that we know with this key code, are
+                            // pressed using an `Alt-Key` combination.
+                            let modifier = KeyModifier::Alt;
+                            // At this point we know we should read a 3rd byte
+                            let byte_3 = checked_stdin_read()?;
+                            match byte_3 {
+                                // `Alt-d`
+                                130 => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Letter(Letter::D),
+                                    modifier,
+                                ),
+                                // `Alt-j`
+                                134 => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Letter(Letter::J),
+                                    modifier,
+                                ),
+                                // `Alt-w`
+                                145 => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Letter(Letter::W),
+                                    modifier,
+                                ),
+                                // `Alt-v`
+                                154 => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Letter(Letter::V),
+                                    modifier,
+                                ),
+                                // `Alt-5`
+                                158 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::N5, modifier)
+                                }
+                                // `Alt-b`
+                                171 => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Letter(Letter::B),
+                                    modifier,
+                                ),
+                                // If we do not know the key, we log it in case we might want to
+                                // have support for it.
+                                _ => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Unknown,
+                                    KeyModifier::None
+                                ),
+                            }
+                        }
+                        137 => {
+                            // Currently, all the character that we know with this key code, are
+                            // pressed using an `Alt-Key` combination.
+                            let modifier = KeyModifier::Alt;
+                            // At this point we know we should read a 3rd byte
+                            let byte_3 = checked_stdin_read()?;
+                            match byte_3 {
+                                // `Alt-X`
+                                136 => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Letter(Letter::X),
+                                    modifier,
+                                ),
+                                // `Alt-=` (Alt-equal)
+                                160 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Equal, modifier)
+                                }
+                                // `Alt-,` (Alt-comma)
+                                164 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Comma, modifier)
+                                }
+                                // `Alt-.` (Alt-dot)
+                                165 => {
+                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Dot, modifier)
+                                }
+                                // If we do not know the key, we log it in case we might want to
+                                // have support for it.
+                                _ => (
+                                    [c, byte_2, byte_3, 0, 0],
+                                    AnsiKeyCode::Unknown,
+                                    KeyModifier::None
+                                ),
+                            }
+                        }
+                        // If we do not know the key, we log it in case we might want to have
+                        // support for it.
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None)
+                    }
+                }
                 _ => ([c, 0, 0, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
             };
+            println!("bytes: {:#?}", bytes);
             return Ok(AnsiKey {
                 bytes,
                 code,

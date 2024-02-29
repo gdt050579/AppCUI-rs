@@ -102,12 +102,11 @@ impl Terminal for TermiosTerminal {
                 };
                 let value = u32::from_le_bytes(bytes.try_into().unwrap_or([0; 4]));
 
-                let Some(character) = char::from_u32(value) else {
-                    return SystemEvent::None;
-                };
+                let character = char::from_u32(value).unwrap_or('\0');
 
                 // We convert our ANSI key to the system's `Key` known key type
                 let key: Key = ansi_key.into();
+                println!("{:#?}", key);
                 SystemEvent::KeyPressed(KeyPressedEvent {
                     key,
                     character,
