@@ -1,6 +1,4 @@
 use std::fmt::Display;
-#[cfg(target_family = "unix")]
-use crate::terminals::ansi::TermiosError;
 
 #[repr(u8)]
 #[derive(Debug)]
@@ -8,8 +6,6 @@ pub enum ErrorKind {
     InitializationFailure,
     InvalidFeature,
     InvalidParameter,
-    #[cfg(target_family = "unix")]
-    TermiosError(TermiosError),
 }
 
 #[derive(Debug)]
@@ -34,15 +30,5 @@ impl std::error::Error for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", &self.description)
-    }
-}
-
-#[cfg(target_family = "unix")]
-impl From<TermiosError> for Error {
-    fn from(err: TermiosError) -> Self {
-        Self {
-            kind: ErrorKind::TermiosError(err),
-            description: "Termios setup in terminal failed".to_string(),
-        }
     }
 }

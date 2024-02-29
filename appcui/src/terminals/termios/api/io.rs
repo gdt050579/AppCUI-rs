@@ -1,7 +1,7 @@
 use crate::{
     prelude::KeyCode,
     input::{Key, KeyModifier},
-    terminals::ansi::termios::TermiosError,
+    terminals::termios::api::TermiosError,
 };
 
 // Define C system binding calls

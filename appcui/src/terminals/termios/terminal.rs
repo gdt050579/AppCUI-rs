@@ -1,28 +1,36 @@
-//! Module representing an `AnsiTerminal` abstraction over the ANSI protocol
+//! Module representing an `TermiosTerminal` abstraction over the ANSI protocol using the termios
+//! API to set it into raw mode. Targeted for UNIX systems, including `linux` and `mac`
+
 use super::super::{ SystemEvent, Terminal };
 use crate::{ graphics::*, system::Error, prelude::{Key, KeyModifier}, terminals::KeyPressedEvent };
 
 #[cfg(target_family = "unix")]
-use super::termios::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios};
+use super::api::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios};
 
-/// Represents a terminal interface that has support for ANSI escape codes and receives input from
+/// Represents a terminal interface that has support for termios API terminals, supported by unix
+/// family and outputs ANSI escape codes and receives input from
 /// the standard input descriptor
-pub struct AnsiTerminal {
+pub struct TermiosTerminal {
     // Size of the window created
     size: Size,
     // We keep the original `Termios` structure, such that before the application exits, we return
     // the terminal as the user had it initially.
-    #[cfg(target_family = "unix")]
     _orig_termios: Termios,
 }
 
-impl AnsiTerminal {
+impl TermiosTerminal {
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        let Ok(_orig_termios) = Termios::enable_raw_mode() else {
+            return Err(Error::new(
+                crate::prelude::ErrorKind::InitializationFailure,
+                "Cannot enable raw mode in Termios Terminal to get input from stdin"
+                    .to_string(),
+            ));
+        };
 
-        let mut t = AnsiTerminal {
+        let mut t = TermiosTerminal {
             size: Size::new(80, 30),
-            #[cfg(target_family = "unix")]
-            _orig_termios: Termios::enable_raw_mode()?,
+            _orig_termios,
         };
         if let Some(sz) = builder.size {
             t.size = sz;
@@ -31,20 +39,21 @@ impl AnsiTerminal {
             // However, we are returning an `Err` without checking that :-?
             return Err(Error::new(
                 crate::prelude::ErrorKind::InvalidFeature,
-                "AnsiTerminal is not yet implemented to support custom sizes".to_owned(),
+                "TermiosTerminal is not yet implemented to support custom sizes".to_owned(),
             ));
         }
         Ok(Box::new(t))
     }
 }
 
-impl Terminal for AnsiTerminal {
+impl Terminal for TermiosTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         let mut s = String::new();
         let sz = surface.get_size();
         for y in 0..sz.height {
             for x in 0..sz.width {
                 if let Some(c) = surface.get(x as i32, y as i32) {
+                    // Set the foreground using ANSI escape codes
                     match c.foreground {
                         Color::Black => s.push_str("\x1b[30m"),
                         Color::DarkBlue => s.push_str("\x1b[34m"),
