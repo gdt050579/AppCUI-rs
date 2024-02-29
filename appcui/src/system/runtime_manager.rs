@@ -447,7 +447,7 @@ impl RuntimeManager {
     }
     fn remove_deleted_controls(&mut self) {
         while let Some(handle) = self.to_remove_list.pop() {
-            let focused_parent = self.remove_control(handle, true);
+            let _focused_parent = self.remove_control(handle, true);
             // what if the current handle has focus (in this case we will need to change the focus to
             // a different control). self.remove_control should return the handle to its parent only if
             // the current object has focus

@@ -89,18 +89,19 @@ where
         if index < self.objects.len() {
             return self.objects[index].as_ref();
         }
-        None   
+        None
     }
     pub(crate) fn get_element_mut(&mut self, index: usize) -> Option<&mut T> {
         if index < self.objects.len() {
             return self.objects[index].as_mut();
         }
-        None   
+        None
     }
 
     pub(crate) fn allocated_objects(&self) -> usize {
         self.objects.len()
     }
+
     pub(super) fn free_spaces(&self) -> usize {
         self.free.len()
     }

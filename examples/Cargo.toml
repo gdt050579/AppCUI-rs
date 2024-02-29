@@ -6,7 +6,7 @@ edition = "2021"
 
 [dev-dependencies]
 appcui = { version = "1.0.0", path = "../appcui" }
-AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"} 
+AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"}
 
 
 [[example]]

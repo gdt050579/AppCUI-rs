@@ -1,17 +1,15 @@
 mod debug;
-mod ansi;
 mod system_event;
 #[cfg(target_os = "windows")]
 mod windows_console;
+#[cfg(target_family = "unix")]
+mod termios;
 
-use super::graphics::CharFlags;
-use super::graphics::Color;
 use super::graphics::Size;
 use super::graphics::Surface;
 use super::system::Error;
 use super::system::ErrorKind;
 
-use self::ansi::AnsiTerminal;
 pub(crate) use self::system_event::KeyPressedEvent;
 pub(crate) use self::system_event::MouseButtonDownEvent;
 pub(crate) use self::system_event::MouseButtonUpEvent;
@@ -21,7 +19,11 @@ pub(crate) use self::system_event::MouseWheelEvent;
 pub(crate) use self::system_event::SystemEvent;
 
 use self::debug::DebugTerminal;
+
+#[cfg(target_os = "windows")]
 use self::windows_console::WindowsTerminal;
+#[cfg(target_family = "unix")]
+use self::termios::TermiosTerminal;
 
 pub(crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
@@ -34,7 +36,8 @@ pub(crate) trait Terminal {
 pub enum TerminalType {
     #[cfg(target_os = "windows")]
     WindowsConsole,
-    ANSI,
+    #[cfg(target_family = "unix")]
+    Termios,
 }
 impl TerminalType {
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
@@ -43,7 +46,10 @@ impl TerminalType {
             if (sz.width == 0) || (sz.height == 0) {
                 return Err(Error::new(
                     ErrorKind::InvalidParameter,
-                    format!("Invalid size for a terminal ({}x{}). Both width and height must be bigger than 0 !",sz.width,sz.height),
+                    format!(
+                        "Invalid size for a terminal ({}x{}). Both width and height must be bigger than 0 !",
+                        sz.width, sz.height
+                    ),
                 ));
             }
         }
@@ -62,7 +68,8 @@ impl TerminalType {
         match terminal {
             #[cfg(target_os = "windows")]
             TerminalType::WindowsConsole => WindowsTerminal::new(builder),
-            TerminalType::ANSI => AnsiTerminal::new(builder),            
+            #[cfg(target_family = "unix")]
+            TerminalType::Termios => TermiosTerminal::new(builder),
         }
     }
     #[cfg(target_os = "windows")]
@@ -71,15 +78,15 @@ impl TerminalType {
     }
     #[cfg(target_os = "linux")]
     fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-        AnsiTerminal::new(builder)
+        TermiosTerminal::new(builder)
     }
     #[cfg(target_os = "macos")]
     fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-        AnsiTerminal::new(builder)
+        TermiosTerminal::new(builder)
     }
     #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
     fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
         // anything else
-        AnsiTerminal::new(builder)
+        TermiosTerminal::new(builder)
     }
 }

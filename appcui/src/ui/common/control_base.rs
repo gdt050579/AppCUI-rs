@@ -547,8 +547,13 @@ impl ControlBase {
     pub fn register_menu(&mut self, menu: Menu) -> Handle<Menu> {
         RuntimeManager::get().add_menu(menu)
     }
+
     #[allow(private_bounds)]
-    pub fn get_menuitem<T>(&self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&T>
+    pub fn get_menuitem<T>(
+        &self,
+        menu_handle: Handle<Menu>,
+        menuitem_handle: Handle<T>,
+    ) -> Option<&T>
     where
         T: MenuItem,
     {
@@ -557,8 +562,13 @@ impl ControlBase {
         }
         return None;
     }
+
     #[allow(private_bounds)]
-    pub fn get_menuitem_mut<T>(&mut self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&mut T>
+    pub fn get_menuitem_mut<T>(
+        &mut self,
+        menu_handle: Handle<Menu>,
+        menuitem_handle: Handle<T>,
+    ) -> Option<&mut T>
     where
         T: MenuItem,
     {
