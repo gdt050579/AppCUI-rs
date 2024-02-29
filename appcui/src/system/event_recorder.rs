@@ -69,7 +69,7 @@ impl Display for Command {
             Command::Resize(sz) => write!(f, "Resize({},{})\n", sz.width, sz.height),
             Command::MouseMove(cmd) => write!(f, "Mouse.Move({},{})\n", cmd.x, cmd.y),
             Command::MouseHold(cmd) => write!(f, "Mouse.Hold({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
-            Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{})\n", cmd.x, cmd.y),
+            Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{},left)\n", cmd.x, cmd.y),
             Command::MouseClick(cmd) => write!(f, "Mouse.Click({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
             Command::MouseDrag(cmd) => write!(f, "Mouse.Drag({},{},{},{})\n", cmd.x1, cmd.y1, cmd.x2, cmd.y2),
 
@@ -89,12 +89,16 @@ impl Display for Command {
 pub(super) struct EventRecorder {
     commands: Vec<Command>,
     state_id: u32,
+    auto_mode: bool,
+    last_hash: u64,
 }
 impl EventRecorder {
     pub(super) fn new() -> Self {
         Self {
             commands: Vec::with_capacity(512),
             state_id: 1,
+            auto_mode: false,
+            last_hash: 0,
         }
     }
     pub(super) fn save(&self) {
@@ -131,6 +135,21 @@ impl EventRecorder {
             SystemEvent::MouseDoubleClick(_) => {}
             SystemEvent::MouseMove(evnt) => self.add_mouse_move(evnt),
             SystemEvent::MouseWheel(evnt) => self.add_mouse_wheel(evnt),
+        }
+    }
+    pub(super) fn auto_update(&mut self, surface: &Surface) {
+        if !self.auto_mode {
+            return;
+        }
+        let hash = EventRecorder::compute_surface_hash(surface);
+        if hash != self.last_hash {
+            self.last_hash = hash;
+            self.state_id += 1;
+            let state_id = self.state_id;
+            self.commands.push(Command::Paint(PaintCommand {
+                state_name: format!("State_{}", state_id),
+            }));
+            self.commands.push(Command::CheckHash(hash));
         }
     }
     fn compute_surface_hash(surface: &Surface) -> u64 {
@@ -225,9 +244,9 @@ impl EventRecorder {
         }
         match action {
             MouseUpPossibleCombineAction::Up => {
-                // we should never add a MouseRelease command 
+                // we should never add a MouseRelease command
                 // because in reality we should have either a Mouse.Click or a Mouse.Drag scenario
-                //self.commands.push(Command::MouseRelease(*evnt));
+                self.commands.push(Command::MouseRelease(*evnt));
             }
             MouseUpPossibleCombineAction::Click => {
                 let button = match self.commands.pop().unwrap() {
@@ -293,6 +312,7 @@ impl EventRecorder {
         let mut screen = Surface::new(sz.width, sz.height);
         let mut state_name = format!("State_{}", self.state_id);
         let mut comands = format!("Commands: {}", self.commands.len());
+        let mut auto = String::from(if self.auto_mode { "Auto:ON" } else { "Auto:OFF" });
         loop {
             // paint
             screen.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
@@ -320,6 +340,7 @@ impl EventRecorder {
             EventRecorder::print_hot_key("Esc", "Exit", 2, &mut screen);
             EventRecorder::print_hot_key("Enter", "Add", 13, &mut screen);
             EventRecorder::print_hot_key("F8", "Clear All", 25, &mut screen);
+            EventRecorder::print_hot_key("F9", &auto, 40, &mut screen);
 
             terminal.update_screen(&screen);
             // get the events
@@ -338,6 +359,11 @@ impl EventRecorder {
                     key!("F8") => {
                         self.commands.clear();
                         comands = format!("Commands: {}", self.commands.len());
+                    }
+                    key!("F9") => {
+                        self.auto_mode = !self.auto_mode;
+                        auto.clear();
+                        auto.push_str(if self.auto_mode { "Auto:ON" } else { "Auto:OFF" });
                     }
                     key!("Backspace") => {
                         // delete last character

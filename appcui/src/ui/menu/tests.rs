@@ -156,7 +156,6 @@ fn check_scroll_button_activation() {
     a.run();
 }
 
-
 #[test]
 fn check_submenus_open() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
@@ -169,7 +168,8 @@ fn check_submenus_open() {
                 base: window!("Test,d:c,w:40,h:8"),
                 m_file: Handle::None,
             };
-            let m = menu!("&Menu, class:MyWin, items=[
+            let m = menu!(
+                "&Menu, class:MyWin, items=[
                 {1,items=[
                     {1,cmd:A},
                     {2,cmd:A},
@@ -221,7 +221,8 @@ fn check_submenus_open() {
                 {10,cmd:A},
                 {11,cmd:A},
                 {12,cmd:A},
-            ]");
+            ]"
+            );
             w.m_file = w.register_menu(m);
             w
         }
@@ -299,6 +300,193 @@ fn check_submenus_open() {
     
     ";
     let mut a = App::debug(60, 15, script).menu().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_dynamic_change_menu() {
+    #[Window(events = MenuEvents, commands=Increment, internal: true)]
+    struct MyWin {
+        m_counter: Handle<menu::Command>,
+        some_menu: Handle<Menu>,
+        counter: u32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:40,h:8"),
+                m_counter: Handle::None,
+                some_menu: Handle::None,
+                counter: 0,
+            };
+            let mut m = Menu::new("Some menu");
+            w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
+            w.some_menu = w.register_menu(m);
+
+            w
+        }
+    }
+    impl MenuEvents for MyWin {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.some_menu);
+        }
+        fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
+            if item == self.m_counter {
+                self.counter += 1;
+                let new_text = format!("Increment ({})", self.counter);
+                if let Some(menuitem) = self.get_menuitem_mut(menu, item) {
+                    menuitem.set_caption(&new_text.as_str());
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0xf788ef470502e34a)
+        Mouse.Move(6,0)
+        Paint('hover over menu bar')
+        CheckHash(0x3d94307e4fc9bd2)
+        Mouse.Click(6,0,left)
+        Paint('increment (0)')
+        CheckHash(0x288a35a870df748e)
+        Mouse.Move(6,2)
+        Paint('hover over increment')
+        CheckHash(0x1ec2bf22389e4636)
+        Mouse.Click(6,2,left)
+        Mouse.Move(4,0)
+        Mouse.Click(4,0,left)
+        Mouse.Move(6,2)
+        Paint('increment (1)')
+        CheckHash(0xf24b54cf300890fb)
+        Mouse.Click(6,2,left)
+        Mouse.Move(4,0)
+        Mouse.Click(4,0,left)
+        Mouse.Move(6,2)
+        Paint('increment (2)')
+        CheckHash(0x16c4c2a4544f97f4)
+    ";
+    let mut a = App::debug(60, 24, script).menu().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_dynamic_change_menu_2() {
+    #[Window(events = MenuEvents, commands=Increment, internal: true)]
+    struct MyWin {
+        m_counter: Handle<menu::Command>,
+        some_menu: Handle<Menu>,
+        counter: u32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:40,h:8"),
+                m_counter: Handle::None,
+                some_menu: Handle::None,
+                counter: 0,
+            };
+            let mut m = Menu::new("Some menu");
+            w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
+            w.some_menu = w.register_menu(m);
+
+            w
+        }
+    }
+    impl MenuEvents for MyWin {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.some_menu);
+        }
+        fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
+            if item == self.m_counter {
+                self.counter += 1;
+                let new_text = format!("Increment ({})", self.counter);
+                if let Some(menuitem) = self.get_menuitem_mut(menu, item) {
+                    menuitem.set_caption(&new_text.as_str());
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('State_2')
+        CheckHash(0xf788ef470502e34a)
+        Mouse.Move(8,0)
+        Paint('State_3')
+        CheckHash(0x3d94307e4fc9bd2)
+        Mouse.Move(6,0)
+        Mouse.Hold(6,0,left)
+        Paint('State_4')
+        CheckHash(0x288a35a870df748e)
+        Mouse.Release(6,0,left)
+        Mouse.Move(7,2)
+        Paint('State_5')
+        CheckHash(0x1ec2bf22389e4636)
+        Mouse.Hold(7,2,left)
+        Paint('State_6')
+        CheckHash(0xf788ef470502e34a)
+        Mouse.Release(7,2,left)
+        Mouse.Move(7,0)
+        Paint('State_7')
+        CheckHash(0x3d94307e4fc9bd2)
+        Mouse.Move(6,0)
+        Mouse.Hold(6,0,left)
+        Paint('State_8')
+        CheckHash(0xe93455b60e606693)
+        Mouse.Release(6,0,left)
+        Mouse.Move(7,2)
+        Paint('State_9')
+        CheckHash(0xf24b54cf300890fb)
+        Mouse.Move(8,2)
+        Mouse.Hold(8,2,left)
+        Paint('State_10')
+        CheckHash(0xf788ef470502e34a)
+        Mouse.Release(8,2,left)
+        Mouse.Move(7,0)
+        Paint('State_11')
+        CheckHash(0x3d94307e4fc9bd2)
+        Mouse.Hold(7,0,left)
+        Paint('State_12')
+        CheckHash(0x8741fbdd037efe3c)
+        Mouse.Release(7,0,left)
+        Mouse.Move(8,2)
+        Paint('State_13')
+        CheckHash(0x16c4c2a4544f97f4)
+        Mouse.Hold(8,2,left)
+        Paint('State_14')
+        CheckHash(0xf788ef470502e34a)
+        Mouse.Release(8,2,left)
+        Mouse.Move(7,0)
+        Paint('State_15')
+        CheckHash(0x3d94307e4fc9bd2)
+        Mouse.Move(6,0)
+        Mouse.Hold(6,0,left)
+        Paint('State_16')
+        CheckHash(0xb62b7cc777749d19)
+        Mouse.Release(6,0,left)
+        Key.Pressed(Down)
+        Paint('State_17')
+        CheckHash(0xdf0e1894cf1d1d31)
+        Key.Pressed(Enter)
+        Paint('State_18')
+        CheckHash(0xf788ef470502e34a)
+        Mouse.Hold(6,0,left)
+        Paint('State_19')
+        CheckHash(0xc708e44f863d76ba)
+        Mouse.Release(6,0,left)
+        Key.Pressed(Down)
+        Paint('State_20')
+        CheckHash(0x6a9abad8f1616dd2)
+        Key.Pressed(Enter)
+        Paint('State_21')
+        CheckHash(0xf788ef470502e34a)
+        Key.Pressed(Escape)
+        Paint('State_22')
+        CheckHash(0x86cfc913da83fa16)
+            ";
+    let mut a = App::debug(60, 24, script).menu().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

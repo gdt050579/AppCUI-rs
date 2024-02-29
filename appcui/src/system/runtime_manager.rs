@@ -370,8 +370,10 @@ impl RuntimeManager {
             }
             self.recompute_layout = false;
             self.repaint = false;
-            //self.debug_print(self.desktop_handler, 0);
-            //return;
+            // auto save changes
+            #[cfg(feature = "EVENT_RECORDER")]
+            self.event_recorder.auto_update(&self.surface);
+            
             let sys_event = self.terminal.get_system_event();
             match sys_event {
                 SystemEvent::None => {}
@@ -1279,7 +1281,7 @@ impl MouseMethods for RuntimeManager {
             MouseLockedObject::None => self.process_mousemove(event),
             MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
             MouseLockedObject::CommandBar => {}
-            MouseLockedObject::MenuBar => todo!(),
+            MouseLockedObject::MenuBar => {}
         }
     }
     fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
