@@ -1327,6 +1327,7 @@ impl MouseMethods for RuntimeManager {
                 //if response == EventProcessStatus::Processed {
                 self.mouse_locked_object = MouseLockedObject::Control(handle);
                 self.repaint = true;
+                self.request_update_command_and_menu_bars = true;
                 return;
                 //}
             }

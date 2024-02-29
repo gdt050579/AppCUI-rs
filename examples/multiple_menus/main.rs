@@ -20,4 +20,4 @@ fn main() -> Result<(), appcui::system::Error> {
     a.add_window(w2);
     a.run();
     Ok(())
-}
+}  

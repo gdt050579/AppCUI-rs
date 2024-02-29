@@ -490,3 +490,191 @@ fn check_dynamic_change_menu_2() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_menubar_update_multiple_menus() {
+    mod mywin {
+        use crate::prelude::*;
+        #[Window(events = MenuEvents, commands=New+Save+Open, internal: true)]
+        pub struct MyWindow {
+            h_menu: Handle<Menu>,
+        }
+        impl MyWindow {
+            pub fn new(title: &str, layout: Layout) -> Self {
+                let mut w = MyWindow {
+                    base: Window::new(title, layout, window::Flags::None),
+                    h_menu: Handle::None,
+                };
+                let m = menu!(
+                    "File,class:MyWindow,items=[
+                    {New,cmd:New},
+                    {Save,cmd:Save},
+                    {Open,cmd:Open},
+                ]"
+                );
+                w.h_menu = w.register_menu(m);
+
+                w
+            }
+        }
+        impl MenuEvents for MyWindow {
+            fn on_update_menubar(&self, menubar: &mut MenuBar) {
+                menubar.add(self.h_menu);
+            }
+        }
+    }
+    mod colorcustomcontrol {
+        use crate::prelude::*;
+
+        #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
+        pub struct ColorCustomControl {
+            col: Color,
+            h_menu: Handle<Menu>,
+        }
+        impl ColorCustomControl {
+            pub fn new(layout: Layout) -> Self {
+                let mut obj = Self {
+                    base: ControlBase::new(layout, true),
+                    col: Color::Red,
+                    h_menu: Handle::None,
+                };
+                let m = menu!(
+                    "ColorControl,class:ColorCustomControl,items=[
+            {Red,F1,selected:true,cmd:Red},
+            {Green,F2,selected:false,cmd:Green},
+            {Blue,F3,selected:false,cmd:Blue}
+        ]"
+                );
+                obj.h_menu = obj.register_menu(m);
+                obj
+            }
+        }
+        impl OnPaint for ColorCustomControl {
+            fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+                surface.clear(Character::new(' ', Color::Black, self.col, CharFlags::None));
+                if self.has_focus() {
+                    surface.write_string(1, 0, "Focus", CharAttribute::with_fore_color(Color::Yellow), false);
+                }
+            }
+        }
+        impl MenuEvents for ColorCustomControl {
+            fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<menu::SingleChoice>, command: colorcustomcontrol::Commands) {
+                match command {
+                    colorcustomcontrol::Commands::Red => self.col = Color::Red,
+                    colorcustomcontrol::Commands::Green => self.col = Color::Green,
+                    colorcustomcontrol::Commands::Blue => self.col = Color::Blue,
+                }
+            }
+
+            fn on_update_menubar(&self, menubar: &mut MenuBar) {
+                menubar.add(self.h_menu);
+            }
+        }
+    }
+    mod textcustomcontrol {
+        use crate::prelude::*;
+
+        #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
+        pub struct TextCustomControl {
+            text: &'static str,
+            h_menu: Handle<Menu>,
+        }
+        impl TextCustomControl {
+            pub fn new(layout: Layout) -> Self {
+                let mut obj = Self {
+                    base: ControlBase::new(layout, true),
+                    text: "Red",
+                    h_menu: Handle::None,
+                };
+                let m = menu!(
+                    "Text,class:TextCustomControl,items=[
+            {'Text->Red',F1,selected:true,cmd:Red},
+            {'Text->Green',F2,selected:false,cmd:Green},
+            {'Text->Blue',F3,selected:false,cmd:Blue}
+        ]"
+                );
+                obj.h_menu = obj.register_menu(m);
+                obj
+            }
+        }
+        impl OnPaint for TextCustomControl {
+            fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+                if self.has_focus() {
+                    surface.clear(Character::new(' ', Color::Black, Color::Black, CharFlags::None));
+                    surface.write_string(1, 0, self.text, CharAttribute::with_fore_color(Color::Yellow), false);
+                } else {
+                    surface.clear(Character::new(' ', Color::Blue, Color::Blue, CharFlags::None));
+                    surface.write_string(1, 0, self.text, CharAttribute::with_fore_color(Color::Yellow), false);
+                }
+            }
+        }
+        impl MenuEvents for TextCustomControl {
+            fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<menu::SingleChoice>, command: textcustomcontrol::Commands) {
+                match command {
+                    textcustomcontrol::Commands::Red => self.text = "Red",
+                    textcustomcontrol::Commands::Green => self.text = "Green",
+                    textcustomcontrol::Commands::Blue => self.text = "Blue",
+                }
+            }
+
+            fn on_update_menubar(&self, menubar: &mut MenuBar) {
+                menubar.add(self.h_menu);
+            }
+        }
+    }
+    let script = "
+            Paint.Enable(false)
+            Paint('initial_state')
+            CheckHash(0xdcba473356cabc6)
+            Key.Pressed(Tab)
+            Paint('two_menus')
+            CheckHash(0xc93f804f8356dbd7)
+            Mouse.Move(8,0)
+            Mouse.Click(8,0,left)
+            Paint('file menu opened')
+            CheckHash(0x6b2f0c6cde25d6c1)
+            Mouse.Move(1,0)
+            Mouse.Move(5,4)
+            Paint()
+            Mouse.Click(5,4,left)
+            Paint('blue')
+            CheckHash(0xab05af43acbaa8e4)
+            Mouse.Move(10,9)
+            Mouse.Click(10,9,left)
+            Paint('win-1 focused')
+            CheckHash(0xc842e40135eb3190)
+            Mouse.Move(9,4)
+            Mouse.Click(9,4,left)
+            Paint('two menus')
+            CheckHash(0xb325123cd8b36a5)
+            Mouse.Move(10,0)
+            Mouse.Click(10,0,left)
+            Mouse.Move(8,3)
+            Mouse.Click(8,3,left)
+            Paint('green')
+            CheckHash(0x39be1f5c9b1502f5)
+            Mouse.Move(27,10)
+            Mouse.Click(27,10,left)
+            Paint('win-2 focused')
+            CheckHash(0x22e770cdf16b33a4)
+            Mouse.Move(3,0)
+            Mouse.Click(3,0,left)
+            Paint('text->blue selected')
+            CheckHash(0xcb24ccb03a1993df)
+            Mouse.Move(28,9)
+            Mouse.Click(28,9,left)
+            Key.Pressed(Tab)
+            Paint('one menu')
+            CheckHash(0x6ec113e98df3ca14)
+            ";
+    let mut a = App::debug(60, 24, script).menu().build().unwrap();
+    let mut w1 = mywin::MyWindow::new("Win-1", Layout::new("x:1,y:2,w:18,h:10"));
+    w1.add(colorcustomcontrol::ColorCustomControl::new(Layout::new("x:1,y:1,w:10")));
+    w1.add(button!("Button,x:1,y:3,w:10"));
+    let mut w2 = mywin::MyWindow::new("Win-2", Layout::new("x:20,y:2,w:18,h:15"));
+    w2.add(textcustomcontrol::TextCustomControl::new(Layout::new("x:1,y:1,w:10")));
+    w2.add(button!("Button,x:1,y:3,w:10"));
+    a.add_window(w1);
+    a.add_window(w2);
+    a.run();
+}
