@@ -10,7 +10,7 @@ pub(crate) trait Component {
     fn into_toolbar(self)->ComponentToolbarItem;
 }
 
-pub(crate) enum ComponentToolbarItem {
+pub(super) enum ComponentToolbarItem {
     ScrollBar(super::ScrollBar),
 }
 
