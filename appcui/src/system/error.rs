@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 #[repr(u8)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum ErrorKind {
     InitializationFailure,
     InvalidFeature,
