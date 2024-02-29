@@ -745,7 +745,6 @@ impl TermiosReader {
                 }
                 _ => ([c, 0, 0, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
             };
-            println!("bytes: {:#?}", bytes);
             return Ok(AnsiKey {
                 bytes,
                 code,

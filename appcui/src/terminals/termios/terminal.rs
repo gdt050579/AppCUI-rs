@@ -106,7 +106,6 @@ impl Terminal for TermiosTerminal {
 
                 // We convert our ANSI key to the system's `Key` known key type
                 let key: Key = ansi_key.into();
-                println!("{:#?}", key);
                 SystemEvent::KeyPressed(KeyPressedEvent {
                     key,
                     character,
