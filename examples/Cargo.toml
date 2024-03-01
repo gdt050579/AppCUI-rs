@@ -33,7 +33,7 @@ path = "colorpicker.rs"
 
 [[example]]
 name = "hello_world"
-path = "hello_world.rs"
+path = "hello_world/main.rs"
 
 [[example]]
 name = "window_toolbar"
