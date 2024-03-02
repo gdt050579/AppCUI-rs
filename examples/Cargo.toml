@@ -25,11 +25,11 @@ path = "canvas.rs"
 
 [[example]]
 name = "checkboxes"
-path = "checkboxes.rs"
+path = "checkboxes/main.rs"
 
 [[example]]
 name = "colorpicker"
-path = "colorpicker.rs"
+path = "colorpicker/main.rs"
 
 [[example]]
 name = "hello_world"
@@ -37,15 +37,15 @@ path = "hello_world/main.rs"
 
 [[example]]
 name = "window_toolbar"
-path = "window_toolbar.rs"
+path = "window_toolbar/main.rs"
 
 [[example]]
 name = "modal_window"
-path = "modal_window.rs"
+path = "modal_window/main.rs"
 
 [[example]]
 name = "change_menu_status"
-path = "change_menu_status.rs"
+path = "change_menu_status/main.rs"
 
 [[example]]
 name = "multiple_menus"
