@@ -8,13 +8,13 @@ pub struct MyWindow {
 impl MyWindow {
     pub fn new() -> Self {
         let mut w = MyWindow {
-            base: Window::new("Test", Layout::new("d:c,w:76,h:12"), window::Flags::None),
+            base: Window::new("Test", Layout::new("d:c,w:76,h:10"), window::Flags::None),
             hc: Handle::None,
             cb: Handle::None,
         };
-        w.hc = w.add(super::MyCustomControl::new(Layout::new("d:c,w:4,h:2")));
+        w.hc = w.add(super::MyCustomControl::new(Layout::new("x:50%,y:6,a:c,w:16,h:4")));
         w.add(label!("'Press the right mouse button on the square below to show a popup menu',x:37,y:1,a:c,w:70,h:1"));
-        w.add(checkbox!("'&Limit the meniu size to 3 items',x:2,y:3,w:30,checked:false"));
+        w.cb = w.add(checkbox!("'&Limit the meniu size to 3 items',x:2,y:2,w:30,checked:false"));
 
         w
     }

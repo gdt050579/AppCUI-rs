@@ -70,10 +70,10 @@ impl OnMouseEvent for MyCustomControl {
             if ev.button == MouseButton::Right {
                 self.show_menu(
                     self.h_menu,
-                    1,
-                    1,
+                    ev.x,
+                    ev.y,
                     if self.small_menu {
-                        Some(Size::new(20,6))
+                        Some(Size::new(20,5))
                     } else {
                         None
                     },
