@@ -547,13 +547,13 @@ impl ControlBase {
     pub fn register_menu(&mut self, menu: Menu) -> Handle<Menu> {
         RuntimeManager::get().add_menu(menu)
     }
+    pub fn show_menu(&self, handle: Handle<Menu>, x: i32, y: i32) {
+        let r = self.get_absolute_rect();
+        RuntimeManager::get().show_menu(handle, self.handle, r.get_left() + x, r.get_top() + y, Size::new(0, 0));
+    }
 
     #[allow(private_bounds)]
-    pub fn get_menuitem<T>(
-        &self,
-        menu_handle: Handle<Menu>,
-        menuitem_handle: Handle<T>,
-    ) -> Option<&T>
+    pub fn get_menuitem<T>(&self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&T>
     where
         T: MenuItem,
     {
@@ -564,11 +564,7 @@ impl ControlBase {
     }
 
     #[allow(private_bounds)]
-    pub fn get_menuitem_mut<T>(
-        &mut self,
-        menu_handle: Handle<Menu>,
-        menuitem_handle: Handle<T>,
-    ) -> Option<&mut T>
+    pub fn get_menuitem_mut<T>(&mut self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&mut T>
     where
         T: MenuItem,
     {
