@@ -547,9 +547,9 @@ impl ControlBase {
     pub fn register_menu(&mut self, menu: Menu) -> Handle<Menu> {
         RuntimeManager::get().add_menu(menu)
     }
-    pub fn show_menu(&self, handle: Handle<Menu>, x: i32, y: i32) {
+    pub fn show_menu(&self, handle: Handle<Menu>, x: i32, y: i32, max_size: Option<Size>) {
         let r = self.get_absolute_rect();
-        RuntimeManager::get().show_menu(handle, self.handle, r.get_left() + x, r.get_top() + y, Size::new(0, 0));
+        RuntimeManager::get().show_menu(handle, self.handle, r.get_left() + x, r.get_top() + y, max_size);
     }
 
     #[allow(private_bounds)]

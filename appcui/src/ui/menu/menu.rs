@@ -485,7 +485,7 @@ impl Menu {
                     self.receiver_control_handle,
                     (self.width as i32) + self.clip.left,
                     self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
-                    Size::new(0, 0),
+                    None,
                 );
 
                 /*

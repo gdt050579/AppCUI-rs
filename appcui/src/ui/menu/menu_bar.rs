@@ -127,7 +127,7 @@ impl MenuBar {
                 self.items[index.index()].receiver_control_handle,
                 self.x + self.items[index.index()].x,
                 self.y + 1,
-                Size::new(0, 0),
+                None,
             )
         }
     }

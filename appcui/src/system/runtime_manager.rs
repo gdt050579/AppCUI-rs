@@ -293,10 +293,10 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<UIElement>, x: i32, y: i32, max_size: Size) {
+    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<UIElement>, x: i32, y: i32, max_size: Option<Size>) {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
-            menu.compute_position(x, y, max_size, self.terminal.get_size());
+            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.terminal.get_size());
             menu.set_receiver_control_handle(receiver_control_handle);
             self.opened_menu_handle = handle;
         }
@@ -373,7 +373,7 @@ impl RuntimeManager {
             // auto save changes
             #[cfg(feature = "EVENT_RECORDER")]
             self.event_recorder.auto_update(&self.surface);
-            
+
             let sys_event = self.terminal.get_system_event();
             match sys_event {
                 SystemEvent::None => {}

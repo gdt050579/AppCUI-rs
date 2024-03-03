@@ -48,7 +48,7 @@ impl OnMouseEvent for MyCustomControl {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if let MouseEvent::Pressed(ev) = event {
             if ev.button == MouseButton::Right {
-                self.show_menu(self.h_menu, 1, 1);
+                self.show_menu(self.h_menu, 1, 1, None);
                 return EventProcessStatus::Processed;
             }
         }
