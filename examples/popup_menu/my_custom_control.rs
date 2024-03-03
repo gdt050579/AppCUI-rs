@@ -1,11 +1,10 @@
-use std::char::CharTryFromError;
-
 use appcui::prelude::*;
 
-#[CustomControl(events = MenuEvents, overwrite = OnPaint+OnMouseEvent, commands = Red+Green+Black)]
+#[CustomControl(events = MenuEvents, overwrite = OnPaint+OnMouseEvent, commands = Red+Green+Black+Aqua+Magenta+Yellow+Blue+Gray+White+LightRed+LightGreen)]
 pub struct MyCustomControl {
     col: Color,
     h_menu: Handle<Menu>,
+    small_menu: bool,
 }
 impl MyCustomControl {
     pub fn new(layout: Layout) -> Self {
@@ -13,16 +12,28 @@ impl MyCustomControl {
             base: ControlBase::new(layout, true),
             col: Color::Red,
             h_menu: Handle::None,
+            small_menu: false,
         };
         let m = menu!(
             "ColorControl,class:MyCustomControl,items=[
-            {Red,selected:true,cmd:Red},
-            {Green,selected:false,cmd:Green},
-            {Black,selected:false,cmd:Black}
+            {&Red,selected:true,cmd:Red},
+            {&Green,selected:false,cmd:Green},
+            {Black,selected:false,cmd:Black},
+            {&Aqua,selected:false,cmd:Aqua},
+            {&Magenta,selected:false,cmd:Magenta},
+            {&Yellow,selected:false,cmd:Yellow},
+            {&Blue,selected:false,cmd:Blue},
+            {Gray,selected:false,cmd:Gray},
+            {White,selected:false,cmd:White},
+            {'Light red',selected:false,cmd:LightRed},
+            {'Light green',selected:false,cmd:LightGreen},
         ]"
         );
         obj.h_menu = obj.register_menu(m);
         obj
+    }
+    pub fn enable_small_menu(&mut self, value: bool) {
+        self.small_menu = value;
     }
 }
 impl OnPaint for MyCustomControl {
@@ -41,6 +52,15 @@ impl MenuEvents for MyCustomControl {
             mycustomcontrol::Commands::Red => self.col = Color::DarkRed,
             mycustomcontrol::Commands::Green => self.col = Color::DarkGreen,
             mycustomcontrol::Commands::Black => self.col = Color::Black,
+            mycustomcontrol::Commands::Aqua => self.col = Color::Aqua,
+            mycustomcontrol::Commands::Magenta => self.col = Color::Magenta,
+            mycustomcontrol::Commands::Yellow => self.col = Color::Yellow,
+            mycustomcontrol::Commands::Blue => self.col = Color::Blue,
+            mycustomcontrol::Commands::Gray => self.col = Color::Gray,
+            mycustomcontrol::Commands::White => self.col = Color::White,
+            mycustomcontrol::Commands::LightRed => self.col = Color::Red,
+            mycustomcontrol::Commands::LightGreen => self.col = Color::Green,
+            
         }
     }
 }
@@ -48,7 +68,16 @@ impl OnMouseEvent for MyCustomControl {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if let MouseEvent::Pressed(ev) = event {
             if ev.button == MouseButton::Right {
-                self.show_menu(self.h_menu, 1, 1, None);
+                self.show_menu(
+                    self.h_menu,
+                    1,
+                    1,
+                    if self.small_menu {
+                        Some(Size::new(20,6))
+                    } else {
+                        None
+                    },
+                );
                 return EventProcessStatus::Processed;
             }
         }
