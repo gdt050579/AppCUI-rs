@@ -47,5 +47,6 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 | Method                  | Purpose                                                                                                         |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `register_menu(...)`    | Register a menu into `AppCUI` framework and returns a Handle for it                                             |
+| `show_menu(...)`        | Show a popup menu that was registered by the current control                                                    |
 | `get_menuitem(...)`     | Returns an immutable reference to a menu item based on two handles: one for the menu, and one for the menu item |
 | `get_menuitem_mut(...)` | Returns an mutable reference to a menu item based on two handles: one for the menu, and one for the menu item   |
