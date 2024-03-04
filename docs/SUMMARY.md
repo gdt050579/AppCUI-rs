@@ -80,7 +80,7 @@
         - [Sub menu](chapter-4/menu/submenu.md)
       - [Build a menu with macros](chapter-4/menu/macro_builder.md)
       - [Menu bar](chapter-4/menu_bar.md)
-      - [Popup menus]()
+      - [Popup menus](chapter-4/menu/popup.md)
     - [Command bar](chapter-4/command_bar.md)
 
 - [Dialogs]()
