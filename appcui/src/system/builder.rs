@@ -10,7 +10,7 @@ pub struct Builder {
     pub(crate) debug_script: Option<String>,
     pub(crate) title: Option<String>,
     pub(crate) desktop_manager: Option<ControlManager>,
-    pub(crate) has_menu: bool,
+    pub(crate) has_menu_bar: bool,
     pub(crate) has_command_bar: bool,
 }
 impl Builder {
@@ -21,7 +21,7 @@ impl Builder {
             terminal: None,
             debug_script: None,
             desktop_manager: None,
-            has_menu: false,
+            has_menu_bar: false,
             has_command_bar: false,
         }
     }
@@ -40,8 +40,8 @@ impl Builder {
         self
     }
     #[inline(always)]
-    pub fn menu(mut self) -> Self {
-        self.has_menu = true;
+    pub fn menu_bar(mut self) -> Self {
+        self.has_menu_bar = true;
         self
     }
     #[inline(always)]

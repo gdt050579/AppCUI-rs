@@ -4,10 +4,10 @@ A menu bar is a bar (on the top part of a desktop and on top of every window) th
 
 <img src="img/menu_bar.png" width=400/>
 
-The menu bar is unique per application. This means, that you need to enable it when a new application is created. A tipical way to do this is by using `.menu()` method when building an application, like in the following snippet:
+The menu bar is unique per application. This means, that you need to enable it when a new application is created. A tipical way to do this is by using `.menu_bar()` method when building an application, like in the following snippet:
 
 ```rust
-let mut app = App.App::new().menu().build()?;
+let mut app = App.App::new().menu_bar().build()?;
 ```
 
 Once you enabled the menu bar, you will need to implement `MenuEvents` on your window or custom control, and you will also need to add a list of commands when you create your window and/or custom control. A typical template of these flows look like this:

@@ -77,7 +77,7 @@ fn check_view() {
     Paint('File::exit menu selected')
     CheckHash(0xbab31a8b40b618a9)    
     ";
-    let mut a = App::debug(60, 15, script).menu().build().unwrap();
+    let mut a = App::debug(60, 15, script).menu_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -151,7 +151,7 @@ fn check_scroll_button_activation() {
         Paint('top button is disabled')
         CheckHash(0x49de03a8810dbb75)
     ";
-    let mut a = App::debug(60, 15, script).menu().build().unwrap();
+    let mut a = App::debug(60, 15, script).menu_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -299,7 +299,7 @@ fn check_submenus_open() {
     CheckHash(0x60340250ec2ef1c2)
     
     ";
-    let mut a = App::debug(60, 15, script).menu().build().unwrap();
+    let mut a = App::debug(60, 15, script).menu_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -367,7 +367,7 @@ fn check_dynamic_change_menu() {
         Paint('increment (2)')
         CheckHash(0x16c4c2a4544f97f4)
     ";
-    let mut a = App::debug(60, 24, script).menu().build().unwrap();
+    let mut a = App::debug(60, 24, script).menu_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -486,7 +486,7 @@ fn check_dynamic_change_menu_2() {
         Paint('State_22')
         CheckHash(0x86cfc913da83fa16)
             ";
-    let mut a = App::debug(60, 24, script).menu().build().unwrap();
+    let mut a = App::debug(60, 24, script).menu_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -667,7 +667,7 @@ fn check_menubar_update_multiple_menus() {
             Paint('one menu')
             CheckHash(0x6ec113e98df3ca14)
             ";
-    let mut a = App::debug(60, 24, script).menu().build().unwrap();
+    let mut a = App::debug(60, 24, script).menu_bar().build().unwrap();
     let mut w1 = mywin::MyWindow::new("Win-1", Layout::new("x:1,y:2,w:18,h:10"));
     w1.add(colorcustomcontrol::ColorCustomControl::new(Layout::new("x:1,y:1,w:10")));
     w1.add(button!("Button,x:1,y:3,w:10"));

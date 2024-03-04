@@ -8,7 +8,7 @@ use my_window::MyWindow;
 
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(60, 24)).menu().build()?;
+    let mut a = App::new().size(Size::new(60, 24)).menu_bar().build()?;
     // first window
     let mut w1 = MyWindow::new("Win-1",Layout::new("x:1,y:2,w:18,h:10"));
     w1.add(ColorCustomControl::new(Layout::new("x:1,y:1,w:10")));

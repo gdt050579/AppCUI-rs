@@ -37,7 +37,7 @@ impl MenuEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().menu().build()?;
+    let mut a = App::new().menu_bar().build()?;
     a.add_window(MyWin::new());
     a.run();
     Ok(())

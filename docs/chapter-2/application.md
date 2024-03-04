@@ -25,7 +25,7 @@ Using `App::new` or `App::with_terminal` creates a builder object that can furth
 * `.size(terminal_size)` to set up a terminal size
 * `.title(terminal_title)` to set up a terminal title
 * `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one
-* `.menu()` to enable the application top menu
+* `.menu_bar()` to enable the application top menu bar
 * `.command_bar()` to enable the application command bar
 
 After setting up the configuration for an application, just call the `build()` method to create an application. This methods returns a result of type `Result<App,Error>` from where the appcui application can be obtained via several methods such as:
@@ -36,7 +36,7 @@ After setting up the configuration for an application, just call the `build()` m
 A typical example of using this settings is as follows:
 ```rs
 let mut a = App::new().size(Size::new(80,40))  // size should be 80x25 chars
-                      .menu()                  // top menu should be enabled
+                      .menu_bar()              // top menu bar should be enabled
                       .command_bar()           // command bar should be enabled
                       .build()
                       .expect("Fail to create an AppCUI application");

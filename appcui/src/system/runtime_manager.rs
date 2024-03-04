@@ -117,7 +117,7 @@ impl RuntimeManager {
             } else {
                 None
             },
-            menubar: if builder.has_menu { Some(MenuBar::new(term_sz.width)) } else { None },
+            menubar: if builder.has_menu_bar { Some(MenuBar::new(term_sz.width)) } else { None },
             #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
         };
