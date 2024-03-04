@@ -17,11 +17,11 @@ path = "test.rs"
 
 [[example]]
 name = "buttons"
-path = "buttons.rs"
+path = "buttons/main.rs"
 
 [[example]]
 name = "canvas"
-path = "canvas.rs"
+path = "canvas/main.rs"
 
 [[example]]
 name = "checkboxes"
