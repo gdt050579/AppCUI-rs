@@ -84,6 +84,7 @@
     - [Command bar](chapter-4/command_bar.md)
 
 - [Dialogs]()
-    - [Open/Save dialog]()
     - [Notifications dialogs]()
+    - [Open/Save dialog]()
+    - [Folder selection dialog]()
     - [Window manager dialog]() 
