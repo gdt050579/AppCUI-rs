@@ -5,6 +5,7 @@ use super::{
 use crate::{
     graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament, TextFormat, TextWrap},
     input::{Key, KeyCode, MouseWheelDirection},
+    prelude::KeyModifier,
     system::{Handle, HandleSupport, RuntimeManager, Theme},
     ui::common::{traits::EventProcessStatus, UIElement},
     utils::{Caption, ExtractHotKeyMethod, Strategy, VectorIndex},
@@ -491,13 +492,6 @@ impl Menu {
                     self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
                     None,
                 );
-
-                /*
-                            itm->SubMenu->Show(
-                      Width + ScreenClip.ScreenPosition.X, ScreenClip.ScreenPosition.Y + 1 + itemIndex - FirstVisibleItem);
-                // transfer owner
-                (reinterpret_cast<MenuContext*>(itm->SubMenu->Context))->Owner = this->Owner;
-                    */
             }
         };
     }
@@ -535,22 +529,24 @@ impl Menu {
             }
             _ => {}
         }
-        // check short keys
-        let count = self.items.len();
-        let mut idx = 0usize;
-        while idx < count {
-            let item = &self.items[idx];
-            if item.is_enabled() {
-                if let Some(hotkey) = item.get_hotkey() {
-                    if hotkey == key {
-                        self.current = VectorIndex::with_value(idx);
-                        self.update_first_visible_item();
-                        self.run_item_action(idx);
-                        return EventProcessStatus::Processed;
+        // check short keys -> only if a key is being pressed without any modifier
+        if (key.code != KeyCode::None) && (key.modifier == KeyModifier::None) {
+            let count = self.items.len();
+            let mut idx = 0usize;
+            while idx < count {
+                let item = &self.items[idx];
+                if item.is_enabled() {
+                    if let Some(hotkey) = item.get_hotkey() {
+                        if hotkey == key {
+                            self.current = VectorIndex::with_value(idx);
+                            self.update_first_visible_item();
+                            self.run_item_action(idx);
+                            return EventProcessStatus::Processed;
+                        }
                     }
                 }
+                idx += 1;
             }
-            idx += 1;
         }
         return EventProcessStatus::Ignored;
     }

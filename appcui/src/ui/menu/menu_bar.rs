@@ -1,6 +1,6 @@
 use crate::{
     ui::common::{traits::EventProcessStatus, UIElement},
-    graphics::{Character, Size, Surface, TextAlignament, TextFormat},
+    graphics::{Character, Surface, TextAlignament, TextFormat},
     input::{Key, KeyCode, KeyModifier},
     system::{RuntimeManager, Theme, Handle},
     utils::{Strategy, VectorIndex},

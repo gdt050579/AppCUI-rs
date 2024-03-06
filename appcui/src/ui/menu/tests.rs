@@ -873,3 +873,153 @@ fn check_popup_menu() {
     a.add_window(MyWindow::new());
     a.run();
 }
+
+
+#[test]
+fn check_popup_menu_with_keys() {
+    pub(crate) mod mycustomcontrol {
+        use crate::prelude::*;
+
+        #[CustomControl(events = MenuEvents, overwrite = OnPaint+OnMouseEvent, commands = Red+Green+Black+Aqua+Magenta+Yellow+Blue+Gray+White+LightRed+LightGreen, internal: true)]
+        pub struct MyCustomControl {
+            col: Color,
+            h_menu: Handle<Menu>,
+            small_menu: bool,
+        }
+        impl MyCustomControl {
+            pub fn new(layout: Layout) -> Self {
+                let mut obj = Self {
+                    base: ControlBase::new(layout, true),
+                    col: Color::Red,
+                    h_menu: Handle::None,
+                    small_menu: false,
+                };
+                let m = menu!(
+                    "ColorControl,class:MyCustomControl,items=[
+                    {&Red,selected:true,cmd:Red},
+                    {&Green,selected:false,cmd:Green},
+                    {Black,selected:false,cmd:Black},
+                    {&Aqua,selected:false,cmd:Aqua},
+                    {&Magenta,selected:false,cmd:Magenta},
+                    {&Yellow,selected:false,cmd:Yellow},
+                    {&Blue,selected:false,cmd:Blue},
+                    {Gray,selected:false,cmd:Gray},
+                    {White,selected:false,cmd:White},
+                    {'Light red',selected:false,cmd:LightRed},
+                    {'Light green',selected:false,cmd:LightGreen},
+                    ]"
+                );
+                obj.h_menu = obj.register_menu(m);
+                obj
+            }
+            pub fn enable_small_menu(&mut self, value: bool) {
+                self.small_menu = value;
+            }
+        }
+        impl OnPaint for MyCustomControl {
+            fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+                surface.clear(Character::new(' ', Color::Black, self.col, CharFlags::None));
+                let sz = self.get_client_size();
+                let attr = CharAttribute::with_fore_color(Color::White);
+                let line = if self.has_focus() { LineType::Double } else { LineType::Single };
+                let r = Rect::with_size(0, 0, sz.width as u16, sz.height as u16);
+                surface.draw_rect(r, line, attr);
+            }
+        }
+        impl MenuEvents for MyCustomControl {
+            fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<menu::SingleChoice>, command: mycustomcontrol::Commands) {
+                match command {
+                    mycustomcontrol::Commands::Red => self.col = Color::DarkRed,
+                    mycustomcontrol::Commands::Green => self.col = Color::DarkGreen,
+                    mycustomcontrol::Commands::Black => self.col = Color::Black,
+                    mycustomcontrol::Commands::Aqua => self.col = Color::Aqua,
+                    mycustomcontrol::Commands::Magenta => self.col = Color::Magenta,
+                    mycustomcontrol::Commands::Yellow => self.col = Color::Yellow,
+                    mycustomcontrol::Commands::Blue => self.col = Color::Blue,
+                    mycustomcontrol::Commands::Gray => self.col = Color::Gray,
+                    mycustomcontrol::Commands::White => self.col = Color::White,
+                    mycustomcontrol::Commands::LightRed => self.col = Color::Red,
+                    mycustomcontrol::Commands::LightGreen => self.col = Color::Green,
+                }
+            }
+        }
+        impl OnMouseEvent for MyCustomControl {
+            fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+                if let MouseEvent::Pressed(ev) = event {
+                    if ev.button == MouseButton::Right {
+                        self.show_menu(self.h_menu, ev.x, ev.y, if self.small_menu { Some(Size::new(20, 5)) } else { None });
+                        return EventProcessStatus::Processed;
+                    }
+                }
+                EventProcessStatus::Ignored
+            }
+        }
+    }
+
+    #[Window(events: CheckBoxEvents, internal: true)]
+    pub struct MyWindow {
+        hc: Handle<mycustomcontrol::MyCustomControl>,
+        cb: Handle<CheckBox>,
+    }
+    impl MyWindow {
+        pub fn new() -> Self {
+            let mut w = MyWindow {
+                base: Window::new("Test", Layout::new("d:c,w:76,h:10"), window::Flags::None),
+                hc: Handle::None,
+                cb: Handle::None,
+            };
+            w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:50%,y:6,a:c,w:16,h:4")));
+            w.add(label!(
+                "'Press the right mouse button on the square below to show a popup menu',x:37,y:1,a:c,w:70,h:1"
+            ));
+            w.cb = w.add(checkbox!("'&Limit the meniu size to 3 items',x:2,y:2,w:30,checked:false"));
+
+            w
+        }
+    }
+    impl CheckBoxEvents for MyWindow {
+        fn on_status_changed(&mut self, handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
+            if handle == self.cb {
+                let h = self.hc;
+                if let Some(obj) = self.get_control_mut(h) {
+                    obj.enable_small_menu(checked);
+                }
+                return EventProcessStatus::Processed;
+            }
+            return EventProcessStatus::Ignored;
+        }
+    }
+    let script = "
+            Paint.Enable(false)
+            Paint('initial_state')
+            CheckHash(0xca08a561329e08e0)
+            Mouse.Click(39,13,right)
+            Paint('popup menu on top')
+            CheckHash(0xBC698D1FFF6C047C)
+            Key.Pressed('G')
+            Paint('Green color selected')
+            CheckHash(0x1AECE5B91EDFACD0)
+            Mouse.Click(39,13,right)
+            Key.Pressed('M')
+            Paint('Magenta color selected')
+            CheckHash(0x60580F11EE435534)
+            Mouse.Click(39,13,right)
+            Key.Pressed(Down,3)
+            Paint('Black selected')
+            CheckHash(0x23506C27C5D8377F)
+            Key.Pressed(Enter)
+            Paint('Black color selected')
+            CheckHash(0x6D59577FB15D2468)
+            Mouse.Click(39,13,right)
+            Key.Pressed(Down,5)
+            Paint('Magenta selected')
+            CheckHash(0x360C3880A88E84EB)
+            Key.Pressed(Escape)
+            Paint('Normal state')
+            CheckHash(0x6D59577FB15D2468)
+
+        ";
+    let mut a = App::debug(80, 24, script).menu_bar().build().unwrap();
+    a.add_window(MyWindow::new());
+    a.run();
+}
