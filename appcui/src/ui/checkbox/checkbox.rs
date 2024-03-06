@@ -14,7 +14,7 @@ impl CheckBox {
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),
-            caption: Caption::new(caption, true),
+            caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
             checked,
         };
         cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
@@ -31,7 +31,7 @@ impl CheckBox {
         self.checked = checked;
     }
     pub fn set_caption(&mut self, caption: &str) {
-        self.caption.set_text(caption, true);
+        self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
         let hotkey = self.caption.get_hotkey();
         self.set_hotkey(hotkey);
     }

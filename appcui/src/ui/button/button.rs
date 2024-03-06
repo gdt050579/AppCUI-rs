@@ -17,7 +17,7 @@ impl Button {
     pub fn new(caption: &str, layout: Layout, button_type: Type) -> Self {
         let mut but = Button {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            caption: Caption::new(caption, true),
+            caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
             button_type,
             pressed: false,
         };
@@ -40,7 +40,7 @@ impl Button {
     /// button.set_caption("three");  // caption is `three`, and no hot-key
     /// ```
     pub fn set_caption(&mut self, caption: &str) {
-        self.caption.set_text(caption, true);
+        self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
         let hotkey = self.caption.get_hotkey();
         self.set_hotkey(hotkey);
     }

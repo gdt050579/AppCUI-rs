@@ -5,6 +5,7 @@ use crate::{
     system::MenuTheme,
     ui::common::traits::CommandID,
     utils::Caption,
+    utils::ExtractHotKeyMethod,
     ui::menu::Menu,
     system::Handle, prelude::RuntimeManager
 };
@@ -27,7 +28,7 @@ impl SingleChoice {
         Self {
             enabled: true,
             command_id: u32::from(command_id),
-            caption: Caption::new(text, true),
+            caption: Caption::new(text, ExtractHotKeyMethod::Key),
             shortcut: Key::from(shortcut),
             selected: selected,
             handle: Handle::None,
@@ -36,7 +37,7 @@ impl SingleChoice {
     }
     #[inline(always)]
     pub fn set_caption(&mut self, text: &str) {
-        self.caption.set_text(text, true);
+        self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
     #[inline(always)]
     pub fn get_caption(&self) -> &str {

@@ -10,7 +10,7 @@ impl Panel {
     pub fn new(caption: &str, layout: Layout, panel_type: Type) -> Self {
         let mut panel = Panel {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
-            caption: Caption::new(caption, false),
+            caption: Caption::new(caption, ExtractHotKeyMethod::NoHotKey),
             panel_type,
         };
         match panel_type {
@@ -22,7 +22,7 @@ impl Panel {
         panel
     }
     pub fn set_title(&mut self, text: &str) {
-        self.caption.set_text(text, false);
+        self.caption.set_text(text, ExtractHotKeyMethod::NoHotKey);
     }
     #[inline(always)]
     pub fn get_title(&self) -> &str {

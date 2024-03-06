@@ -1,5 +1,3 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
-use AppCUIProcMacro::key;
 use super::{
     events::*, menu_button_state::MenuButtonState, menu_item::MenuItem, mouse_position_info::MousePositionInfo, CheckBox, Command, MenuItemWrapper,
     Separator, SingleChoice, SubMenu,
@@ -9,8 +7,10 @@ use crate::{
     input::{Key, KeyCode, MouseWheelDirection},
     system::{Handle, HandleSupport, RuntimeManager, Theme},
     ui::common::{traits::EventProcessStatus, UIElement},
-    utils::{Caption, Strategy, VectorIndex},
+    utils::{Caption, ExtractHotKeyMethod, Strategy, VectorIndex},
 };
+use std::sync::atomic::{AtomicUsize, Ordering};
+use AppCUIProcMacro::key;
 const MAX_ITEMS: usize = 128;
 static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 
@@ -33,7 +33,11 @@ pub struct Menu {
 impl Menu {
     pub fn new(name: &str) -> Self {
         Self {
-            caption: if name.len() == 0 { Caption::default() } else { Caption::new(name, true) },
+            caption: if name.len() == 0 {
+                Caption::default()
+            } else {
+                Caption::new(name, ExtractHotKeyMethod::AltPlusKey)
+            },
             items: Vec::with_capacity(4),
             current: VectorIndex::Invalid,
             width: 1,
@@ -519,7 +523,7 @@ impl Menu {
                 RuntimeManager::get().activate_opened_menu_parent();
                 return EventProcessStatus::Processed;
             }
-            key!("Right")  => {
+            key!("Right") => {
                 if self.current.in_range(self.items.len()) {
                     let item = &self.items[self.current.index()];
                     if (item.is_enabled()) && (item.is_submenu()) {
@@ -556,26 +560,6 @@ impl Menu {
             // can not display if terminal is less than 5 x 5
             return false;
         }
-        /*
-                void MenuContext::Show(
-              Controls::Menu* me, Reference<Controls::Control> relativeControl, int x, int y, const Graphics::Size& maxSize)
-        {
-            // compute abosolute position
-            while (relativeControl.IsValid())
-            {
-                x += relativeControl->GetX();
-                y += relativeControl->GetY();
-                // move to parent
-                relativeControl = relativeControl->GetParent();
-                // add parent margins
-                if (relativeControl.IsValid())
-                {
-                    x += ((ControlContext*) relativeControl->Context)->Margins.Left;
-                    y += ((ControlContext*) relativeControl->Context)->Margins.Top;
-                }
-            }
-            */
-
         // compute best width
         let mut max_width_left = 0usize;
         let mut max_hot_key_width = 0usize;

@@ -1,5 +1,13 @@
 use crate::input::*;
 
+#[repr(u8)]
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub(crate) enum ExtractHotKeyMethod {
+    NoHotKey,
+    Key,
+    AltPlusKey,
+}
+
 #[derive(Clone)]
 pub(crate) struct Caption {
     text: String,
@@ -8,18 +16,18 @@ pub(crate) struct Caption {
     hotkey: Key,
 }
 impl Caption {
-    pub(crate) fn new(text: &str, process_hotkey: bool) -> Self {
+    pub(crate) fn new(text: &str, extract_hotkey_method: ExtractHotKeyMethod) -> Self {
         let mut s = Caption {
             text: String::with_capacity(text.len() + 16),
             chars_count: 0,
             hotkey_pos: 0,
             hotkey: Key::default(),
         };
-        s.set_text(text, process_hotkey);
+        s.set_text(text, extract_hotkey_method);
         s
     }
-    pub(crate) fn set_text(&mut self, text: &str, process_hotkey: bool) {
-        if (process_hotkey) && (text.len() > 0) {
+    pub(crate) fn set_text(&mut self, text: &str, extract_hotkey_method: ExtractHotKeyMethod) {
+        if (extract_hotkey_method != ExtractHotKeyMethod::NoHotKey) && (text.len() > 0) {
             // search for &<char>
             let buf = text.as_bytes();
             let len = buf.len() - 1;
@@ -27,7 +35,7 @@ impl Caption {
             self.hotkey = Key::default();
             while pos < len {
                 if buf[pos] == b'&' {
-                    self.hotkey = Key::from_char(buf[pos + 1] as char, KeyModifier::Alt);
+                    self.hotkey = Key::from_char(buf[pos + 1] as char, KeyModifier::from(extract_hotkey_method));
                     if self.hotkey.code != KeyCode::None {
                         self.hotkey_pos = pos;
                         break;
@@ -83,6 +91,10 @@ impl Caption {
         self.text.clear();
         self.text.push_str(caption.text.as_str());
     }
+    #[inline(always)]
+    pub(crate) fn clear_hotkey_modifier(&mut self) {
+        self.hotkey.modifier = KeyModifier::None;
+    }
 }
 
 impl Default for Caption {
@@ -92,6 +104,16 @@ impl Default for Caption {
             chars_count: 0,
             hotkey_pos: 0,
             hotkey: Key::default(),
+        }
+    }
+}
+
+impl From<ExtractHotKeyMethod> for KeyModifier {
+    fn from(value: ExtractHotKeyMethod) -> Self {
+        match value {
+            ExtractHotKeyMethod::NoHotKey => KeyModifier::None,
+            ExtractHotKeyMethod::Key => KeyModifier::None,
+            ExtractHotKeyMethod::AltPlusKey => KeyModifier::Alt,
         }
     }
 }

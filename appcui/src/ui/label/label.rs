@@ -8,11 +8,11 @@ impl Label {
     pub fn new(caption: &str, layout: Layout) -> Self {
         Label {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
-            caption: Caption::new(caption, true),
+            caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
         }
     }
     pub fn set_caption(&mut self, text: &str) {
-        self.caption.set_text(text, false);
+        self.caption.set_text(text, ExtractHotKeyMethod::AltPlusKey);
     }
     pub fn get_caption(&self)->&str {
         self.caption.get_text()

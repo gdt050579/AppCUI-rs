@@ -6,6 +6,7 @@ use crate::{
     ui::common::traits::CommandID,
     ui::menu::Menu,
     utils::Caption,
+    utils::ExtractHotKeyMethod
 };
 
 use super::{menu_item::MenuItem, MenuItemWrapper};
@@ -28,7 +29,7 @@ impl Command {
         Self {
             enabled: true,
             command_id: u32::from(command_id),
-            caption: Caption::new(text, true),
+            caption: Caption::new(text, ExtractHotKeyMethod::Key),
             shortcut: Key::from(shortcut),
             handle: Handle::None,
             menu_handle: Handle::None,
@@ -36,7 +37,7 @@ impl Command {
     }
     #[inline(always)]
     pub fn set_caption(&mut self, text: &str) {
-        self.caption.set_text(text, true);
+        self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
     #[inline(always)]
     pub fn get_caption(&self) -> &str {

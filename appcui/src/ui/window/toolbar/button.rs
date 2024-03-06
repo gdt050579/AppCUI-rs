@@ -2,6 +2,7 @@ use crate::{
     graphics::{Surface, TextAlignament, TextFormat},
     system::{Handle, Theme},
     utils::Caption, 
+    utils::ExtractHotKeyMethod
 };
 
 use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Group};
@@ -16,13 +17,13 @@ impl Button {
     pub fn new(text: &str) -> Self {
         let mut obj = Button {
             base: ItemBase::new(true),
-            caption: Caption::new("", false),
+            caption: Caption::new("", ExtractHotKeyMethod::NoHotKey),
         };
         obj.set_caption(text);
         obj
     }
     pub fn set_caption(&mut self, text: &str) {
-        self.caption.set_text(text, true);
+        self.caption.set_text(text, ExtractHotKeyMethod::AltPlusKey);
         self.base.set_width(self.caption.get_chars_count() as u16);
         self.base.request_recompute_layout();
     }

@@ -7,6 +7,7 @@ use crate::{
     ui::common::traits::CommandID,
     ui::menu::Menu,
     utils::Caption,
+    utils::ExtractHotKeyMethod
 };
 pub struct CheckBox {
     pub(super) enabled: bool,
@@ -27,7 +28,7 @@ impl CheckBox {
         Self {
             enabled: true,
             command_id: u32::from(command_id),
-            caption: Caption::new(text, true),
+            caption: Caption::new(text, ExtractHotKeyMethod::Key),
             shortcut: Key::from(shortcut),
             checked,
             handle: Handle::None,
@@ -36,7 +37,7 @@ impl CheckBox {
     }
     #[inline(always)]
     pub fn set_caption(&mut self, text: &str) {
-        self.caption.set_text(text, true);
+        self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
     #[inline(always)]
     pub fn get_caption(&self) -> &str {

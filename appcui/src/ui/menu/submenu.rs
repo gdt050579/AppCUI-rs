@@ -2,6 +2,7 @@ use crate::{
     graphics::{Character, SpecialChar, Surface, TextFormat},
     system::{Handle, MenuTheme, RuntimeManager},
     utils::Caption,
+    utils::ExtractHotKeyMethod
 };
 
 use super::Menu;
@@ -16,8 +17,11 @@ pub struct SubMenu {
 }
 impl SubMenu {
     pub fn new(menu: Menu) -> Self {
-        let caption = menu.caption.clone();
+        let mut caption = menu.caption.clone();        
         let handle = RuntimeManager::get().get_menus().add(menu);
+        // submenu hotkey should be a letter while a menu hotkey shoult be Alt+Letter
+        // as such, we will clear the Alt if it is set up
+        caption.clear_hotkey_modifier();
         SubMenu {
             enabled: true,
             caption: caption,
@@ -28,7 +32,7 @@ impl SubMenu {
     }
     #[inline(always)]
     pub fn set_caption(&mut self, text: &str) {
-        self.caption.set_text(text, true);
+        self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
     #[inline(always)]
     pub fn get_caption(&self) -> &str {
