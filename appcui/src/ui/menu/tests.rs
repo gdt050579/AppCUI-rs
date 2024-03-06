@@ -678,3 +678,198 @@ fn check_menubar_update_multiple_menus() {
     a.add_window(w2);
     a.run();
 }
+
+#[test]
+fn check_popup_menu() {
+    pub(crate) mod mycustomcontrol {
+        use crate::prelude::*;
+
+        #[CustomControl(events = MenuEvents, overwrite = OnPaint+OnMouseEvent, commands = Red+Green+Black+Aqua+Magenta+Yellow+Blue+Gray+White+LightRed+LightGreen, internal: true)]
+        pub struct MyCustomControl {
+            col: Color,
+            h_menu: Handle<Menu>,
+            small_menu: bool,
+        }
+        impl MyCustomControl {
+            pub fn new(layout: Layout) -> Self {
+                let mut obj = Self {
+                    base: ControlBase::new(layout, true),
+                    col: Color::Red,
+                    h_menu: Handle::None,
+                    small_menu: false,
+                };
+                let m = menu!(
+                    "ColorControl,class:MyCustomControl,items=[
+                    {&Red,selected:true,cmd:Red},
+                    {&Green,selected:false,cmd:Green},
+                    {Black,selected:false,cmd:Black},
+                    {&Aqua,selected:false,cmd:Aqua},
+                    {&Magenta,selected:false,cmd:Magenta},
+                    {&Yellow,selected:false,cmd:Yellow},
+                    {&Blue,selected:false,cmd:Blue},
+                    {Gray,selected:false,cmd:Gray},
+                    {White,selected:false,cmd:White},
+                    {'Light red',selected:false,cmd:LightRed},
+                    {'Light green',selected:false,cmd:LightGreen},
+                    ]"
+                );
+                obj.h_menu = obj.register_menu(m);
+                obj
+            }
+            pub fn enable_small_menu(&mut self, value: bool) {
+                self.small_menu = value;
+            }
+        }
+        impl OnPaint for MyCustomControl {
+            fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+                surface.clear(Character::new(' ', Color::Black, self.col, CharFlags::None));
+                let sz = self.get_client_size();
+                let attr = CharAttribute::with_fore_color(Color::White);
+                let line = if self.has_focus() { LineType::Double } else { LineType::Single };
+                let r = Rect::with_size(0, 0, sz.width as u16, sz.height as u16);
+                surface.draw_rect(r, line, attr);
+            }
+        }
+        impl MenuEvents for MyCustomControl {
+            fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<menu::SingleChoice>, command: mycustomcontrol::Commands) {
+                match command {
+                    mycustomcontrol::Commands::Red => self.col = Color::DarkRed,
+                    mycustomcontrol::Commands::Green => self.col = Color::DarkGreen,
+                    mycustomcontrol::Commands::Black => self.col = Color::Black,
+                    mycustomcontrol::Commands::Aqua => self.col = Color::Aqua,
+                    mycustomcontrol::Commands::Magenta => self.col = Color::Magenta,
+                    mycustomcontrol::Commands::Yellow => self.col = Color::Yellow,
+                    mycustomcontrol::Commands::Blue => self.col = Color::Blue,
+                    mycustomcontrol::Commands::Gray => self.col = Color::Gray,
+                    mycustomcontrol::Commands::White => self.col = Color::White,
+                    mycustomcontrol::Commands::LightRed => self.col = Color::Red,
+                    mycustomcontrol::Commands::LightGreen => self.col = Color::Green,
+                }
+            }
+        }
+        impl OnMouseEvent for MyCustomControl {
+            fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+                if let MouseEvent::Pressed(ev) = event {
+                    if ev.button == MouseButton::Right {
+                        self.show_menu(self.h_menu, ev.x, ev.y, if self.small_menu { Some(Size::new(20, 5)) } else { None });
+                        return EventProcessStatus::Processed;
+                    }
+                }
+                EventProcessStatus::Ignored
+            }
+        }
+    }
+
+    #[Window(events: CheckBoxEvents, internal: true)]
+    pub struct MyWindow {
+        hc: Handle<mycustomcontrol::MyCustomControl>,
+        cb: Handle<CheckBox>,
+    }
+    impl MyWindow {
+        pub fn new() -> Self {
+            let mut w = MyWindow {
+                base: Window::new("Test", Layout::new("d:c,w:76,h:10"), window::Flags::None),
+                hc: Handle::None,
+                cb: Handle::None,
+            };
+            w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:50%,y:6,a:c,w:16,h:4")));
+            w.add(label!(
+                "'Press the right mouse button on the square below to show a popup menu',x:37,y:1,a:c,w:70,h:1"
+            ));
+            w.cb = w.add(checkbox!("'&Limit the meniu size to 3 items',x:2,y:2,w:30,checked:false"));
+
+            w
+        }
+    }
+    impl CheckBoxEvents for MyWindow {
+        fn on_status_changed(&mut self, handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
+            if handle == self.cb {
+                let h = self.hc;
+                if let Some(obj) = self.get_control_mut(h) {
+                    obj.enable_small_menu(checked);
+                }
+                return EventProcessStatus::Processed;
+            }
+            return EventProcessStatus::Ignored;
+        }
+    }
+    let script = "
+            Paint.Enable(false)
+            Paint('initial_state')
+            CheckHash(0xca08a561329e08e0)
+            Mouse.Move(39,13)
+            Mouse.Click(39,13,right)
+            Paint('popup menu on top')
+            CheckHash(0xbc698d1fff6c047c)
+            Mouse.Move(48,5)
+            Mouse.Click(48,5,left)
+            Paint('color is aqua')
+            CheckHash(0xbadca93818a37db4)
+            Mouse.Move(43,13)
+            Mouse.Click(43,13,right)
+            Paint('menu again')
+            CheckHash(0x614a550849150d1f)
+            Mouse.Move(53,8)
+            Mouse.Click(53,8,left)
+            Mouse.Move(53,7)
+            Paint('menu is blue')
+            CheckHash(0xdeb1cb68b9415d4)
+            Mouse.Move(39,7)
+            Mouse.Drag(39,7,39,2)
+            Paint('window moved on top')
+            CheckHash(0x7daeebcf9fc73b54)
+            Mouse.Move(40,8)
+            Mouse.Click(40,8,right)
+            Paint('now menu is on bottom')
+            CheckHash(0x4c2e4aa471f44b21)
+            Mouse.Move(35,8)
+            Mouse.Click(35,8,left)
+            Mouse.Move(28,8)
+            Paint('no menu showed')
+            CheckHash(0x7daeebcf9fc73b54)
+            Mouse.Move(5,5)
+            Mouse.Click(5,5,left)
+            Paint('enable small menus')
+            CheckHash(0xca41721d2facc991)
+            Mouse.Move(38,8)
+            Mouse.Click(38,8,right)
+            Paint('small menu with 3 items')
+            CheckHash(0xcd82bea014628957)
+            Mouse.Move(47,12)
+            Mouse.Click(47,12,left)
+            Paint('scroll one item')
+            CheckHash(0xae6744d7d3a78b88)
+            Mouse.Move(47,10)
+            Mouse.Click(47,10,left)
+            Paint('menu is now black')
+            CheckHash(0x496f95b6093f7b49)
+            Mouse.Move(21,5)
+            Mouse.Click(21,5,left)
+            Mouse.Move(22,5)
+            Paint('remove the limit of 3 items')
+            CheckHash(0x8c66b5179d508670)
+            Mouse.Move(40,2)
+            Mouse.Drag(40,2,40,7)
+            Mouse.Move(38,13)
+            Mouse.Click(38,13,right)
+            Mouse.Move(38,14)
+            Mouse.Click(38,14,right)
+            Mouse.Click(38,14,right)
+            Mouse.Move(35,12)
+            Mouse.Click(35,12,right)
+            Mouse.Click(35,12,right)
+            Paint('menu on top, but scrolled (up to light red)')
+            CheckHash(0x4191bdc942455569)
+            Mouse.Move(44,12)
+            Mouse.Click(44,12,left)
+            Paint('menu on top scrolled (up to light green)')
+            CheckHash(0xd8069e838766bdfb)
+            Mouse.Move(43,11)
+            Mouse.Click(43,11,left)
+            Paint('color is light green')
+            CheckHash(0x8997a3906f032270)    
+        ";
+    let mut a = App::debug(80, 24, script).menu_bar().build().unwrap();
+    a.add_window(MyWindow::new());
+    a.run();
+}
