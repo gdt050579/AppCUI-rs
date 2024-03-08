@@ -874,7 +874,6 @@ fn check_popup_menu() {
     a.run();
 }
 
-
 #[test]
 fn check_popup_menu_with_keys() {
     pub(crate) mod mycustomcontrol {
@@ -1020,6 +1019,265 @@ fn check_popup_menu_with_keys() {
 
         ";
     let mut a = App::debug(80, 24, script).menu_bar().build().unwrap();
+    a.add_window(MyWindow::new());
+    a.run();
+}
+
+#[test]
+fn check_menubar_with_keys() {
+    #[Window(events : MenuEvents, commands  : A, internal: true)]
+    struct MyWindow {
+        h_file: Handle<Menu>,
+        h_edit: Handle<Menu>,
+        h_help: Handle<Menu>,
+        lb: Handle<Label>,
+    }
+    impl MyWindow {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:40,h:8"),
+                h_file: Handle::None,
+                h_edit: Handle::None,
+                h_help: Handle::None,
+                lb: Handle::None,
+            };
+            w.lb = w.add(label!("None,d:c,w:30,h:1"));
+            // construct a popup menu
+            w.h_file = w.register_menu(menu!(
+                "&File,class: MyWindow, items=[
+                {New,cmd:A},
+                {&Save,cmd:A},
+                {'&Save As ...',cmd:A},
+                {&Open,cmd:A},
+                {-},
+                {E&xit,Alt+F4,cmd:A}
+            ]"
+            ));
+            w.h_edit = w.register_menu(menu!(
+                "&Edit,class: MyWindow, items=[
+                {&Copy,cmd:A},
+                {&Paste,cmd:A},
+                {&Cut,cmd:A},
+                {-},
+                {&Special,items=[
+                    {'Slot &1',cmd:A},
+                    {'Slot &2',cmd:A},
+                    {'Slot &3',cmd:A},
+                    {'Slot &4',cmd:A},
+                    {'Slot &5',cmd:A},
+                ]}            
+            ]"
+            ));
+            w.h_help = w.register_menu(menu!(
+                "&Help,class: MyWindow, items=[
+                {&About,cmd:A},
+                {&Update,cmd:A},
+                {-},
+                {&Tutorials,items=[
+                    {'&Usage',cmd:A},
+                    {'&Download',cmd:A},
+                    {&Time,items=[
+                        {'Day &1',cmd:A},
+                        {'Day &2',cmd:A},
+                        {'Day &3',cmd:A},
+                    ]}            
+                ]}            
+            ]"
+            ));
+            w
+        }
+    }
+    impl MenuEvents for MyWindow {
+        fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywindow::Commands) {
+            if let Some(i) = self.get_menuitem(menu, item) {
+                let s = String::from(i.get_caption());
+                let h = self.lb;
+                if let Some(l) = self.get_control_mut(h) {
+                    l.set_caption(&s);
+                }
+            }
+        }
+
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.h_file);
+            menubar.add(self.h_edit);
+            menubar.add(self.h_help);
+        }
+    }
+
+    let script = "
+            Paint.Enable(false)
+            Paint('Initial state')
+            CheckHash(0x91b83be85febb5c)
+            Paint('State_3')
+            CheckHash(0x91b83be85febb5c)
+            Key.Pressed(Alt+F)
+            Paint('State_4')
+            CheckHash(0xa918009138fe8394)
+            Key.Pressed(Right)
+            Paint('State_5')
+            CheckHash(0xd06ed5592e610e0f)
+            Key.Pressed(Right)
+            Paint('State_6')
+            CheckHash(0xa2e5920f376a7c9)
+            Key.Pressed(U)
+            Paint('State_7')
+            CheckHash(0x17a048b709c71033)
+            Key.Pressed(Alt+F)
+            Paint('State_8')
+            CheckHash(0xe284e496b7d64afb)
+            Key.Pressed(S)
+            Paint('State_9')
+            CheckHash(0x75e666eee2ec2383)
+            Key.Pressed(Alt+E)
+            Paint('State_10')
+            CheckHash(0x5bccabd112b0ed28)
+            Key.Pressed(S)
+            Paint('State_11')
+            CheckHash(0xc8c4a1989978790e)
+            Key.Pressed(Down)
+            Paint('State_12')
+            CheckHash(0xe3e988ca07ae6fe6)
+            Key.Pressed(Down)
+            Paint('State_13')
+            CheckHash(0xd2df5bfbc348f96)
+            Key.Pressed(Down)
+            Paint('State_14')
+            CheckHash(0x2d2b5de8d5a7fe6)
+            Key.Pressed(Down)
+            Paint('State_15')
+            CheckHash(0x205ef8f927624f76)
+            Key.Pressed(Down)
+            Paint('State_16')
+            CheckHash(0xce1e7f26f590f866)
+            Key.Pressed(Enter)
+            Paint('State_17')
+            CheckHash(0x7e95895334949bc7)
+            Key.Pressed(Alt+H)
+            Paint('State_18')
+            CheckHash(0xf476bd281922256a)
+            Key.Pressed(T)
+            Paint('State_19')
+            CheckHash(0xf6d7db13b0b1b332)
+            Key.Pressed(T)
+            Paint('State_20')
+            CheckHash(0xa68414070d2a191c)
+            Key.Pressed(Down)
+            Paint('State_21')
+            CheckHash(0x97b5cc6f878adc34)
+            Key.Pressed(Down)
+            Paint('State_22')
+            CheckHash(0x85047c827afb8e74)
+            Key.Pressed(Enter)
+            Paint('State_23')
+            CheckHash(0x29d76feb6df37f57)
+            Key.Pressed(Alt+F)
+            Paint('State_24')
+            CheckHash(0xd6801a161b7f144f)
+            Key.Pressed(Down)
+            Paint('State_25')
+            CheckHash(0x530cc0e8ac7b3207)
+            Key.Pressed(Down)
+            Paint('State_26')
+            CheckHash(0xad73304bd2c81b7)
+            Key.Pressed(Right)
+            Paint('State_27')
+            CheckHash(0x9de3637f03dcd744)
+            Key.Pressed(Left)
+            Paint('State_28')
+            CheckHash(0xd6801a161b7f144f)
+            Key.Pressed(Right)
+            Paint('State_29')
+            CheckHash(0x9de3637f03dcd744)
+            Key.Pressed(Down)
+            Paint('State_30')
+            CheckHash(0x73be6d2e4e3bea5c)
+            Key.Pressed(Down)
+            Paint('State_31')
+            CheckHash(0xc1dbc3b0e5ffa5c)
+            Key.Pressed(Down)
+            Paint('State_32')
+            CheckHash(0xf09bd9750d5dcdfc)
+            Key.Pressed(Down)
+            Paint('State_33')
+            CheckHash(0x37ce7965152d471c)
+            Key.Pressed(Right)
+            Paint('State_34')
+            CheckHash(0x3430b51df070dcd)
+            Key.Pressed(Down)
+            Paint('State_35')
+            CheckHash(0xe64221bacee7efe5)
+            Key.Pressed(Down)
+            Paint('State_36')
+            CheckHash(0x422121deb76b6df5)
+            Key.Pressed(Down)
+            Paint('State_37')
+            CheckHash(0x52b4ecf5493ffe5)
+            Key.Pressed(Left)
+            Paint('State_38')
+            CheckHash(0x37ce7965152d471c)
+            Key.Pressed(Left)
+            Paint('State_39')
+            CheckHash(0xd6801a161b7f144f)
+            Key.Pressed(Right)
+            Paint('State_40')
+            CheckHash(0x9de3637f03dcd744)
+            Key.Pressed(Right)
+            Paint('State_41')
+            CheckHash(0x10f873625ddc4f52)
+            Key.Pressed(T)
+            Paint('State_42')
+            CheckHash(0x8c36a2dd1f0b78a)
+            Key.Pressed(Right)
+            Paint('State_43')
+            CheckHash(0xd6801a161b7f144f)
+            Key.Pressed(Alt+H)
+            Paint('State_44')
+            CheckHash(0x10f873625ddc4f52)
+            Key.Pressed(T)
+            Paint('State_45')
+            CheckHash(0x8c36a2dd1f0b78a)
+            Key.Pressed(T)
+            Paint('State_46')
+            CheckHash(0xe9823256d89c85ec)
+            Key.Pressed(Down)
+            Paint('State_47')
+            CheckHash(0xef869c71dcb89a94)
+            Key.Pressed(Down)
+            Paint('State_48')
+            CheckHash(0xc3544620e83d04)
+            Key.Pressed(Down)
+            Paint('State_49')
+            CheckHash(0x1e7a2ed30fdad484)
+            Key.Pressed(Left)
+            Paint('State_50')
+            CheckHash(0x37ee79faf757c172)
+            Key.Pressed(Up)
+            Paint('State_51')
+            CheckHash(0x7e0dd88d668d7372)
+            Key.Pressed(Up)
+            Paint('State_52')
+            CheckHash(0x1de0a99c3bca602)
+            Key.Pressed(Left)
+            Paint('State_53')
+            CheckHash(0xd980b4cfb1a79f7a)
+            Key.Pressed(Up)
+            Paint('State_54')
+            CheckHash(0xa4ab426dd6c7a96a)
+            Key.Pressed(Up)
+            Paint('State_55')
+            CheckHash(0x5f67cd6dac41f2ba)
+            Key.Pressed(Left)
+            Paint('State_56')
+            CheckHash(0x9de3637f03dcd744)
+            Key.Pressed(P)
+            Paint('State_57')
+            CheckHash(0xf45c01a4988b0fe2)
+            Key.Pressed(Escape)
+            Paint('State_58')
+            CheckHash(0x7d77e1090489150e)
+        ";
+    let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
     a.add_window(MyWindow::new());
     a.run();
 }
