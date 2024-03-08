@@ -1,12 +1,12 @@
 use crate::{
-    ui::common::{traits::EventProcessStatus, UIElement},
     graphics::{Character, Surface, TextAlignament, TextFormat},
     input::{Key, KeyCode, KeyModifier},
-    system::{RuntimeManager, Theme, Handle},
+    system::{Handle, RuntimeManager, Theme},
+    ui::common::{traits::EventProcessStatus, UIElement},
     utils::{Strategy, VectorIndex},
 };
 
-use super::{MenuBarItem, Menu};
+use super::{Menu, MenuBarItem};
 
 pub struct MenuBar {
     items: Vec<MenuBarItem>,
@@ -25,18 +25,20 @@ impl MenuBar {
             items: Vec::with_capacity(8),
             x: 0,
             y: 0,
-            count:0,
+            count: 0,
             width,
             opened_item: VectorIndex::Invalid,
             hovered_item: VectorIndex::Invalid,
             receiver_control_handle: Handle::None,
         }
     }
-    pub (crate) fn update_positions(&mut self) {
+    pub(crate) fn update_positions(&mut self) {
         let mut x = 0;
         let mut idx = 0usize;
         for item in &mut self.items {
-            if idx>=self.count { break; }
+            if idx >= self.count {
+                break;
+            }
             item.x = x;
             x += 2 + (item.caption.get_chars_count() as i32);
             idx += 1;
@@ -50,7 +52,9 @@ impl MenuBar {
             return None;
         }
         for (index, item) in self.items.iter().enumerate() {
-            if index>=self.count { break; }
+            if index >= self.count {
+                break;
+            }
             if (x >= item.x) && (x < (item.x + 2 + (item.caption.get_chars_count() as i32))) {
                 return Some(index);
             }
@@ -68,13 +72,13 @@ impl MenuBar {
             return;
         }
         if let Some(menu) = RuntimeManager::get().get_menu(handle) {
-            if self.count<self.items.len() {
+            if self.count < self.items.len() {
                 // overwrite an existing item
                 self.items[self.count].set(handle, self.receiver_control_handle, &menu.caption);
             } else {
-                self.items.push(MenuBarItem::new(handle,self.receiver_control_handle, &menu.caption));
+                self.items.push(MenuBarItem::new(handle, self.receiver_control_handle, &menu.caption));
             }
-            self.count+=1;
+            self.count += 1;
         }
     }
 
@@ -132,12 +136,24 @@ impl MenuBar {
         }
     }
     #[inline(always)]
-    fn is_opened(&self) -> bool {
+    pub(crate) fn is_opened(&self) -> bool {
         return self.opened_item.is_valid();
     }
-    pub(crate) fn on_key_event(&mut self, key: Key) -> EventProcessStatus {
-        if self.is_opened() {
-            if (key.code == KeyCode::Left) && (key.modifier == KeyModifier::None) {
+    fn process_shortcut(&mut self, key: Key) -> bool {
+        for (index, item) in self.items.iter().enumerate() {
+            if index >= self.count {
+                break;
+            }
+            if item.caption.get_hotkey() == key {
+                self.open(VectorIndex::from(index));
+                return true;
+            }
+        }
+        return false;
+    }
+    fn process_key(&mut self, key: Key) -> EventProcessStatus {
+        match key.code {
+            KeyCode::Left => {
                 let mut idx = self.opened_item;
                 idx.sub(1, self.count, Strategy::Rotate);
                 if idx.is_valid() {
@@ -145,7 +161,7 @@ impl MenuBar {
                 }
                 return EventProcessStatus::Processed;
             }
-            if (key.code == KeyCode::Right) && (key.modifier == KeyModifier::None) {
+            KeyCode::Right => {
                 let mut idx = self.opened_item;
                 idx.add(1, self.count, Strategy::Rotate);
                 if idx.is_valid() {
@@ -153,41 +169,52 @@ impl MenuBar {
                 }
                 return EventProcessStatus::Processed;
             }
-        } else {
-            for (index, item) in self.items.iter().enumerate() {
-                if index>=self.count { break; }
-                if item.caption.get_hotkey() == key {
-                    self.open(VectorIndex::from(index));
-                    return EventProcessStatus::Processed;
-                }
+            _ => {
+                return EventProcessStatus::Ignored;
             }
         }
-        // check recursivelly if a shortcut key was not pressed
-        for _item in &self.items {
-            // if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
-            // {
-            //     Close();
-            //     return true;
-            // }
+    }
+    pub(crate) fn on_key_event(&mut self, key: Key, menu_is_opened: bool) -> EventProcessStatus {
+        if menu_is_opened {
+            if key.modifier.is_empty() {
+                return self.process_key(key);
+            }
+            if key.modifier == KeyModifier::Alt {
+                // check if a shortcut was pressed
+                if self.process_shortcut(key) {
+                    return EventProcessStatus::Processed; 
+                }
+            }
+            return EventProcessStatus::Ignored;
+        } else {
+            if key.modifier == KeyModifier::Alt {
+                // check if a shortcut was pressed
+                if self.process_shortcut(key) {
+                    return EventProcessStatus::Processed; 
+                }
+            }
+            // else check all shortcuts
+            for _item in &self.items {
+                // if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
+                // {
+                //     Close();
+                //     return true;
+                // }
+            }
+    
+            // nothing to process
+            return EventProcessStatus::Ignored;
         }
 
-        // nothing to process
-        return EventProcessStatus::Ignored;
     }
 
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
-        surface.fill_horizontal_line_with_size(
-            self.x,
-            self.y,
-            self.width,
-            Character::with_attributes(' ', theme.menu.text.normal),
-        );
-        let mut format =
-            TextFormat::single_line(0, self.y, theme.menu.text.normal, TextAlignament::Left);
+        surface.fill_horizontal_line_with_size(self.x, self.y, self.width, Character::with_attributes(' ', theme.menu.text.normal));
+        let mut format = TextFormat::single_line(0, self.y, theme.menu.text.normal, TextAlignament::Left);
         let open_idx = self.opened_item.index();
         let hover_idx = self.hovered_item.index();
         for (index, item) in self.items.iter().enumerate() {
-            if index>=self.count {
+            if index >= self.count {
                 break;
             }
             format.x = self.x + item.x + 1;

@@ -172,6 +172,7 @@ impl RuntimeManager {
         if !self.opened_menu_handle.is_none() {
             self.opened_menu_handle = Handle::None;
             self.repaint = true;
+            // close menu bar (in case the opened menu was part of the menubar)
             if let Some(menubar) = self.menubar.as_mut() {
                 menubar.close();
             }
@@ -938,9 +939,19 @@ impl KeyboardMethods for RuntimeManager {
     fn process_keypressed_event(&mut self, event: KeyPressedEvent) {
         // 1. check for a menu on_key_event
         if let Some(menu) = self.get_opened_menu() {
+            // 1.1. check current menu open opened key process
             if menu.on_key_pressed(event.key) == EventProcessStatus::Processed {
                 self.repaint = true;
                 return;
+            }
+            // 1.2. if menubar is opened (e.g. the current menu is part of the menu bar )
+            if let Some(menubar) = self.menubar.as_mut() {
+                if menubar.is_opened() {
+                    if menubar.on_key_event(event.key, true) == EventProcessStatus::Processed {
+                        self.repaint = true;
+                        return;
+                    }
+                }
             }
         }
         // 2. check controls
@@ -955,7 +966,7 @@ impl KeyboardMethods for RuntimeManager {
         }
         // 4. check the menubar
         if let Some(menubar) = self.menubar.as_mut() {
-            if menubar.on_key_event(event.key) == EventProcessStatus::Processed {
+            if menubar.on_key_event(event.key, false) == EventProcessStatus::Processed {
                 self.repaint = true;
                 return;
             }
