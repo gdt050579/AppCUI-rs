@@ -132,10 +132,10 @@ impl ToolBar {
     pub(crate) fn get_current_item_handle(&self) -> Handle<UIElement> {
         self.current_handle
     }
-    #[inline(always)]
-    pub(crate) fn get_item(&self, handle: Handle<UIElement>) -> Option<&ToolBarItem> {
-        self.items.get(handle.cast())
-    }
+    // #[inline(always)]
+    // pub(crate) fn get_item(&self, handle: Handle<UIElement>) -> Option<&ToolBarItem> {
+    //     self.items.get(handle.cast())
+    // }
     #[inline(always)]
     pub(crate) fn get_item_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut ToolBarItem> {
         self.items.get_mut(handle.cast())

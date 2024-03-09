@@ -575,12 +575,12 @@ impl Window {
         }
         None
     }
-    pub(super) fn get_interface(&self) -> Option<&dyn Control> {
-        if let Some(control) = RuntimeManager::get().get_controls().get(self.handle.cast()) {
-            return Some(control.get_control());
-        }
-        None
-    }
+    // pub(super) fn get_interface(&self) -> Option<&dyn Control> {
+    //     if let Some(control) = RuntimeManager::get().get_controls().get(self.handle.cast()) {
+    //         return Some(control.get_control());
+    //     }
+    //     None
+    // }
 }
 
 impl OnWindowRegistered for Window {

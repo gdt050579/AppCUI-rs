@@ -470,13 +470,13 @@ impl RuntimeManager {
             self.modal_windows[self.modal_windows.len() - 1]
         }
     }
-    pub(crate) fn get_parent_handle(&self, handle: Handle<UIElement>) -> Handle<UIElement> {
-        let controls = unsafe { &mut *self.controls };
-        if let Some(ctrl) = controls.get(handle) {
-            return ctrl.get_base().parent;
-        }
-        return Handle::None;
-    }
+    // pub(crate) fn get_parent_handle(&self, handle: Handle<UIElement>) -> Handle<UIElement> {
+    //     let controls = unsafe { &mut *self.controls };
+    //     if let Some(ctrl) = controls.get(handle) {
+    //         return ctrl.get_base().parent;
+    //     }
+    //     return Handle::None;
+    // }
     pub(crate) fn get_focused_control_for_parent(&self, parent_handle: Handle<UIElement>) -> Option<Handle<UIElement>> {
         let controls = unsafe { &mut *self.controls };
         if let Some(ctrl) = controls.get(parent_handle) {
@@ -753,29 +753,29 @@ impl RuntimeManager {
         self.recompute_layout = true;
     }
 
-    fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
-        for _ in 0..depth {
-            print!(" ");
-        }
-        let base = self.get_controls().get(handle).unwrap().get_base();
-        if base.parent_index.is_valid() {
-            print!("{}. ", base.parent_index.index());
-        } else {
-            print!("?.");
-        }
-        //print!("[ID:{},Index:{}],", handle.get_id(), handle.get_index());
-        print!("  Children: {}", base.children.len());
-        if base.focused_child_index.is_valid() {
-            print!("  Idx:{}", base.focused_child_index.index());
-        } else {
-            print!("  Idx:Invalid");
-        }
-        print!("  Focus:{}", base.has_focus());
-        println!("");
-        for handle in base.children.iter() {
-            self.debug_print(*handle, depth + 2);
-        }
-    }
+    // fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
+    //     for _ in 0..depth {
+    //         print!(" ");
+    //     }
+    //     let base = self.get_controls().get(handle).unwrap().get_base();
+    //     if base.parent_index.is_valid() {
+    //         print!("{}. ", base.parent_index.index());
+    //     } else {
+    //         print!("?.");
+    //     }
+    //     //print!("[ID:{},Index:{}],", handle.get_id(), handle.get_index());
+    //     print!("  Children: {}", base.children.len());
+    //     if base.focused_child_index.is_valid() {
+    //         print!("  Idx:{}", base.focused_child_index.index());
+    //     } else {
+    //         print!("  Idx:Invalid");
+    //     }
+    //     print!("  Focus:{}", base.has_focus());
+    //     println!("");
+    //     for handle in base.children.iter() {
+    //         self.debug_print(*handle, depth + 2);
+    //     }
+    // }
 
     pub(super) fn destroy() {
         // save all records to a file

@@ -102,6 +102,7 @@ where
         self.objects.len()
     }
 
+    #[cfg(test)]
     pub(super) fn free_spaces(&self) -> usize {
         self.free.len()
     }
