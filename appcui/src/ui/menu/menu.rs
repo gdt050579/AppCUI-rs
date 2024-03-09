@@ -198,21 +198,21 @@ impl Menu {
         self.update_first_visible_item();
     }
 
-    pub(super) fn process_shortcut(&mut self, key: Key) -> bool {
+    pub(super) fn process_shortcut(&mut self, key: Key, receiver_control_handle: Handle<UIElement>) -> bool {
         for (index, item) in self.items.iter_mut().enumerate() {
             if !item.is_enabled() {
                 continue;
             }
             if let Some(shortcut) = item.get_shortcut() {                
                 if shortcut == key {
-                    self.run_item_action(index);
+                    self.run_item_action(index, receiver_control_handle);
                     return true;
                 }
             }
             // recursively check other menus
-            if item.is_submenu() {
-                if let Some(menu) = RuntimeManager::get().get_menu(item.get_handle().cast()) {
-                    if menu.process_shortcut(key) {
+            if let Some(submenu_handle) = item.get_submenu() {
+                if let Some(menu) = RuntimeManager::get().get_menu(submenu_handle) {
+                    if menu.process_shortcut(key, receiver_control_handle) {
                         return true;
                     }
                 }
@@ -368,7 +368,7 @@ impl Menu {
         }
         // if click on a valid item, apply the action and close the menu
         if mpi.item_index.is_valid() {
-            self.run_item_action(mpi.item_index.index());
+            self.run_item_action(mpi.item_index.index() ,self.receiver_control_handle);
             return MousePressedMenuResult::Repaint;
         }
 
@@ -412,7 +412,7 @@ impl Menu {
     fn close(&mut self) {
         RuntimeManager::get().activate_opened_menu_parent();
     }
-    fn run_item_action(&mut self, index: usize) {
+    fn run_item_action(&mut self, index: usize, receiver_control_handle: Handle<UIElement>) {
         if index >= self.items.len() {
             return;
         }
@@ -425,7 +425,7 @@ impl Menu {
                     command_id: item.command_id,
                     menu: self.handle,
                     item: item.handle,
-                    control_receiver_handle: self.receiver_control_handle,
+                    control_receiver_handle: receiver_control_handle,
                 });
                 self.send_event(evnt);
             }
@@ -436,7 +436,7 @@ impl Menu {
                     menu: self.handle,
                     item: item.handle,
                     checked: item.checked,
-                    control_receiver_handle: self.receiver_control_handle,
+                    control_receiver_handle: receiver_control_handle,
                 });
                 self.send_event(evnt);
             }
@@ -445,7 +445,7 @@ impl Menu {
                     command_id: item.command_id,
                     menu: self.handle,
                     item: item.handle,
-                    control_receiver_handle: self.receiver_control_handle,
+                    control_receiver_handle: receiver_control_handle,
                 });
                 self.select_single_choice(index);
                 self.send_event(evnt);
@@ -454,7 +454,7 @@ impl Menu {
             MenuItemWrapper::SubMenu(item) => {
                 RuntimeManager::get().show_menu(
                     item.submenu_handle,
-                    self.receiver_control_handle,
+                    receiver_control_handle,
                     (self.width as i32) + self.clip.left,
                     self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
                     None,
@@ -470,7 +470,7 @@ impl Menu {
                 return EventProcessStatus::Processed;
             }
             key!("Enter") | key!("Space") => {
-                self.run_item_action(self.current.index());
+                self.run_item_action(self.current.index(), self.receiver_control_handle);
                 return EventProcessStatus::Processed;
             }
             key!("Escape") => {
@@ -488,7 +488,7 @@ impl Menu {
                 if self.current.in_range(self.items.len()) {
                     let item = &self.items[self.current.index()];
                     if (item.is_enabled()) && (item.is_submenu()) {
-                        self.run_item_action(self.current.index());
+                        self.run_item_action(self.current.index(), self.receiver_control_handle);
                         return EventProcessStatus::Processed;
                     }
                 }
@@ -507,7 +507,7 @@ impl Menu {
                         if hotkey == key {
                             self.current = VectorIndex::with_value(idx);
                             self.update_first_visible_item();
-                            self.run_item_action(idx);
+                            self.run_item_action(idx, self.receiver_control_handle);
                             return EventProcessStatus::Processed;
                         }
                     }

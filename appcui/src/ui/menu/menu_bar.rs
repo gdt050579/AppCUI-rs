@@ -182,7 +182,7 @@ impl MenuBar {
             if key.modifier == KeyModifier::Alt {
                 // check if a shortcut was pressed
                 if self.process_shortcut(key) {
-                    return EventProcessStatus::Processed; 
+                    return EventProcessStatus::Processed;
                 }
             }
             return EventProcessStatus::Ignored;
@@ -190,23 +190,25 @@ impl MenuBar {
             if key.modifier == KeyModifier::Alt {
                 // check if a shortcut was pressed
                 if self.process_shortcut(key) {
-                    return EventProcessStatus::Processed; 
+                    return EventProcessStatus::Processed;
                 }
             }
             // else check all shortcuts
             let menus = RuntimeManager::get().get_menus();
-            for item in &self.items {
+            for (index, item) in self.items.iter().enumerate() {
+                if index >= self.count {
+                    break;
+                }
                 if let Some(menu) = menus.get_mut(item.handle) {
-                    if menu.process_shortcut(key) {
+                    if menu.process_shortcut(key, item.receiver_control_handle) {
                         return EventProcessStatus::Processed;
                     }
                 }
             }
-    
+
             // nothing to process
             return EventProcessStatus::Ignored;
         }
-
     }
 
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
