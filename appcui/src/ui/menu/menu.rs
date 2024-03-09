@@ -198,55 +198,22 @@ impl Menu {
         self.update_first_visible_item();
     }
 
-    fn process_shortcut(&mut self, key: Key) -> bool {
+    pub(super) fn process_shortcut(&mut self, key: Key) -> bool {
         for (index, item) in self.items.iter_mut().enumerate() {
             if !item.is_enabled() {
                 continue;
             }
-            if let Some(shortcut) = item.get_shortcut() {
+            if let Some(shortcut) = item.get_shortcut() {                
                 if shortcut == key {
-                    match item {
-                        MenuItemWrapper::Command(item) => {
-                            let evnt = MenuEvent::Command(MenuCommandEvent {
-                                command_id: item.command_id,
-                                menu: self.handle,
-                                item: item.handle,
-                                control_receiver_handle: self.receiver_control_handle,
-                            });
-                            self.send_event(evnt);
-                            return true;
-                        }
-                        MenuItemWrapper::CheckBox(item) => {
-                            item.checked = !item.checked;
-                            let evnt = MenuEvent::CheckBoxStateChanged(MenuCheckBoxStateChangedEvent {
-                                command_id: item.command_id,
-                                menu: self.handle,
-                                item: item.handle,
-                                checked: item.checked,
-                                control_receiver_handle: self.receiver_control_handle,
-                            });
-                            self.send_event(evnt);
-                            return true;
-                        }
-                        MenuItemWrapper::SingleChoice(item) => {
-                            let evnt = MenuEvent::SingleChoiceSelected(MenuRadioBoxSelectedEvent {
-                                command_id: item.command_id,
-                                menu: self.handle,
-                                item: item.handle,
-                                control_receiver_handle: self.receiver_control_handle,
-                            });
-                            self.select_single_choice(index);
-                            self.send_event(evnt);
-                            return true;
-                        }
-                        MenuItemWrapper::Separator(_) => {}
-                        MenuItemWrapper::SubMenu(item) => {
-                            if let Some(submenu) = RuntimeManager::get().get_menus().get_mut(item.submenu_handle) {
-                                if submenu.process_shortcut(key) {
-                                    return true;
-                                }
-                            }
-                        }
+                    self.run_item_action(index);
+                    return true;
+                }
+            }
+            // recursively check other menus
+            if item.is_submenu() {
+                if let Some(menu) = RuntimeManager::get().get_menu(item.get_handle().cast()) {
+                    if menu.process_shortcut(key) {
+                        return true;
                     }
                 }
             }

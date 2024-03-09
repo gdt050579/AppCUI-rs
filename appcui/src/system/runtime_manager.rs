@@ -962,7 +962,10 @@ impl KeyboardMethods for RuntimeManager {
         // 3. check cmdbar
         if let Some(cmdbar) = self.commandbar.as_mut() {
             self.commandbar_event = cmdbar.get_event(event.key);
-            self.repaint |= self.commandbar_event.is_some();
+            if self.commandbar_event.is_some() {
+                self.repaint = true;
+                return;
+            }
         }
         // 4. check the menubar
         if let Some(menubar) = self.menubar.as_mut() {

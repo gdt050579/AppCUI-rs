@@ -194,12 +194,13 @@ impl MenuBar {
                 }
             }
             // else check all shortcuts
-            for _item in &self.items {
-                // if (this->Items[tr]->Mnu.ProcessShortcutKey(keyCode))
-                // {
-                //     Close();
-                //     return true;
-                // }
+            let menus = RuntimeManager::get().get_menus();
+            for item in &self.items {
+                if let Some(menu) = menus.get_mut(item.handle) {
+                    if menu.process_shortcut(key) {
+                        return EventProcessStatus::Processed;
+                    }
+                }
             }
     
             // nothing to process
