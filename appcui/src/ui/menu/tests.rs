@@ -1283,7 +1283,7 @@ fn check_menubar_with_keys() {
 }
 
 #[test]
-fn check_menubar_with_shortkeys() {
+fn check_menubar_recursive_shortcuts() {
     #[Window(events : MenuEvents, commands  : A, internal: true)]
     struct MyWindow {
         h_file: Handle<Menu>,

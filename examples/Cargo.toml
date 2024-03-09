@@ -54,3 +54,7 @@ path = "multiple_menus/main.rs"
 [[example]]
 name = "popup_menu"
 path = "popup_menu/main.rs"
+
+[[example]]
+name = "menus"
+path = "menus/main.rs"
