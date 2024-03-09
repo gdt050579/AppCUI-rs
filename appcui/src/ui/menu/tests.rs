@@ -1281,3 +1281,166 @@ fn check_menubar_with_keys() {
     a.add_window(MyWindow::new());
     a.run();
 }
+
+#[test]
+fn check_menubar_with_shortkeys() {
+    #[Window(events : MenuEvents, commands  : A, internal: true)]
+    struct MyWindow {
+        h_file: Handle<Menu>,
+        h_edit: Handle<Menu>,
+        h_help: Handle<Menu>,
+        lb: Handle<Label>,
+    }
+    impl MyWindow {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:40,h:8"),
+                h_file: Handle::None,
+                h_edit: Handle::None,
+                h_help: Handle::None,
+                lb: Handle::None,
+            };
+            w.lb = w.add(label!("None,d:c,w:30,h:1"));
+            // construct a popup menu
+            w.h_file = w.register_menu(menu!(
+                "&File,class: MyWindow, items=[
+                {New,F1,cmd:A},
+                {&Save,F2,cmd:A},
+                {'&Save As ...',Alt+F2,cmd:A},
+                {&Open,F3,cmd:A},
+                {-},
+                {E&xit,Alt+F4,cmd:A}
+            ]"
+            ));
+            w.h_edit = w.register_menu(menu!(
+                "&Edit,class: MyWindow, items=[
+                {&Copy,Ctrl+Ins,cmd:A},
+                {&Paste,Shift+Ins,cmd:A},
+                {&Cut,Ctrl+X,cmd:A},
+                {-},
+                {&Special,items=[
+                    {'Slot &1',Alt+1,cmd:A},
+                    {'Slot &2',Alt+2,cmd:A},
+                    {'Slot &3',Alt+3,cmd:A},
+                    {'Slot &4',Alt+4,cmd:A},
+                    {'Slot &5',Alt+5,cmd:A},
+                ]}            
+            ]"
+            ));
+            w.h_help = w.register_menu(menu!(
+                "&Help,class: MyWindow, items=[
+                {&About,Ctrl+Shift+A,cmd:A},
+                {&Update,F10,cmd:A},
+                {-},
+                {&Tutorials,items=[
+                    {'&Usage',Alt+U,cmd:A},
+                    {'&Download',Ctrl+D,cmd:A},
+                    {&Time,items=[
+                        {'Day &1',Ctrl+Alt+Shift+1,cmd:A},
+                        {'Day &2',Ctrl+Alt+Shift+2,cmd:A},
+                        {'Day &3',Ctrl+Alt+Shift+3,cmd:A},
+                    ]}            
+                ]}            
+            ]"
+            ));
+            w
+        }
+    }
+    impl MenuEvents for MyWindow {
+        fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywindow::Commands) {
+            if let Some(i) = self.get_menuitem(menu, item) {
+                let s = String::from(i.get_caption());
+                let h = self.lb;
+                if let Some(l) = self.get_control_mut(h) {
+                    l.set_caption(&s);
+                }
+            }
+        }
+
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.h_file);
+            menubar.add(self.h_edit);
+            menubar.add(self.h_help);
+        }
+    }
+
+    let script = "
+            Paint.Enable(false)
+            Paint('Initial State')
+            CheckHash(0x91b83be85febb5c)
+            Paint('State_3')
+            CheckHash(0x91b83be85febb5c)
+            Key.Pressed(F1)
+            Paint('State_4')
+            CheckHash(0x991cc1c2da3524e5)
+            Key.Pressed(F2)
+            Paint('State_5')
+            CheckHash(0x75e666eee2ec2383)
+            Key.Pressed(F3)
+            Paint('State_6')
+            CheckHash(0xbd478c6ec1d61d7a)
+            Key.Pressed(F10)
+            Paint('State_7')
+            CheckHash(0x17a048b709c71033)
+            Key.Pressed(Ctrl+Insert)
+            Paint('State_8')
+            CheckHash(0x6a44a1c00095e983)
+            Key.Pressed(Shift+Insert)
+            Paint('State_9')
+            CheckHash(0xf45c01a4988b0fe2)
+            Key.Pressed(Ctrl+X)
+            Paint('State_10')
+            CheckHash(0x74119be5c3c516b)
+            Key.Pressed(Alt+1)
+            Paint('State_11')
+            CheckHash(0x2ac25f636c040343)
+            Key.Pressed(Alt+2)
+            Paint('State_12')
+            CheckHash(0x1538278948c78240)
+            Key.Pressed(Alt+3)
+            Paint('State_13')
+            CheckHash(0xa5e95649068b8b0d)
+            Key.Pressed(Alt+4)
+            Paint('State_14')
+            CheckHash(0xcc5a96a3371609a2)
+            Key.Pressed(Alt+5)
+            Paint('State_15')
+            CheckHash(0x7e95895334949bc7)
+            Key.Pressed(Ctrl+Alt+Shift+1)
+            Paint('State_16')
+            CheckHash(0x58dec6ef41fcf9ec)
+            Key.Pressed(Ctrl+Alt+Shift+2)
+            Paint('State_17')
+            CheckHash(0x29d76feb6df37f57)
+            Key.Pressed(Ctrl+Alt+Shift+3)
+            Paint('State_18')
+            CheckHash(0x18e2245507c5d476)
+            Key.Pressed(Alt+D)
+            Key.Pressed(Alt+H)
+            Paint('State_19')
+            CheckHash(0x12ed0204088005fd)
+            Key.Pressed(A)
+            Paint('State_20')
+            CheckHash(0x36480d44d0d8e490)
+            Key.Pressed(F10)
+            Paint('State_21')
+            CheckHash(0x17a048b709c71033)
+            Key.Pressed(Ctrl+Alt+Shift+A)
+            Key.Pressed(Alt+G)
+            Key.Pressed(Alt+H)
+            Paint('State_22')
+            CheckHash(0x1083ad875a04b658)
+            Key.Pressed(Escape)
+            Paint('State_23')
+            CheckHash(0x17a048b709c71033)
+            Key.Pressed(Ctrl+Shift+A)
+            Paint('State_24')
+            CheckHash(0x36480d44d0d8e490)
+            Key.Pressed(Escape)
+            Paint('State_25')
+            CheckHash(0x7d77e1090489150e)    
+        ";
+    let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
+    a.add_window(MyWindow::new());
+    a.run();
+}
