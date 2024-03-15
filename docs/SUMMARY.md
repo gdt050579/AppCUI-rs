@@ -58,7 +58,7 @@
         - [Panel](chapter-3/stock-controls/panel.md)
         - [Password]()
         - [PropertyView]()
-        - [RadioBox]()
+        - [RadioBox](chapter-3/stock-controls/radiobox.md)
         - [Slider]()
         - [Splitter]() <!-- (chapter-3/stock-controls/splitter.md) --> 
         - [Tab]() <!-- (chapter-3/stock-controls/tab.md) -->
