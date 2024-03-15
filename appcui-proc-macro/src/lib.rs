@@ -78,6 +78,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
@@ -136,6 +137,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
@@ -171,6 +173,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
@@ -231,6 +234,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);

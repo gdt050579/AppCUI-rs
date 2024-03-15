@@ -1,12 +1,17 @@
 use crate::{
     graphics::{Size, Surface},
     input::{Key, MouseEvent},
-    prelude::{colorpicker::events::ColorPickerEvents, ThreeStateBoxEvents},
-    system::Handle,
-    system::Theme,
+    system::{Handle, Theme},
     ui::{
-        button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, desktop::events::DesktopEvents,
-        menu::events::GenericMenuEvents, window::events::ToolBarEvents, window::events::WindowEvents,
+        button::events::ButtonEvents, 
+        checkbox::events::CheckBoxEvents, 
+        radiobox::events::RadioBoxEvents,
+        threestatebox::events::ThreeStateBoxEvents,
+        colorpicker::events::ColorPickerEvents,
+        command_bar::events::GenericCommandBarEvents, 
+        desktop::events::DesktopEvents,
+        menu::events::GenericMenuEvents, 
+        window::events::{ToolBarEvents, WindowEvents},
     },
 };
 
@@ -82,6 +87,7 @@ pub trait Control:
     /* events from each control */
     + ButtonEvents
     + CheckBoxEvents
+    + RadioBoxEvents
     + ThreeStateBoxEvents
     + ColorPickerEvents
     + GenericCommandBarEvents

@@ -5,6 +5,7 @@ pub mod common;
 // controls
 pub mod desktop;
 pub mod checkbox;
+pub mod radiobox;
 pub mod threestatebox;
 pub mod label;
 pub mod panel;
@@ -20,6 +21,7 @@ pub mod components;
 pub use common::ControlBase;
 pub use desktop::Desktop;
 pub use checkbox::CheckBox;
+pub use radiobox::RadioBox;
 pub use threestatebox::ThreeStateBox;
 pub use label::Label;
 pub use panel::Panel;

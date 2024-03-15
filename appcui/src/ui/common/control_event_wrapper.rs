@@ -4,12 +4,15 @@ use crate::prelude::{colorpicker, threestatebox, ThreeStateBoxEvents};
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::Handle;
 use crate::ui::{
-    button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, 
+    button, button::events::ButtonEvents, 
+    checkbox, checkbox::events::CheckBoxEvents, 
+    radiobox, radiobox::events::RadioBoxEvents, 
 };
 
 pub(crate) enum ControlEventData {
     ButtonEvent(button::events::EventData),
     CheckBoxEvent(checkbox::events::EventData),
+    RadioBoxEvent(radiobox::events::EventData),
     ThreeStateBoxEvent(threestatebox::events::EventData),
     ColorPickerEvent(colorpicker::events::EventData),
 }
@@ -31,6 +34,12 @@ impl ControlEvent {
                     receiver,
                     self.emitter.cast(),
                     data.checked,
+                );
+            }
+            ControlEventData::RadioBoxEvent(data) => {
+                return RadioBoxEvents::on_selected(
+                    receiver,
+                    self.emitter.cast(),
                 );
             }
             ControlEventData::ColorPickerEvent(data) => {
