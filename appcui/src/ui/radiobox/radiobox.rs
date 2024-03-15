@@ -25,7 +25,12 @@ impl RadioBox {
     }
     #[inline(always)]
     pub fn set_selected(&mut self) {
-        //self.checked = checked;
+        if self.handle.is_none() {
+            return; 
+        }
+        if let Some(parent) = RuntimeManager::get().get_controls_mut().get(self.parent) {
+            parent.get_base().notify_children_of_selection(self.handle);
+        }
     }
     pub fn set_caption(&mut self, caption: &str) {
         self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
@@ -118,6 +123,7 @@ impl OnMouseEvent for RadioBox {
     }
 }
 impl OnSiblingSelected for RadioBox {
+    #[allow(private_interfaces)]
     fn on_sibling_selected(&mut self, handle: Handle<UIElement>) {
         self.selected = self.handle == handle;
     }

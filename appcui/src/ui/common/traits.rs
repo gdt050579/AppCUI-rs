@@ -71,7 +71,8 @@ pub trait OnWindowRegistered {
     fn on_registered(&mut self) {}
 }
 pub trait OnSiblingSelected {
-    fn on_sibling_selected(&mut self, handle: Handle<UIElement>) {}
+    #[allow(private_interfaces)]
+    fn on_sibling_selected(&mut self, _handle: Handle<UIElement>) {}
 }
 
 pub trait Control:

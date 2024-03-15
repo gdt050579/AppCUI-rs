@@ -544,6 +544,15 @@ impl ControlBase {
         RuntimeManager::get().hide_tooltip();
     }
 
+    pub(crate) fn notify_children_of_selection(&self, requester: Handle<UIElement>) {
+        let controls = RuntimeManager::get().get_controls_mut();
+        for h_child in &self.children {
+            if let Some(c) = controls.get_mut(*h_child) {
+                OnSiblingSelected::on_sibling_selected(c.get_control_mut(), requester);
+            }
+        }
+    }
+
     pub fn register_menu(&mut self, menu: Menu) -> Handle<Menu> {
         RuntimeManager::get().add_menu(menu)
     }

@@ -36,7 +36,7 @@ impl ControlEvent {
                     data.checked,
                 );
             }
-            ControlEventData::RadioBoxEvent(data) => {
+            ControlEventData::RadioBoxEvent(_) => {
                 return RadioBoxEvents::on_selected(
                     receiver,
                     self.emitter.cast(),
