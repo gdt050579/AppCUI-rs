@@ -10,5 +10,6 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [ColorPicker](stock-controls/colorpicker.md)     | <img src="stock-controls/img/colorpicker.png" width=300/>   |
 | [Label](stock-controls/label.md)                 | <img src="stock-controls/img/label.png" width=300/>         |
 | [Panel](stock-controls/panel.md)                 | <img src="stock-controls/img/panel.png" width=300/>         |
+| [RadioBox](stock-controls/radiobox.md)           | <img src="stock-controls/img/radiobox.png" width=300/>      |
 | [ThreeStateBox](stock-controls/threestatebox.md) | <img src="stock-controls/img/threestatebox.png" width=300/> |
 
