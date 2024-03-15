@@ -51,6 +51,12 @@ impl OnMouseEvent for $(STRUCT_NAME) {
 }
 ";
 
+pub(crate) static ON_SIBLING_SELECTED: &str = "
+impl OnSiblingSelected for $(STRUCT_NAME) {
+    fn on_sibling_selected(&mut self, handle: Handle<UIElement>)  { self.base.on_sibling_selected(handle); }
+}
+";
+
 pub(crate) static ON_DEFAULT_ACTION_TRAIT: &str = "
 impl OnDefaultAction for $(STRUCT_NAME) {
     fn on_default_action(&mut self){ self.base.on_default_action(); }

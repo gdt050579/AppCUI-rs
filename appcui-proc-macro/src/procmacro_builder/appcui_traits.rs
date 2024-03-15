@@ -21,16 +21,17 @@ pub(crate) enum AppCUITrait {
     OnResize = 13,
     OnFocus = 14,
     OnExpand = 15,
+    OnSiblingSelected = 16,
     // control events
-    ButtonEvents = 16,
-    CheckBoxEvents = 17,
-    WindowEvents = 18,
-    CommandBarEvents = 19,
-    MenuEvents = 20,
-    DesktopEvents = 21,
-    ToolBarEvents = 22,
-    ColorPickerEvents = 23,
-    ThreeStateBoxEvents = 24,
+    ButtonEvents = 17,
+    CheckBoxEvents = 18,
+    WindowEvents = 19,
+    CommandBarEvents = 20,
+    MenuEvents = 21,
+    DesktopEvents = 22,
+    ToolBarEvents = 23,
+    ColorPickerEvents = 24,
+    ThreeStateBoxEvents = 25,
 }
 
 #[repr(u8)]
@@ -62,6 +63,7 @@ impl AppCUITrait {
             AppCUITrait::OnResize => "OnResize",
             AppCUITrait::OnFocus => "OnFocus",
             AppCUITrait::OnExpand => "OnExpand",
+            AppCUITrait::OnSiblingSelected => "OnSiblingSelected",
             // control events
             AppCUITrait::ButtonEvents => "ButtonEvents",
             AppCUITrait::CheckBoxEvents => "CheckBoxEvents",
@@ -94,6 +96,7 @@ impl AppCUITrait {
             AppCUITrait::OnResize => TraitType::RawEvent,
             AppCUITrait::OnFocus => TraitType::RawEvent,
             AppCUITrait::OnExpand => TraitType::RawEvent,
+            AppCUITrait::OnSiblingSelected => TraitType::RawEvent,
             // control events
             AppCUITrait::ButtonEvents => TraitType::ControlEvent,
             AppCUITrait::CheckBoxEvents => TraitType::ControlEvent,
@@ -126,6 +129,7 @@ impl AppCUITrait {
             AppCUITrait::OnResize => templates::ON_RESIZE_TRAIT,
             AppCUITrait::OnFocus => templates::ON_FOCUS_TRAIT,
             AppCUITrait::OnExpand => templates::ON_EXPAND_TRAIT,
+            AppCUITrait::OnSiblingSelected => templates::ON_SIBLING_SELECTED,
             // control events
             AppCUITrait::ButtonEvents => "",
             AppCUITrait::CheckBoxEvents => "",
@@ -158,6 +162,7 @@ impl AppCUITrait {
             AppCUITrait::OnResize => "impl OnResize for $(STRUCT_NAME) {}",
             AppCUITrait::OnFocus => "impl OnFocus for $(STRUCT_NAME) {}",
             AppCUITrait::OnExpand => "impl OnExpand for $(STRUCT_NAME) {}",
+            AppCUITrait::OnSiblingSelected => "impl OnSiblingSelected for $(STRUCT_NAME) {}",
             // control events
             AppCUITrait::ButtonEvents => "impl ButtonEvents for $(STRUCT_NAME) {}",
             AppCUITrait::CheckBoxEvents => "impl CheckBoxEvents for $(STRUCT_NAME) {}",
@@ -180,6 +185,7 @@ impl AppCUITrait {
             "OnResize" => Some(AppCUITrait::OnResize),
             "OnFocus" => Some(AppCUITrait::OnFocus),
             "OnExpand" => Some(AppCUITrait::OnExpand),
+            "OnSiblingSelected" => Some(AppCUITrait::OnSiblingSelected),
             // control events
             "ButtonEvents" | "Button" => Some(AppCUITrait::ButtonEvents),
             "CheckBoxEvents" | "CheckBox" => Some(AppCUITrait::CheckBoxEvents),
@@ -213,16 +219,17 @@ impl AppCUITrait {
             13 => Some(AppCUITrait::OnResize),
             14 => Some(AppCUITrait::OnFocus),
             15 => Some(AppCUITrait::OnExpand),
+            16 => Some(AppCUITrait::OnSiblingSelected),
             // control events
-            16 => Some(AppCUITrait::ButtonEvents),
-            17 => Some(AppCUITrait::CheckBoxEvents),
-            18 => Some(AppCUITrait::WindowEvents),
-            19 => Some(AppCUITrait::CommandBarEvents),
-            20 => Some(AppCUITrait::MenuEvents),
-            21 => Some(AppCUITrait::DesktopEvents),
-            22 => Some(AppCUITrait::ToolBarEvents),
-            23 => Some(AppCUITrait::ColorPickerEvents),
-            24 => Some(AppCUITrait::ThreeStateBoxEvents),
+            17 => Some(AppCUITrait::ButtonEvents),
+            18 => Some(AppCUITrait::CheckBoxEvents),
+            19 => Some(AppCUITrait::WindowEvents),
+            20 => Some(AppCUITrait::CommandBarEvents),
+            21 => Some(AppCUITrait::MenuEvents),
+            22 => Some(AppCUITrait::DesktopEvents),
+            23 => Some(AppCUITrait::ToolBarEvents),
+            24 => Some(AppCUITrait::ColorPickerEvents),
+            25 => Some(AppCUITrait::ThreeStateBoxEvents),
             _ => None,
         };
         if result.is_none() {

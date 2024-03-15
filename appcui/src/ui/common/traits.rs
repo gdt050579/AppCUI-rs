@@ -1,17 +1,16 @@
 use crate::{
     graphics::{Size, Surface},
     input::{Key, MouseEvent},
+    prelude::{colorpicker::events::ColorPickerEvents, ThreeStateBoxEvents},
+    system::Handle,
     system::Theme,
     ui::{
-        button::events::ButtonEvents, 
-        checkbox::events::CheckBoxEvents, 
-        command_bar::events::GenericCommandBarEvents, 
-        desktop::events::DesktopEvents,
-        menu::events::GenericMenuEvents, 
-        window::events::WindowEvents,
-        window::events::ToolBarEvents,
-    }, prelude::{colorpicker::events::ColorPickerEvents, ThreeStateBoxEvents}
+        button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, desktop::events::DesktopEvents,
+        menu::events::GenericMenuEvents, window::events::ToolBarEvents, window::events::WindowEvents,
+    },
 };
+
+use super::UIElement;
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
@@ -26,10 +25,10 @@ pub enum ActionRequest {
     Deny,
 }
 #[repr(u8)]
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub enum ExpandedDirection {
     OnTop,
-    OnBottom
+    OnBottom,
 }
 
 pub trait OnPaint {
@@ -66,6 +65,9 @@ pub trait OnExpand {
 pub trait OnWindowRegistered {
     fn on_registered(&mut self) {}
 }
+pub trait OnSiblingSelected {
+    fn on_sibling_selected(&mut self, handle: Handle<UIElement>) {}
+}
 
 pub trait Control:
     OnPaint
@@ -76,6 +78,7 @@ pub trait Control:
     + OnFocus
     + OnExpand
     + OnWindowRegistered
+    + OnSiblingSelected
     /* events from each control */
     + ButtonEvents
     + CheckBoxEvents
