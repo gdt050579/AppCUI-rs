@@ -203,7 +203,7 @@ impl Menu {
             if !item.is_enabled() {
                 continue;
             }
-            if let Some(shortcut) = item.get_shortcut() {                
+            if let Some(shortcut) = item.shortcut() {                
                 if shortcut == key {
                     self.run_item_action(index, receiver_control_handle);
                     return true;
@@ -532,7 +532,7 @@ impl Menu {
             if item.is_checkable() {
                 w_left += 2;
             }
-            if let Some(shortcut) = item.get_shortcut() {
+            if let Some(shortcut) = item.shortcut() {
                 w_right += shortcut.code.get_name().len();
                 w_right += shortcut.modifier.get_name().len();
                 if w_right > 0 {

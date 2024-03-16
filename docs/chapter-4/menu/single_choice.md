@@ -59,7 +59,7 @@ The following methods are availble for a `menu::SingleChoice` object:
 | `set_selected()`    | Selects the current item                                                                                                                                                                                                                                              |
 | `is_enabled()`      | `true` if the item is enables, `false` otherwise                                                                                                                                                                                                                      |
 | `set_shortcut(...)` | Sets a new shortcut for the current item                                                                                                                                                                                                                              |
-| `get_shortcut()`    | Returns the shortcut for the current item                                                                                                                                                                                                                             |
+| `shortcut()`        | Returns the shortcut for the current item                                                                                                                                                                                                                             |
 
 ## Groups
 

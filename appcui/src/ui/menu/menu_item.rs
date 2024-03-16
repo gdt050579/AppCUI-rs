@@ -76,7 +76,7 @@ impl MenuItemWrapper {
         }
     }
     #[inline(always)]
-    pub(super) fn get_shortcut(&self) -> Option<Key> {
+    pub(super) fn shortcut(&self) -> Option<Key> {
         let key = match self {
             MenuItemWrapper::Command(item) => item.shortcut,
             MenuItemWrapper::CheckBox(item) => item.shortcut,

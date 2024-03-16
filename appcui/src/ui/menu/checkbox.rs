@@ -60,7 +60,7 @@ impl CheckBox {
         self.enabled = value;
     }
     #[inline(always)]
-    pub fn get_shortcut(&self) -> Key {
+    pub fn shortcut(&self) -> Key {
         self.shortcut
     }
     #[inline(always)]

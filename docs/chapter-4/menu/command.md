@@ -56,7 +56,7 @@ The following methods are availble for a `menu::Command` object:
 | `set_enables(...)`  | Enables or disables current item                                                                                                                                                                                                                                      |
 | `is_enabled()`      | `true` if the item is enables, `false` otherwise                                                                                                                                                                                                                      |
 | `set_shortcut(...)` | Sets a new shortcut for the current item                                                                                                                                                                                                                              |
-| `get_shortcut()`    | Returns the shortcut for the current item                                                                                                                                                                                                                             |
+| `shortcut()`        | Returns the shortcut for the current item                                                                                                                                                                                                                             |
 
 ## Example
 
