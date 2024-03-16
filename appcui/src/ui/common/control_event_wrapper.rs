@@ -1,12 +1,11 @@
 use super::traits::{Control, EventProcessStatus};
 use super::UIElement;
-use crate::prelude::{colorpicker, threestatebox, ThreeStateBoxEvents};
 use crate::prelude::colorpicker::events::ColorPickerEvents;
+use crate::prelude::{colorpicker, threestatebox, ThreeStateBoxEvents};
 use crate::system::Handle;
 use crate::ui::{
-    button, button::events::ButtonEvents, 
-    checkbox, checkbox::events::CheckBoxEvents, 
-    radiobox, radiobox::events::RadioBoxEvents, 
+    button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
+    radiobox::events::RadioBoxEvents,
 };
 
 pub(crate) enum ControlEventData {
@@ -15,6 +14,7 @@ pub(crate) enum ControlEventData {
     RadioBoxEvent(radiobox::events::EventData),
     ThreeStateBoxEvent(threestatebox::events::EventData),
     ColorPickerEvent(colorpicker::events::EventData),
+    PasswordEvent(password::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -30,31 +30,23 @@ impl ControlEvent {
                 return ButtonEvents::on_pressed(receiver, self.emitter.cast());
             }
             ControlEventData::CheckBoxEvent(data) => {
-                return CheckBoxEvents::on_status_changed(
-                    receiver,
-                    self.emitter.cast(),
-                    data.checked,
-                );
+                return CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked);
             }
             ControlEventData::RadioBoxEvent(_) => {
-                return RadioBoxEvents::on_selected(
-                    receiver,
-                    self.emitter.cast(),
-                );
+                return RadioBoxEvents::on_selected(receiver, self.emitter.cast());
             }
             ControlEventData::ColorPickerEvent(data) => {
-                return ColorPickerEvents::on_color_changed(
-                    receiver,
-                    self.emitter.cast(),
-                    data.color,
-                );
+                return ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color);
             }
             ControlEventData::ThreeStateBoxEvent(data) => {
-                return ThreeStateBoxEvents::on_status_changed(
-                    receiver,
-                    self.emitter.cast(),
-                    data.state,
-                );
+                return ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state);
+            }
+            ControlEventData::PasswordEvent(data) => {
+                if data.accept {
+                    return PasswordEvents::on_accept(receiver, self.emitter.cast());
+                } else {
+                    return PasswordEvents::on_cancel(receiver, self.emitter.cast());
+                }
             }
         }
     }

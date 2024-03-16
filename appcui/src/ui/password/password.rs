@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::ui::password::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Password {
@@ -72,9 +73,23 @@ impl OnKeyPressed for Password {
             key!("Back") => {
                 self.pass.pop();
                 return EventProcessStatus::Processed;
-            },
-            key!("Enter") => {},
-            key!("Esc") => {},
+            }
+            key!("Enter") => {
+                self.raise_event(ControlEvent {
+                    emitter: self.handle,
+                    receiver: self.event_processor,
+                    data: ControlEventData::PasswordEvent(EventData { accept: true }),
+                });
+                return EventProcessStatus::Processed;
+            }
+            key!("Esc") => {
+                self.raise_event(ControlEvent {
+                    emitter: self.handle,
+                    receiver: self.event_processor,
+                    data: ControlEventData::PasswordEvent(EventData { accept: false }),
+                });
+                return EventProcessStatus::Processed;
+            }
             _ => {}
         }
         EventProcessStatus::Ignored
@@ -86,7 +101,7 @@ impl OnMouseEvent for Password {
             MouseEvent::Enter => {
                 self.show_tooltip("Click and hold to see the password");
                 return EventProcessStatus::Processed;
-            },
+            }
             MouseEvent::Leave => {
                 self.hide_tooltip();
                 return EventProcessStatus::Processed;
@@ -95,11 +110,11 @@ impl OnMouseEvent for Password {
             MouseEvent::Pressed(_) => {
                 self.visible = true;
                 return EventProcessStatus::Processed;
-            },
+            }
             MouseEvent::Released(_) => {
                 self.visible = false;
                 return EventProcessStatus::Processed;
-            },
+            }
             MouseEvent::DoubleClick(_) => return EventProcessStatus::Ignored,
             MouseEvent::Drag(_) => return EventProcessStatus::Ignored,
             MouseEvent::Wheel(_) => return EventProcessStatus::Ignored,
