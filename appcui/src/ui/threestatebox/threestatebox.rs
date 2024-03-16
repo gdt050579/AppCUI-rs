@@ -20,7 +20,7 @@ impl ThreeStateBox {
             state,
         };
         cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
-        let hotkey = cb.caption.get_hotkey();
+        let hotkey = cb.caption.hotkey();
         cb.set_hotkey(hotkey);
         cb
     }
@@ -41,14 +41,14 @@ impl ThreeStateBox {
     #[inline]
     pub fn set_caption(&mut self, caption: &str) {
         self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
-        let hotkey = self.caption.get_hotkey();
+        let hotkey = self.caption.hotkey();
         self.set_hotkey(hotkey);
     }
 
     /// Returns the caption of the threestatebox.
     #[inline]
     pub fn caption(&self) -> &str {
-        self.caption.get_text()
+        self.caption.text()
     }
 }
 impl OnPaint for ThreeStateBox {
@@ -72,11 +72,11 @@ impl OnPaint for ThreeStateBox {
                 format.width = Some(sz.width as u16 - 4);
             }
             if self.caption.has_hotkey() {
-                format.hotkey_pos = self.caption.get_hotkey_pos();
+                format.hotkey_pos = self.caption.hotkey_pos();
                 format.hotkey_attr = Some(col_hot_key);
             }
             format.chars_count = Some(self.caption.get_chars_count() as u16);
-            surface.write_text(&self.caption.get_text(), &format);
+            surface.write_text(&self.caption.text(), &format);
         }
 
         match self.state {
@@ -132,7 +132,7 @@ impl OnMouseEvent for ThreeStateBox {
         match event {
             MouseEvent::Enter => {
                 if self.caption.get_chars_count() > (self.size().width - 4) as usize {
-                    self.show_tooltip(self.caption.get_text());
+                    self.show_tooltip(self.caption.text());
                 }
                 EventProcessStatus::Processed
             }

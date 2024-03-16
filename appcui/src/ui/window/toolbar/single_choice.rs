@@ -36,7 +36,7 @@ impl SingleChoice {
     }
     #[inline(always)]
     pub fn get_content(&self) -> &str {
-        &self.caption.get_text()
+        &self.caption.text()
     }
     #[inline(always)]
     pub fn is_selected(&self) -> bool {
@@ -68,11 +68,11 @@ impl SingleChoice {
             TextAlignament::Left,
         );
         format.width = Some(self.caption.get_chars_count() as u16);
-        format.hotkey_pos = self.caption.get_hotkey_pos();
+        format.hotkey_pos = self.caption.hotkey_pos();
         if self.caption.has_hotkey() {
             format.hotkey_attr = Some(st.get_hotkey_attr(theme));
         }
-        surface.write_text(self.caption.get_text(), &format);
+        surface.write_text(self.caption.text(), &format);
     }
     add_toolbaritem_basic_methods!();
 }

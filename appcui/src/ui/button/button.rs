@@ -27,7 +27,7 @@ impl Button {
         } else {
             but.set_size_bounds(4, 2, u16::MAX, 2);
         }
-        let hotkey = but.caption.get_hotkey();
+        let hotkey = but.caption.hotkey();
         but.set_hotkey(hotkey);
         but
     }
@@ -41,12 +41,12 @@ impl Button {
     /// ```
     pub fn set_caption(&mut self, caption: &str) {
         self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
-        let hotkey = self.caption.get_hotkey();
+        let hotkey = self.caption.hotkey();
         self.set_hotkey(hotkey);
     }
     /// Returns the button caption.
     pub fn caption(&self) -> &str {
-        self.caption.get_text()
+        self.caption.text()
     }
 }
 impl OnDefaultAction for Button {
@@ -90,19 +90,19 @@ impl OnPaint for Button {
                 _ if self.is_mouse_over() => theme.button.hotkey.hovered,
                 _ => theme.button.hotkey.normal,
             });
-            format.hotkey_pos = self.caption.get_hotkey_pos();
+            format.hotkey_pos = self.caption.hotkey_pos();
         }
         if flat {
             surface.clear(Character::with_attributes(' ', col_text));
-            surface.write_text(self.caption.get_text(), &format);
+            surface.write_text(self.caption.text(), &format);
         } else {
             if self.pressed {
                 surface.fill_horizontal_line_with_size(1, 0, w, Character::with_attributes(' ', col_text));
                 format.x += 1;
-                surface.write_text(self.caption.get_text(), &format);
+                surface.write_text(self.caption.text(), &format);
             } else {
                 surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
-                surface.write_text(self.caption.get_text(), &format);
+                surface.write_text(self.caption.text(), &format);
                 surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
                 surface.write_char(
                     w as i32,
@@ -118,7 +118,7 @@ impl OnMouseEvent for Button {
         match event {
             MouseEvent::Enter => {
                 if self.caption.get_chars_count() > (self.size().width - 2) as usize {
-                    self.show_tooltip(self.caption.get_text());
+                    self.show_tooltip(self.caption.text());
                 }
                 EventProcessStatus::Processed
             }

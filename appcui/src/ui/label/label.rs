@@ -16,7 +16,7 @@ impl Label {
     }
     #[inline(always)]
     pub fn caption(&self)->&str {
-        self.caption.get_text()
+        self.caption.text()
     }
 }
 impl OnPaint for Label {
@@ -35,7 +35,7 @@ impl OnPaint for Label {
         } else {
             theme.text.inactive
         };
-        format.hotkey_pos = self.caption.get_hotkey_pos();
+        format.hotkey_pos = self.caption.hotkey_pos();
         if self.caption.has_hotkey() {
             format.hotkey_attr = Some(if self.is_enabled() {
                 theme.text.hot_key
@@ -48,6 +48,6 @@ impl OnPaint for Label {
             format.width = Some(sz.width as u16);
         }
         format.chars_count = Some(self.caption.get_chars_count() as u16);
-        surface.write_text(self.caption.get_text(), &format);
+        surface.write_text(self.caption.text(), &format);
     }
 }

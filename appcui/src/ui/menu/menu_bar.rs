@@ -144,7 +144,7 @@ impl MenuBar {
             if index >= self.count {
                 break;
             }
-            if item.caption.get_hotkey() == key {
+            if item.caption.hotkey() == key {
                 self.open(VectorIndex::from(index));
                 return true;
             }
@@ -221,7 +221,7 @@ impl MenuBar {
                 break;
             }
             format.x = self.x + item.x + 1;
-            format.hotkey_pos = item.caption.get_hotkey_pos();
+            format.hotkey_pos = item.caption.hotkey_pos();
             format.chars_count = Some(item.caption.get_chars_count() as u16);
             format.char_attr = match () {
                 _ if index == open_idx => theme.menu.text.pressed_or_selectd,
@@ -243,7 +243,7 @@ impl MenuBar {
                     Character::with_attributes(' ', format.char_attr),
                 );
             }
-            surface.write_text(item.caption.get_text(), &format);
+            surface.write_text(item.caption.text(), &format);
         }
     }
 }

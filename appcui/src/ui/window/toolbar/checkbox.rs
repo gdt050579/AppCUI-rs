@@ -32,7 +32,7 @@ impl CheckBox {
     }
     #[inline(always)]
     pub fn get_content(&self) -> &str {
-        &self.caption.get_text()
+        &self.caption.text()
     }
     pub fn set_checked(&mut self, checked: bool) {
         self.checked = checked;
@@ -52,12 +52,12 @@ impl CheckBox {
         let y = self.base.get_y();
         let mut format = TextFormat::single_line(x + 2, y, text_attr, TextAlignament::Left);
         format.width = Some(self.caption.get_chars_count() as u16);
-        format.hotkey_pos = self.caption.get_hotkey_pos();
+        format.hotkey_pos = self.caption.hotkey_pos();
         if self.caption.has_hotkey() {
             format.hotkey_attr = Some(st.get_hotkey_attr(theme));
         }
         surface.write_string(x, y, "  ", text_attr, false);
-        surface.write_text(self.caption.get_text(), &format);
+        surface.write_text(self.caption.text(), &format);
         if self.checked {
             surface.write_char(
                 x,

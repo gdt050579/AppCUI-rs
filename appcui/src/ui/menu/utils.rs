@@ -85,7 +85,7 @@ pub(super) fn update_format_with_caption(
     color: &MenuTheme,
 ) {
     format.char_attr = get_text_attr(enabled, current_item, color);
-    format.hotkey_pos = caption.get_hotkey_pos();
+    format.hotkey_pos = caption.hotkey_pos();
     if caption.has_hotkey() {
         format.hotkey_attr = Some(get_hotkey_attr(enabled, current_item, color));
     }

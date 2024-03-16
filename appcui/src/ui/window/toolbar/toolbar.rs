@@ -311,7 +311,7 @@ impl ToolBar {
         // paint bar items
         for index in 0..count {
             if let Some(item) = self.items.get_element(index) {
-                if item.get_hotkey() == hotkey {
+                if item.hotkey() == hotkey {
                     return Some(item.get_base().get_handle());
                 }
             }

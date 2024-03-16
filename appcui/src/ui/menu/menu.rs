@@ -503,7 +503,7 @@ impl Menu {
             while idx < count {
                 let item = &self.items[idx];
                 if item.is_enabled() {
-                    if let Some(hotkey) = item.get_hotkey() {
+                    if let Some(hotkey) = item.hotkey() {
                         if hotkey == key {
                             self.current = VectorIndex::with_value(idx);
                             self.update_first_visible_item();

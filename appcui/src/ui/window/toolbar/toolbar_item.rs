@@ -76,7 +76,7 @@ impl ToolBarItem {
             }
         }
     }
-    pub(super) fn get_hotkey(&self) -> Key {
+    pub(super) fn hotkey(&self) -> Key {
         match self {
             ToolBarItem::Label(_) => Key::None,
             ToolBarItem::HotKey(_) => Key::None,
@@ -84,9 +84,9 @@ impl ToolBarItem {
             ToolBarItem::CloseButton(_) => Key::None,
             ToolBarItem::MaximizeRestoreButton(_) => Key::None,
             ToolBarItem::ResizeCorner(_) => Key::None,
-            ToolBarItem::Button(item) => item.caption.get_hotkey(),
-            ToolBarItem::CheckBox(item) => item.caption.get_hotkey(),
-            ToolBarItem::SingleChoice(item) => item.caption.get_hotkey(),
+            ToolBarItem::Button(item) => item.caption.hotkey(),
+            ToolBarItem::CheckBox(item) => item.caption.hotkey(),
+            ToolBarItem::SingleChoice(item) => item.caption.hotkey(),
         }
     }
     #[inline(always)]

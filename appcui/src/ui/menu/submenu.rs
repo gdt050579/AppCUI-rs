@@ -36,7 +36,7 @@ impl SubMenu {
     }
     #[inline(always)]
     pub fn caption(&self) -> &str {
-        self.caption.get_text()
+        self.caption.text()
     }
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
@@ -54,7 +54,7 @@ impl SubMenu {
             surface.fill_horizontal_line_with_size(1, format.y, width as u32, Character::with_attributes(' ', color.text.hovered));
         }
         format.x = 2;
-        surface.write_text(self.caption.get_text(), format);
+        surface.write_text(self.caption.text(), format);
         surface.write_char(
             width as i32,
             format.y,

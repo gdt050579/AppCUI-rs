@@ -29,7 +29,7 @@ impl Button {
     }
     #[inline(always)]
     pub fn get_content(&self) -> &str {
-        &self.caption.get_text()
+        &self.caption.text()
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
@@ -40,11 +40,11 @@ impl Button {
             TextAlignament::Left,
         );
         format.width = Some(self.caption.get_chars_count() as u16);
-        format.hotkey_pos = self.caption.get_hotkey_pos();
+        format.hotkey_pos = self.caption.hotkey_pos();
         if self.caption.has_hotkey() {
             format.hotkey_attr = Some(st.get_hotkey_attr(theme));
         }
-        surface.write_text(self.caption.get_text(), &format);
+        surface.write_text(self.caption.text(), &format);
     }
     add_toolbaritem_basic_methods!();
 }

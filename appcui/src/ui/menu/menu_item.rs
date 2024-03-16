@@ -91,13 +91,13 @@ impl MenuItemWrapper {
         }
     }
     #[inline(always)]
-    pub(super) fn get_hotkey(&self) -> Option<Key> {
+    pub(super) fn hotkey(&self) -> Option<Key> {
         let key = match self {
-            MenuItemWrapper::Command(item) => item.caption.get_hotkey(),
-            MenuItemWrapper::CheckBox(item) => item.caption.get_hotkey(),
-            MenuItemWrapper::SingleChoice(item) => item.caption.get_hotkey(),
+            MenuItemWrapper::Command(item) => item.caption.hotkey(),
+            MenuItemWrapper::CheckBox(item) => item.caption.hotkey(),
+            MenuItemWrapper::SingleChoice(item) => item.caption.hotkey(),
             MenuItemWrapper::Separator(_) => Key::default(),
-            MenuItemWrapper::SubMenu(item) => item.caption.get_hotkey(),
+            MenuItemWrapper::SubMenu(item) => item.caption.hotkey(),
         };
         if key.code != KeyCode::None {
             return Some(key);

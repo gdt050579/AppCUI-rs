@@ -61,7 +61,7 @@ impl Caption {
         self.chars_count = self.text.chars().count();
     }
     #[inline(always)]
-    pub(crate) fn get_text(&self) -> &str {
+    pub(crate) fn text(&self) -> &str {
         self.text.as_str()
     }
     #[inline(always)]
@@ -69,7 +69,7 @@ impl Caption {
         self.chars_count
     }
     #[inline(always)]
-    pub(crate) fn get_hotkey_pos(&self) -> Option<usize> {
+    pub(crate) fn hotkey_pos(&self) -> Option<usize> {
         if self.hotkey.code == KeyCode::None {
             None
         } else {
@@ -77,7 +77,7 @@ impl Caption {
         }
     }
     #[inline(always)]
-    pub(crate) fn get_hotkey(&self) -> Key {
+    pub(crate) fn hotkey(&self) -> Key {
         self.hotkey
     }
     #[inline(always)]
