@@ -25,12 +25,12 @@ impl Panel {
         self.caption.set_text(text, ExtractHotKeyMethod::NoHotKey);
     }
     #[inline(always)]
-    pub fn get_title(&self) -> &str {
+    pub fn title(&self) -> &str {
         self.caption.text()
     }
     #[inline(always)]
     pub fn get_type(&self) -> Type {
-        self.panel_type
+        self.panel_type        
     }
     #[inline(always)]
     pub fn add<T>(&mut self, control: T) -> Handle<T>

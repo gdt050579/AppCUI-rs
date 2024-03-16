@@ -16,9 +16,9 @@ let p2 = panel!("MyPanel,x:10,y:5,w:15,type:Border");
 
 A panel supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name                 | Type   | Positional parameter                | Purpose |
-|--------------------------------|--------|-------------------------------------|---------|
-| `title` or `text` or `caption` | String | **Yes** (first postional parameter) | The title of the panel |
+| Parameter name                 | Type   | Positional parameter                | Purpose                                                               |
+| ------------------------------ | ------ | ----------------------------------- | --------------------------------------------------------------------- |
+| `title` or `text` or `caption` | String | **Yes** (first postional parameter) | The title of the panel                                                |
 | `type`                         | String | **No**                              | Panel type. If not provided, **Border** type is considered as default |
 
 A pabel supports the following types:
@@ -36,11 +36,11 @@ A panel emits no events.
 
 Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
 
-| Method           | Purpose                                |
-|------------------|----------------------------------------|
-| `set_title(...)` | Set the new title of the panel         |
-| `get_title()`    | Returns the current title of the panel |
-| `get_type()`     | Returns type of the panel              |
+| Method           | Purpose                                                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `set_title(...)` | Set the new title of the panel                                                                                                      |
+| `title()`        | Returns the current title of the panel                                                                                              |
+| `get_type()`     | Returns type of the panel                                                                                                           |
 | `add(...)`       | Adds a new control as a child for the panel. It returns a handle for the new control or `Handle::None` if the control was not added |
 
 ## Key association
