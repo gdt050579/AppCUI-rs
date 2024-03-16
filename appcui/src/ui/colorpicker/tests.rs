@@ -299,7 +299,7 @@ fn check_colorpicker_events() {
         fn on_color_changed(&mut self, _handle: Handle<ColorPicker>, color: Color) -> EventProcessStatus {
             let h = self.l;
             if let Some(label) = self.control_mut(h) {
-                label.set_caption(color.get_name());
+                label.set_caption(color.name());
                 return EventProcessStatus::Processed;
             }
             return EventProcessStatus::Ignored;

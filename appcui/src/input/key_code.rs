@@ -203,14 +203,14 @@ const KEY_NAME_PADDED: [&str; 64] = [
 ];
 
 impl KeyCode {
-    pub fn get_name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         let index = ((*self) as u8) as usize;
         if index<64 {
             return KEY_NAME[index];
         }
         return "";
     }
-    pub fn get_name_padded(&self) -> &'static str {
+    pub fn name_padded(&self) -> &'static str {
         let index = ((*self) as u8) as usize;
         if index<64 {
             return KEY_NAME_PADDED[index];

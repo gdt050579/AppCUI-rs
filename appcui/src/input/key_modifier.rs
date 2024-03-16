@@ -19,13 +19,13 @@ static KEY_NAME: [&str; 8] = [
 ];
 
 impl KeyModifier {
-    pub fn get_name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         if self.value < 8 {
             return KEY_NAME[self.value as usize];
         }
         return "";
     }
-    pub(crate) fn get_name_from_index(index: usize) -> &'static str {
+    pub(crate) fn name_from_index(index: usize) -> &'static str {
         return if index < 8 { KEY_NAME[index] } else { "" };
     }
 }

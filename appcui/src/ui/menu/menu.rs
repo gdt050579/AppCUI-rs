@@ -533,8 +533,8 @@ impl Menu {
                 w_left += 2;
             }
             if let Some(shortcut) = item.shortcut() {
-                w_right += shortcut.code.get_name().len();
-                w_right += shortcut.modifier.get_name().len();
+                w_right += shortcut.code.name().len();
+                w_right += shortcut.modifier.name().len();
                 if w_right > 0 {
                     w_right += 2;
                 }

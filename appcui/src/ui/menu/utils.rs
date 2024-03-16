@@ -60,8 +60,8 @@ pub(super) fn paint_shortcut(
     current_item: bool,
     color: &MenuTheme,
 ) {
-    let name = shortcut.code.get_name();
-    let modifier_name = shortcut.modifier.get_name();
+    let name = shortcut.code.name();
+    let modifier_name = shortcut.modifier.name();
     let sz = name.len() + modifier_name.len();
     let attr = get_shortcut_attr(enabled, current_item, color);
     let x = (width as i32) - (sz as i32);

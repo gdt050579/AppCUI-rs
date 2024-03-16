@@ -107,6 +107,6 @@ impl From<u16> for Key {
 }
 impl Display for Key {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}", self.modifier.get_name(), self.code.get_name())
+        write!(f, "{}{}", self.modifier.name(), self.code.name())
     }
 }

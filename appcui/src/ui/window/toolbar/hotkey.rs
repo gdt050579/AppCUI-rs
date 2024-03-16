@@ -26,7 +26,7 @@ impl HotKey {
             self.base.set_visible(false);
             self.base.request_recompute_layout();
         } else {
-            self.base.set_width(key.code.get_name().chars().count() as u16);
+            self.base.set_width(key.code.name().chars().count() as u16);
             self.base.set_visible(true);
             self.base.request_recompute_layout();
         }
@@ -36,6 +36,6 @@ impl HotKey {
             true => theme.text.normal,
             false => theme.text.inactive,
         };
-        surface.write_string(self.base.get_left(), self.base.get_y(), self.key.code.get_name(), attr, false);
+        surface.write_string(self.base.get_left(), self.base.get_y(), self.key.code.name(), attr, false);
     }
 }

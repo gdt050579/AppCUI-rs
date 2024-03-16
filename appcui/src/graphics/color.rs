@@ -42,7 +42,7 @@ impl Color {
             _ => None
         }
     }
-    pub fn get_name(&self)->&str {
+    pub fn name(&self)->&str {
         match self {
             Color::Black => "Black",
             Color::DarkBlue => "DarkBlue",

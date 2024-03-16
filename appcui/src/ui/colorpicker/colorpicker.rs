@@ -140,7 +140,7 @@ impl OnPaint for ColorPicker {
             if size.width > MIN_WIDTH_FOR_COLOR_NAME {
                 let mut format = TextFormat::single_line(3, self.header_y_ofs, col_text, TextAlignament::Left);
                 format.width = Some((size.width - MIN_WIDTH_FOR_COLOR_NAME) as u16);
-                surface.write_text(self.color.get_name(), &format);
+                surface.write_text(self.color.name(), &format);
             }
         }
         if size.width >= MINSPACE_FOR_DROPBUTTON_DRAWING {
@@ -289,8 +289,8 @@ impl OnMouseEvent for ColorPicker {
         match event {
             MouseEvent::Enter => {
                 if self.is_expanded() == false {
-                    if self.color.get_name().len() as i32 > ((self.size().width as i32) - 8) {
-                        self.show_tooltip(self.color.get_name())
+                    if self.color.name().len() as i32 > ((self.size().width as i32) - 8) {
+                        self.show_tooltip(self.color.name())
                     }
                 }
                 return EventProcessStatus::Processed;
