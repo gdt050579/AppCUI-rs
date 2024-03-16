@@ -64,7 +64,7 @@ impl MyWindow {
 }
 impl MenuEvents for MyWindow {
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywindow::Commands) {
-        if let Some(i) = self.get_menuitem(menu, item) {
+        if let Some(i) = self.menuitem(menu, item) {
             let s = String::from(i.get_caption());
             let h = self.lb;
             if let Some(l) = self.get_control_mut(h) {

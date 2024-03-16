@@ -65,7 +65,7 @@ impl ComponentsToolbar {
     }
 
     pub fn on_resize(&mut self, control: &ControlBase) {
-        let control_size = control.get_size();
+        let control_size = control.size();
         let left_margin = control.left_components_margin as i32;
         let top_margin = control.top_components_margin as i32;
         let mut w = (control_size.width as i32) - (left_margin + 1); // 2 space from right

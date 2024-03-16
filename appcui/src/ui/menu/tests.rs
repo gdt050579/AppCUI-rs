@@ -335,7 +335,7 @@ fn check_dynamic_change_menu() {
             if item == self.m_counter {
                 self.counter += 1;
                 let new_text = format!("Increment ({})", self.counter);
-                if let Some(menuitem) = self.get_menuitem_mut(menu, item) {
+                if let Some(menuitem) = self.menuitem_mut(menu, item) {
                     menuitem.set_caption(&new_text.as_str());
                 }
             }
@@ -403,7 +403,7 @@ fn check_dynamic_change_menu_2() {
             if item == self.m_counter {
                 self.counter += 1;
                 let new_text = format!("Increment ({})", self.counter);
-                if let Some(menuitem) = self.get_menuitem_mut(menu, item) {
+                if let Some(menuitem) = self.menuitem_mut(menu, item) {
                     menuitem.set_caption(&new_text.as_str());
                 }
             }
@@ -723,7 +723,7 @@ fn check_popup_menu() {
         impl OnPaint for MyCustomControl {
             fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
                 surface.clear(Character::new(' ', Color::Black, self.col, CharFlags::None));
-                let sz = self.get_client_size();
+                let sz = self.client_size();
                 let attr = CharAttribute::with_fore_color(Color::White);
                 let line = if self.has_focus() { LineType::Double } else { LineType::Single };
                 let r = Rect::with_size(0, 0, sz.width as u16, sz.height as u16);
@@ -918,7 +918,7 @@ fn check_popup_menu_with_keys() {
         impl OnPaint for MyCustomControl {
             fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
                 surface.clear(Character::new(' ', Color::Black, self.col, CharFlags::None));
-                let sz = self.get_client_size();
+                let sz = self.client_size();
                 let attr = CharAttribute::with_fore_color(Color::White);
                 let line = if self.has_focus() { LineType::Double } else { LineType::Single };
                 let r = Rect::with_size(0, 0, sz.width as u16, sz.height as u16);
@@ -1089,7 +1089,7 @@ fn check_menubar_with_keys() {
     }
     impl MenuEvents for MyWindow {
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywindow::Commands) {
-            if let Some(i) = self.get_menuitem(menu, item) {
+            if let Some(i) = self.menuitem(menu, item) {
                 let s = String::from(i.get_caption());
                 let h = self.lb;
                 if let Some(l) = self.get_control_mut(h) {
@@ -1348,7 +1348,7 @@ fn check_menubar_recursive_shortcuts() {
     }
     impl MenuEvents for MyWindow {
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywindow::Commands) {
-            if let Some(i) = self.get_menuitem(menu, item) {
+            if let Some(i) = self.menuitem(menu, item) {
                 let s = String::from(i.get_caption());
                 let h = self.lb;
                 if let Some(l) = self.get_control_mut(h) {

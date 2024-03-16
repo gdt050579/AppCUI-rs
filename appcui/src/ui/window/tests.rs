@@ -463,8 +463,8 @@ fn check_window_on_layout_changed() {
     impl WindowEvents for MyWin {
         fn on_layout_changed(&mut self, old_layout: Rect, new_layout: Rect) {
             let label_handle = self.info;
-            let size = self.get_size();
-            let client_size = self.get_client_size();
+            let size = self.size();
+            let client_size = self.client_size();
             if let Some(label) = self.get_control_mut(label_handle) {
                 label.set_caption(
                     format!(

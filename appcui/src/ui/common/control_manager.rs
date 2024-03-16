@@ -16,9 +16,9 @@ pub(crate) struct ParentLayout {
 }
 impl From<&ControlBase> for ParentLayout {
     fn from(base: &ControlBase) -> Self {
-        let client_sz = base.get_client_size();
+        let client_sz = base.client_size();
         let mut pl = ParentLayout {
-            clip: base.get_client_clip(),
+            clip: base.client_clip(),
             origin: base.screen_origin,
             client_width: client_sz.width as u16,
             client_height: client_sz.height as u16,

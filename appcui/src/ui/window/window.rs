@@ -102,7 +102,7 @@ impl Window {
             }
             if best.handle.is_none() {
                 if base.can_receive_input() {
-                    let r = base.get_absolute_rect();
+                    let r = base.absolute_rect();
                     let dist = Window::point_to_point_distance(r, object_rect, dir);
                     if dist < best.value {
                         best.value = dist;
@@ -140,7 +140,7 @@ impl Window {
             return Handle::None;
         }
         if let Some(ctrl) = controls.get_mut(found) {
-            let object_rect = ctrl.get_base().get_absolute_rect();
+            let object_rect = ctrl.get_base().absolute_rect();
             if let Some(result) = Window::compute_closest_distance(handle, object_rect, dir) {
                 if (result.value==u32::MAX) || (result.handle.is_none()) {
                     return Handle::None;
@@ -244,7 +244,7 @@ impl Window {
     // title
     pub fn set_title(&mut self, title: &str) {
         self.title.set_text(title);
-        self.update_positions(self.get_size());
+        self.update_positions(self.size());
     }
     pub fn get_title(&self) -> &str {
         self.title.get_text()
@@ -253,7 +253,7 @@ impl Window {
     pub fn set_tag(&mut self, name: &str) {
         if let Some(item) = self.toolbar.get_mut(self.tag_handle) {
             item.set_text(name);
-            self.update_positions(self.get_size());
+            self.update_positions(self.size());
         }
     }
     pub fn get_tag(&self) -> Option<&str> {
@@ -265,7 +265,7 @@ impl Window {
     pub fn clear_tag(&mut self) {
         if let Some(item) = self.toolbar.get_mut(self.tag_handle) {
             item.set_text("");
-            self.update_positions(self.get_size());
+            self.update_positions(self.size());
         }
     }
     pub fn set_hotkey<T>(&mut self, key: T)
@@ -274,7 +274,7 @@ impl Window {
     {
         if let Some(item) = self.toolbar.get_mut(self.hotkey_handle) {
             item.set_key(key.into());
-            self.update_positions(self.get_size());
+            self.update_positions(self.size());
         }
     }
 
@@ -290,21 +290,21 @@ impl Window {
 
     fn center_to_screen(&mut self) {
         let screen_size = RuntimeManager::get().get_terminal_size();
-        let win_size = self.get_size();
+        let win_size = self.size();
         let x = (screen_size.width as i32 - win_size.width as i32) / 2;
         let y = (screen_size.height as i32 - win_size.height as i32) / 2;
         self.set_position(x, y);
     }
     fn resize_window_with(&mut self, add_to_width: i32, add_to_height: i32) {
-        let size = self.get_size();
+        let size = self.size();
         let new_width = ((size.width as i32) + add_to_width).clamp(0, 0xFFFF);
         let new_height = ((size.height as i32) + add_to_height).clamp(0, 0xFFFF);
         self.set_size(new_width as u16, new_height as u16);
     }
     fn move_window_pos_to(&mut self, add_x: i32, add_y: i32, keep_in_desktop_bounderies: bool) {
-        let size = self.get_size();
+        let size = self.size();
         let screen_size = RuntimeManager::get().get_terminal_size();
-        let mut pos = self.get_position();
+        let mut pos = self.position();
         if keep_in_desktop_bounderies {
             pos.x = (pos.x + add_x).clamp(0, screen_size.width as i32 - size.width as i32);
             pos.y = (pos.y + add_y).clamp(0, screen_size.height as i32 - size.height as i32);
@@ -317,7 +317,7 @@ impl Window {
 
     fn maximize_restore(&mut self) {
         if self.maximized == false {
-            self.old_rect = Rect::with_point_and_size(self.get_position(), self.get_size());
+            self.old_rect = Rect::with_point_and_size(self.position(), self.size());
             let desktop_rect = RuntimeManager::get().get_desktop_rect();
             self.set_position(desktop_rect.get_left(), desktop_rect.get_top());
             self.set_size(desktop_rect.get_width() as u16, desktop_rect.get_height() as u16);
@@ -394,7 +394,7 @@ impl Window {
             // object has to be visible and enabled
             if base.is_visible() && base.is_enabled() {
                 if base.can_receive_input() {
-                    if base.get_hotkey() == hotkey {
+                    if base.hotkey() == hotkey {
                         // I hold te hotkey
                         return parent;
                     }
@@ -626,7 +626,7 @@ impl OnPaint for Window {
             line_type = LineType::Single;
         }
 
-        let sz = self.get_size();
+        let sz = self.size();
         surface.clear(Character::with_attributes(' ', color_window));
         surface.draw_rect(Rect::with_size(0, 0, sz.width as u16, sz.height as u16), line_type, color_border);
 

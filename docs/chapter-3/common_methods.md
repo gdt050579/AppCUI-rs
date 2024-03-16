@@ -19,10 +19,10 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 
 | Method                                | Purpose                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `get_size()`                          | Returns the size (**width**x**height**) for the current control                                                                                                                                                                                                                                                                                                                            |
-| `get_client_size()`                   | Returns the client size (the size minus the margins) for the current control                                                                                                                                                                                                                                                                                                               |
+| `size()`                              | Returns the size (**width**x**height**) for the current control                                                                                                                                                                                                                                                                                                                            |
+| `client_size()`                       | Returns the client size (the size minus the margins) for the current control                                                                                                                                                                                                                                                                                                               |
 | `set_size(...)`                       | Sets the new size for a control (to a specified size given by parameters `width` and `height`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by controls `x` and `y` coordonates) and the new provided size. Any dock or alignament properties will be removed.<br>This method has no effect on a Desktop control.         |
-| `get_position()`                      | Returns the relatove position (x,y) of the current control to its parent.                                                                                                                                                                                                                                                                                                                  |
+| `position()`                          | Returns the relatove position (x,y) of the current control to its parent.                                                                                                                                                                                                                                                                                                                  |
 | `set_position(...)`                   | Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignament properties will be removed.<br>This method has no effect on a Desktop control. |
 | `set_components_toolbar_margins(...)` | Sets the left and top components margins - for scrollbars, filters, etc                                                                                                                                                                                                                                                                                                                    |
 
@@ -32,7 +32,7 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 
 | Method         | Purpose                                                                                                   |
 | -------------- | --------------------------------------------------------------------------------------------------------- |
-| `get_hotkey()` | Returns the hotkey associated witha control or `Key::None` otherwise                                      |
+| `hotkey()`     | Returns the hotkey associated witha control or `Key::None` otherwise                                      |
 | `set_hotkey()` | Sets the hotkey for a control. To clear the hotkey call this function like this: `.set_hotkey(Key::None)` |
 
 ## Update methods
@@ -44,9 +44,9 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 
 ## Menu related methods
 
-| Method                  | Purpose                                                                                                         |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `register_menu(...)`    | Register a menu into `AppCUI` framework and returns a Handle for it                                             |
-| `show_menu(...)`        | Show a popup menu that was registered by the current control                                                    |
-| `get_menuitem(...)`     | Returns an immutable reference to a menu item based on two handles: one for the menu, and one for the menu item |
-| `get_menuitem_mut(...)` | Returns an mutable reference to a menu item based on two handles: one for the menu, and one for the menu item   |
+| Method               | Purpose                                                                                                         |
+| -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `register_menu(...)` | Register a menu into `AppCUI` framework and returns a Handle for it                                             |
+| `show_menu(...)`     | Show a popup menu that was registered by the current control                                                    |
+| `menuitem(...)`      | Returns an immutable reference to a menu item based on two handles: one for the menu, and one for the menu item |
+| `menuitem_mut(...)`  | Returns an mutable reference to a menu item based on two handles: one for the menu, and one for the menu item   |

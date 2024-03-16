@@ -63,7 +63,7 @@ impl OnPaint for ThreeStateBox {
         let col_hot_key = if self.is_enabled() { theme.text.hot_key } else { theme.text.inactive };
 
         surface.write_string(0, 0, "[ ] ", col_text, false);
-        let sz = self.get_size();
+        let sz = self.size();
 
         if sz.width > 4 {
             let mut format = TextFormat::new(4, 0, col_text, TextAlignament::Left, sz.height > 1);
@@ -131,7 +131,7 @@ impl OnMouseEvent for ThreeStateBox {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter => {
-                if self.caption.get_chars_count() > (self.get_size().width - 4) as usize {
+                if self.caption.get_chars_count() > (self.size().width - 4) as usize {
                     self.show_tooltip(self.caption.get_text());
                 }
                 EventProcessStatus::Processed

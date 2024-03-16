@@ -67,7 +67,7 @@ impl Canvas {
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
-        let sz = self.get_size();
+        let sz = self.size();
         let surface_size = self.surface.get_size();
         self.x = if surface_size.width <= sz.width {
             0
@@ -160,19 +160,19 @@ impl OnKeyPressed for Canvas {
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Left") => {
-                self.move_scroll_to(self.x + self.get_size().width as i32, self.y);
+                self.move_scroll_to(self.x + self.size().width as i32, self.y);
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Right") => {
-                self.move_scroll_to(self.x - self.get_size().width as i32, self.y);
+                self.move_scroll_to(self.x - self.size().width as i32, self.y);
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Up") | key!("PageUp")=> {
-                self.move_scroll_to(self.x, self.y + self.get_size().height as i32);
+                self.move_scroll_to(self.x, self.y + self.size().height as i32);
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Down") | key!("PageDown")=> {
-                self.move_scroll_to(self.x, self.y - self.get_size().height as i32);
+                self.move_scroll_to(self.x, self.y - self.size().height as i32);
                 EventProcessStatus::Processed
             }
             key!("Home") => {
@@ -206,7 +206,7 @@ impl OnMouseEvent for Canvas {
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(data) => {
                 if (self.flags == Flags::ScrollBars) && (self.has_focus()) {
-                    let sz = self.get_size();
+                    let sz = self.size();
                     if (data.x == sz.width as i32) || (data.y == sz.height as i32) {
                         return EventProcessStatus::Ignored;
                     }

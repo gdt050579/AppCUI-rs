@@ -89,7 +89,7 @@ impl ControlBase {
 
     /// Returns the size of a control
     #[inline(always)]
-    pub fn get_size(&self) -> Size {
+    pub fn size(&self) -> Size {
         Size {
             width: self.layout.get_width() as u32,
             height: self.layout.get_height() as u32,
@@ -98,7 +98,7 @@ impl ControlBase {
 
     /// Returns the client size of a control. In most cases it is the same as the size returned the method `.get_size()`. However, if the control has margins (for example in case of a Window) this size will be smaller.
     #[inline(always)]
-    pub fn get_client_size(&self) -> Size {
+    pub fn client_size(&self) -> Size {
         let horizontal_margins = (self.margins.left as u32) + (self.margins.right as u32);
         let vertical_margins = (self.margins.top as u32) + (self.margins.bottom as u32);
         let width = self.layout.get_width() as u32;
@@ -122,7 +122,7 @@ impl ControlBase {
 
     /// Returns the relatove position (x,y) of the current control to its parent.
     #[inline(always)]
-    pub fn get_position(&self) -> Point {
+    pub fn position(&self) -> Point {
         Point {
             x: self.layout.get_x() as i32,
             y: self.layout.get_y() as i32,
@@ -254,14 +254,14 @@ impl ControlBase {
         }
     }
     #[inline(always)]
-    pub fn get_expanded_size(&self) -> Size {
+    pub fn expanded_size(&self) -> Size {
         if self.is_expanded() {
             Size {
                 width: (self.screen_clip.right + 1 - self.screen_clip.left) as u32,
                 height: (self.screen_clip.bottom + 1 - self.screen_clip.top) as u32,
             }
         } else {
-            self.get_size()
+            self.size()
         }
     }
 
@@ -402,7 +402,7 @@ impl ControlBase {
 
     /// Returns the hotkey associated to a control or Key::None otherwise.
     #[inline]
-    pub fn get_hotkey(&self) -> Key {
+    pub fn hotkey(&self) -> Key {
         self.hotkey
     }
     #[inline(always)]
@@ -453,7 +453,7 @@ impl ControlBase {
     }
 
     #[inline]
-    pub(crate) fn get_client_clip(&self) -> ClipArea {
+    pub(crate) fn client_clip(&self) -> ClipArea {
         let mut c = ClipArea::with_size(
             self.screen_origin.x,
             self.screen_origin.y,
@@ -471,7 +471,7 @@ impl ControlBase {
     }
 
     #[inline(always)]
-    pub(crate) fn get_absolute_rect(&self) -> Rect {
+    pub(crate) fn absolute_rect(&self) -> Rect {
         Rect::with_point_and_size(self.screen_origin, self.layout.get_size())
     }
     pub(crate) fn prepare_paint(&self, surface: &mut Surface) -> bool {
@@ -557,12 +557,12 @@ impl ControlBase {
         RuntimeManager::get().add_menu(menu)
     }
     pub fn show_menu(&self, handle: Handle<Menu>, x: i32, y: i32, max_size: Option<Size>) {
-        let r = self.get_absolute_rect();
+        let r = self.absolute_rect();
         RuntimeManager::get().show_menu(handle, self.handle, r.get_left() + x, r.get_top() + y, max_size);
     }
 
     #[allow(private_bounds)]
-    pub fn get_menuitem<T>(&self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&T>
+    pub fn menuitem<T>(&self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&T>
     where
         T: MenuItem,
     {
@@ -573,7 +573,7 @@ impl ControlBase {
     }
 
     #[allow(private_bounds)]
-    pub fn get_menuitem_mut<T>(&mut self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&mut T>
+    pub fn menuitem_mut<T>(&mut self, menu_handle: Handle<Menu>, menuitem_handle: Handle<T>) -> Option<&mut T>
     where
         T: MenuItem,
     {

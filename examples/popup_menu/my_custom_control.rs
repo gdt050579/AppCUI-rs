@@ -39,7 +39,7 @@ impl MyCustomControl {
 impl OnPaint for MyCustomControl {
     fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
         surface.clear(Character::new(' ', Color::Black, self.col, CharFlags::None));
-        let sz = self.get_client_size();
+        let sz = self.client_size();
         let attr = CharAttribute::with_fore_color(Color::White);
         let line = if self.has_focus() { LineType::Double } else { LineType::Single };
         let r = Rect::with_size(0, 0, sz.width as u16, sz.height as u16);

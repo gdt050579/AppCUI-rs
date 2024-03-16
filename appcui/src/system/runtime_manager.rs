@@ -747,7 +747,7 @@ impl RuntimeManager {
         }
         // resize the desktop as well
         let desktop = self.get_controls_mut().get_desktop();
-        let original_size = desktop.get_base().get_size();
+        let original_size = desktop.get_base().size();
         desktop.get_base_mut().set_size(new_size.width as u16, new_size.height as u16);
         desktop.get_control_mut().on_resize(original_size, new_size);
         self.recompute_layout = true;
@@ -803,8 +803,8 @@ impl LayoutMethods for RuntimeManager {
         if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
             let window_control = base.is_window_control();
-            let old_size = base.get_size();
-            let old_pos = base.get_position();
+            let old_size = base.size();
+            let old_pos = base.position();
             let expanded = base.is_expanded();
             let mut expand_status = ExpandStatus::None;
             base.update_control_layout_and_screen_origin(parent_layout);
@@ -830,8 +830,8 @@ impl LayoutMethods for RuntimeManager {
                     }
                 }
             }
-            let new_size = base.get_size();
-            let new_pos = base.get_position();
+            let new_size = base.size();
+            let new_pos = base.position();
             let interface = control.get_control_mut();
             // expand events
             match expand_status {

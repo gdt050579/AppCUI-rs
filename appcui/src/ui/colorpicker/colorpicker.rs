@@ -121,7 +121,7 @@ impl ColorPicker {
 impl OnPaint for ColorPicker {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         // first paint the header
-        let size = self.get_size();
+        let size = self.size();
         let col_text = match () {
             _ if !self.is_enabled() => theme.button.text.inactive,
             _ if self.has_focus() => theme.button.text.focused,
@@ -150,7 +150,7 @@ impl OnPaint for ColorPicker {
         }
         // assuming the control is expanded
         if self.is_expanded() {
-            let size = self.get_expanded_size();
+            let size = self.expanded_size();
             let col = theme.menu.text.normal;
             let mut space_char = Character::with_attributes(' ', col);
             surface.fill_rect(
@@ -222,7 +222,7 @@ impl OnDefaultAction for ColorPicker {
         } else {
             self.expand(
                 Size::new((TRANSPARENT_CHECKBOX_X_LAST_OFFSET as u32) + 2, 7),
-                Size::new(self.get_size().width, 7),
+                Size::new(self.size().width, 7),
             );
         }
     }
@@ -232,7 +232,7 @@ impl OnExpand for ColorPicker {
         match direction {
             ExpandedDirection::OnTop => {
                 self.expanded_panel_y = 0;
-                self.header_y_ofs = (self.get_expanded_size().height as i32) - 1;
+                self.header_y_ofs = (self.expanded_size().height as i32) - 1;
             }
             ExpandedDirection::OnBottom => {
                 self.expanded_panel_y = 1;
@@ -289,7 +289,7 @@ impl OnMouseEvent for ColorPicker {
         match event {
             MouseEvent::Enter => {
                 if self.is_expanded() == false {
-                    if self.color.get_name().len() as i32 > ((self.get_size().width as i32) - 8) {
+                    if self.color.get_name().len() as i32 > ((self.size().width as i32) - 8) {
                         self.show_tooltip(self.color.get_name())
                     }
                 }

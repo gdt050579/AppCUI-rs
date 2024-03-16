@@ -41,7 +41,7 @@ impl Panel {
     }
     #[inline(always)]
     fn paint_border(&self, surface: &mut Surface, theme: &Theme) {
-        let sz = self.get_size();
+        let sz = self.size();
         let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
         surface.clear(Character::with_char(' '));
         surface.draw_rect(Rect::with_point_and_size(Point::ORIGIN, sz), LineType::Single, border_color);
@@ -62,7 +62,7 @@ impl Panel {
     }
     #[inline(always)]
     fn paint_window(&self, surface: &mut Surface, theme: &Theme) {
-        let sz = self.get_size();
+        let sz = self.size();
         let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
         surface.clear(Character::with_char(' '));
         surface.draw_rect(Rect::with_point_and_size(Point::ORIGIN, sz), LineType::Single, border_color);
@@ -96,7 +96,7 @@ impl Panel {
     }
     #[inline(always)]
     fn paint_topbar(&self, surface: &mut Surface, theme: &Theme) {
-        let sz = self.get_size();
+        let sz = self.size();
         if self.is_enabled() {
             surface.clear(Character::with_attributes(' ', theme.tab.text.pressed_or_selectd));
             surface.fill_horizontal_line(0, 0, sz.width as i32, Character::with_attributes(' ', theme.tab.text.normal))

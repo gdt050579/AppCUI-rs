@@ -20,7 +20,7 @@ impl Label {
 }
 impl OnPaint for Label {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let sz = self.get_size();
+        let sz = self.size();
         let mut format = TextFormat::new(
             0,
             0,
