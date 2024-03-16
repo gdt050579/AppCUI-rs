@@ -26,8 +26,8 @@ impl ThreeStateBox {
     }
     
     /// Returns the current state of the threestatebox.
-    #[inline]
-    pub fn get_state(&self) -> State {
+    #[inline(always)]
+    pub fn state(&self) -> State {
         self.state
     }
 
