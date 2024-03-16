@@ -17,8 +17,8 @@ let c3 = colorpicker!("Yellow,x:10,y:5,w:15,visible:false");
 
 A ColorPicker control supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name | Type   | Positional parameter                | Purpose |
-|----------------|--------|-------------------------------------|---------|
+| Parameter name | Type   | Positional parameter                | Purpose                                                                                                                                                                                                                                               |
+| -------------- | ------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `color`        | String | **Yes** (first postional parameter) | The color of the ColorPicker control (should be one of the following values: `Black`, `DarkBlue`, `DarkGreen`, `Teal`, `DarkRed`, `Magenta`, `Olive`, `Silver`,   `Gray`, `Blue`, `Green`, `Aqua`, `Red`, `Pink`, `Yellow`, `White` or `Transparent`) |
 
 ## Events
@@ -33,18 +33,18 @@ pub trait ColorPickerEvents {
 
 Besides the [Common methods for all Controls](../common_methods.md) a ColorPicker control also has the following aditional methods:
 
-| Method           | Purpose                                                                             |
-|------------------|-------------------------------------------------------------------------------------|
+| Method           | Purpose                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------- |
 | `set_color(...)` | Manually sets the color of the ColorPicker control. It receives an object of type Color. |
-| `get_color()`    | Returns the current color selected in the ColorPicker control |
+| `color()`        | Returns the current color selected in the ColorPicker control                            |
 
 The following keys are processed by a ColorPicker control if it has focus:
 
-| Key                    | Purpose                                                                             |
-|------------------------|-------------------------------------------------------------------------------------|
-| `Space` or `Enter` | Expands or packs (collapses) the ColorPicker control.|
-| `Up` or `Down` or<br>`Left` or `Right` | Changes the current selected color from the ColorPicker. Using this keys will trigger a call to `ColorPickerEvents::on_color_changed(...)`  |
-| `Escape`               | Only when the ColorPicker is expanded, it collapses the control. If the ColorPicker is already colapsed, this key will not be captured (meaning that one of the ColorPicker ancestors will be responsable with treating this key) |
+| Key                                    | Purpose                                                                                                                                                                                                                           |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Space` or `Enter`                     | Expands or packs (collapses) the ColorPicker control.                                                                                                                                                                             |
+| `Up` or `Down` or<br>`Left` or `Right` | Changes the current selected color from the ColorPicker. Using this keys will trigger a call to `ColorPickerEvents::on_color_changed(...)`                                                                                        |
+| `Escape`                               | Only when the ColorPicker is expanded, it collapses the control. If the ColorPicker is already colapsed, this key will not be captured (meaning that one of the ColorPicker ancestors will be responsable with treating this key) |
 
 ## Example
 

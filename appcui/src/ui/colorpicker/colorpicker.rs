@@ -51,7 +51,7 @@ impl ColorPicker {
         cp
     }
     #[inline(always)]
-    pub fn get_color(&self) -> Color {
+    pub fn color(&self) -> Color {
         self.color
     }
     #[inline(always)]
