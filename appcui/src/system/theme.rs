@@ -84,6 +84,7 @@ pub struct Theme {
     pub button: ButtonTheme,
     pub tab: TabTheme,
     pub scrollbar: ScrollBarTheme,
+    pub editor: ControlCharAttributesState
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -244,6 +245,14 @@ impl Theme {
             inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
             pressed_or_selectd: CharAttribute::with_color(Color::Green, Color::Teal),
         };
+
+        self.editor = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Silver, Color::Black),
+            focused: CharAttribute::with_color(Color::White, Color::Black),
+            hovered: CharAttribute::with_color(Color::Yellow, Color::Black),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Black),
+        }
     }
 }
 //         inline void Set(focused, normal, inactive, hovered, pressedOrSelected)

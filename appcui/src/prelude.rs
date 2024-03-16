@@ -10,6 +10,8 @@ pub use super::ui::threestatebox::events::ThreeStateBoxEvents;
 pub use super::ui::colorpicker;
 pub use super::ui::colorpicker::events::ColorPickerEvents;
 pub use super::ui::canvas;
+pub use super::ui::password;
+pub use super::ui::password::events::PasswordEvents;
 pub use super::ui::common::traits::*;
 pub use super::ui::window::events::WindowEvents;
 pub use super::ui::window::events::ToolBarEvents;

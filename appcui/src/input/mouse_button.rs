@@ -7,7 +7,7 @@ pub enum MouseButton {
     Center
 }
 impl MouseButton {
-    pub fn get_name(&self)->&str {
+    pub fn name(&self)->&str {
         match self {
             MouseButton::None => "",
             MouseButton::Left => "left",

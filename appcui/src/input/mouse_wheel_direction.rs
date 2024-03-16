@@ -9,7 +9,7 @@ pub enum MouseWheelDirection {
 }
 
 impl MouseWheelDirection {
-    pub fn get_name(&self)->&str {
+    pub fn name(&self)->&str {
         match self {
             MouseWheelDirection::None => "",
             MouseWheelDirection::Left => "left",
