@@ -558,7 +558,7 @@ impl ControlBase {
     }
     pub fn show_menu(&self, handle: Handle<Menu>, x: i32, y: i32, max_size: Option<Size>) {
         let r = self.absolute_rect();
-        RuntimeManager::get().show_menu(handle, self.handle, r.get_left() + x, r.get_top() + y, max_size);
+        RuntimeManager::get().show_menu(handle, self.handle, r.left() + x, r.top() + y, max_size);
     }
 
     #[allow(private_bounds)]

@@ -220,10 +220,10 @@ impl Surface {
     }
 
     pub fn fill_rect(&mut self, rect: Rect, ch: Character) {
-        let left = rect.get_left();
-        let right = rect.get_right();
-        let top = rect.get_top();
-        let bottom = rect.get_bottom();
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
         for x in left..=right {
             for y in top..=bottom {
                 if let Some(pos) = self.coords_to_position(x, y) {
@@ -304,10 +304,10 @@ impl Surface {
     }
 
     pub fn draw_rect(&mut self, rect: Rect, line_type: LineType, attr: CharAttribute) {
-        let left = rect.get_left();
-        let right = rect.get_right();
-        let top = rect.get_top();
-        let bottom = rect.get_bottom();
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
 
         let line_chars = line_type.get_chars();
         let mut ch = Character::new(' ', attr.foreground, attr.background, attr.flags);

@@ -76,35 +76,35 @@ impl Rect {
         }
     }
     #[inline]
-    pub fn get_left(&self) -> i32 {
+    pub fn left(&self) -> i32 {
         self.left
     }
     #[inline]
-    pub fn get_right(&self) -> i32 {
+    pub fn right(&self) -> i32 {
         self.right
     }
     #[inline]
-    pub fn get_top(&self) -> i32 {
+    pub fn top(&self) -> i32 {
         self.top
     }
     #[inline]
-    pub fn get_bottom(&self) -> i32 {
+    pub fn bottom(&self) -> i32 {
         self.bottom
     }
     #[inline]
-    pub fn get_width(&self) -> u32 {
+    pub fn width(&self) -> u32 {
         ((self.right - self.left) as u32) + 1u32
     }
     #[inline]
-    pub fn get_height(&self) -> u32 {
+    pub fn height(&self) -> u32 {
         ((self.bottom - self.top) as u32) + 1u32
     }
     #[inline]
-    pub fn get_x_center(&self) -> i32 {
+    pub fn center_x(&self) -> i32 {
         (self.right+self.left)/2
     }
     #[inline]
-    pub fn get_y_center(&self) -> i32 {
+    pub fn center_y(&self) -> i32 {
         (self.bottom+self.top)/2
     }
 }

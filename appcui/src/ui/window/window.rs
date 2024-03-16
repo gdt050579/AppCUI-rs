@@ -48,32 +48,32 @@ impl Window {
             MoveDirection::ToLeft => {
                 // we need to have <object>[space]<origin>
                 // we compare <TOP,LEFT>
-                object = Point::new(object_rect.get_right(), object_rect.get_top());
-                origin = Point::new(origin_rect.get_left(), origin_rect.get_top());
+                object = Point::new(object_rect.right(), object_rect.top());
+                origin = Point::new(origin_rect.left(), origin_rect.top());
                 if object.x >= origin.x {
                     return u32::MAX;
                 }
             }
             MoveDirection::ToRight => {
                 // we need to have <origin>[space]<object>
-                object = Point::new(object_rect.get_left(), object_rect.get_top());
-                origin = Point::new(origin_rect.get_right(), origin_rect.get_top());
+                object = Point::new(object_rect.left(), object_rect.top());
+                origin = Point::new(origin_rect.right(), origin_rect.top());
                 if object.x <= origin.x {
                     return u32::MAX;
                 }
             }
             MoveDirection::ToTop => {
                 // we need to have <object>[space]<origin>
-                object = Point::new(object_rect.get_left(), object_rect.get_bottom());
-                origin = Point::new(origin_rect.get_left(), origin_rect.get_top());
+                object = Point::new(object_rect.left(), object_rect.bottom());
+                origin = Point::new(origin_rect.left(), origin_rect.top());
                 if object.y >= origin.y {
                     return u32::MAX;
                 }
             }
             MoveDirection::ToBottom => {
                 // we need to have <origin>[space]<object>
-                object = Point::new(object_rect.get_left(), object_rect.get_top());
-                origin = Point::new(origin_rect.get_left(), origin_rect.get_bottom());
+                object = Point::new(object_rect.left(), object_rect.top());
+                origin = Point::new(origin_rect.left(), origin_rect.bottom());
                 if object.y <= origin.y {
                     return u32::MAX;
                 }
@@ -319,15 +319,15 @@ impl Window {
         if self.maximized == false {
             self.old_rect = Rect::with_point_and_size(self.position(), self.size());
             let desktop_rect = RuntimeManager::get().get_desktop_rect();
-            self.set_position(desktop_rect.get_left(), desktop_rect.get_top());
-            self.set_size(desktop_rect.get_width() as u16, desktop_rect.get_height() as u16);
+            self.set_position(desktop_rect.left(), desktop_rect.top());
+            self.set_size(desktop_rect.width() as u16, desktop_rect.height() as u16);
             self.maximized = true;
         } else {
-            let l = self.old_rect.get_left();
-            let t = self.old_rect.get_top();
+            let l = self.old_rect.left();
+            let t = self.old_rect.top();
             self.set_position(l, t);
-            let w = self.old_rect.get_width() as u16;
-            let h = self.old_rect.get_height() as u16;
+            let w = self.old_rect.width() as u16;
+            let h = self.old_rect.height() as u16;
             self.set_size(w, h);
             self.maximized = false;
         }

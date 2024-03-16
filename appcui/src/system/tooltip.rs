@@ -62,10 +62,10 @@ impl ToolTip {
         best_width = best_width.max(5) + 2;
 
         // find best position  (prefer on-top)
-        if object_rect.get_top() >= ((nr_lines + 1) as i32) {
-            let cx = object_rect.get_x_center();
+        if object_rect.top() >= ((nr_lines + 1) as i32) {
+            let cx = object_rect.center_x();
             let mut x = cx - ((best_width / 2) as i32);
-            let top = object_rect.get_top();
+            let top = object_rect.top();
             //let best_x = x;
             x = x.min((screen_size.width as i32) - (best_width as i32)).max(0);
             self.arrow_pos = Point::new(cx.clamp(0, (screen_size.width as i32)-1), top-1);
@@ -85,10 +85,10 @@ impl ToolTip {
             return true;
         }
         // bottom position
-        if (object_rect.get_bottom() + ((nr_lines + 1) as i32)) <= screen_size.height as i32 {
-            let cx = object_rect.get_x_center();
+        if (object_rect.bottom() + ((nr_lines + 1) as i32)) <= screen_size.height as i32 {
+            let cx = object_rect.center_x();
             let mut x = cx - ((best_width / 2) as i32);
-            let bottom = object_rect.get_bottom();
+            let bottom = object_rect.bottom();
             //let best_x = x;
             x = x.min((screen_size.width as i32) - (best_width as i32)).max(0);
             self.arrow_pos = Point::new(cx.clamp(0, (screen_size.width as i32)-1), bottom+1);

@@ -469,22 +469,22 @@ fn check_window_on_layout_changed() {
                 label.set_caption(
                     format!(
                         "Previous rect : {},{} - {}x{}\nNew rect      : {},{} - {}x{}\nClient size   : {}x{}",
-                        old_layout.get_left(),
-                        old_layout.get_top(),
-                        old_layout.get_width(),
-                        old_layout.get_height(),
-                        new_layout.get_left(),
-                        new_layout.get_top(),
-                        new_layout.get_width(),
-                        new_layout.get_height(),
+                        old_layout.left(),
+                        old_layout.top(),
+                        old_layout.width(),
+                        old_layout.height(),
+                        new_layout.left(),
+                        new_layout.top(),
+                        new_layout.width(),
+                        new_layout.height(),
                         client_size.width,
                         client_size.height
                     )
                     .as_str(),
                 );
             }
-            assert!(size.width == new_layout.get_width());
-            assert!(size.height == new_layout.get_height());
+            assert!(size.width == new_layout.width());
+            assert!(size.height == new_layout.height());
         }
     }
 
