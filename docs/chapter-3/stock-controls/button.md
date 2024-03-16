@@ -18,10 +18,10 @@ The caption of a button may contain the special character `&` that indicates tha
 
 A button supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name | Type | Positional parameter  | Purpose |
-|----------------|------|-----------------------|---------|
+| Parameter name                | Type   | Positional parameter                | Purpose                                |
+| ----------------------------- | ------ | ----------------------------------- | -------------------------------------- |
 | `name` or `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a button |
-| `type`                        | String | **No** | Button initialization flags |
+| `type`                        | String | **No**                              | Button initialization flags            |
 
 A button supports the following initialization types:
 * `button::Type::Flat` or `flat` (for macro initialization) - thils will hide the shaddow of the button makeing it flat.
@@ -45,19 +45,19 @@ pub trait ButtonEvents {
 
 Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
 
-| Method             | Purpose                                                                             |
-|--------------------|-------------------------------------------------------------------------------------|
+| Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Set the new caption for a button. If the string provided contains the special character `&`, this method also sets the hotkey associated with a control. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any).<br>Example: `button.set_caption("&Start")` - this will set the caption of the button cu `Start` and the hotket to `Alt+S` |
-| `get_caption()`    | Returns the current caption of a button |
+| `caption()`        | Returns the current caption of a button                                                                                                                                                                                                                                                                                                                                                           |
 
 ## Key association
 
 The following keys are processed by a Button control if it has focus:
 
-| Key           | Purpose                                                                             |
-|---------------|-------------------------------------------------------------------------------------|
-| `Space`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action clicking the checkbox with the mouse.  |
-| `Enter`       | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action clicking the checkbox with the mouse.  |
+| Key     | Purpose                                                                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `Space` | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action clicking the checkbox with the mouse. |
+| `Enter` | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action clicking the checkbox with the mouse. |
 
 Aditionally, `Alt`+**letter or number** will have the same action (even if the Button does not have a focus) if that letter or nunber was set as a hot-key for a button via its caption. For example, creating a value with the following caption: `"My b&utton"` (notice the `&` character before letter `u`) will enable `Alt+U` to be a hot-key associated with this button. Pressing this combination while the button is enabled and part of the current focused window, will change the focus to that button and will emit the `ButtonEvents::on_pressed(...)` event.
 

@@ -44,7 +44,7 @@ impl RadioBoxEvents for MyWin {
     fn on_selected(&mut self, handle: Handle<RadioBox>) -> EventProcessStatus {
         let mut s = String::new();
         if let Some(r) = self.get_control(handle) {
-            s += r.get_caption();
+            s += r.caption();
         }
         if s.len()>0 {
             let h = self.l;

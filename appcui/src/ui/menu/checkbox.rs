@@ -40,7 +40,7 @@ impl CheckBox {
         self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
     #[inline(always)]
-    pub fn get_caption(&self) -> &str {
+    pub fn caption(&self) -> &str {
         self.caption.get_text()
     }
     #[inline(always)]

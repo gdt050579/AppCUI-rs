@@ -25,19 +25,19 @@ Using the character `&` as part of the button caption will associate the next ch
 
 The following parameters are supported for a toolbar button:
 
-| Parameter name      | Type   | Positional parameter                | Purpose |
-|---------------------|--------|-------------------------------------|---------|
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the button |
-| `type`              | String | **No**                              | For a button use: `type:Button` |
-| `tooltip`           | String | **No**                              | The tooltip associated with the button |
+| Parameter name      | Type   | Positional parameter                | Purpose                                                                                       |
+| ------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
+| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the button                                                      |
+| `type`              | String | **No**                              | For a button use: `type:Button`                                                               |
+| `tooltip`           | String | **No**                              | The tooltip associated with the button                                                        |
 | `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |
 
 Besides the default methods that every toolbar item has (as described [here](../toolbar.md#common-methods)), the following methods are available for a toolbar label:
 
-| Method             | Purpose                                                                                                          |
-|--------------------|------------------------------------------------------------------------------------------------------------------|
+| Method             | Purpose                                                                                                                                   |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Set the new caption for a button. The width (in characters) of the button is the considered to be the number of characters in its content |
-| `get_caption()`    | Returns the current caption of a button. |
+| `caption()`        | Returns the current caption of a button.                                                                                                  |
 
 ## Events
 

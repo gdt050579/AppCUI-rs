@@ -21,19 +21,19 @@ let toolbal_label_4 = toolbaritem!("content='hidden label',type:label,visible:fa
 
 The following parameters are supported for a toolbar label:
 
-| Parameter name      | Type   | Positional parameter                | Purpose |
-|---------------------|--------|-------------------------------------|---------|
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the label |
-| `type`              | String | **No**                              | For a label use: `type:Label` |
-| `tooltip`           | String | **No**                              | The tooltip associated with the label |
+| Parameter name      | Type   | Positional parameter                | Purpose                                                                                       |
+| ------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
+| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the label                                                       |
+| `type`              | String | **No**                              | For a label use: `type:Label`                                                                 |
+| `tooltip`           | String | **No**                              | The tooltip associated with the label                                                         |
 | `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |
 
 Besides the default methods that every toolbar item has (as described [here](../toolbar.md#common-methods)), the following methods are available for a toolbar label:
 
 | Method             | Purpose                                                                                                          |
-|--------------------|------------------------------------------------------------------------------------------------------------------|
+| ------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Set the new caption for a label. The size of the label is the considered the number of characters in its content |
-| `get_caption()`    | Returns the current caption of a label. |
+| `caption()`        | Returns the current caption of a label.                                                                          |
 
 # Example
 

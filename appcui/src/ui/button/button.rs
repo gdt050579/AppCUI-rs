@@ -45,7 +45,7 @@ impl Button {
         self.set_hotkey(hotkey);
     }
     /// Returns the button caption.
-    pub fn get_caption(&self) -> &str {
+    pub fn caption(&self) -> &str {
         self.caption.get_text()
     }
 }

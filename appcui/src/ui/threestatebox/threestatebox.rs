@@ -47,7 +47,7 @@ impl ThreeStateBox {
 
     /// Returns the caption of the threestatebox.
     #[inline]
-    pub fn get_caption(&self) -> &str {
+    pub fn caption(&self) -> &str {
         self.caption.get_text()
     }
 }

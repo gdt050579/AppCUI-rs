@@ -22,10 +22,10 @@ A threestatebox can contain a multi-line text but you will have to set the heigh
 
 A threestatebox supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name       | Type   | Positional parameter                | Purpose                                                       |
-|----------------------|--------|-------------------------------------|---------------------------------------------------------------|
-| `text` or `caption`  | String | **Yes** (first postional parameter) | The caption (text) written on a threestatebox                 |
-| `state`              | String | **No**                              | threestatebox state: **checked**, **unchecked** or **unknown**. If the parameter is not provided, it will be defaulted to **unknown** state |
+| Parameter name      | Type   | Positional parameter                | Purpose                                                                                                                                     |
+| ------------------- | ------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a threestatebox                                                                                               |
+| `state`             | String | **No**                              | threestatebox state: **checked**, **unchecked** or **unknown**. If the parameter is not provided, it will be defaulted to **unknown** state |
 
 
 Some examples that uses these paramateres:
@@ -47,20 +47,20 @@ pub trait ThreeStateBoxEvents {
 
 Besides the [Common methods for all Controls](../common_methods.md) a checkbox also has the following aditional methods:
 
-| Method             | Purpose                                                                             |
-|--------------------|-------------------------------------------------------------------------------------|
+| Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `set_caption(...)` | Set the new caption. If the string provided contains the special character `&`, this method also sets the hotkey associated with a control. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any).<br>Example: `threestatebox.set_caption("&Option")` - this will set the caption of the threestatebox with `Option` and the hotkey to `Alt+O` |
-| `get_caption()`    | Returns the current caption |
-| `get_state()`      | Returns the current state of the threestatebox (**checked**, **unchecked** or **unknown**) |
-| `set_state(...)`   | Sets the new state for the threestatebox (**checked**, **unchecked** or **unknown**)|
+| `caption()`        | Returns the current caption                                                                                                                                                                                                                                                                                                                                                                            |
+| `get_state()`      | Returns the current state of the threestatebox (**checked**, **unchecked** or **unknown**)                                                                                                                                                                                                                                                                                                             |
+| `set_state(...)`   | Sets the new state for the threestatebox (**checked**, **unchecked** or **unknown**)                                                                                                                                                                                                                                                                                                                   |
 
 ## Key association
 
 The following keys are processed by the control if it has focus:
 
-| Key                | Purpose                                                                             |
-|--------------------|-------------------------------------------------------------------------------------|
-| `Space` or `Enter` | Cycle throght the states (checked to un-checked and vice-versa). It also emits `ThreeStateBoxEvents::on_status_changed(...)` event with the `state` parameter, the current state of the threestatebox. It has the same action clicking the threestatebox with the mouse.  |
+| Key                | Purpose                                                                                                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Space` or `Enter` | Cycle throght the states (checked to un-checked and vice-versa). It also emits `ThreeStateBoxEvents::on_status_changed(...)` event with the `state` parameter, the current state of the threestatebox. It has the same action clicking the threestatebox with the mouse. |
 
 Aditionally, `Alt`+**letter or number** will have the same action (even if the threestatebox does not have a focus) if that letter or nunber was set as a hot-key for a threestatebox via its caption. 
 

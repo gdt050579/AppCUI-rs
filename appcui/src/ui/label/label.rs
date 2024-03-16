@@ -14,7 +14,8 @@ impl Label {
     pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::AltPlusKey);
     }
-    pub fn get_caption(&self)->&str {
+    #[inline(always)]
+    pub fn caption(&self)->&str {
         self.caption.get_text()
     }
 }

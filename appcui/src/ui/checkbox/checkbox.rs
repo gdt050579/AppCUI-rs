@@ -37,7 +37,7 @@ impl CheckBox {
     }
     /// Returns the checkbox caption.
     #[inline(always)]
-    pub fn get_caption(&self) -> &str {
+    pub fn caption(&self) -> &str {
         self.caption.get_text()
     }
 }

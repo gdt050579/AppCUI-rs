@@ -25,23 +25,23 @@ Using the character `&` as part of the button caption will associate the next ch
 
 The following parameters are supported for a toolbar checkbox:
 
-| Parameter name      | Type   | Positional parameter                | Purpose |
-|---------------------|--------|-------------------------------------|---------|
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the checkbox |
-| `type`              | String | **No**                              | For a checkbox use: `type:Checkbox` |
-| `tooltip`           | String | **No**                              | The tooltip associated with the button |
-| `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |
-| `check` or `checked`| Bool   | **No**                              | `true` if the checkbox is checked or `false` otherwise |
+| Parameter name       | Type   | Positional parameter                | Purpose                                                                                       |
+| -------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
+| `text` or `caption`  | String | **Yes** (first postional parameter) | The caption (text) written on the checkbox                                                    |
+| `type`               | String | **No**                              | For a checkbox use: `type:Checkbox`                                                           |
+| `tooltip`            | String | **No**                              | The tooltip associated with the button                                                        |
+| `visible`            | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |
+| `check` or `checked` | Bool   | **No**                              | `true` if the checkbox is checked or `false` otherwise                                        |
 
 
 Besides the default methods that every toolbar item has (as described [here](../toolbar.md#common-methods)), the following methods are available for a toolbar label:
 
-| Method             | Purpose                                                                                                          |
-|--------------------|------------------------------------------------------------------------------------------------------------------|
+| Method             | Purpose                                                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Sets the new caption for a checkbox. The width (in characters) of the checkbox is the considered to be the number of characters in its content |
-| `get_caption()`    | Returns the current caption of a checkbox. |
-| `set_checked()`    | Sets the new checked stated of the checkbox. |
-| `is_checked()`     | `true` if the toolbar checkbox is checked or `false` otherwise |
+| `caption()`        | Returns the current caption of a checkbox.                                                                                                     |
+| `set_checked()`    | Sets the new checked stated of the checkbox.                                                                                                   |
+| `is_checked()`     | `true` if the toolbar checkbox is checked or `false` otherwise                                                                                 |
 
 ## Events
 

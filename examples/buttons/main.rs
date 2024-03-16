@@ -36,7 +36,7 @@ impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
         if (button_handle == self.b1) || (button_handle == self.b2) || (button_handle == self.b3) {
             let button = self.get_control(button_handle).unwrap();
-            let new_text = format!("Button ('{}') was pressed !", button.get_caption());
+            let new_text = format!("Button ('{}') was pressed !", button.caption());
             self.set_label_text(&new_text.as_str());
             return EventProcessStatus::Processed;
         }

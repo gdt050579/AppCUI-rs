@@ -21,9 +21,9 @@ A checkbox can contain a multi-line text but you will have to set the height par
 
 A checkbox supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name       | Type   | Positional parameter                | Purpose |
-|----------------------|--------|-------------------------------------|---------|
-| `text` or `caption`  | String | **Yes** (first postional parameter) | The caption (text) written on a checkbox |
+| Parameter name       | Type   | Positional parameter                | Purpose                                         |
+| -------------------- | ------ | ----------------------------------- | ----------------------------------------------- |
+| `text` or `caption`  | String | **Yes** (first postional parameter) | The caption (text) written on a checkbox        |
 | `checked` or `check` | Bool   | **No**                              | Checkbox checked status: **true** for **false** |
 
 
@@ -46,20 +46,20 @@ pub trait CheckBoxEvents {
 
 Besides the [Common methods for all Controls](../common_methods.md) a checkbox also has the following aditional methods:
 
-| Method             | Purpose                                                                             |
-|--------------------|-------------------------------------------------------------------------------------|
+| Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Set the new caption for a checkbox. If the string provided contains the special character `&`, this method also sets the hotkey associated with a control. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any).<br>Example: `checkbox.set_caption("&Option")` - this will set the caption of the checkbox cu `Option` and the hotkey to `Alt+O` |
-| `get_caption()`    | Returns the current caption of a checbox |
-| `is_checked()`     | **true** if the checkbox is checked, false otherwise |
-| `set_checked(...)` | Sets the new checked status for the checkbox |
+| `caption()`        | Returns the current caption of a checbox                                                                                                                                                                                                                                                                                                                                                                  |
+| `is_checked()`     | **true** if the checkbox is checked, false otherwise                                                                                                                                                                                                                                                                                                                                                      |
+| `set_checked(...)` | Sets the new checked status for the checkbox                                                                                                                                                                                                                                                                                                                                                              |
 
 ## Key association
 
 The following keys are processed by a Checkbox control if it has focus:
 
-| Key                | Purpose                                                                             |
-|--------------------|-------------------------------------------------------------------------------------|
-| `Space` or `Enter` | Changes the checked state (checked to un-checked and vice-versa). It also emits  `CheckBoxEvents::on_status_changed(...)` event with the `checked` parameter the current chcked status of the checkbox. It has the same action clicking the checkbox with the mouse.  |
+| Key                | Purpose                                                                                                                                                                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Space` or `Enter` | Changes the checked state (checked to un-checked and vice-versa). It also emits  `CheckBoxEvents::on_status_changed(...)` event with the `checked` parameter the current chcked status of the checkbox. It has the same action clicking the checkbox with the mouse. |
 
 Aditionally, `Alt`+**letter or number** will have the same action (even if the checkbox does not have a focus) if that letter or nunber was set as a hot-key for a checkbox via its caption. 
 

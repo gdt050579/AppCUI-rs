@@ -27,21 +27,21 @@ Using the character `&` as part of the button caption will associate the next ch
 
 The following parameters are supported for a toolbar singlechoice:
 
-| Parameter name        | Type   | Positional parameter                | Purpose |
-|-----------------------|--------|-------------------------------------|---------|
-| `text` or `caption`   | String | **Yes** (first postional parameter) | The caption (text) written on the single choice |
-| `type`                | String | **No**                              | For a singlechoince use: `type:SingleChoince` |
-| `tooltip`             | String | **No**                              | The tooltip associated with the singlechoice |
-| `visible`             | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |
+| Parameter name      | Type   | Positional parameter                | Purpose                                                                                       |
+| ------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
+| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the single choice                                               |
+| `type`              | String | **No**                              | For a singlechoince use: `type:SingleChoince`                                                 |
+| `tooltip`           | String | **No**                              | The tooltip associated with the singlechoice                                                  |
+| `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |
 
 Besides the default methods that every toolbar item has (as described [here](../toolbar.md#common-methods)), the following methods are available for a toolbar label:
 
-| Method             | Purpose                                                                                                          |
-|--------------------|------------------------------------------------------------------------------------------------------------------|
+| Method             | Purpose                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Sets the new caption for a singlechoince. The width (in characters) of the singlechoince is the considered to be the number of characters in its content |
-| `get_caption()`    | Returns the current caption of a singlechoice item. |
-| `select()`         | Sets the current single choice as the selected single choince for the current group. |
-| `is_selected()`    | `true` if the toolbar single choice is selected or `false` otherwise |
+| `caption()`        | Returns the current caption of a singlechoice item.                                                                                                      |
+| `select()`         | Sets the current single choice as the selected single choince for the current group.                                                                     |
+| `is_selected()`    | `true` if the toolbar single choice is selected or `false` otherwise                                                                                     |
 
 **OBS**: Keep in mind that using `select()` method only works if the single choice has already been added to a toolbar. Using this methid without adding the item to a toolbar will result in a panic.
 

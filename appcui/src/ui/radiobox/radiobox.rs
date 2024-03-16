@@ -39,7 +39,7 @@ impl RadioBox {
     }
     /// Returns the RadioBox caption.
     #[inline(always)]
-    pub fn get_caption(&self) -> &str {
+    pub fn caption(&self) -> &str {
         self.caption.get_text()
     }
 }

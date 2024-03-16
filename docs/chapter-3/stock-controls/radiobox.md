@@ -51,7 +51,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a radiobox a
 | Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Set the new caption for a radiobox. If the string provided contains the special character `&`, this method also sets the hotkey associated with a control. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any).<br>Example: `radiobox.set_caption("&Option")` - this will set the caption of the radiobox cu `Option` and the hotkey to `Alt+O` |
-| `get_caption()`    | Returns the current caption of a checbox                                                                                                                                                                                                                                                                                                                                                                  |
+| `caption()`        | Returns the current caption of a radiobox                                                                                                                                                                                                                                                                                                                                                                  |
 | `is_selected()`    | **true** if the radiobox is selected, false otherwise                                                                                                                                                                                                                                                                                                                                                     |
 | `set_checked()`    | Sets the new checked status for the radiobox                                                                                                                                                                                                                                                                                                                                                              |
 
@@ -134,7 +134,7 @@ impl RadioBoxEvents for MyWin {
     fn on_selected(&mut self, handle: Handle<RadioBox>) -> EventProcessStatus {
         let mut s = String::new();
         if let Some(r) = self.get_control(handle) {
-            s += r.get_caption();
+            s += r.caption();
         }
         if s.len()>0 {
             let h = self.l;

@@ -34,7 +34,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a label also
 | Method             | Purpose                                                                                                                                                                                                                                                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `set_caption(...)` | Set the new caption for a label. If the string provided contains the special character `&`, this method will highlight the next character just like a hotkey does. <br>Example: `label.set_caption("&Start")` - this will set the caption of the label to `Start` and highlight the first letter (`S`) |
-| `get_caption()`    | Returns the current caption of a label                                                                                                                                                                                                                                                                 |
+| `caption()`        | Returns the current caption of a label                                                                                                                                                                                                                                                                 |
 
 ## Key association
 
