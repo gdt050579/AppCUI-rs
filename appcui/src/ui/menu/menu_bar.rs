@@ -40,7 +40,7 @@ impl MenuBar {
                 break;
             }
             item.x = x;
-            x += 2 + (item.caption.get_chars_count() as i32);
+            x += 2 + (item.caption.chars_count() as i32);
             idx += 1;
         }
     }
@@ -55,7 +55,7 @@ impl MenuBar {
             if index >= self.count {
                 break;
             }
-            if (x >= item.x) && (x < (item.x + 2 + (item.caption.get_chars_count() as i32))) {
+            if (x >= item.x) && (x < (item.x + 2 + (item.caption.chars_count() as i32))) {
                 return Some(index);
             }
         }
@@ -222,7 +222,7 @@ impl MenuBar {
             }
             format.x = self.x + item.x + 1;
             format.hotkey_pos = item.caption.hotkey_pos();
-            format.chars_count = Some(item.caption.get_chars_count() as u16);
+            format.chars_count = Some(item.caption.chars_count() as u16);
             format.char_attr = match () {
                 _ if index == open_idx => theme.menu.text.pressed_or_selectd,
                 _ if index == hover_idx => theme.menu.text.hovered,
@@ -239,7 +239,7 @@ impl MenuBar {
                 surface.fill_horizontal_line(
                     format.x - 1,
                     format.y,
-                    format.x + item.caption.get_chars_count() as i32,
+                    format.x + item.caption.chars_count() as i32,
                     Character::with_attributes(' ', format.char_attr),
                 );
             }

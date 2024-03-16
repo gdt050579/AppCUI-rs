@@ -29,7 +29,7 @@ impl OnPaint for Label {
             TextAlignament::Left,
             sz.height > 1,
         );
-        format.chars_count = Some(self.caption.get_chars_count() as u16);
+        format.chars_count = Some(self.caption.chars_count() as u16);
         format.char_attr = if self.is_enabled() {
             theme.text.normal
         } else {
@@ -47,7 +47,7 @@ impl OnPaint for Label {
             format.text_wrap = TextWrap::Word;
             format.width = Some(sz.width as u16);
         }
-        format.chars_count = Some(self.caption.get_chars_count() as u16);
+        format.chars_count = Some(self.caption.chars_count() as u16);
         surface.write_text(self.caption.text(), &format);
     }
 }

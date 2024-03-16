@@ -67,7 +67,7 @@ impl OnPaint for RadioBox {
                 format.hotkey_pos = self.caption.hotkey_pos();
                 format.hotkey_attr = Some(col_hot_key);
             }
-            format.chars_count = Some(self.caption.get_chars_count() as u16);
+            format.chars_count = Some(self.caption.chars_count() as u16);
             surface.write_text(&self.caption.text(), &format);
         }
         if self.selected {
@@ -106,7 +106,7 @@ impl OnMouseEvent for RadioBox {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter => {
-                if self.caption.get_chars_count() > (self.size().width - 4) as usize {
+                if self.caption.chars_count() > (self.size().width - 4) as usize {
                     self.show_tooltip(self.caption.text());
                 }
                 EventProcessStatus::Processed

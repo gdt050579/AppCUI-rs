@@ -65,7 +65,7 @@ impl Caption {
         self.text.as_str()
     }
     #[inline(always)]
-    pub(crate) fn get_chars_count(&self) -> usize {
+    pub(crate) fn chars_count(&self) -> usize {
         self.chars_count
     }
     #[inline(always)]

@@ -45,11 +45,11 @@ impl Panel {
         let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
         surface.clear(Character::with_char(' '));
         surface.draw_rect(Rect::with_point_and_size(Point::ORIGIN, sz), LineType::Single, border_color);
-        if (self.caption.get_chars_count() > 0) && (sz.width > 7) {
+        if (self.caption.chars_count() > 0) && (sz.width > 7) {
             let text_color = if self.is_enabled() { theme.text.normal } else { theme.text.inactive };
             let mut format = TextFormat::new(3, 0, text_color, TextAlignament::Left, false);
             format.width = Some((sz.width - 6) as u16);
-            let chars_count = self.caption.get_chars_count();
+            let chars_count = self.caption.chars_count();
             surface.write_text(self.caption.text(), &format);
             surface.write_char(2, 0, Character::with_char(' '));
             if chars_count > (sz.width - 6) as usize {
@@ -66,11 +66,11 @@ impl Panel {
         let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
         surface.clear(Character::with_char(' '));
         surface.draw_rect(Rect::with_point_and_size(Point::ORIGIN, sz), LineType::Single, border_color);
-        if (self.caption.get_chars_count() > 0) && (sz.width > 7) {
+        if (self.caption.chars_count() > 0) && (sz.width > 7) {
             let text_color = if self.is_enabled() { theme.text.normal } else { theme.text.inactive };
             let mut format = TextFormat::new(3, 0, text_color, TextAlignament::Left, false);
             format.width = Some((sz.width - 6) as u16);
-            let chars_count = self.caption.get_chars_count();
+            let chars_count = self.caption.chars_count();
             if chars_count > (sz.width - 6) as usize {
                 surface.write_text(self.caption.text(), &format);
                 surface.write_char(2, 0, Character::with_char(' '));
@@ -103,11 +103,11 @@ impl Panel {
         } else {
             surface.clear(Character::with_char(' '));
         }
-        if (self.caption.get_chars_count() > 0) && (sz.width > 7) {
+        if (self.caption.chars_count() > 0) && (sz.width > 7) {
             let text_color = if self.is_enabled() { theme.tab.text.normal } else { theme.text.inactive };
             let mut format = TextFormat::new(3, 0, text_color, TextAlignament::Left, false);
             format.width = Some((sz.width - 6) as u16);
-            let chars_count = self.caption.get_chars_count();
+            let chars_count = self.caption.chars_count();
             if chars_count > (sz.width - 6) as usize {
                 surface.write_text(self.caption.text(), &format);
                 surface.write_char(2, 0, Character::with_char(' '));

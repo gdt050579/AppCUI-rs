@@ -89,5 +89,5 @@ pub(super) fn update_format_with_caption(
     if caption.has_hotkey() {
         format.hotkey_attr = Some(get_hotkey_attr(enabled, current_item, color));
     }
-    format.chars_count = Some(caption.get_chars_count() as u16);
+    format.chars_count = Some(caption.chars_count() as u16);
 }

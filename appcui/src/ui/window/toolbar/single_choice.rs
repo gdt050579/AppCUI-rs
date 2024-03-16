@@ -31,7 +31,7 @@ impl SingleChoice {
     }
     pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::AltPlusKey);
-        self.base.set_width(self.caption.get_chars_count() as u16);
+        self.base.set_width(self.caption.chars_count() as u16);
         self.base.request_recompute_layout();
     }
     #[inline(always)]
@@ -67,7 +67,7 @@ impl SingleChoice {
             st.get_button_attr(theme),
             TextAlignament::Left,
         );
-        format.width = Some(self.caption.get_chars_count() as u16);
+        format.width = Some(self.caption.chars_count() as u16);
         format.hotkey_pos = self.caption.hotkey_pos();
         if self.caption.has_hotkey() {
             format.hotkey_attr = Some(st.get_hotkey_attr(theme));

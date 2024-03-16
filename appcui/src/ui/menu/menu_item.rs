@@ -116,11 +116,11 @@ impl MenuItemWrapper {
     #[inline(always)]
     pub(super) fn get_caption_chars_count(&self) -> usize {
         match self {
-            MenuItemWrapper::Command(item) => item.caption.get_chars_count(),
-            MenuItemWrapper::CheckBox(item) => item.caption.get_chars_count(),
-            MenuItemWrapper::SingleChoice(item) => item.caption.get_chars_count(),
+            MenuItemWrapper::Command(item) => item.caption.chars_count(),
+            MenuItemWrapper::CheckBox(item) => item.caption.chars_count(),
+            MenuItemWrapper::SingleChoice(item) => item.caption.chars_count(),
             MenuItemWrapper::Separator(_) => 0,
-            MenuItemWrapper::SubMenu(item) => item.caption.get_chars_count(),
+            MenuItemWrapper::SubMenu(item) => item.caption.chars_count(),
         }
     }
     #[inline(always)]

@@ -81,7 +81,7 @@ impl OnPaint for Button {
         let flat = self.button_type == super::Type::Flat;
         let w = if flat { self.size().width } else { self.size().width - 1 };
         let mut format = TextFormat::single_line((w / 2) as i32, 0, col_text, TextAlignament::Center);
-        format.chars_count = Some(self.caption.get_chars_count() as u16);
+        format.chars_count = Some(self.caption.chars_count() as u16);
         format.width = Some(w as u16);
         if self.caption.has_hotkey() {
             format.hotkey_attr = Some(match () {
@@ -117,7 +117,7 @@ impl OnMouseEvent for Button {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter => {
-                if self.caption.get_chars_count() > (self.size().width - 2) as usize {
+                if self.caption.chars_count() > (self.size().width - 2) as usize {
                     self.show_tooltip(self.caption.text());
                 }
                 EventProcessStatus::Processed
