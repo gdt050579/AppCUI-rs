@@ -32,7 +32,7 @@ fn check_commands() {
         }
         fn set_info(&mut self, txt: &str) {
             let h_label = self.info;
-            if let Some(label) = self.get_control_mut(h_label) {
+            if let Some(label) = self.control_mut(h_label) {
                 label.set_caption(txt);
             }
         }

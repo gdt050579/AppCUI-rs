@@ -89,7 +89,7 @@ impl MyWin {
 impl CheckBoxEvents for MyWin {
     fn on_status_changed(&mut self, _handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
         let handle = self.l;
-        let l = self.get_control_mut(handle).unwrap();
+        let l = self.control_mut(handle).unwrap();
         if checked {
             l.set_caption("Status: Checked");
         } else {

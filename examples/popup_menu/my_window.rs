@@ -23,7 +23,7 @@ impl CheckBoxEvents for MyWindow {
     fn on_status_changed(&mut self, handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
         if handle == self.cb {
             let h = self.hc;
-            if let Some(obj) = self.get_control_mut(h) {
+            if let Some(obj) = self.control_mut(h) {
                 obj.enable_small_menu(checked);
             }
             return EventProcessStatus::Processed;

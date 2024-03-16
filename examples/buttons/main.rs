@@ -26,7 +26,7 @@ impl MyWin {
     }
     fn set_label_text(&mut self, txt: &str) {
         let h = self.lb;
-        if let Some(label) = self.get_control_mut(h) {
+        if let Some(label) = self.control_mut(h) {
             label.set_caption(txt);
         }
     }
@@ -35,7 +35,7 @@ impl MyWin {
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
         if (button_handle == self.b1) || (button_handle == self.b2) || (button_handle == self.b3) {
-            let button = self.get_control(button_handle).unwrap();
+            let button = self.control(button_handle).unwrap();
             let new_text = format!("Button ('{}') was pressed !", button.caption());
             self.set_label_text(&new_text.as_str());
             return EventProcessStatus::Processed;

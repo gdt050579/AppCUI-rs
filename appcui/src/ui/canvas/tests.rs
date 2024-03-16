@@ -531,7 +531,7 @@ fn check_resize_surface() {
     impl ButtonEvents for MyWin {
         fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
             let h = self.viewer;
-            if let Some(canvas) = self.get_control_mut(h) {
+            if let Some(canvas) = self.control_mut(h) {
                 canvas.resize_surface(Size::new(60, 15));
                 canvas
                     .get_drawing_surface()

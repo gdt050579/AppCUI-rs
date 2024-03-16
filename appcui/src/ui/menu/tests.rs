@@ -785,7 +785,7 @@ fn check_popup_menu() {
         fn on_status_changed(&mut self, handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
             if handle == self.cb {
                 let h = self.hc;
-                if let Some(obj) = self.get_control_mut(h) {
+                if let Some(obj) = self.control_mut(h) {
                     obj.enable_small_menu(checked);
                 }
                 return EventProcessStatus::Processed;
@@ -980,7 +980,7 @@ fn check_popup_menu_with_keys() {
         fn on_status_changed(&mut self, handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
             if handle == self.cb {
                 let h = self.hc;
-                if let Some(obj) = self.get_control_mut(h) {
+                if let Some(obj) = self.control_mut(h) {
                     obj.enable_small_menu(checked);
                 }
                 return EventProcessStatus::Processed;
@@ -1092,7 +1092,7 @@ fn check_menubar_with_keys() {
             if let Some(i) = self.menuitem(menu, item) {
                 let s = String::from(i.caption());
                 let h = self.lb;
-                if let Some(l) = self.get_control_mut(h) {
+                if let Some(l) = self.control_mut(h) {
                     l.set_caption(&s);
                 }
             }
@@ -1351,7 +1351,7 @@ fn check_menubar_recursive_shortcuts() {
             if let Some(i) = self.menuitem(menu, item) {
                 let s = String::from(i.caption());
                 let h = self.lb;
-                if let Some(l) = self.get_control_mut(h) {
+                if let Some(l) = self.control_mut(h) {
                     l.set_caption(&s);
                 }
             }

@@ -31,8 +31,8 @@ impl MyWin {
         let mut me = Self {
             base: window!("..."),
         };
-        let a_group = me.get_toolbar().create_group(toolbar::GroupPosition::<Value>);
-        let item_handle = me.get_toolbar().add(a_group, toolbar::<Type>::new("..."));
+        let a_group = me.toolbar().create_group(toolbar::GroupPosition::<Value>);
+        let item_handle = me.toolbar().add(a_group, toolbar::<Type>::new("..."));
         // other initializations
         me
     }

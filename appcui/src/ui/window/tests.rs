@@ -167,26 +167,26 @@ fn check_multiple_items_top_bar() {
     let mut w = Window::new("Title", Layout::new("d:c,w:70,h:10"), window::Flags::Sizeable);
     w.set_tag("ABC");
     w.set_hotkey(key!("F1"));
-    let g = w.get_toolbar().create_group(GroupPosition::TopLeft);
-    w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
-    w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
-    let g = w.get_toolbar().create_group(GroupPosition::TopLeft);
-    w.get_toolbar().add(g, toolbar::Label::new("Single"));
-    let g = w.get_toolbar().create_group(GroupPosition::TopRight);
-    w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
-    w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
-    let g = w.get_toolbar().create_group(GroupPosition::TopRight);
-    w.get_toolbar().add(g, toolbar::Label::new("AB"));
-    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
-    w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
-    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::Label::new("Single"));
-    let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::Label::new("Lb-1"));
-    w.get_toolbar().add(g, toolbar::Label::new("Lb-2"));
-    let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::Label::new("AB"));
+    let g = w.toolbar().create_group(GroupPosition::TopLeft);
+    w.toolbar().add(g, toolbar::Label::new("Lb-1"));
+    w.toolbar().add(g, toolbar::Label::new("Lb-2"));
+    let g = w.toolbar().create_group(GroupPosition::TopLeft);
+    w.toolbar().add(g, toolbar::Label::new("Single"));
+    let g = w.toolbar().create_group(GroupPosition::TopRight);
+    w.toolbar().add(g, toolbar::Label::new("Lb-1"));
+    w.toolbar().add(g, toolbar::Label::new("Lb-2"));
+    let g = w.toolbar().create_group(GroupPosition::TopRight);
+    w.toolbar().add(g, toolbar::Label::new("AB"));
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+    w.toolbar().add(g, toolbar::Label::new("Lb-1"));
+    w.toolbar().add(g, toolbar::Label::new("Lb-2"));
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+    w.toolbar().add(g, toolbar::Label::new("Single"));
+    let g = w.toolbar().create_group(GroupPosition::BottomRight);
+    w.toolbar().add(g, toolbar::Label::new("Lb-1"));
+    w.toolbar().add(g, toolbar::Label::new("Lb-2"));
+    let g = w.toolbar().create_group(GroupPosition::BottomRight);
+    w.toolbar().add(g, toolbar::Label::new("AB"));
 
     a.add_window(w);
     a.run();
@@ -291,10 +291,10 @@ fn check_window_toolbar_title_pos_recompute() {
                 info: Handle::None,
                 change_info: Handle::None,
             };
-            let g = me.get_toolbar().create_group(GroupPosition::TopLeft);
-            me.info = me.get_toolbar().add(g, toolbar::Label::new("?"));
-            let g = me.get_toolbar().create_group(GroupPosition::BottomLeft);
-            me.change_info = me.get_toolbar().add(g, toolbar::Button::new("&Change Info Size"));
+            let g = me.toolbar().create_group(GroupPosition::TopLeft);
+            me.info = me.toolbar().add(g, toolbar::Label::new("?"));
+            let g = me.toolbar().create_group(GroupPosition::BottomLeft);
+            me.change_info = me.toolbar().add(g, toolbar::Button::new("&Change Info Size"));
             me
         }
     }
@@ -302,7 +302,7 @@ fn check_window_toolbar_title_pos_recompute() {
         fn on_button_clicked(&mut self, handle: Handle<toolbar::Button>) -> EventProcessStatus {
             if handle == self.change_info {
                 let h = self.info;
-                self.get_toolbar().get_mut(h).unwrap().set_content("ABCDEFGHI");
+                self.toolbar().get_mut(h).unwrap().set_content("ABCDEFGHI");
                 return EventProcessStatus::Processed;
             }
             EventProcessStatus::Ignored
@@ -465,7 +465,7 @@ fn check_window_on_layout_changed() {
             let label_handle = self.info;
             let size = self.size();
             let client_size = self.client_size();
-            if let Some(label) = self.get_control_mut(label_handle) {
+            if let Some(label) = self.control_mut(label_handle) {
                 label.set_caption(
                     format!(
                         "Previous rect : {},{} - {}x{}\nNew rect      : {},{} - {}x{}\nClient size   : {}x{}",
@@ -529,14 +529,14 @@ fn check_window_on_activate_deactivate() {
     impl WindowEvents for MyWin {
         fn on_activate(&mut self) {
             let h = self.info;
-            if let Some(label) = self.get_control_mut(h) {
+            if let Some(label) = self.control_mut(h) {
                 label.set_caption("Activated");
             }
         }
 
         fn on_deactivate(&mut self) {
             let h = self.info;
-            if let Some(label) = self.get_control_mut(h) {
+            if let Some(label) = self.control_mut(h) {
                 label.set_caption("Deactivated");
             }
         }
@@ -569,11 +569,11 @@ fn check_window_toolbar_label() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
-    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::Label::new("Label 1"));
-    w.get_toolbar().add(g, toolbar::Label::new("Label 2"));
-    let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::Label::new("Label 3"));
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+    w.toolbar().add(g, toolbar::Label::new("Label 1"));
+    w.toolbar().add(g, toolbar::Label::new("Label 2"));
+    let g = w.toolbar().create_group(GroupPosition::BottomRight);
+    w.toolbar().add(g, toolbar::Label::new("Label 3"));
 
     a.add_window(w);
     a.run();
@@ -592,12 +592,12 @@ fn check_window_toolbar_label_tooltip() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
-    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
     let mut l = toolbaritem!("first,type:label");
     l.set_tooltip("A toolbar label");
-    w.get_toolbar().add(g, l);
-    w.get_toolbar().add(g, toolbaritem!("second,type:label,tooltip:'second tooltip'"));
-    w.get_toolbar().add(g, toolbaritem!("caption:hidden,type:label,visible:false"));
+    w.toolbar().add(g, l);
+    w.toolbar().add(g, toolbaritem!("second,type:label,tooltip:'second tooltip'"));
+    w.toolbar().add(g, toolbaritem!("caption:hidden,type:label,visible:false"));
     a.add_window(w);
     a.run();
 }
@@ -621,11 +621,11 @@ fn check_window_toolbar_button() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
-    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::Button::new("Start"));
-    w.get_toolbar().add(g, toolbar::Button::new("Stop"));
-    let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::Button::new("Exit"));
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+    w.toolbar().add(g, toolbar::Button::new("Start"));
+    w.toolbar().add(g, toolbar::Button::new("Stop"));
+    let g = w.toolbar().create_group(GroupPosition::BottomRight);
+    w.toolbar().add(g, toolbar::Button::new("Exit"));
 
     a.add_window(w);
     a.run();
@@ -650,10 +650,10 @@ fn check_window_toolbar_button_click() {
                 number: 10,
             };
             // create a group
-            let g = win.get_toolbar().create_group(toolbar::GroupPosition::BottomRight);
+            let g = win.toolbar().create_group(toolbar::GroupPosition::BottomRight);
             // add buttons
-            win.increase_button = win.get_toolbar().add(g, toolbaritem!("'+',type:button,tooltip:'Click to increase'"));
-            win.decrease_button = win.get_toolbar().add(g, toolbar::Button::new("-"));
+            win.increase_button = win.toolbar().add(g, toolbaritem!("'+',type:button,tooltip:'Click to increase'"));
+            win.decrease_button = win.toolbar().add(g, toolbar::Button::new("-"));
             // add a label
             win.text = win.add(label!("10,d:c,w:2,h:1"));
             win
@@ -668,7 +668,7 @@ fn check_window_toolbar_button_click() {
             }
             let h = self.text;
             let n = self.number;
-            if let Some(label) = self.get_control_mut(h) {
+            if let Some(label) = self.control_mut(h) {
                 label.set_caption(format!("{}", n).as_str());
             }
             EventProcessStatus::Processed
@@ -714,15 +714,15 @@ fn check_window_toolbar_button_events() {
                 exit_button: Handle::None,
             };
             me.info = me.add(Label::new("<no-state>", Layout::new("x:1,y:1,w:16")));
-            let g = me.get_toolbar().create_group(GroupPosition::BottomLeft);
-            me.run_button = me.get_toolbar().add(g, toolbar::Button::new("&Run"));
-            me.stop_button = me.get_toolbar().add(g, toolbar::Button::new("&Stop"));
-            me.exit_button = me.get_toolbar().add(g, toolbar::Button::new("E&xit"));
+            let g = me.toolbar().create_group(GroupPosition::BottomLeft);
+            me.run_button = me.toolbar().add(g, toolbar::Button::new("&Run"));
+            me.stop_button = me.toolbar().add(g, toolbar::Button::new("&Stop"));
+            me.exit_button = me.toolbar().add(g, toolbar::Button::new("E&xit"));
             me
         }
         fn set_info(&mut self, info: &str) {
             let h = self.info;
-            if let Some(label) = self.get_control_mut(h) {
+            if let Some(label) = self.control_mut(h) {
                 label.set_caption(info);
             }
         }
@@ -799,11 +799,11 @@ fn check_window_toolbar_checkbox() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
-    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::CheckBox::new("Task &1", true));
-    w.get_toolbar().add(g, toolbar::CheckBox::new("Task &2", false));
-    let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::CheckBox::new("Enable &All", false));
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+    w.toolbar().add(g, toolbar::CheckBox::new("Task &1", true));
+    w.toolbar().add(g, toolbar::CheckBox::new("Task &2", false));
+    let g = w.toolbar().create_group(GroupPosition::BottomRight);
+    w.toolbar().add(g, toolbar::CheckBox::new("Enable &All", false));
 
     a.add_window(w);
     a.run();
@@ -821,8 +821,8 @@ fn check_window_toolbar_checkbox_events() {
                 base: Window::new("Win", Layout::new("d:c,w:50,h:6"), window::Flags::None),
                 cb: Handle::None,
             };
-            let g = me.get_toolbar().create_group(GroupPosition::TopLeft);
-            me.cb = me.get_toolbar().add(g, toolbar::CheckBox::new("No State", false));
+            let g = me.toolbar().create_group(GroupPosition::TopLeft);
+            me.cb = me.toolbar().add(g, toolbar::CheckBox::new("No State", false));
             me
         }
     }
@@ -830,7 +830,7 @@ fn check_window_toolbar_checkbox_events() {
         fn on_checkbox_clicked(&mut self, handle: Handle<toolbar::CheckBox>, checked: bool) -> EventProcessStatus {
             if handle == self.cb {
                 let h = self.cb;
-                if let Some(checkbox) = self.get_toolbar().get_mut(h) {
+                if let Some(checkbox) = self.toolbar().get_mut(h) {
                     if checked {
                         checkbox.set_content("&Checked");
                     } else {
@@ -896,14 +896,14 @@ fn check_window_toolbar_single_choice() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:58,h:8"), window::Flags::None);
-    let g = w.get_toolbar().create_group(GroupPosition::BottomLeft);
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &1"));
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &2"));
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &3"));
-    let g = w.get_toolbar().create_group(GroupPosition::BottomRight);
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &A"));
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &B"));
-    w.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &C"));
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+    w.toolbar().add(g, toolbar::SingleChoice::new("Opt &1"));
+    w.toolbar().add(g, toolbar::SingleChoice::new("Opt &2"));
+    w.toolbar().add(g, toolbar::SingleChoice::new("Opt &3"));
+    let g = w.toolbar().create_group(GroupPosition::BottomRight);
+    w.toolbar().add(g, toolbar::SingleChoice::new("Opt &A"));
+    w.toolbar().add(g, toolbar::SingleChoice::new("Opt &B"));
+    w.toolbar().add(g, toolbar::SingleChoice::new("Opt &C"));
 
     a.add_window(w);
     a.run();
@@ -931,14 +931,14 @@ fn check_window_toolbar_singlechoice_events() {
                 optB: Handle::None,
                 optC: Handle::None,
             };
-            let g = me.get_toolbar().create_group(GroupPosition::BottomLeft);
-            me.opt1 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &1"));
-            me.opt2 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &2"));
-            me.opt3 = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &3"));
-            let g = me.get_toolbar().create_group(GroupPosition::BottomRight);
-            me.optA = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &A"));
-            me.optB = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &B"));
-            me.optC = me.get_toolbar().add(g, toolbar::SingleChoice::new("Opt &C"));
+            let g = me.toolbar().create_group(GroupPosition::BottomLeft);
+            me.opt1 = me.toolbar().add(g, toolbar::SingleChoice::new("Opt &1"));
+            me.opt2 = me.toolbar().add(g, toolbar::SingleChoice::new("Opt &2"));
+            me.opt3 = me.toolbar().add(g, toolbar::SingleChoice::new("Opt &3"));
+            let g = me.toolbar().create_group(GroupPosition::BottomRight);
+            me.optA = me.toolbar().add(g, toolbar::SingleChoice::new("Opt &A"));
+            me.optB = me.toolbar().add(g, toolbar::SingleChoice::new("Opt &B"));
+            me.optC = me.toolbar().add(g, toolbar::SingleChoice::new("Opt &C"));
             me
         }
     }
@@ -946,14 +946,14 @@ fn check_window_toolbar_singlechoice_events() {
         fn on_choice_selected(&mut self, handle: Handle<toolbar::SingleChoice>) -> EventProcessStatus {
             if handle == self.opt1 {
                 let h = self.optA;
-                if let Some(opt_a) = self.get_toolbar().get_mut(h) {
+                if let Some(opt_a) = self.toolbar().get_mut(h) {
                     opt_a.select();
                 }
                 return EventProcessStatus::Processed;
             }
             if handle == self.opt2 {
                 let h = self.optB;
-                if let Some(opt_b) = self.get_toolbar().get_mut(h) {
+                if let Some(opt_b) = self.toolbar().get_mut(h) {
                     opt_b.select();
                 }
                 return EventProcessStatus::Processed;
@@ -1042,21 +1042,21 @@ fn check_window_toolbar_item_visibility() {
             win.show_hex = win.add(checkbox!("'Show hex',x:20,y:2,w:16,checked:true"));
             win.show_bin = win.add(checkbox!("'Show binary',x:20,y:3,w:16,checked:true"));
             // add toolbar labels
-            let first_group = win.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-            let second_group = win.get_toolbar().create_group(toolbar::GroupPosition::TopRight);
-            win.dec = win.get_toolbar().add(first_group, toolbar::Label::new(""));
-            win.hex = win.get_toolbar().add(first_group, toolbar::Label::new(""));
-            win.bin = win.get_toolbar().add(second_group, toolbar::Label::new(""));
+            let first_group = win.toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+            let second_group = win.toolbar().create_group(toolbar::GroupPosition::TopRight);
+            win.dec = win.toolbar().add(first_group, toolbar::Label::new(""));
+            win.hex = win.toolbar().add(first_group, toolbar::Label::new(""));
+            win.bin = win.toolbar().add(second_group, toolbar::Label::new(""));
             win.update_toolbar_labels();
             win
         }
         fn update_toolbale_label(&mut self, handle: Handle<toolbar::Label>, text: String) {
-            if let Some(label) = self.get_toolbar().get_mut(handle) {
+            if let Some(label) = self.toolbar().get_mut(handle) {
                 label.set_content(text.as_str());
             }
         }
         fn update_visibility_status_for_label(&mut self, handle: Handle<toolbar::Label>, visible: bool) {
-            if let Some(label) = self.get_toolbar().get_mut(handle) {
+            if let Some(label) = self.toolbar().get_mut(handle) {
                 label.set_visible(visible);
             }
         }
@@ -1198,7 +1198,7 @@ fn check_modal_window() {
         fn update_counter(&mut self) {
             let handle = self.b2;
             let counter = self.counter;
-            if let Some(b2) = self.get_control_mut(handle) {
+            if let Some(b2) = self.control_mut(handle) {
                 b2.set_caption(format!("Counter = {}", counter).as_str());
             }
         }
@@ -1214,11 +1214,11 @@ fn check_modal_window() {
             if button_handle == self.b1 {
                 let response = MyWin::new(format!("{}", self.counter + 1).as_str(), self.counter + 1).show();
                 let handle = self.lb;
-                if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
+                if let (Some(r), Some(lb)) = (response, self.control_mut(handle)) {
                     lb.set_caption(format!("Reponse from modal window: {}", r).as_str());
                 } else {
                     if response.is_none() {
-                        if let Some(lb) = self.get_control_mut(handle) {
+                        if let Some(lb) = self.control_mut(handle) {
                             lb.set_caption("Exit with None from modal window !");
                         }
                     }
@@ -1426,7 +1426,7 @@ fn check_window_on_cancel_callback() {
         fn update_count(&mut self) {
             let h = self.txt;
             let c = self.count;
-            if let Some(label) = self.get_control_mut(h) {
+            if let Some(label) = self.control_mut(h) {
                 label.set_caption(format!("tries: {}", c).as_str());
             }
         }

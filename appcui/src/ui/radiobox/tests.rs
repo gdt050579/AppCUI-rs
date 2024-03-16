@@ -105,12 +105,12 @@ fn check_shortkeys() {
     impl RadioBoxEvents for MyWin {
         fn on_selected(&mut self, handle: Handle<RadioBox>) -> EventProcessStatus {
             let mut s = String::new();
-            if let Some(r) = self.get_control(handle) {
+            if let Some(r) = self.control(handle) {
                 s += r.caption();
             }
             if s.len() > 0 {
                 let h = self.l;
-                if let Some(l) = self.get_control_mut(h) {
+                if let Some(l) = self.control_mut(h) {
                     l.set_caption(&s);
                 }
             }

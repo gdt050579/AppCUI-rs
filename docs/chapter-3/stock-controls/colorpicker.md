@@ -73,7 +73,7 @@ impl MyWin {
 impl ColorPickerEvents for MyWin {
     fn on_color_changed(&mut self, _handle: Handle<ColorPicker>, color: Color) -> EventProcessStatus {
         let h = self.l;
-        if let Some(label) = self.get_control_mut(h) {
+        if let Some(label) = self.control_mut(h) {
             label.set_caption(color.get_name());
             return EventProcessStatus::Processed;
         }

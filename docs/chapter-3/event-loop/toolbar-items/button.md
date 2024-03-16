@@ -76,10 +76,10 @@ impl MyWin {
             number: 10,
         };
         // create a group
-        let g = win.get_toolbar().create_group(toolbar::GroupPosition::BottomRight);
+        let g = win.toolbar().create_group(toolbar::GroupPosition::BottomRight);
         // add buttons
-        win.increase_button = win.get_toolbar().add(g, toolbar::Button::new("+"));
-        win.decrease_button = win.get_toolbar().add(g, toolbar::Button::new("-"));
+        win.increase_button = win.toolbar().add(g, toolbar::Button::new("+"));
+        win.decrease_button = win.toolbar().add(g, toolbar::Button::new("-"));
         // add a label
         win.text = win.add(label!("10,d:c,w:2,h:1"));
         win
@@ -94,7 +94,7 @@ impl ToolBarEvents for MyWin {
         }
         let h = self.text;
         let n = self.number;
-        if let Some(label) = self.get_control_mut(h) {            
+        if let Some(label) = self.control_mut(h) {            
             label.set_caption(format!("{}", n).as_str());
         }
         EventProcessStatus::Processed

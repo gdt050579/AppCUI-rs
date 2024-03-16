@@ -27,7 +27,7 @@ fn check_button_control() {
         }
         fn set_info(&mut self, txt: &str) {
             let h_label = self.info;
-            if let Some(label) = self.get_control_mut(h_label) {
+            if let Some(label) = self.control_mut(h_label) {
                 label.set_caption(txt);
             }
         }
@@ -92,7 +92,7 @@ fn check_button_control_2() {
         fn update_add_button(&mut self) {
             let h = self.add;
             let new_text = format!("Add ({})", self.counter);
-            if let Some(button) = self.get_control_mut(h) {
+            if let Some(button) = self.control_mut(h) {
                 button.set_caption(new_text.as_str());
             }
         }
@@ -173,7 +173,7 @@ fn check_button_control_hotkey() {
         }
         fn set_info(&mut self, txt: &str) {
             let h_label = self.info;
-            if let Some(label) = self.get_control_mut(h_label) {
+            if let Some(label) = self.control_mut(h_label) {
                 label.set_caption(txt);
             }
         }
@@ -186,15 +186,15 @@ fn check_button_control_hotkey() {
                     1 => self.set_info("State: 1"),
                     2 => {
                         self.set_info("State: 2");
-                        self.get_control_mut(button_handle).unwrap().set_caption("Another &caption");
+                        self.control_mut(button_handle).unwrap().set_caption("Another &caption");
                     }
                     3 => {
                         self.set_info("State: 3");
-                        self.get_control_mut(button_handle).unwrap().set_hotkey(Key::None);
+                        self.control_mut(button_handle).unwrap().set_hotkey(Key::None);
                     }
                     4 => {
                         self.set_info("State: 4");
-                        self.get_control_mut(button_handle).unwrap().set_hotkey(key!("Alt+X"));
+                        self.control_mut(button_handle).unwrap().set_hotkey(key!("Alt+X"));
                     }
                     5 => self.set_info("State: 5 (after pressing Alt+X)"),
                     _ => self.set_info("<none>"),

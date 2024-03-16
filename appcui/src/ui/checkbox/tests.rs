@@ -49,7 +49,7 @@ fn check_checkbox_events() {
         }
         fn set_label_text(&mut self, txt: &str) {
             let h = self.lb;
-            if let Some(label) = self.get_control_mut(h) {
+            if let Some(label) = self.control_mut(h) {
                 label.set_caption(txt);
             }
         }
@@ -127,7 +127,7 @@ fn check_checkbox_set_checked() {
     impl ButtonEvents for MyWin {
         fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
             let handle = self.c;
-            let c = self.get_control_mut(handle).unwrap();
+            let c = self.control_mut(handle).unwrap();
             c.set_checked(!c.is_checked());
             return EventProcessStatus::Processed;
         }

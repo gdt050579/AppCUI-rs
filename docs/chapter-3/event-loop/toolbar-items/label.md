@@ -76,21 +76,21 @@ impl MyWin {
         win.show_hex = win.add(checkbox!("'Show hex',x:20,y:2,w:16,checked:true"));
         win.show_bin = win.add(checkbox!("'Show binary',x:20,y:3,w:16,checked:true"));
         // add toolbar labels
-        let first_group = win.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-        let second_group = win.get_toolbar().create_group(toolbar::GroupPosition::TopRight);
-        win.dec = win.get_toolbar().add(first_group, toolbar::Label::new(""));
-        win.hex = win.get_toolbar().add(first_group, toolbar::Label::new(""));
-        win.bin = win.get_toolbar().add(second_group, toolbar::Label::new(""));
+        let first_group = win.toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+        let second_group = win.toolbar().create_group(toolbar::GroupPosition::TopRight);
+        win.dec = win.toolbar().add(first_group, toolbar::Label::new(""));
+        win.hex = win.toolbar().add(first_group, toolbar::Label::new(""));
+        win.bin = win.toolbar().add(second_group, toolbar::Label::new(""));
         win.update_toolbar_labels();
         win
     }
     fn update_toolbar_label(&mut self, handle: Handle<toolbar::Label>, text: String) {
-        if let Some(label) = self.get_toolbar().get_mut(handle) {
+        if let Some(label) = self.toolbar().get_mut(handle) {
             label.set_content(text.as_str());
         }
     }
     fn update_visibility_status_for_label(&mut self, handle: Handle<toolbar::Label>, visible: bool) {
-        if let Some(label) = self.get_toolbar().get_mut(handle) {
+        if let Some(label) = self.toolbar().get_mut(handle) {
             label.set_visible(visible);
         }        
     }

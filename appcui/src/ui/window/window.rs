@@ -225,19 +225,19 @@ impl Window {
     {
         return self.add_child(control);
     }
-    pub fn get_control<T>(&self, handle: Handle<T>) -> Option<&T>
+    pub fn control<T>(&self, handle: Handle<T>) -> Option<&T>
     where
         T: Control + 'static,
     {
         RuntimeManager::get().get_control(handle)
     }
-    pub fn get_control_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T>
+    pub fn control_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T>
     where
         T: Control + 'static,
     {
         RuntimeManager::get().get_control_mut(handle)
     }
-    pub fn get_toolbar(&mut self) -> &mut ToolBar {
+    pub fn toolbar(&mut self) -> &mut ToolBar {
         &mut self.toolbar
     }
 
@@ -246,7 +246,7 @@ impl Window {
         self.title.set_text(title);
         self.update_positions(self.size());
     }
-    pub fn get_title(&self) -> &str {
+    pub fn title(&self) -> &str {
         self.title.get_text()
     }
 
@@ -256,7 +256,7 @@ impl Window {
             self.update_positions(self.size());
         }
     }
-    pub fn get_tag(&self) -> Option<&str> {
+    pub fn tag(&self) -> Option<&str> {
         if let Some(item) = self.toolbar.get(self.tag_handle) {
             return Some(item.get_text());
         }
@@ -505,7 +505,7 @@ impl Window {
     }
 
     fn on_close_request(&mut self) {
-        if let Some(interface) = self.get_interface_mut() {
+        if let Some(interface) = self.interface_mut() {
             let result = WindowEvents::on_cancel(interface);
             if result == ActionRequest::Allow {
                 // logic to remove me
@@ -537,7 +537,7 @@ impl Window {
                     return true;
                 }
                 ToolBarItem::Button(_) => {
-                    if let Some(me) = self.get_interface_mut() {
+                    if let Some(me) = self.interface_mut() {
                         return ToolBarEvents::on_button_clicked(me, handle.cast()) == EventProcessStatus::Processed;
                     }
                     return false;
@@ -545,14 +545,14 @@ impl Window {
                 ToolBarItem::CheckBox(checkbox) => {
                     checkbox.reverse_check();
                     let is_checked = checkbox.is_checked();
-                    if let Some(me) = self.get_interface_mut() {
+                    if let Some(me) = self.interface_mut() {
                         ToolBarEvents::on_checkbox_clicked(me, handle.cast(), is_checked);
                     }
                     return true; // regardless on what we do in the interface
                 }
                 ToolBarItem::SingleChoice(_) => {
                     self.toolbar.update_singlechoice_group_id(handle);
-                    if let Some(me) = self.get_interface_mut() {
+                    if let Some(me) = self.interface_mut() {
                         ToolBarEvents::on_choice_selected(me, handle.cast());
                     }
                     return true; // regardless on what we do in the interface
@@ -569,13 +569,13 @@ impl Window {
         }
         false
     }
-    pub(super) fn get_interface_mut(&mut self) -> Option<&mut dyn Control> {
+    pub(super) fn interface_mut(&mut self) -> Option<&mut dyn Control> {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
             return Some(control.get_control_mut());
         }
         None
     }
-    // pub(super) fn get_interface(&self) -> Option<&dyn Control> {
+    // pub(super) fn interface(&self) -> Option<&dyn Control> {
     //     if let Some(control) = RuntimeManager::get().get_controls().get(self.handle.cast()) {
     //         return Some(control.get_control());
     //     }

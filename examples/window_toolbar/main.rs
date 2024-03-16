@@ -20,21 +20,21 @@ impl MyWin {
             opt2: Handle::None,
             opt3: Handle::None,
         };
-        let labels_group = me.get_toolbar().create_group(toolbar::GroupPosition::TopLeft);
-        me.lb1 = me.get_toolbar().add(labels_group, toolbar::Label::new("<None>"));
-        let checkboxes_group = me.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-        me.cb1 = me.get_toolbar().add(checkboxes_group, toolbar::CheckBox::new("CheckBox &1", false));
-        me.cb2 = me.get_toolbar().add(checkboxes_group, toolbar::CheckBox::new("CheckBox &2", false));
-        let buttons_group = me.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
-        me.opt1 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &A"));
-        me.opt2 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &B"));
-        me.opt3 = me.get_toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &C"));
+        let labels_group = me.toolbar().create_group(toolbar::GroupPosition::TopLeft);
+        me.lb1 = me.toolbar().add(labels_group, toolbar::Label::new("<None>"));
+        let checkboxes_group = me.toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+        me.cb1 = me.toolbar().add(checkboxes_group, toolbar::CheckBox::new("CheckBox &1", false));
+        me.cb2 = me.toolbar().add(checkboxes_group, toolbar::CheckBox::new("CheckBox &2", false));
+        let buttons_group = me.toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+        me.opt1 = me.toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &A"));
+        me.opt2 = me.toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &B"));
+        me.opt3 = me.toolbar().add(buttons_group, toolbar::SingleChoice::new("Opt &C"));
 
         me
     }
     fn set_info(&mut self, text: &str) {
         let h = self.lb1;
-        if let Some(status) = self.get_toolbar().get_mut(h) {
+        if let Some(status) = self.toolbar().get_mut(h) {
             status.set_content(text);
         }
     }

@@ -81,10 +81,10 @@ impl MyWin {
             text: Handle::None,
         };
         // create a group
-        let g = win.get_toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+        let g = win.toolbar().create_group(toolbar::GroupPosition::BottomLeft);
         // add buttons
-        win.opt1 = win.get_toolbar().add(g, toolbar::SingleChoice::new("First Choice"));
-        win.opt2 = win.get_toolbar().add(g, toolbar::SingleChoice::new("Second Choice"));
+        win.opt1 = win.toolbar().add(g, toolbar::SingleChoice::new("First Choice"));
+        win.opt2 = win.toolbar().add(g, toolbar::SingleChoice::new("Second Choice"));
         // add a label
         win.text = win.add(label!("'',d:c,w:22,h:1"));
         win
@@ -98,7 +98,7 @@ impl ToolBarEvents for MyWin {
             _ => "",
         };
         let h = self.text;
-        if let Some(label) = self.get_control_mut(h) {
+        if let Some(label) = self.control_mut(h) {
             label.set_caption(txt);
         }
         EventProcessStatus::Processed

@@ -80,10 +80,10 @@ impl MyWin {
             text: Handle::None,
         };
         // create a group
-        let g = win.get_toolbar().create_group(toolbar::GroupPosition::BottomRight);
+        let g = win.toolbar().create_group(toolbar::GroupPosition::BottomRight);
         // add checkboxes
-        win.cb1 = win.get_toolbar().add(g, toolbar::CheckBox::new("Opt-1",false));
-        win.cb2 = win.get_toolbar().add(g, toolbar::CheckBox::new("Opt-2",false));
+        win.cb1 = win.toolbar().add(g, toolbar::CheckBox::new("Opt-1",false));
+        win.cb2 = win.toolbar().add(g, toolbar::CheckBox::new("Opt-2",false));
         // add a label
         win.text = win.add(label!("'',d:c,w:20,h:1"));
         win
@@ -97,7 +97,7 @@ impl ToolBarEvents for MyWin {
             _ => String::new(),
         };
         let h = self.text;
-        if let Some(label) = self.get_control_mut(h) {
+        if let Some(label) = self.control_mut(h) {
             label.set_caption(&txt);
         }
         EventProcessStatus::Processed

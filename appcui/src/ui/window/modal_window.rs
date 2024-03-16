@@ -89,13 +89,13 @@ impl<T: 'static> OnKeyPressed for ModalWindow<T> {
         if !self.base.is_in_resize_mode() {
             match key.get_compact_code() {
                 key!("Enter") => {
-                    if let Some(interface) = self.get_interface_mut() {
+                    if let Some(interface) = self.interface_mut() {
                         WindowEvents::on_accept(interface);
                     }
                     return EventProcessStatus::Processed; 
                 }
                 key!("Escape") => {
-                    if let Some(interface) = self.get_interface_mut() {
+                    if let Some(interface) = self.interface_mut() {
                         let result = WindowEvents::on_cancel(interface);
                         if result == ActionRequest::Allow {
                             // force the exit with None 

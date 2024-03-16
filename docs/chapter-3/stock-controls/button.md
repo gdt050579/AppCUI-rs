@@ -90,7 +90,7 @@ impl MyWin {
     fn update_add_button_caption(&mut self) {
         let h = self.add;
         let new_text = format!("Add ({})",self.counter);
-        if let Some(button) = self.get_control_mut(h) {
+        if let Some(button) = self.control_mut(h) {
             button.set_caption(new_text.as_str());
         }
     }

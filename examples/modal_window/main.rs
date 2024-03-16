@@ -32,7 +32,7 @@ impl MyWin {
     fn update_counter(&mut self) {
         let handle = self.b2;
         let counter = self.counter;
-        if let Some(b2) = self.get_control_mut(handle) {
+        if let Some(b2) = self.control_mut(handle) {
             b2.set_caption(format!("Counter = {}", counter).as_str());
         }
     }
@@ -48,11 +48,11 @@ impl ButtonEvents for MyWin {
         if button_handle == self.b1 {
             let response = MyWin::new(format!("{}", self.counter + 1).as_str(), self.counter + 1).show();
             let handle = self.lb;
-            if let (Some(r), Some(lb)) = (response, self.get_control_mut(handle)) {
+            if let (Some(r), Some(lb)) = (response, self.control_mut(handle)) {
                 lb.set_caption(format!("Reponse from modal window: {}", r).as_str());
             } else {
                 if response.is_none() {
-                    if let Some(lb) = self.get_control_mut(handle) {
+                    if let Some(lb) = self.control_mut(handle) {
                         lb.set_caption("Exit with None from modal window !");
                     }
                 }

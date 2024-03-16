@@ -51,7 +51,7 @@ impl ColorPickerEvents for MyWin {
         let h = self.ct;
         let f = self.fore;
         let b = self.back;
-        if let Some(coloredtext) = self.get_control_mut(h) {
+        if let Some(coloredtext) = self.control_mut(h) {
             match () {
                 _ if handle==f => coloredtext.fore = color,
                 _ if handle==b => coloredtext.back = color,

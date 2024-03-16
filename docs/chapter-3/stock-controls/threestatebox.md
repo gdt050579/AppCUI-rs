@@ -90,7 +90,7 @@ impl MyWin {
 impl ThreeStateBoxEvents for MyWin {
     fn on_status_changed(&mut self, _handle: Handle<ThreeStateBox>, state: State) -> EventProcessStatus {
         let handle = self.l;
-        let l = self.get_control_mut(handle).unwrap();
+        let l = self.control_mut(handle).unwrap();
         match state {
             State::Checked => l.set_caption("State: Checked"),
             State::Unchecked => l.set_caption("State: Unchecked"),
