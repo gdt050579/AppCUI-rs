@@ -62,3 +62,7 @@ path = "popup_menu/main.rs"
 [[example]]
 name = "menus"
 path = "menus/main.rs"
+
+[[example]]
+name = "password"
+path = "password/main.rs"
