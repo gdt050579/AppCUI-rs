@@ -8,6 +8,7 @@ use super::{
     check_hash_command::CheckHashCommand,
     command_parser::{CommandParser, ParserError},
     keypress_command::KeyPressedCommand,
+    keytypetext_command::KeyTypeTextCommand,
     mouse_click_command::MouseClickCommand,
     mouse_drag_command::MouseDragCommand,
     mouse_hold_command::MouseHoldCommand,
@@ -32,6 +33,7 @@ pub(super) enum Command {
     CheckCursor(CheckCursorCommand),
     Resize(ResizeCommand),
     KeyPresed(KeyPressedCommand),
+    KeyTypeText(KeyTypeTextCommand),
 }
 impl Command {
     pub(super) fn new(text: &str) -> Result<Command, ParserError> {
@@ -85,6 +87,10 @@ impl Command {
                 let variant = KeyPressedCommand::new(&cp)?;
                 return Ok(Command::KeyPresed(variant));
             }
+            "Key.TypeText" => {
+                let variant = KeyTypeTextCommand::new(&cp)?;
+                return Ok(Command::KeyTypeText(variant));
+            }
             _ => {
                 let mut s = String::from("Invalid/Unknwon command: ");
                 s += cp.get_command();
@@ -102,6 +108,7 @@ impl Command {
             Command::MouseWheel(cmd) => cmd.generate_event(mouse_pos, sys_events),
             Command::Resize(cmd) => cmd.generate_event(sys_events),
             Command::KeyPresed(cmd) => cmd.generate_event(sys_events),
+            Command::KeyTypeText(cmd) => cmd.generate_event(sys_events),
             Command::Paint(_) => {}
             Command::PaintEnable(_) => {}
             Command::CheckHash(_) => {}

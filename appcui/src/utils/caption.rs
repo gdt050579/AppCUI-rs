@@ -35,7 +35,7 @@ impl Caption {
             self.hotkey = Key::default();
             while pos < len {
                 if buf[pos] == b'&' {
-                    self.hotkey = Key::from_char(buf[pos + 1] as char, KeyModifier::from(extract_hotkey_method));
+                    self.hotkey = Key::create_hotkey(buf[pos + 1] as char, KeyModifier::from(extract_hotkey_method));
                     if self.hotkey.code != KeyCode::None {
                         self.hotkey_pos = pos;
                         break;

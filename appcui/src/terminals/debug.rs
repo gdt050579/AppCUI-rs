@@ -12,6 +12,7 @@ mod check_hash_command;
 mod check_cursor_command;
 mod resize_command;
 mod keypress_command;
+mod keytypetext_command;
 mod command;
 
 #[cfg(test)]

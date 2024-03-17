@@ -35,6 +35,8 @@ Mouse related commands are a set of commands that simulate various mouse events
 | Command          | Purpose |
 |------------------|---------|
 |`Key.Pressed(key)`| where `key` parameter can be a key name or any combination of control key and a regular key such as<br>- `Z` (for pressin the `Z` key)<br>- `Enter` (for pressing the `Enter` key)<br>-`Alt+T` (`Alt` + `T` combination)<br>-`Ctrl+Alt+F1` (`Ctrl`+`Alt`+`F1` keys)|
+| `Key.TypeText(text)` | where `text` parameter is a text that is being typed                                                                                                                                                                                                                |
+
 
 Usually the key parameter can have several forms:
 * `key`
