@@ -267,6 +267,9 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str("::None");
         }
     }
+    pub(super) fn add_command(&mut self, content: &str) {
+        self.content.push_str(content);
+    }
     pub(super) fn add_line(&mut self, content: &str) {
         if !self.content.ends_with("\n") {
             self.content.push_str("\n");

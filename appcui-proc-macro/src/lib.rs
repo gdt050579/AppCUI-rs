@@ -313,6 +313,11 @@ pub fn panel(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn password(input: TokenStream) -> TokenStream {
+    crate::controls::password::create(input)
+}
+
+#[proc_macro]
 pub fn window(input: TokenStream) -> TokenStream {
     crate::controls::window::create(input)
 }

@@ -7,10 +7,10 @@ pub struct Password {
     visible: bool,
 }
 impl Password {
-    pub fn new(pass: &str, layout: Layout) -> Self {
+    pub fn new(layout: Layout) -> Self {
         let mut p = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            pass: String::from(pass),
+            pass: String::new(),
             visible: false,
         };
         p.set_size_bounds(4, 1, u16::MAX, 1);
