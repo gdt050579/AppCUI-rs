@@ -277,7 +277,7 @@ impl<'a> ControlBuilder<'a> {
         self.content.push_str("\t");
         self.content.push_str(content);
         self.content.push_str("\n");
-    }
+    }    
     #[inline(always)]
     pub(super) fn get_dict(&mut self, name: &str) -> Option<&mut NamedParamsMap<'a>> {
         self.parser.get_mut(name)?.get_dict()
