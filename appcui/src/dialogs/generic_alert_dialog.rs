@@ -61,7 +61,7 @@ impl GenericAlertDialog {
         let s = format!("x:{x},y:{y},w:11");
         Button::new(text, Layout::new(&s), button::Type::Normal)
     }
-    pub (super) fn new(title: &str, caption: &str, buttons: DialogButtons, win_type: window::Type) -> Self {
+    pub(super) fn new(title: &str, caption: &str, buttons: DialogButtons, win_type: window::Type) -> Self {
         let size = RuntimeManager::get().get_terminal_size();
         // the minimum size of the window should contain at least all buttons
         let min_window_width = buttons.count() * GenericAlertDialog::BUTTON_SIZE + 3;
@@ -73,8 +73,9 @@ impl GenericAlertDialog {
         let (mut nr_lines, mut text_width) = GenericAlertDialog::compute_text_width_and_lines(caption);
         if text_width + 4 <= max_window_width {
             // all good --> it fits
+            text_width = text_width.max(min_window_width - 4);
         } else {
-            text_width = max_window_width - 4;
+            text_width = (max_window_width - 4).max(min_window_width - 4);
             nr_lines = GenericAlertDialog::compute_text_lines(caption, text_width);
         }
         // a minimum o 8 chars (o line info + buttons) is required.

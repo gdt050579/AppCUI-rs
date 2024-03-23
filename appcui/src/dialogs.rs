@@ -1,6 +1,8 @@
 mod dialog_buttons;
 mod dialog_result;
 mod generic_alert_dialog;
+#[cfg(test)]
+mod tests;
 
 use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
