@@ -103,7 +103,7 @@ impl GenericAlertDialog {
 
         // add the buttons
         let mut x = ((window_width - (buttons.count() * GenericAlertDialog::BUTTON_SIZE)) >> 1) as i32;
-        let y = (window_height - 2) as i32;
+        let y = (window_height - 4) as i32;
         match buttons {
             DialogButtons::Ok => {
                 w.b_ok = w.add(GenericAlertDialog::add_button("&Ok", x, y));

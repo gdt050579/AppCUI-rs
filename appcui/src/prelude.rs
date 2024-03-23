@@ -25,4 +25,5 @@ pub use super::ui::menu::MenuBar;
 pub use super::graphics::*;
 pub use super::system::*;
 pub use super::input::*;
+pub use super::dialogs::*;
 pub use AppCUIProcMacro::*;

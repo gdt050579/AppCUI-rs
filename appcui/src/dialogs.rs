@@ -1,8 +1,8 @@
-mod dialog_buttons;
+pub mod dialog_buttons;
 pub mod dialog_result;
 mod generic_alert_dialog;
 
-pub(self) use dialog_buttons::DialogButtons;
+pub use dialog_buttons::DialogButtons;
 pub use dialog_result::DialogResult;
 use generic_alert_dialog::GenericAlertDialog;
 
