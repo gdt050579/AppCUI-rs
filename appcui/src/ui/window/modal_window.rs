@@ -28,6 +28,14 @@ impl<T> ModalWindow<T> {
             result: None,
         }
     }
+    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: window::Type) -> Self {
+        // a Modal Window does not have an implicit close button
+        // as exiting has to be done from either exit(...) or exit_with(...) method.
+        Self {
+            base: Window::with_type(title, layout, flags | Flags::NoCloseButton, window_type),
+            result: None,
+        }
+    }
     pub fn show<U>(object: U) -> Option<T>
     where
         U: Control + WindowControl + ModalWindowMethods<T> + 'static,
