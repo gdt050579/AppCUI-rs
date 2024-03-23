@@ -11,7 +11,7 @@ AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"}
 
 [[example]]
 name = "test"
-path = "test.rs"
+path = "dev_test.rs"
 
 
 
