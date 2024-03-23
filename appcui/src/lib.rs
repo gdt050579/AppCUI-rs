@@ -13,5 +13,6 @@ pub mod terminals;
 pub mod input;
 pub mod ui;
 pub mod system;
+pub mod dialogs;
 pub mod prelude;
 mod utils;

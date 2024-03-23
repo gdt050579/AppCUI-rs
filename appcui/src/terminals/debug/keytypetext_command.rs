@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
-    input::{Key, KeyCode, KeyModifier},
+    input::Key,
     terminals::{KeyPressedEvent, SystemEvent},
 };
 
