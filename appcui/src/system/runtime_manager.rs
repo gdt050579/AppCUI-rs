@@ -284,7 +284,7 @@ impl RuntimeManager {
         unsafe { &*self.controls }
     }
     #[inline(always)]
-    pub(crate) fn get_menus(&self) -> &mut MenuHandleManager {
+    pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {
         unsafe { &mut *self.menus }
     }
     pub(crate) fn add_menu(&mut self, menu: Menu) -> Handle<Menu> {
