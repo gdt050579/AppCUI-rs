@@ -227,7 +227,7 @@ fn check_cursor() {
     assert!((s.cursor.x == 10) && (s.cursor.y == 5));
     assert!(s.cursor.is_visible());
     s.hide_cursor();
-    assert!(s.cursor.is_visible() == false);
+    assert!(!s.cursor.is_visible());
     s.set_origin(3, 3);
     s.set_cursor(2, 2);
     assert!((s.cursor.x == 5) && (s.cursor.y == 5));
@@ -235,9 +235,9 @@ fn check_cursor() {
     assert!((s.cursor.x == 1) && (s.cursor.y == 1));
     s.set_clip(3, 3, 6, 6);
     s.set_cursor(-2, -2);
-    assert!(s.cursor.is_visible() == false);
+    assert!(!s.cursor.is_visible());
     s.set_cursor(4, 4);
-    assert!(s.cursor.is_visible() == false);
+    assert!(!s.cursor.is_visible());
     s.set_cursor(2, 2);
     assert!((s.cursor.x == 5) && (s.cursor.y == 5));
     assert!(s.cursor.is_visible());
@@ -898,7 +898,7 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize) -> 
     format.x = 85;
     s.write_text(txt, &format);
 
-    return s;
+    s
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_1() {

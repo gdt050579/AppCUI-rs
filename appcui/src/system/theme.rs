@@ -90,7 +90,7 @@ impl Theme {
     pub(crate) fn new() -> Self {
         let mut t = Theme::default();
         t.set_regular_theme();
-        return t;
+        t
     }
     fn set_regular_theme(&mut self) {
         self.desktop.character = Character::new(SpecialChar::Block50, Color::Gray, Color::Black, CharFlags::None);

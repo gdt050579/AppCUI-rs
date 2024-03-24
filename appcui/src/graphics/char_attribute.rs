@@ -20,7 +20,7 @@ impl CharAttribute {
         CharAttribute {
             foreground: fore,
             background: back,
-            flags: flags,
+            flags,
         }
     }
     pub fn with_color(fore: Color, back: Color) -> CharAttribute {

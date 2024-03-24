@@ -11,10 +11,10 @@ impl ClipArea {
     #[inline]
     pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> ClipArea {
         ClipArea {
-            left: left,
-            top: top,
-            right: right,
-            bottom: bottom,
+            left,
+            top,
+            right,
+            bottom,
             visible: (left <= right) && (top < bottom),
         }
     }
@@ -40,11 +40,11 @@ impl ClipArea {
     }
     #[inline(always)]
     pub fn contains(&self, x: i32, y: i32) -> bool {
-        return self.visible && (x >= self.left) && (x <= self.right) && (y >= self.top) && (y <= self.bottom);
+        self.visible && (x >= self.left) && (x <= self.right) && (y >= self.top) && (y <= self.bottom)
     }
     #[inline]
     pub fn contains_y(&self, y: i32) -> bool {
-        return self.visible && (y >= self.top) && (y <= self.bottom);
+        self.visible && (y >= self.top) && (y <= self.bottom)
     }
     #[inline]
     pub fn intersect_with(&mut self, clip: &ClipArea) {

@@ -97,7 +97,7 @@ impl SurfaceTester {
                 Color::White => temp_buf.push_str("107"),
                 _ => temp_buf.push_str("40"), /* default is white */
             }
-            temp_buf.push_str("m");
+            temp_buf.push('m');
             if ch.code < ' ' {
                 temp_buf.push(' ');
             } else {
@@ -134,11 +134,11 @@ impl SurfaceTester {
             buf[6] = ((ch.flags.get_value() >> 8) & 0xFF) as u8;
             buf[7] = (ch.flags.get_value() & 0xFF) as u8;
             for b in buf {
-                hash = hash ^ (b as u64);
+                hash ^= b as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
             }
         }
-        return hash;
+        hash
     }
 }
 impl Deref for SurfaceTester {

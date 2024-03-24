@@ -17,8 +17,8 @@ impl Key {
     };
     pub fn new(code: KeyCode, modifier: KeyModifier) -> Key {
         Key {
-            code: code,
-            modifier: modifier,
+            code,
+            modifier,
         }
     }
     pub fn create_hotkey(character: char, modifier: KeyModifier) -> Key {

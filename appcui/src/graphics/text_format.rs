@@ -1,29 +1,21 @@
 use super::CharAttribute;
 
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub enum TextAlignament {
+    #[default]
     Left,
     Center,
     Right,
 }
-impl Default for TextAlignament {
-    fn default() -> Self {
-        TextAlignament::Left
-    }
-}
 
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub enum TextWrap {
+    #[default]
     None,
     Character,
     Word,
-}
-impl Default for TextWrap {
-    fn default() -> Self {
-        TextWrap::None
-    }
 }
 
 pub struct TextFormat {

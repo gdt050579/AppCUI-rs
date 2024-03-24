@@ -96,7 +96,7 @@ impl Character {
             code: char::from(code),
             foreground: fore,
             background: back,
-            flags: flags,
+            flags,
         }
     }
     #[inline(always)]

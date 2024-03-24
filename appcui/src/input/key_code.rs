@@ -208,14 +208,14 @@ impl KeyCode {
         if index<64 {
             return KEY_NAME[index];
         }
-        return "";
+        ""
     }
     pub fn name_padded(&self) -> &'static str {
         let index = ((*self) as u8) as usize;
         if index<64 {
             return KEY_NAME_PADDED[index];
         }
-        return "";
+        ""
     }
 }
 

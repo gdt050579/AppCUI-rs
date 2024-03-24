@@ -17,8 +17,8 @@ impl Image {
         }
         let sz = (width as usize) * (height as usize);
         let mut img = Image {
-            width: width,
-            height: height,
+            width,
+            height,
             pixels: Vec::with_capacity(sz),
         };
         let empty_pixel = Pixel::default();

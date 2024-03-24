@@ -23,10 +23,10 @@ impl KeyModifier {
         if self.value < 8 {
             return KEY_NAME[self.value as usize];
         }
-        return "";
+        ""
     }
     pub(crate) fn name_from_index(index: usize) -> &'static str {
-        return if index < 8 { KEY_NAME[index] } else { "" };
+        if index < 8 { KEY_NAME[index] } else { "" }
     }
 }
 
@@ -45,6 +45,6 @@ impl From<u8> for KeyModifier {
             }
             return result;
         }
-        return KeyModifier::None;
+        KeyModifier::None
     }
 }

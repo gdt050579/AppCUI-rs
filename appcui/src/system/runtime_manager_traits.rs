@@ -17,7 +17,7 @@ pub(crate) trait PaintMethods {
     fn paint_menu(&mut self, handle: Handle<Menu>, activ: bool);
     fn request_repaint(&mut self);
 }
-
+ 
 pub(crate) trait KeyboardMethods {
     fn process_key_modifier_changed_event(&mut self, new_state: KeyModifier);
     fn process_keypressed_event(&mut self, event: KeyPressedEvent);

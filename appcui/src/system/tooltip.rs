@@ -106,7 +106,7 @@ impl ToolTip {
             self.canvas.write_text(text, &self.format);
             self.visible = true;
         }
-        return false;
+        false
     }
     pub(crate) fn hide(&mut self) {
         self.visible = false;
