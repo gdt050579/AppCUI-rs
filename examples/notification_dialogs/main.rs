@@ -1,5 +1,17 @@
 use appcui::prelude::*;
 
+#[derive(Copy,Clone,PartialEq,Eq)]
+enum NotificationType {
+    None,
+    Error,
+    Retry,
+    Alert,
+    Proceed,
+    Message,
+    Validate,
+    TryValidate
+}
+
 #[Window(events = ButtonEvents+RadioBoxEvents)]
 struct MyWin {
     rb_error: Handle<RadioBox>,
@@ -11,6 +23,7 @@ struct MyWin {
     rb_try_validate: Handle<RadioBox>,
     b_show: Handle<Button>,
     b_cancel: Handle<Button>,
+    ntype: NotificationType
 }
 
 impl MyWin {
@@ -25,7 +38,8 @@ impl MyWin {
             rb_validate: Handle::None,
             rb_try_validate: Handle::None,
             b_show: Handle::None,
-            b_cancel: Handle::None
+            b_cancel: Handle::None,
+            ntype: NotificationType::Error
         };
         win.rb_error = win.add(radiobox!("'&Error popup dialog',x:1,y:1,w:38,h:1,select:true"));
         win.rb_retry = win.add(radiobox!("'Error with &retry popup',x:1,y:2,w:38,h:1"));
@@ -33,7 +47,7 @@ impl MyWin {
         win.rb_proceed = win.add(radiobox!("'&Proceed alert with Yes/No options',x:1,y:4,w:38,h:1"));
         win.rb_message = win.add(radiobox!("'Simple &message popup',x:1,y:5,w:38,h:1"));
         win.rb_validate = win.add(radiobox!("'&Validate message with Yes/No options',x:1,y:6,w:39,h:1"));
-        win.rb_validate = win.add(radiobox!("'&Try validate message with Yes, No and Cancel options',x:1,y:7,w:38,h:2"));
+        win.rb_try_validate = win.add(radiobox!("'&Try validate message with Yes, No and Cancel options',x:1,y:7,w:38,h:2"));
         win.b_show = win.add(button!("&Show,x:5,y:10,w:15"));
         win.b_cancel = win.add(button!("E&xit,x:22,y:10,w:15"));
         win
@@ -44,7 +58,19 @@ impl ButtonEvents for MyWin {
 
 }
 impl RadioBoxEvents for MyWin {
-    
+    fn on_selected(&mut self, handle: Handle<RadioBox>) -> EventProcessStatus {
+        self.ntype = match () {
+            _ if handle==self.rb_error => NotificationType::Error,
+            _ if handle==self.rb_retry => NotificationType::Retry,
+            _ if handle==self.rb_alert => NotificationType::Alert,
+            _ if handle==self.rb_proceed => NotificationType::Proceed,
+            _ if handle==self.rb_message => NotificationType::Message,
+            _ if handle==self.rb_validate => NotificationType::Validate,
+            _ if handle==self.rb_try_validate => NotificationType::TryValidate,
+            _ => NotificationType::None
+        };
+        EventProcessStatus::Processed
+    }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
