@@ -241,3 +241,47 @@ fn check_message() {
     a.add_window(CallbackWin::new(|| dialogs::message("Success", "Operation completed succesifully.")));
     a.run();
 }
+
+#[test]
+fn check_validate() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('No (do not start the action)');
+        CheckHash(0xA081FA6B7B9761A1)
+        Key.Pressed(Enter)
+        Paint('Back to initial State (result is cancel)')   
+        CheckHash(0x937CE126B66578D9)
+        Key.Pressed(Enter)
+        Paint('Back to initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Retry (second time)');
+        CheckHash(0xA081FA6B7B9761A1)
+        Key.Pressed(Escape)
+        Paint('Back to initial State (after escape)')   
+        Key.Pressed(Enter)
+        Paint('Back to initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Retry (third time)');
+        CheckHash(0xA081FA6B7B9761A1)
+        Key.Pressed(Tab)
+        Paint('Yes button selected')
+        CheckHash(0x1D8F2EAA023E3949)
+        Key.Pressed(Enter)
+        Paint('Now we should start the action');
+        CheckHash(0x893A6F5432DC3312)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    a.add_window(CallbackWin::new(|| {
+        if dialogs::validate("Alert", "Are you sure that you want to start the action ?") {
+            dialogs::message("Response", "Start the action.")
+        } else {
+            dialogs::message("Response", "Stop the action.")
+        }
+    }));
+    a.run();
+}
