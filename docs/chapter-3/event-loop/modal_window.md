@@ -18,19 +18,19 @@ struct MyModalWindow {
 
 Besides the normal [methods](./window.md#methods) that a regular Window has, the following extra methods are available:
 
-| Method           | Purpose                                                                             |
-|------------------|-------------------------------------------------------------------------------------|
-| `exit()`         | Exits the current modal window without returning anything. This translates into returning `None` from the call of method `show(...)` |
-| `exit_with(...)` | Exits and returns a value of the same type as the parameter `reponse` from the `#[ModalWindo(...)]` definition. This translates into returning `Some(value)` from the call of method `show(...)` |
-| `show()`         | Shows the modal window and capture the entire input. The execution flow is blocked until method `show` returns. |
+| Method                | Purpose                                                                                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `exit()` or `close()` | Exits the current modal window without returning anything. This translates into returning `None` from the call of method `show(...)`                                                             |
+| `exit_with(...)`      | Exits and returns a value of the same type as the parameter `reponse` from the `#[ModalWindo(...)]` definition. This translates into returning `Some(value)` from the call of method `show(...)` |
+| `show()`              | Shows the modal window and capture the entire input. The execution flow is blocked until method `show` returns.                                                                                  |
 
 
 Besides the keys that a regular (non-modal) window supports, the following keys have a different purpose:
 
-| Key       | Purpose                                                                             |
-|-----------|-------------------------------------------------------------------------------------|
-| `Escape`  | Trigers a call to `on_cancel(...)` method. By default this will close the modal window and will return `None` to the caller. The behavior can be changed by returning `ActionRequest::Deny` from the `on_cancel` callback |
-| `Enter`   | Calls the `on_accept(...)` method. This will not close the window unless you call `exit()` or `exit_with(...)` from within the callback |
+| Key      | Purpose                                                                                                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Escape` | Trigers a call to `on_cancel(...)` method. By default this will close the modal window and will return `None` to the caller. The behavior can be changed by returning `ActionRequest::Deny` from the `on_cancel` callback |
+| `Enter`  | Calls the `on_accept(...)` method. This will not close the window unless you call `exit()` or `exit_with(...)` from within the callback                                                                                   |
 
 
 To disable this behavior, you can add `WindowEvents` to the list of events and then return `ActionRequest::Deny` when implementing `on_cancel`.

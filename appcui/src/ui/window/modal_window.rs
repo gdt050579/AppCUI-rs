@@ -153,4 +153,8 @@ impl<T: 'static> ModalWindowMethods<T> for ModalWindow<T> {
         self.result = None;
         RuntimeManager::get().exit_execution_loop();
     }
+
+    fn close(&mut self) {
+        self.exit();
+    }
 }
