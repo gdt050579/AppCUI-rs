@@ -182,3 +182,47 @@ fn check_alert() {
     a.add_window(CallbackWin::new(|| dialogs::alert("Error", "A problem occured while running the code.")));
     a.run();
 }
+
+#[test]
+fn check_proceed() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('No (do not continue)');
+        CheckHash(0x24B39A0A49793368)
+        Key.Pressed(Enter)
+        Paint('Back to initial State (result is cancel)')   
+        CheckHash(0x937CE126B66578D9)
+        Key.Pressed(Enter)
+        Paint('Back to initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Retry (second time)');
+        CheckHash(0x24B39A0A49793368)
+        Key.Pressed(Escape)
+        Paint('Back to initial State (after escape)')   
+        Key.Pressed(Enter)
+        Paint('Back to initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Retry (third time)');
+        CheckHash(0x24B39A0A49793368)
+        Key.Pressed(Tab)
+        Paint('Yes button selected')
+        CheckHash(0x7DB1B8B269F1DAB8)
+        Key.Pressed(Enter)
+        Paint('Now we should continue');
+        CheckHash(0xF8045E482E522D83)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    a.add_window(CallbackWin::new(|| {
+        if dialogs::proceed("Alert", "An problem occured.\nContinue anyway ?") {
+            dialogs::message("Response", "We should continue.")
+        } else {
+            dialogs::message("Response", "Stop the action.")
+        }
+    }));
+    a.run();
+}
