@@ -120,7 +120,7 @@ impl ButtonEvents for MyWin {
             return EventProcessStatus::Processed;
         }
         if handle == self.b_exit {
-            //self.close();
+            self.close();
             return EventProcessStatus::Processed;
         }
         EventProcessStatus::Ignored

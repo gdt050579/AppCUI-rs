@@ -153,10 +153,14 @@ impl Window {
         return Handle::None;
     }
     pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type) -> Self {
+        Window::with_type_and_status_flags(title, layout, flags, window_type, StatusFlags::None)
+    }
+    #[inline(always)]
+    pub(super) fn with_type_and_status_flags(title: &str, layout: Layout, flags: Flags, window_type: Type, status_flags: StatusFlags) -> Self {
         let mut win: Window = Window {
             base: ControlBase::with_status_flags(
                 layout,
-                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
+                status_flags | StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl, 
             ),
             title: Title::new(title),
             flags,
@@ -504,7 +508,10 @@ impl Window {
         }
     }
 
-    fn on_close_request(&mut self) {
+    pub fn close(&mut self) {
+        if self.base.is_modal_window() {
+            panic!("close method can not be called directly on a modal window (or the base of a modal window)");
+        }
         if let Some(interface) = self.interface_mut() {
             let result = WindowEvents::on_cancel(interface);
             if result == ActionRequest::Allow {
@@ -529,7 +536,7 @@ impl Window {
         if let Some(item) = self.toolbar.get_item_mut(handle) {
             match item {
                 ToolBarItem::CloseButton(_) => {
-                    self.on_close_request();
+                    self.close();
                     return true;
                 }
                 ToolBarItem::ResizeCorner(_) => {
@@ -732,7 +739,7 @@ impl OnKeyPressed for Window {
                     return EventProcessStatus::Processed;
                 }
                 key!("Escape") => {
-                    self.on_close_request();
+                    self.close();
                     return EventProcessStatus::Processed;
                 }
                 key!("Left") | key!("Ctrl+Left") | key!("Alt+Left") => {
