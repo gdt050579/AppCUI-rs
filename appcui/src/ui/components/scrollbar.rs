@@ -150,7 +150,7 @@ impl ScrollBar {
             self.dimension = available_size as u16;
         }
         self.visible = true;
-        return available_size;
+        available_size
     }
 
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
@@ -336,7 +336,7 @@ impl ScrollBar {
                         return ProcessEventResult::Repaint;
                     }
                 }
-                return ProcessEventResult::Processed;
+                ProcessEventResult::Processed
             }
             MouseEvent::Pressed(data) => {
                 let new_status = self.get_press_status(data.x, data.y);
@@ -349,16 +349,16 @@ impl ScrollBar {
                     self.status = new_status;
                     return ProcessEventResult::PassToControlAndRepaint;
                 }
-                return ProcessEventResult::PassToControl;
+                ProcessEventResult::PassToControl
             }
             MouseEvent::Released(data) => {
                 let new_status = self.get_hover_status(data.x, data.y);
                 if self.status.is_pressed() {
                     self.status = new_status;
-                    return ProcessEventResult::Repaint;
+                    ProcessEventResult::Repaint
                 } else {
                     self.status = new_status;
-                    return ProcessEventResult::PassToControlAndRepaint;
+                    ProcessEventResult::PassToControlAndRepaint
                 }
             }
             MouseEvent::Drag(data) => {
@@ -366,17 +366,17 @@ impl ScrollBar {
                 if self.status.is_pressed() {
                     if (new_status == self.status) && (new_status == MouseOnScrollbarStatus::PressedOnBar) {
                         self.update_index_for_mouse_pos(data.x, data.y, MouseOnScrollbarStatus::PressedOnBar);
-                        return ProcessEventResult::Update;
+                        ProcessEventResult::Update
                     } else {
-                        return ProcessEventResult::Processed;
+                        ProcessEventResult::Processed
                     }
                 } else {
-                    return ProcessEventResult::PassToControl;
+                    ProcessEventResult::PassToControl
                 }
             }
             MouseEvent::Enter => {
                 self.status = MouseOnScrollbarStatus::None;
-                return ProcessEventResult::PassToControlAndRepaint;
+                ProcessEventResult::PassToControlAndRepaint
             }
             MouseEvent::Leave => {
                 if !self.status.is_none() {
@@ -397,9 +397,9 @@ impl ScrollBar {
                     self.status = new_status;
                     return ProcessEventResult::PassToControlAndRepaint;
                 }
-                return ProcessEventResult::PassToControl;
+                ProcessEventResult::PassToControl
             }
-            MouseEvent::Wheel(_) => return ProcessEventResult::PassToControl,
+            MouseEvent::Wheel(_) => ProcessEventResult::PassToControl,
         }
     }
     #[inline(always)]

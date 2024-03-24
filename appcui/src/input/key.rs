@@ -16,10 +16,7 @@ impl Key {
         modifier: KeyModifier::None,
     };
     pub fn new(code: KeyCode, modifier: KeyModifier) -> Key {
-        Key {
-            code,
-            modifier,
-        }
+        Key { code, modifier }
     }
     pub fn create_hotkey(character: char, modifier: KeyModifier) -> Key {
         let code = match character {
@@ -62,12 +59,12 @@ impl Key {
             _ => KeyCode::None,
         };
         if code == KeyCode::None {
-            return Key {
+            Key {
                 code: KeyCode::None,
                 modifier: KeyModifier::None,
-            };
+            }
         } else {
-            return Key { code, modifier };
+            Key { code, modifier }
         }
     }
     pub fn get_compact_code(&self) -> u16 {
@@ -109,92 +106,94 @@ impl From<char> for Key {
     fn from(value: char) -> Self {
         match value {
             // capital
-            'A' => return Key::new(KeyCode::A, KeyModifier::None),
-            'B' => return Key::new(KeyCode::B, KeyModifier::None),
-            'C' => return Key::new(KeyCode::C, KeyModifier::None),
-            'D' => return Key::new(KeyCode::D, KeyModifier::None),
-            'E' => return Key::new(KeyCode::E, KeyModifier::None),
-            'F' => return Key::new(KeyCode::F, KeyModifier::None),
-            'G' => return Key::new(KeyCode::G, KeyModifier::None),
-            'H' => return Key::new(KeyCode::H, KeyModifier::None),
-            'I' => return Key::new(KeyCode::I, KeyModifier::None),
-            'J' => return Key::new(KeyCode::J, KeyModifier::None),
-            'K' => return Key::new(KeyCode::K, KeyModifier::None),
-            'L' => return Key::new(KeyCode::L, KeyModifier::None),
-            'M' => return Key::new(KeyCode::M, KeyModifier::None),
-            'N' => return Key::new(KeyCode::N, KeyModifier::None),
-            'O' => return Key::new(KeyCode::O, KeyModifier::None),
-            'P' => return Key::new(KeyCode::P, KeyModifier::None),
-            'Q' => return Key::new(KeyCode::Q, KeyModifier::None),
-            'R' => return Key::new(KeyCode::R, KeyModifier::None),
-            'S' => return Key::new(KeyCode::S, KeyModifier::None),
-            'T' => return Key::new(KeyCode::T, KeyModifier::None),
-            'U' => return Key::new(KeyCode::U, KeyModifier::None),
-            'V' => return Key::new(KeyCode::V, KeyModifier::None),
-            'W' => return Key::new(KeyCode::W, KeyModifier::None),
-            'X' => return Key::new(KeyCode::X, KeyModifier::None),
-            'Y' => return Key::new(KeyCode::Y, KeyModifier::None),
-            'Z' => return Key::new(KeyCode::Z, KeyModifier::None),
+            'A' => Key::new(KeyCode::A, KeyModifier::None),
+            'B' => Key::new(KeyCode::B, KeyModifier::None),
+            'C' => Key::new(KeyCode::C, KeyModifier::None),
+            'D' => Key::new(KeyCode::D, KeyModifier::None),
+            'E' => Key::new(KeyCode::E, KeyModifier::None),
+            'F' => Key::new(KeyCode::F, KeyModifier::None),
+            'G' => Key::new(KeyCode::G, KeyModifier::None),
+            'H' => Key::new(KeyCode::H, KeyModifier::None),
+            'I' => Key::new(KeyCode::I, KeyModifier::None),
+            'J' => Key::new(KeyCode::J, KeyModifier::None),
+            'K' => Key::new(KeyCode::K, KeyModifier::None),
+            'L' => Key::new(KeyCode::L, KeyModifier::None),
+            'M' => Key::new(KeyCode::M, KeyModifier::None),
+            'N' => Key::new(KeyCode::N, KeyModifier::None),
+            'O' => Key::new(KeyCode::O, KeyModifier::None),
+            'P' => Key::new(KeyCode::P, KeyModifier::None),
+            'Q' => Key::new(KeyCode::Q, KeyModifier::None),
+            'R' => Key::new(KeyCode::R, KeyModifier::None),
+            'S' => Key::new(KeyCode::S, KeyModifier::None),
+            'T' => Key::new(KeyCode::T, KeyModifier::None),
+            'U' => Key::new(KeyCode::U, KeyModifier::None),
+            'V' => Key::new(KeyCode::V, KeyModifier::None),
+            'W' => Key::new(KeyCode::W, KeyModifier::None),
+            'X' => Key::new(KeyCode::X, KeyModifier::None),
+            'Y' => Key::new(KeyCode::Y, KeyModifier::None),
+            'Z' => Key::new(KeyCode::Z, KeyModifier::None),
             // lower case letters
-            'a' => return Key::new(KeyCode::A, KeyModifier::Shift),
-            'b' => return Key::new(KeyCode::B, KeyModifier::Shift),
-            'c' => return Key::new(KeyCode::C, KeyModifier::Shift),
-            'd' => return Key::new(KeyCode::D, KeyModifier::Shift),
-            'e' => return Key::new(KeyCode::E, KeyModifier::Shift),
-            'f' => return Key::new(KeyCode::F, KeyModifier::Shift),
-            'g' => return Key::new(KeyCode::G, KeyModifier::Shift),
-            'h' => return Key::new(KeyCode::H, KeyModifier::Shift),
-            'i' => return Key::new(KeyCode::I, KeyModifier::Shift),
-            'j' => return Key::new(KeyCode::J, KeyModifier::Shift),
-            'k' => return Key::new(KeyCode::K, KeyModifier::Shift),
-            'l' => return Key::new(KeyCode::L, KeyModifier::Shift),
-            'm' => return Key::new(KeyCode::M, KeyModifier::Shift),
-            'n' => return Key::new(KeyCode::N, KeyModifier::Shift),
-            'o' => return Key::new(KeyCode::O, KeyModifier::Shift),
-            'p' => return Key::new(KeyCode::P, KeyModifier::Shift),
-            'q' => return Key::new(KeyCode::Q, KeyModifier::Shift),
-            'r' => return Key::new(KeyCode::R, KeyModifier::Shift),
-            's' => return Key::new(KeyCode::S, KeyModifier::Shift),
-            't' => return Key::new(KeyCode::T, KeyModifier::Shift),
-            'u' => return Key::new(KeyCode::U, KeyModifier::Shift),
-            'v' => return Key::new(KeyCode::V, KeyModifier::Shift),
-            'w' => return Key::new(KeyCode::W, KeyModifier::Shift),
-            'x' => return Key::new(KeyCode::X, KeyModifier::Shift),
-            'y' => return Key::new(KeyCode::Y, KeyModifier::Shift),
-            'z' => return Key::new(KeyCode::Z, KeyModifier::Shift),
+            'a' => Key::new(KeyCode::A, KeyModifier::Shift),
+            'b' => Key::new(KeyCode::B, KeyModifier::Shift),
+            'c' => Key::new(KeyCode::C, KeyModifier::Shift),
+            'd' => Key::new(KeyCode::D, KeyModifier::Shift),
+            'e' => Key::new(KeyCode::E, KeyModifier::Shift),
+            'f' => Key::new(KeyCode::F, KeyModifier::Shift),
+            'g' => Key::new(KeyCode::G, KeyModifier::Shift),
+            'h' => Key::new(KeyCode::H, KeyModifier::Shift),
+            'i' => Key::new(KeyCode::I, KeyModifier::Shift),
+            'j' => Key::new(KeyCode::J, KeyModifier::Shift),
+            'k' => Key::new(KeyCode::K, KeyModifier::Shift),
+            'l' => Key::new(KeyCode::L, KeyModifier::Shift),
+            'm' => Key::new(KeyCode::M, KeyModifier::Shift),
+            'n' => Key::new(KeyCode::N, KeyModifier::Shift),
+            'o' => Key::new(KeyCode::O, KeyModifier::Shift),
+            'p' => Key::new(KeyCode::P, KeyModifier::Shift),
+            'q' => Key::new(KeyCode::Q, KeyModifier::Shift),
+            'r' => Key::new(KeyCode::R, KeyModifier::Shift),
+            's' => Key::new(KeyCode::S, KeyModifier::Shift),
+            't' => Key::new(KeyCode::T, KeyModifier::Shift),
+            'u' => Key::new(KeyCode::U, KeyModifier::Shift),
+            'v' => Key::new(KeyCode::V, KeyModifier::Shift),
+            'w' => Key::new(KeyCode::W, KeyModifier::Shift),
+            'x' => Key::new(KeyCode::X, KeyModifier::Shift),
+            'y' => Key::new(KeyCode::Y, KeyModifier::Shift),
+            'z' => Key::new(KeyCode::Z, KeyModifier::Shift),
 
             // numbers
-            '0' => return Key::new(KeyCode::N0, KeyModifier::None),
-            '1' => return Key::new(KeyCode::N1, KeyModifier::None),
-            '2' => return Key::new(KeyCode::N2, KeyModifier::None),
-            '3' => return Key::new(KeyCode::N3, KeyModifier::None),
-            '4' => return Key::new(KeyCode::N4, KeyModifier::None),
-            '5' => return Key::new(KeyCode::N5, KeyModifier::None),
-            '6' => return Key::new(KeyCode::N6, KeyModifier::None),
-            '7' => return Key::new(KeyCode::N7, KeyModifier::None),
-            '8' => return Key::new(KeyCode::N8, KeyModifier::None),
-            '9' => return Key::new(KeyCode::N9, KeyModifier::None),
+            '0' => Key::new(KeyCode::N0, KeyModifier::None),
+            '1' => Key::new(KeyCode::N1, KeyModifier::None),
+            '2' => Key::new(KeyCode::N2, KeyModifier::None),
+            '3' => Key::new(KeyCode::N3, KeyModifier::None),
+            '4' => Key::new(KeyCode::N4, KeyModifier::None),
+            '5' => Key::new(KeyCode::N5, KeyModifier::None),
+            '6' => Key::new(KeyCode::N6, KeyModifier::None),
+            '7' => Key::new(KeyCode::N7, KeyModifier::None),
+            '8' => Key::new(KeyCode::N8, KeyModifier::None),
+            '9' => Key::new(KeyCode::N9, KeyModifier::None),
 
             // simbols over bnumbers
-            ')' => return Key::new(KeyCode::N0, KeyModifier::Shift),
-            '!' => return Key::new(KeyCode::N1, KeyModifier::Shift),
-            '@' => return Key::new(KeyCode::N2, KeyModifier::Shift),
-            '#' => return Key::new(KeyCode::N3, KeyModifier::Shift),
-            '$' => return Key::new(KeyCode::N4, KeyModifier::Shift),
-            '%' => return Key::new(KeyCode::N5, KeyModifier::Shift),
-            '^' => return Key::new(KeyCode::N6, KeyModifier::Shift),
-            '&' => return Key::new(KeyCode::N7, KeyModifier::Shift),
-            '*' => return Key::new(KeyCode::N8, KeyModifier::Shift),
-            '(' => return Key::new(KeyCode::N9, KeyModifier::Shift),
+            ')' => Key::new(KeyCode::N0, KeyModifier::Shift),
+            '!' => Key::new(KeyCode::N1, KeyModifier::Shift),
+            '@' => Key::new(KeyCode::N2, KeyModifier::Shift),
+            '#' => Key::new(KeyCode::N3, KeyModifier::Shift),
+            '$' => Key::new(KeyCode::N4, KeyModifier::Shift),
+            '%' => Key::new(KeyCode::N5, KeyModifier::Shift),
+            '^' => Key::new(KeyCode::N6, KeyModifier::Shift),
+            '&' => Key::new(KeyCode::N7, KeyModifier::Shift),
+            '*' => Key::new(KeyCode::N8, KeyModifier::Shift),
+            '(' => Key::new(KeyCode::N9, KeyModifier::Shift),
 
             // other combinations
-            ' ' => return Key::new(KeyCode::Space, KeyModifier::None),
-            '\n' => return Key::new(KeyCode::Enter, KeyModifier::None),
-            '\t' => return Key::new(KeyCode::Tab, KeyModifier::None),
+            ' ' => Key::new(KeyCode::Space, KeyModifier::None),
+            '\n' => Key::new(KeyCode::Enter, KeyModifier::None),
+            '\t' => Key::new(KeyCode::Tab, KeyModifier::None),
 
             // default
-            _ => { return Key::None; }
-        };        
+            _ => {
+                Key::None
+            }
+        }
     }
 }
 
