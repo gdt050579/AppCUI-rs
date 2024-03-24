@@ -25,6 +25,13 @@ pub fn alert(title: &str, caption: &str)  {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Warning);
     w.show();
 }
+pub fn proceed(title: &str, caption: &str)->bool  {
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNo, window::Type::Warning);
+    if let Some(result) = w.show() {
+        return result == DialogResult::Yes;
+    }
+    return false;
+}
 pub fn message(title: &str, caption: &str)  {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Notification);
     w.show();

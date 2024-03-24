@@ -32,7 +32,7 @@ if dialogs::retry("Error","An error occured while performn a copy operation.\nRe
     // retry the operation
 }
 ```
-that looks like the following picture:
+will create a dialog that looks like the following picture:
 <img src="img/retry.png" width=300/>
 
 ## Alerts
@@ -49,3 +49,17 @@ dialogs::alert("Error","An error has occured during the last operation");
 
 will produce the following error modal window:
 <img src="img/alert.png" width=300/>
+
+Just like in the case of errors, if the alert is something we can ignore and continue with the execution, the following method can be used:
+```rs
+fn dialogs::proceed(title: &str, caption: &str) -> bool {...}
+```
+
+This method will create an alert dialog but with two buttons (`Yes` and `No`). If you click on `Yes` button the method will return **true** otherwise it will return **false**. For example, the following code:
+```rs
+if dialogs::proceed("Alert","An error occured while performn a copy operation.\nContinue anyway ?") {
+    // retry the operation
+}
+```
+will create a dialog that looks like the following picture:
+<img src="img/proceed.png" width=300/>
