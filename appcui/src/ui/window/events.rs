@@ -49,6 +49,7 @@ pub trait ModalWindowMethods<T> {
     fn show(self) -> Option<T>;
     fn exit_with(&mut self, result: T);
     fn exit(&mut self);
+    fn close(&mut self);
 }
 
 #[derive(Copy, Clone)]

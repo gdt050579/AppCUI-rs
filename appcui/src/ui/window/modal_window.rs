@@ -1,3 +1,5 @@
+use self::common::StatusFlags;
+
 use super::{events::ModalWindowMethods, Flags, Window};
 use crate::prelude::*;
 use std::ops::{Deref, DerefMut};
@@ -32,7 +34,7 @@ impl<T> ModalWindow<T> {
         // a Modal Window does not have an implicit close button
         // as exiting has to be done from either exit(...) or exit_with(...) method.
         Self {
-            base: Window::with_type(title, layout, flags | Flags::NoCloseButton, window_type),
+            base: Window::with_type_and_status_flags(title, layout, flags | Flags::NoCloseButton, window_type, StatusFlags::ModalWindow),
             result: None,
         }
     }
@@ -101,13 +103,13 @@ impl<T: 'static> OnKeyPressed for ModalWindow<T> {
                     if let Some(interface) = self.interface_mut() {
                         WindowEvents::on_accept(interface);
                     }
-                    return EventProcessStatus::Processed; 
+                    return EventProcessStatus::Processed;
                 }
                 key!("Escape") => {
                     if let Some(interface) = self.interface_mut() {
                         let result = WindowEvents::on_cancel(interface);
                         if result == ActionRequest::Allow {
-                            // force the exit with None 
+                            // force the exit with None
                             self.exit();
                         } else {
                             // clean the result
@@ -115,13 +117,13 @@ impl<T: 'static> OnKeyPressed for ModalWindow<T> {
                             RuntimeManager::get().cancel_exit_from_execution_loop();
                         }
                     }
-                    return EventProcessStatus::Processed; 
+                    return EventProcessStatus::Processed;
                 }
                 _ => {
-                    return OnKeyPressed::on_key_pressed(&mut self.base, key, character); 
+                    return OnKeyPressed::on_key_pressed(&mut self.base, key, character);
                 }
             }
-        } else {        
+        } else {
             return OnKeyPressed::on_key_pressed(&mut self.base, key, character);
         }
     }
@@ -150,5 +152,9 @@ impl<T: 'static> ModalWindowMethods<T> for ModalWindow<T> {
     fn exit(&mut self) {
         self.result = None;
         RuntimeManager::get().exit_execution_loop();
+    }
+
+    fn close(&mut self) {
+        self.exit();
     }
 }

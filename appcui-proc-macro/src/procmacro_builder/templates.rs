@@ -20,6 +20,10 @@ impl ModalWindowMethods<$(MODAL_RESULT_TYPE)> for $(STRUCT_NAME) {
     fn exit(&mut self) {
         self.base.exit();
     }
+    
+    fn close(&mut self) {
+        self.base.exit();
+    }
 }
 ";
 

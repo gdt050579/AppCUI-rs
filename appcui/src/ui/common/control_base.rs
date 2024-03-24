@@ -20,11 +20,12 @@ pub enum StatusFlags {
     MarkedForFocus = 0x0010,
     MouseOver = 0x0020,
     WindowControl = 0x0040,
-    DesktopControl = 0x0080,
-    KeyInputBeforeChildren = 0x0100,
-    Expanded = 0x0200,
-    IncreaseRightMarginOnFocus = 0x0400,
-    IncreaseBottomMarginOnFocus = 0x0800,
+    ModalWindow = 0x0080,
+    DesktopControl = 0x0100,
+    KeyInputBeforeChildren = 0x0200,
+    Expanded = 0x0400,
+    IncreaseRightMarginOnFocus = 0x0800,
+    IncreaseBottomMarginOnFocus = 0x1000,
 }
 #[derive(Copy, Clone)]
 pub(crate) struct Margins {
@@ -213,6 +214,10 @@ impl ControlBase {
     #[inline(always)]
     pub(crate) fn is_window_control(&self) -> bool {
         self.status_flags.contains(StatusFlags::WindowControl)
+    }
+    #[inline(always)]
+    pub(crate) fn is_modal_window(&self) -> bool {
+        self.status_flags.contains(StatusFlags::ModalWindow)
     }
     #[inline(always)]
     pub(crate) fn is_desktop_control(&self) -> bool {

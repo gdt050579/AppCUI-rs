@@ -66,3 +66,7 @@ path = "menus/main.rs"
 [[example]]
 name = "password"
 path = "password/main.rs"
+
+[[example]]
+name = "notification_dialogs"
+path = "notification_dialogs/main.rs"
