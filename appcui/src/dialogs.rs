@@ -46,7 +46,11 @@ pub fn validate(title: &str, caption: &str) -> bool {
 pub fn try_validate(title: &str, caption: &str) -> Option<bool> {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNoCancel, window::Type::Notification);
     if let Some(result) = w.show() {
-        return Some(result == DialogResult::Yes);
+        match result {
+            DialogResult::Yes => return Some(true),
+            DialogResult::No => return Some(false),
+            _ => return None
+        }
     }
     return None;
 }

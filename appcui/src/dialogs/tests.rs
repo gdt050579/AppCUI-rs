@@ -285,3 +285,51 @@ fn check_validate() {
     }));
     a.run();
 }
+
+#[test]
+fn check_try_validate() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Save all files ?');
+        CheckHash(0xAEC8093ED340EABD)    
+        Key.Pressed(Enter)
+        Paint('Cancel exit')  
+        CheckHash(0xE75AE21563966113)
+        Key.Pressed(Enter)   
+        Paint('Back to initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Save all files ?');
+        CheckHash(0xAEC8093ED340EABD) 
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('Save, then exit')
+        CheckHash(0xB4DED0FD1E127409) 
+        Key.Pressed(Enter)   
+        Paint('Back to initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Save all files ?');
+        CheckHash(0xAEC8093ED340EABD) 
+        Key.Pressed(Tab,2)
+        Key.Pressed(Enter)
+        Paint('Exit without saving')
+        CheckHash(0x1E7B8615E4DBEF3F)  
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    a.add_window(CallbackWin::new(|| {
+        if let Some(save) = dialogs::try_validate("Exit", "Save all files ?") {
+            if save {
+                dialogs::message("Response", "Save, then exit");
+            } else {
+                dialogs::message("Response", "Exit without saving");
+            }            
+        } else {
+            dialogs::message("Response", "Cancel exit")
+        }
+    }));
+    a.run();
+}
