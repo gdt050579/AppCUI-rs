@@ -114,11 +114,6 @@ impl GenericAlertDialog {
                 x += GenericAlertDialog::BUTTON_SIZE as i32;
                 w.b_no = w.add(GenericAlertDialog::add_button("&No", x, y));
             }
-            DialogButtons::OkCancel => {
-                w.b_ok = w.add(GenericAlertDialog::add_button("&Ok", x, y));
-                x += GenericAlertDialog::BUTTON_SIZE as i32;
-                w.b_cancel = w.add(GenericAlertDialog::add_button("&Cancel", x, y));
-            }
             DialogButtons::YesNoCancel => {
                 w.b_yes = w.add(GenericAlertDialog::add_button("&Yes", x, y));
                 x += GenericAlertDialog::BUTTON_SIZE as i32;

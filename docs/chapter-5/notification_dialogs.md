@@ -63,3 +63,19 @@ if dialogs::proceed("Alert","An error occured while performn a copy operation.\n
 ```
 will create a dialog that looks like the following picture:
 <img src="img/proceed.png" width=300/>
+
+
+## Popup messages
+
+Popup messages are notification of success or generic information or simple questions that determine how the execution flow should continue from that point. To show a simple message use the following method:
+```rs
+fn dialogs::message(title: &str, caption: &str) {...}
+```
+This will create a modal window with the message (the content of variable `caption`) provided to this method and one button (that contains the caption `Ok`). The following code:
+
+```rs
+dialogs::message("Success","All files have been copied");
+```
+
+will produce the following modal window:
+<img src="img/message.png" width=300/>
