@@ -83,7 +83,7 @@ impl MyWin {
                 }
             }
             NotificationType::Message => {
-                dialogs::error("Message", "The last operation has been completed succesifully.");
+                dialogs::message("Message", "The last operation has been completed succesifully.");
             }
             NotificationType::Validate => {
                 if dialogs::validate("Delete", "Are you sure that you want to delete this folder ?") {
