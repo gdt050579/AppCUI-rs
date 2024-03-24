@@ -1606,3 +1606,37 @@ fn check_window_on_close_default() {
     a.add_window(window!("Win-2,x:30,y:0,w:30,h:5"));
     a.run();
 }
+
+
+#[test]
+fn check_window_close() {
+    #[Window(events = ButtonEvents,internal = true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Test,d:c,w:30,h:8")
+            };
+            me.add(button!("Close,d:c,w:14,h:1"));
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            self.close();
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0x9E8F35BB0431A941)
+        Mouse.Click(30,4,left)
+        Paint('window is closed - empty desktop')
+        CheckHash(0x734FECAF52FDE955)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

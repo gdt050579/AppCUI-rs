@@ -62,6 +62,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | `tag()`               | Returns the tag of the current window                                                                             |
 | `clear_tag()`         | Clears the current tag. Its equivalent to `set_tag("")`                                                           |
 | `enter_resize_mode()` | Enters the resize mode programatically                                                                            |
+| `close`               | Closes current window                                                                                             |
 
 ## Key association
 
