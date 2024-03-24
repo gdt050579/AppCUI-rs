@@ -167,3 +167,18 @@ fn check_retry_error() {
     }));
     a.run();
 }
+
+#[test]
+fn check_alert() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Message box');
+        CheckHash(0xBCA6A406AE5AE98E)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    a.add_window(CallbackWin::new(|| dialogs::alert("Error", "A problem occured while running the code.")));
+    a.run();
+}

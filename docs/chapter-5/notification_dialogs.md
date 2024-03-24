@@ -34,3 +34,18 @@ if dialogs::retry("Error","An error occured while performn a copy operation.\nRe
 ```
 that looks like the following picture:
 <img src="img/retry.png" width=300/>
+
+## Alerts
+
+Alerts are dialogs where an error has occured, but it is not that relevant for the program exection flow (its an error from where we can recover).  You can show an error by using the following method:
+```rs
+fn dialogs::alert(title: &str, caption: &str) {...}
+```
+This will create a modal window with the message (the content of variable `caption`) provided to this method and one button (that contains the caption `Ok`). The following code:
+
+```rs
+dialogs::alert("Error","An error has occured during the last operation");
+```
+
+will produce the following error modal window:
+<img src="img/alert.png" width=300/>
