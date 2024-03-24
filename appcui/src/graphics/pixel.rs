@@ -181,12 +181,10 @@ const COLORMAP_64_COLORS: [Color; 125] = [
 ];
 
 const COLORMAP_64_COLORS_PROC: [u8; 125] = [
-    0, 25, 50, 75, 100, 25, 25, 50, 75, 100, 50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100, 100, 75,
-    75, 100, 25, 25, 50, 75, 100, 25, 25, 25, 75, 100, 50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100,
-    100, 75, 75, 100, 50, 25, 50, 50, 75, 25, 25, 50, 50, 75, 50, 50, 50, 50, 50, 50, 50, 50, 75,
-    75, 75, 75, 50, 75, 100, 75, 75, 50, 75, 75, 75, 75, 50, 75, 75, 50, 50, 50, 75, 75, 75, 75,
-    75, 75, 75, 75, 75, 75, 75, 100, 100, 100, 75, 75, 100, 100, 100, 75, 75, 100, 75, 75, 50, 75,
-    100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
+    0, 25, 50, 75, 100, 25, 25, 50, 75, 100, 50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100, 100, 75, 75, 100, 25, 25, 50, 75, 100, 25, 25, 25, 75, 100,
+    50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100, 100, 75, 75, 100, 50, 25, 50, 50, 75, 25, 25, 50, 50, 75, 50, 50, 50, 50, 50, 50, 50, 50, 75, 75,
+    75, 75, 50, 75, 100, 75, 75, 50, 75, 75, 75, 75, 50, 75, 75, 50, 50, 50, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 100, 100, 100, 75, 75, 100,
+    100, 100, 75, 75, 100, 75, 75, 50, 75, 100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
 ];
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -198,12 +196,7 @@ pub struct Pixel {
 }
 impl Pixel {
     pub fn new(red: u8, green: u8, blue: u8, alpha: u8) -> Self {
-        Pixel {
-            red,
-            green,
-            blue,
-            alpha,
-        }
+        Pixel { red, green, blue, alpha }
     }
     pub fn from_rgb(red: u8, green: u8, blue: u8) -> Self {
         Pixel {
@@ -291,21 +284,21 @@ impl Pixel {
         }
     }
     pub(super) fn to_gray_scale(&self) -> Character {
-        let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32))/3;
+        let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32)) / 3;
         if val < 32 {
-            return Character::new(' ',Color::Black,Color::Black,CharFlags::None);
+            return Character::new(' ', Color::Black, Color::Black, CharFlags::None);
         }
         if val < 96 {
-            return Character::new(SpecialChar::Block25,Color::White,Color::Black,CharFlags::None);
-        }     
+            return Character::new(SpecialChar::Block25, Color::White, Color::Black, CharFlags::None);
+        }
         if val < 160 {
-            return Character::new(SpecialChar::Block50,Color::White,Color::Black,CharFlags::None);
-        }  
+            return Character::new(SpecialChar::Block50, Color::White, Color::Black, CharFlags::None);
+        }
         if val < 224 {
-            return Character::new(SpecialChar::Block75,Color::White,Color::Black,CharFlags::None);
+            Character::new(SpecialChar::Block75, Color::White, Color::Black, CharFlags::None)
         } else {
-            return Character::new(' ',Color::White,Color::White,CharFlags::None);
-        }                     
+            Character::new(' ', Color::White, Color::White, CharFlags::None)
+        }
     }
 }
 
