@@ -95,18 +95,11 @@ impl MyWin {
                 }
             }
             NotificationType::TryValidate => {
-                if let Some(save_files_and_exit) = dialogs::try_validate("Exit", "Some of the files were modified. Do you want to save them ?") {
-                    // we got a result
-                    if save_files_and_exit {
-                        // YES button was pressed
-                        dialogs::message("Result", "We will exit and save the files.");
-                    } else {
-                        // NO button was pressed
-                        dialogs::message("Result", "We will exit but we will not save the modified files.");
-                    }
-                } else {
-                    // cancel button was pressed
-                    dialogs::message("Result", "We will not exit the app.");
+                let result = dialogs::validate_or_cancel("Exit", "Some of the files were modified. Do you want to save them ?");
+                match result {
+                    dialogs::ValidateOrCancelResult::Yes => dialogs::message("Result", "We will exit and save the files."),
+                    dialogs::ValidateOrCancelResult::No => dialogs::message("Result", "We will exit but we will not save the modified files."),
+                    dialogs::ValidateOrCancelResult::Cancel => dialogs::message("Result", "We will not exit the app."),
                 }
             }
         }

@@ -287,7 +287,7 @@ fn check_validate() {
 }
 
 #[test]
-fn check_try_validate() {
+fn check_validate_or_cancel() {
     let script = "
         Paint.Enable(false)
         Paint('Initial State')   
@@ -321,14 +321,11 @@ fn check_try_validate() {
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
     a.add_window(CallbackWin::new(|| {
-        if let Some(save) = dialogs::try_validate("Exit", "Save all files ?") {
-            if save {
-                dialogs::message("Response", "Save, then exit");
-            } else {
-                dialogs::message("Response", "Exit without saving");
-            }            
-        } else {
-            dialogs::message("Response", "Cancel exit")
+        let result = dialogs::validate_or_cancel("Exit", "Save all files ?");
+        match result {
+            dialogs::ValidateOrCancelResult::Yes => dialogs::message("Response", "Save, then exit"),
+            dialogs::ValidateOrCancelResult::No => dialogs::message("Response", "Exit without saving"),
+            dialogs::ValidateOrCancelResult::Cancel => dialogs::message("Response", "Cancel exit"),
         }
     }));
     a.run();

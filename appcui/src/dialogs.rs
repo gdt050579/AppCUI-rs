@@ -10,6 +10,13 @@ use generic_alert_dialog::GenericAlertDialog;
 
 use crate::prelude::{window, ModalWindowMethods};
 
+#[derive(Copy,Clone,PartialEq,Eq)]
+pub enum ValidateOrCancelResult {
+    Yes,
+    No,
+    Cancel
+}
+
 pub fn error(title: &str, caption: &str) {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Error);
     w.show();
@@ -43,14 +50,14 @@ pub fn validate(title: &str, caption: &str) -> bool {
     }
     return false;
 }
-pub fn try_validate(title: &str, caption: &str) -> Option<bool> {
+pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNoCancel, window::Type::Notification);
     if let Some(result) = w.show() {
         match result {
-            DialogResult::Yes => return Some(true),
-            DialogResult::No => return Some(false),
-            _ => return None
+            DialogResult::Yes => return ValidateOrCancelResult::Yes,
+            DialogResult::No => return ValidateOrCancelResult::No,
+            _ => return ValidateOrCancelResult::Cancel
         }
     }
-    return None;
+    return ValidateOrCancelResult::Cancel;
 }
