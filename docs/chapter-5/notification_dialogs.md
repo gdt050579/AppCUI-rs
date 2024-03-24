@@ -19,6 +19,7 @@ dialogs::error("Error","An error has occured during the last operation");
 ```
 
 will produce the following error modal window:
+
 <img src="img/error.png" width=300/>
 
 Error dialogs are often use in scenarios where an error has occured and a specific action need to pe stop because of it. There are however cases where you will also want a retry option (if an error occurs, retry the same operation in the hope of another result). If this is the case, the following method can be used:
@@ -33,6 +34,7 @@ if dialogs::retry("Error","An error occured while performn a copy operation.\nRe
 }
 ```
 will create a dialog that looks like the following picture:
+
 <img src="img/retry.png" width=300/>
 
 ## Alerts
@@ -48,6 +50,7 @@ dialogs::alert("Error","An error has occured during the last operation");
 ```
 
 will produce the following error modal window:
+
 <img src="img/alert.png" width=300/>
 
 Just like in the case of errors, if the alert is something we can ignore and continue with the execution, the following method can be used:
@@ -62,6 +65,7 @@ if dialogs::proceed("Alert","An error occured while performn a copy operation.\n
 }
 ```
 will create a dialog that looks like the following picture:
+
 <img src="img/proceed.png" width=300/>
 
 
@@ -78,6 +82,7 @@ dialogs::message("Success","All files have been copied");
 ```
 
 will produce the following modal window:
+
 <img src="img/message.png" width=300/>
 
 ## Validation messages
@@ -95,6 +100,7 @@ if dialogs::validate("Question","Are you sure you want to proceed ?") {
 }
 ```
 will create a dialog that looks like the following picture:
+
 <img src="img/validate.png" width=300/>
 
 Aditionally a `try_validate` method is also available with the following definition:
@@ -125,4 +131,5 @@ if let Some(save_files) = dialogs::try_validate("Exit","Do you want to save your
 }
 ```
 and should create a dialog that looks like the following picture:
+
 <img src="img/try_validate.png" width=300/>
