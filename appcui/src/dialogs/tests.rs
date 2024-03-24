@@ -37,7 +37,6 @@ fn check_small_error() {
     a.run();
 }
 
-
 #[test]
 fn check_large_error() {
     let script = "
@@ -49,7 +48,9 @@ fn check_large_error() {
         CheckHash(0x563DF7AC2DDD7DAE)
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
-    a.add_window(CallbackWin::new(|| dialogs::error("Error", "An error has occured while running the code.")));
+    a.add_window(CallbackWin::new(|| {
+        dialogs::error("Error", "An error has occured while running the code.")
+    }));
     a.run();
 }
 
@@ -64,7 +65,12 @@ fn check_very_large_error() {
         CheckHash(0xF83F2AE0FC4EC4ED)
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
-    a.add_window(CallbackWin::new(|| dialogs::error("Error", "An error has occured while running the code. Because of this certain operations are no longer possible.")));
+    a.add_window(CallbackWin::new(|| {
+        dialogs::error(
+            "Error",
+            "An error has occured while running the code. Because of this certain operations are no longer possible.",
+        )
+    }));
     a.run();
 }
 
@@ -117,5 +123,47 @@ fn check_return_from_error() {
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
     a.add_window(CallbackWin::new(|| dialogs::error("Error", "123")));
+    a.run();
+}
+
+#[test]
+fn check_retry_error() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Retry');
+        CheckHash(0x7C19591705072D6D)
+        Key.Pressed(Enter)
+        Paint('Back to initial State (result is cancel)')   
+        CheckHash(0x937CE126B66578D9)
+        Key.Pressed(Enter)
+        Paint('Back to initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Retry (second time)');
+        CheckHash(0x7C19591705072D6D)
+        Key.Pressed(Escape)
+        Paint('Back to initial State (after escape)')   
+        Key.Pressed(Enter)
+        Paint('Back to initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Retry (third time)');
+        CheckHash(0x7C19591705072D6D)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('Now we need to retry');
+        CheckHash(0xC88A5ABECB445F81)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    a.add_window(CallbackWin::new(|| {
+        if dialogs::retry("Error", "An error occured. Retry ?") {
+            dialogs::message("Response", "We should retry.")
+        } else {
+            dialogs::message("Response", "Stop the action.")
+        }
+    }));
     a.run();
 }

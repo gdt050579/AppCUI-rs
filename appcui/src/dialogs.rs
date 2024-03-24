@@ -21,3 +21,7 @@ pub fn retry(title: &str, caption: &str)->bool  {
     }
     return false;
 }
+pub fn message(title: &str, caption: &str)  {
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Notification);
+    w.show();
+}
