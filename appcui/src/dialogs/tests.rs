@@ -226,3 +226,18 @@ fn check_proceed() {
     }));
     a.run();
 }
+
+#[test]
+fn check_message() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')   
+        CheckHash(0x90DB478C0FC0C3A9)
+        Key.Pressed(Enter)
+        Paint('Message box');
+        CheckHash(0xE2E128A51D518819)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    a.add_window(CallbackWin::new(|| dialogs::message("Success", "Operation completed succesifully.")));
+    a.run();
+}
