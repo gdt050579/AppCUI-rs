@@ -36,3 +36,10 @@ pub fn message(title: &str, caption: &str)  {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Notification);
     w.show();
 }
+pub fn validate(title: &str, caption: &str)->bool  {
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNo, window::Type::Notification);
+    if let Some(result) = w.show() {
+        return result == DialogResult::Yes;
+    }
+    return false;
+}

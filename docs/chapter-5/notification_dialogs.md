@@ -67,7 +67,7 @@ will create a dialog that looks like the following picture:
 
 ## Popup messages
 
-Popup messages are notification of success or generic information or simple questions that determine how the execution flow should continue from that point. To show a simple message use the following method:
+Popup messages are notification of success or generic information that are provided. To show a simple message use the following method:
 ```rs
 fn dialogs::message(title: &str, caption: &str) {...}
 ```
@@ -79,3 +79,20 @@ dialogs::message("Success","All files have been copied");
 
 will produce the following modal window:
 <img src="img/message.png" width=300/>
+
+## Validation messages
+
+Validation messages are simple questions that determine how the execution flow should continue from that point. To show a validation message use the following method:
+```rs
+fn dialogs::validate(title: &str, caption: &str) -> bool {...}
+```
+This method will create a dialog with two buttons (`Yes` and `No`). If you click on `Yes` button the method will return **true** otherwise it will return **false**. This is used to create a simple validation message such `Are you sure you want to proceed ?`.
+
+For example, the following code:
+```rs
+if dialogs::validate("Question","Are you sure you want to proceed ?") {
+    // start the action
+}
+```
+will create a dialog that looks like the following picture:
+<img src="img/validate.png" width=300/>
