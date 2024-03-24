@@ -96,3 +96,33 @@ if dialogs::validate("Question","Are you sure you want to proceed ?") {
 ```
 will create a dialog that looks like the following picture:
 <img src="img/validate.png" width=300/>
+
+Aditionally a `try_validate` method is also available with the following definition:
+```rs
+fn dialogs::try_validate(title: &str, caption: &str) -> Option<bool> {...}
+```
+This method will display three button (`Yes`, `No` and `Cancel`). The result of this dialog are:
+* **Some(true)** if `Yes` button is being clicked
+* **Some(false)** if `No` button is being clicked
+* **None** if `Cancel` button is clicked (or escape key is pressed).
+
+This type of dialog should be used for scenarios where you can do one action in two ways or you can stop doing that action. For example, when an application ends and you need to save the date, you can chose between:
+* saving the data (and close the application)
+* not saving the date (and still close the application)
+or
+* cancel (meaning that you will not close the application)
+
+The following code describes a similar scenario:
+```rs
+if let Some(save_files) = dialogs::try_validate("Exit","Do you want to save your files ?") {
+    if save_files {
+        // save files and then exist application
+    } else {
+        // exit the application directly
+    }
+} else {
+    // don't exit the application
+}
+```
+and should create a dialog that looks like the following picture:
+<img src="img/try_validate.png" width=300/>
