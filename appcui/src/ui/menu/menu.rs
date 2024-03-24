@@ -34,7 +34,7 @@ pub struct Menu {
 impl Menu {
     pub fn new(name: &str) -> Self {
         Self {
-            caption: if name.len() == 0 {
+            caption: if name.is_empty() {
                 Caption::default()
             } else {
                 Caption::new(name, ExtractHotKeyMethod::AltPlusKey)
@@ -111,7 +111,7 @@ impl Menu {
     }
 
     pub(crate) fn is_on_menu(&self, x: i32, y: i32) -> bool {
-        MousePositionInfo::new(x - self.clip.left, y - self.clip.top, &self).is_on_menu
+        MousePositionInfo::new(x - self.clip.left, y - self.clip.top, self).is_on_menu
     }
     #[inline(always)]
     pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
@@ -218,7 +218,7 @@ impl Menu {
                 }
             }
         }
-        return false;
+        false
     }
 
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, active: bool) {
@@ -321,16 +321,14 @@ impl Menu {
         }
         if need_repaint {
             if mpi.is_on_menu {
-                return MouseMoveMenuResult::ProcessedAndRepaint;
+                MouseMoveMenuResult::ProcessedAndRepaint
             } else {
-                return MouseMoveMenuResult::RepaintAndPass;
+                MouseMoveMenuResult::RepaintAndPass
             }
+        } else if mpi.is_on_menu {
+            return MouseMoveMenuResult::ProcessWithoutRepaint;
         } else {
-            if mpi.is_on_menu {
-                return MouseMoveMenuResult::ProcessWithoutRepaint;
-            } else {
-                return MouseMoveMenuResult::Ignored;
-            }
+            return MouseMoveMenuResult::Ignored;
         }
     }
     pub(crate) fn on_mouse_wheel(&mut self, direction: MouseWheelDirection) -> EventProcessStatus {
@@ -346,7 +344,7 @@ impl Menu {
             self.first_visible_item += 1;
             return EventProcessStatus::Processed;
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> MousePressedMenuResult {
         let x = x - self.clip.left;
@@ -377,7 +375,7 @@ impl Menu {
             return MousePressedMenuResult::None;
         }
         // if it's outsize, check if mouse is on one of its parens
-        return MousePressedMenuResult::CheckParent;
+        MousePressedMenuResult::CheckParent
     }
 
     pub(super) fn select_single_choice(&mut self, index: usize) {
@@ -515,7 +513,7 @@ impl Menu {
                 idx += 1;
             }
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
 
     pub(crate) fn compute_position(&mut self, x: i32, y: i32, max_size: Size, term_size: Size) -> bool {
@@ -598,18 +596,16 @@ impl Menu {
                 self.clip
                     .set_with_size(x, y + 1 - (menu_height as i32), menu_width as u16, menu_height as u16);
             }
+        } else if to_bottom {
+            self.clip
+                .set_with_size(x + 1 - (menu_width as i32), y, menu_width as u16, menu_height as u16);
         } else {
-            if to_bottom {
-                self.clip
-                    .set_with_size(x + 1 - (menu_width as i32), y, menu_width as u16, menu_height as u16);
-            } else {
-                self.clip.set_with_size(
-                    x + 1 - (menu_width as i32),
-                    y + 1 - (menu_height as i32),
-                    menu_width as u16,
-                    menu_height as u16,
-                );
-            }
+            self.clip.set_with_size(
+                x + 1 - (menu_width as i32),
+                y + 1 - (menu_height as i32),
+                menu_width as u16,
+                menu_height as u16,
+            );
         }
 
         // clear selection & buttons
@@ -618,7 +614,7 @@ impl Menu {
         self.button_up = MenuButtonState::Normal;
         self.button_down = MenuButtonState::Normal;
 
-        return true;
+        true
     }
 
     #[inline(always)]

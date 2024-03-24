@@ -109,7 +109,7 @@ impl OnKeyPressed for CheckBox {
             self.on_default_action();
             return EventProcessStatus::Processed;
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
 }
 impl OnMouseEvent for CheckBox {

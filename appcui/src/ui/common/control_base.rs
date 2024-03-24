@@ -79,7 +79,7 @@ impl ControlBase {
                 top: 0,
                 bottom: 0,
             },
-            status_flags: status_flags,
+            status_flags,
             screen_clip: ClipArea::default(),
             screen_origin: Point::default(),
             hotkey: Key::default(),
@@ -125,8 +125,8 @@ impl ControlBase {
     #[inline(always)]
     pub fn position(&self) -> Point {
         Point {
-            x: self.layout.get_x() as i32,
-            y: self.layout.get_y() as i32,
+            x: self.layout.get_x(),
+            y: self.layout.get_y(),
         }
     }
 
@@ -194,7 +194,7 @@ impl ControlBase {
             self.status_flags |= StatusFlags::MarkedForFocus;
             return true;
         }
-        return false;
+        false
     }
     pub(crate) fn clear_mark_to_receive_focus(&mut self) {
         self.status_flags.remove(StatusFlags::MarkedForFocus);
@@ -283,7 +283,7 @@ impl ControlBase {
             RuntimeManager::get().request_focus_for_control(self.handle);
             return true;
         }
-        return false;
+        false
     }
 
     pub(crate) fn add_child<T>(&mut self, control: T) -> Handle<T>
@@ -310,7 +310,7 @@ impl ControlBase {
             // since we have already pushed one handle, we know that children count > 0
             self.focused_child_index.set(children_count - 1, children_count, false);
         }
-        return handle.cast();
+        handle.cast()
     }
 
     /// Returns `true` if the current control is visible or `false` otherwise
@@ -375,7 +375,7 @@ impl ControlBase {
         if self.status_flags.contains_one(StatusFlags::IncreaseBottomMarginOnFocus) {
             v |= 2;
         }
-        return Some(v);
+        Some(v)
     }
 
     /// Sets the bounds (minim and maxim sized allowed for a control). If the size of a control is outside its bounds, its size will be adjusted automatically. This method has no effect on a Desktop control.
@@ -454,7 +454,7 @@ impl ControlBase {
             return Some(ExpandedDirection::OnTop);
         }
         // no expansion possible
-        return None;
+        None
     }
 
     #[inline]
@@ -480,7 +480,7 @@ impl ControlBase {
         Rect::with_point_and_size(self.screen_origin, self.layout.get_size())
     }
     pub(crate) fn prepare_paint(&self, surface: &mut Surface) -> bool {
-        if (self.is_visible() == false) || (self.screen_clip.is_visible() == false) {
+        if !self.is_visible() || !self.screen_clip.is_visible() {
             return false; // nothing to draw
         }
         // paint myself
@@ -512,7 +512,7 @@ impl ControlBase {
         surface.set_base_origin(self.screen_origin.x, self.screen_origin.y);
         surface.reset_clip();
         surface.reset_origin();
-        return true;
+        true
     }
     pub(crate) fn raise_event(&self, event: ControlEvent) {
         if !self.handle.is_none() {
@@ -574,7 +574,7 @@ impl ControlBase {
         if let Some(menu) = RuntimeManager::get().get_menu(menu_handle) {
             return menu.get(menuitem_handle);
         }
-        return None;
+        None
     }
 
     #[allow(private_bounds)]
@@ -585,7 +585,7 @@ impl ControlBase {
         if let Some(menu) = RuntimeManager::get().get_menu(menu_handle) {
             return menu.get_mut(menuitem_handle);
         }
-        return None;
+        None
     }
 }
 // default implementations

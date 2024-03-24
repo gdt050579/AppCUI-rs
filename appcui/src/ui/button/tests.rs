@@ -42,7 +42,7 @@ fn check_button_control() {
                 self.set_info("Button 2 pressed");
                 return EventProcessStatus::Processed;
             }
-            return EventProcessStatus::Ignored;
+            EventProcessStatus::Ignored
         }
     }
 

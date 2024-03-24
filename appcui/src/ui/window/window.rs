@@ -176,7 +176,7 @@ impl Window {
         };
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
-        if flags.contains(Flags::NoCloseButton) == false {
+        if !flags.contains(Flags::NoCloseButton) {
             let g = win.toolbar.create_group(GroupPosition::TopRight);
             win.toolbar.add(g, toolbar::CloseButton::new());
         }

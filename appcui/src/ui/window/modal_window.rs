@@ -103,7 +103,7 @@ impl<T: 'static> OnKeyPressed for ModalWindow<T> {
                     if let Some(interface) = self.interface_mut() {
                         WindowEvents::on_accept(interface);
                     }
-                    return EventProcessStatus::Processed;
+                    EventProcessStatus::Processed
                 }
                 key!("Escape") => {
                     if let Some(interface) = self.interface_mut() {
@@ -117,20 +117,20 @@ impl<T: 'static> OnKeyPressed for ModalWindow<T> {
                             RuntimeManager::get().cancel_exit_from_execution_loop();
                         }
                     }
-                    return EventProcessStatus::Processed;
+                    EventProcessStatus::Processed
                 }
                 _ => {
-                    return OnKeyPressed::on_key_pressed(&mut self.base, key, character);
+                    OnKeyPressed::on_key_pressed(&mut self.base, key, character)
                 }
             }
         } else {
-            return OnKeyPressed::on_key_pressed(&mut self.base, key, character);
+            OnKeyPressed::on_key_pressed(&mut self.base, key, character)
         }
     }
 }
 impl<T> OnMouseEvent for ModalWindow<T> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        return OnMouseEvent::on_mouse_event(&mut self.base, event);
+        OnMouseEvent::on_mouse_event(&mut self.base, event)
     }
 }
 impl<T> OnWindowRegistered for ModalWindow<T> {

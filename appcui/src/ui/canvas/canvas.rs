@@ -242,9 +242,9 @@ impl OnMouseEvent for Canvas {
         };
         // if one of the components require a repaint, than we should repaint even if the canvas required us to ignore the event
         if res.should_repaint() {
-            return EventProcessStatus::Processed;
+            EventProcessStatus::Processed
         } else {
-            return response;
+            response
         }
     }
 }

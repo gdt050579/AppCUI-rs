@@ -24,7 +24,7 @@ impl SubMenu {
         caption.clear_hotkey_modifier();
         SubMenu {
             enabled: true,
-            caption: caption,
+            caption,
             submenu_handle: handle,
             handle: Handle::None,
             menu_handle: Handle::None,

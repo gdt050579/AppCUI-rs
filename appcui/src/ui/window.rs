@@ -12,5 +12,5 @@ pub use window::Window;
 pub use modal_window::ModalWindow;
 pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::Type;
-pub (self) use drag_status::DragStatus;
-pub (self) use title::Title;
+use drag_status::DragStatus;
+use title::Title;

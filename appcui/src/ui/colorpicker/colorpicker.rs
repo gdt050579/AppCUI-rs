@@ -68,24 +68,18 @@ impl ColorPicker {
             let transparent = (Color::Transparent as u8) as i32;
             if (result == COLOR_MATRIX_WIDTH) && (offset == ONE_POSITION_TO_RIGHT) {
                 result = transparent; // Move to the right with 1 position
+            } else if (result == transparent + 1) && (offset == ONE_POSITION_TO_RIGHT) {
+                result = 0;
+            } else if (result == -1) && (offset == ONE_POSITION_TO_LEFT) {
+                result = transparent;
+            } else if (result == transparent - 1) && (offset == ONE_POSITION_TO_LEFT) {
+                result = COLOR_MATRIX_WIDTH - 1;
             } else {
-                if (result == transparent + 1) && (offset == ONE_POSITION_TO_RIGHT) {
-                    result = 0;
-                } else {
-                    if (result == -1) && (offset == ONE_POSITION_TO_LEFT) {
-                        result = transparent;
-                    } else {
-                        if (result == transparent - 1) && (offset == ONE_POSITION_TO_LEFT) {
-                            result = COLOR_MATRIX_WIDTH - 1;
-                        } else {
-                            if result < 0 {
-                                result += NUMBER_OF_COLORS;
-                            }
-                            if result >= NUMBER_OF_COLORS {
-                                result -= NUMBER_OF_COLORS;
-                            }
-                        }
-                    }
+                if result < 0 {
+                    result += NUMBER_OF_COLORS;
+                }
+                if result >= NUMBER_OF_COLORS {
+                    result -= NUMBER_OF_COLORS;
                 }
             }
         } else {
@@ -112,10 +106,10 @@ impl ColorPicker {
         {
             return ((x - 1) / SPACES_PER_COLOR) + (y - (self.expanded_panel_y + 1)) * COLOR_MATRIX_WIDTH;
         }
-        if (y == 1 + self.expanded_panel_y) && (x >= TRANSPARENT_CHECKBOX_X_OFFSET) && (x <= TRANSPARENT_CHECKBOX_X_LAST_OFFSET) {
+        if (y == 1 + self.expanded_panel_y) && (TRANSPARENT_CHECKBOX_X_OFFSET..=TRANSPARENT_CHECKBOX_X_LAST_OFFSET).contains(&x) {
             return (Color::Transparent as u8) as i32;
         }
-        return -1;
+        -1
     }
 }
 impl OnPaint for ColorPicker {
@@ -288,17 +282,15 @@ impl OnMouseEvent for ColorPicker {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter => {
-                if self.is_expanded() == false {
-                    if self.color.name().len() as i32 > ((self.size().width as i32) - 8) {
-                        self.show_tooltip(self.color.name())
-                    }
+                if !self.is_expanded() && self.color.name().len() as i32 > ((self.size().width as i32) - 8) {
+                    self.show_tooltip(self.color.name())
                 }
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
 
             MouseEvent::Leave => {
                 self.hide_tooltip();
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             MouseEvent::Over(p) => {
                 let idx = self.mouse_to_color_index(p.x, p.y);
@@ -306,7 +298,7 @@ impl OnMouseEvent for ColorPicker {
                     self.mouse_on_color_index = idx;
                     return EventProcessStatus::Processed;
                 }
-                return EventProcessStatus::Ignored;
+                EventProcessStatus::Ignored
             }
             MouseEvent::Pressed(data) => {
                 let idx = self.mouse_to_color_index(data.x, data.y);
@@ -321,9 +313,9 @@ impl OnMouseEvent for ColorPicker {
                     }
                 }
                 self.on_default_action();
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
-            _ => return EventProcessStatus::Ignored,
+            _ => EventProcessStatus::Ignored,
         }
     }
 }

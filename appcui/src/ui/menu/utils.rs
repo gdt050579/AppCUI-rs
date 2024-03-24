@@ -8,7 +8,7 @@ use crate::{
 #[inline(always)]
 pub(super) fn get_text_attr(enabled: bool, current_item: bool, color: &MenuTheme) -> CharAttribute {
     match () {
-        _ if enabled == false => color.text.inactive,
+        _ if !enabled => color.text.inactive,
         _ if current_item => color.text.hovered,
         _ => color.text.normal,
     }
@@ -20,7 +20,7 @@ pub(super) fn get_hotkey_attr(
     color: &MenuTheme,
 ) -> CharAttribute {
     match () {
-        _ if enabled == false => color.hotkey.inactive,
+        _ if !enabled => color.hotkey.inactive,
         _ if current_item => color.hotkey.hovered,
         _ => color.hotkey.normal,
     }
@@ -32,7 +32,7 @@ pub(super) fn get_shortcut_attr(
     color: &MenuTheme,
 ) -> CharAttribute {
     match () {
-        _ if enabled == false => color.shortcut.inactive,
+        _ if !enabled => color.shortcut.inactive,
         _ if current_item => color.shortcut.hovered,
         _ => color.shortcut.normal,
     }
@@ -44,7 +44,7 @@ pub(super) fn get_symbol_attr(
     color: &MenuTheme,
 ) -> CharAttribute {
     match () {
-        _ if enabled == false => color.symbol.inactive,
+        _ if !enabled => color.symbol.inactive,
         _ if current_item => color.symbol.hovered,
         _ => color.symbol.normal,
     }
@@ -65,7 +65,7 @@ pub(super) fn paint_shortcut(
     let sz = name.len() + modifier_name.len();
     let attr = get_shortcut_attr(enabled, current_item, color);
     let x = (width as i32) - (sz as i32);
-    if modifier_name.len() > 0 {
+    if !modifier_name.is_empty() {
         surface.write_string(x, format.y, modifier_name, attr, false);
     }
     surface.write_string(

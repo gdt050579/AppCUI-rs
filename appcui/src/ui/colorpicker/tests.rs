@@ -302,7 +302,7 @@ fn check_colorpicker_events() {
                 label.set_caption(color.name());
                 return EventProcessStatus::Processed;
             }
-            return EventProcessStatus::Ignored;
+            EventProcessStatus::Ignored
         }
     }
     let script = "

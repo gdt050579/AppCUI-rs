@@ -37,7 +37,7 @@ impl Panel {
     where
         T: Control + NotWindow + NotDesktop + 'static,
     {
-        return self.add_child(control);
+        self.add_child(control)
     }
     #[inline(always)]
     fn paint_border(&self, surface: &mut Surface, theme: &Theme) {

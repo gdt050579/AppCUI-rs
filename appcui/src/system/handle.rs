@@ -52,10 +52,7 @@ impl<T> Handle<T> {
 }
 impl<T> Clone for Handle<T> {
     fn clone(&self) -> Self {
-        Self {
-            value: self.value,
-            _phantom: PhantomData,
-        }
+        *self
     }
 }
 impl<T> Copy for Handle<T> {}

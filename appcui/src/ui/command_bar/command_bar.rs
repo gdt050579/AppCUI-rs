@@ -158,17 +158,17 @@ impl CommandBar {
         if item.receiver_control.is_none() {
             return None;
         }
-        return Some(CommandBarEvent {
+        Some(CommandBarEvent {
             command_id: item.command,
             control_receiver_handle: item.receiver_control,
-        });
+        })
     }
     pub(crate) fn update_positions(&mut self) {
         // recompute all positions regardless of the shift state
         for shift_state in 0..MAX_SHIFT_STATES {
             let vidx = &mut self.indexes[shift_state];
             vidx.clear();
-            if self.has_shifts[shift_state] == false {
+            if !self.has_shifts[shift_state] {
                 continue;
             }
             let start_index = MAX_KEYS * shift_state;
@@ -199,11 +199,11 @@ impl CommandBar {
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.fill_horizontal_line(0, self.y, self.width as i32, Character::with_attributes(' ', theme.menu.text.normal));
         let modifier_name = self.modifier.name();
-        if modifier_name.len() > 0 {
+        if !modifier_name.is_empty() {
             surface.write_string(0, self.y, modifier_name, theme.menu.text.inactive, false);
         }
         let shift_idx = self.modifier.get_value() as usize;
-        if (shift_idx >= MAX_SHIFT_STATES) || (self.has_shifts[shift_idx] == false) {
+        if (shift_idx >= MAX_SHIFT_STATES) || !self.has_shifts[shift_idx] {
             return;
         }
         for idx in &self.indexes[shift_idx] {
@@ -232,7 +232,7 @@ impl CommandBar {
             return None;
         }
         let shift_idx = self.modifier.get_value() as usize;
-        if (shift_idx >= MAX_SHIFT_STATES) || (self.has_shifts[shift_idx] == false) {
+        if (shift_idx >= MAX_SHIFT_STATES) || !self.has_shifts[shift_idx] {
             return None;
         }
         for idx in &self.indexes[shift_idx] {
@@ -264,7 +264,7 @@ impl CommandBar {
             return true;
         }
         self.hovered_index = INVALID_INDEX;
-        return false;
+        false
     }
 
     pub(crate) fn on_mouse_down(&mut self, _: &MouseButtonDownEvent) -> bool {
@@ -273,10 +273,10 @@ impl CommandBar {
             self.pressed_index = self.hovered_index;
             return true;
         }
-        return false;
+        false
     }
     pub(crate) fn on_mouse_up(&mut self) -> Option<CommandBarEvent> {
-        let idx = self.pressed_index as u32;
+        let idx = self.pressed_index;
         self.pressed_index = INVALID_INDEX;
 
         if (idx != INVALID_INDEX) && ((idx as usize) < self.items.len()) {
@@ -286,6 +286,6 @@ impl CommandBar {
             });
         }
         self.hovered_index = INVALID_INDEX;
-        return None;
+        None
     }
 }

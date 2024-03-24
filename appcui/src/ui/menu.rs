@@ -18,8 +18,8 @@ pub mod submenu;
 
 pub use self::menu::Menu;
 pub use self::menu_bar::MenuBar;
-pub(self) use self::menu_bar_item::MenuBarItem;
-pub(self) use self::menu_item::MenuItemWrapper;
+use self::menu_bar_item::MenuBarItem;
+use self::menu_item::MenuItemWrapper;
 pub(crate) use self::menu_item::MenuItem;
 
 pub use self::checkbox::CheckBox;

@@ -68,7 +68,7 @@ impl OnPaint for RadioBox {
                 format.hotkey_attr = Some(col_hot_key);
             }
             format.chars_count = Some(self.caption.chars_count() as u16);
-            surface.write_text(&self.caption.text(), &format);
+            surface.write_text(self.caption.text(), &format);
         }
         if self.selected {
             let col = if self.is_enabled() {
@@ -99,7 +99,7 @@ impl OnKeyPressed for RadioBox {
             self.on_default_action();
             return EventProcessStatus::Processed;
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
 }
 impl OnMouseEvent for RadioBox {

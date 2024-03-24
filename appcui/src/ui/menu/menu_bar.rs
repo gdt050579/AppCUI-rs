@@ -59,7 +59,7 @@ impl MenuBar {
                 return Some(index);
             }
         }
-        return None;
+        None
     }
     pub(crate) fn set_position(&mut self, x: i32, y: i32, width: u32) {
         self.x = x;
@@ -87,7 +87,7 @@ impl MenuBar {
             self.open(VectorIndex::from(idx));
             return EventProcessStatus::Processed;
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
     pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
         if let Some(idx) = self.mouse_position_to_index(x, y) {
@@ -102,13 +102,11 @@ impl MenuBar {
                 // the same index (and a valid one)
                 return EventProcessStatus::Ignored;
             }
-        } else {
-            if self.hovered_item.is_valid() {
-                self.hovered_item = VectorIndex::Invalid;
-                return EventProcessStatus::Processed;
-            }
+        } else if self.hovered_item.is_valid() {
+            self.hovered_item = VectorIndex::Invalid;
+            return EventProcessStatus::Processed;
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
 
     #[inline(always)]
@@ -137,7 +135,7 @@ impl MenuBar {
     }
     #[inline(always)]
     pub(crate) fn is_opened(&self) -> bool {
-        return self.opened_item.is_valid();
+        self.opened_item.is_valid()
     }
     fn process_shortcut(&mut self, key: Key) -> bool {
         for (index, item) in self.items.iter().enumerate() {
@@ -149,7 +147,7 @@ impl MenuBar {
                 return true;
             }
         }
-        return false;
+        false
     }
     fn process_key(&mut self, key: Key) -> EventProcessStatus {
         match key.code {
@@ -159,7 +157,7 @@ impl MenuBar {
                 if idx.is_valid() {
                     self.open(idx);
                 }
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             KeyCode::Right => {
                 let mut idx = self.opened_item;
@@ -167,10 +165,10 @@ impl MenuBar {
                 if idx.is_valid() {
                     self.open(idx);
                 }
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             _ => {
-                return EventProcessStatus::Ignored;
+                EventProcessStatus::Ignored
             }
         }
     }
@@ -185,7 +183,7 @@ impl MenuBar {
                     return EventProcessStatus::Processed;
                 }
             }
-            return EventProcessStatus::Ignored;
+            EventProcessStatus::Ignored
         } else {
             if key.modifier == KeyModifier::Alt {
                 // check if a shortcut was pressed
@@ -207,7 +205,7 @@ impl MenuBar {
             }
 
             // nothing to process
-            return EventProcessStatus::Ignored;
+            EventProcessStatus::Ignored
         }
     }
 

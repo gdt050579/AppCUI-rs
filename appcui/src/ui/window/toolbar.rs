@@ -18,12 +18,12 @@ mod single_choice;
 mod symbol_attr_state;
 
 
-pub (self) use self::item_base::ItemBase;
+use self::item_base::ItemBase;
 pub (super) use self::toolbar_item::ToolBarItem;
-pub (self) use self::toolbar::AddToToolbar;
-pub (self) use self::position_helper::PositionHelper;
-pub (self) use self::paint_data::PaintData;
-pub (self) use self::symbol_attr_state::SymbolAttrState;
+use self::toolbar::AddToToolbar;
+use self::position_helper::PositionHelper;
+use self::paint_data::PaintData;
+use self::symbol_attr_state::SymbolAttrState;
 pub (super) use self::toolbar::ToolBar;
 pub use self::group::GroupPosition;
 pub use self::group::Group;

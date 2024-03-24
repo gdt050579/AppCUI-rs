@@ -85,7 +85,7 @@ impl MenuItemWrapper {
             MenuItemWrapper::SubMenu(_) => Key::default(),
         };
         if key.code != KeyCode::None {
-            return Some(key);
+            Some(key)
         } else {
             None
         }
@@ -100,7 +100,7 @@ impl MenuItemWrapper {
             MenuItemWrapper::SubMenu(item) => item.caption.hotkey(),
         };
         if key.code != KeyCode::None {
-            return Some(key);
+            Some(key)
         } else {
             None
         }

@@ -27,25 +27,25 @@ impl ControlEvent {
     pub(crate) fn invoke(&self, receiver: &mut dyn Control) -> EventProcessStatus {
         match &self.data {
             ControlEventData::ButtonEvent(_) => {
-                return ButtonEvents::on_pressed(receiver, self.emitter.cast());
+                ButtonEvents::on_pressed(receiver, self.emitter.cast())
             }
             ControlEventData::CheckBoxEvent(data) => {
-                return CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked);
+                CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked)
             }
             ControlEventData::RadioBoxEvent(_) => {
-                return RadioBoxEvents::on_selected(receiver, self.emitter.cast());
+                RadioBoxEvents::on_selected(receiver, self.emitter.cast())
             }
             ControlEventData::ColorPickerEvent(data) => {
-                return ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color);
+                ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color)
             }
             ControlEventData::ThreeStateBoxEvent(data) => {
-                return ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state);
+                ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state)
             }
             ControlEventData::PasswordEvent(data) => {
                 if data.accept {
-                    return PasswordEvents::on_accept(receiver, self.emitter.cast());
+                    PasswordEvents::on_accept(receiver, self.emitter.cast())
                 } else {
-                    return PasswordEvents::on_cancel(receiver, self.emitter.cast());
+                    PasswordEvents::on_cancel(receiver, self.emitter.cast())
                 }
             }
         }

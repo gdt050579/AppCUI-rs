@@ -30,7 +30,7 @@ impl SingleChoice {
             command_id: u32::from(command_id),
             caption: Caption::new(text, ExtractHotKeyMethod::Key),
             shortcut: Key::from(shortcut),
-            selected: selected,
+            selected,
             handle: Handle::None,
             menu_handle: Handle::None,
         }

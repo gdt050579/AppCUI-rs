@@ -100,24 +100,24 @@ impl OnMouseEvent for Password {
         match event {
             MouseEvent::Enter => {
                 self.show_tooltip("Click and hold to see the password");
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             MouseEvent::Leave => {
                 self.hide_tooltip();
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
-            MouseEvent::Over(_) => return EventProcessStatus::Ignored,
+            MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(_) => {
                 self.visible = true;
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             MouseEvent::Released(_) => {
                 self.visible = false;
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
-            MouseEvent::DoubleClick(_) => return EventProcessStatus::Ignored,
-            MouseEvent::Drag(_) => return EventProcessStatus::Ignored,
-            MouseEvent::Wheel(_) => return EventProcessStatus::Ignored,
+            MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
+            MouseEvent::Drag(_) => EventProcessStatus::Ignored,
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }
     }
 }

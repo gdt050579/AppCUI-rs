@@ -336,7 +336,7 @@ fn check_dynamic_change_menu() {
                 self.counter += 1;
                 let new_text = format!("Increment ({})", self.counter);
                 if let Some(menuitem) = self.menuitem_mut(menu, item) {
-                    menuitem.set_caption(&new_text.as_str());
+                    menuitem.set_caption(new_text.as_str());
                 }
             }
         }
@@ -404,7 +404,7 @@ fn check_dynamic_change_menu_2() {
                 self.counter += 1;
                 let new_text = format!("Increment ({})", self.counter);
                 if let Some(menuitem) = self.menuitem_mut(menu, item) {
-                    menuitem.set_caption(&new_text.as_str());
+                    menuitem.set_caption(new_text.as_str());
                 }
             }
         }
@@ -790,7 +790,7 @@ fn check_popup_menu() {
                 }
                 return EventProcessStatus::Processed;
             }
-            return EventProcessStatus::Ignored;
+            EventProcessStatus::Ignored
         }
     }
     let script = "
@@ -985,7 +985,7 @@ fn check_popup_menu_with_keys() {
                 }
                 return EventProcessStatus::Processed;
             }
-            return EventProcessStatus::Ignored;
+            EventProcessStatus::Ignored
         }
     }
     let script = "
