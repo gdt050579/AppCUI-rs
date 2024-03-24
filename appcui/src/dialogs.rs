@@ -26,7 +26,7 @@ pub fn retry(title: &str, caption: &str) -> bool {
     if let Some(result) = w.show() {
         return result == DialogResult::Retry;
     }
-    return false;
+    false
 }
 pub fn alert(title: &str, caption: &str) {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Warning);
@@ -37,7 +37,7 @@ pub fn proceed(title: &str, caption: &str) -> bool {
     if let Some(result) = w.show() {
         return result == DialogResult::Yes;
     }
-    return false;
+    false
 }
 pub fn message(title: &str, caption: &str) {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Notification);
@@ -48,7 +48,7 @@ pub fn validate(title: &str, caption: &str) -> bool {
     if let Some(result) = w.show() {
         return result == DialogResult::Yes;
     }
-    return false;
+    false
 }
 pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNoCancel, window::Type::Notification);
@@ -59,5 +59,5 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
             _ => return ValidateOrCancelResult::Cancel
         }
     }
-    return ValidateOrCancelResult::Cancel;
+    ValidateOrCancelResult::Cancel
 }
