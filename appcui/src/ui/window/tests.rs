@@ -1640,3 +1640,79 @@ fn check_window_close() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_modal_window_close() {
+    #[ModalWindow(events = ButtonEvents, response: i32, internal=true)]
+    struct MyModalWin {
+        value: i32
+    }
+    impl MyModalWin {
+        fn new(value: i32) -> Self {
+            let mut me = Self {
+                base: ModalWindow::with_type("Modal", Layout::new("d:c,w:50,h:6"), window::Flags::None, window::Type::Notification),
+                value
+            };
+            if value % 2 == 0 {
+                me.add(button!("Close,d:c,w:24,h:1"));
+            } else {
+                me.add(button!("Exit,d:c,w:24,h:1"));
+            }
+            me
+        }
+    }
+    impl ButtonEvents for MyModalWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            if self.value % 2 == 0 {
+                self.close();
+            } else {
+                self.exit();
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+
+    #[Window(events = ButtonEvents,internal = true)]
+    struct MyWin {
+        value: i32
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Test,d:c,w:30,h:8"),
+                value: 0
+            };
+            me.add(button!("Run,d:c,w:14,h:1"));
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            MyModalWin::new(self.value).show();
+            self.value += 1;
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0xF724A64E6A51AC9E)
+        Mouse.Click(30,4,left)
+        Paint('Modal with close button')
+        CheckHash(0xC1F4302009EB0D63)
+        Key.Pressed(Enter)
+        Paint('back initial state')
+        CheckHash(0xF724A64E6A51AC9E)
+        Key.Pressed(Enter)
+        Paint('Modal with exit button')
+        CheckHash(0xD2F95351BFDDC8A1)
+        Key.Pressed(Enter)
+        Paint('back initial state')
+        CheckHash(0xF724A64E6A51AC9E)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
