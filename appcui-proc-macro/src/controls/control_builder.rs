@@ -290,6 +290,6 @@ impl<'a> ControlBuilder<'a> {
 impl From<ControlBuilder<'_>> for TokenStream {
     fn from(mut val: ControlBuilder<'_>) -> Self {
         val.content.push_str("\n\tcontrol\n}");
-        TokenStream::from_str(val.content.as_str()).expect(format!("Fail to convert '{}!' macro content to token stream", val.name).as_str())
+        TokenStream::from_str(val.content.as_str()).unwrap_or_else(|_| panic!("Fail to convert '{}!' macro content to token stream", val.name))
     }
 }

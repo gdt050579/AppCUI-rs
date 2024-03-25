@@ -166,7 +166,7 @@ impl Arguments {
             h.insert(hash);
         }
         // all good --> move current value vector into commands and create a new one for values
-        self.commands = std::mem::replace(&mut self.values, Vec::new());
+        self.commands = std::mem::take(&mut self.values);
     }
     fn validate_events_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
@@ -217,7 +217,7 @@ impl Arguments {
             self.values.clear();
             self.expect_next = ExpectNext::Equal;
         } else {
-            panic!("Expecting a key (a-zA-Z0-9) but got: `{}`", token.to_string());
+            panic!("Expecting a key (a-zA-Z0-9) but got: `{}`", token);
         }
     }
     fn validate_expect_equal(&mut self, token: TokenTree) {
@@ -227,7 +227,7 @@ impl Arguments {
             }
             self.expect_next = ExpectNext::Value;
         } else {
-            panic!("Expecting asign ('=' or ':') symbol but got: {}", token.to_string());
+            panic!("Expecting asign ('=' or ':') symbol but got: {}", token);
         }
     }
     fn validate_expect_value(&mut self, token: TokenTree) {
@@ -245,14 +245,14 @@ impl Arguments {
                         if let TokenTree::Ident(val) = inner_token {
                             self.values.push(val.to_string());
                         } else {
-                            panic!("Expecting a proper format for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token.to_string())
+                            panic!("Expecting a proper format for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token)
                         }
                     } else if let TokenTree::Punct(p) = inner_token {
                         if p.as_char() != ',' {
-                            panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,p.to_string())
+                            panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,p)
                         }
                     } else {
-                        panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token.to_string())
+                        panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token)
                     }
                     expect_value = !expect_value;
                 }
@@ -267,7 +267,7 @@ impl Arguments {
                 self.expect_next = ExpectNext::Comma;
             }
             _ => {
-                panic!("Expecting a value (a-zA-Z0-9) but got: `{}`", token.to_string());
+                panic!("Expecting a value (a-zA-Z0-9) but got: `{}`", token);
             }
         }
     }
@@ -283,7 +283,7 @@ impl Arguments {
             self.validate_key_value_pair(config);
             self.expect_next = ExpectNext::Key;
         } else {
-            panic!("Expecting delimiter (',' comma) symbol but got:{}", token.to_string());
+            panic!("Expecting delimiter (',' comma) symbol but got:{}", token);
         }
     }
     pub(crate) fn parse(&mut self, input: TokenStream, config: &mut TraitsConfig) {

@@ -247,9 +247,7 @@ impl AppCUITrait {
             27 => Some(AppCUITrait::PasswordEvents),
             _ => None,
         };
-        if result.is_none() {
-            return None;
-        }
+        result?;
         // double check
         if value != (result.unwrap() as u8) {
             panic!("Internal error: Conversion of discriminant {} to AppCUITraits failed !", value);
