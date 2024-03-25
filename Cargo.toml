@@ -7,5 +7,5 @@ members = [
   "examples",
 ]
 
-[lints.clippy]
+[workspace.lints.clippy]
 module_inception = "allow"
