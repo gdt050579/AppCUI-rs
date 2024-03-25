@@ -328,7 +328,7 @@ fn check_colors() {
 #[test]
 fn check_draw_imge() {
     let mut s = SurfaceTester::new(40, 10);
-    let i = Image::from_str(
+    let i = Image::with_str(
         r#"
         |BB.........BB|
         |B..rr...rr..B|

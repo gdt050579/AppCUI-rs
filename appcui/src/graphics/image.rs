@@ -27,7 +27,7 @@ impl Image {
         }
         Some(img)
     }
-    pub fn from_str(image: &str) -> Option<Image> {
+    pub fn with_str(image: &str) -> Option<Image> {
         let buf = image.as_bytes();
         let mut w = 0u32;
         let mut h = 0u32;
@@ -40,10 +40,8 @@ impl Image {
                     h += 1;
                     if w == 0 {
                         w = temp_w;
-                    } else {
-                        if temp_w != w {
-                            return None;
-                        }
+                    } else if temp_w != w {
+                        return None;
                     }
                     temp_w = 0;
                 }
