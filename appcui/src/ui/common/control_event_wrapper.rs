@@ -9,12 +9,12 @@ use crate::ui::{
 };
 
 pub(crate) enum ControlEventData {
-    ButtonEvent(button::events::EventData),
-    CheckBoxEvent(checkbox::events::EventData),
-    RadioBoxEvent(radiobox::events::EventData),
-    ThreeStateBoxEvent(threestatebox::events::EventData),
-    ColorPickerEvent(colorpicker::events::EventData),
-    PasswordEvent(password::events::EventData),
+    Button(button::events::EventData),
+    CheckBox(checkbox::events::EventData),
+    RadioBox(radiobox::events::EventData),
+    ThreeStateBox(threestatebox::events::EventData),
+    ColorPicker(colorpicker::events::EventData),
+    Password(password::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -26,22 +26,22 @@ pub(crate) struct ControlEvent {
 impl ControlEvent {
     pub(crate) fn invoke(&self, receiver: &mut dyn Control) -> EventProcessStatus {
         match &self.data {
-            ControlEventData::ButtonEvent(_) => {
+            ControlEventData::Button(_) => {
                 ButtonEvents::on_pressed(receiver, self.emitter.cast())
             }
-            ControlEventData::CheckBoxEvent(data) => {
+            ControlEventData::CheckBox(data) => {
                 CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked)
             }
-            ControlEventData::RadioBoxEvent(_) => {
+            ControlEventData::RadioBox(_) => {
                 RadioBoxEvents::on_selected(receiver, self.emitter.cast())
             }
-            ControlEventData::ColorPickerEvent(data) => {
+            ControlEventData::ColorPicker(data) => {
                 ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color)
             }
-            ControlEventData::ThreeStateBoxEvent(data) => {
+            ControlEventData::ThreeStateBox(data) => {
                 ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state)
             }
-            ControlEventData::PasswordEvent(data) => {
+            ControlEventData::Password(data) => {
                 if data.accept {
                     PasswordEvents::on_accept(receiver, self.emitter.cast())
                 } else {

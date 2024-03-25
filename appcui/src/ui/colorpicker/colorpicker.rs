@@ -90,7 +90,7 @@ impl ColorPicker {
             self.raise_event(ControlEvent {
                 emitter: self.handle,
                 receiver: self.event_processor,
-                data: ControlEventData::ColorPickerEvent(EventData { color: col }),
+                data: ControlEventData::ColorPicker(EventData { color: col }),
             });
         }
     }
@@ -308,7 +308,7 @@ impl OnMouseEvent for ColorPicker {
                         self.raise_event(ControlEvent {
                             emitter: self.handle,
                             receiver: self.event_processor,
-                            data: ControlEventData::ColorPickerEvent(EventData { color: col }),
+                            data: ControlEventData::ColorPicker(EventData { color: col }),
                         });
                     }
                 }

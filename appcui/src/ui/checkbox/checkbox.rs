@@ -95,7 +95,7 @@ impl OnDefaultAction for CheckBox {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::CheckBoxEvent(EventData {
+            data: ControlEventData::CheckBox(EventData {
                 checked: self.checked,
             }),
         });

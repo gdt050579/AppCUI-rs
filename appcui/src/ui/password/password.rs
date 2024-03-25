@@ -78,7 +78,7 @@ impl OnKeyPressed for Password {
                 self.raise_event(ControlEvent {
                     emitter: self.handle,
                     receiver: self.event_processor,
-                    data: ControlEventData::PasswordEvent(EventData { accept: true }),
+                    data: ControlEventData::Password(EventData { accept: true }),
                 });
                 return EventProcessStatus::Processed;
             }
@@ -86,7 +86,7 @@ impl OnKeyPressed for Password {
                 self.raise_event(ControlEvent {
                     emitter: self.handle,
                     receiver: self.event_processor,
-                    data: ControlEventData::PasswordEvent(EventData { accept: false }),
+                    data: ControlEventData::Password(EventData { accept: false }),
                 });
                 return EventProcessStatus::Processed;
             }

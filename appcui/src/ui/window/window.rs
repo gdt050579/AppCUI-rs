@@ -9,11 +9,11 @@ use super::Title;
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
-enum MoveDirection {
-    ToLeft,
-    ToRight,
-    ToTop,
-    ToBottom,
+enum MoveDirectionTowards {
+    Left,
+    Right,
+    Top,
+    Bottom,
 }
 
 #[derive(Copy, Clone)]
@@ -41,11 +41,11 @@ const MOVE_TO_LOWER_MARGIN: i32 = -100000;
 const MOVE_TO_UPPER_MARGIN: i32 = 100000;
 
 impl Window {
-    fn point_to_point_distance(origin_rect: Rect, object_rect: Rect, dir: MoveDirection) -> u32 {
+    fn point_to_point_distance(origin_rect: Rect, object_rect: Rect, dir: MoveDirectionTowards) -> u32 {
         let origin: Point;
         let object: Point;
         match dir {
-            MoveDirection::ToLeft => {
+            MoveDirectionTowards::Left => {
                 // we need to have <object>[space]<origin>
                 // we compare <TOP,LEFT>
                 object = Point::new(object_rect.right(), object_rect.top());
@@ -54,7 +54,7 @@ impl Window {
                     return u32::MAX;
                 }
             }
-            MoveDirection::ToRight => {
+            MoveDirectionTowards::Right => {
                 // we need to have <origin>[space]<object>
                 object = Point::new(object_rect.left(), object_rect.top());
                 origin = Point::new(origin_rect.right(), origin_rect.top());
@@ -62,7 +62,7 @@ impl Window {
                     return u32::MAX;
                 }
             }
-            MoveDirection::ToTop => {
+            MoveDirectionTowards::Top => {
                 // we need to have <object>[space]<origin>
                 object = Point::new(object_rect.left(), object_rect.bottom());
                 origin = Point::new(origin_rect.left(), origin_rect.top());
@@ -70,7 +70,7 @@ impl Window {
                     return u32::MAX;
                 }
             }
-            MoveDirection::ToBottom => {
+            MoveDirectionTowards::Bottom => {
                 // we need to have <origin>[space]<object>
                 object = Point::new(object_rect.left(), object_rect.top());
                 origin = Point::new(origin_rect.left(), origin_rect.bottom());
@@ -82,7 +82,7 @@ impl Window {
         (((object.x - origin.x) * (object.x - origin.x)) as u32) + (((object.y - origin.y) * (object.y - origin.y)) as u32)
     }
 
-    fn compute_closest_distance(handle_parent: Handle<UIElement>, object_rect: Rect, dir: MoveDirection) -> Option<Distance> {
+    fn compute_closest_distance(handle_parent: Handle<UIElement>, object_rect: Rect, dir: MoveDirectionTowards) -> Option<Distance> {
         let controls = RuntimeManager::get().get_controls_mut();
         if let Some(parent) = controls.get(handle_parent) {
             let base = parent.get_base();
@@ -117,7 +117,7 @@ impl Window {
             None
         }
     }
-    fn find_closest_control(handle: Handle<UIElement>, dir: MoveDirection) -> Handle<UIElement> {
+    fn find_closest_control(handle: Handle<UIElement>, dir: MoveDirectionTowards) -> Handle<UIElement> {
         let rm = RuntimeManager::get();
         let controls = rm.get_controls_mut();
         let mut h = handle;
@@ -136,13 +136,13 @@ impl Window {
             }
             h = base.children[base.focused_child_index.index()];
         }
-        if (found.is_none()) || (handle==found) {
+        if (found.is_none()) || (handle == found) {
             return Handle::None;
         }
         if let Some(ctrl) = controls.get_mut(found) {
             let object_rect = ctrl.get_base().absolute_rect();
             if let Some(result) = Window::compute_closest_distance(handle, object_rect, dir) {
-                if (result.value==u32::MAX) || (result.handle.is_none()) {
+                if (result.value == u32::MAX) || (result.handle.is_none()) {
                     return Handle::None;
                 }
                 return result.handle;
@@ -160,7 +160,7 @@ impl Window {
         let mut win: Window = Window {
             base: ControlBase::with_status_flags(
                 layout,
-                status_flags | StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl, 
+                status_flags | StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
             ),
             title: Title::new(title),
             flags,
@@ -458,7 +458,6 @@ impl Window {
         self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
 
-
         let item_handle = if let Some(item) = self.toolbar.get_from_position(x, y) {
             match item {
                 ToolBarItem::ResizeCorner(_) => self.drag_status = DragStatus::Resize,
@@ -741,28 +740,28 @@ impl OnKeyPressed for Window {
                     return EventProcessStatus::Processed;
                 }
                 key!("Left") | key!("Ctrl+Left") | key!("Alt+Left") => {
-                    let res = Window::find_closest_control(self.handle, MoveDirection::ToRight);
+                    let res = Window::find_closest_control(self.handle, MoveDirectionTowards::Right);
                     if !res.is_none() {
                         RuntimeManager::get().request_focus_for_control(res);
                     }
                     return EventProcessStatus::Processed;
                 }
                 key!("Right") | key!("Ctrl+Right") | key!("Alt+Right") => {
-                    let res = Window::find_closest_control(self.handle, MoveDirection::ToLeft);
+                    let res = Window::find_closest_control(self.handle, MoveDirectionTowards::Left);
                     if !res.is_none() {
                         RuntimeManager::get().request_focus_for_control(res);
                     }
                     return EventProcessStatus::Processed;
                 }
                 key!("Up") | key!("Ctrl+Up") | key!("Alt+Up") => {
-                    let res = Window::find_closest_control(self.handle, MoveDirection::ToBottom);
+                    let res = Window::find_closest_control(self.handle, MoveDirectionTowards::Bottom);
                     if !res.is_none() {
                         RuntimeManager::get().request_focus_for_control(res);
                     }
                     return EventProcessStatus::Processed;
                 }
                 key!("Down") | key!("Ctrl+Down") | key!("Alt+Down") => {
-                    let res = Window::find_closest_control(self.handle, MoveDirection::ToTop);
+                    let res = Window::find_closest_control(self.handle, MoveDirectionTowards::Top);
                     if !res.is_none() {
                         RuntimeManager::get().request_focus_for_control(res);
                     }

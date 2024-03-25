@@ -89,7 +89,7 @@ impl OnDefaultAction for RadioBox {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::RadioBoxEvent(EventData {}),
+            data: ControlEventData::RadioBox(EventData {}),
         });
     }
 }

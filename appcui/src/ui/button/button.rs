@@ -54,7 +54,7 @@ impl OnDefaultAction for Button {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::ButtonEvent(EventData {}),
+            data: ControlEventData::Button(EventData {}),
         });
     }
 }

@@ -250,7 +250,7 @@ impl Menu {
         }
         // write items
         let mut format = TextFormat::default();
-        format.multi_line = false;
+        format.multi_line = false; 
         format.align = TextAlignament::Left;
         format.text_wrap = TextWrap::None;
         format.width = Some(self.text_width);

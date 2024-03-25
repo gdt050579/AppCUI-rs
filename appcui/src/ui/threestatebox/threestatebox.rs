@@ -114,7 +114,7 @@ impl OnDefaultAction for ThreeStateBox {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::ThreeStateBoxEvent(EventData { state: self.state }),
+            data: ControlEventData::ThreeStateBox(EventData { state: self.state }),
         });
     }
 }

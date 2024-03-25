@@ -1529,7 +1529,7 @@ fn check_window_keybeforechildren() {
                 self.raise_event(ControlEvent {
                     emitter: self.handle,
                     receiver: self.event_processor,
-                    data: ControlEventData::ButtonEvent(button::events::EventData {}),
+                    data: ControlEventData::Button(button::events::EventData {}),
                 });
             }
             // all keys are processed
