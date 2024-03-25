@@ -50,11 +50,9 @@ impl ButtonEvents for MyWin {
             let handle = self.lb;
             if let (Some(r), Some(lb)) = (response, self.control_mut(handle)) {
                 lb.set_caption(format!("Reponse from modal window: {}", r).as_str());
-            } else {
-                if response.is_none() {
-                    if let Some(lb) = self.control_mut(handle) {
-                        lb.set_caption("Exit with None from modal window !");
-                    }
+            } else if response.is_none() {
+                if let Some(lb) = self.control_mut(handle) {
+                    lb.set_caption("Exit with None from modal window !");
                 }
             }
             return EventProcessStatus::Processed;

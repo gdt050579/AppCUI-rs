@@ -179,16 +179,14 @@ impl ItemBase {
         let marker_size = if self.status.contains_one(StatusFlags::NoMarker) { 0 } else { 1 };
         let group_space = if helper.last_handle.is_none() {
             0
-        } else {
-            if self.group.id != helper.last_group {
-                if helper.last_group_supports_markers {
-                    2
-                } else {
-                    1
-                }
+        } else if self.group.id != helper.last_group {
+            if helper.last_group_supports_markers {
+                2
             } else {
-                0
+                1
             }
+        } else {
+            0
         };
         marker_size + group_space
     }

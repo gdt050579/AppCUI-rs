@@ -1071,7 +1071,7 @@ fn check_window_toolbar_item_visibility() {
         fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
             self.number += 1;
             self.update_toolbar_labels();
-            return EventProcessStatus::Processed;
+            EventProcessStatus::Processed
         }
     }
     impl CheckBoxEvents for MyWin {
@@ -1216,11 +1216,9 @@ fn check_modal_window() {
                 let handle = self.lb;
                 if let (Some(r), Some(lb)) = (response, self.control_mut(handle)) {
                     lb.set_caption(format!("Reponse from modal window: {}", r).as_str());
-                } else {
-                    if response.is_none() {
-                        if let Some(lb) = self.control_mut(handle) {
-                            lb.set_caption("Exit with None from modal window !");
-                        }
+                } else if response.is_none() {
+                    if let Some(lb) = self.control_mut(handle) {
+                        lb.set_caption("Exit with None from modal window !");
                     }
                 }
                 return EventProcessStatus::Processed;

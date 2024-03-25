@@ -36,7 +36,7 @@ impl SingleChoice {
     }
     #[inline(always)]
     pub fn get_content(&self) -> &str {
-        &self.caption.text()
+        self.caption.text()
     }
     #[inline(always)]
     pub fn is_selected(&self) -> bool {

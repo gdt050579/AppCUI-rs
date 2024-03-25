@@ -381,9 +381,9 @@ impl ScrollBar {
             MouseEvent::Leave => {
                 if !self.status.is_none() {
                     self.status = MouseOnScrollbarStatus::None;
-                    return ProcessEventResult::PassToControlAndRepaint;
+                    ProcessEventResult::PassToControlAndRepaint
                 } else {
-                    return ProcessEventResult::PassToControl;
+                    ProcessEventResult::PassToControl
                 }
             }
             MouseEvent::DoubleClick(data) => {

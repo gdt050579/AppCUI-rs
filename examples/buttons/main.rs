@@ -37,7 +37,7 @@ impl ButtonEvents for MyWin {
         if (button_handle == self.b1) || (button_handle == self.b2) || (button_handle == self.b3) {
             let button = self.control(button_handle).unwrap();
             let new_text = format!("Button ('{}') was pressed !", button.caption());
-            self.set_label_text(&new_text.as_str());
+            self.set_label_text(new_text.as_str());
             return EventProcessStatus::Processed;
         }
         EventProcessStatus::Ignored

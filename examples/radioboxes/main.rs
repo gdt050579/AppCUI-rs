@@ -46,7 +46,7 @@ impl RadioBoxEvents for MyWin {
         if let Some(r) = self.control(handle) {
             s += r.caption();
         }
-        if s.len()>0 {
+        if !s.is_empty() {
             let h = self.l;
             if let Some(l) = self.control_mut(h) {
                 l.set_caption(&s);

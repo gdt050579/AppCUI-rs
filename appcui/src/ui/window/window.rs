@@ -79,7 +79,7 @@ impl Window {
                 }
             }
         }
-        return (((object.x - origin.x) * (object.x - origin.x)) as u32) + (((object.y - origin.y) * (object.y - origin.y)) as u32);
+        (((object.x - origin.x) * (object.x - origin.x)) as u32) + (((object.y - origin.y) * (object.y - origin.y)) as u32)
     }
 
     fn compute_closest_distance(handle_parent: Handle<UIElement>, object_rect: Rect, dir: MoveDirection) -> Option<Distance> {
@@ -112,9 +112,9 @@ impl Window {
                 }
                 return None;
             }
-            return Some(best);
+            Some(best)
         } else {
-            return None;
+            None
         }
     }
     fn find_closest_control(handle: Handle<UIElement>, dir: MoveDirection) -> Handle<UIElement> {
@@ -124,7 +124,7 @@ impl Window {
         let mut found = Handle::None;
         while let Some(ctrl) = controls.get_mut(h) {
             let base = ctrl.get_base();
-            if base.is_active() == false {
+            if !base.is_active() {
                 break;
             }
             // found a possible candidate
@@ -150,7 +150,7 @@ impl Window {
                 return Handle::None;
             }
         }
-        return Handle::None;
+        Handle::None
     }
     pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type) -> Self {
         Window::with_type_and_status_flags(title, layout, flags, window_type, StatusFlags::None)
@@ -227,7 +227,7 @@ impl Window {
     where
         T: Control + NotWindow + NotDesktop + 'static,
     {
-        return self.add_child(control);
+        self.add_child(control)
     }
     pub fn control<T>(&self, handle: Handle<T>) -> Option<&T>
     where
@@ -320,7 +320,7 @@ impl Window {
     }
 
     fn maximize_restore(&mut self) {
-        if self.maximized == false {
+        if !self.maximized {
             self.old_rect = Rect::with_point_and_size(self.position(), self.size());
             let desktop_rect = RuntimeManager::get().get_desktop_rect();
             self.set_position(desktop_rect.left(), desktop_rect.top());
@@ -339,7 +339,7 @@ impl Window {
 
     fn get_children_start_index(index: VectorIndex, count: usize, start_from_current: bool) -> VectorIndex {
         if (start_from_current) && (index.in_range(count)) {
-            return index;
+            index
         } else {
             VectorIndex::Invalid
         }
@@ -348,7 +348,7 @@ impl Window {
         let controls = RuntimeManager::get().get_controls();
         if let Some(control) = controls.get(handle) {
             let base = control.get_base();
-            if base.is_active() == false {
+            if !base.is_active() {
                 return None;
             }
             let count = base.children.len();
@@ -389,7 +389,7 @@ impl Window {
                 }
             }
         }
-        return None;
+        None
     }
 
     fn hotkey_to_handle(controls: &ControlHandleManager, parent: Handle<UIElement>, hotkey: Key) -> Handle<UIElement> {
@@ -397,11 +397,9 @@ impl Window {
             let base = control.get_base();
             // object has to be visible and enabled
             if base.is_visible() && base.is_enabled() {
-                if base.can_receive_input() {
-                    if base.hotkey() == hotkey {
-                        // I hold te hotkey
-                        return parent;
-                    }
+                if base.can_receive_input() && base.hotkey() == hotkey {
+                    // I hold te hotkey
+                    return parent;
                 }
                 for child in base.children.iter() {
                     let result = Window::hotkey_to_handle(controls, *child, hotkey);
@@ -441,7 +439,7 @@ impl Window {
             return EventProcessStatus::Ignored;
         }
         self.toolbar.clear_current_item_handle();
-        return EventProcessStatus::Processed;
+        EventProcessStatus::Processed
     }
 
     fn on_mouse_leave(&mut self) -> EventProcessStatus {
@@ -451,7 +449,7 @@ impl Window {
         }
         self.toolbar.clear_current_item_handle();
         self.hide_tooltip();
-        return EventProcessStatus::Processed;
+        EventProcessStatus::Processed
     }
 
     fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
@@ -485,7 +483,7 @@ impl Window {
             self.drag_start_point.x = x;
             self.drag_start_point.y = y;
         }
-        return EventProcessStatus::Processed;
+        EventProcessStatus::Processed
     }
     fn on_mouse_drag(&mut self, x: i32, y: i32) -> EventProcessStatus {
         self.resize_move_mode = false;
@@ -530,7 +528,7 @@ impl Window {
         } else {
             self.on_toolbar_item_clicked(self.toolbar.get_current_item_handle());
         }
-        return EventProcessStatus::Processed;
+        EventProcessStatus::Processed
     }
     fn on_toolbar_item_clicked(&mut self, handle: Handle<UIElement>) -> bool {
         if let Some(item) = self.toolbar.get_item_mut(handle) {
@@ -799,13 +797,13 @@ impl OnKeyPressed for Window {
 impl OnMouseEvent for Window {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
-            MouseEvent::Enter => return EventProcessStatus::Ignored,
-            MouseEvent::Leave => return self.on_mouse_leave(),
-            MouseEvent::Over(point) => return self.on_mouse_over(point.x, point.y),
-            MouseEvent::Pressed(event) => return self.on_mouse_pressed(event.x, event.y),
-            MouseEvent::Released(_) => return self.on_mouse_release(),
+            MouseEvent::Enter => EventProcessStatus::Ignored,
+            MouseEvent::Leave => self.on_mouse_leave(),
+            MouseEvent::Over(point) => self.on_mouse_over(point.x, point.y),
+            MouseEvent::Pressed(event) => self.on_mouse_pressed(event.x, event.y),
+            MouseEvent::Released(_) => self.on_mouse_release(),
             MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
-            MouseEvent::Drag(event) => return self.on_mouse_drag(event.x, event.y),
+            MouseEvent::Drag(event) => self.on_mouse_drag(event.x, event.y),
             MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }
     }

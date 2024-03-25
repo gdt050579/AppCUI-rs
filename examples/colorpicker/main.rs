@@ -59,7 +59,7 @@ impl ColorPickerEvents for MyWin {
             };
             return EventProcessStatus::Processed;
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
 }
 

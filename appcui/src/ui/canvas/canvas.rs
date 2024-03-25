@@ -193,7 +193,7 @@ impl OnMouseEvent for Canvas {
         if res.should_update() {
             self.update_scroll_pos_from_scrollbars();
         }
-        if res.should_pass_to_control() == false {
+        if !res.should_pass_to_control() {
             if res.should_repaint() {
                 return EventProcessStatus::Processed;
             } else {

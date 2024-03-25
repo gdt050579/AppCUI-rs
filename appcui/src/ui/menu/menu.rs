@@ -261,7 +261,7 @@ impl Menu {
             return;
         }
         for idx in start..end {
-            let item = &self.items[idx as usize];
+            let item = &self.items[idx];
             format.y += 1;
             item.paint(surface, &mut format, self.width, idx == self.current.index(), col);
         }

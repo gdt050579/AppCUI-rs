@@ -28,6 +28,6 @@ impl CheckBoxEvents for MyWindow {
             }
             return EventProcessStatus::Processed;
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
 }

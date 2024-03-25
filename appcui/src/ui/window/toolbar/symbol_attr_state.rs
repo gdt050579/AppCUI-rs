@@ -18,13 +18,11 @@ impl SymbolAttrState {
                 // showChecked = ((Members->Focused) && (btn->IsChecked()));
                 SymbolAttrState::Hovered
             }
+        } else if paint_data.focused {
+            // showChecked = btn->IsChecked();
+            SymbolAttrState::Normal
         } else {
-            if paint_data.focused {
-                // showChecked = btn->IsChecked();
-                SymbolAttrState::Normal
-            } else {
-                SymbolAttrState::Inactive
-            }
+            SymbolAttrState::Inactive
         }
     }
     #[inline(always)]

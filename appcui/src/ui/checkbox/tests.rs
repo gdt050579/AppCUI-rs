@@ -129,7 +129,7 @@ fn check_checkbox_set_checked() {
             let handle = self.c;
             let c = self.control_mut(handle).unwrap();
             c.set_checked(!c.is_checked());
-            return EventProcessStatus::Processed;
+            EventProcessStatus::Processed
         }
     }
 

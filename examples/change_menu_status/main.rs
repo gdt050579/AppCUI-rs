@@ -30,7 +30,7 @@ impl MenuEvents for MyWin {
             self.counter += 1;
             let new_text = format!("Increment ({})",self.counter);
             if let Some(menuitem) = self.menuitem_mut(menu, item) {
-                menuitem.set_caption(&new_text.as_str());
+                menuitem.set_caption(new_text.as_str());
             }
         }
     }
