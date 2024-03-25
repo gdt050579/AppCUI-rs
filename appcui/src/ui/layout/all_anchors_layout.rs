@@ -33,10 +33,10 @@ impl AllAnchorsLayout {
         parent_width: u16,
         parent_height: u16,
     ) {
-        let left = self.left.to_absolute_coordonate(parent_width);
-        let top = self.top.to_absolute_coordonate(parent_height);
-        let right = self.right.to_absolute_coordonate(parent_width);
-        let bottom = self.bottom.to_absolute_coordonate(parent_height);
+        let left = self.left.as_absolute_coordonate(parent_width);
+        let top = self.top.as_absolute_coordonate(parent_height);
+        let right = self.right.as_absolute_coordonate(parent_width);
+        let bottom = self.bottom.as_absolute_coordonate(parent_height);
         control_layout.resize(
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,

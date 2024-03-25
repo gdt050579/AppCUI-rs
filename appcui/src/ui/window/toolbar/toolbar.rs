@@ -296,11 +296,9 @@ impl ToolBar {
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {
-            if let Some(item) = self.items.get_element_mut(index) {
-                if let ToolBarItem::SingleChoice(sc) = item {
-                    if sc.base.get_group_id() == group_id {
-                        sc.update_select_status(handle == sc.base.get_handle());
-                    }
+            if let Some(ToolBarItem::SingleChoice(sc)) = self.items.get_element_mut(index) {
+                if sc.base.get_group_id() == group_id {
+                    sc.update_select_status(handle == sc.base.get_handle());
                 }
             }
         }

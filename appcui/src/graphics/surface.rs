@@ -595,11 +595,11 @@ impl Surface {
             let mut img_x = 0u32;
             while img_x < w {
                 if rap == 1 {
-                    cp.foreground = img.get_pixel_or_default(img_x, img_y).to_color();
-                    cp.background = img.get_pixel_or_default(img_x, img_y + 1).to_color();
+                    cp.foreground = img.get_pixel_or_default(img_x, img_y).as_color();
+                    cp.background = img.get_pixel_or_default(img_x, img_y + 1).as_color();
                 } else {
-                    cp.foreground = img.compute_square_average_color(img_x, img_y, rap).to_color();
-                    cp.background = img.compute_square_average_color(img_x, img_y + rap, rap).to_color();
+                    cp.foreground = img.compute_square_average_color(img_x, img_y, rap).as_color();
+                    cp.background = img.compute_square_average_color(img_x, img_y + rap, rap).as_color();
                 }
 
                 if cp.background == cp.foreground {
@@ -630,9 +630,9 @@ impl Surface {
             let mut img_x = 0u32;
             while img_x < w {
                 if rap == 1 {
-                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).to_character());
+                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).as_character());
                 } else {
-                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).to_character());
+                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).as_character());
                 }
                 img_x += rap;
                 p_x += 2;
@@ -652,9 +652,9 @@ impl Surface {
             let mut img_x = 0u32;
             while img_x < w {
                 if rap == 1 {
-                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).to_gray_scale());
+                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).as_gray_scale_character());
                 } else {
-                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).to_gray_scale());
+                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).as_gray_scale_character());
                 }
                 img_x += rap;
                 p_x += 2;

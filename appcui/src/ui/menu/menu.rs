@@ -249,11 +249,13 @@ impl Menu {
             surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::TriangleDown, c));
         }
         // write items
-        let mut format = TextFormat::default();
-        format.multi_line = false; 
-        format.align = TextAlignament::Left;
-        format.text_wrap = TextWrap::None;
-        format.width = Some(self.text_width);
+        let mut format = TextFormat {
+            width: Some(self.text_width),
+            align: TextAlignament::Left,
+            text_wrap: TextWrap::None,
+            multi_line: false,
+            ..Default::default()
+        };
 
         let start = self.first_visible_item as usize;
         let end = self.items.len().min((self.first_visible_item + self.visible_items_count) as usize);

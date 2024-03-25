@@ -459,9 +459,8 @@ impl Window {
         self.base.set_key_input_before_children_flag(false);
 
         let item_handle = if let Some(item) = self.toolbar.get_from_position(x, y) {
-            match item {
-                ToolBarItem::ResizeCorner(_) => self.drag_status = DragStatus::Resize,
-                _ => {}
+            if let ToolBarItem::ResizeCorner(_) = item {
+                self.drag_status = DragStatus::Resize;
             }
             item.get_handle()
         } else {

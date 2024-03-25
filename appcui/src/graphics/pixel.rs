@@ -225,7 +225,7 @@ impl Pixel {
             }
         }
     }
-    pub(super) fn to_color(&self) -> Color {
+    pub(super) fn as_color(&self) -> Color {
         let b = if self.blue <= 16 {
             0u32
         } else if self.blue < 192 {
@@ -249,7 +249,7 @@ impl Pixel {
         };
         COLORMAP_16_COLORS[(r * 9 + g * 3 + b) as usize]
     }
-    pub(super) fn to_character(&self) -> Character {
+    pub(super) fn as_character(&self) -> Character {
         let r = ((self.red as u32) + 32) / 64;
         let g = ((self.green as u32) + 32) / 64;
         let b = ((self.blue as u32) + 32) / 64;
@@ -277,7 +277,7 @@ impl Pixel {
             }
         }
     }
-    pub(super) fn to_gray_scale(&self) -> Character {
+    pub(super) fn as_gray_scale_character(&self) -> Character {
         let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32)) / 3;
         if val < 32 {
             return Character::new(' ', Color::Black, Color::Black, CharFlags::None);

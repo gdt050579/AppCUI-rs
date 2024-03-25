@@ -27,7 +27,7 @@ impl ParserError {
     pub(super) fn get_error(&self) -> &str {
         return self.error.as_str();
     }
-    pub(super) fn to_string(&self) -> String {
+    pub(super) fn as_string(&self) -> String {
         let mut err = String::with_capacity(256);
         err.push_str("Command parsing error: ");
         err.push_str(self.get_error());

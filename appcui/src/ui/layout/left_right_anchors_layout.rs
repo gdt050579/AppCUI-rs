@@ -44,12 +44,12 @@ impl LeftRightAnchorsLayout {
         parent_width: u16,
         parent_height: u16,
     ) {
-        let left = self.left.to_absolute_coordonate(parent_width);
-        let right = self.right.to_absolute_coordonate(parent_width);
-        let y = self.y.to_absolute_coordonate(parent_height);
+        let left = self.left.as_absolute_coordonate(parent_width);
+        let right = self.right.as_absolute_coordonate(parent_width);
+        let y = self.y.as_absolute_coordonate(parent_height);
         control_layout.resize(
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
-            self.height.to_absolute_size(parent_height),
+            self.height.as_absolute_size(parent_height),
         );
         match self.align {
             Alignament::Top => control_layout.set_position(left, y),

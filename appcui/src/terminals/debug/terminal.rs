@@ -35,7 +35,7 @@ impl DebugTerminal {
             match Command::new(line.trim()) {
                 Ok(cmd) => v.push_back(cmd),
                 Err(err) => {
-                    println!("{}", err.to_string());
+                    println!("{}", err.as_string());
                     panic!()
                 }
             }

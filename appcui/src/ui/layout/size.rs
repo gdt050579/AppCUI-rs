@@ -12,7 +12,7 @@ impl Size {
             Size::Percentage(_) => false,
         }
     }
-    pub(super) fn to_absolute_size(&self, parent_size: u16) -> u16 {
+    pub(super) fn as_absolute_size(&self, parent_size: u16) -> u16 {
         match self {
             Size::Absolute(v) => {
                 *v
