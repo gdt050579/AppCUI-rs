@@ -6,3 +6,6 @@ members = [
   "appcui-proc-macro",
   "examples",
 ]
+
+[lints.clippy]
+module_inception = "allow"
