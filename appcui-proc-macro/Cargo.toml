@@ -12,3 +12,6 @@ license = "MIT"
 proc-macro = true
 
 [dependencies]
+
+[lints]
+workspace = true
