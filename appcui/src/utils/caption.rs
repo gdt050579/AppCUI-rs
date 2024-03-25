@@ -8,7 +8,7 @@ pub(crate) enum ExtractHotKeyMethod {
     AltPlusKey,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub(crate) struct Caption {
     text: String,
     chars_count: usize,
@@ -27,7 +27,7 @@ impl Caption {
         s
     }
     pub(crate) fn set_text(&mut self, text: &str, extract_hotkey_method: ExtractHotKeyMethod) {
-        if (extract_hotkey_method != ExtractHotKeyMethod::NoHotKey) && (text.len() > 0) {
+        if (extract_hotkey_method != ExtractHotKeyMethod::NoHotKey) && (!text.is_empty()) {
             // search for &<char>
             let buf = text.as_bytes();
             let len = buf.len() - 1;
@@ -94,17 +94,6 @@ impl Caption {
     #[inline(always)]
     pub(crate) fn clear_hotkey_modifier(&mut self) {
         self.hotkey.modifier = KeyModifier::None;
-    }
-}
-
-impl Default for Caption {
-    fn default() -> Self {
-        Self {
-            text: String::new(),
-            chars_count: 0,
-            hotkey_pos: 0,
-            hotkey: Key::default(),
-        }
     }
 }
 

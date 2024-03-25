@@ -43,7 +43,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     let mut base_definition = "{\n    base: ".to_string();
     base_definition.push_str(&a.base);
     base_definition.push_str(", ");
-    let mut code = input.to_string().replace("{", base_definition.as_str());
+    let mut code = input.to_string().replace('{', base_definition.as_str());
     let struct_name = utils::extract_structure_name(code.as_str());
     code.insert_str(0, "#[repr(C)]\n");
     code.insert_str(0, templates::IMPORTS);
@@ -75,7 +75,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                 code.push_str(appcui_trait.get_basefallback_implementation());
             }
         }
-        code.push_str("\n");
+        code.push('\n');
     }
     // add commands
     if a.commands.is_empty() {

@@ -91,10 +91,7 @@ impl ToolBarItem {
     }
     #[inline(always)]
     pub(super) fn is_resize_corner(&self) -> bool {
-        match self {
-            ToolBarItem::ResizeCorner(_) => true,
-            _ => false,
-        }
+        matches!(self, ToolBarItem::ResizeCorner(_))
     }
 }
 impl HandleSupport<ToolBarItem> for ToolBarItem {

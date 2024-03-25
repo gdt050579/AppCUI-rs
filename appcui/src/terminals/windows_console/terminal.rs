@@ -448,7 +448,7 @@ impl WindowsTerminal {
             if winapi::GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
-                    format!("GetConsoleMode failed to aquire original mode for current console !"),
+                    "GetConsoleMode failed to aquire original mode for current console !".to_string(),
                 ));
             }
             if winapi::SetConsoleMode(stdin, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) == FALSE {
@@ -514,7 +514,7 @@ impl WindowsTerminal {
         term.chars
             .resize((term.size.width as usize) * (term.size.height as usize), CHAR_INFO { code: 32, attr: 0 });
         //println!("Init(size:{:?},visible:{:?})", term.size, info.window);
-        return Ok(term);
+        Ok(term)
     }
     fn update_size(&mut self) {
         if let Ok(info) = get_console_screen_buffer_info(self.stdout_handle) {

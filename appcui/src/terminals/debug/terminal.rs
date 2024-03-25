@@ -29,7 +29,7 @@ impl DebugTerminal {
         for line in script.lines() {
             // skip empty lines
             let trim_line = line.trim();
-            if (trim_line.len() == 0) || (trim_line.starts_with(";")) || (trim_line.starts_with("#")) || (trim_line.starts_with("//")) {
+            if (trim_line.is_empty()) || (trim_line.starts_with(';')) || (trim_line.starts_with('#')) || (trim_line.starts_with("//")) {
                 continue;
             }
             match Command::new(line.trim()) {
@@ -46,12 +46,12 @@ impl DebugTerminal {
         let mut w = if builder.size.is_none() {
             80
         } else {
-            builder.size.unwrap().width as u32
+            builder.size.unwrap().width
         };
         let mut h = if builder.size.is_none() {
             40
         } else {
-            builder.size.unwrap().height as u32
+            builder.size.unwrap().height
         };
         w = w.clamp(10, 1000);
         h = h.clamp(10, 1000);

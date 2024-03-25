@@ -201,7 +201,7 @@ fn check_button_control_hotkey() {
                 }
                 return EventProcessStatus::Processed;
             }
-            return EventProcessStatus::Ignored;
+            EventProcessStatus::Ignored
         }
     }
 

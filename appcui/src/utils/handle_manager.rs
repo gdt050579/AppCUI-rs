@@ -26,13 +26,13 @@ where
             let h = Handle::new(pos);
             object.set_handle(h);
             self.objects[pos as usize] = Some(object);
-            return h;
+            h
         } else {
             // ad at the end
             let h = Handle::new(self.objects.len() as u32);
             object.set_handle(h);
             self.objects.push(Some(object));
-            return h;
+            h
         }
     }
     pub(crate) fn remove(&mut self, handle: Handle<T> ) -> bool {
@@ -53,7 +53,7 @@ where
         // ok -> we can remove it
         self.objects[idx] = None;
         self.free.push(idx as u32);
-        return true;
+        true
     }
     pub(crate) fn get(&self, handle: Handle<T>) -> Option<&T> {
         if handle.is_none() {
@@ -62,10 +62,8 @@ where
         let idx = handle.get_index();
         if idx < self.objects.len() {
             let m = self.objects[idx].as_ref();
-            if m.is_some() {
-                if m.as_ref().unwrap().get_handle() == handle {
-                    return m;
-                }
+            if m.is_some() && m.as_ref().unwrap().get_handle() == handle {
+                return m;
             }
         }
         None
@@ -77,10 +75,8 @@ where
         let idx = handle.get_index();
         if idx < self.objects.len() {
             let m = self.objects[idx].as_mut();
-            if m.is_some() {
-                if m.as_ref().unwrap().get_handle() == handle {
-                    return m;
-                }
+            if m.is_some() && m.as_ref().unwrap().get_handle() == handle {
+                return m;
             }
         }
         None

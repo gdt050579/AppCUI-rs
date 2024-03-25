@@ -56,7 +56,7 @@ fn check_index() {
     i.set(10, 5, true);
     assert_eq!(i.index(), 4);
     i.set(10, 5, false);
-    assert_eq!(i.is_valid(), false);
+    assert!(!i.is_valid());
     i = VectorIndex::with_value(3);
     assert_eq!(i.index(), 3);
     i.sub(1, 10, Strategy::Clamp);
@@ -95,9 +95,9 @@ fn check_index() {
     assert_eq!(i.index(), 7);
 
     i = VectorIndex::with_value(5);
-    assert_eq!(i.in_range(10), true);
-    assert_eq!(i.in_range(6), true);
-    assert_eq!(i.in_range(5), false);
+    assert!(i.in_range(10));
+    assert!(i.in_range(6));
+    assert!(!i.in_range(5));
 }
 
 #[test]
@@ -145,9 +145,9 @@ fn check_hanlde_manager() {
     assert!(o3.text == "GDT");
     assert!(o3.value == 2345);
     // delete first element
-    assert!(man.remove(h1_123) == true);
+    assert!(man.remove(h1_123));
     // second time it shoudl return false
-    assert!(man.remove(h1_123) == false);
+    assert!(!man.remove(h1_123));
     assert!(man.get(h1_123).is_none());
     // check o3 again
     let o3 = man.get(hgdt_2345).unwrap();

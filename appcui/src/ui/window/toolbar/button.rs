@@ -29,7 +29,7 @@ impl Button {
     }
     #[inline(always)]
     pub fn get_content(&self) -> &str {
-        &self.caption.text()
+        self.caption.text()
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);

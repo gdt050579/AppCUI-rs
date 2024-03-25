@@ -32,7 +32,7 @@ impl CheckBox {
     }
     #[inline(always)]
     pub fn get_content(&self) -> &str {
-        &self.caption.text()
+        self.caption.text()
     }
     pub fn set_checked(&mut self, checked: bool) {
         self.checked = checked;

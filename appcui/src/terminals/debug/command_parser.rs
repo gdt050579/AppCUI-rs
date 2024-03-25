@@ -72,24 +72,10 @@ impl<'a> CommandParser<'a> {
         (value == b' ') || (value == b'\t')
     }
     fn is_command(value: u8) -> bool {
-        match value {
-            b'a'..=b'z' => true,
-            b'A'..=b'Z' => true,
-            b'.' => true,
-            _ => false,
-        }
+        matches!(value, b'a'..=b'z' | b'A'..=b'Z' | b'.')
     }
     fn is_word(value: u8) -> bool {
-        match value {
-            b'a'..=b'z' => true,
-            b'A'..=b'Z' => true,
-            b'.' => true,
-            b'_' => true,
-            b'-' => true,
-            b'+' => true,
-            b'0'..=b'9' => true,
-            _ => false,
-        }
+        matches!(value, b'a'..=b'z' | b'A'..=b'Z' | b'.' | b'_' | b'-' | b'+' | b'0'..=b'9')
     }
     fn skip(buf: &[u8], start: usize, f: fn(u8) -> bool) -> usize {
         let len = buf.len();

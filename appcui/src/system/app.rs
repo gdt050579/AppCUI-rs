@@ -21,7 +21,7 @@ impl App {
         if *app_created {
             return Err(Error::new(
                 ErrorKind::InitializationFailure,
-                format!("App has already been created ! There can only be one instance of an Application at one time. If you have more, make sure that you have only one !"),
+                "App has already been created ! There can only be one instance of an Application at one time. If you have more, make sure that you have only one !".to_string(),
             ));
         }
         RuntimeManager::create(builder)?;

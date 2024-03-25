@@ -41,39 +41,23 @@ impl MenuItemWrapper {
     }
     #[inline(always)]
     pub(super) fn is_line(&self) -> bool {
-        match self {
-            MenuItemWrapper::Separator(_) => true,
-            _ => false,
-        }
+        matches!(self, MenuItemWrapper::Separator(_))
     }
     #[inline(always)]
     pub(super) fn is_singlechoice(&self) -> bool {
-        match self {
-            MenuItemWrapper::SingleChoice(_) => true,
-            _ => false,
-        }
+        matches!(self, MenuItemWrapper::SingleChoice(_))
     }
     #[inline(always)]
     pub(super) fn can_be_selected(&self) -> bool {
-        match self {
-            MenuItemWrapper::Separator(_) => false,
-            _ => true,
-        }
+        !matches!(self, MenuItemWrapper::Separator(_))
     }
     #[inline(always)]
     pub(super) fn is_checkable(&self) -> bool {
-        match self {
-            MenuItemWrapper::CheckBox(_) => true,
-            MenuItemWrapper::SingleChoice(_) => true,
-            _ => false,
-        }
+        matches!(self, MenuItemWrapper::CheckBox(_) | MenuItemWrapper::SingleChoice(_))
     }
     #[inline(always)]
     pub(super) fn is_submenu(&self) -> bool {
-        match self {
-            MenuItemWrapper::SubMenu(_) => true,
-            _ => false,
-        }
+        matches!(self, MenuItemWrapper::SubMenu(_))
     }
     #[inline(always)]
     pub(super) fn shortcut(&self) -> Option<Key> {

@@ -24,12 +24,7 @@ impl MouseOnScrollbarStatus {
     }
     #[inline(always)]
     fn is_pressed(&self) -> bool {
-        match self {
-            MouseOnScrollbarStatus::PressedOnMinimizeArrow => true,
-            MouseOnScrollbarStatus::PressedOnMaximizeArrow => true,
-            MouseOnScrollbarStatus::PressedOnBar => true,
-            _ => false,
-        }
+        matches!(self, MouseOnScrollbarStatus::PressedOnMinimizeArrow | MouseOnScrollbarStatus::PressedOnMaximizeArrow | MouseOnScrollbarStatus::PressedOnBar)
     }
 }
 

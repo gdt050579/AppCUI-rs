@@ -192,7 +192,7 @@ impl Menu {
                 KeyCode::End => current_idx = VectorIndex::last(idx_count),
                 _ => {}
             }
-            self.current.set(idx[current_idx.index()] as usize, self.items.len(), false);
+            self.current.set(idx[current_idx.index()], self.items.len(), false);
         }
 
         self.update_first_visible_item();
