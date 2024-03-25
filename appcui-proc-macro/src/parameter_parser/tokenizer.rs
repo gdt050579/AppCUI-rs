@@ -87,10 +87,7 @@ impl Token {
     }
     #[inline(always)]
     fn is_possible_value(&self) -> bool {
-        match self.token_type {
-            TokenType::Word | TokenType::OpenBrace | TokenType::OpenSquareBracket => true,
-            _ => false,
-        }
+        matches!(self.token_type, TokenType::Word | TokenType::OpenBrace | TokenType::OpenSquareBracket)
     }
 }
 pub(super) struct Tokenizer {
@@ -103,10 +100,7 @@ pub(super) enum TokensFormat {
 }
 impl TokensFormat {
     pub(super) fn is_key_value(&self) -> bool {
-        match self {
-            TokensFormat::KeyValue(_) => true,
-            _ => false,
-        }
+        matches!(self, TokensFormat::KeyValue(_))
     }
     pub(super) fn get_next_pos(&self) -> usize {
         match self {

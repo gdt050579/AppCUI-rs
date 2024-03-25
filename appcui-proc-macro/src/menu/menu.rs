@@ -23,5 +23,5 @@ pub(crate) fn create(input: TokenStream, class: Option<&str>) -> TokenStream {
     d.validate_named_parameters(&s, NAMED_PARAMETERS).unwrap();
 
     let res = super::common::build_menu(&s, &mut d, class);
-    TokenStream::from_str(&res).expect(format!("Fail to convert 'menu!' macro content to token stream").as_str())
+    TokenStream::from_str(&res).expect("Fail to convert 'menu!' macro content to token stream")
 }

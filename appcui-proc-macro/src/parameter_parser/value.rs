@@ -164,7 +164,7 @@ impl<'a> Value<'a> {
     }
     fn validate_layout(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if let Some(value) = self.get_i32() {
-            if (value < -30000) || (value > 30000) {
+            if !(-30000..=30000).contains(&value) {
                 return Err(Error::new(
                     param_list,
                     format!(

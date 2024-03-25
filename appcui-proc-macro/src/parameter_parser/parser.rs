@@ -91,7 +91,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
     }
     Ok(r)
 }
-pub(crate) fn parse<'a>(text: &'a str) -> Result<NamedParamsMap<'a>, Error> {
+pub(crate) fn parse(text: &str) -> Result<NamedParamsMap<'_>, Error> {
     let t = Tokenizer::new(text)?;
     let r = parse_dict(text, &t, 0, t.count())?;
     Ok(r)

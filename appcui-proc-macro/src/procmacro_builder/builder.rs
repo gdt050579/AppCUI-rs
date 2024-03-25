@@ -10,28 +10,22 @@ fn generate_commands(a: &Arguments) -> String {
 
     // step 1 --> generate the list of enum variants
     temp.clear();
-    let mut idx = 0u32;
-    for cmd in &a.commands {
-        let _ = write!(temp, "{} = {}, ", &cmd, idx).unwrap();
-        idx += 1;
+    for (idx, cmd) in a.commands.iter().enumerate() {
+        write!(temp, "{} = {}, ", &cmd, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(COMMANDS_IDS)", &temp);
 
     // step 2 --> generate the conversion code (from u32 to commands)
     temp.clear();
-    let mut idx = 0u32;
-    for cmd in &a.commands {
-        let _ = writeln!(temp, "{} => Ok(Commands::{}),", idx, &cmd).unwrap();
-        idx += 1;
+    for (idx, cmd) in a.commands.iter().enumerate() {
+        writeln!(temp, "{} => Ok(Commands::{}),", idx, &cmd).unwrap();
     }
     cmd_code = cmd_code.replace("$(U32_TO_COMMANDS)", &temp);
 
     // step 3 --> generate the conversion code (from commands to u32)
     temp.clear();
-    let mut idx = 0u32;
-    for cmd in &a.commands {
-        let _ = writeln!(temp, "Commands::{} => {},", &cmd, idx).unwrap();
-        idx += 1;
+    for (idx, cmd) in a.commands.iter().enumerate() {
+        writeln!(temp, "Commands::{} => {},", &cmd, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(COMMANDS_TO_U32)", &temp);
     cmd_code

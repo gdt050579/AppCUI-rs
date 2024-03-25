@@ -287,9 +287,9 @@ impl<'a> ControlBuilder<'a> {
         self.parser.contains(name)
     }
 }
-impl Into<TokenStream> for ControlBuilder<'_> {
-    fn into(mut self) -> TokenStream {
-        self.content.push_str("\n\tcontrol\n}");
-        TokenStream::from_str(self.content.as_str()).expect(format!("Fail to convert '{}!' macro content to token stream", self.name).as_str())
+impl From<ControlBuilder<'_>> for TokenStream {
+    fn from(mut val: ControlBuilder<'_>) -> Self {
+        val.content.push_str("\n\tcontrol\n}");
+        TokenStream::from_str(val.content.as_str()).expect(format!("Fail to convert '{}!' macro content to token stream", val.name).as_str())
     }
 }

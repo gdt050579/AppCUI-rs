@@ -53,10 +53,8 @@ fn get_menu_type(param_list: &str, dict: &mut NamedParamsMap) -> MenuItemType {
         if dict.contains("select") {
             return MenuItemType::SingleChoice;
         }
-        if dict.contains("caption") && (dict.get_parameters_count() == 1) {
-            if dict.get("caption").unwrap().get_string().chars().all(|c| c == '-') {
-                return MenuItemType::Separator;
-            }
+        if dict.contains("caption") && (dict.get_parameters_count() == 1) && dict.get("caption").unwrap().get_string().chars().all(|c| c == '-') {
+            return MenuItemType::Separator;
         }
         MenuItemType::Command
     }
@@ -226,7 +224,7 @@ pub(super) fn build_menu(param_list: &str, dict: &mut NamedParamsMap, class: Opt
         for subitem in value {
             s.push_str("menu.add(");
             if let Some(d) = subitem.get_dict() {
-                let result = menuitem_from_dict(param_list, d, class_name.as_ref().map(|s| s.as_str()));
+                let result = menuitem_from_dict(param_list, d, class_name.as_deref());
                 s.push_str(&result);
             } else {
                 panic!("Invalid format for a menu subitems. Within the `items` attribute all items must be declared within `{{..}}` !");
@@ -242,7 +240,7 @@ fn build_menuitem_submenu(param_list: &str, dict: &mut NamedParamsMap, class: Op
     // check to see if I provide the class or if I have to use the provded one
     // the class that I provive as a key takes priority.
     let class_name = get_class(dict, class);
-    let m = build_menu(param_list, dict, class_name.as_ref().map(|s| s.as_str()));
+    let m = build_menu(param_list, dict, class_name.as_deref());
     s.push_str(&m);
     s.push_str(");\n");
     add_enable_status(&mut s, dict);

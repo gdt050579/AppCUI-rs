@@ -6,7 +6,7 @@ pub(crate) enum BaseControlType {
     CustomControl,
 }
 impl BaseControlType {
-    pub (crate) fn to_string(&self) -> String {
+    pub (crate) fn as_string(&self) -> String {
         String::from(match self {
             BaseControlType::Window => "Window",
             BaseControlType::Desktop => "Desktop",

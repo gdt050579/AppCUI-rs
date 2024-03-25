@@ -8,11 +8,11 @@ use super::{
 
 use proc_macro::*;
 
-enum State {
-    ExpectKey,
-    ExpectEqual,
-    ExpectValue,
-    ExpectComma,
+enum ExpectNext {
+    Key,
+    Equal,
+    Value,
+    Comma,
 }
 pub(crate) struct Arguments {
     pub base_control_type: BaseControlType,
@@ -25,7 +25,7 @@ pub(crate) struct Arguments {
     pub modal_result_type: String,
     pub commands: Vec<String>,
     // internal
-    state: State,
+    expect_next: ExpectNext,
     key: String,
     values: Vec<String>,
 }
@@ -34,9 +34,9 @@ impl Arguments {
     pub fn new(base_control_type: BaseControlType) -> Arguments {
         Arguments {
             base_control_type,
-            base: base_control_type.to_string(),
+            base: base_control_type.as_string(),
             modal_result_type: String::from("()"),
-            state: State::ExpectKey,
+            expect_next: ExpectNext::Key,
             root: "appcui",
             key: String::new(),
             values: Vec::with_capacity(8),
@@ -215,7 +215,7 @@ impl Arguments {
         if let TokenTree::Ident(ident) = token {
             self.key = ident.to_string();
             self.values.clear();
-            self.state = State::ExpectEqual;
+            self.expect_next = ExpectNext::Equal;
         } else {
             panic!("Expecting a key (a-zA-Z0-9) but got: `{}`", token.to_string());
         }
@@ -225,7 +225,7 @@ impl Arguments {
             if (punctuation.as_char() != '=') && (punctuation.as_char() != ':') {
                 panic!("Expecting asign ('=' or ':') symbol but got: {}", punctuation.as_char());
             }
-            self.state = State::ExpectValue;
+            self.expect_next = ExpectNext::Value;
         } else {
             panic!("Expecting asign ('=' or ':') symbol but got: {}", token.to_string());
         }
@@ -256,15 +256,15 @@ impl Arguments {
                     }
                     expect_value = !expect_value;
                 }
-                self.state = State::ExpectComma;
+                self.expect_next = ExpectNext::Comma;
             }
             TokenTree::Ident(ident) => {
                 self.values.push(ident.to_string());
-                self.state = State::ExpectComma;
+                self.expect_next = ExpectNext::Comma;
             }
             TokenTree::Literal(literal) => {
                 self.values.push(literal.to_string());
-                self.state = State::ExpectComma;
+                self.expect_next = ExpectNext::Comma;
             }
             _ => {
                 panic!("Expecting a value (a-zA-Z0-9) but got: `{}`", token.to_string());
@@ -274,14 +274,14 @@ impl Arguments {
     fn validate_expect_comma(&mut self, token: TokenTree, config: &mut TraitsConfig) {
         if let TokenTree::Punct(punctuation) = token {
             if punctuation.as_char() == '+' {
-                self.state = State::ExpectValue;
+                self.expect_next = ExpectNext::Value;
                 return;
             }
             if punctuation.as_char() != ',' {
                 panic!("Expecting delimiter (',' comma) symbol but got: {}", punctuation.as_char());
             }
             self.validate_key_value_pair(config);
-            self.state = State::ExpectKey;
+            self.expect_next = ExpectNext::Key;
         } else {
             panic!("Expecting delimiter (',' comma) symbol but got:{}", token.to_string());
         }
@@ -289,28 +289,28 @@ impl Arguments {
     pub(crate) fn parse(&mut self, input: TokenStream, config: &mut TraitsConfig) {
         for token in input.into_iter() {
             // println!("arg_token: {:?}", token);
-            match self.state {
-                State::ExpectKey => self.validate_expect_key(token),
-                State::ExpectEqual => self.validate_expect_equal(token),
-                State::ExpectValue => self.validate_expect_value(token),
-                State::ExpectComma => self.validate_expect_comma(token, config),
+            match self.expect_next {
+                ExpectNext::Key => self.validate_expect_key(token),
+                ExpectNext::Equal => self.validate_expect_equal(token),
+                ExpectNext::Value => self.validate_expect_value(token),
+                ExpectNext::Comma => self.validate_expect_comma(token, config),
             }
         }
-        match self.state {
-            State::ExpectKey => {}
-            State::ExpectEqual => {
+        match self.expect_next {
+            ExpectNext::Key => {}
+            ExpectNext::Equal => {
                 panic!(
                     "Unexpected end of procedural macro attribute (expecting an asignament character ':' or '=') after key: '{}'",
                     self.key.as_str()
                 );
             }
-            State::ExpectValue => {
+            ExpectNext::Value => {
                 panic!(
                     "Unexpected end of procedural macro attribute (expecting a value for key: '{}')",
                     self.key.as_str()
                 );
             }
-            State::ExpectComma => self.validate_key_value_pair(config),
+            ExpectNext::Comma => self.validate_key_value_pair(config),
         }
     }
 }

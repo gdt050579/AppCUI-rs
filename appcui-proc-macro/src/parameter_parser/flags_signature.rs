@@ -17,7 +17,7 @@ impl FlagsSignature {
             // build the actual map
             let mut m: HashMap<u64, &'static str> = HashMap::with_capacity(8);
             for elem in self.flags {
-                m.insert(utils::compute_hash(*elem), *elem);
+                m.insert(utils::compute_hash(elem), *elem);
             }
             *map = Some(m);
         }

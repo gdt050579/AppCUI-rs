@@ -1,12 +1,6 @@
 #[inline]
 pub(crate)  fn is_name_char(value: u8) -> bool {
-    match value {
-        b'a'..=b'z' => true,
-        b'A'..=b'Z' => true,
-        b'0'..=b'9' => true,
-        b'_' => true,
-        _ => false
-    }
+    matches!(value, b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_')
 }
 
 pub fn extract_structure_name(code: &str) -> String {
