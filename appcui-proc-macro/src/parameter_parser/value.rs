@@ -35,22 +35,13 @@ impl<'a> Value<'a> {
         self.end
     }
     pub(crate) fn is_dict(&self) -> bool {
-        match self.data_type {
-            ValueType::Dict(_) => true,
-            _ => false,
-        }
+        matches!(self.data_type, ValueType::Dict(_))
     }
     pub(crate) fn is_list(&self) -> bool {
-        match self.data_type {
-            ValueType::List(_) => true,
-            _ => false,
-        }
+        matches!(self.data_type, ValueType::List(_))
     }
     pub(crate) fn is_value(&self) -> bool {
-        match self.data_type {
-            ValueType::List(_) | ValueType::Dict(_) => false,
-            _ => true,
-        }
+        !matches!(self.data_type, ValueType::List(_) | ValueType::Dict(_))
     }
     pub(crate) fn get_bool(&mut self) -> Option<bool> {
         if !self.is_value() {
@@ -157,7 +148,7 @@ impl<'a> Value<'a> {
         }
     }
     fn validate_bool(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if let Some(_) = self.get_bool() {
+        if self.get_bool().is_some() {
             return Ok(());
         }
         return Err(Error::new(
@@ -188,7 +179,7 @@ impl<'a> Value<'a> {
             return Ok(());
         }
         if let Some(value) = self.get_percentage() {
-            if (value < -300.0f32) || (value > 300.0f32) {
+            if !(-300.0f32..=300.0f32).contains(&value) {
                 return Err(Error::new(
                     param_list,
                     format!(
@@ -265,10 +256,10 @@ impl<'a> Value<'a> {
         }
         // all good --> lets set up the vector
         self.data_type = ValueType::List(v);
-        return Ok(());
+        Ok(())
     }
     fn validate_alignament(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if let Some(_) = self.get_alignament() {
+        if self.get_alignament().is_some() {
             return Ok(());
         }
         return Err(Error::new(
@@ -283,7 +274,7 @@ impl<'a> Value<'a> {
         ));
     }
     fn validate_color(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if let Some(_) = self.get_color() {
+        if self.get_color().is_some() {
             return Ok(());
         }
         return Err(Error::new(
@@ -298,7 +289,7 @@ impl<'a> Value<'a> {
         ));
     }
     fn validate_size(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if let Some(_) = self.get_size() {
+        if self.get_size().is_some() {
             return Ok(());
         }
         return Err(Error::new(
@@ -313,7 +304,7 @@ impl<'a> Value<'a> {
         ));
     }
     fn validate_dict(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if let Some(_) = self.get_dict() {
+        if self.get_dict().is_some() {
             return Ok(());
         }
         return Err(Error::new(
@@ -328,7 +319,7 @@ impl<'a> Value<'a> {
         ));
     }
     fn validate_list(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if let Some(_) = self.get_list() {
+        if self.get_list().is_some() {
             return Ok(());
         }
         return Err(Error::new(
@@ -343,7 +334,7 @@ impl<'a> Value<'a> {
         ));
     }
     fn validate_i32(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if let Some(_) = self.get_i32() {
+        if self.get_i32().is_some() {
             return Ok(());
         }
         return Err(Error::new(
@@ -358,7 +349,7 @@ impl<'a> Value<'a> {
         ));
     }
     pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
-        let display_param_name = if self.param_name.len() > 0 { self.param_name } else { key_name };
+        let display_param_name = if !self.param_name.is_empty() { self.param_name } else { key_name };
         match expected_type {
             super::ParamType::String => { /* always possible */ }
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,

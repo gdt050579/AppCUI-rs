@@ -77,7 +77,7 @@ impl<'a> ControlBuilder<'a> {
         builder
     }
     fn add_comma(&mut self) {
-        if self.content.ends_with('(') == false {
+        if !self.content.ends_with('(') {
             self.content.push_str(", ");
         }
     }
@@ -111,15 +111,13 @@ impl<'a> ControlBuilder<'a> {
                 let x = std::mem::transmute(str_value.get_string());
                 self.add_text(x);
             }
+        } else if let Some(default_value) = default {
+            self.add_text(default_value);
         } else {
-            if let Some(default_value) = default {
-                self.add_text(default_value);
-            } else {
-                panic!(
-                    "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                    param_name
-                );
-            }
+            panic!(
+                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
         }
     }
     pub(super) fn add_bool_parameter(&mut self, param_name: &str, default: Option<bool>) {
@@ -127,15 +125,13 @@ impl<'a> ControlBuilder<'a> {
         let value = self.parser.get_bool(param_name);
         if let Some(bool_value) = value {
             self.add_bool(bool_value);
+        } else if let Some(default_value) = default {
+            self.add_bool(default_value);
         } else {
-            if let Some(default_value) = default {
-                self.add_bool(default_value);
-            } else {
-                panic!(
-                    "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                    param_name
-                );
-            }
+            panic!(
+                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
         }
     }
     pub(super) fn add_size_parameter(&mut self, param_name: &str, default: Option<Size>) {
@@ -143,15 +139,13 @@ impl<'a> ControlBuilder<'a> {
         let value = self.parser.get_size(param_name);
         if let Some(size_value) = value {
             self.add_size(size_value);
+        } else if let Some(default_value) = default {
+            self.add_size(default_value);
         } else {
-            if let Some(default_value) = default {
-                self.add_size(default_value);
-            } else {
-                panic!(
-                    "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                    param_name
-                );
-            }
+            panic!(
+                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
         }
     }
     pub(super) fn add_layout(&mut self) {
@@ -161,7 +155,7 @@ impl<'a> ControlBuilder<'a> {
     pub(super) fn add_toolbaritem_operations(&mut self) {
         if let Some(tooltip_value) = self.parser.get("tooltip") {
             let txt = tooltip_value.get_string();
-            if txt.len() > 0 {
+            if !txt.is_empty() {
                 self.content.push_str("control.set_tooltip(");
                 unsafe {
                     let x = std::mem::transmute(txt);
@@ -171,19 +165,19 @@ impl<'a> ControlBuilder<'a> {
             }
         }
         if let Some(is_visible) = self.parser.get_bool("visible") {
-            if is_visible == false {
+            if !is_visible {
                 self.content.push_str("control.set_visible(false);\n\t");
             }
         }
     }
     pub(super) fn add_basecontrol_operations(&mut self) {
         if let Some(is_enabled) = self.parser.get_bool("enabled") {
-            if is_enabled == false {
+            if !is_enabled {
                 self.content.push_str("control.set_enabled(false);\n\t");
             }
         }
         if let Some(is_visible) = self.parser.get_bool("visible") {
-            if is_visible == false {
+            if !is_visible {
                 self.content.push_str("control.set_visible(false);\n\t");
             }
         }
@@ -192,12 +186,12 @@ impl<'a> ControlBuilder<'a> {
         if let Some(value) = self.parser.get(param_name) {
             let variant = value.get_string();
             if let Some(variant_name) = available_variants.get(variant) {
-                return Some(variant_name);
+                Some(variant_name)
             } else {
-                return None;
+                None
             }
         } else {
-            return None;
+            None
         }
     }
     pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &mut FlagsSignature, default: Option<&str>) {
@@ -217,24 +211,22 @@ impl<'a> ControlBuilder<'a> {
                 )
                 .panic();
             }
+        } else if let Some(default_value) = default {
+            self.content.push_str(enum_name);
+            self.content.push_str("::");
+            self.content.push_str(default_value);
         } else {
-            if let Some(default_value) = default {
-                self.content.push_str(enum_name);
-                self.content.push_str("::");
-                self.content.push_str(default_value);
-            } else {
-                panic!(
-                    "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                    param_name
-                );
-            }
+            panic!(
+                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
         }
     }
     pub(super) fn add_flags_parameter(&mut self, param_name: &str, flag_name: &str, available_flags: &mut FlagsSignature) {
         self.add_comma();
         if let Some(value) = self.parser.get_mut(param_name) {
             if let Some(list) = value.get_list() {
-                if list.len() == 0 {
+                if list.is_empty() {
                     self.content.push_str(flag_name);
                     self.content.push_str("::None");
                 } else {
@@ -271,12 +263,12 @@ impl<'a> ControlBuilder<'a> {
         self.content.push_str(content);
     }
     pub(super) fn add_line(&mut self, content: &str) {
-        if !self.content.ends_with("\n") {
-            self.content.push_str("\n");
+        if !self.content.ends_with('\n') {
+            self.content.push('\n');
         }
-        self.content.push_str("\t");
+        self.content.push('\t');
         self.content.push_str(content);
-        self.content.push_str("\n");
+        self.content.push('\n');
     }    
     #[inline(always)]
     pub(super) fn get_dict(&mut self, name: &str) -> Option<&mut NamedParamsMap<'a>> {

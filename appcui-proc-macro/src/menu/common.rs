@@ -58,7 +58,7 @@ fn get_menu_type(param_list: &str, dict: &mut NamedParamsMap) -> MenuItemType {
                 return MenuItemType::Separator;
             }
         }
-        return MenuItemType::Command;
+        MenuItemType::Command
     }
 }
 fn add_caption(s: &mut String, dict: &mut NamedParamsMap) {
@@ -122,12 +122,10 @@ fn add_command_id(s: &mut String, dict: &mut NamedParamsMap, class: Option<&str>
             // validate if the class can be build
             let c = if dict.contains("class") {
                 dict.get("class").unwrap().get_string()
+            } else if let Some(name) = class {
+                name
             } else {
-                if let Some(name) = class {
-                    name
-                } else {
-                    ""
-                }
+                ""
             };
             if c.is_empty() {
                 panic!("Unknwon class nane (or empty) for command. Either specify it in the `class` attribute (e.g. class=MyWin) or specify the command with its full qualifier (e.g. command='mywin::Command::<name>').");
@@ -211,13 +209,11 @@ fn get_class(dict: &mut NamedParamsMap, inherit: Option<&str>) -> Option<String>
         if let Err(desc) = crate::utils::validate_name(c, true) {
             panic!("Invalid class name '{}' => {}", c, desc);
         }
-        return Some(String::from(c));
+        Some(String::from(c))
+    } else if let Some(name) = inherit {
+        return Some(String::from(name));
     } else {
-        if let Some(name) = inherit {
-            return Some(String::from(name));
-        } else {
-            return None;
-        }
+        return None;
     }
 }
 pub(super) fn build_menu(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {

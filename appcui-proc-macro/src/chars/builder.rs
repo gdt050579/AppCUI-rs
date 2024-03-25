@@ -45,15 +45,15 @@ fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {
 fn unicode_number_to_value(text: &str) -> u32 {
     let mut value = 0;
     for ch in text.chars() {
-        if ch >= '0' && ch <= '9' {
+        if ch.is_ascii_digit() {
             value = value * 16 + (ch as u32 - '0' as u32);
             continue;
         }
-        if ch >= 'a' && ch <= 'f' {
+        if ('a'..='f').contains(&ch) {
             value = value * 16 + ((ch as u32 - 'a' as u32) + 10);
             continue;
         }
-        if ch >= 'A' && ch <= 'F' {
+        if ('A'..='F').contains(&ch) {
             value = value * 16 + ((ch as u32 - 'A' as u32) + 10);
             continue;
         }
@@ -76,11 +76,11 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
         let char_value = val.get_string();
         let count = char_value.chars().count();
         match count {
-            0 => res.push_str("0"),
+            0 => res.push('0'),
             1 => {
-                res.push_str("'");
+                res.push('\'');
                 res.push_str(char_value);
-                res.push_str("'")
+                res.push('\'')
             }
             _ => {
                 let hash = crate::utils::compute_hash(char_value);
@@ -105,7 +105,7 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
 
     if let Some(value) = dict.get_mut("attr") {
         if let Some(list) = value.get_list() {
-            if list.len() == 0 {
+            if list.is_empty() {
                 res.push_str("CharFlags::None)");
             } else {
                 let mut add_or_operator = false;
@@ -127,7 +127,7 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
                         .panic();
                     }
                 }
-                res.push_str(")")
+                res.push(')')
             }
         } else {
             panic!("Parameter 'attr' should contain some flags !");
@@ -141,5 +141,5 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     let s = input.validate_one_string_parameter("char");
     let mut d = parameter_parser::parse(&s).unwrap();
     let res = create_from_dict(&s, &mut d);
-    TokenStream::from_str(&res).expect(format!("Fail to convert 'char!' macro content to token stream").as_str())
+    TokenStream::from_str(&res).expect("Fail to convert 'char!' macro content to token stream")
 }

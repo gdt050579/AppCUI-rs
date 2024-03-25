@@ -65,7 +65,7 @@ impl<'a> NamedParamsMap<'a> {
                     let other_parameter_index = (*(self.all_params.get(&k).unwrap())) as usize;
                     let other_parameter_name = &self.values[other_parameter_index].param_name;
                     let v = &self.values[*index as usize];
-                    if other_parameter_name.len() > 0 {
+                    if !other_parameter_name.is_empty() {
                         return Err(Error::new(
                             param_list,
                             format!(
@@ -100,7 +100,7 @@ impl<'a> NamedParamsMap<'a> {
     pub(crate) fn check_unkwnon_params(&self, param_list: &str) -> Result<(), Error> {
         // all values must be validated
         for value in &self.values {
-            if value.validated == false {
+            if !value.validated {
                 return Err(Error::new(
                     param_list,
                     format!("Unknwon parameter: '{}' !", value.param_name).as_str(),

@@ -49,7 +49,7 @@ fn parse_dict<'a>(text: &'a str, tokenizer: &Tokenizer, index_start: usize, inde
                 return Err(Error::with_token(
                     text,
                     format!("Duplicate parameter: '{}'", key_token.get_text(text)).as_str(),
-                    &key_token,
+                    key_token,
                 ));
             }
             let next = tokenizer.get(pos + 2).get_next(pos + 2);

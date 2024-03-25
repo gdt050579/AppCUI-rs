@@ -134,7 +134,6 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
             if let Some(value) = params.get("align") {
                 match value.to_align() {
                     Alignament::Top | Alignament::Center | Alignament::Bottom => {
-                        return;
                     }
                     _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignament values are allowed !"),
                 }
@@ -147,7 +146,6 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
             if let Some(value) = params.get("align") {
                 match value.to_align() {
                     Alignament::Top | Alignament::Center | Alignament::Bottom => {
-                        return;
                     }
                     _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) alignament values are allowed !"),
                 }

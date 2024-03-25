@@ -68,9 +68,9 @@ impl Token {
     #[inline(always)]
     pub(super) fn get_next(&self, my_id: usize) -> usize {
         if self.link != Token::NO_LINK {
-            return self.link as usize + 1;
+            self.link as usize + 1
         } else {
-            return my_id + 1;
+            my_id + 1
         }
     }
     #[inline(always)]
@@ -330,32 +330,30 @@ impl Tokenizer {
         }
         // check scenarios
         // 1. <key> <eq> <value> [separator]
-        if (pos + 3 <= end) && (allow_key) {
-            if self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() && self.tokens[pos + 2].is_possible_value() {
-                // either KeyValue or KeyValueSep
-                let next_pos = self.tokens[pos + 2].get_next(pos + 2);
-                if (next_pos < end) && (self.tokens[next_pos].is_separator()) {
-                    return Ok(TokensFormat::KeyValue(next_pos + 1));
-                }
-                if next_pos == end {
-                    return Ok(TokensFormat::KeyValue(next_pos));
-                }
-                // there is a next pos, but it is invalid (a separator is missing)
-                if next_pos < end {
-                    return Err(Error::with_token(
-                        text,
-                        format!("Expecting a separator (';' or ',') before '{}'", self.tokens[next_pos].get_text(text)).as_str(),
-                        &self.tokens[next_pos],
-                    ));
-                }
-                // else we have an internal error ==> in theory we should not reach this step
-                return Err(Error::new(
+        if (pos + 3 <= end) && (allow_key) && self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() && self.tokens[pos + 2].is_possible_value() {
+            // either KeyValue or KeyValueSep
+            let next_pos = self.tokens[pos + 2].get_next(pos + 2);
+            if (next_pos < end) && (self.tokens[next_pos].is_separator()) {
+                return Ok(TokensFormat::KeyValue(next_pos + 1));
+            }
+            if next_pos == end {
+                return Ok(TokensFormat::KeyValue(next_pos));
+            }
+            // there is a next pos, but it is invalid (a separator is missing)
+            if next_pos < end {
+                return Err(Error::with_token(
                     text,
-                    format!("Internal error (1) - next_pos={},pos={},end={}",next_pos,pos,end).as_str(),
-                    self.tokens[pos].start,
-                    self.tokens[pos + 2].end,
+                    format!("Expecting a separator (';' or ',') before '{}'", self.tokens[next_pos].get_text(text)).as_str(),
+                    &self.tokens[next_pos],
                 ));
             }
+            // else we have an internal error ==> in theory we should not reach this step
+            return Err(Error::new(
+                text,
+                format!("Internal error (1) - next_pos={},pos={},end={}",next_pos,pos,end).as_str(),
+                self.tokens[pos].start,
+                self.tokens[pos + 2].end,
+            ));
         }
         // 2. <value> [separator]
         if allow_value && self.tokens[pos].is_possible_value() {
@@ -401,23 +399,21 @@ impl Tokenizer {
             }
         }
         // for values
-        if allow_value {
-            if (pos + 2 <= end) && self.tokens[pos].is_possible_value() {
-                return Err(Error::with_token(
-                    text,
-                    format!("Expecting a separator ',' or ';' after value '{}'", self.tokens[pos].get_text(text)).as_str(),
-                    &self.tokens[pos + 1],
-                ));
-            }
+        if allow_value && (pos + 2 <= end) && self.tokens[pos].is_possible_value() {
+            return Err(Error::with_token(
+                text,
+                format!("Expecting a separator ',' or ';' after value '{}'", self.tokens[pos].get_text(text)).as_str(),
+                &self.tokens[pos + 1],
+            ));
         }
 
         // generic errors
         if allow_value && allow_key {
-            return Err(Error::with_token(text, "Expecting a value or a key:value syntax !", &self.tokens[pos]));
+            Err(Error::with_token(text, "Expecting a value or a key:value syntax !", &self.tokens[pos]))
         } else if allow_key {
-            return Err(Error::with_token(text, "Expecting a key:value syntax !", &self.tokens[pos]));
+            Err(Error::with_token(text, "Expecting a key:value syntax !", &self.tokens[pos]))
         } else {
-            return Err(Error::with_token(text, "Expecting a value !", &self.tokens[pos]));
+            Err(Error::with_token(text, "Expecting a value !", &self.tokens[pos]))
         }
     }
     #[inline(always)]

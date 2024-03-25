@@ -110,7 +110,7 @@ impl MenuItemType {
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        return HASH_TO_ALIGNAMENT[entry_index];
+        HASH_TO_ALIGNAMENT[entry_index]
     }
     pub fn _get_name(&self) -> &'static str {
         match self {

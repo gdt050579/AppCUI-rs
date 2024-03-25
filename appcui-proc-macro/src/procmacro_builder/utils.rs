@@ -1,11 +1,11 @@
 #[inline]
 pub(crate)  fn is_name_char(value: u8) -> bool {
     match value {
-        b'a'..=b'z' => return true,
-        b'A'..=b'Z' => return true,
-        b'0'..=b'9' => return true,
-        b'_' => return true,
-        _ => return false
+        b'a'..=b'z' => true,
+        b'A'..=b'Z' => true,
+        b'0'..=b'9' => true,
+        b'_' => true,
+        _ => false
     }
 }
 
@@ -21,7 +21,7 @@ pub fn extract_structure_name(code: &str) -> String {
         while (pos < len) && (is_name_char(buf[pos])) {
             pos += 1;
         }
-        return String::from(&code[start..pos]);
+        String::from(&code[start..pos])
     } else {
         panic!("Expecting a structure definition !");
     }
