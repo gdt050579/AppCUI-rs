@@ -9,3 +9,4 @@ members = [
 
 [workspace.lints.clippy]
 module_inception = "allow"
+new_without_default = "allow"
