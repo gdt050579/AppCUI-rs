@@ -285,10 +285,10 @@ fn get_stdin_handle() -> Result<HANDLE, Error> {
         if h == INVALID_HANDLE_VALUE {
             return Err(Error::new(
                 ErrorKind::InitializationFailure,
-                format!("Unable to get a valid stdin handle from GetStdHandle WinApi function !"),
+                "Unable to get a valid stdin handle from GetStdHandle WinApi function !".to_string(),
             ));
         }
-        return Ok(h);
+        Ok(h)
     }
 }
 fn get_stdout_handle() -> Result<HANDLE, Error> {
@@ -297,10 +297,10 @@ fn get_stdout_handle() -> Result<HANDLE, Error> {
         if h == INVALID_HANDLE_VALUE {
             return Err(Error::new(
                 ErrorKind::InitializationFailure,
-                format!("Unable to get a valid stdout handle from GetStdHandle WinApi function !"),
+                "Unable to get a valid stdout handle from GetStdHandle WinApi function !".to_string(),
             ));
         }
-        return Ok(h);
+        Ok(h)
     }
 }
 
@@ -316,7 +316,7 @@ fn get_console_screen_buffer_info(handle: HANDLE) -> Result<CONSOLE_SCREEN_BUFFE
                 ),
             ));
         }
-        return Ok(cbuf);
+        Ok(cbuf)
     }
 }
 
@@ -648,7 +648,7 @@ impl Terminal for WindowsTerminal {
                     self.shift_state = key_modifier;
                     return SystemEvent::KeyModifierChanged(KeyModifierChangedEvent {
                         new_state: key_modifier,
-                        old_state: old_state,
+                        old_state,
                     });
                 }
             }
@@ -727,6 +727,6 @@ impl Terminal for WindowsTerminal {
             return SystemEvent::Resize(self.size);
         }
 
-        return SystemEvent::None;
+        SystemEvent::None
     }
 }

@@ -25,7 +25,7 @@ impl ParserError {
         }
     }
     pub(super) fn get_error(&self) -> &str {
-        return &self.error.as_str();
+        return self.error.as_str();
     }
     pub(super) fn to_string(&self) -> String {
         let mut err = String::with_capacity(256);
@@ -52,7 +52,7 @@ impl ParserError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub(super) struct CommandParser<'a> {
     command: &'a str,
     params: [&'a str; 4],
@@ -97,7 +97,7 @@ impl<'a> CommandParser<'a> {
         while (start < len) && (f(buf[start])) {
             start += 1;
         }
-        return start;
+        start
     }
     pub(super) fn get_command(&self) -> &str {
         self.command
@@ -109,7 +109,7 @@ impl<'a> CommandParser<'a> {
         if index >= self.count {
             return None;
         }
-        return Some(self.params[index]);
+        Some(self.params[index])
     }
     pub(super) fn get_bool(&self, index: usize) -> Option<bool> {
         if index >= self.count {
@@ -230,7 +230,7 @@ impl<'a> CommandParser<'a> {
         if let Ok(value) = self.params[index].parse::<i32>() {
             return Some(value);
         }
-        return None;
+        None
     }
     pub(super) fn get_hash(&self, index: usize) -> Option<u64> {
         if index >= self.count {
@@ -243,7 +243,7 @@ impl<'a> CommandParser<'a> {
         if let Ok(value) = u64::from_str_radix(&txt[2..],16) {
             return Some(value);
         }
-        return None;
+        None
     }
     pub(super) fn parse(&mut self, command: &'a str) -> Result<(), ParserError> {
         let buf = command.as_bytes();
@@ -370,12 +370,12 @@ impl<'a> CommandParser<'a> {
         }
     }
 }
-impl<'a> Default for CommandParser<'a> {
-    fn default() -> Self {
-        Self {
-            command: "",
-            params: ["", "", "", ""],
-            count: 0,
-        }
-    }
-}
+// impl<'a> Default for CommandParser<'a> {
+//     fn default() -> Self {
+//         Self {
+//             command: "",
+//             params: ["", "", "", ""],
+//             count: 0,
+//         }
+//     }
+// }

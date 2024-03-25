@@ -146,11 +146,11 @@ impl DebugTerminal {
             buf[6] = ((ch.flags.get_value() >> 8) & 0xFF) as u8;
             buf[7] = (ch.flags.get_value() & 0xFF) as u8;
             for b in buf {
-                hash = hash ^ (b as u64);
+                hash ^= b as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
             }
         }
-        return hash;
+        hash
     }
 }
 impl Terminal for DebugTerminal {
@@ -192,7 +192,7 @@ impl Terminal for DebugTerminal {
         }
         self.paint = false;
 
-        println!("");
+        println!();
         self.temp_str.clear();
         // firt border
         for _ in 0..=6 + self.size.width {
@@ -299,7 +299,7 @@ impl Terminal for DebugTerminal {
             self.temp_str.push_str(DebugTerminal::color_to_str(fore));
             self.temp_str.push_str("m\x1b[48;2;");
             self.temp_str.push_str(DebugTerminal::color_to_str(back));
-            self.temp_str.push_str("m");
+            self.temp_str.push('m');
             if ch.code <= ' ' {
                 self.temp_str.push(' ');
             } else {
@@ -398,6 +398,6 @@ impl Terminal for DebugTerminal {
         }
 
         // if nothing else works, close the app (script has finished)
-        return SystemEvent::AppClose;
+        SystemEvent::AppClose
     }
 }

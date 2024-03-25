@@ -10,11 +10,9 @@ impl CheckHashCommand {
             return Err(ParserError::new("CheckHash command has one parameters !"));
         }
         if let Some(hash) = parser.get_hash(0) {
-            return Ok(Self { value: hash });
+            Ok(Self { value: hash })
         } else {
-            return Err(ParserError::new(
-                "CheckHash (invalid hash) --> use a hexadecimal format 0x....",
-            ));
+            Err(ParserError::new("CheckHash (invalid hash) --> use a hexadecimal format 0x...."))
         }
     }
     pub(super) fn get_hash(&self) -> u64 {

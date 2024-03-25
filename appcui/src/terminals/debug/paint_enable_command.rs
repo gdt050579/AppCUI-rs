@@ -12,7 +12,7 @@ impl PaintEnableCommand {
         if let Some(value) = parser.get_bool(0) {
             return Ok(Self { enabled: value });
         }
-        return Err(ParserError::new("Expecting a boolean value as the first parameter for Paint.Enable command  !"));
+        Err(ParserError::new("Expecting a boolean value as the first parameter for Paint.Enable command  !"))
 
     }
     pub(super) fn is_paint_enabled(&self) -> bool {

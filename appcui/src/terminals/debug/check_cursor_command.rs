@@ -26,9 +26,9 @@ impl CheckCursorCommand {
                 point: Point::new(x.unwrap(), y.unwrap()),
             });
         }
-        return Err(ParserError::new("CheckCursor can be used in two forms: CheckCursor(hidden) or CheckCursor(false) - to check if a cursor is hidden, or CheckCursor(x,y) to check if a cursor is at a specified position."));
+        Err(ParserError::new("CheckCursor can be used in two forms: CheckCursor(hidden) or CheckCursor(false) - to check if a cursor is hidden, or CheckCursor(x,y) to check if a cursor is at a specified position."))
     }
     pub(super) fn get_point(&self) -> Point {
-        self.point.clone()
+        self.point
     }
 }

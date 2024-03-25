@@ -41,60 +41,60 @@ impl Command {
         match cp.get_command() {
             "Mouse.Hold" => {
                 let variant = MouseHoldCommand::new(&cp)?;
-                return Ok(Command::MouseHold(variant));
+                Ok(Command::MouseHold(variant))
             }
             "Mouse.Release" => {
                 let variant = MouseReleaseCommand::new(&cp)?;
-                return Ok(Command::MouseRelease(variant));
+                Ok(Command::MouseRelease(variant))
             }
             "Mouse.Click" => {
                 let variant = MouseClickCommand::new(&cp)?;
-                return Ok(Command::MouseClick(variant));
+                Ok(Command::MouseClick(variant))
             }
             "Mouse.Move" => {
                 let variant = MouseMoveCommand::new(&cp)?;
-                return Ok(Command::MouseMove(variant));
+                Ok(Command::MouseMove(variant))
             }
             "Mouse.Drag" => {
                 let variant = MouseDragCommand::new(&cp)?;
-                return Ok(Command::MouseDrag(variant));
+                Ok(Command::MouseDrag(variant))
             }
             "Mouse.Wheel" => {
                 let variant = MouseWheelCommand::new(&cp)?;
-                return Ok(Command::MouseWheel(variant));
+                Ok(Command::MouseWheel(variant))
             }
             "Paint" => {
                 let variant = PaintCommand::new(&cp)?;
-                return Ok(Command::Paint(variant));
+                Ok(Command::Paint(variant))
             }
             "Paint.Enable" => {
                 let variant = PaintEnableCommand::new(&cp)?;
-                return Ok(Command::PaintEnable(variant));
+                Ok(Command::PaintEnable(variant))
             }
             "CheckHash" => {
                 let variant = CheckHashCommand::new(&cp)?;
-                return Ok(Command::CheckHash(variant));
+                Ok(Command::CheckHash(variant))
             }
             "CheckCursor" => {
                 let variant = CheckCursorCommand::new(&cp)?;
-                return Ok(Command::CheckCursor(variant));
+                Ok(Command::CheckCursor(variant))
             }
             "Resize" => {
                 let variant = ResizeCommand::new(&cp)?;
-                return Ok(Command::Resize(variant));
+                Ok(Command::Resize(variant))
             }
             "Key.Pressed" => {
                 let variant = KeyPressedCommand::new(&cp)?;
-                return Ok(Command::KeyPresed(variant));
+                Ok(Command::KeyPresed(variant))
             }
             "Key.TypeText" => {
                 let variant = KeyTypeTextCommand::new(&cp)?;
-                return Ok(Command::KeyTypeText(variant));
+                Ok(Command::KeyTypeText(variant))
             }
             _ => {
                 let mut s = String::from("Invalid/Unknwon command: ");
                 s += cp.get_command();
-                return Err(ParserError::new(&s));
+                Err(ParserError::new(&s))
             }
         }
     }
