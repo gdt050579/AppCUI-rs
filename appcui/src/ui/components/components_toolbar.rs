@@ -69,7 +69,7 @@ impl ComponentsToolbar {
         let left_margin = control.left_components_margin as i32;
         let top_margin = control.top_components_margin as i32;
         let mut w = (control_size.width as i32) - (left_margin + 1); // 2 space from right
-        let mut h = (control_size.height as i32) - (top_margin + 0); // 1 space from bottom
+        let mut h = (control_size.height as i32) - top_margin; // 1 space from bottom
         let mut x = left_margin;
         let mut y = top_margin;
         let count = self.items.allocated_objects();

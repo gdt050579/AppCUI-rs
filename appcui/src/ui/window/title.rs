@@ -49,17 +49,17 @@ impl Title {
         let first_part_end = self.start_part_size as usize;
         let second_part_start =
             (self.count as usize) - (width as usize - (first_part_end + middle_size as usize));
-        let mut char_index = 0usize;
+        //let mut char_index = 0usize;
         self.start_part_end = 0;
         self.end_part_start = 0;
-        for (offset, _) in self.text.char_indices() {
+        for (char_index, (offset, _)) in self.text.char_indices().enumerate() {
             if char_index == first_part_end {
                 self.start_part_end = offset;
             }
             if char_index == second_part_start {
                 self.end_part_start = offset;
             }
-            char_index += 1;
+            //char_index += 1;
         }
         if (self.start_part_end > 0) && (self.end_part_start > self.start_part_end) {
             self.draw_mode = draw_mode;

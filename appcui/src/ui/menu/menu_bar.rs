@@ -34,14 +34,12 @@ impl MenuBar {
     }
     pub(crate) fn update_positions(&mut self) {
         let mut x = 0;
-        let mut idx = 0usize;
-        for item in &mut self.items {
+        for (idx, item) in self.items.iter_mut().enumerate() {
             if idx >= self.count {
                 break;
             }
             item.x = x;
             x += 2 + (item.caption.chars_count() as i32);
-            idx += 1;
         }
     }
     fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {

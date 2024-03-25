@@ -722,7 +722,7 @@ impl RuntimeManager {
             let base = control.get_base_mut();
             for i in 0..base.children.len() {
                 let child_handle = base.children[i];
-                if let Some(child) = unsafe { (&mut *self.controls).get_mut(child_handle) } {
+                if let Some(child) = unsafe { (*self.controls).get_mut(child_handle) } {
                     child.get_base_mut().parent_index = VectorIndex::with_value(i);
                     self.update_parent_indexes(child_handle);
                 }
