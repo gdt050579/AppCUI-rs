@@ -89,7 +89,7 @@ impl RuntimeManager {
         let mut manager = RuntimeManager {
             theme: Theme::new(),
             terminal: term,
-            surface: surface,
+            surface,
             desktop_handle: Handle::new(0),
             tooltip: ToolTip::new(),
             recompute_layout: true,
@@ -163,7 +163,7 @@ impl RuntimeManager {
         self.loop_status = LoopStatus::Normal;
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
-        self.tooltip.show(txt, &rect, self.terminal.get_size(), &self.theme);
+        self.tooltip.show(txt, rect, self.terminal.get_size(), &self.theme);
     }
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
@@ -231,7 +231,7 @@ impl RuntimeManager {
         if let Some(win) = controls.get_mut(handle.cast()) {
             win.get_control_mut().on_registered();
         }
-        return handle;
+        handle
     }
     pub(crate) fn add_modal_window<T, U>(&mut self, obj: T) -> Handle<T>
     where
@@ -253,7 +253,7 @@ impl RuntimeManager {
             self.request_focus_for_control(handle);
             self.request_update();
         }
-        return handle.cast();
+        handle.cast()
     }
     pub(crate) fn get_control_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T>
     where
@@ -306,7 +306,7 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(self.opened_menu_handle) {
             let parent_handle = menu.get_parent_handle();
-            if let Some(_) = menus.get(parent_handle) {
+            if menus.get(parent_handle).is_some() {
                 self.opened_menu_handle = parent_handle;
                 return;
             }
@@ -441,10 +441,10 @@ impl RuntimeManager {
         }
         controls.remove(handle);
         if has_focus {
-            return parent;
+            parent
         } else {
-            return Handle::None;
-        };
+            Handle::None
+        }
     }
     fn remove_deleted_controls(&mut self) {
         while let Some(handle) = self.to_remove_list.pop() {
@@ -481,7 +481,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(ctrl) = controls.get(parent_handle) {
             let base = ctrl.get_base();
-            if base.is_active() == false {
+            if !base.is_active() {
                 return None;
             }
             if base.focused_child_index.in_range(base.children.len()) {
@@ -495,10 +495,10 @@ impl RuntimeManager {
                 return Some(parent_handle);
             }
         }
-        return None;
+        None
     }
     fn get_focused_control(&self) -> Handle<UIElement> {
-        return self.get_focused_control_for_parent(self.get_root_control_handle()).unwrap();
+        self.get_focused_control_for_parent(self.get_root_control_handle()).unwrap()
         // let controls = unsafe { &mut *self.controls };
         // if let Some(ctrl) = controls.get(parent_handle) {
         //     // at least the parent must be active
@@ -617,7 +617,7 @@ impl RuntimeManager {
         let mut handle = handle;
         while let Some(c) = controls.get_mut(handle) {
             let base = c.get_base();
-            if base.is_active() == false {
+            if !base.is_active() {
                 break;
             }
             // curent handle is a possible candidate for a valid child focused leaf
@@ -814,20 +814,18 @@ impl LayoutMethods for RuntimeManager {
                     base.set_expand_flag(false);
                     expand_status = ExpandStatus::Pack;
                 }
-            } else {
-                if handle == self.expanded_control.handle {
-                    // need to compute my expended size
-                    // also I need to set my internal flags to expanded
-                    let termsize = self.get_terminal_size();
-                    if let Some(dir) = base.update_expanded_layout(self.expanded_control.prefered_size, self.expanded_control.min_size, termsize) {
-                        base.set_expand_flag(true);
-                        expand_status = match dir {
-                            ExpandedDirection::OnTop => ExpandStatus::ExpandOnTop,
-                            ExpandedDirection::OnBottom => ExpandStatus::ExpandOnBottom,
-                        };
-                    } else {
-                        self.expanded_control.handle = Handle::None; // clear expanded handle
-                    }
+            } else if handle == self.expanded_control.handle {
+                // need to compute my expended size
+                // also I need to set my internal flags to expanded
+                let termsize = self.get_terminal_size();
+                if let Some(dir) = base.update_expanded_layout(self.expanded_control.prefered_size, self.expanded_control.min_size, termsize) {
+                    base.set_expand_flag(true);
+                    expand_status = match dir {
+                        ExpandedDirection::OnTop => ExpandStatus::ExpandOnTop,
+                        ExpandedDirection::OnBottom => ExpandStatus::ExpandOnBottom,
+                    };
+                } else {
+                    self.expanded_control.handle = Handle::None; // clear expanded handle
                 }
             }
             let new_size = base.size();
@@ -946,11 +944,9 @@ impl KeyboardMethods for RuntimeManager {
             }
             // 1.2. if menubar is opened (e.g. the current menu is part of the menu bar )
             if let Some(menubar) = self.menubar.as_mut() {
-                if menubar.is_opened() {
-                    if menubar.on_key_event(event.key, true) == EventProcessStatus::Processed {
-                        self.repaint = true;
-                        return;
-                    }
+                if menubar.is_opened() && menubar.on_key_event(event.key, true) == EventProcessStatus::Processed {
+                    self.repaint = true;
+                    return;
                 }
             }
         }
@@ -971,7 +967,7 @@ impl KeyboardMethods for RuntimeManager {
         if let Some(menubar) = self.menubar.as_mut() {
             if menubar.on_key_event(event.key, false) == EventProcessStatus::Processed {
                 self.repaint = true;
-                return;
+                //return;
             }
         }
     }
@@ -979,14 +975,12 @@ impl KeyboardMethods for RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base();
-            if base.is_active() == false {
+            if !base.is_active() {
                 return EventProcessStatus::Ignored;
             }
             if base.should_receive_keyinput_before_children() {
-                if base.can_receive_input() {
-                    if control.get_control_mut().on_key_pressed(key, character) == EventProcessStatus::Processed {
-                        return EventProcessStatus::Processed;
-                    }
+                if base.can_receive_input() && control.get_control_mut().on_key_pressed(key, character) == EventProcessStatus::Processed {
+                    return EventProcessStatus::Processed;
                 }
                 let base = control.get_base();
                 if base.focused_child_index.in_range(base.children.len()) {
@@ -1007,7 +1001,7 @@ impl KeyboardMethods for RuntimeManager {
             }
         }
 
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
     }
 }
 impl MouseMethods for RuntimeManager {
@@ -1015,7 +1009,7 @@ impl MouseMethods for RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.get_base_mut();
-            if base.is_active() == false {
+            if !base.is_active() {
                 return Handle::None;
             }
 
@@ -1044,7 +1038,7 @@ impl MouseMethods for RuntimeManager {
                         if (inc_bottom_margin)
                             && (y == base.screen_clip.bottom + 1)
                             && (x >= base.screen_clip.left + base.left_components_margin as i32)
-                            && (x <= base.screen_clip.right - 1)
+                            && (x < base.screen_clip.right)
                         {
                             // located on the external bottom margin
                             return handle;
@@ -1054,10 +1048,8 @@ impl MouseMethods for RuntimeManager {
                         return Handle::None;
                     }
                 }
-            } else {
-                if !base.screen_clip.contains(x, y) {
-                    return Handle::None;
-                }
+            } else if !base.screen_clip.contains(x, y) {
+                return Handle::None;
             }
             let count = base.children.len();
             if count > 0 {
@@ -1091,7 +1083,7 @@ impl MouseMethods for RuntimeManager {
             }
         }
         // check from root
-        return self.coordinates_to_child_control(self.get_root_control_handle(), x, y, ignore_expanded);
+        self.coordinates_to_child_control(self.get_root_control_handle(), x, y, ignore_expanded)
     }
 
     fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool {
@@ -1145,7 +1137,7 @@ impl MouseMethods for RuntimeManager {
                 self.mouse_over_control = Handle::None;
             }
         }
-        return processed;
+        processed
     }
 
     fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) {
@@ -1276,17 +1268,15 @@ impl MouseMethods for RuntimeManager {
                     self.repaint |= response == EventProcessStatus::Processed;
                 }
             }
-        } else {
-            if !self.mouse_over_control.is_none() {
-                if let Some(control) = controls.get_mut(handle) {
-                    let base = control.get_base();
-                    let scr_x = base.screen_clip.left;
-                    let scr_y = base.screen_clip.top;
-                    let response = control
-                        .get_control_mut()
-                        .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
-                    self.repaint |= response == EventProcessStatus::Processed;
-                }
+        } else if !self.mouse_over_control.is_none() {
+            if let Some(control) = controls.get_mut(handle) {
+                let base = control.get_base();
+                let scr_x = base.screen_clip.left;
+                let scr_y = base.screen_clip.top;
+                let response = control
+                    .get_control_mut()
+                    .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
+                self.repaint |= response == EventProcessStatus::Processed;
             }
         }
     }

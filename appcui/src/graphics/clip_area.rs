@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub(crate) struct ClipArea {
     pub left: i32,
     pub top: i32,
@@ -62,17 +62,5 @@ impl ClipArea {
         self.top += top;
         self.bottom -= bottom;
         self.visible = (self.left <= self.right) && (self.top <= self.bottom);
-    }
-}
-
-impl Default for ClipArea {
-    fn default() -> Self {
-        Self {
-            left: 0,
-            top: 0,
-            right: 0,
-            bottom: 0,
-            visible: false,
-        }
     }
 }

@@ -1,12 +1,7 @@
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
-}
-impl Default for Point {
-    fn default() -> Self {
-        Self { x: 0, y: 0 }
-    }
 }
 impl Point {
     pub const ORIGIN: Point = Point { x: 0, y: 0 };

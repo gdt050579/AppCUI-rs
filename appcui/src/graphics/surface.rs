@@ -46,7 +46,7 @@ enum CharacterType {
 }
 impl From<char> for CharacterType {
     fn from(value: char) -> Self {
-        return match value {
+        match value {
             '\n' | '\r' => CharacterType::NewLine,
             ' ' | '\t' => CharacterType::Space,
             'a'..='z' => CharacterType::Word,
@@ -54,7 +54,7 @@ impl From<char> for CharacterType {
             '0'..='9' => CharacterType::Word,
             '\u{80}'..=char::MAX => CharacterType::Word,
             _ => CharacterType::Other,
-        };
+        }
     }
 }
 
@@ -90,7 +90,7 @@ impl Surface {
             bottom_most: (h - 1) as i32,
         };
         s.chars.resize(count, Character::default());
-        return s;
+        s
     }
 
     #[inline]
@@ -101,13 +101,13 @@ impl Surface {
     fn coords_to_position(&self, x: i32, y: i32) -> Option<usize> {
         let x = x + self.origin.x;
         let y = y + self.origin.y;
-        if self.clip.contains(x, y) == false {
+        if !self.clip.contains(x, y) {
             return None;
         }
         let x_p = x as usize;
         let y_p = y as usize;
-        let pos = (y_p as usize) * (self.size.width as usize) + (x_p as usize);
-        return Some(pos);
+        let pos = y_p * (self.size.width as usize) + x_p;
+        Some(pos)
     }
     #[inline]
     pub fn set_origin(&mut self, x: i32, y: i32) {
@@ -192,7 +192,7 @@ impl Surface {
     #[inline]
     pub fn get(&self, x: i32, y: i32) -> Option<&Character> {
         let pos = self.coords_to_position(x, y)?;
-        return Some(&(self.chars[pos]));
+        Some(&(self.chars[pos]))
     }
 
     pub fn clear(&mut self, ch: Character) {
@@ -330,7 +330,7 @@ impl Surface {
     }
 
     pub fn draw_surface(&mut self, x: i32, y: i32, surface: &Surface) {
-        if self.clip.is_visible() == false {
+        if !self.clip.is_visible() {
             return;
         }
         let mut index = 0usize;
@@ -346,7 +346,7 @@ impl Surface {
         let mut c = Character::new(' ', attr.foreground, attr.background, attr.flags);
         if !multi_line {
             // single line support
-            if self.clip.contains_y(y + self.origin.y) == false {
+            if !self.clip.contains_y(y + self.origin.y) {
                 return; // no need to draw
             }
             let mut p_x = x;
@@ -376,7 +376,7 @@ impl Surface {
     }
 
     fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormat) {
-        if self.clip.contains_y(y + self.origin.y) == false {
+        if !self.clip.contains_y(y + self.origin.y) {
             return; // no need to draw
         }
         let mut x = match format.align {
@@ -543,17 +543,15 @@ impl Surface {
                     start_ofs = offset + 1;
                     ch_index = current_char_index;
                     chars_count = 0;
+                } else if next_ofs >= end_ofs {
+                    start_ofs = next_ofs;
+                    ch_index = current_char_index_on_next;
+                    chars_count = 1 + chars_count - chars_count_next_ofs;
                 } else {
-                    if next_ofs >= end_ofs {
-                        start_ofs = next_ofs;
-                        ch_index = current_char_index_on_next;
-                        chars_count = 1 + chars_count - chars_count_next_ofs;
-                    } else {
-                        start_ofs = offset;
-                        ch_index = current_char_index - 1;
-                        chars_count = 1; // current char
-                        strip_spaces = char_type == CharacterType::Space;
-                    }
+                    start_ofs = offset;
+                    ch_index = current_char_index - 1;
+                    chars_count = 1; // current char
+                    strip_spaces = char_type == CharacterType::Space;
                 }
                 last_char_type = char_type;
                 //println!("   ->new_start={}, chars_count={}, index={} [{strip_spaces}]=> '{}'\n",start_ofs,chars_count,index,&text[start_ofs..]);

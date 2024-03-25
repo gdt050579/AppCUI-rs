@@ -103,14 +103,14 @@ impl Image {
         if (x < self.width) && (y < self.height) {
             return Some(self.pixels[(y as usize) * (self.width as usize) + (x as usize)]);
         }
-        return None;
+        None
     }
     #[inline]
     pub fn get_pixel_or_default(&self, x: u32, y: u32) -> Pixel {
         if (x < self.width) && (y < self.height) {
             return self.pixels[(y as usize) * (self.width as usize) + (x as usize)];
         }
-        return Pixel::default();
+        Pixel::default()
     }
     #[inline]
     pub fn get_width(&self) -> u32 {
@@ -121,7 +121,7 @@ impl Image {
         self.height
     }
 
-    pub (super) fn compute_square_average_color(&self, x: u32, y: u32, sz: u32) -> Pixel {
+    pub(super) fn compute_square_average_color(&self, x: u32, y: u32, sz: u32) -> Pixel {
         if (x >= self.width) || (y >= self.height) || (sz == 0) {
             return Pixel::default(); // nothing to compute
         }
@@ -143,10 +143,6 @@ impl Image {
             p_y += 1;
         }
         let nr_pixels = sz * sz;
-        return Pixel::from_rgb(
-            (sum_r / nr_pixels) as u8,
-            (sum_g / nr_pixels) as u8,
-            (sum_b / nr_pixels) as u8,
-        );
+        Pixel::from_rgb((sum_r / nr_pixels) as u8, (sum_g / nr_pixels) as u8, (sum_b / nr_pixels) as u8)
     }
 }

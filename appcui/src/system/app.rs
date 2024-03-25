@@ -90,7 +90,7 @@ impl App {
     where
         T: Control + WindowControl + NotModalWindow + 'static,
     {
-        return RuntimeManager::get().add_window(window);
+        RuntimeManager::get().add_window(window)
     }
 }
 

@@ -119,6 +119,6 @@ pub enum LineType {
 
 impl LineType {
     pub(super) fn get_chars(&self) -> &'static LineTypeChars {
-        return &LINE_TYPE_CHARS[(*self as u8) as usize];
+        &LINE_TYPE_CHARS[(*self as u8) as usize]
     }
 }

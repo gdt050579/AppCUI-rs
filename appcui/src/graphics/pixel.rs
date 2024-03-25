@@ -187,7 +187,7 @@ const COLORMAP_64_COLORS_PROC: [u8; 125] = [
     100, 100, 75, 75, 100, 75, 75, 50, 75, 100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
 ];
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Pixel {
     pub red: u8,
     pub green: u8,
@@ -228,32 +228,26 @@ impl Pixel {
     pub(super) fn to_color(&self) -> Color {
         let b = if self.blue <= 16 {
             0u32
+        } else if self.blue < 192 {
+            1u32
         } else {
-            if self.blue < 192 {
-                1u32
-            } else {
-                2u32
-            }
+            2u32
         };
         let r = if self.red <= 16 {
             0u32
+        } else if self.red < 192 {
+            1u32
         } else {
-            if self.red < 192 {
-                1u32
-            } else {
-                2u32
-            }
+            2u32
         };
         let g = if self.green <= 16 {
             0u32
+        } else if self.green < 192 {
+            1u32
         } else {
-            if self.green < 192 {
-                1u32
-            } else {
-                2u32
-            }
+            2u32
         };
-        return COLORMAP_16_COLORS[(r * 9 + g * 3 + b) as usize];
+        COLORMAP_16_COLORS[(r * 9 + g * 3 + b) as usize]
     }
     pub(super) fn to_character(&self) -> Character {
         let r = ((self.red as u32) + 32) / 64;
@@ -264,22 +258,22 @@ impl Pixel {
         let proc = COLORMAP_64_COLORS_PROC[idx];
         match proc {
             0 => {
-                return Character::new(' ', Color::Black, Color::Black, CharFlags::None);
+                Character::new(' ', Color::Black, Color::Black, CharFlags::None)
             }
             25 => {
-                return Character::new(SpecialChar::Block25, col, Color::Black, CharFlags::None);
+                Character::new(SpecialChar::Block25, col, Color::Black, CharFlags::None)
             }
             50 => {
-                return Character::new(SpecialChar::Block50, col, Color::Black, CharFlags::None);
+                Character::new(SpecialChar::Block50, col, Color::Black, CharFlags::None)
             }
             75 => {
-                return Character::new(SpecialChar::Block75, col, Color::Black, CharFlags::None);
+                Character::new(SpecialChar::Block75, col, Color::Black, CharFlags::None)
             }
             100 => {
-                return Character::new(' ', col, col, CharFlags::None);
+                Character::new(' ', col, col, CharFlags::None)
             }
             _ => {
-                return Character::default();
+                Character::default()
             }
         }
     }
@@ -298,17 +292,6 @@ impl Pixel {
             Character::new(SpecialChar::Block75, Color::White, Color::Black, CharFlags::None)
         } else {
             Character::new(' ', Color::White, Color::White, CharFlags::None)
-        }
-    }
-}
-
-impl Default for Pixel {
-    fn default() -> Self {
-        Self {
-            red: 0,
-            green: 0,
-            blue: 0,
-            alpha: 0,
         }
     }
 }
