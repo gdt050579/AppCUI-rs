@@ -120,6 +120,6 @@ impl Parameter {
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        return HASH_TO_PARAMETER[entry_index];
+        HASH_TO_PARAMETER[entry_index]
     }
 }   

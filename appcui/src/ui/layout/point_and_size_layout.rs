@@ -103,7 +103,7 @@ impl PointAndSizeLayout {
             width: params.width.unwrap_or(Size::Absolute(1)),
             height: params.height.unwrap_or(Size::Absolute(1)),
             align: anchor,
-            anchor: anchor,
+            anchor,
         }
     }
 

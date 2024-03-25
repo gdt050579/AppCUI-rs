@@ -15,23 +15,23 @@ impl Size {
     pub(super) fn to_absolute_size(&self, parent_size: u16) -> u16 {
         match self {
             Size::Absolute(v) => {
-                return (*v) as u16;
+                *v
             }
             Size::Percentage(v) => {
-                return (((*v) as u32) * (parent_size as u32) / 10000u32).clamp(0, 0xFFFF) as u16;
+                (((*v) as u32) * (parent_size as u32) / 10000u32).clamp(0, 0xFFFF) as u16
             }
         }
     }
     pub(super) fn new(value: &KeyValuePair) -> Option<Self> {
         match value.value_type {
             ValueType::Number => {
-                return Some(Size::Absolute(value.numerical_value.clamp(0, 30000) as u16));
+                Some(Size::Absolute(value.numerical_value.clamp(0, 30000) as u16))
             }
             ValueType::Percentage => {
-                return Some(Size::Percentage(value.numerical_value.clamp(0, 30000) as u16));
+                Some(Size::Percentage(value.numerical_value.clamp(0, 30000) as u16))
             }
             _ => {
-                return None;
+                None
             }
         }
     }

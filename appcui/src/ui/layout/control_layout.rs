@@ -7,7 +7,7 @@ pub struct Layout<'a> {
 
 impl Layout<'_> {
     pub fn new(format: &str) -> Layout {
-        Layout { format: format }
+        Layout { format }
     }
 }
 

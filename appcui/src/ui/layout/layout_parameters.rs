@@ -45,42 +45,42 @@ impl LayoutParameters {
                 match param {
                     Parameter::X => {
                         if p.is_numerical_value() {
-                            inf.x = Coordonate::new(&p);
+                            inf.x = Coordonate::new(p);
                         } else {
                             panic!("Invalid value for X parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Y => {
                         if p.is_numerical_value() {
-                            inf.y = Coordonate::new(&p);
+                            inf.y = Coordonate::new(p);
                         } else {
                             panic!("Invalid value for Y parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Left => {
                         if p.is_numerical_value() {
-                            inf.a_left = Coordonate::new(&p);
+                            inf.a_left = Coordonate::new(p);
                         } else {
                             panic!("Invalid value for LEFT parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Right => {
                         if p.is_numerical_value() {
-                            inf.a_right = Coordonate::new(&p);
+                            inf.a_right = Coordonate::new(p);
                         } else {
                             panic!("Invalid value for RIGHT parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Top => {
                         if p.is_numerical_value() {
-                            inf.a_top = Coordonate::new(&p);
+                            inf.a_top = Coordonate::new(p);
                         } else {
                             panic!("Invalid value for TOP parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Bottom => {
                         if p.is_numerical_value() {
-                            inf.a_bottom = Coordonate::new(&p);
+                            inf.a_bottom = Coordonate::new(p);
                         } else {
                             panic!("Invalid value for BOTTOM parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
@@ -90,7 +90,7 @@ impl LayoutParameters {
                             if p.numerical_value < 0 {
                                 panic!("The value for WIDTH parameter can not be a negative value: {} in layout: {}",p.value,format);
                             }
-                            inf.width = Size::new(&p);
+                            inf.width = Size::new(p);
                         } else {
                             panic!("Invalid value for WIDTH parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
                         }
@@ -100,7 +100,7 @@ impl LayoutParameters {
                             if p.numerical_value < 0 {
                                 panic!("The value for HEIGHT parameter can not be a negative value: {} in layout: {}",p.value,format);
                             }
-                            inf.height = Size::new(&p);
+                            inf.height = Size::new(p);
                         } else {
                             panic!("Invalid value for HEIGHT parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
                         }
@@ -142,7 +142,7 @@ impl LayoutParameters {
                 panic!("Unknwon layout parameter: {}", p.key);
             }
         }
-        return inf;
+        inf
     }
 
     pub(super) fn get_anchors(&self) -> Anchors {

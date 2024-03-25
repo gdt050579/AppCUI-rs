@@ -214,6 +214,6 @@ impl Alignament {
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        return HASH_TO_ALIGNAMENT[entry_index];
+        HASH_TO_ALIGNAMENT[entry_index]
     }
 }
