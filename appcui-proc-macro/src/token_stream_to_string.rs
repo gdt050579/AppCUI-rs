@@ -15,7 +15,7 @@ impl TokenStreamToString for TokenStream {
         if tokens.peek().is_some() {
             panic!("Exactly one string must be provided as input.");
         }
-        if (!string_param.starts_with("\"")) || (!string_param.ends_with("\"")) {
+        if (!string_param.starts_with('\"')) || (!string_param.ends_with('\"')) {
             panic!("The parameter provided to the '{}!' macro must be a string literal.", name);
         }
         if string_param.len() == 2 {

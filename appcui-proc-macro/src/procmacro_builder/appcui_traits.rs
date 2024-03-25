@@ -254,6 +254,6 @@ impl AppCUITrait {
         if value != (result.unwrap() as u8) {
             panic!("Internal error: Conversion of discriminant {} to AppCUITraits failed !", value);
         }
-        return result;
+        result
     }
 }

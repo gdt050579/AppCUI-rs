@@ -13,17 +13,17 @@ static LOWER_CASE_TABLE: [u8; 256] = [
 pub(crate) fn compute_hash(text: &str) -> u64 {
     let buf = text.as_bytes();
     // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-    if buf.len() == 0 {
+    if buf.is_empty() {
         return 0;
     }
     let mut hash = 0xcbf29ce484222325u64;
     let mut idx = 0usize;
     while idx < buf.len() {
-        hash = hash ^ (LOWER_CASE_TABLE[buf[idx] as usize] as u64);
+        hash ^= LOWER_CASE_TABLE[buf[idx] as usize] as u64;
         hash = hash.wrapping_mul(0x00000100000001B3u64);
         idx += 1;
     }
-    return hash;
+    hash
 }
 pub(crate) fn equal_ignore_case(text1: &str, text2: &str) -> bool {
     if text1.len() != text2.len() {
@@ -37,7 +37,7 @@ pub(crate) fn equal_ignore_case(text1: &str, text2: &str) -> bool {
             return false;
         }
     }
-    return true;
+    true
 }
 
 pub(crate) fn to_i32(text: &str) -> Option<i32> {
@@ -49,13 +49,13 @@ pub(crate) fn to_i32(text: &str) -> Option<i32> {
 pub(crate) fn to_bool(text: &str) -> Option<bool> {
     match text {
         "true" | "yes" => {
-            return Some(true);
+            Some(true)
         }
         "false" | "no" => {
-            return Some(false);
+            Some(false)
         }
         _ => {
-            return None;
+            None
         }
     }
 }
@@ -99,7 +99,7 @@ pub(crate) fn to_percentage(text: &str) -> Option<f32> {
     if negative {
         fvalue = -fvalue;
     }
-    return Some(fvalue);
+    Some(fvalue)
 }
 pub(crate) fn skip_spaces(buf: &[u8], start: usize) -> usize {
     let len = buf.len();
@@ -110,14 +110,7 @@ pub(crate) fn skip_spaces(buf: &[u8], start: usize) -> usize {
     pos
 }
 pub(crate) fn is_word_character(value: u8) -> bool {
-    match value {
-        b'0'..=b'9' => true,
-        b'a'..=b'z' => true,
-        b'A'..=b'Z' => true,
-        b'_' => true,
-        128.. => true,
-        _ => false,
-    }
+    matches!(value, b'0'..=b'9' | b'a'..=b'z' | b'A'..=b'Z' | b'_' | 128..)
 }
 pub(crate) fn skip_words(buf: &[u8], start: usize) -> usize {
     let len = buf.len();
@@ -128,21 +121,21 @@ pub(crate) fn skip_words(buf: &[u8], start: usize) -> usize {
     pos   
 }
 pub(crate)  fn validate_name(name: &str, force_one_capilat_letter: bool) -> Result<(),&'static str> {
-    if name.len() == 0 {
+    if name.is_empty() {
         return Err("Empty names are not allowed !");
     }
     let mut one_capital_letter = false;
     let mut idx = 0;
     for ch in name.chars() {
         idx += 1;
-        if (ch >= 'A') && (ch <= 'Z') {
+        if ch.is_ascii_uppercase() {
             one_capital_letter = true;
             continue;
         }
-        if (ch >= 'a') && (ch <= 'z') {
+        if ch.is_ascii_lowercase() {
             continue;
         }
-        if (ch >= '0') && (ch <= '9') {
+        if ch.is_ascii_digit() {
             if idx == 1 {
                 return Err("First character must be a letter");
             } else {

@@ -132,7 +132,7 @@ impl Arguments {
     }
     fn validate_overwrite_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
-            if let Some(appcui_trait) = AppCUITrait::new(&trait_name) {
+            if let Some(appcui_trait) = AppCUITrait::new(trait_name) {
                 if appcui_trait.get_trait_type() != TraitType::RawEvent {
                     panic!(
                         "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}",
@@ -156,10 +156,10 @@ impl Arguments {
     fn validate_commands(&mut self) {
         let mut h = HashSet::with_capacity(self.values.len() * 2);
         for command_name in &self.values {
-            if let Err(desc) = crate::utils::validate_name(&command_name.as_str(), false) {
+            if let Err(desc) = crate::utils::validate_name(command_name.as_str(), false) {
                 panic!("Invalid ID: '{}' => {}", command_name, desc);
             }
-            let hash = crate::utils::compute_hash(&command_name);
+            let hash = crate::utils::compute_hash(command_name);
             if h.contains(&hash) {
                 panic!("Commands must be unique. Duplicate command: {}", command_name);
             }
@@ -170,7 +170,7 @@ impl Arguments {
     }
     fn validate_events_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
-            if let Some(appcui_trait) = AppCUITrait::new(&trait_name) {
+            if let Some(appcui_trait) = AppCUITrait::new(trait_name) {
                 if appcui_trait.get_trait_type() != TraitType::ControlEvent {
                     panic!(
                         "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}",
@@ -247,14 +247,12 @@ impl Arguments {
                         } else {
                             panic!("Expecting a proper format for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token.to_string())
                         }
-                    } else {
-                        if let TokenTree::Punct(p) = inner_token {
-                            if p.as_char() != ',' {
-                                panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,p.to_string())
-                            }
-                        } else {
-                            panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token.to_string())
+                    } else if let TokenTree::Punct(p) = inner_token {
+                        if p.as_char() != ',' {
+                            panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,p.to_string())
                         }
+                    } else {
+                        panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token.to_string())
                     }
                     expect_value = !expect_value;
                 }
