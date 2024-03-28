@@ -158,15 +158,16 @@ impl Menu {
             // make sure that this->CurrentItem is part of the list
             let mut current_idx = VectorIndex::Invalid;
             let mut best_diff = usize::MAX;
-            for tr in 0..idx_count {
-                let diff = if idx[tr] < self.current.index() {
-                    self.current.index() - idx[tr]
+            for (index,item) in idx.iter().enumerate().take(idx_count) {
+                let val = *item;
+                let diff = if val < self.current.index() {
+                    self.current.index() - val
                 } else {
-                    idx[tr] - self.current.index()
+                    val - self.current.index()
                 };
                 if diff < best_diff {
                     best_diff = diff;
-                    current_idx = VectorIndex::with_value(tr);
+                    current_idx = VectorIndex::with_value(index);
                 }
             }
             // sanity check

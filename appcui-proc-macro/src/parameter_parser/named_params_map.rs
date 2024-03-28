@@ -27,15 +27,16 @@ impl<'a> NamedParamsMap<'a> {
             ));
         }
         // lets validate that they are in the right order
-        for index in 0..self.positional_count {
-            let h = crate::utils::compute_hash(params[index].get_key());
+        //for index in 0..self.positional_count {
+        for (index,item) in params.iter().enumerate().take(self.positional_count) {
+            let h = crate::utils::compute_hash(item.get_key());
             if self.all_params.contains_key(&h) {
                 return Err(Error::new(
                     param_list,
                     format!(
                         "Positional parameter with index {} is duplicated. Check for '`{}`' or one of its aliases in the parameters lists",
                         index + 1,
-                        params[index].get_key()
+                        item.get_key()
                     )
                     .as_str(),
                     self.values[index].start,
@@ -44,7 +45,7 @@ impl<'a> NamedParamsMap<'a> {
             }
             // validate
             let v = &mut self.values[index];
-            v.validate(param_list, params[index].get_key(), params[index].get_param_type())?;
+            v.validate(param_list, item.get_key(), item.get_param_type())?;
             // all good -> not use somewhere else --> add it to map
             self.named.insert(h, index as u32);
         }

@@ -40,6 +40,7 @@ pub enum TerminalType {
     Termios,
 }
 
+
 pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
     // check if terminal size if valid (if present)
     if let Some(sz) = builder.size.as_ref() {
@@ -55,7 +56,8 @@ pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>,
     }
     // check if we have a debug script present --> if so ... we will create a Debug terminal
     if builder.debug_script.is_some() {
-        return DebugTerminal::new(builder);
+        let term = DebugTerminal::new(builder)?;
+        return Ok(Box::new(term));
     }
     // if no terminal is provided --> consider the default terminal (best approach)
     // this depends on the OS
@@ -67,14 +69,18 @@ pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>,
     let terminal = *builder.terminal.as_ref().unwrap();
     match terminal {
         #[cfg(target_os = "windows")]
-        TerminalType::WindowsConsole => WindowsTerminal::new(builder),
+        TerminalType::WindowsConsole => {
+            let term = WindowsTerminal::new(builder)?;
+            Ok(Box::new(term))
+        }
         #[cfg(target_family = "unix")]
         TerminalType::Termios => TermiosTerminal::new(builder),
     }
 }
 #[cfg(target_os = "windows")]
 fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-    WindowsTerminal::new(builder)
+    let term = WindowsTerminal::new(builder)?;
+    Ok(Box::new(term))
 }
 #[cfg(target_os = "linux")]
 fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {

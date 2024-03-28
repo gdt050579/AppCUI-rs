@@ -8,8 +8,8 @@ use crate::graphics::Color;
 use crate::graphics::Point;
 use crate::graphics::Size;
 use crate::system::Error;
-use crate::system::RuntimeManager;
 use crate::system::PaintMethods;
+use crate::system::RuntimeManager;
 
 pub(crate) struct DebugTerminal {
     size: Size,
@@ -42,21 +42,13 @@ impl DebugTerminal {
         }
         v
     }
-    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-        let mut w = if builder.size.is_none() {
-            80
-        } else {
-            builder.size.unwrap().width
-        };
-        let mut h = if builder.size.is_none() {
-            40
-        } else {
-            builder.size.unwrap().height
-        };
+    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Self, Error> {
+        let mut w = if builder.size.is_none() { 80 } else { builder.size.unwrap().width };
+        let mut h = if builder.size.is_none() { 40 } else { builder.size.unwrap().height };
         w = w.clamp(10, 1000);
         h = h.clamp(10, 1000);
         let commands = DebugTerminal::build_commands(builder.debug_script.as_ref().unwrap().as_str());
-        Ok(Box::new(DebugTerminal {
+        Ok(DebugTerminal {
             size: Size::new(w, h),
             temp_str: String::with_capacity((w * h) as usize),
             commands,
@@ -67,7 +59,7 @@ impl DebugTerminal {
             hash_to_test: None,
             cursor_point_to_check: None,
             mouse_pos: Point::new(0, 0),
-        }))
+        })
     }
     fn _forecolor_to_str(col: Color) -> &'static str {
         match col {

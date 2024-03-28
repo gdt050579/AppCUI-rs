@@ -336,21 +336,21 @@ impl WindowsTerminal {
     // if colors are present --> recolor
     // if font is present --> apply font & size
 
-    fn string_to_wide(text: &str)->Result<Vec<u16>, Error>  {
-        let mut result: Vec<u16> = Vec::with_capacity(text.len()+1);
+    fn string_to_wide(text: &str) -> Result<Vec<u16>, Error> {
+        let mut result: Vec<u16> = Vec::with_capacity(text.len() + 1);
         for c in text.chars() {
             let unicode_id = c as u32;
-            if unicode_id>=0xFFFF {
+            if unicode_id >= 0xFFFF {
                 return Err(Error::new(
                     ErrorKind::InvalidParameter,
                     format!("Fail convert the string '{}' to windows WTF-16", text),
                 ));
             }
-            if unicode_id==0 {
+            if unicode_id == 0 {
                 return Err(Error::new(
                     ErrorKind::InvalidParameter,
                     format!("Found NULL (\\0 character) in title '{}'. This can not be accurately translated into windows WTF-16 that is NULL terminated !", text),
-                ));              
+                ));
             }
             result.push(unicode_id as u16);
         }
@@ -361,7 +361,7 @@ impl WindowsTerminal {
         let title_wtf16 = WindowsTerminal::string_to_wide(title)?;
 
         unsafe {
-            if winapi::SetConsoleTitleW(title_wtf16.as_ptr())==FALSE {
+            if winapi::SetConsoleTitleW(title_wtf16.as_ptr()) == FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
                     format!(
@@ -432,7 +432,8 @@ impl WindowsTerminal {
         }
         Ok(())
     }
-    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+
+    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Self, Error> {
         let stdin = get_stdin_handle()?;
         let stdout = get_stdout_handle()?;
         let mut original_mode_flags = 0u32;
@@ -501,7 +502,7 @@ impl WindowsTerminal {
         let w = (info.window.right as u32) + 1 - (info.window.left as u32);
         let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
 
-        let mut term = Box::new(WindowsTerminal {
+        let mut term = WindowsTerminal {
             stdin_handle: stdin,
             stdout_handle: stdout,
             size: Size::new(w, h),
@@ -510,7 +511,7 @@ impl WindowsTerminal {
             last_mouse_pos: Point::new(i32::MAX, i32::MAX),
             visible_region: info.window,
             _original_mode_flags: original_mode_flags,
-        });
+        };
         term.chars
             .resize((term.size.width as usize) * (term.size.height as usize), CHAR_INFO { code: 32, attr: 0 });
         //println!("Init(size:{:?},visible:{:?})", term.size, info.window);

@@ -38,7 +38,7 @@ pub(super) struct ControlBuilder<'a> {
     name: &'static str,
     content: String,
     ref_str: &'a str,
-    string_representation: Box<String>,
+    string_representation: String, //Box<String>,
     parser: NamedParamsMap<'a>,
 }
 
@@ -56,7 +56,7 @@ impl<'a> ControlBuilder<'a> {
         let string_repr = ControlBuilder::token_stream_to_string(name, input);
         let mut builder = Self {
             name,
-            string_representation: Box::new(string_repr),
+            string_representation: string_repr, //Box::new(string_repr),
             content: String::with_capacity(512),
             parser: NamedParamsMap::empty(),
             ref_str: "",
