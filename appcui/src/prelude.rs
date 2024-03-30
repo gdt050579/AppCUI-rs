@@ -1,6 +1,7 @@
 pub use super::ui::*;
 pub use super::ui::button;
 pub use super::ui::button::events::ButtonEvents;
+pub use super::ui::tab;
 pub use super::ui::checkbox;
 pub use super::ui::checkbox::events::CheckBoxEvents;
 pub use super::ui::radiobox;
