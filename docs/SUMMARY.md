@@ -56,7 +56,7 @@
         - [KeySelector]()
         - [NumericSelector]()
         - [Panel](chapter-3/stock-controls/panel.md)
-        - [Password]()
+        - [Password](chapter-3/stock-controls/password.md)
         - [PropertyView]()
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
         - [Slider]()
