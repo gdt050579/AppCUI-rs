@@ -6,9 +6,38 @@ pub struct Tab {
     tab_type: Type,
     flags: Flags,
     tab_width: u8,
+    pages: Vec<Caption>,
 }
 
 impl Tab {
+    pub fn new(layout: Layout, flags: Flags) -> Self {
+        let mut t = Self {
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            tab_type: Type::OnTop,
+            flags,
+            tab_width: 12,
+            pages: Vec::with_capacity(4),
+        };
+        t.update_margins();
+        t
+    }
+    pub fn with_type(layout: Layout, flags: Flags, tab_type: Type) -> Self {
+        let mut t = Self {
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            tab_type,
+            flags,
+            tab_width: 12,
+            pages: Vec::with_capacity(4),
+        };
+        t.update_margins();
+        t
+    }
+    pub fn add_tab(&mut self, caption: &str) -> u32 {
+        let idx = self.base.children.len() as u32;
+        self.base.add_child(super::TabPage::new());
+        self.pages.push(Caption::new(caption, ExtractHotKeyMethod::AltPlusKey));
+        idx
+    }
     fn update_margins(&mut self) {
         match self.tab_type {
             Type::Hidden => self.base.set_margins(0, 0, 0, 0),
@@ -93,16 +122,24 @@ impl Tab {
     fn get_backattr(&self, theme: &Theme) -> CharAttribute {
         match () {
             _ if !self.is_enabled() => theme.tab.text.inactive,
-            _ if self.has_focus() => theme.tab.text.focused,
-            _ => theme.tab.text.normal,
+            _ if self.has_focus() => theme.tab.text.pressed_or_selectd,
+            _ => theme.tab.text.pressed_or_selectd,
         }
     }
     #[inline(always)]
-    fn get_tabattr(&self, theme: &Theme) -> CharAttribute {
+    fn get_barattr(&self, theme: &Theme) -> CharAttribute {
         match () {
             _ if !self.is_enabled() => theme.tab.text.inactive,
             _ if self.has_focus() => theme.tab.text.hovered,
             _ => theme.tab.text.normal,
+        }
+    }
+    #[inline(always)]
+    fn get_tabattr(&self, theme: &Theme, current: bool) -> (CharAttribute, CharAttribute) {
+        match () {
+            _ if !self.is_enabled() => (theme.tab.text.inactive, theme.tab.hotkey.inactive),
+            _ if current => (theme.tab.text.pressed_or_selectd, theme.tab.hotkey.pressed_or_selectd),
+            _ => (theme.tab.text.normal, theme.tab.hotkey.normal),
         }
     }
     fn paint_horizontal_tab(&self, surface: &mut Surface, theme: &Theme, y: i32) {
@@ -127,44 +164,27 @@ impl Tab {
         }
 
         if self.flags.contains(Flags::TabsBar) {
-            surface.fill_horizontal_line_with_size(0, y, sz.width, Character::with_attributes(' ', self.get_tabattr(theme)));
+            surface.fill_horizontal_line_with_size(0, y, sz.width, Character::with_attributes(' ', self.get_barattr(theme)));
         }
 
-        //     WriteTextParams params(
-        //         WriteTextFlags::OverwriteColors | WriteTextFlags::SingleLine | WriteTextFlags::HighlightHotKey |
-        //         WriteTextFlags::ClipToWidth | WriteTextFlags::FitTextToWidth);
+        let current = self.base.focused_child_index.index();
+        let s1 = (self.tab_width as i32) >> 1;
+        let s2 = (self.tab_width as i32) - s1;
+        for (index, page) in self.pages.iter().enumerate() {
+            let (text_attr, hotkey_attr) = self.get_tabattr(theme, index == current);
+            format.chars_count = Some(page.chars_count() as u16);
+            format.hotkey_pos = page.hotkey_pos();
+            format.char_attr = text_attr;
+            format.hotkey_attr = Some(hotkey_attr);
 
-        //   params.Width = this->TabTitleSize - 2;
-        //   params.Align = TextAlignament::Center;
-        //   params.Y     = onTop ? 0 : this->Layout.Height - 1;
-        //   int poz      = 1;
+            // fill the tab
+            surface.fill_horizontal_line_with_size(format.x, y, self.tab_width as u32, Character::with_attributes(' ', text_attr));
 
-        //   if ((this->Flags & TabFlags::TransparentBackground) != TabFlags::TransparentBackground)
-        //       renderer.FillRectSize(0, onTop ? 1 : 0, this->Layout.Width, this->Layout.Height - 1, ' ', this->GetPageColor());
-
-        //   if ((this->Flags & TabFlags::TabsBar) == TabFlags::TabsBar)
-        //       renderer.FillHorizontalLineSize(0, params.Y, this->Layout.Width, ' ', this->GetTabBarColor());
-
-        //   for (uint32 tr = 0; tr < this->ControlsCount; tr++, poz += (this->TabTitleSize + 1))
-        //   {
-        //       if (this->Controls[tr] == nullptr)
-        //           continue;
-        //       ControlContext* cc = (ControlContext*) this->Controls[tr]->Context;
-        //       if (cc == nullptr)
-        //           continue;
-
-        //       const auto state = this->GetComponentState(
-        //             ControlStateFlags::All,
-        //             tr == static_cast<uint32>(this->HoveredTabIndex),
-        //             tr == this->CurrentControlIndex);
-        //       params.Color       = this->Cfg->Tab.Text.GetColor(state);
-        //       params.HotKeyColor = this->Cfg->Tab.HotKey.GetColor(state);
-
-        //       renderer.FillHorizontalLineSize(poz, params.Y, this->TabTitleSize, ' ', params.Color);
-        //       params.HotKeyPosition = cc->HotKeyOffset;
-        //       params.X              = poz + 1;
-        //       renderer.WriteText(cc->Text, params);
-        //   }
+            // print the text
+            format.x += s1;
+            surface.write_text(page.text(), &format);
+            format.x += s2 + 1;
+        }
     }
 }
 
