@@ -5,3 +5,4 @@ mod tests;
 
 pub use self::tab::Tab;
 pub use self::initialization_flags::Type;
+pub use self::initialization_flags::Flags;
