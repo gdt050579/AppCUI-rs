@@ -41,6 +41,9 @@ impl Tab {
         self.pages.push(Caption::new(caption, ExtractHotKeyMethod::AltPlusKey));
         idx
     }
+    pub fn set_page(&mut self, index: usize) {
+
+    }
     fn update_margins(&mut self) {
         match self.tab_type {
             Type::Hidden => self.base.set_margins(0, 0, 0, 0),
@@ -183,7 +186,6 @@ impl Tab {
             surface.fill_horizontal_line_with_size(0, y, sz.width, Character::with_attributes(' ', self.get_barattr(theme)));
         }
 
-        let current = self.base.focused_child_index.index();
         let s1 = (self.tab_width as i32) >> 1;
         let s2 = (self.tab_width as i32) - s1;
         for (index, page) in self.pages.iter().enumerate() {
@@ -236,11 +238,23 @@ impl OnMouseEvent for Tab {
                     EventProcessStatus::Ignored
                 }
             },
-            MouseEvent::Pressed(_) => todo!(),
-            MouseEvent::Released(_) => todo!(),
-            MouseEvent::DoubleClick(_) => todo!(),
-            MouseEvent::Drag(_) => todo!(),
-            MouseEvent::Wheel(_) => todo!(),
+            MouseEvent::Pressed(ev) => {
+                let idx = self.mouse_position_to_index(ev.x, ev.y);
+                if let Some(index) = idx {
+                    if index !=self.base.focused_child_index.index() {
+                        self.set_page(index);
+                        EventProcessStatus::Processed
+                    } else {
+                        EventProcessStatus::Ignored
+                    }
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            },
+            MouseEvent::Released(_) => EventProcessStatus::Ignored,
+            MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
+            MouseEvent::Drag(_) => EventProcessStatus::Ignored,
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }
         
     }
