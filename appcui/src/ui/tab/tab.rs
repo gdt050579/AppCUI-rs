@@ -1,12 +1,13 @@
 use crate::prelude::*;
 use crate::ui::tab::{Flags, Type};
 
-#[CustomControl(overwrite=OnPaint, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnMouseEvent, internal=true)]
 pub struct Tab {
     tab_type: Type,
     flags: Flags,
     tab_width: u8,
     pages: Vec<Caption>,
+    hovered_page_idx: Option<usize>,
 }
 
 impl Tab {
@@ -16,6 +17,7 @@ impl Tab {
             tab_type: Type::OnTop,
             flags,
             tab_width: 12,
+            hovered_page_idx: None,
             pages: Vec::with_capacity(4),
         };
         t.update_margins();
@@ -27,6 +29,7 @@ impl Tab {
             tab_type,
             flags,
             tab_width: 12,
+            hovered_page_idx: None,
             pages: Vec::with_capacity(4),
         };
         t.update_margins();
@@ -135,11 +138,24 @@ impl Tab {
         }
     }
     #[inline(always)]
-    fn get_tabattr(&self, theme: &Theme, current: bool) -> (CharAttribute, CharAttribute) {
-        match () {
-            _ if !self.is_enabled() => (theme.tab.text.inactive, theme.tab.hotkey.inactive),
-            _ if current => (theme.tab.text.pressed_or_selectd, theme.tab.hotkey.pressed_or_selectd),
-            _ => (theme.tab.text.normal, theme.tab.hotkey.normal),
+    fn get_tabattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
+        if !self.is_enabled() { (theme.tab.text.inactive, theme.tab.hotkey.inactive) }
+        else if self.has_focus() {
+            if idx == self.focused_child_index.index() {
+                (theme.tab.text.pressed_or_selectd, theme.tab.hotkey.pressed_or_selectd)
+            } else {
+                if let Some(hovered_idx) = self.hovered_page_idx {
+                    if hovered_idx == idx {
+                        (theme.tab.text.hovered, theme.tab.hotkey.hovered)
+                    } else {
+                        (theme.tab.text.normal, theme.tab.hotkey.normal)
+                    }
+                } else {
+                    (theme.tab.text.normal, theme.tab.hotkey.normal)
+                }
+            }
+        } else {
+            (theme.tab.text.normal, theme.tab.hotkey.normal)
         }
     }
     fn paint_horizontal_tab(&self, surface: &mut Surface, theme: &Theme, y: i32) {
@@ -171,7 +187,7 @@ impl Tab {
         let s1 = (self.tab_width as i32) >> 1;
         let s2 = (self.tab_width as i32) - s1;
         for (index, page) in self.pages.iter().enumerate() {
-            let (text_attr, hotkey_attr) = self.get_tabattr(theme, index == current);
+            let (text_attr, hotkey_attr) = self.get_tabattr(theme, index);
             format.chars_count = Some(page.chars_count() as u16);
             format.hotkey_pos = page.hotkey_pos();
             format.char_attr = text_attr;
@@ -197,5 +213,35 @@ impl OnPaint for Tab {
             Type::OnLeft => todo!(),
             Type::List => todo!(),
         }
+    }
+}
+impl OnMouseEvent for Tab {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => EventProcessStatus::Ignored,
+            MouseEvent::Leave => {
+                if self.hovered_page_idx.is_some() {
+                    self.hovered_page_idx = None;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            },
+            MouseEvent::Over(ev) => {
+                let idx = self.mouse_position_to_index(ev.x, ev.y);
+                if idx != self.hovered_page_idx {
+                    self.hovered_page_idx = idx;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            },
+            MouseEvent::Pressed(_) => todo!(),
+            MouseEvent::Released(_) => todo!(),
+            MouseEvent::DoubleClick(_) => todo!(),
+            MouseEvent::Drag(_) => todo!(),
+            MouseEvent::Wheel(_) => todo!(),
+        }
+        
     }
 }
