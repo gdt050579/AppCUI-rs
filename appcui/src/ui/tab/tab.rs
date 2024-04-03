@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::ui::tab::{Flags, Type};
 
-#[CustomControl(overwrite=OnPaint+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct Tab {
     tab_type: Type,
     flags: Flags,
@@ -37,7 +37,7 @@ impl Tab {
     }
     pub fn add_tab(&mut self, caption: &str) -> u32 {
         let idx = self.base.children.len() as u32;
-        self.base.add_child(super::TabPage::new());
+        self.base.add_child(super::TabPage::new(idx == 0));
         self.pages.push(Caption::new(caption, ExtractHotKeyMethod::AltPlusKey));
         idx
     }
@@ -257,5 +257,34 @@ impl OnMouseEvent for Tab {
             MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }
         
+    }
+}
+impl OnKeyPressed for Tab {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.get_compact_code() {
+            key!("Ctrl+Tab") => {
+                let mut idx = self.base.focused_child_index;
+                idx.add(1, self.base.children.len(), Strategy::RotateFromInvalidState);
+                self.set_page(idx.index());
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Shift+Tab") => {
+                let mut idx = self.base.focused_child_index;
+                idx.sub(1, self.base.children.len(), Strategy::RotateFromInvalidState);
+                self.set_page(idx.index());
+                return EventProcessStatus::Processed;
+            }
+            _ => {}
+        }
+        if key.modifier.contains(KeyModifier::Alt) {
+            // check if a new tab was selected
+            for (index, elem) in self.pages.iter().enumerate() {
+                if elem.hotkey() == key {
+                    self.set_page(index);
+                    return EventProcessStatus::Processed;
+                }
+            }
+        }
+        EventProcessStatus::Ignored
     }
 }
