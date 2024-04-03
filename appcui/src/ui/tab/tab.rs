@@ -41,8 +41,25 @@ impl Tab {
         self.pages.push(Caption::new(caption, ExtractHotKeyMethod::AltPlusKey));
         idx
     }
-    pub fn set_page(&mut self, index: usize) {
-
+    pub fn set_current_page(&mut self, index: usize) {
+        // Q: what is the tab is disabled ? can it still change a page 
+        // for the moment we will not allow this behavior
+        // meaning that the tab must be able to receive focus (be visibale and enabled) in order to be able to change the page
+        if !self.can_receive_input() {
+            return;
+        }
+        if (index < self.base.children.len()) && (index != self.base.focused_child_index.index()) {
+            // its a different page (valid)
+            let cm = RuntimeManager::get().get_controls_mut();
+            for (child_index,handle_child) in self.base.children.iter().enumerate() {
+                if let Some(control) = cm.get_mut(*handle_child) {
+                    control.get_base_mut().set_visible(index == child_index);
+                    if index==child_index {
+                        control.get_base_mut().request_focus();
+                    }
+                }
+            }
+        }
     }
     fn update_margins(&mut self) {
         match self.tab_type {
@@ -142,8 +159,9 @@ impl Tab {
     }
     #[inline(always)]
     fn get_tabattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
-        if !self.is_enabled() { (theme.tab.text.inactive, theme.tab.hotkey.inactive) }
-        else if self.has_focus() {
+        if !self.is_enabled() {
+            (theme.tab.text.inactive, theme.tab.hotkey.inactive)
+        } else if self.has_focus() {
             if idx == self.focused_child_index.index() {
                 (theme.tab.text.pressed_or_selectd, theme.tab.hotkey.pressed_or_selectd)
             } else {
@@ -228,7 +246,7 @@ impl OnMouseEvent for Tab {
                 } else {
                     EventProcessStatus::Ignored
                 }
-            },
+            }
             MouseEvent::Over(ev) => {
                 let idx = self.mouse_position_to_index(ev.x, ev.y);
                 if idx != self.hovered_page_idx {
@@ -237,12 +255,12 @@ impl OnMouseEvent for Tab {
                 } else {
                     EventProcessStatus::Ignored
                 }
-            },
+            }
             MouseEvent::Pressed(ev) => {
                 let idx = self.mouse_position_to_index(ev.x, ev.y);
                 if let Some(index) = idx {
-                    if index !=self.base.focused_child_index.index() {
-                        self.set_page(index);
+                    if index != self.base.focused_child_index.index() {
+                        self.set_current_page(index);
                         EventProcessStatus::Processed
                     } else {
                         EventProcessStatus::Ignored
@@ -250,13 +268,12 @@ impl OnMouseEvent for Tab {
                 } else {
                     EventProcessStatus::Ignored
                 }
-            },
+            }
             MouseEvent::Released(_) => EventProcessStatus::Ignored,
             MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
             MouseEvent::Drag(_) => EventProcessStatus::Ignored,
             MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }
-        
     }
 }
 impl OnKeyPressed for Tab {
@@ -265,13 +282,13 @@ impl OnKeyPressed for Tab {
             key!("Ctrl+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.add(1, self.base.children.len(), Strategy::RotateFromInvalidState);
-                self.set_page(idx.index());
+                self.set_current_page(idx.index());
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Shift+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.sub(1, self.base.children.len(), Strategy::RotateFromInvalidState);
-                self.set_page(idx.index());
+                self.set_current_page(idx.index());
                 return EventProcessStatus::Processed;
             }
             _ => {}
@@ -280,7 +297,7 @@ impl OnKeyPressed for Tab {
             // check if a new tab was selected
             for (index, elem) in self.pages.iter().enumerate() {
                 if elem.hotkey() == key {
-                    self.set_page(index);
+                    self.set_current_page(index);
                     return EventProcessStatus::Processed;
                 }
             }
