@@ -244,7 +244,7 @@ impl OnPaint for Tab {
         match self.tab_type {
             Type::Hidden => todo!(),
             Type::OnTop => self.paint_horizontal_tab(surface, theme, 0),
-            Type::OnBottom => todo!(),
+            Type::OnBottom => self.paint_horizontal_tab(surface, theme, (self.size().height as i32) - 1),
             Type::OnLeft => todo!(),
             Type::List => todo!(),
         }

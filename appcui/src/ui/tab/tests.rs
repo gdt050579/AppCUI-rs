@@ -149,3 +149,43 @@ fn check_switch_between_tabcontrols() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_control_tab_on_top() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Tab on top')   
+        CheckHash(0x3C196343BA4C5BCD)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    let mut tab = Tab::with_type(Layout::new("l:0,t:0,r:0,b:0"),tab::Flags::None, tab::Type::OnTop);
+    tab.add_tab("Page &1");
+    tab.add_tab("Page &2");
+    tab.add_tab("Page &3");
+    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+    tab.add(0, button!("Page1-B,d:c,w:10"));    
+    w.add(tab); 
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_control_tab_on_bottom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Tab on top')   
+        CheckHash(0x453AC0EB4A1EA2E1)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    let mut tab = Tab::with_type(Layout::new("l:0,t:0,r:0,b:0"),tab::Flags::None, tab::Type::OnBottom);
+    tab.add_tab("Page &1");
+    tab.add_tab("Page &2");
+    tab.add_tab("Page &3");
+    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+    tab.add(0, button!("Page1-B,d:c,w:10"));    
+    w.add(tab); 
+    a.add_window(w);
+    a.run();
+}
