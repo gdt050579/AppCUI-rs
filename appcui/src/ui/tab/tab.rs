@@ -41,8 +41,26 @@ impl Tab {
         self.pages.push(Caption::new(caption, ExtractHotKeyMethod::AltPlusKey));
         idx
     }
-    pub fn set_current_page(&mut self, index: usize) {
-        // Q: what is the tab is disabled ? can it still change a page 
+    #[inline(always)]
+    pub fn add<T>(&mut self, tabindex: usize, control: T) -> Handle<T>
+    where
+        T: Control + NotWindow + NotDesktop + 'static,
+    {
+        if tabindex < self.base.children.len() {
+            let h = self.base.children[tabindex];
+            let cm = RuntimeManager::get().get_controls_mut();            
+            if let Some(tabpage) = cm.get_mut(h)
+            {
+                tabpage.get_base_mut().add_child(control)
+            } else {
+                Handle::None
+            }
+        } else {
+            Handle::None
+        }
+    }
+    pub fn set_current_tabindex(&mut self, index: usize) {
+        // Q: what is the tab is disabled ? can it still change a page
         // for the moment we will not allow this behavior
         // meaning that the tab must be able to receive focus (be visibale and enabled) in order to be able to change the page
         if !self.can_receive_input() {
@@ -51,10 +69,10 @@ impl Tab {
         if (index < self.base.children.len()) && (index != self.base.focused_child_index.index()) {
             // its a different page (valid)
             let cm = RuntimeManager::get().get_controls_mut();
-            for (child_index,handle_child) in self.base.children.iter().enumerate() {
+            for (child_index, handle_child) in self.base.children.iter().enumerate() {
                 if let Some(control) = cm.get_mut(*handle_child) {
                     control.get_base_mut().set_visible(index == child_index);
-                    if index==child_index {
+                    if index == child_index {
                         control.get_base_mut().request_focus();
                     }
                 }
@@ -260,7 +278,7 @@ impl OnMouseEvent for Tab {
                 let idx = self.mouse_position_to_index(ev.x, ev.y);
                 if let Some(index) = idx {
                     if index != self.base.focused_child_index.index() {
-                        self.set_current_page(index);
+                        self.set_current_tabindex(index);
                         EventProcessStatus::Processed
                     } else {
                         EventProcessStatus::Ignored
@@ -282,13 +300,13 @@ impl OnKeyPressed for Tab {
             key!("Ctrl+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.add(1, self.base.children.len(), Strategy::RotateFromInvalidState);
-                self.set_current_page(idx.index());
+                self.set_current_tabindex(idx.index());
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Shift+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.sub(1, self.base.children.len(), Strategy::RotateFromInvalidState);
-                self.set_current_page(idx.index());
+                self.set_current_tabindex(idx.index());
                 return EventProcessStatus::Processed;
             }
             _ => {}
@@ -297,7 +315,7 @@ impl OnKeyPressed for Tab {
             // check if a new tab was selected
             for (index, elem) in self.pages.iter().enumerate() {
                 if elem.hotkey() == key {
-                    self.set_current_page(index);
+                    self.set_current_tabindex(index);
                     return EventProcessStatus::Processed;
                 }
             }
