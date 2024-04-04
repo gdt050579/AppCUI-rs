@@ -42,12 +42,12 @@ impl Tab {
         idx
     }
     #[inline(always)]
-    pub fn add<T>(&mut self, tabindex: usize, control: T) -> Handle<T>
+    pub fn add<T>(&mut self, tabindex: u32, control: T) -> Handle<T>
     where
         T: Control + NotWindow + NotDesktop + 'static,
     {
-        if tabindex < self.base.children.len() {
-            let h = self.base.children[tabindex];
+        if (tabindex as usize) < self.base.children.len() {
+            let h = self.base.children[tabindex as usize];
             let cm = RuntimeManager::get().get_controls_mut();            
             if let Some(tabpage) = cm.get_mut(h)
             {

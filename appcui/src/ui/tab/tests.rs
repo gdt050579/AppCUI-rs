@@ -42,3 +42,55 @@ fn check_control_reposition() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_key_control() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x52DCC8DF3E55C403)
+        Key.Pressed(Ctrl+Tab)
+        Paint('2nd page')
+        CheckHash(0x44CDC0ABE77E55F3)
+        Key.Pressed(Ctrl+Tab)
+        Paint('3rd page')
+        CheckHash(0x4D5C8439170A28E7)
+        Key.Pressed(Ctrl+Tab)
+        Paint('first page')
+        CheckHash(0x52DCC8DF3E55C403)
+        Key.Pressed(Ctrl+Shift+Tab)
+        Paint('3rd page again')
+        CheckHash(0x4D5C8439170A28E7)
+        Key.Pressed(Ctrl+Tab,2)
+        Paint('2nd page (again)')
+        CheckHash(0x44CDC0ABE77E55F3)
+        Key.Pressed(Ctrl+Shift+Tab)
+        Paint('first page again')
+        CheckHash(0x52DCC8DF3E55C403)
+        Key.Pressed(Alt+3)
+        Paint('3rd page again (hotkey)')
+        CheckHash(0x4D5C8439170A28E7)
+        Key.Pressed(Alt+2)
+        Paint('2nd page - hotkey')
+        CheckHash(0x44CDC0ABE77E55F3)
+        Key.Pressed(Alt+1)
+        Paint('1st page - hotkey')
+        CheckHash(0x52DCC8DF3E55C403)        
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7,flags: Sizeable");
+    let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"),tab::Flags::None);
+    tab.add_tab("Page &1");
+    tab.add_tab("Page &2");
+    tab.add_tab("Page &3");
+    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+    tab.add(0, button!("Page1-B,d:c,w:10"));    
+    tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
+    tab.add(1, button!("Page2-B,d:c,w:14")); 
+    tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
+    tab.add(2, button!("Page3-B,d:l,w:20"));  
+
+    w.add(tab); 
+    a.add_window(w);
+    a.run();
+}
