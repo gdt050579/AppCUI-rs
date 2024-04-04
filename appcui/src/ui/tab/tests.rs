@@ -176,6 +176,12 @@ fn check_control_tab_on_bottom() {
         Paint.Enable(false)
         Paint('Tab on top')   
         CheckHash(0x453AC0EB4A1EA2E1)
+        Mouse.Move(27,7)
+        Paint('Hover over 2nd tab')
+        CheckHash(0xFEF7E7949F3FBFE3)
+        Mouse.Move(40,7)
+        Paint('Hover over 3rd tab')
+        CheckHash(0xAEC0A0FB2C29E77)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:7");
