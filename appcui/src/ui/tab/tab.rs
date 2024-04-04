@@ -48,9 +48,8 @@ impl Tab {
     {
         if (tabindex as usize) < self.base.children.len() {
             let h = self.base.children[tabindex as usize];
-            let cm = RuntimeManager::get().get_controls_mut();            
-            if let Some(tabpage) = cm.get_mut(h)
-            {
+            let cm = RuntimeManager::get().get_controls_mut();
+            if let Some(tabpage) = cm.get_mut(h) {
                 tabpage.get_base_mut().add_child(control)
             } else {
                 Handle::None
@@ -179,7 +178,7 @@ impl Tab {
     fn get_tabattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
         if !self.is_enabled() {
             (theme.tab.text.inactive, theme.tab.hotkey.inactive)
-        } else if self.has_focus() {
+        } else {
             if idx == self.focused_child_index.index() {
                 (theme.tab.text.pressed_or_selectd, theme.tab.hotkey.pressed_or_selectd)
             } else {
@@ -193,8 +192,6 @@ impl Tab {
                     (theme.tab.text.normal, theme.tab.hotkey.normal)
                 }
             }
-        } else {
-            (theme.tab.text.normal, theme.tab.hotkey.normal)
         }
     }
     fn paint_horizontal_tab(&self, surface: &mut Surface, theme: &Theme, y: i32) {
