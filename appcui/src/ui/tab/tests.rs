@@ -151,7 +151,7 @@ fn check_switch_between_tabcontrols() {
 }
 
 #[test]
-fn check_control_tab_on_top() {
+fn check_tab_on_top() {
     let script = "
         Paint.Enable(false)
         Paint('Tab on top')   
@@ -171,7 +171,7 @@ fn check_control_tab_on_top() {
 }
 
 #[test]
-fn check_control_tab_on_bottom() {
+fn check_tab_on_bottom() {
     let script = "
         Paint.Enable(false)
         Paint('Tab on top')   
@@ -192,6 +192,23 @@ fn check_control_tab_on_bottom() {
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
     tab.add(0, button!("Page1-B,d:c,w:10"));    
     w.add(tab); 
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_macro_build() {
+    let script = "
+        Paint.Enable(false)
+        Paint('build with macro')   
+        CheckHash(0x453AC0EB4A1EA2E1)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    let mut t = tab!("l:0,t:0,r:0,b:0,type: OnBottom,tabs=['Page &1','Page &2','Page &3']");
+    t.add(0, button!("Page1-A,r:1,b:0,w:10"));
+    t.add(0, button!("Page1-B,d:c,w:10"));    
+    w.add(t); 
     a.add_window(w);
     a.run();
 }
