@@ -38,6 +38,12 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             cb.add_line(line.as_str());
         }
     }
+    if let Some(tw) = cb.get_i32("tabwidth") {
+        if !(3..=32).contains(&tw) {
+            panic!("Tab width parameter must be a value between 3 and 32 !");
+        }
+        cb.add_line(format!("control.set_tab_width({tw});").as_str());
+    }
     cb.add_basecontrol_operations();
     cb.into()
 }

@@ -301,3 +301,17 @@ fn check_page_width() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_tab_width_macro() {
+    let script = "
+        Paint.Enable(false)
+        Paint('build with macro')   
+        CheckHash(0x7B4F15E5D50B4816)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    w.add(tab!("l:0,t:0,r:0,b:0,type: OnTop,tabs=['A','B','C'],tw:5"));
+    a.add_window(w);
+    a.run();
+}
