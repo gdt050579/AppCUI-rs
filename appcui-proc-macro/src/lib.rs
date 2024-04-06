@@ -239,7 +239,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::MenuEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
@@ -340,6 +340,11 @@ pub fn threestatebox(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn canvas(input: TokenStream) -> TokenStream {
     crate::controls::canvas::create(input)
+}
+
+#[proc_macro]
+pub fn tab(input: TokenStream) -> TokenStream {
+    crate::controls::tab::create(input)
 }
 
 #[proc_macro]

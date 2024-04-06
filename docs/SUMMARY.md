@@ -61,7 +61,7 @@
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
         - [Slider]()
         - [Splitter]() <!-- (chapter-3/stock-controls/splitter.md) --> 
-        - [Tab]() <!-- (chapter-3/stock-controls/tab.md) -->
+        - [Tab](chapter-3/stock-controls/tab.md)
         - [TextField]() <!-- (chapter-3/stock-controls/textfield.md) -->
         - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)

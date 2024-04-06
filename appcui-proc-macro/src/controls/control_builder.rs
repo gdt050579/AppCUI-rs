@@ -275,6 +275,10 @@ impl<'a> ControlBuilder<'a> {
         self.parser.get_mut(name)?.get_dict()
     }
     #[inline(always)]
+    pub(super) fn get_list(&mut self, name: &str) -> Option<&mut Vec<Value<'a>>> {
+        self.parser.get_mut(name)?.get_list()
+    }
+    #[inline(always)]
     pub(super) fn get_i32(&mut self, name: &str) -> Option<i32> {
         self.parser.get_mut(name)?.get_i32()
     }
