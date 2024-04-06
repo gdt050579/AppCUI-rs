@@ -382,3 +382,96 @@ fn check_tabsbar_on_left() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_page_width_on_left() {
+    #[Window(events = ButtonEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        minus: Handle<Button>,
+        plus: Handle<Button>,
+        tab: Handle<Tab>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win-1", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                info: Handle::None,
+                plus: Handle::None,
+                minus: Handle::None,
+                tab: Handle::None,
+            };
+            me.info = me.add(label!("'',x:4,y:0,w:5"));
+            me.plus = me.add(button!("x:10,y:0,w:3,caption:'+',type:flat"));
+            me.minus = me.add(button!("x:0,y:0,w:3,caption:'-',type:flat"));
+            let mut t = tab!("l:1,t:3,r:1,b:0,tabs:['A','B'],type:OnLeft");
+            t.add(0,button!("caption:'TopLeft',x:1,y:1,w:14,type:flat"));
+            t.add(0,button!("caption:'BottomRight',r:1,b:1,w:18,type:flat"));
+            me.tab = me.add(t);
+
+
+            me.update_tab_wdth_info();
+
+            me
+        }
+        fn update_tab_wdth_info(&mut self) {
+            let tw = if let Some(t) = self.control(self.tab) { t.tab_width() } else { 0 };
+            let txt = format!("{tw}");
+            let h_label = self.info;
+            if let Some(label) = self.control_mut(h_label) {
+                label.set_caption(txt.as_str());
+            }
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
+            let h = self.tab;
+            if self.plus == button_handle {
+                if let Some(t) = self.control_mut(h) {
+                    let tw = t.tab_width();
+                    t.set_tab_width(tw + 1);
+                }
+                self.update_tab_wdth_info();
+                return EventProcessStatus::Processed;
+            }
+            if self.minus == button_handle {
+                if let Some(t) = self.control_mut(h) {
+                    let tw = t.tab_width();
+                    t.set_tab_width(tw - 1);
+                }
+                self.update_tab_wdth_info();
+                return EventProcessStatus::Processed;
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xFF8140618A335809)   
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Paint('tab width is 8')  
+        CheckHash(0x8798CB1908367490)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Mouse.Click(2,1,left)
+        Paint('tab width is 3 (limited)')   
+        CheckHash(0x3D8CC6BFA80BD404)
+        Mouse.Click(12,1,left)
+        Mouse.Click(12,1,left)
+        Paint('tab width is 5')   
+        CheckHash(0xEC90EDD06FC8B9E)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
