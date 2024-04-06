@@ -13,5 +13,4 @@ pub enum Type {
     OnTop,
     OnBottom,
     OnLeft,
-    List
 }

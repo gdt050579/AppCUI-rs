@@ -7,7 +7,6 @@ static mut TAB_TYPES: FlagsSignature = FlagsSignature::new(&[
     "OnTop",
     "OnBottom",
     "OnLeft",
-    "List"
 ]);
 static mut TAB_FLAGS: FlagsSignature = FlagsSignature::new(&["TransparentBackground", "TabsBar"]);
 

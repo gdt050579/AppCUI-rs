@@ -27,10 +27,8 @@ impl MyWin {
         if let Some(pass) = self.control(p) {
             if pass.password() == "admin" {
                 dialogs::message("Login", "Correct password. Let's start !");
-            } else {
-                if !dialogs::retry("Login", "Invalid password. Try again ?") {
-                    self.close();
-                }
+            } else if !dialogs::retry("Login", "Invalid password. Try again ?") {
+                self.close();
             }
         }
     }

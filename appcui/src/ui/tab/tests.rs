@@ -319,7 +319,7 @@ fn check_tab_width_macro() {
 #[test]
 fn check_tab_on_left() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Tab on top')   
         CheckHash(0xCE96D04271FC5A04)
         Mouse.Move(10,5)
@@ -382,6 +382,7 @@ fn check_tabsbar_on_left() {
     a.add_window(w);
     a.run();
 }
+
 
 #[test]
 fn check_page_width_on_left() {
@@ -575,3 +576,4 @@ fn check_hiddentabs_changepage() {
     a.add_window(MyWin::new());
     a.run();
 }
+

@@ -106,21 +106,17 @@ impl Tab {
             None
         }
     }
+    pub fn set_tab_caption(&mut self, index: usize, caption: &str) {
+        if index < self.pages.len() {
+            self.pages[index].set_text(caption, ExtractHotKeyMethod::AltPlusKey);
+        }
+    }
     fn update_margins(&mut self) {
         match self.tab_type {
             Type::HiddenTabs => self.base.set_margins(0, 0, 0, 0),
             Type::OnTop => self.base.set_margins(0, 1, 0, 0),
             Type::OnBottom => self.base.set_margins(0, 0, 0, 1),
             Type::OnLeft => self.base.set_margins(self.tab_width, 0, 0, 0),
-            Type::List => {
-                let idx = self.base.focused_child_index.index();
-                let cnt = self.base.children.len();
-                if idx < cnt {
-                    self.base.set_margins(0, 1 + idx as u8, 0, (cnt - (idx + 1)) as u8);
-                } else {
-                    self.base.set_margins(0, 0, 0, 0);
-                }
-            }
         }
     }
     fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
@@ -160,30 +156,7 @@ impl Tab {
                 }
                 Some(idx)
             }
-            Type::List => {
-                if y < 0 {
-                    return None;
-                }
-                let fc = self.base.focused_child_index.index();
-                // check top allignament
-                if y as usize <= fc {
-                    return Some(y as usize);
-                }
-                if fc >= count {
-                    return None;
-                }
-                // check bottom allignament
-                let bottom_index = (count - fc) as i32;
-                let h = self.size().height as i32;
-                if h < bottom_index {
-                    return None;
-                }
-                if y >= (h - bottom_index) && (y < h) {
-                    Some(fc + 1 + ((h - bottom_index) as usize))
-                } else {
-                    None
-                }
-            }
+
         }
     }
     #[inline(always)]
@@ -205,20 +178,16 @@ impl Tab {
     fn get_tabattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
         if !self.is_enabled() {
             (theme.tab.text.inactive, theme.tab.hotkey.inactive)
-        } else {
-            if idx == self.focused_child_index.index() {
-                (theme.tab.text.pressed_or_selectd, theme.tab.hotkey.pressed_or_selectd)
+        } else if idx == self.focused_child_index.index() {
+            (theme.tab.text.pressed_or_selectd, theme.tab.hotkey.pressed_or_selectd)
+        } else if let Some(hovered_idx) = self.hovered_page_idx {
+            if hovered_idx == idx {
+                (theme.tab.text.hovered, theme.tab.hotkey.hovered)
             } else {
-                if let Some(hovered_idx) = self.hovered_page_idx {
-                    if hovered_idx == idx {
-                        (theme.tab.text.hovered, theme.tab.hotkey.hovered)
-                    } else {
-                        (theme.tab.text.normal, theme.tab.hotkey.normal)
-                    }
-                } else {
-                    (theme.tab.text.normal, theme.tab.hotkey.normal)
-                }
+                (theme.tab.text.normal, theme.tab.hotkey.normal)
             }
+        } else {
+            (theme.tab.text.normal, theme.tab.hotkey.normal)
         }
     }
     fn paint_horizontal_tab(&self, surface: &mut Surface, theme: &Theme, y: i32) {
@@ -318,7 +287,6 @@ impl OnPaint for Tab {
             Type::OnTop => self.paint_horizontal_tab(surface, theme, 0),
             Type::OnBottom => self.paint_horizontal_tab(surface, theme, (self.size().height as i32) - 1),
             Type::OnLeft => self.paint_leftside_tab(surface, theme),
-            Type::List => todo!(),
         }
     }
 }
