@@ -405,10 +405,9 @@ fn check_page_width_on_left() {
             me.plus = me.add(button!("x:10,y:0,w:3,caption:'+',type:flat"));
             me.minus = me.add(button!("x:0,y:0,w:3,caption:'-',type:flat"));
             let mut t = tab!("l:1,t:3,r:1,b:0,tabs:['A','B'],type:OnLeft");
-            t.add(0,button!("caption:'TopLeft',x:1,y:1,w:14,type:flat"));
-            t.add(0,button!("caption:'BottomRight',r:1,b:1,w:18,type:flat"));
+            t.add(0, button!("caption:'TopLeft',x:1,y:1,w:14,type:flat"));
+            t.add(0, button!("caption:'BottomRight',r:1,b:1,w:18,type:flat"));
             me.tab = me.add(t);
-
 
             me.update_tab_wdth_info();
 
@@ -470,6 +469,107 @@ fn check_page_width_on_left() {
         Mouse.Click(12,1,left)
         Paint('tab width is 5')   
         CheckHash(0xEC90EDD06FC8B9E)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_hidden_tabs() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Tabs ar hidden')   
+        CheckHash(0x434174D1EB8F39A3)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    let mut tab = Tab::with_type(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::HiddenTabs);
+    tab.add_tab("Page &1");
+    tab.add_tab("Page &2");
+    tab.add_tab("Page &3");
+    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+    tab.add(0, button!("Page1-B,d:c,w:10"));
+    w.add(tab);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_hiddentabs_changepage() {
+    #[Window(events = ButtonEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        minus: Handle<Button>,
+        plus: Handle<Button>,
+        tab: Handle<Tab>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                info: Handle::None,
+                plus: Handle::None,
+                minus: Handle::None,
+                tab: Handle::None,
+            };
+            me.info = me.add(label!("'',x:4,y:0,w:5"));
+            me.plus = me.add(button!("x:4,y:0,w:3,caption:'>',type:flat"));
+            me.minus = me.add(button!("x:0,y:0,w:3,caption:'<',type:flat"));
+            let mut t = tab!("l:1,t:3,r:1,b:0,tabs:['A','B','C','D'],type:HiddenTabs");
+            t.add(0, button!("caption:'TopLeft - A',x:1,y:1,w:14,type:flat"));
+            t.add(0, button!("caption:'BottomRight - A',r:1,b:1,w:18,type:flat"));
+            t.add(1, button!("caption:'TopLeft - B',x:1,y:1,w:14,type:flat"));
+            t.add(1, button!("caption:'BottomRight - B',r:1,b:1,w:18,type:flat"));
+            t.add(2, button!("caption:'TopLeft - C',x:1,y:1,w:14,type:flat"));
+            t.add(2, button!("caption:'BottomRight - C',r:1,b:1,w:18,type:flat"));
+            t.add(3, button!("caption:'TopLeft - D',x:1,y:1,w:14,type:flat"));
+            t.add(3, button!("caption:'BottomRight - D',r:1,b:1,w:18,type:flat"));
+            me.tab = me.add(t);
+            me
+        }
+
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
+            let h = self.tab;
+            if self.plus == button_handle {
+                if let Some(t) = self.control_mut(h) {
+                    let idx = t.current_tab().unwrap_or(0);
+                    t.set_current_tab(idx + 1);
+                }
+                return EventProcessStatus::Processed;
+            }
+            if self.minus == button_handle {
+                if let Some(t) = self.control_mut(h) {
+                    let idx = t.current_tab().unwrap_or(0);
+                    t.set_current_tab(idx - 1);
+                }
+                return EventProcessStatus::Processed;
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xA8ADF7FC20FDF239)   
+        Mouse.Click(6,1,left)
+        Paint('2nd page')  
+        CheckHash(0x490AC90BF6434117)
+        Mouse.Click(6,1,left)
+        Paint('3nd page')  
+        CheckHash(0x533625E8A00AF0A7)
+        Mouse.Click(6,1,left)
+        Paint('4th page')  
+        CheckHash(0xE4E96057767B106F)
+        Mouse.Click(6,1,left)
+        Paint('4th page (reached the limit) - now button > has the focus')  
+        CheckHash(0xC44447C148857AD8)
+        Mouse.Click(2,1,left)
+        Paint('3rd page')  
+        CheckHash(0x8DB5DEA9AA3BE6F7)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());

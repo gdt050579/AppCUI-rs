@@ -58,6 +58,15 @@ impl Tab {
             Handle::None
         }
     }
+    #[inline(always)]
+    pub fn current_tab(&self) -> Option<usize> {
+        let idx = self.base.focused_child_index.index();
+        if idx < self.base.children.len() {
+            Some(idx)
+        } else {
+            None
+        }
+    }
     pub fn set_current_tab(&mut self, index: usize) {
         // Q: what is the tab is disabled ? can it still change a page
         // for the moment we will not allow this behavior
@@ -87,6 +96,14 @@ impl Tab {
             self.tab_width = width;
             self.update_margins();
             self.request_update();
+        }
+    }
+    #[inline]
+    pub fn tab_caption(&self, index: usize) -> Option<&str> {
+        if index < self.pages.len() {
+            Some(self.pages[index].text())
+        } else {
+            None
         }
     }
     fn update_margins(&mut self) {
