@@ -315,3 +315,29 @@ fn check_tab_width_macro() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_tab_on_left() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('Tab on top')   
+        CheckHash(0xCE96D04271FC5A04)
+        Mouse.Move(10,5)
+        Paint('Hover over 2nd tab')
+        CheckHash(0x1D451DFD9954A596)
+        Mouse.Move(10,6)
+        Paint('Hover over 3rd tab')
+        CheckHash(0x19AFCD73D259E49A)
+        Mouse.Click(10,6,left)
+        Paint('3rd page selected')
+        CheckHash(0x51F4F150FE86E9D2)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    let mut tab = tab!("l:0,t:0,r:0,b:0,type:OnLeft,pages:['Page &1','Page &2','Page &2']");
+    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+    tab.add(0, button!("Page1-B,d:c,w:10"));
+    w.add(tab);
+    a.add_window(w);
+    a.run();
+}

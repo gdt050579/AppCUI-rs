@@ -248,6 +248,46 @@ impl Tab {
             format.x += s2 + 1;
         }
     }
+    fn paint_leftside_tab(&self, surface: &mut Surface, theme: &Theme) {
+        let sz = self.size();
+        if !self.flags.contains(Flags::TransparentBackground) {
+            let fill_char = Character::with_attributes(' ', self.get_backattr(theme));
+            surface.fill_rect(Rect::new(self.tab_width as i32, 0, sz.width as i32, sz.height as i32), fill_char);
+        }
+
+        if self.flags.contains(Flags::TabsBar) {
+            surface.fill_rect(
+                Rect::new(0, 0, sz.width as i32, self.tab_width as i32),
+                Character::with_attributes(' ', self.get_barattr(theme)),
+            );
+        }
+
+        let mut format = TextFormat {
+            x: 1,
+            y: 1,
+            width: Some(self.tab_width as u16 - 2),
+            align: TextAlignament::Left,
+            text_wrap: TextWrap::None,
+            multi_line: false,
+            ..Default::default()
+        };
+
+        for (index, page) in self.pages.iter().enumerate() {
+            let (text_attr, hotkey_attr) = self.get_tabattr(theme, index);
+            format.chars_count = Some(page.chars_count() as u16);
+            format.hotkey_pos = page.hotkey_pos();
+            format.char_attr = text_attr;
+            format.hotkey_attr = Some(hotkey_attr);
+
+            // fill the tab
+            surface.fill_horizontal_line_with_size(0, format.y, self.tab_width as u32, Character::with_attributes(' ', text_attr));
+
+            // write the text
+            surface.write_text(page.text(), &format);
+            // next pos
+            format.y += 1;
+        }
+    }
 }
 
 impl OnPaint for Tab {
@@ -256,7 +296,7 @@ impl OnPaint for Tab {
             Type::Hidden => todo!(),
             Type::OnTop => self.paint_horizontal_tab(surface, theme, 0),
             Type::OnBottom => self.paint_horizontal_tab(surface, theme, (self.size().height as i32) - 1),
-            Type::OnLeft => todo!(),
+            Type::OnLeft => self.paint_leftside_tab(surface, theme),
             Type::List => todo!(),
         }
     }
