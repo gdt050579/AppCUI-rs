@@ -3,7 +3,7 @@ use crate::parameter_parser::*;
 use proc_macro::*;
 
 static mut TAB_TYPES: FlagsSignature = FlagsSignature::new(&[
-    "Hidden",
+    "HiddenTabs",
     "OnTop",
     "OnBottom",
     "OnLeft",

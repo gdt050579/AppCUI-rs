@@ -9,7 +9,7 @@ pub enum Flags {
 #[repr(u8)]
 #[derive(Copy,Clone,PartialEq,Eq)]
 pub enum Type {
-    Hidden,
+    HiddenTabs,
     OnTop,
     OnBottom,
     OnLeft,

@@ -91,7 +91,7 @@ impl Tab {
     }
     fn update_margins(&mut self) {
         match self.tab_type {
-            Type::Hidden => self.base.set_margins(0, 0, 0, 0),
+            Type::HiddenTabs => self.base.set_margins(0, 0, 0, 0),
             Type::OnTop => self.base.set_margins(0, 1, 0, 0),
             Type::OnBottom => self.base.set_margins(0, 0, 0, 1),
             Type::OnLeft => self.base.set_margins(self.tab_width, 0, 0, 0),
@@ -112,7 +112,7 @@ impl Tab {
             return None;
         }
         match self.tab_type {
-            Type::Hidden => None,
+            Type::HiddenTabs => None,
             Type::OnTop => {
                 if (y != 0) || (x < 1) {
                     return None;
@@ -287,12 +287,17 @@ impl Tab {
             format.y += 1;
         }
     }
+    fn paint_hidden_tabs(&self, surface: &mut Surface, theme: &Theme) {
+        if !self.flags.contains(Flags::TransparentBackground) {
+            surface.clear(Character::with_attributes(' ', self.get_backattr(theme)));
+        }
+    }
 }
 
 impl OnPaint for Tab {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         match self.tab_type {
-            Type::Hidden => todo!(),
+            Type::HiddenTabs => self.paint_hidden_tabs(surface, theme),
             Type::OnTop => self.paint_horizontal_tab(surface, theme, 0),
             Type::OnBottom => self.paint_horizontal_tab(surface, theme, (self.size().height as i32) - 1),
             Type::OnLeft => self.paint_leftside_tab(surface, theme),
