@@ -14,7 +14,6 @@ static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("type", "type", ParamType::String),
-    NamedParameter::new("pages", "tabs", ParamType::List),
     NamedParameter::new("tabs", "tabs", ParamType::List),
     NamedParameter::new("tab-width", "tabwidth", ParamType::Integer),
     NamedParameter::new("tabwidth", "tabwidth", ParamType::Integer),

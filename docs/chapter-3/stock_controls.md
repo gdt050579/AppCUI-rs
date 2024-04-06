@@ -12,5 +12,6 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [Panel](stock-controls/panel.md)                 | <img src="stock-controls/img/panel.png" width=300/>         |
 | [Password](stock-controls/password.md)           | <img src="stock-controls/img/password.png" width=300/>      |
 | [RadioBox](stock-controls/radiobox.md)           | <img src="stock-controls/img/radiobox.png" width=300/>      |
+| [Tab](stock-controls/tab.md)                     | <img src="stock-controls/img/tab.png" width=300/>           |
 | [ThreeStateBox](stock-controls/threestatebox.md) | <img src="stock-controls/img/threestatebox.png" width=300/> |
 

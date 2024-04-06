@@ -21,7 +21,7 @@ A button supports all common parameters (as they are described in [Instantiate v
 | Parameter name                | Type   | Positional parameter                | Purpose                                |
 | ----------------------------- | ------ | ----------------------------------- | -------------------------------------- |
 | `name` or `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a button |
-| `type`                        | String | **No**                              | Button initialization flags            |
+| `type`                        | String | **No**                              | Button type                            |
 
 A button supports the following initialization types:
 * `button::Type::Flat` or `flat` (for macro initialization) - thils will hide the shaddow of the button makeing it flat.

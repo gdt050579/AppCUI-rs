@@ -334,7 +334,7 @@ fn check_tab_on_left() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:7");
-    let mut tab = tab!("l:0,t:0,r:0,b:0,type:OnLeft,pages:['Page &1','Page &2','Page &2']");
+    let mut tab = tab!("l:0,t:0,r:0,b:0,type:OnLeft,tabs:['Page &1','Page &2','Page &2']");
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
     tab.add(0, button!("Page1-B,d:c,w:10"));
     w.add(tab);
