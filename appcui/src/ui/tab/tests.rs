@@ -341,3 +341,44 @@ fn check_tab_on_left() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_tabsbar_on_top() {
+    let script = "
+        Paint.Enable(false)
+        Paint('TabBar - on top')   
+        CheckHash(0x72410B54ADF4591B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    w.add(tab!("l:0,t:0,r:0,b:0,type: OnTop,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_tabsbar_on_bottom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('TabBar - on bottom')   
+        CheckHash(0x1537B92659C4B71B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    w.add(tab!("l:0,t:0,r:0,b:0,type: OnBottom,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_tabsbar_on_left() {
+    let script = "
+        Paint.Enable(false)
+        Paint('TabBar - on left')   
+        CheckHash(0x2AD3E362406BFC73)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:7");
+    w.add(tab!("l:0,t:0,r:0,b:0,type: OnLeft,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
+    a.add_window(w);
+    a.run();
+}

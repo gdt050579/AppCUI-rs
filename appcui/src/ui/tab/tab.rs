@@ -178,10 +178,9 @@ impl Tab {
         }
     }
     #[inline(always)]
-    fn get_barattr(&self, theme: &Theme) -> CharAttribute {
+    fn get_tabsbarattr(&self, theme: &Theme) -> CharAttribute {
         match () {
             _ if !self.is_enabled() => theme.tab.text.inactive,
-            _ if self.has_focus() => theme.tab.text.hovered,
             _ => theme.tab.text.normal,
         }
     }
@@ -227,7 +226,7 @@ impl Tab {
         }
 
         if self.flags.contains(Flags::TabsBar) {
-            surface.fill_horizontal_line_with_size(0, y, sz.width, Character::with_attributes(' ', self.get_barattr(theme)));
+            surface.fill_horizontal_line_with_size(0, y, sz.width, Character::with_attributes(' ', self.get_tabsbarattr(theme)));
         }
 
         let s1 = (self.tab_width as i32) >> 1;
@@ -257,8 +256,8 @@ impl Tab {
 
         if self.flags.contains(Flags::TabsBar) {
             surface.fill_rect(
-                Rect::new(0, 0, sz.width as i32, self.tab_width as i32),
-                Character::with_attributes(' ', self.get_barattr(theme)),
+                Rect::new(0, 0, (self.tab_width as i32) - 1, sz.height as i32),
+                Character::with_attributes(' ', self.get_tabsbarattr(theme)),
             );
         }
 
