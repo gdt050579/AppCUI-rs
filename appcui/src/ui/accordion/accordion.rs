@@ -210,4 +210,32 @@ impl OnMouseEvent for Accordion {
             MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }    }
 }
-impl OnKeyPressed for Accordion {}
+impl OnKeyPressed for Accordion {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.get_compact_code() {
+            key!("Ctrl+Tab") => {
+                let mut idx = self.base.focused_child_index;
+                idx.add(1, self.base.children.len(), Strategy::RotateFromInvalidState);
+                self.set_current_panel(idx.index());
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Shift+Tab") => {
+                let mut idx = self.base.focused_child_index;
+                idx.sub(1, self.base.children.len(), Strategy::RotateFromInvalidState);
+                self.set_current_panel(idx.index());
+                return EventProcessStatus::Processed;
+            }
+            _ => {}
+        }
+        if key.modifier.contains(KeyModifier::Alt) {
+            // check if a new tab was selected
+            for (index, elem) in self.panels.iter().enumerate() {
+                if elem.hotkey() == key {
+                    self.set_current_panel(index);
+                    return EventProcessStatus::Processed;
+                }
+            }
+        }
+        EventProcessStatus::Ignored
+    }    
+}
