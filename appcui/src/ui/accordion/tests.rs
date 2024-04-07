@@ -5,25 +5,25 @@ fn check_control_reposition() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
-        CheckHash(0xA54E71FE5E8F33F2)
+        CheckHash(0x59375A32B72A3ACA)
         Mouse.Click(6,1,left)
         Paint('Maximized window')
-        CheckHash(0x520775CA72A80B9A)
+        CheckHash(0x13C58E8EFB3C0782)
         Mouse.Move(10,12)
         Paint('Hover over second page')
-        CheckHash(0xCE5C457C4DAAD6A0)
+        CheckHash(0x35F8EDC3268D2518)
         Mouse.Click(10,12,left)
         Paint('Second page selected')
-        CheckHash(0xCC377F34D916DAD2)
+        CheckHash(0x4F7D31365BB4312)
         Mouse.Click(2,0,left)
         Paint('Return to original size')
-        CheckHash(0x455E671F87CAEBB2)
+        CheckHash(0xA450FC3636F665B2)
         Mouse.Click(40,11,left)
         Paint('3rd page selected')
-        CheckHash(0x79E1692D8F6CCFA2)
+        CheckHash(0x6C08EA349DACC442)
         Mouse.Click(7,1,left)
         Paint('Maximize again')
-        CheckHash(0x303FE6CF830F139A)
+        CheckHash(0x2D8DF67B09FC3F82)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
@@ -48,25 +48,25 @@ fn check_keys() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
-        CheckHash(0xA54E71FE5E8F33F2)
+        CheckHash(0x59375A32B72A3ACA)
         Key.Pressed(Ctrl+Tab)
         Paint('Second panel selected')   
-        CheckHash(0x455E671F87CAEBB2)
+        CheckHash(0xA450FC3636F665B2)
         Key.Pressed(Ctrl+Tab)
         Paint('3rd panel selected')   
-        CheckHash(0x79E1692D8F6CCFA2)
+        CheckHash(0x6C08EA349DACC442)
         Key.Pressed(Ctrl+Shift+Tab,2)
         Paint('1st panel selected')   
-        CheckHash(0xA54E71FE5E8F33F2)
+        CheckHash(0x59375A32B72A3ACA)
         Key.Pressed(Alt+2)
         Paint('Second panel selected')   
-        CheckHash(0x455E671F87CAEBB2)
+        CheckHash(0xA450FC3636F665B2)
         Key.Pressed(Alt+1)
-        Paint('1st panel selected')   
-        CheckHash(0xA54E71FE5E8F33F2)
+        Paint('1st panel re-selected')   
+        CheckHash(0x59375A32B72A3ACA)
         Key.Pressed(Alt+3)
         Paint('3rd panel selected')   
-        CheckHash(0x79E1692D8F6CCFA2)
+        CheckHash(0x6C08EA349DACC442)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
@@ -126,7 +126,10 @@ fn check_macro() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
-        CheckHash(0xA54E71FE5E8F33F2)
+        CheckHash(0x59375A32B72A3ACA)
+        Mouse.Click(20,10,left)
+        Paint('Second panel')
+        CheckHash(0xA450FC3636F665B2)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
