@@ -42,3 +42,46 @@ fn check_control_reposition() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xA54E71FE5E8F33F2)
+        Key.Pressed(Ctrl+Tab)
+        Paint('Second panel selected')   
+        CheckHash(0x455E671F87CAEBB2)
+        Key.Pressed(Ctrl+Tab)
+        Paint('3rd panel selected')   
+        CheckHash(0x79E1692D8F6CCFA2)
+        Key.Pressed(Ctrl+Shift+Tab,2)
+        Paint('1st panel selected')   
+        CheckHash(0xA54E71FE5E8F33F2)
+        Key.Pressed(Alt+2)
+        Paint('Second panel selected')   
+        CheckHash(0x455E671F87CAEBB2)
+        Key.Pressed(Alt+1)
+        Paint('1st panel selected')   
+        CheckHash(0xA54E71FE5E8F33F2)
+        Key.Pressed(Alt+3)
+        Paint('3rd panel selected')   
+        CheckHash(0x79E1692D8F6CCFA2)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
+    let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
+    ac.add_panel("Panel &1");
+    ac.add_panel("Panel &2");
+    ac.add_panel("Panel &3");
+    ac.add(0, button!("P-1-A,r:1,b:0,w:10,type:flat"));
+    ac.add(0, button!("P-1-B,l:1,t:1,w:10,type:flat"));
+    ac.add(1, button!("P-2-A,r:1,b:0,w:14,type:flat"));
+    ac.add(1, button!("P-2-B,l:1,t:1,w:14,type:flat"));
+    ac.add(2, button!("P-3-A,r:1,b:0,w:20,type:flat"));
+    ac.add(2, button!("P-3-B,l:1,t:1,w:20,type:flat"));
+
+    w.add(ac);
+    a.add_window(w);
+    a.run();
+}

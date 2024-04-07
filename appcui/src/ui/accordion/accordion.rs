@@ -127,6 +127,7 @@ impl Accordion {
         if !self.can_receive_input() {
             return;
         }
+        let mut idx = None;
         if (index < self.base.children.len()) && (index != self.base.focused_child_index.index()) {
             // its a different page (valid)
             let cm = RuntimeManager::get().get_controls_mut();
@@ -135,11 +136,13 @@ impl Accordion {
                     control.get_base_mut().set_visible(index == child_index);
                     if index == child_index {
                         control.get_base_mut().request_focus();
-                        self.update_margins_for(index);
-                        return;
+                        idx = Some(index);
                     }
                 }
             }
+        }
+        if let Some(index) = idx {
+            self.update_margins_for(index);
         }
     }
 
