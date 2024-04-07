@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::ui::tab::Flags;
+use crate::ui::accordion::Flags;
 
 #[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed+OnResize, internal=true)]
 pub struct Accordion {

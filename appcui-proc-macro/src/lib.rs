@@ -348,6 +348,12 @@ pub fn tab(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn accordion(input: TokenStream) -> TokenStream {
+    crate::controls::accordion::create(input)
+}
+
+
+#[proc_macro]
 pub fn menuitem(input: TokenStream) -> TokenStream {
     crate::menu::menuitem::create(input, None)
 }
