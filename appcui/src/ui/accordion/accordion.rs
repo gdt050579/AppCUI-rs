@@ -1,6 +1,6 @@
+use super::AccordionPanel;
 use crate::prelude::*;
 use crate::ui::tab::Flags;
-use super::AccordionPanel;
 
 #[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct Accordion {
@@ -12,19 +12,19 @@ impl Accordion {
     #[inline(always)]
     fn get_panelattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
         if !self.is_enabled() {
-            (theme.tab.list.inactive, theme.tab.listhotkey.inactive)
+            (theme.accordion.text.inactive, theme.accordion.hotkey.inactive)
         } else {
             if idx == self.focused_child_index.index() {
-                (theme.tab.list.pressed_or_selectd, theme.tab.listhotkey.pressed_or_selectd)
+                (theme.accordion.text.pressed_or_selectd, theme.accordion.hotkey.pressed_or_selectd)
             } else {
                 if let Some(hovered_idx) = self.hovered_page_idx {
                     if hovered_idx == idx {
-                        (theme.tab.list.hovered, theme.tab.listhotkey.hovered)
+                        (theme.accordion.text.hovered, theme.accordion.hotkey.hovered)
                     } else {
-                        (theme.tab.list.normal, theme.tab.listhotkey.normal)
+                        (theme.accordion.text.normal, theme.accordion.hotkey.normal)
                     }
                 } else {
-                    (theme.tab.list.normal, theme.tab.listhotkey.normal)
+                    (theme.accordion.text.normal, theme.accordion.hotkey.normal)
                 }
             }
         }
@@ -35,6 +35,32 @@ impl Accordion {
             _ if !self.is_enabled() => theme.tab.text.inactive,
             _ if self.has_focus() => theme.tab.text.pressed_or_selectd,
             _ => theme.tab.text.pressed_or_selectd,
+        }
+    }
+    fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
+        let sz = self.size();
+        if (y < 0) || (x < 0) || (x>=sz.width as i32) {
+            return None;
+        }
+        let count = self.base.children.len();
+        let fc = self.base.focused_child_index.index();
+        // check top allignament
+        if y as usize <= fc {
+            return Some(y as usize);
+        }
+        if fc >= count {
+            return None;
+        }
+        // check bottom allignament
+        let bottom_index = (count - fc) as i32;
+        let h = sz.height as i32;
+        if h < bottom_index {
+            return None;
+        }
+        if y >= (h - bottom_index) && (y < h) {
+            Some(fc + 1 + ((h - bottom_index) as usize))
+        } else {
+            None
         }
     }
 }
@@ -74,12 +100,8 @@ impl OnPaint for Accordion {
 
             // write the text
             surface.write_text(page.text(), &format);
-        }        
+        }
     }
 }
-impl OnMouseEvent for Accordion {
-
-}
-impl OnKeyPressed for Accordion {
-
-}
+impl OnMouseEvent for Accordion {}
+impl OnKeyPressed for Accordion {}
