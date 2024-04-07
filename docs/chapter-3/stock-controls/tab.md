@@ -39,7 +39,6 @@ and the following flags:
 
 Some examples that uses these paramateres:
 ```rs
-let  = tab!("caption=&Disabled,x:10,y:5,w:15,enable=false");
 let t1 = tab!("type:OnBottom,tabs:[Tab1,Tab2,Tab&3],tw:10,flags:TabsBar,d:c,w:100%,h:100%");
 let t2 = tab!("type:OnLeft,tabs:[A,B,C],flags:TabsBar+TransparentBackground,d:c,w:100%,h:100%");
 ```
@@ -64,7 +63,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a tab also h
 
 ## Key association
 
-The following keys are processed by a Button control if it has focus:
+The following keys are processed by a Tab control if it has focus:
 
 | Key              | Purpose                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------- |
@@ -75,7 +74,7 @@ Aditionally, `Alt`+**letter or number** will automatically select the tab with t
 
 ## Example
 
-The following code creates 3 tabs and adds two buttons on each tab.
+The following code creates a tab with 3 tabs pages and adds two buttons on each tab page.
 
 ```rs
 use appcui::prelude::*;
@@ -84,7 +83,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
     let mut w = window!("Test,d:c,w:100%,h:100%");
-    let mut t = tab!("l:1,t:1,r:1,b:3,tabs:['Tab &1','Tab &1','Tab &1']");
+    let mut t = tab!("l:1,t:1,r:1,b:3,tabs:['Tab &1','Tab &2','Tab &3']");
     t.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
     t.add(0, button!("T1-1-B,d:c,w:10,type:flat"));      
     t.add(1, button!("T1-2-A,r:1,b:0,w:14,type:flat"));
@@ -94,7 +93,7 @@ fn main() -> Result<(), appcui::system::Error> {
     w.add(t); 
 
     w.add(button!("OK,r:0,b:0,w:10, type: flat"));
-    w.add(button!("Cancle,r:12,b:0,w:10, type: flat"));
+    w.add(button!("Cancel,r:12,b:0,w:10, type: flat"));
 
     a.add_window(w);
     a.run();
