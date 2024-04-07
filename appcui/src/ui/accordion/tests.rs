@@ -148,12 +148,12 @@ fn check_transparent_background() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
-        CheckHash(0x284F78E77A236112)
+        CheckHash(0xA1CFB89BF40E15DA)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
     let mut ac = accordion!("l:0,t:0,r:0,b:0,panels:['Panel &1','Panel &2','Panel &3'],flags: TransparentBackground");
-    ac.add(0, button!("P-1-A,r:1,b:0,w:10,type:flat"));
+    ac.add(0, button!("P-1-A,r:1,b:1,w:10,type:flat"));
     ac.add(0, button!("P-1-B,l:1,t:1,w:10,type:flat"));
 
     w.add(ac);

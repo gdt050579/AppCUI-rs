@@ -22,7 +22,7 @@ impl Accordion {
         if index < count {
             let bottom_elements = count - (index + 1);
             if h > bottom_elements {
-                self.set_margins(0, index as u8, 0, bottom_elements as u8);
+                self.set_margins(0, (index + 1) as u8, 0, bottom_elements as u8);
                 self.request_update();
                 return;
             }
@@ -91,6 +91,9 @@ impl Accordion {
         let idx = self.base.children.len() as u32;
         self.base.add_child(super::AccordionPanel::new(idx == 0));
         self.panels.push(Caption::new(caption, ExtractHotKeyMethod::AltPlusKey));
+        if idx == 0 {
+            self.update_margins_for(0);
+        }
         idx
     }
     #[inline(always)]
