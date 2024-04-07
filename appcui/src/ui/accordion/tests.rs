@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[test]
 fn check_control_reposition() {
     let script = "
-        Paint.Enable(false)
+        Paint.Enable(false) 
         Paint('Initial state')   
         CheckHash(0x59375A32B72A3ACA)
         Mouse.Click(6,1,left)

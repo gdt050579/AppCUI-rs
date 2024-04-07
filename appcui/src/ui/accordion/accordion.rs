@@ -38,20 +38,16 @@ impl Accordion {
     fn get_panelattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
         if !self.is_enabled() {
             (theme.accordion.text.inactive, theme.accordion.hotkey.inactive)
-        } else {
-            if idx == self.focused_child_index.index() {
-                (theme.accordion.text.pressed_or_selectd, theme.accordion.hotkey.pressed_or_selectd)
+        } else if idx == self.focused_child_index.index() {
+            (theme.accordion.text.pressed_or_selectd, theme.accordion.hotkey.pressed_or_selectd)
+        } else if let Some(hovered_idx) = self.hovered_page_idx {
+            if hovered_idx == idx {
+                (theme.accordion.text.hovered, theme.accordion.hotkey.hovered)
             } else {
-                if let Some(hovered_idx) = self.hovered_page_idx {
-                    if hovered_idx == idx {
-                        (theme.accordion.text.hovered, theme.accordion.hotkey.hovered)
-                    } else {
-                        (theme.accordion.text.normal, theme.accordion.hotkey.normal)
-                    }
-                } else {
-                    (theme.accordion.text.normal, theme.accordion.hotkey.normal)
-                }
+                (theme.accordion.text.normal, theme.accordion.hotkey.normal)
             }
+        } else {
+            (theme.accordion.text.normal, theme.accordion.hotkey.normal)
         }
     }
     #[inline(always)]
@@ -194,7 +190,7 @@ impl OnPaint for Accordion {
             }
 
             // fill the tab
-            surface.fill_horizontal_line_with_size(0, format.y, sz.width as u32, Character::with_attributes(' ', text_attr));
+            surface.fill_horizontal_line_with_size(0, format.y, sz.width, Character::with_attributes(' ', text_attr));
 
             // write the text
             surface.write_text(page.text(), &format);
