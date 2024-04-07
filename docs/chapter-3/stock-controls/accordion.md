@@ -1,7 +1,6 @@
 # Accordion
 
-
-Represent tabulator (accordion control) where you can select the visible page:
+An accordion control is a graphical user interface element that consists of a vertically stacked list of panels. Only one panel can be "expanded" to reveal its associated content.
 
 <img src="img/accordion.png" width=400/>
 
@@ -54,10 +53,10 @@ Besides the [Common methods for all Controls](../common_methods.md) a accordion 
 
 The following keys are processed by a Accordion control if it has focus:
 
-| Key                    | Purpose                                                                                                 |
-| ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| `Ctrl+Accordion`       | Select the next accordion. If the current accordion is the last one, the first one will be selected.    |
-| `Ctrl+Shift+Accordion` | Select the previous accordion. If the current accordion is the first one, the last one will be selected |
+| Key              | Purpose                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `Ctrl+Tab`       | Select the next accordion. If the current accordion is the last one, the first one will be selected.    |
+| `Ctrl+Shift+Tab` | Select the previous accordion. If the current accordion is the first one, the last one will be selected |
 
 Aditionally, `Alt`+**letter or number** will automatically select the accordion with that particular hotkey combination.
 
