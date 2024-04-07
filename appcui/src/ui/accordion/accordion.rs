@@ -8,6 +8,30 @@ pub struct Accordion {
     hovered_page_idx: Option<usize>,
 }
 impl Accordion {
+    pub fn new(layout: Layout, flags: Flags) -> Self {
+        Self {
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            flags,
+            hovered_page_idx: None,
+            panels: Vec::with_capacity(4),
+        }
+    }
+    fn update_margins(&mut self) {
+        let ci = self.focused_child_index.index();
+        let count = self.children.len();
+        let h = self.size().height as usize;
+        if ci < count {
+            let bottom_elements = count - (ci + 1);
+            if h > bottom_elements {
+                self.set_margins(0, ci as u8, 0, bottom_elements as u8);
+                self.request_update();
+                return;
+            }
+        }
+        // we can not paint the object so we will set up an invalid marging
+        self.set_margins(0, 0, 0, h as u8); // invalid margins
+        self.request_update();
+    }
     #[inline(always)]
     fn get_panelattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
         if !self.is_enabled() {
@@ -38,7 +62,7 @@ impl Accordion {
     }
     fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
         let sz = self.size();
-        if (y < 0) || (x < 0) || (x>=sz.width as i32) {
+        if (y < 0) || (x < 0) || (x >= sz.width as i32) {
             return None;
         }
         let count = self.base.children.len();
@@ -128,7 +152,6 @@ impl Accordion {
             self.panels[index].set_text(caption, ExtractHotKeyMethod::AltPlusKey);
         }
     }
-
 }
 impl OnPaint for Accordion {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -207,7 +230,8 @@ impl OnMouseEvent for Accordion {
             MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
             MouseEvent::Drag(_) => EventProcessStatus::Ignored,
             MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
-        }    }
+        }
+    }
 }
 impl OnKeyPressed for Accordion {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
@@ -236,5 +260,5 @@ impl OnKeyPressed for Accordion {
             }
         }
         EventProcessStatus::Ignored
-    }    
+    }
 }
