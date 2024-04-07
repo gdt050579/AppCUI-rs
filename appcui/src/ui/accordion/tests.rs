@@ -85,3 +85,39 @@ fn check_keys() {
     a.add_window(w);
     a.run();
 }
+
+
+
+#[test]
+fn check_focus() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xF8B8FB1A7C6A4324)
+    ";
+    let mut a = App::debug(80, 15, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:75,h:12,flags: Sizeable");
+    let mut ac1 = Accordion::new(Layout::new("x:1,y:1,w:20,h:8"), tab::Flags::None);
+    ac1.add_panel("Panel &1");
+    ac1.add_panel("Panel &2");
+    ac1.add_panel("Panel &3");
+    ac1.add_panel("Panel &4");
+    ac1.add_panel("Panel &5");
+
+    let mut ac2 = Accordion::new(Layout::new("x:25,y:1,w:20,h:8"), tab::Flags::None);
+    ac2.add_panel("Panel &1");
+    ac2.add_panel("Panel &2");
+    ac2.add_panel("Panel &3");
+
+    let mut ac3 = Accordion::new(Layout::new("x:49,y:1,w:20,h:8"), tab::Flags::None);
+    ac3.add_panel("Panel &1");
+    ac3.add_panel("Panel &2");
+    ac3.add_panel("Panel &3");
+    ac3.set_enabled(false);
+
+    w.add(ac1);
+    w.add(ac2);
+    w.add(ac3);
+    a.add_window(w);
+    a.run();
+}

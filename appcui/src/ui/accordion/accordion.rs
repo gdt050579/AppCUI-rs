@@ -57,8 +57,7 @@ impl Accordion {
     #[inline(always)]
     fn get_backattr(&self, theme: &Theme) -> CharAttribute {
         match () {
-            _ if !self.is_enabled() => theme.tab.text.inactive,
-            _ if self.has_focus() => theme.tab.text.pressed_or_selectd,
+            _ if !self.is_enabled() => theme.accordion.text.inactive,
             _ => theme.tab.text.pressed_or_selectd,
         }
     }
