@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-//#[test]
+#[test]
 fn check_control_reposition() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Initial state')   
         CheckHash(0xA54E71FE5E8F33F2)
         Mouse.Click(6,1,left)
@@ -11,19 +11,19 @@ fn check_control_reposition() {
         CheckHash(0x520775CA72A80B9A)
         Mouse.Move(10,12)
         Paint('Hover over second page')
-        CheckHash(0x7D995CC4CB874301)
-        Mouse.Click(20,1,left)
+        CheckHash(0xCE5C457C4DAAD6A0)
+        Mouse.Click(10,12,left)
         Paint('Second page selected')
-        CheckHash(0x565503C15E91F6DB)
+        CheckHash(0xCC377F34D916DAD2)
         Mouse.Click(2,0,left)
         Paint('Return to original size')
-        CheckHash(0x44CDC0ABE77E55F3)
-        Mouse.Click(40,3,left)
+        CheckHash(0x455E671F87CAEBB2)
+        Mouse.Click(40,11,left)
         Paint('3rd page selected')
-        CheckHash(0x4D5C8439170A28E7)
-        Mouse.Click(6,2,left)
+        CheckHash(0x79E1692D8F6CCFA2)
+        Mouse.Click(7,1,left)
         Paint('Maximize again')
-        CheckHash(0x8FB38F9341D9899F)
+        CheckHash(0x303FE6CF830F139A)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
