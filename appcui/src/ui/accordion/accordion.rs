@@ -170,5 +170,44 @@ impl OnPaint for Accordion {
         }
     }
 }
-impl OnMouseEvent for Accordion {}
+impl OnMouseEvent for Accordion {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => EventProcessStatus::Ignored,
+            MouseEvent::Leave => {
+                if self.hovered_page_idx.is_some() {
+                    self.hovered_page_idx = None;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Over(ev) => {
+                let idx = self.mouse_position_to_index(ev.x, ev.y);
+                if idx != self.hovered_page_idx {
+                    self.hovered_page_idx = idx;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Pressed(ev) => {
+                let idx = self.mouse_position_to_index(ev.x, ev.y);
+                if let Some(index) = idx {
+                    if index != self.base.focused_child_index.index() {
+                        self.set_current_panel(index);
+                        EventProcessStatus::Processed
+                    } else {
+                        EventProcessStatus::Ignored
+                    }
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Released(_) => EventProcessStatus::Ignored,
+            MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
+            MouseEvent::Drag(_) => EventProcessStatus::Ignored,
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
+        }    }
+}
 impl OnKeyPressed for Accordion {}
