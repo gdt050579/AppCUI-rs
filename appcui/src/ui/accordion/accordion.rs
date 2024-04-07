@@ -5,7 +5,7 @@ use crate::ui::tab::Flags;
 #[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct Accordion {
     flags: Flags,
-    pages: Vec<Caption>,
+    panels: Vec<Caption>,
     hovered_page_idx: Option<usize>,
 }
 impl Accordion {
@@ -63,6 +63,73 @@ impl Accordion {
             None
         }
     }
+    pub fn add_panel(&mut self, caption: &str) -> u32 {
+        let idx = self.base.children.len() as u32;
+        self.base.add_child(super::AccordionPanel::new(idx == 0));
+        self.panels.push(Caption::new(caption, ExtractHotKeyMethod::AltPlusKey));
+        idx
+    }
+    #[inline(always)]
+    pub fn add<T>(&mut self, tabindex: u32, control: T) -> Handle<T>
+    where
+        T: Control + NotWindow + NotDesktop + 'static,
+    {
+        if (tabindex as usize) < self.base.children.len() {
+            let h = self.base.children[tabindex as usize];
+            let cm = RuntimeManager::get().get_controls_mut();
+            if let Some(tabpage) = cm.get_mut(h) {
+                tabpage.get_base_mut().add_child(control)
+            } else {
+                Handle::None
+            }
+        } else {
+            Handle::None
+        }
+    }
+    #[inline(always)]
+    pub fn current_panel(&self) -> Option<usize> {
+        let idx = self.base.focused_child_index.index();
+        if idx < self.base.children.len() {
+            Some(idx)
+        } else {
+            None
+        }
+    }
+    pub fn set_current_panel(&mut self, index: usize) {
+        // Q: what is the tab is disabled ? can it still change a page
+        // for the moment we will not allow this behavior
+        // meaning that the tab must be able to receive focus (be visibale and enabled) in order to be able to change the page
+        if !self.can_receive_input() {
+            return;
+        }
+        if (index < self.base.children.len()) && (index != self.base.focused_child_index.index()) {
+            // its a different page (valid)
+            let cm = RuntimeManager::get().get_controls_mut();
+            for (child_index, handle_child) in self.base.children.iter().enumerate() {
+                if let Some(control) = cm.get_mut(*handle_child) {
+                    control.get_base_mut().set_visible(index == child_index);
+                    if index == child_index {
+                        control.get_base_mut().request_focus();
+                    }
+                }
+            }
+        }
+    }
+
+    #[inline]
+    pub fn panel_caption(&self, index: usize) -> Option<&str> {
+        if index < self.panels.len() {
+            Some(self.panels[index].text())
+        } else {
+            None
+        }
+    }
+    pub fn set_panel_caption(&mut self, index: usize, caption: &str) {
+        if index < self.panels.len() {
+            self.panels[index].set_text(caption, ExtractHotKeyMethod::AltPlusKey);
+        }
+    }
+
 }
 impl OnPaint for Accordion {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -82,7 +149,7 @@ impl OnPaint for Accordion {
 
         let cidx = self.base.focused_child_index.index();
         let count = self.base.children.len();
-        for (index, page) in self.pages.iter().enumerate() {
+        for (index, page) in self.panels.iter().enumerate() {
             let (text_attr, hotkey_attr) = self.get_panelattr(theme, index);
             format.chars_count = Some(page.chars_count() as u16);
             format.hotkey_pos = page.hotkey_pos();
