@@ -16,14 +16,13 @@ impl Accordion {
             panels: Vec::with_capacity(4),
         }
     }
-    fn update_margins(&mut self) {
-        let ci = self.focused_child_index.index();
+    fn update_margins_for(&mut self, index: usize) {
         let count = self.children.len();
         let h = self.size().height as usize;
-        if ci < count {
-            let bottom_elements = count - (ci + 1);
+        if index < count {
+            let bottom_elements = count - (index + 1);
             if h > bottom_elements {
-                self.set_margins(0, ci as u8, 0, bottom_elements as u8);
+                self.set_margins(0, index as u8, 0, bottom_elements as u8);
                 self.request_update();
                 return;
             }
@@ -31,6 +30,9 @@ impl Accordion {
         // we can not paint the object so we will set up an invalid marging
         self.set_margins(0, 0, 0, h as u8); // invalid margins
         self.request_update();
+    }
+    fn update_margins(&mut self) {
+        self.update_margins_for(self.focused_child_index.index());
     }
     #[inline(always)]
     fn get_panelattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
@@ -67,12 +69,12 @@ impl Accordion {
         }
         let count = self.base.children.len();
         let fc = self.base.focused_child_index.index();
+        if fc >= count {
+            return None;
+        }
         // check top allignament
         if y as usize <= fc {
             return Some(y as usize);
-        }
-        if fc >= count {
-            return None;
         }
         // check bottom allignament
         let bottom_index = (count - fc) as i32;
@@ -81,7 +83,7 @@ impl Accordion {
             return None;
         }
         if y >= (h - bottom_index) && (y < h) {
-            Some(fc + 1 + ((h - bottom_index) as usize))
+            Some(fc + ((y - h + bottom_index) as usize))
         } else {
             None
         }
@@ -133,6 +135,8 @@ impl Accordion {
                     control.get_base_mut().set_visible(index == child_index);
                     if index == child_index {
                         control.get_base_mut().request_focus();
+                        self.update_margins_for(index);
+                        return;
                     }
                 }
             }
