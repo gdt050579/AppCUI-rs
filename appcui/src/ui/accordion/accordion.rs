@@ -1,4 +1,3 @@
-use super::AccordionPanel;
 use crate::prelude::*;
 use crate::ui::tab::Flags;
 
