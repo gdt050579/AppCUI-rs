@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::ui::tab::Flags;
 
-#[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed+OnResize, internal=true)]
 pub struct Accordion {
     flags: Flags,
     panels: Vec<Caption>,
@@ -260,5 +260,10 @@ impl OnKeyPressed for Accordion {
             }
         }
         EventProcessStatus::Ignored
+    }
+}
+impl OnResize for Accordion {
+    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
+        self.update_margins();
     }
 }
