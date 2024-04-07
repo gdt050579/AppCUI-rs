@@ -74,3 +74,7 @@ path = "notification_dialogs/main.rs"
 [[example]]
 name = "tab"
 path = "tab/main.rs"
+
+[[example]]
+name = "accordion"
+path = "accordion/main.rs"

@@ -13,3 +13,4 @@ pub (crate) mod toolbaritem;
 pub (crate) mod colorpicker;
 pub (crate) mod canvas;
 pub (crate) mod tab;
+pub (crate) mod accordion;

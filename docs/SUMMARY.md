@@ -43,6 +43,7 @@
             - [SingleChoice](chapter-3/event-loop/toolbar-items/singlechoice.md)
         - [Modal Window](chapter-3/event-loop/modal_window.md)
     - [Stock controls](chapter-3/stock_controls.md)
+        - [Accordion](chapter-3/stock-controls/accordion.md)
         - [Button](chapter-3/stock-controls/button.md)
         - [Canvas](chapter-3/stock-controls/canvas.md)
         - [CheckBox](chapter-3/stock-controls/checkbox.md)

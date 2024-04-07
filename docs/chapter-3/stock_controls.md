@@ -4,6 +4,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 
 | Control                                          | Image                                                       |
 | ------------------------------------------------ | ----------------------------------------------------------- |
+| [Accordion](stock-controls/accordion.md)         | <img src="stock-controls/img/accordion.png" width=300/>     |
 | [Button](stock-controls/button.md)               | <img src="stock-controls/img/button.png" width=300/>        |
 | [Canvas](stock-controls/canvas.md)               | <img src="stock-controls/img/canvas.png" width=300/>        |
 | [CheckBox](stock-controls/checkbox.md)           | <img src="stock-controls/img/checkbox.png" width=300/>      |

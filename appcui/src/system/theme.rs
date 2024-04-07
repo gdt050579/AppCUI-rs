@@ -61,8 +61,11 @@ pub struct ButtonTheme {
 pub struct TabTheme {
     pub text: ControlCharAttributesState,
     pub hotkey: ControlCharAttributesState,
-    pub list: ControlCharAttributesState,
-    pub listhotkey: ControlCharAttributesState,
+}
+#[derive(Default)]
+pub struct AccordionTheme {
+    pub text: ControlCharAttributesState,
+    pub hotkey: ControlCharAttributesState,
 }
 #[derive(Default)]
 pub struct ScrollBarTheme {
@@ -72,6 +75,7 @@ pub struct ScrollBarTheme {
 }
 #[derive(Default)]
 pub struct Theme {
+    pub accordion: AccordionTheme,
     pub desktop: DesktopTheme,
     pub text: TextTheme,
     pub symbol: SymbolTheme,
@@ -219,10 +223,10 @@ impl Theme {
             inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
             pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Blue),
         };
-        self.tab.list = self.tab.text;
-        self.tab.list.pressed_or_selectd = CharAttribute::with_color(Color::Black, Color::White);
-        self.tab.listhotkey = self.tab.hotkey;
-        self.tab.listhotkey.pressed_or_selectd = CharAttribute::with_color(Color::DarkRed, Color::White);
+        self.accordion.text = self.tab.text;
+        self.accordion.text.pressed_or_selectd = CharAttribute::with_color(Color::Black, Color::White);
+        self.accordion.hotkey = self.tab.hotkey;
+        self.accordion.hotkey.pressed_or_selectd = CharAttribute::with_color(Color::DarkRed, Color::White);
 
         self.scrollbar.arrow = ControlCharAttributesState {
             normal: CharAttribute::with_color(Color::White, Color::DarkBlue),
