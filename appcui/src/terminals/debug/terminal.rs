@@ -22,6 +22,7 @@ pub(crate) struct DebugTerminal {
     hash_to_test: Option<u64>,
     cursor_point_to_check: Option<Point>,
     mouse_pos: Point,
+    errors_disabled: bool,
 }
 impl DebugTerminal {
     fn build_commands(script: &str) -> VecDeque<Command> {
@@ -55,6 +56,7 @@ impl DebugTerminal {
             sys_events: VecDeque::with_capacity(8),
             paint: false,
             ignore_paint_command: false,
+            errors_disabled: false,
             paint_title: String::new(),
             hash_to_test: None,
             cursor_point_to_check: None,
@@ -149,14 +151,22 @@ impl Terminal for DebugTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         let surface_hash = DebugTerminal::compute_surface_hash(surface);
         if let Some(hash_to_test) = self.hash_to_test {
-            if hash_to_test != surface_hash {
-                panic!(
-                    "Invalid hash for surface (expecting: 0x{:X} but found 0x{:X})",
-                    hash_to_test, surface_hash
-                );
-            }
             // no need to paint --> just a check hash command
             self.paint = false;
+            if hash_to_test != surface_hash {
+                if self.errors_disabled {
+                    println!(
+                        "\x1b[91;40m[Error] Invalid hash: (expecting: 0x{:X} but found 0x{:X})\x1b[0m",
+                        hash_to_test, surface_hash
+                    );
+                    //println!("        at: {}",&self.paint_title);
+                } else {
+                    panic!(
+                        "Invalid hash for surface (expecting: 0x{:X} but found 0x{:X})",
+                        hash_to_test, surface_hash
+                    );
+                }
+            }
         }
         let cursor = if !surface.cursor.is_visible() {
             Point::new(-1, -1)
@@ -169,10 +179,17 @@ impl Terminal for DebugTerminal {
                 let cursor_repr = if cursor.x < 0 { "Hidden" } else { cursor_pos.as_str() };
                 let point_pos = format!("({},{})", point.x, point.y);
                 let point_repr = if point.x < 0 { "Hidden" } else { point_pos.as_str() };
-                panic!(
-                    "Invalid cursor position. Expectig the cursor to be {}, but found {}",
-                    cursor_repr, point_repr
-                );
+                if self.errors_disabled {
+                    println!(
+                        "\x1b[91;40m[Error] Invalid cursor position. Expectig the cursor to be {}, but found {}\x1b[0m",
+                        cursor_repr, point_repr
+                    );
+                } else {
+                    panic!(
+                        "Invalid cursor position. Expectig the cursor to be {}, but found {}",
+                        cursor_repr, point_repr
+                    );
+                }
             }
         }
 
@@ -384,6 +401,11 @@ impl Terminal for DebugTerminal {
             // check for PaintEnable command
             if let Some(value) = cmd.get_paint_enable_status() {
                 self.ignore_paint_command = !value;
+                return SystemEvent::None;
+            }
+            // check for ErrorDisable command
+            if let Some(value) = cmd.get_error_disable_status() {
+                self.errors_disabled = value;
                 return SystemEvent::None;
             }
             return SystemEvent::None;

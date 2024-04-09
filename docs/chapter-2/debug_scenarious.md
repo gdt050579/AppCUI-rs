@@ -62,6 +62,7 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
 |--------------------------------------|---------|     
 |`Paint(staet_name)`<br>or<br>`Paint()`| paints the current virtual screen into the current screen using ANSI codes and colors. This command also computes a hash over the current virtual screen and prints it. The `state_name` is a name can be used to reflect the current execution state. This is useful if multipl `Paint` command are being used and you need to differentiate between them.  |
 |`Paint.Enable(value)`                 | enables or disables painting. `value` is a boolean value (**true** or **false**). If set to **false** all subsequent calls to command `Paint` will be ignored. By default, all paints are enabled. |
+|`Error.Disable(value)`                | enables or disables errors when testing the the hashes or cursor position. `value` is a boolean value (**true** or **false**). By default, errors are **NOT** disabled |
 
 ## System events
 

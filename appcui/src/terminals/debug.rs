@@ -8,6 +8,7 @@ mod mouse_drag_command;
 mod mouse_wheel_command;
 mod paint_command;
 mod paint_enable_command;
+mod error_disable_command;
 mod check_hash_command;
 mod check_cursor_command;
 mod resize_command;
