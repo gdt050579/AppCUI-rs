@@ -146,4 +146,10 @@ impl Command {
             _ => None,
         }
     }
+    pub(super) fn get_error_disable_status(&self) -> Option<bool> {
+        match self {
+            Command::ErrorDisable(cmd) => Some(cmd.is_error_disabled()),
+            _ => None,
+        }
+    }
 }

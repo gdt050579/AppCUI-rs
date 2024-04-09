@@ -22,6 +22,7 @@ pub(crate) struct DebugTerminal {
     hash_to_test: Option<u64>,
     cursor_point_to_check: Option<Point>,
     mouse_pos: Point,
+    errors_disabled: bool,
 }
 impl DebugTerminal {
     fn build_commands(script: &str) -> VecDeque<Command> {
@@ -55,6 +56,7 @@ impl DebugTerminal {
             sys_events: VecDeque::with_capacity(8),
             paint: false,
             ignore_paint_command: false,
+            errors_disabled: false,
             paint_title: String::new(),
             hash_to_test: None,
             cursor_point_to_check: None,
@@ -384,6 +386,11 @@ impl Terminal for DebugTerminal {
             // check for PaintEnable command
             if let Some(value) = cmd.get_paint_enable_status() {
                 self.ignore_paint_command = !value;
+                return SystemEvent::None;
+            }
+            // check for ErrorDisable command
+            if let Some(value) = cmd.get_error_disable_status() {
+                self.errors_disabled = value;
                 return SystemEvent::None;
             }
             return SystemEvent::None;
