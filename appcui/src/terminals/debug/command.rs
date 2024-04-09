@@ -17,6 +17,7 @@ use super::{
     mouse_wheel_command::MouseWheelCommand,
     paint_command::PaintCommand,
     paint_enable_command::PaintEnableCommand,
+    error_disable_command::ErrorDisableCommand,
     resize_command::ResizeCommand,
 };
 
@@ -29,6 +30,7 @@ pub(super) enum Command {
     MouseWheel(MouseWheelCommand),
     Paint(PaintCommand),
     PaintEnable(PaintEnableCommand),
+    ErrorDisable(ErrorDisableCommand),
     CheckHash(CheckHashCommand),
     CheckCursor(CheckCursorCommand),
     Resize(ResizeCommand),
@@ -79,6 +81,10 @@ impl Command {
                 let variant = CheckCursorCommand::new(&cp)?;
                 Ok(Command::CheckCursor(variant))
             }
+            "Error.Disable" => {
+                let variant = ErrorDisableCommand::new(&cp)?;
+                Ok(Command::ErrorDisable(variant))
+            }
             "Resize" => {
                 let variant = ResizeCommand::new(&cp)?;
                 Ok(Command::Resize(variant))
@@ -111,6 +117,7 @@ impl Command {
             Command::KeyTypeText(cmd) => cmd.generate_event(sys_events),
             Command::Paint(_) => {}
             Command::PaintEnable(_) => {}
+            Command::ErrorDisable(_) => {}
             Command::CheckHash(_) => {}
             Command::CheckCursor(_) => {}
         }
