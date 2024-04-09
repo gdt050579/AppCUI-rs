@@ -137,8 +137,8 @@ fn check_button_control_2() {
 fn check_button_control_with_macro() {
     let script = "
         Paint.Enable(false)
-        Paint('Initial focus => Add (0) and Reset')   
-        //CheckHash(0xC656986DBDA863BA)
+        Paint('tests')   
+        CheckHash(0xC656986DBDA863BA)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Macro Test", Layout::new("d:c,w:40,h:10"), window::Flags::None);
