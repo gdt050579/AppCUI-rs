@@ -16,6 +16,14 @@ impl KeySelector {
         obj.set_size_bounds(5, 1, u16::MAX, 1);
         obj
     }
+    #[inline(always)]
+    pub fn key(&self)->Key {
+        self.key
+    }
+    #[inline(always)]
+    pub fn set_key(&mut self, key: Key) {
+        self.key = key;
+    }
 }
 impl OnPaint for KeySelector {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
