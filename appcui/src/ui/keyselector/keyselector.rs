@@ -33,7 +33,7 @@ impl OnPaint for KeySelector {
             _ if self.is_mouse_over() => theme.editor.hovered,
             _ => theme.editor.normal,
         };
-        let right = self.size().height as i32;
+        let right = self.size().width as i32;
         surface.fill_horizontal_line(0, 0, right, Character::with_attributes(' ', attr));
         surface.reduce_clip_by(1, 0, 1, 0);
         let m = self.key.modifier.name();
