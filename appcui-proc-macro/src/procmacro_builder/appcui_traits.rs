@@ -34,6 +34,7 @@ pub(crate) enum AppCUITrait {
     ThreeStateBoxEvents = 25,
     RadioBoxEvents = 26,
     PasswordEvents = 27,
+    KeySelectionEvents = 28,
 }
 
 #[repr(u8)]
@@ -78,6 +79,8 @@ impl AppCUITrait {
             AppCUITrait::ThreeStateBoxEvents => "ThreeStateBoxEvents",
             AppCUITrait::RadioBoxEvents => "RadioBoxEvents",
             AppCUITrait::PasswordEvents => "PasswordEvents",
+            AppCUITrait::KeySelectionEvents => "KeySelectionEvents",
+
             
         }
     }
@@ -114,6 +117,7 @@ impl AppCUITrait {
             AppCUITrait::ThreeStateBoxEvents => TraitType::ControlEvent,
             AppCUITrait::RadioBoxEvents => TraitType::ControlEvent,
             AppCUITrait::PasswordEvents => TraitType::ControlEvent,
+            AppCUITrait::KeySelectionEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn get_basefallback_implementation(&self) -> &'static str {
@@ -149,6 +153,7 @@ impl AppCUITrait {
             AppCUITrait::ThreeStateBoxEvents => "",
             AppCUITrait::RadioBoxEvents => "",
             AppCUITrait::PasswordEvents => "",
+            AppCUITrait::KeySelectionEvents => "",
         }
     }
     pub(crate) fn get_default_implementation(&self) -> &'static str {
@@ -184,6 +189,7 @@ impl AppCUITrait {
             AppCUITrait::ThreeStateBoxEvents => "impl ThreeStateBoxEvents for $(STRUCT_NAME) {}",
             AppCUITrait::RadioBoxEvents => "impl RadioBoxEvents for $(STRUCT_NAME) {}",
             AppCUITrait::PasswordEvents => "impl PasswordEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::KeySelectionEvents => "impl KeySelectionEvents for $(STRUCT_NAME) {}",
         }
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -209,6 +215,7 @@ impl AppCUITrait {
             "ToolBarEvents" | "ToolBar" => Some(AppCUITrait::ToolBarEvents),
             "ColorPickerEvents" | "ColorPicker" => Some(AppCUITrait::ColorPickerEvents),
             "ThreeStateBoxEvents" | "ThreeStateBox" => Some(AppCUITrait::ThreeStateBoxEvents),
+            "KeySelectionEvents" | "KeySelection" => Some(AppCUITrait::KeySelectionEvents),
             _ => None,
         }
     }
@@ -245,6 +252,7 @@ impl AppCUITrait {
             25 => Some(AppCUITrait::ThreeStateBoxEvents),
             26 => Some(AppCUITrait::RadioBoxEvents),
             27 => Some(AppCUITrait::PasswordEvents),
+            28 => Some(AppCUITrait::KeySelectionEvents),
             _ => None,
         };
         result?;
