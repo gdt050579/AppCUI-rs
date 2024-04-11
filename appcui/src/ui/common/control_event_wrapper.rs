@@ -1,7 +1,8 @@
 use super::traits::{Control, EventProcessStatus};
 use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
-use crate::prelude::{colorpicker, threestatebox, ThreeStateBoxEvents};
+use crate::prelude::keyselector::events::KeySelectorEvents;
+use crate::prelude::{colorpicker, keyselector, threestatebox, ThreeStateBoxEvents};
 use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
@@ -15,6 +16,7 @@ pub(crate) enum ControlEventData {
     ThreeStateBox(threestatebox::events::EventData),
     ColorPicker(colorpicker::events::EventData),
     Password(password::events::EventData),
+    KeySelector(keyselector::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -48,6 +50,10 @@ impl ControlEvent {
                     PasswordEvents::on_cancel(receiver, self.emitter.cast())
                 }
             }
+            ControlEventData::KeySelector(data) => {
+                KeySelectorEvents::on_key_changed(receiver, self.emitter.cast(), data.new_key, data.old_key )
+            },
+            
         }
     }
 }
