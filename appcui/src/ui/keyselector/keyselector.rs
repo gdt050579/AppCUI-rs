@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::ui::keyselector::{events::EventData, Flags};
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct KeySelector {
     flags: Flags,
     key: Key,
@@ -89,5 +89,14 @@ impl OnKeyPressed for KeySelector {
             }
         }
         EventProcessStatus::Processed
+    }
+}
+impl OnMouseEvent for KeySelector {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => EventProcessStatus::Processed,
+            _ => EventProcessStatus::Ignored
+        }
+        
     }
 }
