@@ -7,6 +7,7 @@ use crate::{
         checkbox::events::CheckBoxEvents, 
         radiobox::events::RadioBoxEvents,
         password::events::PasswordEvents,
+        keyselector::events::KeySelectorEvents,
         threestatebox::events::ThreeStateBoxEvents,
         colorpicker::events::ColorPickerEvents,
         command_bar::events::GenericCommandBarEvents, 
@@ -93,6 +94,7 @@ pub trait Control:
     + PasswordEvents
     + ThreeStateBoxEvents
     + ColorPickerEvents
+    + KeySelectorEvents
     + GenericCommandBarEvents
     + WindowEvents
     + ToolBarEvents

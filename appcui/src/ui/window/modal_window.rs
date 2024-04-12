@@ -1,4 +1,4 @@
-use self::common::StatusFlags;
+use self::{common::StatusFlags, keyselector::events::KeySelectorEvents};
 
 use super::{events::ModalWindowMethods, Flags, Window};
 use crate::prelude::*;
@@ -67,6 +67,7 @@ impl<T> GenericCommandBarEvents for ModalWindow<T> {}
 impl<T> CheckBoxEvents for ModalWindow<T> {}
 impl<T> RadioBoxEvents for ModalWindow<T> {}
 impl<T> PasswordEvents for ModalWindow<T> {}
+impl<T> KeySelectorEvents for ModalWindow<T> {}
 impl<T> ButtonEvents for ModalWindow<T> {}
 impl<T> ColorPickerEvents for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
