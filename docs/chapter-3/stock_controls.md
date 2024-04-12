@@ -9,6 +9,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [Canvas](stock-controls/canvas.md)               | <img src="stock-controls/img/canvas.png" width=300/>        |
 | [CheckBox](stock-controls/checkbox.md)           | <img src="stock-controls/img/checkbox.png" width=300/>      |
 | [ColorPicker](stock-controls/colorpicker.md)     | <img src="stock-controls/img/colorpicker.png" width=300/>   |
+| [KeySelector](stock-controls/keyselector.md)     | <img src="stock-controls/img/keyselector.png" width=300/>   |
 | [Label](stock-controls/label.md)                 | <img src="stock-controls/img/label.png" width=300/>         |
 | [Panel](stock-controls/panel.md)                 | <img src="stock-controls/img/panel.png" width=300/>         |
 | [Password](stock-controls/password.md)           | <img src="stock-controls/img/password.png" width=300/>      |

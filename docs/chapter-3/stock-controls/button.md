@@ -6,7 +6,7 @@ Represent a clickable button control:
 
 To create a button use `Button::new` method (with 3 parameters: a caption, a layout and initialization flags).
 ```rs
-let b = Button::new("&Start", Layout::new("x:10,y:5,w:15"),botton::Flags::None);
+let b = Button::new("&Start", Layout::new("x:10,y:5,w:15"),button::Flags::None);
 ```
 or the macro `button!`
 ```rs
