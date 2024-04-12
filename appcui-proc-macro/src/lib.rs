@@ -357,6 +357,11 @@ pub fn accordion(input: TokenStream) -> TokenStream {
     crate::controls::accordion::create(input)
 }
 
+#[proc_macro]
+pub fn keyselector(input: TokenStream) -> TokenStream {
+    crate::controls::keyselector::create(input)
+}
+
 
 #[proc_macro]
 pub fn menuitem(input: TokenStream) -> TokenStream {

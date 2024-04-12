@@ -120,6 +120,21 @@ impl<'a> ControlBuilder<'a> {
             );
         }
     }
+    pub(super) fn add_key_parameter(&mut self, param_name: &str, default: Option<&str>) {
+        self.add_comma();
+        let value = self.parser.get(param_name);
+        if let Some(str_value) = value {            
+            let r = crate::key::builder::create_string(str_value.get_string());
+            self.content.push_str(&r);
+        } else if let Some(default_value) = default {
+            self.content.push_str(default_value);
+        } else {
+            panic!(
+                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
+        }
+    }
     pub(super) fn add_bool_parameter(&mut self, param_name: &str, default: Option<bool>) {
         self.add_comma();
         let value = self.parser.get_bool(param_name);
@@ -269,7 +284,7 @@ impl<'a> ControlBuilder<'a> {
         self.content.push('\t');
         self.content.push_str(content);
         self.content.push('\n');
-    }    
+    }
     #[inline(always)]
     pub(super) fn get_dict(&mut self, name: &str) -> Option<&mut NamedParamsMap<'a>> {
         self.parser.get_mut(name)?.get_dict()
@@ -277,6 +292,10 @@ impl<'a> ControlBuilder<'a> {
     #[inline(always)]
     pub(super) fn get_list(&mut self, name: &str) -> Option<&mut Vec<Value<'a>>> {
         self.parser.get_mut(name)?.get_list()
+    }
+    #[inline(always)]
+    pub(super) fn get_string(&mut self, name: &str) -> Option<&str> {
+        Some(self.parser.get_mut(name)?.get_string())
     }
     #[inline(always)]
     pub(super) fn get_i32(&mut self, name: &str) -> Option<i32> {
