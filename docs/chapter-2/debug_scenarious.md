@@ -155,7 +155,7 @@ We can inspect inspect if the position of the window is correct. We can also not
 
 25. `CheckHash(0x419533D4BBEFE538)` - finally we check the new hash to see if it maches the one we expect.
 
-**Remarsk**: using unit tests (while it works with the `Paint` command activated) might look strange on the actual screen (especially if all you need is to validate an example). As such, it is best that after one example such as the previous one was validated, to add another command at the begining of the script: `Paint.Enable(false)`. This will not change the logic of the script, instead it will not print anything on the screen. As such, the final test function should look like this:
+**Remark**: using unit tests (while it works with the `Paint` command activated) might look strange on the actual screen (especially if all you need is to validate an example). As such, it is best that after one example such as the previous one was validated, to add another command at the begining of the script: `Paint.Enable(false)`. This will not change the logic of the script, instead it will not print anything on the screen. As such, the final test function should look like this:
 
 ```rs
 #[test]

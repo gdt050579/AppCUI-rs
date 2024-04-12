@@ -8,7 +8,7 @@
 - [Basic concepts](chapter-2/basic_concepts.md)
     - [Application](chapter-2/application.md)
         - [Debug scenarios](chapter-2/debug_scenarious.md)
-        - [Recording events]()
+        - [Recording events](chapter-2/event_recording.md)
     - [Terminals](chapter-2/terminals.md)
         - [Windows Console]()
         - [NCurses]()

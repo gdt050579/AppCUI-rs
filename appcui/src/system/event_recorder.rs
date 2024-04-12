@@ -68,16 +68,16 @@ impl Display for Command {
             }
             Command::Resize(sz) => write!(f, "Resize({},{})\n", sz.width, sz.height),
             Command::MouseMove(cmd) => write!(f, "Mouse.Move({},{})\n", cmd.x, cmd.y),
-            Command::MouseHold(cmd) => write!(f, "Mouse.Hold({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
+            Command::MouseHold(cmd) => write!(f, "Mouse.Hold({},{},{})\n", cmd.x, cmd.y, cmd.button.name()),
             Command::MouseRelease(cmd) => write!(f, "Mouse.Release({},{},left)\n", cmd.x, cmd.y),
-            Command::MouseClick(cmd) => write!(f, "Mouse.Click({},{},{})\n", cmd.x, cmd.y, cmd.button.get_name()),
+            Command::MouseClick(cmd) => write!(f, "Mouse.Click({},{},{})\n", cmd.x, cmd.y, cmd.button.name()),
             Command::MouseDrag(cmd) => write!(f, "Mouse.Drag({},{},{},{})\n", cmd.x1, cmd.y1, cmd.x2, cmd.y2),
 
             Command::MouseWheel(cmd) => {
                 if cmd.times > 1 {
-                    write!(f, "Mouse.Wheel({},{},{},{})\n", cmd.x, cmd.y, cmd.dir.get_name(), cmd.times)
+                    write!(f, "Mouse.Wheel({},{},{},{})\n", cmd.x, cmd.y, cmd.dir.name(), cmd.times)
                 } else {
-                    write!(f, "Mouse.Wheel({},{},{})\n", cmd.x, cmd.y, cmd.dir.get_name())
+                    write!(f, "Mouse.Wheel({},{},{})\n", cmd.x, cmd.y, cmd.dir.name())
                 }
             }
             Command::Paint(cmd) => write!(f, "Paint('{}')\n", cmd.state_name),
