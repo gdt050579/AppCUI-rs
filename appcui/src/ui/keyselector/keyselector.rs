@@ -17,7 +17,7 @@ impl KeySelector {
         obj
     }
     #[inline(always)]
-    pub fn key(&self)->Key {
+    pub fn key(&self) -> Key {
         self.key
     }
     #[inline(always)]
@@ -44,9 +44,9 @@ impl OnPaint for KeySelector {
         } else {
             if self.key == Key::None {
                 if self.has_focus() {
-                    surface.write_string(1, 0, k, attr, false);
+                    surface.write_string(1, 0, "None", attr, false);
                 } else {
-                    surface.write_string(1, 0, m, theme.editor.inactive, false);
+                    surface.write_string(1, 0, "None", theme.editor.inactive, false);
                 }
             } else {
                 surface.write_string(1, 0, k, attr, false);
@@ -61,17 +61,17 @@ impl OnKeyPressed for KeySelector {
     fn on_key_pressed(&mut self, key: Key, _: char) -> EventProcessStatus {
         match key.code {
             KeyCode::Enter => {
-                if !self.flags.contains(Flags::AcceptEnter) {
+                if (!self.flags.contains(Flags::AcceptEnter)) || (self.flags.contains(Flags::ReadOnly)) {
                     return EventProcessStatus::Ignored;
                 }
             }
             KeyCode::Escape => {
-                if !self.flags.contains(Flags::AcceptEscape) {
+                if (!self.flags.contains(Flags::AcceptEscape)) || (self.flags.contains(Flags::ReadOnly)) {
                     return EventProcessStatus::Ignored;
                 }
             }
             KeyCode::Tab => {
-                if !self.flags.contains(Flags::AcceptTab) {
+                if (!self.flags.contains(Flags::AcceptTab)) || (self.flags.contains(Flags::ReadOnly)) {
                     return EventProcessStatus::Ignored;
                 }
             }
@@ -95,8 +95,7 @@ impl OnMouseEvent for KeySelector {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter | MouseEvent::Leave => EventProcessStatus::Processed,
-            _ => EventProcessStatus::Ignored
+            _ => EventProcessStatus::Ignored,
         }
-        
     }
 }
