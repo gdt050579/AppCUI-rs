@@ -165,7 +165,7 @@ fn check_events() {
     struct MyWin {
         info: Handle<Label>,
         ks: Handle<KeySelector>,
-    }
+    } 
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {

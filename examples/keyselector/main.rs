@@ -21,7 +21,7 @@ impl MyWin {
         win
     }
     fn update_info(&mut self) {
-        let key = self.control(self.ks).and_then(|obj| Some(obj.key())).unwrap_or(Key::None);
+        let key = self.control(self.ks).map(|obj| obj.key()).unwrap_or(Key::None);
         let s = if key == Key::None {
             "<none>".to_string()
         } else {

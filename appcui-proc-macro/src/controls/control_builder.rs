@@ -294,10 +294,6 @@ impl<'a> ControlBuilder<'a> {
         self.parser.get_mut(name)?.get_list()
     }
     #[inline(always)]
-    pub(super) fn get_string(&mut self, name: &str) -> Option<&str> {
-        Some(self.parser.get_mut(name)?.get_string())
-    }
-    #[inline(always)]
     pub(super) fn get_i32(&mut self, name: &str) -> Option<i32> {
         self.parser.get_mut(name)?.get_i32()
     }

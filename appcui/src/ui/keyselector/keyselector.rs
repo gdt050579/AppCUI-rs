@@ -41,16 +41,14 @@ impl OnPaint for KeySelector {
         if !m.is_empty() {
             surface.write_string(1, 0, m, attr, false);
             surface.write_string(1 + m.len() as i32, 0, k, attr, false);
-        } else {
-            if self.key == Key::None {
-                if self.has_focus() {
-                    surface.write_string(1, 0, "None", attr, false);
-                } else {
-                    surface.write_string(1, 0, "None", theme.editor.inactive, false);
-                }
+        } else if self.key == Key::None {
+            if self.has_focus() {
+                surface.write_string(1, 0, "None", attr, false);
             } else {
-                surface.write_string(1, 0, k, attr, false);
+                surface.write_string(1, 0, "None", theme.editor.inactive, false);
             }
+        } else {
+            surface.write_string(1, 0, k, attr, false);
         }
         if self.has_focus() {
             surface.set_cursor(1, 0);
@@ -77,16 +75,14 @@ impl OnKeyPressed for KeySelector {
             }
             _ => {}
         }
-        if !self.flags.contains(Flags::ReadOnly) {
-            if self.key != key {
-                let old = self.key;
-                self.key = key;
-                self.raise_event(ControlEvent {
-                    emitter: self.handle,
-                    receiver: self.event_processor,
-                    data: ControlEventData::KeySelector(EventData { new_key: key, old_key: old }),
-                });
-            }
+        if !self.flags.contains(Flags::ReadOnly) && self.key != key {
+            let old = self.key;
+            self.key = key;
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::KeySelector(EventData { new_key: key, old_key: old }),
+            });
         }
         EventProcessStatus::Processed
     }
