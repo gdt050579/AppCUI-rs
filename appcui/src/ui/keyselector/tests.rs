@@ -87,3 +87,75 @@ fn check_tab_key() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_enter_key() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(20,2,left)
+        Mouse.Move(0,0)
+        Paint('initial state (focus on first)')   
+        CheckHash(0xD32B06D73947F7A0)
+        Key.Pressed(F5)
+        Paint('Now the key is F5')   
+        CheckHash(0x3FDB25EF5AE3C344)
+        Key.Pressed(Enter)
+        Paint('Now the key is Enter')   
+        CheckHash(0x9E7ABA2EFC88CBF)
+        Key.Pressed(Tab)
+        Paint('Focus on the second keyselector')   
+        CheckHash(0x18530A81C49D2DAF)
+        Key.Pressed(Enter)
+        Paint('Nothing changes - Enter is not captured')   
+        CheckHash(0x18530A81C49D2DAF)
+        Key.Pressed(Insert)
+        Paint('Insert is the second keyselector')   
+        CheckHash(0x5657C532B015EC26)
+        Key.Pressed(Tab)
+        Paint('Focus on the 3rd keyselector')   
+        CheckHash(0xE96A44D9FC272DB6)
+        Key.Pressed(Enter)
+        Paint('Nothing changes - 3rd report is readonly')   
+        CheckHash(0xE96A44D9FC272DB6)
+        Key.Pressed(F3)
+        Paint('Nothing changes - 3rd report is readonly (2)')   
+        CheckHash(0xE96A44D9FC272DB6)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("test,d:c,w:40,h:10");
+    w.add(keyselector!("F1,x:1,y:1,w:35,h:1,flags:AcceptEnter"));
+    w.add(keyselector!("x:1,y:3,w:35,h:1"));
+    w.add(keyselector!("F2,x:1,y:5,w:35,h:1,flags:[AcceptEnter,ReadOnly]"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_esc_key() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(20,2,left)
+        Mouse.Move(0,0)
+        Paint('initial state (focus on first)')   
+        CheckHash(0xD32B06D73947F7A0)
+        Key.Pressed(F5)
+        Paint('Now the key is F5')   
+        CheckHash(0x3FDB25EF5AE3C344)
+        Key.Pressed(Escape)
+        Paint('Now the key is Escape')   
+        CheckHash(0x4A4FCD3F96196F36)
+        Key.Pressed(Tab,2)
+        Paint('Focus on the 3rd keyselector')   
+        CheckHash(0x5DB16390FC968356)
+        Key.Pressed(Escape)
+        Paint('Window is closed (escape is captured)')   
+        CheckHash(0x734FECAF52FDE955)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("test,d:c,w:40,h:10");
+    w.add(keyselector!("F1,x:1,y:1,w:35,h:1,flags:AcceptEscape"));
+    w.add(keyselector!("x:1,y:3,w:35,h:1"));
+    w.add(keyselector!("F2,x:1,y:5,w:35,h:1,flags:[AcceptEscape,ReadOnly]"));
+    a.add_window(w);
+    a.run();
+}
