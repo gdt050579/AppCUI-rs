@@ -15,12 +15,12 @@ fn check_on_paint() {
         keyselector::Flags::None,
     ));
     w.add(KeySelector::new(
-        Key::new(KeyCode::Insert, KeyModifier::Ctrl|KeyModifier::Alt),
+        Key::new(KeyCode::Insert, KeyModifier::Ctrl | KeyModifier::Alt),
         Layout::new("x:1,y:3,w:35,h:1"),
         keyselector::Flags::None,
     ));
     let mut ks = KeySelector::new(
-        Key::new(KeyCode::Escape, KeyModifier::Ctrl|KeyModifier::Shift),
+        Key::new(KeyCode::Escape, KeyModifier::Ctrl | KeyModifier::Shift),
         Layout::new("x:1,y:5,w:35,h:1"),
         keyselector::Flags::AcceptEscape,
     );
@@ -29,7 +29,6 @@ fn check_on_paint() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_macro() {
@@ -157,5 +156,57 @@ fn check_esc_key() {
     w.add(keyselector!("x:1,y:3,w:35,h:1"));
     w.add(keyselector!("F2,x:1,y:5,w:35,h:1,flags:[AcceptEscape,ReadOnly]"));
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_events() {
+    #[Window(events = KeySelectorEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        ks: Handle<KeySelector>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new("d:c,w:57,h:7"), window::Flags::None),
+                info: Handle::None,
+                ks: Handle::None,
+            };
+            me.info = me.add(Label::new("<none>", Layout::new("x:1,y:1,w:55,h:2")));
+            me.ks = me.add(keyselector!("F1,x:1,y:3,w:35"));
+            me
+        }
+        fn set_info(&mut self, txt: &str) {
+            let h_label = self.info;
+            if let Some(label) = self.control_mut(h_label) {
+                label.set_caption(txt);
+            }
+        }
+    }
+    impl KeySelectorEvents for MyWin {
+        fn on_key_changed(&mut self, _handle: Handle<KeySelector>, new_key: Key, old_key: Key) -> EventProcessStatus {
+            let s = format!(
+                "Old: {}{}\nNew: {}{}",
+                old_key.modifier.name(),
+                old_key.code.name(),
+                new_key.modifier.name(),
+                new_key.code.name()
+            );
+            self.set_info(&s);
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0xF7B889598DA3905D)
+        Key.Pressed(Ctrl+Alt+Shift+F5)
+        Paint('Now the key is F5')   
+        CheckHash(0x8EDEC6861A791691)
+   ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
