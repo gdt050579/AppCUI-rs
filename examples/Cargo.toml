@@ -78,3 +78,7 @@ path = "tab/main.rs"
 [[example]]
 name = "accordion"
 path = "accordion/main.rs"
+
+[[example]]
+name = "keyselector"
+path = "keyselector/main.rs"
