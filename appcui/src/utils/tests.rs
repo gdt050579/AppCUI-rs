@@ -1,5 +1,6 @@
 use crate::system::Handle;
 use crate::system::HandleSupport;
+use crate::utils::glyphs::Glyphs;
 use crate::utils::HandleManager;
 
 use super::KeyValueParser;
@@ -167,4 +168,12 @@ fn check_hanlde_manager() {
     // no free spacess stored
     assert!(man.free_spaces() == 0);
     assert!(man.allocated_objects() == 3);
+}
+
+
+#[test]
+fn check_next_char() {
+    let g = Glyphs::from("123❤️╬▶-〓GDT");
+    assert_eq!(g.text().chars().count(),12);
+    assert_eq!(g.count(),11);
 }
