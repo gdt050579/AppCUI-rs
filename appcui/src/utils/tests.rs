@@ -172,8 +172,20 @@ fn check_hanlde_manager() {
 
 
 #[test]
-fn check_next_char() {
+fn check_glyph_char_and_size() {
     let g = Glyphs::from("123❤️╬▶-〓GDT");
     assert_eq!(g.text().chars().count(),12);
     assert_eq!(g.count(),11);
+    assert_eq!(g.character(0),Some(('1',1)));
+    assert_eq!(g.character(2),Some(('3',1)));
+    assert_eq!(g.character(3),Some(('❤',6)));
+    assert_eq!(g.character(9),Some(('╬',3)));
+    assert_eq!(g.character(12),Some(('▶',3)));
+    assert_eq!(g.character(15),Some(('-',1)));
+    assert_eq!(g.character(16),Some(('〓',3)));
+    assert_eq!(g.character(19),Some(('G',1)));
+    assert_eq!(g.character(20),Some(('D',1)));
+    assert_eq!(g.character(21),Some(('T',1)));
+    assert_eq!(g.character(22),None);
+
 }
