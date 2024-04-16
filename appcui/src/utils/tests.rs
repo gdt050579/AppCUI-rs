@@ -176,6 +176,8 @@ fn check_glyph_char_and_size() {
     let g = Glyphs::from("123❤️╬▶-〓GDT");
     assert_eq!(g.text().chars().count(),12);
     assert_eq!(g.count(),11);
+    assert_eq!(g.len(),22);
+
     assert_eq!(g.character(0),Some(('1',1)));
     assert_eq!(g.character(2),Some(('3',1)));
     assert_eq!(g.character(3),Some(('❤',6)));
@@ -187,5 +189,21 @@ fn check_glyph_char_and_size() {
     assert_eq!(g.character(20),Some(('D',1)));
     assert_eq!(g.character(21),Some(('T',1)));
     assert_eq!(g.character(22),None);
+
+    let poz = g.len();
+    assert_eq!(g.prev_character(poz),Some(('T',1)));
+    assert_eq!(g.prev_character(poz-1),Some(('D',1)));
+    assert_eq!(g.prev_character(poz-2),Some(('G',1)));
+    assert_eq!(g.prev_character(poz-3),Some(('〓',3)));
+    assert_eq!(g.prev_character(poz-6),Some(('-',1)));
+    assert_eq!(g.prev_character(poz-7),Some(('▶',3)));
+    assert_eq!(g.prev_character(poz-10),Some(('╬',3)));
+    assert_eq!(g.prev_character(poz-13),Some(('❤',6)));
+    assert_eq!(g.prev_character(poz-19),Some(('3',1)));
+    assert_eq!(g.prev_character(poz-20),Some(('2',1)));
+    assert_eq!(g.prev_character(poz-21),Some(('1',1)));
+    assert_eq!(g.prev_character(poz-22),None);
+    assert_eq!(g.prev_character(0),None);
+
 
 }

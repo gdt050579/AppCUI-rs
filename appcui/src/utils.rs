@@ -4,6 +4,7 @@ pub (crate) mod vector_index;
 pub (crate) mod handle_manager;
 #[cfg(test)]
 mod tests;
+mod glyphs;
 
 
 pub (crate) use self::key_value_parser::KeyValueParser;
