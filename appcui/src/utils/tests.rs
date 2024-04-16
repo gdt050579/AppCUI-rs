@@ -204,6 +204,17 @@ fn check_glyph_char_and_size() {
     assert_eq!(g.prev_character(poz-21),Some(('1',1)));
     assert_eq!(g.prev_character(poz-22),None);
     assert_eq!(g.prev_character(0),None);
+}
 
 
+
+#[test]
+fn check_glyph_next_pos() {
+    let g = Glyphs::from("123❤️╬▶-〓GDT");
+    assert_eq!(g.next_pos(0,3),3);
+    assert_eq!(g.next_pos(2, 2),9);
+    assert_eq!(g.next_pos(9,100),22);
+    assert_eq!(g.next_pos(9,1),12);
+    assert_eq!(g.next_pos(9,4),19);
+    assert_eq!(&g.text()[9..g.next_pos(9,4)],"╬▶-〓");
 }

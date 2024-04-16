@@ -25,6 +25,7 @@ impl Glyphs {
         text.chars().filter(|&c| !Glyphs::is_variation_selector(c)).count()
     }
 
+    #[inline(always)]
     pub fn character(&self, offset: usize) -> Option<(char, u32)> {
         let mut chars = self.text[offset..].chars();
         chars.next().map(|first_char| {
@@ -39,6 +40,8 @@ impl Glyphs {
             (first_char, char_size)
         })
     }
+
+    #[inline(always)]
     pub fn prev_character(&self, offset: usize) -> Option<(char, u32)> {
         if offset == 0 || offset > self.text.len() {
             return None;
@@ -52,7 +55,7 @@ impl Glyphs {
             if Glyphs::is_variation_selector(previous_char) {
                 if let Some((_, char_before_previous_char)) = char_indices.next() {
                     total_size += char_before_previous_char.len_utf8() as u32;
-                    return Some((char_before_previous_char, total_size));    
+                    return Some((char_before_previous_char, total_size));
                 }
             }
             Some((previous_char, total_size))
@@ -60,7 +63,20 @@ impl Glyphs {
             None
         }
     }
-
+    pub fn next_pos(&self, current_pos: usize, count_chars: usize) -> usize {
+        let len = self.text.len();
+        let mut count = count_chars;
+        let mut pos = current_pos;
+        while (count>0) && (pos<len) {
+            if let Some((_,sz)) = self.character(pos) {
+                pos += sz as usize;
+            } else {
+                break;
+            }
+            count -= 1;
+        }
+        pos
+    }
 }
 
 impl From<&str> for Glyphs {
