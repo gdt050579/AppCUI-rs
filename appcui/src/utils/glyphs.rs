@@ -67,9 +67,27 @@ impl Glyphs {
         let len = self.text.len();
         let mut count = count_chars;
         let mut pos = current_pos;
-        while (count>0) && (pos<len) {
-            if let Some((_,sz)) = self.character(pos) {
+        while (count > 0) && (pos < len) {
+            if let Some((_, sz)) = self.character(pos) {
                 pos += sz as usize;
+            } else {
+                break;
+            }
+            count -= 1;
+        }
+        pos
+    }
+    pub fn previous_pos(&self, current_pos: usize, count_chars: usize) -> usize {
+        let mut count = count_chars;
+        let mut pos = current_pos;
+        while (count > 0) && (pos > 0) {
+            if let Some((_, sz)) = self.prev_character(pos) {
+                let sz = sz as usize;
+                if sz > pos {
+                    pos = 0;
+                } else {
+                    pos -= sz;
+                }
             } else {
                 break;
             }

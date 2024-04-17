@@ -218,3 +218,12 @@ fn check_glyph_next_pos() {
     assert_eq!(g.next_pos(9,4),19);
     assert_eq!(&g.text()[9..g.next_pos(9,4)],"╬▶-〓");
 }
+
+
+#[test]
+fn check_glyph_previous_pos() {
+    let g = Glyphs::from("123❤️╬▶-〓GDT");
+    assert_eq!(g.previous_pos(22,3),19);
+    assert_eq!(g.previous_pos(19,3),12);
+    assert_eq!(&g.text()[2..g.previous_pos(12,1)],"3❤️");
+}
