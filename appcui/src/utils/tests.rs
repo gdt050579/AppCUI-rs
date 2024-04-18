@@ -226,4 +226,5 @@ fn check_glyph_previous_pos() {
     assert_eq!(g.previous_pos(22,3),19);
     assert_eq!(g.previous_pos(19,3),12);
     assert_eq!(&g.text()[2..g.previous_pos(12,1)],"3❤️");
+    assert_eq!(g.previous_pos(19,1000),0);
 }
