@@ -15,3 +15,4 @@ pub (crate) mod canvas;
 pub (crate) mod tab;
 pub (crate) mod accordion;
 pub (crate) mod keyselector;
+pub (crate) mod textfield;
