@@ -1,6 +1,6 @@
+use super::events::EventData;
 use super::Flags;
 use crate::prelude::*;
-use crate::ui::textfield::events::EventData;
 use crate::utils::Glyphs;
 
 struct Cursor {
@@ -25,7 +25,18 @@ impl Selection {
     }
     #[inline(always)]
     fn update(&mut self, start: usize, end: usize) {
-        todo!()
+        if !self.has_selection() {
+            self.origin = start;
+            self.end = start.max(end);
+            self.start = start.min(end);            
+        } else {
+            self.start = self.origin.min(end);
+            self.end = self.origin.max(end);
+        }
+    }
+    #[inline(always)]
+    fn contains(&self, pos: usize) -> bool {
+        (pos >= self.start) && (pos <= self.end)
     }
 }
 
@@ -150,9 +161,15 @@ impl OnPaint for TextField {
         let mut x = 1;
         let mut y = 0;
         let mut ch = Character::with_attributes(' ', attr);
+        let mut ch_selected = Character::with_attributes(' ', theme.editor.pressed_or_selectd);
         while let Some((code, glyph_size)) = self.glyphs.character(pos) {
-            ch.code = code;
-            surface.write_char(x, y, ch);
+            if (show_cursor) && self.selection.contains(pos) {
+                ch_selected.code = code;
+                surface.write_char(x, y, ch_selected);
+            } else {
+                ch.code = code;
+                surface.write_char(x, y, ch);
+            }
             if show_cursor && (pos == self.cursor.pos) {
                 surface.set_cursor(x, y);
             }
