@@ -118,7 +118,9 @@ impl TextField {
         todo!()
     }
     fn select_all(&mut self) {
-        todo!()
+        self.selection = Selection::NONE;
+        self.selection.update(0, self.glyphs.len());
+        self.move_cursor_to(self.glyphs.len(), true);
     }
     fn delete_current_character(&mut self) {
         todo!()
