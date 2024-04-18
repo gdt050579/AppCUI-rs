@@ -4,6 +4,5 @@ use EnumBitFlags::EnumBitFlags;
 pub enum Flags {
     ProcessEnter             = 0x0001,
     Readonly                 = 0x0002,
-    SyntaxHighlighting       = 0x0004,
-    DisableAutoSelectOnFocus = 0x0008,
+    DisableAutoSelectOnFocus = 0x0004,
 }
