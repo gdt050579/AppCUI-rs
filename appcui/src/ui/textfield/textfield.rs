@@ -36,7 +36,7 @@ impl Selection {
     }
     #[inline(always)]
     fn contains(&self, pos: usize) -> bool {
-        (pos >= self.start) && (pos <= self.end)
+        (pos >= self.start) && (pos < self.end)
     }
 }
 
