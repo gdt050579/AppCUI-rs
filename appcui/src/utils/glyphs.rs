@@ -1,38 +1,27 @@
-pub(crate) struct Glyphs {
-    text: String,
-    count: usize,
+pub(crate) trait GlyphParser {
+    fn count_glyphs(&self) -> usize;
+    fn glyph(&self, offset: usize) -> Option<(char, u32)>;
+    fn previous_glyph(&self, offset: usize) -> Option<(char, u32)>;
+    fn next_pos(&self, current_pos: usize, count_glyphs: usize) -> usize;
+    fn previous_pos(&self, current_pos: usize, count_glyphs: usize) -> usize;
 }
-impl Glyphs {
-    #[inline(always)]
-    pub fn count(&self) -> usize {
-        self.count
-    }
-    #[inline(always)]
-    pub fn len(&self) -> usize {
-        self.text.len()
-    }
-    #[inline(always)]
-    pub fn text(&self) -> &str {
-        self.text.as_str()
-    }
 
-    #[inline(always)]
-    fn is_variation_selector(c: char) -> bool {
-        matches!(c, '\u{FE00}'..='\u{FE0F}' | '\u{E0100}'..='\u{E01EF}')
-    }
-    #[inline(always)]
-    fn count_glyphs(text: &str) -> usize {
-        text.chars().filter(|&c| !Glyphs::is_variation_selector(c)).count()
-    }
+#[inline(always)]
+fn is_variation_selector(c: char) -> bool {
+    matches!(c, '\u{FE00}'..='\u{FE0F}' | '\u{E0100}'..='\u{E01EF}')
+}
 
-    #[inline(always)]
-    pub fn character(&self, offset: usize) -> Option<(char, u32)> {
-        let mut chars = self.text[offset..].chars();
+impl GlyphParser for String {
+    fn count_glyphs(&self) -> usize {
+        self.chars().filter(|&c| !is_variation_selector(c)).count()
+    }
+    fn glyph(&self, offset: usize) -> Option<(char, u32)> {
+        let mut chars = self[offset..].chars();
         chars.next().map(|first_char| {
             let mut char_size = first_char.len_utf8() as u32;
             if char_size > 1 {
                 if let Some(next_char) = chars.next() {
-                    if Glyphs::is_variation_selector(next_char) {
+                    if is_variation_selector(next_char) {
                         char_size += next_char.len_utf8() as u32;
                     }
                 }
@@ -41,18 +30,17 @@ impl Glyphs {
         })
     }
 
-    #[inline(always)]
-    pub fn prev_character(&self, offset: usize) -> Option<(char, u32)> {
-        if offset == 0 || offset > self.text.len() {
+    fn previous_glyph(&self, offset: usize) -> Option<(char, u32)> {
+        if offset == 0 || offset > self.len() {
             return None;
         }
-        let slice = &self.text[..offset];
+        let slice = &self[..offset];
         let mut char_indices = slice.char_indices().rev();
         let mut total_size = 0;
 
         if let Some((_, previous_char)) = char_indices.next() {
             total_size += previous_char.len_utf8() as u32;
-            if Glyphs::is_variation_selector(previous_char) {
+            if is_variation_selector(previous_char) {
                 if let Some((_, char_before_previous_char)) = char_indices.next() {
                     total_size += char_before_previous_char.len_utf8() as u32;
                     return Some((char_before_previous_char, total_size));
@@ -63,12 +51,13 @@ impl Glyphs {
             None
         }
     }
-    pub fn next_pos(&self, current_pos: usize, count_chars: usize) -> usize {
-        let len = self.text.len();
-        let mut count = count_chars;
+
+    fn next_pos(&self, current_pos: usize, count_glyphs: usize) -> usize {
+        let len = self.len();
+        let mut count = count_glyphs;
         let mut pos = current_pos;
         while (count > 0) && (pos < len) {
-            if let Some((_, sz)) = self.character(pos) {
+            if let Some((_, sz)) = self.glyph(pos) {
                 pos += sz as usize;
             } else {
                 break;
@@ -77,11 +66,12 @@ impl Glyphs {
         }
         pos
     }
-    pub fn previous_pos(&self, current_pos: usize, count_chars: usize) -> usize {
-        let mut count = count_chars;
+
+    fn previous_pos(&self, current_pos: usize, count_glyphs: usize) -> usize {
+        let mut count = count_glyphs;
         let mut pos = current_pos;
         while (count > 0) && (pos > 0) {
-            if let Some((_, sz)) = self.prev_character(pos) {
+            if let Some((_, sz)) = self.previous_glyph(pos) {
                 let sz = sz as usize;
                 if sz > pos {
                     pos = 0;
@@ -94,16 +84,5 @@ impl Glyphs {
             count -= 1;
         }
         pos
-    }
-}
-
-impl From<&str> for Glyphs {
-    fn from(value: &str) -> Self {
-        let mut obj = Self {
-            text: String::from(value),
-            count: 0,
-        };
-        obj.count = Glyphs::count_glyphs(obj.text.as_str());
-        obj
     }
 }

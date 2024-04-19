@@ -1,7 +1,7 @@
 use super::events::EventData;
 use super::Flags;
 use crate::prelude::*;
-use crate::utils::Glyphs;
+use crate::utils::GlyphParser;
 
 struct Cursor {
     pos: usize,
@@ -20,12 +20,12 @@ impl Selection {
         origin: usize::MAX,
     };
     #[inline(always)]
-    fn has_selection(&self) -> bool {
-        self.origin != usize::MAX
+    fn is_empty(&self) -> bool {
+        self.origin == usize::MAX
     }
     #[inline(always)]
     fn update(&mut self, start: usize, end: usize) {
-        if !self.has_selection() {
+        if self.is_empty() {
             self.origin = start;
             self.end = start.max(end);
             self.start = start.min(end);
@@ -44,7 +44,7 @@ impl Selection {
 pub struct TextField {
     cursor: Cursor,
     selection: Selection,
-    glyphs: Glyphs,
+    glyphs: String,
     flags: Flags,
 }
 impl TextField {
@@ -53,7 +53,7 @@ impl TextField {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             cursor: Cursor { pos: 0, start: 0, end: 0 },
             selection: Selection::NONE,
-            glyphs: Glyphs::from(text),
+            glyphs: String::from(text),
             flags,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
@@ -108,11 +108,16 @@ impl TextField {
         todo!()
     }
     fn copy_text(&mut self) {
-        todo!()
+        if !self.selection.is_empty() {
+            todo!()
+        } 
     }
     fn paste_text(&mut self) {
         if self.is_readonly() {
             return;
+        }
+        if !self.selection.is_empty() {
+            self.delete_selection();
         }
         todo!()
     }
@@ -120,7 +125,11 @@ impl TextField {
         if self.is_readonly() {
             return;
         }
-        todo!()
+        if !self.selection.is_empty() {
+            // copy text
+            todo!();
+            self.delete_selection();
+        } 
     }
     fn convert_to_upper(&mut self) {
         if self.is_readonly() {
@@ -139,21 +148,35 @@ impl TextField {
         self.selection.update(0, self.glyphs.len());
         self.move_cursor_to(self.glyphs.len(), true);
     }
+    fn delete_selection(&mut self) {
+        todo!()
+    }
     fn delete_current_character(&mut self) {
         if self.is_readonly() {
             return;
         }
-        todo!()
+        if self.selection.is_empty() {
+            todo!()
+        } else {
+            self.delete_selection();
+        }
     }
     fn delete_previous_character(&mut self) {
         if self.is_readonly() {
             return;
         }
-        todo!()
+        if self.selection.is_empty() {
+            todo!()
+        } else {
+            self.delete_selection();
+        }
     }
     fn add_char(&mut self, character: char) {
         if self.is_readonly() {
             return;
+        }
+        if !self.selection.is_empty() {
+            self.delete_selection();
         }
         todo!()
     }
@@ -190,7 +213,7 @@ impl OnPaint for TextField {
         let mut y = 0;
         let mut ch = Character::with_attributes(' ', attr);
         let mut ch_selected = Character::with_attributes(' ', theme.editor.pressed_or_selectd);
-        while let Some((code, glyph_size)) = self.glyphs.character(pos) {
+        while let Some((code, glyph_size)) = self.glyphs.glyph(pos) {
             if (show_cursor) && self.selection.contains(pos) {
                 ch_selected.code = code;
                 surface.write_char(x, y, ch_selected);
