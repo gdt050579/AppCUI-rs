@@ -71,7 +71,7 @@ impl TextField {
             return;
         }
         let sz = self.size();
-        let visible_glyphs = ((sz.height as usize) - 2) * (sz.width as usize);
+        let visible_glyphs = ((sz.width as usize) - 2) * (sz.height as usize);
 
         if self.cursor.pos < self.cursor.start {
             // scroll to the left
@@ -203,7 +203,7 @@ impl OnPaint for TextField {
             }
             x += 1;
             if x >= w {
-                x = 0;
+                x = 1;
                 y += 1;
             }
             pos += glyph_size as usize;
@@ -214,7 +214,12 @@ impl OnPaint for TextField {
         }
         // if it is the last char
         if show_cursor && (pos == self.cursor.pos) {
-            surface.set_cursor(x, y);
+            // if the cursor is located on the fist line outside the view --> put it on the last char but on previous line
+            if (y == sz.height as i32) && (x == 1) {
+                surface.set_cursor(sz.width as i32 - 1, sz.height as i32 - 1);
+            } else {
+                surface.set_cursor(x, y);
+            }
         }
     }
 }
