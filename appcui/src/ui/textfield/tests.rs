@@ -219,3 +219,96 @@ fn check_scroll_left_right() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_delete_1() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Home)
+        Paint('Text: [Hello ❤╬▶-]')   
+        CheckHash(0x5B8CEEE9E9B5B8F8)
+        CheckCursor(13,3)
+        Key.Pressed(Right,4)
+        Paint('Show: Hell|o| ❤╬▶-')   
+        CheckHash(0x5B8CEEE9E9B5B8F8)
+        CheckCursor(17,3)
+        Key.Pressed(Delete)
+        Paint('Show: Hell| |❤╬▶-〓')   
+        CheckHash(0x9D7057333DEA1294)
+        CheckCursor(17,3)
+        Key.Pressed(Delete)
+        Paint('Show: Hell|❤|╬▶-〓 ')   
+        CheckHash(0x21EE5121805EEE60)
+        CheckCursor(17,3)
+        Key.Pressed(Delete)
+        Paint('Show: Hell|╬|▶-〓 w')   
+        CheckHash(0xE17209AE4688CF0A)
+        CheckCursor(17,3)
+        Key.Pressed(Delete)
+        Paint('Show: Hell|▶|-〓 wo')   
+        CheckHash(0xD496D44D8168F24E)
+        CheckCursor(17,3)
+        Key.Pressed(Delete,3)
+        Paint('Show: Hell world')   
+        CheckHash(0x44E4F736AFDEAEC3)
+        CheckCursor(17,3)
+        Key.Pressed(Delete,5)
+        Paint('Show: Helld')   
+        CheckHash(0xB916CB18AB8F111)
+        CheckCursor(17,3)
+        Key.Pressed(Delete)
+        Paint('Show: Hell')   
+        CheckHash(0xA6A83D08E7B5430D)
+        CheckCursor(17,3)
+        Key.Pressed(Home)
+        Paint('Show: Hell')   
+        CheckHash(0xA6A83D08E7B5430D)
+        CheckCursor(13,3)
+        Key.Pressed(End)
+        Paint('Show: Hell')   
+        CheckHash(0xA6A83D08E7B5430D)
+        CheckCursor(17,3)
+        Key.Pressed(Home)
+        Key.Pressed(Delete,2)
+        Paint('Show: ll')   
+        CheckHash(0xD37A8CFC9107AD14)
+        CheckCursor(13,3)
+        Key.Pressed(End)
+        Paint('Show: ll')   
+        CheckHash(0xD37A8CFC9107AD14)
+        CheckCursor(15,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_delete_from_end() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Left)
+        Paint('Text: ▶-〓 worl|d|')   
+        CheckHash(0xB5F2856A17C1B50D)
+        CheckCursor(21,3)
+        Key.Pressed(Delete)
+        Paint('Text: ╬▶-〓 worl, cursor last')   
+        CheckHash(0x57F85A60FF685391)
+        CheckCursor(21,3)
+        Key.Pressed(Delete,10)
+        Paint('Text: ╬▶-〓 worl, cursor last, nothing changes')   
+        CheckHash(0x57F85A60FF685391)
+        CheckCursor(21,3)
+
+
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
