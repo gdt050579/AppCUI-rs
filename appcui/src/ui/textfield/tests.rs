@@ -312,3 +312,32 @@ fn check_delete_from_end() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_delete_after_selection() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Home)
+        Key.Pressed(Right,2)
+        Key.Pressed(Shift+Right,4)
+        Paint('Text: Hello |❤|╬▶-')   
+        CheckHash(0x473ABCF8BA20B908)
+        CheckCursor(19,3)
+        Key.Pressed(Delete)
+        Paint('Text:  He|❤|╬▶-〓 wo')   
+        CheckHash(0xE80B6D9DE88C7B68)
+        CheckCursor(15,3)
+        Key.Pressed(Delete,10)
+        Paint('Text: He|d|')   
+        CheckHash(0xE76A8A2CB6353D91)
+        CheckCursor(15,3)
+
+
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
