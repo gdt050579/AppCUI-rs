@@ -149,14 +149,22 @@ impl TextField {
         self.move_cursor_to(self.glyphs.len(), true);
     }
     fn delete_selection(&mut self) {
-        todo!()
+        if !self.selection.is_empty() {
+            let new_pos = self.selection.start;
+            self.glyphs.replace_range(self.selection.start..self.selection.end, "");
+            self.selection = Selection::NONE;
+            self.move_cursor_to(new_pos, false);
+        }
     }
     fn delete_current_character(&mut self) {
         if self.is_readonly() {
             return;
         }
         if self.selection.is_empty() {
-            todo!()
+            let next_pos = self.glyphs.next_pos(self.cursor.pos, 1);
+            if self.cursor.pos<next_pos {
+                self.glyphs.replace_range(self.cursor.pos..next_pos, "");
+            }
         } else {
             self.delete_selection();
         }
@@ -166,7 +174,11 @@ impl TextField {
             return;
         }
         if self.selection.is_empty() {
-            todo!()
+            let prev_pos = self.glyphs.previous_pos(self.cursor.pos, 1);
+            if prev_pos<self.cursor.pos {
+                self.glyphs.replace_range(prev_pos..self.cursor.pos, "");
+                self.move_cursor_to(prev_pos, false);
+            }
         } else {
             self.delete_selection();
         }
