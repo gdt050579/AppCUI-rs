@@ -191,7 +191,8 @@ impl TextField {
         if !self.selection.is_empty() {
             self.delete_selection();
         }
-        todo!()
+        self.glyphs.insert(self.cursor.pos, character);
+        self.move_cursor_with(1, false);
     }
 }
 impl OnResize for TextField {
