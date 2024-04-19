@@ -208,7 +208,7 @@ impl OnKeyPressed for TextField {
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Shift+Down") => {
-                self.move_cursor_with(((self.size().width as i32) - 2), key.modifier.contains(KeyModifier::Shift));
+                self.move_cursor_with((self.size().width as i32) - 2, key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Home") | key!("Shift+Home") => {
