@@ -66,7 +66,7 @@ impl TextField {
     }
 
     fn update_scroll_view(&mut self) {
-        if (self.cursor.pos >= self.cursor.start) && (self.cursor.pos <= self.cursor.end) {
+        if (self.cursor.pos >= self.cursor.start) && (self.cursor.pos < self.cursor.end) {
             // nothing to do --> curent pos is already in the view window
             return;
         }
@@ -80,7 +80,7 @@ impl TextField {
         } else {
             // scroll to the right
             self.cursor.end = self.cursor.pos;
-            self.cursor.start = self.glyphs.previous_pos(self.cursor.end, visible_glyphs);
+            self.cursor.start = self.glyphs.previous_pos(self.cursor.end, visible_glyphs - 1);
         }
     }
     fn move_cursor_with(&mut self, no_of_glyphs: i32, select: bool) {
@@ -110,7 +110,7 @@ impl TextField {
     fn copy_text(&mut self) {
         if !self.selection.is_empty() {
             todo!()
-        } 
+        }
     }
     fn paste_text(&mut self) {
         if self.is_readonly() {
@@ -129,7 +129,7 @@ impl TextField {
             // copy text
             todo!();
             self.delete_selection();
-        } 
+        }
     }
     fn convert_to_upper(&mut self) {
         if self.is_readonly() {
@@ -162,8 +162,9 @@ impl TextField {
         }
         if self.selection.is_empty() {
             let next_pos = self.glyphs.next_pos(self.cursor.pos, 1);
-            if self.cursor.pos<next_pos {
+            if self.cursor.pos < next_pos {
                 self.glyphs.replace_range(self.cursor.pos..next_pos, "");
+                self.update_scroll_view();
             }
         } else {
             self.delete_selection();
@@ -175,7 +176,7 @@ impl TextField {
         }
         if self.selection.is_empty() {
             let prev_pos = self.glyphs.previous_pos(self.cursor.pos, 1);
-            if prev_pos<self.cursor.pos {
+            if prev_pos < self.cursor.pos {
                 self.glyphs.replace_range(prev_pos..self.cursor.pos, "");
                 self.move_cursor_to(prev_pos, false);
             }
