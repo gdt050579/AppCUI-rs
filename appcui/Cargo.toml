@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 EnumBitFlags = "1.0.7"
 AppCUIProcMacro = {path = "../appcui-proc-macro"}
+ncurses = "6.0.0"
 
 [features]
 default = []
