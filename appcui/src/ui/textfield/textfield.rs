@@ -28,7 +28,7 @@ impl Selection {
         if !self.has_selection() {
             self.origin = start;
             self.end = start.max(end);
-            self.start = start.min(end);            
+            self.start = start.min(end);
         } else {
             self.start = self.origin.min(end);
             self.end = self.origin.max(end);
@@ -60,6 +60,11 @@ impl TextField {
         obj.cursor.pos = obj.glyphs.len();
         obj
     }
+    #[inline(always)]
+    pub fn is_readonly(&self) -> bool {
+        self.flags.contains(Flags::Readonly)
+    }
+
     fn update_scroll_view(&mut self) {
         if (self.cursor.pos >= self.cursor.start) && (self.cursor.pos <= self.cursor.end) {
             // nothing to do --> curent pos is already in the view window
@@ -106,15 +111,27 @@ impl TextField {
         todo!()
     }
     fn paste_text(&mut self) {
+        if self.is_readonly() {
+            return;
+        }
         todo!()
     }
     fn cut_text(&mut self) {
+        if self.is_readonly() {
+            return;
+        }
         todo!()
     }
     fn convert_to_upper(&mut self) {
+        if self.is_readonly() {
+            return;
+        }
         todo!()
     }
     fn convert_to_lower(&mut self) {
+        if self.is_readonly() {
+            return;
+        }
         todo!()
     }
     fn select_all(&mut self) {
@@ -123,12 +140,21 @@ impl TextField {
         self.move_cursor_to(self.glyphs.len(), true);
     }
     fn delete_current_character(&mut self) {
+        if self.is_readonly() {
+            return;
+        }
         todo!()
     }
     fn delete_previous_character(&mut self) {
+        if self.is_readonly() {
+            return;
+        }
         todo!()
     }
     fn add_char(&mut self, character: char) {
+        if self.is_readonly() {
+            return;
+        }
         todo!()
     }
 }
