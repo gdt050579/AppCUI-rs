@@ -65,9 +65,14 @@ impl TextField {
         self.flags.contains(Flags::Readonly)
     }
 
-    fn update_scroll_view(&mut self) {
+    fn update_scroll_view(&mut self, force_end_update: bool) {
         if (self.cursor.pos >= self.cursor.start) && (self.cursor.pos < self.cursor.end) {
             // nothing to do --> curent pos is already in the view window
+            if force_end_update {
+                let sz = self.size();
+                let visible_glyphs = ((sz.width as usize) - 2) * (sz.height as usize);
+                self.cursor.end = self.glyphs.next_pos(self.cursor.start, visible_glyphs);
+            }
             return;
         }
         let sz = self.size();
@@ -76,11 +81,12 @@ impl TextField {
         if self.cursor.pos < self.cursor.start {
             // scroll to the left
             self.cursor.start = self.cursor.pos;
-            self.cursor.end = self.glyphs.next_pos(self.cursor.start, visible_glyphs);
+            self.cursor.end = self.glyphs.next_pos(self.cursor.pos, visible_glyphs);
         } else {
             // scroll to the right
-            self.cursor.end = self.cursor.pos;
-            self.cursor.start = self.glyphs.previous_pos(self.cursor.end, visible_glyphs - 1);
+            self.cursor.start = self.glyphs.previous_pos(self.cursor.pos, visible_glyphs - 1);
+            // we add ONE to the end pot to satisfy (self.cursor.pos < self.cursor.end) condition
+            self.cursor.end = self.cursor.pos + 1;
         }
     }
     fn move_cursor_with(&mut self, no_of_glyphs: i32, select: bool) {
@@ -89,12 +95,12 @@ impl TextField {
         } else {
             self.glyphs.previous_pos(self.cursor.pos, (-no_of_glyphs) as usize)
         };
-        self.move_cursor_to(new_poz, select);
+        self.move_cursor_to(new_poz, select, false);
     }
-    fn move_cursor_to(&mut self, new_offset: usize, select: bool) {
+    fn move_cursor_to(&mut self, new_offset: usize, select: bool, force_end_update: bool) {
         let current_pos = self.cursor.pos;
         self.cursor.pos = new_offset.min(self.glyphs.len());
-        self.update_scroll_view();
+        self.update_scroll_view(force_end_update);
         if select {
             self.selection.update(current_pos, self.cursor.pos);
         } else {
@@ -146,14 +152,14 @@ impl TextField {
     fn select_all(&mut self) {
         self.selection = Selection::NONE;
         self.selection.update(0, self.glyphs.len());
-        self.move_cursor_to(self.glyphs.len(), true);
+        self.move_cursor_to(self.glyphs.len(), true, false);
     }
     fn delete_selection(&mut self) {
         if !self.selection.is_empty() {
             let new_pos = self.selection.start;
             self.glyphs.replace_range(self.selection.start..self.selection.end, "");
             self.selection = Selection::NONE;
-            self.move_cursor_to(new_pos, false);
+            self.move_cursor_to(new_pos, false, true);
         }
     }
     fn delete_current_character(&mut self) {
@@ -164,7 +170,7 @@ impl TextField {
             let next_pos = self.glyphs.next_pos(self.cursor.pos, 1);
             if self.cursor.pos < next_pos {
                 self.glyphs.replace_range(self.cursor.pos..next_pos, "");
-                self.update_scroll_view();
+                self.update_scroll_view(true);
             }
         } else {
             self.delete_selection();
@@ -177,8 +183,9 @@ impl TextField {
         if self.selection.is_empty() {
             let prev_pos = self.glyphs.previous_pos(self.cursor.pos, 1);
             if prev_pos < self.cursor.pos {
-                self.glyphs.replace_range(prev_pos..self.cursor.pos, "");
-                self.move_cursor_to(prev_pos, false);
+                let end_pos = self.cursor.pos;
+                self.glyphs.replace_range(prev_pos..end_pos, "");
+                self.move_cursor_to(prev_pos, false, true);
             }
         } else {
             self.delete_selection();
@@ -205,7 +212,7 @@ impl OnResize for TextField {
         };
         self.cursor.end = self.glyphs.next_pos(self.cursor.start, visible_chars);
         // check if the current cursor is within the scroll view and if not update the scroll view
-        self.update_scroll_view();
+        self.update_scroll_view(false);
     }
 }
 impl OnPaint for TextField {
@@ -280,11 +287,11 @@ impl OnKeyPressed for TextField {
                 return EventProcessStatus::Processed;
             }
             key!("Home") | key!("Shift+Home") => {
-                self.move_cursor_to(0, key.modifier.contains(KeyModifier::Shift));
+                self.move_cursor_to(0, key.modifier.contains(KeyModifier::Shift), false);
                 return EventProcessStatus::Processed;
             }
             key!("End") | key!("Shift+End") => {
-                self.move_cursor_to(self.glyphs.len(), key.modifier.contains(KeyModifier::Shift));
+                self.move_cursor_to(self.glyphs.len(), key.modifier.contains(KeyModifier::Shift), false);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Left") | key!("Ctrl+Shift+Left") => {

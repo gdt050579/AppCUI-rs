@@ -221,7 +221,32 @@ fn check_scroll_left_right() {
 }
 
 #[test]
-fn check_delete_1() {
+fn check_home_end() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('Text:  ▶-〓 world|| (initial state - cursor is last)')   
+        CheckHash(0xB5F2856A17C1B50D)
+        CheckCursor(22,3)
+        Key.Pressed(Home)
+        Paint('Text: |H|ello |❤|╬▶-')   
+        CheckHash(0x5B8CEEE9E9B5B8F8)
+        CheckCursor(13,3)
+        Key.Pressed(End)
+        Paint('Text:  ▶-〓 world||')   
+        CheckHash(0xB5F2856A17C1B50D)
+        CheckCursor(22,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_delete() {
     let script = "
         Paint.Enable(false)
         //Error.Disable(true)
@@ -289,7 +314,7 @@ fn check_delete_1() {
 #[test]
 fn check_delete_from_end() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         //Error.Disable(true)
         Key.Pressed(Left)
         Paint('Text: ▶-〓 worl|d|')   
@@ -303,8 +328,6 @@ fn check_delete_from_end() {
         Paint('Text: ╬▶-〓 worl, cursor last, nothing changes')   
         CheckHash(0x57F85A60FF685391)
         CheckCursor(21,3)
-
-
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
@@ -332,8 +355,56 @@ fn check_delete_after_selection() {
         Paint('Text: He|d|')   
         CheckHash(0xE76A8A2CB6353D91)
         CheckCursor(15,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
 
-
+#[test]
+fn check_backspace() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Home)
+        Key.Pressed(Right,3)
+        Paint('Text: Hel|l|o ❤╬▶-')   
+        CheckHash(0x5B8CEEE9E9B5B8F8)
+        CheckCursor(16,3)
+        Key.Pressed(Backspace)
+        Paint('Text:  He|l|o ❤╬▶-〓')   
+        CheckHash(0xF711197C690A2243)
+        CheckCursor(15,3)
+        Key.Pressed(Backspace)
+        Paint('Text:  H|l|o ❤╬▶-〓 ')   
+        CheckHash(0x218C39E1236E15A6)
+        CheckCursor(14,3)
+        Key.Pressed(Backspace)
+        Paint('Text:  |l|o ❤╬▶-〓 w')   
+        CheckHash(0xDF2768238E2F92D5)
+        CheckCursor(13,3)
+        Key.Pressed(Backspace,10)
+        Paint('Text:  |l|o ❤╬▶-〓 w => nothing changes')   
+        CheckHash(0xDF2768238E2F92D5)
+        CheckCursor(13,3)
+        Key.Pressed(Right,5)
+        Paint('Text: lo ❤╬|▶|-〓 w')   
+        CheckHash(0xDF2768238E2F92D5)
+        CheckCursor(18,3)
+        Key.Pressed(Backspace)
+        Paint('Text: lo ❤|▶|-〓 wo')   
+        CheckHash(0x29812F27AF27CF21)
+        CheckCursor(17,3)
+        Key.Pressed(Backspace)
+        Paint('Text: lo |▶|-〓 wor')   
+        CheckHash(0xF757EDD3740156BE)
+        CheckCursor(16,3)
+        Key.Pressed(End)
+        Paint('Text: ▶-〓 world||')   
+        CheckHash(0xB5F2856A17C1B50D)
+        CheckCursor(22,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
