@@ -87,6 +87,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -148,6 +149,8 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
@@ -186,6 +189,8 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+
 
 
     // desktop
@@ -250,6 +255,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+
 
 
     // desktop

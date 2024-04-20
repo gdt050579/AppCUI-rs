@@ -1,4 +1,4 @@
-use super::events::EventData;
+use super::events::{EventData, TextFieldEventsType};
 use super::Flags;
 use crate::prelude::*;
 use crate::utils::GlyphParser;
@@ -63,6 +63,11 @@ impl TextField {
     #[inline(always)]
     pub fn is_readonly(&self) -> bool {
         self.flags.contains(Flags::Readonly)
+    }
+
+    #[inline(always)]
+    pub fn text(&self) -> &str {
+        &self.glyphs
     }
 
     fn update_scroll_view(&mut self, force_end_update: bool) {
@@ -337,7 +342,13 @@ impl OnKeyPressed for TextField {
             }
             key!("Enter") => {
                 if self.flags.contains(Flags::ProcessEnter) {
-                    // send validation event
+                    self.raise_event(ControlEvent {
+                        emitter: self.handle,
+                        receiver: self.event_processor,
+                        data: ControlEventData::TextField(EventData {
+                            evtype: TextFieldEventsType::OnValidate,
+                        }),
+                    });
                     return EventProcessStatus::Processed;
                 }
             }
