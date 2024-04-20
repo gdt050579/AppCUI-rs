@@ -15,7 +15,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("textfield", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
     cb.init_control("TextField::new");
-    cb.add_string_parameter("text", None);
+    cb.add_string_parameter("text", Some(""));
     cb.add_layout();
     cb.add_flags_parameter("flags", "textfield::Flags", unsafe { &mut FLAGS });
     cb.finish_control_initialization();

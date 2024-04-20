@@ -510,3 +510,115 @@ fn check_backspace_after_selection() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_write_text() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.No text')   
+        CheckHash(0x45BA2529A16D4D14)
+        CheckCursor(13,3)
+        Key.TypeText('Hello')
+        Paint('2.Text is: Hello')   
+        CheckHash(0xF2A1C652DC792B72)
+        CheckCursor(18,3)
+        Key.TypeText('_')
+        Paint('3.Text is: ello,')   
+        CheckHash(0xD94D182D41DB085)
+        CheckCursor(18,3)
+        Key.TypeText('world')
+        Paint('4.Text is: world')   
+        CheckHash(0x7C2C49BC32FC4A52)
+        CheckCursor(18,3)
+        Key.Pressed(Home)
+        Paint('5.Text is: Hello_')   
+        CheckHash(0xD77BA73FFBC7795D)
+        CheckCursor(13,3)
+        Key.Pressed(End)
+        Paint('6.Text is: world')   
+        CheckHash(0x7C2C49BC32FC4A52)
+        CheckCursor(18,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("x:1,y:1,w:8,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_write_unicode_text() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.No text')   
+        CheckHash(0x45BA2529A16D4D14)
+        CheckCursor(13,3)
+        Key.TypeText('Hello')
+        Paint('2.Text is: Hello')   
+        CheckHash(0xF2A1C652DC792B72)
+        CheckCursor(18,3)
+        Key.TypeText('❤️')
+        Paint('3.Text is: ello❤️')   
+        CheckHash(0xF1B75E37ED9C08B)
+        CheckCursor(18,3)
+        Key.TypeText('〓rl❤️')
+        Paint('4.Text is: ❤️〓rl❤️')   
+        CheckHash(0x3CCD819EB95146CD)
+        CheckCursor(18,3)
+        Key.Pressed(Home)
+        Paint('5.Text is: Hello❤️')   
+        CheckHash(0x8931746B3B63B087)
+        CheckCursor(13,3)
+        Key.Pressed(End)
+        Paint('6.Text is: ❤️〓rl❤️')   
+        CheckHash(0x3CCD819EB95146CD)
+        CheckCursor(18,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("x:1,y:1,w:8,h:1"));
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_write_multiline_text() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.No text')   
+        CheckHash(0x51B7DD250957FD14)
+        CheckCursor(13,3)
+        Key.TypeText('Hello_world')
+        Paint('2.Text is: Hello_word')   
+        CheckHash(0xF1C8594065D9D73)
+        CheckCursor(18,4)
+        Key.TypeText('❤️')
+        Paint('3.Text is: Hello_word❤️')   
+        CheckHash(0x300DCC6FF4C1CB86)
+        CheckCursor(13,5)
+        Key.TypeText('〓rl❤️')
+        Paint('4.Text is: Hello_word❤️❤️〓rl❤️')   
+        CheckHash(0x770216FAF138E89A)
+        CheckCursor(17,5)
+        Key.TypeText('❤️')
+        Paint('5.Text is: Hello_word❤️❤️〓rl❤️❤️')   
+        CheckHash(0x2B30AC2B28C6526B)
+        CheckCursor(18,5)
+        Key.TypeText('❤️')
+        Paint('6.Text is: ello_word❤️❤️〓rl❤️❤️❤️')   
+        CheckHash(0x2476BC2CC3EF5C9E)
+        CheckCursor(18,5)
+        Key.TypeText('12345')
+        Paint('7.Text is: word❤️❤️〓rl❤️❤️❤️12345')   
+        CheckHash(0x581C58B9161C94E2)
+        CheckCursor(18,5)
+        Key.Pressed(Home)
+        Paint('8.Text is: Hello_word❤️❤️〓rl❤️❤️❤️')   
+        CheckHash(0xE60DAD19F94F1D86)
+        CheckCursor(13,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("x:1,y:1,w:8,h:3"));
+    a.add_window(w);
+    a.run();
+}
