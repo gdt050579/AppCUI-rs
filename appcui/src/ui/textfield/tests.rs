@@ -314,7 +314,7 @@ fn check_delete() {
 #[test]
 fn check_delete_from_end() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         //Error.Disable(true)
         Key.Pressed(Left)
         Paint('Text: ▶-〓 worl|d|')   
@@ -405,6 +405,104 @@ fn check_backspace() {
         Paint('Text: ▶-〓 world||')   
         CheckHash(0xB5F2856A17C1B50D)
         CheckCursor(22,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_backspace_from_end() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Text: ▶-〓 world||')   
+        CheckHash(0xB5F2856A17C1B50D)
+        CheckCursor(22,3)
+        Key.Pressed(Backspace)
+        Paint('2.Text: ▶-〓 worl||')   
+        CheckHash(0x57F85A60FF685391)
+        CheckCursor(21,3)
+        Key.Pressed(Backspace,5)
+        Paint('3.Text: ▶-〓||')   
+        CheckHash(0xDCF04CF5A595D7C3)
+        CheckCursor(16,3)
+        Key.Pressed(Left,7)
+        Paint('4.Text: o ❤╬▶-〓')   
+        CheckHash(0xEDBA26DAAFF5F06A)
+        CheckCursor(13,3)
+        Key.Pressed(End)
+        Paint('5.Text: llo ❤╬▶-〓||')   
+        CheckHash(0x777BAF7290F92F2A)
+        CheckCursor(22,3)
+        Key.Pressed(Backspace,3)
+        Paint('6.Text: llo ❤╬||')   
+        CheckHash(0x1CCCA3758557EAD9)
+        CheckCursor(19,3)
+        Key.Pressed(Backspace,3)
+        Paint('7.Text: llo||')   
+        CheckHash(0x120F4BA0A2FAD8A3)
+        CheckCursor(16,3)
+        Key.Pressed(Backspace)
+        Paint('8.Text: ll||')   
+        CheckHash(0xD37A8CFC9107AD14)
+        CheckCursor(15,3)
+        Key.Pressed(Backspace)
+        Paint('9.Text: l||')   
+        CheckHash(0x6F226838BB58E638)
+        CheckCursor(14,3)
+        Key.Pressed(Home)
+        Paint('10.Text: |H|el')   
+        CheckHash(0xD8844B5C8926B539)
+        CheckCursor(13,3)
+        Key.Pressed(Backspace,5)
+        Paint('11.Text: |H|el (nothing changes)')   
+        CheckHash(0xD8844B5C8926B539)
+        CheckCursor(13,3)
+        Key.Pressed(End)
+        Paint('12.Text: Hel||')   
+        CheckHash(0xD8844B5C8926B539)
+        CheckCursor(16,3)
+        Key.Pressed(Backspace,2)
+        Paint('13.Text: H||')   
+        CheckHash(0xD2F96D0190922BCC)
+        CheckCursor(14,3)
+        Key.Pressed(Backspace)
+        Paint('14.Text: || (text completely deleted)')   
+        CheckHash(0xA4EDA87645FBF114)
+        CheckCursor(13,3)
+        Key.Pressed(Backspace,10)
+        Paint('15.Text: || (nothing changes)')   
+        CheckHash(0xA4EDA87645FBF114)
+        CheckCursor(13,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_backspace_after_selection() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Home)
+        Key.Pressed(Right,2)
+        Key.Pressed(Shift+Right,4)
+        Paint('Text: Hello |❤|╬▶-')   
+        CheckHash(0x473ABCF8BA20B908)
+        CheckCursor(19,3)
+        Key.Pressed(Backspace)
+        Paint('Text:  He|❤|╬▶-〓 wo')   
+        CheckHash(0xE80B6D9DE88C7B68)
+        CheckCursor(15,3)
+        Key.Pressed(Backspace,2)
+        Paint('Text: ❤╬▶-〓 worl')   
+        CheckHash(0xDA69921E3679D663)
+        CheckCursor(13,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);

@@ -86,7 +86,7 @@ impl TextField {
             // scroll to the right
             self.cursor.start = self.glyphs.previous_pos(self.cursor.pos, visible_glyphs - 1);
             // we add ONE to the end pot to satisfy (self.cursor.pos < self.cursor.end) condition
-            self.cursor.end = self.cursor.pos + 1;
+            self.cursor.end = self.cursor.pos;
         }
     }
     fn move_cursor_with(&mut self, no_of_glyphs: i32, select: bool) {
