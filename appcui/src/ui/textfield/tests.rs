@@ -622,3 +622,78 @@ fn check_write_multiline_text() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_insert_text() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial state (llo world)')   
+        CheckHash(0x13D74C30632D286D)
+        CheckCursor(22,3)
+        Key.Pressed(Home)
+        Key.Pressed(Right,2)        
+        Key.TypeText('123456')
+        Paint('2.Text: He123456|l|l')   
+        CheckHash(0x616CCD19CA5D1D2A)
+        CheckCursor(21,3)
+        Key.Pressed(Backspace,6)
+        Paint('3.Text: He|l|lo worl')   
+        CheckHash(0xCC5E5369E794A320)
+        CheckCursor(15,3)
+        Key.TypeText('〓rl❤️❤️❤️')
+        Paint('4.Text: He〓rl❤❤❤|l|l')   
+        CheckHash(0x9A47A09DA4CFEA69)
+        CheckCursor(21,3)
+        Key.Pressed(End)
+        Paint('4.Text: llo world||')   
+        CheckHash(0x13D74C30632D286D)
+        CheckCursor(22,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_insert_text_over_selection() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Home)
+        Key.Pressed(Right,2) 
+        Paint('1.Initial state (He|l|lo worl)')   
+        CheckHash(0xCC5E5369E794A320)
+        CheckCursor(15,3)
+        Key.Pressed(Shift+Right,4)
+        Paint('2.Selected [llo ] (Hello |w|orl)')   
+        CheckHash(0xA8CA2E147025C590)
+        CheckCursor(19,3)
+        Key.TypeText('〓❤️❤️❤️')
+        Paint('3.Text replaces (He〓❤❤❤|w|orl)')   
+        CheckHash(0x2D25F2AE8CA02B9D)
+        CheckCursor(19,3)
+        Key.Pressed(Right)
+        Paint('4.Move cursor to right (He〓❤❤❤w|o|rl)')   
+        CheckHash(0x2D25F2AE8CA02B9D)
+        CheckCursor(20,3)
+        Key.Pressed(Right)
+        Paint('5.Move cursor to right (He〓❤❤❤wo|r|l)')   
+        CheckHash(0x2D25F2AE8CA02B9D)
+        CheckCursor(21,3)
+        Key.Pressed(Right)
+        Paint('6.Move cursor to right (He〓❤❤❤wor|l|)')   
+        CheckHash(0x2D25F2AE8CA02B9D)
+        CheckCursor(22,3)
+        Key.Pressed(Right)
+        Paint('7.Move cursor to right (e〓❤❤❤worl|d|)')   
+        CheckHash(0x3D405AF32EA72405)
+        CheckCursor(22,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello world',x:1,y:1,w:12,h:1"));
+    a.add_window(w);
+    a.run();
+}
