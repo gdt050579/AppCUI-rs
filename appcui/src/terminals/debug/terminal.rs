@@ -182,12 +182,12 @@ impl Terminal for DebugTerminal {
                 if self.errors_disabled {
                     println!(
                         "\x1b[91;40m[Error] Invalid cursor position. Expectig the cursor to be {}, but found {}\x1b[0m",
-                        cursor_repr, point_repr
+                        point_repr, cursor_repr
                     );
                 } else {
                     panic!(
                         "Invalid cursor position. Expectig the cursor to be {}, but found {}",
-                        cursor_repr, point_repr
+                        point_repr, cursor_repr
                     );
                 }
             }
