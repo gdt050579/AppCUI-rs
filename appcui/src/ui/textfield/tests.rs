@@ -702,7 +702,6 @@ fn check_insert_text_over_selection() {
 fn check_move_to_next_word() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(Home)
         Paint('1.Visible:  |H|ello   world,〓❤,123,  test.set')   
         CheckHash(0x2D7A431271FF0AE0)
