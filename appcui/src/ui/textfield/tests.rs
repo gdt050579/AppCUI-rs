@@ -778,3 +778,86 @@ fn check_move_to_next_word() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_move_to_previous_word() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(End)
+        Paint('1.Visible:    test.set    uni〓code  twice    ||')   
+        CheckHash(0x188AC9EB95C89126)
+        CheckCursor(45,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('2.Visible:   test.set    uni〓code  |t|wice    ')   
+        CheckHash(0x188AC9EB95C89126)
+        CheckCursor(37,3)
+        Key.Pressed(Left,1)
+        Paint('3.Visible:   test.set    uni〓code  | |twice    ')   
+        CheckHash(0x188AC9EB95C89126)
+        CheckCursor(36,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('4.Visible:   test.set    |u|ni〓code  twice   ')   
+        CheckHash(0x188AC9EB95C89126)
+        CheckCursor(27,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('5.Visible:   test.|s|et    uni〓code  twice   ')   
+        CheckHash(0x188AC9EB95C89126)
+        CheckCursor(20,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('6.Visible:   test|.|set    uni〓code  twice   ')   
+        CheckHash(0x188AC9EB95C89126)
+        CheckCursor(19,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('7.Visible:  |t|est.set    uni〓code  twice   ')   
+        CheckHash(0x188AC9EB95C89126)
+        CheckCursor(15,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('8.Visible:  |,|  test.set    uni〓code  twice   ')   
+        CheckHash(0x85C9E5D26DF4B442)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('9.Visible:  |1|23,  test.set    uni〓code  twicet')   
+        CheckHash(0x1F31A3D060CF832)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('10.Visible: |,|123,  test.set    uni〓code  twic')   
+        CheckHash(0xC9CD5299AA782443)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('11.Visible:  |〓|❤,123,  test.set    uni〓code  tw')   
+        CheckHash(0xD8427A56B47AB583)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('12.Visible:  |,|〓❤,123,  test.set    uni〓code  t')   
+        CheckHash(0x1F540C31A3C9129C)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('13.Visible:  |w|orld,〓❤,123,  test.set    uni〓co')   
+        CheckHash(0x39319158125831AB)
+        CheckCursor(13,3)
+        Key.Pressed(Left,2)
+        Paint('14.Visible: || world,〓❤,123,  test.set    uni〓')   
+        CheckHash(0x7B07EF88A003B02F)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('15.Visible:  |H|ello   world,〓❤,123,  test.set')   
+        CheckHash(0x2D7A431271FF0AE0)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Left)
+        // now we reach the start of the test
+        Paint('16.Visible: ||   Hello   world,〓❤,123,  test.set')   
+        CheckHash(0xC7E06F2FFB5E0060)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Left)
+        Paint('17.Visible: ||   Hello   world,〓❤,123,  test.set (nothing happens)')   
+        CheckHash(0xC7E06F2FFB5E0060)
+        CheckCursor(13,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'  Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
+    a.add_window(w);
+    a.run();
+}
