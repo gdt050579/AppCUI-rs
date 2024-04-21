@@ -109,7 +109,38 @@ impl TextField {
         }
     }
     fn move_to_previous_word(&mut self, select: bool) {
-        todo!()
+        if let Some(char_class) = self.glyphs.previous_glyph(self.cursor.pos).map(|c| CharClass::from(c.0)) {
+            let mut pos = self.cursor.pos;
+            let mut new_char_class = char_class;
+            // skip current class
+            while let Some((c, size)) = self.glyphs.previous_glyph(pos) {
+                if CharClass::from(c) != char_class {
+                    new_char_class = CharClass::from(c);
+                    break;
+                }
+                if size as usize <= pos {
+                    pos -= size as usize;
+                } else {
+                    pos = 0;
+                    break;
+                }
+            }
+            if (new_char_class != char_class) && (char_class == CharClass::Space) {
+                // skip the the current class until I rech the start of it
+                while let Some((c, size)) = self.glyphs.previous_glyph(pos) {
+                    if CharClass::from(c) != new_char_class {
+                        break;
+                    }
+                    if size as usize <= pos {
+                        pos -= size as usize;
+                    } else {
+                        pos = 0;
+                        break;
+                    }
+                }
+            }
+            self.move_cursor_to(pos, select, false);
+        }
     }
     fn copy_text(&mut self) {
         if !self.selection.is_empty() {
