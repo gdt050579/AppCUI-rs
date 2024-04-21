@@ -1,5 +1,6 @@
 use super::events::{EventData, TextFieldEventsType};
 use super::Flags;
+use super::CharClass;
 use crate::prelude::*;
 use crate::utils::GlyphParser;
 
@@ -113,7 +114,29 @@ impl TextField {
         }
     }
     fn move_to_next_word(&mut self, select: bool) {
-        todo!()
+        if let Some(char_class) = self.glyphs.glyph(self.cursor.pos).map(|c| CharClass::from(c.0)) {
+            let mut pos = self.cursor.pos;
+            let mut new_char_class = char_class;
+            // skip current class
+            while let Some((c,size)) = self.glyphs.glyph(pos) {
+                if CharClass::from(c) != char_class {
+                    new_char_class = CharClass::from(c);
+                    break;
+                }
+                pos+=size as usize;
+            }
+            if (new_char_class != char_class) && (new_char_class == CharClass::Space) {
+                // skip the spaces until we reach a new char class
+                while let Some((c,size)) = self.glyphs.glyph(pos) {
+                    if CharClass::from(c) != new_char_class {
+                        break;
+                    }
+                    pos+=size as usize;
+                }                
+            }
+            pos = pos.min(self.glyphs.len());
+            self.move_cursor_to(pos, select, false);
+        }
     }
     fn move_to_previous_word(&mut self, select: bool) {
         todo!()
