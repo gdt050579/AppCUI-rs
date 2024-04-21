@@ -166,18 +166,23 @@ impl TextField {
             self.delete_selection();
         }
     }
-    fn convert_to_upper(&mut self) {
+    fn convert_selection_or_word(&mut self,callback: fn(text:&str)->String) {
         if self.is_readonly() {
             return;
         }
-        todo!()
-    }
-    fn convert_to_lower(&mut self) {
-        if self.is_readonly() {
-            return;
+        if !self.selection.is_empty() {
+            let s = callback(&self.glyphs[self.selection.start..self.selection.end]);
+            self.glyphs.replace_range(self.selection.start..self.selection.end, &s);
+            let start = self.selection.start;
+            let count = s.count_glyphs();
+            self.selection = Selection::NONE;
+            self.cursor.pos = start;
+            self.move_cursor_with(count as i32, true);
+        } else {
+            todo!()
         }
-        todo!()
     }
+
     fn select_all(&mut self) {
         self.selection = Selection::NONE;
         self.selection.update(0, self.glyphs.len());
@@ -345,11 +350,11 @@ impl OnKeyPressed for TextField {
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Shift+U") => {
-                self.convert_to_upper();
+                self.convert_selection_or_word(|s| s.to_uppercase());
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+U") => {
-                self.convert_to_lower();
+                self.convert_selection_or_word(|s| s.to_lowercase());
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+A") => {
