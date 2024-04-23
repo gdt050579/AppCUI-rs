@@ -861,3 +861,39 @@ fn check_move_to_previous_word() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_readonly_flag() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Left,4)
+        Paint('1.Visible: Hello   w|o|rld')   
+        CheckHash(0x320354CF1FEFAEB4)
+        CheckCursor(22,3)
+        Key.Pressed(Backspace,10)
+        Key.Pressed(Delete,10)
+        Key.TypeText('hello')
+        Paint('2.Visible: Hello   w|o|rld (nothing changes)')   
+        CheckHash(0x320354CF1FEFAEB4)
+        CheckCursor(22,3)
+        Key.Pressed(Shift+Right,2)
+        Key.Pressed(Delete,10)
+        Key.TypeText('hello')
+        Paint('3.Visible: Hello   wor|l|d (text not modified)')   
+        CheckHash(0x1CD049E1CD927118)
+        CheckCursor(24,3)
+        Key.Pressed(Ctrl+Shift+U)
+        Paint('4.Visible: Hello   wor|l|d (text not modified) no UPCASE')   
+        CheckHash(0x1CD049E1CD927118)
+        CheckCursor(24,3)
+        Key.Pressed(Ctrl+U)
+        Paint('5.Visible: Hello   wor|l|d (text not modified) no LOWERCASE')   
+        CheckHash(0x1CD049E1CD927118)
+        CheckCursor(24,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello   world',x:1,y:1,w:20,h:1,flags: ReadOnly"));
+    a.add_window(w);
+    a.run();
+}
