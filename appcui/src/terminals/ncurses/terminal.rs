@@ -94,13 +94,13 @@ impl Terminal for NcursesTerminal {
                 _ => ch.code as u32,
             };
             if ch.foreground != Color::Transparent {
-                ncurses::attron(ncurses::COLOR_PAIR(1));
+                ncurses::attron(ncurses::COLOR_PAIR(0)); // TODO: use ColorManager to get the color pair index
             }
 
             ncurses::mvaddch(current_y as i32, current_x as i32, code as chtype);
 
             if ch.foreground != Color::Transparent {
-                ncurses::attroff(ncurses::COLOR_PAIR(1));
+                ncurses::attroff(ncurses::COLOR_PAIR(0));
             }
             current_x += 1;
             if current_x >= surface.size.width {
