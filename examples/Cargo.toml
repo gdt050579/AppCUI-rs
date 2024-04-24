@@ -82,3 +82,7 @@ path = "accordion/main.rs"
 [[example]]
 name = "keyselector"
 path = "keyselector/main.rs"
+
+[[example]]
+name = "textfield"
+path = "textfield/main.rs"
