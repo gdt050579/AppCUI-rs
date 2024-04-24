@@ -897,3 +897,28 @@ fn check_readonly_flag() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_autoselect_on_focus() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Text-3 focused')   
+        CheckHash(0xBD293603FEBD93F4)
+        Key.Pressed(Tab)
+        Paint('Text-1 focused (and selected)')   
+        CheckHash(0x67FEAAC03BEBCF24)
+        Key.Pressed(Tab)
+        Paint('Text-2 focused (and selected)')   
+        CheckHash(0x318BE55CDA07E3FC)
+        Key.Pressed(Tab)
+        Paint('Text-3 focused (no selection)')   
+        CheckHash(0xBD293603FEBD93F4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Text-1',x:1,y:1,w:30,h:1,flags: ReadOnly"));
+    w.add(textfield!("'Text-2',x:1,y:3,w:30,h:1"));
+    w.add(textfield!("'Text-3',x:1,y:5,w:30,h:1,flags: DisableAutoSelectOnFocus"));
+    a.add_window(w);
+    a.run();
+}

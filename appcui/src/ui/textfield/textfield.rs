@@ -11,7 +11,7 @@ struct Cursor {
     end: usize,
 }
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct TextField {
     cursor: Cursor,
     selection: Selection,
@@ -389,6 +389,13 @@ impl OnKeyPressed for TextField {
             return EventProcessStatus::Processed;
         }
         EventProcessStatus::Ignored
+    }
+}
+impl OnFocus for TextField {
+    fn on_focus(&mut self) {
+        if !self.flags.contains(Flags::DisableAutoSelectOnFocus) {
+            self.select_all();
+        }
     }
 }
 impl OnMouseEvent for TextField {}
