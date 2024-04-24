@@ -220,7 +220,7 @@ impl AppCUITrait {
             "ColorPickerEvents" | "ColorPicker" => Some(AppCUITrait::ColorPickerEvents),
             "ThreeStateBoxEvents" | "ThreeStateBox" => Some(AppCUITrait::ThreeStateBoxEvents),
             "KeySelectorEvents" | "KeySelector" => Some(AppCUITrait::KeySelectorEvents),
-            "TextFieldEvents" | "TextField" => Some(AppCUITrait::KeySelectorEvents),
+            "TextFieldEvents" | "TextField" => Some(AppCUITrait::TextFieldEvents),
             _ => None,
         }
     }

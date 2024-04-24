@@ -922,3 +922,51 @@ fn check_autoselect_on_focus() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_validation_event() {
+    #[Window(events = TextFieldEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        txt: Handle<TextField>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                info: Handle::None,
+                txt: Handle::None,
+            };
+            me.info = me.add(label!("'',x:1,y:1,w:35"));
+            me.txt = me.add(textfield!("x:1,y:3,w:35,flags:ProcessEnter"));
+            me
+        }
+        fn set_info(&mut self, txt: &str) {
+            let h_label = self.info;
+            if let Some(label) = self.control_mut(h_label) {
+                label.set_caption(txt);
+            }
+        }
+    }
+    impl TextFieldEvents for MyWin {
+        fn on_validate(&mut self, _handle: Handle<TextField>, text: &str) -> EventProcessStatus {
+            self.set_info(text);
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x615B7D42C0680A1E)   
+        Key.TypeText('Hello world')
+        Paint('Hello world') 
+        CheckHash(0x7762DE5EE067C87E) 
+        Key.Pressed(Enter)
+        Paint('Label contains: Hello world')
+        CheckHash(0x5E0D88141ECF26FD) 
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
