@@ -1,5 +1,8 @@
-use super::{super::super::graphics::Color, NcursesTerminal};
+use std::{collections::HashMap, fs::OpenOptions, io::Write};
 
+use super::super::super::graphics::Color;
+
+#[derive(Clone, Copy, Debug)]
 pub enum NCursesColor {
     Black = 0,
     Red = 1,
@@ -45,12 +48,13 @@ impl NCursesColor {
 }
 
 pub struct ColorManager {
-    nr_colors: i32,
+    nr_colors: i16,
+    color_mapping: HashMap<i16, bool>
 }
 
 impl ColorManager {
-    
-    const PAIR_MAPPING: [i32; 256] = [
+    const NR_COLORS: i16 = 16;
+    const PAIR_MAPPING: [i16; 256] = [
         1,   2,    3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,  22,
         23,  24,   25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,
         45,  46,   47,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,  65,  66,
@@ -65,19 +69,65 @@ impl ColorManager {
         242, 243,  244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255];
 
     pub(crate) fn new() -> ColorManager {
-        let mut result = ColorManager { nr_colors: 0 };
+        let mut result = ColorManager{nr_colors : 0, color_mapping: HashMap::new()};
         ncurses::start_color();
-        // ncurses::init_pair(1, ncurses::COLOR_RED, 2);
-        result.nr_colors = ncurses::COLORS();
+        ncurses::use_default_colors();
+        result.nr_colors = ncurses::COLORS() as i16;
         result
     }
 
-    pub fn transalte_to_ncurses_color(color: Color) -> NCursesColor {
-        let int_value = color as i32;
-        NCursesColor::from_value(int_value).unwrap_or(NCursesColor::Transparent)
+    pub fn translate_to_ncurses_color(color: &Color) -> NCursesColor {
+        match color{
+            Color::Black => NCursesColor::Black,
+            Color::DarkRed => NCursesColor::Red,
+            Color::DarkGreen => NCursesColor::Green,
+            Color::Olive => NCursesColor::Olive,
+            Color::DarkBlue => NCursesColor::Blue,
+            Color::Magenta => NCursesColor::Magenta,
+            Color::Teal => NCursesColor::Cyan,
+            Color::Silver => NCursesColor::Silver,
+            Color::Gray => NCursesColor::Gray,
+            Color::Red => NCursesColor::LightRed,
+            Color::Green => NCursesColor::LightGreen,
+            Color::Yellow => NCursesColor::Yellow,
+            Color::Blue => NCursesColor::LightBlue,
+            Color::Pink => NCursesColor::LightMagenta,
+            Color::Aqua => NCursesColor::LightCyan,
+            Color::White => NCursesColor::White,
+            Color::Transparent => NCursesColor::Transparent,
+        }
     }
 
-    pub fn from_int(value: i32) -> NCursesColor {
-        NCursesColor::from_value(value).unwrap_or(NCursesColor::Transparent)
+    // pub fn from_int(value: i32) -> NCursesColor {
+    //     NCursesColor::from_value(value).unwrap_or(NCursesColor::Transparent)
+    // }
+
+    pub fn set_color_pair(&mut self, foreground: &Color, background: &Color) {
+        
+        let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
+        let foreground_color = ColorManager::translate_to_ncurses_color(foreground);
+        let background_color = ColorManager::translate_to_ncurses_color(background);
+        let pair_index = foreground_color as i16 * ColorManager::NR_COLORS + background_color as i16;
+        debugfile.write_all(format!("START F: {} {} B: {} {} {} {}\n", *foreground as i16, foreground_color as i16, *background as i16, background_color as i16, pair_index, ColorManager::PAIR_MAPPING[pair_index as usize]).as_bytes()).unwrap();
+        let pair_index = ColorManager::PAIR_MAPPING[pair_index as usize];
+        
+        if !self.color_mapping.contains_key(&pair_index) {
+            ncurses::init_pair(pair_index, foreground_color as i16, background_color as i16);
+        }
+        self.color_mapping.insert(pair_index, true);
+
+        ncurses::wattron(ncurses::stdscr(), ncurses::COLOR_PAIR(pair_index));
+    }
+
+    pub fn unset_color_pair(&mut self, foreground: &Color, background: &Color) {
+        
+        let foreground_color = ColorManager::translate_to_ncurses_color(foreground);
+        let background_color = ColorManager::translate_to_ncurses_color(background);
+        let pair_index = foreground_color as i16 * ColorManager::NR_COLORS + background_color as i16;
+
+        let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
+        debugfile.write_all(format!("END {} {} {}\n", *foreground as i16, *background as i16, pair_index).as_bytes()).unwrap();
+        let pair_index = ColorManager::PAIR_MAPPING[pair_index as usize];
+        ncurses::wattroff(ncurses::stdscr(), ncurses::COLOR_PAIR(pair_index));
     }
 }

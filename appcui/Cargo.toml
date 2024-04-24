@@ -14,6 +14,8 @@ ncurses = "6.0.0"
 default = []
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
 EVENT_RECORDER = []
+mouse_v1 = []
+wide_chtype = []
 
 [lints]
 workspace = true

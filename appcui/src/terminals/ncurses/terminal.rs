@@ -93,15 +93,18 @@ impl Terminal for NcursesTerminal {
                 9562 => ncurses::ACS_LLCORNER(),
                 _ => ch.code as u32,
             };
-            if ch.foreground != Color::Transparent {
-                ncurses::attron(ncurses::COLOR_PAIR(0)); // TODO: use ColorManager to get the color pair index
+            
+            let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
+            debugfile.write_all(format!("{} {} {:?}\n", ch.foreground as i32, ch.background as i32, char::from_u32(code)).as_bytes()).unwrap();
+            if ch.foreground != Color::Transparent || ch.background != Color::Transparent{
+                self.color_manager.set_color_pair(&ch.foreground, &ch.background);
+                ncurses::mvaddch(current_y as i32, current_x as i32, code as chtype);
+                self.color_manager.unset_color_pair(&ch.foreground, &ch.background);
+            }
+            else {
+                ncurses::mvaddch(current_y as i32, current_x as i32, code as chtype);
             }
 
-            ncurses::mvaddch(current_y as i32, current_x as i32, code as chtype);
-
-            if ch.foreground != Color::Transparent {
-                ncurses::attroff(ncurses::COLOR_PAIR(0));
-            }
             current_x += 1;
             if current_x >= surface.size.width {
                 current_x = 0;
@@ -120,7 +123,7 @@ impl Terminal for NcursesTerminal {
 
     fn get_system_event(&mut self) -> SystemEvent {
         let ch = ncurses::wgetch(stdscr());
-        // let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
+        let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
 
         if ch == ncurses::ERR {
             return SystemEvent::None;
@@ -186,6 +189,7 @@ impl Terminal for NcursesTerminal {
 
         if ch == 27 {
             endwin();
+            debugfile.set_len(0).unwrap();
             return SystemEvent::AppClose;
         }
         SystemEvent::None
