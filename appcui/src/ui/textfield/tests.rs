@@ -1071,3 +1071,27 @@ fn check_mouse_click_outside_bounds() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_mouse_selection() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right)
+        Paint('1. Text: - I ❤️ Rust Language :)')   
+        CheckHash(0x480A380B10C2094C)
+        CheckCursor(20,5)
+        Mouse.Drag(20,3,17,5)
+        Paint('2. Selected text: Rust Language')   
+        CheckHash(0xD374BBDDCBFB9EFB)
+        CheckCursor(17,5)
+        Mouse.Drag(18,3,10,2)
+        Paint('3. Selected text: ello w❤️rl❤️d - I ')   
+        CheckHash(0x57E8868A7830C0DE)
+        CheckCursor(13,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:10,h:3"));
+    a.add_window(w);
+    a.run();
+}
