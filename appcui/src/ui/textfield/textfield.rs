@@ -43,6 +43,15 @@ impl TextField {
         &self.glyphs
     }
 
+    #[inline(always)]
+    pub fn set_text(&mut self, text: &str) {
+        self.cursor = Cursor { pos: 0, start: 0, end: 0 };
+        self.selection = Selection::NONE;
+        self.glyphs.clear();
+        self.glyphs.push_str(text);
+        self.move_cursor_to(self.glyphs.len(), false, true);
+    }
+
     fn update_scroll_view(&mut self, force_end_update: bool) {
         if (self.cursor.pos >= self.cursor.start) && (self.cursor.pos < self.cursor.end) {
             // nothing to do --> curent pos is already in the view window
