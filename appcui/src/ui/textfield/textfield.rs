@@ -16,6 +16,7 @@ pub struct TextField {
     cursor: Cursor,
     selection: Selection,
     glyphs: String,
+    drag_started: bool,
     flags: Flags,
 }
 impl TextField {
@@ -25,6 +26,7 @@ impl TextField {
             cursor: Cursor { pos: 0, start: 0, end: 0 },
             selection: Selection::NONE,
             glyphs: String::from(text),
+            drag_started: false,
             flags,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
@@ -166,7 +168,7 @@ impl TextField {
             self.delete_selection();
         }
     }
-    fn convert_selection_or_word(&mut self,callback: fn(text:&str)->String) {
+    fn convert_selection_or_word(&mut self, callback: fn(text: &str) -> String) {
         if self.is_readonly() {
             return;
         }
@@ -234,6 +236,24 @@ impl TextField {
         }
         self.glyphs.insert(self.cursor.pos, character);
         self.move_cursor_with(1, false);
+    }
+    fn mouse_pos_to_glyph_offset(&self, x: i32, y: i32, within_control: bool) -> Option<usize> {
+        let sz = self.size();
+        let w = sz.width as i32;
+        let h = sz.height as i32;
+        if within_control {
+            if (x < 1) || (x >= w - 1) || (y < 0) || (y >= h) {
+                return None;
+            }
+        }
+        let glyphs_count = (x - 1) + y * (w - 2);
+        if glyphs_count > 0 {
+            Some(self.glyphs.next_pos(self.cursor.start, glyphs_count as usize))
+        } else if glyphs_count < 0 {
+            Some(self.glyphs.previous_pos(self.cursor.start, (-glyphs_count) as usize))
+        } else {
+            Some(self.cursor.start)
+        }
     }
 }
 impl OnResize for TextField {
@@ -398,4 +418,33 @@ impl OnFocus for TextField {
         }
     }
 }
-impl OnMouseEvent for TextField {}
+impl OnMouseEvent for TextField {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => EventProcessStatus::Processed,
+            MouseEvent::Leave => EventProcessStatus::Processed,
+            MouseEvent::Over(_) => EventProcessStatus::Ignored,
+            MouseEvent::Pressed(data) => {
+                if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, true) {
+                    self.move_cursor_to(new_pos, false, false);
+                    self.drag_started = true;
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Released(_) => {
+                self.drag_started = false;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::DoubleClick(_) => todo!(),
+            MouseEvent::Drag(data) => {
+                if self.drag_started {
+                    if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, false) {
+                        self.move_cursor_to(new_pos, true, true);
+                    }
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(_) => todo!(),
+        }
+    }
+}
