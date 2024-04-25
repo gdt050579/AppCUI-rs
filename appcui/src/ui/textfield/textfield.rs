@@ -421,8 +421,10 @@ impl OnFocus for TextField {
 impl OnMouseEvent for TextField {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
-            MouseEvent::Enter => EventProcessStatus::Processed,
-            MouseEvent::Leave => EventProcessStatus::Processed,
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.drag_started = false;
+                EventProcessStatus::Processed
+            }
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(data) => {
                 if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, true) {

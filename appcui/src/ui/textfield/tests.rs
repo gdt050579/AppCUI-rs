@@ -4,6 +4,8 @@ use crate::prelude::*;
 fn check_move_left_right() {
     let script = "
         Paint.Enable(false)
+        // pressed Right arrow to remove selection
+        Key.Pressed(Right)
         Paint('cursor at end')   
         CheckHash(0x52EEFBBE06A52F24)
         CheckCursor(24,3)
@@ -35,6 +37,8 @@ fn check_move_left_right() {
 fn check_select_all() {
     let script = "
         Paint.Enable(false)
+        // pressed Right arrow to remove selection
+        Key.Pressed(Right)
         Paint('cursor at end')   
         CheckHash(0x52EEFBBE06A52F24)
         CheckCursor(24,3)
@@ -58,6 +62,8 @@ fn check_select_all() {
 fn check_select_left_right() {
     let script = "
         Paint.Enable(false)
+        // pressed Right arrow to remove selection
+        Key.Pressed(Right)
         Paint('cursor at end')   
         CheckHash(0x118C7686A80A8D9E)
         CheckCursor(24,3)
@@ -95,7 +101,8 @@ fn check_select_left_right() {
 fn check_move_up_down() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
+        // pressed Right arrow to remove selection
+        Key.Pressed(Right)
         Paint('Text: [orld ... field], cursor after field')   
         CheckHash(0x1F3E1601C2AD9D28)
         CheckCursor(22,5)
@@ -172,7 +179,8 @@ fn check_move_up_down() {
 fn check_scroll_left_right() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
+        // pressed Right arrow to remove selection
+        Key.Pressed(Right)
         Paint('Text: [ext field], cursor after field')   
         CheckHash(0x17543EE2D2FC227)
         CheckCursor(22,3)
@@ -224,7 +232,8 @@ fn check_scroll_left_right() {
 fn check_home_end() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
+        // pressed Right arrow to remove selection
+        Key.Pressed(Right)
         Paint('Text:  ▶-〓 world|| (initial state - cursor is last)')   
         CheckHash(0xB5F2856A17C1B50D)
         CheckCursor(22,3)
@@ -249,7 +258,6 @@ fn check_home_end() {
 fn check_delete() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(Home)
         Paint('Text: [Hello ❤╬▶-]')   
         CheckHash(0x5B8CEEE9E9B5B8F8)
@@ -315,7 +323,6 @@ fn check_delete() {
 fn check_delete_from_end() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(Left)
         Paint('Text: ▶-〓 worl|d|')   
         CheckHash(0xB5F2856A17C1B50D)
@@ -340,7 +347,6 @@ fn check_delete_from_end() {
 fn check_delete_after_selection() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(Home)
         Key.Pressed(Right,2)
         Key.Pressed(Shift+Right,4)
@@ -367,7 +373,6 @@ fn check_delete_after_selection() {
 fn check_backspace() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(Home)
         Key.Pressed(Right,3)
         Paint('Text: Hel|l|o ❤╬▶-')   
@@ -417,7 +422,8 @@ fn check_backspace() {
 fn check_backspace_from_end() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
+        // pressed Right arrow to remove selection
+        Key.Pressed(Right)
         Paint('1. Text: ▶-〓 world||')   
         CheckHash(0xB5F2856A17C1B50D)
         CheckCursor(22,3)
@@ -628,7 +634,7 @@ fn check_insert_text() {
     let script = "
         Paint.Enable(false)
         Paint('1.Initial state (llo world)')   
-        CheckHash(0x13D74C30632D286D)
+        CheckHash(0x483E309A3C03D9D2)
         CheckCursor(22,3)
         Key.Pressed(Home)
         Key.Pressed(Right,2)        
@@ -968,5 +974,100 @@ fn check_validation_event() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+
+#[test]
+fn check_mouse_click() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xCA13991A964D78E7)
+        CheckCursor(25,3)
+        Mouse.Click(17,3,left)
+        Paint('2. Nothing selected, cursor on |o|')   
+        CheckHash(0x9D7022C6AA5D3FFB)
+        CheckCursor(17,3)
+        Mouse.Click(30,3,left)
+        Paint('3. Nothing selected, cursor at the end')   
+        CheckHash(0x9D7022C6AA5D3FFB)
+        CheckCursor(25,3)
+        Key.TypeText('Rust is a great language')
+        Paint('4. Text: a great language')   
+        CheckHash(0xCA75D9C93B27BEBE)
+        CheckCursor(30,3)
+        Mouse.Click(16,3,left)
+        Paint('5. Text: a |g|reat language')   
+        CheckHash(0xCA75D9C93B27BEBE)
+        CheckCursor(16,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_click_multi_line() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x1D939C7615CD409F)
+        CheckCursor(17,4)
+        Mouse.Click(17,3,left)
+        Paint('2. Nothing selected, cursor on |o|')   
+        CheckHash(0xF2E5B0D71CC946A3)
+        CheckCursor(17,3)
+        Mouse.Click(20,5,left)
+        Paint('3. Nothing selected, cursor at the end')   
+        CheckHash(0xF2E5B0D71CC946A3)
+        CheckCursor(17,4)
+        Key.TypeText('Rust is a great language')
+        Paint('4. Text: ust is a great language')   
+        CheckHash(0x82AAADB5012BC38E)
+        CheckCursor(20,5)
+        Mouse.Click(17,4,left)
+        Paint('5. Text: ust is a gre|a|t language')   
+        CheckHash(0x82AAADB5012BC38E)
+        CheckCursor(17,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:10,h:3"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_click_outside_bounds() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Initial state')   
+        CheckHash(0xCA13991A964D78E7)
+        CheckCursor(25,3)
+        Mouse.Click(17,3,left)
+        Paint('2. Nothing selected, cursor on |o|')   
+        CheckHash(0x9D7022C6AA5D3FFB)
+        CheckCursor(17,3)
+        Mouse.Click(12,3,left)
+        Paint('3. Nothing happens (click outside bounds) cursor remains the same')   
+        CheckHash(0x9D7022C6AA5D3FFB)
+        CheckCursor(17,3)
+        Mouse.Click(31,3,left)
+        Paint('4. Nothing happens (click outside bounds) cursor remains the same')   
+        CheckHash(0x9D7022C6AA5D3FFB)
+        CheckCursor(17,3)
+        Mouse.Click(30,3,left)
+        Paint('5. Now cursor at end')   
+        CheckHash(0x9D7022C6AA5D3FFB)
+        CheckCursor(25,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
+    a.add_window(w);
     a.run();
 }
