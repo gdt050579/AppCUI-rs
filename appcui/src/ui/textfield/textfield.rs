@@ -237,6 +237,13 @@ impl TextField {
         self.glyphs.insert(self.cursor.pos, character);
         self.move_cursor_with(1, false);
     }
+    fn select_word(&mut self, offset: usize) {
+        if let Some((start,end)) = self.glyphs.word_range(offset, |c| CharClass::from(c) == CharClass::Word) {
+            self.selection = Selection::NONE;
+            self.move_cursor_to(start, false, true);
+            self.move_cursor_to(end, true, true);
+        }
+    }
     fn mouse_pos_to_glyph_offset(&self, x: i32, y: i32, within_control: bool) -> Option<usize> {
         let sz = self.size();
         let w = sz.width as i32;
@@ -437,7 +444,12 @@ impl OnMouseEvent for TextField {
                 self.drag_started = false;
                 EventProcessStatus::Processed
             }
-            MouseEvent::DoubleClick(_) => todo!(),
+            MouseEvent::DoubleClick(data) => {
+                if let Some(ofs) = self.mouse_pos_to_glyph_offset(data.x, data.y, true) {
+                    self.select_word(ofs);
+                }
+                EventProcessStatus::Processed
+            },
             MouseEvent::Drag(data) => {
                 if self.drag_started {
                     if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, false) {

@@ -4,6 +4,7 @@ pub(crate) trait GlyphParser {
     fn previous_glyph(&self, offset: usize) -> Option<(char, u32)>;
     fn next_pos(&self, current_pos: usize, count_glyphs: usize) -> usize;
     fn previous_pos(&self, current_pos: usize, count_glyphs: usize) -> usize;
+    fn word_range(&self, current_pos: usize, is_word_char: fn(char) -> bool) -> Option<(usize, usize)>;
 }
 
 #[inline(always)]
@@ -85,5 +86,48 @@ impl GlyphParser for String {
         }
         pos
     }
+
+    fn word_range(&self, current_pos: usize, is_word_char: fn(char) -> bool) -> Option<(usize, usize)> {
+        if current_pos >= self.len() {
+            return None;
+        }
+        if let Some((ch, _)) = self.glyph(current_pos) {
+            if !is_word_char(ch) {
+                return None;
+            }
+            let len = self.len();
+            let mut end = current_pos;
+            while end < len {
+                if let Some((ch, sz)) = self.glyph(end) {
+                    if is_word_char(ch) {
+                        end += sz as usize;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            // we found 'end' of word
+            let mut start = current_pos;
+            while start > 0 {
+                if let Some((ch, sz)) = self.previous_glyph(start) {
+                    if is_word_char(ch) {
+                        if sz as usize > start {
+                            start = 0;
+                            break;
+                        } else {
+                            start -= sz as usize;
+                        }
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            return Some((start,end));
+        }
+        None
+    }
 }
-    
