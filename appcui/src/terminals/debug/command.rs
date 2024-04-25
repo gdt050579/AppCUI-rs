@@ -10,6 +10,7 @@ use super::{
     keypress_command::KeyPressedCommand,
     keytypetext_command::KeyTypeTextCommand,
     mouse_click_command::MouseClickCommand,
+    mouse_doubleclick_command::MouseDoubleClickCommand,
     mouse_drag_command::MouseDragCommand,
     mouse_hold_command::MouseHoldCommand,
     mouse_move_command::MouseMoveCommand,
@@ -25,6 +26,7 @@ pub(super) enum Command {
     MouseHold(MouseHoldCommand),
     MouseRelease(MouseReleaseCommand),
     MouseClick(MouseClickCommand),
+    MouseDoubleClick(MouseDoubleClickCommand),
     MouseMove(MouseMoveCommand),
     MouseDrag(MouseDragCommand),
     MouseWheel(MouseWheelCommand),
@@ -52,6 +54,10 @@ impl Command {
             "Mouse.Click" => {
                 let variant = MouseClickCommand::new(&cp)?;
                 Ok(Command::MouseClick(variant))
+            }
+            "Mouse.DoubleClick" => {
+                let variant = MouseDoubleClickCommand::new(&cp)?;
+                Ok(Command::MouseDoubleClick(variant))
             }
             "Mouse.Move" => {
                 let variant = MouseMoveCommand::new(&cp)?;
@@ -109,6 +115,7 @@ impl Command {
             Command::MouseHold(cmd) => cmd.generate_event(mouse_pos, sys_events),
             Command::MouseRelease(cmd) => cmd.generate_event(mouse_pos, sys_events),
             Command::MouseClick(cmd) => cmd.generate_event(mouse_pos, sys_events),
+            Command::MouseDoubleClick(cmd) => cmd.generate_event(mouse_pos, sys_events),
             Command::MouseMove(cmd) => cmd.generate_event(sys_events),
             Command::MouseDrag(cmd) => cmd.generate_event(sys_events),
             Command::MouseWheel(cmd) => cmd.generate_event(mouse_pos, sys_events),
