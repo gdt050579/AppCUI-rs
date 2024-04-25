@@ -458,7 +458,7 @@ impl OnMouseEvent for TextField {
                 }
                 EventProcessStatus::Processed
             }
-            MouseEvent::Wheel(_) => todo!(),
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
         }
     }
 }

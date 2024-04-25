@@ -1095,3 +1095,23 @@ fn check_mouse_selection() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_double_click_selection() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right)
+        Paint('1. Text: - I ❤️ Rust Language :)')   
+        CheckHash(0xC612D5EC66D395F)
+        CheckCursor(24,5)
+        Mouse.DoubleClick(17,5,left)
+        Paint('2. Selected text: Language')   
+        CheckHash(0xC500029C8BF4A50B)
+        CheckCursor(21,5)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:14,h:3"));
+    a.add_window(w);
+    a.run();
+}
