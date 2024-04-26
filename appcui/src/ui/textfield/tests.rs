@@ -1115,3 +1115,29 @@ fn check_double_click_selection() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_select_word_for_upper_and_lowercase() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Home)
+        Key.Pressed(Right,8)
+        Paint('1. Hello world, I ❤ Rust Language :)')   
+        CheckHash(0x933F4645D825CC91 )
+        CheckCursor(21,3)
+        Key.Pressed(Ctrl+U)
+        Paint('2. Hello world, I ❤ Rust Language :)')   
+        CheckHash(0xAED543050B90DB6)
+        CheckCursor(24,3)
+        Key.Pressed(Ctrl+Shift+U)
+        Paint('3. Hello WORLD, I ❤ Rust Language :)')   
+        CheckHash(0x350A1BC25797ADD6)
+        CheckCursor(24,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello wOrLd, I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    a.add_window(w);
+    a.run();
+}

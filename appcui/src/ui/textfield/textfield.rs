@@ -181,6 +181,10 @@ impl TextField {
         if self.is_readonly() {
             return;
         }
+        if self.selection.is_empty() {
+            self.select_word(self.cursor.pos);
+        }
+
         if !self.selection.is_empty() {
             let s = callback(&self.glyphs[self.selection.start..self.selection.end]);
             self.glyphs.replace_range(self.selection.start..self.selection.end, &s);
@@ -189,8 +193,6 @@ impl TextField {
             self.selection = Selection::NONE;
             self.cursor.pos = start;
             self.move_cursor_with(count as i32, true);
-        } else {
-            todo!()
         }
     }
 
