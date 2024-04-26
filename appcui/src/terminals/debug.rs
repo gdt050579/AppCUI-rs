@@ -15,6 +15,8 @@ mod check_cursor_command;
 mod resize_command;
 mod keypress_command;
 mod keytypetext_command;
+mod clipboard_clear_command;
+mod clipboard_settext_command;
 mod command;
 
 #[cfg(test)]

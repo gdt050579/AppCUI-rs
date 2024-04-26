@@ -4,22 +4,11 @@ use crate::graphics::Point;
 use crate::terminals::SystemEvent;
 
 use super::{
-    check_cursor_command::CheckCursorCommand,
-    check_hash_command::CheckHashCommand,
-    command_parser::{CommandParser, ParserError},
-    keypress_command::KeyPressedCommand,
-    keytypetext_command::KeyTypeTextCommand,
-    mouse_click_command::MouseClickCommand,
-    mouse_doubleclick_command::MouseDoubleClickCommand,
-    mouse_drag_command::MouseDragCommand,
-    mouse_hold_command::MouseHoldCommand,
-    mouse_move_command::MouseMoveCommand,
-    mouse_release_command::MouseReleaseCommand,
-    mouse_wheel_command::MouseWheelCommand,
-    paint_command::PaintCommand,
-    paint_enable_command::PaintEnableCommand,
-    error_disable_command::ErrorDisableCommand,
-    resize_command::ResizeCommand,
+    check_cursor_command::CheckCursorCommand, 
+    check_hash_command::CheckHashCommand, 
+    clipboard_clear_command::ClipboardClearCommand, 
+    clipboard_settext_command::ClipboardSetTextCommand, 
+    command_parser::{CommandParser, ParserError}, error_disable_command::ErrorDisableCommand, keypress_command::KeyPressedCommand, keytypetext_command::KeyTypeTextCommand, mouse_click_command::MouseClickCommand, mouse_doubleclick_command::MouseDoubleClickCommand, mouse_drag_command::MouseDragCommand, mouse_hold_command::MouseHoldCommand, mouse_move_command::MouseMoveCommand, mouse_release_command::MouseReleaseCommand, mouse_wheel_command::MouseWheelCommand, paint_command::PaintCommand, paint_enable_command::PaintEnableCommand, resize_command::ResizeCommand
 };
 
 pub(super) enum Command {
@@ -38,6 +27,8 @@ pub(super) enum Command {
     Resize(ResizeCommand),
     KeyPresed(KeyPressedCommand),
     KeyTypeText(KeyTypeTextCommand),
+    ClipboardSetText(ClipboardSetTextCommand),
+    ClipboardClear(ClipboardClearCommand)
 }
 impl Command {
     pub(super) fn new(text: &str) -> Result<Command, ParserError> {
@@ -103,6 +94,14 @@ impl Command {
                 let variant = KeyTypeTextCommand::new(&cp)?;
                 Ok(Command::KeyTypeText(variant))
             }
+            "Clipboard.SetText" => {
+                let variant = ClipboardSetTextCommand::new(&cp)?;
+                Ok(Command::ClipboardSetText(variant))
+            }
+            "Clipboard.Clear" => {
+                let variant = ClipboardClearCommand::new(&cp)?;
+                Ok(Command::ClipboardClear(variant))
+            }
             _ => {
                 let mut s = String::from("Invalid/Unknwon command: ");
                 s += cp.get_command();
@@ -126,7 +125,10 @@ impl Command {
             Command::PaintEnable(_) => {}
             Command::ErrorDisable(_) => {}
             Command::CheckHash(_) => {}
-            Command::CheckCursor(_) => {}
+            Command::CheckCursor(_) => {},
+            Command::ClipboardSetText(_) => {},
+            Command::ClipboardClear(_) => {},
+            
         }
     }
     pub(super) fn get_paint_command_title(&self) -> Option<String> {

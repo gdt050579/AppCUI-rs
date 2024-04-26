@@ -23,6 +23,7 @@ pub(crate) struct DebugTerminal {
     cursor_point_to_check: Option<Point>,
     mouse_pos: Point,
     errors_disabled: bool,
+    clipboard_text: String,
 }
 impl DebugTerminal {
     fn build_commands(script: &str) -> VecDeque<Command> {
@@ -61,6 +62,7 @@ impl DebugTerminal {
             hash_to_test: None,
             cursor_point_to_check: None,
             mouse_pos: Point::new(0, 0),
+            clipboard_text: String::new(),
         })
     }
     fn _forecolor_to_str(col: Color) -> &'static str {
@@ -416,15 +418,20 @@ impl Terminal for DebugTerminal {
     }
     
     fn get_clipboard_text(&self) -> Option<&str> {
-        todo!()
+        if self.clipboard_text.is_empty() {
+            None
+        } else {
+            Some(&self.clipboard_text)
+        }
     }
     
     fn set_clipboard_text(&mut self, text: &str) {
-        todo!()
+        self.clipboard_text.clear();
+        self.clipboard_text.push_str(text);
     }
     
     fn has_clipboard_text(&self) -> bool {
-        todo!()
+        !self.clipboard_text.is_empty()
     }
 
 
