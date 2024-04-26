@@ -1141,3 +1141,35 @@ fn check_select_word_for_upper_and_lowercase() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_mouse_hover() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x830F7BB11593414E)
+        Mouse.Move(30,3)
+        Paint('Hover over first textfiedl')   
+        CheckHash(0x3B39C1913BBB1AAE)
+        Mouse.Move(30,5)
+        Paint('Hover over second textfiedl')   
+        CheckHash(0x8DAD48F6A47E900E)
+        Mouse.Click(30,5,left)
+        Paint('second textfiedl selected')   
+        CheckHash(0x152353F68A181C4E)
+        Mouse.Move(30,7)
+        Paint('Hover over inactive textfield - nothing changes')   
+        CheckHash(0x152353F68A181C4E)
+        Mouse.Move(30,9)
+        Paint('Hover over last textfield')   
+        CheckHash(0xAC1C531E6045ADEE)
+    ";
+    let mut a = App::debug(60, 13, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:11"), window::Flags::None);
+    w.add(textfield!("'Hello world !',x:1,y:1,w:36,h:1"));
+    w.add(textfield!("'Read onlye text',x:1,y:3,w:36,h:1, flags: Readonly"));
+    w.add(textfield!("Inactive,x:1,y:5,w:36,h:1,enable: false"));
+    w.add(textfield!("'No auto selection',x:1,y:7,w:36,h:1, flags: DisableAutoSelectOnFocus"));
+    a.add_window(w);
+    a.run();
+}
