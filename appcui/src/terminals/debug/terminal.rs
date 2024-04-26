@@ -414,4 +414,19 @@ impl Terminal for DebugTerminal {
         // if nothing else works, close the app (script has finished)
         SystemEvent::AppClose
     }
+    
+    fn get_clipboard_text(&self) -> Option<&str> {
+        todo!()
+    }
+    
+    fn set_clipboard_text(&mut self, text: &str) {
+        todo!()
+    }
+    
+    fn has_clipboard_text(&self) -> bool {
+        todo!()
+    }
+
+
+
 }

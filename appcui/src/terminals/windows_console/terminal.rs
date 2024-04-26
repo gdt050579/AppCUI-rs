@@ -730,4 +730,17 @@ impl Terminal for WindowsTerminal {
 
         SystemEvent::None
     }
+
+    fn get_clipboard_text(&self) -> Option<&str> {
+        todo!()
+    }
+    
+    fn set_clipboard_text(&mut self, text: &str) {
+        todo!()
+    }
+    
+    fn has_clipboard_text(&self) -> bool {
+        todo!()
+    }   
+
 }
