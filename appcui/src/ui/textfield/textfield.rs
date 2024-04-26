@@ -174,7 +174,7 @@ impl TextField {
         if !self.selection.is_empty() {
             // copy text
             todo!();
-            self.delete_selection();
+            //self.delete_selection();
         }
     }
     fn convert_selection_or_word(&mut self, callback: fn(text: &str) -> String) {
@@ -259,18 +259,14 @@ impl TextField {
         let sz = self.size();
         let w = sz.width as i32;
         let h = sz.height as i32;
-        if within_control {
-            if (x < 1) || (x >= w - 1) || (y < 0) || (y >= h) {
-                return None;
-            }
+        if within_control && ((x < 1) || (x >= w - 1) || (y < 0) || (y >= h)) {
+            return None;
         }
         let glyphs_count = (x - 1) + y * (w - 2);
-        if glyphs_count > 0 {
-            Some(self.glyphs.next_pos(self.cursor.start, glyphs_count as usize))
-        } else if glyphs_count < 0 {
-            Some(self.glyphs.previous_pos(self.cursor.start, (-glyphs_count) as usize))
-        } else {
-            Some(self.cursor.start)
+        match glyphs_count.cmp(&0) {
+            std::cmp::Ordering::Less => Some(self.glyphs.previous_pos(self.cursor.start, (-glyphs_count) as usize)),
+            std::cmp::Ordering::Equal => Some(self.cursor.start),
+            std::cmp::Ordering::Greater => Some(self.glyphs.next_pos(self.cursor.start, glyphs_count as usize)),
         }
     }
 }

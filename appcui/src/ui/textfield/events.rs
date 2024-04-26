@@ -4,14 +4,11 @@ use super::TextField;
 #[derive(Copy,Clone,Eq,PartialEq)]
 pub(crate) enum TextFieldEventsType {
     OnValidate,
-    OnTextChanged,
+    //OnTextChanged,
 }
 
 pub trait TextFieldEvents {
     fn on_validate(&mut self, _handle: Handle<TextField>, _text: &str) -> EventProcessStatus {
-        EventProcessStatus::Ignored
-    }
-    fn on_text_changed(&mut self, _handle: Handle<TextField>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
