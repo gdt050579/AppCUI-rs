@@ -1,20 +1,7 @@
 use crate::{
-    graphics::{Size, Surface},
-    input::{Key, MouseEvent},
-    system::{Handle, Theme},
-    ui::{
-        button::events::ButtonEvents, 
-        checkbox::events::CheckBoxEvents, 
-        radiobox::events::RadioBoxEvents,
-        password::events::PasswordEvents,
-        keyselector::events::KeySelectorEvents,
-        threestatebox::events::ThreeStateBoxEvents,
-        colorpicker::events::ColorPickerEvents,
-        command_bar::events::GenericCommandBarEvents, 
-        desktop::events::DesktopEvents,
-        menu::events::GenericMenuEvents, 
-        window::events::{ToolBarEvents, WindowEvents},
-    },
+    graphics::{Size, Surface}, input::{Key, MouseEvent}, prelude::textfield::events::TextFieldEvents, system::{Handle, Theme}, ui::{
+        button::events::ButtonEvents, checkbox::events::CheckBoxEvents, colorpicker::events::ColorPickerEvents, command_bar::events::GenericCommandBarEvents, desktop::events::DesktopEvents, keyselector::events::KeySelectorEvents, menu::events::GenericMenuEvents, password::events::PasswordEvents, radiobox::events::RadioBoxEvents, threestatebox::events::ThreeStateBoxEvents, window::events::{ToolBarEvents, WindowEvents}
+    }
 };
 
 use super::UIElement;
@@ -95,6 +82,7 @@ pub trait Control:
     + ThreeStateBoxEvents
     + ColorPickerEvents
     + KeySelectorEvents
+    + TextFieldEvents
     + GenericCommandBarEvents
     + WindowEvents
     + ToolBarEvents

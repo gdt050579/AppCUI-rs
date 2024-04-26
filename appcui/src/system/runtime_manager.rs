@@ -4,7 +4,6 @@ use super::runtime_manager_traits::*;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
-use crate::{prelude::*, terminals};
 use crate::terminals::*;
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
@@ -15,6 +14,7 @@ use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
+use crate::{prelude::*, terminals};
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -1374,7 +1374,33 @@ impl MouseMethods for RuntimeManager {
         }
         self.mouse_locked_object = MouseLockedObject::None;
     }
-    fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent) {}
+    fn process_mouse_dblclick_event(&mut self, event: MouseDoubleClickEvent) {
+        // Hide ToolTip
+        self.hide_tooltip();
+        // check for a control
+        let handle = self.coordinates_to_control(event.x, event.y, false);
+        if !handle.is_none() {
+            let controls = unsafe { &mut *self.controls };
+            if let Some(control) = controls.get_mut(handle) {
+                self.update_focus(handle);
+                let base = control.get_base();
+                let scr_x = base.screen_clip.left;
+                let scr_y = base.screen_clip.top;
+                //let has_margins = base.should_increase_margins_on_focus().is_some();
+
+                let response = control.get_control_mut().on_mouse_event(&MouseEvent::DoubleClick(MouseEventData {
+                    x: event.x - scr_x,
+                    y: event.y - scr_y,
+                    button: event.button,
+                }));
+                if response == EventProcessStatus::Processed {
+                    self.mouse_locked_object = MouseLockedObject::None;
+                    self.repaint = true;
+                    self.request_update_command_and_menu_bars = true;
+                }
+            }
+        }
+    }
 }
 
 impl Drop for RuntimeManager {

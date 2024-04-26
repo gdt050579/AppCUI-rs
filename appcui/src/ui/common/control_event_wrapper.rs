@@ -1,12 +1,15 @@
+use textfield::TextField;
+
 use super::traits::{Control, EventProcessStatus};
 use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
-use crate::prelude::{colorpicker, keyselector, threestatebox, ThreeStateBoxEvents};
+use crate::prelude::{colorpicker, keyselector, textfield, threestatebox, RuntimeManager, ThreeStateBoxEvents};
 use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
     radiobox::events::RadioBoxEvents,
+    textfield::events::TextFieldEvents,
 };
 
 pub(crate) enum ControlEventData {
@@ -17,6 +20,7 @@ pub(crate) enum ControlEventData {
     ColorPicker(colorpicker::events::EventData),
     Password(password::events::EventData),
     KeySelector(keyselector::events::EventData),
+    TextField(textfield::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -53,6 +57,20 @@ impl ControlEvent {
             ControlEventData::KeySelector(data) => {
                 KeySelectorEvents::on_key_changed(receiver, self.emitter.cast(), data.new_key, data.old_key )
             },
+            ControlEventData::TextField(data) => {
+                let h: Handle<TextField> = self.emitter.cast();
+                match data.evtype {
+                    textfield::events::TextFieldEventsType::OnValidate => {
+                        if let Some(tf) = RuntimeManager::get().get_control(h) {
+                            TextFieldEvents::on_validate(receiver, self.emitter.cast(), tf.text())
+                        } else {
+                            EventProcessStatus::Ignored
+                        }
+                    },
+                    //textfield::events::TextFieldEventsType::OnTextChanged => todo!(),
+                }
+            },
+            
             
         }
     }

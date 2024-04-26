@@ -26,16 +26,17 @@ Mouse related commands are a set of commands that simulate various mouse events
 |`Mouse.Hold(x,y,button)`          |simulates an event where the mouse button is being pressed while the mouse is located at a specific position on screen. The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center`|
 |`Mouse.Release(x,y)`              |simulates the release of all mouse buttons while the mouse is located at a specific screen position.|
 |`Mouse.Click(x,y,button)`         |simulates a click (hold and release). It is equivalent to<br> - Mouse.Hold(x,y,button)<br> - Mouse.Release(x,y) |
+|`Mouse.DoubleClick(x,y,button)`   |simulates a double-click (for a specific button) |
 |`Mouse.Move(x,y)`                 |simulates the movement of a mouse to coordonates (x,y). No mouse button are being pressed.|
 |`Mouse.Drag(x1,y1,x2,y2)`         |simulates the movement of a mouse from (x1,y1) to (x2,y2) while the `left` button is being pressed |
 |`Mouse.Wheel(x,y,direction,times)`|simulates the wheel mouse being rotated into a direction (one of `top`, `bottom`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0. |
      
 ## Keyboard related commands
 
-| Command          | Purpose |
-|------------------|---------|
-|`Key.Pressed(key)`| where `key` parameter can be a key name or any combination of control key and a regular key such as<br>- `Z` (for pressin the `Z` key)<br>- `Enter` (for pressing the `Enter` key)<br>-`Alt+T` (`Alt` + `T` combination)<br>-`Ctrl+Alt+F1` (`Ctrl`+`Alt`+`F1` keys)|
-| `Key.TypeText(text)` | where `text` parameter is a text that is being typed                                                                                                                                                                                                                |
+| Command                   | Purpose |
+|---------------------------|---------|
+|`Key.Pressed(key,times)`   | where `key` parameter can be a key name or any combination of control key and a regular key such as<br>- `Z` (for pressin the `Z` key)<br>- `Enter` (for pressing the `Enter` key)<br>-`Alt+T` (`Alt` + `T` combination)<br>-`Ctrl+Alt+F1` (`Ctrl`+`Alt`+`F1` keys). The `times` parameter can be omited. If present it has to be bigger than 1|
+|`Key.TypeText(text)`       | where `text` parameter is a text that is being typed                                                                                                                                                                                                                |
 
 
 Usually the key parameter can have several forms:
