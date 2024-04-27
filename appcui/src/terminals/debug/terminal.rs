@@ -454,11 +454,11 @@ impl Terminal for DebugTerminal {
         SystemEvent::AppClose
     }
 
-    fn get_clipboard_text(&self) -> Option<&str> {
+    fn get_clipboard_text(&self) -> Option<String> {
         if self.clipboard_text.is_empty() {
             None
         } else {
-            Some(&self.clipboard_text)
+            Some(self.clipboard_text.clone())
         }
     }
 

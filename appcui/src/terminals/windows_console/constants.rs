@@ -21,3 +21,6 @@ pub(super) const SHIFT_PRESSED: u32 = 0x0010;
 pub(super) const ENABLE_WINDOW_INPUT: u32 = 0x0008;
 pub(super) const ENABLE_MOUSE_INPUT: u32 = 0x0010;
 pub(super) const ENABLE_EXTENDED_FLAGS: u32 = 0x0080;
+pub(super) const CF_UNICODETEXT: u32 = 13;
+pub(super) const CF_TEXT: u32 = 1;
+pub(super) const GMEM_MOVEABLE: u32 = 0x0002;

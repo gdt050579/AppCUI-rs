@@ -168,7 +168,7 @@ impl TextField {
             self.delete_selection();
         }
         if let Some(txt) = RuntimeManager::get().terminal().get_clipboard_text() {
-            self.glyphs.insert_str(self.cursor.pos, txt);
+            self.glyphs.insert_str(self.cursor.pos, &txt);
             self.move_cursor_to(self.cursor.pos + txt.len(), false, true);
         }
     }
