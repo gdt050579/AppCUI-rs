@@ -137,28 +137,4 @@ impl Command {
             _ => None,
         }
     }
-    pub(super) fn get_screen_hash(&self) -> Option<u64> {
-        match self {
-            Command::CheckHash(cmd) => Some(cmd.get_hash()),
-            _ => None,
-        }
-    }
-    pub(super) fn get_cursor_pos(&self) -> Option<Point> {
-        match self {
-            Command::CheckCursor(cmd) => Some(cmd.get_point()),
-            _ => None,
-        }
-    }
-    pub(super) fn get_paint_enable_status(&self) -> Option<bool> {
-        match self {
-            Command::PaintEnable(cmd) => Some(cmd.is_paint_enabled()),
-            _ => None,
-        }
-    }
-    pub(super) fn get_error_disable_status(&self) -> Option<bool> {
-        match self {
-            Command::ErrorDisable(cmd) => Some(cmd.is_error_disabled()),
-            _ => None,
-        }
-    }
 }
