@@ -329,7 +329,6 @@ pub struct WindowsTerminal {
     shift_state: KeyModifier,
     last_mouse_pos: Point,
     visible_region: SMALL_RECT,
-    clipboard: String,
     _original_mode_flags: u32,
 }
 
@@ -512,7 +511,6 @@ impl WindowsTerminal {
             shift_state: KeyModifier::None,
             last_mouse_pos: Point::new(i32::MAX, i32::MAX),
             visible_region: info.window,
-            clipboard: String::new(),
             _original_mode_flags: original_mode_flags,
         };
         term.chars
