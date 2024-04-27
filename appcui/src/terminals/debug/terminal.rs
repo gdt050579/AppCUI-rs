@@ -424,11 +424,29 @@ impl Terminal for DebugTerminal {
                 Command::ClipboardSetText(obj) => {
                     self.set_clipboard_text(obj.get_text());
                     return SystemEvent::None;
-                },
+                }
                 Command::ClipboardClear(_) => {
                     self.set_clipboard_text("");
                     return SystemEvent::None;
-                },
+                }
+                Command::CheckClipboardText(obj) => {
+                    if obj.get_text() != self.clipboard_text {
+                        if self.errors_disabled {
+                            println!(
+                                "\x1b[91;40m[Error] Invalid clipboard text: (expecting: '{}' but found '{}')\x1b[0m",
+                                obj.get_text(),
+                                self.clipboard_text
+                            );
+                        } else {
+                            panic!(
+                                "Invalid clipboard text: (expecting: '{}' but found '{}')",
+                                obj.get_text(),
+                                self.clipboard_text
+                            );
+                        }
+                    }
+                    return SystemEvent::None;
+                }
             }
         }
 

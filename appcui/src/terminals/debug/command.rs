@@ -8,7 +8,21 @@ use super::{
     check_hash_command::CheckHashCommand, 
     clipboard_clear_command::ClipboardClearCommand, 
     clipboard_settext_command::ClipboardSetTextCommand, 
-    command_parser::{CommandParser, ParserError}, error_disable_command::ErrorDisableCommand, keypress_command::KeyPressedCommand, keytypetext_command::KeyTypeTextCommand, mouse_click_command::MouseClickCommand, mouse_doubleclick_command::MouseDoubleClickCommand, mouse_drag_command::MouseDragCommand, mouse_hold_command::MouseHoldCommand, mouse_move_command::MouseMoveCommand, mouse_release_command::MouseReleaseCommand, mouse_wheel_command::MouseWheelCommand, paint_command::PaintCommand, paint_enable_command::PaintEnableCommand, resize_command::ResizeCommand
+    check_clipboardtext_command::CheckClipboardTextCommand,
+    command_parser::{CommandParser, ParserError}, 
+    error_disable_command::ErrorDisableCommand, 
+    keypress_command::KeyPressedCommand, 
+    keytypetext_command::KeyTypeTextCommand, 
+    mouse_click_command::MouseClickCommand, 
+    mouse_doubleclick_command::MouseDoubleClickCommand, 
+    mouse_drag_command::MouseDragCommand, 
+    mouse_hold_command::MouseHoldCommand, 
+    mouse_move_command::MouseMoveCommand, 
+    mouse_release_command::MouseReleaseCommand, 
+    mouse_wheel_command::MouseWheelCommand, 
+    paint_command::PaintCommand, 
+    paint_enable_command::PaintEnableCommand, 
+    resize_command::ResizeCommand,
 };
 
 pub(super) enum Command {
@@ -28,7 +42,8 @@ pub(super) enum Command {
     KeyPresed(KeyPressedCommand),
     KeyTypeText(KeyTypeTextCommand),
     ClipboardSetText(ClipboardSetTextCommand),
-    ClipboardClear(ClipboardClearCommand)
+    ClipboardClear(ClipboardClearCommand),
+    CheckClipboardText(CheckClipboardTextCommand),
 }
 impl Command {
     pub(super) fn new(text: &str) -> Result<Command, ParserError> {
@@ -78,6 +93,10 @@ impl Command {
                 let variant = CheckCursorCommand::new(&cp)?;
                 Ok(Command::CheckCursor(variant))
             }
+            "CheckClipboardText" => {
+                let variant = CheckClipboardTextCommand::new(&cp)?;
+                Ok(Command::CheckClipboardText(variant))
+            }            
             "Error.Disable" => {
                 let variant = ErrorDisableCommand::new(&cp)?;
                 Ok(Command::ErrorDisable(variant))
@@ -126,6 +145,7 @@ impl Command {
             Command::ErrorDisable(_) => {}
             Command::CheckHash(_) => {}
             Command::CheckCursor(_) => {},
+            Command::CheckClipboardText(_) => {},
             Command::ClipboardSetText(_) => {},
             Command::ClipboardClear(_) => {},
             
