@@ -1,5 +1,6 @@
 mod theme;
 mod app;
+mod clipboard;
 mod runtime_manager;
 mod runtime_manager_traits;
 mod tooltip;
@@ -23,6 +24,7 @@ pub (crate) use self::control_handle_manager::ControlHandleManager;
 pub (crate) use self::menu_handle_manager::MenuHandleManager;
 
 pub use self::app::App;
+pub use self::clipboard::Clipboard;
 pub use self::error::Error;
 pub use self::error::ErrorKind;
 pub (crate) use self::runtime_manager::RuntimeManager;
