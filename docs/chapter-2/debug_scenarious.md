@@ -84,7 +84,7 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
 | `CheckHash(hash)`          | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing. |
 | `CheckCursor(x,y)`         | checks if the cursor (caret) is at a specify position |
 | `CheckCursor(hidden)`      | checks is the cursor (caret) is hidden (not visible). You cal also check this by using `false` instead of `hidden` |
-| `CheckClipboardTetx(text)` | checks to see if the clipboard if the clipboard contains a specific text. This method is used to validate if the `Copy`/`Cut` to clipboard command from a control worked properly |
+| `CheckClipboardText(text)` | checks to see if the clipboard if the clipboard contains a specific text. This method is used to validate if the `Copy`/`Cut` to clipboard command from a control worked properly |
 | `Error.Disable(value)`     | enables or disables errors when testing the the hashes or cursor position. `value` is a boolean value (**true** or **false**). By default, errors are **NOT** disabled |
 
 ## Example
