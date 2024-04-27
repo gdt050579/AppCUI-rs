@@ -22,6 +22,7 @@
     - [Input]() <!-- (chapter-2/input.md) -->
         - [Mouse]()
         - [Keyboard]()
+    - [Clipboard](chapter-2/clipboard.md)
 
 - [Controls](chapter-3/controls.md)
     - [Layout](chapter-3/layout.md)
