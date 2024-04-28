@@ -749,16 +749,12 @@ impl Terminal for WindowsTerminal {
                 return None;
             }
             let mut s = String::with_capacity(16);
-            loop {
-                if let Some(ch) = char::from_u32((*ptr) as u32) {
-                    if (ch as u32) == 0 {
-                        break;
-                    }
-                    s.push(ch);
-                    ptr = ptr.add(1);
-                } else {
+            while let Some(ch) = char::from_u32((*ptr) as u32) {
+                if (ch as u32) == 0 {
                     break;
                 }
+                s.push(ch);
+                ptr = ptr.add(1);
             }
             winapi::GlobalUnlock(hmem);
             winapi::CloseClipboard();
