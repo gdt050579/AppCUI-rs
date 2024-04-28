@@ -2,7 +2,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static mut WINDOW_FLAGS: FlagsSignature = FlagsSignature::new(&[
+static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "Sizeable",
     "NoCloseButton",
     "FixedPosition",
@@ -10,7 +10,7 @@ static mut WINDOW_FLAGS: FlagsSignature = FlagsSignature::new(&[
     "NotifyWindow",
     "WarningWindow",
 ]);
-static mut WINDOW_TYPES: FlagsSignature = FlagsSignature::new(&["Normal", "Error", "Warning", "Notification"]);
+static TYPES: FlagsSignature = FlagsSignature::new(&["Normal", "Error", "Warning", "Notification"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("title", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
@@ -26,8 +26,8 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.init_control("Window::with_type");
     cb.add_string_parameter("title", None);
     cb.add_layout();
-    cb.add_flags_parameter("flags", "window::Flags", unsafe { &mut WINDOW_FLAGS });
-    cb.add_enum_parameter("type", "window::Type", unsafe { &mut WINDOW_TYPES }, Some("Normal"));
+    cb.add_flags_parameter("flags", "window::Flags", &FLAGS);
+    cb.add_enum_parameter("type", "window::Type", &TYPES, Some("Normal"));
     cb.finish_control_initialization();
     cb.into()
 }

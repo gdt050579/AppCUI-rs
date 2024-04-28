@@ -197,7 +197,7 @@ impl<'a> ControlBuilder<'a> {
             }
         }
     }
-    pub(super) fn get_enum_value(&mut self, param_name: &str, available_variants: &mut FlagsSignature) -> Option<&str> {
+    pub(super) fn get_enum_value(&mut self, param_name: &str, available_variants: &FlagsSignature) -> Option<&str> {
         if let Some(value) = self.parser.get(param_name) {
             let variant = value.get_string();
             if let Some(variant_name) = available_variants.get(variant) {
@@ -209,7 +209,7 @@ impl<'a> ControlBuilder<'a> {
             None
         }
     }
-    pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &mut FlagsSignature, default: Option<&str>) {
+    pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &FlagsSignature, default: Option<&str>) {
         self.add_comma();
         if let Some(value) = self.parser.get(param_name) {
             let variant = value.get_string();
@@ -237,7 +237,7 @@ impl<'a> ControlBuilder<'a> {
             );
         }
     }
-    pub(super) fn add_flags_parameter(&mut self, param_name: &str, flag_name: &str, available_flags: &mut FlagsSignature) {
+    pub(super) fn add_flags_parameter(&mut self, param_name: &str, flag_name: &str, available_flags: &FlagsSignature) {
         self.add_comma();
         if let Some(value) = self.parser.get_mut(param_name) {
             if let Some(list) = value.get_list() {
