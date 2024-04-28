@@ -23,6 +23,7 @@ pub(crate) struct DebugTerminal {
     cursor_point_to_check: Option<Point>,
     mouse_pos: Point,
     errors_disabled: bool,
+    clipboard_text: String,
 }
 impl DebugTerminal {
     fn build_commands(script: &str) -> VecDeque<Command> {
@@ -61,6 +62,7 @@ impl DebugTerminal {
             hash_to_test: None,
             cursor_point_to_check: None,
             mouse_pos: Point::new(0, 0),
+            clipboard_text: String::new(),
         })
     }
     fn _forecolor_to_str(col: Color) -> &'static str {
@@ -384,34 +386,88 @@ impl Terminal for DebugTerminal {
                     return SystemEvent::None;
                 }
             }
-            // check for CheckHash command
-            if let Some(hash) = cmd.get_screen_hash() {
-                self.paint = false; // I don't want to paint anything --> just store the hash
-                self.hash_to_test = Some(hash); // next time I paint --> I will check it
-                RuntimeManager::get().request_repaint();
-                return SystemEvent::None;
+            match cmd {
+                Command::MouseHold(_)
+                | Command::MouseRelease(_)
+                | Command::MouseClick(_)
+                | Command::MouseDoubleClick(_)
+                | Command::MouseMove(_)
+                | Command::MouseDrag(_)
+                | Command::MouseWheel(_)
+                | Command::Paint(_)
+                | Command::Resize(_)
+                | Command::KeyPresed(_)
+                | Command::KeyTypeText(_) => {
+                    return SystemEvent::None;
+                }
+                Command::PaintEnable(obj) => {
+                    self.ignore_paint_command = !obj.is_paint_enabled();
+                    return SystemEvent::None;
+                }
+                Command::ErrorDisable(obj) => {
+                    self.errors_disabled = obj.is_error_disabled();
+                    return SystemEvent::None;
+                }
+                Command::CheckHash(obj) => {
+                    self.paint = false; // I don't want to paint anything --> just store the hash
+                    self.hash_to_test = Some(obj.get_hash()); // next time I paint --> I will check it
+                    RuntimeManager::get().request_repaint();
+                    return SystemEvent::None;
+                }
+                Command::CheckCursor(obj) => {
+                    self.paint = false; // I don't want to paint anything --> just store the hash
+                    self.cursor_point_to_check = Some(obj.get_point()); // next time I paint --> I will check it
+                    RuntimeManager::get().request_repaint();
+                    return SystemEvent::None;
+                }
+
+                Command::ClipboardSetText(obj) => {
+                    self.set_clipboard_text(obj.get_text());
+                    return SystemEvent::None;
+                }
+                Command::ClipboardClear(_) => {
+                    self.set_clipboard_text("");
+                    return SystemEvent::None;
+                }
+                Command::CheckClipboardText(obj) => {
+                    if obj.get_text() != self.clipboard_text {
+                        if self.errors_disabled {
+                            println!(
+                                "\x1b[91;40m[Error] Invalid clipboard text: (expecting: '{}' but found '{}')\x1b[0m",
+                                obj.get_text(),
+                                self.clipboard_text
+                            );
+                        } else {
+                            panic!(
+                                "Invalid clipboard text: (expecting: '{}' but found '{}')",
+                                obj.get_text(),
+                                self.clipboard_text
+                            );
+                        }
+                    }
+                    return SystemEvent::None;
+                }
             }
-            // check for CheckCursor command
-            if let Some(pos) = cmd.get_cursor_pos() {
-                self.paint = false; // I don't want to paint anything --> just store the hash
-                self.cursor_point_to_check = Some(pos); // next time I paint --> I will check it
-                RuntimeManager::get().request_repaint();
-                return SystemEvent::None;
-            }
-            // check for PaintEnable command
-            if let Some(value) = cmd.get_paint_enable_status() {
-                self.ignore_paint_command = !value;
-                return SystemEvent::None;
-            }
-            // check for ErrorDisable command
-            if let Some(value) = cmd.get_error_disable_status() {
-                self.errors_disabled = value;
-                return SystemEvent::None;
-            }
-            return SystemEvent::None;
         }
 
         // if nothing else works, close the app (script has finished)
         SystemEvent::AppClose
+    }
+
+    fn get_clipboard_text(&self) -> Option<String> {
+        if self.clipboard_text.is_empty() {
+            None
+        } else {
+            Some(self.clipboard_text.clone())
+        }
+    }
+
+    fn set_clipboard_text(&mut self, text: &str) {
+        self.clipboard_text.clear();
+        self.clipboard_text.push_str(text);
+    }
+
+    fn has_clipboard_text(&self) -> bool {
+        !self.clipboard_text.is_empty()
     }
 }

@@ -12,9 +12,12 @@ mod paint_enable_command;
 mod error_disable_command;
 mod check_hash_command;
 mod check_cursor_command;
+mod check_clipboardtext_command;
 mod resize_command;
 mod keypress_command;
 mod keytypetext_command;
+mod clipboard_clear_command;
+mod clipboard_settext_command;
 mod command;
 
 #[cfg(test)]

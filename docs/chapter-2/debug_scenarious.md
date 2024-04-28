@@ -36,7 +36,7 @@ Mouse related commands are a set of commands that simulate various mouse events
 | Command                   | Purpose |
 |---------------------------|---------|
 |`Key.Pressed(key,times)`   | where `key` parameter can be a key name or any combination of control key and a regular key such as<br>- `Z` (for pressin the `Z` key)<br>- `Enter` (for pressing the `Enter` key)<br>-`Alt+T` (`Alt` + `T` combination)<br>-`Ctrl+Alt+F1` (`Ctrl`+`Alt`+`F1` keys). The `times` parameter can be omited. If present it has to be bigger than 1|
-|`Key.TypeText(text)`       | where `text` parameter is a text that is being typed                                                                                                                                                                                                                |
+|`Key.TypeText(text)`       | where `text` parameter is a text that is being typed.<br>Example: `Key.TypeText('Hello world')` will trigger the following keys to be pressed: `H`, `e`, `l`, `l`, `o`, `Space`, `w`, `o`, `r`, `l` and `d`                                                                                              |
 
 
 Usually the key parameter can have several forms:
@@ -63,7 +63,6 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
 |--------------------------------------|---------|     
 |`Paint(staet_name)`<br>or<br>`Paint()`| paints the current virtual screen into the current screen using ANSI codes and colors. This command also computes a hash over the current virtual screen and prints it. The `state_name` is a name can be used to reflect the current execution state. This is useful if multipl `Paint` command are being used and you need to differentiate between them.  |
 |`Paint.Enable(value)`                 | enables or disables painting. `value` is a boolean value (**true** or **false**). If set to **false** all subsequent calls to command `Paint` will be ignored. By default, all paints are enabled. |
-|`Error.Disable(value)`                | enables or disables errors when testing the the hashes or cursor position. `value` is a boolean value (**true** or **false**). By default, errors are **NOT** disabled |
 
 ## System events
 
@@ -71,12 +70,22 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
 |------------------------|---------|  
 | `Resize(width,height)` | simulates a resize of the virtual terminal to the size represented by `width` and `height` parameters |
      
+## Clipboard commands
+
+| Command                   | Purpose |
+|---------------------------|---------|  
+| `Clipboard.SetText(text)` | sets a new text into a simulated clipboard. That text will be available to all controls if they want to paste it |
+| `Clipboard.Clear()`       | clears the text from the simulated clipboard. |
+
 ## Validation commands
-| Command               | Purpose |
-|-----------------------|---------|  
-| `CheckHash(hash)`     | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing. |
-| `CheckCursor(x,y)`    | checks if the cursor (caret) is at a specify position |
-| `CheckCursor(hidden)` | checks is the cursor (caret) is hidden (not visible). You cal also check this by using `false` instead of `hidded` |
+
+| Command                    | Purpose |
+|----------------------------|---------|  
+| `CheckHash(hash)`          | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing. |
+| `CheckCursor(x,y)`         | checks if the cursor (caret) is at a specify position |
+| `CheckCursor(hidden)`      | checks is the cursor (caret) is hidden (not visible). You cal also check this by using `false` instead of `hidden` |
+| `CheckClipboardText(text)` | checks to see if the clipboard if the clipboard contains a specific text. This method is used to validate if the `Copy`/`Cut` to clipboard command from a control worked properly |
+| `Error.Disable(value)`     | enables or disables errors when testing the the hashes or cursor position. `value` is a boolean value (**true** or **false**). By default, errors are **NOT** disabled |
 
 ## Example
 
@@ -103,8 +112,9 @@ Let's break the event script in pieces and see exactly what is supposed to happe
 1. `Paint('initial state')` - this will print the virtual screen. It should look like the following (but with colors):
 ```
     +===================================================================+
-    | Name: initial state                                               |
-    | Hash: 0xB1471A30B30F5C6C                                          |
+    | Name  : initial state                                             |
+    | Hash  : 0xB1471A30B30F5C6C                                        |
+    | Cursor: Hidden                                                    |
     |-------------------------------------------------------------------|
     |    |           11111111112222222222333333333344444444445555555555 |
     |    | 012345678901234567890123456789012345678901234567890123456789 |
@@ -135,8 +145,9 @@ We can inspect inspect if the position of the window is correct. We can also not
 
 ```
     +===================================================================+
-    | Name: window was moved                                            |
-    | Hash: 0x419533D4BBEFE538                                          |
+    | Name  : window was moved                                          |
+    | Hash  : 0x419533D4BBEFE538                                        |
+    | Cursor: Hidden                                                    |
     |-------------------------------------------------------------------|
     |    |           11111111112222222222333333333344444444445555555555 |
     |    | 012345678901234567890123456789012345678901234567890123456789 |

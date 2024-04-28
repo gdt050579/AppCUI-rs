@@ -1173,3 +1173,59 @@ fn check_mouse_hover() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_paste() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Home)
+        Key.Pressed(Right,6)
+        Paint('1. Hello , I ❤ Rust Language :)')   
+        CheckHash(0x29421C7A89674F1F )
+        CheckCursor(19,3)
+        Clipboard.SetText('world')
+        Key.Pressed('Ctrl+V')
+        Paint('2. Hello world, I ❤ Rust Language :)')   
+        CheckHash(0x73D49C462B964C91)
+        CheckCursor(24,3)
+        Key.Pressed('Shift+Insert',2)
+        Paint('3. Hello worldworldworld, I ❤ Rust La')   
+        CheckHash(0xDF568934EEA67B95)
+        CheckCursor(34,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_copy_cut() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Home)
+        Key.Pressed(Right,8)
+        Paint('1. Hello , I ❤ Rust Language :)')   
+        CheckHash(0x29421C7A89674F1F )
+        CheckCursor(21,3)
+        Key.Pressed(Shift+Right,8)
+        Key.Pressed('Ctrl+C')
+        Paint('2. Same text but `I ❤ Rust` is selected')   
+        CheckHash(0xF417AC2E90B028C3)
+        CheckCursor(29,3)
+        CheckClipboardText('I ❤️ Rust')
+        Key.Pressed('Home')
+        Key.Pressed(Shift+Right,5)
+        Key.Pressed('Ctrl+X')
+        Paint('3. , I ❤️ Rust Language :)')   
+        CheckHash(0x6A2C27777CF8CA71)
+        CheckCursor(13,3)
+        CheckClipboardText('Hello')
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    a.add_window(w);
+    a.run();
+}

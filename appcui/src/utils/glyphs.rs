@@ -12,7 +12,7 @@ fn is_variation_selector(c: char) -> bool {
     matches!(c, '\u{FE00}'..='\u{FE0F}' | '\u{E0100}'..='\u{E01EF}')
 }
 
-impl GlyphParser for String {
+impl GlyphParser for str {
     fn count_glyphs(&self) -> usize {
         self.chars().filter(|&c| !is_variation_selector(c)).count()
     }

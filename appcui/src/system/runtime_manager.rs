@@ -155,6 +155,12 @@ impl RuntimeManager {
             },
         )
     }
+    pub(crate) fn terminal(&self) -> &dyn Terminal {
+        self.terminal.as_ref()
+    }
+    pub(crate) fn terminal_mut(&mut self) -> &mut dyn Terminal {
+        self.terminal.as_mut()
+    }
 
     pub(crate) fn exit_execution_loop(&mut self) {
         self.loop_status = LoopStatus::ExitCurrentLoop;

@@ -16,6 +16,10 @@ pub struct App {
 }
 
 impl App {
+    pub(super) fn is_created() -> bool {
+        let app_created = APP_CREATED_MUTEX.lock().unwrap();
+        *app_created
+    }
     pub(super) fn create(builder: crate::system::Builder) -> Result<Self, Error> {
         let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
         if *app_created {

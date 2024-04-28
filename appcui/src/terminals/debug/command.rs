@@ -4,21 +4,24 @@ use crate::graphics::Point;
 use crate::terminals::SystemEvent;
 
 use super::{
-    check_cursor_command::CheckCursorCommand,
-    check_hash_command::CheckHashCommand,
-    command_parser::{CommandParser, ParserError},
-    keypress_command::KeyPressedCommand,
-    keytypetext_command::KeyTypeTextCommand,
-    mouse_click_command::MouseClickCommand,
-    mouse_doubleclick_command::MouseDoubleClickCommand,
-    mouse_drag_command::MouseDragCommand,
-    mouse_hold_command::MouseHoldCommand,
-    mouse_move_command::MouseMoveCommand,
-    mouse_release_command::MouseReleaseCommand,
-    mouse_wheel_command::MouseWheelCommand,
-    paint_command::PaintCommand,
-    paint_enable_command::PaintEnableCommand,
-    error_disable_command::ErrorDisableCommand,
+    check_cursor_command::CheckCursorCommand, 
+    check_hash_command::CheckHashCommand, 
+    clipboard_clear_command::ClipboardClearCommand, 
+    clipboard_settext_command::ClipboardSetTextCommand, 
+    check_clipboardtext_command::CheckClipboardTextCommand,
+    command_parser::{CommandParser, ParserError}, 
+    error_disable_command::ErrorDisableCommand, 
+    keypress_command::KeyPressedCommand, 
+    keytypetext_command::KeyTypeTextCommand, 
+    mouse_click_command::MouseClickCommand, 
+    mouse_doubleclick_command::MouseDoubleClickCommand, 
+    mouse_drag_command::MouseDragCommand, 
+    mouse_hold_command::MouseHoldCommand, 
+    mouse_move_command::MouseMoveCommand, 
+    mouse_release_command::MouseReleaseCommand, 
+    mouse_wheel_command::MouseWheelCommand, 
+    paint_command::PaintCommand, 
+    paint_enable_command::PaintEnableCommand, 
     resize_command::ResizeCommand,
 };
 
@@ -38,6 +41,9 @@ pub(super) enum Command {
     Resize(ResizeCommand),
     KeyPresed(KeyPressedCommand),
     KeyTypeText(KeyTypeTextCommand),
+    ClipboardSetText(ClipboardSetTextCommand),
+    ClipboardClear(ClipboardClearCommand),
+    CheckClipboardText(CheckClipboardTextCommand),
 }
 impl Command {
     pub(super) fn new(text: &str) -> Result<Command, ParserError> {
@@ -87,6 +93,10 @@ impl Command {
                 let variant = CheckCursorCommand::new(&cp)?;
                 Ok(Command::CheckCursor(variant))
             }
+            "CheckClipboardText" => {
+                let variant = CheckClipboardTextCommand::new(&cp)?;
+                Ok(Command::CheckClipboardText(variant))
+            }            
             "Error.Disable" => {
                 let variant = ErrorDisableCommand::new(&cp)?;
                 Ok(Command::ErrorDisable(variant))
@@ -102,6 +112,14 @@ impl Command {
             "Key.TypeText" => {
                 let variant = KeyTypeTextCommand::new(&cp)?;
                 Ok(Command::KeyTypeText(variant))
+            }
+            "Clipboard.SetText" => {
+                let variant = ClipboardSetTextCommand::new(&cp)?;
+                Ok(Command::ClipboardSetText(variant))
+            }
+            "Clipboard.Clear" => {
+                let variant = ClipboardClearCommand::new(&cp)?;
+                Ok(Command::ClipboardClear(variant))
             }
             _ => {
                 let mut s = String::from("Invalid/Unknwon command: ");
@@ -126,36 +144,16 @@ impl Command {
             Command::PaintEnable(_) => {}
             Command::ErrorDisable(_) => {}
             Command::CheckHash(_) => {}
-            Command::CheckCursor(_) => {}
+            Command::CheckCursor(_) => {},
+            Command::CheckClipboardText(_) => {},
+            Command::ClipboardSetText(_) => {},
+            Command::ClipboardClear(_) => {},
+            
         }
     }
     pub(super) fn get_paint_command_title(&self) -> Option<String> {
         match self {
             Command::Paint(cmd) => Some(String::from(cmd.get_title())),
-            _ => None,
-        }
-    }
-    pub(super) fn get_screen_hash(&self) -> Option<u64> {
-        match self {
-            Command::CheckHash(cmd) => Some(cmd.get_hash()),
-            _ => None,
-        }
-    }
-    pub(super) fn get_cursor_pos(&self) -> Option<Point> {
-        match self {
-            Command::CheckCursor(cmd) => Some(cmd.get_point()),
-            _ => None,
-        }
-    }
-    pub(super) fn get_paint_enable_status(&self) -> Option<bool> {
-        match self {
-            Command::PaintEnable(cmd) => Some(cmd.is_paint_enabled()),
-            _ => None,
-        }
-    }
-    pub(super) fn get_error_disable_status(&self) -> Option<bool> {
-        match self {
-            Command::ErrorDisable(cmd) => Some(cmd.is_error_disabled()),
             _ => None,
         }
     }

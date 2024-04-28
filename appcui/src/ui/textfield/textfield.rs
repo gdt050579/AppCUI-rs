@@ -155,7 +155,9 @@ impl TextField {
     }
     fn copy_text(&mut self) {
         if !self.selection.is_empty() {
-            todo!()
+            RuntimeManager::get()
+                .terminal_mut()
+                .set_clipboard_text(&self.glyphs[self.selection.start..self.selection.end]);
         }
     }
     fn paste_text(&mut self) {
@@ -165,16 +167,20 @@ impl TextField {
         if !self.selection.is_empty() {
             self.delete_selection();
         }
-        todo!()
+        if let Some(txt) = RuntimeManager::get().terminal().get_clipboard_text() {
+            self.glyphs.insert_str(self.cursor.pos, &txt);
+            self.move_cursor_to(self.cursor.pos + txt.len(), false, true);
+        }
     }
     fn cut_text(&mut self) {
         if self.is_readonly() {
             return;
         }
         if !self.selection.is_empty() {
-            // copy text
-            todo!();
-            //self.delete_selection();
+            RuntimeManager::get()
+                .terminal_mut()
+                .set_clipboard_text(&self.glyphs[self.selection.start..self.selection.end]);
+            self.delete_selection();
         }
     }
     fn convert_selection_or_word(&mut self, callback: fn(text: &str) -> String) {
@@ -249,7 +255,7 @@ impl TextField {
         self.move_cursor_with(1, false);
     }
     fn select_word(&mut self, offset: usize) {
-        if let Some((start,end)) = self.glyphs.word_range(offset, |c| CharClass::from(c) == CharClass::Word) {
+        if let Some((start, end)) = self.glyphs.word_range(offset, |c| CharClass::from(c) == CharClass::Word) {
             self.selection = Selection::NONE;
             self.move_cursor_to(start, false, true);
             self.move_cursor_to(end, true, true);
@@ -456,7 +462,7 @@ impl OnMouseEvent for TextField {
                     self.select_word(ofs);
                 }
                 EventProcessStatus::Processed
-            },
+            }
             MouseEvent::Drag(data) => {
                 if self.drag_started {
                     if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, false) {
