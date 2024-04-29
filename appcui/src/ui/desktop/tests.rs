@@ -112,3 +112,48 @@ fn check_on_resize_for_desktop() {
     let a = App::debug(30, 7, script).desktop(MyDesktop::new()).build().unwrap();
     a.run();
 }
+
+#[test]
+fn check_menus() {
+    #[Desktop(events = DesktopEvents + MenuEvents,  commands: [A,B,C], internal = true)]
+    struct MyDesktop {
+        file_menu: Handle<Menu>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                file_menu: Handle::None,
+            }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            self.file_menu = self.register_menu(menu!(
+                "&File,class: MyDesktop, items=[
+                    {New,F1,cmd:A},
+                    {&Save,F2,cmd:B},
+                    {'&Save As ...',Alt+F2,cmd:C},
+                    {&Open,F3,cmd:A},
+                    {-},
+                    {E&xit,Alt+F4,cmd:C}
+                ]"
+            ));
+        }
+    }
+    impl MenuEvents for MyDesktop {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.file_menu);
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (with menus)')
+        CheckHash(0x8FCFD286F8A503DB)
+        Mouse.Click(3,0,left)
+        Paint('Menu opem')
+        CheckHash(0x610ADBDB875BBED1)
+    ";
+    let a = App::debug(40, 12, script).desktop(MyDesktop::new()).menu_bar().build().unwrap();
+    a.run();
+}
