@@ -26,6 +26,7 @@ use ncurses::ll::mmask_t;
 use ncurses::stdscr;
 use ncurses::WINDOW;
 
+use std::char;
 // debug
 use std::fs::File;
 use std::fs::Metadata;
@@ -48,13 +49,18 @@ impl NcursesTerminal {
         ncurses::clear();
 
         ncurses::nodelay(ncurses::stdscr(), true);
+        ncurses::halfdelay(1);
         ncurses::keypad(ncurses::stdscr(), true);
         ncurses::cbreak();
         ncurses::noecho();
         ncurses::nonl();
         ncurses::raw();
         ncurses::meta(ncurses::stdscr(), true);
-        ncurses::mousemask((ncurses::ALL_MOUSE_EVENTS as u64 | ncurses::REPORT_MOUSE_POSITION as u64) as u32, None);
+        ncurses::mousemask(
+            (ncurses::ALL_MOUSE_EVENTS as mmask_t | ncurses::REPORT_MOUSE_POSITION as mmask_t) as mmask_t,
+            None,
+        );
+        println!("\x1B[?1003h");
         ncurses::mouseinterval(0);
         ncurses::set_escdelay(0);
 
@@ -70,6 +76,42 @@ impl NcursesTerminal {
     }
 }
 
+const SHFIT_NUM: [i32; 10] = [41, 33, 64, 35, 36, 37, 94, 38, 42, 40];
+pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
+    let key_code ;
+    let mut key_modifier = KeyModifier::None;
+    let character: char = ch as u8 as char;
+
+    if ch >= 97 && ch <= 122 {
+        key_code = KeyCode::from((ch - 69) as u8);
+    } else if ch >= 65 && ch <= 90 {
+        key_code = KeyCode::from((ch - 37) as u8);
+        key_modifier = KeyModifier::Shift;
+    } else if ch >= 48 && ch <= 57 {
+        key_code = KeyCode::from((ch + 6) as u8);
+    } else if SHFIT_NUM.contains(&(ch as i32)){
+        let pos = SHFIT_NUM.iter().position(|&r| r == ch as i32).unwrap();
+        key_code = KeyCode::from((pos + 54) as u8);
+        key_modifier = KeyModifier::Shift;
+    } else {
+        match ch {
+            32 => key_code = KeyCode::Space,
+            9 => key_code = KeyCode::Tab,
+            13 => key_code = KeyCode::Enter,
+            27 => key_code = KeyCode::Escape,
+            127 => key_code = KeyCode::Backspace,
+            _ => key_code = KeyCode::None,
+        }
+    }
+    KeyPressedEvent {
+        key: Key {
+            code: key_code,
+            modifier: key_modifier,
+        },
+        character,
+    }
+}
+
 impl Terminal for NcursesTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         if self.window.is_null() {
@@ -82,6 +124,7 @@ impl Terminal for NcursesTerminal {
         let mut current_x = 0;
         let mut current_y = 0;
         ncurses::wclear(self.window);
+
         for ch in surface.chars.iter() {
             let code = match ch.code as u32 {
                 9618 => ncurses::ACS_CKBOARD(),
@@ -91,17 +134,42 @@ impl Terminal for NcursesTerminal {
                 9559 => ncurses::ACS_URCORNER(),
                 9565 => ncurses::ACS_LRCORNER(),
                 9562 => ncurses::ACS_LLCORNER(),
-                _ => ch.code as u32,
+                9632 => ncurses::ACS_BLOCK(),
+                9660 => ncurses::ACS_DARROW(),
+                9650 => ncurses::ACS_UARROW(),
+                9472 => ncurses::ACS_HLINE(),
+                9474 => ncurses::ACS_VLINE(),
+                9484 => ncurses::ACS_ULCORNER(),
+                9488 => ncurses::ACS_URCORNER(),
+                9496 => ncurses::ACS_LRCORNER(),
+                9492 => ncurses::ACS_LLCORNER(),
+                _ => ch.code as chtype,
             };
-            
-            let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
-            debugfile.write_all(format!("{} {} {:?}\n", ch.foreground as i32, ch.background as i32, char::from_u32(code)).as_bytes()).unwrap();
-            if ch.foreground != Color::Transparent || ch.background != Color::Transparent{
+
+            // debugfile
+            // .write_all(format!("{} {} {}\n", ch.code as char, ch.code as i32, code).as_bytes())
+            // .unwrap();
+            if ch.foreground != Color::Transparent || ch.background != Color::Transparent {
                 self.color_manager.set_color_pair(&ch.foreground, &ch.background);
+                if (ch.flags & CharFlags::Underline) == CharFlags::Underline {
+                    ncurses::wattron(self.window, ncurses::A_UNDERLINE);
+                }
+
+                if ch.flags & CharFlags::Bold == CharFlags::Bold {
+                    ncurses::wattron(self.window, ncurses::A_BOLD);
+                }
+
                 ncurses::mvaddch(current_y as i32, current_x as i32, code as chtype);
+
+                if (ch.flags & CharFlags::Underline) == CharFlags::Underline {
+                    ncurses::wattroff(self.window, ncurses::A_UNDERLINE);
+                }
+
+                if ch.flags & CharFlags::Bold == CharFlags::Bold {
+                    ncurses::wattroff(self.window, ncurses::A_BOLD);
+                }
                 self.color_manager.unset_color_pair(&ch.foreground, &ch.background);
-            }
-            else {
+            } else {
                 ncurses::mvaddch(current_y as i32, current_x as i32, code as chtype);
             }
 
@@ -122,76 +190,75 @@ impl Terminal for NcursesTerminal {
     }
 
     fn get_system_event(&mut self) -> SystemEvent {
-        let ch = ncurses::wgetch(stdscr());
+        let ch = ncurses::wget_wch(stdscr());
         let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
 
-        if ch == ncurses::ERR {
-            return SystemEvent::None;
-        }
-
-        // debugfile.write_all(format!("{}\n", ch).as_bytes()).unwrap();
-        if ch == ncurses::KEY_MOUSE {
-            let mut mevent = ncurses::MEVENT {
-                id: 0,
-                x: 0,
-                y: 0,
-                z: 0,
-                bstate: 0,
-            };
-            if ncurses::getmouse(&mut mevent) == ncurses::OK {
-                // debugfile.write_all(format!("{}\n", mevent.bstate).as_bytes()).unwrap();
-                let x = mevent.x as i32;
-                let y = mevent.y as i32;
-                let button = match mevent.bstate as i32 {
-                    ncurses::BUTTON1_PRESSED => MouseButton::Left,
-                    ncurses::BUTTON1_RELEASED => MouseButton::Left,
-                    ncurses::BUTTON1_CLICKED => MouseButton::Left,
-                    ncurses::BUTTON1_DOUBLE_CLICKED => MouseButton::Left,
-
-                    ncurses::BUTTON2_PRESSED => MouseButton::Center,
-                    ncurses::BUTTON2_RELEASED => MouseButton::Center,
-                    ncurses::BUTTON2_CLICKED => MouseButton::Center,
-                    ncurses::BUTTON2_DOUBLE_CLICKED => MouseButton::Center,
-
-                    ncurses::BUTTON3_PRESSED => MouseButton::Right,
-                    ncurses::BUTTON3_RELEASED => MouseButton::Right,
-                    ncurses::BUTTON3_CLICKED => MouseButton::Right,
-                    ncurses::BUTTON3_DOUBLE_CLICKED => MouseButton::Right,
-                    _ => MouseButton::None,
+        match ch {
+            Some(ncurses::WchResult::KeyCode(ncurses::KEY_MOUSE)) => {
+                let mut mevent = ncurses::MEVENT {
+                    id: 0,
+                    x: 0,
+                    y: 0,
+                    z: 0,
+                    bstate: 0,
                 };
+                if ncurses::getmouse(&mut mevent) == ncurses::OK {
+                    let x = mevent.x as i32;
+                    let y = mevent.y as i32;
+                    let button = match mevent.bstate as i32 {
+                        ncurses::BUTTON1_PRESSED => MouseButton::Left,
+                        ncurses::BUTTON1_RELEASED => MouseButton::Left,
+                        ncurses::BUTTON1_CLICKED => MouseButton::Left,
+                        ncurses::BUTTON1_DOUBLE_CLICKED => MouseButton::Left,
 
-                // debugfile.write_all(format!("MOUSE {} {} {}\n", button_type, x, y).as_bytes()).unwrap();
-                
-                let mut returned = SystemEvent::None;
-                if mevent.bstate as i32 & ncurses::BUTTON1_PRESSED != 0 {
-                    returned = SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button });
+                        ncurses::BUTTON2_PRESSED => MouseButton::Center,
+                        ncurses::BUTTON2_RELEASED => MouseButton::Center,
+                        ncurses::BUTTON2_CLICKED => MouseButton::Center,
+                        ncurses::BUTTON2_DOUBLE_CLICKED => MouseButton::Center,
+
+                        ncurses::BUTTON3_PRESSED => MouseButton::Right,
+                        ncurses::BUTTON3_RELEASED => MouseButton::Right,
+                        ncurses::BUTTON3_CLICKED => MouseButton::Right,
+                        ncurses::BUTTON3_DOUBLE_CLICKED => MouseButton::Right,
+                        _ => MouseButton::None,
+                    };
+
+                    let mut returned = SystemEvent::None;
+                    if mevent.bstate as i32 & ncurses::BUTTON1_PRESSED != 0 {
+                        returned = SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button });
+                    } else if mevent.bstate as i32 & ncurses::BUTTON1_RELEASED != 0 {
+                        returned = SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button });
+                    } else if mevent.bstate as i32 & ncurses::BUTTON1_CLICKED != 0 {
+                        returned = SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
+                    } else if mevent.bstate as i32 & ncurses::BUTTON1_DOUBLE_CLICKED != 0 {
+                        returned = SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
+                    } else if mevent.bstate as i32 & ncurses::REPORT_MOUSE_POSITION != 0 {
+                        returned = SystemEvent::MouseMove(MouseMoveEvent { x, y, button });
+                    }
+                    return returned;
                 }
-                else if mevent.bstate as i32 & ncurses::BUTTON1_RELEASED != 0 {
-                    returned = SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button });
-                }
-                else if mevent.bstate as i32 & ncurses::BUTTON1_CLICKED != 0 {
-                    returned = SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
-                }
-                else if mevent.bstate as i32 & ncurses::BUTTON1_DOUBLE_CLICKED != 0 {
-                    returned = SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
-                }
-                else 
-                if mevent.bstate as i32 & ncurses::REPORT_MOUSE_POSITION != 0 {
-                    returned = SystemEvent::MouseMove(MouseMoveEvent { x, y, button });
-                }
-                return returned;
             }
-        }
-        if ch == ncurses::KEY_RESIZE {
-            let new_size = self.get_size();
-            return SystemEvent::Resize(new_size);
-        }
+            Some(ncurses::WchResult::KeyCode(ncurses::KEY_RESIZE)) => {
+                let new_size = self.get_size();
+                return SystemEvent::Resize(new_size);
+            }
+            Some(ncurses::WchResult::Char(ch)) => {
+                if ch == 27 {
+                    endwin();
+                    debugfile.set_len(0).unwrap();
 
-        if ch == 27 {
-            endwin();
-            debugfile.set_len(0).unwrap();
-            return SystemEvent::AppClose;
-        }
+                    println!("\x1B[?1003l");
+                    return SystemEvent::AppClose;
+                }
+
+                let key = get_key_struct(ch);
+                debugfile.write_all(format!("{}\n", ch).as_bytes()).unwrap();
+                return SystemEvent::KeyPressed(key);
+            }
+
+            _ => return SystemEvent::None,
+        };
+
         SystemEvent::None
     }
 }

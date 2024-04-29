@@ -104,11 +104,9 @@ impl ColorManager {
 
     pub fn set_color_pair(&mut self, foreground: &Color, background: &Color) {
         
-        let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
         let foreground_color = ColorManager::translate_to_ncurses_color(foreground);
         let background_color = ColorManager::translate_to_ncurses_color(background);
         let pair_index = foreground_color as i16 * ColorManager::NR_COLORS + background_color as i16;
-        debugfile.write_all(format!("START F: {} {} B: {} {} {} {}\n", *foreground as i16, foreground_color as i16, *background as i16, background_color as i16, pair_index, ColorManager::PAIR_MAPPING[pair_index as usize]).as_bytes()).unwrap();
         let pair_index = ColorManager::PAIR_MAPPING[pair_index as usize];
         
         if !self.color_mapping.contains_key(&pair_index) {
@@ -125,8 +123,6 @@ impl ColorManager {
         let background_color = ColorManager::translate_to_ncurses_color(background);
         let pair_index = foreground_color as i16 * ColorManager::NR_COLORS + background_color as i16;
 
-        let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
-        debugfile.write_all(format!("END {} {} {}\n", *foreground as i16, *background as i16, pair_index).as_bytes()).unwrap();
         let pair_index = ColorManager::PAIR_MAPPING[pair_index as usize];
         ncurses::wattroff(ncurses::stdscr(), ncurses::COLOR_PAIR(pair_index));
     }
