@@ -8,12 +8,15 @@ impl Desktop {
         Desktop {
             base: ControlBase::with_status_flags(
                 Layout::new("x:0,y:0,w:100%,h:100%"),
-                StatusFlags::Visible
-                    | StatusFlags::Enabled
-                    | StatusFlags::AcceptInput
-                    | StatusFlags::DesktopControl,
+                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::DesktopControl,
             ),
         }
+    }
+    fn interface_mut(&mut self) -> Option<&mut dyn Control> {
+        if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
+            return Some(control.get_control_mut());
+        }
+        None
     }
 }
 impl OnPaint for Desktop {
@@ -25,7 +28,11 @@ impl OnKeyPressed for Desktop {
     fn on_key_pressed(&mut self, key: Key, _: char) -> EventProcessStatus {
         match key.get_compact_code() {
             key!("Escape") => {
-                RuntimeManager::get().close();
+                if let Some(desktop_interface) = self.interface_mut() {
+                    if DesktopEvents::on_close(desktop_interface) == ActionRequest::Allow {
+                        RuntimeManager::get().close();
+                    }
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Tab") => {
@@ -57,4 +64,3 @@ impl OnKeyPressed for Desktop {
         EventProcessStatus::Ignored
     }
 }
-

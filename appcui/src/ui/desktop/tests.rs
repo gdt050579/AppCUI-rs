@@ -157,3 +157,40 @@ fn check_menus() {
     let a = App::debug(40, 12, script).desktop(MyDesktop::new()).menu_bar().build().unwrap();
     a.run();
 }
+
+#[test]
+fn check_on_close() {
+    #[Desktop(events = DesktopEvents, internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_close(&mut self) -> ActionRequest {
+            if dialogs::validate("Exit", "Close application ?") {
+                ActionRequest::Allow
+            } else {
+                ActionRequest::Deny
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (with menus)')
+        CheckHash(0xAB06844D69595285)
+        Key.Pressed(Escape)
+        Paint('Exit question')
+        CheckHash(0xD156AD73229C5DB6)
+        Key.Pressed(Escape)
+        Paint('Back to original state')
+        CheckHash(0xAB06844D69595285)
+        Key.Pressed(Escape)
+        Paint('Exit question')
+        CheckHash(0xD156AD73229C5DB6)
+        Key.Pressed(Alt+Y)
+    ";
+    let a = App::debug(40, 6, script).desktop(MyDesktop::new()).build().unwrap();
+    a.run();
+}
