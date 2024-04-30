@@ -24,7 +24,7 @@ impl Desktop {
         if next_window {
             idx.add(1, len, Strategy::RotateFromInvalidState);
         } else {
-            idx.add(1, len, Strategy::RotateFromInvalidState);
+            idx.sub(1, len, Strategy::RotateFromInvalidState);
         }
         if (idx.in_range(len)) && (idx.index() != self.base.focused_child_index.index()) {
             let handle = self.base.children[idx.index()];

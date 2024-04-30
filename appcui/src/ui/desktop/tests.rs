@@ -194,3 +194,36 @@ fn check_on_close() {
     let a = App::debug(40, 6, script).desktop(MyDesktop::new()).build().unwrap();
     a.run();
 }
+
+#[test]
+fn check_keys() {
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (Win-3 has focus)')
+        CheckHash(0x4BFB9A7144462371)
+        Key.Pressed(Ctrl+Tab)
+        Paint('Win-1 has focus')
+        CheckHash(0xEC4FE4476E3A7665)
+        Key.Pressed(Ctrl+Tab)
+        Paint('Win-2 has focus')
+        CheckHash(0x14C5966515628B45)
+        Key.Pressed(Ctrl+Tab)
+        Paint('Win-3 has focus (again)')
+        CheckHash(0x4BFB9A7144462371)
+        Key.Pressed(Ctrl+Shift+Tab)
+        Paint('Win-2 has focus (again)')
+        CheckHash(0x14C5966515628B45)
+        Key.Pressed(Ctrl+Shift+Tab)
+        Paint('Win-1 has focus (again)')
+        CheckHash(0xEC4FE4476E3A7665)
+        Key.Pressed(Ctrl+Shift+Tab)
+        Paint('Win-3 has focus (final)')
+        CheckHash(0x4BFB9A7144462371)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    a.add_window(window!("Win-1,x:0,y:0,w:20,h:7"));
+    a.add_window(window!("Win-2,x:20,y:0,w:40,h:7"));
+    a.add_window(window!("Win-3,x:0,y:7,w:60,h:8"));
+    a.run();
+}
