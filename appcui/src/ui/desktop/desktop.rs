@@ -18,6 +18,21 @@ impl Desktop {
         }
         None
     }
+    fn set_focus_for_child_window(&mut self, next_window: bool) {
+        let mut idx = self.base.focused_child_index;
+        let len = self.base.children.len();
+        if next_window {
+            idx.add(1, len, Strategy::RotateFromInvalidState);
+        } else {
+            idx.add(1, len, Strategy::RotateFromInvalidState);
+        }
+        if (idx.in_range(len)) && (idx.index() != self.base.focused_child_index.index()) {
+            let handle = self.base.children[idx.index()];
+            if !handle.is_none() {
+                RuntimeManager::get().request_focus_for_control(handle);
+            }
+        }
+    }
 }
 impl OnPaint for Desktop {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -35,12 +50,12 @@ impl OnKeyPressed for Desktop {
                 }
                 return EventProcessStatus::Processed;
             }
-            key!("Ctrl+Tab") => {
-                // GoToNextWindow(Members, 1);
+            key!("Ctrl+Tab") | key!("Tab") => {
+                self.set_focus_for_child_window(true);
                 return EventProcessStatus::Processed;
             }
-            key!("Ctrl+Shift+Tab") => {
-                // GoToNextWindow(Members, -1);
+            key!("Ctrl+Shift+Tab") | key!("Shift+Tab") => {
+                self.set_focus_for_child_window(false);
                 return EventProcessStatus::Processed;
             }
             key!("Alt+0") => {
@@ -55,7 +70,7 @@ impl OnKeyPressed for Desktop {
             for ctrl in self.children.iter() {
                 if let Some(child) = controls.get_mut(*ctrl) {
                     if child.get_base_mut().hotkey() == key {
-                        // child.set_focus();
+                        RuntimeManager::get().request_focus_for_control(*ctrl);
                         return EventProcessStatus::Processed;
                     }
                 }
