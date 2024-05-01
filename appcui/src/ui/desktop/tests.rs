@@ -229,7 +229,7 @@ fn check_keys() {
 
 #[test]
 fn check_arrange() {
-    #[Desktop(events =  CommandBarEvents,  commands: [Cascade,Vertical,Horizontal], internal = true)]
+    #[Desktop(events =  CommandBarEvents,  commands: [Cascade,Vertical,Horizontal,Grid], internal = true)]
     struct MyDesktop {}
     impl MyDesktop {
         fn new() -> Self {
@@ -241,6 +241,7 @@ fn check_arrange() {
             commandbar.set(key!("F1"), "Cascade", mydesktop::Commands::Cascade);
             commandbar.set(key!("F2"), "Vertical", mydesktop::Commands::Vertical);
             commandbar.set(key!("F3"), "Horizontal", mydesktop::Commands::Horizontal);
+            commandbar.set(key!("F4"), "Grid", mydesktop::Commands::Grid);
         }
 
         fn on_event(&mut self, command_id: mydesktop::Commands) {
@@ -248,23 +249,26 @@ fn check_arrange() {
                 mydesktop::Commands::Cascade => self.arrange_windows(desktop::ArrangeWindowsMethod::Cascade),
                 mydesktop::Commands::Vertical => self.arrange_windows(desktop::ArrangeWindowsMethod::Vertical),
                 mydesktop::Commands::Horizontal => self.arrange_windows(desktop::ArrangeWindowsMethod::Horizontal),
+                mydesktop::Commands::Grid => self.arrange_windows(desktop::ArrangeWindowsMethod::Grid),
             }
         }
     }
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('Initial state (with commandbar)')
-        CheckHash(0x7585FB34F692BC3A)
+        CheckHash(0x2F1B69CC9EBAEB2C)
         Key.Pressed(F1)
         Paint('Cascade organize')
-        CheckHash(0xD7244F7D363982D4)
+        CheckHash(0x5E252D3B71E80DD2)
         Key.Pressed(F2)
         Paint('Vertical organize')
-        CheckHash(0x49F855CF88A41230)
+        CheckHash(0x7BA6DFEB4FF5DFCE)
         Key.Pressed(F3)
         Paint('Horizontal organize')
-        CheckHash(0xC637CCAE057E6058)
+        CheckHash(0xF8776ED5B111BA06)
+        Key.Pressed(F4)
+        Paint('Grid organize')
+        CheckHash(0x10C3635607CCDB8A)
     ";
     let mut a = App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap();
     a.add_window(window!("Win-1,x:1,y:1,w:20,h:10"));

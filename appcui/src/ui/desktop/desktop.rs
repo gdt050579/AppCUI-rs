@@ -3,7 +3,8 @@ use crate::prelude::*;
 pub enum ArrangeWindowsMethod {
     Cascade,
     Vertical,
-    Horizontal
+    Horizontal,
+    Grid,
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed, internal=true, desktop=true)]
@@ -79,6 +80,46 @@ impl Desktop {
             );
         }
     }
+    fn arrange_grid(&self, r: Rect) {
+        let count = self.children.len() as u32;
+        if count == 0 {
+            return;
+        }
+        let mut columns = ((count as f32).sqrt()) as i32;
+        if columns * columns < count as i32 {
+            columns += 1;
+        }
+        let mut rows = (count as i32) / columns;
+        if rows * columns < count as i32 {
+            rows += 1;
+        }
+        let mut x = r.left();
+        let mut y = r.top();
+        let mut column = 1;
+        let mut row = 1;
+        let w = (r.width() as i32) / columns;
+        let h = (r.height() as i32) / rows;
+        let len = self.base.children.len();
+        for (index, child) in self.base.children.iter().enumerate() {
+            self.reposition_child(
+                *child,
+                Rect::new(
+                    x,
+                    y,
+                    if (column < columns) && (index + 1 < len) { x + w - 1 } else { r.right() },
+                    if row < rows { y + h - 1 } else { r.bottom() },
+                ),
+            );
+            x += w;
+            column += 1;
+            if column > columns {
+                x = r.left();
+                column = 1;
+                y += h;
+                row += 1;
+            }
+        }
+    }
     fn arrange_horizontal(&self, r: Rect) {
         let count = self.children.len() as u32;
         if count == 0 {
@@ -89,8 +130,8 @@ impl Desktop {
             self.reposition_child(
                 *child,
                 Rect::new(
-                    r.left(), 
-                    r.top()+ (index as i32) * h,
+                    r.left(),
+                    r.top() + (index as i32) * h,
                     r.right(),
                     if (index + 1) as u32 == count {
                         r.bottom()
@@ -107,6 +148,7 @@ impl Desktop {
             ArrangeWindowsMethod::Cascade => self.arrange_cascade(r),
             ArrangeWindowsMethod::Vertical => self.arrange_vertical(r),
             ArrangeWindowsMethod::Horizontal => self.arrange_horizontal(r),
+            ArrangeWindowsMethod::Grid => self.arrange_grid(r),
         }
     }
 }
