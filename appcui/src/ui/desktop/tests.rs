@@ -335,3 +335,74 @@ fn check_arrange_10() {
     a.add_window(window!("Win-10,x:61,y:4,w:20,h:10"));
     a.run();
 }
+
+#[test]
+fn check_add_window() {
+    #[Desktop(events =  CommandBarEvents,  commands: [AddWindow], internal = true)]
+    struct MyDesktop {
+        index: u32,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new(), index:1 }
+        }
+    }
+    impl CommandBarEvents for MyDesktop {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("Insert"), "Add new_window", mydesktop::Commands::AddWindow);
+        }
+
+        fn on_event(&mut self, command_id: mydesktop::Commands) {
+            match command_id {
+                mydesktop::Commands::AddWindow => {
+                    let name = format!("Win-{}",self.index);
+                    self.index += 1;
+                    self.add_window(Window::new(&name,Layout::new("d:c,w:20,h:10"),window::Flags::None));
+                    self.arrange_windows(desktop::ArrangeWindowsMethod::Grid);
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (no windows)')
+        CheckHash(0xC7E76D8C5E7F81DC)
+        Key.Pressed(Insert)
+        Paint('Windows: 1')
+        CheckHash(0x5BFA1E0142EF45ED)
+        Key.Pressed(Insert)
+        Paint('Windows: 2')
+        CheckHash(0xD2012C0AB876B397)
+        Key.Pressed(Insert)
+        Paint('Windows: 3')
+        CheckHash(0xC918078AE4AF3A0)
+        Key.Pressed(Insert)
+        Paint('Windows: 4')
+        CheckHash(0xE6DFAA0914BD140C)
+        Key.Pressed(Insert)
+        Paint('Windows: 5')
+        CheckHash(0x3303AB0FB4415E89)
+        Key.Pressed(Insert)
+        Paint('Windows: 6')
+        CheckHash(0x2A9128EBDC49B9AB)
+        Key.Pressed(Insert)
+        Paint('Windows: 7')
+        CheckHash(0x4CAA81F585A26D04)
+        Key.Pressed(Insert)
+        Paint('Windows: 8')
+        CheckHash(0x78EAF9A6F827646C)
+        Key.Pressed(Insert)
+        Paint('Windows: 9')
+        CheckHash(0xB5B9048D1B38E8F9)
+        Key.Pressed(Insert)
+        Paint('Windows: 10')
+        CheckHash(0xC13EF322B9A8FA1B)
+        Key.Pressed(Insert)
+        Paint('Windows: 11')
+        CheckHash(0xBCAC5EC3B4B59F0C)
+        Key.Pressed(Insert)
+        Paint('Windows: 12')
+        CheckHash(0xDC880EC0932210A4)
+    ";
+    let a = App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
+}

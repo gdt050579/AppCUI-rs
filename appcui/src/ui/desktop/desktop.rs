@@ -12,7 +12,10 @@ pub struct Desktop {}
 
 impl Desktop {
     pub fn new() -> Self {
-        Desktop {
+        if RuntimeManager::is_instantiated() {
+            panic!("A desktop object can only be created once (when the application is started) !");
+        }
+        Self {
             base: ControlBase::with_status_flags(
                 Layout::new("x:0,y:0,w:100%,h:100%"),
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::DesktopControl,
@@ -150,6 +153,12 @@ impl Desktop {
             ArrangeWindowsMethod::Horizontal => self.arrange_horizontal(r),
             ArrangeWindowsMethod::Grid => self.arrange_grid(r),
         }
+    }
+    pub fn add_window<T>(&mut self, window: T) -> Handle<T>
+    where
+        T: Control + WindowControl + NotModalWindow + 'static,
+    {
+        RuntimeManager::get().add_window(window)
     }
 }
 impl OnPaint for Desktop {

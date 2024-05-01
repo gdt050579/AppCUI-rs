@@ -136,6 +136,9 @@ impl RuntimeManager {
         }
         Ok(())
     }
+    pub(crate) fn is_instantiated() -> bool {
+        unsafe { RUNTIME_MANAGER.is_some() }
+    }
     pub(crate) fn get() -> &'static mut RuntimeManager {
         unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
     }
