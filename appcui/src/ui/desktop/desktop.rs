@@ -1,5 +1,11 @@
 use crate::prelude::*;
 
+pub enum ArrangeWindowsMethod {
+    Cascade,
+    Vertical,
+    Horizontal
+}
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed, internal=true, desktop=true)]
 pub struct Desktop {}
 
@@ -11,6 +17,12 @@ impl Desktop {
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::DesktopControl,
             ),
         }
+    }
+    pub fn terminal_size(&self) -> Size {
+        RuntimeManager::get().get_terminal_size()
+    }
+    pub fn desktop_rect(&self) -> Rect {
+        RuntimeManager::get().get_desktop_rect()
     }
     fn interface_mut(&mut self) -> Option<&mut dyn Control> {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
@@ -31,6 +43,70 @@ impl Desktop {
             if !handle.is_none() {
                 RuntimeManager::get().request_focus_for_control(handle);
             }
+        }
+    }
+    fn reposition_child(&self, handle: Handle<UIElement>, new_poz: Rect) {
+        if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(handle) {
+            let base = control.get_base_mut();
+            base.set_position(new_poz.left(), new_poz.right());
+            base.set_size(new_poz.width() as u16, new_poz.height() as u16);
+        }
+    }
+    fn arrange_cascade(&self, r: Rect) {
+        for (index, child) in self.base.children.iter().enumerate() {
+            self.reposition_child(*child, Rect::new(r.left() + index as i32, r.top() + index as i32, r.right(), r.bottom()));
+        }
+    }
+    fn arrange_vertical(&self, r: Rect) {
+        let count = self.children.len() as u32;
+        if count == 0 {
+            return;
+        }
+        let w = (r.width() / count) as i32;
+        for (index, child) in self.base.children.iter().enumerate() {
+            self.reposition_child(
+                *child,
+                Rect::new(
+                    r.left() + (index as i32) * w,
+                    r.top(),
+                    if (index + 1) as u32 == count {
+                        r.right()
+                    } else {
+                        r.left() + ((index as i32) + 1) * w
+                    },
+                    r.bottom(),
+                ),
+            );
+        }
+    }
+    fn arrange_horizontal(&self, r: Rect) {
+        let count = self.children.len() as u32;
+        if count == 0 {
+            return;
+        }
+        let h = (r.height() / count) as i32;
+        for (index, child) in self.base.children.iter().enumerate() {
+            self.reposition_child(
+                *child,
+                Rect::new(
+                    r.left(), 
+                    r.top()+ (index as i32) * h,
+                    r.right(),
+                    if (index + 1) as u32 == count {
+                        r.bottom()
+                    } else {
+                        r.top() + ((index as i32) + 1) * h
+                    },
+                ),
+            );
+        }
+    }
+    pub fn arrange_windows(&mut self, method: ArrangeWindowsMethod) {
+        let r = self.desktop_rect();
+        match method {
+            ArrangeWindowsMethod::Cascade => self.arrange_cascade(r),
+            ArrangeWindowsMethod::Vertical => self.arrange_vertical(r),
+            ArrangeWindowsMethod::Horizontal => self.arrange_horizontal(r),
         }
     }
 }
