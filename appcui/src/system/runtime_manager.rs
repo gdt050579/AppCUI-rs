@@ -445,6 +445,8 @@ impl RuntimeManager {
                     if let Some(index) = base.children.iter().position(|&elem| elem == handle) {
                         // if the index is bigger than the focused children index --> than all god
                         // otherwise, we need to reset the index
+                        // println!("Before removing index {} focus was {}", index, base.focused_child_index.index());
+                        // println!("Focus = {:?}", base.children[base.focused_child_index.index()]);
                         if base.focused_child_index.is_valid() {
                             match index.cmp(&base.focused_child_index.index()) {
                                 std::cmp::Ordering::Less => {
@@ -456,7 +458,11 @@ impl RuntimeManager {
                             }
                         }
                         // remove from the vector
+                        // println!("Remove index: {} - from vector: {:?}", index, base.children);
+                        // println!("New Focus index: {}", base.focused_child_index.index());
                         base.children.remove(index);
+                        // println!("After removal: {:?}", base.children);
+                        // println!("Focus = {:?}", base.children[base.focused_child_index.index()]);
                     }
                 }
             }

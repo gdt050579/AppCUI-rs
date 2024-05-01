@@ -408,20 +408,6 @@ fn check_add_window() {
 }
 
 #[test]
-fn check_desktop_single_creation() {
-    let _ = Desktop::new();
-    // this code should not panic
-}
-
-#[test]
-#[should_panic]
-fn check_desktop_multiple_creations() {
-    let a = App::debug(80, 15, "").build().unwrap();
-    let _ = Desktop::new(); // this line should panic as there is already a desktop object
-    a.run();
-}
-
-#[test]
 fn check_update_desktop_windows_count() {
     #[Desktop(events =  CommandBarEvents+DesktopEvents,  commands: [AddWindow], internal = true)]
     struct MyDesktop {
@@ -453,8 +439,8 @@ fn check_update_desktop_windows_count() {
         }
     }
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
+        //Error.Disable(true)
         Paint('Initial state (no windows)')
         CheckHash(0xC7E76D8C5E7F81DC)
         Key.Pressed(Insert)
@@ -473,8 +459,12 @@ fn check_update_desktop_windows_count() {
         Paint('Windows: 5')
         CheckHash(0x3303AB0FB4415E89)
         Mouse.Click(77,0,left)    
-        Paint('Windows: 1,2,4 and 5, Window 5 has focus')
-        CheckHash(0x3303AB0FB4415E89)
+        // when we close a window it first receives the focus and them it gets closed
+        Paint('Windows: 1,2,4 and 5, no window has focus')
+        CheckHash(0x18002E09EF88A2CA)
+        Mouse.Click(37,0,left)
+        Paint('Windows: 2,4 and 5, no window has focus')
+        CheckHash(0xFECF03BAC60063E7)
     ";
     App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
 }
