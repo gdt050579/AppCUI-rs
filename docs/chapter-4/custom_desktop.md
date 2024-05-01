@@ -83,6 +83,7 @@ Besides the [Common methods for all Controls](../chapter-3/common_methods.md) a 
 | `desktop_rect()`       | Returns the actual rectangle for the desktop. If menu bar and command bar are prezent, the desktop rectangle provides the visible side of the desktop. For example, if the terminal size is `80x20` and we also have a coomand bar and a menu bar, then the desktop rectangle will be `[Left:0, Top:1, Right:79, bottom:18]` |
 | `add_window(...)`      | Adds a new window to the desktop                                                                                                                                                                                                                                                                                             |
 | `arrange_windows(...)` | Arranges windows on the desktop. 4 methods are provided: `Cascade', 'Verical`, `Horizontal` and `Grid`                                                                                                                                                                                                                       |
+| `close()`              | Closes the desktop and the entire app                                                                                                                                                                                                                                                                                        |
 
 
 ## Key associations

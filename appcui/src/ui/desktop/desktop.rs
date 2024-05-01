@@ -28,6 +28,9 @@ impl Desktop {
     pub fn desktop_rect(&self) -> Rect {
         RuntimeManager::get().get_desktop_rect()
     }
+    pub fn close(&mut self) {
+        RuntimeManager::get().close();
+    }
     fn interface_mut(&mut self) -> Option<&mut dyn Control> {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
             return Some(control.get_control_mut());
