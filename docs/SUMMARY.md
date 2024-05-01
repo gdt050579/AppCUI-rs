@@ -71,7 +71,7 @@
     - [Custom controls](chapter-3/custom_controls.md)
 
 - [Desktop](chapter-4/desktop.md)
-    - [Custom desktops]()
+    - [Custom desktops](chapter-4/custom_desktop.md)
     - [Commands](chapter-4/commands.md)
     - [Menus](chapter-4/menu.md)
       - [Menu items](chapter-4/menu/items.md)
