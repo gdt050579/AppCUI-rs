@@ -278,3 +278,60 @@ fn check_arrange() {
     a.add_window(window!("Win-5,x:61,y:1,w:20,h:10"));
     a.run();
 }
+
+#[test]
+fn check_arrange_10() {
+    #[Desktop(events =  CommandBarEvents,  commands: [Cascade,Vertical,Horizontal,Grid], internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl CommandBarEvents for MyDesktop {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Cascade", mydesktop::Commands::Cascade);
+            commandbar.set(key!("F2"), "Vertical", mydesktop::Commands::Vertical);
+            commandbar.set(key!("F3"), "Horizontal", mydesktop::Commands::Horizontal);
+            commandbar.set(key!("F4"), "Grid", mydesktop::Commands::Grid);
+        }
+
+        fn on_event(&mut self, command_id: mydesktop::Commands) {
+            match command_id {
+                mydesktop::Commands::Cascade => self.arrange_windows(desktop::ArrangeWindowsMethod::Cascade),
+                mydesktop::Commands::Vertical => self.arrange_windows(desktop::ArrangeWindowsMethod::Vertical),
+                mydesktop::Commands::Horizontal => self.arrange_windows(desktop::ArrangeWindowsMethod::Horizontal),
+                mydesktop::Commands::Grid => self.arrange_windows(desktop::ArrangeWindowsMethod::Grid),
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (with commandbar)')
+        CheckHash(0x97096A5866923F2F)
+        Key.Pressed(F1)
+        Paint('Cascade organize')
+        CheckHash(0x1E6593D92DF7369B)
+        Key.Pressed(F2)
+        Paint('Vertical organize')
+        CheckHash(0xB95352C9DBCD30FC)
+        Key.Pressed(F3)
+        Paint('Horizontal organize')
+        CheckHash(0x561C682770B3564)
+        Key.Pressed(F4)
+        Paint('Grid organize')
+        CheckHash(0xAE251A2349BDB8C0)
+    ";
+    let mut a = App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap();
+    a.add_window(window!("Win-1,x:1,y:1,w:20,h:10"));
+    a.add_window(window!("Win-2,x:16,y:1,w:20,h:10"));
+    a.add_window(window!("Win-3,x:31,y:1,w:20,h:10"));
+    a.add_window(window!("Win-4,x:46,y:1,w:20,h:10"));
+    a.add_window(window!("Win-5,x:61,y:1,w:20,h:10"));
+    a.add_window(window!("Win-6,x:1,y:4,w:20,h:10"));
+    a.add_window(window!("Win-7,x:16,y:4,w:20,h:10"));
+    a.add_window(window!("Win-8,x:31,y:4,w:20,h:10"));
+    a.add_window(window!("Win-9,x:46,y:4,w:20,h:10"));
+    a.add_window(window!("Win-10,x:61,y:4,w:20,h:10"));
+    a.run();
+}
