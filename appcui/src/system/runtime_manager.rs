@@ -240,6 +240,7 @@ impl RuntimeManager {
         if let Some(win) = controls.get_mut(handle.cast()) {
             win.get_control_mut().on_registered();
         }
+        self.update_desktop_window_count();
         handle
     }
     pub(crate) fn add_modal_window<T, U>(&mut self, obj: T) -> Handle<T>
@@ -327,6 +328,13 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(desktop) = controls.get_mut(self.desktop_handle.cast()) {
             DesktopEvents::on_start(desktop.get_control_mut());
+        }
+    }
+    pub(crate) fn update_desktop_window_count(&mut self) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(desktop) = controls.get_mut(self.desktop_handle.cast()) {
+            let count = desktop.get_base().children.len();
+            DesktopEvents::on_update_window_count(desktop.get_control_mut(), count);
         }
     }
     pub(crate) fn run(&mut self) {
@@ -417,26 +425,38 @@ impl RuntimeManager {
             self.request_update();
         }
     }
-    fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> Handle<UIElement> {
+    fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
         if handle.is_none() {
-            return Handle::None;
+            return (Handle::None, false);
         }
         let controls = unsafe { &mut *self.controls };
         let mut parent: Handle<UIElement> = Handle::None;
         let mut has_focus = false;
+        let mut is_window_control = false;
         // remove the link from its parent if requested
         if unlink_from_parent {
             if let Some(control) = controls.get(handle.cast()) {
+                is_window_control = control.get_base().is_window_control();
                 parent = control.get_base().parent;
                 has_focus = control.get_base().has_focus();
                 if let Some(parent) = controls.get_mut(parent.cast()) {
                     let base = parent.get_base_mut();
+                    let count = base.children.len();
                     if let Some(index) = base.children.iter().position(|&elem| elem == handle) {
                         // if the index is bigger than the focused children index --> than all god
                         // otherwise, we need to reset the index
-                        if index <= base.focused_child_index.index() {
-                            base.focused_child_index = VectorIndex::Invalid;
+                        if base.focused_child_index.is_valid() {
+                            match index.cmp(&base.focused_child_index.index()) {
+                                std::cmp::Ordering::Less => {
+                                    // we need to decrease the index of the current focused index
+                                    base.focused_child_index.sub(1, count, crate::utils::Strategy::Clamp);
+                                }
+                                std::cmp::Ordering::Equal => base.focused_child_index = VectorIndex::Invalid,
+                                std::cmp::Ordering::Greater => { /* do nothing */ }
+                            }
                         }
+                        // remove from the vector
+                        base.children.remove(index);
                     }
                 }
             }
@@ -450,18 +470,23 @@ impl RuntimeManager {
         }
         controls.remove(handle);
         if has_focus {
-            parent
+            (parent, is_window_control)
         } else {
-            Handle::None
+            (Handle::None, is_window_control)
         }
     }
     fn remove_deleted_controls(&mut self) {
+        let mut window_removed = false;
         while let Some(handle) = self.to_remove_list.pop() {
-            let _focused_parent = self.remove_control(handle, true);
+            let (_focused_parent, is_window_control) = self.remove_control(handle, true);
+            window_removed |= is_window_control;
             // what if the current handle has focus (in this case we will need to change the focus to
             // a different control). self.remove_control should return the handle to its parent only if
             // the current object has focus
             // if focused_parent != Handle::None, we are in this scenario
+        }
+        if window_removed {
+            self.update_desktop_window_count();
         }
     }
     fn get_opened_menu(&mut self) -> Option<&mut Menu> {

@@ -404,5 +404,77 @@ fn check_add_window() {
         Paint('Windows: 12')
         CheckHash(0xDC880EC0932210A4)
     ";
-    let a = App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
+    App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_desktop_single_creation() {
+    let _ = Desktop::new();
+    // this code should not panic
+}
+
+#[test]
+#[should_panic]
+fn check_desktop_multiple_creations() {
+    let a = App::debug(80, 15, "").build().unwrap();
+    let _ = Desktop::new(); // this line should panic as there is already a desktop object
+    a.run();
+}
+
+#[test]
+fn check_update_desktop_windows_count() {
+    #[Desktop(events =  CommandBarEvents+DesktopEvents,  commands: [AddWindow], internal = true)]
+    struct MyDesktop {
+        index: u32,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new(), index:1 }
+        }
+    }
+    impl DesktopEvents for MyDesktop {    
+        fn on_update_window_count(&mut self, _count: usize) {
+            self.arrange_windows(desktop::ArrangeWindowsMethod::Grid);
+        }
+    }
+    impl CommandBarEvents for MyDesktop {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("Insert"), "Add new_window", mydesktop::Commands::AddWindow);
+        }
+
+        fn on_event(&mut self, command_id: mydesktop::Commands) {
+            match command_id {
+                mydesktop::Commands::AddWindow => {
+                    let name = format!("Win-{}",self.index);
+                    self.index += 1;
+                    self.add_window(Window::new(&name,Layout::new("d:c,w:20,h:10"),window::Flags::None));
+                }
+            }
+        }
+    }
+    let script = "
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('Initial state (no windows)')
+        CheckHash(0xC7E76D8C5E7F81DC)
+        Key.Pressed(Insert)
+        Paint('Windows: 1')
+        CheckHash(0x5BFA1E0142EF45ED)
+        Key.Pressed(Insert)
+        Paint('Windows: 2')
+        CheckHash(0xD2012C0AB876B397)
+        Key.Pressed(Insert)
+        Paint('Windows: 3')
+        CheckHash(0xC918078AE4AF3A0)
+        Key.Pressed(Insert)
+        Paint('Windows: 4')
+        CheckHash(0xE6DFAA0914BD140C)
+        Key.Pressed(Insert)
+        Paint('Windows: 5')
+        CheckHash(0x3303AB0FB4415E89)
+        Mouse.Click(77,0,left)    
+        Paint('Windows: 1,2,4 and 5, Window 5 has focus')
+        CheckHash(0x3303AB0FB4415E89)
+    ";
+    App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
 }

@@ -4,4 +4,7 @@ pub trait DesktopEvents {
     fn on_close(&mut self) -> ActionRequest {
         ActionRequest::Allow
     }
+    fn on_update_window_count(&mut self, _count: usize) {
+
+    }
 }
