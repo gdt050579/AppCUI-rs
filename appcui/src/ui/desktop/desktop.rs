@@ -48,7 +48,7 @@ impl Desktop {
     fn reposition_child(&self, handle: Handle<UIElement>, new_poz: Rect) {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(handle) {
             let base = control.get_base_mut();
-            base.set_position(new_poz.left(), new_poz.right());
+            base.set_position(new_poz.left(), new_poz.top());
             base.set_size(new_poz.width() as u16, new_poz.height() as u16);
         }
     }
@@ -72,7 +72,7 @@ impl Desktop {
                     if (index + 1) as u32 == count {
                         r.right()
                     } else {
-                        r.left() + ((index as i32) + 1) * w
+                        r.left() + ((index as i32) + 1) * w - 1
                     },
                     r.bottom(),
                 ),
@@ -95,7 +95,7 @@ impl Desktop {
                     if (index + 1) as u32 == count {
                         r.bottom()
                     } else {
-                        r.top() + ((index as i32) + 1) * h
+                        r.top() + ((index as i32) + 1) * h - 1
                     },
                 ),
             );

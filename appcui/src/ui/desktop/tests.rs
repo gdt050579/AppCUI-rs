@@ -197,7 +197,6 @@ fn check_on_close() {
 
 #[test]
 fn check_keys() {
-
     let script = "
         Paint.Enable(false)
         Paint('Initial state (Win-3 has focus)')
@@ -225,5 +224,53 @@ fn check_keys() {
     a.add_window(window!("Win-1,x:0,y:0,w:20,h:7"));
     a.add_window(window!("Win-2,x:20,y:0,w:40,h:7"));
     a.add_window(window!("Win-3,x:0,y:7,w:60,h:8"));
+    a.run();
+}
+
+#[test]
+fn check_arrange() {
+    #[Desktop(events =  CommandBarEvents,  commands: [Cascade,Vertical,Horizontal], internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl CommandBarEvents for MyDesktop {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Cascade", mydesktop::Commands::Cascade);
+            commandbar.set(key!("F2"), "Vertical", mydesktop::Commands::Vertical);
+            commandbar.set(key!("F3"), "Horizontal", mydesktop::Commands::Horizontal);
+        }
+
+        fn on_event(&mut self, command_id: mydesktop::Commands) {
+            match command_id {
+                mydesktop::Commands::Cascade => self.arrange_windows(desktop::ArrangeWindowsMethod::Cascade),
+                mydesktop::Commands::Vertical => self.arrange_windows(desktop::ArrangeWindowsMethod::Vertical),
+                mydesktop::Commands::Horizontal => self.arrange_windows(desktop::ArrangeWindowsMethod::Horizontal),
+            }
+        }
+    }
+    let script = "
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('Initial state (with commandbar)')
+        CheckHash(0x7585FB34F692BC3A)
+        Key.Pressed(F1)
+        Paint('Cascade organize')
+        CheckHash(0xD7244F7D363982D4)
+        Key.Pressed(F2)
+        Paint('Vertical organize')
+        CheckHash(0x49F855CF88A41230)
+        Key.Pressed(F3)
+        Paint('Horizontal organize')
+        CheckHash(0xC637CCAE057E6058)
+    ";
+    let mut a = App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap();
+    a.add_window(window!("Win-1,x:1,y:1,w:20,h:10"));
+    a.add_window(window!("Win-2,x:16,y:1,w:20,h:10"));
+    a.add_window(window!("Win-3,x:31,y:1,w:20,h:10"));
+    a.add_window(window!("Win-4,x:46,y:1,w:20,h:10"));
+    a.add_window(window!("Win-5,x:61,y:1,w:20,h:10"));
     a.run();
 }
