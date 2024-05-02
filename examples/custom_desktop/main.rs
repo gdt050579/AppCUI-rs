@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-const LOGO: [&'static str; 15] = [
+const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
     "▒▒█████┐▒▒██████┐▒▒██████┐▒▒",
     "▒██┌──██┐▒██┌──██┐▒██┌──██┐▒",
@@ -43,7 +43,7 @@ impl OnPaint for MyDesktop {
         let x = ((surface.get_size().width as i32) / 2 ) - 15;
         let mut y = ((surface.get_size().height as i32) / 2 ) - 7;
         for line in LOGO {
-            surface.write_string(x, y, &line, attr, false);
+            surface.write_string(x, y, line, attr, false);
             y += 1;
         }
     }
