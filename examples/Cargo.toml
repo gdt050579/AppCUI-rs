@@ -86,3 +86,7 @@ path = "keyselector/main.rs"
 [[example]]
 name = "textfield"
 path = "textfield/main.rs"
+
+[[example]]
+name = "custom_desktop"
+path = "custom_desktop/main.rs"

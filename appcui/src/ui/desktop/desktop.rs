@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[derive(Copy,Clone,Eq,PartialEq)]
 pub enum ArrangeWindowsMethod {
     Cascade,
     Vertical,

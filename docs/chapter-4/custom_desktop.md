@@ -97,3 +97,8 @@ A desktop intercepts the following keys (if they are not process at window level
 | `Escape`                        | Calls the `on_close` method and if the result is `ActionRequest::Allow` closes the desktop and the entire application. |
 
 If hotkeys are present for window, `Alt+{hotkey}` is checked by the desktop window and the focused is moved to that window that has that specific hotkey association.
+
+
+## Example
+
+The following example created a custom desktop that ...
