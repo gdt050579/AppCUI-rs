@@ -1,6 +1,10 @@
 # Custom Desktop
 
-A custom desktop is an user defined desktop where various method can be overwritten and system events can be processed. To build a custom Desktop that supports event handling, you must use a special procedural macro call `Desktop`, defined in the the following way:
+A custom desktop is an user defined desktop where various method can be overwritten and system events can be processed. 
+
+<img src="img/custom_desktop.png" width=500/>
+
+To build a custom Desktop that supports event handling, you must use a special procedural macro call `Desktop`, defined in the the following way:
 
 ```rs
 #[Desktop(events=..., overwrite=... )]
