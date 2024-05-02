@@ -86,7 +86,7 @@ Besides the [Common methods for all Controls](../chapter-3/common_methods.md) a 
 | `terminal_size()`      | Returns the size of the current terminal                                                                                                                                                                                                                                                                                     |
 | `desktop_rect()`       | Returns the actual rectangle for the desktop. If menu bar and command bar are prezent, the desktop rectangle provides the visible side of the desktop. For example, if the terminal size is `80x20` and we also have a coomand bar and a menu bar, then the desktop rectangle will be `[Left:0, Top:1, Right:79, bottom:18]` |
 | `add_window(...)`      | Adds a new window to the desktop                                                                                                                                                                                                                                                                                             |
-| `arrange_windows(...)` | Arranges windows on the desktop. 4 methods are provided: `Cascade', 'Verical`, `Horizontal` and `Grid`                                                                                                                                                                                                                       |
+| `arrange_windows(...)` | Arranges windows on the desktop. 4 methods are provided: `Cascade`, `Verical`, `Horizontal` and `Grid`                                                                                                                                                                                                                       |
 | `close()`              | Closes the desktop and the entire app                                                                                                                                                                                                                                                                                        |
 
 
@@ -105,4 +105,53 @@ If hotkeys are present for window, `Alt+{hotkey}` is checked by the desktop wind
 
 ## Example
 
-The following example created a custom desktop that ...
+The following example created a custom desktop that that prints `My desktop` on the top-left side of the screen with white color on a red background. The desktop has one command (`AddWindow`) to add new windows via key `Insert`.
+
+At the same time, `DesktopEvents::on_update_window_count(...)` is intercepted and whenever a new window is being added, it reorganize all windows in a grid.
+
+```rs
+use appcui::prelude::*;
+
+#[Desktop(events: CommandBarEvents+DesktopEvents, overwrite:OnPaint, commands:AddWindow)]
+struct MyDesktop {
+    index: u32,
+}
+impl MyDesktop {
+    fn new() -> Self {
+        Self {
+            base: Desktop::new(),
+            index: 1,
+        }
+    }
+}
+impl OnPaint for MyDesktop {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        surface.clear(theme.desktop.character);
+        surface.write_string(1, 1, "My desktop", CharAttribute::with_color(Color::White, Color::Red), false);
+    }
+}
+impl DesktopEvents for MyDesktop {
+    fn on_update_window_count(&mut self, _count: usize) {
+        self.arrange_windows(desktop::ArrangeWindowsMethod::Grid);
+    }   
+}
+impl CommandBarEvents for MyDesktop {
+    fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+        commandbar.set(key!("Insert"), "Add new_window", mydesktop::Commands::AddWindow);
+    }
+
+    fn on_event(&mut self, command_id: mydesktop::Commands) {
+        match command_id {
+            mydesktop::Commands::AddWindow => {
+                let name = format!("Win─{}", self.index);
+                self.index += 1;
+                self.add_window(Window::new(&name, Layout::new("d:c,w:20,h:10"), window::Flags::None));
+            }
+        }
+    }
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    App::new().size(Size::new(80,20)).desktop(MyDesktop::new()).command_bar().build()?.run();
+    Ok(())
+}```
