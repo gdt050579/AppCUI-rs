@@ -4,3 +4,4 @@ pub mod events;
 mod tests;
 
 pub use self::desktop::Desktop;
+pub use self::desktop::ArrangeWindowsMethod;
