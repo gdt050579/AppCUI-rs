@@ -272,12 +272,21 @@ impl Window {
             self.update_positions(self.size());
         }
     }
+    pub fn set_auto_hotkey(&mut self) {
+        let mut k = RuntimeManager::get().find_first_free_hotkey();
+        if k.code != KeyCode::None {
+            k.modifier = KeyModifier::Alt;
+            self.set_hotkey(k);
+        }
+    }
     pub fn set_hotkey<T>(&mut self, key: T)
     where
         Key: From<T>,
     {
         if let Some(item) = self.toolbar.get_mut(self.hotkey_handle) {
-            item.set_key(key.into());
+            let k: Key = key.into();
+            self.base.hotkey = k; // we need this deduplication for desktop to be able to change focus
+            item.set_key(k);
             self.update_positions(self.size());
         }
     }
