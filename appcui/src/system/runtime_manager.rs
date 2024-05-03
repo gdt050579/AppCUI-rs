@@ -187,6 +187,39 @@ impl RuntimeManager {
             }
         }
     }
+
+    pub(crate) fn find_first_free_hotkey(&self) -> Key {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(desktop) = controls.get(self.desktop_handle) {
+            let base = desktop.get_base();
+            let mut free_keys: [KeyCode; 9] = [KeyCode::N1,KeyCode::N2,KeyCode::N3,KeyCode::N4,KeyCode::N5,KeyCode::N6,KeyCode::N7,KeyCode::N8,KeyCode::N9];
+            for child_handle in base.children.iter() {
+                if let Some(child) = controls.get(*child_handle) {
+                    let key = child.get_base().hotkey;
+                    match key.code {
+                        KeyCode::N1 => free_keys[0] = KeyCode::None,
+                        KeyCode::N2 => free_keys[1] = KeyCode::None,
+                        KeyCode::N3 => free_keys[2] = KeyCode::None,
+                        KeyCode::N4 => free_keys[3] = KeyCode::None,
+                        KeyCode::N5 => free_keys[4] = KeyCode::None,
+                        KeyCode::N6 => free_keys[5] = KeyCode::None,
+                        KeyCode::N7 => free_keys[6] = KeyCode::None,
+                        KeyCode::N8 => free_keys[7] = KeyCode::None,
+                        KeyCode::N9 => free_keys[8] = KeyCode::None,
+                        _ => {}
+                    }
+                }
+            }
+            // search for the first free one
+            for k in free_keys {
+                if k != KeyCode::None {
+                    return Key::new(k, KeyModifier::None);
+                }
+            }
+        }
+        Key::None
+    }
+
     pub(crate) fn send_event(&mut self, event: ControlEvent) {
         self.events.push(event);
     }

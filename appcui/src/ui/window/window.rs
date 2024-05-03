@@ -272,6 +272,13 @@ impl Window {
             self.update_positions(self.size());
         }
     }
+    pub fn set_auto_hotkey(&mut self) {
+        let mut k = RuntimeManager::get().find_first_free_hotkey();
+        if k.code != KeyCode::None {
+            k.modifier = KeyModifier::Alt;
+            self.set_hotkey(k);
+        }
+    }
     pub fn set_hotkey<T>(&mut self, key: T)
     where
         Key: From<T>,

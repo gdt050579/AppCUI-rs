@@ -41,7 +41,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if cb.has_parameter("hotkey") {
         let s = cb.get_value("hotkey").unwrap();
         if utils::equal_ignore_case(s, "auto") {
-            cb.add_line("control.set_hotkey_automatically();")
+            cb.add_line("control.set_auto_hotkey();")
         } else {
             let key = crate::key::builder::create_string(s);
             cb.add_command("\n\tcontrol.set_hotkey(");

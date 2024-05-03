@@ -1741,3 +1741,22 @@ fn check_procmacro_hotkey() {
     a.add_window(window!("Test,x:30,y:1,w:30,h:8,hotkey:Ctrl+Alt+F10"));
     a.run();
 }
+
+#[test]
+fn check_procmacro_auto_hotkey() {
+    let script = "
+        Paint.Enable(false)
+        // ┌[1]─── Test ───[x]┐┌[2]─── Test ───[x]┐┌[3]─── Test ───[x]┐╔[4]═══ Test ═══[x]╗
+        Paint('hot keys (1 to 4) - 4th window selected')
+        CheckHash(0x293B1966B54D22E6)
+        Key.Pressed(Alt+2)
+        Paint('hot keys (1 to 4) - 2nd window selected')
+        CheckHash(0x2FB120200251AD9E)
+    ";
+    let mut a = App::debug(80, 10, script).build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:20,h:8,hotkey:auto"));
+    a.add_window(window!("Test,x:20,y:1,w:20,h:8,hotkey:auto"));
+    a.add_window(window!("Test,x:40,y:1,w:20,h:8,hotkey:auto"));
+    a.add_window(window!("Test,x:60,y:1,w:20,h:8,hotkey:auto"));
+    a.run();
+}
