@@ -1,5 +1,5 @@
 use super::control_builder::ControlBuilder;
-use crate::parameter_parser::*;
+use crate::{parameter_parser::*, utils};
 use proc_macro::*;
 
 static FLAGS: FlagsSignature = FlagsSignature::new(&[
@@ -19,6 +19,10 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("text", "title", ParamType::String),
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("type", "type", ParamType::String),
+    NamedParameter::new("tag", "tag", ParamType::String),
+    NamedParameter::new("hot-key", "hotkey", ParamType::String),
+    NamedParameter::new("hotkey", "hotkey", ParamType::String),
+    NamedParameter::new("key", "hotkey", ParamType::String),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -29,5 +33,21 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_flags_parameter("flags", "window::Flags", &FLAGS);
     cb.add_enum_parameter("type", "window::Type", &TYPES, Some("Normal"));
     cb.finish_control_initialization();
+    if cb.has_parameter("tag") {
+        cb.add_command("\n\tcontrol.set_tag(");
+        cb.add_string_parameter("tag", None);
+        cb.add_line(");\n");  
+    }
+    if cb.has_parameter("hotkey") {
+        let s = cb.get_value("hotkey").unwrap();
+        if utils::equal_ignore_case(s, "auto") {
+            cb.add_line("control.set_hotkey_automatically();")
+        } else {
+            let key = crate::key::builder::create_string(s);
+            cb.add_command("\n\tcontrol.set_hotkey(");
+            cb.add_command(&key);
+            cb.add_line(");\n");  
+        }
+    }
     cb.into()
 }
