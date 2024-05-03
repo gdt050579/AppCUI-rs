@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Copy,Clone,Eq,PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ArrangeWindowsMethod {
     Cascade,
     Vertical,
@@ -196,14 +196,12 @@ impl OnKeyPressed for Desktop {
             _ => {}
         }
         // check controls hot keys
-        if key.modifier.contains(KeyModifier::Alt) {
-            let controls = RuntimeManager::get().get_controls_mut();
-            for ctrl in self.children.iter() {
-                if let Some(child) = controls.get_mut(*ctrl) {
-                    if child.get_base_mut().hotkey() == key {
-                        RuntimeManager::get().request_focus_for_control(*ctrl);
-                        return EventProcessStatus::Processed;
-                    }
+        let controls = RuntimeManager::get().get_controls_mut();
+        for ctrl in self.children.iter() {
+            if let Some(child) = controls.get(*ctrl) {
+                if child.get_base().hotkey() == key {
+                    RuntimeManager::get().request_focus_for_control(*ctrl);
+                    return EventProcessStatus::Processed;
                 }
             }
         }

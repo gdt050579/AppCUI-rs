@@ -468,3 +468,25 @@ fn check_update_desktop_windows_count() {
     ";
     App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
 }
+
+#[test]
+fn check_window_activation_from_hotkeys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('second window active')
+        CheckHash(0xD9C42D40B16A6F46)
+        Key.Pressed(Ctrl+3)
+        Paint('first window active')
+        CheckHash(0x775C95F0EB0C41E6)
+        Key.Pressed(F10)
+        Paint('first window active (nothing happens)')
+        CheckHash(0x775C95F0EB0C41E6)
+        Key.Pressed(Ctrl+Alt+F10)
+        Paint('second window active (again')
+        CheckHash(0xD9C42D40B16A6F46)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:30,h:8,hotkey:Ctrl+3"));
+    a.add_window(window!("Test,x:30,y:1,w:30,h:8,hotkey:Ctrl+Alt+F10"));
+    a.run();
+}
