@@ -344,7 +344,10 @@ fn check_add_window() {
     }
     impl MyDesktop {
         fn new() -> Self {
-            Self { base: Desktop::new(), index:1 }
+            Self {
+                base: Desktop::new(),
+                index: 1,
+            }
         }
     }
     impl CommandBarEvents for MyDesktop {
@@ -355,9 +358,9 @@ fn check_add_window() {
         fn on_event(&mut self, command_id: mydesktop::Commands) {
             match command_id {
                 mydesktop::Commands::AddWindow => {
-                    let name = format!("Win-{}",self.index);
+                    let name = format!("Win-{}", self.index);
                     self.index += 1;
-                    self.add_window(Window::new(&name,Layout::new("d:c,w:20,h:10"),window::Flags::None));
+                    self.add_window(Window::new(&name, Layout::new("d:c,w:20,h:10"), window::Flags::None));
                     self.arrange_windows(desktop::ArrangeWindowsMethod::Grid);
                 }
             }
@@ -415,10 +418,13 @@ fn check_update_desktop_windows_count() {
     }
     impl MyDesktop {
         fn new() -> Self {
-            Self { base: Desktop::new(), index:1 }
+            Self {
+                base: Desktop::new(),
+                index: 1,
+            }
         }
     }
-    impl DesktopEvents for MyDesktop {    
+    impl DesktopEvents for MyDesktop {
         fn on_update_window_count(&mut self, _count: usize) {
             self.arrange_windows(desktop::ArrangeWindowsMethod::Grid);
         }
@@ -431,9 +437,9 @@ fn check_update_desktop_windows_count() {
         fn on_event(&mut self, command_id: mydesktop::Commands) {
             match command_id {
                 mydesktop::Commands::AddWindow => {
-                    let name = format!("Win-{}",self.index);
+                    let name = format!("Win-{}", self.index);
                     self.index += 1;
-                    self.add_window(Window::new(&name,Layout::new("d:c,w:20,h:10"),window::Flags::None));
+                    self.add_window(Window::new(&name, Layout::new("d:c,w:20,h:10"), window::Flags::None));
                 }
             }
         }
@@ -489,4 +495,74 @@ fn check_window_activation_from_hotkeys() {
     a.add_window(window!("Test,x:0,y:1,w:30,h:8,hotkey:Ctrl+3"));
     a.add_window(window!("Test,x:30,y:1,w:30,h:8,hotkey:Ctrl+Alt+F10"));
     a.run();
+}
+
+#[test]
+fn check_auto_hotkey_on_desktop() {
+    #[Desktop(events =  CommandBarEvents+DesktopEvents,  commands: [AddWindow], internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_update_window_count(&mut self, _count: usize) {
+            self.arrange_windows(desktop::ArrangeWindowsMethod::Grid);
+        }
+    }
+    impl CommandBarEvents for MyDesktop {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("Insert"), "Add new_window", mydesktop::Commands::AddWindow);
+        }
+
+        fn on_event(&mut self, _: mydesktop::Commands) {
+            self.add_window(window!("Test,d:c,w:20,h:10,hotkey:auto"));
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('Initial state (no windows)')
+        CheckHash(0xC7E76D8C5E7F81DC)
+        Key.Pressed(Insert)
+        Paint('Windows: 1')
+        CheckHash(0x9A7AB8BB639E5770)
+        Key.Pressed(Insert)
+        Paint('Windows: 2')
+        CheckHash(0x4892F1525B336110)
+        Key.Pressed(Insert)
+        Paint('Windows: 3')
+        CheckHash(0xC6C1BF7A99A1488D)
+        Key.Pressed(Insert)
+        Paint('Windows: 4')
+        CheckHash(0x262A939AE8050523)
+        Key.Pressed(Insert)
+        Paint('Windows: 5')
+        CheckHash(0x25D9AAC6C1CB281C)
+        Mouse.Click(77,0,left)    
+        // when we close a window it first receives the focus and them it gets closed
+        Paint('Windows: 1,2,4 and 5, no window has focus')
+        CheckHash(0xA7D1E29A09941CCA)
+        Mouse.Click(37,0,left)
+        Paint('Windows: 2,4 and 5, no window has focus')
+        CheckHash(0x4960349156A97285)
+        Key.Pressed(Insert)
+        Paint('Windows: 1 (again - but last and with focus)')
+        CheckHash(0xAD0E893C6548D6B9)
+        Key.Pressed(Insert)
+        Paint('Windows: 3 (again - but last and with focus)')
+        CheckHash(0x8084FB5EE9C16C34)
+        Key.Pressed(Insert,6)
+        Paint('6 more window but only 4 have keys')
+        CheckHash(0x5D21AA1DB419FADF)
+        Mouse.Click(17,0,left)
+        Paint('Window with hotkey 2 was destroyes')
+        CheckHash(0x3A0419B78D3634E7)
+        Key.Pressed(Insert)
+        Paint('Windows: hotkey-2 (again - but last and with focus)')
+        CheckHash(0x42BE6AB1C9A89F8)
+
+    ";
+    App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
 }
