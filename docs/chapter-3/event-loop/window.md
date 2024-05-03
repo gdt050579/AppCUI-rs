@@ -12,17 +12,23 @@ To create a Window use:
 let w = Window::new("Title", Layout::new("x:10,y:5,w:15,h:9"),window::Flags::None);
 let w2 = window!("Title,d:c,w:10,h:10");
 let w3 = window!("title='Some Title',d:c,w:30,h:10,flags=[Sizeable])");
+let w4 = window!("title='WithTag',d:c,w:30,h:10,tag:MyTag)");
+let w5 = window!("Title,d:c,w:10,h:10,key:Alt+F10");
+let w6 = window!("Title,d:c,w:10,h:10,key:auto");
 ```
 
 Keep in mind that window will **NOT** handle any events from its children. 
 
 A window supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name                 | Type           | Positional parameter                | Purpose                        |
-| ------------------------------ | -------------- | ----------------------------------- | ------------------------------ |
-| `title` or `text` or `caption` | String         | **Yes** (first postional parameter) | The title (text) of the window |
-| `flags`                        | String or List | **No**                              | Window initialization flags    |
-| `type`                         | String         | **No**                              | Window type                    |
+| Parameter name                 | Type           | Positional parameter                | Purpose                                                                                                                                                   |
+| ------------------------------ | -------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title` or `text` or `caption` | String         | **Yes** (first postional parameter) | The title (text) of the window                                                                                                                            |
+| `flags`                        | String or List | **No**                              | Window initialization flags                                                                                                                               |
+| `type`                         | String         | **No**                              | Window type                                                                                                                                               |
+| `tag`                          | String         | **No**                              | The tag of the window                                                                                                                                     |
+| `hotkey` or `hot-key` or `key` | Key            | **No**                              | The hotkey associated with a window. You can also use the `auto` value to ask the framework to find the first available key (from `Alt`+`1` to `Alt`+`9`) |
+
 
 To create a window that will handle events from its children, use `#[Window(...)]` method:
 ```rs
@@ -61,6 +67,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | `set_tag(...)`        | Sets the tag of Window.<br>Example: `win.set_tag("ABC")` - this will set the tag of the window to `ABC`           |
 | `tag()`               | Returns the tag of the current window                                                                             |
 | `clear_tag()`         | Clears the current tag. Its equivalent to `set_tag("")`                                                           |
+| `set_auto_hotkey()`   | Automatically selects a free hotkey (in a format `Alt`+{number} where `{number}` is between 1 and 9)              |
 | `enter_resize_mode()` | Enters the resize mode programatically                                                                            |
 | `close`               | Closes current window                                                                                             |
 
