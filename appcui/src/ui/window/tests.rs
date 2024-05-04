@@ -1760,3 +1760,50 @@ fn check_procmacro_auto_hotkey() {
     a.add_window(window!("Test,x:60,y:1,w:20,h:8,hotkey:auto"));
     a.run();
 }
+
+#[test]
+fn check_single_window() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen)')
+        CheckHash(0x8B0177987DEEAB59)
+    ";
+    let mut a = App::debug(40, 10, script).single_window().build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.run();
+}
+#[test]
+fn check_single_window_with_commandbar() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen,command bar visible)')
+        CheckHash(0x1250605ADBD5CC99)
+    ";
+    let mut a = App::debug(40, 10, script).single_window().command_bar().build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.run();
+}
+
+#[test]
+fn check_single_window_with_menubar() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen,menu bar visible)')
+        CheckHash(0x4E4AA2CCB6734C99)
+    ";
+    let mut a = App::debug(40, 10, script).single_window().menu_bar().build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.run();
+}
+
+#[test]
+fn check_single_window_with_menu_and_command_bar() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen,menu and command bar visible)')
+        CheckHash(0xA95AE2CA1B885CD9)
+    ";
+    let mut a = App::debug(40, 10, script).single_window().menu_bar().command_bar().build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.run();
+}
