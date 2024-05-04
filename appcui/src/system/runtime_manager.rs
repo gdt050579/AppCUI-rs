@@ -424,6 +424,11 @@ impl RuntimeManager {
         if !self.desktop_os_start_called {
             self.process_terminal_resize_event(self.terminal.get_size());
             self.process_desktop_on_start();
+            if self.single_window {
+                if self.get_controls_mut().get_desktop().get_base().children.len()!=1 {
+                    panic!("You can not run a single window app and not add a window to the app. Have you forget to add an .add_window(...) call before the .run() call ?")
+                }
+            }
         }
         while self.loop_status == LoopStatus::Normal {
             // 1. Process events from command bar

@@ -604,10 +604,11 @@ impl Window {
 impl OnWindowRegistered for Window {
     fn on_registered(&mut self) {
         if self.is_singlewindow() {
-            self.flags.remove(Flags::Sizeable);
+            if self.flags.contains(Flags::Sizeable) {
+                // a single window can not be sizeable and can not have the resiz grip and/or the maximized button
+                panic!("A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !");
+            }
             self.flags |= Flags::FixedPosition;
-            //TODO: remove toolbars to maximize and/or resize grip
-            //self.toolbar().
         }
         // propagate my handle to toolbar elements
         self.toolbar.set_window_handle(self.handle);
