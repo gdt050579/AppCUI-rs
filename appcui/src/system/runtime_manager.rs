@@ -141,6 +141,12 @@ impl RuntimeManager {
 
         let controls = unsafe { &mut *manager.controls };
         desktop.get_base_mut().update_focus_flag(true);
+        desktop.get_base_mut().set_margins(
+            0,
+            if builder.has_menu_bar { 1 } else { 0 },
+            0,
+            if builder.has_command_bar { 1 } else { 0 },
+        );
         manager.desktop_handle = controls.add(desktop);
         manager.current_focus = Some(manager.desktop_handle);
         controls.get_mut(manager.desktop_handle).unwrap().get_base_mut().handle = manager.desktop_handle;
@@ -300,7 +306,7 @@ impl RuntimeManager {
         // this window current handle
         self.set_event_processors(handle.cast(), handle.cast());
         // all good --> the window has been registered
-        if let Some(win) = controls.get_mut(handle.cast()) {            
+        if let Some(win) = controls.get_mut(handle.cast()) {
             if self.single_window {
                 let base = win.get_base_mut();
                 base.set_singlewindow_flag();

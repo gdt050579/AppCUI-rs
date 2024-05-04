@@ -521,7 +521,13 @@ impl Window {
             let result = WindowEvents::on_cancel(interface);
             if result == ActionRequest::Allow {
                 // logic to remove me
-                RuntimeManager::get().request_remove(self.handle);
+                if self.is_singlewindow() {
+                    // close the entire app
+                    RuntimeManager::get().close();
+                } else {
+                    // remove me from the desktop
+                    RuntimeManager::get().request_remove(self.handle);
+                }
             }
         }
     }
