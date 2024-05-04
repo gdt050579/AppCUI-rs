@@ -108,6 +108,14 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         .replace("$(BASE)", &a.base)
         .replace("$(ROOT)", a.root)
         .replace("$(MODAL_RESULT_TYPE)", &a.modal_result_type);
+    // check templates
+    if struct_data.template_type.is_empty() {
+        code = code.replace("$(TEMPLATE_TYPE)", "").replace("$(TEMPLATE_DEF)", "");
+    } else {
+        code = code
+            .replace("$(TEMPLATE_TYPE)", &struct_data.template_type)
+            .replace("$(TEMPLATE_DEF)", &struct_data.template_def);
+    }
     //println!("{}", code);
     TokenStream::from_str(&code).expect("Fail to convert string to token stream")
 }

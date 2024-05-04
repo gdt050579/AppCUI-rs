@@ -22,6 +22,4 @@ fn check_struct_definition() {
     assert_eq!(sd4.name,"MyControl");
     assert_eq!(sd4.template_def,"<TT> where TT: Copy+Clone> ");
     assert_eq!(sd4.template_type,"<TT>");
-
-
 }
