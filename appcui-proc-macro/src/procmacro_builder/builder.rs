@@ -1,4 +1,5 @@
-use super::{arguments::Arguments, templates, utils, AppCUITrait, BaseControlType, TraitImplementation, TraitsConfig};
+use super::StructDefinition;
+use super::{arguments::Arguments, templates, AppCUITrait, BaseControlType, TraitImplementation, TraitsConfig};
 use proc_macro::TokenStream;
 use std::fmt::Write;
 use std::str::FromStr;
@@ -38,7 +39,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     base_definition.push_str(&a.base);
     base_definition.push_str(", ");
     let mut code = input.to_string().replace('{', base_definition.as_str());
-    let struct_name = utils::extract_structure_name(code.as_str());
+    let struct_data = StructDefinition::from(code.as_str());
     code.insert_str(0, "#[repr(C)]\n");
     code.insert_str(0, templates::IMPORTS);
     if a.internal_mode {
@@ -102,8 +103,8 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     }
     // replace templates
     code = code
-        .replace("$(STRUCT_NAME)", &struct_name)
-        .replace("$(MOD_NAME)", struct_name.to_lowercase().as_str())
+        .replace("$(STRUCT_NAME)", &struct_data.name)
+        .replace("$(MOD_NAME)", struct_data.name.to_lowercase().as_str())
         .replace("$(BASE)", &a.base)
         .replace("$(ROOT)", a.root)
         .replace("$(MODAL_RESULT_TYPE)", &a.modal_result_type);
