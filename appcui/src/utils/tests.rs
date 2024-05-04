@@ -118,7 +118,7 @@ fn check_hanlde_manager() {
         }
     }
     impl HandleSupport<MyData> for MyData {
-        fn get_handle(&self) -> crate::system::Handle<MyData> {
+        fn handle(&self) -> crate::system::Handle<MyData> {
             self.handle
         }
 
@@ -163,8 +163,8 @@ fn check_hanlde_manager() {
     // add a new element
     let h_new = man.add(MyData::new("new_handle", 1234));
     assert!(h_new != h1_123);
-    assert!(h_new.get_index() == 0);
-    assert!(h1_123.get_index() == 0);
+    assert!(h_new.index() == 0);
+    assert!(h1_123.index() == 0);
     // no free spacess stored
     assert!(man.free_spaces() == 0);
     assert!(man.allocated_objects() == 3);

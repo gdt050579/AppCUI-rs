@@ -95,7 +95,7 @@ impl ToolBarItem {
     }
 }
 impl HandleSupport<ToolBarItem> for ToolBarItem {
-    fn get_handle(&self) -> Handle<ToolBarItem> {
+    fn handle(&self) -> Handle<ToolBarItem> {
         self.get_base().get_handle().cast()
     }
 

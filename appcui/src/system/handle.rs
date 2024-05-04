@@ -6,7 +6,7 @@ use std::{
 static GLOBAL_ID: AtomicUsize = AtomicUsize::new(0);
 
 pub(crate) trait HandleSupport<T> {
-    fn get_handle(&self) -> Handle<T>;
+    fn handle(&self) -> Handle<T>;
     fn set_handle(&mut self, handle: Handle<T>);
 }
 
@@ -34,7 +34,7 @@ impl<T> Handle<T> {
         }
     }
     #[inline(always)]
-    pub(crate) fn get_index(&self) -> usize {
+    pub(crate) fn index(&self) -> usize {
         (self.value & 0xFFFFFFFF) as usize
     }
     #[inline(always)]
@@ -71,6 +71,6 @@ impl<T> Default for Handle<T> {
 }
 impl<T> std::fmt::Debug for Handle<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Handle {{ index: {}, id: {} }}", self.get_index(), (self.value >> 32) & 0xFFFFFFFF)
+        write!(f, "Handle {{ index: {}, id: {} }}", self.index(), (self.value >> 32) & 0xFFFFFFFF)
     }
 }

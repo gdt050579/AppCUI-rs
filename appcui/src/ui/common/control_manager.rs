@@ -46,19 +46,19 @@ pub(crate) struct ControlManager {
 }
 impl ControlManager {
     #[inline]
-    pub(crate) fn get_control(&self) -> &dyn Control {
+    pub(crate) fn control(&self) -> &dyn Control {
         unsafe { &*(self.interface.as_ptr()) }
     }
     #[inline]
-    pub(crate) fn get_control_mut(&mut self) -> &mut dyn Control {
+    pub(crate) fn control_mut(&mut self) -> &mut dyn Control {
         unsafe { &mut *(self.interface.as_ptr()) }
     }
     #[inline(always)]
-    pub(crate) fn get_base(&self) -> &ControlBase {
+    pub(crate) fn base(&self) -> &ControlBase {
         unsafe { &*self.base }
     }
     #[inline(always)]
-    pub(crate) fn get_base_mut(&mut self) -> &mut ControlBase {
+    pub(crate) fn base_mut(&mut self) -> &mut ControlBase {
         unsafe { &mut *self.base }
     }
     pub(crate) fn new<T>(obj: T) -> ControlManager
@@ -95,21 +95,21 @@ impl Drop for ControlManager {
 }
 
 impl HandleSupport<ControlManager> for ControlManager {
-    fn get_handle(&self) -> Handle<ControlManager> {
-        self.get_base().handle.cast()
+    fn handle(&self) -> Handle<ControlManager> {
+        self.base().handle.cast()
     }
 
     fn set_handle(&mut self, handle: Handle<ControlManager>) {
         // set the handle for all children - only for non desktop controls
-        if !self.get_base().is_desktop_control() {
+        if !self.base().is_desktop_control() {
             let controls = RuntimeManager::get().get_controls_mut();
-            for child in self.get_base().children.iter() {
+            for child in self.base().children.iter() {
                 if let Some(control) = controls.get_mut(*child) {
-                    control.get_base_mut().parent = handle.cast();
+                    control.base_mut().parent = handle.cast();
                 }
             }
         }
         // set my handle
-        self.get_base_mut().handle = handle.cast();
+        self.base_mut().handle = handle.cast();
     }
 }

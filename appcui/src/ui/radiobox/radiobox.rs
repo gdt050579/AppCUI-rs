@@ -29,7 +29,7 @@ impl RadioBox {
             return; 
         }
         if let Some(parent) = RuntimeManager::get().get_controls_mut().get(self.parent) {
-            parent.get_base().notify_children_of_selection(self.handle);
+            parent.base().notify_children_of_selection(self.handle);
         }
     }
     pub fn set_caption(&mut self, caption: &str) {

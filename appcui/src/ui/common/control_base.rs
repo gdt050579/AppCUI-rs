@@ -301,7 +301,7 @@ impl ControlBase {
     {
         let mut c = ControlManager::new(control);
         // if I am already registered, I will set the parent of my child
-        let base = c.get_base_mut();
+        let base = c.base_mut();
         let focusable = base.can_receive_input();
 
         base.parent = self.handle;
@@ -562,7 +562,7 @@ impl ControlBase {
         let controls = RuntimeManager::get().get_controls_mut();
         for h_child in &self.children {
             if let Some(c) = controls.get_mut(*h_child) {
-                OnSiblingSelected::on_sibling_selected(c.get_control_mut(), requester);
+                OnSiblingSelected::on_sibling_selected(c.control_mut(), requester);
             }
         }
     }

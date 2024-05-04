@@ -39,7 +39,7 @@ where
         if handle.is_none() {
             return false;
         }
-        let idx = handle.get_index();
+        let idx = handle.index();
         if idx >= self.objects.len() {
             return false;
         }
@@ -47,7 +47,7 @@ where
         if m.is_none() {
             return false;
         }
-        if m.as_ref().unwrap().get_handle() != handle {
+        if m.as_ref().unwrap().handle() != handle {
             return false;
         }
         // ok -> we can remove it
@@ -59,10 +59,10 @@ where
         if handle.is_none() {
             return None;
         }
-        let idx = handle.get_index();
+        let idx = handle.index();
         if idx < self.objects.len() {
             let m = self.objects[idx].as_ref();
-            if m.is_some() && m.as_ref().unwrap().get_handle() == handle {
+            if m.is_some() && m.as_ref().unwrap().handle() == handle {
                 return m;
             }
         }
@@ -72,10 +72,10 @@ where
         if handle.is_none() {
             return None;
         }
-        let idx = handle.get_index();
+        let idx = handle.index();
         if idx < self.objects.len() {
             let m = self.objects[idx].as_mut();
-            if m.is_some() && m.as_ref().unwrap().get_handle() == handle {
+            if m.is_some() && m.as_ref().unwrap().handle() == handle {
                 return m;
             }
         }

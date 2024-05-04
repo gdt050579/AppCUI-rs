@@ -34,7 +34,7 @@ impl Desktop {
     }
     fn interface_mut(&mut self) -> Option<&mut dyn Control> {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
-            return Some(control.get_control_mut());
+            return Some(control.control_mut());
         }
         None
     }
@@ -55,7 +55,7 @@ impl Desktop {
     }
     fn reposition_child(&self, handle: Handle<UIElement>, new_poz: Rect) {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(handle) {
-            let base = control.get_base_mut();
+            let base = control.base_mut();
             base.set_position(new_poz.left(), new_poz.top());
             base.set_size(new_poz.width() as u16, new_poz.height() as u16);
         }
@@ -199,7 +199,7 @@ impl OnKeyPressed for Desktop {
         let controls = RuntimeManager::get().get_controls_mut();
         for ctrl in self.children.iter() {
             if let Some(child) = controls.get(*ctrl) {
-                if child.get_base().hotkey() == key {
+                if child.base().hotkey() == key {
                     RuntimeManager::get().request_focus_for_control(*ctrl);
                     return EventProcessStatus::Processed;
                 }

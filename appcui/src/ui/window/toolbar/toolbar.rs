@@ -262,7 +262,7 @@ impl ToolBar {
             is_current_item_pressed: self.pressed,
             sep_attr: if focused { theme.lines.normal } else { theme.lines.inactive },
         };
-        let current_bar_index = self.current_handle.get_index();
+        let current_bar_index = self.current_handle.index();
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {

@@ -23,7 +23,7 @@ impl ControlHandleManager {
         self.manager.get(handle.cast())
     }
     #[inline(always)]
-    pub(crate) fn get_desktop(&mut self) -> &mut ControlManager {
+    pub(crate) fn desktop_mut(&mut self) -> &mut ControlManager {
         return self.manager.get_element_mut(0).unwrap();
     }
     #[inline(always)]
@@ -34,7 +34,7 @@ impl ControlHandleManager {
         let max_count = self.manager.allocated_objects();
         for i in 0..max_count {
             if let Some(c) = self.manager.get_element_mut(i) {
-                c.get_base_mut().clear_mark_to_receive_focus();
+                c.base_mut().clear_mark_to_receive_focus();
             }
         }
     }

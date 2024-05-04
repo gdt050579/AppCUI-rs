@@ -71,7 +71,7 @@ impl Menu {
     where
         T: MenuItem,
     {
-        let idx = menuitem_hamdle.get_index();
+        let idx = menuitem_hamdle.index();
         if idx >= self.items.len() {
             return None;
         }
@@ -93,7 +93,7 @@ impl Menu {
     where
         T: MenuItem,
     {
-        let idx = menuitem_hamdle.get_index();
+        let idx = menuitem_hamdle.index();
         if idx >= self.items.len() {
             return None;
         }
@@ -627,7 +627,7 @@ impl Menu {
 }
 
 impl HandleSupport<Menu> for Menu {
-    fn get_handle(&self) -> Handle<Menu> {
+    fn handle(&self) -> Handle<Menu> {
         self.handle.cast()
     }
 
