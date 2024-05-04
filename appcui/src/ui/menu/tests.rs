@@ -668,10 +668,10 @@ fn check_menubar_update_multiple_menus() {
             CheckHash(0x6ec113e98df3ca14)
             ";
     let mut a = App::debug(60, 24, script).menu_bar().build().unwrap();
-    let mut w1 = mywin::MyWindow::new("Win-1", Layout::new("x:1,y:1,w:18,h:10"));
+    let mut w1 = mywin::MyWindow::new("Win-1", Layout::new("x:1,y:2,w:18,h:10"));
     w1.add(colorcustomcontrol::ColorCustomControl::new(Layout::new("x:1,y:1,w:10")));
     w1.add(button!("Button,x:1,y:3,w:10"));
-    let mut w2 = mywin::MyWindow::new("Win-2", Layout::new("x:20,y:1,w:18,h:15"));
+    let mut w2 = mywin::MyWindow::new("Win-2", Layout::new("x:20,y:2,w:18,h:15"));
     w2.add(textcustomcontrol::TextCustomControl::new(Layout::new("x:1,y:1,w:10")));
     w2.add(button!("Button,x:1,y:3,w:10"));
     a.add_window(w1);
@@ -794,7 +794,7 @@ fn check_popup_menu() {
         }
     }
     let script = "
-            //Paint.Enable(false)
+            Paint.Enable(false)
             Paint('initial_state')
             CheckHash(0xca08a561329e08e0)
             Mouse.Move(39,13)
