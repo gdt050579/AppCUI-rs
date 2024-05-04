@@ -26,6 +26,7 @@ pub enum StatusFlags {
     Expanded = 0x0400,
     IncreaseRightMarginOnFocus = 0x0800,
     IncreaseBottomMarginOnFocus = 0x1000,
+    SingleWindow = 0x2000,
 }
 #[derive(Copy, Clone)]
 pub(crate) struct Margins {
@@ -37,7 +38,7 @@ pub(crate) struct Margins {
 
 #[repr(C)]
 pub struct ControlBase {
-    layout: ControlLayout,
+    pub(crate) layout: ControlLayout,
     pub(crate) margins: Margins,
     pub(crate) handle: Handle<UIElement>,
     pub(crate) parent: Handle<UIElement>,
@@ -235,6 +236,14 @@ impl ControlBase {
         } else {
             self.status_flags.remove(StatusFlags::KeyInputBeforeChildren);
         }
+    }
+    #[inline(always)]
+    pub(crate) fn set_singlewindow_flag(&mut self) {
+        self.status_flags |= StatusFlags::SingleWindow;
+    }
+    #[inline(always)]
+    pub(crate) fn is_singlewindow(&self) -> bool {
+        self.status_flags.contains(StatusFlags::SingleWindow)
     }
 
     #[inline(always)]

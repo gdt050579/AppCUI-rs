@@ -1,3 +1,4 @@
+use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
 
 use super::runtime_manager_traits::*;
@@ -140,19 +141,31 @@ impl RuntimeManager {
         manager.current_focus = Some(manager.desktop_handle);
         controls.get_mut(manager.desktop_handle).unwrap().get_base_mut().handle = manager.desktop_handle;
         // all good --> add single window if case
-        // if manager.single_window {
+        if manager.single_window {
 
-        //     let handle = controls.get_desktop().get_base_mut().add_child(builder.single_window.take());
-        //     // since it is the first time I register this window
-        //     // I need to recursively set the event processor for all of its childern to
-        //     // this window current handle
-        //     manager.set_event_processors(handle.cast(), handle.cast());
-        //     // all good --> the window has been registered
-        //     if let Some(win) = controls.get_mut(handle.cast()) {
-        //         win.get_control_mut().on_registered();
-        //     }
+            let mut single_window = builder.single_window.take().unwrap();
+            let base = single_window.get_base_mut();
+            // link to the desktop
+            base.parent = manager.desktop_handle.cast();
+            // make sure that the layout implies full screen and can not be moved
+            base.layout = ControlLayout::new("x:0,y:0,w:100%,h:100%");
+            base.set_singlewindow_flag();
+            // add the window to control list
+            let window_handle = controls.add(single_window);
+            // I need to manually link the window to the desktop object
+            let desktop = controls.get_desktop().get_base_mut();
+            desktop.children.push(window_handle);
+            desktop.focused_child_index.set(0, 1, false);
+            manager.request_focus_for_control(window_handle);
+            // I need to recursively set the event processor for all of its childern to
+            // this window current handle
+            manager.set_event_processors(window_handle.cast(), window_handle.cast());
+            // all good --> the window has been registered
+            if let Some(win) = controls.get_mut(window_handle.cast()) {
+                win.get_control_mut().on_registered();
+            }
     
-        // }
+        }
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
