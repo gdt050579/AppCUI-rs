@@ -126,6 +126,10 @@ impl RuntimeManager {
             event_recorder: super::event_recorder::EventRecorder::new(),
         };
         let mut desktop = if manager.single_window {
+            // first check if a desktop was provided - if so panic
+            if builder.desktop_manager.is_some() {
+                panic!("When `single_window(...)` is being used to initialized an application, you can not use `.desktop(...)` command to provide a custom desktop !");
+            }
             // for a single window we will use a custom (empty) desktop
             // that does nothing
             ControlManager::new(EmptyDesktop::new())
@@ -309,6 +313,9 @@ impl RuntimeManager {
     where
         T: Control + WindowControl + 'static,
     {
+        if self.single_window {
+            panic!("When `single_window(...)` is being used to initialized an application, you can not add aditional windows to a desktop object !");
+        }
         let controls = unsafe { &mut *self.controls };
         let handle = controls.get_desktop().get_base_mut().add_child(obj);
         // since it is the first time I register this window
