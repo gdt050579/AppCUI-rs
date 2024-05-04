@@ -304,7 +304,15 @@ impl RuntimeManager {
             if self.single_window {
                 let base = win.get_base_mut();
                 base.set_singlewindow_flag();
-                base.layout = ControlLayout::new("x:0,y:0,w:100%,h:100%");
+                let top = self.menubar.is_some();
+                let bottom = self.commandbar.is_some();
+                base.layout = ControlLayout::new(match () {
+                    _ if (!top) && (!bottom) => "l:0,t:0,r:0,b:0",
+                    _ if (!top) && (bottom) => "l:0,t:0,r:0,b:1",
+                    _ if (top) && (!bottom) => "l:0,t:1,r:0,b:0",
+                    _ if (top) && (bottom) => "l:0,t:1,r:0,b:1",
+                    _ => "l:0,t:0,r:0,b:0",
+                });
             }
             // this must be called last as it will inactivate some flags on a window if in single window mode
             win.get_control_mut().on_registered();
