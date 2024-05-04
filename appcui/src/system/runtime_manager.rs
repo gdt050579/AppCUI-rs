@@ -289,7 +289,7 @@ impl RuntimeManager {
         T: Control + WindowControl + 'static,
     {
         let controls = unsafe { &mut *self.controls };
-        if self.single_window && (controls.get_desktop().get_base().children.len() != 0) {
+        if self.single_window && (!controls.get_desktop().get_base().children.is_empty()) {
             // check to see how many window were added
             panic!("When `single_window(...)` is being used to initialized an application, you can only use add_window(...) method once (to add the first and single window) !");
         }
@@ -424,10 +424,8 @@ impl RuntimeManager {
         if !self.desktop_os_start_called {
             self.process_terminal_resize_event(self.terminal.get_size());
             self.process_desktop_on_start();
-            if self.single_window {
-                if self.get_controls_mut().get_desktop().get_base().children.len()!=1 {
-                    panic!("You can not run a single window app and not add a window to the app. Have you forget to add an .add_window(...) call before the .run() call ?")
-                }
+            if self.single_window && self.get_controls_mut().get_desktop().get_base().children.len() != 1 {
+                panic!("You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")
             }
         }
         while self.loop_status == LoopStatus::Normal {
