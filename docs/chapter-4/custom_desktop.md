@@ -154,4 +154,5 @@ impl CommandBarEvents for MyDesktop {
 fn main() -> Result<(), appcui::system::Error> {
     App::new().size(Size::new(80,20)).desktop(MyDesktop::new()).command_bar().build()?.run();
     Ok(())
-}```
+}
+```
