@@ -5,6 +5,8 @@ mod traits_configuration;
 mod builder;
 mod base_control_type;
 mod struct_definition;
+#[cfg(test)]
+mod tests;
 
 pub(crate) use struct_definition::StructDefinition;
 pub(crate) use appcui_traits::AppCUITrait;
