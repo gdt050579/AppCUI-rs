@@ -13,6 +13,7 @@ use crate::ui::common::{ControlManager, UIElement};
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
+use crate::ui::desktop::EmptyDesktop;
 use crate::utils::VectorIndex;
 use crate::{prelude::*, terminals};
 
@@ -62,6 +63,7 @@ pub(crate) struct RuntimeManager {
     desktop_os_start_called: bool,
     recompute_parent_indexes: bool,
     request_update_command_and_menu_bars: bool,
+    single_window: bool,
     loop_status: LoopStatus,
     request_focus: Option<Handle<UIElement>>,
     current_focus: Option<Handle<UIElement>>,
@@ -97,6 +99,7 @@ impl RuntimeManager {
             desktop_os_start_called: false,
             request_update_command_and_menu_bars: true,
             recompute_parent_indexes: true,
+            single_window: builder.single_window.is_some(),
             request_focus: None,
             current_focus: None,
             mouse_over_control: Handle::None,
@@ -121,19 +124,39 @@ impl RuntimeManager {
             #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
         };
-        let mut desktop = if let Some(desktop) = builder.desktop_manager.take() {
+        let mut desktop = if manager.single_window {
+            // for a single window we will use a custom (empty) desktop
+            // that does nothing
+            ControlManager::new(EmptyDesktop::new())
+        } else if let Some(desktop) = builder.desktop_manager.take() {
             desktop
         } else {
             ControlManager::new(Desktop::new())
         };
+
         let controls = unsafe { &mut *manager.controls };
         desktop.get_base_mut().update_focus_flag(true);
         manager.desktop_handle = controls.add(desktop);
         manager.current_focus = Some(manager.desktop_handle);
         controls.get_mut(manager.desktop_handle).unwrap().get_base_mut().handle = manager.desktop_handle;
+        // all good --> add single window if case
+        // if manager.single_window {
+
+        //     let handle = controls.get_desktop().get_base_mut().add_child(builder.single_window.take());
+        //     // since it is the first time I register this window
+        //     // I need to recursively set the event processor for all of its childern to
+        //     // this window current handle
+        //     manager.set_event_processors(handle.cast(), handle.cast());
+        //     // all good --> the window has been registered
+        //     if let Some(win) = controls.get_mut(handle.cast()) {
+        //         win.get_control_mut().on_registered();
+        //     }
+    
+        // }
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
+
         Ok(())
     }
     pub(crate) fn is_instantiated() -> bool {
@@ -192,7 +215,17 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(desktop) = controls.get(self.desktop_handle) {
             let base = desktop.get_base();
-            let mut free_keys: [KeyCode; 9] = [KeyCode::N1,KeyCode::N2,KeyCode::N3,KeyCode::N4,KeyCode::N5,KeyCode::N6,KeyCode::N7,KeyCode::N8,KeyCode::N9];
+            let mut free_keys: [KeyCode; 9] = [
+                KeyCode::N1,
+                KeyCode::N2,
+                KeyCode::N3,
+                KeyCode::N4,
+                KeyCode::N5,
+                KeyCode::N6,
+                KeyCode::N7,
+                KeyCode::N8,
+                KeyCode::N9,
+            ];
             for child_handle in base.children.iter() {
                 if let Some(child) = controls.get(*child_handle) {
                     let key = child.get_base().hotkey;
