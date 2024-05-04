@@ -11,10 +11,10 @@ use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::{traits::*, ControlEvent};
 use crate::ui::common::{ControlManager, UIElement};
+use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
-use crate::ui::desktop::EmptyDesktop;
 use crate::utils::VectorIndex;
 use crate::{prelude::*, terminals};
 
@@ -100,7 +100,7 @@ impl RuntimeManager {
             desktop_os_start_called: false,
             request_update_command_and_menu_bars: true,
             recompute_parent_indexes: true,
-            single_window: builder.single_window.is_some(),
+            single_window: builder.single_window,
             request_focus: None,
             current_focus: None,
             mouse_over_control: Handle::None,
@@ -145,31 +145,6 @@ impl RuntimeManager {
         manager.current_focus = Some(manager.desktop_handle);
         controls.get_mut(manager.desktop_handle).unwrap().get_base_mut().handle = manager.desktop_handle;
         // all good --> add single window if case
-        if manager.single_window {
-
-            let mut single_window = builder.single_window.take().unwrap();
-            let base = single_window.get_base_mut();
-            // link to the desktop
-            base.parent = manager.desktop_handle.cast();
-            // make sure that the layout implies full screen and can not be moved
-            base.layout = ControlLayout::new("x:0,y:0,w:100%,h:100%");
-            base.set_singlewindow_flag();
-            // add the window to control list
-            let window_handle = controls.add(single_window);
-            // I need to manually link the window to the desktop object
-            let desktop = controls.get_desktop().get_base_mut();
-            desktop.children.push(window_handle);
-            desktop.focused_child_index.set(0, 1, false);
-            manager.request_focus_for_control(window_handle);
-            // I need to recursively set the event processor for all of its childern to
-            // this window current handle
-            manager.set_event_processors(window_handle.cast(), window_handle.cast());
-            // all good --> the window has been registered
-            if let Some(win) = controls.get_mut(window_handle.cast()) {
-                win.get_control_mut().on_registered();
-            }
-    
-        }
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
@@ -313,8 +288,10 @@ impl RuntimeManager {
     where
         T: Control + WindowControl + 'static,
     {
-        if self.single_window {
-            panic!("When `single_window(...)` is being used to initialized an application, you can not add aditional windows to a desktop object !");
+        let controls = unsafe { &mut *self.controls };
+        if self.single_window && (controls.get_desktop().get_base().children.len() != 0) {
+            // check to see how many window were added
+            panic!("When `single_window(...)` is being used to initialized an application, you can only use add_window(...) method once (to add the first and single window) !");
         }
         let controls = unsafe { &mut *self.controls };
         let handle = controls.get_desktop().get_base_mut().add_child(obj);
@@ -323,7 +300,13 @@ impl RuntimeManager {
         // this window current handle
         self.set_event_processors(handle.cast(), handle.cast());
         // all good --> the window has been registered
-        if let Some(win) = controls.get_mut(handle.cast()) {
+        if let Some(win) = controls.get_mut(handle.cast()) {            
+            if self.single_window {
+                let base = win.get_base_mut();
+                base.set_singlewindow_flag();
+                base.layout = ControlLayout::new("x:0,y:0,w:100%,h:100%");
+            }
+            // this must be called last as it will inactivate some flags on a window if in single window mode
             win.get_control_mut().on_registered();
         }
         self.update_desktop_window_count();

@@ -12,7 +12,7 @@ pub struct Builder {
     pub(crate) desktop_manager: Option<ControlManager>,
     pub(crate) has_menu_bar: bool,
     pub(crate) has_command_bar: bool,
-    pub(crate) single_window: Option<ControlManager>,
+    pub(crate) single_window: bool,
 }
 impl Builder {
     pub(crate) fn new() -> Self {
@@ -24,7 +24,7 @@ impl Builder {
             desktop_manager: None,
             has_menu_bar: false,
             has_command_bar: false,
-            single_window: None,
+            single_window: false,
         }
     }
     #[inline(always)]
@@ -52,19 +52,16 @@ impl Builder {
         self
     }
     #[inline(always)]
+    pub fn single_window(mut self) -> Self {
+        self.single_window = true;
+        self
+    }
+    #[inline(always)]
     pub fn desktop<T>(mut self, desktop: T) -> Self
     where
         T: Control + DesktopControl + 'static,
     {
         self.desktop_manager = Some(ControlManager::new(desktop));
-        self
-    }
-    #[inline(always)]
-    pub fn single_window<T>(mut self, window: T) -> Self
-    where
-        T: Control + WindowControl + NotModalWindow + 'static,
-    {
-        self.single_window = Some(ControlManager::new(window));
         self
     }
 }

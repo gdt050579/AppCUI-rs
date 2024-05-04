@@ -292,7 +292,7 @@ impl Window {
     }
 
     pub fn enter_resize_mode(&mut self) {
-        if self.has_focus() {
+        if (self.has_focus()) && (!self.is_singlewindow()) {
             self.resize_move_mode = true;
             self.base.set_key_input_before_children_flag(true);
         }
@@ -597,6 +597,12 @@ impl Window {
 
 impl OnWindowRegistered for Window {
     fn on_registered(&mut self) {
+        if self.is_singlewindow() {
+            self.flags.remove(Flags::Sizeable);
+            self.flags |= Flags::FixedPosition;
+            //TODO: remove toolbars to maximize and/or resize grip
+            //self.toolbar().
+        }
         // propagate my handle to toolbar elements
         self.toolbar.set_window_handle(self.handle);
     }

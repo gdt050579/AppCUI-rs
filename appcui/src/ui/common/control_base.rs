@@ -115,7 +115,7 @@ impl ControlBase {
     /// This method has no effect on a Desktop control.
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
-        if self.status_flags.contains(StatusFlags::DesktopControl) {
+        if self.status_flags.contains(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
             return;
         }
         self.layout.layout_resize(width, height);
@@ -134,7 +134,7 @@ impl ControlBase {
     /// Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignament properties will be removed.
     /// This method has no effect on a Desktop control.
     pub fn set_position(&mut self, x: i32, y: i32) {
-        if self.status_flags.contains(StatusFlags::DesktopControl) {
+        if self.status_flags.contains(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
             return;
         }
         self.layout.layout_set_position(x, y);
@@ -167,7 +167,7 @@ impl ControlBase {
             self.status_flags.set(StatusFlags::Visible);
         } else {
             // desktop controls can not be hidden
-            if self.status_flags.contains_one(StatusFlags::DesktopControl) {
+            if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
                 return;
             }
             self.status_flags.remove(StatusFlags::Visible);
