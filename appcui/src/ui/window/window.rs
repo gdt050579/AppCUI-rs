@@ -292,7 +292,7 @@ impl Window {
     }
 
     pub fn enter_resize_mode(&mut self) {
-        if self.has_focus() {
+        if (self.has_focus()) && (!self.is_singlewindow()) {
             self.resize_move_mode = true;
             self.base.set_key_input_before_children_flag(true);
         }
@@ -521,7 +521,13 @@ impl Window {
             let result = WindowEvents::on_cancel(interface);
             if result == ActionRequest::Allow {
                 // logic to remove me
-                RuntimeManager::get().request_remove(self.handle);
+                if self.is_singlewindow() {
+                    // close the entire app
+                    RuntimeManager::get().close();
+                } else {
+                    // remove me from the desktop
+                    RuntimeManager::get().request_remove(self.handle);
+                }
             }
         }
     }
@@ -597,6 +603,13 @@ impl Window {
 
 impl OnWindowRegistered for Window {
     fn on_registered(&mut self) {
+        if self.is_singlewindow() {
+            if self.flags.contains(Flags::Sizeable) {
+                // a single window can not be sizeable and can not have the resiz grip and/or the maximized button
+                panic!("A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !");
+            }
+            self.flags |= Flags::FixedPosition;
+        }
         // propagate my handle to toolbar elements
         self.toolbar.set_window_handle(self.handle);
     }

@@ -25,6 +25,7 @@ Using `App::new` or `App::with_terminal` creates a builder object that can furth
 * `.size(terminal_size)` to set up a terminal size
 * `.title(terminal_title)` to set up a terminal title
 * `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one
+* `.single_window()` if you want a single window application
 * `.menu_bar()` to enable the application top menu bar
 * `.command_bar()` to enable the application command bar
 
