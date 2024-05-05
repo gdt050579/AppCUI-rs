@@ -34,7 +34,7 @@ const WIN_POSITIONS: [(usize, usize, usize); 8] = [
 enum GameResult {
     WinnerX,
     WinnerO,
-    Draw
+    Draw,
 }
 
 #[CustomControl(overwrite: OnPaint+OnKeyPressed+OnMouseEvent)]
@@ -43,6 +43,7 @@ pub struct Board {
     current_cell_index: usize,
     clicked: bool,
     piece: Piece,
+    computer: bool,
 }
 
 impl Board {
@@ -53,6 +54,7 @@ impl Board {
             current_cell_index: usize::MAX,
             clicked: false,
             piece: Piece::X,
+            computer: false,
         }
     }
     pub fn reset_game(&mut self) {
@@ -127,23 +129,23 @@ impl Board {
                 return Some(GameResult::WinnerO);
             }
         }
-        for (index,elem) in self.cells.iter().enumerate() {
+        for elem in self.cells.iter() {
             if elem.is_none() {
                 return None;
             }
         }
-        return Some(GameResult::Draw);
+        Some(GameResult::Draw)
     }
     fn computer_move(&mut self) {
-        let mut available: [usize;9] = [usize::MAX;9];
+        let mut available: [usize; 9] = [usize::MAX; 9];
         let mut count = 0;
-        for (index,elem) in self.cells.iter().enumerate() {
+        for (index, elem) in self.cells.iter().enumerate() {
             if elem.is_some() {
                 available[count] = index;
                 count += 1;
             }
         }
-        if count==0 {
+        if count == 0 {
             return;
         }
         // pseudo random value
@@ -160,10 +162,20 @@ impl Board {
             return;
         }
         self.piece = self.piece.switch();
-        
+        if self.computer {
+            self.computer_move();
+            if let Some(result) = self.game_result() {
+                self.show_result(result);
+            }
+        }
+        self.next_valid();
     }
     fn show_result(&mut self, result: GameResult) {
-
+        match result {
+            GameResult::WinnerX => dialogs::message("Game over", "Player (X) wins !"),
+            GameResult::WinnerO => dialogs::message("Game over", "Player (O) wins !"),
+            GameResult::Draw => dialogs::message("Game over", "Draw game !"),
+        }
     }
 }
 
