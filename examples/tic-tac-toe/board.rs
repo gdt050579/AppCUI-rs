@@ -1,24 +1,47 @@
 use appcui::prelude::*;
 
-#[derive(Copy, Clone)]
-enum Player {
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum Piece {
     X,
     O,
 }
+impl Piece {
+    fn switch(self) -> Self {
+        match self {
+            Piece::X => Piece::O,
+            Piece::O => Piece::X,
+        }
+    }
+}
+
+const WIN_POSITIONS: [(usize, usize, usize); 8] = [
+    // Rows
+    (0, 1, 2),
+    (3, 4, 5),
+    (6, 7, 8),
+    // Columns
+    (0, 3, 6),
+    (1, 4, 7),
+    (2, 5, 8),
+    // Diagonals
+    (0, 4, 8),
+    (2, 4, 6),
+];
 
 #[derive(Copy, Clone)]
 enum GameState {
     InProgress,
     Draw,
-    Winner(Player),
+    Winner(Piece),
 }
 
 #[CustomControl(overwrite: OnPaint+OnKeyPressed+OnMouseEvent)]
 pub struct Board {
-    cells: Vec<Option<Player>>,
+    cells: Vec<Option<Piece>>,
     status: GameState,
     current_cell_index: usize,
     clicked: bool,
+    piece: Piece,
 }
 
 impl Board {
@@ -29,6 +52,7 @@ impl Board {
             status: GameState::InProgress,
             current_cell_index: usize::MAX,
             clicked: false,
+            piece: Piece::X,
         }
     }
     pub fn reset_game(&mut self) {
@@ -66,7 +90,12 @@ impl Board {
         if (x == 6) || (x == 12) || (y == 1) || (y == 22) {
             return usize::MAX;
         }
-        (((x - 1) / 11) + ((y - 1) / 6) * 3) as usize
+        let new_poz = (((x - 1) / 11) + ((y - 1) / 6) * 3) as usize;
+        if self.cells[new_poz].is_some() {
+            usize::MAX
+        } else {
+            new_poz
+        }
     }
     fn next_valid(&mut self) {
         let poz = if self.current_cell_index < 9 { self.current_cell_index } else { 0 };
@@ -90,7 +119,29 @@ impl Board {
         }
         self.current_cell_index = usize::MAX;
     }
-    fn place_piece(&mut self) {}
+    fn check_win(&self) -> Option<Piece> {
+        for &(pos_1, pos_2, pos_3) in WIN_POSITIONS.iter() {
+            if let (Some(Piece::X), Some(Piece::X), Some(Piece::X)) = (self.cells[pos_1], self.cells[pos_2], self.cells[pos_3]) {
+                return Some(Piece::X);
+            }
+            if let (Some(Piece::O), Some(Piece::O), Some(Piece::O)) = (self.cells[pos_1], self.cells[pos_2], self.cells[pos_3]) {
+                return Some(Piece::O);
+            }
+        }
+
+        None
+    }
+    
+    fn place_piece(&mut self) {
+        if self.current_cell_index >= 9 {
+            return;
+        }
+        self.cells[self.current_cell_index] = Some(self.piece);
+        if let Some(winner_piece) = self.check_win() {
+            return;
+        }
+        self.piece = self.piece.switch();
+    }
 }
 
 impl OnPaint for Board {
@@ -114,8 +165,8 @@ impl OnPaint for Board {
             let x = ((index % 3) as i32) * 11 + 1;
             let y = ((index / 3) as i32) * 6 + 1;
             match cell {
-                Some(Player::X) => self.paint_x(x, y, surface),
-                Some(Player::O) => self.paint_o(x, y, surface),
+                Some(Piece::X) => self.paint_x(x, y, surface),
+                Some(Piece::O) => self.paint_o(x, y, surface),
                 None => {}
             }
             if index == self.current_cell_index {
