@@ -1,3 +1,5 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use appcui::prelude::*;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -29,16 +31,15 @@ const WIN_POSITIONS: [(usize, usize, usize); 8] = [
 ];
 
 #[derive(Copy, Clone)]
-enum GameState {
-    InProgress,
-    Draw,
-    Winner(Piece),
+enum GameResult {
+    WinnerX,
+    WinnerO,
+    Draw
 }
 
 #[CustomControl(overwrite: OnPaint+OnKeyPressed+OnMouseEvent)]
 pub struct Board {
     cells: Vec<Option<Piece>>,
-    status: GameState,
     current_cell_index: usize,
     clicked: bool,
     piece: Piece,
@@ -49,7 +50,6 @@ impl Board {
         Self {
             base: ControlBase::new(Layout::new("x:2,y:1,w:34,h:19"), true),
             cells: vec![None; 9],
-            status: GameState::InProgress,
             current_cell_index: usize::MAX,
             clicked: false,
             piece: Piece::X,
@@ -59,7 +59,6 @@ impl Board {
         for c in self.cells.iter_mut() {
             *c = None;
         }
-        self.status = GameState::InProgress;
         self.current_cell_index = usize::MAX;
         self.clicked = false;
     }
@@ -119,28 +118,52 @@ impl Board {
         }
         self.current_cell_index = usize::MAX;
     }
-    fn check_win(&self) -> Option<Piece> {
+    fn game_result(&self) -> Option<GameResult> {
         for &(pos_1, pos_2, pos_3) in WIN_POSITIONS.iter() {
             if let (Some(Piece::X), Some(Piece::X), Some(Piece::X)) = (self.cells[pos_1], self.cells[pos_2], self.cells[pos_3]) {
-                return Some(Piece::X);
+                return Some(GameResult::WinnerX);
             }
             if let (Some(Piece::O), Some(Piece::O), Some(Piece::O)) = (self.cells[pos_1], self.cells[pos_2], self.cells[pos_3]) {
-                return Some(Piece::O);
+                return Some(GameResult::WinnerO);
             }
         }
-
-        None
+        for (index,elem) in self.cells.iter().enumerate() {
+            if elem.is_none() {
+                return None;
+            }
+        }
+        return Some(GameResult::Draw);
     }
-    
+    fn computer_move(&mut self) {
+        let mut available: [usize;9] = [usize::MAX;9];
+        let mut count = 0;
+        for (index,elem) in self.cells.iter().enumerate() {
+            if elem.is_some() {
+                available[count] = index;
+                count += 1;
+            }
+        }
+        if count==0 {
+            return;
+        }
+        // pseudo random value
+        let index = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().subsec_nanos() as usize) % count;
+        self.cells[index] = Some(self.piece);
+    }
     fn place_piece(&mut self) {
         if self.current_cell_index >= 9 {
             return;
         }
         self.cells[self.current_cell_index] = Some(self.piece);
-        if let Some(winner_piece) = self.check_win() {
+        if let Some(result) = self.game_result() {
+            self.show_result(result);
             return;
         }
         self.piece = self.piece.switch();
+        
+    }
+    fn show_result(&mut self, result: GameResult) {
+
     }
 }
 
