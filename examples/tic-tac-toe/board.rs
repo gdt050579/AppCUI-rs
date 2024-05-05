@@ -68,6 +68,28 @@ impl Board {
         }
         (((x - 1) / 11) + ((y - 1) / 6) * 3) as usize
     }
+    fn next_valid(&mut self) {
+        let poz = if self.current_cell_index < 9 { self.current_cell_index } else { 0 };
+        for i in 1..9 {
+            let new_poz = (poz + i) % 9;
+            if self.cells[new_poz].is_none() {
+                self.current_cell_index = new_poz;
+                return;
+            }
+        }
+        self.current_cell_index = usize::MAX;
+    }
+    fn previous_valid(&mut self) {
+        let poz = if self.current_cell_index < 9 { self.current_cell_index } else { 8 };
+        for i in 1..9 {
+            let new_poz = (poz + 9 - i) % 9;
+            if self.cells[new_poz].is_none() {
+                self.current_cell_index = new_poz;
+                return;
+            }
+        }
+        self.current_cell_index = usize::MAX;
+    }
     fn place_piece(&mut self) {}
 }
 
@@ -110,7 +132,21 @@ impl OnPaint for Board {
         }
     }
 }
-impl OnKeyPressed for Board {}
+impl OnKeyPressed for Board {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.get_compact_code() {
+            key!("Left") => {
+                self.previous_valid();
+                EventProcessStatus::Processed
+            }
+            key!("Right") => {
+                self.next_valid();
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
+    }
+}
 impl OnMouseEvent for Board {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
