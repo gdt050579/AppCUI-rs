@@ -17,6 +17,8 @@ enum GameState {
 pub struct Board {
     cells: Vec<Option<Player>>,
     status: GameState,
+    current_cell_index: usize,
+    clicked: bool,
 }
 
 impl Board {
@@ -24,7 +26,9 @@ impl Board {
         Self {
             base: ControlBase::new(Layout::new("x:2,y:1,w:34,h:19"), true),
             cells: vec![None; 9],
-            status: GameState::InProgress
+            status: GameState::InProgress,
+            current_cell_index: usize::MAX,
+            clicked: false,
         }
     }
     pub fn reset_game(&mut self) {
@@ -32,6 +36,8 @@ impl Board {
             *c = None;
         }
         self.status = GameState::InProgress;
+        self.current_cell_index = usize::MAX;
+        self.clicked = false;
     }
     fn paint_x(&self, x: i32, y: i32, surface: &mut Surface) {
         let ch = char!("' ',back:red");
@@ -53,6 +59,16 @@ impl Board {
             surface.write_char(x + 9, y + i, ch);
         }
     }
+    fn mouse_pos_to_cell_index(&self, x: i32, y: i32) -> usize {
+        if !(1..=32).contains(&x) || !(1..=17).contains(&y) {
+            return usize::MAX;
+        }
+        if (x == 6) || (x == 12) || (y == 1) || (y == 22) {
+            return usize::MAX;
+        }
+        (((x - 1) / 11) + ((y - 1) / 6) * 3) as usize
+    }
+    fn place_piece(&mut self) {}
 }
 
 impl OnPaint for Board {
@@ -80,8 +96,45 @@ impl OnPaint for Board {
                 Some(Player::O) => self.paint_o(x, y, surface),
                 None => {}
             }
+            if index == self.current_cell_index {
+                surface.draw_rect(
+                    Rect::with_size(x - 1, y - 1, 12, 7),
+                    LineType::Border,
+                    if self.clicked {
+                        CharAttribute::with_color(Color::Blue, Color::Black)
+                    } else {
+                        CharAttribute::with_color(Color::Yellow, Color::Black)
+                    },
+                );
+            }
         }
     }
 }
 impl OnKeyPressed for Board {}
-impl OnMouseEvent for Board {}
+impl OnMouseEvent for Board {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.current_cell_index = usize::MAX;
+                self.clicked = false;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(data) => {
+                self.current_cell_index = self.mouse_pos_to_cell_index(data.x, data.y);
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Pressed(data) => {
+                self.current_cell_index = self.mouse_pos_to_cell_index(data.x, data.y);
+                self.clicked = true;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Released(data) => {
+                self.current_cell_index = self.mouse_pos_to_cell_index(data.x, data.y);
+                self.clicked = false;
+                self.place_piece();
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
+    }
+}
