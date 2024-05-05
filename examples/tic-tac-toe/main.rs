@@ -10,4 +10,4 @@ fn main() -> Result<(), appcui::system::Error> {
     a.add_window(MyWin::new());
     a.run();
     Ok(())
-}  
+}   
