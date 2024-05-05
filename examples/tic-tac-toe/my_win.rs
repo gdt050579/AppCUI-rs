@@ -1,12 +1,15 @@
 use appcui::prelude::*;
+use super::Board;
 
-#[Window()]
+#[Window(events: ButtonEvents)]
 pub struct MyWin {
     rb_computer: Handle<RadioBox>,
     rb_human: Handle<RadioBox>,
     rb_easy: Handle<RadioBox>,
     rb_normal: Handle<RadioBox>,
     rb_hard: Handle<RadioBox>,
+    board: Handle<Board>,
+    tab: Handle<Tab>,
 }
 impl MyWin {
     pub fn new() -> Self {
@@ -17,6 +20,8 @@ impl MyWin {
             rb_easy: Handle::None,
             rb_normal: Handle::None,
             rb_hard: Handle::None,
+            board: Handle::None,
+            tab: Handle::None,
         };
         let mut t = tab!("tabs:[MainPage,Game],d:c,type:HiddenTabs,flags:TransparentBackground");
         // first player
@@ -32,9 +37,21 @@ impl MyWin {
         w.rb_hard = p2.add(radiobox!("H&ard,x:30,y:0,w:10"));
         t.add(0,p2);
 
-        w.add(button!("'&Start Game',x:50%,y:100%,a:b,w:21"));
+        t.add(0,button!("'&Start Game',x:50%,y:100%,a:b,w:21"));
 
-        w.add(t);
+        w.board = t.add(1, Board::new());
+        w.tab = w.add(t);
         w
+    }
+}
+impl ButtonEvents for MyWin {
+    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+        // there is only one button ( the start game button )
+        let h = self.tab;
+        if let Some(tab) = self.control_mut(h) {
+            // switch to game time
+            tab.set_current_tab(1);            
+        }
+        EventProcessStatus::Processed
     }
 }
