@@ -55,13 +55,21 @@ impl MyWin {
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         // there is only one button ( the start game button )
+        let p1 = self.control(self.p1_name).map(|t| t.text().to_string()).unwrap_or_default();
+        let p2 = self.control(self.p2_name).map(|t| t.text().to_string()).unwrap_or_default();
+        let p1_c = self.control(self.p1_computer).map(|r| r.is_selected()).unwrap_or(false); 
+        let p2_c = self.control(self.p2_computer).map(|r| r.is_selected()).unwrap_or(false); 
+        if p1_c && p2_c {
+            dialogs::error("Error", "At least one player should be human !");
+            return EventProcessStatus::Processed;
+        }
         let h = self.tab;
         if let Some(tab) = self.control_mut(h) {
             // switch to game time
             tab.set_current_tab(1);
             let b = self.board;
             if let Some(board) = self.control_mut(b) {
-                board.reset_game();
+                board.reset_game(&p1,&p2,p1_c,p2_c);
             }
         }
         EventProcessStatus::Processed

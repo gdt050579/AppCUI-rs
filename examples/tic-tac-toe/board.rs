@@ -44,6 +44,8 @@ pub struct Board {
     clicked: bool,
     piece: Piece,
     computer: bool,
+    player_X: String,
+    player_O: String,
 }
 
 impl Board {
@@ -55,14 +57,26 @@ impl Board {
             clicked: false,
             piece: Piece::X,
             computer: false,
+            player_O: String::new(),
+            player_X: String::new()
         }
     }
-    pub fn reset_game(&mut self) {
+    pub fn reset_game(&mut self, player_x: &str, player_o: &str, px_computer:bool, po_computer: bool) {
         for c in self.cells.iter_mut() {
             *c = None;
         }
         self.current_cell_index = usize::MAX;
         self.clicked = false;
+        self.player_X.clear();
+        self.player_X.push_str(player_x);
+        self.player_O.clear();
+        self.player_O.push_str(player_o);
+        self.computer = px_computer | po_computer;
+        self.piece = Piece::X;
+        if px_computer {
+            // computer starts first
+            self.computer_move();
+        }
     }
     fn paint_x(&self, x: i32, y: i32, surface: &mut Surface) {
         let ch = char!("' ',back:red");
@@ -140,7 +154,7 @@ impl Board {
         let mut available: [usize; 9] = [usize::MAX; 9];
         let mut count = 0;
         for (index, elem) in self.cells.iter().enumerate() {
-            if elem.is_some() {
+            if elem.is_none() {
                 available[count] = index;
                 count += 1;
             }
@@ -150,7 +164,8 @@ impl Board {
         }
         // pseudo random value
         let index = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().subsec_nanos() as usize) % count;
-        self.cells[index] = Some(self.piece);
+        self.cells[available[index]] = Some(self.piece);
+        self.piece = self.piece.switch();
     }
     fn place_piece(&mut self) {
         if self.current_cell_index >= 9 {
@@ -172,8 +187,8 @@ impl Board {
     }
     fn show_result(&mut self, result: GameResult) {
         match result {
-            GameResult::WinnerX => dialogs::message("Game over", "Player (X) wins !"),
-            GameResult::WinnerO => dialogs::message("Game over", "Player (O) wins !"),
+            GameResult::WinnerX => dialogs::message("Game over", format!("{} wins !",&self.player_X).as_str()),
+            GameResult::WinnerO => dialogs::message("Game over", format!("{} wins !",&self.player_O).as_str()),
             GameResult::Draw => dialogs::message("Game over", "Draw game !"),
         }
         self.raise_event(board::Events::GameOver);
@@ -228,6 +243,10 @@ impl OnKeyPressed for Board {
             }
             key!("Right") => {
                 self.next_valid();
+                EventProcessStatus::Processed
+            }
+            key!("Escape") => {
+                self.raise_event(board::Events::Exit);
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
