@@ -70,6 +70,7 @@
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
         - [TreeView]()
     - [Custom controls](chapter-3/custom_controls.md)
+        - [Overwriteable traits](chapter-3/custon-controls/overwriteable_traits.md)
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops](chapter-4/custom_desktop.md)

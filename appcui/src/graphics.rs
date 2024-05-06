@@ -27,6 +27,7 @@ pub use self::surface::Surface;
 pub use self::surface::ImageRenderingMethod;
 pub use self::surface::ImageScaleMethod;
 pub use self::size::Size;
+pub use self::point::Point;
 pub use self::rect::Rect;
 pub use self::cursor::Cursor;
 pub use self::pixel::Pixel;
@@ -35,7 +36,6 @@ pub use self::text_format::TextAlignament;
 pub use self::text_format::TextFormat;
 pub use self::text_format::TextWrap;
 pub (crate) use self::clip_area::ClipArea;
-pub (crate) use self::point::Point;
 
 #[cfg(test)]
 pub (crate) use self::surface_tester::SurfaceTester;
