@@ -88,6 +88,10 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // custom events
+    config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
+
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -151,6 +155,9 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
 
+    // custom events
+    config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -189,6 +196,9 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+
+    // custom events
+    config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
@@ -253,6 +263,9 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // custom events
+    config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
