@@ -1,3 +1,5 @@
+use self::control_event_wrapper::CustomEventData;
+
 use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;
@@ -527,6 +529,13 @@ impl ControlBase {
         if !self.handle.is_none() {
             RuntimeManager::get().send_event(event);
         }
+    }
+    pub fn raise_custom_event(&self, class_hash: u64, event_id: u32) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::Custom(CustomEventData { class_hash, event_id }),
+        });
     }
     pub fn request_update(&self) {
         if !self.handle.is_none() {

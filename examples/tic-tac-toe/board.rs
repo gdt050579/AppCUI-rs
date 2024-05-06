@@ -37,7 +37,7 @@ enum GameResult {
     Draw,
 }
 
-#[CustomControl(overwrite: OnPaint+OnKeyPressed+OnMouseEvent)]
+#[CustomControl(overwrite: OnPaint+OnKeyPressed+OnMouseEvent, emit: GameOver+Exit)]
 pub struct Board {
     cells: Vec<Option<Piece>>,
     current_cell_index: usize,
@@ -176,6 +176,7 @@ impl Board {
             GameResult::WinnerO => dialogs::message("Game over", "Player (O) wins !"),
             GameResult::Draw => dialogs::message("Game over", "Draw game !"),
         }
+        self.raise_event(board::Events::GameOver);
     }
 }
 

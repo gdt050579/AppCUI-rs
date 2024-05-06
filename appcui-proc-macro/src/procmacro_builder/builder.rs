@@ -1,3 +1,5 @@
+use crate::utils;
+
 use super::StructDefinition;
 use super::{arguments::Arguments, templates, AppCUITrait, BaseControlType, TraitImplementation, TraitsConfig};
 use proc_macro::TokenStream;
@@ -95,6 +97,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     let mut code = input.to_string().replace('{', base_definition.as_str());
     let struct_data = StructDefinition::from(code.as_str());
     let has_inner_module = !a.commands.is_empty() || !a.emitted_events.is_empty();
+    let mut struct_name_hash =  String::new();
     code.insert_str(0, "#[repr(C)]\n");
     code.insert_str(0, templates::IMPORTS);
     if a.internal_mode {
@@ -129,7 +132,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     }
     // if commands or emit is available - build the inner module
     if has_inner_module {
-        code.push_str("mod $(MOD_NAME) {\n");
+        code.push_str("mod $(MOD_NAME) {\nuse $(ROOT)::prelude::*;\n");
         generate_inner_module(&a, config, &mut code, base_control);
         code.push_str("}\n");
         // add the CommandBar events wrapper if needed
@@ -143,6 +146,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         // add raise events support
         if !a.emitted_events.is_empty() {
             code.push_str(templates::RAISE_EVENTS_TEMPLATE);
+            write!(struct_name_hash,"0x{:X}",utils::compute_hash(struct_data.name.as_str())).unwrap();
         }
     }
 
@@ -152,7 +156,8 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         .replace("$(MOD_NAME)", struct_data.name.to_lowercase().as_str())
         .replace("$(BASE)", &a.base)
         .replace("$(ROOT)", a.root)
-        .replace("$(MODAL_RESULT_TYPE)", &a.modal_result_type);
+        .replace("$(MODAL_RESULT_TYPE)", &a.modal_result_type)
+        .replace("$(STRUCT_NAME_HASH)", &struct_name_hash);
     // check templates
     if struct_data.template_type.is_empty() {
         code = code.replace("$(TEMPLATE_TYPE)", "").replace("$(TEMPLATE_DEF)", "");

@@ -94,8 +94,6 @@ impl$(TEMPLATE_TYPE) OnWindowRegistered for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 ";
 
 pub(crate) static COMMANDS_TEMPLATE: &str = "
-    use $(ROOT)::prelude::*;
-
     #[repr(u32)]
     #[derive(Copy,Clone,Eq,PartialEq,Debug)]
     pub enum Commands {
@@ -119,6 +117,7 @@ pub(crate) static COMMANDS_TEMPLATE: &str = "
             }
         }
     }
+    
 ";
 pub(crate) static COMMANDBAR_EVENTS: &str = "
 trait CommandBarEvents {
@@ -178,9 +177,6 @@ impl$(TEMPLATE_TYPE) GenericMenuEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 ";
 
 pub(crate) static EMIT_EVENTS_TEMPLATE: &str = "
-
-    use $(ROOT)::prelude::*;
-
     #[repr(u32)]
     #[derive(Copy,Clone,Eq,PartialEq,Debug)]
     pub enum Events {
@@ -207,8 +203,11 @@ pub(crate) static EMIT_EVENTS_TEMPLATE: &str = "
 ";
 pub(crate) static RAISE_EVENTS_TEMPLATE: &str = "
 trait RaiseEvents {
-    fn raise_event(&self, event: $(MOD_NAME)::Event) {
-        self.raise_event($(CONTROL_NAME_HASH),u32::From(event));
+    fn raise_event(&self, event: $(MOD_NAME)::Events);
+}
+impl$(TEMPLATE_TYPE) RaiseEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn raise_event(&self, event: $(MOD_NAME)::Events) {
+        self.raise_custom_event($(STRUCT_NAME_HASH),u32::from(event));
     }
 }
 ";
