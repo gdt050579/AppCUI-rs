@@ -58,10 +58,10 @@ impl Board {
             piece: Piece::X,
             computer: false,
             player_O: String::new(),
-            player_X: String::new()
+            player_X: String::new(),
         }
     }
-    pub fn reset_game(&mut self, player_x: &str, player_o: &str, px_computer:bool, po_computer: bool) {
+    pub fn reset_game(&mut self, player_x: &str, player_o: &str, px_computer: bool, po_computer: bool) {
         for c in self.cells.iter_mut() {
             *c = None;
         }
@@ -187,8 +187,8 @@ impl Board {
     }
     fn show_result(&mut self, result: GameResult) {
         match result {
-            GameResult::WinnerX => dialogs::message("Game over", format!("{} wins !",&self.player_X).as_str()),
-            GameResult::WinnerO => dialogs::message("Game over", format!("{} wins !",&self.player_O).as_str()),
+            GameResult::WinnerX => dialogs::message("Game over", format!("{} wins !", &self.player_X).as_str()),
+            GameResult::WinnerO => dialogs::message("Game over", format!("{} wins !", &self.player_O).as_str()),
             GameResult::Draw => dialogs::message("Game over", "Draw game !"),
         }
         self.raise_event(board::Events::GameOver);
@@ -278,5 +278,11 @@ impl OnMouseEvent for Board {
             }
             _ => EventProcessStatus::Ignored,
         }
+    }
+}
+
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
     }
 }
