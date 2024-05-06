@@ -465,7 +465,7 @@ impl Menu {
     }
 
     pub(crate) fn on_key_pressed(&mut self, key: Key) -> EventProcessStatus {
-        match key.get_compact_code() {
+        match key.value() {
             key!("Up") | key!("Down") | key!("Home") | key!("End") | key!("PageUp") | key!("PageDown") => {
                 self.move_currentitem_to(key);
                 return EventProcessStatus::Processed;

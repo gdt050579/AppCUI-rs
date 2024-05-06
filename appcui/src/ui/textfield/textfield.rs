@@ -343,7 +343,7 @@ impl OnPaint for TextField {
 }
 impl OnKeyPressed for TextField {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
-        match key.get_compact_code() {
+        match key.value() {
             key!("Left") | key!("Shift+Left") => {
                 self.move_cursor_with(-1, key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;

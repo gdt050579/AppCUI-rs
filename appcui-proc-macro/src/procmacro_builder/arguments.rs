@@ -24,6 +24,8 @@ pub(crate) struct Arguments {
     pub base: String,
     pub modal_result_type: String,
     pub commands: Vec<String>,
+    pub emitted_events: Vec<String>,
+    pub custom_events: Vec<String>,
     // internal
     expect_next: ExpectNext,
     key: String,
@@ -41,6 +43,8 @@ impl Arguments {
             key: String::new(),
             values: Vec::with_capacity(8),
             commands: Vec::new(),
+            emitted_events: Vec::new(),
+            custom_events: Vec::new(),
             debug_mode: false,
             internal_mode: false,
             window_control: false,
@@ -168,6 +172,40 @@ impl Arguments {
         // all good --> move current value vector into commands and create a new one for values
         self.commands = std::mem::take(&mut self.values);
     }
+    fn validate_emitted_events(&mut self) {
+        let mut h = HashSet::with_capacity(self.values.len() * 2);
+        for event_name in &self.values {
+            if let Err(desc) = crate::utils::validate_name(event_name.as_str(), false) {
+                panic!("Invalid Evenat name:: '{}' => {}", event_name, desc);
+            }
+            let hash = crate::utils::compute_hash(event_name);
+            if h.contains(&hash) {
+                panic!("Events name must be unique. Duplicate event name: {}", event_name);
+            }
+            h.insert(hash);
+        }
+        // all good --> move current value vector into emitted events and create a new one for values
+        self.emitted_events = std::mem::take(&mut self.values);
+    }
+    fn validate_custom_events(&mut self) {
+        let mut h = HashSet::with_capacity(self.values.len() * 2);
+        for trait_name in &self.values {
+            if let Err(desc) = crate::utils::validate_name(trait_name.as_str(), false) {
+                panic!("Invalid trait name: '{}' => {}", trait_name, desc);
+            }
+            // analyze format
+            if !trait_name.ends_with("Events") {
+                panic!("Custom events should have their trait name in the format ( <struct_name>Events - ex: MyCustomButtonEvents, where MyCustomButton is the actual custom control). This is required as a trait will be automatically generated with this name for you to implement.")
+            }
+            let hash = crate::utils::compute_hash(trait_name);
+            if h.contains(&hash) {
+                panic!("Custom events trait names must be unique. Duplicate trait name: {}", trait_name);
+            }
+            h.insert(hash);
+        }
+        // all good --> move current value vector into custom events and create a new one for values
+        self.custom_events = std::mem::take(&mut self.values);
+    }
     fn validate_events_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
             if let Some(appcui_trait) = AppCUITrait::new(trait_name) {
@@ -202,9 +240,11 @@ impl Arguments {
             "response" => self.validate_modal_response(),
             "desktop" => self.validate_desktop_control(),
             "commands" => self.validate_commands(),
+            "emit" => self.validate_emitted_events(),
+            "custom_events" => self.validate_custom_events(),
             _ => {
                 panic!(
-                    "Unknown attribute `{}` for AppCUI. Accepted attributes are 'overwrite', 'events', 'debug', 'response', 'commands' !",
+                    "Unknown attribute `{}` for AppCUI. Accepted attributes are 'overwrite', 'events', 'debug', 'response', 'commands', 'emit', 'custom_events' !",
                     self.key.as_str()
                 );
             }

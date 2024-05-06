@@ -3,11 +3,13 @@ use super::StructDefinition;
 #[test]
 fn check_struct_definition() {
     let sd = StructDefinition::from("struct    MyStruct { ");
+    assert!(sd.access.is_empty());
     assert_eq!(sd.name,"MyStruct");
     assert!(sd.template_def.is_empty());
     assert!(sd.template_type.is_empty());
 
     let sd2 = StructDefinition::from("pub(crate) struct Test<T> { ");
+    assert_eq!(sd2.access,"pub(crate) ");
     assert_eq!(sd2.name,"Test");
     assert_eq!(sd2.template_def,"<T> ");
     assert_eq!(sd2.template_type,"<T>");

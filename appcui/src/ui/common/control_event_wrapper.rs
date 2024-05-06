@@ -1,6 +1,6 @@
 use textfield::TextField;
 
-use super::traits::{Control, EventProcessStatus};
+use super::traits::{Control, CustomEvents, EventProcessStatus};
 use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
@@ -12,7 +12,14 @@ use crate::ui::{
     textfield::events::TextFieldEvents,
 };
 
+#[derive(Copy,Clone)]
+pub(crate) struct CustomEventData {
+    pub(crate) class_hash: u64,
+    pub(crate) event_id: u32
+}
+
 pub(crate) enum ControlEventData {
+    Custom(CustomEventData),
     Button(button::events::EventData),
     CheckBox(checkbox::events::EventData),
     RadioBox(radiobox::events::EventData),
@@ -69,6 +76,9 @@ impl ControlEvent {
                     },
                     //textfield::events::TextFieldEventsType::OnTextChanged => todo!(),
                 }
+            },
+            ControlEventData::Custom(data) => {
+                CustomEvents::on_event(receiver, self.emitter.cast(),data.class_hash, data.event_id)
             },
             
             

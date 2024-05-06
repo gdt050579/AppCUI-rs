@@ -172,7 +172,7 @@ impl OnPaint for Desktop {
 }
 impl OnKeyPressed for Desktop {
     fn on_key_pressed(&mut self, key: Key, _: char) -> EventProcessStatus {
-        match key.get_compact_code() {
+        match key.value() {
             key!("Escape") => {
                 if let Some(desktop_interface) = self.interface_mut() {
                     if DesktopEvents::on_close(desktop_interface) == ActionRequest::Allow {

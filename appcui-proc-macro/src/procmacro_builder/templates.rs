@@ -94,10 +94,6 @@ impl$(TEMPLATE_TYPE) OnWindowRegistered for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 ";
 
 pub(crate) static COMMANDS_TEMPLATE: &str = "
-mod $(MOD_NAME)
-{
-    use $(ROOT)::prelude::*;
-
     #[repr(u32)]
     #[derive(Copy,Clone,Eq,PartialEq,Debug)]
     pub enum Commands {
@@ -121,7 +117,7 @@ mod $(MOD_NAME)
             }
         }
     }
-}
+
 ";
 pub(crate) static COMMANDBAR_EVENTS: &str = "
 trait CommandBarEvents {
@@ -177,5 +173,66 @@ impl$(TEMPLATE_TYPE) GenericMenuEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
             panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
         }
     }
+}
+";
+
+pub(crate) static EMIT_EVENTS_TEMPLATE: &str = "
+    #[repr(u32)]
+    #[derive(Copy,Clone,Eq,PartialEq,Debug)]
+    pub enum Events {
+        $(EVENTS_IDS)
+    }
+    impl TryFrom<u32> for Events {
+        type Error = ();
+
+        fn try_from(value: u32) -> Result<Self, Self::Error> {
+            match value {
+                $(U32_TO_EVENTS)
+                _ => Err(())
+            }
+        }
+    }
+    impl From<Events> for u32 {
+        fn from(value: Events)->u32 {
+            match value {
+                $(EVENTS_TO_U32)
+            }
+        }
+    }
+
+";
+pub(crate) static RAISE_EVENTS_TEMPLATE: &str = "
+trait RaiseEvents {
+    fn raise_event(&self, event: $(MOD_NAME)::Events);
+}
+impl$(TEMPLATE_TYPE) RaiseEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn raise_event(&self, event: $(MOD_NAME)::Events) {
+        self.raise_custom_event($(STRUCT_NAME_HASH),u32::from(event));
+    }
+}
+";
+
+pub(crate) static CUSTOM_EVENTS: &str = "
+impl$(TEMPLATE_TYPE) CustomEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_event(&mut self, handle: Handle<()>, class_hash: u64, event_id: u32) -> EventProcessStatus {
+        match class_hash {
+            $(CUSTOM_EVENT_CLASS_PROXY_CALL)
+            _ => EventProcessStatus::Ignored
+        }        
+    }
+}
+";
+
+pub(crate) static CUSTOM_EVENT_CONVERTOR: &str = "
+if let Ok(event) = $(MOD_NAME)::Events::try_from(event_id) {
+    $(STRUC_NAME)Events::on_event(self, unsafe { handle.unsafe_cast() }, event)
+} else {
+    panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Events\",event_id);
+}
+";
+
+pub(crate) static CUSTOM_TRAIT_DEF: &str = "
+trait $(TRAIT_NAME) {
+    fn on_event(&mut self, handle: Handle<$(STRUC_NAME)>, event:  $(MOD_NAME)::Events) -> EventProcessStatus;
 }
 ";

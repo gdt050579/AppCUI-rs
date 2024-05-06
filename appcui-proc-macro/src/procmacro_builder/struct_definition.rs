@@ -1,5 +1,6 @@
 #[derive(Debug)]
 pub(crate) struct StructDefinition {
+    pub(crate) access: String,
     pub(crate) name: String,
     pub(crate) template_type: String,
     pub(crate) template_def: String,
@@ -30,6 +31,7 @@ impl StructDefinition {
 impl From<&str> for StructDefinition {
     fn from(value: &str) -> Self {
         if let Some(mut pos) = value.find("struct") {
+            let access_ends = pos;
             pos += 6;
             let buf = value.as_bytes();
             let len = buf.len();
@@ -47,6 +49,7 @@ impl From<&str> for StructDefinition {
                 b'{' => {
                     // normal format --> without template
                     StructDefinition {
+                        access: String::from(&value[..access_ends]),
                         name: String::from(&value[start_name..end_name]),
                         template_type: String::new(),
                         template_def: String::new(),
@@ -72,6 +75,7 @@ impl From<&str> for StructDefinition {
                     template_type.push_str(&value[start_tamplate_type..end_template_type]);
                     template_type.push('>');
                     StructDefinition {
+                        access: String::from(&value[..access_ends]),
                         name: String::from(&value[start_name..end_name]),
                         template_type,
                         template_def: String::from(&value[start_template..end_template]),

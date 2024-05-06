@@ -1,7 +1,21 @@
 use crate::{
-    graphics::{Size, Surface}, input::{Key, MouseEvent}, prelude::textfield::events::TextFieldEvents, system::{Handle, Theme}, ui::{
-        button::events::ButtonEvents, checkbox::events::CheckBoxEvents, colorpicker::events::ColorPickerEvents, command_bar::events::GenericCommandBarEvents, desktop::events::DesktopEvents, keyselector::events::KeySelectorEvents, menu::events::GenericMenuEvents, password::events::PasswordEvents, radiobox::events::RadioBoxEvents, threestatebox::events::ThreeStateBoxEvents, window::events::{ToolBarEvents, WindowEvents}
-    }
+    graphics::{Size, Surface},
+    input::{Key, MouseEvent},
+    prelude::textfield::events::TextFieldEvents,
+    system::{Handle, Theme},
+    ui::{
+        button::events::ButtonEvents,
+        checkbox::events::CheckBoxEvents,
+        colorpicker::events::ColorPickerEvents,
+        command_bar::events::GenericCommandBarEvents,
+        desktop::events::DesktopEvents,
+        keyselector::events::KeySelectorEvents,
+        menu::events::GenericMenuEvents,
+        password::events::PasswordEvents,
+        radiobox::events::RadioBoxEvents,
+        threestatebox::events::ThreeStateBoxEvents,
+        window::events::{ToolBarEvents, WindowEvents},
+    },
 };
 
 use super::UIElement;
@@ -63,6 +77,12 @@ pub trait OnSiblingSelected {
     #[allow(private_interfaces)]
     fn on_sibling_selected(&mut self, _handle: Handle<UIElement>) {}
 }
+pub trait CustomEvents {
+    #[allow(private_interfaces)]
+    fn on_event(&mut self, _handle: Handle<()>, _class_hash: u64, _event_id: u32) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
 
 pub trait Control:
     OnPaint
@@ -88,6 +108,7 @@ pub trait Control:
     + ToolBarEvents
     + DesktopEvents
     + GenericMenuEvents
+    + CustomEvents
 {
 }
 
