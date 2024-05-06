@@ -91,7 +91,7 @@ struct MyWin {
 }
 
 impl ChessEvents for MyWin {
-        fn on_event(&mut self, handle: Handle<Board>, 
+        fn on_event(&mut self, handle: Handle<Chess>, 
                                event: board::Events) -> EventProcessStatus 
         {
             match event {
