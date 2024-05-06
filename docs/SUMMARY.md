@@ -71,6 +71,7 @@
         - [TreeView]()
     - [Custom controls](chapter-3/custom_controls.md)
         - [Overwriteable traits](chapter-3/custon-controls/overwriteable_traits.md)
+        - [Emitting events](chapter-3/custon-controls/emitting_events.md)
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops](chapter-4/custom_desktop.md)
