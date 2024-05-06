@@ -89,3 +89,136 @@ pub trait OnKeyPressed {
 ```
 
 if `OnKeyPressed::on_key_pressed(...)` returns **EventProcessStatus::Ignored** the key is being send to the parent of the current control. If the method returns **EventProcessStatus::Processed** the cotrol will ne redrawn and the event will not be passed to its parent anymore.
+
+The following custom control uses arrow keys to move a rectangle within the control:
+
+```rs
+use appcui::prelude::*;
+
+#[CustomControl(overwrite = OnPaint+OnKeyPressed)]
+struct MyControl {
+    p: Point,
+}
+impl MyControl {
+    fn new(layout: Layout) -> Self {
+        Self {
+            base: ControlBase::new(layout, true),
+            p: Point::ORIGIN,
+        }
+    }
+}
+
+impl OnPaint for MyControl {
+    fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+        surface.clear(char!("' ',black,black"));
+        surface.draw_rect(
+            Rect::with_point_and_size(self.p, Size::new(2, 2)),
+            LineType::Double,
+            CharAttribute::with_fore_color(Color::White),
+        );
+    }
+}
+impl OnKeyPressed for MyControl {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Left")  => { self.p.x -= 1; EventProcessStatus::Processed }
+            key!("Right") => { self.p.x += 1; EventProcessStatus::Processed }
+            key!("Up")    => { self.p.y -= 1; EventProcessStatus::Processed }
+            key!("Down")  => { self.p.y += 1; EventProcessStatus::Processed }
+            _             => EventProcessStatus::Ignored
+        }        
+    }
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut a = App::new().build()?;
+    let mut w = window!("caption:'Custom Control',d:c,w:30,h:10");
+    w.add(MyControl::new(Layout::new("l:1,t:1,r:1,b:1")));
+    a.add_window(w);
+    a.run();
+    Ok(())
+}
+```
+
+## OnMouseEvent
+
+**OnMouseEvent** trait methods can be use to react to mouse events such as clicks, drag, wheel movement, etc.
+
+```rs
+pub trait OnMouseEvent {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+```
+
+if `OnMouseEvent::on_mouse_event(...)` returns **EventProcessStatus::Processed** the control is going to be repainted, otherwise nothing happens.
+
+A tipical implementation for this trait looks like the following one:
+
+```rs
+impl OnMouseEvent for /* control name */ {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => todo!(),
+            MouseEvent::Leave => todo!(),
+            MouseEvent::Over(_) => todo!(),
+            MouseEvent::Pressed(_) => todo!(),
+            MouseEvent::Released(_) => todo!(),
+            MouseEvent::DoubleClick(_) => todo!(),
+            MouseEvent::Drag(_) => todo!(),
+            MouseEvent::Wheel(_) => todo!(),
+        }
+    }
+}
+```
+
+The following example intercepts the mouse movement while the mouse is over the control and prints it.
+
+```rs
+use std::fmt::Write;
+use appcui::prelude::*;
+
+#[CustomControl(overwrite = OnPaint+OnMouseEvent)]
+struct MyControl {
+    text: String
+}
+impl MyControl {
+    fn new(layout: Layout) -> Self {
+        Self {
+            base: ControlBase::new(layout, true),
+            text: String::new()
+        }
+    }
+}
+
+impl OnPaint for MyControl {
+    fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+        surface.clear(char!("' ',black,black"));
+        surface.write_string(0, 0, &self.text, CharAttribute::with_fore_color(Color::White), false);
+    }
+}
+
+impl OnMouseEvent for MyControl {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => EventProcessStatus::Processed,
+            MouseEvent::Over(data) => {
+                self.text.clear();
+                write!(&mut self.text,"Mouse at: ({}x{})", data.x, data.y).unwrap();
+                EventProcessStatus::Processed
+            },
+            _ => EventProcessStatus::Ignored
+        }
+    }
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut a = App::new().build()?;
+    let mut w = window!("caption:'Custom Control',d:c,w:30,h:10");
+    w.add(MyControl::new(Layout::new("l:1,t:1,r:1,b:1")));
+    a.add_window(w);
+    a.run();
+    Ok(())
+}
+```
