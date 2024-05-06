@@ -3,7 +3,7 @@ use appcui::prelude::*;
 mod my_win;
 mod board;
 use my_win::MyWin;
-pub (crate) use board::Board;
+pub use board::Board;
 
 
 

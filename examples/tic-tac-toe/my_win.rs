@@ -1,3 +1,4 @@
+use super::board::*;
 use super::Board;
 use appcui::prelude::*;
 
@@ -67,7 +68,15 @@ impl ButtonEvents for MyWin {
     }
 }
 impl BoardEvents for MyWin {
-    fn on_event(&mut self,handle:Handle<Board>,event:board::Events) -> EventProcessStatus {
-        todo!()
+    fn on_event(&mut self, _handle: Handle<Board>, event: board::Events) -> EventProcessStatus {
+        match event {
+            board::Events::GameOver | board::Events::Exit => {
+                let h = self.tab;
+                if let Some(t) = self.control_mut(h) {
+                    t.set_current_tab(0);
+                }
+            }
+        }
+        EventProcessStatus::Processed
     }
 }

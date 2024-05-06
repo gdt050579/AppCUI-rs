@@ -20,11 +20,11 @@ impl<T> Handle<T> {
         value: u64::MAX,
         _phantom: PhantomData,
     };
-    pub(crate) fn with_id(id: u32, index:u32)-> Self {
+    pub(crate) fn with_id(id: u32, index: u32) -> Self {
         Self {
             value: (index as u64) | ((id as u64) << 32),
             _phantom: PhantomData,
-        }        
+        }
     }
     pub(crate) fn new(index: u32) -> Self {
         let id = ((GLOBAL_ID.fetch_add(1, Ordering::SeqCst) as u32) % 0xFFFF_FFFE) as u64;
@@ -39,6 +39,17 @@ impl<T> Handle<T> {
     }
     #[inline(always)]
     pub(crate) fn cast<U>(&self) -> Handle<U> {
+        let r: Handle<U> = Handle {
+            value: self.value,
+            _phantom: PhantomData,
+        };
+        r
+    }
+    /// # Safety
+    ///
+    /// This function should not be used (its purpose is to serve some proc-macros such as #[CustomControl]) to convert a handle. Using this will imply an unsafe block and the results can be undetermined.
+    #[inline(always)]
+    pub unsafe fn unsafe_cast<U>(&self) -> Handle<U> {
         let r: Handle<U> = Handle {
             value: self.value,
             _phantom: PhantomData,

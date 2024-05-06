@@ -225,7 +225,7 @@ impl$(TEMPLATE_TYPE) CustomEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
 pub(crate) static CUSTOM_EVENT_CONVERTOR: &str = "
 if let Ok(event) = $(MOD_NAME)::Events::try_from(event_id) {
-    $(STRUC_NAME)Events::on_event(self, handle::cast(), event);
+    $(STRUC_NAME)Events::on_event(self, unsafe { handle.unsafe_cast() }, event)
 } else {
     panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Events\",event_id);
 }

@@ -172,6 +172,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     }
     // if commands or emit is available - build the inner module
     if has_inner_module {
+        code.push_str(struct_data.access.as_str());
         code.push_str("mod $(MOD_NAME) {\nuse $(ROOT)::prelude::*;\n");
         generate_inner_module(&a, config, &mut code, base_control);
         code.push_str("}\n");
