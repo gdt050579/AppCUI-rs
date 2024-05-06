@@ -31,7 +31,61 @@ fn generate_commands(a: &Arguments) -> String {
     cmd_code = cmd_code.replace("$(COMMANDS_TO_U32)", &temp);
     cmd_code
 }
+fn generate_emitted_events(a: &Arguments) -> String {
+    let mut cmd_code = String::with_capacity(1024);
+    cmd_code.push_str(templates::EMIT_EVENTS_TEMPLATE);
+    let mut temp = String::with_capacity(256);
 
+    // step 1 --> generate the list of enum variants
+    temp.clear();
+    for (idx, event_name) in a.emitted_events.iter().enumerate() {
+        write!(temp, "{} = {}, ", &event_name, idx).unwrap();
+    }
+    cmd_code = cmd_code.replace("$(EVENTS_IDS)", &temp);
+
+    // step 2 --> generate the conversion code (from u32 to events)
+    temp.clear();
+    for (idx, cmd) in a.emitted_events.iter().enumerate() {
+        writeln!(temp, "{} => Ok(Events::{}),", idx, &cmd).unwrap();
+    }
+    cmd_code = cmd_code.replace("$(U32_TO_EVENTS)", &temp);
+
+    // step 3 --> generate the conversion code (from events to u32)
+    temp.clear();
+    for (idx, cmd) in a.emitted_events.iter().enumerate() {
+        writeln!(temp, "Events::{} => {},", &cmd, idx).unwrap();
+    }
+    cmd_code = cmd_code.replace("$(EVENTS_TO_U32)", &temp);
+    cmd_code
+}
+pub(crate) fn generate_inner_module(a: &Arguments, config: &mut TraitsConfig, code: &mut String, base_control: BaseControlType) {
+    // add commands
+    if a.commands.is_empty() {
+        // if CommandBarEvents is present, we should add commands as well
+        if config.get(AppCUITrait::CommandBarEvents) == TraitImplementation::None {
+            panic!("Overwriting `CommandBarEvents` implies you should also define the `commands` attribute with possible values !");
+        }
+        // if MenuEvents is present, we should add commands as well
+        if config.get(AppCUITrait::MenuEvents) == TraitImplementation::None {
+            panic!("Overwriting `MenuEvents` implies you should also define the `commands` attribute with possible values !");
+        }
+    } else {
+        if (config.get(AppCUITrait::CommandBarEvents) != TraitImplementation::None)
+            && (config.get(AppCUITrait::MenuEvents) != TraitImplementation::None)
+        {
+            panic!(
+                "The 'commands` attribute can only be used if one of the CommandBarEvents or MenuEvents is overwritten (via `events` attributie) !"
+            );
+        }
+        code.push_str(generate_commands(a).as_str());
+    }
+    if !a.emitted_events.is_empty() {
+        if base_control != BaseControlType::CustomControl {
+            panic!("The 'emit' attribute can only be used with a CustomControl !");
+        }
+        code.push_str(generate_emitted_events(a).as_str());
+    }
+}
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args, config);
@@ -40,6 +94,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     base_definition.push_str(", ");
     let mut code = input.to_string().replace('{', base_definition.as_str());
     let struct_data = StructDefinition::from(code.as_str());
+    let has_inner_module = !a.commands.is_empty() || !a.emitted_events.is_empty();
     code.insert_str(0, "#[repr(C)]\n");
     code.insert_str(0, templates::IMPORTS);
     if a.internal_mode {
@@ -72,26 +127,11 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         }
         code.push('\n');
     }
-    // add commands
-    if a.commands.is_empty() {
-        // if CommandBarEvents is present, we should add commands as well
-        if config.get(AppCUITrait::CommandBarEvents) == TraitImplementation::None {
-            panic!("Overwriting `CommandBarEvents` implies you should also define the `commands` attribute with possible values !");
-        }
-        // if MenuEvents is present, we should add commands as well
-        if config.get(AppCUITrait::MenuEvents) == TraitImplementation::None {
-            panic!("Overwriting `MenuEvents` implies you should also define the `commands` attribute with possible values !");
-        }
-    } else {
-        if (config.get(AppCUITrait::CommandBarEvents) != TraitImplementation::None)
-            && (config.get(AppCUITrait::MenuEvents) != TraitImplementation::None)
-        {
-            panic!(
-                "The 'commands` attribute can only be used if one of the CommandBarEvents or MenuEvents is overwritten (via `events` attributie) !"
-            );
-        }
-        let cmd_gen_code = generate_commands(&a);
-        code.push_str(&cmd_gen_code);
+    // if commands or emit is available - build the inner module
+    if has_inner_module {
+        code.push_str("mod $(MOD_NAME) {\n");
+        generate_inner_module(&a, config, &mut code, base_control);
+        code.push_str("}\n");
         // add the CommandBar events wrapper if needed
         if config.get(AppCUITrait::CommandBarEvents) == TraitImplementation::None {
             code.push_str(templates::COMMANDBAR_EVENTS);
@@ -100,7 +140,12 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         if config.get(AppCUITrait::MenuEvents) == TraitImplementation::None {
             code.push_str(templates::MENU_EVENTS);
         }
+        // add raise events support
+        if !a.emitted_events.is_empty() {
+            code.push_str(templates::RAISE_EVENTS_TEMPLATE);
+        }
     }
+
     // replace templates
     code = code
         .replace("$(STRUCT_NAME)", &struct_data.name)

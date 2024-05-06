@@ -24,6 +24,7 @@ pub(crate) struct Arguments {
     pub base: String,
     pub modal_result_type: String,
     pub commands: Vec<String>,
+    pub emitted_events: Vec<String>,
     // internal
     expect_next: ExpectNext,
     key: String,
@@ -41,6 +42,7 @@ impl Arguments {
             key: String::new(),
             values: Vec::with_capacity(8),
             commands: Vec::new(),
+            emitted_events: Vec::new(),
             debug_mode: false,
             internal_mode: false,
             window_control: false,
@@ -168,6 +170,21 @@ impl Arguments {
         // all good --> move current value vector into commands and create a new one for values
         self.commands = std::mem::take(&mut self.values);
     }
+    fn validate_emitted_events(&mut self) {
+        let mut h = HashSet::with_capacity(self.values.len() * 2);
+        for event_name in &self.values {
+            if let Err(desc) = crate::utils::validate_name(event_name.as_str(), false) {
+                panic!("Invalid Evenat name:: '{}' => {}", event_name, desc);
+            }
+            let hash = crate::utils::compute_hash(event_name);
+            if h.contains(&hash) {
+                panic!("Events name must be unique. Duplicate event name: {}", event_name);
+            }
+            h.insert(hash);
+        }
+        // all good --> move current value vector into emitted events and create a new one for values
+        self.emitted_events = std::mem::take(&mut self.values);
+    }
     fn validate_events_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
             if let Some(appcui_trait) = AppCUITrait::new(trait_name) {
@@ -202,9 +219,10 @@ impl Arguments {
             "response" => self.validate_modal_response(),
             "desktop" => self.validate_desktop_control(),
             "commands" => self.validate_commands(),
+            "emit-events" | "emit" => self.validate_emitted_events(),
             _ => {
                 panic!(
-                    "Unknown attribute `{}` for AppCUI. Accepted attributes are 'overwrite', 'events', 'debug', 'response', 'commands' !",
+                    "Unknown attribute `{}` for AppCUI. Accepted attributes are 'overwrite', 'events', 'debug', 'response', 'commands', 'emit' !",
                     self.key.as_str()
                 );
             }

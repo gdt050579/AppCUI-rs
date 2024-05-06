@@ -94,8 +94,6 @@ impl$(TEMPLATE_TYPE) OnWindowRegistered for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 ";
 
 pub(crate) static COMMANDS_TEMPLATE: &str = "
-mod $(MOD_NAME)
-{
     use $(ROOT)::prelude::*;
 
     #[repr(u32)]
@@ -121,7 +119,6 @@ mod $(MOD_NAME)
             }
         }
     }
-}
 ";
 pub(crate) static COMMANDBAR_EVENTS: &str = "
 trait CommandBarEvents {
@@ -176,6 +173,42 @@ impl$(TEMPLATE_TYPE) GenericMenuEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
         } else {
             panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
         }
+    }
+}
+";
+
+pub(crate) static EMIT_EVENTS_TEMPLATE: &str = "
+
+    use $(ROOT)::prelude::*;
+
+    #[repr(u32)]
+    #[derive(Copy,Clone,Eq,PartialEq,Debug)]
+    pub enum Events {
+        $(EVENTS_IDS)
+    }
+    impl TryFrom<u32> for Events {
+        type Error = ();
+
+        fn try_from(value: u32) -> Result<Self, Self::Error> {
+            match value {
+                $(U32_TO_EVENTS)
+                _ => Err(())
+            }
+        }
+    }
+    impl From<Events> for u32 {
+        fn from(value: Events)->u32 {
+            match value {
+                $(EVENTS_TO_U32)
+            }
+        }
+    }
+
+";
+pub(crate) static RAISE_EVENTS_TEMPLATE: &str = "
+trait RaiseEvents {
+    fn raise_event(&self, event: $(MOD_NAME)::Event) {
+        self.raise_event($(CONTROL_NAME_HASH),u32::From(event));
     }
 }
 ";
