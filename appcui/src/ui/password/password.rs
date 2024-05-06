@@ -69,7 +69,7 @@ impl OnKeyPressed for Password {
             self.pass.push(character);
             return EventProcessStatus::Processed;
         }
-        match key.get_compact_code() {
+        match key.value() {
             key!("Back") => {
                 self.pass.pop();
                 return EventProcessStatus::Processed;

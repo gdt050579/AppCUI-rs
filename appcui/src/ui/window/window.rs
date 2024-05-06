@@ -672,7 +672,7 @@ impl OnResize for Window {
 impl OnKeyPressed for Window {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         if self.resize_move_mode {
-            match key.get_compact_code() {
+            match key.value() {
                 key!("Escape") | key!("Enter") | key!("Space") | key!("Tab") => {
                     self.resize_move_mode = false;
                     self.base.set_key_input_before_children_flag(false);
@@ -738,7 +738,7 @@ impl OnKeyPressed for Window {
                 _ => return EventProcessStatus::Ignored,
             }
         } else {
-            match key.get_compact_code() {
+            match key.value() {
                 key!("Tab") => {
                     if let Some(new_child) = Window::find_next_child_control(self.handle, true, true, true) {
                         RuntimeManager::get().request_focus_for_control(new_child);

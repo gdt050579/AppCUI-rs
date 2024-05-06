@@ -126,7 +126,7 @@ impl OnPaint for Canvas {
 }
 impl OnKeyPressed for Canvas {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        match key.get_compact_code() {
+        match key.value() {
             key!("Left") => {
                 self.move_scroll_to(self.x + 1, self.y);
                 EventProcessStatus::Processed

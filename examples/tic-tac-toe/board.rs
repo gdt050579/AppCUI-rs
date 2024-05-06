@@ -236,7 +236,7 @@ impl OnPaint for Board {
 }
 impl OnKeyPressed for Board {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        match key.get_compact_code() {
+        match key.value() {
             key!("Left") => {
                 self.previous_valid();
                 EventProcessStatus::Processed

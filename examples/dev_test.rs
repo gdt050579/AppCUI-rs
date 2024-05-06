@@ -1,30 +1,31 @@
 use appcui::prelude::*;
 
-
 #[CustomControl(overwrite = OnPaint)]
-struct MyControl<T> {
-    value: T
-}
-impl<T> MyControl<T> {
-    fn new(value: T)->Self {
+struct MyControl {}
+impl MyControl {
+    fn new(layout: Layout) -> Self {
         Self {
-            base: ControlBase::new(Layout::new("d:c,w:10,h:20"), true),
-            value,
+            base: ControlBase::new(layout, true),
         }
     }
 }
 
-impl<T> OnPaint for MyControl<T> {
-    fn on_paint(&self, _surface: &mut Surface, _theme: &Theme) {}
+impl OnPaint for MyControl {
+    fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+        surface.clear(char!("'X',Yellow,DarkRed"));
+        let size = self.size();
+        surface.draw_rect(
+            Rect::with_point_and_size(Point::ORIGIN, size),
+            LineType::Double,
+            CharAttribute::with_fore_color(Color::White),
+        );
+    }
 }
-
-
-
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Test,x:1,y:1,w:30,h:10");
-    w.add(MyControl::new(10));
+    let mut w = window!("caption:'Custom Control',d:c,w:30,h:10");
+    w.add(MyControl::new(Layout::new("l:1,t:1,r:1,b:1")));
     a.add_window(w);
     a.run();
     Ok(())

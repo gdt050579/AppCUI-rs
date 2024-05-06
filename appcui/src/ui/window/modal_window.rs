@@ -101,7 +101,7 @@ impl<T> OnResize for ModalWindow<T> {
 impl<T: 'static> OnKeyPressed for ModalWindow<T> {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         if !self.base.is_in_resize_mode() {
-            match key.get_compact_code() {
+            match key.value() {
                 key!("Enter") => {
                     if let Some(interface) = self.interface_mut() {
                         WindowEvents::on_accept(interface);

@@ -67,7 +67,7 @@ impl Key {
             Key { code, modifier }
         }
     }
-    pub fn get_compact_code(&self) -> u16 {
+    pub fn value(&self) -> u16 {
         ((self.code as u8) as u16) | ((self.modifier.get_value() as u16) << 8)
     }
 }
