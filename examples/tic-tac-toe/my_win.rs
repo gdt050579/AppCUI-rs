@@ -1,7 +1,7 @@
 use super::Board;
 use appcui::prelude::*;
 
-#[Window(events: ButtonEvents)]
+#[Window(events: ButtonEvents, custom_events: BoardEvents)]
 pub struct MyWin {
     p1_computer: Handle<RadioBox>,
     p1_human: Handle<RadioBox>,
@@ -64,5 +64,10 @@ impl ButtonEvents for MyWin {
             }
         }
         EventProcessStatus::Processed
+    }
+}
+impl BoardEvents for MyWin {
+    fn on_event(&mut self,handle:Handle<Board>,event:board::Events) -> EventProcessStatus {
+        todo!()
     }
 }

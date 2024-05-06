@@ -79,7 +79,7 @@ pub trait OnSiblingSelected {
 }
 pub trait CustomEvents {
     #[allow(private_interfaces)]
-    fn on_event(&mut self, _handle: Handle<UIElement>, _class_hash: u64, _event_id: u32) -> EventProcessStatus {
+    fn on_event(&mut self, _handle: Handle<()>, _class_hash: u64, _event_id: u32) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }

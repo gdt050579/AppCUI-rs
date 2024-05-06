@@ -88,6 +88,36 @@ pub(crate) fn generate_inner_module(a: &Arguments, config: &mut TraitsConfig, co
         code.push_str(generate_emitted_events(a).as_str());
     }
 }
+pub(crate) fn generate_custom_event_traits(a: &mut Arguments) -> String {
+    let mut cmd_code = String::with_capacity(1024);
+    cmd_code.push_str(templates::CUSTOM_EVENTS);
+    let mut temp = String::with_capacity(256);
+
+    // step 1 --> generate all custom traits and reduce the names
+    for trait_name in a.custom_events.iter_mut() {
+        temp.clear();
+        temp.push_str(templates::CUSTOM_TRAIT_DEF);
+        temp = temp.replace("$(TRAIT_NAME)", trait_name);
+        // remove the Events part from trait_name
+        trait_name.truncate(trait_name.len()-6); // 6 = sizeof(Events);
+        // now its just the name (replace the structura name)
+        temp = temp.replace("$(STRUC_NAME)", trait_name).replace("$(MOD_NAME)",trait_name.to_ascii_lowercase().as_str());
+        cmd_code.push_str(&temp);
+    }
+
+    // step 2 --> generate all proxy calls
+    temp.clear();
+    for trait_name in a.custom_events.iter() {
+        // at this point the trait name does not have the Events part at its end
+        let hash = utils::compute_hash(trait_name);
+        write!(temp,"0x{:X} => {{",hash).unwrap();
+        temp.push_str(templates::CUSTOM_EVENT_CONVERTOR);
+        temp.push_str("}\n");
+        temp = temp.replace("$(STRUC_NAME)", trait_name).replace("$(MOD_NAME)", &trait_name.to_lowercase());
+    }
+
+    cmd_code.replace("$(CUSTOM_EVENT_CLASS_PROXY_CALL)", &temp)
+}
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args, config);
@@ -97,7 +127,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     let mut code = input.to_string().replace('{', base_definition.as_str());
     let struct_data = StructDefinition::from(code.as_str());
     let has_inner_module = !a.commands.is_empty() || !a.emitted_events.is_empty();
-    let mut struct_name_hash =  String::new();
+    let mut struct_name_hash = String::new();
     code.insert_str(0, "#[repr(C)]\n");
     code.insert_str(0, templates::IMPORTS);
     if a.internal_mode {
@@ -116,6 +146,16 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
             config.clear(AppCUITrait::NotDesktop);
             config.clear(AppCUITrait::DesktopControl);
             config.set(AppCUITrait::DesktopControl, TraitImplementation::Default);
+        }
+    }
+    if !a.custom_events.is_empty() {
+        if config.get(AppCUITrait::CustomEvents) != TraitImplementation::Default {
+            panic!("Support for custom events (via 'custom_events' attribute) is only allowed for a Window or a ModalWindow !");
+        } else {
+            // we clear the custom event to avoid default implementation
+            config.clear(AppCUITrait::CustomEvents);
+            // generate the code
+            code.push_str(generate_custom_event_traits(&mut a).as_str());
         }
     }
     for (appcui_trait, trait_impl) in config.iter() {
@@ -146,7 +186,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         // add raise events support
         if !a.emitted_events.is_empty() {
             code.push_str(templates::RAISE_EVENTS_TEMPLATE);
-            write!(struct_name_hash,"0x{:X}",utils::compute_hash(struct_data.name.as_str())).unwrap();
+            write!(struct_name_hash, "0x{:X}", utils::compute_hash(struct_data.name.as_str())).unwrap();
         }
     }
 

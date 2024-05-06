@@ -117,7 +117,7 @@ pub(crate) static COMMANDS_TEMPLATE: &str = "
             }
         }
     }
-    
+
 ";
 pub(crate) static COMMANDBAR_EVENTS: &str = "
 trait CommandBarEvents {
@@ -209,5 +209,30 @@ impl$(TEMPLATE_TYPE) RaiseEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn raise_event(&self, event: $(MOD_NAME)::Events) {
         self.raise_custom_event($(STRUCT_NAME_HASH),u32::from(event));
     }
+}
+";
+
+pub(crate) static CUSTOM_EVENTS: &str = "
+impl$(TEMPLATE_TYPE) CustomEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_event(&mut self, handle: Handle<()>, class_hash: u64, event_id: u32) -> EventProcessStatus {
+        match class_hash {
+            $(CUSTOM_EVENT_CLASS_PROXY_CALL)
+            _ => EventProcessStatus::Ignored
+        }        
+    }
+}
+";
+
+pub(crate) static CUSTOM_EVENT_CONVERTOR: &str = "
+if let Ok(event) = $(MOD_NAME)::Events::try_from(event_id) {
+    $(STRUC_NAME)Events::on_event(self, handle::cast(), event);
+} else {
+    panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Events\",event_id);
+}
+";
+
+pub(crate) static CUSTOM_TRAIT_DEF: &str = "
+trait $(TRAIT_NAME) {
+    fn on_event(&mut self, handle: Handle<$(STRUC_NAME)>, event:  $(MOD_NAME)::Events) -> EventProcessStatus;
 }
 ";
