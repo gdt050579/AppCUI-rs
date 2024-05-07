@@ -6,6 +6,7 @@ use crate::ui::components::ScrollBar;
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ImageViewer {
     surface: Surface,
+    image: Image,
     x: i32,
     y: i32,
     background: Option<Character>,
@@ -16,7 +17,7 @@ pub struct ImageViewer {
     vertical_scrollbar: Handle<ScrollBar>,
 }
 impl ImageViewer {
-    pub fn new(image_size: Size, layout: Layout, flags: Flags) -> Self {
+    pub fn new(image: &Image, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -27,10 +28,11 @@ impl ImageViewer {
                         StatusFlags::None
                     },
             ),
-            surface: Surface::new(image_size.width, image_size.height),
+            surface: Surface::new(image.get_width(), image.get_height()),
             x: 0,
             y: 0,
             flags,
+            image: image.clone(),
             background: None,
             drag_point: None,
             components: ComponentsToolbar::with_capacity(if flags == Flags::ScrollBars { 2 } else { 0 }),
@@ -44,17 +46,20 @@ impl ImageViewer {
         }
         obj
     }
-    pub fn resize_image(&mut self, new_size: Size) {
-        self.surface.resize(new_size);
-        let sz = self.surface.get_size();
-        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            s.set_count(sz.width as u64);
-        }
-        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-            s.set_count(sz.height as u64);
-        }
-        self.move_scroll_to(self.x, self.y);
+    pub fn set_image(&mut self, image: &Image) {
+
     }
+    // pub fn resize_image(&mut self, new_size: Size) {
+    //     self.surface.resize(new_size);
+    //     let sz = self.surface.get_size();
+    //     if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
+    //         s.set_count(sz.width as u64);
+    //     }
+    //     if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
+    //         s.set_count(sz.height as u64);
+    //     }
+    //     self.move_scroll_to(self.x, self.y);
+    // }
     pub fn set_backgound(&mut self, backgroud_char: Character) {
         self.background = Some(backgroud_char);
     }

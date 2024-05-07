@@ -1,6 +1,7 @@
 use super::Color;
 use super::Pixel;
 
+#[derive(Clone)]
 pub struct Image {
     width: u32,
     height: u32,
@@ -97,7 +98,7 @@ impl Image {
         }
     }
     #[inline]
-    pub fn get_pixel(&self, x: u32, y: u32) -> Option<Pixel> {
+    pub fn pixel(&self, x: u32, y: u32) -> Option<Pixel> {
         if (x < self.width) && (y < self.height) {
             return Some(self.pixels[(y as usize) * (self.width as usize) + (x as usize)]);
         }
