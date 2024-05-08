@@ -19,7 +19,7 @@ pub struct ImageViewer {
     vertical_scrollbar: Handle<ScrollBar>,
 }
 impl ImageViewer {
-    pub fn new(image: Image, layout: Layout, flags: Flags, render_method: ImageRenderingMethod, scale: ImageScaleMethod) -> Self {
+    pub fn new(image: Image, layout: Layout, render_method: ImageRenderingMethod, scale: ImageScaleMethod, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -65,6 +65,7 @@ impl ImageViewer {
     }
     fn update_surface(&mut self) {
         self.surface.resize_to_fit_image(&self.image, self.render_method, self.scale);
+        self.surface.draw_image(0, 0, &self.image, self.render_method, self.scale);
         let sz = self.surface.size();
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
             s.set_count(sz.width as u64);
