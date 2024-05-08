@@ -1,13 +1,13 @@
 use crate::prelude::components::ComponentsToolbar;
 use crate::prelude::*;
-use crate::ui::image_viewer::initialization_flags::Flags;
 use crate::ui::components::ScrollBar;
+use crate::ui::image_viewer::initialization_flags::Flags;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ImageViewer {
     surface: Surface,
     image: Image,
-    render_method:ImageRenderingMethod,
+    render_method: ImageRenderingMethod,
     scale: ImageScaleMethod,
     x: i32,
     y: i32,
@@ -53,10 +53,18 @@ impl ImageViewer {
     }
     pub fn set_image(&mut self, image: Image) {
         self.image = image;
-        self.surface.resize_to_fit_image(&self.image, self.render_method, self.scale);
+        self.update_surface();
+    }
+    pub fn set_scale(&mut self, scale: ImageScaleMethod) {
+        self.scale = scale;
+        self.update_surface();
+    }
+    pub fn set_render_method(&mut self, render_method: ImageRenderingMethod) {
+        self.render_method = render_method;
         self.update_surface();
     }
     fn update_surface(&mut self) {
+        self.surface.resize_to_fit_image(&self.image, self.render_method, self.scale);
         let sz = self.surface.size();
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
             s.set_count(sz.width as u64);
@@ -124,7 +132,7 @@ impl OnPaint for ImageViewer {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
             self.components.paint(surface, theme, self);
-            surface.reduce_clip_by(0,0,1,1);
+            surface.reduce_clip_by(0, 0, 1, 1);
         }
         if let Some(back) = self.background {
             surface.clear(back);
@@ -175,11 +183,11 @@ impl OnKeyPressed for ImageViewer {
                 self.move_scroll_to(self.x - self.size().width as i32, self.y);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Up") | key!("PageUp")=> {
+            key!("Ctrl+Up") | key!("PageUp") => {
                 self.move_scroll_to(self.x, self.y + self.size().height as i32);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Down") | key!("PageDown")=> {
+            key!("Ctrl+Down") | key!("PageDown") => {
                 self.move_scroll_to(self.x, self.y - self.size().height as i32);
                 EventProcessStatus::Processed
             }
@@ -256,4 +264,3 @@ impl OnMouseEvent for ImageViewer {
         }
     }
 }
-
