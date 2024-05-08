@@ -18,8 +18,8 @@ use super::TextFormat;
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ImageRenderingMethod {
-    PixelTo16ColorsSmallBlock,
-    PixelTo64ColorsLargeBlock,
+    SmallBlocks,
+    LargeBlocks64Colors,
     GrayScale,
     AsciiArt,
 }
@@ -94,7 +94,7 @@ impl Surface {
     }
 
     #[inline]
-    pub fn get_size(&self) -> Size {
+    pub fn size(&self) -> Size {
         self.size
     }
     #[inline]
@@ -583,8 +583,8 @@ impl Surface {
     }
 
     fn paint_small_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
-        let w = img.get_width();
-        let h = img.get_height();
+        let w = img.width();
+        let h = img.height();
         let x_step = rap;
         let y_step = rap * 2;
         let mut cp = Character::default();
@@ -621,8 +621,8 @@ impl Surface {
     }
 
     fn paint_large_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
-        let w = img.get_width();
-        let h = img.get_height();
+        let w = img.width();
+        let h = img.height();
         let mut img_y = 0u32;
         let mut p_y = y;
         while img_y < h {
@@ -643,8 +643,8 @@ impl Surface {
     }
 
     fn paint_gray_scale(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
-        let w = img.get_width();
-        let h = img.get_height();
+        let w = img.width();
+        let h = img.height();
         let mut img_y = 0u32;
         let mut p_y = y;
         while img_y < h {
@@ -654,7 +654,12 @@ impl Surface {
                 if rap == 1 {
                     self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).as_gray_scale_character());
                 } else {
-                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).as_gray_scale_character());
+                    self.fill_horizontal_line(
+                        p_x,
+                        p_y,
+                        p_x + 1,
+                        img.compute_square_average_color(img_x, img_y, rap).as_gray_scale_character(),
+                    );
                 }
                 img_x += rap;
                 p_x += 2;
@@ -667,15 +672,26 @@ impl Surface {
     pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: ImageRenderingMethod, scale_method: ImageScaleMethod) {
         let rap = scale_method as u32;
         match rendering_method {
-            ImageRenderingMethod::PixelTo16ColorsSmallBlock => self.paint_small_blocks(image, x, y, rap),
-            ImageRenderingMethod::PixelTo64ColorsLargeBlock => self.paint_large_blocks(image, x, y, rap),
+            ImageRenderingMethod::SmallBlocks => self.paint_small_blocks(image, x, y, rap),
+            ImageRenderingMethod::LargeBlocks64Colors => self.paint_large_blocks(image, x, y, rap),
             ImageRenderingMethod::GrayScale => self.paint_gray_scale(image, x, y, rap),
             _ => {
                 todo!()
             }
         }
     }
-
+    pub fn resize_to_fit_image(&mut self, image: &Image, rendering_method: ImageRenderingMethod, scale_method: ImageScaleMethod) {
+        let rap = scale_method as u32;
+        let w = image.width();
+        let h = image.height();
+        let new_size = match rendering_method {
+            ImageRenderingMethod::SmallBlocks => Size::new((w + rap - 1) / rap, (h + 2 * rap - 1) / (2 * rap)),
+            ImageRenderingMethod::LargeBlocks64Colors => Size::new((w * 2 + rap - 1) / rap, (h + rap - 1) / rap),
+            ImageRenderingMethod::GrayScale => Size::new((w * 2 + rap - 1) / rap, (h + rap - 1) / rap),
+            ImageRenderingMethod::AsciiArt => todo!(),
+        };
+        self.resize(new_size);
+    }
     pub(crate) fn resize(&mut self, size: Size) {
         let w = size.width.clamp(1, MAX_SURFACE_WIDTH);
         let h = size.height.clamp(1, MAX_SURFACE_HEIGHT);

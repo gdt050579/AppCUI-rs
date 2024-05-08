@@ -7,6 +7,8 @@ use crate::ui::components::ScrollBar;
 pub struct ImageViewer {
     surface: Surface,
     image: Image,
+    render_method:ImageRenderingMethod,
+    scale: ImageScaleMethod,
     x: i32,
     y: i32,
     background: Option<Character>,
@@ -17,7 +19,7 @@ pub struct ImageViewer {
     vertical_scrollbar: Handle<ScrollBar>,
 }
 impl ImageViewer {
-    pub fn new(image: &Image, layout: Layout, flags: Flags) -> Self {
+    pub fn new(image: Image, layout: Layout, flags: Flags, render_method: ImageRenderingMethod, scale: ImageScaleMethod) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -28,38 +30,43 @@ impl ImageViewer {
                         StatusFlags::None
                     },
             ),
-            surface: Surface::new(image.get_width(), image.get_height()),
+            surface: Surface::new(image.width(), image.height()),
             x: 0,
             y: 0,
             flags,
-            image: image.clone(),
+            image,
+            scale,
+            render_method,
             background: None,
             drag_point: None,
             components: ComponentsToolbar::with_capacity(if flags == Flags::ScrollBars { 2 } else { 0 }),
             horizontal_scrollbar: Handle::None,
             vertical_scrollbar: Handle::None,
         };
+        obj.update_surface();
         if flags == Flags::ScrollBars {
-            let sz = obj.surface.get_size();
+            let sz = obj.surface.size();
             obj.horizontal_scrollbar = obj.components.add(ScrollBar::new(sz.width as u64, false));
             obj.vertical_scrollbar = obj.components.add(ScrollBar::new(sz.width as u64, true));
         }
         obj
     }
-    pub fn set_image(&mut self, image: &Image) {
-
+    pub fn set_image(&mut self, image: Image) {
+        self.image = image;
+        self.surface.resize_to_fit_image(&self.image, self.render_method, self.scale);
+        self.update_surface();
     }
-    // pub fn resize_image(&mut self, new_size: Size) {
-    //     self.surface.resize(new_size);
-    //     let sz = self.surface.get_size();
-    //     if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-    //         s.set_count(sz.width as u64);
-    //     }
-    //     if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-    //         s.set_count(sz.height as u64);
-    //     }
-    //     self.move_scroll_to(self.x, self.y);
-    // }
+    fn update_surface(&mut self) {
+        let sz = self.surface.size();
+        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
+            s.set_count(sz.width as u64);
+        }
+        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
+            s.set_count(sz.height as u64);
+        }
+        self.move_scroll_to(self.x, self.y);
+    }
+
     pub fn set_backgound(&mut self, backgroud_char: Character) {
         self.background = Some(backgroud_char);
     }
@@ -69,7 +76,7 @@ impl ImageViewer {
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();
-        let surface_size = self.surface.get_size();
+        let surface_size = self.surface.size();
         self.x = if surface_size.width <= sz.width {
             0
         } else {
@@ -103,7 +110,7 @@ impl ImageViewer {
 impl OnResize for ImageViewer {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.components.on_resize(&self.base);
-        let paint_sz = self.surface.get_size();
+        let paint_sz = self.surface.size();
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
             s.update_count(new_size.width as u64, paint_sz.width as u64)
         }

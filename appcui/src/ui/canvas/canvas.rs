@@ -38,7 +38,7 @@ impl Canvas {
             vertical_scrollbar: Handle::None,
         };
         if flags == Flags::ScrollBars {
-            let sz = canvas.surface.get_size();
+            let sz = canvas.surface.size();
             canvas.horizontal_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64, false));
             canvas.vertical_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64, true));
         }
@@ -46,7 +46,7 @@ impl Canvas {
     }
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
-        let sz = self.surface.get_size();
+        let sz = self.surface.size();
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
             s.set_count(sz.width as u64);
         }
@@ -68,7 +68,7 @@ impl Canvas {
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();
-        let surface_size = self.surface.get_size();
+        let surface_size = self.surface.size();
         self.x = if surface_size.width <= sz.width {
             0
         } else {
@@ -102,7 +102,7 @@ impl Canvas {
 impl OnResize for Canvas {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.components.on_resize(&self.base);
-        let paint_sz = self.surface.get_size();
+        let paint_sz = self.surface.size();
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
             s.update_count(new_size.width as u64, paint_sz.width as u64)
         }

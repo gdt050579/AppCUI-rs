@@ -112,11 +112,11 @@ impl Image {
         Pixel::default()
     }
     #[inline]
-    pub fn get_width(&self) -> u32 {
+    pub fn width(&self) -> u32 {
         self.width
     }
     #[inline]
-    pub fn get_height(&self) -> u32 {
+    pub fn height(&self) -> u32 {
         self.height
     }
 

@@ -40,8 +40,8 @@ impl OnPaint for MyDesktop {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.clear(theme.desktop.character);
         let attr = CharAttribute::with_color(theme.desktop.character.foreground,theme.desktop.character.background);
-        let x = ((surface.get_size().width as i32) / 2 ) - 15;
-        let mut y = ((surface.get_size().height as i32) / 2 ) - 7;
+        let x = ((surface.size().width as i32) / 2 ) - 15;
+        let mut y = ((surface.size().height as i32) / 2 ) - 7;
         for line in LOGO {
             surface.write_string(x, y, line, attr, false);
             y += 1;

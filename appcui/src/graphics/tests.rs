@@ -347,21 +347,21 @@ fn check_draw_imge() {
         1,
         1,
         &i,
-        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
+        ImageRenderingMethod::SmallBlocks,
         ImageScaleMethod::NoScale,
     );
     s.draw_image(
         20,
         1,
         &i,
-        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
+        ImageRenderingMethod::SmallBlocks,
         ImageScaleMethod::Scale50,
     );
     s.draw_image(
         30,
         1,
         &i,
-        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
+        ImageRenderingMethod::SmallBlocks,
         ImageScaleMethod::Scale25,
     );
     //s.print();
@@ -371,7 +371,7 @@ fn check_draw_imge() {
         0,
         0,
         &i,
-        ImageRenderingMethod::PixelTo64ColorsLargeBlock,
+        ImageRenderingMethod::LargeBlocks64Colors,
         ImageScaleMethod::NoScale,
     );
     //s.print();
@@ -463,7 +463,7 @@ fn check_resize() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xB015E3D08D4D238B);
     s.resize(Size::new(20, 5));
-    assert_eq!(s.get_size(), Size::new(20,5));
+    assert_eq!(s.size(), Size::new(20,5));
     s.write_string(
         1,
         1,
