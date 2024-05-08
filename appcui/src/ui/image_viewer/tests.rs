@@ -34,3 +34,50 @@ fn check_create() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_smallbloacks_scaling() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x2F7D4E8955E1C3D8)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    // let s = r#"
+    //     |RRRRRRRR|
+    //     |RGGGGGGR|
+    //     |RGBBBBGR|
+    //     |RGBWWBGR|
+    //     |RGBWWBGR|
+    //     |RGBBBBGR|
+    //     |RGGGGGGR|
+    //     |RRRRRRRR|
+    // "#;
+    let s = r#"
+        |RRRRGGGG|
+        |RRRRGGGG|
+        |GGWWGGWW|
+        |GGWWGGWW|
+        |RRRRGGGG|
+        |RRRRGGGG|
+        |YYWWGGWW|
+        |YYWWGGWW|
+    "#;
+    w.add(ImageViewer::new(
+        Image::with_str(s).unwrap(),
+        Layout::new("x:0,y:0,w:8,h:4"),
+        ImageRenderingMethod::SmallBlocks,
+        ImageScaleMethod::NoScale,
+        image_viewer::Flags::None,
+    ));
+    w.add(ImageViewer::new(
+        Image::with_str(s).unwrap(),
+        Layout::new("x:10,y:0,w:16,h:8"),
+        ImageRenderingMethod::SmallBlocks,
+        ImageScaleMethod::Scale50,
+        image_viewer::Flags::None,
+    ));
+    a.add_window(w);
+    a.run();
+}
