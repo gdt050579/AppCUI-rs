@@ -55,9 +55,17 @@ impl ImageViewer {
         self.image = image;
         self.update_surface();
     }
+    #[inline(always)]
+    pub fn scale(&self) -> ImageScaleMethod {
+        self.scale
+    }
     pub fn set_scale(&mut self, scale: ImageScaleMethod) {
         self.scale = scale;
         self.update_surface();
+    }
+    #[inline(always)]
+    pub fn render_method(&self) -> ImageRenderingMethod {
+        self.render_method
     }
     pub fn set_render_method(&mut self, render_method: ImageRenderingMethod) {
         self.render_method = render_method;
