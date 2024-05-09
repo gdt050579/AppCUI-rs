@@ -295,3 +295,13 @@ impl Pixel {
         }
     }
 }
+impl From<u32> for Pixel {
+    fn from(value: u32) -> Self {
+        Self {
+            blue: (value & 0xFF) as u8,
+            green: ((value >> 8) & 0xFF) as u8, 
+            red: ((value >> 16) & 0xFF) as u8,
+            alpha: ((value >> 24) & 0xFF) as u8,
+        }
+    }
+}
