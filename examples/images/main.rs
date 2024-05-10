@@ -5,6 +5,7 @@ mod mywin;
 mod dizzy;
 mod hello_rust;
 mod shapes;
+mod ferris;
 
 use mydesktop::MyDesktop;
 

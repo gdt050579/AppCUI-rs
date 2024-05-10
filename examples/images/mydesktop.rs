@@ -1,12 +1,13 @@
 use appcui::prelude::*;
 
 use crate::dizzy::DIZZY_PIXELS;
+use crate::ferris::FERRIS_PIXELS;
 use crate::hello_rust::HELLO_RUST_PIXELS;
 use crate::mywin::MyWin;
 use crate::shapes::SHAPES_PIXELS;
 
 #[Desktop(events    = MenuEvents+DesktopEvents, 
-          commands  = Dizzy+Hello+Shapes+Exit+Grid+Vertical+Horizontal+Cascade)]
+          commands  = Dizzy+Hello+Shapes+Ferris+Exit+Grid+Vertical+Horizontal+Cascade)]
 pub struct MyDesktop {
     index: u32,
     menu_windows: Handle<Menu>,
@@ -40,6 +41,7 @@ impl DesktopEvents for MyDesktop {
                 {'&Dizzy',Alt+1, cmd: Dizzy},
                 {'&Hello Rust',Alt+2, cmd: Hello},
                 {'&Shapes',Alt+3, cmd: Shapes},
+                {'&Ferris',Alt+4, cmd: Ferris},
                 {---},
                 {'E&xit',cmd: Exit},
             ]"
@@ -71,6 +73,9 @@ impl MenuEvents for MyDesktop {
             }
             mydesktop::Commands::Shapes => {
                 self.add_window(MyWin::new("Shapes", MyDesktop::create_image(120, 60, SHAPES_PIXELS)));
+            }
+            mydesktop::Commands::Ferris => {
+                self.add_window(MyWin::new("Ferris", MyDesktop::create_image(172, 122, FERRIS_PIXELS)));
             }
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::Grid => self.arrange_windows(desktop::ArrangeWindowsMethod::Grid),
