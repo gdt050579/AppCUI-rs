@@ -59,7 +59,15 @@ impl CommandBarEvents for MyWin {
                         Scale::Scale5 => img.set_scale(image::Scale::NoScale),
                     }
                 }
-                mywin::Commands::RenderMethod => todo!(),
+                mywin::Commands::RenderMethod => {
+                    let m = img.render_method();
+                    match m {
+                        RenderMethod::SmallBlocks => img.set_render_method(image::RenderMethod::GrayScale),
+                        RenderMethod::LargeBlocks64Colors => todo!(),
+                        RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::SmallBlocks),
+                        RenderMethod::AsciiArt => todo!(),
+                    }
+                },
             }
         }
         self.request_update();
