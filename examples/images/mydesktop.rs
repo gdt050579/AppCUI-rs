@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 
-use crate::mywin::MyWin;
 use crate::dizzy::DIZZY_PIXELS;
+use crate::mywin::MyWin;
 
 #[Desktop(events = MenuEvents+DesktopEvents, commands  = Dizzy+Exit)]
 pub struct MyDesktop {
@@ -23,18 +23,11 @@ impl MyDesktop {
                 dizzy.set_pixel(x, y, Pixel::from(DIZZY_PIXELS[(y * 256 + x) as usize]));
             }
         }
-        self.add_window(MyWin::new("Dizzy",dizzy));
+        self.add_window(MyWin::new("Dizzy", dizzy));
     }
 }
 
 impl DesktopEvents for MyDesktop {
-    fn on_update_window_count(&mut self, _count: usize) {
-        // let m = self.arrange_method;
-        // if let Some(method) = m {
-        //     self.arrange_windows(method);
-        // }
-    }
-
     fn on_start(&mut self) {
         // define and register a menu
         self.menu_windows = self.register_menu(menu!(
@@ -48,21 +41,6 @@ impl DesktopEvents for MyDesktop {
 }
 
 impl MenuEvents for MyDesktop {
-    fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<menu::SingleChoice>, command: mydesktop::Commands) {
-        // match command {
-        //     mydesktop::Commands::NoArrange => self.arrange_method = None,
-        //     mydesktop::Commands::Cascade => self.arrange_method = Some(desktop::ArrangeWindowsMethod::Cascade),
-        //     mydesktop::Commands::Vertical => self.arrange_method = Some(desktop::ArrangeWindowsMethod::Vertical),
-        //     mydesktop::Commands::Horizontal => self.arrange_method = Some(desktop::ArrangeWindowsMethod::Horizontal),
-        //     mydesktop::Commands::Grid => self.arrange_method = Some(desktop::ArrangeWindowsMethod::Grid),
-        //     _ => {}
-        // }
-        // let m = self.arrange_method;
-        // if let Some(method) = m {
-        //     self.arrange_windows(method);
-        // }
-    }
-
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
         menubar.add(self.menu_windows);
     }
