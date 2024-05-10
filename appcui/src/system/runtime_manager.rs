@@ -472,6 +472,8 @@ impl RuntimeManager {
             #[cfg(feature = "EVENT_RECORDER")]
             self.event_recorder.auto_update(&self.surface);
 
+            //self.debug_print(self.desktop_handle, 0);
+
             let sys_event = self.terminal.get_system_event();
             match sys_event {
                 SystemEvent::None => {}
@@ -877,7 +879,7 @@ impl RuntimeManager {
     //     for _ in 0..depth {
     //         print!(" ");
     //     }
-    //     let base = self.get_controls().get(handle).unwrap().get_base();
+    //     let base = self.get_controls().get(handle).unwrap().base();
     //     if base.parent_index.is_valid() {
     //         print!("{}. ", base.parent_index.index());
     //     } else {
@@ -886,9 +888,9 @@ impl RuntimeManager {
     //     //print!("[ID:{},Index:{}],", handle.get_id(), handle.get_index());
     //     print!("  Children: {}", base.children.len());
     //     if base.focused_child_index.is_valid() {
-    //         print!("  Idx:{}", base.focused_child_index.index());
+    //         print!("  Focused-child-index:{}", base.focused_child_index.index());
     //     } else {
-    //         print!("  Idx:Invalid");
+    //         print!("  Focused-child-index:Invalid");
     //     }
     //     print!("  Focus:{}", base.has_focus());
     //     println!("");
@@ -1022,12 +1024,23 @@ impl PaintMethods for RuntimeManager {
     }
     fn paint_control(&mut self, handle: Handle<UIElement>) {
         let controls = unsafe { &mut *self.controls };
-        if let Some(control) = controls.get_mut(handle) {
-            if control.base().prepare_paint(&mut self.surface) {
+        if let Some(element) = controls.get_mut(handle) {
+            let base = element.base();
+            if base.prepare_paint(&mut self.surface) {
                 // paint is possible
-                control.control().on_paint(&mut self.surface, &self.theme);
-                for child_handle in &control.base().children {
-                    self.paint_control(*child_handle);
+                element.control().on_paint(&mut self.surface, &self.theme);
+                let children_count = base.children.len();
+                if base.focused_child_index.in_range(children_count) {
+                    // draw from the next visible element until
+                    let focus_index = base.focused_child_index.index();
+                    for i in 0..children_count {
+                        let index = (focus_index + 1 + i) % children_count;
+                        self.paint_control(base.children[index]);
+                    }
+                } else {
+                    for child_handle in base.children.iter() {
+                        self.paint_control(*child_handle);
+                    }
                 }
             }
         }
@@ -1183,7 +1196,7 @@ impl MouseMethods for RuntimeManager {
                     if !result.is_none() {
                         return result;
                     }
-                    idx = (idx + 1) % count;
+                    idx = (idx + count - 1) % count;
                 }
             }
             if base.can_receive_input() {

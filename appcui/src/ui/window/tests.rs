@@ -1807,3 +1807,26 @@ fn check_single_window_with_menu_and_command_bar() {
     a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
     a.run();
 }
+
+#[test]
+fn check_multiple_windows_focus() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0x97D61849202889DF)
+        Mouse.Click(18,4,left)
+        Paint('Win2 on top & focus')
+        CheckHash(0xFB56BEF5838FD80C)
+        Mouse.Click(10,1,left)
+        Paint('Win1 on top & focus')
+        CheckHash(0x53405223F149E9D)
+        Mouse.Click(35,6,left)
+        Paint('Win3 on top & focus')
+        CheckHash(0x97D61849202889DF)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(window!("Win1,x:1,y:1,w:30,h:5"));
+    a.add_window(window!("Win2,x:11,y:3,w:30,h:5"));
+    a.add_window(window!("Win3,x:21,y:5,w:30,h:5"));
+    a.run();
+}
