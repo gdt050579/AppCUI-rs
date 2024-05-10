@@ -47,11 +47,14 @@ impl Canvas {
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
         let sz = self.surface.size();
+        let control_size = self.size();
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            s.set_count(sz.width as u64);
+            //s.set_count(sz.width as u64);
+            s.update_count(control_size.width as u64, sz.width as u64);
         }
         if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-            s.set_count(sz.height as u64);
+            //s.set_count(sz.height as u64);
+            s.update_count(control_size.height as u64, sz.height as u64)
         }
         self.move_scroll_to(self.x, self.y);
     }
