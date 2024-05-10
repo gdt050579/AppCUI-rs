@@ -318,6 +318,7 @@ impl RuntimeManager {
             win.control_mut().on_registered();
         }
         self.update_desktop_window_count();
+        self.recompute_parent_indexes = true;
         handle
     }
     pub(crate) fn add_modal_window<T, U>(&mut self, obj: T) -> Handle<T>
@@ -444,6 +445,7 @@ impl RuntimeManager {
             // 4. if there is a control that was removed (due to the previously fired events) remove it
             if !self.to_remove_list.is_empty() {
                 self.remove_deleted_controls();
+                self.recompute_parent_indexes = true;
             }
 
             // If we reach this point, there should not be any change in the logic of controls
@@ -876,6 +878,7 @@ impl RuntimeManager {
     }
 
     // fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
+    //     println!("----------------------------- Control Tree -----------------------------");
     //     for _ in 0..depth {
     //         print!(" ");
     //     }
@@ -893,7 +896,18 @@ impl RuntimeManager {
     //         print!("  Focused-child-index:Invalid");
     //     }
     //     print!("  Focus:{}", base.has_focus());
-    //     println!("");
+    //     if base.is_window_control() {
+    //         print!("  [Window]");
+    //     }
+    //     if base.is_desktop_control() {
+    //         print!("  [Desktop]");
+    //     }
+
+    //     if depth == 0 {
+    //         println!(" --> [ROOT]");
+    //     } else {
+    //         println!();
+    //     }
     //     for handle in base.children.iter() {
     //         self.debug_print(*handle, depth + 2);
     //     }
