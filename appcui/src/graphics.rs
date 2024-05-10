@@ -8,8 +8,7 @@ mod clip_area;
 mod rect;
 mod point;
 mod cursor;
-mod pixel;
-mod image;
+pub mod image;
 mod text_format;
 
 #[cfg(test)]
@@ -24,13 +23,11 @@ pub use self::char_attribute::CharFlags;
 pub use self::char_attribute::CharAttribute;
 pub use self::line_type::LineType;
 pub use self::surface::Surface;
-pub use self::surface::ImageRenderingMethod;
-pub use self::surface::ImageScaleMethod;
 pub use self::size::Size;
 pub use self::point::Point;
 pub use self::rect::Rect;
 pub use self::cursor::Cursor;
-pub use self::pixel::Pixel;
+pub use self::image::*;
 pub use self::image::Image;
 pub use self::text_format::TextAlignament;
 pub use self::text_format::TextFormat;

@@ -1,4 +1,5 @@
-use crate::graphics::SpecialChar;
+use super::image;
+use super::Renderer;
 
 use super::CharAttribute;
 use super::Rect;
@@ -7,33 +8,12 @@ use super::Size;
 use super::text_format::TextWrap;
 use super::Character;
 use super::ClipArea;
-use super::Color;
 use super::Cursor;
 use super::Image;
 use super::LineType;
 use super::Point;
 use super::TextAlignament;
 use super::TextFormat;
-
-#[repr(u32)]
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum ImageRenderingMethod {
-    SmallBlocks,
-    LargeBlocks64Colors,
-    GrayScale,
-    AsciiArt,
-}
-#[repr(u32)]
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum ImageScaleMethod {
-    NoScale = 1,
-    Scale50 = 2,
-    Scale33 = 3,
-    Scale25 = 4,
-    Scale20 = 5,
-    Scale10 = 10,
-    Scale5 = 20,
-}
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -582,115 +562,16 @@ impl Surface {
         }
     }
 
-    fn paint_small_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
-        let w = img.width();
-        let h = img.height();
-        let x_step = rap;
-        let y_step = rap * 2;
-        let mut cp = Character::default();
-        let mut py = y;
-        let mut img_y = 0;
-        while img_y < h {
-            let mut px = x;
-            let mut img_x = 0u32;
-            while img_x < w {
-                if rap == 1 {
-                    cp.foreground = img.get_pixel_or_default(img_x, img_y).as_color();
-                    cp.background = img.get_pixel_or_default(img_x, img_y + 1).as_color();
-                } else {
-                    cp.foreground = img.compute_square_average_color(img_x, img_y, rap).as_color();
-                    cp.background = img.compute_square_average_color(img_x, img_y + rap, rap).as_color();
-                }
-
-                if cp.background == cp.foreground {
-                    if cp.background == Color::Black {
-                        cp.code = ' ';
-                    } else {
-                        cp.code = char::from(SpecialChar::Block100);
-                    }
-                } else {
-                    cp.code = char::from(SpecialChar::BlockUpperHalf);
-                }
-                self.write_char(px, py, cp);
-                img_x += x_step;
-                px += 1;
-            }
-            py += 1;
-            img_y += y_step;
-        }
-    }
-
-    fn paint_large_blocks(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
-        let w = img.width();
-        let h = img.height();
-        let mut img_y = 0u32;
-        let mut p_y = y;
-        while img_y < h {
-            let mut p_x = x;
-            let mut img_x = 0u32;
-            while img_x < w {
-                if rap == 1 {
-                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).as_character());
-                } else {
-                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).as_character());
-                }
-                img_x += rap;
-                p_x += 2;
-            }
-            img_y += rap;
-            p_y += 1;
-        }
-    }
-
-    fn paint_gray_scale(&mut self, img: &Image, x: i32, y: i32, rap: u32) {
-        let w = img.width();
-        let h = img.height();
-        let mut img_y = 0u32;
-        let mut p_y = y;
-        while img_y < h {
-            let mut p_x = x;
-            let mut img_x = 0u32;
-            while img_x < w {
-                if rap == 1 {
-                    self.fill_horizontal_line(p_x, p_y, p_x + 1, img.get_pixel_or_default(img_x, img_y).as_gray_scale_character());
-                } else {
-                    self.fill_horizontal_line(
-                        p_x,
-                        p_y,
-                        p_x + 1,
-                        img.compute_square_average_color(img_x, img_y, rap).as_gray_scale_character(),
-                    );
-                }
-                img_x += rap;
-                p_x += 2;
-            }
-            img_y += rap;
-            p_y += 1;
-        }
-    }
-
-    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: ImageRenderingMethod, scale_method: ImageScaleMethod) {
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: image::RenderMethod, scale_method: image::Scale) {
         let rap = scale_method as u32;
         match rendering_method {
-            ImageRenderingMethod::SmallBlocks => self.paint_small_blocks(image, x, y, rap),
-            ImageRenderingMethod::LargeBlocks64Colors => self.paint_large_blocks(image, x, y, rap),
-            ImageRenderingMethod::GrayScale => self.paint_gray_scale(image, x, y, rap),
+            image::RenderMethod::SmallBlocks => Renderer::render_with_small_blocks(self, image, x, y, rap),
+            image::RenderMethod::LargeBlocks64Colors => Renderer::render_with_large_blocks_64(self, image, x, y, rap),
+            image::RenderMethod::GrayScale => Renderer::render_with_gray_scale(self, image, x, y, rap),
             _ => {
                 todo!()
             }
         }
-    }
-    pub fn resize_to_fit_image(&mut self, image: &Image, rendering_method: ImageRenderingMethod, scale_method: ImageScaleMethod) {
-        let rap = scale_method as u32;
-        let w = image.width();
-        let h = image.height();
-        let new_size = match rendering_method {
-            ImageRenderingMethod::SmallBlocks => Size::new((w + rap - 1) / rap, (h + 2 * rap - 1) / (2 * rap)),
-            ImageRenderingMethod::LargeBlocks64Colors => Size::new((w * 2 + rap - 1) / rap, (h + rap - 1) / rap),
-            ImageRenderingMethod::GrayScale => Size::new((w * 2 + rap - 1) / rap, (h + rap - 1) / rap),
-            ImageRenderingMethod::AsciiArt => todo!(),
-        };
-        self.resize(new_size);
     }
     pub(crate) fn resize(&mut self, size: Size) {
         let w = size.width.clamp(1, MAX_SURFACE_WIDTH);

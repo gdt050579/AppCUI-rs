@@ -7,8 +7,8 @@ use crate::ui::image_viewer::initialization_flags::Flags;
 pub struct ImageViewer {
     surface: Surface,
     image: Image,
-    render_method: ImageRenderingMethod,
-    scale: ImageScaleMethod,
+    render_method: image::RenderMethod,
+    scale: image::Scale,
     x: i32,
     y: i32,
     background: Option<Character>,
@@ -19,7 +19,7 @@ pub struct ImageViewer {
     vertical_scrollbar: Handle<ScrollBar>,
 }
 impl ImageViewer {
-    pub fn new(image: Image, layout: Layout, render_method: ImageRenderingMethod, scale: ImageScaleMethod, flags: Flags) -> Self {
+    pub fn new(image: Image, layout: Layout, render_method: image::RenderMethod, scale: image::Scale, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -56,23 +56,24 @@ impl ImageViewer {
         self.update_surface();
     }
     #[inline(always)]
-    pub fn scale(&self) -> ImageScaleMethod {
+    pub fn scale(&self) -> image::Scale {
         self.scale
     }
-    pub fn set_scale(&mut self, scale: ImageScaleMethod) {
+    pub fn set_scale(&mut self, scale: image::Scale) {
         self.scale = scale;
         self.update_surface();
     }
     #[inline(always)]
-    pub fn render_method(&self) -> ImageRenderingMethod {
+    pub fn render_method(&self) -> image::RenderMethod {
         self.render_method
     }
-    pub fn set_render_method(&mut self, render_method: ImageRenderingMethod) {
+    pub fn set_render_method(&mut self, render_method: image::RenderMethod) {
         self.render_method = render_method;
         self.update_surface();
     }
     fn update_surface(&mut self) {
-        self.surface.resize_to_fit_image(&self.image, self.render_method, self.scale);
+        let sz = self.image.render_size(self.render_method, self.scale);
+        self.surface.resize(sz);
         self.surface.draw_image(0, 0, &self.image, self.render_method, self.scale);
         let sz = self.surface.size();
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {

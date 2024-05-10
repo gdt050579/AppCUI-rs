@@ -27,12 +27,12 @@ fn check_create() {
     w.add(ImageViewer::new(
         img,
         Layout::new("d:c"),
-        ImageRenderingMethod::SmallBlocks,
-        ImageScaleMethod::NoScale,
+        image::RenderMethod::SmallBlocks,
+        image::Scale::NoScale,
         image_viewer::Flags::None,
     ));
     a.add_window(w);
-    a.run();
+    a.run();    
 }
 
 #[test]
@@ -67,15 +67,15 @@ fn check_smallbloacks_scaling() {
     w.add(ImageViewer::new(
         Image::with_str(s).unwrap(),
         Layout::new("x:0,y:0,w:8,h:4"),
-        ImageRenderingMethod::SmallBlocks,
-        ImageScaleMethod::NoScale,
+        image::RenderMethod::SmallBlocks,
+        image::Scale::NoScale,
         image_viewer::Flags::None,
     ));
     w.add(ImageViewer::new(
         Image::with_str(s).unwrap(),
         Layout::new("x:10,y:0,w:16,h:8"),
-        ImageRenderingMethod::SmallBlocks,
-        ImageScaleMethod::Scale50,
+        image::RenderMethod::SmallBlocks,
+        image::Scale::Scale50,
         image_viewer::Flags::None,
     ));
     a.add_window(w);

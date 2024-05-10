@@ -11,8 +11,7 @@ use super::CharFlags;
 use super::Character;
 use super::Color;
 use super::Image;
-use super::ImageRenderingMethod;
-use super::ImageScaleMethod;
+use super::image;
 use super::LineType;
 use super::Surface;
 use super::TextAlignament;
@@ -347,22 +346,22 @@ fn check_draw_imge() {
         1,
         1,
         &i,
-        ImageRenderingMethod::SmallBlocks,
-        ImageScaleMethod::NoScale,
+        image::RenderMethod::SmallBlocks,
+        image::Scale::NoScale,
     );
     s.draw_image(
         20,
         1,
         &i,
-        ImageRenderingMethod::SmallBlocks,
-        ImageScaleMethod::Scale50,
+        image::RenderMethod::SmallBlocks,
+        image::Scale::Scale50,
     );
     s.draw_image(
         30,
         1,
         &i,
-        ImageRenderingMethod::SmallBlocks,
-        ImageScaleMethod::Scale25,
+        image::RenderMethod::SmallBlocks,
+        image::Scale::Scale25,
     );
     //s.print();
     assert_eq!(s.compute_hash(), 0xFD04064498933DB);
@@ -371,8 +370,8 @@ fn check_draw_imge() {
         0,
         0,
         &i,
-        ImageRenderingMethod::LargeBlocks64Colors,
-        ImageScaleMethod::NoScale,
+        image::RenderMethod::LargeBlocks64Colors,
+        image::Scale::NoScale,
     );
     //s.print();
     assert_eq!(s.compute_hash(), 0x7BAAAA0605CBFA25);
@@ -381,8 +380,8 @@ fn check_draw_imge() {
         0,
         0,
         &i,
-        ImageRenderingMethod::GrayScale,
-        ImageScaleMethod::NoScale,
+        image::RenderMethod::GrayScale,
+        image::Scale::NoScale,
     );
     //s.print();
     assert_eq!(s.compute_hash(), 0x9803283450732669);

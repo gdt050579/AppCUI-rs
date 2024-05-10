@@ -1,7 +1,7 @@
-use super::CharFlags;
-use super::Character;
-use super::Color;
-use super::SpecialChar;
+use super::super::CharFlags;
+use super::super::Character;
+use super::super::Color;
+use super::super::SpecialChar;
 
 const COLOR_TO_PIXEL: [u32; 16] = [
     0x000000, // Black
