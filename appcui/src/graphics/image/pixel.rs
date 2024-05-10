@@ -226,21 +226,21 @@ impl Pixel {
         }
     }
     pub(super) fn as_color(&self) -> Color {
-        let b = if self.blue <= 16 {
+        let b = if self.blue <= 64 {
             0u32
         } else if self.blue < 192 {
             1u32
         } else {
             2u32
         };
-        let r = if self.red <= 16 {
+        let r = if self.red <= 64 {
             0u32
         } else if self.red < 192 {
             1u32
         } else {
             2u32
         };
-        let g = if self.green <= 16 {
+        let g = if self.green <= 64 {
             0u32
         } else if self.green < 192 {
             1u32
