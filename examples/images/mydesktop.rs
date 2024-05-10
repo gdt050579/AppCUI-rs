@@ -1,9 +1,12 @@
 use appcui::prelude::*;
 
 use crate::dizzy::DIZZY_PIXELS;
+use crate::hello_rust::HELLO_RUST_PIXELS;
 use crate::mywin::MyWin;
+use crate::shapes::SHAPES_PIXELS;
 
-#[Desktop(events = MenuEvents+DesktopEvents, commands  = Dizzy+Exit+Grid+Vertical+Horizontal+Cascade)]
+#[Desktop(events    = MenuEvents+DesktopEvents, 
+          commands  = Dizzy+Hello+Shapes+Exit+Grid+Vertical+Horizontal+Cascade)]
 pub struct MyDesktop {
     index: u32,
     menu_windows: Handle<Menu>,
@@ -18,14 +21,14 @@ impl MyDesktop {
             menu_arrange: Handle::None,
         }
     }
-    fn open_dizzy(&mut self) {
-        let mut dizzy = Image::new(256, 192).unwrap();
-        for y in 0..192 {
-            for x in 0..256 {
-                dizzy.set_pixel(x, y, Pixel::from(DIZZY_PIXELS[(y * 256 + x) as usize]));
+    fn create_image(width: u32, height: u32, buf: &[u32]) -> Image {
+        let mut img = Image::new(width, height).unwrap();
+        for y in 0..height {
+            for x in 0..width {
+                img.set_pixel(x, y, Pixel::from(buf[(y * width + x) as usize]));
             }
         }
-        self.add_window(MyWin::new("Dizzy", dizzy));
+        img
     }
 }
 
@@ -35,18 +38,20 @@ impl DesktopEvents for MyDesktop {
         self.menu_windows = self.register_menu(menu!(
             "&Windows,class: MyDesktop, items:[
                 {'&Dizzy',Alt+1, cmd: Dizzy},
+                {'&Hello Rust',Alt+2, cmd: Hello},
+                {'&Shapes',Alt+3, cmd: Shapes},
                 {---},
                 {'E&xit',cmd: Exit},
             ]"
         ));
         self.menu_arrange = self.register_menu(menu!(
-          "&Arrange,class: MyDesktop, items:[
+            "&Arrange,class: MyDesktop, items:[
               {'&Grid',cmd: Grid},
               {'&Vertical',cmd: Vertical},
               {'&Horizontal',cmd: Horizontal},
               {'&Cascade',cmd: Cascade},
           ]"
-      ));
+        ));
     }
 }
 
@@ -58,13 +63,20 @@ impl MenuEvents for MyDesktop {
 
     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mydesktop::Commands) {
         match command {
-            mydesktop::Commands::Dizzy => self.open_dizzy(),
+            mydesktop::Commands::Dizzy => {
+                self.add_window(MyWin::new("Dizzy", MyDesktop::create_image(256, 192, DIZZY_PIXELS)));
+            }
+            mydesktop::Commands::Hello => {
+                self.add_window(MyWin::new("Hello Rust", MyDesktop::create_image(163, 41, HELLO_RUST_PIXELS)));
+            }
+            mydesktop::Commands::Shapes => {
+                self.add_window(MyWin::new("Shapes", MyDesktop::create_image(120, 60, SHAPES_PIXELS)));
+            }
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::Grid => self.arrange_windows(desktop::ArrangeWindowsMethod::Grid),
             mydesktop::Commands::Vertical => self.arrange_windows(desktop::ArrangeWindowsMethod::Vertical),
             mydesktop::Commands::Horizontal => self.arrange_windows(desktop::ArrangeWindowsMethod::Horizontal),
             mydesktop::Commands::Cascade => self.arrange_windows(desktop::ArrangeWindowsMethod::Cascade),
-            
         }
     }
 }

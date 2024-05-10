@@ -3,6 +3,8 @@ use appcui::prelude::*;
 mod mydesktop;
 mod mywin;
 mod dizzy;
+mod hello_rust;
+mod shapes;
 
 use mydesktop::MyDesktop;
 
