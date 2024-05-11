@@ -102,3 +102,7 @@ path = "tic-tac-toe/main.rs"
 [[example]]
 name = "images"
 path = "images/main.rs"
+
+[[example]]
+name = "ferris"
+path = "ferris/main.rs"
