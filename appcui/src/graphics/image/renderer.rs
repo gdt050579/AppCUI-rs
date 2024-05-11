@@ -77,4 +77,7 @@ impl Renderer {
     pub(crate) fn render_with_gray_scale(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32) {
         Renderer::render_with_large_block(surface,img,x,y,rap,|p| p.as_gray_scale_character());
     }
+    pub(crate) fn render_ascii_art(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32) {
+        Renderer::render_with_large_block(surface,img,x,y,rap,|p| p.as_ascii_art());
+    }
 }

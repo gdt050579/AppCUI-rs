@@ -568,9 +568,7 @@ impl Surface {
             image::RenderMethod::SmallBlocks => Renderer::render_with_small_blocks(self, image, x, y, rap),
             image::RenderMethod::LargeBlocks64Colors => Renderer::render_with_large_blocks_64(self, image, x, y, rap),
             image::RenderMethod::GrayScale => Renderer::render_with_gray_scale(self, image, x, y, rap),
-            _ => {
-                todo!()
-            }
+            image::RenderMethod::AsciiArt => Renderer::render_ascii_art(self, image, x, y, rap),
         }
     }
     pub(crate) fn resize(&mut self, size: Size) {

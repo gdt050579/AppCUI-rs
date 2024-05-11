@@ -62,10 +62,10 @@ impl CommandBarEvents for MyWin {
                 mywin::Commands::RenderMethod => {
                     let m = img.render_method();
                     match m {
-                        RenderMethod::SmallBlocks => img.set_render_method(image::RenderMethod::GrayScale),
-                        RenderMethod::LargeBlocks64Colors => todo!(),
-                        RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::SmallBlocks),
-                        RenderMethod::AsciiArt => todo!(),
+                        RenderMethod::SmallBlocks => img.set_render_method(image::RenderMethod::LargeBlocks64Colors),
+                        RenderMethod::LargeBlocks64Colors => img.set_render_method(image::RenderMethod::GrayScale),
+                        RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::AsciiArt),
+                        RenderMethod::AsciiArt => img.set_render_method(image::RenderMethod::SmallBlocks),
                     }
                 },
             }

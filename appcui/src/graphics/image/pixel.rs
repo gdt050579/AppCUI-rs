@@ -22,7 +22,6 @@ const COLOR_TO_PIXEL: [u32; 16] = [
     0xFFFFFF, // White
 ];
 
-
 const COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
     Color::Black,
     Color::Black,
@@ -4257,6 +4256,12 @@ const COLORMAP_64_COLORS_PROC: [u8; 125] = [
     100, 100, 75, 75, 100, 75, 75, 50, 75, 100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
 ];
 
+const ASCII_ART_CHARSET: &[char] = &[
+    ' ', '.', '\'', '`', '^', '"', ',', ':', ';', 'I', 'l', '!', 'i', '>', '<', '~', '+', '_', '-', '?', ']', '[', '}', '{', '1', ')', '(', '|',
+    '\\', '/', 't', 'f', 'j', 'r', 'x', 'n', 'u', 'v', 'c', 'z', 'X', 'Y', 'U', 'J', 'C', 'L', 'Q', '0', 'O', 'Z', 'm', 'w', 'q', 'p', 'd', 'b', 'k',
+    'h', 'a', 'o', '*', '#', 'M', 'W', '&', '8', '%', 'B', '@', '$',
+];
+
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Pixel {
     pub red: u8,
@@ -4314,6 +4319,14 @@ impl Pixel {
             100 => Character::new(' ', col, col, CharFlags::None),
             _ => Character::default(),
         }
+    }
+    pub(super) fn as_ascii_art(&self) -> Character {
+        let ch = {
+            let luminance = (0.299 * self.red as f64 + 0.587 * self.green as f64 + 0.114 * self.blue as f64) / 255.0;
+            let index = ((luminance * (ASCII_ART_CHARSET.len() as f64 - 1.0)).round() as usize).clamp(0, ASCII_ART_CHARSET.len() - 1);
+            ASCII_ART_CHARSET[index]
+        };
+        Character::new(ch, Color::White, Color::Black, CharFlags::None)
     }
     pub(super) fn as_gray_scale_character(&self) -> Character {
         let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32)) / 3;

@@ -125,7 +125,7 @@ impl Image {
             RenderMethod::SmallBlocks => Size::new((self.width + rap - 1) / rap, (self.height + 2 * rap - 1) / (2 * rap)),
             RenderMethod::LargeBlocks64Colors => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
             RenderMethod::GrayScale => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
-            RenderMethod::AsciiArt => todo!(),
+            RenderMethod::AsciiArt => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
         }
     }
 

@@ -160,6 +160,7 @@ Let's consider an image of [Cuddly Ferris](https://www.rustacean.net/assets/cudd
 | SmallBlocks         | <img src="img/cuddlyferris_small_blocks.png" width=400/>    |
 | LargeBlocks64Colors | <img src="img/cuddlyferris_large_blocks_64.png" width=400/> |
 | GrayScale           | <img src="img/cuddlyferris_grayscale.png" width=400/>       |
+| AsciiArt            | <img src="img/cuddlyferris_ascii_art.png" width=400/>       |
 
 The supported scales (from the enume `image::Scale`):
 * `Scale::NoScale` => 100%
