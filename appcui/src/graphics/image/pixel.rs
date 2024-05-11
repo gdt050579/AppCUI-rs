@@ -4268,7 +4268,7 @@ impl Pixel {
     pub fn new(red: u8, green: u8, blue: u8, alpha: u8) -> Self {
         Pixel { red, green, blue, alpha }
     }
-    pub fn from_rgb(red: u8, green: u8, blue: u8) -> Self {
+    pub fn with_rgb(red: u8, green: u8, blue: u8) -> Self {
         Pixel {
             red,
             green,
@@ -4276,7 +4276,7 @@ impl Pixel {
             alpha: 255,
         }
     }
-    pub fn from_color(color: Color) -> Self {
+    pub fn with_color(color: Color) -> Self {
         let idx = color as u8;
         if idx >= 16 {
             Pixel {

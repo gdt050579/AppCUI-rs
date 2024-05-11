@@ -29,8 +29,8 @@ extern crate proc_macro;
 /// * CommandBarEvents
 /// * MenuEvents
 ///
-/// None of the **overwrite** or **events** parameters should be present. If not present, a
-/// default implementation will be provided.
+/// If none of the **overwrite** or **events** parameters is present, a default implementation 
+/// will be provided.
 ///
 /// # Example
 /// ```rust,compile_fail

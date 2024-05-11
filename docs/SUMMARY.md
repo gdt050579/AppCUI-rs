@@ -19,6 +19,7 @@
         - [Web]()
     - [Screen area and sizes](chapter-2/screen.md)
     - [Surface]() <!-- (chapter-2/surface.md) -->
+        - [Images](chapter-2/images.md)
     - [Input]() <!-- (chapter-2/input.md) -->
         - [Mouse]()
         - [Keyboard]()

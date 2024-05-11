@@ -66,23 +66,23 @@ impl Image {
                 add_value = 1 - add_value;
             } else if add_value == 1 {
                 match *b {
-                    b'0' | b' ' | b'.' => img.pixels.push(Pixel::from_color(Color::Black)),
-                    b'B' | b'1' => img.pixels.push(Pixel::from_color(Color::DarkBlue)),
-                    b'G' | b'2' => img.pixels.push(Pixel::from_color(Color::DarkGreen)),
-                    b'T' | b'3' => img.pixels.push(Pixel::from_color(Color::Teal)),
-                    b'R' | b'4' => img.pixels.push(Pixel::from_color(Color::DarkRed)),
-                    b'M' | b'm' | b'5' => img.pixels.push(Pixel::from_color(Color::Magenta)),
-                    b'6' => img.pixels.push(Pixel::from_color(Color::Olive)),
-                    b'S' | b'7' => img.pixels.push(Pixel::from_color(Color::Silver)),
-                    b's' | b'8' => img.pixels.push(Pixel::from_color(Color::Gray)),
-                    b'b' | b'9' => img.pixels.push(Pixel::from_color(Color::Blue)),
-                    b'g' => img.pixels.push(Pixel::from_color(Color::Green)),
-                    b'A' | b'a' | b't' => img.pixels.push(Pixel::from_color(Color::Aqua)),
-                    b'r' => img.pixels.push(Pixel::from_color(Color::Red)),
-                    b'P' | b'p' => img.pixels.push(Pixel::from_color(Color::Pink)),
-                    b'Y' | b'y' => img.pixels.push(Pixel::from_color(Color::Yellow)),
-                    b'W' | b'w' => img.pixels.push(Pixel::from_color(Color::White)),
-                    _ => img.pixels.push(Pixel::from_color(Color::Transparent)),
+                    b'0' | b' ' | b'.' => img.pixels.push(Pixel::with_color(Color::Black)),
+                    b'B' | b'1' => img.pixels.push(Pixel::with_color(Color::DarkBlue)),
+                    b'G' | b'2' => img.pixels.push(Pixel::with_color(Color::DarkGreen)),
+                    b'T' | b'3' => img.pixels.push(Pixel::with_color(Color::Teal)),
+                    b'R' | b'4' => img.pixels.push(Pixel::with_color(Color::DarkRed)),
+                    b'M' | b'm' | b'5' => img.pixels.push(Pixel::with_color(Color::Magenta)),
+                    b'6' | b'o' | b'O' => img.pixels.push(Pixel::with_color(Color::Olive)),
+                    b'S' | b'7' => img.pixels.push(Pixel::with_color(Color::Silver)),
+                    b's' | b'8' => img.pixels.push(Pixel::with_color(Color::Gray)),
+                    b'b' | b'9' => img.pixels.push(Pixel::with_color(Color::Blue)),
+                    b'g' => img.pixels.push(Pixel::with_color(Color::Green)),
+                    b'A' | b'a' | b't' => img.pixels.push(Pixel::with_color(Color::Aqua)),
+                    b'r' => img.pixels.push(Pixel::with_color(Color::Red)),
+                    b'P' | b'p' => img.pixels.push(Pixel::with_color(Color::Pink)),
+                    b'Y' | b'y' => img.pixels.push(Pixel::with_color(Color::Yellow)),
+                    b'W' | b'w' => img.pixels.push(Pixel::with_color(Color::White)),
+                    _ => img.pixels.push(Pixel::with_color(Color::Transparent)),
                 }
             }
         }
@@ -151,6 +151,6 @@ impl Image {
             p_y += 1;
         }
         let nr_pixels = sz * sz;
-        Pixel::from_rgb((sum_r / nr_pixels) as u8, (sum_g / nr_pixels) as u8, (sum_b / nr_pixels) as u8)
+        Pixel::with_rgb((sum_r / nr_pixels) as u8, (sum_g / nr_pixels) as u8, (sum_b / nr_pixels) as u8)
     }
 }
