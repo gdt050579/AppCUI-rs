@@ -128,3 +128,44 @@ let heart = r#"
 "#;
 let img = Image::with_str(heart);
 ```
+
+## Rendering images
+
+AppCUI framework relies on characters. As such, an image can not be displayes **as it is**. However, there is one method in the [Surface](surface.md) object that be used to aproximate an image:
+
+```rs
+impl Surface {
+    // other methods
+    pub fn draw_image(&mut self, x: i32, 
+                                y: i32, 
+                                image: &Image, 
+                                rendering_method: image::RenderMethod, 
+                                scale_method: image::Scale
+                    ) { ... }
+}
+```
+This method attempts to draw an image using characters and the available colors.
+The following rendering methods are available:
+* SmallBlocks
+* LargeBlocks64Colors
+* GrayScale
+* AsciiArt
+
+Let's consider an image of [Cuddly Ferris](https://www.rustacean.net/assets/cuddlyferris.svg) and see how it will be displayed using different rendering methods:
+
+<img src="img/cuddlyferris.png" width=120/>
+
+| Methods             | Result                                                      |
+| ------------------- | ----------------------------------------------------------- |
+| SmallBlocks         | <img src="img/cuddlyferris_small_blocks.png" width=400/>    |
+| LargeBlocks64Colors | <img src="img/cuddlyferris_large_blocks_64.png" width=400/> |
+| GrayScale           | <img src="img/cuddlyferris_grayscale.png" width=400/>       |
+
+The supported scales (from the enume `image::Scale`):
+* `Scale::NoScale` => 100%
+* `Scale::Scale50` => 50%
+* `Scale::Scale33` => 33%
+* `Scale::Scale25` => 25%
+* `Scale::Scale20` => 20%
+* `Scale::Scale10` => 10%
+* `Scale::Scale5` => 5%
