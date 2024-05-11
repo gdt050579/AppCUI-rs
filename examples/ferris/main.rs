@@ -790,7 +790,7 @@ fn main() -> Result<(), appcui::system::Error> {
         Layout::new("d:c"),
         image::RenderMethod::SmallBlocks,
         image::Scale::NoScale,
-        image_viewer::Flags::ScrollBars,
+        imageviewer::Flags::ScrollBars,
     ));
     a.add_window(w);
     a.run();

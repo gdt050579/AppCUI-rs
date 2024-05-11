@@ -797,7 +797,7 @@ impl MyWin {
             Layout::new("d:c"),
             image::RenderMethod::AsciiArt,
             image::Scale::NoScale,
-            image_viewer::Flags::ScrollBars,
+            imageviewer::Flags::ScrollBars,
         );
         w.himg = w.add(i);
         w

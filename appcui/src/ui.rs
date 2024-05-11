@@ -19,7 +19,7 @@ pub mod tab;
 pub mod accordion;
 pub mod colorpicker;
 pub mod canvas;
-pub mod image_viewer;
+pub mod imageviewer;
 pub mod keyselector;
 pub mod components;
 
@@ -39,7 +39,7 @@ pub use button::Button;
 pub use tab::Tab;
 pub use accordion::Accordion;
 pub use canvas::Canvas;
-pub use image_viewer::ImageViewer;
+pub use imageviewer::ImageViewer;
 pub use keyselector::KeySelector;
 pub use colorpicker::ColorPicker;
 pub use command_bar::CommandBar;

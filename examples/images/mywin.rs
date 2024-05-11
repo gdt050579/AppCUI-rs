@@ -16,7 +16,7 @@ impl MyWin {
             Layout::new("d:c"),
             image::RenderMethod::SmallBlocks,
             image::Scale::NoScale,
-            image_viewer::Flags::ScrollBars,
+            imageviewer::Flags::ScrollBars,
         );
         w.himg = w.add(i);
         w

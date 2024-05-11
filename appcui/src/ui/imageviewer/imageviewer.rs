@@ -1,7 +1,7 @@
 use crate::prelude::components::ComponentsToolbar;
 use crate::prelude::*;
 use crate::ui::components::ScrollBar;
-use crate::ui::image_viewer::initialization_flags::Flags;
+use crate::ui::imageviewer::initialization_flags::Flags;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ImageViewer {

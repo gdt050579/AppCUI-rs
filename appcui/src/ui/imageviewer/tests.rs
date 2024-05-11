@@ -29,7 +29,7 @@ fn check_create() {
         Layout::new("d:c"),
         image::RenderMethod::SmallBlocks,
         image::Scale::NoScale,
-        image_viewer::Flags::None,
+        imageviewer::Flags::None,
     ));
     a.add_window(w);
     a.run();    
@@ -69,14 +69,14 @@ fn check_smallbloacks_scaling() {
         Layout::new("x:0,y:0,w:8,h:4"),
         image::RenderMethod::SmallBlocks,
         image::Scale::NoScale,
-        image_viewer::Flags::None,
+        imageviewer::Flags::None,
     ));
     w.add(ImageViewer::new(
         Image::with_str(s).unwrap(),
         Layout::new("x:10,y:0,w:16,h:8"),
         image::RenderMethod::SmallBlocks,
         image::Scale::Scale50,
-        image_viewer::Flags::None,
+        imageviewer::Flags::None,
     ));
     a.add_window(w);
     a.run();
