@@ -1,4 +1,4 @@
-use super::super::{Character, Color, Image, SpecialChar, Surface};
+use super::{super::{Character, Color, Image, SpecialChar, Surface}, Pixel};
 
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -47,7 +47,8 @@ impl Renderer {
             img_y += y_step;
         }
     }
-    pub(crate) fn render_with_large_blocks_64(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32) {
+
+    fn render_with_large_block(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p: Pixel)->Character) {
         let w = img.width();
         let h = img.height();
         let mut img_y = 0u32;
@@ -57,9 +58,9 @@ impl Renderer {
             let mut img_x = 0u32;
             while img_x < w {
                 if rap == 1 {
-                    surface.fill_horizontal_line(p_x, p_y, p_x + 1, img.pixel(img_x, img_y).unwrap_or_default().as_character());
+                    surface.fill_horizontal_line(p_x, p_y, p_x + 1, f(img.pixel(img_x, img_y).unwrap_or_default()));
                 } else {
-                    surface.fill_horizontal_line(p_x, p_y, p_x + 1, img.compute_square_average_color(img_x, img_y, rap).as_character());
+                    surface.fill_horizontal_line(p_x, p_y, p_x + 1, f(img.compute_square_average_color(img_x, img_y, rap)));
                 }
                 img_x += rap;
                 p_x += 2;
@@ -68,30 +69,12 @@ impl Renderer {
             p_y += 1;
         }
     }
+
+
+    pub(crate) fn render_with_large_blocks_64(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32) {
+        Renderer::render_with_large_block(surface,img,x,y,rap,|p| p.as_character());
+    }
     pub(crate) fn render_with_gray_scale(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32) {
-        let w = img.width();
-        let h = img.height();
-        let mut img_y = 0u32;
-        let mut p_y = y;
-        while img_y < h {
-            let mut p_x = x;
-            let mut img_x = 0u32;
-            while img_x < w {
-                if rap == 1 {
-                    surface.fill_horizontal_line(p_x, p_y, p_x + 1, img.pixel(img_x, img_y).unwrap_or_default().as_gray_scale_character());
-                } else {
-                    surface.fill_horizontal_line(
-                        p_x,
-                        p_y,
-                        p_x + 1,
-                        img.compute_square_average_color(img_x, img_y, rap).as_gray_scale_character(),
-                    );
-                }
-                img_x += rap;
-                p_x += 2;
-            }
-            img_y += rap;
-            p_y += 1;
-        }
+        Renderer::render_with_large_block(surface,img,x,y,rap,|p| p.as_gray_scale_character());
     }
 }
