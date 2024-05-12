@@ -355,7 +355,7 @@ impl<'a> Value<'a> {
         return Err(Error::new(
             param_list,
             format!(
-                "Expecting a percentage value (integer) for parameter '{}' but found '{}'",
+                "Expecting a percentage value (a number followed by the percentage % sign) for parameter '{}' but found '{}'",
                 display_param_name, self.raw_data
             )
             .as_str(),

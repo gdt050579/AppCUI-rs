@@ -30,7 +30,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         cb.add_string_parameter("image", None);
         cb.add_command(").unwrap()");
     } else {
-        cb.add_command("Image::new(1,1), ");
+        cb.add_command("Image::new(1,1).unwrap()");
     }
     cb.add_layout();
     cb.add_enum_parameter("render", "image::RenderMethod", &RENDER_METHOD, Some("SmallBlocks"));
