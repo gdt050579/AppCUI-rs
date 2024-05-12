@@ -81,3 +81,32 @@ fn check_smallbloacks_scaling() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_macro_creation() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x336411586F530FA4)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_macro_creation_2() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0xD4B545A31AC55161)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, flags: Scrollbars, back: {char: *, fore: Yellow, back: Green}"));
+    a.add_window(w);
+    a.run();
+}

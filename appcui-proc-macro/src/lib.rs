@@ -363,6 +363,11 @@ pub fn canvas(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn imageviewer(input: TokenStream) -> TokenStream {
+    crate::controls::imageviewer::create(input)
+}
+
+#[proc_macro]
 pub fn tab(input: TokenStream) -> TokenStream {
     crate::controls::tab::create(input)
 }
