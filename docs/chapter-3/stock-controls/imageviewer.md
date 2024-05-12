@@ -83,5 +83,36 @@ The following keys are processed by a image viewer control if it has focus:
 
 ## Example
 
-The following code uses a image viewer to create a viewer over the Rust language definition from wikipedia:
+The following code draws a heart with differemt colors using an ImageView:
+
+```rs
+use appcui::prelude::*;
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut a = App::new().build()?;
+    let mut w = window!("Heart,d:c,w:15,h:7");
+    let heart = Image::with_str(r#"
+        |.............|
+        |...rr...rr...|
+        |..rrrr.rrrr..|
+        |.rrrrrrrrrrr.|
+        |.raaaaaaaaar.|
+        |..ryyyyyyyr..|
+        |   rwwwwwr   |
+        |....rwwwr....|
+        |.....rwr.....|
+        |......r......|
+    "#).unwrap();
+    w.add(ImageViewer::new(
+        heart,
+        Layout::new("d:c"),
+        image::RenderMethod::SmallBlocks,
+        image::Scale::NoScale,
+        imageviewer::Flags::None,
+    ));
+    a.add_window(w);
+    a.run();
+    Ok(())
+}
+```
 
