@@ -912,3 +912,121 @@ fn check_ferris_ascii_art() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_keyboard() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0xE687A7FF877E7CAD)
+        Key.Pressed(Right)
+        Paint('2')
+        CheckHash(0xAEDA243436089AD1)
+        Key.Pressed(Right,3)
+        Paint('3')
+        CheckHash(0x6675A042BCB18785)
+        Key.Pressed(Right,2)
+        Paint('4 (no changed)')
+        CheckHash(0x6675A042BCB18785)
+        Key.Pressed(Right,100)
+        Paint('4 (already at margin)')
+        CheckHash(0x6675A042BCB18785)
+        Key.Pressed(Left,3)
+        Paint('5')
+        CheckHash(0xE687A7FF877E7CAD)
+        Key.Pressed(Left,2)
+        Paint('Back to initial state')
+        CheckHash(0xE687A7FF877E7CAD)
+        Key.Pressed(Down,2)
+        Paint('6')
+        CheckHash(0xB186B00D9154AF51)
+        Key.Pressed(Down,4)
+        Paint('7')
+        CheckHash(0x7D04E0FF30ADBD6D)
+        Key.Pressed(Up,2)
+        Paint('8')
+        CheckHash(0x58A6EECA36A86306)
+        Key.Pressed(Shift+Up)
+        Paint('Back to initial state')
+        CheckHash(0xE687A7FF877E7CAD)
+        Key.Pressed(Shift+Right)
+        Paint('Right top margin')
+        CheckHash(0x6675A042BCB18785)
+        Key.Pressed(Shift+Down)
+        Paint('9')
+        CheckHash(0xED9975A640E4C422)
+        Key.Pressed(Shift+Left)
+        Paint('10')
+        CheckHash(0xD05FD48F6B38C61A)
+        Key.Pressed(Home)
+        Paint('Back to initial state')
+        CheckHash(0xE687A7FF877E7CAD)
+        Key.Pressed(End)
+        Paint('11')
+        CheckHash(0xED9975A640E4C422)
+";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    let mut i = imageviewer!("d:c,w:100%,h:100%,scale:50%,flags:ScrollBars");
+    i.set_image(ferris_image());
+    w.add(i);
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_keyboard_2() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x7E1A55A4EF19B93B)
+        Key.Pressed(Ctrl+Right)
+        Paint('2')
+        CheckHash(0xDF777EC8613B64D7)
+        Key.Pressed(Ctrl+Right)
+        Paint('3')
+        CheckHash(0xA7DBAFAE1C99A4A2)
+        Key.Pressed(Ctrl+Right)
+        Paint('4 (reach right margin)')
+        CheckHash(0x13087BE7BACD4556)
+        Key.Pressed(Ctrl+Right)
+        Paint('5 (already right margin)')
+        CheckHash(0x13087BE7BACD4556)
+        Key.Pressed(Ctrl+Down)
+        Paint('6')
+        CheckHash(0x997641F7719B635A)
+        Key.Pressed(Ctrl+Down)
+        Paint('7')
+        CheckHash(0xDD63003DDC15BD29)
+        Key.Pressed(Ctrl+Down)
+        Paint('8 (reached bottom-right margin')
+        CheckHash(0x4CA8845B7CA98615)
+        Key.Pressed(Ctrl+Down)
+        Paint('9 (already ay bottom-right margin')
+        CheckHash(0x4CA8845B7CA98615)
+        Key.Pressed(Ctrl+Left)
+        Paint('10')
+        CheckHash(0x9AD092366D1F105A)
+        Key.Pressed(Ctrl+Left,2)
+        Paint('11 (reached bottom-left margin)')
+        CheckHash(0x661B7011FB31F1D6)
+        Key.Pressed(Ctrl+Left)
+        Paint('12 (already at bottom-left margin)')
+        CheckHash(0x661B7011FB31F1D6)
+        Key.Pressed(Ctrl+Up)
+        Paint('13')
+        CheckHash(0x88FC6D76174940F7)
+        Key.Pressed(Ctrl+Up,2)
+        Paint('14 (initial state)')
+        CheckHash(0x7E1A55A4EF19B93B)
+        Key.Pressed(Ctrl+Up,100)
+        Paint('15 (already at initial state)')
+        CheckHash(0x7E1A55A4EF19B93B)
+";
+    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    let mut i = imageviewer!("d:c,w:100%,h:100%,flags:ScrollBars");
+    i.set_image(ferris_image());
+    w.add(i);
+    a.add_window(w);
+    a.run();
+}
