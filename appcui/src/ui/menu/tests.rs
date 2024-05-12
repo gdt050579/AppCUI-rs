@@ -483,9 +483,9 @@ fn check_dynamic_change_menu_2() {
         Paint('State_21')
         CheckHash(0xf788ef470502e34a)
         Key.Pressed(Escape)
-        Paint('State_22')
-        CheckHash(0x86cfc913da83fa16)
-            ";
+        Paint('State_22 (desktop is empty, no menu in menubar)')
+        CheckHash(0xDB84D57C7804761D)
+    ";
     let mut a = App::debug(60, 24, script).menu_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
@@ -1274,8 +1274,8 @@ fn check_menubar_with_keys() {
             Paint('State_57')
             CheckHash(0xf45c01a4988b0fe2)
             Key.Pressed(Escape)
-            Paint('State_58')
-            CheckHash(0x7d77e1090489150e)
+            Paint('State_58 (no menu visible in the menu bar)')
+            CheckHash(0xD0C81ECF174389FD)
         ";
     let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
     a.add_window(MyWindow::new());
@@ -1437,8 +1437,8 @@ fn check_menubar_recursive_shortcuts() {
             Paint('State_24')
             CheckHash(0x36480d44d0d8e490)
             Key.Pressed(Escape)
-            Paint('State_25')
-            CheckHash(0x7d77e1090489150e)    
+            Paint('State_25 (no menu visible in the menubar)')
+            CheckHash(0xD0C81ECF174389FD)    
         ";
     let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
     a.add_window(MyWindow::new());

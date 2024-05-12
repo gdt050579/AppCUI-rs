@@ -1505,22 +1505,25 @@ fn check_window_keybeforechildren() {
         text: String,
     }
     impl MyCustomControl {
-        fn new()->Self {
+        fn new() -> Self {
             MyCustomControl {
-                base: ControlBase::with_status_flags(Layout::new("d:c,w:100%,h:1"),StatusFlags::AcceptInput|StatusFlags::Enabled|StatusFlags::Visible),
+                base: ControlBase::with_status_flags(
+                    Layout::new("d:c,w:100%,h:1"),
+                    StatusFlags::AcceptInput | StatusFlags::Enabled | StatusFlags::Visible,
+                ),
                 text: String::new(),
             }
         }
     }
     impl OnPaint for MyCustomControl {
         fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
-            surface.clear(Character::new(' ',Color::White,Color::Black,CharFlags::None));
+            surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
             surface.write_string(1, 0, self.text.as_str(), CharAttribute::with_color(Color::White, Color::Black), false);
         }
     }
     impl OnKeyPressed for MyCustomControl {
         fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-            self.text = format!("Key = {:?}",key.code);
+            self.text = format!("Key = {:?}", key.code);
             if key.code == KeyCode::Enter {
                 // this is not a safe practice as a custom control can not emmit a ButtonEvent
                 // not it is possible when using the crate.
@@ -1549,7 +1552,7 @@ fn check_window_keybeforechildren() {
     }
     impl ButtonEvents for MyWin {
         fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
-            // the _handle is in fact the handle of the MyCustomControl 
+            // the _handle is in fact the handle of the MyCustomControl
             // as such we will not check it here nor we will try to convert it into a Button
             // as this will result in an undefine behavior (most likely a crash)
             // However, as we just want to test if the event reaches this point, we can use it safely.
@@ -1605,7 +1608,6 @@ fn check_window_on_close_default() {
     a.run();
 }
 
-
 #[test]
 fn check_window_close() {
     #[Window(events = ButtonEvents,internal = true)]
@@ -1613,7 +1615,7 @@ fn check_window_close() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:8")
+                base: window!("Test,d:c,w:30,h:8"),
             };
             me.add(button!("Close,d:c,w:14,h:1"));
             me
@@ -1643,13 +1645,13 @@ fn check_window_close() {
 fn check_modal_window_close() {
     #[ModalWindow(events = ButtonEvents, response: i32, internal=true)]
     struct MyModalWin {
-        value: i32
+        value: i32,
     }
     impl MyModalWin {
         fn new(value: i32) -> Self {
             let mut me = Self {
                 base: ModalWindow::with_type("Modal", Layout::new("d:c,w:50,h:6"), window::Flags::None, window::Type::Notification),
-                value
+                value,
             };
             if value % 2 == 0 {
                 me.add(button!("Close,d:c,w:24,h:1"));
@@ -1670,16 +1672,15 @@ fn check_modal_window_close() {
         }
     }
 
-
     #[Window(events = ButtonEvents,internal = true)]
     struct MyWin {
-        value: i32
+        value: i32,
     }
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
                 base: window!("Test,d:c,w:30,h:8"),
-                value: 0
+                value: 0,
             };
             me.add(button!("Run,d:c,w:14,h:1"));
             me
@@ -1711,6 +1712,50 @@ fn check_modal_window_close() {
         CheckHash(0xF724A64E6A51AC9E)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_window_close_with_commandbar_and_menu() {
+    #[Window(events = CommandBarEvents+MenuEvents, commands: A, internal = true)]
+    struct MyWin {
+        h_menu: Handle<Menu>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:30,h:8"),
+                h_menu: Handle::None,
+            };
+            w.h_menu = w.register_menu(menu!("File,class:MyWin,items=[{New,cmd:A}]"));
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Do something", mywin::Commands::A);
+        }
+
+        fn on_event(&mut self, _: mywin::Commands) { /* do nothing */
+        }
+    }
+    impl MenuEvents for MyWin {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.h_menu);
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (F1 Do something is visible, File menu is visible)')
+        CheckHash(0x3BC0083FFBDD10CF)
+        Key.Pressed(Escape)
+        Paint('window is closed - empty desktop & empty command bar, no menus')
+        // we should NOT see any command visible on the command bar
+        // we should NOT see any menu in the menu bar
+        CheckHash(0x75E8571FB3005265)
+    ";
+    let mut a = App::debug(60, 10, script).command_bar().menu_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
