@@ -3,7 +3,7 @@ use super::Image;
 use super::RenderMethod;
 use super::Scale;
 
-const HEART: &'static str = r#"
+const HEART: &str = r#"
         |BB..........BB|
         |B..rr....rr..B|
         |..rrrr..rrrr..|
@@ -16,7 +16,7 @@ const HEART: &'static str = r#"
         |GG....rr....GG|
 "#;
 
-const HEART_RED: &'static str = r#"
+const HEART_RED: &str = r#"
         |...rr....rr...|
         |..rrrr..rrrr..|
         |.rrrrrrrrrrrr.|
@@ -39,7 +39,7 @@ fn check_draw_smallblocks() {
 #[test]
 fn check_draw_smallblocks_scale() {
     let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(&HEART_RED).unwrap();
+    let i = Image::with_str(HEART_RED).unwrap();
     s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, Scale::NoScale);
     s.draw_image(20, 1, &i, RenderMethod::SmallBlocks, Scale::Scale50);
     //s.print();
@@ -57,7 +57,7 @@ fn check_draw_gray() {
 #[test]
 fn check_draw_gray_scale() {
     let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(&HEART_RED).unwrap();
+    let i = Image::with_str(HEART_RED).unwrap();
     s.draw_image(1, 1, &i, RenderMethod::GrayScale, Scale::NoScale);
     s.draw_image(30, 1, &i, RenderMethod::GrayScale, Scale::Scale50);
     //s.print();
@@ -75,7 +75,7 @@ fn check_draw_large_chars_64() {
 #[test]
 fn check_draw_large_chars_64_scale() {
     let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(&HEART_RED).unwrap();
+    let i = Image::with_str(HEART_RED).unwrap();
     s.draw_image(1, 1, &i, RenderMethod::LargeBlocks64Colors, Scale::NoScale);
     s.draw_image(30, 1, &i, RenderMethod::LargeBlocks64Colors, Scale::Scale50);
     //s.print();
@@ -93,7 +93,7 @@ fn check_draw_ascii_art() {
 #[test]
 fn check_draw_ascii_art_scale() {
     let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(&HEART_RED).unwrap();
+    let i = Image::with_str(HEART_RED).unwrap();
     s.draw_image(1, 1, &i, RenderMethod::AsciiArt, Scale::NoScale);
     s.draw_image(30, 1, &i, RenderMethod::AsciiArt, Scale::Scale50);
     //s.print();
