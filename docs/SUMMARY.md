@@ -56,7 +56,7 @@
         - [Label](chapter-3/stock-controls/label.md)
         - [Line]()
         - [ListView]()
-        - [ImageViewer]()
+        - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
         - [KeySelector](chapter-3/stock-controls/keyselector.md)
         - [NumericSelector]()
         - [Panel](chapter-3/stock-controls/panel.md)
