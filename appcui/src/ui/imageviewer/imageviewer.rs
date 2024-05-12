@@ -1,11 +1,14 @@
 use crate::prelude::components::ComponentsToolbar;
 use crate::prelude::*;
-use crate::ui::canvas::initialization_flags::Flags;
 use crate::ui::components::ScrollBar;
+use crate::ui::imageviewer::initialization_flags::Flags;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
-pub struct Canvas {
+pub struct ImageViewer {
     surface: Surface,
+    image: Image,
+    render_method: image::RenderMethod,
+    scale: image::Scale,
     x: i32,
     y: i32,
     background: Option<Character>,
@@ -15,9 +18,9 @@ pub struct Canvas {
     horizontal_scrollbar: Handle<ScrollBar>,
     vertical_scrollbar: Handle<ScrollBar>,
 }
-impl Canvas {
-    pub fn new(canvas_size: Size, layout: Layout, flags: Flags) -> Self {
-        let mut canvas = Self {
+impl ImageViewer {
+    pub fn new(image: Image, layout: Layout, render_method: image::RenderMethod, scale: image::Scale, flags: Flags) -> Self {
+        let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
                 (StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput)
@@ -27,30 +30,56 @@ impl Canvas {
                         StatusFlags::None
                     },
             ),
-            surface: Surface::new(canvas_size.width, canvas_size.height),
+            surface: Surface::new(image.width(), image.height()),
             x: 0,
             y: 0,
             flags,
+            image,
+            scale,
+            render_method,
             background: None,
             drag_point: None,
             components: ComponentsToolbar::with_capacity(if flags == Flags::ScrollBars { 2 } else { 0 }),
             horizontal_scrollbar: Handle::None,
             vertical_scrollbar: Handle::None,
         };
+        obj.update_surface();
         if flags == Flags::ScrollBars {
-            let sz = canvas.surface.size();
-            canvas.horizontal_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64, false));
-            canvas.vertical_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64, true));
+            let sz = obj.surface.size();
+            obj.horizontal_scrollbar = obj.components.add(ScrollBar::new(sz.width as u64, false));
+            obj.vertical_scrollbar = obj.components.add(ScrollBar::new(sz.width as u64, true));
         }
-        canvas
+        obj
     }
-    pub fn resize_surface(&mut self, new_size: Size) {
-        self.surface.resize(new_size);
+    pub fn set_image(&mut self, image: Image) {
+        self.image = image;
+        self.update_surface();
+    }
+    #[inline(always)]
+    pub fn scale(&self) -> image::Scale {
+        self.scale
+    }
+    pub fn set_scale(&mut self, scale: image::Scale) {
+        self.scale = scale;
+        self.update_surface();
+    }
+    #[inline(always)]
+    pub fn render_method(&self) -> image::RenderMethod {
+        self.render_method
+    }
+    pub fn set_render_method(&mut self, render_method: image::RenderMethod) {
+        self.render_method = render_method;
+        self.update_surface();
+    }
+    fn update_surface(&mut self) {
+        let sz = self.image.render_size(self.render_method, self.scale);
+        self.surface.resize(sz);
+        self.surface.draw_image(0, 0, &self.image, self.render_method, self.scale);
         let sz = self.surface.size();
         let control_size = self.size();
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
             //s.set_count(sz.width as u64);
-            s.update_count(control_size.width as u64, sz.width as u64);
+            s.update_count(control_size.width as u64, sz.width as u64)
         }
         if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
             //s.set_count(sz.height as u64);
@@ -58,10 +87,7 @@ impl Canvas {
         }
         self.move_scroll_to(self.x, self.y);
     }
-    #[inline(always)]
-    pub fn get_drawing_surface(&mut self) -> &mut Surface {
-        &mut self.surface
-    }
+
     pub fn set_backgound(&mut self, backgroud_char: Character) {
         self.background = Some(backgroud_char);
     }
@@ -102,7 +128,7 @@ impl Canvas {
         }
     }
 }
-impl OnResize for Canvas {
+impl OnResize for ImageViewer {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.components.on_resize(&self.base);
         let paint_sz = self.surface.size();
@@ -115,11 +141,11 @@ impl OnResize for Canvas {
         self.move_scroll_to(self.x, self.y);
     }
 }
-impl OnPaint for Canvas {
+impl OnPaint for ImageViewer {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
             self.components.paint(surface, theme, self);
-            surface.reduce_clip_by(0,0,1,1);
+            surface.reduce_clip_by(0, 0, 1, 1);
         }
         if let Some(back) = self.background {
             surface.clear(back);
@@ -127,7 +153,7 @@ impl OnPaint for Canvas {
         surface.draw_surface(self.x, self.y, &self.surface);
     }
 }
-impl OnKeyPressed for Canvas {
+impl OnKeyPressed for ImageViewer {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         match key.value() {
             key!("Left") => {
@@ -170,11 +196,11 @@ impl OnKeyPressed for Canvas {
                 self.move_scroll_to(self.x - self.size().width as i32, self.y);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Up") | key!("PageUp")=> {
+            key!("Ctrl+Up") | key!("PageUp") => {
                 self.move_scroll_to(self.x, self.y + self.size().height as i32);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Down") | key!("PageDown")=> {
+            key!("Ctrl+Down") | key!("PageDown") => {
                 self.move_scroll_to(self.x, self.y - self.size().height as i32);
                 EventProcessStatus::Processed
             }
@@ -190,7 +216,7 @@ impl OnKeyPressed for Canvas {
         }
     }
 }
-impl OnMouseEvent for Canvas {
+impl OnMouseEvent for ImageViewer {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         let res = self.components.on_mouse_event(event);
         if res.should_update() {
@@ -251,4 +277,3 @@ impl OnMouseEvent for Canvas {
         }
     }
 }
-

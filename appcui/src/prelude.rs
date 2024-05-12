@@ -16,6 +16,7 @@ pub use super::ui::keyselector::events::KeySelectorEvents;
 pub use super::ui::textfield;
 pub use super::ui::textfield::events::TextFieldEvents;
 pub use super::ui::canvas;
+pub use super::ui::imageviewer;
 pub use super::ui::password;
 pub use super::ui::password::events::PasswordEvents;
 pub use super::ui::common::traits::*;

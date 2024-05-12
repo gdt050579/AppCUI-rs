@@ -19,6 +19,7 @@
         - [Web]()
     - [Screen area and sizes](chapter-2/screen.md)
     - [Surface]() <!-- (chapter-2/surface.md) -->
+        - [Images](chapter-2/images.md)
     - [Input]() <!-- (chapter-2/input.md) -->
         - [Mouse]()
         - [Keyboard]()
@@ -55,7 +56,7 @@
         - [Label](chapter-3/stock-controls/label.md)
         - [Line]()
         - [ListView]()
-        - [ImageViewer]()
+        - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
         - [KeySelector](chapter-3/stock-controls/keyselector.md)
         - [NumericSelector]()
         - [Panel](chapter-3/stock-controls/panel.md)

@@ -29,8 +29,8 @@ extern crate proc_macro;
 /// * CommandBarEvents
 /// * MenuEvents
 ///
-/// None of the **overwrite** or **events** parameters should be present. If not present, a
-/// default implementation will be provided.
+/// If none of the **overwrite** or **events** parameters is present, a default implementation 
+/// will be provided.
 ///
 /// # Example
 /// ```rust,compile_fail
@@ -360,6 +360,11 @@ pub fn threestatebox(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn canvas(input: TokenStream) -> TokenStream {
     crate::controls::canvas::create(input)
+}
+
+#[proc_macro]
+pub fn imageviewer(input: TokenStream) -> TokenStream {
+    crate::controls::imageviewer::create(input)
 }
 
 #[proc_macro]

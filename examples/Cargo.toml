@@ -98,3 +98,11 @@ path = "single_window/main.rs"
 [[example]]
 name = "tic-tac-toe"
 path = "tic-tac-toe/main.rs"
+
+[[example]]
+name = "images"
+path = "images/main.rs"
+
+[[example]]
+name = "ferris"
+path = "ferris/main.rs"

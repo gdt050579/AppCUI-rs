@@ -10,9 +10,6 @@ use super::CharAttribute;
 use super::CharFlags;
 use super::Character;
 use super::Color;
-use super::Image;
-use super::ImageRenderingMethod;
-use super::ImageScaleMethod;
 use super::LineType;
 use super::Surface;
 use super::TextAlignament;
@@ -325,68 +322,6 @@ fn check_colors() {
     assert_eq!(s.compute_hash(), 0xF47F25A9A2342269);
 }
 
-#[test]
-fn check_draw_imge() {
-    let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(
-        r#"
-        |BB.........BB|
-        |B..rr...rr..B|
-        |..rrrr.rrrr..|
-        |.rrrrrrrrrrr.|
-        |.raaaaaaaaar.|
-        |..ryyyyyyyr..|
-        |   rwwwwwr   |
-        |....rwwwr....|
-        |G....rwr....G|
-        |GG....r....GG|
-    "#,
-    )
-    .unwrap();
-    s.draw_image(
-        1,
-        1,
-        &i,
-        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
-        ImageScaleMethod::NoScale,
-    );
-    s.draw_image(
-        20,
-        1,
-        &i,
-        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
-        ImageScaleMethod::Scale50,
-    );
-    s.draw_image(
-        30,
-        1,
-        &i,
-        ImageRenderingMethod::PixelTo16ColorsSmallBlock,
-        ImageScaleMethod::Scale25,
-    );
-    //s.print();
-    assert_eq!(s.compute_hash(), 0xFD04064498933DB);
-    s.clear(Character::default());
-    s.draw_image(
-        0,
-        0,
-        &i,
-        ImageRenderingMethod::PixelTo64ColorsLargeBlock,
-        ImageScaleMethod::NoScale,
-    );
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x7BAAAA0605CBFA25);
-    s.clear(Character::default());
-    s.draw_image(
-        0,
-        0,
-        &i,
-        ImageRenderingMethod::GrayScale,
-        ImageScaleMethod::NoScale,
-    );
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x9803283450732669);
-}
 
 #[test]
 fn check_write_string_single_line() {
@@ -463,7 +398,7 @@ fn check_resize() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xB015E3D08D4D238B);
     s.resize(Size::new(20, 5));
-    assert_eq!(s.get_size(), Size::new(20,5));
+    assert_eq!(s.size(), Size::new(20,5));
     s.write_string(
         1,
         1,
