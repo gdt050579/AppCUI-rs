@@ -79,7 +79,7 @@ fn check_state_commands() {
     #[Window(events = CommandBarEvents, internal=true,commands=[ChangeOption,ShowState])]
     struct MyWin {
         option: bool,
-        state_is_visible: bool
+        state_is_visible: bool,
     }
     impl MyWin {
         fn new() -> Self {
@@ -107,7 +107,62 @@ fn check_state_commands() {
         fn on_event(&mut self, command_id: mywin::Commands) {
             match command_id {
                 mywin::Commands::ShowState => self.state_is_visible = !self.state_is_visible,
-                mywin::Commands::ChangeOption => self.option = !self.option
+                mywin::Commands::ChangeOption => self.option = !self.option,
+            }
+            self.request_update();
+        }
+    }
+
+    let mut a = App::debug(60, 10, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_mouse_selection() {
+    let script = "
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('Initial state')
+        CheckHash(0xBCC08015A93E5C3D)
+        Mouse.Move(10,9)
+        Paint('Mouse over F1 command')
+        CheckHash(0x5DDF2DEC0A8B0785)
+        Mouse.Click(10,9,left)
+        Paint('Mouse over F1 command - F1 command should be selected')
+        CheckHash(0x5DDF2DEC0A8B0785)
+        Mouse.Move(18,9)        
+        Paint('Mouse moved F1 command - F1 command should be selected')
+        CheckHash(0x71DB394D82332DCF)
+        Mouse.Click(18,9,left)
+        Paint('Mouse OUTISIDE F1 command - F1 command should NOT be selected')
+        CheckHash(0xBCC08015A93E5C3D)
+    ";
+
+    #[Window(events = CommandBarEvents, internal=true,commands=A)]
+    struct MyWin {
+        state: bool,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            Self {
+                base: window!("Win,x:1,y:1,w:20,h:7"),
+                state: false,
+            }
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            if self.state {
+                commandbar.set(key!("F1"), "Data is visible", mywin::Commands::A);
+            } else {
+                commandbar.set(key!("F1"), "Hidden", mywin::Commands::A);
+            }
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            match command_id {
+                mywin::Commands::A => self.state = !self.state,
             }
             self.request_update();
         }
