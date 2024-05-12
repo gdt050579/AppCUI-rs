@@ -1030,3 +1030,114 @@ fn check_keyboard_2() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_resize() {
+    #[Window(events=CommandBarEvents,commands:[Scale,RenderMethod], internal: true)]
+    struct MyWin {
+        himg: Handle<ImageViewer>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Image,r:1,t:1,l:1,b:2,flags: Sizeable"),
+                himg: Handle::None,
+            };
+            let i = ImageViewer::new(
+                ferris_image(),
+                Layout::new("d:c"),
+                image::RenderMethod::SmallBlocks,
+                image::Scale::NoScale,
+                imageviewer::Flags::ScrollBars,
+            );
+            w.himg = w.add(i);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            let sc_name = match self.control(self.himg).map(|i| i.scale()).unwrap_or(image::Scale::NoScale) {
+                Scale::NoScale => "Scale:100%",
+                Scale::Scale50 => "Scale:50%",
+                Scale::Scale33 => "Scale:33%",
+                Scale::Scale25 => "Scale:25%",
+                Scale::Scale20 => "Scale:20%",
+                Scale::Scale10 => "Scale:10%",
+                Scale::Scale5 => "Scale:5%",
+            };
+            commandbar.set(key!("F1"), sc_name, mywin::Commands::Scale);
+            let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RenderMethod::SmallBlocks) {
+                RenderMethod::SmallBlocks => "Method:SmallBlocks",
+                RenderMethod::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
+                RenderMethod::GrayScale => "Method:GrayScale",
+                RenderMethod::AsciiArt => "Method:AsciiArt",
+            };
+            commandbar.set(key!("F2"), rd_name, mywin::Commands::RenderMethod);
+        }
+    
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            let h = self.himg;
+            if let Some(img) = self.control_mut(h) {
+                match command_id {
+                    mywin::Commands::Scale => {
+                        let sc = img.scale();
+                        match sc {
+                            Scale::NoScale => img.set_scale(image::Scale::Scale50),
+                            Scale::Scale50 => img.set_scale(image::Scale::Scale33),
+                            Scale::Scale33 => img.set_scale(image::Scale::Scale25),
+                            Scale::Scale25 => img.set_scale(image::Scale::Scale20),
+                            Scale::Scale20 => img.set_scale(image::Scale::Scale10),
+                            Scale::Scale10 => img.set_scale(image::Scale::Scale5),
+                            Scale::Scale5 => img.set_scale(image::Scale::NoScale),
+                        }
+                    }
+                    mywin::Commands::RenderMethod => {
+                        let m = img.render_method();
+                        match m {
+                            RenderMethod::SmallBlocks => img.set_render_method(image::RenderMethod::LargeBlocks64Colors),
+                            RenderMethod::LargeBlocks64Colors => img.set_render_method(image::RenderMethod::GrayScale),
+                            RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::AsciiArt),
+                            RenderMethod::AsciiArt => img.set_render_method(image::RenderMethod::SmallBlocks),
+                        }
+                    },
+                }
+            }
+            self.request_update();
+        }
+    }
+    
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x254C230E20162366)
+        Key.Pressed(End);
+        Paint('Bottom-right view')
+        CheckHash(0x83968372270053CA)
+        Key.Pressed(F1)
+        Paint('Scale 50% - still right-bottom corner')
+        CheckHash(0x47C7A4F7921EBA48)
+        Key.Pressed(F1)
+        Paint('Scale 33% - full image')
+        CheckHash(0x6D5016A101BD20B8)
+        Key.Pressed(F2,2)
+        Paint('Scale 33% - Gray scale')
+        CheckHash(0xDA77D4E54A3D71CA)
+        Key.Pressed(End)
+        Paint('Scale 33% - Gray scale - right-bottom corner')
+        CheckHash(0x81EC3DC991F1D7AA)
+        Key.Pressed(F1)
+        Paint('Scale 25% - Gray scale - right bottom corner')
+        CheckHash(0xD11EF0A644DBD149)
+        Key.Pressed(F1)
+        Paint('Scale 20% - Gray scale - right bottom corner')
+        CheckHash(0xB2742B8A5C81CEC4)
+        Key.Pressed(F1)
+        Paint('Scale 10% - Gray scale - full image')
+        CheckHash(0x4929B46F945F5DED)
+    ";
+    
+    let mut a = App::debug(90, 20, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+
+}
