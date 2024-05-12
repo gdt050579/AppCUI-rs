@@ -448,6 +448,7 @@ impl RuntimeManager {
             if !self.to_remove_list.is_empty() {
                 self.remove_deleted_controls();
                 self.recompute_parent_indexes = true;
+                self.request_update_command_and_menu_bars = true;
             }
 
             // If we reach this point, there should not be any change in the logic of controls
