@@ -121,8 +121,7 @@ fn check_state_commands() {
 #[test]
 fn check_mouse_selection() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('Initial state')
         CheckHash(0xBCC08015A93E5C3D)
         Mouse.Move(10,9)
@@ -130,7 +129,7 @@ fn check_mouse_selection() {
         CheckHash(0x5DDF2DEC0A8B0785)
         Mouse.Click(10,9,left)
         Paint('Mouse over F1 command - F1 command should be selected')
-        CheckHash(0x5DDF2DEC0A8B0785)
+        CheckHash(0x71DB394D82332DCF)
         Mouse.Move(18,9)        
         Paint('Mouse moved F1 command - F1 command should be selected')
         CheckHash(0x71DB394D82332DCF)

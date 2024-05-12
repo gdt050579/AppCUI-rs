@@ -61,6 +61,7 @@ pub(crate) struct RuntimeManager {
     menubar: Option<MenuBar>,
     recompute_layout: bool,
     repaint: bool,
+    mouse_pos: Point,
     desktop_os_start_called: bool,
     recompute_parent_indexes: bool,
     request_update_command_and_menu_bars: bool,
@@ -101,6 +102,7 @@ impl RuntimeManager {
             request_update_command_and_menu_bars: true,
             recompute_parent_indexes: true,
             single_window: builder.single_window,
+            mouse_pos: Point::new(-1, -1),
             request_focus: None,
             current_focus: None,
             mouse_over_control: Handle::None,
@@ -732,7 +734,9 @@ impl RuntimeManager {
             }
             menubar.update_positions();
         }
+        self.process_menu_and_cmdbar_mousemove(self.mouse_pos.x, self.mouse_pos.y);
         self.request_update_command_and_menu_bars = false;
+        
     }
 
     fn find_last_leaf(&mut self, handle: Handle<UIElement>) -> Handle<UIElement> {
@@ -1352,6 +1356,11 @@ impl MouseMethods for RuntimeManager {
     }
 
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
+        // update mouse position
+        self.mouse_pos.x = event.x;
+        self.mouse_pos.y = event.y;
+        
+        
         if let Some(menu) = self.get_opened_menu() {
             self.repaint |= menu.on_mouse_wheel(event.direction) == EventProcessStatus::Processed;
             return;
@@ -1428,6 +1437,10 @@ impl MouseMethods for RuntimeManager {
         }
     }
     fn process_mousemove_event(&mut self, event: MouseMoveEvent) {
+        // update mouse position
+        self.mouse_pos.x = event.x;
+        self.mouse_pos.y = event.y;
+        
         match self.mouse_locked_object {
             MouseLockedObject::None => self.process_mousemove(event),
             MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
@@ -1436,6 +1449,9 @@ impl MouseMethods for RuntimeManager {
         }
     }
     fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
+        // update mouse position
+        self.mouse_pos.x = event.x;
+        self.mouse_pos.y = event.y;
         // Hide ToolTip
         self.hide_tooltip();
         // check contextual menu
@@ -1486,6 +1502,10 @@ impl MouseMethods for RuntimeManager {
         self.mouse_locked_object = MouseLockedObject::None;
     }
     fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent) {
+        // update mouse position
+        self.mouse_pos.x = event.x;
+        self.mouse_pos.y = event.y;
+        
         // check contextual menus
         if let Some(menu) = self.get_opened_menu() {
             self.repaint |= menu.on_mouse_released(event.x, event.y) == EventProcessStatus::Processed;
@@ -1522,6 +1542,10 @@ impl MouseMethods for RuntimeManager {
         self.mouse_locked_object = MouseLockedObject::None;
     }
     fn process_mouse_dblclick_event(&mut self, event: MouseDoubleClickEvent) {
+        // update mouse position
+        self.mouse_pos.x = event.x;
+        self.mouse_pos.y = event.y;
+        
         // Hide ToolTip
         self.hide_tooltip();
         // check for a control
