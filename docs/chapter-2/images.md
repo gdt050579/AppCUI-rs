@@ -10,6 +10,7 @@ To create an image, use the class `Image` with the following construction method
 ## Methods
 
 Once an image is create you can use the following methods to manipulate it:
+
 | Method             | Purpose                                                                                                                                                          |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `clear(...)`       | Fills the entire image with a specific pixel                                                                                                                     |
