@@ -20,8 +20,8 @@
     - [Screen area and sizes](chapter-2/screen.md)
     - [Surface]() <!-- (chapter-2/surface.md) -->
         - [Images](chapter-2/images.md)
-    - [Input]() <!-- (chapter-2/input.md) -->
-        - [Mouse]()
+    - [Input](chapter-2/input.md)
+        - [Mouse](chapter-2/keyboard.md)
         - [Keyboard]()
     - [Clipboard](chapter-2/clipboard.md)
 
