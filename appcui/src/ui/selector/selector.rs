@@ -66,6 +66,10 @@ where
         EnumSelector::from_index(self.current_index)
     }
 
+    fn visible_items(&self) -> u32 {
+        let height = self.expanded_size().height;
+        return if height > 3 { height - 3 } else { 1 };
+    }
     fn update_current_index(&mut self, pos: u32) {
         let expanded_size = self.expanded_size();
         // there should be atleast one item visible
@@ -225,14 +229,27 @@ where
                 self.update_current_index(self.current_index + 1);
                 return EventProcessStatus::Processed;
             }
-            // key!("Left") => {
-            //     self.next_color(expanded, -1);
-            //     return EventProcessStatus::Processed;
-            // }
-            // key!("Right") => {
-            //     self.next_color(expanded, 1);
-            //     return EventProcessStatus::Processed;
-            // }
+            key!("Home") => {
+                self.update_current_index(0);
+                return EventProcessStatus::Processed;
+            }
+            key!("End") => {
+                self.update_current_index(u32::MAX);
+                return EventProcessStatus::Processed;
+            }
+            key!("PageUp") => {
+                let page_count = self.visible_items();
+                if self.current_index > page_count {
+                    self.update_current_index(self.current_index - page_count);
+                } else {
+                    self.update_current_index(0);
+                }
+                return EventProcessStatus::Processed;
+            }
+            key!("PageDown") => {
+                self.update_current_index(self.current_index + self.visible_items());
+                return EventProcessStatus::Processed;
+            }
             _ => {}
         }
         EventProcessStatus::Ignored
