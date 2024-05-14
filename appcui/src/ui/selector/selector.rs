@@ -318,6 +318,19 @@ where
                 self.on_default_action();
                 EventProcessStatus::Processed
             }
+            MouseEvent::Wheel(direction) => {
+                match direction {
+                    MouseWheelDirection::Up => {
+                        if self.current_index > 0 {
+                            self.update_current_index(self.current_index - 1);
+                        }
+                    }
+                    MouseWheelDirection::Down => self.update_current_index(self.current_index + 1),
+                    _ => {}
+                }
+                EventProcessStatus::Processed
+            }
+
             _ => EventProcessStatus::Ignored,
         }
     }
