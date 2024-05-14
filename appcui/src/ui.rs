@@ -22,6 +22,7 @@ pub mod canvas;
 pub mod imageviewer;
 pub mod keyselector;
 pub mod components;
+pub mod selector;
 
 // re-export
 pub use common::ControlBase;
@@ -42,5 +43,6 @@ pub use canvas::Canvas;
 pub use imageviewer::ImageViewer;
 pub use keyselector::KeySelector;
 pub use colorpicker::ColorPicker;
+pub use selector::Selector;
 pub use command_bar::CommandBar;
 pub use layout::Layout;
