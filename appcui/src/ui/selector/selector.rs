@@ -15,6 +15,7 @@ where
 {
     current_index: u32,
     header_y_ofs: i32,
+    expanded_panel_y: i32,
     flags: Flags,
     _phanton: PhantomData<T>,
 }
@@ -27,6 +28,7 @@ where
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             current_index: u32::MAX,
             header_y_ofs: 0,
+            expanded_panel_y: 1,
             flags,
             _phanton: PhantomData,
         };
@@ -91,91 +93,100 @@ where
             surface.write_char(px + 1, self.header_y_ofs, Character::with_attributes(SpecialChar::TriangleDown, col_text));
         }
         // assuming the control is expanded
-        // if self.is_expanded() {
-        //     let size = self.expanded_size();
-        //     let col = theme.menu.text.normal;
-        //     let mut space_char = Character::with_attributes(' ', col);
-        //     surface.fill_rect(
-        //         Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
-        //         space_char,
-        //     );
-        //     surface.draw_rect(
-        //         Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
-        //         LineType::Single,
-        //         col,
-        //     );
-        //     for y in 0..COLOR_MATRIX_HEIGHT {
-        //         for x in 0..COLOR_MATRIX_WIDTH {
-        //             space_char.background = Color::from_value(y * COLOR_MATRIX_WIDTH + x).unwrap();
-        //             surface.fill_horizontal_line_with_size(
-        //                 x * SPACES_PER_COLOR + 1,
-        //                 y + 1 + self.expanded_panel_y,
-        //                 SPACES_PER_COLOR as u32,
-        //                 space_char,
-        //             );
-        //             if space_char.background == self.color {
-        //                 surface.write_char(
-        //                     x * SPACES_PER_COLOR + ((SPACES_PER_COLOR + 1) >> 1),
-        //                     y + 1 + self.expanded_panel_y,
-        //                     Character::new(
-        //                         SpecialChar::CheckMark,
-        //                         REVERSED_COLORS[(y * COLOR_MATRIX_WIDTH + x) as usize],
-        //                         space_char.background,
-        //                         CharFlags::None,
-        //                     ),
-        //                 );
-        //             }
-        //             if self.mouse_on_color_index == (y * COLOR_MATRIX_WIDTH + x) {
-        //                 let x_p = x * SPACES_PER_COLOR + 1;
-        //                 let y_p = y + 1 + self.expanded_panel_y;
-        //                 let c_attr = CharAttribute::new(
-        //                     REVERSED_COLORS[(y * COLOR_MATRIX_WIDTH + x) as usize],
-        //                     space_char.background,
-        //                     CharFlags::None,
-        //                 );
-        //                 surface.write_char(x_p, y_p, Character::with_attributes(SpecialChar::TriangleLeft, c_attr));
-        //                 surface.write_char(x_p + 2, y_p, Character::with_attributes(SpecialChar::TriangleRight, c_attr));
-        //             }
-        //         }
-        //     }
-
-        //     // transparent part
-        //     let attr = match () {
-        //         _ if self.color == Color::Transparent => theme.menu.text.focused,
-        //         _ if self.mouse_on_color_index == 16 => theme.menu.text.hovered,
-        //         _ => theme.menu.text.normal,
-        //     };
-        //     surface.write_string(TRANSPARENT_CHECKBOX_X_OFFSET, 1 + self.expanded_panel_y, "[ ] Transparent", attr, false);
-        //     if self.color == Color::Transparent {
-        //         surface.write_char(
-        //             TRANSPARENT_CHECKBOX_X_OFFSET + 1,
-        //             1 + self.expanded_panel_y,
-        //             Character::with_attributes(SpecialChar::CheckMark, theme.menu.symbol.normal),
-        //         );
-        //         surface.set_cursor(TRANSPARENT_CHECKBOX_X_OFFSET + 1, 1 + self.expanded_panel_y);
-        //     }
-        // }
+        if self.is_expanded() {
+            let size = self.expanded_size();
+            let col = theme.menu.text.normal;
+            let mut space_char = Character::with_attributes(' ', col);
+            surface.fill_rect(
+                Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+                space_char,
+            );
+            surface.draw_rect(
+                Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+                LineType::Single,
+                col,
+            );
+        }
     }
 }
 impl<T> OnExpand for Selector<T>
 where
     T: EnumSelector + Copy + Eq,
 {
-    fn on_expand(&mut self, _direction: ExpandedDirection) {}
-
-    fn on_pack(&mut self) {}
+    fn on_expand(&mut self, direction: ExpandedDirection) {
+        match direction {
+            ExpandedDirection::OnTop => {
+                self.expanded_panel_y = 0;
+                self.header_y_ofs = (self.expanded_size().height as i32) - 1;
+            }
+            ExpandedDirection::OnBottom => {
+                self.expanded_panel_y = 1;
+                self.header_y_ofs = 0;
+            }
+        }
+        //self.mouse_on_color_index = -1;
+    }
+    fn on_pack(&mut self) {
+        self.expanded_panel_y = 1;
+        self.header_y_ofs = 0;
+    }
 }
 impl<T> OnDefaultAction for Selector<T>
 where
     T: EnumSelector + Copy + Eq,
 {
-    fn on_default_action(&mut self) {}
+    fn on_default_action(&mut self) {
+        if self.is_expanded() {
+            self.pack();
+        } else {
+            let w = self.size().width;
+            let h = if self.flags.contains(Flags::AllowNoneVariant) {
+                T::count() + 3
+            } else {
+                T::count() + 2
+            };
+            self.expand(Size::new(w, h.min(4)), Size::new(w, h));
+        }
+    }
 }
 impl<T> OnKeyPressed for Selector<T>
 where
     T: EnumSelector + Copy + Eq,
 {
-    fn on_key_pressed(&mut self, _key: Key, _character: char) -> EventProcessStatus {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        let expanded = self.is_expanded();
+
+        match key.value() {
+            key!("Escape") => {
+                if expanded {
+                    self.pack();
+                    return EventProcessStatus::Processed;
+                } else {
+                    return EventProcessStatus::Ignored;
+                }
+            }
+            key!("Space") | key!("Enter") => {
+                self.on_default_action();
+                return EventProcessStatus::Processed;
+            }
+            // key!("Up") => {
+            //     self.next_color(expanded, if expanded { -COLOR_MATRIX_WIDTH } else { -1 });
+            //     return EventProcessStatus::Processed;
+            // }
+            // key!("Down") => {
+            //     self.next_color(expanded, if expanded { COLOR_MATRIX_WIDTH } else { 1 });
+            //     return EventProcessStatus::Processed;
+            // }
+            // key!("Left") => {
+            //     self.next_color(expanded, -1);
+            //     return EventProcessStatus::Processed;
+            // }
+            // key!("Right") => {
+            //     self.next_color(expanded, 1);
+            //     return EventProcessStatus::Processed;
+            // }
+            _ => {}
+        }
         EventProcessStatus::Ignored
     }
 }
@@ -183,7 +194,48 @@ impl<T> OnMouseEvent for Selector<T>
 where
     T: EnumSelector + Copy + Eq,
 {
-    fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => {
+                if !self.is_expanded() {
+                    if let Some(value) = T::from_index(self.current_index) {
+                        let desc = EnumSelector::description(&value);
+                        if !desc.is_empty() {
+                            self.show_tooltip(desc);
+                        }
+                    }
+                }
+                EventProcessStatus::Processed
+            }
+
+            MouseEvent::Leave => {
+                self.hide_tooltip();
+                EventProcessStatus::Processed
+            }
+            // MouseEvent::Over(p) => {
+            //     let idx = self.mouse_to_color_index(p.x, p.y);
+            //     if idx != self.mouse_on_color_index {
+            //         self.mouse_on_color_index = idx;
+            //         return EventProcessStatus::Processed;
+            //     }
+            //     EventProcessStatus::Ignored
+            // }
+            // MouseEvent::Pressed(data) => {
+            //     let idx = self.mouse_to_color_index(data.x, data.y);
+            //     if let Some(col) = Color::from_value(idx) {
+            //         if col != self.color {
+            //             self.color = col;
+            //             self.raise_event(ControlEvent {
+            //                 emitter: self.handle,
+            //                 receiver: self.event_processor,
+            //                 data: ControlEventData::ColorPicker(EventData { color: col }),
+            //             });
+            //         }
+            //     }
+            //     self.on_default_action();
+            //     EventProcessStatus::Processed
+            // }
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
