@@ -15,6 +15,7 @@ where
 {
     start_index: u32,
     current_index: u32,
+    mouse_index: u32,
     header_y_ofs: i32,
     expanded_panel_y: i32,
     flags: Flags,
@@ -31,6 +32,7 @@ where
             current_index: 0,
             header_y_ofs: 0,
             expanded_panel_y: 1,
+            mouse_index: u32::MAX,
             flags,
             _phanton: PhantomData,
         };
@@ -86,6 +88,20 @@ where
         } else if self.start_index + visible_items <= self.current_index {
             self.start_index = self.current_index + 1 - visible_items;
         }
+        if self.start_index + visible_items > (last_item_index + 1) {
+            self.start_index = last_item_index + 1 - visible_items;
+        }
+    }
+    fn mouse_pos_to_index(&self, x: i32, y: i32) -> u32 {
+        if !self.is_expanded() {
+            return u32::MAX;
+        }
+        let size = self.expanded_size();
+        let visible_items = (if size.height > 3 { size.height - 3 } else { 1 }) as i32;
+        if (x > 0) && (x < size.width as i32) && (y > self.expanded_panel_y) && (y <= self.expanded_panel_y + visible_items) {
+            return self.start_index + (y - (self.expanded_panel_y + 1)) as u32;
+        }
+        return u32::MAX;
     }
 }
 impl<T> OnPaint for Selector<T>
@@ -152,6 +168,13 @@ where
                         (size.width - 2) as i32,
                         Character::with_attributes(0, theme.menu.text.hovered),
                     );
+                } else if i == self.mouse_index {
+                    surface.fill_horizontal_line(
+                        1,
+                        format.y,
+                        (size.width - 2) as i32,
+                        Character::with_attributes(0, theme.menu.hotkey.normal),
+                    );
                 }
                 format.y += 1;
             }
@@ -174,11 +197,12 @@ where
             }
         }
         self.update_current_index(self.current_index);
-        //self.mouse_on_color_index = -1;
+        self.mouse_index = u32::MAX;
     }
     fn on_pack(&mut self) {
         self.expanded_panel_y = 1;
         self.header_y_ofs = 0;
+        self.mouse_index = u32::MAX;
     }
 }
 impl<T> OnDefaultAction for Selector<T>
@@ -275,31 +299,25 @@ where
 
             MouseEvent::Leave => {
                 self.hide_tooltip();
+                self.mouse_index = u32::MAX;
                 EventProcessStatus::Processed
             }
-            // MouseEvent::Over(p) => {
-            //     let idx = self.mouse_to_color_index(p.x, p.y);
-            //     if idx != self.mouse_on_color_index {
-            //         self.mouse_on_color_index = idx;
-            //         return EventProcessStatus::Processed;
-            //     }
-            //     EventProcessStatus::Ignored
-            // }
-            // MouseEvent::Pressed(data) => {
-            //     let idx = self.mouse_to_color_index(data.x, data.y);
-            //     if let Some(col) = Color::from_value(idx) {
-            //         if col != self.color {
-            //             self.color = col;
-            //             self.raise_event(ControlEvent {
-            //                 emitter: self.handle,
-            //                 receiver: self.event_processor,
-            //                 data: ControlEventData::ColorPicker(EventData { color: col }),
-            //             });
-            //         }
-            //     }
-            //     self.on_default_action();
-            //     EventProcessStatus::Processed
-            // }
+            MouseEvent::Over(p) => {
+                let idx = self.mouse_pos_to_index(p.x, p.y);
+                if idx != self.mouse_index {
+                    self.mouse_index = idx;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Pressed(data) => {
+                let idx = self.mouse_pos_to_index(data.x, data.y);
+                if idx != u32::MAX {
+                    self.update_current_index(idx);
+                }
+                self.on_default_action();
+                EventProcessStatus::Processed
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
