@@ -13,6 +13,7 @@ pub struct Selector<T>
 where
     T: EnumSelector + Copy + Eq,
 {
+    start_index: u32,
     current_index: u32,
     header_y_ofs: i32,
     expanded_panel_y: i32,
@@ -26,14 +27,15 @@ where
     pub fn new(value: Option<T>, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            current_index: u32::MAX,
+            start_index: 0,
+            current_index: 0,
             header_y_ofs: 0,
             expanded_panel_y: 1,
             flags,
             _phanton: PhantomData,
         };
         if let Some(val) = value {
-            let count = T::count();
+            let count = T::COUNT;
             for i in 0..count {
                 if T::from_index(i) == Some(val) {
                     obj.current_index = i;
@@ -47,6 +49,10 @@ where
                     "You can not instantiate a selector with `None` value without setting the flags `AllowNoneVariant`. Have you forgot to do this ?"
                 );
             }
+            obj.current_index = T::COUNT;
+        }
+        if T::COUNT == 0 {
+            panic!("You should have at least one variant in the enum associated with the seclector control !");
         }
         obj.set_size_bounds(7, 1, u16::MAX, 1);
         obj
@@ -58,6 +64,24 @@ where
     #[inline(always)]
     pub fn try_value(&self) -> Option<T> {
         EnumSelector::from_index(self.current_index)
+    }
+
+    fn update_current_index(&mut self, pos: u32) {
+        let expanded_size = self.expanded_size();
+        // there should be atleast one item visible
+        let visible_items = if expanded_size.height > 3 { expanded_size.height - 3 } else { 1 };
+        let count = T::COUNT;
+        let last_item_index = if self.flags.contains(Flags::AllowNoneVariant) {
+            count
+        } else {
+            count - 1
+        };
+        self.current_index = pos.min(last_item_index);
+        if self.start_index >= self.current_index {
+            self.start_index = self.current_index;
+        } else if self.start_index + visible_items <= self.current_index {
+            self.start_index = self.current_index + 1 - visible_items;
+        }
     }
 }
 impl<T> OnPaint for Selector<T>
@@ -95,17 +119,38 @@ where
         // assuming the control is expanded
         if self.is_expanded() {
             let size = self.expanded_size();
+            let visible_items = if size.height > 3 { size.height - 3 } else { 1 };
             let col = theme.menu.text.normal;
-            let mut space_char = Character::with_attributes(' ', col);
             surface.fill_rect(
                 Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
-                space_char,
+                Character::with_attributes(' ', col),
             );
             surface.draw_rect(
                 Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
                 LineType::Single,
                 col,
             );
+            let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
+            format.width = Some((size.width - 4) as u16);
+
+            for i in self.start_index..self.start_index + visible_items {
+                if let Some(value) = T::from_index(i) {
+                    format.char_attr = theme.menu.text.normal;
+                    surface.write_text(value.name(), &format);
+                } else {
+                    format.char_attr = theme.menu.text.inactive;
+                    surface.write_text("None", &format);
+                }
+                if i == self.current_index {
+                    surface.fill_horizontal_line(
+                        1,
+                        format.y,
+                        (size.width - 2) as i32,
+                        Character::with_attributes(0, theme.menu.text.hovered),
+                    );
+                }
+                format.y += 1;
+            }
         }
     }
 }
@@ -124,6 +169,7 @@ where
                 self.header_y_ofs = 0;
             }
         }
+        self.update_current_index(self.current_index);
         //self.mouse_on_color_index = -1;
     }
     fn on_pack(&mut self) {
@@ -141,9 +187,9 @@ where
         } else {
             let w = self.size().width;
             let h = if self.flags.contains(Flags::AllowNoneVariant) {
-                T::count() + 3
+                T::COUNT + 4
             } else {
-                T::count() + 2
+                T::COUNT + 3
             };
             self.expand(Size::new(w, h.min(4)), Size::new(w, h));
         }
@@ -169,14 +215,16 @@ where
                 self.on_default_action();
                 return EventProcessStatus::Processed;
             }
-            // key!("Up") => {
-            //     self.next_color(expanded, if expanded { -COLOR_MATRIX_WIDTH } else { -1 });
-            //     return EventProcessStatus::Processed;
-            // }
-            // key!("Down") => {
-            //     self.next_color(expanded, if expanded { COLOR_MATRIX_WIDTH } else { 1 });
-            //     return EventProcessStatus::Processed;
-            // }
+            key!("Up") => {
+                if self.current_index > 0 {
+                    self.update_current_index(self.current_index - 1);
+                };
+                return EventProcessStatus::Processed;
+            }
+            key!("Down") => {
+                self.update_current_index(self.current_index + 1);
+                return EventProcessStatus::Processed;
+            }
             // key!("Left") => {
             //     self.next_color(expanded, -1);
             //     return EventProcessStatus::Processed;
