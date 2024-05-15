@@ -162,10 +162,10 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         match trait_impl {
             TraitImplementation::None => {}
             TraitImplementation::Default | TraitImplementation::DefaultNonOverwritable => {
-                code.push_str(appcui_trait.get_default_implementation());
+                code.push_str(appcui_trait.default_implementation());
             }
             TraitImplementation::BaseFallback | TraitImplementation::BaseFallbackNonOverwritable => {
-                code.push_str(appcui_trait.get_basefallback_implementation());
+                code.push_str(appcui_trait.basefallback_implementation());
             }
         }
         code.push('\n');

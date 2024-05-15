@@ -49,7 +49,7 @@ pub(crate) enum TraitType {
 }
 
 impl AppCUITrait {
-    pub(crate) fn get_name(&self) -> &'static str {
+    pub(crate) fn name(&self) -> &'static str {
         match self {
             AppCUITrait::Deref => "Deref",
             // markers
@@ -85,11 +85,10 @@ impl AppCUITrait {
             AppCUITrait::KeySelectorEvents => "KeySelectorEvents",
             AppCUITrait::TextFieldEvents => "TextFieldEvents",
             AppCUITrait::CustomEvents => "CustomEvents",
-            AppCUITrait::GenericSelectorEvents => "GenericSelectorEvents", 
-            
+            AppCUITrait::GenericSelectorEvents => "SelectorEvents", // important to be without Generic
         }
     }
-    pub(crate) fn get_trait_type(&self) -> TraitType {
+    pub(crate) fn trait_type(&self) -> TraitType {
         match self {
             AppCUITrait::Deref => TraitType::Other,
             // markers
@@ -128,7 +127,7 @@ impl AppCUITrait {
             AppCUITrait::GenericSelectorEvents => TraitType::ControlEvent,
         }
     }
-    pub(crate) fn get_basefallback_implementation(&self) -> &'static str {
+    pub(crate) fn basefallback_implementation(&self) -> &'static str {
         match self {
             AppCUITrait::Deref => templates::DEREF_TRAIT,
             // markers
@@ -167,7 +166,7 @@ impl AppCUITrait {
             AppCUITrait::GenericSelectorEvents => "",
         }
     }
-    pub(crate) fn get_default_implementation(&self) -> &'static str {
+    pub(crate) fn default_implementation(&self) -> &'static str {
         match self {
             AppCUITrait::Deref => "",
             // markers
@@ -204,6 +203,12 @@ impl AppCUITrait {
             AppCUITrait::TextFieldEvents => "impl$(TEMPLATE_TYPE) TextFieldEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::CustomEvents => "impl$(TEMPLATE_TYPE) CustomEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericSelectorEvents => "impl$(TEMPLATE_TYPE) GenericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+        }
+    }
+    pub(crate) fn is_generic(&self) -> bool {
+        match self {
+            AppCUITrait::GenericSelectorEvents => true,
+            _ => false,
         }
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
