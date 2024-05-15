@@ -82,6 +82,7 @@ where
         } else {
             count - 1
         };
+        let last_current_index = self.current_index;
         self.current_index = pos.min(last_item_index);
         if self.start_index >= self.current_index {
             self.start_index = self.current_index;
@@ -90,6 +91,9 @@ where
         }
         if self.start_index + visible_items > (last_item_index + 1) {
             self.start_index = last_item_index + 1 - visible_items;
+        }
+        if last_current_index != self.current_index {
+            // emit event
         }
     }
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> u32 {
