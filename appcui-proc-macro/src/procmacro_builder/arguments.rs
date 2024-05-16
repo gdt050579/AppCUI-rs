@@ -1,7 +1,6 @@
-use std::{
-    collections::{HashMap, HashSet},
-    iter::Map,
-};
+use std::collections::{HashMap, HashSet};
+
+use crate::utils;
 
 use super::{
     appcui_traits::{AppCUITrait, TraitType},
@@ -30,7 +29,7 @@ pub(crate) struct Arguments {
     pub commands: Vec<String>,
     pub emitted_events: Vec<String>,
     pub custom_events: Vec<String>,
-    pub template_events: HashMap<String, Vec<String>>,
+    pub template_events: HashMap<AppCUITrait, Vec<String>>,
     // internal
     expect_next: ExpectNext,
     key: String,
@@ -348,10 +347,30 @@ impl Arguments {
                 );
             }
             // now check if the template name is valid
-            // we should also get a slice from the original name
+            for (index, ch) in self.template_content.char_indices() {
+                if ch == '<' {
+                    if index == 0 {
+                        panic!(
+                            "Invalid generic type (expecting a normal character: A-Z, a-z, 0-9 or underline but fount '<') in '{}'",
+                            self.template_content
+                        );
+                    }
+                    // if its not the first character then it is secondary template: xxx<yyy....> so we wll stop the validation here
+                    break;
+                }
+                if (ch as u32) > 127 {
+                    panic!("Invalid character for generic type: '{}' in '{}'", ch, self.template_content);
+                }
+                if !utils::is_word_character((ch as u32) as u8) {
+                    panic!(
+                        "Invalid character to be used in a template type name: '{}' in '{}'",
+                        ch, self.template_content
+                    );
+                }
+            }
             // add to a hash map
             self.template_events
-                .entry(last_control.name().to_string())
+                .entry(last_control)
                 .or_insert_with(Vec::new)
                 .push(self.template_content.clone());
         } else {
@@ -368,8 +387,10 @@ impl Arguments {
                 );
             }
             TokenTree::Ident(id) => {
+                if !self.template_content.is_empty() {
+                    self.template_content.push(' ');
+                }
                 self.template_content.push_str(id.to_string().as_str());
-                self.template_content.push(' ');
             }
             TokenTree::Punct(punctuation) => match punctuation.as_char() {
                 '<' => {
@@ -391,8 +412,10 @@ impl Arguments {
                 }
             },
             TokenTree::Literal(lit) => {
+                if !self.template_content.is_empty() {
+                    self.template_content.push(' ');
+                }
                 self.template_content.push_str(lit.to_string().as_str());
-                self.template_content.push(' ');
             }
         }
     }

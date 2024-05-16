@@ -236,3 +236,25 @@ trait $(TRAIT_NAME) {
     fn on_event(&mut self, handle: Handle<$(STRUC_NAME)>, event:  $(MOD_NAME)::Events) -> EventProcessStatus;
 }
 ";
+
+pub(crate) static SELECTOR_TRAIT_DEF: &str = "
+trait SelectorEvents<T: Copy+Clone+EnumSelector+Eq> {
+    fn on_selection_changed(&mut self, handle: Handle<Selector<T>>, value: Option<T>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_SELECTOR)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+pub(crate) static SELECT_ON_SELECTION_CHANGE_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<Selector<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if let Some(obj) = self.control(h) {
+        let value = obj.try_value();
+        return SelectorEvents::<$(TYPE)>::on_selection_changed(self, h, value);
+    }
+    return EventProcessStatus::Ignored;
+}
+";

@@ -100,7 +100,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     procmacro_builder::build(args, input, BaseControlType::CustomControl, &mut config)
 }
 
-/// Used to acustom desktop
+/// Used to create a custom window that can process events from its controls
 /// The general format is: `#[Window(events = ...)]`
 /// Where the **events** parameter is a list of traits that can be overwritten:
 /// * WindowEvents
