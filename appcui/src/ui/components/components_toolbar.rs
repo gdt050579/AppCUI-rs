@@ -48,7 +48,7 @@ impl ComponentsToolbar {
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         let count = self.items.allocated_objects();
         for index in 0..count {
-            if let Some(item) = self.items.get_element(index) {
+            if let Some(item) = self.items.element(index) {
                 item.paint(surface, theme, control);
             }
         }
@@ -57,7 +57,7 @@ impl ComponentsToolbar {
         let mut res = ProcessEventResult::PassToControl;
         let count = self.items.allocated_objects();
         for index in 0..count {
-            if let Some(item) = self.items.get_element_mut(index) {
+            if let Some(item) = self.items.element_mut(index) {
                 res |= item.on_mouse_event(event);
             }
         }
@@ -74,7 +74,7 @@ impl ComponentsToolbar {
         let mut y = top_margin;
         let count = self.items.allocated_objects();
         for index in 0..count {
-            if let Some(item) = self.items.get_element_mut(index) {
+            if let Some(item) = self.items.element_mut(index) {
                 let vertical = item.is_vertical();
                 if vertical {
                     let height = item.recompute_pos(y, h, control_size);

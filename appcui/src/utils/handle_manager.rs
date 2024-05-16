@@ -81,13 +81,13 @@ where
         }
         None
     }
-    pub(crate) fn get_element(&self, index: usize) -> Option<&T> {
+    pub(crate) fn element(&self, index: usize) -> Option<&T> {
         if index < self.objects.len() {
             return self.objects[index].as_ref();
         }
         None
     }
-    pub(crate) fn get_element_mut(&mut self, index: usize) -> Option<&mut T> {
+    pub(crate) fn element_mut(&mut self, index: usize) -> Option<&mut T> {
         if index < self.objects.len() {
             return self.objects[index].as_mut();
         }

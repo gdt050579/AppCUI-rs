@@ -24,7 +24,7 @@ impl ControlHandleManager {
     }
     #[inline(always)]
     pub(crate) fn desktop_mut(&mut self) -> &mut ControlManager {
-        return self.manager.get_element_mut(0).unwrap();
+        return self.manager.element_mut(0).unwrap();
     }
     #[inline(always)]
     pub(crate) fn remove(&mut self, handle: Handle<UIElement>) -> bool {
@@ -33,7 +33,7 @@ impl ControlHandleManager {
     pub(crate) fn clean_marked_for_focus(&mut self) {
         let max_count = self.manager.allocated_objects();
         for i in 0..max_count {
-            if let Some(c) = self.manager.get_element_mut(i) {
+            if let Some(c) = self.manager.element_mut(i) {
                 c.base_mut().clear_mark_to_receive_focus();
             }
         }
