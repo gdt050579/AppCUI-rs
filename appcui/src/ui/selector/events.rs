@@ -7,4 +7,6 @@ pub trait GenericSelectorEvents {
     }
 }
 #[derive(Copy, Clone)]
-pub(crate) struct EventData {}
+pub(crate) struct EventData {
+    pub(crate) type_id: std::any::TypeId
+}

@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 
+use super::events::EventData;
 use super::EnumSelector;
 use super::Flags;
 use crate::prelude::*;
@@ -11,7 +12,7 @@ const MINSPACE_FOR_DROPBUTTON_DRAWING: u32 = 3;
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
 pub struct Selector<T>
 where
-    T: EnumSelector + Copy + Eq,
+    T: EnumSelector + Copy + Eq + 'static,
 {
     start_index: u32,
     current_index: u32,
@@ -23,7 +24,7 @@ where
 }
 impl<T> Selector<T>
 where
-    T: EnumSelector + Copy + Eq,
+    T: EnumSelector + Copy + Eq + 'static,
 {
     pub fn new(value: Option<T>, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
@@ -93,7 +94,13 @@ where
             self.start_index = last_item_index + 1 - visible_items;
         }
         if last_current_index != self.current_index {
-            // emit event
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::Selector(EventData {
+                    type_id: std::any::TypeId::of::<T>(),
+                }),
+            });
         }
     }
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> u32 {

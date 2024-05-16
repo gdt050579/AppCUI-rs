@@ -238,7 +238,7 @@ trait $(TRAIT_NAME) {
 ";
 
 pub(crate) static SELECTOR_TRAIT_DEF: &str = "
-trait SelectorEvents<T: Copy+Clone+EnumSelector+Eq> {
+trait SelectorEvents<T: Copy+Clone+EnumSelector+Eq+'static> {
     fn on_selection_changed(&mut self, handle: Handle<Selector<T>>, value: Option<T>) -> EventProcessStatus;
 }
 impl$(TEMPLATE_TYPE) GenericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {

@@ -4,7 +4,7 @@ use super::traits::{Control, CustomEvents, EventProcessStatus};
 use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
-use crate::prelude::{colorpicker, keyselector, textfield, threestatebox, RuntimeManager, ThreeStateBoxEvents};
+use crate::prelude::{colorpicker, keyselector, selector, textfield, threestatebox, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
 use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
@@ -28,6 +28,7 @@ pub(crate) enum ControlEventData {
     Password(password::events::EventData),
     KeySelector(keyselector::events::EventData),
     TextField(textfield::events::EventData),
+    Selector(selector::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -80,7 +81,9 @@ impl ControlEvent {
             ControlEventData::Custom(data) => {
                 CustomEvents::on_event(receiver, self.emitter.cast(),data.class_hash, data.event_id)
             },
-            
+            ControlEventData::Selector(data) => {
+                GenericSelectorEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
+            }
             
         }
     }
