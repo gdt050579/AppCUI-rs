@@ -103,6 +103,34 @@ where
             });
         }
     }
+    fn move_scrollview_up(&mut self) {
+        let cpoz = self.start_index;
+        if self.start_index > 0 {
+            self.start_index -= 1;
+            self.update_current_index(self.current_index);
+        }
+        if (cpoz == self.start_index) && (self.current_index > 0) {
+            // if the view has not changed -> move the selection
+            self.update_current_index(self.current_index - 1);
+            // try one more time
+            if self.start_index > 0 {
+                self.start_index -= 1;
+                self.update_current_index(self.current_index);
+            }
+        }
+    }
+    fn move_scrollview_down(&mut self) {
+        let cpoz = self.start_index;
+        self.start_index += 1;
+        self.update_current_index(self.current_index);
+        if cpoz == self.start_index {
+            // if the view has not changed -> move the selection
+            self.update_current_index(self.current_index + 1);
+            // try one more time
+            self.start_index += 1;
+            self.update_current_index(self.current_index);
+        }
+    }
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> u32 {
         if !self.is_expanded() {
             return u32::MAX;
@@ -262,6 +290,14 @@ where
             }
             key!("Down") => {
                 self.update_current_index(self.current_index + 1);
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Up") => {
+                self.move_scrollview_up();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Down") => {
+                self.move_scrollview_down();
                 return EventProcessStatus::Processed;
             }
             key!("Home") => {
