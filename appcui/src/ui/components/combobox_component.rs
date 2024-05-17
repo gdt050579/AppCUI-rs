@@ -1,0 +1,315 @@
+use std::marker::PhantomData;
+
+use crate::prelude::*;
+
+const MINSPACE_FOR_DRAWING: u32 = 5;
+const MIN_WIDTH_VARIANT_NAME: u32 = 6;
+const MINSPACE_FOR_DROPBUTTON_DRAWING: u32 = 3;
+
+pub(crate) trait ComboBoxComponentDataProvider {
+    fn count(&self) -> u32;
+    fn name(&self, index: u32) -> Option<&str>;
+    fn description(&self, index: u32) -> &str;
+}
+
+pub(crate) struct ComboBoxComponent<DataProvider>
+where
+    DataProvider: ComboBoxComponentDataProvider,
+{
+    pub(crate) start_index: u32,
+    pub(crate) current_index: u32,
+    pub(crate) mouse_index: u32,
+    pub(crate) header_y_ofs: i32,
+    pub(crate) expanded_panel_y: i32,
+    pub(crate) allow_none_value: bool,
+    pub(crate) expanded_size: Size,
+    pub(crate) count: u32,
+    _phantom: PhantomData<DataProvider>,
+}
+impl<T> ComboBoxComponent<T>
+where
+    T: ComboBoxComponentDataProvider,
+{
+    pub(crate) fn new(allow_none_value: bool, count: u32) -> Self {
+        Self {
+            start_index: 0,
+            current_index: 0,
+            header_y_ofs: 0,
+            expanded_panel_y: 1,
+            mouse_index: u32::MAX,
+            allow_none_value,
+            expanded_size: Size::default(),
+            count,
+            _phantom: PhantomData,
+        }
+    }
+    fn visible_items(&self) -> u32 {
+        let height = self.expanded_size.height;
+        return if height > 3 { height - 3 } else { 1 };
+    }
+    fn update_current_index(&mut self, pos: u32) {
+        let expanded_size = self.expanded_size;
+        // there should be atleast one item visible
+        let visible_items = if expanded_size.height > 3 { expanded_size.height - 3 } else { 1 };
+        let count = self.count;
+        let last_item_index = if self.allow_none_value { count } else { count - 1 };
+        self.current_index = pos.min(last_item_index);
+        if self.start_index >= self.current_index {
+            self.start_index = self.current_index;
+        } else if self.start_index + visible_items <= self.current_index {
+            self.start_index = self.current_index + 1 - visible_items;
+        }
+        if self.start_index + visible_items > (last_item_index + 1) {
+            self.start_index = last_item_index + 1 - visible_items;
+        }
+    }
+    fn move_scrollview_up(&mut self) {
+        let cpoz = self.start_index;
+        if self.start_index > 0 {
+            self.start_index -= 1;
+            self.update_current_index(self.current_index);
+        }
+        if (cpoz == self.start_index) && (self.current_index > 0) {
+            // if the view has not changed -> move the selection
+            self.update_current_index(self.current_index - 1);
+            // try one more time
+            if self.start_index > 0 {
+                self.start_index -= 1;
+                self.update_current_index(self.current_index);
+            }
+        }
+    }
+    fn move_scrollview_down(&mut self) {
+        let cpoz = self.start_index;
+        self.start_index += 1;
+        self.update_current_index(self.current_index);
+        if cpoz == self.start_index {
+            // if the view has not changed -> move the selection
+            self.update_current_index(self.current_index + 1);
+            // try one more time
+            self.start_index += 1;
+            self.update_current_index(self.current_index);
+        }
+    }
+    fn mouse_pos_to_index(&self, x: i32, y: i32) -> u32 {
+        if self.expanded_size.height == 0 {
+            return u32::MAX;
+        }
+        let size = self.expanded_size;
+        let visible_items = (if size.height > 3 { size.height - 3 } else { 1 }) as i32;
+        if (x > 0) && (x < size.width as i32) && (y > self.expanded_panel_y) && (y <= self.expanded_panel_y + visible_items) {
+            return self.start_index + (y - (self.expanded_panel_y + 1)) as u32;
+        }
+        return u32::MAX;
+    }
+    pub(crate) fn on_paint(&self, control: &ControlBase, data: &T, surface: &mut Surface, theme: &Theme) {
+        // first paint the header
+        let size = control.size();
+        let col_text = match () {
+            _ if !control.is_enabled() => theme.button.text.inactive,
+            _ if control.has_focus() => theme.button.text.focused,
+            _ if control.is_mouse_over() => theme.button.text.hovered,
+            _ => theme.button.text.normal,
+        };
+
+        let space_char = Character::with_attributes(' ', col_text);
+        if size.width > MINSPACE_FOR_DRAWING {
+            surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_DRAWING) as i32, space_char);
+            if size.width > MIN_WIDTH_VARIANT_NAME {
+                let mut format = TextFormat::single_line(1, self.header_y_ofs, col_text, TextAlignament::Left);
+                format.width = Some((size.width - MIN_WIDTH_VARIANT_NAME) as u16);
+                if let Some(value) = data.name(self.current_index) {
+                    surface.write_text(value, &format);
+                } else {
+                    surface.write_text("None", &format);
+                }
+            }
+        }
+        if size.width >= MINSPACE_FOR_DROPBUTTON_DRAWING {
+            let px = (size.width - MINSPACE_FOR_DROPBUTTON_DRAWING) as i32;
+            surface.fill_horizontal_line_with_size(px, self.header_y_ofs, 3, space_char);
+            surface.write_char(px + 1, self.header_y_ofs, Character::with_attributes(SpecialChar::TriangleDown, col_text));
+        }
+        // assuming the control is expanded
+        if control.is_expanded() {
+            let size = self.expanded_size;
+            let visible_items = if size.height > 3 { size.height - 3 } else { 1 };
+            let col = theme.menu.text.normal;
+            surface.fill_rect(
+                Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+                Character::with_attributes(' ', col),
+            );
+            surface.draw_rect(
+                Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+                LineType::Single,
+                col,
+            );
+            let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
+            format.width = Some((size.width - 4) as u16);
+
+            for i in self.start_index..self.start_index + visible_items {
+                if let Some(value) = data.name(i) {
+                    format.char_attr = theme.menu.text.normal;
+                    surface.write_text(value, &format);
+                } else {
+                    format.char_attr = theme.menu.text.inactive;
+                    surface.write_text("None", &format);
+                }
+                if i == self.current_index {
+                    surface.fill_horizontal_line(
+                        1,
+                        format.y,
+                        (size.width - 2) as i32,
+                        Character::with_attributes(0, theme.menu.text.hovered),
+                    );
+                } else if i == self.mouse_index {
+                    surface.fill_horizontal_line(
+                        1,
+                        format.y,
+                        (size.width - 2) as i32,
+                        Character::with_attributes(0, theme.menu.hotkey.normal),
+                    );
+                }
+                format.y += 1;
+            }
+        }
+    }
+    pub(crate) fn on_default_action(&mut self, control: &mut ControlBase) {
+        if control.is_expanded() {
+            control.pack();
+        } else {
+            let w = control.size().width;
+            let h = if self.allow_none_value { self.count + 4 } else { self.count + 3 };
+            control.expand(Size::new(w, h.min(4)), Size::new(w, h));
+        }
+    }
+    pub(crate) fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, _character: char) -> EventProcessStatus {
+        let expanded = control.is_expanded();
+
+        match key.value() {
+            key!("Escape") => {
+                if expanded {
+                    control.pack();
+                    return EventProcessStatus::Processed;
+                } else {
+                    return EventProcessStatus::Ignored;
+                }
+            }
+            key!("Space") | key!("Enter") => {
+                self.on_default_action(control);
+                return EventProcessStatus::Processed;
+            }
+            key!("Up") => {
+                if self.current_index > 0 {
+                    self.update_current_index(self.current_index - 1);
+                };
+                return EventProcessStatus::Processed;
+            }
+            key!("Down") => {
+                self.update_current_index(self.current_index + 1);
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Up") => {
+                self.move_scrollview_up();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Down") => {
+                self.move_scrollview_down();
+                return EventProcessStatus::Processed;
+            }
+            key!("Home") => {
+                self.update_current_index(0);
+                return EventProcessStatus::Processed;
+            }
+            key!("End") => {
+                self.update_current_index(u32::MAX);
+                return EventProcessStatus::Processed;
+            }
+            key!("PageUp") => {
+                let page_count = self.visible_items();
+                if self.current_index > page_count {
+                    self.update_current_index(self.current_index - page_count);
+                } else {
+                    self.update_current_index(0);
+                }
+                return EventProcessStatus::Processed;
+            }
+            key!("PageDown") => {
+                self.update_current_index(self.current_index + self.visible_items());
+                return EventProcessStatus::Processed;
+            }
+            _ => {}
+        }
+        EventProcessStatus::Ignored
+    }
+    pub(crate) fn on_mouse_event(&mut self, control: &mut ControlBase, data: &T, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => {
+                if !control.is_expanded() {
+                    let desc = data.description(self.current_index);
+                    if !desc.is_empty() {
+                        control.show_tooltip(desc);
+                    }
+                }
+                EventProcessStatus::Processed
+            }
+
+            MouseEvent::Leave => {
+                control.hide_tooltip();
+                self.mouse_index = u32::MAX;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(p) => {
+                let idx = self.mouse_pos_to_index(p.x, p.y);
+                if idx != self.mouse_index {
+                    self.mouse_index = idx;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Pressed(data) => {
+                let idx = self.mouse_pos_to_index(data.x, data.y);
+                if idx != u32::MAX {
+                    self.update_current_index(idx);
+                }
+                self.on_default_action(control);
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(direction) => {
+                match direction {
+                    MouseWheelDirection::Up => {
+                        if self.current_index > 0 {
+                            self.update_current_index(self.current_index - 1);
+                        }
+                    }
+                    MouseWheelDirection::Down => self.update_current_index(self.current_index + 1),
+                    _ => {}
+                }
+                EventProcessStatus::Processed
+            }
+
+            _ => EventProcessStatus::Ignored,
+        }
+    }
+    pub(crate) fn on_expand(&mut self, control: &mut ControlBase, direction: ExpandedDirection) {
+        match direction {
+            ExpandedDirection::OnTop => {
+                self.expanded_panel_y = 0;
+                self.header_y_ofs = (control.expanded_size().height as i32) - 1;
+            }
+            ExpandedDirection::OnBottom => {
+                self.expanded_panel_y = 1;
+                self.header_y_ofs = 0;
+            }
+        }
+        self.expanded_size = control.expanded_size();
+        self.update_current_index(self.current_index);
+        self.mouse_index = u32::MAX;
+    }
+    pub(crate) fn on_pack(&mut self) {
+        self.expanded_panel_y = 1;
+        self.header_y_ofs = 0;
+        self.mouse_index = u32::MAX;
+        self.expanded_size = Size::default();
+    }
+}

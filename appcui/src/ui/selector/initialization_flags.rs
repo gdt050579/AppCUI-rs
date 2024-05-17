@@ -8,8 +8,8 @@ pub enum Flags {
 pub trait EnumSelector {
     const COUNT: u32;
     fn from_index(index: u32) -> Option<Self> where Self: Sized;
-    fn name(&self) -> &str;
-    fn description(&self) -> &str {
+    fn name(&self) -> &'static str;
+    fn description(&self) -> &'static str {
         ""
     }
 }
