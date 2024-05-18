@@ -34,7 +34,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_enum_parameter("type", "window::Type", &TYPES, Some("Normal"));
     cb.finish_control_initialization();
     if cb.has_parameter("tag") {
-        cb.add_command("\n\tcontrol.set_tag(");
+        cb.add("\n\tcontrol.set_tag(");
         cb.add_string_parameter("tag", None);
         cb.add_line(");\n");  
     }
@@ -44,8 +44,8 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             cb.add_line("control.set_auto_hotkey();")
         } else {
             let key = crate::key::builder::create_string(s);
-            cb.add_command("\n\tcontrol.set_hotkey(");
-            cb.add_command(&key);
+            cb.add("\n\tcontrol.set_hotkey(");
+            cb.add(&key);
             cb.add_line(");\n");  
         }
     }

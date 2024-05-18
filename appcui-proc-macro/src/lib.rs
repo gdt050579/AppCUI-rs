@@ -396,6 +396,11 @@ pub fn textfield(input: TokenStream) -> TokenStream {
 
 
 #[proc_macro]
+pub fn selector(input: TokenStream) -> TokenStream {
+    crate::controls::selector::create(input)
+}
+
+#[proc_macro]
 pub fn menuitem(input: TokenStream) -> TokenStream {
     crate::menu::menuitem::create(input, None)
 }

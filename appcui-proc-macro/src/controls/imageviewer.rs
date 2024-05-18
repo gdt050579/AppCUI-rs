@@ -26,18 +26,18 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
 
     cb.init_control("ImageViewer::new");
     if cb.has_parameter("image") {
-        cb.add_command("Image::with_str(");
+        cb.add("Image::with_str(");
         cb.add_string_parameter("image", None);
-        cb.add_command(").unwrap()");
+        cb.add(").unwrap()");
     } else {
-        cb.add_command("Image::new(1,1).unwrap()");
+        cb.add("Image::new(1,1).unwrap()");
     }
     cb.add_layout();
     cb.add_enum_parameter("render", "image::RenderMethod", &RENDER_METHOD, Some("SmallBlocks"));
     if cb.has_parameter("scale") {
         let rap = cb.get_percentage("scale").unwrap() as i32;
-        cb.add_command(", image::Scale::");
-        cb.add_command(match rap {
+        cb.add(", image::Scale::");
+        cb.add(match rap {
             100 => "NoScale",
             50 => "Scale50",
             33 => "Scale33",
@@ -50,7 +50,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             }
         });
     } else {
-        cb.add_command(", image::Scale::NoScale");
+        cb.add(", image::Scale::NoScale");
     }
 
     cb.add_flags_parameter("flags", "imageviewer::Flags", &FLAGS);

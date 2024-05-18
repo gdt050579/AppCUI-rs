@@ -14,7 +14,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_layout();
     cb.finish_control_initialization();
     if cb.has_parameter("pass") {
-        cb.add_command("\n\tcontrol.set_password(");
+        cb.add("\n\tcontrol.set_password(");
         cb.add_string_parameter("pass", None);
         cb.add_line(");\n");        
     }
