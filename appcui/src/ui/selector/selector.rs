@@ -120,9 +120,10 @@ impl<T> OnKeyPressed for Selector<T>
 where
     T: EnumSelector + Copy + Eq,
 {
-    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        let data: DataProvider<T> = DataProvider { _phanton: PhantomData };
         let orig_index = self.component.current_index;
-        let result = self.component.on_key_pressed(&mut self.base, key, _character);
+        let result = self.component.on_key_pressed(&mut self.base, &data, key, character);
         if orig_index != self.component.current_index {
             self.emit_on_selection_changed_event();
         }

@@ -158,6 +158,25 @@ where
             self.update_current_index(self.current_index);
         }
     }
+    fn find_first_with_letter(&self, data: &T, to_find: char) -> u32 {
+        if self.count == 0 {
+            return u32::MAX;
+        }
+        for i in 1..=self.count {
+            let poz = (self.current_index + i) % self.count;
+            if let Some(name) = data.name(poz) {
+                if name
+                    .chars()
+                    .next()
+                    .map(|c| c.to_ascii_lowercase() == to_find.to_ascii_lowercase())
+                    .unwrap_or(false)
+                {
+                    return poz;
+                }
+            }
+        }
+        return u32::MAX;
+    }
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> u32 {
         if self.expanded_size.height == 0 {
             return u32::MAX;
@@ -279,7 +298,7 @@ where
             control.expand(Size::new(w, h.min(4)), Size::new(w, h));
         }
     }
-    pub(crate) fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, _character: char) -> EventProcessStatus {
+    pub(crate) fn on_key_pressed(&mut self, control: &mut ControlBase,data: &T, key: Key, character: char) -> EventProcessStatus {
         let expanded = control.is_expanded();
 
         match key.value() {
@@ -306,12 +325,22 @@ where
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Up") => {
-                self.move_scrollview_up();
-                return EventProcessStatus::Processed;
+                if expanded {
+                    // only if expanded
+                    self.move_scrollview_up();
+                    return EventProcessStatus::Processed;
+                } else {
+                    return EventProcessStatus::Ignored;
+                }
             }
             key!("Ctrl+Down") => {
-                self.move_scrollview_down();
-                return EventProcessStatus::Processed;
+                if expanded {
+                    // only if expanded
+                    self.move_scrollview_down();
+                    return EventProcessStatus::Processed;
+                } else {
+                    return EventProcessStatus::Ignored;
+                }
             }
             key!("Home") => {
                 self.update_current_index(0);
@@ -335,6 +364,18 @@ where
                 return EventProcessStatus::Processed;
             }
             _ => {}
+        }
+        if !key.modifier.contains_one(KeyModifier::Alt | KeyModifier::Ctrl) {
+            match character {
+                'A'..='Z' | 'a'..='z' | '0'..='9' => {
+                    let poz = self.find_first_with_letter(data, character);
+                    if poz != u32::MAX {
+                        self.update_current_index(poz);
+                    }
+                    return EventProcessStatus::Processed;
+                }
+                _ => {}
+            }
         }
         EventProcessStatus::Ignored
     }
