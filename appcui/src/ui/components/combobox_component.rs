@@ -6,6 +6,41 @@ const MINSPACE_FOR_DRAWING: u32 = 5;
 const MIN_WIDTH_VARIANT_NAME: u32 = 6;
 const MINSPACE_FOR_DROPBUTTON_DRAWING: u32 = 3;
 
+#[repr(u8)]
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum ButtonState {
+    Hidden,
+    Normal,
+    Hovered,
+    Inactive,
+    Pressed,
+}
+
+impl ButtonState {
+    #[inline(always)]
+    fn color(&self, theme: &Theme) -> CharAttribute {
+        match self {
+            ButtonState::Hidden => theme.menu.text.inactive,
+            ButtonState::Normal => theme.menu.text.normal,
+            ButtonState::Hovered => theme.menu.text.hovered,
+            ButtonState::Inactive => theme.menu.text.inactive,
+            ButtonState::Pressed => theme.menu.text.pressed_or_selectd,
+        }
+    }
+    #[inline(always)]
+    fn update_state(&mut self, check: bool, expected_value: ButtonState) -> bool {
+        if (check) && (*self != expected_value) {
+            *self = expected_value;
+            return true;
+        }
+        if (!check) && (*self == expected_value) {
+            *self = ButtonState::Normal;
+            return true;
+        }
+        return false;
+    }
+}
+
 pub(crate) trait ComboBoxComponentDataProvider {
     fn count(&self) -> u32;
     fn name(&self, index: u32) -> Option<&str>;
@@ -24,6 +59,8 @@ where
     pub(crate) allow_none_value: bool,
     pub(crate) expanded_size: Size,
     pub(crate) count: u32,
+    button_up: ButtonState,
+    button_down: ButtonState,
     _phantom: PhantomData<DataProvider>,
 }
 impl<T> ComboBoxComponent<T>
@@ -40,6 +77,8 @@ where
             allow_none_value,
             expanded_size: Size::default(),
             count,
+            button_up: ButtonState::Hidden,
+            button_down: ButtonState::Hidden,
             _phantom: PhantomData,
         }
     }
@@ -61,6 +100,27 @@ where
         }
         if self.start_index + visible_items > (last_item_index + 1) {
             self.start_index = last_item_index + 1 - visible_items;
+        }
+        self.update_button_states();
+    }
+    fn update_button_states(&mut self) {
+        if self.button_up == ButtonState::Hidden {
+            return;
+        }
+        self.button_up = if self.current_index == 0 {
+            ButtonState::Inactive
+        } else {
+            ButtonState::Normal
+        };
+        if self.count > 0 {
+            let last = if self.allow_none_value { self.count - 1 } else { self.count };
+            self.button_down = if self.current_index == last {
+                ButtonState::Inactive
+            } else {
+                ButtonState::Normal
+            };
+        } else {
+            self.button_down = ButtonState::Inactive;
         }
     }
     fn move_scrollview_up(&mut self) {
@@ -101,6 +161,30 @@ where
             return self.start_index + (y - (self.expanded_panel_y + 1)) as u32;
         }
         return u32::MAX;
+    }
+    fn is_on_button_up(&self, x: i32, y: i32) -> bool {
+        if self.button_up == ButtonState::Hidden {
+            return false;
+        }
+        let x_start_menu = (self.expanded_size.width / 2) as i32 - 1;
+        return (y == self.expanded_panel_y) && (x >= x_start_menu) && (x < x_start_menu + 3);
+    }
+    fn is_on_buttom_down(&self, x: i32, y: i32) -> bool {
+        if self.button_down == ButtonState::Hidden {
+            return false;
+        }
+        let x_start_menu = (self.expanded_size.width / 2) as i32 - 1;
+        return (y == self.expanded_panel_y + self.expanded_size.height as i32 - 2) && (x >= x_start_menu) && (x < x_start_menu + 3);
+    }
+    fn paint_buttons(&self, surface: &mut Surface, theme: &Theme) {
+        let x = (self.expanded_size.width / 2) as i32 - 1;
+        let attr = self.button_up.color(theme);
+        surface.fill_horizontal_line_with_size(x, self.expanded_panel_y, 3, Character::with_attributes(' ', attr));
+        surface.write_char(x + 1, self.expanded_panel_y, Character::with_attributes(SpecialChar::TriangleUp, attr));
+        let y = self.expanded_panel_y + self.expanded_size.height as i32 - 2;
+        let attr = self.button_down.color(theme);
+        surface.fill_horizontal_line_with_size(x, y, 3, Character::with_attributes(' ', attr));
+        surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::TriangleDown, attr));
     }
     pub(crate) fn on_paint(&self, control: &ControlBase, data: &T, surface: &mut Surface, theme: &Theme) {
         // first paint the header
@@ -144,6 +228,11 @@ where
                 LineType::Single,
                 col,
             );
+
+            if self.button_up != ButtonState::Hidden {
+                self.paint_buttons(surface, theme);
+            }
+
             let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
             format.width = Some((size.width - 4) as u16);
 
@@ -160,14 +249,14 @@ where
                         1,
                         format.y,
                         (size.width - 2) as i32,
-                        Character::with_attributes(0, theme.menu.text.hovered),
+                        Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
                     );
                 } else if i == self.mouse_index {
                     surface.fill_horizontal_line(
                         1,
                         format.y,
                         (size.width - 2) as i32,
-                        Character::with_attributes(0, theme.menu.hotkey.normal),
+                        Character::with_attributes(0, theme.menu.text.hovered),
                     );
                 }
                 format.y += 1;
@@ -261,19 +350,54 @@ where
             }
             MouseEvent::Over(p) => {
                 let idx = self.mouse_pos_to_index(p.x, p.y);
+                let is_on_button_up = self.is_on_button_up(p.x, p.y);
+                let is_on_button_down = self.is_on_buttom_down(p.x, p.y);
+                let mut result = EventProcessStatus::Ignored;
+                if self.button_up.update_state(is_on_button_up, ButtonState::Hovered) {
+                    result = EventProcessStatus::Processed;
+                }
+                if self.button_down.update_state(is_on_button_down, ButtonState::Hovered) {
+                    result = EventProcessStatus::Processed;
+                }
                 if idx != self.mouse_index {
                     self.mouse_index = idx;
-                    return EventProcessStatus::Processed;
+                    result = EventProcessStatus::Processed;
                 }
-                EventProcessStatus::Ignored
+                result
             }
             MouseEvent::Pressed(data) => {
+                let is_on_button_up = self.is_on_button_up(data.x, data.y);
+                let is_on_button_down = self.is_on_buttom_down(data.x, data.y);
+                if is_on_button_up {
+                    if self.current_index > 0 {
+                        self.update_current_index(self.current_index - 1);
+                    };
+                    self.button_up = ButtonState::Pressed;
+                    return EventProcessStatus::Processed;
+                }
+                if is_on_button_down {
+                    self.update_current_index(self.current_index + 1);
+                    self.button_down = ButtonState::Pressed;
+                    return EventProcessStatus::Processed;
+                }
                 let idx = self.mouse_pos_to_index(data.x, data.y);
                 if idx != u32::MAX {
                     self.update_current_index(idx);
                 }
                 self.on_default_action(control);
                 EventProcessStatus::Processed
+            }
+            MouseEvent::Released(data) => {
+                let is_on_button_up = self.is_on_button_up(data.x, data.y);
+                let is_on_button_down = self.is_on_buttom_down(data.x, data.y);
+                let mut result = EventProcessStatus::Ignored;
+                if self.button_up.update_state(is_on_button_up, ButtonState::Hovered) {
+                    result = EventProcessStatus::Processed;
+                }
+                if self.button_down.update_state(is_on_button_down, ButtonState::Hovered) {
+                    result = EventProcessStatus::Processed;
+                }
+                result
             }
             MouseEvent::Wheel(direction) => {
                 match direction {
@@ -305,11 +429,22 @@ where
         self.expanded_size = control.expanded_size();
         self.update_current_index(self.current_index);
         self.mouse_index = u32::MAX;
+        let items_to_show = if self.allow_none_value { self.count + 1 } else { self.count };
+        if self.expanded_size.height == items_to_show + 3 {
+            self.button_down = ButtonState::Hidden;
+            self.button_up = ButtonState::Hidden;
+        } else {
+            self.button_down = ButtonState::Normal;
+            self.button_up = ButtonState::Normal;
+            self.update_button_states();
+        }
     }
     pub(crate) fn on_pack(&mut self) {
         self.expanded_panel_y = 1;
         self.header_y_ofs = 0;
         self.mouse_index = u32::MAX;
         self.expanded_size = Size::default();
+        self.button_down = ButtonState::Hidden;
+        self.button_up = ButtonState::Hidden;
     }
 }
