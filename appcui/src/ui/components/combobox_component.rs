@@ -39,6 +39,13 @@ impl ButtonState {
         }
         return false;
     }
+    #[inline(always)]
+    fn is_accesible(&self) -> bool {
+        match self {
+            ButtonState::Hidden | ButtonState::Inactive => false,
+            _ => true,
+        }
+    }
 }
 
 pub(crate) trait ComboBoxComponentDataProvider {
@@ -113,7 +120,7 @@ where
             ButtonState::Normal
         };
         if self.count > 0 {
-            let last = if self.allow_none_value { self.count - 1 } else { self.count };
+            let last = if self.allow_none_value { self.count } else { self.count - 1 };
             self.button_down = if self.current_index == last {
                 ButtonState::Inactive
             } else {
@@ -353,10 +360,10 @@ where
                 let is_on_button_up = self.is_on_button_up(p.x, p.y);
                 let is_on_button_down = self.is_on_buttom_down(p.x, p.y);
                 let mut result = EventProcessStatus::Ignored;
-                if self.button_up.update_state(is_on_button_up, ButtonState::Hovered) {
+                if self.button_up.is_accesible() && self.button_up.update_state(is_on_button_up, ButtonState::Hovered) {
                     result = EventProcessStatus::Processed;
                 }
-                if self.button_down.update_state(is_on_button_down, ButtonState::Hovered) {
+                if self.button_down.is_accesible() && self.button_down.update_state(is_on_button_down, ButtonState::Hovered) {
                     result = EventProcessStatus::Processed;
                 }
                 if idx != self.mouse_index {
@@ -365,19 +372,25 @@ where
                 }
                 result
             }
-            MouseEvent::Pressed(data) => {
+            MouseEvent::DoubleClick(data) | MouseEvent::Pressed(data) => {
                 let is_on_button_up = self.is_on_button_up(data.x, data.y);
                 let is_on_button_down = self.is_on_buttom_down(data.x, data.y);
                 if is_on_button_up {
-                    if self.current_index > 0 {
+                    if self.button_up.is_accesible() && self.current_index > 0 {
                         self.update_current_index(self.current_index - 1);
                     };
-                    self.button_up = ButtonState::Pressed;
+                    if self.button_up.is_accesible() {
+                        self.button_up = ButtonState::Pressed;
+                    }
                     return EventProcessStatus::Processed;
                 }
                 if is_on_button_down {
-                    self.update_current_index(self.current_index + 1);
-                    self.button_down = ButtonState::Pressed;
+                    if self.button_down.is_accesible() {
+                        self.update_current_index(self.current_index + 1);
+                    }
+                    if self.button_down.is_accesible() {
+                        self.button_down = ButtonState::Pressed;
+                    }
                     return EventProcessStatus::Processed;
                 }
                 let idx = self.mouse_pos_to_index(data.x, data.y);
@@ -391,10 +404,10 @@ where
                 let is_on_button_up = self.is_on_button_up(data.x, data.y);
                 let is_on_button_down = self.is_on_buttom_down(data.x, data.y);
                 let mut result = EventProcessStatus::Ignored;
-                if self.button_up.update_state(is_on_button_up, ButtonState::Hovered) {
+                if self.button_up.is_accesible() && self.button_up.update_state(is_on_button_up, ButtonState::Hovered) {
                     result = EventProcessStatus::Processed;
                 }
-                if self.button_down.update_state(is_on_button_down, ButtonState::Hovered) {
+                if self.button_down.is_accesible() && self.button_down.update_state(is_on_button_down, ButtonState::Hovered) {
                     result = EventProcessStatus::Processed;
                 }
                 result
@@ -411,7 +424,6 @@ where
                 }
                 EventProcessStatus::Processed
             }
-
             _ => EventProcessStatus::Ignored,
         }
     }
