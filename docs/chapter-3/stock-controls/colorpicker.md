@@ -38,13 +38,16 @@ Besides the [Common methods for all Controls](../common_methods.md) a ColorPicke
 | `set_color(...)` | Manually sets the color of the ColorPicker control. It receives an object of type Color. |
 | `color()`        | Returns the current color selected in the ColorPicker control                            |
 
+
+## Key association
+
 The following keys are processed by a ColorPicker control if it has focus:
 
-| Key                                    | Purpose                                                                                                                                                                                                                           |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Space` or `Enter`                     | Expands or packs (collapses) the ColorPicker control.                                                                                                                                                                             |
-| `Up` or `Down` or<br>`Left` or `Right` | Changes the current selected color from the ColorPicker. Using this keys will trigger a call to `ColorPickerEvents::on_color_changed(...)`                                                                                        |
-| `Escape`                               | Only when the ColorPicker is expanded, it collapses the control. If the ColorPicker is already colapsed, this key will not be captured (meaning that one of the ColorPicker ancestors will be responsable with treating this key) |
+| Key                           | Purpose                                                                                                                                                                                                                           |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Space` or `Enter`            | Expands or packs (collapses) the ColorPicker control.                                                                                                                                                                             |
+| `Up`, `Down`, `Left`, `Right` | Changes the current selected color from the ColorPicker. Using this keys will trigger a call to `ColorPickerEvents::on_color_changed(...)`                                                                                        |
+| `Escape`                      | Only when the ColorPicker is expanded, it collapses the control. If the ColorPicker is already colapsed, this key will not be captured (meaning that one of the ColorPicker ancestors will be responsable with treating this key) |
 
 ## Example
 

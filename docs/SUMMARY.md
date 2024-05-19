@@ -21,8 +21,8 @@
     - [Surface]() <!-- (chapter-2/surface.md) -->
         - [Images](chapter-2/images.md)
     - [Input](chapter-2/input.md)
-        - [Mouse](chapter-2/keyboard.md)
-        - [Keyboard]()
+        - [Mouse]()
+        - [Keyboard](chapter-2/keyboard.md)
     - [Clipboard](chapter-2/clipboard.md)
 
 - [Controls](chapter-3/controls.md)
@@ -63,6 +63,7 @@
         - [Password](chapter-3/stock-controls/password.md)
         - [PropertyView]()
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
+        - [Selector](chapter-3/stock-controls/selector.md)
         - [Slider]()
         - [Splitter]() <!-- (chapter-3/stock-controls/splitter.md) --> 
         - [Tab](chapter-3/stock-controls/tab.md)

@@ -88,6 +88,8 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -98,7 +100,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     procmacro_builder::build(args, input, BaseControlType::CustomControl, &mut config)
 }
 
-/// Used to acustom desktop
+/// Used to create a custom window that can process events from its controls
 /// The general format is: `#[Window(events = ...)]`
 /// Where the **events** parameter is a list of traits that can be overwritten:
 /// * WindowEvents
@@ -154,6 +156,8 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
@@ -196,6 +200,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -263,6 +268,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -387,6 +394,11 @@ pub fn textfield(input: TokenStream) -> TokenStream {
     crate::controls::textfield::create(input)
 }
 
+
+#[proc_macro]
+pub fn selector(input: TokenStream) -> TokenStream {
+    crate::controls::selector::create(input)
+}
 
 #[proc_macro]
 pub fn menuitem(input: TokenStream) -> TokenStream {

@@ -1,7 +1,7 @@
 use crate::{
     graphics::{Size, Surface},
     input::{Key, MouseEvent},
-    prelude::textfield::events::TextFieldEvents,
+    prelude::{selector::events::GenericSelectorEvents, textfield::events::TextFieldEvents},
     system::{Handle, Theme},
     ui::{
         button::events::ButtonEvents,
@@ -109,6 +109,7 @@ pub trait Control:
     + DesktopEvents
     + GenericMenuEvents
     + CustomEvents
+    + GenericSelectorEvents
 {
 }
 

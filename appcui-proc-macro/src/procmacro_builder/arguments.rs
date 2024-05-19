@@ -1,4 +1,6 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+
+use crate::utils;
 
 use super::{
     appcui_traits::{AppCUITrait, TraitType},
@@ -13,6 +15,7 @@ enum ExpectNext {
     Equal,
     Value,
     Comma,
+    Template,
 }
 pub(crate) struct Arguments {
     pub base_control_type: BaseControlType,
@@ -26,9 +29,12 @@ pub(crate) struct Arguments {
     pub commands: Vec<String>,
     pub emitted_events: Vec<String>,
     pub custom_events: Vec<String>,
+    pub template_events: HashMap<AppCUITrait, Vec<String>>,
     // internal
     expect_next: ExpectNext,
     key: String,
+    template_content: String,
+    template_depth: u32,
     values: Vec<String>,
 }
 
@@ -45,10 +51,13 @@ impl Arguments {
             commands: Vec::new(),
             emitted_events: Vec::new(),
             custom_events: Vec::new(),
+            template_events: HashMap::new(),
             debug_mode: false,
             internal_mode: false,
             window_control: false,
             desktop_control: false,
+            template_content: String::new(),
+            template_depth: 0,
         }
     }
 
@@ -137,7 +146,7 @@ impl Arguments {
     fn validate_overwrite_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
             if let Some(appcui_trait) = AppCUITrait::new(trait_name) {
-                if appcui_trait.get_trait_type() != TraitType::RawEvent {
+                if appcui_trait.trait_type() != TraitType::RawEvent {
                     panic!(
                         "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}",
                         config.traits_of_type(TraitType::RawEvent)
@@ -209,7 +218,7 @@ impl Arguments {
     fn validate_events_attribute(&mut self, config: &mut TraitsConfig) {
         for trait_name in &self.values {
             if let Some(appcui_trait) = AppCUITrait::new(trait_name) {
-                if appcui_trait.get_trait_type() != TraitType::ControlEvent {
+                if appcui_trait.trait_type() != TraitType::ControlEvent {
                     panic!(
                         "Trait {trait_name} can not be used with the 'overwrite' attribute. Allowed traits for the 'overwrite' attribute are: {}",
                         config.traits_of_type(TraitType::ControlEvent)
@@ -311,10 +320,115 @@ impl Arguments {
             }
         }
     }
+    fn validate_template(&mut self) {
+        // Validate if a tmplate is correct (from example it should contain only letters and no spaces or other punctuation marks)
+        // step 1 --> grab the last control in values list
+        if self.values.is_empty() {
+            let mut list_of_generic_controls = String::new();
+            let mut index = 0u8;
+            while let Some(appcui_trait) = AppCUITrait::with_discriminant(index) {
+                if appcui_trait.is_generic() {
+                    if !list_of_generic_controls.is_empty() {
+                        list_of_generic_controls.push_str(", ");
+                    }
+                    list_of_generic_controls.push_str(appcui_trait.name());
+                }
+                index += 1;
+            }
+            panic!("Generic type '{}' without a proper control. You should haved used it as a template Control<Type> and not just <Type>. The following controls supports generic: {}, please select one of them for your generic type !",self.template_content,list_of_generic_controls);
+        }
+        if let Some(last_control) = AppCUITrait::new(self.values.last().unwrap().as_str()) {
+            if !last_control.is_generic() {
+                panic!(
+                    "Events of type `{}` are not generic and can not be used with a templetize form => '{}<{}>'",
+                    last_control.name(),
+                    last_control.name(),
+                    self.template_content
+                );
+            }
+            // now check if the template name is valid
+            for (index, ch) in self.template_content.char_indices() {
+                if ch == '<' {
+                    if index == 0 {
+                        panic!(
+                            "Invalid generic type (expecting a normal character: A-Z, a-z, 0-9 or underline but fount '<') in '{}'",
+                            self.template_content
+                        );
+                    }
+                    // if its not the first character then it is secondary template: xxx<yyy....> so we wll stop the validation here
+                    break;
+                }
+                if (ch as u32) > 127 {
+                    panic!("Invalid character for generic type: '{}' in '{}'", ch, self.template_content);
+                }
+                if !utils::is_word_character((ch as u32) as u8) {
+                    panic!(
+                        "Invalid character to be used in a template type name: '{}' in '{}'",
+                        ch, self.template_content
+                    );
+                }
+            }
+            // add to a hash map
+            self.template_events
+                .entry(last_control)
+                .or_default()
+                .push(self.template_content.clone());
+        } else {
+            // do nothing --> upon validation the template is not valid !! and error will occur anyway !
+        }
+    }
+    fn validate_expect_template(&mut self, token: TokenTree) {
+        match token {
+            TokenTree::Group(g) => {
+                panic!(
+                    "Invalid group delimiter {} in a template definition : {}",
+                    g,
+                    self.template_content
+                );
+            }
+            TokenTree::Ident(id) => {
+                if !self.template_content.is_empty() {
+                    self.template_content.push(' ');
+                }
+                self.template_content.push_str(id.to_string().as_str());
+            }
+            TokenTree::Punct(punctuation) => match punctuation.as_char() {
+                '<' => {
+                    self.template_content.push('<');
+                    self.template_depth += 1;
+                }
+                '>' => {
+                    self.template_depth -= 1;
+                    if self.template_depth > 0 {
+                        self.template_content.push('>');
+                    } else {
+                        // template is over
+                        self.validate_template();
+                        self.expect_next = ExpectNext::Comma;
+                    }
+                }
+                other_punctuation_mark => {
+                    self.template_content.push(other_punctuation_mark);
+                }
+            },
+            TokenTree::Literal(lit) => {
+                if !self.template_content.is_empty() {
+                    self.template_content.push(' ');
+                }
+                self.template_content.push_str(lit.to_string().as_str());
+            }
+        }
+    }
     fn validate_expect_comma(&mut self, token: TokenTree, config: &mut TraitsConfig) {
         if let TokenTree::Punct(punctuation) = token {
             if punctuation.as_char() == '+' {
                 self.expect_next = ExpectNext::Value;
+                return;
+            }
+            if punctuation.as_char() == '<' {
+                self.template_content.clear();
+                self.template_depth = 1;
+                self.expect_next = ExpectNext::Template;
                 return;
             }
             if punctuation.as_char() != ',' {
@@ -323,7 +437,7 @@ impl Arguments {
             self.validate_key_value_pair(config);
             self.expect_next = ExpectNext::Key;
         } else {
-            panic!("Expecting delimiter (',' comma) symbol but got:{}", token);
+            panic!("Expecting a punctuation symbol (e.g. ',' comma), but got:{}", token);
         }
     }
     pub(crate) fn parse(&mut self, input: TokenStream, config: &mut TraitsConfig) {
@@ -334,6 +448,7 @@ impl Arguments {
                 ExpectNext::Equal => self.validate_expect_equal(token),
                 ExpectNext::Value => self.validate_expect_value(token),
                 ExpectNext::Comma => self.validate_expect_comma(token, config),
+                ExpectNext::Template => self.validate_expect_template(token),
             }
         }
         match self.expect_next {
@@ -347,6 +462,12 @@ impl Arguments {
             ExpectNext::Value => {
                 panic!(
                     "Unexpected end of procedural macro attribute (expecting a value for key: '{}')",
+                    self.key.as_str()
+                );
+            }
+            ExpectNext::Template => {
+                panic!(
+                    "Unexpected end of procedural macro attribute (incomplete template for the value of key: '{}')",
                     self.key.as_str()
                 );
             }

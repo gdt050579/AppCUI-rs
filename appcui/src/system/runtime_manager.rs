@@ -1481,7 +1481,11 @@ impl MouseMethods for RuntimeManager {
         if !handle.is_none() {
             let controls = unsafe { &mut *self.controls };
             if let Some(control) = controls.get_mut(handle) {
-                self.update_focus(handle);
+                // only update focus if the control does not already have focus or if it has at least one child
+                // this avoids packing controls while they have focus and are expanded
+                if !control.base().has_focus() || !control.base().children.is_empty() {
+                    self.update_focus(handle);
+                }
                 let base = control.base();
                 let scr_x = base.screen_clip.left;
                 let scr_y = base.screen_clip.top;

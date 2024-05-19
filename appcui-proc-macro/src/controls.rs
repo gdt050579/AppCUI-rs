@@ -17,3 +17,4 @@ pub (crate) mod tab;
 pub (crate) mod accordion;
 pub (crate) mod keyselector;
 pub (crate) mod textfield;
+pub (crate) mod selector;

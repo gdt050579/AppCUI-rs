@@ -106,3 +106,7 @@ path = "images/main.rs"
 [[example]]
 name = "ferris"
 path = "ferris/main.rs"
+
+[[example]]
+name = "selector"
+path = "selector/main.rs"

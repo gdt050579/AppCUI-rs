@@ -99,9 +99,11 @@ pub(crate) fn generate_custom_event_traits(a: &mut Arguments) -> String {
         temp.push_str(templates::CUSTOM_TRAIT_DEF);
         temp = temp.replace("$(TRAIT_NAME)", trait_name);
         // remove the Events part from trait_name
-        trait_name.truncate(trait_name.len()-6); // 6 = sizeof(Events);
-        // now its just the name (replace the structura name)
-        temp = temp.replace("$(STRUC_NAME)", trait_name).replace("$(MOD_NAME)",trait_name.to_ascii_lowercase().as_str());
+        trait_name.truncate(trait_name.len() - 6); // 6 = sizeof(Events);
+                                                   // now its just the name (replace the structura name)
+        temp = temp
+            .replace("$(STRUC_NAME)", trait_name)
+            .replace("$(MOD_NAME)", trait_name.to_ascii_lowercase().as_str());
         cmd_code.push_str(&temp);
     }
 
@@ -110,14 +112,24 @@ pub(crate) fn generate_custom_event_traits(a: &mut Arguments) -> String {
     for trait_name in a.custom_events.iter() {
         // at this point the trait name does not have the Events part at its end
         let hash = utils::compute_hash(trait_name);
-        write!(temp,"0x{:X} => {{",hash).unwrap();
+        write!(temp, "0x{:X} => {{", hash).unwrap();
         temp.push_str(templates::CUSTOM_EVENT_CONVERTOR);
         temp.push_str("}\n");
-        temp = temp.replace("$(STRUC_NAME)", trait_name).replace("$(MOD_NAME)", &trait_name.to_lowercase());
+        temp = temp
+            .replace("$(STRUC_NAME)", trait_name)
+            .replace("$(MOD_NAME)", &trait_name.to_lowercase());
     }
 
     cmd_code.replace("$(CUSTOM_EVENT_CLASS_PROXY_CALL)", &temp)
 }
+fn generate_selector_events(a: &mut Arguments) -> String {
+    let mut s = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericSelectorEvents].iter() {
+        s.push_str(templates::SELECT_ON_SELECTION_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());        
+    }
+    return templates::SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_SELECTOR)", s.as_str());
+}
+
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args, config);
@@ -160,12 +172,19 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
     }
     for (appcui_trait, trait_impl) in config.iter() {
         match trait_impl {
-            TraitImplementation::None => {}
+            TraitImplementation::None => {
+                if appcui_trait.is_generic() {
+                    match appcui_trait {
+                        AppCUITrait::GenericSelectorEvents => code.push_str(generate_selector_events(&mut a).as_str()),
+                        _ => {}
+                    }
+                }
+            }
             TraitImplementation::Default | TraitImplementation::DefaultNonOverwritable => {
-                code.push_str(appcui_trait.get_default_implementation());
+                code.push_str(appcui_trait.default_implementation());
             }
             TraitImplementation::BaseFallback | TraitImplementation::BaseFallbackNonOverwritable => {
-                code.push_str(appcui_trait.get_basefallback_implementation());
+                code.push_str(appcui_trait.basefallback_implementation());
             }
         }
         code.push('\n');

@@ -100,8 +100,38 @@ impl<'a> ControlBuilder<'a> {
         self.content.push_str(method);
         self.content.push('(');
     }
+    pub(super) fn init_control_with_template(&mut self, controlname: &str, method: &str, template_param: &str) {
+        self.content.push_str(controlname);
+        self.content.push_str("::<");
+        if let Some(value) = self.parser.get(template_param) {
+            let name = value.get_string();
+            if name.is_empty() {
+                panic!("Parameter `{}` can not be an empty string. It should be a generic/template type to be used !", template_param);
+            }
+            self.content.push_str(name);
+            self.content.push_str(">::");
+            self.content.push_str(method);            
+            self.content.push('(');
+        } else {
+            panic!("Parameter `{}` is mandatory and must express the generic/template type to be used !", template_param);
+        }
+    }
     pub(super) fn finish_control_initialization(&mut self) {
         self.content.push_str(");\n\t");
+    }
+    pub(super) fn add_param_value(&mut self, param_name: &str) {
+        let value = self.parser.get(param_name);
+        if let Some(str_value) = value {
+            unsafe {
+                let x = std::mem::transmute(str_value.get_string());
+                self.content.push_str(x);
+            }        
+        } else {
+            panic!(
+                "Parameter '{}' is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
+        }
     }
     pub(super) fn add_string_parameter(&mut self, param_name: &str, default: Option<&str>) {
         self.add_comma();
@@ -274,7 +304,7 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str("::None");
         }
     }
-    pub(super) fn add_command(&mut self, content: &str) {
+    pub(super) fn add(&mut self, content: &str) {
         self.content.push_str(content);
     }
     pub(super) fn add_line(&mut self, content: &str) {
