@@ -338,7 +338,7 @@ impl Arguments {
             panic!("Generic type '{}' without a proper control. You should haved used it as a template Control<Type> and not just <Type>. The following controls supports generic: {}, please select one of them for your generic type !",self.template_content,list_of_generic_controls);
         }
         if let Some(last_control) = AppCUITrait::new(self.values.last().unwrap().as_str()) {
-            if last_control.is_generic() == false {
+            if !last_control.is_generic() {
                 panic!(
                     "Events of type `{}` are not generic and can not be used with a templetize form => '{}<{}>'",
                     last_control.name(),
@@ -371,7 +371,7 @@ impl Arguments {
             // add to a hash map
             self.template_events
                 .entry(last_control)
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(self.template_content.clone());
         } else {
             // do nothing --> upon validation the template is not valid !! and error will occur anyway !
@@ -382,7 +382,7 @@ impl Arguments {
             TokenTree::Group(g) => {
                 panic!(
                     "Invalid group delimiter {} in a template definition : {}",
-                    g.to_string(),
+                    g,
                     self.template_content
                 );
             }
@@ -407,7 +407,7 @@ impl Arguments {
                         self.expect_next = ExpectNext::Comma;
                     }
                 }
-                other_punctuation_mark @ _ => {
+                other_punctuation_mark => {
                     self.template_content.push(other_punctuation_mark);
                 }
             },

@@ -37,14 +37,11 @@ impl ButtonState {
             *self = ButtonState::Normal;
             return true;
         }
-        return false;
+        false
     }
     #[inline(always)]
     fn is_accesible(&self) -> bool {
-        match self {
-            ButtonState::Hidden | ButtonState::Inactive => false,
-            _ => true,
-        }
+        !matches!(self, ButtonState::Hidden | ButtonState::Inactive)
     }
 }
 
@@ -91,7 +88,7 @@ where
     }
     fn visible_items(&self) -> u32 {
         let height = self.expanded_size.height;
-        return if height > 3 { height - 3 } else { 1 };
+        if height > 3 { height - 3 } else { 1 }
     }
     pub(crate) fn update_current_index(&mut self, pos: u32) {
         let expanded_size = self.expanded_size;
@@ -175,7 +172,7 @@ where
                 }
             }
         }
-        return u32::MAX;
+        u32::MAX
     }
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> u32 {
         if self.expanded_size.height == 0 {
@@ -186,21 +183,21 @@ where
         if (x > 0) && (x < size.width as i32) && (y > self.expanded_panel_y) && (y <= self.expanded_panel_y + visible_items) {
             return self.start_index + (y - (self.expanded_panel_y + 1)) as u32;
         }
-        return u32::MAX;
+        u32::MAX
     }
     fn is_on_button_up(&self, x: i32, y: i32) -> bool {
         if self.button_up == ButtonState::Hidden {
             return false;
         }
         let x_start_menu = (self.expanded_size.width / 2) as i32 - 1;
-        return (y == self.expanded_panel_y) && (x >= x_start_menu) && (x < x_start_menu + 3);
+        (y == self.expanded_panel_y) && (x >= x_start_menu) && (x < x_start_menu + 3)
     }
     fn is_on_buttom_down(&self, x: i32, y: i32) -> bool {
         if self.button_down == ButtonState::Hidden {
             return false;
         }
         let x_start_menu = (self.expanded_size.width / 2) as i32 - 1;
-        return (y == self.expanded_panel_y + self.expanded_size.height as i32 - 2) && (x >= x_start_menu) && (x < x_start_menu + 3);
+        (y == self.expanded_panel_y + self.expanded_size.height as i32 - 2) && (x >= x_start_menu) && (x < x_start_menu + 3)
     }
     fn paint_buttons(&self, surface: &mut Surface, theme: &Theme) {
         let x = (self.expanded_size.width / 2) as i32 - 1;

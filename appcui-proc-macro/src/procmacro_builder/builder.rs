@@ -125,7 +125,7 @@ pub(crate) fn generate_custom_event_traits(a: &mut Arguments) -> String {
 fn generate_selector_events(a: &mut Arguments) -> String {
     let mut s = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericSelectorEvents].iter() {
-        s.push_str(templates::SELECT_ON_SELECTION_CHANGE_DEF.replace("$(TYPE)", &trait_name).as_str());        
+        s.push_str(templates::SELECT_ON_SELECTION_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());        
     }
     return templates::SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_SELECTOR)", s.as_str());
 }
@@ -175,7 +175,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
             TraitImplementation::None => {
                 if appcui_trait.is_generic() {
                     match appcui_trait {
-                        AppCUITrait::GenericSelectorEvents => code.push_str(&generate_selector_events(&mut a).as_str()),
+                        AppCUITrait::GenericSelectorEvents => code.push_str(generate_selector_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

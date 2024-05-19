@@ -35,7 +35,7 @@ impl EnumSelector for Options {
 enum Cars {
     Dacia,
     Toyota,
-    BMW,
+    Bmw,
     Mazda,
     Mercedes,
     Ford,
@@ -54,7 +54,7 @@ impl EnumSelector for Cars {
         match index {
             0 => Some(Cars::Dacia),
             1 => Some(Cars::Toyota),
-            2 => Some(Cars::BMW),
+            2 => Some(Cars::Bmw),
             3 => Some(Cars::Mazda),
             4 => Some(Cars::Mercedes),
             5 => Some(Cars::Ford),
@@ -71,7 +71,7 @@ impl EnumSelector for Cars {
         match self {
             Cars::Dacia => "Dacia",
             Cars::Toyota => "Toyota",
-            Cars::BMW => "BMW",
+            Cars::Bmw => "BMW",
             Cars::Mazda => "Mazda",
             Cars::Mercedes => "Mercedes",
             Cars::Ford => "Ford",
