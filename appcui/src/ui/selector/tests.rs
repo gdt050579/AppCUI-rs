@@ -2,17 +2,24 @@ use crate::prelude::*;
 
 use super::EnumSelector;
 
-#[derive(Copy,Clone,Eq,PartialEq)]
-enum Options { A, B, C}
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum Options {
+    A,
+    B,
+    C,
+}
 impl EnumSelector for Options {
     const COUNT: u32 = 3;
 
-    fn from_index(index: u32) -> Option<Self> where Self: Sized {
+    fn from_index(index: u32) -> Option<Self>
+    where
+        Self: Sized,
+    {
         match index {
             0 => Some(Options::A),
             1 => Some(Options::B),
             2 => Some(Options::C),
-            _ => None
+            _ => None,
         }
     }
 
@@ -61,7 +68,7 @@ impl EnumSelector for Cars {
     }
 
     fn name(&self) -> &'static str {
-        match self {    
+        match self {
             Cars::Dacia => "Dacia",
             Cars::Toyota => "Toyota",
             Cars::BMW => "BMW",
@@ -106,8 +113,16 @@ fn check_creation() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:36,h:7");
-    w.add(Selector::<Options>::new(Some(Options::B),Layout::new("x:1,y:1,w:10"),selector::Flags::None));
-    w.add(Selector::<Options>::new(None,Layout::new("x:1,y:3,w:10"),selector::Flags::AllowNoneVariant));
+    w.add(Selector::<Options>::new(
+        Some(Options::B),
+        Layout::new("x:1,y:1,w:10"),
+        selector::Flags::None,
+    ));
+    w.add(Selector::<Options>::new(
+        None,
+        Layout::new("x:1,y:3,w:10"),
+        selector::Flags::AllowNoneVariant,
+    ));
     a.add_window(w);
     a.run();
 }
@@ -308,7 +323,6 @@ fn check_movement_keys_packed() {
     a.run();
 }
 
-
 #[test]
 fn check_scroll_view() {
     let script = "
@@ -419,8 +433,83 @@ fn check_quick_search_packed() {
     a.run();
 }
 
-// esc to be tested (packs)
-// events -> on value changed
+#[test]
+fn check_escape_key() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (closed)')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Key.Pressed(Enter)
+        Paint('Expanded')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Key.Pressed(Escape)
+        Paint('Back to initial state')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Key.Pressed(Escape)
+        Paint('Now the window closes (empty desktop)')   
+        CheckHash(0xAB06844D69595285)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_events() {
+    #[Window(events = SelectorEvents<Cars>,internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("x:1,y:1,w:30,h:8,caption:Win"),
+            };
+            w.add(selector!("enum:Cars,value:Renault,x:1,y:1,w:20,flags:AllowNoneVariant"));
+            w
+        }
+    }
+    impl SelectorEvents<Cars> for MyWin {
+        fn on_selection_changed(&mut self, _: Handle<Selector<Cars>>, value: Option<Cars>) -> EventProcessStatus {
+            if let Some(val) = value {
+                self.set_title(val.name());
+            } else {
+                self.set_title("None");
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x9881715A3EAA1684)
+        Key.Pressed(Up)
+        Paint('Window title: Skoda')   
+        CheckHash(0x11FDA2E612720F15)
+        Key.Pressed(Space)
+        Paint('Window title: Skoda, expanded')   
+        CheckHash(0xAFFC1660D08EBD8C)
+        Key.Pressed(Down)
+        Paint('Window title: Renault, expanded')   
+        CheckHash(0x152BB3E5C33E4764)
+        Key.Pressed(Down)
+        Paint('Window title: None, expanded')   
+        CheckHash(0x8077DD177D7FB53B)
+        Key.Pressed(Down,4)
+        Paint('Window title: None, expanded (nothing changes)')   
+        CheckHash(0x8077DD177D7FB53B)
+        Key.Pressed(Escape)
+        Paint('Window title: None')   
+        CheckHash(0xD99A74E9CD19C9BE)
+        Key.Pressed(Home)
+        Paint('Window title: Dacia')   
+        CheckHash(0xD22ED284CAF9BD9)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
 // mouse --> a lot of scenarios
 // test with None value as well
 // suport de iconite (1 sau 2 caractere)
