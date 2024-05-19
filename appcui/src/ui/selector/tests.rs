@@ -81,6 +81,10 @@ impl EnumSelector for Cars {
             Cars::Renault => "Renault",
         }
     }
+
+    fn description(&self) -> &'static str {
+        "list of cars :)"
+    }
 }
 
 #[test]
@@ -635,7 +639,7 @@ fn check_mouse_click() {
 
 
 #[test]
-fn check_mouse_cheel() {
+fn check_mouse_wheel() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state (closed)')   
@@ -670,5 +674,20 @@ fn check_mouse_cheel() {
     a.run();
 }
 
-// suport de iconite (1 sau 2 caractere)
-// descriere pentru mouse over
+#[test]
+fn check_description_on_hover() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (closed)')   
+        CheckHash(0x371A30F83F6AE4E) 
+        Mouse.Move(20,1)
+        Paint('Tootltip with description for cars')   
+        CheckHash(0x58E1F498C9A61D16) 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+    w.add(selector!("enum: Options,x:1,y:3,w:20,flags: AllowNoneVariant"));
+    a.add_window(w);
+    a.run();
+}
