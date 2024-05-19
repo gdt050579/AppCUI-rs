@@ -510,7 +510,39 @@ fn check_events() {
     a.run();
 }
 
+#[test]
+fn check_none_value_scenario() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (closed)')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Key.Pressed(Enter)
+        Paint('Expanded')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Key.Pressed(End)
+        Paint('Lamborghini,Skoda,Renault,[None]')   
+        CheckHash(0x3542CEA13D858F82)
+        Key.Pressed(Down,10)
+        Paint('Lamborghini,Skoda,Renault,[None] (nothing changes)')   
+        CheckHash(0x3542CEA13D858F82)
+        Key.Pressed(Up)
+        Paint('Lamborghini,Skoda,[Renault],None')   
+        CheckHash(0x136ABAE2F97FAC5D)
+        Key.Pressed(Escape)
+        Paint('Renault')
+        CheckHash(0x3FC6F7D52AD87990)
+        Key.Pressed(Down)
+        Paint('None')
+        CheckHash(0xA2FD5F80F94CD11B)        
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+    a.add_window(w);
+    a.run();
+}
+
+
 // mouse --> a lot of scenarios
-// test with None value as well
 // suport de iconite (1 sau 2 caractere)
 // descriere pentru mouse over
