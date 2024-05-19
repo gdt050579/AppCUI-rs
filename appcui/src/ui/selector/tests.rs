@@ -307,3 +307,45 @@ fn check_movement_keys_packed() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_scroll_view() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Space)
+        Paint('Mazda,Mercedes,Ford,[Ferari]')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Key.Pressed(Ctrl+Down)
+        Paint('Mercedes,Ford,[Ferari],Lamborghini')   
+        CheckHash(0xD56D26E736D7B5DC)
+        Key.Pressed(Ctrl+Down,2)
+        Paint('[Ferari],Lamborghini,Skoda,Renault')   
+        CheckHash(0x6650D85CD5812D3A)
+        Key.Pressed(Ctrl+Down,2)
+        Paint('Ferari,Lamborghini,[Skoda],Renault')   
+        CheckHash(0xC148E101DB80BD9)
+        Key.Pressed(Ctrl+Up)
+        Paint('Ford,Ferari,Lamborghini,[Skoda]')   
+        CheckHash(0x6FE834D546EB9957)
+        Key.Pressed(Ctrl+Up)
+        Paint('Mercedes,Ford,Ferari,[Lamborghini]')   
+        CheckHash(0x53D0DC3BE6A4E553)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+    a.add_window(w);
+    a.run();
+}
+
+
+
+
+// search keys (packed si unpacked)
+// esc to be tested (packs)
+// events -> on value changed
+// mouse --> a lot of scenarios
+// test with None value as well
+// suport de iconite (1 sau 2 caractere)
+// descriere pentru mouse over
