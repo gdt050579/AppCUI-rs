@@ -339,10 +339,86 @@ fn check_scroll_view() {
     a.run();
 }
 
+#[test]
+fn check_quick_search_expanded() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Space)
+        Paint('Mazda,Mercedes,Ford,[Ferari]')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Key.Pressed(M)
+        Paint('[Mazda],Mercedes,Ford,Ferari')   
+        CheckHash(0x6056BD2A0F71A6A3)
+        Key.Pressed(M)
+        Paint('Mazda,[Mercedes],Ford,Ferari')   
+        CheckHash(0xDD4C5FFCF03E4BD6)
+        Key.Pressed(M)
+        Paint('[Mazda],Mercedes,Ford,Ferari')   
+        CheckHash(0x6056BD2A0F71A6A3)
+        Key.Pressed(F)
+        Paint('Mazda,Mercedes,[Ford],Ferari')   
+        CheckHash(0x2B2EC2641591323B)
+        Key.Pressed(F)
+        Paint('Mazda,Mercedes,Ford,[Ferari]')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Key.Pressed(R)
+        Paint('Ferari,Lamborghini,Skoda,[Renault]')   
+        CheckHash(0x385754AAEE74FE3A)
+        Key.Pressed(D)
+        Paint('[Dacia],Toyota,BMW,Mazda')   
+        CheckHash(0x668B915504B8FAAC)
+        Key.Pressed(X)
+        Paint('[Dacia],Toyota,BMW,Mazda - no car with `X`')   
+        CheckHash(0x668B915504B8FAAC)
 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+    a.add_window(w);
+    a.run();
+}
 
+#[test]
+fn check_quick_search_packed() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Ferari')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Key.Pressed(M)
+        Paint('2.Mazda')   
+        CheckHash(0xD93C83FFFEE3151A)
+        Key.Pressed(M)
+        Paint('3.Mercedes')   
+        CheckHash(0x139A7D66A92482B3)
+        Key.Pressed(M)
+        Paint('4.Mazda')   
+        CheckHash(0xD93C83FFFEE3151A)
+        Key.Pressed(F)
+        Paint('5.Ford')   
+        CheckHash(0xF6AF2FA25E408A22)
+        Key.Pressed(F)
+        Paint('6.Ferari')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Key.Pressed(R)
+        Paint('7.Renault')   
+        CheckHash(0x3FC6F7D52AD87990)
+        Key.Pressed(D)
+        Paint('8.Dacia')   
+        CheckHash(0xF3BF1B9540CD5A5B)
+        Key.Pressed(X)
+        Paint('9.Dacia - no car with `X`')   
+        CheckHash(0xF3BF1B9540CD5A5B)
 
-// search keys (packed si unpacked)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+    a.add_window(w);
+    a.run();
+}
+
 // esc to be tested (packs)
 // events -> on value changed
 // mouse --> a lot of scenarios

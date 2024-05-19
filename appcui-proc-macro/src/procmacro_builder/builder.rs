@@ -3,7 +3,6 @@ use crate::utils;
 use super::StructDefinition;
 use super::{arguments::Arguments, templates, AppCUITrait, BaseControlType, TraitImplementation, TraitsConfig};
 use proc_macro::TokenStream;
-use std::any::type_name;
 use std::fmt::Write;
 use std::str::FromStr;
 
