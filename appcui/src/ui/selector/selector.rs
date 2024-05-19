@@ -78,6 +78,21 @@ where
     pub fn try_value(&self) -> Option<T> {
         EnumSelector::from_index(self.component.current_index)
     }
+    pub fn set_value(&mut self, value: T) {
+        let count = T::COUNT;
+        for i in 0..count {
+            if T::from_index(i) == Some(value) {
+                self.component.update_current_index(i);
+                break;
+            }
+        }
+    }
+    pub fn clear_value(&mut self) {
+        if !self.flags.contains(Flags::AllowNoneVariant) {
+            panic!("You can not clear the value of a selector unless flag `AllowNoneVariant` was set. Have you forgot to do this ?");
+        }
+        self.component.update_current_index(T::COUNT);
+    }
     fn emit_on_selection_changed_event(&mut self) {
         self.raise_event(ControlEvent {
             emitter: self.handle,

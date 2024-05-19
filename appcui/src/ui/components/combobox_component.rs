@@ -58,14 +58,14 @@ pub(crate) struct ComboBoxComponent<DataProvider>
 where
     DataProvider: ComboBoxComponentDataProvider,
 {
-    pub(crate) start_index: u32,
     pub(crate) current_index: u32,
-    pub(crate) mouse_index: u32,
-    pub(crate) header_y_ofs: i32,
-    pub(crate) expanded_panel_y: i32,
-    pub(crate) allow_none_value: bool,
-    pub(crate) expanded_size: Size,
-    pub(crate) count: u32,
+    start_index: u32,
+    mouse_index: u32,
+    header_y_ofs: i32,
+    expanded_panel_y: i32,
+    allow_none_value: bool,
+    expanded_size: Size,
+    count: u32,
     button_up: ButtonState,
     button_down: ButtonState,
     _phantom: PhantomData<DataProvider>,
@@ -93,7 +93,7 @@ where
         let height = self.expanded_size.height;
         return if height > 3 { height - 3 } else { 1 };
     }
-    fn update_current_index(&mut self, pos: u32) {
+    pub(crate) fn update_current_index(&mut self, pos: u32) {
         let expanded_size = self.expanded_size;
         // there should be atleast one item visible
         let visible_items = if expanded_size.height > 3 { expanded_size.height - 3 } else { 1 };
