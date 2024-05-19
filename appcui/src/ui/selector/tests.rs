@@ -24,6 +24,57 @@ impl EnumSelector for Options {
         }
     }
 }
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum Cars {
+    Dacia,
+    Toyota,
+    BMW,
+    Mazda,
+    Mercedes,
+    Ford,
+    Ferrari,
+    Lamborghini,
+    Skoda,
+    Renault,
+}
+impl EnumSelector for Cars {
+    const COUNT: u32 = 10;
+
+    fn from_index(index: u32) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        match index {
+            0 => Some(Cars::Dacia),
+            1 => Some(Cars::Toyota),
+            2 => Some(Cars::BMW),
+            3 => Some(Cars::Mazda),
+            4 => Some(Cars::Mercedes),
+            5 => Some(Cars::Ford),
+            6 => Some(Cars::Ferrari),
+            7 => Some(Cars::Lamborghini),
+            8 => Some(Cars::Skoda),
+            9 => Some(Cars::Renault),
+
+            _ => None,
+        }
+    }
+
+    fn name(&self) -> &'static str {
+        match self {    
+            Cars::Dacia => "Dacia",
+            Cars::Toyota => "Toyota",
+            Cars::BMW => "BMW",
+            Cars::Mazda => "Mazda",
+            Cars::Mercedes => "Mercedes",
+            Cars::Ford => "Ford",
+            Cars::Ferrari => "Ferrari",
+            Cars::Lamborghini => "Lamborghini",
+            Cars::Skoda => "Skoda",
+            Cars::Renault => "Renault",
+        }
+    }
+}
 
 #[test]
 fn check_creation() {
@@ -93,6 +144,166 @@ fn check_create_with_macro() {
     let mut w = window!("Title,d:c,w:36,h:7");
     w.add(selector!("Options,value:B,x:1,y:1,w:10"));
     w.add(selector!("Options,x:1,y:3,w:10,flags: AllowNoneVariant"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_expand_pack() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Ferari (focus), B (not-focus)')   
+        CheckHash(0xEEC6C631F8745D86)
+        Key.Pressed(Tab)
+        Paint('Ferari (not-focus), B (focus)')   
+        CheckHash(0xFDB5C05259D5E41A)
+        Key.Pressed(Space)
+        Paint('Ferari (not-focus), B (focus+expanded)')   
+        CheckHash(0x1F5694B15DBA6047)
+        Key.Pressed(Down)
+        Paint('Ferari (not-focus), C (focus+expanded)')   
+        CheckHash(0x252F7D4697BB1DF)
+        Key.Pressed(Tab)
+        // control C should be packed
+        Paint('Ferari (focus), C (not-focus)')   
+        CheckHash(0xDB04242D9F2D9B3)
+        Key.Pressed(Enter)
+        Paint('Ferari (focus-expanded), C (not-focus)')   
+        CheckHash(0xC9B87A3C51E97477)
+        Key.Pressed(Home)
+        Paint('Dacia (focus-expanded), C (not-focus)')   
+        CheckHash(0xC560A1D708693D8C)
+        Key.Pressed(Tab)
+        // Control Dacia shoud be packed
+        Paint('Dacia (not-focus), C (focus)')   
+        CheckHash(0xE947715F06C97410)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:36,h:7");
+    w.add(selector!("Options,value:B,x:1,y:1,w:20"));
+    w.add(selector!("Cars,value:Ferrari,x:1,y:3,w:20"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_movement_keys_expand() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Key.Pressed(Space)
+        Paint('Mazda,Mercedes,Ford,[Ferari]')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Key.Pressed(Up)
+        Paint('Mazda,Mercedes,[Ford],Ferari')   
+        CheckHash(0x2B2EC2641591323B)
+        Key.Pressed(Up,2)
+        Paint('[Mazda],Mercedes,Ford,Ferari')   
+        CheckHash(0x6056BD2A0F71A6A3)
+        Key.Pressed(Up,2)
+        Paint('[Toyota],BMW,Mazda,Mercedes')   
+        CheckHash(0x7806AE51A75CF8FE)
+        Key.Pressed(Down,3)
+        Paint('Toyota,BMW,Mazda,[Mercedes]')   
+        CheckHash(0xC7E09CB60639C054)
+        Key.Pressed(Down)
+        Paint('BMW,Mazda,Mercedes,[Ford]')   
+        CheckHash(0x40729635B9A03C0E)
+        Key.Pressed(Home)
+        Paint('[Dacia],Toyota,BMW,Mazda')   
+        CheckHash(0x668B915504B8FAAC)
+        Key.Pressed(Up)
+        Paint('[Dacia],Toyota,BMW,Mazda (nothing changes)')   
+        CheckHash(0x668B915504B8FAAC)
+        Key.Pressed(End)
+        Paint('Ferarri,Lamborghini,Skoda,[Renault]')   
+        CheckHash(0x385754AAEE74FE3A)
+        Key.Pressed(Down)
+        Paint('Ferarri,Lamborghini,Skoda,[Renault] (nothing changes)')   
+        CheckHash(0x385754AAEE74FE3A)
+        Key.Pressed(Up,2)
+        Paint('Ferarri,[Lamborghini],Skoda,Renault')   
+        CheckHash(0xB22AD47B8725FAAD)
+        Key.Pressed(PageUp)
+        Paint('[Mazda],Mercedes,Ford,Ferrar')   
+        CheckHash(0x6056BD2A0F71A6A3)
+        Key.Pressed(PageUp)
+        Paint('[Dacia],Toyota,BMW,Mazda')   
+        CheckHash(0x668B915504B8FAAC)
+        Key.Pressed(PageDown)
+        Paint('Toyota,BMW,Mazda,[Mercedes]')   
+        CheckHash(0xC7E09CB60639C054)
+        Key.Pressed(PageDown)
+        Paint('Ford,Ferrari,Lamborghini,[Skoda]')   
+        CheckHash(0x6FE834D546EB9957)
+        Key.Pressed(PageDown)
+        Paint('Ferrari,Lamborghini,Skoda,[Renault]')   
+        CheckHash(0x385754AAEE74FE3A)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_movement_keys_packed() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Ferari')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Key.Pressed(Up)
+        Paint('2.Ford')   
+        CheckHash(0xF6AF2FA25E408A22)
+        Key.Pressed(Up,2)
+        Paint('3.Mazda')   
+        CheckHash(0xD93C83FFFEE3151A)
+        Key.Pressed(Up,2)
+        Paint('4.Toyota')   
+        CheckHash(0x412BB7B9C2C736F1)
+        Key.Pressed(Down,3)
+        Paint('5.Mercedes')   
+        CheckHash(0x139A7D66A92482B3)
+        Key.Pressed(Down)
+        Paint('6.Ford')   
+        CheckHash(0xF6AF2FA25E408A22)
+        Key.Pressed(Home)
+        Paint('7.Dacia')   
+        CheckHash(0xF3BF1B9540CD5A5B)
+        Key.Pressed(Up)
+        Paint('8.Dacia (nothing changes)')   
+        CheckHash(0xF3BF1B9540CD5A5B)
+        Key.Pressed(End)
+        Paint('9.Renault')   
+        CheckHash(0x3FC6F7D52AD87990)
+        Key.Pressed(Down)
+        Paint('10.Renault (nothing changes)')   
+        CheckHash(0x3FC6F7D52AD87990)
+        Key.Pressed(Up,2)
+        Paint('11.Lamborghini')   
+        CheckHash(0xA441EC0C730FA1CF)
+        Key.Pressed(PageUp)
+        // pack mode --> PageUp moves one element at time
+        Paint('12.Ferrari')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Key.Pressed(PageUp)
+        Paint('13.Ford')   
+        CheckHash(0xF6AF2FA25E408A22)
+        Key.Pressed(PageDown,2)
+        // pack mode --> PageDown moves one element at time
+        Paint('14.Lamborghini')   
+        CheckHash(0xA441EC0C730FA1CF)
+        Key.Pressed(PageDown)
+        Paint('15.Skoda')   
+        CheckHash(0xD46BF7EA6F08B293)
+        Key.Pressed(PageDown,10)
+        Paint('16.Renault')   
+        CheckHash(0x3FC6F7D52AD87990)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
     a.add_window(w);
     a.run();
 }
