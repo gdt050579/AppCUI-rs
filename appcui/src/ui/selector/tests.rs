@@ -542,7 +542,133 @@ fn check_none_value_scenario() {
     a.run();
 }
 
+#[test]
+fn check_mouse_up_down_buttons() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('Initial state (closed)')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Mouse.Click(16,1,left)     
+        Paint('Expanded (Mazda,Mercedes,Ford,[Ferrari])')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Mouse.Move(16,4)
+        Paint('Hovered over Mercedes (Mazda,Mercedes,Ford,[Ferrari])')   
+        CheckHash(0xF4C3E1C47C2FFB45)
+        Mouse.Move(17,2)
+        Paint('Hovered over Up Button (Mazda,Mercedes,Ford,[Ferrari])')   
+        CheckHash(0x19079C5374C7B9FD)
+        Mouse.Hold(16,2,left)
+        Paint('Pressed Up Button (Mazda,Mercedes,[Ford],Ferrari)')   
+        CheckHash(0x59696BB058528C5F)
+        Mouse.Release(16,2,left)
+        Paint('Release Up Button (Mazda,Mercedes,[Ford],Ferrari)')   
+        CheckHash(0x258A40181DFDFE03)
+        Mouse.Click(16,2,left)
+        Mouse.Click(17,2,left)
+        Mouse.Click(18,2,left)
+        Paint('Now ([BMW],Mazda,Mercedes,Ford)')   
+        CheckHash(0x5ACB598F5ECEC9D9)
+        Mouse.Click(17,2,left)
+        Paint('Now ([Toyota],BMW,Mazda,Mercedes)')   
+        CheckHash(0x8ADAE9B5E15D42A6)
+        Mouse.Click(17,2,left)
+        Paint('Up button inactive ([Dacia],Toyota,BMW,Mazda)')   
+        CheckHash(0x668B915504B8FAAC)
+        Mouse.Click(17,2,left)
+        Paint('Up button inactive ([Dacia],Toyota,BMW,Mazda) - nothing changes')   
+        CheckHash(0x668B915504B8FAAC)
+        Key.Pressed(PageDown,2)
+        Paint('Ford,Ferrari,Lamborghini,[Skoda]')   
+        CheckHash(0x6FE834D546EB9957)
+        Mouse.Click(17,7,left)
+        Paint('Ferrari,Lamborghini,Skoda,[Renault]')   
+        CheckHash(0xC6C48AF71E8F54DA)
+        Mouse.Click(17,7,left)
+        Paint('DownButton inactive - Lamborghini,Skoda,Renault,[None]')   
+        CheckHash(0x3542CEA13D858F82)
+        Mouse.Click(17,7,left)
+        Paint('DownButton inactive - Lamborghini,Skoda,Renault,[None] - nothing changes')   
+        CheckHash(0x3542CEA13D858F82)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+    a.add_window(w);
+    a.run();
+}
 
-// mouse --> a lot of scenarios
+#[test]
+fn check_mouse_click() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (closed)')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Mouse.Click(16,1,left)     
+        Paint('Expanded (Mazda,Mercedes,Ford,[Ferrari])')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Mouse.Click(16,3,left)
+        Paint('Packed -> [Mazda],Mercedes,Ford,Ferrari)')   
+        CheckHash(0xD93C83FFFEE3151A)
+        Mouse.Click(16,1,left)
+        Paint('Expanded -> [Mazda],Mercedes,Ford,Ferrari)')   
+        CheckHash(0x6056BD2A0F71A6A3)
+        Mouse.Move(16,4)
+        Paint('Hovered over Mercedes -> [Mazda],Mercedes,Ford,Ferrari)')   
+        CheckHash(0x1F679526B9D9C0B3)
+        Mouse.Click(16,4,left)
+        Paint('Packed -> Mazda,[Mercedes],Ford,Ferrari)')   
+        CheckHash(0x139A7D66A92482B3)
+        Mouse.Click(30,1,left)
+        Paint('Expanded -> Mazda,[Mercedes],Ford,Ferrari)')   
+        CheckHash(0xDD4C5FFCF03E4BD6)
+        Mouse.Click(0,0,left)
+        Paint('Packed -> Mazda,[Mercedes],Ford,Ferrari)')   
+        CheckHash(0x139A7D66A92482B3)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_mouse_cheel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (closed)')   
+        CheckHash(0x4D5DD26CD625E51C)
+        Mouse.Click(16,1,left)     
+        Paint('Expanded (Mazda,Mercedes,Ford,[Ferrari])')   
+        CheckHash(0xEFFDEFE5806F6E75)
+        Mouse.Move(20,4)
+        Mouse.Wheel(20,4,up,1)
+        Paint('Mazda,Mercedes,[Ford],Ferrari)')   
+        CheckHash(0x9DD4AFF02416E60B)    
+        Mouse.Wheel(20,4,up,1)
+        Paint('Mazda,[Mercedes],Ford,Ferrari)')   
+        CheckHash(0xDD4C5FFCF03E4BD6)    
+        Mouse.Wheel(20,4,up,10)
+        Paint('[Dacia],Toyota,BMW,Mazda')   
+        CheckHash(0x668B915504B8FAAC)    
+        Mouse.Wheel(20,4,down,1)
+        Paint('Dacia,[Toyota],BMW,Mazda')   
+        CheckHash(0x243C9F25A37EE0EA)    
+        Mouse.Wheel(20,4,down,3)
+        Paint('Toyota,BMW,Mazda,[Mercedes]')   
+        CheckHash(0xC7E09CB60639C054)    
+        Mouse.Wheel(20,4,down,10)
+        Paint('Lamborghini,Skoda,Renault,[None]')   
+        CheckHash(0x3542CEA13D858F82)    
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+    a.add_window(w);
+    a.run();
+}
+
 // suport de iconite (1 sau 2 caractere)
 // descriere pentru mouse over
