@@ -487,7 +487,9 @@ where
             }
         }
         self.expanded_size = control.expanded_size();
-        self.update_current_index(self.current_index);
+        if self.current_index < self.count {
+            self.update_current_index(self.current_index);
+        }
         self.mouse_index = u32::MAX;
         let items_to_show = if self.allow_none_value { self.count + 1 } else { self.count };
         if self.expanded_size.height == items_to_show + 3 {
@@ -512,8 +514,19 @@ where
         self.none_repr.push_str(value);
     }
     pub(crate) fn update_count(&mut self, new_count: u32) {
-        todo!("check logic between the new count and the old one");
-        // for example, if new_count is 0, then reset the value to 0
-        // same if the new_count is smaller than current index or start view
+        if new_count == self.count {
+            return;
+        }
+        if new_count > self.count {
+            if self.current_index >= self.count {
+                self.current_index = new_count;
+            }
+        } else {
+            if self.current_index >= new_count {
+                self.current_index = new_count;
+            }
+        }
+        self.start_index = self.start_index.min(if new_count > 0 { new_count - 1 } else { 0 });
+        self.count = new_count;
     }
 }
