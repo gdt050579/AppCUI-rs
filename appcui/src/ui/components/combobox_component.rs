@@ -66,6 +66,7 @@ where
     button_up: ButtonState,
     button_down: ButtonState,
     _phantom: PhantomData<DataProvider>,
+    none_repr: String,
 }
 impl<T> ComboBoxComponent<T>
 where
@@ -83,12 +84,17 @@ where
             count,
             button_up: ButtonState::Hidden,
             button_down: ButtonState::Hidden,
+            none_repr: String::new(),
             _phantom: PhantomData,
         }
     }
     fn visible_items(&self) -> u32 {
         let height = self.expanded_size.height;
-        if height > 3 { height - 3 } else { 1 }
+        if height > 3 {
+            height - 3
+        } else {
+            1
+        }
     }
     pub(crate) fn update_current_index(&mut self, pos: u32) {
         let expanded_size = self.expanded_size;
@@ -227,8 +233,8 @@ where
                 format.width = Some((size.width - MIN_WIDTH_VARIANT_NAME) as u16);
                 if let Some(value) = data.name(self.current_index) {
                     surface.write_text(value, &format);
-                } else {
-                    surface.write_text("None", &format);
+                } else if !self.none_repr.is_empty() {
+                    surface.write_text(&self.none_repr, &format);
                 }
             }
         }
@@ -263,9 +269,9 @@ where
                 if let Some(value) = data.name(i) {
                     format.char_attr = theme.menu.text.normal;
                     surface.write_text(value, &format);
-                } else {
+                } else if !self.none_repr.is_empty() {
                     format.char_attr = theme.menu.text.inactive;
-                    surface.write_text("None", &format);
+                    surface.write_text(&self.none_repr, &format);
                 }
                 if i == self.current_index {
                     surface.fill_horizontal_line(
@@ -295,7 +301,7 @@ where
             control.expand(Size::new(w, h.min(4)), Size::new(w, h));
         }
     }
-    pub(crate) fn on_key_pressed(&mut self, control: &mut ControlBase,data: &T, key: Key, character: char) -> EventProcessStatus {
+    pub(crate) fn on_key_pressed(&mut self, control: &mut ControlBase, data: &T, key: Key, character: char) -> EventProcessStatus {
         let expanded = control.is_expanded();
 
         match key.value() {
@@ -496,5 +502,9 @@ where
         self.expanded_size = Size::default();
         self.button_down = ButtonState::Hidden;
         self.button_up = ButtonState::Hidden;
+    }
+    pub(crate) fn set_none_string(&mut self, value: &str) {
+        self.none_repr.clear();
+        self.none_repr.push_str(value);
     }
 }

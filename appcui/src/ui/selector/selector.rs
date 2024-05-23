@@ -67,6 +67,7 @@ where
         if T::COUNT == 0 {
             panic!("You should have at least one variant in the enum associated with the seclector control !");
         }
+        obj.component.set_none_string("None");
         obj.set_size_bounds(7, 1, u16::MAX, 1);
         obj
     }

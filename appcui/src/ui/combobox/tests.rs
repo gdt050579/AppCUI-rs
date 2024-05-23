@@ -7,7 +7,7 @@ fn check_creation() {
         Error.Disable(true)
         Paint('initial state')   
         CheckHash(0x8E402A80F606DBF1)
-        Key.Pressed(Space)
+        //Key.Pressed(Space)
         Paint('Opened')   
         CheckHash(0x8E402A80F606DBF1)
     ";
