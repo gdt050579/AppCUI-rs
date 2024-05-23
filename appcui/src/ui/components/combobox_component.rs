@@ -101,15 +101,17 @@ where
         // there should be atleast one item visible
         let visible_items = if expanded_size.height > 3 { expanded_size.height - 3 } else { 1 };
         let count = self.count;
-        let last_item_index = if self.allow_none_value { count } else { count - 1 };
-        self.current_index = pos.min(last_item_index);
-        if self.start_index >= self.current_index {
-            self.start_index = self.current_index;
-        } else if self.start_index + visible_items <= self.current_index {
-            self.start_index = self.current_index + 1 - visible_items;
-        }
-        if self.start_index + visible_items > (last_item_index + 1) {
-            self.start_index = last_item_index + 1 - visible_items;
+        if count > 0 {
+            let last_item_index = if self.allow_none_value { count } else { count - 1 };
+            self.current_index = pos.min(last_item_index);
+            if self.start_index >= self.current_index {
+                self.start_index = self.current_index;
+            } else if self.start_index + visible_items <= self.current_index {
+                self.start_index = self.current_index + 1 - visible_items;
+            }
+            if self.start_index + visible_items > (last_item_index + 1) {
+                self.start_index = last_item_index + 1 - visible_items;
+            }
         }
         self.update_button_states();
     }
@@ -246,7 +248,6 @@ where
         // assuming the control is expanded
         if control.is_expanded() {
             let size = self.expanded_size;
-            let visible_items = if size.height > 3 { size.height - 3 } else { 1 };
             let col = theme.menu.text.normal;
             surface.fill_rect(
                 Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
@@ -262,33 +263,36 @@ where
                 self.paint_buttons(surface, theme);
             }
 
-            let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
-            format.width = Some((size.width - 4) as u16);
+            if self.count > 0 {
+                let visible_items = if size.height > 3 { size.height - 3 } else { 1 };
+                let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
+                format.width = Some((size.width - 4) as u16);
 
-            for i in self.start_index..self.start_index + visible_items {
-                if let Some(value) = data.name(i) {
-                    format.char_attr = theme.menu.text.normal;
-                    surface.write_text(value, &format);
-                } else if !self.none_repr.is_empty() {
-                    format.char_attr = theme.menu.text.inactive;
-                    surface.write_text(&self.none_repr, &format);
+                for i in self.start_index..self.start_index + visible_items {
+                    if let Some(value) = data.name(i) {
+                        format.char_attr = theme.menu.text.normal;
+                        surface.write_text(value, &format);
+                    } else if !self.none_repr.is_empty() {
+                        format.char_attr = theme.menu.text.inactive;
+                        surface.write_text(&self.none_repr, &format);
+                    }
+                    if i == self.current_index {
+                        surface.fill_horizontal_line(
+                            1,
+                            format.y,
+                            (size.width - 2) as i32,
+                            Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
+                        );
+                    } else if i == self.mouse_index {
+                        surface.fill_horizontal_line(
+                            1,
+                            format.y,
+                            (size.width - 2) as i32,
+                            Character::with_attributes(0, theme.menu.text.hovered),
+                        );
+                    }
+                    format.y += 1;
                 }
-                if i == self.current_index {
-                    surface.fill_horizontal_line(
-                        1,
-                        format.y,
-                        (size.width - 2) as i32,
-                        Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
-                    );
-                } else if i == self.mouse_index {
-                    surface.fill_horizontal_line(
-                        1,
-                        format.y,
-                        (size.width - 2) as i32,
-                        Character::with_attributes(0, theme.menu.text.hovered),
-                    );
-                }
-                format.y += 1;
             }
         }
     }
