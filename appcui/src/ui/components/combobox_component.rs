@@ -193,6 +193,23 @@ where
         }
         u32::MAX
     }
+    #[inline(always)]
+    fn update_position_from_invalid_index(&mut self) -> bool {
+        if self.count == 0 {
+            return true;
+        }
+        if self.allow_none_value {
+            // none value is something we can chose --> this means we are on the last position
+            return false;
+        }
+        // there is no non value (we just did not select one)
+        // we will need to set the firts one as valied
+        if self.current_index >= self.count {
+            self.update_current_index(0);
+            return true;
+        }
+        return false;
+    }
     fn is_on_button_up(&self, x: i32, y: i32) -> bool {
         if self.button_up == ButtonState::Hidden {
             return false;
@@ -322,16 +339,26 @@ where
                 return EventProcessStatus::Processed;
             }
             key!("Up") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
                 if self.current_index > 0 {
                     self.update_current_index(self.current_index - 1);
                 };
                 return EventProcessStatus::Processed;
             }
             key!("Down") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
                 self.update_current_index(self.current_index + 1);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Up") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
+
                 if expanded {
                     // only if expanded
                     self.move_scrollview_up();
@@ -341,6 +368,10 @@ where
                 }
             }
             key!("Ctrl+Down") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
+
                 if expanded {
                     // only if expanded
                     self.move_scrollview_down();
@@ -358,6 +389,9 @@ where
                 return EventProcessStatus::Processed;
             }
             key!("PageUp") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
                 let page_count = self.visible_items();
                 if self.current_index > page_count {
                     self.update_current_index(self.current_index - page_count);
@@ -367,6 +401,9 @@ where
                 return EventProcessStatus::Processed;
             }
             key!("PageDown") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
                 self.update_current_index(self.current_index + self.visible_items());
                 return EventProcessStatus::Processed;
             }
