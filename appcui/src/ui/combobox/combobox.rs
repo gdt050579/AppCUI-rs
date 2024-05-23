@@ -1,12 +1,10 @@
 use super::events::EventData;
 use super::Flags;
+use super::Item;
 use crate::prelude::*;
 use crate::ui::components::{ComboBoxComponent, ComboBoxComponentDataProvider};
 
-struct Item {
-    value: String,
-    description: String,
-}
+
 struct DataProvider {
     items: Vec<Item>
 }
