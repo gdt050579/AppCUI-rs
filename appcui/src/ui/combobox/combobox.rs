@@ -52,6 +52,14 @@ impl ComboBox
         self.data.name(self.component.current_index)
     }
 
+    pub fn add(&mut self, value: &str) {
+        self.add_item(Item::new(value, ""));
+    }
+    pub fn add_item(&mut self, item: combobox::Item) {
+        self.data.items.push(item);
+        self.component.update_count(self.data.items.len() as u32);
+    }
+
     fn emit_on_selection_changed_event(&mut self) {
         // self.raise_event(ControlEvent {
         //     emitter: self.handle,

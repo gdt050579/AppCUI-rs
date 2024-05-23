@@ -511,4 +511,9 @@ where
         self.none_repr.clear();
         self.none_repr.push_str(value);
     }
+    pub(crate) fn update_count(&mut self, new_count: u32) {
+        todo!("check logic between the new count and the old one");
+        // for example, if new_count is 0, then reset the value to 0
+        // same if the new_count is smaller than current index or start view
+    }
 }
