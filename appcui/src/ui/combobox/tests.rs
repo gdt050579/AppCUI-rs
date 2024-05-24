@@ -74,3 +74,108 @@ fn check_select_item_from_unselected() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_clear_items_when_closed() {
+    #[Window(events=CommandBarEvents,commands:A, internal:true)]
+    struct MyWin {
+        h: Handle<ComboBox>
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Win,x:1,y:1,w:38,h:8"),
+                h: Handle::None,
+            };
+            let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"),combobox::Flags::None);
+            c.add("option 1");
+            c.add("option 2");
+            c.add("option 3");
+            c.set_index(1);
+            w.h = w.add(c);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self,commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"),"Clear",mywin::Commands::A);
+        }
+    
+        fn on_event(&mut self,command_id:mywin::Commands) {
+            if command_id == mywin::Commands::A {
+                let h = self.h;
+                if let Some(cb) = self.control_mut(h) {
+                    cb.clear();
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (option 2)')   
+        CheckHash(0x677F305E06C6CC2A)
+        Key.Pressed(F1)
+        Paint('Items are clear')   
+        CheckHash(0xA48FE4D6600B53E3)
+    ";
+    let mut a = App::debug(40, 10, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_clear_items_when_opened() {
+    #[Window(events=CommandBarEvents,commands:A, internal:true)]
+    struct MyWin {
+        h: Handle<ComboBox>
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Win,x:1,y:1,w:38,h:8"),
+                h: Handle::None,
+            };
+            let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"),combobox::Flags::None);
+            c.add("option 1");
+            c.add("option 2");
+            c.add("option 3");
+            c.set_index(1);
+            w.h = w.add(c);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self,commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"),"Clear",mywin::Commands::A);
+        }
+    
+        fn on_event(&mut self,command_id:mywin::Commands) {
+            if command_id == mywin::Commands::A {
+                let h = self.h;
+                if let Some(cb) = self.control_mut(h) {
+                    cb.clear();
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (option 2)')   
+        CheckHash(0x677F305E06C6CC2A)
+        Key.Pressed(Space)
+        Paint('Opened')
+        CheckHash(0xDCB81C344C555A2D)
+        Key.Pressed(F1)
+        Paint('Items are clear (larger)')   
+        CheckHash(0x3A0D2563A2353DAB)
+        Key.Pressed(Space)
+        Paint('Items are clear (closed)')   
+        CheckHash(0xA48FE4D6600B53E3)
+        Key.Pressed(Space)
+        Paint('Items are clear (opened and smaller)')   
+        CheckHash(0x7D591AE22C8A7DFB)
+    ";
+    let mut a = App::debug(40, 10, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
