@@ -71,6 +71,7 @@ impl<T> KeySelectorEvents for ModalWindow<T> {}
 impl<T> TextFieldEvents for ModalWindow<T> {}
 impl<T> ButtonEvents for ModalWindow<T> {}
 impl<T> ColorPickerEvents for ModalWindow<T> {}
+impl<T> ComboBoxEvents for ModalWindow<T> {}
 impl<T> CustomEvents for ModalWindow<T> {}
 impl<T> GenericSelectorEvents for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}

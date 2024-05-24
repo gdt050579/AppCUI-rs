@@ -89,6 +89,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events
@@ -157,6 +158,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
 
 
     // custom events
@@ -201,6 +203,8 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
+   
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -269,6 +273,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events
