@@ -19,6 +19,29 @@ fn check_empty_combobox() {
 }
 
 #[test]
+fn check_show_description() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0x6B9CEEE64BE5336A)
+        Key.Pressed(Space)
+        Paint('Opened')   
+        CheckHash(0x9B224EA337A5BDC6)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:60,h:7");
+    let mut c = ComboBox::new(Layout::new("x:1,y:1,w:50"), combobox::Flags::ShowDescription);
+    c.add_item(combobox::Item::new("Option 1", "(Description for option 1)"));
+    c.add_item(combobox::Item::new("Option 2", "(Description for option 2)"));
+    c.add_item(combobox::Item::new("Option 3", "(Description for option 3)"));
+    c.add_item(combobox::Item::new("Option 4", "(Description for option 4)"));
+    c.set_index(3);
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_open_unselected_combobox() {
     let script = "
         Paint.Enable(false)

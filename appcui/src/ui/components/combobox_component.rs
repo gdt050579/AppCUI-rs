@@ -61,6 +61,7 @@ where
     header_y_ofs: i32,
     expanded_panel_y: i32,
     allow_none_value: bool,
+    show_description: bool,
     expanded_size: Size,
     count: u32,
     button_up: ButtonState,
@@ -72,7 +73,7 @@ impl<T> ComboBoxComponent<T>
 where
     T: ComboBoxComponentDataProvider,
 {
-    pub(crate) fn new(allow_none_value: bool, count: u32) -> Self {
+    pub(crate) fn new(allow_none_value: bool, show_description: bool, count: u32) -> Self {
         Self {
             start_index: 0,
             current_index: 0,
@@ -80,6 +81,7 @@ where
             expanded_panel_y: 1,
             mouse_index: u32::MAX,
             allow_none_value,
+            show_description,
             expanded_size: Size::default(),
             count,
             button_up: ButtonState::Hidden,
@@ -297,6 +299,22 @@ where
                     if let Some(value) = data.name(i) {
                         format.char_attr = theme.menu.text.normal;
                         surface.write_text(value, &format);
+                        if self.show_description {
+                            if let Some(desc) = data.description(i) {
+                                if !desc.is_empty() {
+                                    let sz = value.chars().count();
+                                    let old_width = format.width;
+                                    format.x = 3 + sz as i32;
+                                    if format.x < (size.width as i32) - 2 {
+                                        format.width = Some((size.width as i32 - (2 + format.x)) as u16);
+                                        format.char_attr = theme.menu.text.inactive;
+                                        surface.write_text(desc, &format);
+                                    }
+                                    format.x = 2;
+                                    format.width = old_width;
+                                }
+                            }
+                        }
                     } else if !self.none_repr.is_empty() {
                         format.char_attr = theme.menu.text.inactive;
                         surface.write_text(&self.none_repr, &format);
@@ -559,7 +577,7 @@ where
         self.none_repr.clear();
         self.none_repr.push_str(value);
     }
-    pub(crate) fn update_count(&mut self,control: &mut ControlBase, new_count: u32) {
+    pub(crate) fn update_count(&mut self, control: &mut ControlBase, new_count: u32) {
         if new_count == self.count {
             return;
         }
