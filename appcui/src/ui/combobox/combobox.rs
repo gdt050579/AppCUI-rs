@@ -59,7 +59,43 @@ impl ComboBox
         self.data.items.push(item);
         self.component.update_count(self.data.items.len() as u32);
     }
-
+    pub fn selected_item(&self)->Option<&Item> {
+        let idx = self.component.current_index;
+        if idx>=self.data.count() {
+            None 
+        } else {
+            Some(&self.data.items[idx as usize])
+        }
+    }
+    pub fn selected_item_mut(&mut self)->Option<&mut Item> {
+        let idx = self.component.current_index;
+        if idx>=self.data.count() {
+            None 
+        } else {
+            Some(&mut self.data.items[idx as usize])
+        }
+    }
+    pub fn index(&self)->Option<u32> {
+        let idx = self.component.current_index;
+        if idx>=self.data.count() {
+            None 
+        } else {
+            Some(idx)
+        }
+    }
+    pub fn set_index(&mut self, index: u32) {
+        if index<self.data.count() {
+            self.component.update_current_index(index);
+        }
+    }
+    pub fn clear(&mut self) {
+        self.data.items.clear();
+        self.component.clear();
+    }
+    #[inline(always)]
+    pub fn has_selection(&self)->bool {
+        self.component.current_index < self.data.count()
+    }
     fn emit_on_selection_changed_event(&mut self) {
         // self.raise_event(ControlEvent {
         //     emitter: self.handle,

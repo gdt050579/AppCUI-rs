@@ -115,6 +115,14 @@ where
         }
         self.update_button_states();
     }
+    pub(crate) fn clear(&mut self) {
+        self.count = 0;
+        self.start_index = 0;
+        self.current_index = 0;
+        self.button_up = ButtonState::Hidden;
+        self.button_down = ButtonState::Hidden;
+        self.mouse_index = u32::MAX;
+    }
     fn update_button_states(&mut self) {
         if self.button_up == ButtonState::Hidden {
             return;
