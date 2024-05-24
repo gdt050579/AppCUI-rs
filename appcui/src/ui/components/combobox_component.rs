@@ -288,8 +288,8 @@ where
                 self.paint_buttons(surface, theme);
             }
 
-            if self.count > 0 {
-                let visible_items = if size.height > 3 { size.height - 3 } else { 1 };
+            if (self.count > 0) && (size.height > 3) {
+                let visible_items = size.height - 3;
                 let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
                 format.width = Some((size.width - 4) as u16);
 
@@ -574,5 +574,16 @@ where
         }
         self.start_index = self.start_index.min(if new_count > 0 { new_count - 1 } else { 0 });
         self.count = new_count;
+        if self.expanded_size.height > 0 {
+            let items_to_show = if self.allow_none_value { self.count + 1 } else { self.count };
+            if self.expanded_size.height == items_to_show + 3 {
+                self.button_down = ButtonState::Hidden;
+                self.button_up = ButtonState::Hidden;
+            } else {
+                self.button_down = ButtonState::Normal;
+                self.button_up = ButtonState::Normal;
+                self.update_button_states();
+            }
+        }
     }
 }

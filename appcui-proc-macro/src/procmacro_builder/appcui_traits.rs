@@ -243,7 +243,7 @@ impl AppCUITrait {
             "TextFieldEvents" | "TextField" => Some(AppCUITrait::TextFieldEvents),
             // nothing for the custom events -> they are enabled through a different field
             "SelectorEvents" | "Selector" => Some(AppCUITrait::GenericSelectorEvents),
-            "ComboBoxEvents" | "ComboBox" => Some(AppCUITrait::GenericSelectorEvents),
+            "ComboBoxEvents" | "ComboBox" => Some(AppCUITrait::ComboBoxEvents),
             _ => None,
         }
     }

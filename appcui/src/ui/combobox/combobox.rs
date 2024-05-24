@@ -92,6 +92,10 @@ impl ComboBox {
     pub fn has_selection(&self) -> bool {
         self.component.current_index < self.data.count()
     }
+    #[inline(always)]
+    pub fn count(&self) -> u32 {
+        self.data.count()
+    }
     fn emit_on_selection_changed_event(&mut self) {
         self.raise_event(ControlEvent {
             emitter: self.handle,
