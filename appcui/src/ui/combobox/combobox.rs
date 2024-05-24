@@ -53,7 +53,7 @@ impl ComboBox {
     }
     pub fn add_item(&mut self, item: combobox::Item) {
         self.data.items.push(item);
-        self.component.update_count(self.data.items.len() as u32);
+        self.component.update_count(&mut self.base, self.data.items.len() as u32);
     }
     pub fn selected_item(&self) -> Option<&Item> {
         let idx = self.component.current_index;

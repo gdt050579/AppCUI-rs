@@ -559,7 +559,7 @@ where
         self.none_repr.clear();
         self.none_repr.push_str(value);
     }
-    pub(crate) fn update_count(&mut self, new_count: u32) {
+    pub(crate) fn update_count(&mut self,control: &mut ControlBase, new_count: u32) {
         if new_count == self.count {
             return;
         }
@@ -574,16 +574,9 @@ where
         }
         self.start_index = self.start_index.min(if new_count > 0 { new_count - 1 } else { 0 });
         self.count = new_count;
+        // pack the control if expanded
         if self.expanded_size.height > 0 {
-            let items_to_show = if self.allow_none_value { self.count + 1 } else { self.count };
-            if self.expanded_size.height == items_to_show + 3 {
-                self.button_down = ButtonState::Hidden;
-                self.button_up = ButtonState::Hidden;
-            } else {
-                self.button_down = ButtonState::Normal;
-                self.button_up = ButtonState::Normal;
-                self.update_button_states();
-            }
+            control.pack();
         }
     }
 }
