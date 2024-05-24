@@ -50,3 +50,27 @@ fn check_open_unselected_combobox() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_select_item_from_unselected() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0xD3338F888B5B6D69)
+        Key.Pressed(Space)
+        Paint('Opened (nothing selected)')   
+        CheckHash(0xB6B348402DAF8E22)
+        Mouse.Click(10,5,left)
+        Paint('Second item selected')   
+        CheckHash(0x4A4D0C1E30FE00E4)        
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:40,h:7");
+    let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"),combobox::Flags::None);
+    c.add("option 1");
+    c.add("option 2");
+    c.add("option 3");
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
