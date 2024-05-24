@@ -24,8 +24,8 @@ where
         T::from_index(index).map(|p| p.name())
     }
 
-    fn description(&self, index: u32) -> &str {
-        T::from_index(index).map(|p| p.description()).unwrap_or("")
+    fn description(&self, index: u32) -> Option<&str> {
+        T::from_index(index).map(|p| p.description())
     }
 }
 

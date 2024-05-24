@@ -48,7 +48,7 @@ impl ButtonState {
 pub(crate) trait ComboBoxComponentDataProvider {
     fn count(&self) -> u32;
     fn name(&self, index: u32) -> Option<&str>;
-    fn description(&self, index: u32) -> &str;
+    fn description(&self, index: u32) -> Option<&str>;
 }
 
 pub(crate) struct ComboBoxComponent<DataProvider>
@@ -435,9 +435,10 @@ where
         match event {
             MouseEvent::Enter => {
                 if !control.is_expanded() {
-                    let desc = data.description(self.current_index);
-                    if !desc.is_empty() {
-                        control.show_tooltip(desc);
+                    if let Some(desc) = data.description(self.current_index) {
+                        if !desc.is_empty() {
+                            control.show_tooltip(desc);
+                        }
                     }
                 }
                 EventProcessStatus::Processed
