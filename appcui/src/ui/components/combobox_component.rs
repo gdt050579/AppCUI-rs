@@ -218,7 +218,7 @@ where
             self.update_current_index(0);
             return true;
         }
-        return false;
+        false
     }
     fn is_on_button_up(&self, x: i32, y: i32) -> bool {
         if self.button_up == ButtonState::Hidden {
@@ -585,10 +585,8 @@ where
             if self.current_index >= self.count {
                 self.current_index = new_count;
             }
-        } else {
-            if self.current_index >= new_count {
-                self.current_index = new_count;
-            }
+        } else if self.current_index >= new_count {
+            self.current_index = new_count;
         }
         self.start_index = self.start_index.min(if new_count > 0 { new_count - 1 } else { 0 });
         self.count = new_count;

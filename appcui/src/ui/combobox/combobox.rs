@@ -81,7 +81,7 @@ impl ComboBox {
     }
     pub fn set_index(&mut self, index: u32) {
         if index < self.data.count() {
-            self.component.update_current_index(index);
+            self.component.update_current_index(index); 
         }
     }
     pub fn clear(&mut self) {
