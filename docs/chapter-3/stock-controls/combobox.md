@@ -1,10 +1,10 @@
 # ComboBox
 
-A combobox is a drop down list control that allows you to select a variant from a list os trsings. 
+A combobox is a drop down list control that allows you to select a variant from a list os strings. 
 
 <img src="img/combobox.png" width=300/>
 
-It can be create using `ComboBox::new(...)` or the `combobox!` macro as follows:
+It can be created using `ComboBox::new(...)` or the `combobox!` macro. 
 
 ```rs
 let c1 = ComboBox::new(Layout::new("..."),combobox::Flags::None);
