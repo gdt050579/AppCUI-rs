@@ -42,6 +42,33 @@ fn check_show_description() {
 }
 
 #[test]
+fn check_macro_creation() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0xDFFF12815B314ED0)
+        Key.Pressed(Space)
+        Paint('2nd opened (BMW selected)')   
+        CheckHash(0x3E4501DFCFB4948A)
+        Key.Pressed(Space)
+        Key.Pressed(Tab)
+        Key.Pressed(Space)
+        Paint('1st selected')   
+        CheckHash(0xCD6CE57B63BBE3DD)
+        Key.Pressed(Down)
+        Key.Pressed(Enter)
+        Paint('1st selected (Item-1)')   
+        CheckHash(0x9D5F6C4A639F82FC)
+    ";
+    let mut a = App::debug(40, 12, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:60,h:7");
+    w.add(combobox!("x:1,y:1,w:30,items=['Item 1','Item 2','Item 3']"));
+    w.add(combobox!("x:1,y:3,w:30,items=['Toyota','Dacia','BMW'],index:2"));    
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_open_unselected_combobox() {
     let script = "
         Paint.Enable(false)
