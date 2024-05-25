@@ -48,7 +48,7 @@ impl ButtonState {
 pub(crate) trait ComboBoxComponentDataProvider {
     fn count(&self) -> u32;
     fn name(&self, index: u32) -> Option<&str>;
-    fn description(&self, index: u32) -> &str;
+    fn description(&self, index: u32) -> Option<&str>;
 }
 
 pub(crate) struct ComboBoxComponent<DataProvider>
@@ -61,17 +61,19 @@ where
     header_y_ofs: i32,
     expanded_panel_y: i32,
     allow_none_value: bool,
+    show_description: bool,
     expanded_size: Size,
     count: u32,
     button_up: ButtonState,
     button_down: ButtonState,
     _phantom: PhantomData<DataProvider>,
+    none_repr: String,
 }
 impl<T> ComboBoxComponent<T>
 where
     T: ComboBoxComponentDataProvider,
 {
-    pub(crate) fn new(allow_none_value: bool, count: u32) -> Self {
+    pub(crate) fn new(allow_none_value: bool, show_description: bool, count: u32) -> Self {
         Self {
             start_index: 0,
             current_index: 0,
@@ -79,33 +81,49 @@ where
             expanded_panel_y: 1,
             mouse_index: u32::MAX,
             allow_none_value,
+            show_description,
             expanded_size: Size::default(),
             count,
             button_up: ButtonState::Hidden,
             button_down: ButtonState::Hidden,
+            none_repr: String::new(),
             _phantom: PhantomData,
         }
     }
     fn visible_items(&self) -> u32 {
         let height = self.expanded_size.height;
-        if height > 3 { height - 3 } else { 1 }
+        if height > 3 {
+            height - 3
+        } else {
+            1
+        }
     }
     pub(crate) fn update_current_index(&mut self, pos: u32) {
         let expanded_size = self.expanded_size;
         // there should be atleast one item visible
         let visible_items = if expanded_size.height > 3 { expanded_size.height - 3 } else { 1 };
         let count = self.count;
-        let last_item_index = if self.allow_none_value { count } else { count - 1 };
-        self.current_index = pos.min(last_item_index);
-        if self.start_index >= self.current_index {
-            self.start_index = self.current_index;
-        } else if self.start_index + visible_items <= self.current_index {
-            self.start_index = self.current_index + 1 - visible_items;
-        }
-        if self.start_index + visible_items > (last_item_index + 1) {
-            self.start_index = last_item_index + 1 - visible_items;
+        if count > 0 {
+            let last_item_index = if self.allow_none_value { count } else { count - 1 };
+            self.current_index = pos.min(last_item_index);
+            if self.start_index >= self.current_index {
+                self.start_index = self.current_index;
+            } else if self.start_index + visible_items <= self.current_index {
+                self.start_index = self.current_index + 1 - visible_items;
+            }
+            if self.start_index + visible_items > (last_item_index + 1) {
+                self.start_index = last_item_index + 1 - visible_items;
+            }
         }
         self.update_button_states();
+    }
+    pub(crate) fn clear(&mut self) {
+        self.count = 0;
+        self.start_index = 0;
+        self.current_index = 0;
+        self.button_up = ButtonState::Hidden;
+        self.button_down = ButtonState::Hidden;
+        self.mouse_index = u32::MAX;
     }
     fn update_button_states(&mut self) {
         if self.button_up == ButtonState::Hidden {
@@ -185,6 +203,23 @@ where
         }
         u32::MAX
     }
+    #[inline(always)]
+    fn update_position_from_invalid_index(&mut self) -> bool {
+        if self.count == 0 {
+            return true;
+        }
+        if self.allow_none_value {
+            // none value is something we can chose --> this means we are on the last position
+            return false;
+        }
+        // there is no non value (we just did not select one)
+        // we will need to set the firts one as valied
+        if self.current_index >= self.count {
+            self.update_current_index(0);
+            return true;
+        }
+        false
+    }
     fn is_on_button_up(&self, x: i32, y: i32) -> bool {
         if self.button_up == ButtonState::Hidden {
             return false;
@@ -227,8 +262,8 @@ where
                 format.width = Some((size.width - MIN_WIDTH_VARIANT_NAME) as u16);
                 if let Some(value) = data.name(self.current_index) {
                     surface.write_text(value, &format);
-                } else {
-                    surface.write_text("None", &format);
+                } else if !self.none_repr.is_empty() {
+                    surface.write_text(&self.none_repr, &format);
                 }
             }
         }
@@ -240,7 +275,6 @@ where
         // assuming the control is expanded
         if control.is_expanded() {
             let size = self.expanded_size;
-            let visible_items = if size.height > 3 { size.height - 3 } else { 1 };
             let col = theme.menu.text.normal;
             surface.fill_rect(
                 Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
@@ -256,33 +290,52 @@ where
                 self.paint_buttons(surface, theme);
             }
 
-            let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
-            format.width = Some((size.width - 4) as u16);
+            if (self.count > 0) && (size.height > 3) {
+                let visible_items = size.height - 3;
+                let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
+                format.width = Some((size.width - 4) as u16);
 
-            for i in self.start_index..self.start_index + visible_items {
-                if let Some(value) = data.name(i) {
-                    format.char_attr = theme.menu.text.normal;
-                    surface.write_text(value, &format);
-                } else {
-                    format.char_attr = theme.menu.text.inactive;
-                    surface.write_text("None", &format);
+                for i in self.start_index..self.start_index + visible_items {
+                    if let Some(value) = data.name(i) {
+                        format.char_attr = theme.menu.text.normal;
+                        surface.write_text(value, &format);
+                        if self.show_description {
+                            if let Some(desc) = data.description(i) {
+                                if !desc.is_empty() {
+                                    let sz = value.chars().count();
+                                    let old_width = format.width;
+                                    format.x = 3 + sz as i32;
+                                    if format.x < (size.width as i32) - 2 {
+                                        format.width = Some((size.width as i32 - (2 + format.x)) as u16);
+                                        format.char_attr = theme.menu.text.inactive;
+                                        surface.write_text(desc, &format);
+                                    }
+                                    format.x = 2;
+                                    format.width = old_width;
+                                }
+                            }
+                        }
+                    } else if !self.none_repr.is_empty() {
+                        format.char_attr = theme.menu.text.inactive;
+                        surface.write_text(&self.none_repr, &format);
+                    }
+                    if i == self.current_index {
+                        surface.fill_horizontal_line(
+                            1,
+                            format.y,
+                            (size.width - 2) as i32,
+                            Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
+                        );
+                    } else if i == self.mouse_index {
+                        surface.fill_horizontal_line(
+                            1,
+                            format.y,
+                            (size.width - 2) as i32,
+                            Character::with_attributes(0, theme.menu.text.hovered),
+                        );
+                    }
+                    format.y += 1;
                 }
-                if i == self.current_index {
-                    surface.fill_horizontal_line(
-                        1,
-                        format.y,
-                        (size.width - 2) as i32,
-                        Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
-                    );
-                } else if i == self.mouse_index {
-                    surface.fill_horizontal_line(
-                        1,
-                        format.y,
-                        (size.width - 2) as i32,
-                        Character::with_attributes(0, theme.menu.text.hovered),
-                    );
-                }
-                format.y += 1;
             }
         }
     }
@@ -295,7 +348,7 @@ where
             control.expand(Size::new(w, h.min(4)), Size::new(w, h));
         }
     }
-    pub(crate) fn on_key_pressed(&mut self, control: &mut ControlBase,data: &T, key: Key, character: char) -> EventProcessStatus {
+    pub(crate) fn on_key_pressed(&mut self, control: &mut ControlBase, data: &T, key: Key, character: char) -> EventProcessStatus {
         let expanded = control.is_expanded();
 
         match key.value() {
@@ -312,16 +365,26 @@ where
                 return EventProcessStatus::Processed;
             }
             key!("Up") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
                 if self.current_index > 0 {
                     self.update_current_index(self.current_index - 1);
                 };
                 return EventProcessStatus::Processed;
             }
             key!("Down") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
                 self.update_current_index(self.current_index + 1);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Up") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
+
                 if expanded {
                     // only if expanded
                     self.move_scrollview_up();
@@ -331,6 +394,10 @@ where
                 }
             }
             key!("Ctrl+Down") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
+
                 if expanded {
                     // only if expanded
                     self.move_scrollview_down();
@@ -348,6 +415,9 @@ where
                 return EventProcessStatus::Processed;
             }
             key!("PageUp") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
                 let page_count = self.visible_items();
                 if self.current_index > page_count {
                     self.update_current_index(self.current_index - page_count);
@@ -357,6 +427,9 @@ where
                 return EventProcessStatus::Processed;
             }
             key!("PageDown") => {
+                if self.update_position_from_invalid_index() {
+                    return EventProcessStatus::Processed;
+                }
                 self.update_current_index(self.current_index + self.visible_items());
                 return EventProcessStatus::Processed;
             }
@@ -380,9 +453,10 @@ where
         match event {
             MouseEvent::Enter => {
                 if !control.is_expanded() {
-                    let desc = data.description(self.current_index);
-                    if !desc.is_empty() {
-                        control.show_tooltip(desc);
+                    if let Some(desc) = data.description(self.current_index) {
+                        if !desc.is_empty() {
+                            control.show_tooltip(desc);
+                        }
                     }
                 }
                 EventProcessStatus::Processed
@@ -477,7 +551,9 @@ where
             }
         }
         self.expanded_size = control.expanded_size();
-        self.update_current_index(self.current_index);
+        if self.current_index < self.count {
+            self.update_current_index(self.current_index);
+        }
         self.mouse_index = u32::MAX;
         let items_to_show = if self.allow_none_value { self.count + 1 } else { self.count };
         if self.expanded_size.height == items_to_show + 3 {
@@ -496,5 +572,27 @@ where
         self.expanded_size = Size::default();
         self.button_down = ButtonState::Hidden;
         self.button_up = ButtonState::Hidden;
+    }
+    pub(crate) fn set_none_string(&mut self, value: &str) {
+        self.none_repr.clear();
+        self.none_repr.push_str(value);
+    }
+    pub(crate) fn update_count(&mut self, control: &mut ControlBase, new_count: u32) {
+        if new_count == self.count {
+            return;
+        }
+        if new_count > self.count {
+            if self.current_index >= self.count {
+                self.current_index = new_count;
+            }
+        } else if self.current_index >= new_count {
+            self.current_index = new_count;
+        }
+        self.start_index = self.start_index.min(if new_count > 0 { new_count - 1 } else { 0 });
+        self.count = new_count;
+        // pack the control if expanded
+        if self.expanded_size.height > 0 {
+            control.pack();
+        }
     }
 }

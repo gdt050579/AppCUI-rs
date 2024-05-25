@@ -9,6 +9,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [Canvas](stock-controls/canvas.md)               | ui::Canvas            | `canvas!`        | <img src="stock-controls/img/canvas.png" width=300/>        |
 | [CheckBox](stock-controls/checkbox.md)           | ui::CheckBox          | `checkbox!`      | <img src="stock-controls/img/checkbox.png" width=300/>      |
 | [ColorPicker](stock-controls/colorpicker.md)     | ui::ColorPicker       | `colorpicker!`   | <img src="stock-controls/img/colorpicker.png" width=300/>   |
+| [ComboBox](stock-controls/combobox.md)           | ui::ComboBox          | `combobox!`      | <img src="stock-controls/img/combobox.png" width=300/>      |
 | [ImageViewer](stock-controls/imageviewer.md)     | ui::ImageViewer       | `imageviewer!`   | <img src="stock-controls/img/imageviewer.png" width=300/>   |
 | [KeySelector](stock-controls/keyselector.md)     | ui::KeySelector       | `keyselector!`   | <img src="stock-controls/img/keyselector.png" width=300/>   |
 | [Label](stock-controls/label.md)                 | ui::Label             | `label!`         | <img src="stock-controls/img/label.png" width=300/>         |

@@ -24,8 +24,8 @@ where
         T::from_index(index).map(|p| p.name())
     }
 
-    fn description(&self, index: u32) -> &str {
-        T::from_index(index).map(|p| p.description()).unwrap_or("")
+    fn description(&self, index: u32) -> Option<&str> {
+        T::from_index(index).map(|p| p.description())
     }
 }
 
@@ -44,7 +44,7 @@ where
     pub fn new(value: Option<T>, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            component: ComboBoxComponent::new(flags.contains(Flags::AllowNoneVariant), T::COUNT),
+            component: ComboBoxComponent::new(flags.contains(Flags::AllowNoneVariant), false, T::COUNT),
             flags,
         };
         if let Some(val) = value {
@@ -67,6 +67,7 @@ where
         if T::COUNT == 0 {
             panic!("You should have at least one variant in the enum associated with the seclector control !");
         }
+        obj.component.set_none_string("None");
         obj.set_size_bounds(7, 1, u16::MAX, 1);
         obj
     }

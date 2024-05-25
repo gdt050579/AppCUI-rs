@@ -7,6 +7,7 @@ use crate::{
         button::events::ButtonEvents,
         checkbox::events::CheckBoxEvents,
         colorpicker::events::ColorPickerEvents,
+        combobox::events::ComboBoxEvents,
         command_bar::events::GenericCommandBarEvents,
         desktop::events::DesktopEvents,
         keyselector::events::KeySelectorEvents,
@@ -110,6 +111,7 @@ pub trait Control:
     + GenericMenuEvents
     + CustomEvents
     + GenericSelectorEvents
+    + ComboBoxEvents
 {
 }
 

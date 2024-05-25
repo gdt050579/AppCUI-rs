@@ -4,12 +4,13 @@ use super::traits::{Control, CustomEvents, EventProcessStatus};
 use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
-use crate::prelude::{colorpicker, keyselector, selector, textfield, threestatebox, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
+use crate::prelude::{colorpicker, combobox, keyselector, selector, textfield, threestatebox, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
 use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
     radiobox::events::RadioBoxEvents,
     textfield::events::TextFieldEvents,
+    combobox::events::ComboBoxEvents,
 };
 
 #[derive(Copy,Clone)]
@@ -29,6 +30,7 @@ pub(crate) enum ControlEventData {
     KeySelector(keyselector::events::EventData),
     TextField(textfield::events::EventData),
     Selector(selector::events::EventData),
+    ComboBox(combobox::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -83,7 +85,11 @@ impl ControlEvent {
             },
             ControlEventData::Selector(data) => {
                 GenericSelectorEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
-            }
+            },
+            ControlEventData::ComboBox(_) => {
+                ComboBoxEvents::on_selection_changed(receiver, self.emitter.cast())
+            },
+            
             
         }
     }

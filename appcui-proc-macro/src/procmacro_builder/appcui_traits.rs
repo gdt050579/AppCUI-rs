@@ -38,6 +38,7 @@ pub(crate) enum AppCUITrait {
     TextFieldEvents = 29,
     CustomEvents = 30,
     GenericSelectorEvents = 31,
+    ComboBoxEvents = 32,
 }
 
 #[repr(u8)]
@@ -86,6 +87,7 @@ impl AppCUITrait {
             AppCUITrait::TextFieldEvents => "TextFieldEvents",
             AppCUITrait::CustomEvents => "CustomEvents",
             AppCUITrait::GenericSelectorEvents => "SelectorEvents", // important to be without Generic
+            AppCUITrait::ComboBoxEvents => "ComboBoxEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -125,6 +127,7 @@ impl AppCUITrait {
             AppCUITrait::TextFieldEvents => TraitType::ControlEvent,
             AppCUITrait::CustomEvents => TraitType::ControlEvent,
             AppCUITrait::GenericSelectorEvents => TraitType::ControlEvent,
+            AppCUITrait::ComboBoxEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -164,6 +167,7 @@ impl AppCUITrait {
             AppCUITrait::TextFieldEvents => "",
             AppCUITrait::CustomEvents => "",
             AppCUITrait::GenericSelectorEvents => "",
+            AppCUITrait::ComboBoxEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -203,6 +207,7 @@ impl AppCUITrait {
             AppCUITrait::TextFieldEvents => "impl$(TEMPLATE_TYPE) TextFieldEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::CustomEvents => "impl$(TEMPLATE_TYPE) CustomEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericSelectorEvents => "impl$(TEMPLATE_TYPE) GenericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::ComboBoxEvents => "impl$(TEMPLATE_TYPE) ComboBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -238,6 +243,7 @@ impl AppCUITrait {
             "TextFieldEvents" | "TextField" => Some(AppCUITrait::TextFieldEvents),
             // nothing for the custom events -> they are enabled through a different field
             "SelectorEvents" | "Selector" => Some(AppCUITrait::GenericSelectorEvents),
+            "ComboBoxEvents" | "ComboBox" => Some(AppCUITrait::ComboBoxEvents),
             _ => None,
         }
     }
@@ -278,6 +284,7 @@ impl AppCUITrait {
             29 => Some(AppCUITrait::TextFieldEvents),
             30 => Some(AppCUITrait::CustomEvents),
             31 => Some(AppCUITrait::GenericSelectorEvents),
+            32 => Some(AppCUITrait::ComboBoxEvents),
             _ => None,
         };
         result?;

@@ -173,7 +173,7 @@ impl EventRecorder {
         return hash;
     }
     fn add_keypressed(&mut self, key: Key) -> bool {
-        if key.get_compact_code() == key!("Ctrl+Alt+Space") {
+        if key.value() == key!("Ctrl+Alt+Space") {
             // save state
             return true;
         }
@@ -308,7 +308,7 @@ impl EventRecorder {
         );
     }
     fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
-        let sz = surface.get_size();
+        let sz = surface.size();
         let mut screen = Surface::new(sz.width, sz.height);
         let mut state_name = format!("State_{}", self.state_id);
         let mut comands = format!("Commands: {}", self.commands.len());
@@ -346,7 +346,7 @@ impl EventRecorder {
             // get the events
             let sys_event = terminal.get_system_event();
             match sys_event {
-                SystemEvent::KeyPressed(evnt) => match evnt.key.get_compact_code() {
+                SystemEvent::KeyPressed(evnt) => match evnt.key.value() {
                     key!("Escape") => {
                         return;
                     }
