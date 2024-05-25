@@ -51,7 +51,7 @@
         - [Canvas](chapter-3/stock-controls/canvas.md)
         - [CheckBox](chapter-3/stock-controls/checkbox.md)
         - [ColorPicker](chapter-3/stock-controls/colorpicker.md)
-        - [ComboBox]() <!-- (chapter-3/stock-controls/combobox.md) -->
+        - [ComboBox](chapter-3/stock-controls/combobox.md)
         - [DateTimePicker]()
         - [Label](chapter-3/stock-controls/label.md)
         - [Line]()
