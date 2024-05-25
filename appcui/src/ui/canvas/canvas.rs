@@ -16,6 +16,17 @@ pub struct Canvas {
     vertical_scrollbar: Handle<ScrollBar>,
 }
 impl Canvas {
+    /// Creates a new canvas with the specified size, layout and flags.
+    /// The flags can be a combination of the following values:
+    /// * `Flags::ScrollBars` - if set, the canvas will have horizontal and vertical scrollbars
+    /// 
+    /// The parameter `canvas_size` is the size of the canvas (in characters), while the layout is the layout of the control.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars); 
+    /// ```
     pub fn new(canvas_size: Size, layout: Layout, flags: Flags) -> Self {
         let mut canvas = Self {
             base: ControlBase::with_status_flags(
@@ -44,6 +55,15 @@ impl Canvas {
         }
         canvas
     }
+
+
+    /// Resizes the inner surface of the canvas. This will also update the scrollbars if they are present.
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars);
+    /// canvas.resize_surface(Size::new(200, 200));
+    /// ```
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
         let sz = self.surface.size();
@@ -62,9 +82,19 @@ impl Canvas {
     pub fn get_drawing_surface(&mut self) -> &mut Surface {
         &mut self.surface
     }
-    pub fn set_backgound(&mut self, backgroud_char: Character) {
+
+    /// Sets the background of the canvas to the specified character.
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars);
+    /// canvas.set_background(Character::new('*', Color::White, Color::Black, CharFlags::None));
+    /// ```
+    pub fn set_background(&mut self, backgroud_char: Character) {
         self.background = Some(backgroud_char);
     }
+
+    /// Clears the background character of the canvas. It esentially resets it to transparent foreground and backgroud colors
     pub fn clear_background(&mut self) {
         self.background = None;
     }

@@ -32,7 +32,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         let str_repr = String::from(cb.get_string_representation());
         if let Some(d) = cb.get_dict("back") {
             let s = crate::chars::builder::create_from_dict(&str_repr, d);
-            cb.add_line(format!("control.set_backgound({});", s).as_str());
+            cb.add_line(format!("control.set_background({});", s).as_str());
         }
     }
     let lsm = cb.get_i32("lsm").unwrap_or(0);

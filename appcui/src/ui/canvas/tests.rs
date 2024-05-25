@@ -194,7 +194,7 @@ fn check_background_char() {
     let mut c = Canvas::new(Size::new(2, 2), Layout::new("x:1,y:1,w:15,h:4"), canvas::Flags::None);
     let s = c.get_drawing_surface();
     s.clear(Character::new('X', Color::Yellow, Color::DarkRed, CharFlags::None));
-    c.set_backgound(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    c.set_background(Character::new('.', Color::White, Color::Black, CharFlags::None));
     w.add(c);
     a.add_window(w);
     a.run();
