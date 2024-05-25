@@ -110,3 +110,7 @@ path = "ferris/main.rs"
 [[example]]
 name = "selector"
 path = "selector/main.rs"
+
+[[example]]
+name = "combobox"
+path = "combobox/main.rs"
