@@ -7,7 +7,10 @@ use crate::ui::components::{ComboBoxComponent, ComboBoxComponentDataProvider};
 struct DataProvider<T: DropDownListType> {
     items: Vec<T>,
 }
-impl<T> ComboBoxComponentDataProvider for DataProvider<T> where T: DropDownListType{
+impl<T> ComboBoxComponentDataProvider for DataProvider<T>
+where
+    T: DropDownListType,
+{
     fn count(&self) -> u32 {
         self.items.len() as u32
     }
@@ -24,7 +27,7 @@ impl<T> ComboBoxComponentDataProvider for DataProvider<T> where T: DropDownListT
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
 pub struct DropDownList<T>
 where
-    T: DropDownListType
+    T: DropDownListType,
 {
     component: ComboBoxComponent<DataProvider<T>>,
     data: DataProvider<T>,
@@ -32,9 +35,9 @@ where
 }
 impl<T> DropDownList<T>
 where
-    T: DropDownListType
+    T: DropDownListType,
 {
-    pub fn new(value: Option<T>, layout: Layout, flags: Flags) -> Self {
+    pub fn new(layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             component: ComboBoxComponent::new(flags.contains(Flags::AllowNoneSelection), flags.contains(Flags::ShowDescription), 0),
@@ -44,6 +47,66 @@ where
         obj.component.set_none_string("None");
         obj.set_size_bounds(7, 1, u16::MAX, 1);
         obj
+    }
+
+    pub fn add(&mut self, value: T) {
+        self.data.items.push(value);
+        self.component.update_count(&mut self.base, self.data.items.len() as u32);
+    }
+    
+    /// Returns the selected item from the ComboBox control. If no item is selected, the code will return None
+    pub fn selected_item(&self) -> Option<&T> {
+        let idx = self.component.current_index;
+        if idx >= self.data.count() {
+            None
+        } else {
+            Some(&self.data.items[idx as usize])
+        }
+    }
+
+    /// Returns the selected item from the ComboBox control. If no item is selected, the code will return None
+    pub fn selected_item_mut(&mut self) -> Option<&mut T> {
+        let idx = self.component.current_index;
+        if idx >= self.data.count() {
+            None
+        } else {
+            Some(&mut self.data.items[idx as usize])
+        }
+    }
+
+    /// Returns the index of the selected item. If no item is selected, the code will return None
+    pub fn index(&self) -> Option<u32> {
+        let idx = self.component.current_index;
+        if idx >= self.data.count() {
+            None
+        } else {
+            Some(idx)
+        }
+    }
+
+    /// Sets the selected item based on the provided index. If the index is invalid, the index will be ignored
+    pub fn set_index(&mut self, index: u32) {
+        if index < self.data.count() {
+            self.component.update_current_index(index);
+        }
+    }
+
+    /// Clears all items from the ComboBox control
+    pub fn clear(&mut self) {
+        self.data.items.clear();
+        self.component.clear();
+    }
+
+    /// Returns true if the ComboBox control has a selected item
+    #[inline(always)]
+    pub fn has_selection(&self) -> bool {
+        self.component.current_index < self.data.count()
+    }
+
+    /// Returns the number of items in the ComboBox control
+    #[inline(always)]
+    pub fn count(&self) -> u32 {
+        self.data.count()
     }
 
     fn emit_on_selection_changed_event(&mut self) {
