@@ -24,6 +24,7 @@ pub mod keyselector;
 pub mod components;
 pub mod selector;
 pub mod combobox;
+pub mod dropdownlist;
 
 // re-export
 pub use common::ControlBase;
