@@ -44,7 +44,7 @@ where
     pub fn new(value: Option<T>, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            component: ComboBoxComponent::new(flags.contains(Flags::AllowNoneVariant), false, T::COUNT),
+            component: ComboBoxComponent::new(flags.contains(Flags::AllowNoneVariant), false, T::COUNT, 0),
             flags,
         };
         if let Some(val) = value {

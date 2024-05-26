@@ -43,7 +43,7 @@ impl ComboBox {
     pub fn new(layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            component: ComboBoxComponent::new(false,flags.contains(Flags::ShowDescription), 0),
+            component: ComboBoxComponent::new(false,flags.contains(Flags::ShowDescription), 0, 0),
             data: DataProvider { items: Vec::new() },
             flags,
         };

@@ -38,9 +38,18 @@ where
     T: DropDownListType,
 {
     pub fn new(layout: Layout, flags: Flags) -> Self {
+        Self::with_symbol(0, layout, flags)
+    }
+
+    pub fn with_symbol(symbol_size: u8, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            component: ComboBoxComponent::new(flags.contains(Flags::AllowNoneSelection), flags.contains(Flags::ShowDescription), 0),
+            component: ComboBoxComponent::new(
+                flags.contains(Flags::AllowNoneSelection),
+                flags.contains(Flags::ShowDescription),
+                0,
+                symbol_size,
+            ),
             data: DataProvider { items: Vec::new() },
             flags,
         };
@@ -53,7 +62,7 @@ where
         self.data.items.push(value);
         self.component.update_count(&mut self.base, self.data.items.len() as u32);
     }
-    
+
     /// Returns the selected item from the ComboBox control. If no item is selected, the code will return None
     pub fn selected_item(&self) -> Option<&T> {
         let idx = self.component.current_index;

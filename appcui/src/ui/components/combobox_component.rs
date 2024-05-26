@@ -64,6 +64,7 @@ where
     show_description: bool,
     expanded_size: Size,
     count: u32,
+    symbol_size: u8,
     button_up: ButtonState,
     button_down: ButtonState,
     _phantom: PhantomData<DataProvider>,
@@ -73,7 +74,7 @@ impl<T> ComboBoxComponent<T>
 where
     T: ComboBoxComponentDataProvider,
 {
-    pub(crate) fn new(allow_none_value: bool, show_description: bool, count: u32) -> Self {
+    pub(crate) fn new(allow_none_value: bool, show_description: bool, count: u32, symbol_size: u8) -> Self {
         Self {
             start_index: 0,
             current_index: 0,
@@ -84,6 +85,7 @@ where
             show_description,
             expanded_size: Size::default(),
             count,
+            symbol_size,
             button_up: ButtonState::Hidden,
             button_down: ButtonState::Hidden,
             none_repr: String::new(),
