@@ -20,7 +20,7 @@ impl ComboBoxComponentDataProvider for DataProvider {
         self.items.get(index as usize).map(|item| item.description.as_str())
     }
 
-    fn symbol(&self, index: u32) -> Option<&str> {
+    fn symbol(&self, _index: u32) -> Option<&str> {
         None
     }
 }

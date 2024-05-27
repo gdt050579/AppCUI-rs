@@ -9,7 +9,7 @@ struct DataProvider<T: DropDownListType> {
 }
 impl<T> ComboBoxComponentDataProvider for DataProvider<T>
 where
-    T: DropDownListType,
+    T: DropDownListType + 'static,
 {
     fn count(&self) -> u32 {
         self.items.len() as u32
@@ -31,7 +31,7 @@ where
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
 pub struct DropDownList<T>
 where
-    T: DropDownListType,
+    T: DropDownListType + 'static,
 {
     component: ComboBoxComponent<DataProvider<T>>,
     data: DataProvider<T>,
@@ -39,7 +39,7 @@ where
 }
 impl<T> DropDownList<T>
 where
-    T: DropDownListType,
+    T: DropDownListType + 'static,
 {
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_symbol(0, layout, flags)
@@ -125,13 +125,13 @@ where
     }
 
     fn emit_on_selection_changed_event(&mut self) {
-        // self.raise_event(ControlEvent {
-        //     emitter: self.handle,
-        //     receiver: self.event_processor,
-        //     data: ControlEventData::DropDownList(EventData {
-        //         type_id: std::any::TypeId::of::<T>(),
-        //     }),
-        // });
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::DropDownList(EventData {
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
     }
 }
 impl<T> OnPaint for DropDownList<T>

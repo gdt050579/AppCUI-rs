@@ -1,7 +1,6 @@
 use crate::{
     graphics::{Size, Surface},
     input::{Key, MouseEvent},
-    prelude::{selector::events::GenericSelectorEvents, textfield::events::TextFieldEvents},
     system::{Handle, Theme},
     ui::{
         button::events::ButtonEvents,
@@ -15,6 +14,9 @@ use crate::{
         password::events::PasswordEvents,
         radiobox::events::RadioBoxEvents,
         threestatebox::events::ThreeStateBoxEvents,
+        dropdownlist::events::GenericDropDownListEvents,
+        selector::events::GenericSelectorEvents,
+        textfield::events::TextFieldEvents,
         window::events::{ToolBarEvents, WindowEvents},
     },
 };
@@ -111,6 +113,7 @@ pub trait Control:
     + GenericMenuEvents
     + CustomEvents
     + GenericSelectorEvents
+    + GenericDropDownListEvents
     + ComboBoxEvents
 {
 }
