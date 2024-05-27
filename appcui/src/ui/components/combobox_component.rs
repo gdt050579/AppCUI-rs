@@ -49,6 +49,7 @@ pub(crate) trait ComboBoxComponentDataProvider {
     fn count(&self) -> u32;
     fn name(&self, index: u32) -> Option<&str>;
     fn description(&self, index: u32) -> Option<&str>;
+    fn symbol(&self, index: u32) -> Option<&str>;
 }
 
 pub(crate) struct ComboBoxComponent<DataProvider>
@@ -260,12 +261,31 @@ where
         if size.width > MINSPACE_FOR_DRAWING {
             surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_DRAWING) as i32, space_char);
             if size.width > MIN_WIDTH_VARIANT_NAME {
+                let mut paint_next = true;
                 let mut format = TextFormat::single_line(1, self.header_y_ofs, col_text, TextAlignament::Left);
-                format.width = Some((size.width - MIN_WIDTH_VARIANT_NAME) as u16);
-                if let Some(value) = data.name(self.current_index) {
-                    surface.write_text(value, &format);
-                } else if !self.none_repr.is_empty() {
-                    surface.write_text(&self.none_repr, &format);
+                if self.symbol_size > 0 {
+                    format.width = Some(self.symbol_size as u16);
+                    if let Some(value) = data.symbol(self.current_index) {
+                        surface.write_text(value, &format);
+                    }
+                    format.x += self.symbol_size as i32;
+                    format.x += 1;
+                    // recompute the new width
+                    let w = (size.width - MIN_WIDTH_VARIANT_NAME) as i32 - self.symbol_size as i32 - 1;
+                    if w > 0 {
+                        format.width = Some(w as u16);
+                    } else {
+                        paint_next = false;
+                    }
+                } else {
+                    format.width = Some((size.width - MIN_WIDTH_VARIANT_NAME) as u16);
+                }
+                if paint_next {
+                    if let Some(value) = data.name(self.current_index) {
+                        surface.write_text(value, &format);
+                    } else if !self.none_repr.is_empty() {
+                        surface.write_text(&self.none_repr, &format);
+                    }
                 }
             }
         }
@@ -295,9 +315,27 @@ where
             if (self.count > 0) && (size.height > 3) {
                 let visible_items = size.height - 3;
                 let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
-                format.width = Some((size.width - 4) as u16);
+                let mut format_symbol = TextFormat::single_line(2, self.expanded_panel_y + 1, theme.menu.symbol.normal, TextAlignament::Left);
+                format_symbol.width = Some(self.symbol_size as u16);
+                if self.symbol_size > 0 {
+                    format.x += self.symbol_size as i32;
+                    format.x += 1;
+                    let space_left = (size.width as i32) - (5 + self.symbol_size as i32);
+                    if space_left>0 {
+                        format.width = Some(space_left as u16);
+                    } else {
+                        format.width = Some(0);
+                    }
+                } else {
+                    format.width = Some((size.width - 4) as u16);
+                }
 
                 for i in self.start_index..self.start_index + visible_items {
+                    if self.symbol_size > 0 {
+                        if let Some(value) = data.symbol(i) {
+                            surface.write_text(value, &format_symbol);
+                        }
+                    }
                     if let Some(value) = data.name(i) {
                         format.char_attr = theme.menu.text.normal;
                         surface.write_text(value, &format);
@@ -306,6 +344,7 @@ where
                                 if !desc.is_empty() {
                                     let sz = value.chars().count();
                                     let old_width = format.width;
+                                    // rethink logic !!!
                                     format.x = 3 + sz as i32;
                                     if format.x < (size.width as i32) - 2 {
                                         format.width = Some((size.width as i32 - (2 + format.x)) as u16);

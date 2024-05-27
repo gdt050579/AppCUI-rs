@@ -19,6 +19,10 @@ impl ComboBoxComponentDataProvider for DataProvider {
     fn description(&self, index: u32) -> Option<&str> {
         self.items.get(index as usize).map(|item| item.description.as_str())
     }
+
+    fn symbol(&self, index: u32) -> Option<&str> {
+        None
+    }
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]

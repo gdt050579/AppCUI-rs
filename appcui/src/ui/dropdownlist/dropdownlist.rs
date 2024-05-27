@@ -22,6 +22,10 @@ where
     fn description(&self, index: u32) -> Option<&str> {
         self.items.get(index as usize).map(|item| DropDownListType::description(item))
     }
+
+    fn symbol(&self, index: u32) -> Option<&str> {
+        self.items.get(index as usize).map(|item| DropDownListType::symbol(item))
+    }
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
@@ -53,7 +57,9 @@ where
             data: DataProvider { items: Vec::new() },
             flags,
         };
-        obj.component.set_none_string("None");
+        if flags.contains(Flags::AllowNoneSelection) {
+            obj.component.set_none_string("None");
+        }
         obj.set_size_bounds(7, 1, u16::MAX, 1);
         obj
     }

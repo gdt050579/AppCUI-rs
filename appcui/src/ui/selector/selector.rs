@@ -27,6 +27,10 @@ where
     fn description(&self, index: u32) -> Option<&str> {
         T::from_index(index).map(|p| p.description())
     }
+
+    fn symbol(&self, index: u32) -> Option<&str> {
+        None    
+    }
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
