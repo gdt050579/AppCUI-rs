@@ -316,15 +316,17 @@ where
                 let visible_items = size.height - 3;
                 let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
                 let mut format_symbol = TextFormat::single_line(2, self.expanded_panel_y + 1, theme.menu.symbol.normal, TextAlignament::Left);
+                let mut display_value = true;
                 format_symbol.width = Some(self.symbol_size as u16);
                 if self.symbol_size > 0 {
                     format.x += self.symbol_size as i32;
                     format.x += 1;
                     let space_left = (size.width as i32) - (5 + self.symbol_size as i32);
-                    if space_left>0 {
+                    if space_left > 0 {
                         format.width = Some(space_left as u16);
                     } else {
                         format.width = Some(0);
+                        display_value = false;
                     }
                 } else {
                     format.width = Some((size.width - 4) as u16);
@@ -336,29 +338,31 @@ where
                             surface.write_text(value, &format_symbol);
                         }
                     }
-                    if let Some(value) = data.name(i) {
-                        format.char_attr = theme.menu.text.normal;
-                        surface.write_text(value, &format);
-                        if self.show_description {
-                            if let Some(desc) = data.description(i) {
-                                if !desc.is_empty() {
-                                    let sz = value.chars().count();
-                                    let old_width = format.width;
-                                    // rethink logic !!!
-                                    format.x = 3 + sz as i32;
-                                    if format.x < (size.width as i32) - 2 {
-                                        format.width = Some((size.width as i32 - (2 + format.x)) as u16);
-                                        format.char_attr = theme.menu.text.inactive;
-                                        surface.write_text(desc, &format);
+                    if display_value {
+                        if let Some(value) = data.name(i) {
+                            format.char_attr = theme.menu.text.normal;
+                            surface.write_text(value, &format);
+                            if self.show_description {
+                                if let Some(desc) = data.description(i) {
+                                    if !desc.is_empty() {
+                                        let sz = value.chars().count();
+                                        let old_width = format.width;
+                                        let old_x = format.x;
+                                        format.x += 1 + sz as i32;
+                                        if format.x < (size.width as i32) - 2 {
+                                            format.width = Some((size.width as i32 - (2 + format.x)) as u16);
+                                            format.char_attr = theme.menu.text.inactive;
+                                            surface.write_text(desc, &format);
+                                        }
+                                        format.width = old_width;
+                                        format.x = old_x;
                                     }
-                                    format.x = 2;
-                                    format.width = old_width;
                                 }
                             }
+                        } else if !self.none_repr.is_empty() {
+                            format.char_attr = theme.menu.text.inactive;
+                            surface.write_text(&self.none_repr, &format);
                         }
-                    } else if !self.none_repr.is_empty() {
-                        format.char_attr = theme.menu.text.inactive;
-                        surface.write_text(&self.none_repr, &format);
                     }
                     if i == self.current_index {
                         surface.fill_horizontal_line(
