@@ -28,7 +28,7 @@ where
         T::from_index(index).map(|p| p.description())
     }
 
-    fn symbol(&self, index: u32) -> Option<&str> {
+    fn symbol(&self, _index: u32) -> Option<&str> {
         None    
     }
 }

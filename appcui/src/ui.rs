@@ -47,5 +47,6 @@ pub use keyselector::KeySelector;
 pub use colorpicker::ColorPicker;
 pub use selector::Selector;
 pub use combobox::ComboBox;
+pub use dropdownlist::DropDownList;
 pub use command_bar::CommandBar;
 pub use layout::Layout;
