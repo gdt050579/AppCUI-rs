@@ -380,6 +380,7 @@ where
                         );
                     }
                     format.y += 1;
+                    format_symbol.y += 1;
                 }
             }
         }
