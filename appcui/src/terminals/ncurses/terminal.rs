@@ -192,7 +192,12 @@ impl Terminal for NcursesTerminal {
     fn get_system_event(&mut self) -> SystemEvent {
         let ch = ncurses::wget_wch(stdscr());
         let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
+        
+        if ch.is_none() {
+            return SystemEvent::None;
+        }
 
+        debugfile.write(format!("{:?} \n",ch).as_bytes()).unwrap();
         match ch {
             Some(ncurses::WchResult::KeyCode(ncurses::KEY_MOUSE)) => {
                 let mut mevent = ncurses::MEVENT {
@@ -242,6 +247,43 @@ impl Terminal for NcursesTerminal {
                 let new_size = self.get_size();
                 return SystemEvent::Resize(new_size);
             }
+
+            // Arrow keys
+            Some(ncurses::WchResult::KeyCode(ncurses::KEY_UP | ncurses::KEY_DOWN | ncurses::KEY_LEFT | ncurses::KEY_RIGHT)) => {
+                let key_code  = match ch {
+                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_UP)) => KeyCode::Up,
+                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_DOWN)) => KeyCode::Down,
+                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_LEFT)) => KeyCode::Left,
+                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_RIGHT)) => KeyCode::Right,
+                    _ => KeyCode::None,
+                };
+                return SystemEvent::KeyPressed(KeyPressedEvent {
+                    key: Key {
+                        code: key_code,
+                        modifier: KeyModifier::None,
+                    },
+                    character: ' ',
+                });
+            }
+
+            // Shift + Arrow keys
+            Some(ncurses::WchResult::KeyCode(ncurses::KEY_SR | ncurses::KEY_SF | ncurses::KEY_SLEFT | ncurses::KEY_SRIGHT)) => {
+                let key_code  = match ch {
+                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_SR)) => KeyCode::Up,
+                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_SF)) => KeyCode::Down,
+                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_SLEFT)) => KeyCode::Left,
+                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_SRIGHT)) => KeyCode::Right,
+                    _ => KeyCode::None,
+                };
+                return SystemEvent::KeyPressed(KeyPressedEvent {
+                    key: Key {
+                        code: key_code,
+                        modifier: KeyModifier::Shift,
+                    },
+                    character: ' ',
+                });
+            }
+
             Some(ncurses::WchResult::Char(ch)) => {
                 if ch == 27 {
                     endwin();
