@@ -261,7 +261,7 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 
 pub(crate) static DROPDOWNLIST_TRAIT_DEF: &str = "
 trait DropDownListEvents<T: DropDownListType+'static> {
-    fn on_selection_changed(&mut self, handle: Handle<Selector<T>>) -> EventProcessStatus;
+    fn on_selection_changed(&mut self, handle: Handle<DropDownList<T>>) -> EventProcessStatus;
 }
 impl$(TEMPLATE_TYPE) GenericDropDownListEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
