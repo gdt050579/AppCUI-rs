@@ -28,14 +28,15 @@ A canvas supports the following initialization flags:
 * `canvas::Flags::ScrollBars` or `ScrollBars` (for macro initialization) - thils enable a set of scrollbars that can be used to change the view of the inner surface, but only when the control has focus, as described in [Components](../components.md) section.
 
 Some examples that uses these paramateres:
+
 1. A canvas with a backgroud that consists in the character `X` in with `Aqua` and `DarkBlue` colors.
-```rs
-let c = canvas!("size:10x5,x:10,y:5,w:15,back={X,fore:aqua,back:darkblue}");
-```
+    ```rs
+    let c = canvas!("size:10x5,x:10,y:5,w:15,back={X,fore:aqua,back:darkblue}");
+    ```
 2. A canvas with scrollbars with different margins
-```rs
-let c = canvas!("sz:'10 x 5',x:10,y:5,w:15,flags:Scrollbars,lsm:5,tsm:1");
-```
+    ```rs
+    let c = canvas!("sz:'10 x 5',x:10,y:5,w:15,flags:Scrollbars,lsm:5,tsm:1");
+    ```
 
 ## Events
 A canvas emits no events.

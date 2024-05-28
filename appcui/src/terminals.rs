@@ -31,6 +31,9 @@ pub(crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
     fn get_size(&self) -> Size;
     fn get_system_event(&mut self) -> SystemEvent;
+    fn get_clipboard_text(&self) -> Option<String>;
+    fn set_clipboard_text(&mut self, text: &str);
+    fn has_clipboard_text(&self) -> bool;
 }
 
 #[repr(u8)]
@@ -42,7 +45,6 @@ pub enum TerminalType {
     Termios,
     NcursesTerminal,
 }
-
 
 pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
     // check if terminal size if valid (if present)

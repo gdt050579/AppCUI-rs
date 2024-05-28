@@ -4,6 +4,7 @@ use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::input::MouseWheelDirection;
 use crate::prelude::ErrorKind;
+use crate::utils::GlyphParser;
 
 use super::super::system_event::KeyModifierChangedEvent;
 use super::super::KeyPressedEvent;
@@ -729,5 +730,96 @@ impl Terminal for WindowsTerminal {
         }
 
         SystemEvent::None
+    }
+
+    fn get_clipboard_text(&self) -> Option<String> {
+        unsafe {
+            if winapi::OpenClipboard(0) == FALSE {
+                return None;
+            }
+
+            let hmem = winapi::GetClipboardData(CF_UNICODETEXT);
+            if hmem == 0 {
+                winapi::CloseClipboard();
+                return None;
+            }
+            let mut ptr = winapi::GlobalLock(hmem) as *mut u16;
+            if ptr.is_null() {
+                winapi::CloseClipboard();
+                return None;
+            }
+            let mut s = String::with_capacity(16);
+            while let Some(ch) = char::from_u32((*ptr) as u32) {
+                if (ch as u32) == 0 {
+                    break;
+                }
+                s.push(ch);
+                ptr = ptr.add(1);
+            }
+            winapi::GlobalUnlock(hmem);
+            winapi::CloseClipboard();
+            Some(s)
+        }
+    }
+
+    fn set_clipboard_text(&mut self, text: &str) {
+        if text.is_empty() {
+            unsafe {
+                if winapi::OpenClipboard(0) != FALSE {
+                    winapi::EmptyClipboard();
+                    winapi::CloseClipboard();
+                }
+            }
+        } else {
+            unsafe {
+                if winapi::OpenClipboard(0) == FALSE {
+                    return;
+                }
+
+                winapi::EmptyClipboard();
+
+                let len = text.count_glyphs() + 1;
+                // alocate twice as much bytes (windows unicode)
+                let hmem = winapi::GlobalAlloc(GMEM_MOVEABLE, len * 2);
+                if hmem == 0 {
+                    winapi::CloseClipboard();
+                    return;
+                }
+
+                let mut ptr = winapi::GlobalLock(hmem) as *mut u16;
+                if ptr.is_null() {
+                    winapi::CloseClipboard();
+                    winapi::GlobalFree(hmem);
+                    return;
+                }
+
+                let mut pos = 0;
+                while let Some((ch, size)) = text.glyph(pos) {
+                    pos += size as usize;
+                    if ch as u32 <= 0xFFFFu32 {
+                        *ptr = ch as u16;
+                    } else {
+                        *ptr = b'?' as u16;
+                    }
+                    ptr = ptr.add(1);
+                }
+                // last null terminator character
+                *ptr = 0;
+
+                winapi::GlobalUnlock(hmem);
+
+                if winapi::SetClipboardData(CF_UNICODETEXT, hmem) == 0 {
+                    winapi::CloseClipboard();
+                    winapi::GlobalFree(hmem);
+                    return;
+                }
+
+                winapi::CloseClipboard();
+            }
+        }
+    }
+
+    fn has_clipboard_text(&self) -> bool {
+        unsafe { (winapi::IsClipboardFormatAvailable(CF_TEXT) != FALSE) || (winapi::IsClipboardFormatAvailable(CF_UNICODETEXT) != FALSE) }
     }
 }

@@ -2,8 +2,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static mut TOOLBARITEM_TYPE: FlagsSignature = FlagsSignature::new(&["Label", "Button", "CheckBox", "SingleChoice"]);
-
+static TYPES: FlagsSignature = FlagsSignature::new(&["Label", "Button", "CheckBox", "SingleChoice"]);
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("caption", "caption", ParamType::String),
@@ -17,7 +16,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("toolbaritem", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, false);
-    if let Some(item_type) = cb.get_enum_value("type", unsafe { &mut TOOLBARITEM_TYPE }) {
+    if let Some(item_type) = cb.get_enum_value("type", &TYPES) {
         let init_type = format!("toolbar::{}::new", item_type);
         let is_checkbox = item_type == "CheckBox";
         cb.init_control(init_type.as_str());

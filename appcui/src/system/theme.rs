@@ -255,7 +255,7 @@ impl Theme {
             focused: CharAttribute::with_color(Color::White, Color::Black),
             hovered: CharAttribute::with_color(Color::Yellow, Color::Black),
             inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
-            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Black),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Magenta),
         }
     }
 }

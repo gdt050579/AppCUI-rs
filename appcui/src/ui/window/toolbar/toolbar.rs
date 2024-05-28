@@ -152,7 +152,7 @@ impl ToolBar {
     pub(crate) fn get_from_position(&self, x: i32, y: i32) -> Option<&ToolBarItem> {
         let count = self.items.allocated_objects();
         for index in 0..count {
-            if let Some(item) = self.items.get_element(index) {
+            if let Some(item) = self.items.element(index) {
                 if item.get_base().contains(x, y) {
                     return Some(item);
                 }
@@ -165,7 +165,7 @@ impl ToolBar {
         self.window = handle;
         let count = self.items.allocated_objects();
         for index in 0..count {
-            if let Some(item) = self.items.get_element_mut(index) {
+            if let Some(item) = self.items.element_mut(index) {
                 item.get_base_mut().set_window_handle(handle);
             }
         }
@@ -174,7 +174,7 @@ impl ToolBar {
         // clear all flags (visible & left|right marker)
         let count = self.items.allocated_objects();
         for index in 0..count {
-            if let Some(d) = self.items.get_element_mut(index) {
+            if let Some(d) = self.items.element_mut(index) {
                 d.get_base_mut().clear();
             }
         }
@@ -262,11 +262,11 @@ impl ToolBar {
             is_current_item_pressed: self.pressed,
             sep_attr: if focused { theme.lines.normal } else { theme.lines.inactive },
         };
-        let current_bar_index = self.current_handle.get_index();
+        let current_bar_index = self.current_handle.index();
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {
-            if let Some(item) = self.items.get_element(index) {
+            if let Some(item) = self.items.element(index) {
                 paint_data.current = index == current_bar_index;
                 item.paint(surface, theme, &paint_data);
             }
@@ -296,7 +296,7 @@ impl ToolBar {
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {
-            if let Some(ToolBarItem::SingleChoice(sc)) = self.items.get_element_mut(index) {
+            if let Some(ToolBarItem::SingleChoice(sc)) = self.items.element_mut(index) {
                 if sc.base.get_group_id() == group_id {
                     sc.update_select_status(handle == sc.base.get_handle());
                 }
@@ -308,7 +308,7 @@ impl ToolBar {
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {
-            if let Some(item) = self.items.get_element(index) {
+            if let Some(item) = self.items.element(index) {
                 if item.hotkey() == hotkey {
                     return Some(item.get_base().get_handle());
                 }

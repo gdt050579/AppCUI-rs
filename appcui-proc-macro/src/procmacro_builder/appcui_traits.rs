@@ -1,7 +1,7 @@
 use super::templates;
 
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub(crate) enum AppCUITrait {
     Deref = 0,
     // markers
@@ -35,6 +35,10 @@ pub(crate) enum AppCUITrait {
     RadioBoxEvents = 26,
     PasswordEvents = 27,
     KeySelectorEvents = 28,
+    TextFieldEvents = 29,
+    CustomEvents = 30,
+    GenericSelectorEvents = 31,
+    ComboBoxEvents = 32,
 }
 
 #[repr(u8)]
@@ -46,7 +50,7 @@ pub(crate) enum TraitType {
 }
 
 impl AppCUITrait {
-    pub(crate) fn get_name(&self) -> &'static str {
+    pub(crate) fn name(&self) -> &'static str {
         match self {
             AppCUITrait::Deref => "Deref",
             // markers
@@ -80,11 +84,13 @@ impl AppCUITrait {
             AppCUITrait::RadioBoxEvents => "RadioBoxEvents",
             AppCUITrait::PasswordEvents => "PasswordEvents",
             AppCUITrait::KeySelectorEvents => "KeySelectorEvents",
-
-            
+            AppCUITrait::TextFieldEvents => "TextFieldEvents",
+            AppCUITrait::CustomEvents => "CustomEvents",
+            AppCUITrait::GenericSelectorEvents => "SelectorEvents", // important to be without Generic
+            AppCUITrait::ComboBoxEvents => "ComboBoxEvents",
         }
     }
-    pub(crate) fn get_trait_type(&self) -> TraitType {
+    pub(crate) fn trait_type(&self) -> TraitType {
         match self {
             AppCUITrait::Deref => TraitType::Other,
             // markers
@@ -118,9 +124,13 @@ impl AppCUITrait {
             AppCUITrait::RadioBoxEvents => TraitType::ControlEvent,
             AppCUITrait::PasswordEvents => TraitType::ControlEvent,
             AppCUITrait::KeySelectorEvents => TraitType::ControlEvent,
+            AppCUITrait::TextFieldEvents => TraitType::ControlEvent,
+            AppCUITrait::CustomEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericSelectorEvents => TraitType::ControlEvent,
+            AppCUITrait::ComboBoxEvents => TraitType::ControlEvent,
         }
     }
-    pub(crate) fn get_basefallback_implementation(&self) -> &'static str {
+    pub(crate) fn basefallback_implementation(&self) -> &'static str {
         match self {
             AppCUITrait::Deref => templates::DEREF_TRAIT,
             // markers
@@ -154,42 +164,56 @@ impl AppCUITrait {
             AppCUITrait::RadioBoxEvents => "",
             AppCUITrait::PasswordEvents => "",
             AppCUITrait::KeySelectorEvents => "",
+            AppCUITrait::TextFieldEvents => "",
+            AppCUITrait::CustomEvents => "",
+            AppCUITrait::GenericSelectorEvents => "",
+            AppCUITrait::ComboBoxEvents => "",
         }
     }
-    pub(crate) fn get_default_implementation(&self) -> &'static str {
+    pub(crate) fn default_implementation(&self) -> &'static str {
         match self {
             AppCUITrait::Deref => "",
             // markers
-            AppCUITrait::Control => "impl Control for $(STRUCT_NAME) {}",
-            AppCUITrait::DesktopControl => "impl DesktopControl for $(STRUCT_NAME) {}",
-            AppCUITrait::WindowControl => "impl WindowControl for $(STRUCT_NAME) {}",
-            AppCUITrait::NotDesktop => "impl NotDesktop for $(STRUCT_NAME) {}",
-            AppCUITrait::NotWindow => "impl NotWindow for $(STRUCT_NAME) {}",
-            AppCUITrait::NotModalWindow => "impl NotModalWindow for $(STRUCT_NAME) {}",
-            AppCUITrait::OnWindowRegistered => "impl OnWindowRegistered for $(STRUCT_NAME) {}",
+            AppCUITrait::Control => "impl$(TEMPLATE_TYPE) Control for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::DesktopControl => "impl$(TEMPLATE_TYPE) DesktopControl for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::WindowControl => "impl$(TEMPLATE_TYPE) WindowControl for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::NotDesktop => "impl$(TEMPLATE_TYPE) NotDesktop for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::NotWindow => "impl$(TEMPLATE_TYPE) NotWindow for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::NotModalWindow => "impl$(TEMPLATE_TYPE) NotModalWindow for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnWindowRegistered => "impl$(TEMPLATE_TYPE) OnWindowRegistered for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::ModalWindowMethods => "",
             // raw events
-            AppCUITrait::OnPaint => "impl OnPaint for $(STRUCT_NAME) {}",
-            AppCUITrait::OnKeyPressed => "impl OnKeyPressed for $(STRUCT_NAME) {}",
-            AppCUITrait::OnMouseEvent => "impl OnMouseEvent for $(STRUCT_NAME) {}",
-            AppCUITrait::OnDefaultAction => "impl OnDefaultAction for $(STRUCT_NAME) {}",
-            AppCUITrait::OnResize => "impl OnResize for $(STRUCT_NAME) {}",
-            AppCUITrait::OnFocus => "impl OnFocus for $(STRUCT_NAME) {}",
-            AppCUITrait::OnExpand => "impl OnExpand for $(STRUCT_NAME) {}",
-            AppCUITrait::OnSiblingSelected => "impl OnSiblingSelected for $(STRUCT_NAME) {}",
+            AppCUITrait::OnPaint => "impl$(TEMPLATE_TYPE) OnPaint for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnKeyPressed => "impl$(TEMPLATE_TYPE) OnKeyPressed for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnMouseEvent => "impl$(TEMPLATE_TYPE) OnMouseEvent for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnDefaultAction => "impl$(TEMPLATE_TYPE) OnDefaultAction for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnResize => "impl$(TEMPLATE_TYPE) OnResize for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnFocus => "impl$(TEMPLATE_TYPE) OnFocus for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnExpand => "impl$(TEMPLATE_TYPE) OnExpand for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnSiblingSelected => "impl$(TEMPLATE_TYPE) OnSiblingSelected for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             // control events
-            AppCUITrait::ButtonEvents => "impl ButtonEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::CheckBoxEvents => "impl CheckBoxEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::WindowEvents => "impl WindowEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::CommandBarEvents => "impl GenericCommandBarEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::MenuEvents => "impl GenericMenuEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::DesktopEvents => "impl DesktopEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::ToolBarEvents => "impl ToolBarEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::ColorPickerEvents => "impl ColorPickerEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::ThreeStateBoxEvents => "impl ThreeStateBoxEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::RadioBoxEvents => "impl RadioBoxEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::PasswordEvents => "impl PasswordEvents for $(STRUCT_NAME) {}",
-            AppCUITrait::KeySelectorEvents => "impl KeySelectorEvents for $(STRUCT_NAME) {}",
+            AppCUITrait::ButtonEvents => "impl$(TEMPLATE_TYPE) ButtonEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::CheckBoxEvents => "impl$(TEMPLATE_TYPE) CheckBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::WindowEvents => "impl$(TEMPLATE_TYPE) WindowEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::CommandBarEvents => "impl$(TEMPLATE_TYPE) GenericCommandBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::MenuEvents => "impl$(TEMPLATE_TYPE) GenericMenuEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::DesktopEvents => "impl$(TEMPLATE_TYPE) DesktopEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::ToolBarEvents => "impl$(TEMPLATE_TYPE) ToolBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::ColorPickerEvents => "impl$(TEMPLATE_TYPE) ColorPickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::ThreeStateBoxEvents => "impl$(TEMPLATE_TYPE) ThreeStateBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::RadioBoxEvents => "impl$(TEMPLATE_TYPE) RadioBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::PasswordEvents => "impl$(TEMPLATE_TYPE) PasswordEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::KeySelectorEvents => "impl$(TEMPLATE_TYPE) KeySelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::TextFieldEvents => "impl$(TEMPLATE_TYPE) TextFieldEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::CustomEvents => "impl$(TEMPLATE_TYPE) CustomEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericSelectorEvents => "impl$(TEMPLATE_TYPE) GenericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::ComboBoxEvents => "impl$(TEMPLATE_TYPE) ComboBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+        }
+    }
+    pub(crate) fn is_generic(&self) -> bool {
+        match self {
+            AppCUITrait::GenericSelectorEvents => true,
+            _ => false,
         }
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -216,6 +240,10 @@ impl AppCUITrait {
             "ColorPickerEvents" | "ColorPicker" => Some(AppCUITrait::ColorPickerEvents),
             "ThreeStateBoxEvents" | "ThreeStateBox" => Some(AppCUITrait::ThreeStateBoxEvents),
             "KeySelectorEvents" | "KeySelector" => Some(AppCUITrait::KeySelectorEvents),
+            "TextFieldEvents" | "TextField" => Some(AppCUITrait::TextFieldEvents),
+            // nothing for the custom events -> they are enabled through a different field
+            "SelectorEvents" | "Selector" => Some(AppCUITrait::GenericSelectorEvents),
+            "ComboBoxEvents" | "ComboBox" => Some(AppCUITrait::ComboBoxEvents),
             _ => None,
         }
     }
@@ -253,6 +281,10 @@ impl AppCUITrait {
             26 => Some(AppCUITrait::RadioBoxEvents),
             27 => Some(AppCUITrait::PasswordEvents),
             28 => Some(AppCUITrait::KeySelectorEvents),
+            29 => Some(AppCUITrait::TextFieldEvents),
+            30 => Some(AppCUITrait::CustomEvents),
+            31 => Some(AppCUITrait::GenericSelectorEvents),
+            32 => Some(AppCUITrait::ComboBoxEvents),
             _ => None,
         };
         result?;

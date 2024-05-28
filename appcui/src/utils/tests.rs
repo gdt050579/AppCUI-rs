@@ -1,11 +1,12 @@
 use crate::system::Handle;
 use crate::system::HandleSupport;
 use crate::utils::HandleManager;
-
 use super::KeyValueParser;
 use super::Strategy;
 use super::ValueType;
 use super::VectorIndex;
+use super::GlyphParser;
+
 
 #[test]
 fn check_key_value_parser_single() {
@@ -117,7 +118,7 @@ fn check_hanlde_manager() {
         }
     }
     impl HandleSupport<MyData> for MyData {
-        fn get_handle(&self) -> crate::system::Handle<MyData> {
+        fn handle(&self) -> crate::system::Handle<MyData> {
             self.handle
         }
 
@@ -162,9 +163,68 @@ fn check_hanlde_manager() {
     // add a new element
     let h_new = man.add(MyData::new("new_handle", 1234));
     assert!(h_new != h1_123);
-    assert!(h_new.get_index() == 0);
-    assert!(h1_123.get_index() == 0);
+    assert!(h_new.index() == 0);
+    assert!(h1_123.index() == 0);
     // no free spacess stored
     assert!(man.free_spaces() == 0);
     assert!(man.allocated_objects() == 3);
+}
+
+
+#[test]
+fn check_glyph_char_and_size() {
+    let g = String::from("123❤️╬▶-〓GDT");
+    assert_eq!(g.chars().count(),12);
+    assert_eq!(g.count_glyphs(),11);
+    assert_eq!(g.len(),22);
+
+    assert_eq!(g.glyph(0),Some(('1',1)));
+    assert_eq!(g.glyph(2),Some(('3',1)));
+    assert_eq!(g.glyph(3),Some(('❤',6)));
+    assert_eq!(g.glyph(9),Some(('╬',3)));
+    assert_eq!(g.glyph(12),Some(('▶',3)));
+    assert_eq!(g.glyph(15),Some(('-',1)));
+    assert_eq!(g.glyph(16),Some(('〓',3)));
+    assert_eq!(g.glyph(19),Some(('G',1)));
+    assert_eq!(g.glyph(20),Some(('D',1)));
+    assert_eq!(g.glyph(21),Some(('T',1)));
+    assert_eq!(g.glyph(22),None);
+
+    let poz = g.len();
+    assert_eq!(g.previous_glyph(poz),Some(('T',1)));
+    assert_eq!(g.previous_glyph(poz-1),Some(('D',1)));
+    assert_eq!(g.previous_glyph(poz-2),Some(('G',1)));
+    assert_eq!(g.previous_glyph(poz-3),Some(('〓',3)));
+    assert_eq!(g.previous_glyph(poz-6),Some(('-',1)));
+    assert_eq!(g.previous_glyph(poz-7),Some(('▶',3)));
+    assert_eq!(g.previous_glyph(poz-10),Some(('╬',3)));
+    assert_eq!(g.previous_glyph(poz-13),Some(('❤',6)));
+    assert_eq!(g.previous_glyph(poz-19),Some(('3',1)));
+    assert_eq!(g.previous_glyph(poz-20),Some(('2',1)));
+    assert_eq!(g.previous_glyph(poz-21),Some(('1',1)));
+    assert_eq!(g.previous_glyph(poz-22),None);
+    assert_eq!(g.previous_glyph(0),None);
+}
+
+
+
+#[test]
+fn check_glyph_next_pos() {
+    let g = String::from("123❤️╬▶-〓GDT");
+    assert_eq!(g.next_pos(0,3),3);
+    assert_eq!(g.next_pos(2, 2),9);
+    assert_eq!(g.next_pos(9,100),22);
+    assert_eq!(g.next_pos(9,1),12);
+    assert_eq!(g.next_pos(9,4),19);
+    assert_eq!(&g[9..g.next_pos(9,4)],"╬▶-〓");
+}
+
+
+#[test]
+fn check_glyph_previous_pos() {
+    let g = String::from("123❤️╬▶-〓GDT");
+    assert_eq!(g.previous_pos(22,3),19);
+    assert_eq!(g.previous_pos(19,3),12);
+    assert_eq!(&g[2..g.previous_pos(12,1)],"3❤️");
+    assert_eq!(g.previous_pos(19,1000),0);
 }

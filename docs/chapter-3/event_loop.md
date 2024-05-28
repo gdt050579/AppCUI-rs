@@ -13,13 +13,19 @@ where the attribute `events` has the following form:
 * `events=EventTrait-1 + EventTrait-2 + EventTrait-3 + ... EventTrait-n`
 
 and an `event trait` can be one of the following:
-* WindowEvents
 * ButtonEvents
 * CheckBoxEvents
-* CommandBarEvents
+* RadioBoxEvents
+* WindowEvents
 * MenuEvents
+* CommandBarEvents
 * ToolBarEvents
 * ColorPickerEvents
+* ThreeStateBoxEvents
+* PasswordEvents
+* KeySelectorEvents
+* TextFieldEvents
+
 
 These events can be implemented to receive notification on various actions that children controls are performing. 
 

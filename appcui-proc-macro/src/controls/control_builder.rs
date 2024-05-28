@@ -100,8 +100,38 @@ impl<'a> ControlBuilder<'a> {
         self.content.push_str(method);
         self.content.push('(');
     }
+    pub(super) fn init_control_with_template(&mut self, controlname: &str, method: &str, template_param: &str) {
+        self.content.push_str(controlname);
+        self.content.push_str("::<");
+        if let Some(value) = self.parser.get(template_param) {
+            let name = value.get_string();
+            if name.is_empty() {
+                panic!("Parameter `{}` can not be an empty string. It should be a generic/template type to be used !", template_param);
+            }
+            self.content.push_str(name);
+            self.content.push_str(">::");
+            self.content.push_str(method);            
+            self.content.push('(');
+        } else {
+            panic!("Parameter `{}` is mandatory and must express the generic/template type to be used !", template_param);
+        }
+    }
     pub(super) fn finish_control_initialization(&mut self) {
         self.content.push_str(");\n\t");
+    }
+    pub(super) fn add_param_value(&mut self, param_name: &str) {
+        let value = self.parser.get(param_name);
+        if let Some(str_value) = value {
+            unsafe {
+                let x = std::mem::transmute(str_value.get_string());
+                self.content.push_str(x);
+            }        
+        } else {
+            panic!(
+                "Parameter '{}' is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
+        }
     }
     pub(super) fn add_string_parameter(&mut self, param_name: &str, default: Option<&str>) {
         self.add_comma();
@@ -197,7 +227,7 @@ impl<'a> ControlBuilder<'a> {
             }
         }
     }
-    pub(super) fn get_enum_value(&mut self, param_name: &str, available_variants: &mut FlagsSignature) -> Option<&str> {
+    pub(super) fn get_enum_value(&mut self, param_name: &str, available_variants: &FlagsSignature) -> Option<&str> {
         if let Some(value) = self.parser.get(param_name) {
             let variant = value.get_string();
             if let Some(variant_name) = available_variants.get(variant) {
@@ -209,7 +239,7 @@ impl<'a> ControlBuilder<'a> {
             None
         }
     }
-    pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &mut FlagsSignature, default: Option<&str>) {
+    pub(super) fn add_enum_parameter(&mut self, param_name: &str, enum_name: &str, available_variants: &FlagsSignature, default: Option<&str>) {
         self.add_comma();
         if let Some(value) = self.parser.get(param_name) {
             let variant = value.get_string();
@@ -237,7 +267,7 @@ impl<'a> ControlBuilder<'a> {
             );
         }
     }
-    pub(super) fn add_flags_parameter(&mut self, param_name: &str, flag_name: &str, available_flags: &mut FlagsSignature) {
+    pub(super) fn add_flags_parameter(&mut self, param_name: &str, flag_name: &str, available_flags: &FlagsSignature) {
         self.add_comma();
         if let Some(value) = self.parser.get_mut(param_name) {
             if let Some(list) = value.get_list() {
@@ -274,7 +304,7 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str("::None");
         }
     }
-    pub(super) fn add_command(&mut self, content: &str) {
+    pub(super) fn add(&mut self, content: &str) {
         self.content.push_str(content);
     }
     pub(super) fn add_line(&mut self, content: &str) {
@@ -296,6 +326,14 @@ impl<'a> ControlBuilder<'a> {
     #[inline(always)]
     pub(super) fn get_i32(&mut self, name: &str) -> Option<i32> {
         self.parser.get_mut(name)?.get_i32()
+    }
+    #[inline(always)]
+    pub(super) fn get_percentage(&mut self, name: &str) -> Option<f32> {
+        self.parser.get_mut(name)?.get_percentage()
+    }
+    #[inline(always)]
+    pub(super) fn get_value(&mut self, name: &str) -> Option<&str> {
+        Some(self.parser.get(name)?.get_string())
     }
     #[inline(always)]
     pub(super) fn get_string_representation(&self) -> &str {

@@ -63,7 +63,7 @@ impl SingleChoice {
         if self.menu_handle.is_none() {
             panic!("`set_selected` method should only be called after a sigle choice item was added to a registered menu !");
         }
-        let index = self.handle.get_index();
+        let index = self.handle.index();
         if let Some(menu) = RuntimeManager::get().get_menu(self.menu_handle) {
             menu.select_single_choice(index);
         }

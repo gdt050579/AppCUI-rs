@@ -1,3 +1,5 @@
+use self::control_event_wrapper::CustomEventData;
+
 use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;
@@ -26,6 +28,7 @@ pub enum StatusFlags {
     Expanded = 0x0400,
     IncreaseRightMarginOnFocus = 0x0800,
     IncreaseBottomMarginOnFocus = 0x1000,
+    SingleWindow = 0x2000,
 }
 #[derive(Copy, Clone)]
 pub(crate) struct Margins {
@@ -37,7 +40,7 @@ pub(crate) struct Margins {
 
 #[repr(C)]
 pub struct ControlBase {
-    layout: ControlLayout,
+    pub(crate) layout: ControlLayout,
     pub(crate) margins: Margins,
     pub(crate) handle: Handle<UIElement>,
     pub(crate) parent: Handle<UIElement>,
@@ -114,7 +117,7 @@ impl ControlBase {
     /// This method has no effect on a Desktop control.
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
-        if self.status_flags.contains(StatusFlags::DesktopControl) {
+        if self.status_flags.contains(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
             return;
         }
         self.layout.layout_resize(width, height);
@@ -133,7 +136,7 @@ impl ControlBase {
     /// Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignament properties will be removed.
     /// This method has no effect on a Desktop control.
     pub fn set_position(&mut self, x: i32, y: i32) {
-        if self.status_flags.contains(StatusFlags::DesktopControl) {
+        if self.status_flags.contains(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
             return;
         }
         self.layout.layout_set_position(x, y);
@@ -166,7 +169,7 @@ impl ControlBase {
             self.status_flags.set(StatusFlags::Visible);
         } else {
             // desktop controls can not be hidden
-            if self.status_flags.contains_one(StatusFlags::DesktopControl) {
+            if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
                 return;
             }
             self.status_flags.remove(StatusFlags::Visible);
@@ -236,6 +239,14 @@ impl ControlBase {
             self.status_flags.remove(StatusFlags::KeyInputBeforeChildren);
         }
     }
+    #[inline(always)]
+    pub(crate) fn set_singlewindow_flag(&mut self) {
+        self.status_flags |= StatusFlags::SingleWindow;
+    }
+    #[inline(always)]
+    pub(crate) fn is_singlewindow(&self) -> bool {
+        self.status_flags.contains(StatusFlags::SingleWindow)
+    }
 
     #[inline(always)]
     pub(crate) fn is_expanded(&self) -> bool {
@@ -292,7 +303,7 @@ impl ControlBase {
     {
         let mut c = ControlManager::new(control);
         // if I am already registered, I will set the parent of my child
-        let base = c.get_base_mut();
+        let base = c.base_mut();
         let focusable = base.can_receive_input();
 
         base.parent = self.handle;
@@ -519,6 +530,13 @@ impl ControlBase {
             RuntimeManager::get().send_event(event);
         }
     }
+    pub fn raise_custom_event(&self, class_hash: u64, event_id: u32) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::Custom(CustomEventData { class_hash, event_id }),
+        });
+    }
     pub fn request_update(&self) {
         if !self.handle.is_none() {
             RuntimeManager::get().request_update();
@@ -553,7 +571,7 @@ impl ControlBase {
         let controls = RuntimeManager::get().get_controls_mut();
         for h_child in &self.children {
             if let Some(c) = controls.get_mut(*h_child) {
-                OnSiblingSelected::on_sibling_selected(c.get_control_mut(), requester);
+                OnSiblingSelected::on_sibling_selected(c.control_mut(), requester);
             }
         }
     }

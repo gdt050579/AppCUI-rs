@@ -71,7 +71,7 @@ impl Menu {
     where
         T: MenuItem,
     {
-        let idx = menuitem_hamdle.get_index();
+        let idx = menuitem_hamdle.index();
         if idx >= self.items.len() {
             return None;
         }
@@ -93,7 +93,7 @@ impl Menu {
     where
         T: MenuItem,
     {
-        let idx = menuitem_hamdle.get_index();
+        let idx = menuitem_hamdle.index();
         if idx >= self.items.len() {
             return None;
         }
@@ -465,7 +465,7 @@ impl Menu {
     }
 
     pub(crate) fn on_key_pressed(&mut self, key: Key) -> EventProcessStatus {
-        match key.get_compact_code() {
+        match key.value() {
             key!("Up") | key!("Down") | key!("Home") | key!("End") | key!("PageUp") | key!("PageDown") => {
                 self.move_currentitem_to(key);
                 return EventProcessStatus::Processed;
@@ -627,7 +627,7 @@ impl Menu {
 }
 
 impl HandleSupport<Menu> for Menu {
-    fn get_handle(&self) -> Handle<Menu> {
+    fn handle(&self) -> Handle<Menu> {
         self.handle.cast()
     }
 

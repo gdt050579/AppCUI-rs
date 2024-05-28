@@ -244,7 +244,7 @@ impl OnKeyPressed for ColorPicker {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         let expanded = self.is_expanded();
 
-        match key.get_compact_code() {
+        match key.value() {
             key!("Escape") => {
                 if expanded {
                     self.pack();

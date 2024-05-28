@@ -50,7 +50,7 @@ impl Tab {
             let h = self.base.children[tabindex as usize];
             let cm = RuntimeManager::get().get_controls_mut();
             if let Some(tabpage) = cm.get_mut(h) {
-                tabpage.get_base_mut().add_child(control)
+                tabpage.base_mut().add_child(control)
             } else {
                 Handle::None
             }
@@ -79,9 +79,9 @@ impl Tab {
             let cm = RuntimeManager::get().get_controls_mut();
             for (child_index, handle_child) in self.base.children.iter().enumerate() {
                 if let Some(control) = cm.get_mut(*handle_child) {
-                    control.get_base_mut().set_visible(index == child_index);
+                    control.base_mut().set_visible(index == child_index);
                     if index == child_index {
-                        control.get_base_mut().request_focus();
+                        control.base_mut().request_focus();
                     }
                 }
             }
@@ -333,7 +333,7 @@ impl OnMouseEvent for Tab {
 }
 impl OnKeyPressed for Tab {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        match key.get_compact_code() {
+        match key.value() {
             key!("Ctrl+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.add(1, self.base.children.len(), Strategy::RotateFromInvalidState);

@@ -7,6 +7,19 @@ pub struct Panel {
     panel_type: Type,
 }
 impl Panel {
+    /// Creates a new Panel control with the specified caption, layout and type.
+    /// The panel type is one of the following values:
+    /// * `Type::Border` - a panel with a border around it
+    /// * `Type::Window` - a panel with a border around it and a title bar
+    /// * `Type::Page` - a panel without a border, used to group controls
+    /// * `Type::TopBar` - a panel without a border, used to group controls and to display a title bar
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut panel = Panel::new("Panel", Layout::new("x:1,y:1,w:20,h:10"), panel::Type::Border);
+    /// ```
     pub fn new(caption: &str, layout: Layout, panel_type: Type) -> Self {
         let mut panel = Panel {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
@@ -21,17 +34,33 @@ impl Panel {
         }
         panel
     }
+    /// Sets the title of the panel. The title is displayed only if the panel type is `Type::Window` , `Type::TopBar` or 
     pub fn set_title(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::NoHotKey);
     }
+
+    /// Returns the title of the panel
     #[inline(always)]
     pub fn title(&self) -> &str {
         self.caption.text()
     }
+
+    /// Returns the type of the panel
     #[inline(always)]
     pub fn get_type(&self) -> Type {
         self.panel_type        
     }
+
+    /// Adds a new control to the panel. The control will be added as a child of the panel and will be automatically removed when the panel is destroyed.
+    /// Returns a handle to the newly created control.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut panel = Panel::new("Panel", Layout::new("x:1,y:1,w:10,h:10"), panel::Type::Border);
+    /// let handle_button = panel.add(Button::new("Button", Layout::new("x:1,y:1,w:8"), button::Type::Normal));
+    /// ```
     #[inline(always)]
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where

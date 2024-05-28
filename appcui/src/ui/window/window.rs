@@ -85,7 +85,7 @@ impl Window {
     fn compute_closest_distance(handle_parent: Handle<UIElement>, object_rect: Rect, dir: MoveDirectionTowards) -> Option<Distance> {
         let controls = RuntimeManager::get().get_controls_mut();
         if let Some(parent) = controls.get(handle_parent) {
-            let base = parent.get_base();
+            let base = parent.base();
             if !base.is_active() {
                 return None;
             }
@@ -123,7 +123,7 @@ impl Window {
         let mut h = handle;
         let mut found = Handle::None;
         while let Some(ctrl) = controls.get_mut(h) {
-            let base = ctrl.get_base();
+            let base = ctrl.base();
             if !base.is_active() {
                 break;
             }
@@ -140,7 +140,7 @@ impl Window {
             return Handle::None;
         }
         if let Some(ctrl) = controls.get_mut(found) {
-            let object_rect = ctrl.get_base().absolute_rect();
+            let object_rect = ctrl.base().absolute_rect();
             if let Some(result) = Window::compute_closest_distance(handle, object_rect, dir) {
                 if (result.value == u32::MAX) || (result.handle.is_none()) {
                     return Handle::None;
@@ -272,18 +272,27 @@ impl Window {
             self.update_positions(self.size());
         }
     }
+    pub fn set_auto_hotkey(&mut self) {
+        let mut k = RuntimeManager::get().find_first_free_hotkey();
+        if k.code != KeyCode::None {
+            k.modifier = KeyModifier::Alt;
+            self.set_hotkey(k);
+        }
+    }
     pub fn set_hotkey<T>(&mut self, key: T)
     where
         Key: From<T>,
     {
         if let Some(item) = self.toolbar.get_mut(self.hotkey_handle) {
-            item.set_key(key.into());
+            let k: Key = key.into();
+            self.base.hotkey = k; // we need this deduplication for desktop to be able to change focus
+            item.set_key(k);
             self.update_positions(self.size());
         }
     }
 
     pub fn enter_resize_mode(&mut self) {
-        if self.has_focus() {
+        if (self.has_focus()) && (!self.is_singlewindow()) {
             self.resize_move_mode = true;
             self.base.set_key_input_before_children_flag(true);
         }
@@ -347,7 +356,7 @@ impl Window {
     fn find_next_child_control(handle: Handle<UIElement>, forward: bool, start_from_current: bool, window_level: bool) -> Option<Handle<UIElement>> {
         let controls = RuntimeManager::get().get_controls();
         if let Some(control) = controls.get(handle) {
-            let base = control.get_base();
+            let base = control.base();
             if !base.is_active() {
                 return None;
             }
@@ -382,7 +391,7 @@ impl Window {
                         if result.is_some() {
                             return result;
                         }
-                        if child.get_base().can_receive_input() {
+                        if child.base().can_receive_input() {
                             return Some(child_handle);
                         }
                     }
@@ -394,7 +403,7 @@ impl Window {
 
     fn hotkey_to_handle(controls: &ControlHandleManager, parent: Handle<UIElement>, hotkey: Key) -> Handle<UIElement> {
         if let Some(control) = controls.get(parent) {
-            let base = control.get_base();
+            let base = control.base();
             // object has to be visible and enabled
             if base.is_visible() && base.is_enabled() {
                 if base.can_receive_input() && base.hotkey() == hotkey {
@@ -430,7 +439,7 @@ impl Window {
             } else {
                 self.show_tooltip_on_point(tooltip, cx, y);
             }
-            self.toolbar.set_current_item_handle(item.get_handle().cast());
+            self.toolbar.set_current_item_handle(item.handle().cast());
             return EventProcessStatus::Processed;
         }
         // if I reach this point - tool tip should not be shown and there is no win button selected
@@ -462,7 +471,7 @@ impl Window {
             if let ToolBarItem::ResizeCorner(_) = item {
                 self.drag_status = DragStatus::Resize;
             }
-            item.get_handle()
+            item.handle()
         } else {
             Handle::None
         };
@@ -512,7 +521,13 @@ impl Window {
             let result = WindowEvents::on_cancel(interface);
             if result == ActionRequest::Allow {
                 // logic to remove me
-                RuntimeManager::get().request_remove(self.handle);
+                if self.is_singlewindow() {
+                    // close the entire app
+                    RuntimeManager::get().close();
+                } else {
+                    // remove me from the desktop
+                    RuntimeManager::get().request_remove(self.handle);
+                }
             }
         }
     }
@@ -574,7 +589,7 @@ impl Window {
     }
     pub(super) fn interface_mut(&mut self) -> Option<&mut dyn Control> {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(self.handle.cast()) {
-            return Some(control.get_control_mut());
+            return Some(control.control_mut());
         }
         None
     }
@@ -588,6 +603,13 @@ impl Window {
 
 impl OnWindowRegistered for Window {
     fn on_registered(&mut self) {
+        if self.is_singlewindow() {
+            if self.flags.contains(Flags::Sizeable) {
+                // a single window can not be sizeable and can not have the resiz grip and/or the maximized button
+                panic!("A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !");
+            }
+            self.flags |= Flags::FixedPosition;
+        }
         // propagate my handle to toolbar elements
         self.toolbar.set_window_handle(self.handle);
     }
@@ -650,7 +672,7 @@ impl OnResize for Window {
 impl OnKeyPressed for Window {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         if self.resize_move_mode {
-            match key.get_compact_code() {
+            match key.value() {
                 key!("Escape") | key!("Enter") | key!("Space") | key!("Tab") => {
                     self.resize_move_mode = false;
                     self.base.set_key_input_before_children_flag(false);
@@ -716,7 +738,7 @@ impl OnKeyPressed for Window {
                 _ => return EventProcessStatus::Ignored,
             }
         } else {
-            match key.get_compact_code() {
+            match key.value() {
                 key!("Tab") => {
                     if let Some(new_child) = Window::find_next_child_control(self.handle, true, true, true) {
                         RuntimeManager::get().request_focus_for_control(new_child);
@@ -783,7 +805,7 @@ impl OnKeyPressed for Window {
                 rm.request_focus_for_control(control_handle);
                 // call the default method
                 if let Some(control) = rm.get_controls_mut().get_mut(control_handle) {
-                    OnDefaultAction::on_default_action(control.get_control_mut());
+                    OnDefaultAction::on_default_action(control.control_mut());
                 }
                 return EventProcessStatus::Processed;
             }

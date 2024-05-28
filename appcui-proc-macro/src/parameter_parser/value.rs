@@ -348,6 +348,21 @@ impl<'a> Value<'a> {
             self.end,
         ));
     }
+    fn validate_percentage(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if self.get_percentage().is_some() {
+            return Ok(());
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting a percentage value (a number followed by the percentage % sign) for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }
     pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if !self.param_name.is_empty() { self.param_name } else { key_name };
         match expected_type {
@@ -361,7 +376,7 @@ impl<'a> Value<'a> {
             super::ParamType::Dict => self.validate_dict(display_param_name, param_list)?,
             super::ParamType::List => self.validate_list(display_param_name, param_list)?,
             super::ParamType::Integer => self.validate_i32(display_param_name, param_list)?,
-            
+            super::ParamType::Percentage => self.validate_percentage(display_param_name, param_list)?,            
         }
         // all good
         self.validated = true;

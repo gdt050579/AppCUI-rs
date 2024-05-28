@@ -42,7 +42,7 @@ impl ComponentToolbarItem {
 }
 
 impl HandleSupport<ComponentToolbarItem> for ComponentToolbarItem {
-    fn get_handle(&self) -> Handle<ComponentToolbarItem> {
+    fn handle(&self) -> Handle<ComponentToolbarItem> {
         match self {
             ComponentToolbarItem::ScrollBar(item) => item.handle.cast(),
         }

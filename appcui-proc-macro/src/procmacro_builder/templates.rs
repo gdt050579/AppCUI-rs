@@ -28,76 +28,72 @@ impl ModalWindowMethods<$(MODAL_RESULT_TYPE)> for $(STRUCT_NAME) {
 ";
 
 pub(crate) static DEREF_TRAIT: &str = "
-impl std::ops::Deref for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) std::ops::Deref for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     type Target = $(BASE);
     fn deref(&self) -> &Self::Target { return &self.base; }
 }
-impl std::ops::DerefMut for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) std::ops::DerefMut for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn deref_mut(&mut self) -> &mut Self::Target { return &mut self.base; }
 }
 ";
 
 pub(crate) static ON_PAINT_TRAIT: &str = "
-impl OnPaint for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnPaint for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme)  { self.base.on_paint(surface, theme); }
 }
 ";
 
 pub(crate) static ON_KEY_PRESSED_TRAIT: &str = "
-impl OnKeyPressed for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnKeyPressed for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_key_pressed(&mut self, key: Key, character: char)->EventProcessStatus { return self.base.on_key_pressed(key, character); }
 }
 ";
 
 pub(crate) static ON_MOUSE_EVENT_TRAIT: &str = "
-impl OnMouseEvent for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnMouseEvent for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_mouse_event(&mut self, event: &MouseEvent)->EventProcessStatus { return self.base.on_mouse_event(event); }
 }
 ";
 
 pub(crate) static ON_SIBLING_SELECTED: &str = "
-impl OnSiblingSelected for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnSiblingSelected for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_sibling_selected(&mut self, handle: Handle<UIElement>)  { self.base.on_sibling_selected(handle); }
 }
 ";
 
 pub(crate) static ON_DEFAULT_ACTION_TRAIT: &str = "
-impl OnDefaultAction for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnDefaultAction for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_default_action(&mut self){ self.base.on_default_action(); }
 }
 ";
 
 pub(crate) static ON_RESIZE_TRAIT: &str = "
-impl OnResize for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnResize for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_resize(&mut self, old: Size, new: Size)  { self.base.on_resize(old, new); }
 }
 ";
 
 pub(crate) static ON_FOCUS_TRAIT: &str = "
-impl OnFocus for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnFocus for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_focus(&mut self)  { self.base.on_focus(); }
     fn on_lose_focus(&mut self)  { self.base.on_lose_focus(); }
 }
 ";
 
 pub(crate) static ON_EXPAND_TRAIT: &str = "
-impl OnExpand for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnExpand for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_expand(&mut self, direction: ExpandedDirection) { self.base.on_expand(direction); }
     fn on_pack(&mut self) { self.base.on_pack(); }
 }
 ";
 
 pub(crate) static ON_WINDOW_REGISTERED_TRAIT: &str = "
-impl OnWindowRegistered for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) OnWindowRegistered for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_registered(&mut self)  { self.base.on_registered(); }
 }
 ";
 
 pub(crate) static COMMANDS_TEMPLATE: &str = "
-mod $(MOD_NAME)
-{
-    use $(ROOT)::prelude::*;
-
     #[repr(u32)]
     #[derive(Copy,Clone,Eq,PartialEq,Debug)]
     pub enum Commands {
@@ -121,14 +117,14 @@ mod $(MOD_NAME)
             }
         }
     }
-}
+
 ";
 pub(crate) static COMMANDBAR_EVENTS: &str = "
 trait CommandBarEvents {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar);
     fn on_event(&mut self, command_id: $(MOD_NAME)::Commands);
 }
-impl GenericCommandBarEvents for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) GenericCommandBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
         CommandBarEvents::on_update_commandbar(self, commandbar);
     }
@@ -149,7 +145,7 @@ trait MenuEvents {
     fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, command: $(MOD_NAME)::Commands) {}
     fn on_update_menubar(&self, menubar: &mut MenuBar) {}
 }
-impl GenericMenuEvents for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) GenericMenuEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_menu_open(&self, menu: &mut Menu) {
         MenuEvents::on_menu_open(self, menu);
     }
@@ -177,5 +173,88 @@ impl GenericMenuEvents for $(STRUCT_NAME) {
             panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
         }
     }
+}
+";
+
+pub(crate) static EMIT_EVENTS_TEMPLATE: &str = "
+    #[repr(u32)]
+    #[derive(Copy,Clone,Eq,PartialEq,Debug)]
+    pub enum Events {
+        $(EVENTS_IDS)
+    }
+    impl TryFrom<u32> for Events {
+        type Error = ();
+
+        fn try_from(value: u32) -> Result<Self, Self::Error> {
+            match value {
+                $(U32_TO_EVENTS)
+                _ => Err(())
+            }
+        }
+    }
+    impl From<Events> for u32 {
+        fn from(value: Events)->u32 {
+            match value {
+                $(EVENTS_TO_U32)
+            }
+        }
+    }
+
+";
+pub(crate) static RAISE_EVENTS_TEMPLATE: &str = "
+trait RaiseEvents {
+    fn raise_event(&self, event: $(MOD_NAME)::Events);
+}
+impl$(TEMPLATE_TYPE) RaiseEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn raise_event(&self, event: $(MOD_NAME)::Events) {
+        self.raise_custom_event($(STRUCT_NAME_HASH),u32::from(event));
+    }
+}
+";
+
+pub(crate) static CUSTOM_EVENTS: &str = "
+impl$(TEMPLATE_TYPE) CustomEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_event(&mut self, handle: Handle<()>, class_hash: u64, event_id: u32) -> EventProcessStatus {
+        match class_hash {
+            $(CUSTOM_EVENT_CLASS_PROXY_CALL)
+            _ => EventProcessStatus::Ignored
+        }        
+    }
+}
+";
+
+pub(crate) static CUSTOM_EVENT_CONVERTOR: &str = "
+if let Ok(event) = $(MOD_NAME)::Events::try_from(event_id) {
+    $(STRUC_NAME)Events::on_event(self, unsafe { handle.unsafe_cast() }, event)
+} else {
+    panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Events\",event_id);
+}
+";
+
+pub(crate) static CUSTOM_TRAIT_DEF: &str = "
+trait $(TRAIT_NAME) {
+    fn on_event(&mut self, handle: Handle<$(STRUC_NAME)>, event:  $(MOD_NAME)::Events) -> EventProcessStatus;
+}
+";
+
+pub(crate) static SELECTOR_TRAIT_DEF: &str = "
+trait SelectorEvents<T: Copy+Clone+EnumSelector+Eq+'static> {
+    fn on_selection_changed(&mut self, handle: Handle<Selector<T>>, value: Option<T>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_SELECTOR)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+pub(crate) static SELECT_ON_SELECTION_CHANGE_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<Selector<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if let Some(obj) = self.control(h) {
+        let value = obj.try_value();
+        return SelectorEvents::<$(TYPE)>::on_selection_changed(self, h, value);
+    }
+    return EventProcessStatus::Ignored;
 }
 ";

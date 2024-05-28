@@ -483,9 +483,9 @@ fn check_dynamic_change_menu_2() {
         Paint('State_21')
         CheckHash(0xf788ef470502e34a)
         Key.Pressed(Escape)
-        Paint('State_22')
-        CheckHash(0x86cfc913da83fa16)
-            ";
+        Paint('State_22 (desktop is empty, no menu in menubar)')
+        CheckHash(0xDB84D57C7804761D)
+    ";
     let mut a = App::debug(60, 24, script).menu_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
@@ -507,10 +507,10 @@ fn check_menubar_update_multiple_menus() {
                 };
                 let m = menu!(
                     "File,class:MyWindow,items=[
-                    {New,cmd:New},
-                    {Save,cmd:Save},
-                    {Open,cmd:Open},
-                ]"
+                        {New,cmd:New},
+                        {Save,cmd:Save},
+                        {Open,cmd:Open},
+                    ]"
                 );
                 w.h_menu = w.register_menu(m);
 
@@ -540,10 +540,10 @@ fn check_menubar_update_multiple_menus() {
                 };
                 let m = menu!(
                     "ColorControl,class:ColorCustomControl,items=[
-            {Red,F1,selected:true,cmd:Red},
-            {Green,F2,selected:false,cmd:Green},
-            {Blue,F3,selected:false,cmd:Blue}
-        ]"
+                        {Red,F1,selected:true,cmd:Red},
+                        {Green,F2,selected:false,cmd:Green},
+                        {Blue,F3,selected:false,cmd:Blue}
+                    ]"
                 );
                 obj.h_menu = obj.register_menu(m);
                 obj
@@ -588,10 +588,10 @@ fn check_menubar_update_multiple_menus() {
                 };
                 let m = menu!(
                     "Text,class:TextCustomControl,items=[
-            {'Text->Red',F1,selected:true,cmd:Red},
-            {'Text->Green',F2,selected:false,cmd:Green},
-            {'Text->Blue',F3,selected:false,cmd:Blue}
-        ]"
+                        {'Text->Red',F1,selected:true,cmd:Red},
+                        {'Text->Green',F2,selected:false,cmd:Green},
+                        {'Text->Blue',F3,selected:false,cmd:Blue}
+                    ]"
                 );
                 obj.h_menu = obj.register_menu(m);
                 obj
@@ -700,17 +700,17 @@ fn check_popup_menu() {
                 };
                 let m = menu!(
                     "ColorControl,class:MyCustomControl,items=[
-                    {&Red,selected:true,cmd:Red},
-                    {&Green,selected:false,cmd:Green},
-                    {Black,selected:false,cmd:Black},
-                    {&Aqua,selected:false,cmd:Aqua},
-                    {&Magenta,selected:false,cmd:Magenta},
-                    {&Yellow,selected:false,cmd:Yellow},
-                    {&Blue,selected:false,cmd:Blue},
-                    {Gray,selected:false,cmd:Gray},
-                    {White,selected:false,cmd:White},
-                    {'Light red',selected:false,cmd:LightRed},
-                    {'Light green',selected:false,cmd:LightGreen},
+                        {&Red,selected:true,cmd:Red},
+                        {&Green,selected:false,cmd:Green},
+                        {Black,selected:false,cmd:Black},
+                        {&Aqua,selected:false,cmd:Aqua},
+                        {&Magenta,selected:false,cmd:Magenta},
+                        {&Yellow,selected:false,cmd:Yellow},
+                        {&Blue,selected:false,cmd:Blue},
+                        {Gray,selected:false,cmd:Gray},
+                        {White,selected:false,cmd:White},
+                        {'Light red',selected:false,cmd:LightRed},
+                        {'Light green',selected:false,cmd:LightGreen},
                     ]"
                 );
                 obj.h_menu = obj.register_menu(m);
@@ -895,17 +895,17 @@ fn check_popup_menu_with_keys() {
                 };
                 let m = menu!(
                     "ColorControl,class:MyCustomControl,items=[
-                    {&Red,selected:true,cmd:Red},
-                    {&Green,selected:false,cmd:Green},
-                    {Black,selected:false,cmd:Black},
-                    {&Aqua,selected:false,cmd:Aqua},
-                    {&Magenta,selected:false,cmd:Magenta},
-                    {&Yellow,selected:false,cmd:Yellow},
-                    {&Blue,selected:false,cmd:Blue},
-                    {Gray,selected:false,cmd:Gray},
-                    {White,selected:false,cmd:White},
-                    {'Light red',selected:false,cmd:LightRed},
-                    {'Light green',selected:false,cmd:LightGreen},
+                        {&Red,selected:true,cmd:Red},
+                        {&Green,selected:false,cmd:Green},
+                        {Black,selected:false,cmd:Black},
+                        {&Aqua,selected:false,cmd:Aqua},
+                        {&Magenta,selected:false,cmd:Magenta},
+                        {&Yellow,selected:false,cmd:Yellow},
+                        {&Blue,selected:false,cmd:Blue},
+                        {Gray,selected:false,cmd:Gray},
+                        {White,selected:false,cmd:White},
+                        {'Light red',selected:false,cmd:LightRed},
+                        {'Light green',selected:false,cmd:LightGreen},
                     ]"
                 );
                 obj.h_menu = obj.register_menu(m);
@@ -1274,8 +1274,8 @@ fn check_menubar_with_keys() {
             Paint('State_57')
             CheckHash(0xf45c01a4988b0fe2)
             Key.Pressed(Escape)
-            Paint('State_58')
-            CheckHash(0x7d77e1090489150e)
+            Paint('State_58 (no menu visible in the menu bar)')
+            CheckHash(0xD0C81ECF174389FD)
         ";
     let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
     a.add_window(MyWindow::new());
@@ -1304,44 +1304,44 @@ fn check_menubar_recursive_shortcuts() {
             // construct a popup menu
             w.h_file = w.register_menu(menu!(
                 "&File,class: MyWindow, items=[
-                {New,F1,cmd:A},
-                {&Save,F2,cmd:A},
-                {'&Save As ...',Alt+F2,cmd:A},
-                {&Open,F3,cmd:A},
-                {-},
-                {E&xit,Alt+F4,cmd:A}
-            ]"
+                    {New,F1,cmd:A},
+                    {&Save,F2,cmd:A},
+                    {'&Save As ...',Alt+F2,cmd:A},
+                    {&Open,F3,cmd:A},
+                    {-},
+                    {E&xit,Alt+F4,cmd:A}
+                ]"
             ));
             w.h_edit = w.register_menu(menu!(
                 "&Edit,class: MyWindow, items=[
-                {&Copy,Ctrl+Ins,cmd:A},
-                {&Paste,Shift+Ins,cmd:A},
-                {&Cut,Ctrl+X,cmd:A},
-                {-},
-                {&Special,items=[
-                    {'Slot &1',Alt+1,cmd:A},
-                    {'Slot &2',Alt+2,cmd:A},
-                    {'Slot &3',Alt+3,cmd:A},
-                    {'Slot &4',Alt+4,cmd:A},
-                    {'Slot &5',Alt+5,cmd:A},
-                ]}            
-            ]"
+                    {&Copy,Ctrl+Ins,cmd:A},
+                    {&Paste,Shift+Ins,cmd:A},
+                    {&Cut,Ctrl+X,cmd:A},
+                    {-},
+                    {&Special,items=[
+                        {'Slot &1',Alt+1,cmd:A},
+                        {'Slot &2',Alt+2,cmd:A},
+                        {'Slot &3',Alt+3,cmd:A},
+                        {'Slot &4',Alt+4,cmd:A},
+                        {'Slot &5',Alt+5,cmd:A},
+                    ]}            
+                ]"
             ));
             w.h_help = w.register_menu(menu!(
                 "&Help,class: MyWindow, items=[
-                {&About,Ctrl+Shift+A,cmd:A},
-                {&Update,F10,cmd:A},
-                {-},
-                {&Tutorials,items=[
-                    {'&Usage',Alt+U,cmd:A},
-                    {'&Download',Ctrl+D,cmd:A},
-                    {&Time,items=[
-                        {'Day &1',Ctrl+Alt+Shift+1,cmd:A},
-                        {'Day &2',Ctrl+Alt+Shift+2,cmd:A},
-                        {'Day &3',Ctrl+Alt+Shift+3,cmd:A},
+                    {&About,Ctrl+Shift+A,cmd:A},
+                    {&Update,F10,cmd:A},
+                    {-},
+                    {&Tutorials,items=[
+                        {'&Usage',Alt+U,cmd:A},
+                        {'&Download',Ctrl+D,cmd:A},
+                        {&Time,items=[
+                            {'Day &1',Ctrl+Alt+Shift+1,cmd:A},
+                            {'Day &2',Ctrl+Alt+Shift+2,cmd:A},
+                            {'Day &3',Ctrl+Alt+Shift+3,cmd:A},
+                        ]}            
                     ]}            
-                ]}            
-            ]"
+                ]"
             ));
             w
         }
@@ -1437,8 +1437,8 @@ fn check_menubar_recursive_shortcuts() {
             Paint('State_24')
             CheckHash(0x36480d44d0d8e490)
             Key.Pressed(Escape)
-            Paint('State_25')
-            CheckHash(0x7d77e1090489150e)    
+            Paint('State_25 (no menu visible in the menubar)')
+            CheckHash(0xD0C81ECF174389FD)    
         ";
     let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
     a.add_window(MyWindow::new());

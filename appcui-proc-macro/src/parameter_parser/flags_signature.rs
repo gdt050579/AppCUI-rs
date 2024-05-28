@@ -1,29 +1,24 @@
-use std::{collections::HashMap, sync::Mutex};
+use std::{collections::HashMap, sync::OnceLock};
 
 use crate::utils;
 
 pub(crate) struct FlagsSignature {
     flags: &'static [&'static str],
-    map: Mutex<Option<HashMap<u64, &'static str>>>,
+    map: OnceLock<HashMap<u64, &'static str>>,
 }
 impl FlagsSignature {
     pub(crate) const fn new(flags: &'static [&'static str]) -> Self {
-        Self { flags, map: Mutex::new(None) }
+        Self { flags, map: OnceLock::new() }
     }
-    pub(crate) fn get(&mut self, name: &str)->Option<&'static str> {
-        let hash = utils::compute_hash(name);
-        let map = self.map.get_mut().unwrap();
-        if map.is_none() {
-            // build the actual map
+    pub(crate) fn get(&self, name: &str)->Option<&'static str> {
+        let map = self.map.get_or_init(||{
             let mut m: HashMap<u64, &'static str> = HashMap::with_capacity(8);
             for elem in self.flags {
                 m.insert(utils::compute_hash(elem), *elem);
             }
-            *map = Some(m);
-        }
-        if let Some(m) = map {
-            return m.get(&hash).copied();
-        }
-        None
+            m
+        });
+        let hash = utils::compute_hash(name);
+        map.get(&hash).copied()
     }
 }

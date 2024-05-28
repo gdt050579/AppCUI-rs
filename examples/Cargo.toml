@@ -82,3 +82,35 @@ path = "accordion/main.rs"
 [[example]]
 name = "keyselector"
 path = "keyselector/main.rs"
+
+[[example]]
+name = "textfield"
+path = "textfield/main.rs"
+
+[[example]]
+name = "custom_desktop"
+path = "custom_desktop/main.rs"
+
+[[example]]
+name = "single_window"
+path = "single_window/main.rs"
+
+[[example]]
+name = "tic-tac-toe"
+path = "tic-tac-toe/main.rs"
+
+[[example]]
+name = "images"
+path = "images/main.rs"
+
+[[example]]
+name = "ferris"
+path = "ferris/main.rs"
+
+[[example]]
+name = "selector"
+path = "selector/main.rs"
+
+[[example]]
+name = "combobox"
+path = "combobox/main.rs"

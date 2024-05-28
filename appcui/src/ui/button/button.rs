@@ -60,7 +60,7 @@ impl OnDefaultAction for Button {
 }
 impl OnKeyPressed for Button {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        match key.get_compact_code() {
+        match key.value() {
             key!("Space") | key!("Enter") => {
                 self.on_default_action();
                 EventProcessStatus::Processed

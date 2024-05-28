@@ -12,6 +12,7 @@ pub struct Builder {
     pub(crate) desktop_manager: Option<ControlManager>,
     pub(crate) has_menu_bar: bool,
     pub(crate) has_command_bar: bool,
+    pub(crate) single_window: bool,
 }
 impl Builder {
     pub(crate) fn new() -> Self {
@@ -23,6 +24,7 @@ impl Builder {
             desktop_manager: None,
             has_menu_bar: false,
             has_command_bar: false,
+            single_window: false,
         }
     }
     #[inline(always)]
@@ -47,6 +49,11 @@ impl Builder {
     #[inline(always)]
     pub fn command_bar(mut self) -> Self {
         self.has_command_bar = true;
+        self
+    }
+    #[inline(always)]
+    pub fn single_window(mut self) -> Self {
+        self.single_window = true;
         self
     }
     #[inline(always)]
