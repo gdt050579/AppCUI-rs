@@ -114,3 +114,7 @@ path = "selector/main.rs"
 [[example]]
 name = "combobox"
 path = "combobox/main.rs"
+
+[[example]]
+name = "dropdownlist"
+path = "dropdownlist/main.rs"
