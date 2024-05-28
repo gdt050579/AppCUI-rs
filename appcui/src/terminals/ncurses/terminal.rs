@@ -20,6 +20,8 @@ use super::colors::ColorManager;
 use crate::graphics::*;
 use crate::system::Error;
 
+use copypasta::ClipboardContext;
+use copypasta::ClipboardProvider;
 use ncurses::chtype;
 use ncurses::endwin;
 use ncurses::ll::mmask_t;
@@ -302,5 +304,20 @@ impl Terminal for NcursesTerminal {
         };
 
         SystemEvent::None
+    }
+    
+    fn get_clipboard_text(&self) -> Option<String> {
+        let mut ctx: ClipboardContext = ClipboardContext::new().ok()?;
+        ctx.get_contents().ok()
+    }
+
+    fn set_clipboard_text(&mut self, text: &str) {
+        let mut ctx: ClipboardContext = ClipboardContext::new().unwrap();
+        ctx.set_contents(text.to_owned()).unwrap();
+    }
+
+    fn has_clipboard_text(&self) -> bool {
+        let mut ctx: ClipboardContext = ClipboardContext::new().unwrap();
+        ctx.get_contents().is_ok()
     }
 }

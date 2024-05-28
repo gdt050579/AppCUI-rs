@@ -9,6 +9,7 @@ edition = "2021"
 EnumBitFlags = "1.0.7"
 AppCUIProcMacro = {path = "../appcui-proc-macro"}
 ncurses = { version = "6.0.0", features = ["wide", "panel", "menu", "wide_chtype", "mouse_v1", "extended_colors"] }
+copypasta = "0.10.1"
 
 [features]
 default = []
