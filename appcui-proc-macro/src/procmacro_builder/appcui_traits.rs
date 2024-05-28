@@ -219,6 +219,7 @@ impl AppCUITrait {
     pub(crate) fn is_generic(&self) -> bool {
         match self {
             AppCUITrait::GenericSelectorEvents => true,
+            AppCUITrait::GenericDropDownListEvents => true,
             _ => false,
         }
     }
