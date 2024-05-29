@@ -7,6 +7,7 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&["AllowNoneSelection", "Show
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("class", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("class", "class", ParamType::String),
+    NamedParameter::new("type", "class", ParamType::String),
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("symbolsize", "symbolsize", ParamType::Integer),
     NamedParameter::new("none", "none", ParamType::String),
@@ -31,7 +32,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if cb.has_parameter("none") {
         cb.add("\ncontrol.set_none_string(");
         cb.add_string_parameter("none", None);
-        cb.add(");\n");
+        cb.add(");\n"); 
     }
     cb.add_basecontrol_operations();
     cb.into()

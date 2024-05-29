@@ -52,6 +52,7 @@
         - [CheckBox](chapter-3/stock-controls/checkbox.md)
         - [ColorPicker](chapter-3/stock-controls/colorpicker.md)
         - [ComboBox](chapter-3/stock-controls/combobox.md)
+        - [DropDownList](chapter-3/stock-controls/dropdownlist.md)
         - [DateTimePicker]()
         - [Label](chapter-3/stock-controls/label.md)
         - [Line]()
