@@ -25,7 +25,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         }
     }
     cb.add_layout();
-    cb.add_flags_parameter("flags", "DropDownList::Flags", &FLAGS);
+    cb.add_flags_parameter("flags", "dropdownlist::Flags", &FLAGS);
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();
     cb.into()

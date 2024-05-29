@@ -65,6 +65,77 @@ fn check_symbol_paint() {
 }
 
 #[test]
+fn check_create_with_macro() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (closed)')   
+        CheckHash(0x2A53E5A0DF2E4049) 
+        Key.Pressed(Space)
+        Paint('Opened')   
+        CheckHash(0x40CE2546F1948D43) 
+        Key.Pressed(Down)
+        Key.Pressed(Enter)
+        Paint('Sum selected')   
+        CheckHash(0xFE59E5136C4A00BD) 
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:56,h:7");
+    let mut db = dropdownlist!("class:MathOp,x:1,y:1,w:50,flags:ShowDescription,symbolsize:1");
+    db.add(MathOp::Sum);
+    db.add(MathOp::Product);
+    db.add(MathOp::Integral);
+    db.add(MathOp::Radical);
+    db.add(MathOp::Different);
+    w.add(db);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_no_symbols() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (closed)')   
+        CheckHash(0x2A53E5A0DF2E4049) 
+        Key.Pressed(Space)
+        Paint('Opened')   
+        CheckHash(0x1CFE19F59CB0D41A) 
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:56,h:7");
+    let mut db = dropdownlist!("class:MathOp,x:1,y:1,w:50,flags:ShowDescription");
+    db.add(MathOp::Sum);
+    db.add(MathOp::Product);
+    db.add(MathOp::Integral);
+    db.add(MathOp::Radical);
+    db.add(MathOp::Different);
+    w.add(db);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_allow_none() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (should be None)')   
+        CheckHash(0xC716BFA675C55B4B) 
+        Key.Pressed(Space)
+        Paint('Opened - None should be selected')   
+        CheckHash(0xAA1D368EE131B77B) 
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:56,h:7");
+    let mut db = dropdownlist!("class:MathOp,x:1,y:1,w:50,flags:AllowNoneSelection");
+    db.add(MathOp::Sum);
+    db.add(MathOp::Product);
+    db.add(MathOp::Integral);
+    w.add(db);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_events() {
     #[Window(events=DropDownListEvents<MathOp>,internal: true)]
     struct MyWindow {}
