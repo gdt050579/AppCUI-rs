@@ -24,6 +24,7 @@ pub mod keyselector;
 pub mod components;
 pub mod selector;
 pub mod combobox;
+pub mod dropdownlist;
 
 // re-export
 pub use common::ControlBase;
@@ -46,5 +47,6 @@ pub use keyselector::KeySelector;
 pub use colorpicker::ColorPicker;
 pub use selector::Selector;
 pub use combobox::ComboBox;
+pub use dropdownlist::DropDownList;
 pub use command_bar::CommandBar;
 pub use layout::Layout;

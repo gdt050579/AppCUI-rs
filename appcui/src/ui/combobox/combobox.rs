@@ -19,6 +19,10 @@ impl ComboBoxComponentDataProvider for DataProvider {
     fn description(&self, index: u32) -> Option<&str> {
         self.items.get(index as usize).map(|item| item.description.as_str())
     }
+
+    fn symbol(&self, _index: u32) -> Option<&str> {
+        None
+    }
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
@@ -43,7 +47,7 @@ impl ComboBox {
     pub fn new(layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            component: ComboBoxComponent::new(false,flags.contains(Flags::ShowDescription), 0),
+            component: ComboBoxComponent::new(false,flags.contains(Flags::ShowDescription), 0, 0),
             data: DataProvider { items: Vec::new() },
             flags,
         };

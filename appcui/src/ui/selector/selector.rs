@@ -27,6 +27,10 @@ where
     fn description(&self, index: u32) -> Option<&str> {
         T::from_index(index).map(|p| p.description())
     }
+
+    fn symbol(&self, _index: u32) -> Option<&str> {
+        None    
+    }
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
@@ -44,7 +48,7 @@ where
     pub fn new(value: Option<T>, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            component: ComboBoxComponent::new(flags.contains(Flags::AllowNoneVariant), false, T::COUNT),
+            component: ComboBoxComponent::new(flags.contains(Flags::AllowNoneVariant), false, T::COUNT, 0),
             flags,
         };
         if let Some(val) = value {

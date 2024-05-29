@@ -74,6 +74,7 @@ impl<T> ColorPickerEvents for ModalWindow<T> {}
 impl<T> ComboBoxEvents for ModalWindow<T> {}
 impl<T> CustomEvents for ModalWindow<T> {}
 impl<T> GenericSelectorEvents for ModalWindow<T> {}
+impl<T> GenericDropDownListEvents for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
 impl<T> WindowControl for ModalWindow<T> {}
 impl<T> OnExpand for ModalWindow<T> {}
