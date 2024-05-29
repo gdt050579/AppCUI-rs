@@ -2,18 +2,11 @@ use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
-use crate::input::MouseWheelDirection;
-use crate::prelude::window;
-use crate::prelude::ErrorKind;
-use crate::terminals::debug;
-
-use super::super::system_event::KeyModifierChangedEvent;
 use super::super::KeyPressedEvent;
 use super::super::MouseButtonDownEvent;
 use super::super::MouseButtonUpEvent;
 use super::super::MouseDoubleClickEvent;
 use super::super::MouseMoveEvent;
-use super::super::MouseWheelEvent;
 use super::super::SystemEvent;
 use super::super::Terminal;
 use super::colors::ColorManager;
@@ -23,17 +16,13 @@ use crate::system::Error;
 use copypasta::ClipboardContext;
 use copypasta::ClipboardProvider;
 use ncurses::chtype;
+use ncurses::curs_set;
 use ncurses::endwin;
 use ncurses::ll::mmask_t;
 use ncurses::stdscr;
 use ncurses::WINDOW;
 
 use std::char;
-// debug
-use std::fs::File;
-use std::fs::Metadata;
-use std::fs::OpenOptions;
-use std::io::Write;
 pub struct NcursesTerminal {
     window: WINDOW,
     color_manager: ColorManager,
@@ -95,13 +84,16 @@ pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
         let pos = SHFIT_NUM.iter().position(|&r| r == ch as i32).unwrap();
         key_code = KeyCode::from((pos + 54) as u8);
         key_modifier = KeyModifier::Shift;
+    } else if ch >=1 && ch <= 26{
+        key_code = KeyCode::from((ch + 27 as u32) as u8);
+        key_modifier = KeyModifier::Ctrl;
     } else {
         match ch {
             32 => key_code = KeyCode::Space,
             9 => key_code = KeyCode::Tab,
             13 => key_code = KeyCode::Enter,
             27 => key_code = KeyCode::Escape,
-            127 => key_code = KeyCode::Backspace,
+            263 => key_code = KeyCode::Backspace,
             _ => key_code = KeyCode::None,
         }
     }
@@ -136,7 +128,7 @@ impl Terminal for NcursesTerminal {
                 9559 => ncurses::ACS_URCORNER(),
                 9565 => ncurses::ACS_LRCORNER(),
                 9562 => ncurses::ACS_LLCORNER(),
-                9632 => ncurses::ACS_BLOCK(),
+                // 9604 => ncurses::ACS_BLOCK(),
                 9660 => ncurses::ACS_DARROW(),
                 9650 => ncurses::ACS_UARROW(),
                 9472 => ncurses::ACS_HLINE(),
@@ -145,12 +137,10 @@ impl Terminal for NcursesTerminal {
                 9488 => ncurses::ACS_URCORNER(),
                 9496 => ncurses::ACS_LRCORNER(),
                 9492 => ncurses::ACS_LLCORNER(),
+                9679 => ncurses::ACS_BULLET(),
                 _ => ch.code as chtype,
             };
 
-            // debugfile
-            // .write_all(format!("{} {} {}\n", ch.code as char, ch.code as i32, code).as_bytes())
-            // .unwrap();
             if ch.foreground != Color::Transparent || ch.background != Color::Transparent {
                 self.color_manager.set_color_pair(&ch.foreground, &ch.background);
                 if (ch.flags & CharFlags::Underline) == CharFlags::Underline {
@@ -181,6 +171,14 @@ impl Terminal for NcursesTerminal {
                 current_y += 1;
             }
         }
+
+        if surface.cursor.is_visible() {
+            curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_VISIBLE);
+            ncurses::wmove(self.window, surface.cursor.y as i32, surface.cursor.x as i32);
+        } else {
+            curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE);
+        }
+        
         ncurses::wrefresh(self.window);
     }
 
@@ -192,14 +190,11 @@ impl Terminal for NcursesTerminal {
     }
 
     fn get_system_event(&mut self) -> SystemEvent {
-        let ch = ncurses::wget_wch(stdscr());
-        let mut debugfile = OpenOptions::new().write(true).append(true).open("debug.txt").unwrap();
-        
+        let ch = ncurses::wget_wch(stdscr());        
         if ch.is_none() {
             return SystemEvent::None;
         }
 
-        debugfile.write(format!("{:?} \n",ch).as_bytes()).unwrap();
         match ch {
             Some(ncurses::WchResult::KeyCode(ncurses::KEY_MOUSE)) => {
                 let mut mevent = ncurses::MEVENT {
@@ -249,14 +244,49 @@ impl Terminal for NcursesTerminal {
                 let new_size = self.get_size();
                 return SystemEvent::Resize(new_size);
             }
-
+            // F1 - F12
+            Some(ncurses::WchResult::KeyCode(265..=276)) => {
+                let key_code = match ch {
+                    Some(ncurses::WchResult::KeyCode(265)) => KeyCode::F1,
+                    Some(ncurses::WchResult::KeyCode(266)) => KeyCode::F2,
+                    Some(ncurses::WchResult::KeyCode(267)) => KeyCode::F3,
+                    Some(ncurses::WchResult::KeyCode(268)) => KeyCode::F4,
+                    Some(ncurses::WchResult::KeyCode(269)) => KeyCode::F5,
+                    Some(ncurses::WchResult::KeyCode(270)) => KeyCode::F6,
+                    Some(ncurses::WchResult::KeyCode(271)) => KeyCode::F7,
+                    Some(ncurses::WchResult::KeyCode(272)) => KeyCode::F8,
+                    Some(ncurses::WchResult::KeyCode(273)) => KeyCode::F9,
+                    Some(ncurses::WchResult::KeyCode(274)) => KeyCode::F10,
+                    Some(ncurses::WchResult::KeyCode(275)) => KeyCode::F11,
+                    Some(ncurses::WchResult::KeyCode(276)) => KeyCode::F12,
+                    _ => KeyCode::None,
+                };
+                return SystemEvent::KeyPressed(KeyPressedEvent {
+                    key: Key {
+                        code: key_code,
+                        modifier: KeyModifier::None,
+                    },
+                    character: ' ',
+                });
+            }
+            // Delete
+            Some(ncurses::WchResult::KeyCode(330) ) =>{
+                return SystemEvent::KeyPressed(KeyPressedEvent {
+                    key: Key {
+                        code: KeyCode::Delete,
+                        modifier: KeyModifier::None,
+                    },
+                    character: ' ',
+                });
+            }
             // Arrow keys
-            Some(ncurses::WchResult::KeyCode(ncurses::KEY_UP | ncurses::KEY_DOWN | ncurses::KEY_LEFT | ncurses::KEY_RIGHT)) => {
+            Some(ncurses::WchResult::KeyCode(ncurses::KEY_UP | ncurses::KEY_DOWN | ncurses::KEY_LEFT | ncurses::KEY_RIGHT | 263)) => {
                 let key_code  = match ch {
                     Some(ncurses::WchResult::KeyCode(ncurses::KEY_UP)) => KeyCode::Up,
                     Some(ncurses::WchResult::KeyCode(ncurses::KEY_DOWN)) => KeyCode::Down,
                     Some(ncurses::WchResult::KeyCode(ncurses::KEY_LEFT)) => KeyCode::Left,
                     Some(ncurses::WchResult::KeyCode(ncurses::KEY_RIGHT)) => KeyCode::Right,
+                    Some(ncurses::WchResult::KeyCode(263)) => KeyCode::Backspace,
                     _ => KeyCode::None,
                 };
                 return SystemEvent::KeyPressed(KeyPressedEvent {
@@ -288,15 +318,19 @@ impl Terminal for NcursesTerminal {
 
             Some(ncurses::WchResult::Char(ch)) => {
                 if ch == 27 {
-                    endwin();
-                    debugfile.set_len(0).unwrap();
-
-                    println!("\x1B[?1003l");
-                    return SystemEvent::AppClose;
+                    return  SystemEvent::KeyPressed(KeyPressedEvent {
+                        key: Key {
+                            code: KeyCode::Escape,
+                            modifier: KeyModifier::None,
+                        },
+                        character: ' ',
+                    });
                 }
 
-                let key = get_key_struct(ch);
-                debugfile.write_all(format!("{}\n", ch).as_bytes()).unwrap();
+                let mut key = get_key_struct(ch);
+                if key.key.code == KeyCode::Backspace{
+                    key.character = 8 as char;
+                }
                 return SystemEvent::KeyPressed(key);
             }
 
