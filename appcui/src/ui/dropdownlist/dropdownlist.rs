@@ -64,6 +64,36 @@ where
         obj
     }
 
+    /// Adds a new item to the DropDownList control
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// struct MyObject { name: String, description: String, symbol: String }
+    ///
+    /// impl MyObject {
+    ///    fn new(name: &str, description: &str, symbol: &str) -> MyObject {
+    ///        MyObject { 
+    ///             name: name.to_string(), 
+    ///             description: description.to_string(), 
+    ///             symbol: symbol.to_string() 
+    ///        }
+    ///    }
+    /// }
+    /// 
+    /// impl DropDownListType for MyObject {
+    ///    fn name(&self) -> &str { &self.name }
+    ///    fn description(&self) -> &str { &self.description }
+    ///    fn symbol(&self) -> &str { &self.symbol }
+    /// }
+    ///
+    /// let mut db = DropDownList::<MyObject>::new(Layout::new("x:1,y:1,w:20"), dropdownlist::Flags::None);
+    /// db.add(MyObject::new("Item 1", "Description 1", "Symbol 1"));
+    /// db.add(MyObject::new("Item 2", "Description 2", "Symbol 2"));
+    /// db.add(MyObject::new("Item 3", "Description 3", "Symbol 3"));
+    ///
+    /// ```
     pub fn add(&mut self, value: T) {
         self.data.items.push(value);
         self.component.update_count(&mut self.base, self.data.items.len() as u32);
@@ -123,6 +153,12 @@ where
     pub fn count(&self) -> u32 {
         self.data.count()
     }
+
+    /// Sets the string that will be displayed when no item is selected. By default, this is "None" if the flag `AllowNoneSelection` is set or an empty string otherwise
+    #[inline(always)]
+    pub fn set_none_string(&mut self, text: &str) {
+        self.component.set_none_string(text);
+    }   
 
     fn emit_on_selection_changed_event(&mut self) {
         self.raise_event(ControlEvent {
