@@ -266,7 +266,7 @@ impl Terminal for NcursesTerminal {
                         code: key_code,
                         modifier: KeyModifier::None,
                     },
-                    character: ' ',
+                    character: '\0',
                 });
             }
             // Delete
@@ -276,7 +276,7 @@ impl Terminal for NcursesTerminal {
                         code: KeyCode::Delete,
                         modifier: KeyModifier::None,
                     },
-                    character: ' ',
+                    character: '\0',
                 });
             }
             // Arrow keys
@@ -294,7 +294,7 @@ impl Terminal for NcursesTerminal {
                         code: key_code,
                         modifier: KeyModifier::None,
                     },
-                    character: ' ',
+                    character: '\0',
                 });
             }
 
@@ -312,7 +312,7 @@ impl Terminal for NcursesTerminal {
                         code: key_code,
                         modifier: KeyModifier::Shift,
                     },
-                    character: ' ',
+                    character: '\0',
                 });
             }
 
@@ -323,7 +323,7 @@ impl Terminal for NcursesTerminal {
                             code: KeyCode::Escape,
                             modifier: KeyModifier::None,
                         },
-                        character: ' ',
+                        character: '\0',
                     });
                 }
 
