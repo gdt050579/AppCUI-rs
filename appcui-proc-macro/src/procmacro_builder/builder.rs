@@ -129,6 +129,13 @@ fn generate_selector_events(a: &mut Arguments) -> String {
     }
     return templates::SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_SELECTOR)", s.as_str());
 }
+fn generate_dropdownlist_events(a: &mut Arguments) -> String {
+    let mut s = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericDropDownListEvents].iter() {
+        s.push_str(templates::SELECT_ON_DROPDOWNLIST_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());        
+    }
+    return templates::DROPDOWNLIST_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_DROPDOWNLIST)", s.as_str());
+}
 
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
@@ -176,6 +183,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                 if appcui_trait.is_generic() {
                     match appcui_trait {
                         AppCUITrait::GenericSelectorEvents => code.push_str(generate_selector_events(&mut a).as_str()),
+                        AppCUITrait::GenericDropDownListEvents => code.push_str(generate_dropdownlist_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

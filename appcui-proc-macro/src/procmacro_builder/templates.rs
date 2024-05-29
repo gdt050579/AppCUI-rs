@@ -258,3 +258,21 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
     return EventProcessStatus::Ignored;
 }
 ";
+
+pub(crate) static DROPDOWNLIST_TRAIT_DEF: &str = "
+trait DropDownListEvents<T: DropDownListType+'static> {
+    fn on_selection_changed(&mut self, handle: Handle<DropDownList<T>>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericDropDownListEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_DROPDOWNLIST)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+pub(crate) static SELECT_ON_DROPDOWNLIST_CHANGE_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<DropDownList<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return DropDownListEvents::<$(TYPE)>::on_selection_changed(self, h);
+}
+";
