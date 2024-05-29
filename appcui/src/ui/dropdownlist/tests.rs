@@ -184,7 +184,7 @@ fn check_events() {
                 .unwrap_or("Invalid")
                 .to_string();
             self.set_title(&s);
-            return EventProcessStatus::Processed;
+            EventProcessStatus::Processed
         }
     }
     let script = "

@@ -17,9 +17,9 @@ impl MyWin {
         };
         w.add(label!("Operation,x:1,y:1,w:15"));
         let mut db = DropDownList::<MathOp>::with_symbol(1, Layout::new("x:20,y:1,w:26"), dropdownlist::Flags::ShowDescription);
-        db.add(MathOp::new("Sum", "(Add multiple numbers)", "∑", |x| x.iter().sum::<i32>() as i32));
-        db.add(MathOp::new("Product", "(Multiply multiple numbers)", "∏", |x| x.iter().product::<i32>() as i32));
-        db.add(MathOp::new("Average", "(Calculate the average of multiple numbers)", "∅", |x| x.iter().sum::<i32>() as i32 / x.len() as i32));
+        db.add(MathOp::new("Sum", "(Add multiple numbers)", "∑", |x| x.iter().sum::<i32>()));
+        db.add(MathOp::new("Product", "(Multiply multiple numbers)", "∏", |x| x.iter().product::<i32>()));
+        db.add(MathOp::new("Average", "(Calculate the average of multiple numbers)", "∅", |x| x.iter().sum::<i32>() / x.len() as i32));
         db.add(MathOp::new("Max", "(Calculate the maximum of multiple numbers)", "⊔", |x| *x.iter().max().unwrap()));   
         db.add(MathOp::new("Min", "(Calculate the minimum of multiple numbers)", "⊓", |x| *x.iter().min().unwrap()));
         w.h_op = w.add(db);
