@@ -41,10 +41,57 @@ impl<T> DropDownList<T>
 where
     T: DropDownListType + 'static,
 {
+    /// Creates a new DropDownList control with the specified layout and flags.
+    /// The flags can be a combination of the following values:
+    /// * `Flags::AllowNoneSelection` - if set, the user can select no item from the DropDownList
+    /// * `Flags::ShowDescription` - if set, the description of the selected item will be displayed in the DropDownList
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// struct MyObject { name: String, description: String }
+    /// 
+    /// impl DropDownListType for MyObject {
+    ///   fn name(&self) -> &str { &self.name }
+    ///   fn description(&self) -> &str { &self.description }
+    ///   fn symbol(&self) -> &str { "" }
+    /// }
+    /// 
+    /// let mut db = DropDownList::<MyObject>::new(Layout::new("x:1,y:1,w:30"), dropdownlist::Flags::ShowDescription);
+    /// db.add(MyObject { name: "Item 1".to_string(), description: "Description 1".to_string() });
+    /// db.add(MyObject { name: "Item 2".to_string(), description: "Description 2".to_string() });
+    /// db.add(MyObject { name: "Item 3".to_string(), description: "Description 3".to_string() });
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_symbol(0, layout, flags)
     }
 
+
+    /// Creates a new DropDownList control with the specified layout, symbol size and flags.
+    /// The flags can be a combination of the following values:
+    /// * `Flags::AllowNoneSelection` - if set, the user can select no item from the DropDownList
+    /// * `Flags::ShowDescription` - if set, the description of the selected item will be displayed in the DropDownList
+    /// 
+    /// The symbol size can be one of the following values: 0, 1, 2 or 3
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// struct MyObject { name: String, symbol: &'static str }
+    /// 
+    /// impl DropDownListType for MyObject {
+    ///   fn name(&self) -> &str { &self.name }
+    ///   fn description(&self) -> &str { "" }
+    ///   fn symbol(&self) -> &str { self.symbol }
+    /// }
+    /// 
+    /// let mut db = DropDownList::<MyObject>::with_symbol(1, Layout::new("x:1,y:1,w:30"), dropdownlist::Flags::None); 
+    /// db.add(MyObject { name: "Sum".to_string(), symbol: "∑" });
+    /// db.add(MyObject { name: "Product".to_string(), symbol: "∏" });
+    /// db.add(MyObject { name: "Integral".to_string(), symbol: "∫" });
+    /// ```
     pub fn with_symbol(symbol_size: u8, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -89,9 +136,10 @@ where
     /// }
     ///
     /// let mut db = DropDownList::<MyObject>::new(Layout::new("x:1,y:1,w:20"), dropdownlist::Flags::None);
-    /// db.add(MyObject::new("Item 1", "Description 1", "Symbol 1"));
-    /// db.add(MyObject::new("Item 2", "Description 2", "Symbol 2"));
-    /// db.add(MyObject::new("Item 3", "Description 3", "Symbol 3"));
+    /// db.add(MyObject::new("Heart", "Symbol of love", "❤"));
+    /// db.add(MyObject::new("Star", "Symbol of hope", "⭐"));
+    /// db.add(MyObject::new("Sun", "Symbol of light", "☀"));
+    /// 
     ///
     /// ```
     pub fn add(&mut self, value: T) {
