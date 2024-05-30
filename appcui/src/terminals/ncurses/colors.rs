@@ -52,6 +52,7 @@ pub struct ColorManager {
     color_mapping: HashMap<i16, bool>
 }
 
+#[cfg(target_family = "unix")]
 impl ColorManager {
     const NR_COLORS: i16 = 16;
     const PAIR_MAPPING: [i16; 256] = [

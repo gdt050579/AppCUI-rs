@@ -15,14 +15,16 @@ use crate::system::Error;
 
 use copypasta::ClipboardContext;
 use copypasta::ClipboardProvider;
-use ncurses::chtype;
-use ncurses::curs_set;
-use ncurses::endwin;
-use ncurses::ll::mmask_t;
-use ncurses::stdscr;
-use ncurses::WINDOW;
 
+#[cfg(target_family = "unix")]
+use ncurses::{
+    chtype, curs_set, endwin, ll::mmask_t, stdscr, WINDOW,
+};
+
+#[cfg(target_family = "unix")]
 use std::char;
+
+#[cfg(target_family = "unix")]
 pub struct NcursesTerminal {
     window: WINDOW,
     color_manager: ColorManager,
@@ -33,6 +35,7 @@ pub struct NcursesTerminal {
     // key_modifiers: KeyModifier,
 }
 
+#[cfg(target_family = "unix")]
 impl NcursesTerminal {
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
         ncurses::setlocale(ncurses::LcCategory::all, "").unwrap();
@@ -106,6 +109,7 @@ pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
     }
 }
 
+#[cfg(target_family = "unix")]
 impl Terminal for NcursesTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         if self.window.is_null() {
