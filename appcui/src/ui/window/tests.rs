@@ -491,7 +491,7 @@ fn check_window_on_layout_changed() {
     let script = "
         Paint.Enable(false)
         Paint('initial (pos=10,2 with 40x7)')
-        CheckHash(0x9D72A867C32120E0)
+        CheckHash(0x303678F286D0D033)
         Mouse.Move(49,8)
         Mouse.Hold(49,8,left)
         Mouse.Move(51,9)

@@ -1,6 +1,7 @@
 use std::ops::{Add, Sub};
 
 use super::events::EventData;
+use super::Buttons;
 use super::Flags;
 use crate::prelude::*;
 
@@ -21,7 +22,7 @@ impl Numeric for isize {}
 impl Numeric for f32 {}
 impl Numeric for f64 {}
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct NumericSelector<T>
 where
     T: Numeric + 'static,
@@ -30,6 +31,7 @@ where
     min: T,
     max: T,
     flags: Flags,
+    buttons: Buttons,
 }
 impl<T> NumericSelector<T>
 where
@@ -54,8 +56,9 @@ where
             max: v_max,
             value: v,
             flags,
+            buttons: Buttons::new(),
         };
-
+        obj.buttons.update_width(obj.size().width as u16);
         obj.set_size_bounds(11, 1, u16::MAX, 1);
         obj
     }
@@ -81,7 +84,9 @@ impl<T> OnPaint for NumericSelector<T>
 where
     T: Numeric + 'static,
 {
-    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {}
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        self.buttons.paint(surface, theme, self.is_enabled());
+    }
 }
 impl<T> OnKeyPressed for NumericSelector<T>
 where
@@ -97,5 +102,13 @@ where
 {
     fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
         EventProcessStatus::Ignored
+    }
+}
+impl<T> OnResize for NumericSelector<T>
+where
+    T: Numeric + 'static,
+{
+    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+        self.buttons.update_width(new_size.width as u16);
     }
 }

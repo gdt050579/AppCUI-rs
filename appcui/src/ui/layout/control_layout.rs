@@ -29,8 +29,8 @@ impl ControlLayout {
             mode: LayoutMode::new(format),
             x: 0,
             y: 0,
-            width: 1,
-            height: 1,
+            width: 0,
+            height: 0,
             min_width: 1,
             min_height: 1,
             max_width: u16::MAX,
@@ -55,7 +55,7 @@ impl ControlLayout {
             self.min_height = min_height;
             self.max_width = max_width;
             self.max_height = max_height;
-            self.resize(self.width, self.height);
+            //self.resize(self.width, self.height);
         }
     }
 

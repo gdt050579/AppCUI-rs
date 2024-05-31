@@ -25,7 +25,7 @@ pub mod components;
 pub mod selector;
 pub mod combobox;
 pub mod dropdownlist;
-pub mod numeric_selector;
+pub mod numericselector;
 
 // re-export
 pub use common::ControlBase;
@@ -51,4 +51,4 @@ pub use combobox::ComboBox;
 pub use dropdownlist::DropDownList;
 pub use command_bar::CommandBar;
 pub use layout::Layout;
-pub use numeric_selector::NumericSelector;
+pub use numericselector::NumericSelector;
