@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 
 use crate::{
-    input::{Key, KeyCode, KeyModifier},
-    terminals::{system_event::KeyModifierChangedEvent, KeyPressedEvent, SystemEvent},
+    input::KeyModifier,
+    terminals::{system_event::KeyModifierChangedEvent, SystemEvent},
 };
 
 use super::command_parser::{CommandParser, ParserError};
@@ -26,12 +26,12 @@ impl KeyModifierCommand {
             return Err(ParserError::new(
                 "First parameter for KeyModifier is a not a valid combination (it must be a combination between `'Ctrl'`, `'Alt'`, `'Shift'` separated by `+` or `'None'`)",
             ));
-        }        
+        }
     }
     pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>, old_state: KeyModifier) {
         sys_events.push_back(SystemEvent::KeyModifierChanged(KeyModifierChangedEvent {
             new_state: self.modifier,
-            old_state
+            old_state,
         }));
     }
 }
