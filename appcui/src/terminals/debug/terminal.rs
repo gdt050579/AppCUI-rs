@@ -10,6 +10,7 @@ use crate::graphics::Size;
 use crate::system::Error;
 use crate::system::PaintMethods;
 use crate::system::RuntimeManager;
+use crate::input::KeyModifier;
 
 pub(crate) struct DebugTerminal {
     size: Size,
@@ -22,6 +23,7 @@ pub(crate) struct DebugTerminal {
     hash_to_test: Option<u64>,
     cursor_point_to_check: Option<Point>,
     mouse_pos: Point,
+    keymodifier_state: KeyModifier,
     errors_disabled: bool,
     clipboard_text: String,
 }
@@ -62,6 +64,7 @@ impl DebugTerminal {
             hash_to_test: None,
             cursor_point_to_check: None,
             mouse_pos: Point::new(0, 0),
+            keymodifier_state: KeyModifier::None,
             clipboard_text: String::new(),
         })
     }
@@ -370,13 +373,16 @@ impl Terminal for DebugTerminal {
                     self.mouse_pos.x = evnt.x;
                     self.mouse_pos.y = evnt.y;
                 }
+                SystemEvent::KeyModifierChanged(evnt) => {
+                    self.keymodifier_state = evnt.new_state;
+                }
                 _ => {}
             }
             return event;
         }
         // if no events are in the event queue --> check if a command is present
         if let Some(cmd) = self.commands.pop_front() {
-            cmd.generate_event(self.mouse_pos, &mut self.sys_events);
+            cmd.generate_event(self.mouse_pos, self.keymodifier_state, &mut self.sys_events);
             // check for paint command
             if !self.ignore_paint_command {
                 if let Some(title) = cmd.get_paint_command_title() {
@@ -397,6 +403,7 @@ impl Terminal for DebugTerminal {
                 | Command::Paint(_)
                 | Command::Resize(_)
                 | Command::KeyPresed(_)
+                | Command::KeyModifier(_)
                 | Command::KeyTypeText(_) => {
                     return SystemEvent::None;
                 }
