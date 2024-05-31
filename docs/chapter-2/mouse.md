@@ -116,7 +116,7 @@ impl OnMouseEvent for <MyControl> {
                 if data.modifier.contains(KeyModifier::Ctrl) {
                     // the mouse button was pressed while the Ctrl key was also pressed
                 } else {
-
+                    // the mouse button was pressed without the Ctrl key being pressed 
                 }
             },
             _ => {
