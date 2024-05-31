@@ -55,7 +55,6 @@ impl ControlLayout {
             self.min_height = min_height;
             self.max_width = max_width;
             self.max_height = max_height;
-            //self.resize(self.width, self.height);
         }
     }
 
