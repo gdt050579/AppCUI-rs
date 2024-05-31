@@ -23,9 +23,9 @@ impl KeyModifierCommand {
         if let Some(modifier) = k {
             Ok(Self { modifier })
         } else {
-            return Err(ParserError::new(
+            Err(ParserError::new(
                 "First parameter for KeyModifier is a not a valid combination (it must be a combination between `'Ctrl'`, `'Alt'`, `'Shift'` separated by `+` or `'None'`)",
-            ));
+            ))
         }
     }
     pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>, old_state: KeyModifier) {

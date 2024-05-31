@@ -109,9 +109,7 @@ The `MouseEventData` structure contains a `modifier` field that indicates the ke
 ```rs
 impl OnMouseEvent for <MyControl> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        // check the key
         match event {
-
             MouseEvent::Drag(data) => {
                 if data.modifier.contains(KeyModifier::Ctrl) {
                     // the mouse button was pressed while the Ctrl key was also pressed
