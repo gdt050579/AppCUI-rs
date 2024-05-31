@@ -62,6 +62,7 @@ pub(crate) struct RuntimeManager {
     recompute_layout: bool,
     repaint: bool,
     mouse_pos: Point,
+    key_modifier: KeyModifier,
     desktop_os_start_called: bool,
     recompute_parent_indexes: bool,
     request_update_command_and_menu_bars: bool,
@@ -103,6 +104,7 @@ impl RuntimeManager {
             recompute_parent_indexes: true,
             single_window: builder.single_window,
             mouse_pos: Point::new(-1, -1),
+            key_modifier: KeyModifier::None,
             request_focus: None,
             current_focus: None,
             mouse_over_control: Handle::None,
@@ -1080,6 +1082,7 @@ impl PaintMethods for RuntimeManager {
 }
 impl KeyboardMethods for RuntimeManager {
     fn process_key_modifier_changed_event(&mut self, new_state: KeyModifier) {
+        self.key_modifier = new_state;
         if let Some(commandbar) = self.commandbar.as_mut() {
             commandbar.set_key_modifier(new_state);
             self.repaint = true;
@@ -1389,6 +1392,7 @@ impl MouseMethods for RuntimeManager {
                 x: event.x - scr_x,
                 y: event.y - scr_y,
                 button: event.button,
+                modifier: self.key_modifier,
             }));
             let do_update = response == EventProcessStatus::Processed;
             self.repaint |= do_update;
@@ -1495,6 +1499,7 @@ impl MouseMethods for RuntimeManager {
                     x: event.x - scr_x,
                     y: event.y - scr_y,
                     button: event.button,
+                    modifier: self.key_modifier,
                 }));
                 //if response == EventProcessStatus::Processed {
                 self.mouse_locked_object = MouseLockedObject::Control(handle);
@@ -1527,6 +1532,7 @@ impl MouseMethods for RuntimeManager {
                         x: event.x - scr_x,
                         y: event.y - scr_y,
                         button: event.button,
+                        modifier: self.key_modifier,
                     }));
                     self.repaint = true;
                 }
@@ -1568,6 +1574,7 @@ impl MouseMethods for RuntimeManager {
                     x: event.x - scr_x,
                     y: event.y - scr_y,
                     button: event.button,
+                    modifier: self.key_modifier,
                 }));
                 if response == EventProcessStatus::Processed {
                     self.mouse_locked_object = MouseLockedObject::None;

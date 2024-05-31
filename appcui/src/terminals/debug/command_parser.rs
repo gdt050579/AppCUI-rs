@@ -107,6 +107,24 @@ impl<'a> CommandParser<'a> {
             _ => None,
         }
     }
+    pub(super) fn get_keymodifier(&self, index: usize) -> Option<KeyModifier> {
+        if index >= self.count {
+            return None;
+        }
+        let mut k = KeyModifier::None;
+        for part in self.params[index].split('+') {
+            match part {
+                "Ctrl" => k |= KeyModifier::Ctrl,
+                "Alt" => k |= KeyModifier::Alt,
+                "Shift" => k |= KeyModifier::Shift,
+                "None" => k = KeyModifier::None,
+                _ => { return None; }
+            }
+
+        }   
+        Some(k)   
+    }
+
     pub(super) fn get_key(&self, index: usize) -> Option<Key> {
         if index >= self.count {
             return None;

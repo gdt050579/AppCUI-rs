@@ -21,22 +21,23 @@ cargo test -- --test-threads=1
 
 Mouse related commands are a set of commands that simulate various mouse events
 
-| Command                          | Purpose |
-|----------------------------------|---------|
-|`Mouse.Hold(x,y,button)`          |simulates an event where the mouse button is being pressed while the mouse is located at a specific position on screen. The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center`|
-|`Mouse.Release(x,y)`              |simulates the release of all mouse buttons while the mouse is located at a specific screen position.|
-|`Mouse.Click(x,y,button)`         |simulates a click (hold and release). It is equivalent to<br> - Mouse.Hold(x,y,button)<br> - Mouse.Release(x,y) |
-|`Mouse.DoubleClick(x,y,button)`   |simulates a double-click (for a specific button) |
-|`Mouse.Move(x,y)`                 |simulates the movement of a mouse to coordonates (x,y). No mouse button are being pressed.|
-|`Mouse.Drag(x1,y1,x2,y2)`         |simulates the movement of a mouse from (x1,y1) to (x2,y2) while the `left` button is being pressed |
-|`Mouse.Wheel(x,y,direction,times)`|simulates the wheel mouse being rotated into a direction (one of `up`, `bottom`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0. |
+| Command                            | Purpose                                                                                                                                                                                                                                      |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Mouse.Hold(x,y,button)`           | simulates an event where the mouse button is being pressed while the mouse is located at a specific position on screen. The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center` |
+| `Mouse.Release(x,y)`               | simulates the release of all mouse buttons while the mouse is located at a specific screen position.                                                                                                                                         |
+| `Mouse.Click(x,y,button)`          | simulates a click (hold and release). It is equivalent to<br> - Mouse.Hold(x,y,button)<br> - Mouse.Release(x,y)                                                                                                                              |
+| `Mouse.DoubleClick(x,y,button)`    | simulates a double-click (for a specific button)                                                                                                                                                                                             |
+| `Mouse.Move(x,y)`                  | simulates the movement of a mouse to coordonates (x,y). No mouse button are being pressed.                                                                                                                                                   |
+| `Mouse.Drag(x1,y1,x2,y2)`          | simulates the movement of a mouse from (x1,y1) to (x2,y2) while the `left` button is being pressed                                                                                                                                           |
+| `Mouse.Wheel(x,y,direction,times)` | simulates the wheel mouse being rotated into a direction (one of `up`, `bottom`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0.                                                                        |
      
 ## Keyboard related commands
 
-| Command                   | Purpose |
-|---------------------------|---------|
-|`Key.Pressed(key,times)`   | where `key` parameter can be a key name or any combination of control key and a regular key such as<br>- `Z` (for pressin the `Z` key)<br>- `Enter` (for pressing the `Enter` key)<br>-`Alt+T` (`Alt` + `T` combination)<br>-`Ctrl+Alt+F1` (`Ctrl`+`Alt`+`F1` keys). The `times` parameter can be omited. If present it has to be bigger than 1|
-|`Key.TypeText(text)`       | where `text` parameter is a text that is being typed.<br>Example: `Key.TypeText('Hello world')` will trigger the following keys to be pressed: `H`, `e`, `l`, `l`, `o`, `Space`, `w`, `o`, `r`, `l` and `d`                                                                                              |
+| Command                  | Purpose                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Key.Pressed(key,times)` | where `key` parameter can be a key name or any combination of control key and a regular key such as<br>- `Z` (for pressin the `Z` key)<br>- `Enter` (for pressing the `Enter` key)<br>-`Alt+T` (`Alt` + `T` combination)<br>-`Ctrl+Alt+F1` (`Ctrl`+`Alt`+`F1` keys). The `times` parameter can be omited. If present it has to be bigger than 1 |
+| `Key.TypeText(text)`     | where `text` parameter is a text that is being typed.<br>Example: `Key.TypeText('Hello world')` will trigger the following keys to be pressed: `H`, `e`, `l`, `l`, `o`, `Space`, `w`, `o`, `r`, `l` and `d`                                                                                                                                     |
+| `Key.Modifier(modifier)` | Simulates the pressing of a modifier key (such as `Shift`, `Ctrl` or `Alt`). The `modifier` parameter can be a combination between `Alt`, `Ctrl`, `Shift` separate by `+` or `None` if no modifier is changed. <br>For example: `Key.Modifier(Alt+Ctrl)` will simulate the pressing of `Alt` and `Ctrl` keys at the same time.                  |
 
 
 Usually the key parameter can have several forms:
@@ -59,10 +60,10 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
      
 ## Paint related commands
 
-| Command                              | Purpose |
-|--------------------------------------|---------|     
-|`Paint(staet_name)`<br>or<br>`Paint()`| paints the current virtual screen into the current screen using ANSI codes and colors. This command also computes a hash over the current virtual screen and prints it. The `state_name` is a name can be used to reflect the current execution state. This is useful if multipl `Paint` command are being used and you need to differentiate between them.  |
-|`Paint.Enable(value)`                 | enables or disables painting. `value` is a boolean value (**true** or **false**). If set to **false** all subsequent calls to command `Paint` will be ignored. By default, all paints are enabled. |
+| Command                                | Purpose                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Paint(staet_name)`<br>or<br>`Paint()` | paints the current virtual screen into the current screen using ANSI codes and colors. This command also computes a hash over the current virtual screen and prints it. The `state_name` is a name can be used to reflect the current execution state. This is useful if multipl `Paint` command are being used and you need to differentiate between them. |
+| `Paint.Enable(value)`                  | enables or disables painting. `value` is a boolean value (**true** or **false**). If set to **false** all subsequent calls to command `Paint` will be ignored. By default, all paints are enabled.                                                                                                                                                          |
 
 ## System events
 

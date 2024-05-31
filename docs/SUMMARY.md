@@ -21,7 +21,7 @@
     - [Surface]() <!-- (chapter-2/surface.md) -->
         - [Images](chapter-2/images.md)
     - [Input](chapter-2/input.md)
-        - [Mouse]()
+        - [Mouse](chapter-2/mouse.md)
         - [Keyboard](chapter-2/keyboard.md)
     - [Clipboard](chapter-2/clipboard.md)
 

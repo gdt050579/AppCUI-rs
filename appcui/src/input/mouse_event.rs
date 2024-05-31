@@ -1,4 +1,5 @@
 use crate::graphics::Point;
+use super::KeyModifier;
 use super::MouseButton;
 use super::MouseWheelDirection;
 
@@ -6,7 +7,8 @@ use super::MouseWheelDirection;
 pub struct MouseEventData {
     pub x: i32,
     pub y: i32,
-    pub button: MouseButton
+    pub button: MouseButton,
+    pub modifier: KeyModifier
 }
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MouseEvent {

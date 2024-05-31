@@ -1,3 +1,5 @@
+use AppCUIProcMacro::*;
+
 use super::App;
 use super::Theme;
 use super::ToolTip;
@@ -82,7 +84,7 @@ fn check_tooltip_bottom_pos_no_show() {
     //s.print();
     assert_eq!(s.compute_hash(), 0x9F6184450761DB25);
 }
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 struct Command {
     value: u32,
 }
@@ -212,5 +214,76 @@ fn check_multiple_apps_started() {
     let a = App::debug(60, 10, "").build().unwrap();
     a.run();
     let a = App::debug(50, 20, "").build().unwrap();
+    a.run();
+}
+
+#[test]
+fn check_mouse_keymodifier_mouse() {
+    #[CustomControl(overwrite:OnPaint+OnMouseEvent, internal: true)]
+    struct TestControl {
+        txt: String,
+    }
+    impl TestControl {
+        fn new() -> Self {
+            Self {
+                base: ControlBase::new(Layout::new("d:c,w:100%,h:100%"), true),
+                txt: String::new(),
+            }
+        }
+    }
+    impl OnPaint for TestControl {
+        fn on_paint(&self, surface: &mut crate::prelude::Surface, _theme: &Theme) {
+            surface.clear(char!("' ',red,black"));
+            surface.write_string(0, 0, &self.txt, CharAttribute::new(Color::White, Color::Black, CharFlags::None), true);
+        }
+    }
+    impl OnMouseEvent for TestControl {
+        fn on_mouse_event(&mut self, event: &crate::prelude::MouseEvent) -> EventProcessStatus {
+            match event {
+                crate::prelude::MouseEvent::Enter => {}
+                crate::prelude::MouseEvent::Leave => {}
+                crate::prelude::MouseEvent::Over(_) => {}
+                crate::prelude::MouseEvent::Pressed(data) => {
+                    self.txt = format!("Pressed: x:{},y:{}\nbutton:{:?},modif:{:?}", data.x, data.y, data.button, data.modifier);
+                }
+                crate::prelude::MouseEvent::Released(data) => {
+                    self.txt = format!("Pressed: x:{},y:{}\nbutton:{:?},modif:{:?}", data.x, data.y, data.button, data.modifier);
+                }
+                crate::prelude::MouseEvent::DoubleClick(data) => {
+                    self.txt = format!("Pressed: x:{},y:{}\nbutton:{:?},modif:{:?}", data.x, data.y, data.button, data.modifier);
+                }
+                crate::prelude::MouseEvent::Drag(data) => {
+                    self.txt = format!("Pressed: x:{},y:{}\nbutton:{:?},modif:{:?}", data.x, data.y, data.button, data.modifier);
+                }
+                crate::prelude::MouseEvent::Wheel(_) => {}
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('Initial state')   
+        CheckHash(0x614245CC84C42969)   
+        Mouse.Drag(1,1,3,3);
+        Paint('Simple Drag')   
+        CheckHash(0x72F1BAC32695526E)  
+        Key.Modifier(Ctrl) 
+        Mouse.Drag(3,3,5,5);
+        Paint('Simple Drag (with ctrl - value 2)')   
+        CheckHash(0x6595486EEC0578BC)  
+        Key.Modifier(Ctrl+Shift) 
+        Mouse.Drag(5,5,7,7);
+        Paint('Simple Drag (with ctrl+shift - value 6)')   
+        CheckHash(0x81760858B7A9C498)  
+        Key.Modifier(None) 
+        Mouse.Drag(7,7,1,1);
+        Paint('Simple Drag (with no modifier - value 0)')   
+        CheckHash(0x6959C1EA263F8E6E)          
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c");
+    w.add(TestControl::new());
+    a.add_window(w);
     a.run();
 }

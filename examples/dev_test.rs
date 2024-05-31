@@ -1,59 +1,53 @@
-use appcui::prelude::*;
+use appcui::{prelude::*, ui::dropdownlist::DropDownList};
 
-#[Window(events = ComboBoxEvents+CommandBarEvents, commands: Add+Clear)]
-struct MyWin {
-    h: Handle<ComboBox>,
+enum MathOp {
+    Sum,
+    Product,
+    Integral,
+    Radical,
+    Different
 }
-impl MyWin {
-    fn new() -> Self {
-        let mut w = Self {
-            base: window!("x:1,y:1,w:30,h:15,caption:Win"),
-            h: Handle::None,
-        };
-        w.h = w.add(ComboBox::new(Layout::new("x:1,y:1,w:26"), combobox::Flags::None));
-        w
+impl DropDownListType for MathOp {
+    fn name(&self) -> &str {
+        match self {
+            MathOp::Sum => "Sum",
+            MathOp::Product => "Product",
+            MathOp::Integral => "Integral",
+            MathOp::Radical => "Radical",
+            MathOp::Different => "Different"
+        }
     }
-}
-impl ComboBoxEvents for MyWin {
-    fn on_selection_changed(&mut self, handle: Handle<ComboBox>) -> EventProcessStatus {
-        let title = if let Some(cb) = self.control_mut(handle) {
-            if let Some(item) = cb.selected_item() {
-                item.value().to_string()
-            } else {
-                String::from("[None]")
-            }
-        } else {
-            String::from("?")
-        };
-        self.set_title(&title);
-        EventProcessStatus::Processed
+    fn description(&self) -> &str {
+        match self {
+            MathOp::Sum => "(Add multiple numbers)",
+            MathOp::Product => "(Multiply multiple numbers)",
+            MathOp::Integral => "(Calculate the integral of a function)",
+            MathOp::Radical => "(Calculate the radical of a number  )",
+            MathOp::Different => "(Check if all elements from a set are different)"
+        }
     }
-}
-impl CommandBarEvents for MyWin {
-    fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("F1"), "Add", mywin::Commands::Add);
-        commandbar.set(key!("F2"), "Clear", mywin::Commands::Clear);
-    }
-
-    fn on_event(&mut self, command_id: mywin::Commands) {
-        let handle = self.h;
-        if let Some(cb) = self.control_mut(handle) {
-            match command_id {
-                mywin::Commands::Add => {
-                    let s = format!("Option {}", cb.count() + 1);
-                    cb.add(&s);
-                }
-                mywin::Commands::Clear => {
-                    cb.clear();
-                }
-            }
+    fn symbol(&self) -> &str {
+        match self {
+            MathOp::Sum => "∑",
+            MathOp::Product => "∏",
+            MathOp::Integral => "∫",
+            MathOp::Radical => "√",
+            MathOp::Different => "≠"
         }
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().command_bar().build()?;
-    a.add_window(MyWin::new());
+    let mut w = window!("x:1,y:1,w:60,h:20,title:Win");
+    let mut db = DropDownList::<MathOp>::with_symbol(1, Layout::new("x:1,y:1,w:50"), dropdownlist::Flags::ShowDescription);
+    db.add(MathOp::Sum);
+    db.add(MathOp::Product);
+    db.add(MathOp::Integral);
+    db.add(MathOp::Radical);
+    db.add(MathOp::Different);
+    w.add(db);
+    a.add_window(w);
     a.run();
     Ok(())
 }

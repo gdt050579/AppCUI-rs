@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 
 use crate::graphics::Point;
 use crate::terminals::SystemEvent;
+use crate::input::KeyModifier;
 
 use super::{
     check_cursor_command::CheckCursorCommand, 
@@ -23,6 +24,7 @@ use super::{
     paint_command::PaintCommand, 
     paint_enable_command::PaintEnableCommand, 
     resize_command::ResizeCommand,
+    keymodifier_command::KeyModifierCommand,
 };
 
 pub(super) enum Command {
@@ -40,6 +42,7 @@ pub(super) enum Command {
     CheckCursor(CheckCursorCommand),
     Resize(ResizeCommand),
     KeyPresed(KeyPressedCommand),
+    KeyModifier(KeyModifierCommand),
     KeyTypeText(KeyTypeTextCommand),
     ClipboardSetText(ClipboardSetTextCommand),
     ClipboardClear(ClipboardClearCommand),
@@ -113,6 +116,10 @@ impl Command {
                 let variant = KeyTypeTextCommand::new(&cp)?;
                 Ok(Command::KeyTypeText(variant))
             }
+            "Key.Modifier" => {
+                let variant = KeyModifierCommand::new(&cp)?;
+                Ok(Command::KeyModifier(variant))
+            }
             "Clipboard.SetText" => {
                 let variant = ClipboardSetTextCommand::new(&cp)?;
                 Ok(Command::ClipboardSetText(variant))
@@ -128,7 +135,7 @@ impl Command {
             }
         }
     }
-    pub(super) fn generate_event(&self, mouse_pos: Point, sys_events: &mut VecDeque<SystemEvent>) {
+    pub(super) fn generate_event(&self, mouse_pos: Point, key_modifier_state: KeyModifier, sys_events: &mut VecDeque<SystemEvent>) {
         match self {
             Command::MouseHold(cmd) => cmd.generate_event(mouse_pos, sys_events),
             Command::MouseRelease(cmd) => cmd.generate_event(mouse_pos, sys_events),
@@ -140,6 +147,7 @@ impl Command {
             Command::Resize(cmd) => cmd.generate_event(sys_events),
             Command::KeyPresed(cmd) => cmd.generate_event(sys_events),
             Command::KeyTypeText(cmd) => cmd.generate_event(sys_events),
+            Command::KeyModifier(cmd) => cmd.generate_event(sys_events, key_modifier_state),
             Command::Paint(_) => {}
             Command::PaintEnable(_) => {}
             Command::ErrorDisable(_) => {}
