@@ -261,14 +261,25 @@ fn check_mouse_keymodifier_mouse() {
         }
     }
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
+        //Error.Disable(true)
         Paint('Initial state')   
         CheckHash(0x614245CC84C42969)   
         Mouse.Drag(1,1,3,3);
         Paint('Simple Drag')   
-        CheckHash(0x72F1BAC32695526E)   
-        
+        CheckHash(0x72F1BAC32695526E)  
+        Key.Modifier(Ctrl) 
+        Mouse.Drag(3,3,5,5);
+        Paint('Simple Drag (with ctrl - value 2)')   
+        CheckHash(0x6595486EEC0578BC)  
+        Key.Modifier(Ctrl+Shift) 
+        Mouse.Drag(5,5,7,7);
+        Paint('Simple Drag (with ctrl+shift - value 6)')   
+        CheckHash(0x81760858B7A9C498)  
+        Key.Modifier(None) 
+        Mouse.Drag(7,7,1,1);
+        Paint('Simple Drag (with no modifier - value 0)')   
+        CheckHash(0x6959C1EA263F8E6E)          
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c");
