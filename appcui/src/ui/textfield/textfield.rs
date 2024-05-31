@@ -63,7 +63,7 @@ impl TextField {
             return;
         }
         let sz = self.size();
-        let visible_glyphs = ((sz.width as usize) - 2) * (sz.height as usize);
+        let visible_glyphs = (if sz.width>2 { ((sz.width as usize) - 2) * (sz.height as usize) } else { 0 }).max(1);
 
         if self.cursor.pos < self.cursor.start {
             // scroll to the left
