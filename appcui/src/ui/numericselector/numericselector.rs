@@ -6,6 +6,7 @@ use super::Buttons;
 use super::Flags;
 use crate::prelude::*;
 use std::fmt::Write;
+use std::str::FromStr;
 
 pub trait Numeric: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display {}
 
@@ -24,10 +25,10 @@ impl Numeric for isize {}
 impl Numeric for f32 {}
 impl Numeric for f64 {}
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct NumericSelector<T>
 where
-    T: Numeric + 'static,
+    T: Numeric + FromStr + 'static,
 {
     value: T,
     min: T,
@@ -37,10 +38,11 @@ where
     buttons: Buttons,
     txt: String,
     txtlen: u8,
+    edit_mode: bool,
 }
 impl<T> NumericSelector<T>
 where
-    T: Numeric + 'static,
+    T: Numeric + FromStr + 'static,
 {
     fn to_interval(value: T, min: T, max: T) -> T {
         if value < min {
@@ -65,6 +67,7 @@ where
             txt: String::with_capacity(16),
             txtlen: 0,
             buttons: Buttons::new(),
+            edit_mode: false,
         };
         obj.buttons.update_width(obj.size().width as u16);
         if flags.contains(Flags::HideButtons) {
@@ -122,6 +125,19 @@ where
             self.emit_on_selection_changed_event();
         }
     }
+    fn enter_edit_mode(&mut self) {
+        self.edit_mode = true;
+    }
+    fn exit_edit_mode(&mut self, accept: bool) {
+        if self.edit_mode {
+            if accept {
+                if let Ok(new_value) = self.txt.parse::<T>() {
+                    self.set_value(new_value);
+                }
+            }
+            self.edit_mode = false;
+        }
+    }
 
     fn emit_on_selection_changed_event(&mut self) {
         // self.raise_event(ControlEvent {
@@ -135,10 +151,10 @@ where
 }
 impl<T> OnPaint for NumericSelector<T>
 where
-    T: Numeric + 'static,
+    T: Numeric + FromStr + 'static,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let has_buttons = !self.flags.contains(Flags::HideButtons);
+        let has_buttons = (!self.flags.contains(Flags::HideButtons)) && (!self.edit_mode);
         if has_buttons {
             self.buttons.paint(surface, theme, self.is_enabled());
         }
@@ -152,48 +168,102 @@ where
         let (l, r) = if has_buttons { (4, w - 6) } else { (0, w - 1) };
         surface.fill_horizontal_line(l, 0, r, Character::with_attributes(' ', attr));
         if l + 2 <= r {
-            let mut format = TextFormat::new((l + r) / 2, 0, attr, TextAlignament::Center, false);
-            format.chars_count = Some(self.txtlen as u16);
-            format.width = Some((r - (l + 1)) as u16);
-            surface.write_text(&self.txt, &format);
+            if self.edit_mode {
+                let chars_count = self.txt.len() as i32; // all are ascii
+                let vis_chars = r - (l + 1);
+                let mut format = TextFormat::new(l + 1, 0, attr, TextAlignament::Left, false);
+                if chars_count <= vis_chars {
+                    format.chars_count = Some(chars_count as u16);
+                    format.width = Some(vis_chars as u16);
+                    surface.write_text(&self.txt, &format);
+                    surface.set_cursor(l + chars_count + 1, 0);
+                } else {
+                    let start = chars_count - vis_chars;
+                    format.chars_count = Some(vis_chars as u16);
+                    format.width = Some(vis_chars as u16);
+                    surface.write_text(&self.txt[start as usize..], &format);
+                    surface.set_cursor(r, 0);
+                }
+            } else {
+                let mut format = TextFormat::new((l + r) / 2, 0, attr, TextAlignament::Center, false);
+                format.chars_count = Some(self.txtlen as u16);
+                format.width = Some((r - (l + 1)) as u16);
+                surface.write_text(&self.txt, &format);
+            }
         }
     }
 }
 impl<T> OnKeyPressed for NumericSelector<T>
 where
-    T: Numeric + 'static,
+    T: Numeric + FromStr + 'static,
 {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         match key.value() {
             key!("Up") | key!("Right") => {
+                self.exit_edit_mode(false);
                 self.increment();
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Left") => {
+                self.exit_edit_mode(false);
                 self.decrement();
                 return EventProcessStatus::Processed;
             }
             key!("Home") => {
+                self.exit_edit_mode(false);
                 self.set_value(self.min);
                 return EventProcessStatus::Processed;
             }
             key!("End") => {
+                self.exit_edit_mode(false);
                 self.set_value(self.max);
                 return EventProcessStatus::Processed;
             }
+            key!("Escape") => {
+                if self.edit_mode {
+                    self.exit_edit_mode(false);
+                    return EventProcessStatus::Processed;
+                }
+                return EventProcessStatus::Ignored;
+            }
+            key!("Enter") => {
+                if self.edit_mode {
+                    self.exit_edit_mode(true);
+                } else {
+                    self.enter_edit_mode();
+                }
+                return EventProcessStatus::Processed;
+            }
+            key!("Backspace") => {
+                self.enter_edit_mode();
+                if self.txtlen > 0 {
+                    self.txt.pop();
+                    self.txtlen -= 1;
+                }
+                return EventProcessStatus::Processed;
+            }
             _ => {}
+        }
+        if (character as u32) != 0 {
+            let add_char = matches!(character, '0'..='9' | 'a'..='f' | 'A'..='F' | 'x' | 'X' | 'h' | 'H' | 'o' | 'O' | '.' | '_');
+            if add_char {
+                self.enter_edit_mode();
+                self.txt.push(character);
+                self.txtlen += 1;
+                return EventProcessStatus::Processed;
+            }
         }
         EventProcessStatus::Ignored
     }
 }
 impl<T> OnMouseEvent for NumericSelector<T>
 where
-    T: Numeric + 'static,
+    T: Numeric + FromStr + 'static,
 {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         let mut response = EventProcessStatus::Ignored;
         // process buttons if visible
-        if !self.flags.contains(Flags::HideButtons) {
+        if (!self.flags.contains(Flags::HideButtons)) && (!self.edit_mode) {
             let bres = self.buttons.on_mouse_event(event);
 
             if bres.repaint {
@@ -217,9 +287,21 @@ where
 }
 impl<T> OnResize for NumericSelector<T>
 where
-    T: Numeric + 'static,
+    T: Numeric + FromStr + 'static,
 {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.buttons.update_width(new_size.width as u16);
+    }
+}
+impl<T> OnFocus for NumericSelector<T>
+where
+    T: Numeric + FromStr + 'static,
+{
+    fn on_focus(&mut self) {
+        self.edit_mode = false;
+    }
+
+    fn on_lose_focus(&mut self) {
+        self.edit_mode = false;
     }
 }
