@@ -1,29 +1,14 @@
-use std::fmt::Display;
-use std::ops::{Add, Sub};
+
 
 use super::events::EventData;
 use super::Buttons;
 use super::Flags;
+use super::Numeric;
 use crate::prelude::*;
 use std::fmt::Write;
 use std::str::FromStr;
 
-pub trait Numeric: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display {}
 
-impl Numeric for i8 {}
-impl Numeric for i16 {}
-impl Numeric for i32 {}
-impl Numeric for i64 {}
-impl Numeric for i128 {}
-impl Numeric for u8 {}
-impl Numeric for u16 {}
-impl Numeric for u32 {}
-impl Numeric for u64 {}
-impl Numeric for u128 {}
-impl Numeric for usize {}
-impl Numeric for isize {}
-impl Numeric for f32 {}
-impl Numeric for f64 {}
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct NumericSelector<T>
