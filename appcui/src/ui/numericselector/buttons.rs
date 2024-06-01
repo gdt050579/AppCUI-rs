@@ -1,5 +1,5 @@
 use crate::graphics::*;
-use crate::prelude::{EventProcessStatus, MouseEvent};
+use crate::prelude::MouseEvent;
 use crate::system::*;
 
 #[repr(u8)]
@@ -38,18 +38,6 @@ impl ButtonState {
                 *self = new_state;
                 return true;
             }
-        }
-        false
-    }
-    #[inline(always)]
-    fn update_state(&mut self, check: bool, expected_value: ButtonState) -> bool {
-        if (check) && (*self != expected_value) {
-            *self = expected_value;
-            return true;
-        }
-        if (!check) && (*self == expected_value) {
-            *self = ButtonState::Normal;
-            return true;
         }
         false
     }

@@ -1,11 +1,13 @@
+use std::fmt::Display;
 use std::ops::{Add, Sub};
 
 use super::events::EventData;
 use super::Buttons;
 use super::Flags;
 use crate::prelude::*;
+use std::fmt::Write;
 
-pub trait Numeric: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq {}
+pub trait Numeric: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display {}
 
 impl Numeric for i8 {}
 impl Numeric for i16 {}
@@ -33,6 +35,8 @@ where
     step: T,
     flags: Flags,
     buttons: Buttons,
+    txt: String,
+    txtlen: u8,
 }
 impl<T> NumericSelector<T>
 where
@@ -47,7 +51,7 @@ where
             value
         }
     }
-    pub fn new(value: T, min: T, max: T, step:T, layout: Layout, flags: Flags) -> Self {
+    pub fn new(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags) -> Self {
         let v_min = if min < max { min } else { max };
         let v_max = if max > min { max } else { min };
         let v = Self::to_interval(value, v_min, v_max);
@@ -58,10 +62,14 @@ where
             step,
             value: v,
             flags,
+            txt: String::with_capacity(16),
+            txtlen: 0,
             buttons: Buttons::new(),
         };
         obj.buttons.update_width(obj.size().width as u16);
-        obj.set_size_bounds(11, 1, u16::MAX, 1);
+        obj.set_size_bounds(12, 1, u16::MAX, 1);
+        obj.update_string_representation();
+        obj.update_button_status();
         obj
     }
     #[inline(always)]
@@ -71,14 +79,20 @@ where
     pub fn set_value(&mut self, value: T) {
         self.value = Self::to_interval(value, self.min, self.max);
         self.update_button_status();
+        self.update_string_representation()
     }
     #[inline(always)]
     fn update_button_status(&mut self) {
         self.buttons.disable_buttons(self.value == self.min, self.value == self.max);
     }
+    fn update_string_representation(&mut self) {
+        self.txt.clear();
+        write!(self.txt, "{}", self.value).unwrap();
+        self.txtlen = self.txt.len() as u8;
+    }
     fn increment(&mut self) {
         let mut new_value = self.value + self.step;
-        if new_value<self.value {
+        if new_value < self.value {
             // overflow
             new_value = self.max;
         }
@@ -86,19 +100,21 @@ where
         if new_value != self.value {
             self.value = new_value;
             self.update_button_status();
+            self.update_string_representation();
             self.emit_on_selection_changed_event();
         }
     }
     fn decrement(&mut self) {
         let mut new_value = self.value - self.step;
-        if new_value>self.value {
+        if new_value > self.value {
             // underflow
             new_value = self.min;
         }
         new_value = Self::to_interval(new_value, self.min, self.max);
         if new_value != self.value {
             self.value = new_value;
-            self.update_button_status();    
+            self.update_button_status();
+            self.update_string_representation();
             self.emit_on_selection_changed_event();
         }
     }
@@ -119,6 +135,22 @@ where
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         self.buttons.paint(surface, theme, self.is_enabled());
+        let attr = match () {
+            _ if !self.is_enabled() => theme.editor.inactive,
+            _ if self.has_focus() => theme.editor.focused,
+            _ if self.is_mouse_over() => theme.editor.hovered,
+            _ => theme.editor.normal,
+        };
+        let w = self.size().width as i32;
+        let l = 4;
+        let r = w - 6;
+        surface.fill_horizontal_line(l, 0, r, Character::with_attributes(' ', attr));
+        if l + 2 <= r {
+            let mut format = TextFormat::new((l + r) / 2, 0, attr, TextAlignament::Center, false);
+            format.chars_count = Some(self.txtlen as u16);
+            format.width = Some((r - (l + 1)) as u16);
+            surface.write_text(&self.txt, &format);
+        }
     }
 }
 impl<T> OnKeyPressed for NumericSelector<T>
