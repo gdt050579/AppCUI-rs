@@ -161,7 +161,7 @@ impl FormatNumber {
                 break;
             }
         }
-        if self.representation_digits > 0 {
+        if self.representation_digits as usize > index {
             let mut fill = self.representation_digits as usize - index;
             while fill > 0 {
                 buffer[index] = 48;
@@ -185,7 +185,31 @@ impl FormatNumber {
                 break;
             }
         }
-        if self.representation_digits > 0 {
+        if self.representation_digits as usize > index {
+            let mut fill = self.representation_digits as usize - index;
+            while fill > 0 {
+                buffer[index] = 48;
+                index += 1;
+                fill -= 1;
+            }
+        }
+        self.add_buffer_to_string(&buffer[0..index], prefix, writer);
+    }
+    #[inline(always)]
+    fn write_unsigned_bin(&self, value: u128, prefix: &'static str, writer: &mut String) {
+        let mut buffer = [0u8; 132];
+        let mut index = 0;
+        let mut value = value;
+        loop {
+            let digit = (value % 2) as u8;
+            value /= 2;
+            buffer[index] = digit + 48;
+            index += 1;
+            if value == 0 {
+                break;
+            }
+        }
+        if self.representation_digits as usize > index {
             let mut fill = self.representation_digits as usize - index;
             while fill > 0 {
                 buffer[index] = 48;
@@ -197,6 +221,7 @@ impl FormatNumber {
     }
     pub(crate) fn write_unsigned(&self, value: u128, writer: &mut String) {
         match self.base {
+            2 => self.write_unsigned_bin(value, "0b", writer),
             10 => self.write_unsigned_dec(value, "", writer),
             16 => self.write_unsigned_hex(value, "0x", writer),
             _ => {}
@@ -205,12 +230,14 @@ impl FormatNumber {
     pub(crate) fn write_signed(&self, value: i128, writer: &mut String) {
         if value >= 0 {
             match self.base {
+                2 => self.write_unsigned_bin(value as u128, "0b", writer),
                 10 => self.write_unsigned_dec(value as u128, "", writer),
                 16 => self.write_unsigned_hex(value as u128, "0x", writer),
                 _ => {}
             }
         } else {
             match self.base {
+                2 => self.write_unsigned_bin((-value) as u128, "-0b", writer),
                 10 => self.write_unsigned_dec((-value) as u128, "-", writer),
                 16 => self.write_unsigned_hex((-value) as u128, "-0x", writer),
                 _ => {}

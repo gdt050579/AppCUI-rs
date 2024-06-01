@@ -400,3 +400,23 @@ fn check_format_number_hex() {
         assert_eq!(s, *expect);
     }
 }
+
+#[test]
+fn check_format_number_bin() {
+    let mut s = String::new();
+    const F1: FormatNumber = FormatNumber::new(2).representation_digits(8);
+    let data: &[(u64, &'static str)] = &[
+        (0b10, "0b00000010"),
+        (0b1010, "0b00001010"),
+        (0b101010, "0b00101010"),
+        (0b10101010, "0b10101010"),
+        (0b1010101010101010, "0b1010101010101010"),
+        (0b10101010101010101010101010101010, "0b10101010101010101010101010101010"),
+        (0b1010101010101010101010101010101010101010101010101010101010101010, "0b1010101010101010101010101010101010101010101010101010101010101010")
+    ];
+    for (value, expect) in data.iter() {
+        s.clear();
+        F1.write_unsigned(*value as u128, &mut s);
+        assert_eq!(s, *expect);
+    }
+}
