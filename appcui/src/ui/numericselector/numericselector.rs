@@ -90,7 +90,11 @@ where
     }
     #[inline(always)]
     fn update_button_status(&mut self) {
-        self.buttons.disable_buttons(self.value == self.min, self.value == self.max);
+        if self.flags.contains(Flags::ReadOnly) {
+            self.buttons.disable_buttons(true, true);
+        } else {
+            self.buttons.disable_buttons(self.value == self.min, self.value == self.max);
+        }
     }
     fn update_string_representation(&mut self) {
         self.txt.clear();
@@ -98,6 +102,9 @@ where
         self.txtlen = self.txt.len() as u8;
     }
     fn increment(&mut self) {
+        if self.flags.contains(Flags::ReadOnly) {
+            return;
+        }
         let mut new_value = self.value + self.step;
         if new_value < self.value {
             // overflow
@@ -112,6 +119,9 @@ where
         }
     }
     fn decrement(&mut self) {
+        if self.flags.contains(Flags::ReadOnly) {
+            return;
+        }
         let mut new_value = self.value - self.step;
         if new_value > self.value {
             // underflow
@@ -126,6 +136,9 @@ where
         }
     }
     fn enter_edit_mode(&mut self) {
+        if self.flags.contains(Flags::ReadOnly) {
+            return;
+        }
         self.edit_mode = true;
     }
     fn exit_edit_mode(&mut self, accept: bool) {
@@ -198,25 +211,34 @@ where
     T: Numeric + FromStr + 'static,
 {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        let readonly = self.flags.contains(Flags::ReadOnly);
         match key.value() {
             key!("Up") | key!("Right") => {
                 self.exit_edit_mode(false);
-                self.increment();
+                if !readonly {
+                    self.increment();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Left") => {
                 self.exit_edit_mode(false);
-                self.decrement();
+                if !readonly {
+                    self.decrement();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Home") => {
                 self.exit_edit_mode(false);
-                self.set_value(self.min);
+                if !readonly {
+                    self.set_value(self.min);
+                }
                 return EventProcessStatus::Processed;
             }
             key!("End") => {
                 self.exit_edit_mode(false);
-                self.set_value(self.max);
+                if !readonly {
+                    self.set_value(self.max);
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Escape") => {
@@ -236,7 +258,7 @@ where
             }
             key!("Backspace") => {
                 self.enter_edit_mode();
-                if self.txtlen > 0 {
+                if (self.txtlen > 0) && (!readonly) {
                     self.txt.pop();
                     self.txtlen -= 1;
                 }
@@ -246,7 +268,7 @@ where
         }
         if (character as u32) != 0 {
             let add_char = matches!(character, '0'..='9' | 'a'..='f' | 'A'..='F' | 'x' | 'X' | 'h' | 'H' | 'o' | 'O' | '.' | '_');
-            if add_char {
+            if add_char && (!readonly) {
                 self.enter_edit_mode();
                 self.txt.push(character);
                 self.txtlen += 1;
@@ -263,7 +285,7 @@ where
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         let mut response = EventProcessStatus::Ignored;
         // process buttons if visible
-        if (!self.flags.contains(Flags::HideButtons)) && (!self.edit_mode) {
+        if (!self.flags.contains_one(Flags::HideButtons | Flags::ReadOnly)) && (!self.edit_mode) {
             let bres = self.buttons.on_mouse_event(event);
 
             if bres.repaint {
