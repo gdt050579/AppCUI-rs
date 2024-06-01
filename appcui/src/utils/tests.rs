@@ -344,3 +344,59 @@ fn check_format_number_decimal_signed() {
     }
 }
 
+#[test]
+fn check_format_number_hex_unsigned() {
+    let mut s = String::new();
+    const F1: FormatNumber = FormatNumber::new(16);
+    F1.write_unsigned(0x123, &mut s);
+    assert_eq!(s, "0x123");
+    const F2: FormatNumber = FormatNumber::new(16).group(4, b'_');
+    let data: &[(u64, &'static str)] = &[
+        (0x1234, "0x1234"),
+        (0x123456, "0x12_3456"),
+        (0x123, "0x123"),
+        (0, "0x0"),
+        (9, "0x9"),
+        (10, "0xA"),
+        (0xFFFFFFFF, "0xFFFF_FFFF")
+    ];
+    for (value, expect) in data.iter() {
+        s.clear();
+        F2.write_unsigned(*value as u128, &mut s);
+        assert_eq!(s, *expect);
+    }
+    const F3: FormatNumber = FormatNumber::new(16).fill(10, b'#');
+    let data: &[(u64, &'static str)] = &[
+        (0x1234, "####0x1234"),
+        (0x123456, "##0x123456"),
+        (0, "#######0x0"),
+        (9, "#######0x9"),
+        (10, "#######0xA"),
+        (0x1234567890,"0x1234567890")
+    ];
+    for (value, expect) in data.iter() {
+        s.clear();
+        F3.write_unsigned(*value as u128, &mut s);
+        assert_eq!(s, *expect);
+    }
+}
+
+#[test]
+fn check_format_number_hex() {
+    let mut s = String::new();
+    const F1: FormatNumber = FormatNumber::new(16).representation_digits(8);
+    let data: &[(u64, &'static str)] = &[
+        (0x1234, "0x00001234"),
+        (0x123456, "0x00123456"),
+        (0x123, "0x00000123"),
+        (0, "0x00000000"),
+        (9, "0x00000009"),
+        (10, "0x0000000A"),
+        (0xFFFFFFFF, "0xFFFFFFFF")
+    ];
+    for (value, expect) in data.iter() {
+        s.clear();
+        F1.write_unsigned(*value as u128, &mut s);
+        assert_eq!(s, *expect);
+    }
+}

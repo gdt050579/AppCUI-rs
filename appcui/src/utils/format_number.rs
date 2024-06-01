@@ -4,6 +4,7 @@ pub(crate) struct FormatNumber {
     separator_char: u8,
     width: u8,
     fill_char: u8,
+    representation_digits: u8,
     number_of_decimals: u8,
 }
 
@@ -21,6 +22,7 @@ impl FormatNumber {
             width: 0,
             fill_char: 0,
             number_of_decimals: 0,
+            representation_digits: 0,
         }
     }
     pub(crate) const fn group(mut self, size: u8, separator: u8) -> Self {
@@ -56,6 +58,33 @@ impl FormatNumber {
         }
         self.width = size;
         self.fill_char = fill_char;
+        self
+    }
+    pub(crate) const fn representation_digits(mut self, value: u8) -> Self {
+        match self.base {
+            2 => {
+                if value>128 {
+                    panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 128 for base 2)");
+                }
+            },
+            8 => {
+                if value>43 {
+                    panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 43 for base 8)");
+                }
+            },
+            10 => {
+                if value>39 {
+                    panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 39 for base 10)");
+                }
+            },
+            16 => {
+                if value>32 {
+                    panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 32 for base 16)");
+                }
+            },
+            _ => { }
+        }
+        self.representation_digits = value;
         self
     }
     pub(crate) const fn decimals(mut self, value: u8) -> Self {
@@ -132,11 +161,44 @@ impl FormatNumber {
                 break;
             }
         }
+        if self.representation_digits > 0 {
+            let mut fill = self.representation_digits as usize - index;
+            while fill > 0 {
+                buffer[index] = 48;
+                index += 1;
+                fill -= 1;
+            }
+        }
+        self.add_buffer_to_string(&buffer[0..index], prefix, writer);
+    }
+    #[inline(always)]
+    fn write_unsigned_hex(&self, value: u128, prefix: &'static str, writer: &mut String) {
+        let mut buffer = [0u8; 40];
+        let mut index = 0;
+        let mut value = value;
+        loop {
+            let digit = (value % 16) as u8;
+            value /= 16;
+            buffer[index] = if digit < 10 { digit + 48 } else { digit + 55 };
+            index += 1;
+            if value == 0 {
+                break;
+            }
+        }
+        if self.representation_digits > 0 {
+            let mut fill = self.representation_digits as usize - index;
+            while fill > 0 {
+                buffer[index] = 48;
+                index += 1;
+                fill -= 1;
+            }
+        }
         self.add_buffer_to_string(&buffer[0..index], prefix, writer);
     }
     pub(crate) fn write_unsigned(&self, value: u128, writer: &mut String) {
         match self.base {
             10 => self.write_unsigned_dec(value, "", writer),
+            16 => self.write_unsigned_hex(value, "0x", writer),
             _ => {}
         }
     }
@@ -144,11 +206,13 @@ impl FormatNumber {
         if value >= 0 {
             match self.base {
                 10 => self.write_unsigned_dec(value as u128, "", writer),
+                16 => self.write_unsigned_hex(value as u128, "0x", writer),
                 _ => {}
             }
         } else {
             match self.base {
                 10 => self.write_unsigned_dec((-value) as u128, "-", writer),
+                16 => self.write_unsigned_hex((-value) as u128, "-0x", writer),
                 _ => {}
             }
         }
