@@ -15,7 +15,10 @@ fn format_signed_number(value: i128, format: Format, writer: &mut String) {
     writer.clear();
     match format {
         Format::Decimal => DECIMAL_FORMAT.write_signed(value, writer),
-        Format::Percentage => todo!(),
+        Format::Percentage => { 
+            DECIMAL_FORMAT.write_signed(value, writer);
+            writer.push('%');
+        },
         Format::DigitGrouping => DIGIT_GROUPING_FORMAT.write_signed(value, writer),
     }
 }
@@ -23,7 +26,10 @@ fn format_unsigned_number(value: u128, format: Format, writer: &mut String) {
     writer.clear();
     match format {
         Format::Decimal => DECIMAL_FORMAT.write_unsigned(value, writer),
-        Format::Percentage => todo!(),
+        Format::Percentage => { 
+            DECIMAL_FORMAT.write_unsigned(value, writer);
+            writer.push('%');
+        },
         Format::DigitGrouping => DIGIT_GROUPING_FORMAT.write_unsigned(value, writer),
     }
 }
