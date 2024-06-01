@@ -63,19 +63,8 @@ impl FormatNumber {
         self
     }
     #[inline(always)]
-    fn write_unsigned_dec(&self, value: u128, prefix: &'static str, writer: &mut String) {
-        let mut buffer = [0u8; 40];
-        let mut index = 0;
-        let mut value = value;
-        loop {
-            let digit = (value % 10) as u8;
-            value /= 10;
-            buffer[index] = digit + 48;
-            index += 1;
-            if value == 0 {
-                break;
-            }
-        }
+    fn add_buffer_to_string(&self, buffer: &[u8], prefix: &'static str, writer: &mut String) {
+        let index = buffer.len();
         if self.group_size > 0 {
             if self.width > 0 {
                 let fill_char = self.fill_char as char;
@@ -128,6 +117,22 @@ impl FormatNumber {
                 writer.push(buffer[i] as char);
             }
         }
+    }
+    #[inline(always)]
+    fn write_unsigned_dec(&self, value: u128, prefix: &'static str, writer: &mut String) {
+        let mut buffer = [0u8; 40];
+        let mut index = 0;
+        let mut value = value;
+        loop {
+            let digit = (value % 10) as u8;
+            value /= 10;
+            buffer[index] = digit + 48;
+            index += 1;
+            if value == 0 {
+                break;
+            }
+        }
+        self.add_buffer_to_string(&buffer[0..index], prefix, writer);
     }
     pub(crate) fn write_unsigned(&self, value: u128, writer: &mut String) {
         match self.base {
