@@ -282,3 +282,65 @@ fn check_format_number_decimal_unsigned() {
         assert_eq!(s, *expect);
     }
 }
+
+#[test]
+fn check_format_number_decimal_signed() {
+    let mut s = String::new();
+    const F1: FormatNumber = FormatNumber::new(10);
+    F1.write_signed(123, &mut s);
+    assert_eq!(s, "123");
+    s.clear();
+    F1.write_signed(-123, &mut s);
+    assert_eq!(s, "-123");
+    const F2: FormatNumber = FormatNumber::new(10).group(3, b',');
+    let data: &[(i64, &'static str)] = &[
+        (-1234, "-1,234"),
+        (-123456, "-123,456"),
+        (-123, "-123"),
+        (-12345, "-12,345"),
+        (0, "0"),
+        (-9, "-9"),
+        (-10, "-10"),
+        (-100, "-100"),
+        (-1000, "-1,000"),
+        (-1234567890,"-1,234,567,890")
+    ];
+    for (value, expect) in data.iter() {
+        s.clear();
+        F2.write_signed(*value as i128, &mut s);
+        assert_eq!(s, *expect);
+    }
+    const F3: FormatNumber = FormatNumber::new(10).fill(10, b'#');
+    let data: &[(i32, &'static str)] = &[
+        (-1234, "#####-1234"),
+        (-123456, "###-123456"),
+        (0, "#########0"),
+        (-9, "########-9"),
+        (-10, "#######-10"),
+        (-1234567890,"-1234567890")
+    ];
+    for (value, expect) in data.iter() {
+        s.clear();
+        F3.write_signed(*value as i128, &mut s);
+        assert_eq!(s, *expect);
+    }
+    const F4: FormatNumber = FormatNumber::new(10).group(3, b',').fill(10, b'*');
+    let data: &[(i64, &'static str)] = &[
+        (1234, "*****1,234"),
+        (-123456, "**-123,456"),
+        (123, "*******123"),
+        (-12345, "***-12,345"),
+        (0, "*********0"),
+        (-9, "********-9"),
+        (10, "********10"),
+        (-100, "******-100"),
+        (1000, "*****1,000"),
+        (-1234567890,"-1,234,567,890")
+    ];
+    for (value, expect) in data.iter() {
+        s.clear();
+        F4.write_signed(*value as i128, &mut s);
+        assert_eq!(s, *expect);
+    }
+}
+
