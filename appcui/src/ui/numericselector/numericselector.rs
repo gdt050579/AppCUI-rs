@@ -67,7 +67,11 @@ where
             buttons: Buttons::new(),
         };
         obj.buttons.update_width(obj.size().width as u16);
-        obj.set_size_bounds(12, 1, u16::MAX, 1);
+        if flags.contains(Flags::HideButtons) {
+            obj.set_size_bounds(3, 1, u16::MAX, 1);
+        } else {
+            obj.set_size_bounds(12, 1, u16::MAX, 1);
+        }
         obj.update_string_representation();
         obj.update_button_status();
         obj
@@ -134,7 +138,10 @@ where
     T: Numeric + 'static,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        self.buttons.paint(surface, theme, self.is_enabled());
+        let has_buttons = !self.flags.contains(Flags::HideButtons);
+        if has_buttons {
+            self.buttons.paint(surface, theme, self.is_enabled());
+        }
         let attr = match () {
             _ if !self.is_enabled() => theme.editor.inactive,
             _ if self.has_focus() => theme.editor.focused,
@@ -142,8 +149,7 @@ where
             _ => theme.editor.normal,
         };
         let w = self.size().width as i32;
-        let l = 4;
-        let r = w - 6;
+        let (l, r) = if has_buttons { (4, w - 6) } else { (0, w - 1) };
         surface.fill_horizontal_line(l, 0, r, Character::with_attributes(' ', attr));
         if l + 2 <= r {
             let mut format = TextFormat::new((l + r) / 2, 0, attr, TextAlignament::Center, false);
@@ -158,6 +164,25 @@ where
     T: Numeric + 'static,
 {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Up") | key!("Right") => {
+                self.increment();
+                return EventProcessStatus::Processed;
+            }
+            key!("Down") | key!("Left") => {
+                self.decrement();
+                return EventProcessStatus::Processed;
+            }
+            key!("Home") => {
+                self.set_value(self.min);
+                return EventProcessStatus::Processed;
+            }
+            key!("End") => {
+                self.set_value(self.max);
+                return EventProcessStatus::Processed;
+            }
+            _ => {}
+        }
         EventProcessStatus::Ignored
     }
 }
@@ -166,21 +191,25 @@ where
     T: Numeric + 'static,
 {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        let bres = self.buttons.on_mouse_event(event);
         let mut response = EventProcessStatus::Ignored;
-        if bres.repaint {
-            response = EventProcessStatus::Processed;
-        }
-        if bres.click_on_add {
-            self.increment();
-            response = EventProcessStatus::Processed;
-        }
-        if bres.click_on_sub {
-            self.decrement();
-            response = EventProcessStatus::Processed;
-        }
-        if !bres.forward_to_control {
-            return response;
+        // process buttons if visible
+        if !self.flags.contains(Flags::HideButtons) {
+            let bres = self.buttons.on_mouse_event(event);
+
+            if bres.repaint {
+                response = EventProcessStatus::Processed;
+            }
+            if bres.click_on_add {
+                self.increment();
+                response = EventProcessStatus::Processed;
+            }
+            if bres.click_on_sub {
+                self.decrement();
+                response = EventProcessStatus::Processed;
+            }
+            if !bres.forward_to_control {
+                return response;
+            }
         }
         // do other processing here
         response
