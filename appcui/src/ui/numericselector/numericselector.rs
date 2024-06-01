@@ -30,6 +30,7 @@ where
     value: T,
     min: T,
     max: T,
+    step: T,
     flags: Flags,
     buttons: Buttons,
 }
@@ -46,7 +47,7 @@ where
             value
         }
     }
-    pub fn new(value: T, min: T, max: T, layout: Layout, flags: Flags) -> Self {
+    pub fn new(value: T, min: T, max: T, step:T, layout: Layout, flags: Flags) -> Self {
         let v_min = if min < max { min } else { max };
         let v_max = if max > min { max } else { min };
         let v = Self::to_interval(value, v_min, v_max);
@@ -54,6 +55,7 @@ where
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             min: v_min,
             max: v_max,
+            step,
             value: v,
             flags,
             buttons: Buttons::new(),
@@ -68,6 +70,37 @@ where
     }
     pub fn set_value(&mut self, value: T) {
         self.value = Self::to_interval(value, self.min, self.max);
+        self.update_button_status();
+    }
+    #[inline(always)]
+    fn update_button_status(&mut self) {
+        self.buttons.disable_buttons(self.value == self.min, self.value == self.max);
+    }
+    fn increment(&mut self) {
+        let mut new_value = self.value + self.step;
+        if new_value<self.value {
+            // overflow
+            new_value = self.max;
+        }
+        new_value = Self::to_interval(new_value, self.min, self.max);
+        if new_value != self.value {
+            self.value = new_value;
+            self.update_button_status();
+            self.emit_on_selection_changed_event();
+        }
+    }
+    fn decrement(&mut self) {
+        let mut new_value = self.value - self.step;
+        if new_value>self.value {
+            // underflow
+            new_value = self.min;
+        }
+        new_value = Self::to_interval(new_value, self.min, self.max);
+        if new_value != self.value {
+            self.value = new_value;
+            self.update_button_status();    
+            self.emit_on_selection_changed_event();
+        }
     }
 
     fn emit_on_selection_changed_event(&mut self) {
@@ -100,8 +133,25 @@ impl<T> OnMouseEvent for NumericSelector<T>
 where
     T: Numeric + 'static,
 {
-    fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        let bres = self.buttons.on_mouse_event(event);
+        let mut response = EventProcessStatus::Ignored;
+        if bres.repaint {
+            response = EventProcessStatus::Processed;
+        }
+        if bres.click_on_add {
+            self.increment();
+            response = EventProcessStatus::Processed;
+        }
+        if bres.click_on_sub {
+            self.decrement();
+            response = EventProcessStatus::Processed;
+        }
+        if !bres.forward_to_control {
+            return response;
+        }
+        // do other processing here
+        response
     }
 }
 impl<T> OnResize for NumericSelector<T>

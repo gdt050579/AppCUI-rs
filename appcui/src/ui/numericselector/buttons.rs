@@ -1,4 +1,5 @@
 use crate::graphics::*;
+use crate::prelude::{EventProcessStatus, MouseEvent};
 use crate::system::*;
 
 #[repr(u8)]
@@ -25,6 +26,22 @@ impl ButtonState {
         }
     }
     #[inline(always)]
+    fn clear(&mut self) {
+        if *self != ButtonState::Inactive {
+            *self = ButtonState::Normal;
+        }
+    }
+    #[inline(always)]
+    fn set(&mut self, new_state: ButtonState) -> bool {
+        if *self != ButtonState::Inactive {
+            if *self != new_state {
+                *self = new_state;
+                return true;
+            }
+        }
+        false
+    }
+    #[inline(always)]
     fn update_state(&mut self, check: bool, expected_value: ButtonState) -> bool {
         if (check) && (*self != expected_value) {
             *self = expected_value;
@@ -38,10 +55,15 @@ impl ButtonState {
     }
     #[inline(always)]
     fn is_accesible(&self) -> bool {
-        !matches!(self, ButtonState::Inactive)
+        *self != ButtonState::Inactive
     }
 }
-
+pub(super) struct ButtonResponse {
+    pub(super) repaint: bool,
+    pub(super) forward_to_control: bool,
+    pub(super) click_on_add: bool,
+    pub(super) click_on_sub: bool,
+}
 pub(super) struct Buttons {
     sub: ButtonState,
     add: ButtonState,
@@ -61,8 +83,78 @@ impl Buttons {
         surface.write_string(0, 0, " - ", sub_attr, false);
         surface.write_string(self.width as i32 - 4, 0, " + ", add_attr, false);
     }
-    #[inline(always)]   
+    #[inline(always)]
     pub(super) fn update_width(&mut self, width: u16) {
         self.width = width;
+    }
+    #[inline(always)]
+    fn is_on_sub(&self, x: i32, y: i32) -> bool {
+        ((x >= 0) && (x < 3) && (y == 0)) && self.sub.is_accesible()
+    }
+    #[inline(always)]
+    fn is_on_add(&self, x: i32, y: i32) -> bool {
+        ((x >= (self.width as i32 - 3)) && (x < (self.width as i32)) && (y == 0)) && self.add.is_accesible()
+    }
+    #[inline(always)]
+    fn process_mouse_event(&mut self, x: i32, y: i32, new_state: ButtonState, click: bool) -> ButtonResponse {
+        let mut repaint = false;
+        let on_sub = self.is_on_sub(x, y);
+        let on_add = self.is_on_add(x, y);
+        if on_sub {
+            repaint |= self.sub.set(new_state);
+        } else {
+            repaint |= self.sub.set(ButtonState::Normal);
+        }
+        if on_add {
+            repaint |= self.add.set(new_state);
+        } else {
+            repaint |= self.add.set(ButtonState::Normal);
+        }
+        ButtonResponse {
+            repaint,
+            forward_to_control: (!on_sub) && (!on_add),
+            click_on_add: on_add & click,
+            click_on_sub: on_sub & click,
+        }
+    }
+    pub(super) fn disable_buttons(&mut self, disable_sub: bool, disable_add: bool) {
+        if disable_sub {
+            self.sub = ButtonState::Inactive;
+        } else {
+            if self.sub == ButtonState::Inactive {
+                self.sub = ButtonState::Normal;
+            }
+        }
+        if disable_add {
+            self.add = ButtonState::Inactive;
+        } else {
+            if self.add == ButtonState::Inactive {
+                self.add = ButtonState::Normal;
+            }
+        }   
+    }
+    pub(super) fn on_mouse_event(&mut self, event: &MouseEvent) -> ButtonResponse {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.sub.clear();
+                self.add.clear();
+                ButtonResponse {
+                    repaint: true,
+                    forward_to_control: true,
+                    click_on_add: false,
+                    click_on_sub: false,
+                }
+            }
+            MouseEvent::Over(point) => self.process_mouse_event(point.x, point.y, ButtonState::Hovered, false),
+            MouseEvent::Pressed(data) => self.process_mouse_event(data.x, data.y, ButtonState::Pressed, true),
+            MouseEvent::Released(data) => self.process_mouse_event(data.x, data.y, ButtonState::Hovered, false),
+            MouseEvent::DoubleClick(data) => self.process_mouse_event(data.x, data.y, ButtonState::Hovered, true),
+            MouseEvent::Drag(_) | MouseEvent::Wheel(_) => ButtonResponse {
+                repaint: false,
+                forward_to_control: true,
+                click_on_add: false,
+                click_on_sub: false,
+            },
+        }
     }
 }
