@@ -1,6 +1,7 @@
 use crate::system::Handle;
 use crate::system::HandleSupport;
 use crate::utils::HandleManager;
+use super::FormatNumber;
 use super::KeyValueParser;
 use super::Strategy;
 use super::ValueType;
@@ -227,4 +228,10 @@ fn check_glyph_previous_pos() {
     assert_eq!(g.previous_pos(19,3),12);
     assert_eq!(&g[2..g.previous_pos(12,1)],"3❤️");
     assert_eq!(g.previous_pos(19,1000),0);
+}
+
+
+#[test]
+fn check_format_number() {
+    const F: FormatNumber = FormatNumber::new(2,15,b',',100,b' ',0);
 }
