@@ -152,13 +152,13 @@ where
     }
 
     fn emit_on_selection_changed_event(&mut self) {
-        // self.raise_event(ControlEvent {
-        //     emitter: self.handle,
-        //     receiver: self.event_processor,
-        //     data: ControlEventData::Selector(EventData {
-        //         type_id: std::any::TypeId::of::<T>(),
-        //     }),
-        // });
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::NumericSelector(EventData {
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
     }
 }
 impl<T> OnPaint for NumericSelector<T>

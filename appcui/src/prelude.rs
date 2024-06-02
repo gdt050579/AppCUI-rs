@@ -24,7 +24,7 @@ pub use super::ui::dropdownlist;
 pub use super::ui::dropdownlist::events::GenericDropDownListEvents;
 pub use super::ui::dropdownlist::DropDownListType;
 pub use super::ui::numericselector;
-pub use super::ui::numericselector::events::GenericNumricSelectorEvents;
+pub use super::ui::numericselector::events::GenericNumericSelectorEvents;
 pub use super::ui::canvas;
 pub use super::ui::imageviewer;
 pub use super::ui::password;
