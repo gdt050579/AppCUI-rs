@@ -244,4 +244,42 @@ impl FormatNumber {
             }
         }
     }
+    pub(crate) fn write_float(&self, value: f64, write: &mut String) {
+        let mut buffer = [0u8; 40];
+        let mut index = 0;
+        let mut value = value;
+        if value<0.0 {
+            value = -value;
+            write.push('-');
+        }
+        let mut int_part = value.trunc() as i64;
+        let mut fract_part = value.fract();
+        loop {
+            let digit = (int_part % 10) as u8;
+            int_part /= 10;
+            buffer[index] = digit + 48;
+            index += 1;
+            if int_part == 0 {
+                break;
+            }
+        }
+        if self.representation_digits as usize > index {
+            let mut fill = self.representation_digits as usize - index;
+            while fill > 0 {
+                buffer[index] = 48;
+                index += 1;
+                fill -= 1;
+            }
+        }
+        self.add_buffer_to_string(&buffer[0..index], "", write);
+        if self.number_of_decimals > 0 {
+            write.push('.');
+            for _ in 0..self.number_of_decimals {
+                fract_part *= 10.0;
+                let digit = fract_part.trunc() as u8;
+                fract_part = fract_part.fract();
+                write.push((digit + 48) as char);
+            }            
+        }
+    }
 }
