@@ -12,6 +12,7 @@ pub trait Number: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + Parti
 const DECIMAL_FORMAT: FormatNumber = FormatNumber::new(10);
 const DIGIT_GROUPING_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 const HEX_FORMAT: FormatNumber = FormatNumber::new(16);
+const FLOAT_FORMAT: FormatNumber = FormatNumber::new(10).decimals(2);
 
 fn format_signed_number(value: i128, format: Format, writer: &mut String) {
     writer.clear();
@@ -76,11 +77,20 @@ fn format_unsigned_number(value: u128, format: Format, writer: &mut String) {
 fn format_float_number(value: f64, format: Format, writer: &mut String) {
     writer.clear();
     match format {
-        Format::Decimal => write!(writer, "{}", value).unwrap(),
-        Format::Percentage => todo!(),
-        Format::DigitGrouping => todo!(),
-        Format::Hex => todo!(),
-        Format::Size => todo!(),
+        Format::Decimal => FLOAT_FORMAT.write_float(value, writer),
+        Format::Percentage => {
+            FLOAT_FORMAT.write_float(value * 100.0f64, writer);
+            writer.push('%');
+        },
+        Format::DigitGrouping => FLOAT_FORMAT.write_float(value, writer),
+        Format::Hex => {
+            let v = value as i128;
+            format_signed_number(v, Format::Hex, writer);
+        },
+        Format::Size => {
+            let v = value as i128;
+            format_signed_number(v, Format::Size, writer);
+        }
     }
 }
 
