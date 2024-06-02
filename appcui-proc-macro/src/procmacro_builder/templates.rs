@@ -278,7 +278,7 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 ";
 
 pub(crate) static NUMERIC_SELECTOR_TRAIT_DEF: &str = "
-trait NumericSelectorEvents<T: Copy+Clone+Eq+'static> {
+trait NumericSelectorEvents<T: Number+'static> {
     fn on_value_changed(&mut self, handle: Handle<NumericSelector<T>>, value: T) -> EventProcessStatus;
 }
 impl$(TEMPLATE_TYPE) GenericNumericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {

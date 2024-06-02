@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-
 #[test]
 fn check_creation() {
     let script = "
@@ -10,22 +9,81 @@ fn check_creation() {
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:68,h:9");
-    w.add(NumericSelector::<i32>::new(5,1,8,1,Layout::new("x:1,y:1,w:10"),numericselector::Flags::None));
-    w.add(NumericSelector::<u32>::new(5,1,8,1,Layout::new("x:1,y:3,w:15"),numericselector::Flags::HideButtons));
-    w.add(NumericSelector::<f32>::new(5.5,1.0,8.0,0.5,Layout::new("x:1,y:5,w:14"),numericselector::Flags::None));
+    w.add(NumericSelector::<i32>::new(
+        5,
+        1,
+        8,
+        1,
+        Layout::new("x:1,y:1,w:10"),
+        numericselector::Flags::None,
+    ));
+    w.add(NumericSelector::<u32>::new(
+        5,
+        1,
+        8,
+        1,
+        Layout::new("x:1,y:3,w:15"),
+        numericselector::Flags::HideButtons,
+    ));
+    w.add(NumericSelector::<f32>::new(
+        5.5,
+        1.0,
+        8.0,
+        0.5,
+        Layout::new("x:1,y:5,w:14"),
+        numericselector::Flags::None,
+    ));
 
-    w.add(NumericSelector::<i32>::with_format(1000,1000,8000,100,Layout::new("x:22,y:1,w:20"),numericselector::Flags::None, numericselector::Format::DigitGrouping));
-    w.add(NumericSelector::<u8>::with_format(50,0,100,1,Layout::new("x:22,y:3,w:20"),numericselector::Flags::None, numericselector::Format::Percentage));
-    w.add(NumericSelector::<i8>::with_format(-50,-100,100,1,Layout::new("x:22,y:5,w:20"),numericselector::Flags::ReadOnly, numericselector::Format::Decimal));
+    w.add(NumericSelector::<i32>::with_format(
+        1000,
+        1000,
+        8000,
+        100,
+        Layout::new("x:22,y:1,w:20"),
+        numericselector::Flags::None,
+        numericselector::Format::DigitGrouping,
+    ));
+    w.add(NumericSelector::<u8>::with_format(
+        50,
+        0,
+        100,
+        1,
+        Layout::new("x:22,y:3,w:20"),
+        numericselector::Flags::None,
+        numericselector::Format::Percentage,
+    ));
+    w.add(NumericSelector::<i8>::with_format(
+        -50,
+        -100,
+        100,
+        1,
+        Layout::new("x:22,y:5,w:20"),
+        numericselector::Flags::ReadOnly,
+        numericselector::Format::Decimal,
+    ));
 
-    w.add(NumericSelector::<u128>::with_format(1_000_000,1000,80_000_000,1024,Layout::new("x:43,y:1,w:20"),numericselector::Flags::None, numericselector::Format::Size));
-    w.add(NumericSelector::<u32>::with_format(0xFFEE,0,100000,1,Layout::new("x:43,y:3,w:20"),numericselector::Flags::None, numericselector::Format::Hex));
-
+    w.add(NumericSelector::<u128>::with_format(
+        1_000_000,
+        1000,
+        80_000_000,
+        1024,
+        Layout::new("x:43,y:1,w:20"),
+        numericselector::Flags::None,
+        numericselector::Format::Size,
+    ));
+    w.add(NumericSelector::<u32>::with_format(
+        0xFFEE,
+        0,
+        100000,
+        1,
+        Layout::new("x:43,y:3,w:20"),
+        numericselector::Flags::None,
+        numericselector::Format::Hex,
+    ));
 
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_create_procmacro() {
@@ -47,7 +105,7 @@ fn check_create_procmacro() {
 
     w.add(numericselector!("u128,1000000,1000,80000000,1024,x:43,y:1,w:20,format:Size"));
     w.add(numericselector!("u32,0xFFEE,0,100000,1,x:43,y:3,w:20,format:Hex"));
-    
+
     a.add_window(w);
     a.run();
 }
@@ -72,7 +130,7 @@ fn check_create_procmacro_defaults() {
 
     w.add(numericselector!("u128,1000000,1024,x:43,y:1,w:20,format:Size"));
     w.add(numericselector!("u32,0xFFEE,x:43,y:3,w:20,format:Hex"));
-    
+
     a.add_window(w);
     a.run();
 }
@@ -109,7 +167,7 @@ fn check_min_max_by_mouse() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20")); 
+    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
     a.add_window(w);
     a.run();
 }
@@ -146,7 +204,7 @@ fn check_min_max_by_keyboard() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20")); 
+    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
     a.add_window(w);
     a.run();
 }
@@ -166,7 +224,7 @@ fn check_min_max_by_home_end() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20")); 
+    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
     a.add_window(w);
     a.run();
 }
@@ -200,7 +258,7 @@ fn check_readonly() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20,flags:ReadOnly")); 
+    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20,flags:ReadOnly"));
     a.add_window(w);
     a.run();
 }
@@ -230,7 +288,7 @@ fn check_edit_mode() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20")); 
+    w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20"));
     a.add_window(w);
     a.run();
 }
@@ -255,7 +313,40 @@ fn check_exit_edit_mode() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20")); 
+    w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20"));
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_events() {
+    #[Window(events: NumericSelectorEvents<i32>, internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Title,w:38,h:5,x:1,y:1,"),
+            };
+            w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
+            w
+        }
+    }
+    impl NumericSelectorEvents<i32> for MyWin {
+        fn on_value_changed(&mut self, _handle: Handle<NumericSelector<i32>>, value: i32) -> EventProcessStatus {
+            let s = format!("val = {}", value);
+            self.base.set_title(&s);
+            return EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0xD4AD9150F1EA4E67)
+        Mouse.Click(4,3,left)
+        Paint('New-value: 4')   
+        CheckHash(0xF5654B7B9496886A)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }

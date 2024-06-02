@@ -2,15 +2,16 @@ use super::events::EventData;
 use super::Buttons;
 use super::Flags;
 use super::Format;
-use super::Numeric;
+use super::Number;
 use crate::prelude::*;
 use std::fmt::Write;
 use std::str::FromStr;
 
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct NumericSelector<T>
 where
-    T: Numeric + FromStr + 'static,
+    T: Number + 'static,
 {
     value: T,
     min: T,
@@ -26,7 +27,7 @@ where
 #[allow(private_bounds)]
 impl<T> NumericSelector<T>
 where
-    T: Numeric + FromStr + 'static,
+    T: Number + 'static,
 {
     fn to_interval(value: T, min: T, max: T) -> T {
         if value < min {
@@ -85,7 +86,7 @@ where
         }
     }
     fn update_string_representation(&mut self) {
-        Numeric::write_to_string(&self.value, &mut self.txt, self.format);
+        Number::write_to_string(&self.value, &mut self.txt, self.format);
         self.txtlen = self.txt.len() as u8;
     }
     fn increment(&mut self) {
@@ -163,7 +164,7 @@ where
 }
 impl<T> OnPaint for NumericSelector<T>
 where
-    T: Numeric + FromStr + 'static,
+    T: Number + 'static,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let has_buttons = (!self.flags.contains(Flags::HideButtons)) && (!self.edit_mode);
@@ -207,7 +208,7 @@ where
 }
 impl<T> OnKeyPressed for NumericSelector<T>
 where
-    T: Numeric + FromStr + 'static,
+    T: Number + FromStr + 'static,
 {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         let readonly = self.flags.contains(Flags::ReadOnly);
@@ -281,7 +282,7 @@ where
 }
 impl<T> OnMouseEvent for NumericSelector<T>
 where
-    T: Numeric + FromStr + 'static,
+    T: Number + FromStr + 'static,
 {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         let mut response = EventProcessStatus::Ignored;
@@ -310,7 +311,7 @@ where
 }
 impl<T> OnResize for NumericSelector<T>
 where
-    T: Numeric + FromStr + 'static,
+    T: Number + FromStr + 'static,
 {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.buttons.update_width(new_size.width as u16);
@@ -318,7 +319,7 @@ where
 }
 impl<T> OnFocus for NumericSelector<T>
 where
-    T: Numeric + FromStr + 'static,
+    T: Number + FromStr + 'static,
 {
     fn on_focus(&mut self) {
         self.edit_mode = false;
