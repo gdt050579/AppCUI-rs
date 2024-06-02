@@ -421,6 +421,12 @@ pub fn dropdownlist(input: TokenStream) -> TokenStream {
 
 
 #[proc_macro]
+pub fn numericselector(input: TokenStream) -> TokenStream {
+    crate::controls::numericselector::create(input)
+}
+
+
+#[proc_macro]
 pub fn menuitem(input: TokenStream) -> TokenStream {
     crate::menu::menuitem::create(input, None)
 }
