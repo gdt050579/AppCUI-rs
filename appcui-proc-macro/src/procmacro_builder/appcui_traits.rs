@@ -221,7 +221,7 @@ impl AppCUITrait {
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
-        matches!(self, AppCUITrait::GenericSelectorEvents | AppCUITrait::GenericDropDownListEvents)
+        matches!(self, AppCUITrait::GenericSelectorEvents | AppCUITrait::GenericDropDownListEvents | AppCUITrait::GenericNumericSelectorEvents)
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
         match name {

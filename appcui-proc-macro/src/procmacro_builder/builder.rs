@@ -136,6 +136,13 @@ fn generate_dropdownlist_events(a: &mut Arguments) -> String {
     }
     return templates::DROPDOWNLIST_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_DROPDOWNLIST)", s.as_str());
 }
+fn generate_numeric_selector_events(a: &mut Arguments) -> String {
+    let mut s = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericNumericSelectorEvents].iter() {
+        s.push_str(templates::NUMERIC_SELECT_ON_VALUE_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());        
+    }
+    return templates::NUMERIC_SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_NUMERIC_SELECTOR)", s.as_str());
+}
 
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
@@ -184,6 +191,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                     match appcui_trait {
                         AppCUITrait::GenericSelectorEvents => code.push_str(generate_selector_events(&mut a).as_str()),
                         AppCUITrait::GenericDropDownListEvents => code.push_str(generate_dropdownlist_events(&mut a).as_str()),
+                        AppCUITrait::GenericNumericSelectorEvents => code.push_str(generate_numeric_selector_events(&mut a).as_str()),
                         _ => {}
                     }
                 }
