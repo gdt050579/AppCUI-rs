@@ -11,6 +11,7 @@ pub(crate) trait Numeric: Add<Output = Self> + Sub<Output = Self> + Copy + Clone
 
 const DECIMAL_FORMAT: FormatNumber = FormatNumber::new(10);
 const DIGIT_GROUPING_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
+const HEX_FORMAT: FormatNumber = FormatNumber::new(16);
 
 fn format_signed_number(value: i128, format: Format, writer: &mut String) {
     writer.clear();
@@ -21,6 +22,25 @@ fn format_signed_number(value: i128, format: Format, writer: &mut String) {
             writer.push('%');
         },
         Format::DigitGrouping => DIGIT_GROUPING_FORMAT.write_signed(value, writer),
+        Format::Hex => HEX_FORMAT.write_signed(value, writer),
+        Format::Size => { 
+            if value < 1024 {
+                DIGIT_GROUPING_FORMAT.write_signed(value, writer);
+                writer.push_str(" B");
+            } else if value < 1024 * 1024 {
+                DIGIT_GROUPING_FORMAT.write_signed(value / 1024, writer);
+                writer.push_str(" KB");
+            } else if value < 1024 * 1024 * 1024 {
+                DIGIT_GROUPING_FORMAT.write_signed(value / (1024 * 1024), writer);
+                writer.push_str(" MB");
+            } else if value < 1024 * 1024 * 1024 * 1024 {
+                DIGIT_GROUPING_FORMAT.write_signed(value / (1024 * 1024 * 1024), writer);
+                writer.push_str(" GB");
+            } else {
+                DIGIT_GROUPING_FORMAT.write_signed(value / (1024 * 1024 * 1024 * 1024), writer);
+                writer.push_str(" TB");
+            }
+        }
     }
 }
 fn format_unsigned_number(value: u128, format: Format, writer: &mut String) {
@@ -32,6 +52,25 @@ fn format_unsigned_number(value: u128, format: Format, writer: &mut String) {
             writer.push('%');
         },
         Format::DigitGrouping => DIGIT_GROUPING_FORMAT.write_unsigned(value, writer),
+        Format::Hex => HEX_FORMAT.write_unsigned(value, writer),
+        Format::Size => { 
+            if value < 1024 {
+                DIGIT_GROUPING_FORMAT.write_unsigned(value, writer);
+                writer.push_str(" B");
+            } else if value < 1024 * 1024 {
+                DIGIT_GROUPING_FORMAT.write_unsigned(value / 1024, writer);
+                writer.push_str(" KB");
+            } else if value < 1024 * 1024 * 1024 {
+                DIGIT_GROUPING_FORMAT.write_unsigned(value / (1024 * 1024), writer);
+                writer.push_str(" MB");
+            } else if value < 1024 * 1024 * 1024 * 1024 {
+                DIGIT_GROUPING_FORMAT.write_unsigned(value / (1024 * 1024 * 1024), writer);
+                writer.push_str(" GB");
+            } else {
+                DIGIT_GROUPING_FORMAT.write_unsigned(value / (1024 * 1024 * 1024 * 1024), writer);
+                writer.push_str(" TB");
+            }
+        },
     }
 }
 fn format_float_number(value: f64, format: Format, writer: &mut String) {
@@ -40,6 +79,8 @@ fn format_float_number(value: f64, format: Format, writer: &mut String) {
         Format::Decimal => write!(writer, "{}", value).unwrap(),
         Format::Percentage => todo!(),
         Format::DigitGrouping => todo!(),
+        Format::Hex => todo!(),
+        Format::Size => todo!(),
     }
 }
 

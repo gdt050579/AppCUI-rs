@@ -11,5 +11,7 @@ pub enum Flags {
 pub enum Format {
     Decimal,
     Percentage,
-    DigitGrouping,    
+    DigitGrouping,
+    Hex,
+    Size, 
 }

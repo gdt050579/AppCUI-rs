@@ -2,9 +2,9 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&["HideButtons","ReadOnly"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["HideButtons", "ReadOnly"]);
 
-static NUMERIC_FORMAT: FlagsSignature = FlagsSignature::new(&["Decimal", "Percentage", "DigitGrouping"]);
+static NUMERIC_FORMAT: FlagsSignature = FlagsSignature::new(&["Decimal", "Percentage", "DigitGrouping", "Hex", "Size"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("type", ParamType::String),
@@ -21,7 +21,6 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("min", "min", ParamType::String),
     NamedParameter::new("max", "max", ParamType::String),
     NamedParameter::new("step", "step", ParamType::String),
-    NamedParameter::new("value", "value", ParamType::String),
     NamedParameter::new("format", "format", ParamType::String),
     NamedParameter::new("numericformat", "format", ParamType::String),
     NamedParameter::new("nf", "format", ParamType::String),
@@ -33,7 +32,11 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
 
     // check for a number format
     let type_name = cb.get_value("type").unwrap(); // we know it exists atthis point
-    let accepted = matches!(type_name, "i8" | "i16" | "i32" | "i64" | "i128" | "u8" | "u16" | "u32" | "u64" | "u128" | "usize" | "isize" | "f32" | "f64");
+    let accepted = matches!(
+        type_name,
+        "i8" | "i16" | "i32" | "i64" | "i128" | "u8" | "u16" | "u32" | "u64" | "u128" | "usize" | "isize" | "f32" | "f64"
+    );
+    let is_float = matches!(type_name, "f32" | "f64");
     if !accepted {
         panic!("Invalid type for NumericSelector: '{}' - only the following numeric types are accepted: i8, i16, i32, i64, i128, u8, u16, u32, u64, u128, isize, usize, f32, f64", type_name);
     }
@@ -64,7 +67,11 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if cb.has_parameter("step") {
         cb.add_param_value("step");
     } else {
-        cb.add("1");
+        if is_float {
+            cb.add("1.0");
+        } else {
+            cb.add("1");
+        }   
     }
 
     cb.add_layout();
