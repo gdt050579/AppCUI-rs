@@ -8,6 +8,7 @@ mod tests;
 
 use self::buttons::Buttons;
 pub use self::numericselector::NumericSelector;
-pub use self::numeric::Numeric;
 pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::Format;
+
+pub(crate) use self::numeric::Numeric;

@@ -4,7 +4,8 @@ use std::fmt::Display;
 use std::ops::{Add, Sub};
 use std::fmt::Write;
 
-pub trait Numeric: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display {
+#[allow(private_interfaces)]
+pub(crate) trait Numeric: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display {
     fn write_to_string(&self, writer: &mut String, format: Format);
 }
 

@@ -27,6 +27,7 @@ where
     txtlen: u8,
     edit_mode: bool,
 }
+#[allow(private_bounds)]
 impl<T> NumericSelector<T>
 where
     T: Numeric + FromStr + 'static,
