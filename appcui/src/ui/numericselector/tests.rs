@@ -5,7 +5,7 @@ fn check_creation() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0x401057116C41B768)
+        CheckHash(0xDE731548A8E93318)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:68,h:9");
@@ -30,7 +30,7 @@ fn check_creation() {
         1.0,
         8.0,
         0.5,
-        Layout::new("x:1,y:5,w:14"),
+        Layout::new("x:1,y:5,w:16"),
         numericselector::Flags::None,
     ));
 
@@ -90,14 +90,14 @@ fn check_create_procmacro() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0x401057116C41B768)
+        CheckHash(0xDE731548A8E93318)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:68,h:9");
 
     w.add(numericselector!("i32,5,1,8,1,x:1,y:1,w:10"));
     w.add(numericselector!("u32,5,1,8,1,x:1,y:3,w:15,flags:HideButtons"));
-    w.add(numericselector!("f32,5.5,1.0,8.0,0.5,x:1,y:5,w:14"));
+    w.add(numericselector!("f32,5.5,1.0,8.0,0.5,x:1,y:5,w:16"));
 
     w.add(numericselector!("i32,1000,1000,8000,100,x:22,y:1,w:20,format:DigitGrouping"));
     w.add(numericselector!("u8,50,0,100,1,x:22,y:3,w:20,format:Percentage"));
@@ -115,14 +115,14 @@ fn check_create_procmacro_defaults() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0x401057116C41B768)
+        CheckHash(0xDE731548A8E93318)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:68,h:9");
 
     w.add(numericselector!("i32,5,x:1,y:1,w:10"));
     w.add(numericselector!("u32,5,x:1,y:3,w:15,flags:HideButtons"));
-    w.add(numericselector!("f32,5.5,x:1,y:5,w:14"));
+    w.add(numericselector!("f32,5.5,x:1,y:5,w:16"));
 
     w.add(numericselector!("i32,1000,x:22,y:1,w:20,format:DigitGrouping,min:1000"));
     w.add(numericselector!("u8,50,x:22,y:3,w:20,format:Percentage"));

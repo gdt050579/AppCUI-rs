@@ -38,9 +38,41 @@ where
             value
         }
     }
+
+    /// Creates a new NumericSelector control with the specified layout, flags, and default format (Decimal)
+    /// The flags can be a combination of the following values:
+    /// * `Flags::HideButtons` - if set, the buttons will not be displayed
+    /// * `Flags::ReadOnly` - if set, the control will be read-only
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let ns = NumericSelector::<i32>::new(10, 0, 100, 1, Layout::new("x:1,y:1,w:20"), numericselector::Flags::None);
+    /// 
     pub fn new(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags) -> Self {
         Self::with_format(value, min, max, step, layout, flags, Format::Decimal)
     }
+
+
+    /// Creates a new NumericSelector control with the specified layout, flags, and format
+    /// The flags can be a combination of the following values:
+    /// * `Flags::HideButtons` - if set, the buttons will not be displayed
+    /// * `Flags::ReadOnly` - if set, the control will be read-only
+    /// 
+    /// The format can be one of the following values:
+    /// * `Format::Decimal` - the value will be displayed as a decimal number
+    /// * `Format::Percentage` - the value will be displayed as a percentage
+    /// * `Format::Hex` - the value will be displayed as a hexadecimal number
+    /// * `Format::DigitGrouping` - the value will be displayed with digit grouping
+    /// * `Format::Size` - the value will be displayed as a size (bytes, KB, MB, GB, TB)
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let ns = NumericSelector::<i32>::with_format(10, 0, 100, 1, Layout::new("x:1,y:1,w:20"), numericselector::Flags::None, numericselector::Format::Size);
+    /// ```
     pub fn with_format(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags, format: Format) -> Self {
         let v_min = if min < max { min } else { max };
         let v_max = if max > min { max } else { min };
@@ -68,10 +100,14 @@ where
         obj.update_button_status();
         obj
     }
+
+    /// Returns the selected value
     #[inline(always)]
     pub fn value(&self) -> T {
         self.value
     }
+
+    /// Sets the value of the control. If the value is outside the interval [min, max], it will be set to the closest limit
     pub fn set_value(&mut self, value: T) {
         self.value = Self::to_interval(value, self.min, self.max);
         self.update_button_status();
