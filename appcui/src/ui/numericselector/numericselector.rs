@@ -1,5 +1,3 @@
-
-
 use super::events::EventData;
 use super::Buttons;
 use super::Flags;
@@ -8,8 +6,6 @@ use super::Numeric;
 use crate::prelude::*;
 use std::fmt::Write;
 use std::str::FromStr;
-
-
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct NumericSelector<T>
@@ -70,7 +66,7 @@ where
         obj.update_string_representation();
         obj.update_button_status();
         obj
-    }   
+    }
     #[inline(always)]
     pub fn value(&self) -> T {
         self.value.clone()
@@ -128,6 +124,9 @@ where
     }
     fn enter_edit_mode(&mut self) {
         if self.flags.contains(Flags::ReadOnly) {
+            return;
+        }
+        if self.edit_mode {
             return;
         }
         // use normal representation for editing
@@ -270,8 +269,10 @@ where
             let add_char = matches!(character, '0'..='9' | 'a'..='f' | 'A'..='F' | 'x' | 'X' | 'h' | 'H' | 'o' | 'O' | '.' | '_');
             if add_char && (!readonly) {
                 self.enter_edit_mode();
-                self.txt.push(character);
-                self.txtlen += 1;
+                if self.txt.len() < u8::MAX as usize {
+                    self.txt.push(character);
+                    self.txtlen += 1;
+                }
                 return EventProcessStatus::Processed;
             }
         }

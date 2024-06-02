@@ -1,4 +1,4 @@
-use appcui::{prelude::*, ui::dropdownlist::DropDownList};
+use appcui::prelude::*;
 
 
 
@@ -13,13 +13,14 @@ fn main() -> Result<(), appcui::system::Error> {
         Layout::new("x:1,y:1,w:20"),
         numericselector::Flags::HideButtons,
     ));
-    w.add(NumericSelector::<i32>::new(
-        5,
-        1,
-        6,
-        1,
+    w.add(NumericSelector::<i32>::with_format(
+        10000,
+        100000,
+        10000,
+        1000,
         Layout::new("x:1,y:3,w:20"),
-        numericselector::Flags::ReadOnly,
+        numericselector::Flags::None,
+        numericselector::Format::DigitGrouping,
     ));
     a.add_window(w);
     a.run();
