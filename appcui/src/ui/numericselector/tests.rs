@@ -335,7 +335,7 @@ fn check_events() {
         fn on_value_changed(&mut self, _handle: Handle<NumericSelector<i32>>, value: i32) -> EventProcessStatus {
             let s = format!("val = {}", value);
             self.base.set_title(&s);
-            return EventProcessStatus::Processed
+            EventProcessStatus::Processed
         }
     }
     let script = "

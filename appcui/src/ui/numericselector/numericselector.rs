@@ -70,7 +70,7 @@ where
     }
     #[inline(always)]
     pub fn value(&self) -> T {
-        self.value.clone()
+        self.value
     }
     pub fn set_value(&mut self, value: T) {
         self.value = Self::to_interval(value, self.min, self.max);

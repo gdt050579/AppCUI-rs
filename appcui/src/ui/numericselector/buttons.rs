@@ -33,11 +33,9 @@ impl ButtonState {
     }
     #[inline(always)]
     fn set(&mut self, new_state: ButtonState) -> bool {
-        if *self != ButtonState::Inactive {
-            if *self != new_state {
-                *self = new_state;
-                return true;
-            }
+        if *self != ButtonState::Inactive && *self != new_state {
+            *self = new_state;
+            return true;
         }
         false
     }
@@ -77,7 +75,7 @@ impl Buttons {
     }
     #[inline(always)]
     fn is_on_sub(&self, x: i32, y: i32) -> bool {
-        ((x >= 0) && (x < 3) && (y == 0)) && self.sub.is_accesible()
+        ((0..3).contains(&x) && (y == 0)) && self.sub.is_accesible()
     }
     #[inline(always)]
     fn is_on_add(&self, x: i32, y: i32) -> bool {
@@ -108,17 +106,13 @@ impl Buttons {
     pub(super) fn disable_buttons(&mut self, disable_sub: bool, disable_add: bool) {
         if disable_sub {
             self.sub = ButtonState::Inactive;
-        } else {
-            if self.sub == ButtonState::Inactive {
-                self.sub = ButtonState::Normal;
-            }
+        } else if self.sub == ButtonState::Inactive {
+            self.sub = ButtonState::Normal;
         }
         if disable_add {
             self.add = ButtonState::Inactive;
-        } else {
-            if self.add == ButtonState::Inactive {
-                self.add = ButtonState::Normal;
-            }
+        } else if self.add == ButtonState::Inactive {
+            self.add = ButtonState::Normal;
         }   
     }
     pub(super) fn on_mouse_event(&mut self, event: &MouseEvent) -> ButtonResponse {

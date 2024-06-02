@@ -66,12 +66,10 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add(",");
     if cb.has_parameter("step") {
         cb.add_param_value("step");
+    } else if is_float {
+        cb.add("1.0");
     } else {
-        if is_float {
-            cb.add("1.0");
-        } else {
-            cb.add("1");
-        }   
+        cb.add("1");
     }
 
     cb.add_layout();
