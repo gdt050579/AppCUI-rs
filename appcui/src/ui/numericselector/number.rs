@@ -2,7 +2,6 @@ use super::Format;
 use crate::utils::FormatNumber;
 use std::fmt::Display;
 use std::ops::{Add, Sub};
-use std::fmt::Write;
 use std::str::FromStr;
 
 pub trait Number: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display + FromStr {
