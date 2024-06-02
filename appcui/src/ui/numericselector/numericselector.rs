@@ -3,6 +3,7 @@
 use super::events::EventData;
 use super::Buttons;
 use super::Flags;
+use super::Format;
 use super::Numeric;
 use crate::prelude::*;
 use std::fmt::Write;
@@ -20,6 +21,7 @@ where
     max: T,
     step: T,
     flags: Flags,
+    format: Format,
     buttons: Buttons,
     txt: String,
     txtlen: u8,
@@ -39,6 +41,9 @@ where
         }
     }
     pub fn new(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags) -> Self {
+        Self::with_format(value, min, max, step, layout, flags, Format::Decimal)
+    }
+    pub fn with_format(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags, format: Format) -> Self {
         let v_min = if min < max { min } else { max };
         let v_max = if max > min { max } else { min };
         let v = Self::to_interval(value, v_min, v_max);
@@ -49,6 +54,7 @@ where
             step,
             value: v,
             flags,
+            format,
             txt: String::with_capacity(16),
             txtlen: 0,
             buttons: Buttons::new(),
@@ -63,7 +69,7 @@ where
         obj.update_string_representation();
         obj.update_button_status();
         obj
-    }
+    }   
     #[inline(always)]
     pub fn value(&self) -> T {
         self.value.clone()
@@ -82,8 +88,7 @@ where
         }
     }
     fn update_string_representation(&mut self) {
-        self.txt.clear();
-        write!(self.txt, "{}", self.value).unwrap();
+        Numeric::write_to_string(&self.value, &mut self.txt, self.format);
         self.txtlen = self.txt.len() as u8;
     }
     fn increment(&mut self) {
@@ -124,16 +129,25 @@ where
         if self.flags.contains(Flags::ReadOnly) {
             return;
         }
+        // use normal representation for editing
+        self.txt.clear();
+        write!(self.txt, "{}", self.value).unwrap();
+        self.txtlen = self.txt.len() as u8;
         self.edit_mode = true;
     }
     fn exit_edit_mode(&mut self, accept: bool) {
         if self.edit_mode {
             if accept {
                 if let Ok(new_value) = self.txt.parse::<T>() {
+                    let old_value = self.value;
                     self.set_value(new_value);
+                    if self.value != old_value {
+                        self.emit_on_selection_changed_event();
+                    }
                 }
             }
             self.edit_mode = false;
+            self.update_string_representation();
         }
     }
 
