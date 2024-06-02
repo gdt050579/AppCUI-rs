@@ -204,3 +204,58 @@ fn check_readonly() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_edit_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0xD4AD9150F1EA4E67)
+        Key.Pressed(Enter)
+        Paint('Enter edit mode')   
+        CheckHash(0xE9BCB46477286639)
+        CheckCursor(5,3)
+        Key.Pressed(Backspace)
+        Paint('no value')   
+        CheckHash(0x8E1A6A4BBEB2260C)
+        CheckCursor(4,3)
+        Key.TypeText('56')
+        Paint('edit mode -> 56')   
+        CheckHash(0xA91E775973377A37)
+        CheckCursor(6,3)
+        Key.Pressed(Enter)
+        Paint('exit edit mode -> 56')   
+        CheckHash(0x2F449AF0A464F231)
+        CheckCursor(hidden)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,w:38,h:5,x:1,y:1,");
+    w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20")); 
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_exit_edit_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0xD4AD9150F1EA4E67)
+        Key.Pressed(Enter)
+        Paint('Enter edit mode')   
+        CheckHash(0xE9BCB46477286639)
+        CheckCursor(5,3)
+        Key.Pressed(Escape)
+        Paint('exit edit mode')   
+        CheckHash(0xD4AD9150F1EA4E67)
+        CheckCursor(hidden)
+        Key.Pressed(Escape)
+        Paint('window closed')
+        CheckHash(0xAB06844D69595285)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,w:38,h:5,x:1,y:1,");
+    w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20")); 
+    a.add_window(w);
+    a.run();
+}
