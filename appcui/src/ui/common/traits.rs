@@ -9,14 +9,15 @@ use crate::{
         combobox::events::ComboBoxEvents,
         command_bar::events::GenericCommandBarEvents,
         desktop::events::DesktopEvents,
+        dropdownlist::events::GenericDropDownListEvents,
+        numericselector::events::GenericNumericSelectorEvents,
         keyselector::events::KeySelectorEvents,
         menu::events::GenericMenuEvents,
         password::events::PasswordEvents,
         radiobox::events::RadioBoxEvents,
-        threestatebox::events::ThreeStateBoxEvents,
-        dropdownlist::events::GenericDropDownListEvents,
         selector::events::GenericSelectorEvents,
         textfield::events::TextFieldEvents,
+        threestatebox::events::ThreeStateBoxEvents,
         window::events::{ToolBarEvents, WindowEvents},
     },
 };
@@ -115,6 +116,7 @@ pub trait Control:
     + GenericSelectorEvents
     + GenericDropDownListEvents
     + ComboBoxEvents
+    + GenericNumericSelectorEvents
 {
 }
 

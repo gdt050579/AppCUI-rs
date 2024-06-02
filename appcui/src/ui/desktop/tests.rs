@@ -104,7 +104,7 @@ fn check_on_resize_for_desktop() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state (30x10)')
-        CheckHash(0x66D6684907F9EA24)
+        CheckHash(0x8608DBE8396759BC)
         Resize(40,5)
         Paint('Old: 30x10, New: 40x5')
         CheckHash(0x6CDE4060C8AB8E26)

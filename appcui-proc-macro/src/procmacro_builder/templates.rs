@@ -276,3 +276,25 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
     return DropDownListEvents::<$(TYPE)>::on_selection_changed(self, h);
 }
 ";
+
+pub(crate) static NUMERIC_SELECTOR_TRAIT_DEF: &str = "
+trait NumericSelectorEvents<T: Number+'static> {
+    fn on_value_changed(&mut self, handle: Handle<NumericSelector<T>>, value: T) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericNumericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_value_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_NUMERIC_SELECTOR)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+pub(crate) static NUMERIC_SELECT_ON_VALUE_CHANGE_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<NumericSelector<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if let Some(obj) = self.control(h) {
+        let value = obj.value();
+        return NumericSelectorEvents::<$(TYPE)>::on_value_changed(self, h, value);
+    }
+    return EventProcessStatus::Ignored;
+}
+";

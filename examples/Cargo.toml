@@ -118,3 +118,7 @@ path = "combobox/main.rs"
 [[example]]
 name = "dropdownlist"
 path = "dropdownlist/main.rs"
+
+[[example]]
+name = "temperature_convertor"
+path = "temperature_convertor/main.rs"
