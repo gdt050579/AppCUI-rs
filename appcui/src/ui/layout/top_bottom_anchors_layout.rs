@@ -3,14 +3,14 @@ use super::Alignament;
 use super::ControlLayout;
 use super::Coordonate;
 use super::LayoutParameters;
-use super::Size;
+use super::Dimension;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopBottomAnchorsLayout {
     pub top: Coordonate,
     pub bottom: Coordonate,
     pub x: Coordonate,
-    pub width: Size,
+    pub width: Dimension,
     pub align: Alignament,
 }
 
@@ -33,7 +33,7 @@ impl TopBottomAnchorsLayout {
             top: params.a_top.unwrap(),
             bottom: params.a_bottom.unwrap(),
             x: params.x.unwrap_or(Coordonate::Absolute(0)),
-            width: params.width.unwrap_or(Size::Absolute(1)),
+            width: params.width.unwrap_or(Dimension::Absolute(1)),
             align: params.align.unwrap_or(Alignament::Center),
         }
     }

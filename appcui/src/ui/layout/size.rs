@@ -1,23 +1,23 @@
 use crate::utils::{KeyValuePair, ValueType};
 
 #[derive(Copy,Clone,PartialEq, Debug)]
-pub(super) enum Size {
+pub enum Dimension {
     Absolute(u16),
     Percentage(u16),
 }
-impl Size {
-    pub(super) fn is_absolute(&self) -> bool {
+impl Dimension {
+    pub fn is_absolute(&self) -> bool {
         match self {
-            Size::Absolute(_) => true,
-            Size::Percentage(_) => false,
+            Dimension::Absolute(_) => true,
+            Dimension::Percentage(_) => false,
         }
     }
-    pub(super) fn as_absolute_size(&self, parent_size: u16) -> u16 {
+    pub fn as_absolute_size(&self, parent_size: u16) -> u16 {
         match self {
-            Size::Absolute(v) => {
+            Dimension::Absolute(v) => {
                 *v
             }
-            Size::Percentage(v) => {
+            Dimension::Percentage(v) => {
                 (((*v) as u32) * (parent_size as u32) / 10000u32).clamp(0, 0xFFFF) as u16
             }
         }
@@ -25,14 +25,34 @@ impl Size {
     pub(super) fn new(value: &KeyValuePair) -> Option<Self> {
         match value.value_type {
             ValueType::Number => {
-                Some(Size::Absolute(value.numerical_value.clamp(0, 30000) as u16))
+                Some(Dimension::Absolute(value.numerical_value.clamp(0, 30000) as u16))
             }
             ValueType::Percentage => {
-                Some(Size::Percentage(value.numerical_value.clamp(0, 30000) as u16))
+                Some(Dimension::Percentage(value.numerical_value.clamp(0, 30000) as u16))
             }
             _ => {
                 None
             }
         }
+    }
+}
+impl From<u16> for Dimension {
+    fn from(value: u16) -> Self {
+        Dimension::Absolute(value)
+    }
+}
+impl From<u8> for Dimension {
+    fn from(value: u8) -> Self {
+        Dimension::Absolute(value as u16)
+    }
+}
+impl From<u32> for Dimension {
+    fn from(value: u32) -> Self {
+        Dimension::Absolute(value as u16)
+    }
+}
+impl From<u64> for Dimension {
+    fn from(value: u64) -> Self {
+        Dimension::Absolute(value as u16)
     }
 }

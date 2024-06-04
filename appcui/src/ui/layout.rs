@@ -22,7 +22,7 @@ mod tests;
 use alignament::Alignament;
 use anchors::Anchors;
 use coordonate::Coordonate;
-use size::Size;
+use size::Dimension;
 use layout_parameters::LayoutParameters;
 use layout_mode::LayoutMode;
 use parameter::Parameter;

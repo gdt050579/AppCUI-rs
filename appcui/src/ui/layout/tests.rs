@@ -4,7 +4,7 @@ use super::Alignament;
 use super::ControlLayout;
 use super::Coordonate;
 use super::PointAndSizeLayout;
-use super::Size;
+use super::Dimension;
 
 use super::LayoutMode;
 
@@ -56,8 +56,8 @@ fn layout_mode_xywh() {
             y: Coordonate::Percentage(1000),
             align: Alignament::TopLeft,
             anchor: Alignament::TopLeft,
-            width: Size::Percentage(1000),
-            height: Size::Absolute(8)
+            width: Dimension::Percentage(1000),
+            height: Dimension::Absolute(8)
         })
     );
     let l3 = LayoutMode::new("x:0,y:0,w:100%,h:25%,a:c");
@@ -68,8 +68,8 @@ fn layout_mode_xywh() {
             y: Coordonate::Absolute(0),
             align: Alignament::Center,
             anchor: Alignament::TopLeft,
-            width: Size::Percentage(10000),
-            height: Size::Percentage(2500)
+            width: Dimension::Percentage(10000),
+            height: Dimension::Percentage(2500)
         })
     );
 }

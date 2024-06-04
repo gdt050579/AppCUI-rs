@@ -2,14 +2,14 @@ use super::should_not_use;
 use super::ControlLayout;
 use super::Coordonate;
 use super::LayoutParameters;
-use super::Size;
+use super::Dimension;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopLeftBottomAnchorsLayout {
     pub top: Coordonate,
     pub left: Coordonate,
     pub bottom: Coordonate,
-    pub width: Size,
+    pub width: Dimension,
 }
 
 impl TopLeftBottomAnchorsLayout {
@@ -35,7 +35,7 @@ impl TopLeftBottomAnchorsLayout {
             top: params.a_top.unwrap(),
             left: params.a_left.unwrap(),
             bottom: params.a_bottom.unwrap(),
-            width: params.width.unwrap_or(Size::Absolute(1)),
+            width: params.width.unwrap_or(Dimension::Absolute(1)),
         }
     }
     #[inline]
