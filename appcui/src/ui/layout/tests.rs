@@ -224,3 +224,11 @@ fn layout_mode_anchor_lbr() {
     validate_pos!("l:10%,b:50%,r:20%,h:2",50,30,5,13,35,2);
     validate_pos!("l:10%,bottom:50%,r:20%,h:50%",50,30,5,0,35,15);
 }
+
+#[test]
+fn dimension_from_basic_type() {
+    assert_eq!(Dimension::from(10u8), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10u16), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10u32), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10u64), Dimension::Absolute(10));
+}
