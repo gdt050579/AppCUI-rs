@@ -1,8 +1,10 @@
 use crate::prelude::*;
+use super::SplitterPanel;
 
 #[CustomControl(overwrite=OnPaint + OnKeyPressed + OnMouseEvent + OnResize + OnFocus, internal = true)]
 pub struct Splitter {
-
+    h_1: Handle<SplitterPanel>,
+    h_2: Handle<SplitterPanel>,
 }
 impl Splitter {
 
