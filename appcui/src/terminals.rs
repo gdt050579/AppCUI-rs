@@ -2,6 +2,7 @@ mod debug;
 mod system_event;
 #[cfg(target_family = "unix")]
 mod termios;
+#[cfg(target_family = "unix")]
 mod ncurses;
 #[cfg(target_os = "windows")]
 mod windows_console;
