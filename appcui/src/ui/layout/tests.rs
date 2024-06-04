@@ -17,8 +17,8 @@ macro_rules! validate_abs {
                 y: Coordonate::Absolute($y),
                 align: Alignament::$a,
                 anchor: Alignament::$anc,
-                width: Size::Absolute($w),
-                height: Size::Absolute($h)
+                width: Dimension::Absolute($w),
+                height: Dimension::Absolute($h)
             })
         );
     };
