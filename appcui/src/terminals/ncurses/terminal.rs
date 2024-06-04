@@ -10,16 +10,19 @@ use super::super::MouseMoveEvent;
 use super::super::SystemEvent;
 use super::super::Terminal;
 use super::colors::ColorManager;
+
 use crate::graphics::*;
 use crate::system::Error;
 
 use copypasta::ClipboardContext;
 use copypasta::ClipboardProvider;
+use super::ncursesapi;
 
 #[cfg(target_family = "unix")]
-use ncurses::{
-    chtype, curs_set, endwin, ll::mmask_t, stdscr, WINDOW,
+use ncursesapi::constants::{
+    chtype, mmask_t,
 };
+use ncursesapi::externs::WINDOW;
 
 #[cfg(target_family = "unix")]
 use std::char;
@@ -28,44 +31,34 @@ use std::char;
 pub struct NcursesTerminal {
     window: WINDOW,
     color_manager: ColorManager,
-    // mouse_button: MouseButton,
-    mouse_x: i32,
-    mouse_y: i32,
-    // mouse_wheel: i32,
-    // key_modifiers: KeyModifier,
 }
 
 #[cfg(target_family = "unix")]
 impl NcursesTerminal {
-    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-        ncurses::setlocale(ncurses::LcCategory::all, "").unwrap();
-        let window = ncurses::initscr();
-        ncurses::clear();
+    pub(crate) fn new(_builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+        ncursesapi::lib::setlocale(ncursesapi::structs::LcCategory::all, "").unwrap();
+        let window = ncursesapi::lib::ncurses_initscr();
+        // ncursesapi::lib::ncurses_clear();
 
-        ncurses::nodelay(ncurses::stdscr(), true);
-        ncurses::halfdelay(1);
-        ncurses::keypad(ncurses::stdscr(), true);
-        ncurses::cbreak();
-        ncurses::noecho();
-        ncurses::nonl();
-        ncurses::raw();
-        ncurses::meta(ncurses::stdscr(), true);
-        ncurses::mousemask(
-            (ncurses::ALL_MOUSE_EVENTS as mmask_t | ncurses::REPORT_MOUSE_POSITION as mmask_t) as mmask_t,
+        ncursesapi::lib::ncurses_nodelay(ncursesapi::lib::ncurses_stdscr(), true);
+        ncursesapi::lib::ncurses_halfdelay(1);
+        ncursesapi::lib::ncurses_keypad(ncursesapi::lib::ncurses_stdscr(), true);
+        ncursesapi::lib::ncurses_cbreak();
+        ncursesapi::lib::ncurses_noecho();
+        ncursesapi::lib::ncurses_nonl();
+        ncursesapi::lib::ncurses_raw();
+        ncursesapi::lib::ncurses_meta(ncursesapi::lib::ncurses_stdscr(), true);
+        ncursesapi::lib::ncurses_mousemask(
+            (ncursesapi::constants::ALL_MOUSE_EVENTS as mmask_t | ncursesapi::constants::REPORT_MOUSE_POSITION as mmask_t) as mmask_t,
             None,
         );
         println!("\x1B[?1003h");
-        ncurses::mouseinterval(0);
-        ncurses::set_escdelay(0);
+        ncursesapi::lib::ncurses_mouseinterval(0);
+        ncursesapi::lib::ncurses_set_escdelay(0);
 
         Ok(Box::new(NcursesTerminal {
             window,
-            // mouse_button: MouseButton::None,
             color_manager: ColorManager::new(),
-            mouse_x: 0,
-            mouse_y: 0,
-            // mouse_wheel: 0,
-            // key_modifiers: KeyModifier::None,
         }))
     }
 }
@@ -113,60 +106,60 @@ pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
 impl Terminal for NcursesTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         if self.window.is_null() {
-            self.window = ncurses::initscr();
-            ncurses::raw();
-            ncurses::keypad(ncurses::stdscr(), true);
-            ncurses::noecho();
+            self.window = ncursesapi::lib::ncurses_initscr();
+            ncursesapi::lib::ncurses_raw();
+            ncursesapi::lib::ncurses_keypad(ncursesapi::lib::ncurses_stdscr(), true);
+            ncursesapi::lib::ncurses_noecho();
         }
 
         let mut current_x = 0;
         let mut current_y = 0;
-        ncurses::wclear(self.window);
+        ncursesapi::lib::ncurses_wclear(self.window);
 
         for ch in surface.chars.iter() {
             let code = match ch.code as u32 {
-                9618 => ncurses::ACS_CKBOARD(),
-                9552 => ncurses::ACS_HLINE(),
-                9553 => ncurses::ACS_VLINE(),
-                9556 => ncurses::ACS_ULCORNER(),
-                9559 => ncurses::ACS_URCORNER(),
-                9565 => ncurses::ACS_LRCORNER(),
-                9562 => ncurses::ACS_LLCORNER(),
-                // 9604 => ncurses::ACS_BLOCK(),
-                9660 => ncurses::ACS_DARROW(),
-                9650 => ncurses::ACS_UARROW(),
-                9472 => ncurses::ACS_HLINE(),
-                9474 => ncurses::ACS_VLINE(),
-                9484 => ncurses::ACS_ULCORNER(),
-                9488 => ncurses::ACS_URCORNER(),
-                9496 => ncurses::ACS_LRCORNER(),
-                9492 => ncurses::ACS_LLCORNER(),
-                9679 => ncurses::ACS_BULLET(),
+                // 9618 => ncursesapi::lib::ncurses_ACS_CKBOARD(),
+                // 9552 => ncursesapi::lib::ncurses_ACS_HLINE(),
+                // 9553 => ncursesapi::lib::ncurses_ACS_VLINE(),
+                // 9556 => ncursesapi::lib::ncurses_ACS_ULCORNER(),
+                // 9559 => ncursesapi::lib::ncurses_ACS_URCORNER(),
+                // 9565 => ncursesapi::lib::ncurses_ACS_LRCORNER(),
+                // 9562 => ncursesapi::lib::ncurses_ACS_LLCORNER(),
+                // 9604 => ncursesapi::lib::ncurses_ACS_BLOCK(),
+                // 9660 => ncursesapi::lib::ncurses_ACS_DARROW(),
+                // 9650 => ncursesapi::lib::ncurses_ACS_UARROW(),
+                // 9472 => ncursesapi::lib::ncurses_ACS_HLINE(),
+                // 9474 => ncursesapi::lib::ncurses_ACS_VLINE(),
+                // 9484 => ncursesapi::lib::ncurses_ACS_ULCORNER(),
+                // 9488 => ncursesapi::lib::ncurses_ACS_URCORNER(),
+                // 9496 => ncursesapi::lib::ncurses_ACS_LRCORNER(),
+                // 9492 => ncursesapi::lib::ncurses_ACS_LLCORNER(),
+                // 9679 => ncursesapi::lib::ncurses_ACS_BULLET(),
                 _ => ch.code as chtype,
             };
 
             if ch.foreground != Color::Transparent || ch.background != Color::Transparent {
                 self.color_manager.set_color_pair(&ch.foreground, &ch.background);
                 if (ch.flags & CharFlags::Underline) == CharFlags::Underline {
-                    ncurses::wattron(self.window, ncurses::A_UNDERLINE);
+                    ncursesapi::lib::ncurses_wattron(self.window, ncursesapi::constants::A_UNDERLINE);
                 }
 
                 if ch.flags & CharFlags::Bold == CharFlags::Bold {
-                    ncurses::wattron(self.window, ncurses::A_BOLD);
+                    ncursesapi::lib::ncurses_wattron(self.window, ncursesapi::constants::A_BOLD);
                 }
 
-                ncurses::mvaddch(current_y as i32, current_x as i32, code as chtype);
+                ncursesapi::lib::ncurses_mvaddch(current_y as i32, current_x as i32, code as chtype);
 
                 if (ch.flags & CharFlags::Underline) == CharFlags::Underline {
-                    ncurses::wattroff(self.window, ncurses::A_UNDERLINE);
+                    ncursesapi::lib::ncurses_wattroff(self.window, ncursesapi::constants::A_UNDERLINE);
                 }
 
                 if ch.flags & CharFlags::Bold == CharFlags::Bold {
-                    ncurses::wattroff(self.window, ncurses::A_BOLD);
+                    ncursesapi::lib::ncurses_wattroff(self.window, ncursesapi::constants::A_BOLD);
                 }
                 self.color_manager.unset_color_pair(&ch.foreground, &ch.background);
             } else {
-                ncurses::mvaddch(current_y as i32, current_x as i32, code as chtype);
+                ncursesapi::lib::ncurses_mvaddch(current_y as i32, current_x as i32, code as chtype);
             }
 
             current_x += 1;
@@ -177,92 +170,92 @@ impl Terminal for NcursesTerminal {
         }
 
         if surface.cursor.is_visible() {
-            curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_VISIBLE);
-            ncurses::wmove(self.window, surface.cursor.y as i32, surface.cursor.x as i32);
+            // curs_set(ncursesapi::structs::CURSOR_VISIBILITY::CURSOR_VISIBLE);
+            ncursesapi::lib::ncurses_wmove(self.window, surface.cursor.y as i32, surface.cursor.x as i32);
         } else {
-            curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE);
+            // curs_set(ncursesapi::lib::ncurses_CURSOR_VISIBILITY::CURSOR_INVISIBLE);
         }
         
-        ncurses::wrefresh(self.window);
+        ncursesapi::lib::ncurses_wrefresh(self.window);
     }
 
     fn get_size(&self) -> Size {
         let mut x: i32 = 0;
         let mut y: i32 = 0;
-        ncurses::getmaxyx(self.window, &mut y, &mut x);
+        ncursesapi::lib::ncurses_getmaxyx(self.window, &mut y, &mut x);
         Size::new(x as u32, y as u32)
     }
 
     fn get_system_event(&mut self) -> SystemEvent {
-        let ch = ncurses::wget_wch(stdscr());        
+        let ch = ncursesapi::lib::ncurses_wget_wch(ncursesapi::lib::ncurses_stdscr());        
         if ch.is_none() {
             return SystemEvent::None;
         }
 
         match ch {
-            Some(ncurses::WchResult::KeyCode(ncurses::KEY_MOUSE)) => {
-                let mut mevent = ncurses::MEVENT {
+            Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_MOUSE)) => {
+                let mut mevent = ncursesapi::structs::MEVENT {
                     id: 0,
                     x: 0,
                     y: 0,
                     z: 0,
                     bstate: 0,
                 };
-                if ncurses::getmouse(&mut mevent) == ncurses::OK {
+                if ncursesapi::lib::ncurses_getmouse(&mut mevent) == ncursesapi::constants::OK {
                     let x = mevent.x as i32;
                     let y = mevent.y as i32;
                     let button = match mevent.bstate as i32 {
-                        ncurses::BUTTON1_PRESSED => MouseButton::Left,
-                        ncurses::BUTTON1_RELEASED => MouseButton::Left,
-                        ncurses::BUTTON1_CLICKED => MouseButton::Left,
-                        ncurses::BUTTON1_DOUBLE_CLICKED => MouseButton::Left,
+                        ncursesapi::constants::BUTTON1_PRESSED => MouseButton::Left,
+                        ncursesapi::constants::BUTTON1_RELEASED => MouseButton::Left,
+                        ncursesapi::constants::BUTTON1_CLICKED => MouseButton::Left,
+                        ncursesapi::constants::BUTTON1_DOUBLE_CLICKED => MouseButton::Left,
 
-                        ncurses::BUTTON2_PRESSED => MouseButton::Center,
-                        ncurses::BUTTON2_RELEASED => MouseButton::Center,
-                        ncurses::BUTTON2_CLICKED => MouseButton::Center,
-                        ncurses::BUTTON2_DOUBLE_CLICKED => MouseButton::Center,
+                        ncursesapi::constants::BUTTON2_PRESSED => MouseButton::Center,
+                        ncursesapi::constants::BUTTON2_RELEASED => MouseButton::Center,
+                        ncursesapi::constants::BUTTON2_CLICKED => MouseButton::Center,
+                        ncursesapi::constants::BUTTON2_DOUBLE_CLICKED => MouseButton::Center,
 
-                        ncurses::BUTTON3_PRESSED => MouseButton::Right,
-                        ncurses::BUTTON3_RELEASED => MouseButton::Right,
-                        ncurses::BUTTON3_CLICKED => MouseButton::Right,
-                        ncurses::BUTTON3_DOUBLE_CLICKED => MouseButton::Right,
+                        ncursesapi::constants::BUTTON3_PRESSED => MouseButton::Right,
+                        ncursesapi::constants::BUTTON3_RELEASED => MouseButton::Right,
+                        ncursesapi::constants::BUTTON3_CLICKED => MouseButton::Right,
+                        ncursesapi::constants::BUTTON3_DOUBLE_CLICKED => MouseButton::Right,
                         _ => MouseButton::None,
                     };
 
                     let mut returned = SystemEvent::None;
-                    if mevent.bstate as i32 & ncurses::BUTTON1_PRESSED != 0 {
+                    if mevent.bstate as i32 & ncursesapi::constants::BUTTON1_PRESSED != 0 {
                         returned = SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button });
-                    } else if mevent.bstate as i32 & ncurses::BUTTON1_RELEASED != 0 {
+                    } else if mevent.bstate as i32 & ncursesapi::constants::BUTTON1_RELEASED != 0 {
                         returned = SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button });
-                    } else if mevent.bstate as i32 & ncurses::BUTTON1_CLICKED != 0 {
+                    } else if mevent.bstate as i32 & ncursesapi::constants::BUTTON1_CLICKED != 0 {
                         returned = SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
-                    } else if mevent.bstate as i32 & ncurses::BUTTON1_DOUBLE_CLICKED != 0 {
+                    } else if mevent.bstate as i32 & ncursesapi::constants::BUTTON1_DOUBLE_CLICKED != 0 {
                         returned = SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
-                    } else if mevent.bstate as i32 & ncurses::REPORT_MOUSE_POSITION != 0 {
+                    } else if mevent.bstate as i32 & ncursesapi::constants::REPORT_MOUSE_POSITION != 0 {
                         returned = SystemEvent::MouseMove(MouseMoveEvent { x, y, button });
                     }
                     return returned;
                 }
             }
-            Some(ncurses::WchResult::KeyCode(ncurses::KEY_RESIZE)) => {
+            Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_RESIZE)) => {
                 let new_size = self.get_size();
                 return SystemEvent::Resize(new_size);
             }
             // F1 - F12
-            Some(ncurses::WchResult::KeyCode(265..=276)) => {
+            Some(ncursesapi::structs::WchResult::KeyCode(265..=276)) => {
                 let key_code = match ch {
-                    Some(ncurses::WchResult::KeyCode(265)) => KeyCode::F1,
-                    Some(ncurses::WchResult::KeyCode(266)) => KeyCode::F2,
-                    Some(ncurses::WchResult::KeyCode(267)) => KeyCode::F3,
-                    Some(ncurses::WchResult::KeyCode(268)) => KeyCode::F4,
-                    Some(ncurses::WchResult::KeyCode(269)) => KeyCode::F5,
-                    Some(ncurses::WchResult::KeyCode(270)) => KeyCode::F6,
-                    Some(ncurses::WchResult::KeyCode(271)) => KeyCode::F7,
-                    Some(ncurses::WchResult::KeyCode(272)) => KeyCode::F8,
-                    Some(ncurses::WchResult::KeyCode(273)) => KeyCode::F9,
-                    Some(ncurses::WchResult::KeyCode(274)) => KeyCode::F10,
-                    Some(ncurses::WchResult::KeyCode(275)) => KeyCode::F11,
-                    Some(ncurses::WchResult::KeyCode(276)) => KeyCode::F12,
+                    Some(ncursesapi::structs::WchResult::KeyCode(265)) => KeyCode::F1,
+                    Some(ncursesapi::structs::WchResult::KeyCode(266)) => KeyCode::F2,
+                    Some(ncursesapi::structs::WchResult::KeyCode(267)) => KeyCode::F3,
+                    Some(ncursesapi::structs::WchResult::KeyCode(268)) => KeyCode::F4,
+                    Some(ncursesapi::structs::WchResult::KeyCode(269)) => KeyCode::F5,
+                    Some(ncursesapi::structs::WchResult::KeyCode(270)) => KeyCode::F6,
+                    Some(ncursesapi::structs::WchResult::KeyCode(271)) => KeyCode::F7,
+                    Some(ncursesapi::structs::WchResult::KeyCode(272)) => KeyCode::F8,
+                    Some(ncursesapi::structs::WchResult::KeyCode(273)) => KeyCode::F9,
+                    Some(ncursesapi::structs::WchResult::KeyCode(274)) => KeyCode::F10,
+                    Some(ncursesapi::structs::WchResult::KeyCode(275)) => KeyCode::F11,
+                    Some(ncursesapi::structs::WchResult::KeyCode(276)) => KeyCode::F12,
                     _ => KeyCode::None,
                 };
                 return SystemEvent::KeyPressed(KeyPressedEvent {
@@ -274,7 +267,7 @@ impl Terminal for NcursesTerminal {
                 });
             }
             // Delete
-            Some(ncurses::WchResult::KeyCode(330) ) =>{
+            Some(ncursesapi::structs::WchResult::KeyCode(330) ) =>{
                 return SystemEvent::KeyPressed(KeyPressedEvent {
                     key: Key {
                         code: KeyCode::Delete,
@@ -284,13 +277,13 @@ impl Terminal for NcursesTerminal {
                 });
             }
             // Arrow keys
-            Some(ncurses::WchResult::KeyCode(ncurses::KEY_UP | ncurses::KEY_DOWN | ncurses::KEY_LEFT | ncurses::KEY_RIGHT | 263)) => {
+            Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_UP | ncursesapi::constants::KEY_DOWN | ncursesapi::constants::KEY_LEFT | ncursesapi::constants::KEY_RIGHT | 263)) => {
                 let key_code  = match ch {
-                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_UP)) => KeyCode::Up,
-                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_DOWN)) => KeyCode::Down,
-                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_LEFT)) => KeyCode::Left,
-                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_RIGHT)) => KeyCode::Right,
-                    Some(ncurses::WchResult::KeyCode(263)) => KeyCode::Backspace,
+                    Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_UP)) => KeyCode::Up,
+                    Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_DOWN)) => KeyCode::Down,
+                    Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_LEFT)) => KeyCode::Left,
+                    Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_RIGHT)) => KeyCode::Right,
+                    Some(ncursesapi::structs::WchResult::KeyCode(263)) => KeyCode::Backspace,
                     _ => KeyCode::None,
                 };
                 return SystemEvent::KeyPressed(KeyPressedEvent {
@@ -303,12 +296,12 @@ impl Terminal for NcursesTerminal {
             }
 
             // Shift + Arrow keys
-            Some(ncurses::WchResult::KeyCode(ncurses::KEY_SR | ncurses::KEY_SF | ncurses::KEY_SLEFT | ncurses::KEY_SRIGHT)) => {
+            Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_SR | ncursesapi::constants::KEY_SF | ncursesapi::constants::KEY_SLEFT | ncursesapi::constants::KEY_SRIGHT)) => {
                 let key_code  = match ch {
-                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_SR)) => KeyCode::Up,
-                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_SF)) => KeyCode::Down,
-                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_SLEFT)) => KeyCode::Left,
-                    Some(ncurses::WchResult::KeyCode(ncurses::KEY_SRIGHT)) => KeyCode::Right,
+                    Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_SR)) => KeyCode::Up,
+                    Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_SF)) => KeyCode::Down,
+                    Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_SLEFT)) => KeyCode::Left,
+                    Some(ncursesapi::structs::WchResult::KeyCode(ncursesapi::constants::KEY_SRIGHT)) => KeyCode::Right,
                     _ => KeyCode::None,
                 };
                 return SystemEvent::KeyPressed(KeyPressedEvent {
@@ -320,7 +313,7 @@ impl Terminal for NcursesTerminal {
                 });
             }
 
-            Some(ncurses::WchResult::Char(ch)) => {
+            Some(ncursesapi::structs::WchResult::Char(ch)) => {
                 if ch == 27 {
                     return  SystemEvent::KeyPressed(KeyPressedEvent {
                         key: Key {

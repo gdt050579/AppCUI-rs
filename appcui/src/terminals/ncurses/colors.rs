@@ -1,7 +1,7 @@
-use std::{collections::HashMap, fs::OpenOptions, io::Write};
+use std::collections::HashMap;
 
 use super::super::super::graphics::Color;
-
+use super::ncursesapi;
 #[derive(Clone, Copy, Debug)]
 pub enum NCursesColor {
     Black = 0,
@@ -22,30 +22,30 @@ pub enum NCursesColor {
     White = 15,
     Transparent = 16,
 }
-impl NCursesColor {
-    pub fn from_value(value: i32) -> Option<NCursesColor> {
-        match value {
-            0 => Some(NCursesColor::Black),
-            1 => Some(NCursesColor::Red),
-            2 => Some(NCursesColor::Green),
-            3 => Some(NCursesColor::Olive),
-            4 => Some(NCursesColor::Blue),
-            5 => Some(NCursesColor::Magenta),
-            6 => Some(NCursesColor::Cyan),
-            7 => Some(NCursesColor::Silver),
-            8 => Some(NCursesColor::Gray),
-            9 => Some(NCursesColor::LightRed),
-            10 => Some(NCursesColor::LightGreen),
-            11 => Some(NCursesColor::Yellow),
-            12 => Some(NCursesColor::LightBlue),
-            13 => Some(NCursesColor::LightMagenta),
-            14 => Some(NCursesColor::LightCyan),
-            15 => Some(NCursesColor::White),
-            16 => Some(NCursesColor::Transparent),
-            _ => None,
-        }
-    }
-}
+// impl NCursesColor {
+//     pub fn from_value(value: i32) -> Option<NCursesColor> {
+//         match value {
+//             0 => Some(NCursesColor::Black),
+//             1 => Some(NCursesColor::Red),
+//             2 => Some(NCursesColor::Green),
+//             3 => Some(NCursesColor::Olive),
+//             4 => Some(NCursesColor::Blue),
+//             5 => Some(NCursesColor::Magenta),
+//             6 => Some(NCursesColor::Cyan),
+//             7 => Some(NCursesColor::Silver),
+//             8 => Some(NCursesColor::Gray),
+//             9 => Some(NCursesColor::LightRed),
+//             10 => Some(NCursesColor::LightGreen),
+//             11 => Some(NCursesColor::Yellow),
+//             12 => Some(NCursesColor::LightBlue),
+//             13 => Some(NCursesColor::LightMagenta),
+//             14 => Some(NCursesColor::LightCyan),
+//             15 => Some(NCursesColor::White),
+//             16 => Some(NCursesColor::Transparent),
+//             _ => None,
+//         }
+//     }
+// }
 
 pub struct ColorManager {
     nr_colors: i16,
@@ -71,9 +71,9 @@ impl ColorManager {
 
     pub(crate) fn new() -> ColorManager {
         let mut result = ColorManager{nr_colors : 0, color_mapping: HashMap::new()};
-        ncurses::start_color();
-        ncurses::use_default_colors();
-        result.nr_colors = ncurses::COLORS() as i16;
+        ncursesapi::lib::ncurses_start_color();
+        ncursesapi::lib::ncurses_use_default_colors();
+        result.nr_colors = ncursesapi::constants::NR_COLORS;
         result
     }
 
@@ -111,11 +111,11 @@ impl ColorManager {
         let pair_index = ColorManager::PAIR_MAPPING[pair_index as usize];
         
         if !self.color_mapping.contains_key(&pair_index) {
-            ncurses::init_pair(pair_index, foreground_color as i16, background_color as i16);
+            ncursesapi::lib::ncurses_init_pair(pair_index, foreground_color as i16, background_color as i16);
         }
         self.color_mapping.insert(pair_index, true);
 
-        ncurses::wattron(ncurses::stdscr(), ncurses::COLOR_PAIR(pair_index));
+        ncursesapi::lib::ncurses_wattron(ncursesapi::lib::ncurses_stdscr(), ncursesapi::lib::ncurses_COLOR_PAIR(pair_index));
     }
 
     pub fn unset_color_pair(&mut self, foreground: &Color, background: &Color) {
@@ -125,6 +125,6 @@ impl ColorManager {
         let pair_index = foreground_color as i16 * ColorManager::NR_COLORS + background_color as i16;
 
         let pair_index = ColorManager::PAIR_MAPPING[pair_index as usize];
-        ncurses::wattroff(ncurses::stdscr(), ncurses::COLOR_PAIR(pair_index));
+        ncursesapi::lib::ncurses_wattroff(ncursesapi::lib::ncurses_stdscr(), ncursesapi::lib::ncurses_COLOR_PAIR(pair_index));
     }
 }
