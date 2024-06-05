@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 EnumBitFlags = "1.0.7"
 AppCUIProcMacro = {path = "../appcui-proc-macro"}
+
+[target.'cfg(target_os = "linux")'.dependencies]
 copypasta = "0.10.1"
 libc = "0.2"
 

@@ -1,13 +1,39 @@
+/*
+    Copyright (c) 2016 Jesse 'Jeaye' Wilkerson
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+    Except as contained in this notice, the name(s) of the above copyright
+    holders shall not be used in advertising or otherwise to promote the
+    sale, use or other dealings in this Software without prior written
+    authorization.
+*/
+
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
 use std::ffi::{CStr, CString};
-use std::ptr;
+use std::{mem, ptr};
 use super::constants::*;
 use super::externs::*;
-use super::structs::{MEVENT, LcCategory, WchResult};
-
+use super::structs::{LcCategory, WchResult, CURSOR_VISIBILITY, MEVENT};
 
 pub type WINDOW = *mut i8;
 
@@ -18,13 +44,6 @@ pub fn ncurses_initscr() -> WINDOW {
 
 pub fn ncurses_endwin() -> i32 {
     unsafe { endwin() }
-}
-
-pub fn ncurses_printw(s: &str) {
-    unsafe {
-        let c_str = CString::new(s).unwrap();
-        printw(c_str.as_ptr());
-    }
 }
 
 pub fn ncurses_refresh() -> i32 {
@@ -193,6 +212,28 @@ pub fn ncurses_stdscr() -> WINDOW {
     unsafe {
         stdscr()
     }
+}
+
+pub fn ncurses_addstr(s: &str) -> Result<i32, std::ffi::NulError>
+{ unsafe { Ok(addstr(s.to_c_str()?.as_ptr())) } }
+
+pub fn ncurses_mvaddstr(y: i32, x: i32, s: &str) -> Result<i32, std::ffi::NulError>
+{
+  if ncurses_wmove(stdscr(),y, x) == ERR
+  { return Ok(ERR); }
+  ncurses_addstr(s)
+}
+
+pub fn ncurses_curs_set(visibility: CURSOR_VISIBILITY) -> Option<CURSOR_VISIBILITY>
+{
+  unsafe
+  {
+    match curs_set(visibility as i32)
+    {
+      ERR => None,
+      ret => Some(mem::transmute::<i8, CURSOR_VISIBILITY>(ret as i8)),
+    }
+  }
 }
 
 // pub fn ncurses_ACS_ULCORNER() -> chtype {
