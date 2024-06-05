@@ -68,8 +68,23 @@ impl OnPaint for VSplitter {
     }
 }
 impl OnKeyPressed for VSplitter {
-    fn on_key_pressed(&mut self, _key: Key, _character: char) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Ctrl+Alt+Left") => {
+                let sz = self.size();
+                self.pos.decrement(sz.width as u16, true);
+                self.update_panel_sizes(sz);
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Alt+Right") => {
+                let sz = self.size();
+                self.pos.increment(sz.width as u16, true);
+                self.update_panel_sizes(sz);
+                EventProcessStatus::Processed
+            }
+
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
 impl OnMouseEvent for VSplitter {
