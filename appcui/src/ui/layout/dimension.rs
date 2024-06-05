@@ -12,7 +12,7 @@ impl Dimension {
             Dimension::Percentage(_) => false,
         }
     }
-    pub fn as_absolute_size(&self, parent_size: u16) -> u16 {
+    pub fn absolute_size(&self, parent_size: u16) -> u16 {
         match self {
             Dimension::Absolute(v) => {
                 *v
@@ -54,5 +54,59 @@ impl From<u32> for Dimension {
 impl From<u64> for Dimension {
     fn from(value: u64) -> Self {
         Dimension::Absolute(value as u16)
+    }
+}
+impl From<i8> for Dimension {
+    fn from(value: i8) -> Self {
+        if value>0 {
+            Dimension::Absolute(value as u16)
+        } else {
+            Dimension::Absolute(0)
+        }
+    }
+}
+impl From<i16> for Dimension {
+    fn from(value: i16) -> Self {
+        if value>0 {
+            Dimension::Absolute(value as u16)
+        } else {
+            Dimension::Absolute(0)
+        }
+    }
+}
+impl From<i32> for Dimension {
+    fn from(value: i32) -> Self {
+        if value>0 {
+            Dimension::Absolute(value as u16)
+        } else {
+            Dimension::Absolute(0)
+        }
+    }
+}
+impl From<i64> for Dimension {
+    fn from(value: i64) -> Self {
+        if value>0 {
+            Dimension::Absolute(value as u16)
+        } else {
+            Dimension::Absolute(0)
+        }
+    }
+}
+impl From<f32> for Dimension {
+    fn from(value: f32) -> Self {
+        if value<0.0 {
+            Dimension::Percentage(0)
+        } else {
+            Dimension::Percentage((value * 10000.0f32) as u16)
+        }
+    }
+}
+impl From<f64> for Dimension {
+    fn from(value: f64) -> Self {
+        if value<0.0 {
+            Dimension::Percentage(0)
+        } else {
+            Dimension::Percentage((value * 10000.0f64) as u16)
+        }
     }
 }

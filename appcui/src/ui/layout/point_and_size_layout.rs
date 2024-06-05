@@ -109,7 +109,7 @@ impl PointAndSizeLayout {
 
     #[inline]
     pub(super) fn update_control_layout(&self, control_layout: &mut ControlLayout, parent_width: u16, parent_height: u16) {
-        control_layout.resize(self.width.as_absolute_size(parent_width), self.height.as_absolute_size(parent_height));
+        control_layout.resize(self.width.absolute_size(parent_width), self.height.absolute_size(parent_height));
         let mut x = self.x.as_absolute_coordonate(parent_width);
         let mut y = self.y.as_absolute_coordonate(parent_height);
 

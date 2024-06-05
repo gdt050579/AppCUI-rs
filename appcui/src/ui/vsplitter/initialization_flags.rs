@@ -1,4 +1,11 @@
+use EnumBitFlags::EnumBitFlags;
 
+#[EnumBitFlags(bits=8)]
+pub enum Flags {
+    PreserveAspectRatio = 0x01,
+    AutoCollapseLeft = 0x02,
+    AutoCollapseRight = 0x04,
+}
 
 /*
 

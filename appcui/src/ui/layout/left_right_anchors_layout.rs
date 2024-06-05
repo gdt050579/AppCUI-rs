@@ -49,7 +49,7 @@ impl LeftRightAnchorsLayout {
         let y = self.y.as_absolute_coordonate(parent_height);
         control_layout.resize(
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
-            self.height.as_absolute_size(parent_height),
+            self.height.absolute_size(parent_height),
         );
         match self.align {
             Alignament::Top => control_layout.set_position(left, y),

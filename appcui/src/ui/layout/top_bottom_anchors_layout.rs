@@ -48,7 +48,7 @@ impl TopBottomAnchorsLayout {
         let bottom = self.bottom.as_absolute_coordonate(parent_height);
         let x = self.x.as_absolute_coordonate(parent_width);
         control_layout.resize(
-            self.width.as_absolute_size(parent_width),
+            self.width.absolute_size(parent_width),
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,
         );
         match self.align {

@@ -49,7 +49,7 @@ impl TopLeftBottomAnchorsLayout {
         let left = self.left.as_absolute_coordonate(parent_width);
         let bottom = self.bottom.as_absolute_coordonate(parent_height);
         control_layout.resize(
-            self.width.as_absolute_size(parent_width),
+            self.width.absolute_size(parent_width),
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,
         );
         control_layout.set_position(left, top);
