@@ -1,19 +1,19 @@
 use super::Flags;
 use super::SplitterPanel;
 use crate::prelude::*;
-use crate::ui::layout::Dimension;
+use crate::ui::layout::Coordonate;
 
 #[CustomControl(overwrite=OnPaint + OnKeyPressed + OnMouseEvent + OnResize + OnFocus, internal = true)]
 pub struct VSplitter {
     left: Handle<SplitterPanel>,
     right: Handle<SplitterPanel>,
-    pos: Dimension,
+    pos: Coordonate,
     flags: Flags,
 }
 impl VSplitter {
     pub fn new<T>(pos: T, layout: Layout, flags: Flags) -> Self
     where
-        Dimension: From<T>,
+        Coordonate: From<T>,
     {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -28,7 +28,7 @@ impl VSplitter {
         obj
     }
     fn update_panel_sizes(&mut self, new_size: Size) {
-        let w = self.pos.absolute(new_size.width as u16);
+        let w = self.pos.absolute(new_size.width as u16).max(0) as u16;
         let h = new_size.height as u16;
         let h1 = self.left;
         let h2 = self.right;
@@ -72,14 +72,20 @@ impl OnKeyPressed for VSplitter {
         match key.value() {
             key!("Ctrl+Alt+Left") => {
                 let sz = self.size();
-                self.pos.decrement(sz.width as u16, true);
-                self.update_panel_sizes(sz);
+                if sz.width > 0 {
+                    let x = (self.pos.absolute(sz.width as u16) - 1).clamp(0, sz.width as i32 - 1);
+                    self.pos.update_with_absolute_value(x as i16, sz.width as u16);
+                    self.update_panel_sizes(sz);
+                }
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Right") => {
                 let sz = self.size();
-                self.pos.increment(sz.width as u16, true);
-                self.update_panel_sizes(sz);
+                if sz.width > 0 {
+                    let x = (self.pos.absolute(sz.width as u16) + 1).clamp(0, sz.width as i32 - 1);
+                    self.pos.update_with_absolute_value(x as i16, sz.width as u16);
+                    self.update_panel_sizes(sz);
+                }
                 EventProcessStatus::Processed
             }
 
