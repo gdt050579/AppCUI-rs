@@ -28,7 +28,7 @@ impl VSplitter {
         obj
     }
     fn update_panel_sizes(&mut self, new_size: Size) {
-        let w = self.pos.absolute_size(new_size.width as u16);
+        let w = self.pos.absolute(new_size.width as u16);
         let h = new_size.height as u16;
         let h1 = self.left;
         let h2 = self.right;
@@ -63,7 +63,7 @@ impl OnPaint for VSplitter {
             (theme.lines.normal, theme.symbol.arrows, theme.symbol.arrows)
         };
         let sz = self.size();
-        let x = self.pos.absolute_size(sz.width as u16) as i32;
+        let x = self.pos.absolute(sz.width as u16) as i32;
         surface.draw_vertical_line_with_size(x, 0, sz.height, LineType::Single, col_line);
     }
 }

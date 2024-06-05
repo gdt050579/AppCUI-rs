@@ -45,12 +45,12 @@ impl LeftBottomRightAnchorsLayout {
         parent_width: u16,
         parent_height: u16,
     ) {
-        let left = self.left.as_absolute_coordonate(parent_width);
-        let right = self.right.as_absolute_coordonate(parent_width);
-        let bottom = self.bottom.as_absolute_coordonate(parent_height);
+        let left = self.left.absolute(parent_width);
+        let right = self.right.absolute(parent_width);
+        let bottom = self.bottom.absolute(parent_height);
         control_layout.resize(
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
-            self.height.absolute_size(parent_height),
+            self.height.absolute(parent_height),
         );
         control_layout.set_position(
             left,

@@ -12,7 +12,7 @@ impl Dimension {
             Dimension::Percentage(_) => false,
         }
     }
-    pub fn absolute_size(&self, parent_size: u16) -> u16 {
+    pub fn absolute(&self, parent_size: u16) -> u16 {
         match self {
             Dimension::Absolute(v) => *v,
             Dimension::Percentage(v) => (((*v) as u32) * (parent_size as u32) / 10000u32).clamp(0, 0xFFFF) as u16,

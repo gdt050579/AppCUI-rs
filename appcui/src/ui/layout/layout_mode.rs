@@ -50,12 +50,12 @@ impl LayoutMode {
                 let w = params_list.width.unwrap();
                 let h = params_list.height.unwrap();
                 if x.is_absolute() && y.is_absolute() && w.is_absolute() && h.is_absolute() {
-                    let w = w.absolute_size(0);
-                    let h = h.absolute_size(0);
+                    let w = w.absolute(0);
+                    let h = h.absolute(0);
                     if (w > 0) && (h > 0) {
                         return LayoutMode::Absolute(AbsoluteLayout::new(
-                            x.as_absolute_coordonate(0),
-                            y.as_absolute_coordonate(0),
+                            x.absolute(0),
+                            y.absolute(0),
                             w,
                             h,
                         ));

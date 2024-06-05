@@ -21,7 +21,6 @@ mod tests;
 
 use alignament::Alignament;
 use anchors::Anchors;
-use coordonate::Coordonate;
 use layout_parameters::LayoutParameters;
 use layout_mode::LayoutMode;
 use parameter::Parameter;
@@ -37,6 +36,7 @@ use all_anchors_layout::AllAnchorsLayout;
 use macros::should_not_use;
 pub use control_layout::Layout;
 pub use dimension::Dimension;
+pub use coordonate::Coordonate;
 pub (in crate) use control_layout::ControlLayout;
 
 
