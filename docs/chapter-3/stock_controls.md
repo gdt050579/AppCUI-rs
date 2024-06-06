@@ -11,6 +11,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [ColorPicker](stock-controls/colorpicker.md)         | ui::ColorPicker              | `colorpicker!`     | <img src="stock-controls/img/colorpicker.png" width=300/>     |
 | [ComboBox](stock-controls/combobox.md)               | ui::ComboBox                 | `combobox!`        | <img src="stock-controls/img/combobox.png" width=300/>        |
 | [DropDownList](stock-controls/dropdownlist.md)       | ui::DropDownList&lt;T&gt;    | `dropdownlist!`    | <img src="stock-controls/img/dropdownlist.png" width=300/>    |
+| [HLine](stock-controls/hline.md)                     | ui::HLine                    | `hline!`           | <img src="stock-controls/img/hline.png" width=300/>           |
 | [ImageViewer](stock-controls/imageviewer.md)         | ui::ImageViewer              | `imageviewer!`     | <img src="stock-controls/img/imageviewer.png" width=300/>     |
 | [KeySelector](stock-controls/keyselector.md)         | ui::KeySelector              | `keyselector!`     | <img src="stock-controls/img/keyselector.png" width=300/>     |
 | [Label](stock-controls/label.md)                     | ui::Label                    | `label!`           | <img src="stock-controls/img/label.png" width=300/>           |

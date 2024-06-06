@@ -17,6 +17,15 @@ impl HLine {
         obj.set_size_bounds(1, 1, u16::MAX, 1);
         obj
     }
+
+    pub fn title(&self) -> &str{
+        &self.title
+    }
+
+    pub fn set_title(&mut self, new_title: &str){
+        self.title.clear();
+        self.title.push_str(new_title);
+    }
 }
 
 impl OnPaint for HLine {
