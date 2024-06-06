@@ -189,6 +189,10 @@ pub const BUTTON4_TRIPLE_CLICKED: i32 = 268435456;
 pub const BUTTON_CTRL: i32 = 536870912;
 pub const BUTTON_SHIFT: i32 = 1073741824;
 pub const BUTTON_ALT: i32 = -2147483648;
+pub const WHEEL_DOWN: i32 = 2097152;
+pub const WHEEL_UP: i32 = 65536;
+pub const WHEEL_LEFT: i32 = 134283264;
+pub const WHEEL_RIGHT: i32 = 136314880;
 // pub const NCURSES_MOUSE_MASK: i32 = 4294967295;
 
 pub const A_NORMAL: u64 = 1 - 1;

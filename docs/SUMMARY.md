@@ -11,7 +11,7 @@
         - [Recording events](chapter-2/event_recording.md)
     - [Terminals](chapter-2/terminals.md)
         - [Windows Console]()
-        - [NCurses]()
+        - [NCurses](chapter-2/terminals/ncurses.md)
         - [OpenGL]()
         - [SDL]()
         - [CrossTerm]()
