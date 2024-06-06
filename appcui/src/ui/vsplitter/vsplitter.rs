@@ -1,3 +1,5 @@
+use self::layout::Dimension;
+
 use super::Flags;
 use super::SplitterPanel;
 use crate::prelude::*;
@@ -7,6 +9,8 @@ use crate::ui::layout::Coordonate;
 pub struct VSplitter {
     left: Handle<SplitterPanel>,
     right: Handle<SplitterPanel>,
+    min_left: Dimension,
+    min_right: Dimension,
     pos: Coordonate,
     flags: Flags,
 }
@@ -20,12 +24,45 @@ impl VSplitter {
             left: Handle::None,
             right: Handle::None,
             pos: pos.into(),
+            min_left: Dimension::Percentage(0),
+            min_right: Dimension::Percentage(0),
             flags,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
         obj.left = obj.add_child(SplitterPanel::new());
         obj.right = obj.add_child(SplitterPanel::new());
         obj
+    }
+    pub fn set_left_min_size<T>(&mut self, min_size: T)
+    where
+        Dimension: From<T>,
+    {
+        self.min_left = min_size.into();
+    }
+    pub fn set_right_min_size<T>(&mut self, min_size: T)
+    where
+        Dimension: From<T>,
+    {
+        self.min_right = min_size.into();
+    }
+    pub fn set_position<T>(&mut self, pos: T)
+    where
+        Coordonate: From<T>,
+    {
+        self.set_position_with_coordonate(pos.into());
+    }
+    fn set_position_with_coordonate(&mut self, pos: Coordonate) {
+        let w = self.size().width as u16;
+        self.pos = pos;
+        let mut abs_value = self.pos.absolute(w);
+        let min_left_margin = self.min_left.absolute(w);
+        let min_right_margin = self.min_right.absolute(w);
+        if abs_value >= (w as i32 - min_right_margin as i32) {
+            abs_value = w as i32 - min_right_margin as i32 - 1;
+        }
+        abs_value = abs_value.max(min_left_margin as i32);
+        self.pos.update_with_absolute_value(abs_value as i16, w);
+        self.update_panel_sizes(self.size());
     }
     fn update_panel_sizes(&mut self, new_size: Size) {
         let w = self.pos.absolute(new_size.width as u16).max(0) as u16;
@@ -73,18 +110,14 @@ impl OnKeyPressed for VSplitter {
             key!("Ctrl+Alt+Left") => {
                 let sz = self.size();
                 if sz.width > 0 {
-                    let x = (self.pos.absolute(sz.width as u16) - 1).clamp(0, sz.width as i32 - 1);
-                    self.pos.update_with_absolute_value(x as i16, sz.width as u16);
-                    self.update_panel_sizes(sz);
+                    self.set_position_with_coordonate(Coordonate::Absolute((self.pos.absolute(sz.width as u16) - 1) as i16));
                 }
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Right") => {
                 let sz = self.size();
                 if sz.width > 0 {
-                    let x = (self.pos.absolute(sz.width as u16) + 1).clamp(0, sz.width as i32 - 1);
-                    self.pos.update_with_absolute_value(x as i16, sz.width as u16);
-                    self.update_panel_sizes(sz);
+                    self.set_position_with_coordonate(Coordonate::Absolute((self.pos.absolute(sz.width as u16) + 1) as i16));
                 }
                 EventProcessStatus::Processed
             }
