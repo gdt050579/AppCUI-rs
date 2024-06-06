@@ -49,12 +49,14 @@ impl VSplitter {
     where
         Coordonate: From<T>,
     {
-        self.set_position_with_coordonate(pos.into());
+        // force type conversion
+        self.pos = pos.into();
+        // update the position of the splitter
+        self.update_position(self.pos);
     }
-    fn set_position_with_coordonate(&mut self, pos: Coordonate) {
+    fn update_position(&mut self, pos: Coordonate) {
         let w = self.size().width as u16;
-        self.pos = pos;
-        let mut abs_value = self.pos.absolute(w);
+        let mut abs_value = pos.absolute(w);
         let min_left_margin = self.min_left.absolute(w);
         let min_right_margin = self.min_right.absolute(w);
         if abs_value >= (w as i32 - min_right_margin as i32) {
@@ -110,18 +112,25 @@ impl OnKeyPressed for VSplitter {
             key!("Ctrl+Alt+Left") => {
                 let sz = self.size();
                 if sz.width > 0 {
-                    self.set_position_with_coordonate(Coordonate::Absolute((self.pos.absolute(sz.width as u16) - 1) as i16));
+                    self.update_position(Coordonate::Absolute((self.pos.absolute(sz.width as u16) - 1) as i16));
                 }
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Right") => {
                 let sz = self.size();
                 if sz.width > 0 {
-                    self.set_position_with_coordonate(Coordonate::Absolute((self.pos.absolute(sz.width as u16) + 1) as i16));
+                    self.update_position(Coordonate::Absolute((self.pos.absolute(sz.width as u16) + 1) as i16));
                 }
                 EventProcessStatus::Processed
             }
-
+            key!("Ctrl+Alt+Shift+Left") => {
+                self.update_position(Coordonate::Absolute(0));
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Alt+Shift+Right") => {
+                self.update_position(Coordonate::Absolute(self.size().width as i16));
+                EventProcessStatus::Processed
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
