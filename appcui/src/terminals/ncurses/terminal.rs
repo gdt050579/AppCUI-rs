@@ -12,7 +12,9 @@ use crate::input::KeyModifier;
 use crate::input::MouseButton;
 
 use crate::graphics::*;
+use crate::prelude::MouseWheelDirection;
 use crate::system::Error;
+use crate::terminals::MouseWheelEvent;
 
 use super::ncursesapi;
 use copypasta::ClipboardContext;
@@ -24,6 +26,7 @@ use ncursesapi::externs::WINDOW;
 
 #[cfg(target_family = "unix")]
 use std::char;
+use std::io::Write;
 
 #[cfg(target_family = "unix")]
 pub struct NcursesTerminal {
@@ -67,7 +70,10 @@ pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
     let mut key_modifier = KeyModifier::None;
     let character: char = ch as u8 as char;
 
-    if ch >= 97 && ch <= 122 {
+    if ch == 13{
+        key_code = KeyCode::Enter;
+    }
+    else if ch >= 97 && ch <= 122 {
         key_code = KeyCode::from((ch - 69) as u8);
     } else if ch >= 65 && ch <= 90 {
         key_code = KeyCode::from((ch - 37) as u8);
@@ -198,13 +204,25 @@ impl Terminal for NcursesTerminal {
                         ncursesapi::constants::BUTTON2_CLICKED => MouseButton::Center,
                         ncursesapi::constants::BUTTON2_DOUBLE_CLICKED => MouseButton::Center,
 
-                        ncursesapi::constants::BUTTON3_PRESSED => MouseButton::Right,
-                        ncursesapi::constants::BUTTON3_RELEASED => MouseButton::Right,
-                        ncursesapi::constants::BUTTON3_CLICKED => MouseButton::Right,
-                        ncursesapi::constants::BUTTON3_DOUBLE_CLICKED => MouseButton::Right,
+                        // ncursesapi::constants::BUTTON3_PRESSED => MouseButton::Right,
+                        // ncursesapi::constants::BUTTON3_RELEASED => MouseButton::Right,
+                        // ncursesapi::constants::BUTTON3_CLICKED => MouseButton::Right,
+                        // ncursesapi::constants::BUTTON3_DOUBLE_CLICKED => MouseButton::Right,
                         _ => MouseButton::None,
                     };
 
+                    if button == MouseButton::None {
+                        let button = match mevent.bstate as i32 {
+                            ncursesapi::constants::WHEEL_UP => MouseWheelDirection::Up,
+                            ncursesapi::constants::WHEEL_DOWN => MouseWheelDirection::Down,
+                            ncursesapi::constants::WHEEL_LEFT => MouseWheelDirection::Left,
+                            ncursesapi::constants::WHEEL_RIGHT => MouseWheelDirection::Right,
+                            _ => MouseWheelDirection::None,
+                        };
+                        if button != MouseWheelDirection::None {
+                            return SystemEvent::MouseWheel(MouseWheelEvent { x, y, direction: button });
+                        }
+                    }
                     let mut returned = SystemEvent::None;
                     if mevent.bstate as i32 & ncursesapi::constants::BUTTON1_PRESSED != 0 {
                         returned = SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button });
