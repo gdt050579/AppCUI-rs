@@ -27,6 +27,7 @@ pub mod combobox;
 pub mod dropdownlist;
 pub mod numericselector;
 pub mod splitter;
+pub mod vline;
 
 // re-export
 pub use common::ControlBase;
@@ -54,3 +55,4 @@ pub use command_bar::CommandBar;
 pub use layout::Layout;
 pub use numericselector::NumericSelector;
 pub use splitter::Splitter;
+pub use vline::VLine;

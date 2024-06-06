@@ -435,3 +435,8 @@ pub fn menuitem(input: TokenStream) -> TokenStream {
 pub fn menu(input: TokenStream) -> TokenStream {
     crate::menu::menu::create(input, None)
 }
+
+#[proc_macro]
+pub fn vline(input: TokenStream) -> TokenStream {
+    crate::controls::vline::create(input)
+}
