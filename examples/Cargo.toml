@@ -124,5 +124,9 @@ name = "temperature_convertor"
 path = "temperature_convertor/main.rs"
 
 [[example]]
+name = "hline"
+path = "hline/main.rs"
+
+[[example]]
 name = "vline"
 path = "vline/main.rs"

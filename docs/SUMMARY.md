@@ -56,6 +56,7 @@
         - [DateTimePicker]()
         - [Label](chapter-3/stock-controls/label.md)
         - [ListView]()
+        - [HLine](chapter-3/stock-controls/hline.md)
         - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
         - [KeySelector](chapter-3/stock-controls/keyselector.md)
         - [NumericSelector](chapter-3/stock-controls/numericselector.md)
