@@ -53,3 +53,31 @@ fn check_keyboard_movement() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_mouse_buttons() {
+    let script = "
+        Paint.Enable(false)        
+        Paint('Initial state')   
+        CheckHash(0xE2548C89F72469D9)
+        Mouse.Click(30,2,left)
+        Paint('2. Left most')   
+        CheckHash(0xB617F953476DE6E2)
+        Mouse.Click(11,3,left)
+        Paint('3. Right most')   
+        CheckHash(0x1E6CE665E12C30FE)
+        Mouse.Click(48,2,left)
+        Paint('4. Left most')   
+        CheckHash(0xB617F953476DE6E2)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::Flags::None);
+    vs.set_min_width(vsplitter::Panel::Left, 5);
+    vs.set_min_width(vsplitter::Panel::Right, 5);
+    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
