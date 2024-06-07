@@ -2,6 +2,8 @@ mod debug;
 mod system_event;
 #[cfg(target_family = "unix")]
 mod termios;
+#[cfg(target_family = "unix")]
+mod ncurses;
 #[cfg(target_os = "windows")]
 mod windows_console;
 
@@ -22,6 +24,8 @@ use self::debug::DebugTerminal;
 
 #[cfg(target_family = "unix")]
 use self::termios::TermiosTerminal;
+#[cfg(target_family = "unix")]
+use self::ncurses::NcursesTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_console::WindowsTerminal;
 
@@ -41,6 +45,8 @@ pub enum TerminalType {
     WindowsConsole,
     #[cfg(target_family = "unix")]
     Termios,
+    #[cfg(target_family = "unix")]
+    NcursesTerminal,
 }
 
 pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
@@ -77,6 +83,9 @@ pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>,
         }
         #[cfg(target_family = "unix")]
         TerminalType::Termios => TermiosTerminal::new(builder),
+        
+        #[cfg(target_family = "unix")]
+        TerminalType::NcursesTerminal => NcursesTerminal::new(builder),
     }
 }
 #[cfg(target_os = "windows")]
@@ -86,7 +95,8 @@ fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Te
 }
 #[cfg(target_os = "linux")]
 fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-    TermiosTerminal::new(builder)
+    // TermiosTerminal::new(builder)
+    NcursesTerminal::new(builder)
 }
 #[cfg(target_os = "macos")]
 fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {

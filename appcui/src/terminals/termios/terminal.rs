@@ -49,7 +49,7 @@ impl TermiosTerminal {
 impl Terminal for TermiosTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         let mut s = String::new();
-        let sz = surface.get_size();
+        let sz = surface.size();
         for y in 0..sz.height {
             for x in 0..sz.width {
                 if let Some(c) = surface.get(x as i32, y as i32) {
