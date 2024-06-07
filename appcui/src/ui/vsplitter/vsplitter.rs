@@ -205,19 +205,24 @@ impl OnMouseEvent for VSplitter {
                 }
             }
             MouseEvent::Released(evn) => {
-                match self.state {
+                let processed = match self.state {
                     State::ClickedOnLeftButton => {
                         self.update_position(Coordonate::Absolute(0));
+                        true
                     }
                     State::ClickedOnRightButton => {
                         self.update_position(Coordonate::Absolute(self.size().width as i16));
+                        true
                     }
-                    _ => {
-                        return EventProcessStatus::Ignored;
-                    }
+                    _ => false,
+                };
+                let new_state = self.mouse_to_state(evn.x, evn.y, false);
+                if (new_state != self.state) || processed {
+                    self.state = new_state;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
                 }
-                self.state = self.mouse_to_state(evn.x, evn.y, false);
-                EventProcessStatus::Processed
             }
             MouseEvent::Drag(evn) => {
                 if self.state == State::Dragging {
