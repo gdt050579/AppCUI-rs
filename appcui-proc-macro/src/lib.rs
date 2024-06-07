@@ -440,3 +440,8 @@ pub fn menu(input: TokenStream) -> TokenStream {
 pub fn hline(input: TokenStream) -> TokenStream {
     crate::controls::hline::create(input)
 }
+
+#[proc_macro]
+pub fn vline(input: TokenStream) -> TokenStream {
+    crate::controls::vline::create(input)
+}

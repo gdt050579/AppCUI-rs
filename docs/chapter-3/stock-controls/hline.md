@@ -4,7 +4,7 @@ Represent a horizontal line:
 
 <img src="img/hline.png" width=300/>
 
-To create a horizontal line use `HLine::new` method (with 3 parameters: a title, a layout and a set of flags). The flags let you chose if the line has text or if it is a double line.
+To create a horizontal line use `HLine::new` method (with 3 parameters: a title, a layout and a set of flags). The flags let you choose if the line has text or if it is a double line.
 ```rs
 let a = HLine::new("TestLine", Layout::new("x:1,y:3,w:30"), Flags::None);
 let b = HLine::new("TestLine", Layout::new("x:1,y:3,w:30"), Flags::DoubleLine | Flags::HasTitle);
