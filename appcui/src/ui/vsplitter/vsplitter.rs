@@ -46,6 +46,19 @@ impl VSplitter {
         obj.right = obj.add_child(SplitterPanel::new());
         obj
     }
+    #[inline(always)]
+    pub fn add<T>(&mut self, panel: vsplitter::Panel, control: T) -> Handle<T>
+    where
+        T: Control + NotWindow + NotDesktop + 'static,
+    {
+        let h = if panel == vsplitter::Panel::Left { self.left } else { self.right };
+        let cm = RuntimeManager::get().get_controls_mut();
+        if let Some(panel) = cm.get_mut(h.cast()) {
+            panel.base_mut().add_child(control)
+        } else {
+            Handle::None
+        }
+    }
     pub fn set_left_min_size<T>(&mut self, min_size: T)
     where
         Dimension: From<T>,

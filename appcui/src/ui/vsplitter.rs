@@ -8,4 +8,5 @@ use self::splitter_panel::SplitterPanel;
 
 pub use self::vsplitter::VSplitter;
 pub use self::initialization_flags::Flags;
+pub use self::initialization_flags::Panel;
 

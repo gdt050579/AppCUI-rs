@@ -7,6 +7,12 @@ pub enum Flags {
     AutoCollapseRight = 0x04,
 }
 
+#[derive(Copy,Clone,PartialEq,Eq)]
+pub enum Panel {
+    Left,
+    Right,
+}
+
 /*
 
 poate fi: verfical sau orizantorl --> posibil bool
