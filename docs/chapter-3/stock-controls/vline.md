@@ -27,14 +27,14 @@ A vertical line supports all common parameters (as they are described in [Instan
 A vertical line emits no events.
 
 ## Methods
-A vertical line emits no aditional methods.
+A vertical line has no aditional methods.
 
 ## Key association
 A vertical line does not receive any input and as such it has no key associated with it.
 
 ## Example
 
-The following code creates a window with a vertical line that contains the text `Hello world !`.
+The following code creates a window with a vertical line.
 ```rs
 use appcui::prelude::*;
 
@@ -42,7 +42,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:20"), window::Flags::None);
     
-    w.add(VLine::new(Layout::new("x:3,y:1,h:15"), Flags::DoubleLine));
+    w.add(VLine::new(Layout::new("x:3,y:1,h:15"), VLine::Flags::DoubleLine));
     app.add_window(w);
     app.run();
     Ok(())
