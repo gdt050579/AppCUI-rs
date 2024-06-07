@@ -59,18 +59,16 @@ impl VSplitter {
             Handle::None
         }
     }
-    pub fn set_left_min_size<T>(&mut self, min_size: T)
+    pub fn set_min_width<T>(&mut self, panel: vsplitter::Panel, min_size: T)
     where
         Dimension: From<T>,
     {
-        self.min_left = min_size.into();
+        match panel {
+            vsplitter::Panel::Left => self.min_left = min_size.into(),
+            vsplitter::Panel::Right => self.min_right = min_size.into(),
+        }
     }
-    pub fn set_right_min_size<T>(&mut self, min_size: T)
-    where
-        Dimension: From<T>,
-    {
-        self.min_right = min_size.into();
-    }
+
     pub fn set_position<T>(&mut self, pos: T)
     where
         Coordonate: From<T>,
@@ -100,8 +98,8 @@ impl VSplitter {
         let rm = RuntimeManager::get();
         if let Some(p1) = rm.get_control_mut(h1) {
             p1.set_position(0, 0);
-            if w > 2 {
-                p1.set_size(w - 1, h);
+            if w > 1 {
+                p1.set_size(w, h);
                 p1.set_visible(true);
             } else {
                 p1.set_size(0, h);
