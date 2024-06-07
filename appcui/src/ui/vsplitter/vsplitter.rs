@@ -5,6 +5,17 @@ use super::SplitterPanel;
 use crate::prelude::*;
 use crate::ui::layout::Coordonate;
 
+#[derive(Eq, PartialEq, Copy, Clone)]
+enum State {
+    None,
+    OverSeparator,
+    OverLeftButton,
+    OverRightButton,
+    ClickedOnLeftButton,
+    ClickedOnRightButton,
+    Dragging,
+}
+
 #[CustomControl(overwrite=OnPaint + OnKeyPressed + OnMouseEvent + OnResize + OnFocus, internal = true)]
 pub struct VSplitter {
     left: Handle<SplitterPanel>,
@@ -13,6 +24,7 @@ pub struct VSplitter {
     min_right: Dimension,
     pos: Coordonate,
     flags: Flags,
+    state: State,
 }
 impl VSplitter {
     pub fn new<T>(pos: T, layout: Layout, flags: Flags) -> Self
@@ -26,6 +38,7 @@ impl VSplitter {
             pos: pos.into(),
             min_left: Dimension::Percentage(0),
             min_right: Dimension::Percentage(0),
+            state: State::None,
             flags,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
@@ -93,17 +106,48 @@ impl VSplitter {
             }
         }
     }
+    fn mouse_to_state(&self, x: i32, y: i32, clicked: bool) -> State {
+        let sz = self.size();
+        let pos = self.pos.absolute(sz.width as u16);
+        if x != pos {
+            State::None
+        } else {
+            if clicked {
+                match y {
+                    1 => State::ClickedOnLeftButton,
+                    2 => State::ClickedOnRightButton,
+                    _ => State::Dragging,
+                }
+            } else {
+                match y {
+                    1 => State::OverLeftButton,
+                    2 => State::OverRightButton,
+                    _ => State::OverSeparator,
+                }
+            }
+        }
+    }
 }
 impl OnPaint for VSplitter {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let (col_line, col_b1, col_b2) = if !self.is_enabled() {
             (theme.lines.inactive, theme.symbol.inactive, theme.symbol.inactive)
         } else {
-            (theme.lines.normal, theme.symbol.arrows, theme.symbol.arrows)
+            match self.state {
+                State::OverSeparator => (theme.lines.hovered, theme.symbol.arrows, theme.symbol.arrows),
+                State::OverLeftButton => (theme.lines.normal, theme.symbol.hovered, theme.symbol.arrows),
+                State::OverRightButton => (theme.lines.normal, theme.symbol.arrows, theme.symbol.hovered),
+                State::ClickedOnLeftButton => (theme.lines.normal, theme.symbol.pressed, theme.symbol.arrows),
+                State::ClickedOnRightButton => (theme.lines.normal, theme.symbol.arrows, theme.symbol.pressed),
+                State::Dragging => (theme.lines.pressed_or_selectd, theme.symbol.arrows, theme.symbol.arrows),
+                State::None => (theme.lines.normal, theme.symbol.arrows, theme.symbol.arrows),
+            }
         };
         let sz = self.size();
         let x = self.pos.absolute(sz.width as u16) as i32;
         surface.draw_vertical_line_with_size(x, 0, sz.height, LineType::Single, col_line);
+        surface.write_char(x, 1, Character::with_attributes(SpecialChar::TriangleLeft, col_b1));
+        surface.write_char(x, 2, Character::with_attributes(SpecialChar::TriangleRight, col_b2));
     }
 }
 impl OnKeyPressed for VSplitter {
@@ -136,8 +180,56 @@ impl OnKeyPressed for VSplitter {
     }
 }
 impl OnMouseEvent for VSplitter {
-    fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.state = State::None;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(point) => {
+                let new_state = self.mouse_to_state(point.x, point.y, false);
+                if new_state != self.state {
+                    self.state = new_state;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Pressed(evn) => {
+                let new_state = self.mouse_to_state(evn.x, evn.y, true);
+                if new_state != self.state {
+                    self.state = new_state;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Released(evn) => {
+                match self.state {
+                    State::ClickedOnLeftButton => {
+                        self.update_position(Coordonate::Absolute(0));
+                    }
+                    State::ClickedOnRightButton => {
+                        self.update_position(Coordonate::Absolute(self.size().width as i16));
+                    }
+                    _ => {
+                        return EventProcessStatus::Ignored;
+                    }
+                }
+                self.state = self.mouse_to_state(evn.x, evn.y, false);
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Drag(evn) => {
+                if self.state == State::Dragging {
+                    self.update_position(Coordonate::Absolute(evn.x as i16));
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
+        }
     }
 }
 impl OnResize for VSplitter {
