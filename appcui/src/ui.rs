@@ -29,6 +29,7 @@ pub mod numericselector;
 pub mod splitter;
 pub mod hline;
 pub mod vline;
+pub mod date_picker;
 
 // re-export
 pub use common::ControlBase;
@@ -58,3 +59,4 @@ pub use numericselector::NumericSelector;
 pub use splitter::Splitter;
 pub use hline::HLine;
 pub use vline::VLine;
+pub use date_picker::DatePicker;
