@@ -1,4 +1,4 @@
-use chrono::{DateTime, Datelike, NaiveDate, Utc};
+use chrono::{NaiveDate, Datelike, Utc};
 use AppCUIProcMacro::CustomControl;
 
 const MINSPACE_FOR_SHORT_DATE: u32 = 15;
@@ -34,7 +34,7 @@ enum CharOrSpecialChar {
 pub struct DatePicker {
     header_y_ofs: i32,
     expanded_panel_y: i32,
-    selected_date: DateTime<Utc>,
+    selected_date: NaiveDate,
     date_string: String,
     hover_date: HoveredDate,
     // date_size: DateSize,
@@ -42,7 +42,7 @@ pub struct DatePicker {
 
 impl DatePicker {
     const DAYS: [&'static str; 7] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-    pub fn new(date: DateTime<Utc>, layout: Layout) -> Self {
+    pub fn new(date: NaiveDate, layout: Layout) -> Self {
         let mut dp = DatePicker {
             base: ControlBase::with_status_flags(layout, StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput),
             header_y_ofs: 0,
@@ -111,14 +111,14 @@ impl DatePicker {
         return HoveredDate::None;
     }
 
-    pub fn format_very_short_date(selected_date: DateTime<Utc>) -> String {
+    pub fn format_very_short_date(selected_date: NaiveDate) -> String {
         selected_date.format("%d.%m.%y").to_string()
     }
-    pub fn format_short_date(selected_date: DateTime<Utc>) -> String {
+    pub fn format_short_date(selected_date: NaiveDate) -> String {
         selected_date.format("%d.%m.%Y").to_string()
     }
 
-    pub fn format_long_date(selected_date: DateTime<Utc>) -> String {
+    pub fn format_long_date(selected_date: NaiveDate) -> String {
         selected_date.format("%Y, %b, %d").to_string()
     }
 

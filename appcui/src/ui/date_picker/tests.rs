@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 
 use crate::prelude::*;
 
@@ -10,7 +10,7 @@ fn check_create(){
         CheckHash(0xBE767D638014E39A)
     ";
     let date_str = "2024-06-13T12:00:00Z";
-    let parsed_date = date_str.parse::<DateTime<Utc>>().unwrap();
+    let parsed_date = date_str.parse::<NaiveDate>().unwrap();
     
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:50,h:11");
@@ -40,7 +40,7 @@ fn check_on_hover(){
         
     ";
     let date_str = "2024-06-13T12:00:00Z";
-    let parsed_date = date_str.parse::<DateTime<Utc>>().unwrap();
+    let parsed_date = date_str.parse::<NaiveDate>().unwrap();
     
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:50,h:11");
@@ -68,7 +68,7 @@ fn check_expand(){
         CheckHash(0xA961AB3468AE0A49)
     ";
     let date_str = "2024-06-13T12:00:00Z";
-    let parsed_date = date_str.parse::<DateTime<Utc>>().unwrap();
+    let parsed_date = date_str.parse::<NaiveDate>().unwrap();
     
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
@@ -113,7 +113,7 @@ fn check_hovers(){
         CheckHash(0x44FC96678705B5AC)
     ";
     let date_str = "2024-06-13T12:00:00Z";
-    let parsed_date = date_str.parse::<DateTime<Utc>>().unwrap();
+    let parsed_date = date_str.parse::<NaiveDate>().unwrap();
     
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
