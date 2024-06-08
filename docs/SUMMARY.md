@@ -72,6 +72,7 @@
         - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
         - [TreeView]()
+        - [VLine](chapter-3/stock-controls/vline.md)
     - [Custom controls](chapter-3/custom_controls.md)
         - [Overwriteable traits](chapter-3/custon-controls/overwriteable_traits.md)
         - [Emitting events](chapter-3/custon-controls/emitting_events.md)
