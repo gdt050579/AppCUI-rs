@@ -1,4 +1,4 @@
-use chrono::{Datelike, Months, NaiveDate``};
+use chrono::{Datelike, Months, NaiveDate};
 use AppCUIProcMacro::CustomControl;
 
 const MINSPACE_FOR_SHORT_DATE: u32 = 15;
