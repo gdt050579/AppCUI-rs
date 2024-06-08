@@ -1,5 +1,3 @@
-use chrono::{DateTime, NaiveDate, Utc};
-
 use crate::prelude::*;
 
 #[test]
@@ -9,18 +7,16 @@ fn check_create(){
         Paint('Initial State')
         CheckHash(0xBE767D638014E39A)
     ";
-    let date_str = "2024-06-13T12:00:00Z";
-    let parsed_date = date_str.parse::<NaiveDate>().unwrap();
     
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:50,h:11");
-    w.add(DatePicker::new(parsed_date, Layout::new("x:1,y:1,w:19")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:1,y:3,w:16")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:1,y:5,w:14")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:1,y:7,w:10")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:23,y:1,w:23")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:23,y:3,w:7")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:23,y:5,w:6")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:3,w:16")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:5,w:14")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:7,w:10")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:1,w:23")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:3,w:7")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:5,w:6")));
     a.add_window(w);
     a.run();
 }
@@ -39,18 +35,16 @@ fn check_on_hover(){
         CheckHash(0x93797768E0658943)
         
     ";
-    let date_str = "2024-06-13T12:00:00Z";
-    let parsed_date = date_str.parse::<NaiveDate>().unwrap();
-    
+ 
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:50,h:11");
-    w.add(DatePicker::new(parsed_date, Layout::new("x:1,y:1,w:19")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:1,y:3,w:16")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:1,y:5,w:14")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:1,y:7,w:10")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:23,y:1,w:23")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:23,y:3,w:7")));
-    w.add(DatePicker::new(parsed_date, Layout::new("x:23,y:5,w:6")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:3,w:16")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:5,w:14")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:7,w:10")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:1,w:23")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:3,w:7")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:5,w:6")));
     a.add_window(w);
     a.run();
 }
@@ -59,20 +53,18 @@ fn check_on_hover(){
 #[test]
 fn check_expand(){
     let script = "
-        // Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Initial State')
-        // CheckHash(0xBE767D638014E39A)
+        CheckHash(0x1100DA21CAB3453)
         Mouse.Drag(22,9,22,2)
         Mouse.Click(26,5,left)
         Paint('Calendar expanded')
         CheckHash(0xA961AB3468AE0A49)
     ";
-    let date_str = "2024-06-13T12:00:00Z";
-    let parsed_date = date_str.parse::<NaiveDate>().unwrap();
     
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
-    w.add(DatePicker::new(parsed_date, Layout::new("d:c,w:19")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
     a.add_window(w);
     a.run();
 }
@@ -80,7 +72,7 @@ fn check_expand(){
 #[test]
 fn check_hovers(){
     let script = "
-        // Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Initial State')
 
         Mouse.Drag(22,9,22,19)
@@ -112,12 +104,31 @@ fn check_hovers(){
         Paint('Hover on double right arrows')
         CheckHash(0x44FC96678705B5AC)
     ";
-    let date_str = "2024-06-13T12:00:00Z";
-    let parsed_date = date_str.parse::<NaiveDate>().unwrap();
     
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
-    w.add(DatePicker::new(parsed_date, Layout::new("d:c,w:19")));
+    w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_procmacro(){
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0xBE767D638014E39A)
+    ";
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Dates,d:c,w:50,h:11");
+    w.add(datepicker!("2024-06-13, x:1,y:1,w:19"));
+    w.add(datepicker!("2024-06-13, x:1,y:3,w:16"));
+    w.add(datepicker!("2024-06-13, x:1,y:5,w:14"));
+    w.add(datepicker!("2024-06-13, x:1,y:7,w:10"));
+    w.add(datepicker!("2024-06-13, x:23,y:1,w:23"));
+    w.add(datepicker!("2024-06-13, x:23,y:3,w:7"));
+    w.add(datepicker!("2024-06-13, x:23,y:5,w:6"));
     a.add_window(w);
     a.run();
 }

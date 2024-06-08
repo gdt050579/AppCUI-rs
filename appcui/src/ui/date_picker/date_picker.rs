@@ -42,7 +42,32 @@ pub struct DatePicker {
 
 impl DatePicker {
     const DAYS: [&'static str; 7] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-    pub fn new(date: NaiveDate, layout: Layout) -> Self {
+    // pub fn new(date: NaiveDate, layout: Layout) -> Self {
+    //     let mut dp = DatePicker {
+    //         base: ControlBase::with_status_flags(layout, StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput),
+    //         header_y_ofs: 0,
+    //         expanded_panel_y: 1,
+    //         selected_date: date,
+    //         date_string: Self::format_long_date(date),
+    //         hover_date: HoveredDate::None,
+    //         // date_size: DateSize::Large,
+    //     };
+    //     dp.set_size_bounds(6, 1, u16::MAX, 1);
+    //     let date_len = dp.get_date_size();
+    //     match date_len {
+    //         DateSize::Large => {}
+    //         DateSize::Small => {
+    //             dp.date_string = Self::format_short_date(date);
+    //         }
+    //         DateSize::VerySmall => {
+    //             dp.date_string = Self::format_very_short_date(date);
+    //         }
+    //     }
+    //     dp
+    // }
+
+    pub fn new(date_str: &str, layout: Layout) -> Self {
+        let date = date_str.parse::<NaiveDate>().unwrap();
         let mut dp = DatePicker {
             base: ControlBase::with_status_flags(layout, StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput),
             header_y_ofs: 0,
@@ -430,6 +455,8 @@ impl OnMouseEvent for DatePicker {
                     // MONTH PANICS ON JAN->DEC
                     // MONTH PANICS ON 31
                     // YEAR PANICS ON 29 FEBRUARY
+
+
                     // self.date_string = Self::format_long_date(self.selected_date);
                     // self.raise_event(ControlEvent {
                     //     emitter: self.handle,

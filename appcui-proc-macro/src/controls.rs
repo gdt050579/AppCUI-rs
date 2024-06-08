@@ -23,3 +23,4 @@ pub (crate) mod dropdownlist;
 pub (crate) mod numericselector;
 pub (crate) mod hline;
 pub (crate) mod vline;
+pub (crate) mod date_picker;
