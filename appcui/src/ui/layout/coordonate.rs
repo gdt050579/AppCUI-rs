@@ -84,11 +84,11 @@ impl From<u64> for Coordonate {
 }
 impl From<f32> for Coordonate {
     fn from(value: f32) -> Self {
-        Coordonate::Percentage(((value * 10000.0f32) as f32) as i16)
+        Coordonate::Percentage((value * 10000.0f32) as i16)
     }
 }
 impl From<f64> for Coordonate {
     fn from(value: f64) -> Self {
-        Coordonate::Percentage(((value * 10000.0f64) as f64) as i16)
+        Coordonate::Percentage((value * 10000.0f64) as i16)
     }
 }

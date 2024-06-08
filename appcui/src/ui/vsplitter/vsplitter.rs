@@ -152,19 +152,17 @@ impl VSplitter {
         let pos = self.pos.absolute(sz.width as u16);
         if x != pos {
             State::None
+        } else if clicked {
+            match y {
+                1 => State::ClickedOnLeftButton,
+                2 => State::ClickedOnRightButton,
+                _ => State::Dragging,
+            }
         } else {
-            if clicked {
-                match y {
-                    1 => State::ClickedOnLeftButton,
-                    2 => State::ClickedOnRightButton,
-                    _ => State::Dragging,
-                }
-            } else {
-                match y {
-                    1 => State::OverLeftButton,
-                    2 => State::OverRightButton,
-                    _ => State::OverSeparator,
-                }
+            match y {
+                1 => State::OverLeftButton,
+                2 => State::OverRightButton,
+                _ => State::OverSeparator,
             }
         }
     }
@@ -185,7 +183,7 @@ impl OnPaint for VSplitter {
             }
         };
         let sz = self.size();
-        let x = self.pos.absolute(sz.width as u16) as i32;
+        let x = self.pos.absolute(sz.width as u16);
         surface.draw_vertical_line_with_size(x, 0, sz.height, LineType::Single, col_line);
         surface.write_char(x, 1, Character::with_attributes(SpecialChar::TriangleLeft, col_b1));
         surface.write_char(x, 2, Character::with_attributes(SpecialChar::TriangleRight, col_b2));

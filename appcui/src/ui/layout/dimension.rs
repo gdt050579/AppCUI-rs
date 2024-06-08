@@ -28,9 +28,7 @@ impl Dimension {
                         *value = parent_size;
                     }
                 } else {
-                    if *value < u16::MAX {
-                        *value += 1;
-                    }
+                    *value = (*value).saturating_add(1);
                 }
             }
             Dimension::Percentage(proc) => {
@@ -42,9 +40,7 @@ impl Dimension {
                         v = parent_size;
                     }
                 } else {
-                    if v < u16::MAX {
-                        v += 1;
-                    }
+                    v = v.saturating_add(1);
                 }
                 // convert v into percentage
                 if parent_size > 0 {
@@ -64,10 +60,8 @@ impl Dimension {
                     } else {
                         *value = 0;
                     }
-                } else {
-                    if *value > 0 {
-                        *value -= 1;
-                    }
+                } else if *value > 0 {
+                    *value -= 1;
                 }
             }
             Dimension::Percentage(proc) => {
@@ -79,9 +73,7 @@ impl Dimension {
                         v = 0;
                     }
                 } else {
-                    if v > 0 {
-                        v -= 1;
-                    }
+                    v = v.saturating_sub(1);
                 }
                 // convert v into percentage
                 if parent_size > 0 {

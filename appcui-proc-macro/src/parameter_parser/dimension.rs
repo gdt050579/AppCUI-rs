@@ -6,15 +6,13 @@ pub(crate) enum Dimension {
 }
 impl Dimension {
     pub(crate) fn from_str(value: &str) -> Option<Dimension> {
-        if value.ends_with("%") {
+        if value.ends_with('%') {
             if let Ok(value) = value[0..value.len()-1].parse::<f32>() {
                 return Some(Dimension::Percentage(value/100.0f32));
             }
-        } else {
-            if let Ok(value) = value.parse::<u32>() {
-                return Some(Dimension::Absolute(value));
-            }
+        } else if let Ok(value) = value.parse::<u32>() {
+            return Some(Dimension::Absolute(value));
         }
-        return None;
+        None
     }
 }
