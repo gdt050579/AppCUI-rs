@@ -23,6 +23,7 @@ pub struct VSplitter {
     min_left: Dimension,
     min_right: Dimension,
     pos: Coordonate,
+    preserve_pos: i32,
     resize_behavior: ResizeBehavior,
     state: State,
 }
@@ -40,6 +41,7 @@ impl VSplitter {
             min_right: Dimension::Percentage(0),
             state: State::None,
             resize_behavior,
+            preserve_pos: 0,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
         obj.left = obj.add_child(SplitterPanel::new());
@@ -254,18 +256,21 @@ impl OnResize for VSplitter {
         // recompute the position of the splitter
         match self.resize_behavior {
             ResizeBehavior::PreserveAspectRatio => {
-                if previous_width > 0 {
+                if (previous_width > 0) && (self.pos.is_absolute()) {
                     let ratio = self.pos.absolute(old_size.width as u16) as f32 / previous_width as f32;
                     let new_pos = (new_size.width as f32 * ratio) as i32;
                     self.update_position(Coordonate::Absolute(new_pos as i16));
                 } else {
-                    // first time (initialization)
+                    // first time (initialization) or already a percentage
                     self.update_panel_sizes(new_size);
                 }
             }
             ResizeBehavior::PreserveLeftPanelSize => {
-                let pos = self.pos.absolute(old_size.width as u16);
-                self.update_position(Coordonate::Absolute(pos as i16));
+                if previous_width == 0 {
+                    // first resize (initialize the splitter preserved position)
+                    self.preserve_pos = self.pos.absolute(new_size.width as u16);
+                }
+                self.set_position(self.preserve_pos);
             },
             ResizeBehavior::PreserveRightPanelSize => {
                 let pos = previous_width - self.pos.absolute(old_size.width as u16);

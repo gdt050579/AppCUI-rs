@@ -86,7 +86,6 @@ fn check_mouse_buttons() {
 fn check_mouse_movement() {
     let script = "
         Paint.Enable(false)        
-        //Error.Disable(true)
         Paint('Initial state')   
         CheckHash(0xE2548C89F72469D9)
         Mouse.Move(30,2)
@@ -119,6 +118,110 @@ fn check_mouse_movement() {
     let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
+    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_resize_preseve_aspect_ratio_with_percentage() {
+    let script = "
+        Paint.Enable(false)        
+        Paint('1. Initial state')   
+        CheckHash(0x83B50620086A8781)
+        Mouse.Drag(29,9,35,9)
+        Paint('2. Resize - shoule be equal')   
+        CheckHash(0x48B702D658DEFE95)
+        Mouse.Drag(35,9,55,9)
+        Paint('3. Resize - shoule be equal')   
+        CheckHash(0x82D6CA2ABD8EF32D)
+        Mouse.Drag(55,9,12,9)
+        Paint('4. Resize - shoule be equal')   
+        CheckHash(0x218360470FDB6C4B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
+    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_resize_preseve_aspect_ratio_with_absolute() {
+    let script = "
+        Paint.Enable(false)        
+        Paint('1. Initial state')   
+        CheckHash(0x83B50620086A8781)
+        Mouse.Drag(29,9,35,9)
+        Paint('2. Resize - shoule be equal')   
+        CheckHash(0x48B702D658DEFE95)
+        Mouse.Drag(35,9,55,9)
+        Paint('3. Resize - shoule be equal')   
+        CheckHash(0x82D6CA2ABD8EF32D)
+        Mouse.Drag(55,9,12,9)
+        Paint('4. Resize - shoule be equal')   
+        CheckHash(0x218360470FDB6C4B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(14,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
+    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_resize_preseve_left_width_with_absolute() {
+    let script = "
+        Paint.Enable(false)   
+        Paint('1. Initial state')   
+        CheckHash(0xEA732DB4A58A4F60)
+        Mouse.Drag(29,9,35,9)
+        Paint('2. Resize - spliter shoudl be on y:11')   
+        CheckHash(0x971EF480BA94C0E0)
+        Mouse.Drag(35,9,55,9)
+        Paint('3. Resize - spliter shoudl be on y:11')   
+        CheckHash(0x45C466224BE23FA8)
+        Mouse.Drag(55,9,12,9)
+        Paint('4. Resize - spliter shoudl be on y:11')   
+        CheckHash(0xE49947996A26F3D9)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(10,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveLeftPanelSize);
+    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_resize_preseve_left_width_with_percentage() {
+    let script = "
+        Paint.Enable(false)  
+        Paint('1. Initial state')   
+        CheckHash(0xEA732DB4A58A4F60)
+        Mouse.Drag(29,9,35,9)
+        Paint('2. Resize - spliter shoudl be on y:11')   
+        CheckHash(0x971EF480BA94C0E0)
+        Mouse.Drag(35,9,55,9)
+        Paint('3. Resize - spliter shoudl be on y:11')   
+        CheckHash(0x45C466224BE23FA8)
+        Mouse.Drag(55,9,12,9)
+        Paint('4. Resize - spliter shoudl be on y:11')   
+        CheckHash(0xE49947996A26F3D9)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(0.37,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveLeftPanelSize);
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
