@@ -12,7 +12,9 @@ pub(crate) enum ParamType {
     Dict,
     List,
     Integer,
-    Percentage
+    Percentage,
+    Dimension,
+    Coordonate
 }
 
 pub(crate) struct PositionalParameter {
