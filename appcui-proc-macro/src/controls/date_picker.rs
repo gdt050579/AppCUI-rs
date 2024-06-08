@@ -2,8 +2,6 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&[]);
-
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("date", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("date", "date", ParamType::String),

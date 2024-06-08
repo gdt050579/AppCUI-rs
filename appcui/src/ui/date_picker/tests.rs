@@ -84,10 +84,6 @@ fn check_hovers(){
         Paint('Hover on date')
         CheckHash(0x6538AEDEA96A491C)
 
-        Mouse.Move(24,17)
-        Paint('Hover on date')
-        CheckHash(0x6538AEDEA96A491C)
-
         Mouse.Move(24,12)
         Paint('Hover on double left arrows')
         CheckHash(0xF83DF94071A3F72C)
@@ -103,6 +99,14 @@ fn check_hovers(){
         Mouse.Move(36,12)
         Paint('Hover on double right arrows')
         CheckHash(0x44FC96678705B5AC)
+        
+        Mouse.Move(41,12)
+        Paint('Hover on month arrow left')
+        CheckHash(0x2100005E95347FD4)
+
+        Mouse.Move(47,12)
+        Paint('Hover on month arrow right')
+        CheckHash(0x14B2C3AB88BBE894)
     ";
     
     let mut a = App::debug(60, 25, script).build().unwrap();
@@ -129,6 +133,53 @@ fn check_procmacro(){
     w.add(datepicker!("2024-06-13, x:23,y:1,w:23"));
     w.add(datepicker!("2024-06-13, x:23,y:3,w:7"));
     w.add(datepicker!("2024-06-13, x:23,y:5,w:6"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_buttons(){
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')
+
+        Mouse.Drag(22,9,22,19)
+        Mouse.Click(26,22,left)
+        Paint('Calendar expanded top')
+        CheckHash(0x398D1A8637915FBC)
+        
+        Mouse.Click(24,17,left)
+        Paint('Click on date')
+        CheckHash(0x6A94312ED53A32EF)
+
+        Mouse.Click(24,12,left)
+        Paint('Click on double left arrows')
+        CheckHash(0x5D195BFC67F02023)
+
+        Mouse.Click(26,12,left)
+        Paint('Click on year arrow left')
+        CheckHash(0x4878921ACF356A7F)
+        
+        Mouse.Click(33,12,left)
+        Paint('Click on year arrow right')
+        CheckHash(0xB63B580BB07FDF5B)
+
+        Mouse.Click(36,12,left)
+        Paint('Click on double right arrows')
+        CheckHash(0xF88967A805AB2FDF)
+        
+        Mouse.Click(41,12,left)
+        Paint('Click on month arrow left')
+        CheckHash(0xD8EE6C230D548B99)
+
+        Mouse.Click(47,12,left)
+        Paint('Click on month arrow right')
+        CheckHash(0x6DACF9312D8C587)
+    ";
+    
+    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut w = window!("Dates,d:c,w:25,h:6");
+    w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
     a.add_window(w);
     a.run();
 }

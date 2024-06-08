@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, Datelike, Utc};
+use chrono::{Datelike, Months, NaiveDate``};
 use AppCUIProcMacro::CustomControl;
 
 const MINSPACE_FOR_SHORT_DATE: u32 = 15;
@@ -429,33 +429,29 @@ impl OnMouseEvent for DatePicker {
                 if hd != HoveredDate::None {
                     match hd {
                         HoveredDate::DoubleLeftArrow => {
-                            self.selected_date = self.selected_date.with_year(self.selected_date.year() - 10).unwrap();
+                            self.selected_date = self.selected_date - Months::new(120);
                         }
                         HoveredDate::LeftArrowYear => {
-                            self.selected_date = self.selected_date.with_year(self.selected_date.year() - 1).unwrap();
+                            self.selected_date = self.selected_date - Months::new(12);
                         }
                         HoveredDate::RightArrowYear => {
-                            self.selected_date = self.selected_date.with_year(self.selected_date.year() + 1).unwrap();
+                            self.selected_date = self.selected_date + Months::new(12);
                         }
                         HoveredDate::DoubleRightArrow => {
-                            self.selected_date = self.selected_date.with_year(self.selected_date.year() + 10).unwrap();
+                            self.selected_date = self.selected_date + Months::new(120);
                         }
                         HoveredDate::LeftArrowMonth => {
-                            self.selected_date = self.selected_date.with_month(self.selected_date.month() - 1).unwrap();
+                            self.selected_date = self.selected_date - Months::new(1);
                         }
                         HoveredDate::RightArrowMonth => {
-                            self.selected_date = self.selected_date.with_month(self.selected_date.month() + 1).unwrap();
+                            self.selected_date = self.selected_date + Months::new(1);
                         }
                         HoveredDate::Day(day) => {
                             self.selected_date = self.selected_date.with_day(day).unwrap();
                         }
+                        
                         _ => {}
                     }
-                    // MONTH PANICS ON DEC->JAN
-                    // MONTH PANICS ON JAN->DEC
-                    // MONTH PANICS ON 31
-                    // YEAR PANICS ON 29 FEBRUARY
-
 
                     // self.date_string = Self::format_long_date(self.selected_date);
                     // self.raise_event(ControlEvent {
