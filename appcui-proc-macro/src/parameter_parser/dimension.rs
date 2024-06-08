@@ -1,7 +1,7 @@
 
 #[derive(Copy,Clone,PartialEq, Debug)]
 pub(crate) enum Dimension {
-    Absolutute(u32),
+    Absolute(u32),
     Percentage(f32)
 }
 impl Dimension {
@@ -12,7 +12,7 @@ impl Dimension {
             }
         } else {
             if let Ok(value) = value.parse::<u32>() {
-                return Some(Dimension::Absolutute(value));
+                return Some(Dimension::Absolute(value));
             }
         }
         return None;

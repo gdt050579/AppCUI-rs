@@ -102,14 +102,14 @@ impl<'a> ControlBuilder<'a> {
     }
     fn add_coordonate(&mut self, value: Coordonate) {
         match value {
-            Coordonate::Absolute(v) => write!(self.content, "{}i32", v),
-            Coordonate::Percentage(v) => write!(self.content, "{}f32", v),
+            Coordonate::Absolute(v) => write!(self.content, "{}i32", v).unwrap(),
+            Coordonate::Percentage(v) => write!(self.content, "{}f32", v).unwrap(),
         };
     }
     fn add_dimension(&mut self, value: Dimension) {
         match value {
-            Dimension::Absolute(v) => write!(self.content, "{}u32", v),
-            Dimension::Percentage(v) => write!(self.content, "{}f32", v),
+            Dimension::Absolute(v) => write!(self.content, "{}u32", v).unwrap(),
+            Dimension::Percentage(v) => write!(self.content, "{}f32", v).unwrap(),
         };
     }
     pub(super) fn init_control(&mut self, method: &str) {
