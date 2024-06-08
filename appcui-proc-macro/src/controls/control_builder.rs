@@ -4,6 +4,10 @@ use crate::parameter_parser::*;
 use crate::token_stream_to_string::TokenStreamToString;
 use proc_macro::*;
 use std::str::FromStr;
+use std::fmt::Write;
+
+use self::coordonate::Coordonate;
+use self::dimension::Dimension;
 
 use super::layout;
 
@@ -96,6 +100,18 @@ impl<'a> ControlBuilder<'a> {
     fn add_size(&mut self, value: Size) {
         self.content.push_str(format!("Size::new({},{})", value.width, value.height).as_str());
     }
+    fn add_coordonate(&mut self, value: Coordonate) {
+        match value {
+            Coordonate::Absolute(v) => write!(self.content, "{}i32", v),
+            Coordonate::Percentage(v) => write!(self.content, "{}f32", v),
+        };
+    }
+    fn add_dimension(&mut self, value: Dimension) {
+        match value {
+            Dimension::Absolute(v) => write!(self.content, "{}u32", v),
+            Dimension::Percentage(v) => write!(self.content, "{}f32", v),
+        };
+    }
     pub(super) fn init_control(&mut self, method: &str) {
         self.content.push_str(method);
         self.content.push('(');
@@ -158,6 +174,34 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str(&r);
         } else if let Some(default_value) = default {
             self.content.push_str(default_value);
+        } else {
+            panic!(
+                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
+        }
+    }
+    pub(super) fn add_coordonate_parameter(&mut self, param_name: &str, default: Option<Coordonate>) {
+        self.add_comma();
+        let value = self.parser.get_coordonate(param_name);
+        if let Some(size_value) = value {
+            self.add_coordonate(size_value);
+        } else if let Some(default_value) = default {
+            self.add_coordonate(default_value);
+        } else {
+            panic!(
+                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
+                param_name
+            );
+        }
+    }
+    pub(super) fn add_dimension_parameter(&mut self, param_name: &str, default: Option<Dimension>) {
+        self.add_comma();
+        let value = self.parser.get_dimension(param_name);
+        if let Some(size_value) = value {
+            self.add_dimension(size_value);
+        } else if let Some(default_value) = default {
+            self.add_dimension(default_value);
         } else {
             panic!(
                 "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
