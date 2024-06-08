@@ -12,7 +12,7 @@ fn create_image(width: u32, height: u32, buf: &[u32]) -> Image {
 }
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = window!("'Splitter Example', d:c,w:60,h:20");
+    let mut w = window!("'Splitter Example', d:c,w:60,h:20, flags: Sizeable");
     let mut vs = vsplitter!("pos:50%,d:c,w:100%,h:100%");
     let mut iv_1 = ImageViewer::new(
         create_image(172, 122, ferris::FERRIS_PIXELS),
