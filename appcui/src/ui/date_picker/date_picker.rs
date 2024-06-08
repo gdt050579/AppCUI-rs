@@ -184,7 +184,7 @@ impl OnPaint for DatePicker {
 
         let space_char = Character::with_attributes(' ', col_text);
 
-        // expanded calendar
+        // header
         let date_size = self.get_date_size();
         let mut format = TextFormat::single_line(1, self.header_y_ofs, col_text, TextAlignament::Left);
         surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_DATE_DRAWING) as i32, space_char);
@@ -399,17 +399,45 @@ impl OnMouseEvent for DatePicker {
                 EventProcessStatus::Processed
             }
             MouseEvent::Pressed(data) => {
-                //     let idx = self.mouse_to_color_index(data.x, data.y);
-                //     if let Some(col) = Color::from_value(idx) {
-                //         if col != self.color {
-                //             self.color = col;
-                //             self.raise_event(ControlEvent {
-                //                 emitter: self.handle,
-                //                 receiver: self.event_processor,
-                //                 data: ControlEventData::ColorPicker(EventData { color: col }),
-                //             });
-                //         }
-                //     }
+                
+                let hd = self.mouse_over_calendar(data.x, data.y);
+                if hd != HoveredDate::None {
+                    match hd {
+                        HoveredDate::DoubleLeftArrow => {
+                            self.selected_date = self.selected_date.with_year(self.selected_date.year() - 10).unwrap();
+                        }
+                        HoveredDate::LeftArrowYear => {
+                            self.selected_date = self.selected_date.with_year(self.selected_date.year() - 1).unwrap();
+                        }
+                        HoveredDate::RightArrowYear => {
+                            self.selected_date = self.selected_date.with_year(self.selected_date.year() + 1).unwrap();
+                        }
+                        HoveredDate::DoubleRightArrow => {
+                            self.selected_date = self.selected_date.with_year(self.selected_date.year() + 10).unwrap();
+                        }
+                        HoveredDate::LeftArrowMonth => {
+                            self.selected_date = self.selected_date.with_month(self.selected_date.month() - 1).unwrap();
+                        }
+                        HoveredDate::RightArrowMonth => {
+                            self.selected_date = self.selected_date.with_month(self.selected_date.month() + 1).unwrap();
+                        }
+                        HoveredDate::Day(day) => {
+                            self.selected_date = self.selected_date.with_day(day).unwrap();
+                        }
+                        _ => {}
+                    }
+                    // MONTH PANICS ON DEC->JAN
+                    // MONTH PANICS ON JAN->DEC
+                    // MONTH PANICS ON 31
+                    // YEAR PANICS ON 29 FEBRUARY
+                    // self.date_string = Self::format_long_date(self.selected_date);
+                    // self.raise_event(ControlEvent {
+                    //     emitter: self.handle,
+                    //     receiver: self.event_processor,
+                    //     data: ControlEventData::DatePicker(EventData { date: self.selected_date }),
+                    // });
+                    return EventProcessStatus::Processed;
+                }
                 self.on_default_action();
                 EventProcessStatus::Processed
             }
