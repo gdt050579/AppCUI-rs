@@ -1,6 +1,6 @@
 use self::layout::Dimension;
 
-use super::Flags;
+use super::ResizeBehavior;
 use super::SplitterPanel;
 use crate::prelude::*;
 use crate::ui::layout::Coordonate;
@@ -16,18 +16,18 @@ enum State {
     Dragging,
 }
 
-#[CustomControl(overwrite=OnPaint + OnKeyPressed + OnMouseEvent + OnResize + OnFocus, internal = true)]
+#[CustomControl(overwrite=OnPaint + OnKeyPressed + OnMouseEvent + OnResize, internal = true)]
 pub struct VSplitter {
     left: Handle<SplitterPanel>,
     right: Handle<SplitterPanel>,
     min_left: Dimension,
     min_right: Dimension,
     pos: Coordonate,
-    flags: Flags,
+    resize_behavior: ResizeBehavior,
     state: State,
 }
 impl VSplitter {
-    pub fn new<T>(pos: T, layout: Layout, flags: Flags) -> Self
+    pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior) -> Self
     where
         Coordonate: From<T>,
     {
@@ -39,7 +39,7 @@ impl VSplitter {
             min_left: Dimension::Percentage(0),
             min_right: Dimension::Percentage(0),
             state: State::None,
-            flags,
+            resize_behavior,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
         obj.left = obj.add_child(SplitterPanel::new());
@@ -249,15 +249,32 @@ impl OnMouseEvent for VSplitter {
     }
 }
 impl OnResize for VSplitter {
-    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+    fn on_resize(&mut self, old_size: Size, new_size: Size) {
+        let previous_width = old_size.width as i32;
         // recompute the position of the splitter
-
-        // set the size of panels
-        self.update_panel_sizes(new_size);
+        match self.resize_behavior {
+            ResizeBehavior::PreserveAspectRatio => {
+                if previous_width > 0 {
+                    let ratio = self.pos.absolute(old_size.width as u16) as f32 / previous_width as f32;
+                    let new_pos = (new_size.width as f32 * ratio) as i32;
+                    self.update_position(Coordonate::Absolute(new_pos as i16));
+                } else {
+                    // first time (initialization)
+                    self.update_panel_sizes(new_size);
+                }
+            }
+            ResizeBehavior::PreserveLeftPanelSize => {
+                let pos = self.pos.absolute(old_size.width as u16);
+                self.update_position(Coordonate::Absolute(pos as i16));
+            },
+            ResizeBehavior::PreserveRightPanelSize => {
+                let pos = previous_width - self.pos.absolute(old_size.width as u16);
+                if pos>0 {
+                    self.update_position(Coordonate::Absolute((new_size.width as i32 - pos) as i16));
+                } else {
+                    self.update_position(Coordonate::Absolute(new_size.width as i16));
+                }
+            },
+        }
     }
-}
-impl OnFocus for VSplitter {
-    fn on_focus(&mut self) {}
-
-    fn on_lose_focus(&mut self) {}
 }

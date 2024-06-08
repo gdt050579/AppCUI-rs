@@ -18,6 +18,7 @@ impl Coordonate {
             Coordonate::Percentage(v) => ((*v) as i32) * (parent_size as i32) / 10000i32,
         }
     }
+    
     pub fn update_with_absolute_value(&mut self, value: i16, parent_size: u16) {
         match self {
             Coordonate::Absolute(v) => {

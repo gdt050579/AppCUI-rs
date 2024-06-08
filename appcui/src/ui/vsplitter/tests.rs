@@ -9,7 +9,7 @@ fn check_control_reposition() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::Flags::None);
+    let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -44,7 +44,7 @@ fn check_keyboard_movement() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::Flags::None);
+    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
@@ -72,7 +72,7 @@ fn check_mouse_buttons() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::Flags::None);
+    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
@@ -116,7 +116,7 @@ fn check_mouse_movement() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::Flags::None);
+    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
