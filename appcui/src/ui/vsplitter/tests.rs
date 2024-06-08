@@ -264,3 +264,92 @@ fn check_resize_preseve_left_width_with_percentage() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_resize_preseve_right_width_with_absolute() {
+    let script = "
+        Paint.Enable(false)   
+        //Error.Disable(true)
+        Paint('1. Initial state')   
+        CheckHash(0x83B50620086A8781)
+        Mouse.Drag(29,9,35,9)
+        Paint('2. Resize - spliter shoudl be on y:21')   
+        CheckHash(0x7234B8AA7BB968E1)
+        Mouse.Drag(35,9,55,9)
+        Paint('3. Resize - spliter shoudl be on y:41')   
+        CheckHash(0x3D4FA1C3B7F1FA59)
+        Mouse.Drag(55,9,12,9)
+        Paint('4. Resize - spliter shoudl be on y:1 (no size to fit all)')   
+        CheckHash(0xCF6BC7E6CC74015F)
+        Mouse.Drag(12,9,20,9)
+        Paint('5. Resize - spliter shoudl be on y:6 (now it fits all)')   
+        CheckHash(0xEA7103FA68F5A792)
+        Key.Pressed(Ctrl+Alt+Right,3)
+        Paint('6. Resize - spliter should be on y:9 (text is R…)')   
+        CheckHash(0xE6202A06ADD1605D)
+        Mouse.Drag(20,9,40,9)
+        Paint('7. Resize - spliter shoudl be on y:29 (text is R…)')   
+        CheckHash(0xA14CC7CA0646F2)
+        Mouse.Drag(40,9,18,9)
+        Paint('8. Resize - spliter shoudl be on y:7 (text is R…)')   
+        CheckHash(0xE2F190C2883A755)
+        Mouse.Drag(18,9,10,9)
+        Paint('9. Resize - spliter shoudl be on y:1 (┌─────┐)')   
+        CheckHash(0x865FA35240029B3F)
+        Mouse.Drag(10,9,40,9)
+        Paint('10. Resize - spliter shoudl be on y:29 (text is R…)')   
+        CheckHash(0xA14CC7CA0646F2)        
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(14,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_resize_preseve_right_width_with_percentage() {
+    let script = "
+        Paint.Enable(false)   
+        Paint('1. Initial state')   
+        CheckHash(0x83B50620086A8781)
+        Mouse.Drag(29,9,35,9)
+        Paint('2. Resize - spliter shoudl be on y:21')   
+        CheckHash(0x7234B8AA7BB968E1)
+        Mouse.Drag(35,9,55,9)
+        Paint('3. Resize - spliter shoudl be on y:41')   
+        CheckHash(0x3D4FA1C3B7F1FA59)
+        Mouse.Drag(55,9,12,9)
+        Paint('4. Resize - spliter shoudl be on y:1 (no size to fit all)')   
+        CheckHash(0xCF6BC7E6CC74015F)
+        Mouse.Drag(12,9,20,9)
+        Paint('5. Resize - spliter shoudl be on y:6 (now it fits all)')   
+        CheckHash(0xEA7103FA68F5A792)
+        Key.Pressed(Ctrl+Alt+Right,3)
+        Paint('6. Resize - spliter should be on y:9 (text is R…)')   
+        CheckHash(0xE6202A06ADD1605D)
+        Mouse.Drag(20,9,40,9)
+        Paint('7. Resize - spliter shoudl be on y:29 (text is R…)')   
+        CheckHash(0xA14CC7CA0646F2)
+        Mouse.Drag(40,9,18,9)
+        Paint('8. Resize - spliter shoudl be on y:7 (text is R…)')   
+        CheckHash(0xE2F190C2883A755)
+        Mouse.Drag(18,9,10,9)
+        Paint('9. Resize - spliter shoudl be on y:1 (┌─────┐)')   
+        CheckHash(0x865FA35240029B3F)
+        Mouse.Drag(10,9,40,9)
+        Paint('10. Resize - spliter shoudl be on y:29 (text is R…)')   
+        CheckHash(0xA14CC7CA0646F2)        
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
