@@ -48,6 +48,17 @@ impl VSplitter {
         obj.right = obj.add_child(SplitterPanel::new());
         obj
     }
+
+    /// Adds a new control to the specified panel of the splitter (left or right)
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
+    /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));   
+    /// ```
     #[inline(always)]
     pub fn add<T>(&mut self, panel: vsplitter::Panel, control: T) -> Handle<T>
     where
