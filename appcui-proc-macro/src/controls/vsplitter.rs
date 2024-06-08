@@ -11,6 +11,12 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("on-resize", "resize", ParamType::String),
     NamedParameter::new("resize-behavior", "resize", ParamType::String),
     NamedParameter::new("rb", "resize", ParamType::String),
+    NamedParameter::new("min-left-width", "mlw", ParamType::Dimension),
+    NamedParameter::new("minleftwidth", "mlw", ParamType::Dimension),
+    NamedParameter::new("mlw", "mlw", ParamType::Dimension),
+    NamedParameter::new("min-right-width", "mrw", ParamType::Dimension),
+    NamedParameter::new("minrightwidth", "mrw", ParamType::Dimension),
+    NamedParameter::new("mrw", "mrw", ParamType::Dimension),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -20,6 +26,16 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_layout();
     cb.add_enum_parameter("resize", "vsplitter::ResizeBehavior", &RESIZE_BEHAVIOR, Some("PreserveAspectRatio"));
     cb.finish_control_initialization();
+    if cb.has_parameter("mlw") {
+        cb.add("control.set_min_width(vsplitter::Panel::Left");
+        cb.add_dimension_parameter("mlw", None);
+        cb.add(");\n");
+    }
+    if cb.has_parameter("mrw") {
+        cb.add("control.set_min_width(vsplitter::Panel::Right");
+        cb.add_dimension_parameter("mrw", None);
+        cb.add(");\n");
+    }
     cb.add_basecontrol_operations();
     cb.into()
 }
