@@ -91,6 +91,20 @@ impl DatePicker {
         dp
     }
 
+    pub fn set_date_str(&mut self, date_str: &str){
+        self.selected_date = date_str.parse::<NaiveDate>().unwrap();
+        self.date_string = Self::format_long_date(self.selected_date);
+    }
+
+    pub fn set_date(&mut self, date: NaiveDate) {
+        self.selected_date = date;
+        self.date_string = Self::format_long_date(date);
+    }
+
+    pub fn date(&self) -> NaiveDate {
+        self.selected_date
+    }
+
     fn mouse_over_calendar(&self, x: i32, y: i32) -> HoveredDate {
         if !self.is_expanded() {
             return HoveredDate::None;
@@ -136,23 +150,15 @@ impl DatePicker {
         return HoveredDate::None;
     }
 
-    pub fn format_very_short_date(selected_date: NaiveDate) -> String {
+    fn format_very_short_date(selected_date: NaiveDate) -> String {
         selected_date.format("%d.%m.%y").to_string()
     }
-    pub fn format_short_date(selected_date: NaiveDate) -> String {
+    fn format_short_date(selected_date: NaiveDate) -> String {
         selected_date.format("%d.%m.%Y").to_string()
     }
 
-    pub fn format_long_date(selected_date: NaiveDate) -> String {
+    fn format_long_date(selected_date: NaiveDate) -> String {
         selected_date.format("%Y, %b, %d").to_string()
-    }
-
-    pub fn get_date_ints(&self) -> (i32, i32, i32) {
-        (
-            self.selected_date.year(),
-            self.selected_date.month() as i32,
-            self.selected_date.day() as i32,
-        )
     }
 
     fn get_date_size(&self) -> DateSize {
