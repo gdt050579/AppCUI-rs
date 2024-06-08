@@ -13,6 +13,21 @@ enum DateSize {
     Small,
     VerySmall,
 }
+#[derive(PartialEq, Eq)]
+enum HoveredDate {
+    DoubleLeftArrow,
+    LeftArrowYear,
+    RightArrowYear,
+    DoubleRightArrow,
+    LeftArrowMonth,
+    RightArrowMonth,
+    Day(u32),
+    None,
+}
+enum CharOrSpecialChar {
+    Regular(char),
+    Special(SpecialChar),
+}
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnExpand+OnMouseEvent, internal=true)]
 // +OnKeyPressed
@@ -21,10 +36,12 @@ pub struct DatePicker {
     expanded_panel_y: i32,
     selected_date: DateTime<Utc>,
     date_string: String,
+    hover_date: HoveredDate,
     // date_size: DateSize,
 }
 
 impl DatePicker {
+    const DAYS: [&'static str; 7] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
     pub fn new(date: DateTime<Utc>, layout: Layout) -> Self {
         let mut dp = DatePicker {
             base: ControlBase::with_status_flags(layout, StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput),
@@ -32,6 +49,7 @@ impl DatePicker {
             expanded_panel_y: 1,
             selected_date: date,
             date_string: Self::format_long_date(date),
+            hover_date: HoveredDate::None,
             // date_size: DateSize::Large,
         };
         dp.set_size_bounds(6, 1, u16::MAX, 1);
@@ -48,6 +66,51 @@ impl DatePicker {
         dp
     }
 
+    fn mouse_over_calendar(&self, x: i32, y: i32) -> HoveredDate {
+        if !self.is_expanded() {
+            return HoveredDate::None;
+        }
+        if y == 1 + self.expanded_panel_y {
+            if x == 5 {
+                return HoveredDate::LeftArrowYear;
+            }
+            if x == 12 {
+                return HoveredDate::RightArrowYear;
+            }
+            if x == 2 || x == 3 {
+                return HoveredDate::DoubleLeftArrow;
+            }
+            if x == 14 || x == 15 {
+                return HoveredDate::DoubleRightArrow;
+            }
+
+            if x == 20 {
+                return HoveredDate::LeftArrowMonth;
+            }
+            if x == 26 {
+                return HoveredDate::RightArrowMonth;
+            }
+        }
+        let mut col = self.get_first_day_index() * 4 + 3;
+        let mut row = 4 + self.expanded_panel_y;
+        let last_day = self.days_in_month() as i32;
+
+        for i in 0..last_day {
+            let day = i + 1;
+
+            if(y == row) && (x == col || x == (col - 1)) {
+                return HoveredDate::Day(day as u32);
+            }
+
+            col += 4;
+            if col >= 30 {
+                col = 3;
+                row += 1;
+            }
+        }
+        return HoveredDate::None;
+    }
+
     pub fn format_very_short_date(selected_date: DateTime<Utc>) -> String {
         selected_date.format("%d.%m.%y").to_string()
     }
@@ -60,7 +123,11 @@ impl DatePicker {
     }
 
     pub fn get_date_ints(&self) -> (i32, i32, i32) {
-        (self.selected_date.year(), self.selected_date.month() as i32, self.selected_date.day() as i32)
+        (
+            self.selected_date.year(),
+            self.selected_date.month() as i32,
+            self.selected_date.day() as i32,
+        )
     }
 
     fn get_date_size(&self) -> DateSize {
@@ -87,14 +154,21 @@ impl DatePicker {
         let year = self.selected_date.year();
         let next_month = if month == 12 { 1 } else { month + 1 };
         let next_month_year = if month == 12 { year + 1 } else { year };
-        
-        let first_of_next_month = NaiveDate::from_ymd_opt(next_month_year, next_month, 1)
-            .unwrap();
-        let first_of_current_month = NaiveDate::from_ymd_opt(year, month, 1)
-            .unwrap();
-            
-        first_of_next_month.signed_duration_since(first_of_current_month)
-            .num_days() as u32
+
+        let first_of_next_month = NaiveDate::from_ymd_opt(next_month_year, next_month, 1).unwrap();
+        let first_of_current_month = NaiveDate::from_ymd_opt(year, month, 1).unwrap();
+
+        first_of_next_month.signed_duration_since(first_of_current_month).num_days() as u32
+    }
+
+    fn get_first_day_index(&self) -> i32 {
+        let first_day = self.selected_date.with_day(1).unwrap().format("%a").to_string();
+        for i in 0..DatePicker::DAYS.len() {
+            if first_day.starts_with(DatePicker::DAYS[i]) {
+                return i as i32;
+            }
+        }
+        0
     }
 }
 
@@ -149,57 +223,117 @@ impl OnPaint for DatePicker {
             );
             surface.draw_horizontal_line(1, 2 + self.expanded_panel_y, (CALENDAR_WIDTH - 1) as i32, LineType::SingleRound, col);
             surface.write_char(0, 2 + self.expanded_panel_y, Character::with_attributes(SpecialChar::BoxMidleLeft, col));
-            surface.write_char((CALENDAR_WIDTH - 1) as i32, 2 + self.expanded_panel_y, Character::with_attributes(SpecialChar::BoxMidleRight, col));
-            
+            surface.write_char(
+                (CALENDAR_WIDTH - 1) as i32,
+                2 + self.expanded_panel_y,
+                Character::with_attributes(SpecialChar::BoxMidleRight, col),
+            );
+
             let year = self.selected_date.year();
             let mut year_format = TextFormat::single_line(7, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             year_format.width = Some(4);
             surface.write_text(year.to_string().as_str(), &year_format);
-            surface.write_char(5, 1 + self.expanded_panel_y, Character::with_attributes(SpecialChar::TriangleLeft, col));
-            surface.write_char(12, 1 + self.expanded_panel_y, Character::with_attributes(SpecialChar::TriangleRight, col));
-            surface.write_char(2, 1 + self.expanded_panel_y, Character::with_attributes('<', col));
-            surface.write_char(3, 1 + self.expanded_panel_y, Character::with_attributes('<', col));
-            surface.write_char(14, 1 + self.expanded_panel_y, Character::with_attributes('>', col));
-            surface.write_char(15, 1 + self.expanded_panel_y, Character::with_attributes('>', col));
-            
+
+            fn set_char(surface: &mut Surface, x: i32, y: i32, char_or_special: CharOrSpecialChar, condition: bool, theme: &Theme) {
+                let attr = if condition { theme.menu.text.hovered } else { theme.menu.text.normal };
+                let character = match char_or_special {
+                    CharOrSpecialChar::Regular(c) => Character::with_attributes(c, attr),
+                    CharOrSpecialChar::Special(sc) => Character::with_attributes(sc, attr),
+                };
+                surface.write_char(x, y, character);
+            }
+            let y_pos = 1 + self.expanded_panel_y;
+
+            set_char(
+                surface,
+                5,
+                y_pos,
+                CharOrSpecialChar::Special(SpecialChar::TriangleLeft),
+                self.hover_date == HoveredDate::LeftArrowYear,
+                theme,
+            );
+            set_char(
+                surface,
+                12,
+                y_pos,
+                CharOrSpecialChar::Special(SpecialChar::TriangleRight),
+                self.hover_date == HoveredDate::RightArrowYear,
+                theme,
+            );
+            set_char(
+                surface,
+                2,
+                y_pos,
+                CharOrSpecialChar::Regular('<'),
+                self.hover_date == HoveredDate::DoubleLeftArrow,
+                theme,
+            );
+            set_char(
+                surface,
+                3,
+                y_pos,
+                CharOrSpecialChar::Regular('<'),
+                self.hover_date == HoveredDate::DoubleLeftArrow,
+                theme,
+            );
+            set_char(
+                surface,
+                14,
+                y_pos,
+                CharOrSpecialChar::Regular('>'),
+                self.hover_date == HoveredDate::DoubleRightArrow,
+                theme,
+            );
+            set_char(
+                surface,
+                15,
+                y_pos,
+                CharOrSpecialChar::Regular('>'),
+                self.hover_date == HoveredDate::DoubleRightArrow,
+                theme,
+            );
+            set_char(
+                surface,
+                20,
+                y_pos,
+                CharOrSpecialChar::Special(SpecialChar::TriangleLeft),
+                self.hover_date == HoveredDate::LeftArrowMonth,
+                theme,
+            );
+            set_char(
+                surface,
+                26,
+                y_pos,
+                CharOrSpecialChar::Special(SpecialChar::TriangleRight),
+                self.hover_date == HoveredDate::RightArrowMonth,
+                theme,
+            );
+
             let month: String = self.selected_date.format("%b").to_string();
             let mut month_format = TextFormat::single_line(22, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             month_format.width = Some(3);
-            surface.write_char(20, 1 + self.expanded_panel_y, Character::with_attributes(SpecialChar::TriangleLeft, col));
             surface.write_text(&month.as_str(), &month_format);
-            surface.write_char(26, 1 + self.expanded_panel_y, Character::with_attributes(SpecialChar::TriangleRight, col));
-        
-        
-            let days = vec!["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
             let mut day_format = TextFormat::single_line(2, 3 + self.expanded_panel_y, col, TextAlignament::Left);
             day_format.width = Some(2);
             for i in 0..7 {
                 day_format.char_attr = theme.menu.text.inactive;
-                surface.write_text(days[i], &day_format);
+                surface.write_text(DatePicker::DAYS[i], &day_format);
                 day_format.x += 4;
             }
 
             let mut day_row = 4 + self.expanded_panel_y;
-            let mut day_col = 2i32;
+            let mut day_col = self.get_first_day_index() * 4 + 3;
 
-            let first_day = self.selected_date.with_day(1).unwrap().format("%a").to_string();  
-            let date_day = self.selected_date.day(); 
-            let mut first_day_index = 0i32;
-            for i in 0..days.len() {
-                if first_day.starts_with(days[i]) {
-                    first_day_index = i as i32;
-                    break;
-                }
-            }
+            let date_day = self.selected_date.day();
             let last_day = self.days_in_month();
 
             for i in 0..last_day {
                 let day = i + 1;
-                if day == 1 {
-                    day_col = first_day_index * 4 + 3;
-                }
                 let mut day_format = TextFormat::single_line(day_col, day_row, col, TextAlignament::Right);
-                if day == date_day{                    
+                if day == date_day {
+                    day_format.char_attr = theme.menu.text.pressed_or_selectd;
+                } else if self.hover_date == HoveredDate::Day(day) {
                     day_format.char_attr = theme.menu.text.hovered;
                 }
                 day_format.width = Some(2);
@@ -235,7 +369,7 @@ impl OnExpand for DatePicker {
                 self.header_y_ofs = 0;
             }
         }
-        // self.mouse_on_color_index = -1;
+        self.hover_date = HoveredDate::None;
     }
     fn on_pack(&mut self) {
         self.expanded_panel_y = 1;
@@ -258,25 +392,24 @@ impl OnMouseEvent for DatePicker {
                 EventProcessStatus::Processed
             }
             MouseEvent::Over(p) => {
-                // let idx = self.mouse_to_color_index(p.x, p.y);
-                // if idx != self.mouse_on_color_index {
-                //     self.mouse_on_color_index = idx;
-                //     return EventProcessStatus::Processed;
-                // }
-                EventProcessStatus::Ignored
+                let hd = self.mouse_over_calendar(p.x, p.y);
+                if hd != self.hover_date {
+                    self.hover_date = hd;
+                }
+                EventProcessStatus::Processed
             }
             MouseEvent::Pressed(data) => {
-            //     let idx = self.mouse_to_color_index(data.x, data.y);
-            //     if let Some(col) = Color::from_value(idx) {
-            //         if col != self.color {
-            //             self.color = col;
-            //             self.raise_event(ControlEvent {
-            //                 emitter: self.handle,
-            //                 receiver: self.event_processor,
-            //                 data: ControlEventData::ColorPicker(EventData { color: col }),
-            //             });
-            //         }
-            //     }
+                //     let idx = self.mouse_to_color_index(data.x, data.y);
+                //     if let Some(col) = Color::from_value(idx) {
+                //         if col != self.color {
+                //             self.color = col;
+                //             self.raise_event(ControlEvent {
+                //                 emitter: self.handle,
+                //                 receiver: self.event_processor,
+                //                 data: ControlEventData::ColorPicker(EventData { color: col }),
+                //             });
+                //         }
+                //     }
                 self.on_default_action();
                 EventProcessStatus::Processed
             }
