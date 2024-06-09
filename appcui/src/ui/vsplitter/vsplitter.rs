@@ -72,6 +72,23 @@ impl VSplitter {
             Handle::None
         }
     }
+
+
+    /// Sets the minimum width for the left or right panel
+    /// The value can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
+    /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));
+    /// // minim 10 chars from left
+    /// vs.set_min_width(vsplitter::Panel::Left,10); 
+    /// // minim 20% from right
+    /// vs.set_min_width(vsplitter::Panel::Right,0.2);
+    /// ```
     pub fn set_min_width<T>(&mut self, panel: vsplitter::Panel, min_size: T)
     where
         Dimension: From<T>,
@@ -82,6 +99,7 @@ impl VSplitter {
         }
     }
 
+    /// Sets the position of the splitter. The value can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value) 
     pub fn set_position<T>(&mut self, pos: T)
     where
         Coordonate: From<T>,
