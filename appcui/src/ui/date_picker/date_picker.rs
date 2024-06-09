@@ -1,4 +1,4 @@
-use chrono::{Datelike, Months, NaiveDate};
+use chrono::{Datelike, Days, Months, NaiveDate};
 use date_picker::events::EventData;
 use AppCUIProcMacro::CustomControl;
 
@@ -31,8 +31,7 @@ enum CharOrSpecialChar {
     Special(SpecialChar),
 }
 
-#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnExpand+OnMouseEvent, internal=true)]
-// +OnKeyPressed
+#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnExpand+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct DatePicker {
     header_y_ofs: i32,
     expanded_panel_y: i32,
@@ -44,6 +43,7 @@ pub struct DatePicker {
 
 impl DatePicker {
     const DAYS: [&'static str; 7] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+    const MONTHS: [&'static str; 12] = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     /// Creates a new date picker with a NaiveDate and a layout.
     ///
     /// # Example
@@ -356,11 +356,10 @@ impl OnPaint for DatePicker {
                 theme,
             );
 
-            let month: String = self.selected_date.format("%b").to_string();
-            // todo: get month from constant vector
+            let month = Self::MONTHS[self.selected_date.month0() as usize];
             let mut month_format = TextFormat::single_line(22, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             month_format.width = Some(3);
-            surface.write_text(&month.as_str(), &month_format);
+            surface.write_text(&month, &month_format);
 
             let mut day_format = TextFormat::single_line(2, 3 + self.expanded_panel_y, col, TextAlignament::Left);
             day_format.width = Some(2);
@@ -379,13 +378,15 @@ impl OnPaint for DatePicker {
             for i in 0..last_day {
                 let day = i + 1;
                 let mut day_format = TextFormat::single_line(day_col, day_row, col, TextAlignament::Right);
-                if day == date_day {
-                    day_format.char_attr = theme.menu.text.pressed_or_selectd;
-                } else if self.hover_date == HoveredDate::Day(day) {
-                    day_format.char_attr = theme.menu.text.hovered;
-                }
+
                 day_format.width = Some(2);
                 surface.write_text(day.to_string().as_str(), &day_format);
+                if day == date_day {
+                    surface.fill_horizontal_line_with_size(day_col - 2, day_row, 4, Character::with_attributes(0, theme.menu.text.pressed_or_selectd));
+                } else
+                if self.hover_date == HoveredDate::Day(day){
+                    surface.fill_horizontal_line_with_size(day_col - 2, day_row, 4, Character::with_attributes(0, theme.menu.text.hovered));
+                }
                 day_col += 4;
                 if day_col >= 30 {
                     day_col = 3;
@@ -470,17 +471,12 @@ impl OnMouseEvent for DatePicker {
                         }
                         HoveredDate::Day(day) => {
                             self.update_date(self.selected_date.with_day(day).unwrap());
+                            self.on_default_action();
                         }
 
                         _ => {}
                     }
-
-                    // self.date_string = Self::format_long_date(self.selected_date);
-                    // self.raise_event(ControlEvent {
-                    //     emitter: self.handle,
-                    //     receiver: self.event_processor,
-                    //     data: ControlEventData::DatePicker(EventData { date: self.selected_date }),
-                    // });
+                    
                     return EventProcessStatus::Processed;
                 }
                 self.on_default_action();
@@ -488,5 +484,137 @@ impl OnMouseEvent for DatePicker {
             }
             _ => EventProcessStatus::Ignored,
         }
+    }
+}
+
+impl OnKeyPressed for DatePicker{
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        let expanded = self.is_expanded();
+
+        if !expanded {
+            match key.value() {
+                key!("Escape") => {
+                    if expanded {
+                        self.pack();
+                        return EventProcessStatus::Processed;
+                    } else {
+                        return EventProcessStatus::Ignored;
+                    }
+                }
+                key!("Up") => {
+                    self.update_date(self.selected_date + Days::new(1));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Down") => {
+                    self.update_date(self.selected_date - Days::new(1));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Shift+Up") => {
+                    self.update_date(self.selected_date + Months::new(1));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Shift+Down") => {
+                    self.update_date(self.selected_date - Months::new(1));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Ctrl+Up") => {
+                    self.update_date(self.selected_date + Months::new(12));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Ctrl+Down") => {
+                    self.update_date(self.selected_date - Months::new(12));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Ctrl+Shift+Up") => {
+                    self.update_date(self.selected_date + Months::new(120));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Ctrl+Shift+Down") => {
+                    self.update_date(self.selected_date - Months::new(120));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Enter") => {
+                    self.on_default_action();
+                    return EventProcessStatus::Processed;
+                }
+                _ => {}
+            }
+            EventProcessStatus::Ignored
+        } else {
+            match key.value() {
+                key!("Escape") => {
+                    self.pack();
+                    return EventProcessStatus::Processed;
+                }
+
+
+                key!("Up") => {
+                    self.update_date(self.selected_date - Days::new(7));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Down") => {
+                    self.update_date(self.selected_date + Days::new(7));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Left") => {
+                    self.update_date(self.selected_date - Days::new(1));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Right") => {
+                    self.update_date(self.selected_date + Days::new(1));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Shift+Left") => {
+                    self.update_date(self.selected_date - Months::new(1));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Shift+Right") => {
+                    self.update_date(self.selected_date + Months::new(1));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Ctrl+Left") => {
+                    self.update_date(self.selected_date - Months::new(12));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Ctrl+Right") => {
+                    self.update_date(self.selected_date + Months::new(12));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Ctrl+Shift+Left") => {
+                    self.update_date(self.selected_date - Months::new(120));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Ctrl+Shift+Right") => {
+                    self.update_date(self.selected_date + Months::new(120));
+                    return EventProcessStatus::Processed;
+                }
+
+                key!("Enter") => {
+                    self.on_default_action();
+                    return EventProcessStatus::Processed;
+                }
+                _ => {}
+            }
+
+            EventProcessStatus::Ignored
+        }
+
     }
 }
