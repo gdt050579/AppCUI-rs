@@ -135,3 +135,7 @@ path = "vline/main.rs"
 [[example]]
 name = "date_picker"
 path = "date_picker/main.rs"
+
+[[example]]
+name = "splitter"
+path = "splitter/main.rs"

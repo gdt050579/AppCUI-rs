@@ -1,7 +1,9 @@
 mod alignament;
 mod anchors;
+mod coordonate16;
 mod coordonate;
-mod size;
+mod dimension16;
+mod dimension;
 mod layout_parameters;
 mod layout_mode;
 mod parameter;
@@ -21,8 +23,6 @@ mod tests;
 
 use alignament::Alignament;
 use anchors::Anchors;
-use coordonate::Coordonate;
-use size::Size;
 use layout_parameters::LayoutParameters;
 use layout_mode::LayoutMode;
 use parameter::Parameter;
@@ -37,6 +37,10 @@ use top_right_bottom_anchors_layout::TopRightBottomAnchorsLayout;
 use all_anchors_layout::AllAnchorsLayout;
 use macros::should_not_use;
 pub use control_layout::Layout;
+pub use coordonate::Coordonate;
+pub use dimension::Dimension;
+pub (in crate) use dimension16::Dimension16;
+pub (in crate) use coordonate16::Coordonate16;
 pub (in crate) use control_layout::ControlLayout;
 
 

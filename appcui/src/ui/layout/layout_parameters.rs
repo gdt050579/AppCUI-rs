@@ -1,20 +1,20 @@
 use super::anchors::Anchors;
 use super::Alignament;
-use super::Coordonate;
+use super::Coordonate16;
 use super::Parameter;
-use super::Size;
+use super::Dimension16;
 use crate::utils::KeyValueParser;
 use crate::utils::ValueType;
 
 pub(super) struct LayoutParameters {
-    pub x: Option<Coordonate>,
-    pub y: Option<Coordonate>,
-    pub width: Option<Size>,
-    pub height: Option<Size>,
-    pub a_left: Option<Coordonate>,
-    pub a_right: Option<Coordonate>,
-    pub a_top: Option<Coordonate>,
-    pub a_bottom: Option<Coordonate>,
+    pub x: Option<Coordonate16>,
+    pub y: Option<Coordonate16>,
+    pub width: Option<Dimension16>,
+    pub height: Option<Dimension16>,
+    pub a_left: Option<Coordonate16>,
+    pub a_right: Option<Coordonate16>,
+    pub a_top: Option<Coordonate16>,
+    pub a_bottom: Option<Coordonate16>,
     pub align: Option<Alignament>,
     pub dock: Option<Alignament>,
 }
@@ -45,42 +45,42 @@ impl LayoutParameters {
                 match param {
                     Parameter::X => {
                         if p.is_numerical_value() {
-                            inf.x = Coordonate::new(p);
+                            inf.x = Coordonate16::new(p);
                         } else {
                             panic!("Invalid value for X parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Y => {
                         if p.is_numerical_value() {
-                            inf.y = Coordonate::new(p);
+                            inf.y = Coordonate16::new(p);
                         } else {
                             panic!("Invalid value for Y parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Left => {
                         if p.is_numerical_value() {
-                            inf.a_left = Coordonate::new(p);
+                            inf.a_left = Coordonate16::new(p);
                         } else {
                             panic!("Invalid value for LEFT parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Right => {
                         if p.is_numerical_value() {
-                            inf.a_right = Coordonate::new(p);
+                            inf.a_right = Coordonate16::new(p);
                         } else {
                             panic!("Invalid value for RIGHT parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Top => {
                         if p.is_numerical_value() {
-                            inf.a_top = Coordonate::new(p);
+                            inf.a_top = Coordonate16::new(p);
                         } else {
                             panic!("Invalid value for TOP parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
                     }
                     Parameter::Bottom => {
                         if p.is_numerical_value() {
-                            inf.a_bottom = Coordonate::new(p);
+                            inf.a_bottom = Coordonate16::new(p);
                         } else {
                             panic!("Invalid value for BOTTOM parameter: {} in layout: {} (it should be a numerical or percentage value)",p.value,format);
                         }
@@ -90,7 +90,7 @@ impl LayoutParameters {
                             if p.numerical_value < 0 {
                                 panic!("The value for WIDTH parameter can not be a negative value: {} in layout: {}",p.value,format);
                             }
-                            inf.width = Size::new(p);
+                            inf.width = Dimension16::new(p);
                         } else {
                             panic!("Invalid value for WIDTH parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
                         }
@@ -100,7 +100,7 @@ impl LayoutParameters {
                             if p.numerical_value < 0 {
                                 panic!("The value for HEIGHT parameter can not be a negative value: {} in layout: {}",p.value,format);
                             }
-                            inf.height = Size::new(p);
+                            inf.height = Dimension16::new(p);
                         } else {
                             panic!("Invalid value for HEIGHT parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
                         }

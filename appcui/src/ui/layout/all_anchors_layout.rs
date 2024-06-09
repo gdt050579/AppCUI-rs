@@ -1,14 +1,14 @@
 use super::should_not_use;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::LayoutParameters;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct AllAnchorsLayout {
-    pub left: Coordonate,
-    pub top: Coordonate,
-    pub right: Coordonate,
-    pub bottom: Coordonate,
+    pub left: Coordonate16,
+    pub top: Coordonate16,
+    pub right: Coordonate16,
+    pub bottom: Coordonate16,
 }
 
 impl AllAnchorsLayout {
@@ -33,10 +33,10 @@ impl AllAnchorsLayout {
         parent_width: u16,
         parent_height: u16,
     ) {
-        let left = self.left.as_absolute_coordonate(parent_width);
-        let top = self.top.as_absolute_coordonate(parent_height);
-        let right = self.right.as_absolute_coordonate(parent_width);
-        let bottom = self.bottom.as_absolute_coordonate(parent_height);
+        let left = self.left.absolute(parent_width);
+        let top = self.top.absolute(parent_height);
+        let right = self.right.absolute(parent_width);
+        let bottom = self.bottom.absolute(parent_height);
         control_layout.resize(
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,

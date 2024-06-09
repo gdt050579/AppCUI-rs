@@ -1,16 +1,16 @@
 use super::should_not_use;
 use super::Alignament;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::LayoutParameters;
-use super::Size;
+use super::Dimension16;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftRightAnchorsLayout {
-    pub left: Coordonate,
-    pub right: Coordonate,
-    pub y: Coordonate,
-    pub height: Size,
+    pub left: Coordonate16,
+    pub right: Coordonate16,
+    pub y: Coordonate16,
+    pub height: Dimension16,
     pub align: Alignament,
 }
 
@@ -32,8 +32,8 @@ impl LeftRightAnchorsLayout {
         LeftRightAnchorsLayout {
             left: params.a_left.unwrap(),
             right: params.a_right.unwrap(),
-            y: params.y.unwrap_or(Coordonate::Absolute(0)),
-            height: params.height.unwrap_or(Size::Absolute(1)),
+            y: params.y.unwrap_or(Coordonate16::Absolute(0)),
+            height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: params.align.unwrap_or(Alignament::Center),
         }
     }
@@ -44,12 +44,12 @@ impl LeftRightAnchorsLayout {
         parent_width: u16,
         parent_height: u16,
     ) {
-        let left = self.left.as_absolute_coordonate(parent_width);
-        let right = self.right.as_absolute_coordonate(parent_width);
-        let y = self.y.as_absolute_coordonate(parent_height);
+        let left = self.left.absolute(parent_width);
+        let right = self.right.absolute(parent_width);
+        let y = self.y.absolute(parent_height);
         control_layout.resize(
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
-            self.height.as_absolute_size(parent_height),
+            self.height.absolute(parent_height),
         );
         match self.align {
             Alignament::Top => control_layout.set_position(left, y),

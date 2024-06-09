@@ -450,3 +450,8 @@ pub fn vline(input: TokenStream) -> TokenStream {
 pub fn datepicker(input: TokenStream) -> TokenStream {
     crate::controls::date_picker::create(input)
 }
+
+#[proc_macro]
+pub fn vsplitter(input: TokenStream) -> TokenStream {
+    crate::controls::vsplitter::create(input)
+}
