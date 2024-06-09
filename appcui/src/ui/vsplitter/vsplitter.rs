@@ -99,6 +99,11 @@ impl VSplitter {
         }
     }
 
+    #[inline(always)]
+    pub fn position(&self) -> i32 {
+        self.pos.absolute(self.size().width.saturating_sub(1) as u16) 
+    }
+
     /// Sets the position of the splitter. The value can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value) 
     pub fn set_position<T>(&mut self, pos: T)
     where
