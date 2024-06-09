@@ -1,5 +1,7 @@
 use chrono::{Datelike, Months, NaiveDate};
+use date_picker::events::EventData;
 use AppCUIProcMacro::CustomControl;
+
 
 const MINSPACE_FOR_SHORT_DATE: u32 = 15;
 const MINSPACE_FOR_LONG_DATE: u32 = 18;
@@ -43,11 +45,11 @@ pub struct DatePicker {
 impl DatePicker {
     const DAYS: [&'static str; 7] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
     /// Creates a new date picker with a NaiveDate and a layout.
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let date_picker = DatePicker::with_date(NaiveDate::from_ymd(2024, 6, 13), Layout::new("x:1,y:1,w:19"));
     /// ```
     pub fn with_date(date: NaiveDate, layout: Layout) -> Self {
@@ -76,11 +78,11 @@ impl DatePicker {
 
     /// Creates a new date picker with a date string and a layout.
     /// The date string must be in the format "YYYY-MM-DD".
-    /// 
+    ///
     /// # Example                                       
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let date_picker = DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19"));
     /// ```
     pub fn new(date_str: &str, layout: Layout) -> Self {
@@ -89,7 +91,7 @@ impl DatePicker {
     }
 
     /// Sets the date of the date picker as a string representation.
-    pub fn set_date_str(&mut self, date_str: &str){
+    pub fn set_date_str(&mut self, date_str: &str) {
         self.selected_date = date_str.parse::<NaiveDate>().unwrap();
         self.date_string = Self::format_long_date(self.selected_date);
     }
@@ -104,6 +106,19 @@ impl DatePicker {
     #[inline(always)]
     pub fn date(&self) -> NaiveDate {
         self.selected_date
+    }
+
+    fn update_date(&mut self, date: NaiveDate) {
+        if date != self.selected_date {
+            self.selected_date = date;
+            self.date_string = Self::format_long_date(date);
+
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::DatePicker(EventData {date: self.selected_date}),
+            });
+        }
     }
 
     fn mouse_over_calendar(&self, x: i32, y: i32) -> HoveredDate {
@@ -138,7 +153,7 @@ impl DatePicker {
         for i in 0..last_day {
             let day = i + 1;
 
-            if(y == row) && (x == col || x == (col - 1)) {
+            if (y == row) && (x == col || x == (col - 1)) {
                 return HoveredDate::Day(day as u32);
             }
 
@@ -432,32 +447,31 @@ impl OnMouseEvent for DatePicker {
                 EventProcessStatus::Processed
             }
             MouseEvent::Pressed(data) => {
-                
                 let hd = self.mouse_over_calendar(data.x, data.y);
                 if hd != HoveredDate::None {
                     match hd {
                         HoveredDate::DoubleLeftArrow => {
-                            self.selected_date = self.selected_date - Months::new(120);
+                            self.update_date(self.selected_date - Months::new(120));
                         }
                         HoveredDate::LeftArrowYear => {
-                            self.selected_date = self.selected_date - Months::new(12);
+                            self.update_date(self.selected_date - Months::new(12));
                         }
                         HoveredDate::RightArrowYear => {
-                            self.selected_date = self.selected_date + Months::new(12);
+                            self.update_date(self.selected_date + Months::new(12));
                         }
                         HoveredDate::DoubleRightArrow => {
-                            self.selected_date = self.selected_date + Months::new(120);
+                            self.update_date(self.selected_date + Months::new(120));
                         }
                         HoveredDate::LeftArrowMonth => {
-                            self.selected_date = self.selected_date - Months::new(1);
+                            self.update_date(self.selected_date - Months::new(1));
                         }
                         HoveredDate::RightArrowMonth => {
-                            self.selected_date = self.selected_date + Months::new(1);
+                            self.update_date(self.selected_date + Months::new(1));
                         }
                         HoveredDate::Day(day) => {
-                            self.selected_date = self.selected_date.with_day(day).unwrap();
+                            self.update_date(self.selected_date.with_day(day).unwrap());
                         }
-                        
+
                         _ => {}
                     }
 

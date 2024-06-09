@@ -41,6 +41,7 @@ pub(crate) enum AppCUITrait {
     ComboBoxEvents = 32,
     GenericDropDownListEvents = 33,
     GenericNumericSelectorEvents = 34,
+    DatePickerEvents = 35,
 }
 
 #[repr(u8)]
@@ -92,6 +93,7 @@ impl AppCUITrait {
             AppCUITrait::ComboBoxEvents => "ComboBoxEvents",
             AppCUITrait::GenericDropDownListEvents => "DropDownListEvents", // important to be without Generic
             AppCUITrait::GenericNumericSelectorEvents => "NumericSelectorEvents", // important to be without Generic            
+            AppCUITrait::DatePickerEvents => "DatePickerEvents",          
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -134,6 +136,7 @@ impl AppCUITrait {
             AppCUITrait::ComboBoxEvents => TraitType::ControlEvent,
             AppCUITrait::GenericDropDownListEvents => TraitType::ControlEvent,
             AppCUITrait::GenericNumericSelectorEvents => TraitType::ControlEvent,
+            AppCUITrait::DatePickerEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -176,6 +179,7 @@ impl AppCUITrait {
             AppCUITrait::ComboBoxEvents => "",
             AppCUITrait::GenericDropDownListEvents => "",
             AppCUITrait::GenericNumericSelectorEvents => "",
+            AppCUITrait::DatePickerEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -218,6 +222,7 @@ impl AppCUITrait {
             AppCUITrait::ComboBoxEvents => "impl$(TEMPLATE_TYPE) ComboBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericDropDownListEvents => "impl$(TEMPLATE_TYPE) GenericDropDownListEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericNumericSelectorEvents => "impl$(TEMPLATE_TYPE) GenericNumericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::DatePickerEvents => "impl$(TEMPLATE_TYPE) DatePickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -253,6 +258,7 @@ impl AppCUITrait {
             "ComboBoxEvents" | "ComboBox" => Some(AppCUITrait::ComboBoxEvents),
             "DropDownListEvents" | "DropDownList" => Some(AppCUITrait::GenericDropDownListEvents),
             "NumericSelectorEvents" | "NumericSelector" => Some(AppCUITrait::GenericNumericSelectorEvents),
+            "DatePickerEvents" | "DatePicker" => Some(AppCUITrait::DatePickerEvents),
             _ => None,
         }
     }
@@ -295,7 +301,8 @@ impl AppCUITrait {
             31 => Some(AppCUITrait::GenericSelectorEvents),
             32 => Some(AppCUITrait::ComboBoxEvents),
             33 => Some(AppCUITrait::GenericDropDownListEvents),
-            34 => Some(AppCUITrait::GenericNumericSelectorEvents),  
+            34 => Some(AppCUITrait::GenericNumericSelectorEvents), 
+            35 => Some(AppCUITrait::DatePickerEvents), 
             _ => None,
         };
         result?;
