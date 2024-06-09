@@ -311,11 +311,11 @@ impl OnResize for VSplitter {
             ResizeBehavior::PreserveRightPanelSize => {
                 if previous_width == 0 {
                     // first resize (initialize the splitter preserved position)
-                    self.preserve_pos = (new_size.width as i32 - self.pos.absolute(new_size.width.saturating_sub(1) as u16)).max(0);
-                    let new_pos = (new_size.width as i32 - self.preserve_pos).max(0);
+                    self.preserve_pos = (new_size.width.saturating_sub(1) as i32 - self.pos.absolute(new_size.width.saturating_sub(1) as u16)).max(0);
+                    let new_pos = (new_size.width.saturating_sub(1) as i32 - self.preserve_pos).max(0);
                     self.set_position(new_pos);
                 } else {
-                    let new_pos = (new_size.width as i32 - self.preserve_pos).max(0);
+                    let new_pos = (new_size.width.saturating_sub(1) as i32 - self.preserve_pos).max(0);
                     self.update_position(Coordonate::Absolute(new_pos), false);
                 }
             }

@@ -1,5 +1,3 @@
-use crate::utils::{KeyValuePair, ValueType};
-
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Dimension {
     Absolute(u32),
@@ -18,74 +16,6 @@ impl Dimension {
             Dimension::Percentage(v) =>((parent_size as f32) * v) as u16,
         }
     }
-    /*
-    pub fn increment(&mut self, parent_size: u16, clamp: bool) {
-        match self {
-            Dimension::Absolute(value) => {
-                if clamp {
-                    if *value < parent_size {
-                        *value += 1;
-                    } else {
-                        *value = parent_size;
-                    }
-                } else {
-                    *value = (*value).saturating_add(1);
-                }
-            }
-            Dimension::Percentage(proc) => {
-                let mut v = (((*proc) as u32) * (parent_size as u32) / 10000u32).clamp(0, 0xFFFF) as u16;
-                if clamp {
-                    if v < parent_size {
-                        v += 1;
-                    } else {
-                        v = parent_size;
-                    }
-                } else {
-                    v = v.saturating_add(1);
-                }
-                // convert v into percentage
-                if parent_size > 0 {
-                    *proc = ((v as u32) * 10000 / (parent_size as u32)) as u16;
-                } else {
-                    *proc = 0;
-                }
-            }
-        }
-    }
-    pub fn decrement(&mut self, parent_size: u16, clamp: bool) {
-        match self {
-            Dimension::Absolute(value) => {
-                if clamp {
-                    if *value > 0 {
-                        *value -= 1;
-                    } else {
-                        *value = 0;
-                    }
-                } else if *value > 0 {
-                    *value -= 1;
-                }
-            }
-            Dimension::Percentage(proc) => {
-                let mut v = (((*proc) as u32) * (parent_size as u32) / 10000u32).clamp(0, 0xFFFF) as u16;
-                if clamp {
-                    if v > 0 {
-                        v -= 1;
-                    } else {
-                        v = 0;
-                    }
-                } else {
-                    v = v.saturating_sub(1);
-                }
-                // convert v into percentage
-                if parent_size > 0 {
-                    *proc = ((v as u32) * 10000 / (parent_size as u32)) as u16;
-                } else {
-                    *proc = 0;
-                }
-            }
-        }
-    }
-    */
 }
 impl From<u16> for Dimension {
     fn from(value: u16) -> Self {

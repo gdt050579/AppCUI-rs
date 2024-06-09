@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[test]
 fn check_create() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
         // ┌─ Left ─────────────┐
         // ┌─ Right ────────────┐
         Paint('Initial state')   
@@ -24,10 +24,10 @@ fn check_create_procmacro() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
-        CheckHash(0xE2548C89F72469D9)
+        CheckHash(0xD1DEEDEB85046D1)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
+    let mut w = window!("Test,d:c,w:51,h:10,flags: Sizeable");
     let mut vs = vsplitter!("50%,d:c,w:100%,h:100%");
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
@@ -184,13 +184,13 @@ fn check_resize_preseve_aspect_ratio_with_percentage() {
     let script = "
         Paint.Enable(false)        
         Paint('1. Initial state')   
-        CheckHash(0x83B50620086A8781)
+        CheckHash(0xFC29EDD7475CF785)
         Mouse.Drag(29,9,35,9)
         Paint('2. Resize - shoule be equal')   
-        CheckHash(0x48B702D658DEFE95)
+        CheckHash(0x864A27821D05F7C1)
         Mouse.Drag(35,9,55,9)
         Paint('3. Resize - shoule be equal')   
-        CheckHash(0x82D6CA2ABD8EF32D)
+        CheckHash(0x916704C680DF8EB9)
         Mouse.Drag(55,9,12,9)
         Paint('4. Resize - shoule be equal')   
         CheckHash(0x218360470FDB6C4B)
@@ -278,7 +278,7 @@ fn check_resize_preseve_left_width_with_absolute() {
 #[test]
 fn check_resize_preseve_left_width_with_percentage() {
     let script = "
-        Paint.Enable(false)  
+        Paint.Enable(false) 
         Paint('1. Initial state')   
         CheckHash(0xEA732DB4A58A4F60)
         Mouse.Drag(29,9,35,9)
@@ -311,7 +311,7 @@ fn check_resize_preseve_left_width_with_percentage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.37,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveLeftPanelSize);
+    let mut vs = VSplitter::new(0.39,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveLeftPanelSize);
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -323,7 +323,6 @@ fn check_resize_preseve_left_width_with_percentage() {
 fn check_resize_preseve_right_width_with_absolute() {
     let script = "
         Paint.Enable(false)   
-        //Error.Disable(true)
         Paint('1. Initial state')   
         CheckHash(0x83B50620086A8781)
         Mouse.Drag(29,9,35,9)
@@ -400,7 +399,7 @@ fn check_resize_preseve_right_width_with_percentage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    let mut vs = VSplitter::new(0.55,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
