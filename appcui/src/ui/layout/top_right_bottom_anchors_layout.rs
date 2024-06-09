@@ -1,14 +1,14 @@
 use super::should_not_use;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::LayoutParameters;
 use super::Dimension;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopRightBottomAnchorsLayout {
-    pub top: Coordonate,
-    pub right: Coordonate,
-    pub bottom: Coordonate,
+    pub top: Coordonate16,
+    pub right: Coordonate16,
+    pub bottom: Coordonate16,
     pub width: Dimension,
 }
 

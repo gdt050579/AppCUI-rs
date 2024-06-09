@@ -50,11 +50,11 @@ impl VSplitter {
     }
 
     /// Adds a new control to the specified panel of the splitter (left or right)
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
     /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));   
@@ -92,44 +92,46 @@ impl VSplitter {
         self.update_position(self.pos, true);
     }
     fn update_position(&mut self, pos: Coordonate, upadate_preserve_position: bool) {
-        let w = self.size().width as u16;
-        let mut abs_value = pos.absolute(w);
-        let min_left_margin = self.min_left.absolute(w);
-        let min_right_margin = self.min_right.absolute(w);
-        if abs_value >= (w as i32 - min_right_margin as i32) {
-            abs_value = w as i32 - min_right_margin as i32 - 1;
+        let right_most = self.size().width.saturating_sub(1) as u16;
+        let mut abs_value = pos.absolute(right_most);
+        let min_left_margin = self.min_left.absolute(right_most);
+        let min_right_margin = self.min_right.absolute(right_most);
+        if abs_value > (right_most as i32 - min_right_margin as i32) {
+            abs_value = right_most as i32 - min_right_margin as i32;
         }
         abs_value = abs_value.max(min_left_margin as i32);
         match self.resize_behavior {
-            ResizeBehavior::PreserveAspectRatio => self.pos.update_with_absolute_value(abs_value as i16, w),
+            ResizeBehavior::PreserveAspectRatio => {
+                self.pos.update_with_absolute_value(abs_value as i16, right_most);
+            }
             ResizeBehavior::PreserveLeftPanelSize | ResizeBehavior::PreserveRightPanelSize => {
                 // if the position is preserverd, there is no need to keep the percentage
-                self.pos = Coordonate::Absolute(abs_value as i16);
+                self.pos = Coordonate::Absolute(abs_value);
             }
         };
         self.update_panel_sizes(self.size());
         if upadate_preserve_position {
             match self.resize_behavior {
                 ResizeBehavior::PreserveLeftPanelSize => {
-                    self.preserve_pos = self.pos.absolute(w);
+                    self.preserve_pos = self.pos.absolute(right_most);
                 }
                 ResizeBehavior::PreserveRightPanelSize => {
-                    self.preserve_pos = w as i32 - self.pos.absolute(w);
+                    self.preserve_pos = right_most as i32 - self.pos.absolute(right_most);
                 }
                 _ => {}
             }
         }
     }
     fn update_panel_sizes(&mut self, new_size: Size) {
-        let w = self.pos.absolute(new_size.width as u16).max(0) as u16;
+        let spltter_pos = self.pos.absolute(new_size.width.saturating_sub(1) as u16).max(0) as u16;
         let h = new_size.height as u16;
         let h1 = self.left;
         let h2 = self.right;
         let rm = RuntimeManager::get();
         if let Some(p1) = rm.get_control_mut(h1) {
             p1.set_position(0, 0);
-            if w > 1 {
-                p1.set_size(w, h);
+            if spltter_pos > 0 {
+                p1.set_size(spltter_pos, h);
                 p1.set_visible(true);
             } else {
                 p1.set_size(0, h);
@@ -137,9 +139,9 @@ impl VSplitter {
             }
         }
         if let Some(p2) = rm.get_control_mut(h2) {
-            p2.set_position(w as i32 + 1, 0);
-            if (w as i32 + 1) < new_size.width as i32 {
-                p2.set_size(new_size.width as u16 - w - 1, h);
+            p2.set_position(spltter_pos as i32 + 1, 0);
+            if (spltter_pos as i32) + 1 < (new_size.width as i32) {
+                p2.set_size(new_size.width as u16 - spltter_pos - 1, h);
                 p2.set_visible(true);
             } else {
                 p2.set_size(0, h);
@@ -149,7 +151,7 @@ impl VSplitter {
     }
     fn mouse_to_state(&self, x: i32, y: i32, clicked: bool) -> State {
         let sz = self.size();
-        let pos = self.pos.absolute(sz.width as u16);
+        let pos = self.pos.absolute(sz.width.saturating_sub(1) as u16);
         if x != pos {
             State::None
         } else if clicked {
@@ -183,7 +185,7 @@ impl OnPaint for VSplitter {
             }
         };
         let sz = self.size();
-        let x = self.pos.absolute(sz.width as u16);
+        let x = self.pos.absolute(sz.width.saturating_sub(1) as u16);
         surface.draw_vertical_line_with_size(x, 0, sz.height, LineType::Single, col_line);
         surface.write_char(x, 1, Character::with_attributes(SpecialChar::TriangleLeft, col_b1));
         surface.write_char(x, 2, Character::with_attributes(SpecialChar::TriangleRight, col_b2));
@@ -195,14 +197,20 @@ impl OnKeyPressed for VSplitter {
             key!("Ctrl+Alt+Left") => {
                 let sz = self.size();
                 if sz.width > 0 {
-                    self.update_position(Coordonate::Absolute((self.pos.absolute(sz.width as u16) - 1) as i16), true);
+                    self.update_position(
+                        Coordonate::Absolute(self.pos.absolute(sz.width.saturating_sub(1) as u16) - 1),
+                        true,
+                    );
                 }
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Right") => {
                 let sz = self.size();
                 if sz.width > 0 {
-                    self.update_position(Coordonate::Absolute((self.pos.absolute(sz.width as u16) + 1) as i16), true);
+                    self.update_position(
+                        Coordonate::Absolute(self.pos.absolute(sz.width.saturating_sub(1) as u16) + 1),
+                        true,
+                    );
                 }
                 EventProcessStatus::Processed
             }
@@ -211,7 +219,7 @@ impl OnKeyPressed for VSplitter {
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Shift+Right") => {
-                self.update_position(Coordonate::Absolute(self.size().width as i16), true);
+                self.update_position(Coordonate::Absolute(self.size().width.saturating_sub(1) as i32), true);
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
@@ -250,7 +258,7 @@ impl OnMouseEvent for VSplitter {
                         true
                     }
                     State::ClickedOnRightButton => {
-                        self.update_position(Coordonate::Absolute(self.size().width as i16), true);
+                        self.update_position(Coordonate::Absolute(self.size().width.saturating_sub(1) as i32), true);
                         true
                     }
                     _ => false,
@@ -265,7 +273,7 @@ impl OnMouseEvent for VSplitter {
             }
             MouseEvent::Drag(evn) => {
                 if self.state == State::Dragging {
-                    self.update_position(Coordonate::Absolute(evn.x as i16), true);
+                    self.update_position(Coordonate::Absolute(evn.x), true);
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
@@ -283,9 +291,9 @@ impl OnResize for VSplitter {
         match self.resize_behavior {
             ResizeBehavior::PreserveAspectRatio => {
                 if (previous_width > 0) && (self.pos.is_absolute()) {
-                    let ratio = self.pos.absolute(old_size.width as u16) as f32 / previous_width as f32;
+                    let ratio = self.pos.absolute(old_size.width.saturating_sub(1) as u16) as f32 / previous_width as f32;
                     let new_pos = (new_size.width as f32 * ratio) as i32;
-                    self.update_position(Coordonate::Absolute(new_pos as i16), false);
+                    self.update_position(Coordonate::Absolute(new_pos), false);
                 } else {
                     // first time (initialization) or already a percentage
                     self.update_panel_sizes(new_size);
@@ -294,21 +302,21 @@ impl OnResize for VSplitter {
             ResizeBehavior::PreserveLeftPanelSize => {
                 if previous_width == 0 {
                     // first resize (initialize the splitter preserved position)
-                    self.preserve_pos = self.pos.absolute(new_size.width as u16);
+                    self.preserve_pos = self.pos.absolute(new_size.width.saturating_sub(1) as u16);
                     self.set_position(self.preserve_pos);
                 } else {
-                    self.update_position(Coordonate::Absolute(self.preserve_pos as i16), false);
+                    self.update_position(Coordonate::Absolute(self.preserve_pos), false);
                 }
             }
             ResizeBehavior::PreserveRightPanelSize => {
                 if previous_width == 0 {
                     // first resize (initialize the splitter preserved position)
-                    self.preserve_pos = (new_size.width as i32 - self.pos.absolute(new_size.width as u16)).max(0);
+                    self.preserve_pos = (new_size.width as i32 - self.pos.absolute(new_size.width.saturating_sub(1) as u16)).max(0);
                     let new_pos = (new_size.width as i32 - self.preserve_pos).max(0);
                     self.set_position(new_pos);
                 } else {
                     let new_pos = (new_size.width as i32 - self.preserve_pos).max(0);
-                    self.update_position(Coordonate::Absolute(new_pos as i16), false);
+                    self.update_position(Coordonate::Absolute(new_pos), false);
                 }
             }
         }

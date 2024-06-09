@@ -2,7 +2,7 @@ use crate::ui::layout::absolute_layout::AbsoluteLayout;
 
 use super::Alignament;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::PointAndSizeLayout;
 use super::Dimension;
 
@@ -13,8 +13,8 @@ macro_rules! validate_abs {
         assert_eq!(
             LayoutMode::new($text),
             LayoutMode::PointAndSize(PointAndSizeLayout {
-                x: Coordonate::Absolute($x),
-                y: Coordonate::Absolute($y),
+                x: Coordonate16::Absolute($x),
+                y: Coordonate16::Absolute($y),
                 align: Alignament::$a,
                 anchor: Alignament::$anc,
                 width: Dimension::Absolute($w),
@@ -52,8 +52,8 @@ fn layout_mode_xywh() {
     assert_eq!(
         l2,
         LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: Coordonate::Absolute(-4),
-            y: Coordonate::Percentage(1000),
+            x: Coordonate16::Absolute(-4),
+            y: Coordonate16::Percentage(1000),
             align: Alignament::TopLeft,
             anchor: Alignament::TopLeft,
             width: Dimension::Percentage(1000),
@@ -64,8 +64,8 @@ fn layout_mode_xywh() {
     assert_eq!(
         l3,
         LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: Coordonate::Absolute(0),
-            y: Coordonate::Absolute(0),
+            x: Coordonate16::Absolute(0),
+            y: Coordonate16::Absolute(0),
             align: Alignament::Center,
             anchor: Alignament::TopLeft,
             width: Dimension::Percentage(10000),

@@ -1,14 +1,14 @@
 use super::should_not_use;
 use super::Alignament;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::LayoutParameters;
 use super::Dimension;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct PointAndSizeLayout {
-    pub x: Coordonate,
-    pub y: Coordonate,
+    pub x: Coordonate16,
+    pub y: Coordonate16,
     pub width: Dimension,
     pub height: Dimension,
     pub align: Alignament,
@@ -41,8 +41,8 @@ impl PointAndSizeLayout {
         );
 
         PointAndSizeLayout {
-            x: Coordonate::Absolute(0),
-            y: Coordonate::Absolute(0),
+            x: Coordonate16::Absolute(0),
+            y: Coordonate16::Absolute(0),
             width: params.width.unwrap_or(Dimension::Percentage(10000)),
             height: params.height.unwrap_or(Dimension::Percentage(10000)),
             align: params.dock.unwrap(),

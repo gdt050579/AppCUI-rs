@@ -1,5 +1,6 @@
 mod alignament;
 mod anchors;
+mod coordonate16;
 mod coordonate;
 mod dimension;
 mod layout_parameters;
@@ -37,6 +38,7 @@ use macros::should_not_use;
 pub use control_layout::Layout;
 pub use dimension::Dimension;
 pub use coordonate::Coordonate;
+pub (in crate) use coordonate16::Coordonate16;
 pub (in crate) use control_layout::ControlLayout;
 
 

@@ -1,15 +1,15 @@
 use super::should_not_use;
 use super::Alignament;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::LayoutParameters;
 use super::Dimension;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftRightAnchorsLayout {
-    pub left: Coordonate,
-    pub right: Coordonate,
-    pub y: Coordonate,
+    pub left: Coordonate16,
+    pub right: Coordonate16,
+    pub y: Coordonate16,
     pub height: Dimension,
     pub align: Alignament,
 }
@@ -32,7 +32,7 @@ impl LeftRightAnchorsLayout {
         LeftRightAnchorsLayout {
             left: params.a_left.unwrap(),
             right: params.a_right.unwrap(),
-            y: params.y.unwrap_or(Coordonate::Absolute(0)),
+            y: params.y.unwrap_or(Coordonate16::Absolute(0)),
             height: params.height.unwrap_or(Dimension::Absolute(1)),
             align: params.align.unwrap_or(Alignament::Center),
         }

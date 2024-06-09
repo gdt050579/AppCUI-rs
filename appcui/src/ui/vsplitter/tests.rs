@@ -4,11 +4,13 @@ use crate::prelude::*;
 fn check_create() {
     let script = "
         Paint.Enable(false)
+        // ┌─ Left ─────────────┐
+        // ┌─ Right ────────────┐
         Paint('Initial state')   
-        CheckHash(0xE2548C89F72469D9)
+        CheckHash(0xD1DEEDEB85046D1)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
+    let mut w = window!("Test,d:c,w:51,h:10,flags: Sizeable");
     let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
