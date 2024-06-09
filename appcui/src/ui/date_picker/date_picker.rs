@@ -42,32 +42,15 @@ pub struct DatePicker {
 
 impl DatePicker {
     const DAYS: [&'static str; 7] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-    // pub fn new(date: NaiveDate, layout: Layout) -> Self {
-    //     let mut dp = DatePicker {
-    //         base: ControlBase::with_status_flags(layout, StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput),
-    //         header_y_ofs: 0,
-    //         expanded_panel_y: 1,
-    //         selected_date: date,
-    //         date_string: Self::format_long_date(date),
-    //         hover_date: HoveredDate::None,
-    //         // date_size: DateSize::Large,
-    //     };
-    //     dp.set_size_bounds(6, 1, u16::MAX, 1);
-    //     let date_len = dp.get_date_size();
-    //     match date_len {
-    //         DateSize::Large => {}
-    //         DateSize::Small => {
-    //             dp.date_string = Self::format_short_date(date);
-    //         }
-    //         DateSize::VerySmall => {
-    //             dp.date_string = Self::format_very_short_date(date);
-    //         }
-    //     }
-    //     dp
-    // }
-
-    pub fn new(date_str: &str, layout: Layout) -> Self {
-        let date = date_str.parse::<NaiveDate>().unwrap();
+    /// Creates a new date picker with a NaiveDate and a layout.
+    /// 
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let date_picker = DatePicker::with_date(NaiveDate::from_ymd(2024, 6, 13), Layout::new("x:1,y:1,w:19"));
+    /// ```
+    pub fn with_date(date: NaiveDate, layout: Layout) -> Self {
         let mut dp = DatePicker {
             base: ControlBase::with_status_flags(layout, StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput),
             header_y_ofs: 0,
@@ -91,16 +74,34 @@ impl DatePicker {
         dp
     }
 
+    /// Creates a new date picker with a date string and a layout.
+    /// The date string must be in the format "YYYY-MM-DD".
+    /// 
+    /// # Example                                       
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let date_picker = DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19"));
+    /// ```
+    pub fn new(date_str: &str, layout: Layout) -> Self {
+        let date = date_str.parse::<NaiveDate>().unwrap();
+        Self::with_date(date, layout)
+    }
+
+    /// Sets the date of the date picker as a string representation.
     pub fn set_date_str(&mut self, date_str: &str){
         self.selected_date = date_str.parse::<NaiveDate>().unwrap();
         self.date_string = Self::format_long_date(self.selected_date);
     }
 
+    /// Sets the date of the date picker from a NaiveDate.
     pub fn set_date(&mut self, date: NaiveDate) {
         self.selected_date = date;
         self.date_string = Self::format_long_date(date);
     }
 
+    /// Returns the date of the date picker as a NaiveDate.
+    #[inline(always)]
     pub fn date(&self) -> NaiveDate {
         self.selected_date
     }
@@ -341,6 +342,7 @@ impl OnPaint for DatePicker {
             );
 
             let month: String = self.selected_date.format("%b").to_string();
+            // todo: get month from constant vector
             let mut month_format = TextFormat::single_line(22, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             month_format.width = Some(3);
             surface.write_text(&month.as_str(), &month_format);
