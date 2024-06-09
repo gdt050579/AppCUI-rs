@@ -26,7 +26,7 @@ pub mod selector;
 pub mod combobox;
 pub mod dropdownlist;
 pub mod numericselector;
-pub mod splitter;
+pub mod vsplitter;
 pub mod hline;
 pub mod vline;
 
@@ -55,6 +55,6 @@ pub use dropdownlist::DropDownList;
 pub use command_bar::CommandBar;
 pub use layout::Layout;
 pub use numericselector::NumericSelector;
-pub use splitter::Splitter;
+pub use vsplitter::VSplitter;
 pub use hline::HLine;
 pub use vline::VLine;

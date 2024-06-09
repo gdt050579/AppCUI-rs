@@ -1,15 +1,15 @@
 use super::should_not_use;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::LayoutParameters;
-use super::Size;
+use super::Dimension16;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftBottomRightAnchorsLayout {
-    pub left: Coordonate,
-    pub bottom: Coordonate,
-    pub right: Coordonate,
-    pub height: Size,
+    pub left: Coordonate16,
+    pub bottom: Coordonate16,
+    pub right: Coordonate16,
+    pub height: Dimension16,
 }
 
 impl LeftBottomRightAnchorsLayout {
@@ -35,7 +35,7 @@ impl LeftBottomRightAnchorsLayout {
             left: params.a_left.unwrap(),
             bottom: params.a_bottom.unwrap(),
             right: params.a_right.unwrap(),
-            height: params.height.unwrap_or(Size::Absolute(1)),
+            height: params.height.unwrap_or(Dimension16::Absolute(1)),
         }
     }
     #[inline]
@@ -45,12 +45,12 @@ impl LeftBottomRightAnchorsLayout {
         parent_width: u16,
         parent_height: u16,
     ) {
-        let left = self.left.as_absolute_coordonate(parent_width);
-        let right = self.right.as_absolute_coordonate(parent_width);
-        let bottom = self.bottom.as_absolute_coordonate(parent_height);
+        let left = self.left.absolute(parent_width);
+        let right = self.right.absolute(parent_width);
+        let bottom = self.bottom.absolute(parent_height);
         control_layout.resize(
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
-            self.height.as_absolute_size(parent_height),
+            self.height.absolute(parent_height),
         );
         control_layout.set_position(
             left,

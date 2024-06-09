@@ -22,4 +22,5 @@ pub (crate) mod combobox;
 pub (crate) mod dropdownlist;
 pub (crate) mod numericselector;
 pub (crate) mod hline;
+pub (crate) mod vsplitter;
 pub (crate) mod vline;

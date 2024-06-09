@@ -130,3 +130,7 @@ path = "hline/main.rs"
 [[example]]
 name = "vline"
 path = "vline/main.rs"
+
+[[example]]
+name = "splitter"
+path = "splitter/main.rs"

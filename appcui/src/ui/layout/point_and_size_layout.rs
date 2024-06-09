@@ -1,16 +1,16 @@
 use super::should_not_use;
 use super::Alignament;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::LayoutParameters;
-use super::Size;
+use super::Dimension16;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct PointAndSizeLayout {
-    pub x: Coordonate,
-    pub y: Coordonate,
-    pub width: Size,
-    pub height: Size,
+    pub x: Coordonate16,
+    pub y: Coordonate16,
+    pub width: Dimension16,
+    pub height: Dimension16,
     pub align: Alignament,
     pub anchor: Alignament,
 }
@@ -41,10 +41,10 @@ impl PointAndSizeLayout {
         );
 
         PointAndSizeLayout {
-            x: Coordonate::Absolute(0),
-            y: Coordonate::Absolute(0),
-            width: params.width.unwrap_or(Size::Percentage(10000)),
-            height: params.height.unwrap_or(Size::Percentage(10000)),
+            x: Coordonate16::Absolute(0),
+            y: Coordonate16::Absolute(0),
+            width: params.width.unwrap_or(Dimension16::Percentage(10000)),
+            height: params.height.unwrap_or(Dimension16::Percentage(10000)),
             align: params.dock.unwrap(),
             anchor: params.dock.unwrap(),
         }
@@ -71,8 +71,8 @@ impl PointAndSizeLayout {
         PointAndSizeLayout {
             x: params.x.unwrap(),
             y: params.y.unwrap(),
-            width: params.width.unwrap_or(Size::Absolute(1)),
-            height: params.height.unwrap_or(Size::Absolute(1)),
+            width: params.width.unwrap_or(Dimension16::Absolute(1)),
+            height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: params.align.unwrap_or(Alignament::TopLeft),
             anchor: Alignament::TopLeft,
         }
@@ -100,8 +100,8 @@ impl PointAndSizeLayout {
                 Alignament::BottomLeft | Alignament::BottomRight => params.a_bottom.unwrap(),
                 _ => unreachable!("Internal error --> this point should not ne reached"),
             },
-            width: params.width.unwrap_or(Size::Absolute(1)),
-            height: params.height.unwrap_or(Size::Absolute(1)),
+            width: params.width.unwrap_or(Dimension16::Absolute(1)),
+            height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: anchor,
             anchor,
         }
@@ -109,9 +109,9 @@ impl PointAndSizeLayout {
 
     #[inline]
     pub(super) fn update_control_layout(&self, control_layout: &mut ControlLayout, parent_width: u16, parent_height: u16) {
-        control_layout.resize(self.width.as_absolute_size(parent_width), self.height.as_absolute_size(parent_height));
-        let mut x = self.x.as_absolute_coordonate(parent_width);
-        let mut y = self.y.as_absolute_coordonate(parent_height);
+        control_layout.resize(self.width.absolute(parent_width), self.height.absolute(parent_height));
+        let mut x = self.x.absolute(parent_width);
+        let mut y = self.y.absolute(parent_height);
 
         // compute (x,y) based on anchor
         match self.anchor {

@@ -445,3 +445,9 @@ pub fn hline(input: TokenStream) -> TokenStream {
 pub fn vline(input: TokenStream) -> TokenStream {
     crate::controls::vline::create(input)
 }
+
+
+#[proc_macro]
+pub fn vsplitter(input: TokenStream) -> TokenStream {
+    crate::controls::vsplitter::create(input)
+}

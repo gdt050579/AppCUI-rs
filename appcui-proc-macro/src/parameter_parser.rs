@@ -7,6 +7,8 @@ mod flags_signature;
 pub(crate) mod alignament;
 pub(crate) mod color;
 pub(crate) mod size;
+pub(crate) mod coordonate;
+pub(crate) mod dimension;
 mod value;
 #[cfg(test)]
 mod tests;

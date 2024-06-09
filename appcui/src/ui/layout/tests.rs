@@ -2,9 +2,10 @@ use crate::ui::layout::absolute_layout::AbsoluteLayout;
 
 use super::Alignament;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::PointAndSizeLayout;
-use super::Size;
+use super::Dimension16;
+use super::Dimension;
 
 use super::LayoutMode;
 
@@ -13,12 +14,12 @@ macro_rules! validate_abs {
         assert_eq!(
             LayoutMode::new($text),
             LayoutMode::PointAndSize(PointAndSizeLayout {
-                x: Coordonate::Absolute($x),
-                y: Coordonate::Absolute($y),
+                x: Coordonate16::Absolute($x),
+                y: Coordonate16::Absolute($y),
                 align: Alignament::$a,
                 anchor: Alignament::$anc,
-                width: Size::Absolute($w),
-                height: Size::Absolute($h)
+                width: Dimension16::Absolute($w),
+                height: Dimension16::Absolute($h)
             })
         );
     };
@@ -52,24 +53,24 @@ fn layout_mode_xywh() {
     assert_eq!(
         l2,
         LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: Coordonate::Absolute(-4),
-            y: Coordonate::Percentage(1000),
+            x: Coordonate16::Absolute(-4),
+            y: Coordonate16::Percentage(1000),
             align: Alignament::TopLeft,
             anchor: Alignament::TopLeft,
-            width: Size::Percentage(1000),
-            height: Size::Absolute(8)
+            width: Dimension16::Percentage(1000),
+            height: Dimension16::Absolute(8)
         })
     );
     let l3 = LayoutMode::new("x:0,y:0,w:100%,h:25%,a:c");
     assert_eq!(
         l3,
         LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: Coordonate::Absolute(0),
-            y: Coordonate::Absolute(0),
+            x: Coordonate16::Absolute(0),
+            y: Coordonate16::Absolute(0),
             align: Alignament::Center,
             anchor: Alignament::TopLeft,
-            width: Size::Percentage(10000),
-            height: Size::Percentage(2500)
+            width: Dimension16::Percentage(10000),
+            height: Dimension16::Percentage(2500)
         })
     );
 }
@@ -223,4 +224,12 @@ fn layout_mode_anchor_lbr() {
     validate_pos!("l:5,b:6,r:7,h:10",50,30,5,14,38,10);
     validate_pos!("l:10%,b:50%,r:20%,h:2",50,30,5,13,35,2);
     validate_pos!("l:10%,bottom:50%,r:20%,h:50%",50,30,5,0,35,15);
+}
+
+#[test]
+fn dimension_from_basic_type() {
+    assert_eq!(Dimension::from(10u8), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10u16), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10u32), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10u64), Dimension::Absolute(10));
 }

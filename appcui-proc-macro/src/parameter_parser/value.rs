@@ -1,4 +1,6 @@
 use super::alignament::Alignament;
+use super::coordonate::Coordonate;
+use super::dimension::Dimension;
 use super::color::Color;
 use super::named_params_map::NamedParamsMap;
 use super::size::Size;
@@ -15,6 +17,8 @@ pub(super) enum ValueType<'a> {
     Color(Color),
     List(Vec<Value<'a>>),
     Dict(NamedParamsMap<'a>),
+    Dimension(Dimension),
+    Coordonate(Coordonate),
 }
 
 pub(crate) struct Value<'a> {
@@ -82,6 +86,32 @@ impl<'a> Value<'a> {
         }
         if let Some(value) = utils::to_percentage(self.raw_data) {
             self.data_type = ValueType::Percentage(value);
+            return Some(value);
+        }
+        None
+    }
+    pub(crate) fn get_dimension(&mut self) -> Option<Dimension> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Dimension(value) = &self.data_type {
+            return Some(*value);
+        }
+        if let Some(value) = Dimension::from_str(self.raw_data) {
+            self.data_type = ValueType::Dimension(value);
+            return Some(value);
+        }
+        None
+    }
+    pub(crate) fn get_coordonate(&mut self) -> Option<Coordonate> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Coordonate(value) = &self.data_type {
+            return Some(*value);
+        }
+        if let Some(value) = Coordonate::from_str(self.raw_data) {
+            self.data_type = ValueType::Coordonate(value);
             return Some(value);
         }
         None
@@ -363,6 +393,36 @@ impl<'a> Value<'a> {
             self.end,
         ));
     }
+    fn validate_dimension(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if self.get_dimension().is_some() {
+            return Ok(());
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting a value that express a dimension (a positive number followed by the percentage % sign or an absolute value: ex: 50% or 100) for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }   
+    fn validate_coordonate(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if self.get_coordonate().is_some() {
+            return Ok(());
+        }
+        return Err(Error::new(
+            param_list,
+            format!(
+                "Expecting a value that express a coordonate (a number followed by the percentage % sign or an absolute value: ex: 50% or -25% or 100 or -2) for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ));
+    }  
     pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if !self.param_name.is_empty() { self.param_name } else { key_name };
         match expected_type {
@@ -377,6 +437,8 @@ impl<'a> Value<'a> {
             super::ParamType::List => self.validate_list(display_param_name, param_list)?,
             super::ParamType::Integer => self.validate_i32(display_param_name, param_list)?,
             super::ParamType::Percentage => self.validate_percentage(display_param_name, param_list)?,            
+            super::ParamType::Dimension => self.validate_dimension(display_param_name, param_list)?,
+            super::ParamType::Coordonate => self.validate_coordonate(display_param_name, param_list)?,
         }
         // all good
         self.validated = true;

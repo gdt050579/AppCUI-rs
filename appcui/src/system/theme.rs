@@ -188,7 +188,7 @@ impl Theme {
         self.lines = ControlCharAttributesState {
             normal: CharAttribute::with_fore_color(Color::DarkGreen),
             focused: CharAttribute::with_fore_color(Color::DarkGreen),
-            hovered: CharAttribute::with_fore_color(Color::Gray),
+            hovered: CharAttribute::with_fore_color(Color::Yellow),
             inactive: CharAttribute::with_fore_color(Color::Gray),
             pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Magenta),
         };

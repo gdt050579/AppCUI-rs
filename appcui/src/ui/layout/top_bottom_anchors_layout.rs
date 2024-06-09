@@ -1,16 +1,16 @@
 use super::should_not_use;
 use super::Alignament;
 use super::ControlLayout;
-use super::Coordonate;
+use super::Coordonate16;
 use super::LayoutParameters;
-use super::Size;
+use super::Dimension16;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopBottomAnchorsLayout {
-    pub top: Coordonate,
-    pub bottom: Coordonate,
-    pub x: Coordonate,
-    pub width: Size,
+    pub top: Coordonate16,
+    pub bottom: Coordonate16,
+    pub x: Coordonate16,
+    pub width: Dimension16,
     pub align: Alignament,
 }
 
@@ -32,8 +32,8 @@ impl TopBottomAnchorsLayout {
         TopBottomAnchorsLayout {
             top: params.a_top.unwrap(),
             bottom: params.a_bottom.unwrap(),
-            x: params.x.unwrap_or(Coordonate::Absolute(0)),
-            width: params.width.unwrap_or(Size::Absolute(1)),
+            x: params.x.unwrap_or(Coordonate16::Absolute(0)),
+            width: params.width.unwrap_or(Dimension16::Absolute(1)),
             align: params.align.unwrap_or(Alignament::Center),
         }
     }
@@ -44,11 +44,11 @@ impl TopBottomAnchorsLayout {
         parent_width: u16,
         parent_height: u16,
     ) {
-        let top = self.top.as_absolute_coordonate(parent_height);
-        let bottom = self.bottom.as_absolute_coordonate(parent_height);
-        let x = self.x.as_absolute_coordonate(parent_width);
+        let top = self.top.absolute(parent_height);
+        let bottom = self.bottom.absolute(parent_height);
+        let x = self.x.absolute(parent_width);
         control_layout.resize(
-            self.width.as_absolute_size(parent_width),
+            self.width.absolute(parent_width),
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,
         );
         match self.align {
