@@ -3,14 +3,14 @@ use super::Alignament;
 use super::ControlLayout;
 use super::Coordonate16;
 use super::LayoutParameters;
-use super::Dimension;
+use super::Dimension16;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftRightAnchorsLayout {
     pub left: Coordonate16,
     pub right: Coordonate16,
     pub y: Coordonate16,
-    pub height: Dimension,
+    pub height: Dimension16,
     pub align: Alignament,
 }
 
@@ -33,7 +33,7 @@ impl LeftRightAnchorsLayout {
             left: params.a_left.unwrap(),
             right: params.a_right.unwrap(),
             y: params.y.unwrap_or(Coordonate16::Absolute(0)),
-            height: params.height.unwrap_or(Dimension::Absolute(1)),
+            height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: params.align.unwrap_or(Alignament::Center),
         }
     }

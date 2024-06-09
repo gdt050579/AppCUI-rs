@@ -3,14 +3,14 @@ use super::Alignament;
 use super::ControlLayout;
 use super::Coordonate16;
 use super::LayoutParameters;
-use super::Dimension;
+use super::Dimension16;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct PointAndSizeLayout {
     pub x: Coordonate16,
     pub y: Coordonate16,
-    pub width: Dimension,
-    pub height: Dimension,
+    pub width: Dimension16,
+    pub height: Dimension16,
     pub align: Alignament,
     pub anchor: Alignament,
 }
@@ -43,8 +43,8 @@ impl PointAndSizeLayout {
         PointAndSizeLayout {
             x: Coordonate16::Absolute(0),
             y: Coordonate16::Absolute(0),
-            width: params.width.unwrap_or(Dimension::Percentage(10000)),
-            height: params.height.unwrap_or(Dimension::Percentage(10000)),
+            width: params.width.unwrap_or(Dimension16::Percentage(10000)),
+            height: params.height.unwrap_or(Dimension16::Percentage(10000)),
             align: params.dock.unwrap(),
             anchor: params.dock.unwrap(),
         }
@@ -71,8 +71,8 @@ impl PointAndSizeLayout {
         PointAndSizeLayout {
             x: params.x.unwrap(),
             y: params.y.unwrap(),
-            width: params.width.unwrap_or(Dimension::Absolute(1)),
-            height: params.height.unwrap_or(Dimension::Absolute(1)),
+            width: params.width.unwrap_or(Dimension16::Absolute(1)),
+            height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: params.align.unwrap_or(Alignament::TopLeft),
             anchor: Alignament::TopLeft,
         }
@@ -100,8 +100,8 @@ impl PointAndSizeLayout {
                 Alignament::BottomLeft | Alignament::BottomRight => params.a_bottom.unwrap(),
                 _ => unreachable!("Internal error --> this point should not ne reached"),
             },
-            width: params.width.unwrap_or(Dimension::Absolute(1)),
-            height: params.height.unwrap_or(Dimension::Absolute(1)),
+            width: params.width.unwrap_or(Dimension16::Absolute(1)),
+            height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: anchor,
             anchor,
         }

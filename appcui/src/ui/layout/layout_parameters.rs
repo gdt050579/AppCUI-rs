@@ -2,15 +2,15 @@ use super::anchors::Anchors;
 use super::Alignament;
 use super::Coordonate16;
 use super::Parameter;
-use super::Dimension;
+use super::Dimension16;
 use crate::utils::KeyValueParser;
 use crate::utils::ValueType;
 
 pub(super) struct LayoutParameters {
     pub x: Option<Coordonate16>,
     pub y: Option<Coordonate16>,
-    pub width: Option<Dimension>,
-    pub height: Option<Dimension>,
+    pub width: Option<Dimension16>,
+    pub height: Option<Dimension16>,
     pub a_left: Option<Coordonate16>,
     pub a_right: Option<Coordonate16>,
     pub a_top: Option<Coordonate16>,
@@ -90,7 +90,7 @@ impl LayoutParameters {
                             if p.numerical_value < 0 {
                                 panic!("The value for WIDTH parameter can not be a negative value: {} in layout: {}",p.value,format);
                             }
-                            inf.width = Dimension::new(p);
+                            inf.width = Dimension16::new(p);
                         } else {
                             panic!("Invalid value for WIDTH parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
                         }
@@ -100,7 +100,7 @@ impl LayoutParameters {
                             if p.numerical_value < 0 {
                                 panic!("The value for HEIGHT parameter can not be a negative value: {} in layout: {}",p.value,format);
                             }
-                            inf.height = Dimension::new(p);
+                            inf.height = Dimension16::new(p);
                         } else {
                             panic!("Invalid value for HEIGHT parameter: {} in layout: {} (it should be a numerical or percentage positive value)",p.value,format);
                         }

@@ -4,6 +4,7 @@ use super::Alignament;
 use super::ControlLayout;
 use super::Coordonate16;
 use super::PointAndSizeLayout;
+use super::Dimension16;
 use super::Dimension;
 
 use super::LayoutMode;
@@ -17,8 +18,8 @@ macro_rules! validate_abs {
                 y: Coordonate16::Absolute($y),
                 align: Alignament::$a,
                 anchor: Alignament::$anc,
-                width: Dimension::Absolute($w),
-                height: Dimension::Absolute($h)
+                width: Dimension16::Absolute($w),
+                height: Dimension16::Absolute($h)
             })
         );
     };
@@ -56,8 +57,8 @@ fn layout_mode_xywh() {
             y: Coordonate16::Percentage(1000),
             align: Alignament::TopLeft,
             anchor: Alignament::TopLeft,
-            width: Dimension::Percentage(1000),
-            height: Dimension::Absolute(8)
+            width: Dimension16::Percentage(1000),
+            height: Dimension16::Absolute(8)
         })
     );
     let l3 = LayoutMode::new("x:0,y:0,w:100%,h:25%,a:c");
@@ -68,8 +69,8 @@ fn layout_mode_xywh() {
             y: Coordonate16::Absolute(0),
             align: Alignament::Center,
             anchor: Alignament::TopLeft,
-            width: Dimension::Percentage(10000),
-            height: Dimension::Percentage(2500)
+            width: Dimension16::Percentage(10000),
+            height: Dimension16::Percentage(2500)
         })
     );
 }
