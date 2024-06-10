@@ -526,7 +526,11 @@ impl OnKeyPressed for DatePicker {
                     key!("D") => 12,
                     _ => unreachable!(),
                 };
-                self.update_date(Self::jump_to_month(self.selected_date, month));
+                if expanded {
+                    self.virtual_date = Self::jump_to_month(self.virtual_date, month);
+                } else {
+                    self.update_date(Self::jump_to_month(self.selected_date, month));
+                }
                 return EventProcessStatus::Processed;
             }
 
@@ -536,13 +540,24 @@ impl OnKeyPressed for DatePicker {
                     key!("J") => "J",
                     key!("A") => "A",
                     key!("M") => "M",
-                    key!("Shift+J") => { val = -1; "J" },
-                    key!("Shift+A") => { val = -1; "A" },
-                    key!("Shift+M") => { val = -1; "M" },
+                    key!("Shift+J") => {
+                        val = -1;
+                        "J"
+                    }
+                    key!("Shift+A") => {
+                        val = -1;
+                        "A"
+                    }
+                    key!("Shift+M") => {
+                        val = -1;
+                        "M"
+                    }
                     _ => unreachable!(),
                 };
+                let target_month: &mut NaiveDate = if expanded { &mut self.virtual_date } else { &mut self.selected_date };
+
                 let month = {
-                    let mut current_month = self.selected_date.month() as i32 + val;
+                    let mut current_month = target_month.month() as i32 + val;
                     if current_month > 12 {
                         current_month = 1;
                     }
@@ -564,7 +579,11 @@ impl OnKeyPressed for DatePicker {
                     }
                     current_month
                 };
-                self.update_date(Self::jump_to_month(self.selected_date, month as u32));
+                if expanded {
+                    self.virtual_date = Self::jump_to_month(self.virtual_date, month as u32);
+                } else {
+                    self.update_date(Self::jump_to_month(self.selected_date, month as u32));
+                }
                 return EventProcessStatus::Processed;
             }
 
@@ -574,12 +593,7 @@ impl OnKeyPressed for DatePicker {
         if !expanded {
             match key.value() {
                 key!("Escape") => {
-                    if expanded {
-                        self.pack();
-                        return EventProcessStatus::Processed;
-                    } else {
-                        return EventProcessStatus::Ignored;
-                    }
+                    return EventProcessStatus::Ignored;
                 }
                 key!("Up") => {
                     self.update_date(self.selected_date + Days::new(1));
@@ -621,7 +635,7 @@ impl OnKeyPressed for DatePicker {
                     return EventProcessStatus::Processed;
                 }
 
-                key!("Enter") => {
+                key!("Enter") | key!("Space") => {
                     self.on_default_action();
                     return EventProcessStatus::Processed;
                 }
