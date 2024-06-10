@@ -12,7 +12,7 @@ impl Coordonate {
     }
     pub fn absolute(&self, parent_size: u16) -> i32 {
         match self {
-            Coordonate::Absolute(v) => (*v) as i32,
+            Coordonate::Absolute(v) => *v,
             Coordonate::Percentage(v) => ((parent_size as f32) * v) as i32,
         }
     }
