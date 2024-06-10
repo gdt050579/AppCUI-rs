@@ -1,8 +1,8 @@
-mod date_picker;
+mod datepicker;
 mod initialization_flags;
 #[cfg(test)]
 mod tests;
 pub mod events;
 
 // pub use self::initialization_flags::Flags;
-pub use self::date_picker::DatePicker;
+pub use self::datepicker::DatePicker;

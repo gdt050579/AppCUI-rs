@@ -1,5 +1,5 @@
 use chrono::{Datelike, Days, Months, NaiveDate};
-use date_picker::events::EventData;
+use datepicker::events::EventData;
 use AppCUIProcMacro::CustomControl;
 
 const MINSPACE_FOR_SHORT_DATE: u32 = 15;
@@ -51,7 +51,7 @@ impl DatePicker {
     /// use appcui::prelude::*;
     /// use chrono::NaiveDate;
     /// 
-    /// let date_picker = DatePicker::with_date(NaiveDate::from_ymd(2024, 6, 13), Layout::new("x:1,y:1,w:19"));
+    /// let datepicker = DatePicker::with_date(NaiveDate::from_ymd(2024, 6, 13), Layout::new("x:1,y:1,w:19"));
     /// ```
     pub fn with_date(date: NaiveDate, layout: Layout) -> Self {
         let mut dp = DatePicker {
@@ -84,7 +84,7 @@ impl DatePicker {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let date_picker = DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19"));
+    /// let datepicker = DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19"));
     /// ```
     pub fn new(date_str: &str, layout: Layout) -> Self {
         let date = date_str.parse::<NaiveDate>().unwrap();

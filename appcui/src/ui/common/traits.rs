@@ -8,7 +8,7 @@ use crate::{
         colorpicker::events::ColorPickerEvents,
         combobox::events::ComboBoxEvents,
         command_bar::events::GenericCommandBarEvents,
-        date_picker::events::DatePickerEvents,
+        datepicker::events::DatePickerEvents,
         desktop::events::DesktopEvents,
         dropdownlist::events::GenericDropDownListEvents,
         numericselector::events::GenericNumericSelectorEvents,

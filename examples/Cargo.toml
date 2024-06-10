@@ -133,8 +133,8 @@ name = "vline"
 path = "vline/main.rs"
 
 [[example]]
-name = "date_picker"
-path = "date_picker/main.rs"
+name = "datepicker"
+path = "datepicker/main.rs"
 
 [[example]]
 name = "splitter"
