@@ -2,7 +2,6 @@ use chrono::{Datelike, Days, Months, NaiveDate};
 use date_picker::events::EventData;
 use AppCUIProcMacro::CustomControl;
 
-
 const MINSPACE_FOR_SHORT_DATE: u32 = 15;
 const MINSPACE_FOR_LONG_DATE: u32 = 18;
 const MINSPACE_FOR_DROPBUTTON_DRAWING: u32 = 3;
@@ -38,12 +37,12 @@ pub struct DatePicker {
     selected_date: NaiveDate,
     date_string: String,
     hover_date: HoveredDate,
-    // date_size: DateSize,
 }
 
 impl DatePicker {
     const DAYS: [&'static str; 7] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-    const MONTHS: [&'static str; 12] = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const MONTHS: [&'static str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
     /// Creates a new date picker with a NaiveDate and a layout.
     ///
     /// # Example
@@ -60,7 +59,6 @@ impl DatePicker {
             selected_date: date,
             date_string: Self::format_long_date(date),
             hover_date: HoveredDate::None,
-            // date_size: DateSize::Large,
         };
         dp.set_size_bounds(6, 1, u16::MAX, 1);
         let date_len = dp.get_date_size();
@@ -116,11 +114,28 @@ impl DatePicker {
             self.raise_event(ControlEvent {
                 emitter: self.handle,
                 receiver: self.event_processor,
-                data: ControlEventData::DatePicker(EventData {date: self.selected_date}),
+                data: ControlEventData::DatePicker(EventData { date: self.selected_date }),
             });
         }
     }
 
+    fn jump_to_month(date: NaiveDate, target_month: u32) -> NaiveDate {
+        let year = date.year();
+        let day = date.day();
+
+        let mut new_date = NaiveDate::from_ymd_opt(year, target_month, 1).unwrap();
+
+        // Get the last day of the target month
+        let last_day_of_month = (1..=31)
+            .rev()
+            .find(|&d| NaiveDate::from_ymd_opt(year, target_month, d).is_some())
+            .unwrap();
+
+        // Adjust the day to be the minimum of the original day and the last day of the month
+        new_date = new_date.with_day(day.min(last_day_of_month)).unwrap();
+
+        new_date
+    }
     fn mouse_over_calendar(&self, x: i32, y: i32) -> HoveredDate {
         if !self.is_expanded() {
             return HoveredDate::None;
@@ -382,9 +397,13 @@ impl OnPaint for DatePicker {
                 day_format.width = Some(2);
                 surface.write_text(day.to_string().as_str(), &day_format);
                 if day == date_day {
-                    surface.fill_horizontal_line_with_size(day_col - 2, day_row, 4, Character::with_attributes(0, theme.menu.text.pressed_or_selectd));
-                } else
-                if self.hover_date == HoveredDate::Day(day){
+                    surface.fill_horizontal_line_with_size(
+                        day_col - 2,
+                        day_row,
+                        4,
+                        Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
+                    );
+                } else if self.hover_date == HoveredDate::Day(day) {
                     surface.fill_horizontal_line_with_size(day_col - 2, day_row, 4, Character::with_attributes(0, theme.menu.text.hovered));
                 }
                 day_col += 4;
@@ -476,7 +495,7 @@ impl OnMouseEvent for DatePicker {
 
                         _ => {}
                     }
-                    
+
                     return EventProcessStatus::Processed;
                 }
                 self.on_default_action();
@@ -487,9 +506,56 @@ impl OnMouseEvent for DatePicker {
     }
 }
 
-impl OnKeyPressed for DatePicker{
+impl OnKeyPressed for DatePicker {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         let expanded = self.is_expanded();
+
+        match key.value() {
+            key!("F") | key!("S") | key!("O") | key!("N") | key!("D") => {
+                let month = match key.value() {
+                    key!("F") => 2,
+                    key!("S") => 9,
+                    key!("O") => 10,
+                    key!("N") => 11,
+                    key!("D") => 12,
+                    _ => unreachable!(),
+                };
+                self.update_date(Self::jump_to_month(self.selected_date, month));
+                return EventProcessStatus::Processed;
+            }
+
+            key!("J") | key!("A") | key!("M") => {
+                let month_char = match key.value() {
+                    key!("J") => "J",
+                    key!("A") => "A",
+                    key!("M") => "M",
+                    _ => unreachable!(),
+                };
+                let month = {
+                        let mut current_month = self.selected_date.month() + 1;
+                        if current_month > 12 {
+                            current_month = 1;
+                        }
+                        for _ in 0..Self::MONTHS.len(){
+                            if Self::MONTHS[(current_month - 1) as usize].starts_with(month_char){
+                                break;
+                            }
+                            else{
+                                current_month += 1;
+                                if current_month > 12 {
+                                    current_month = 1;
+                                }
+                            }
+                        }
+                        current_month
+                };
+                self.update_date(Self::jump_to_month(self.selected_date, month));
+                return EventProcessStatus::Processed;
+            }
+
+            
+            _ => {}
+        }
 
         if !expanded {
             match key.value() {
@@ -555,7 +621,6 @@ impl OnKeyPressed for DatePicker{
                     return EventProcessStatus::Processed;
                 }
 
-
                 key!("Up") => {
                     self.update_date(self.selected_date - Days::new(7));
                     return EventProcessStatus::Processed;
@@ -615,6 +680,5 @@ impl OnKeyPressed for DatePicker{
 
             EventProcessStatus::Ignored
         }
-
     }
 }
