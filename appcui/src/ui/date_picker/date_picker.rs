@@ -49,7 +49,8 @@ impl DatePicker {
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    ///
+    /// use chrono::NaiveDate;
+    /// 
     /// let date_picker = DatePicker::with_date(NaiveDate::from_ymd(2024, 6, 13), Layout::new("x:1,y:1,w:19"));
     /// ```
     pub fn with_date(date: NaiveDate, layout: Layout) -> Self {
