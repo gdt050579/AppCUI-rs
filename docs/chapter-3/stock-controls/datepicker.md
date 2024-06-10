@@ -8,7 +8,7 @@ To create a color picker use `DatePicker::new` method (with 2 parameters: a date
 
 ```rs
 let d = DatePicker::new("2024-06-13", Layout::new("d:c,w:19"));
-let d = DatePicker::new(NaiveDate::from_ymd_opt(2000, 10, 1).unwrap(), Layout::new("d:c,w:19"));
+let d = DatePicker::with_date(NaiveDate::from_ymd_opt(2000, 10, 1).unwrap(), Layout::new("d:c,w:19"));
 ```
 
 or the macro `datepicker!`
