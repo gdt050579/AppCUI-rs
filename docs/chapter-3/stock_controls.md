@@ -10,6 +10,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [CheckBox](stock-controls/checkbox.md)               | ui::CheckBox                 | `checkbox!`        | <img src="stock-controls/img/checkbox.png" width=300/>        |
 | [ColorPicker](stock-controls/colorpicker.md)         | ui::ColorPicker              | `colorpicker!`     | <img src="stock-controls/img/colorpicker.png" width=300/>     |
 | [ComboBox](stock-controls/combobox.md)               | ui::ComboBox                 | `combobox!`        | <img src="stock-controls/img/combobox.png" width=300/>        |
+| [DatePicker](stock-controls/datepicker.md)           | ui::DatePicker               | `datepicker!`      | <img src="stock-controls/img/datepicker.png" width=300/>      |
 | [DropDownList](stock-controls/dropdownlist.md)       | ui::DropDownList&lt;T&gt;    | `dropdownlist!`    | <img src="stock-controls/img/dropdownlist.png" width=300/>    |
 | [HLine](stock-controls/hline.md)                     | ui::HLine                    | `hline!`           | <img src="stock-controls/img/hline.png" width=300/>           |
 | [ImageViewer](stock-controls/imageviewer.md)         | ui::ImageViewer              | `imageviewer!`     | <img src="stock-controls/img/imageviewer.png" width=300/>     |

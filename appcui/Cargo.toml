@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 EnumBitFlags = "1.0.7"
+chrono = "0.4.38"
 AppCUIProcMacro = {path = "../appcui-proc-macro"}
 
 [target.'cfg(target_os = "linux")'.dependencies]

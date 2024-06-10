@@ -24,3 +24,4 @@ pub (crate) mod numericselector;
 pub (crate) mod hline;
 pub (crate) mod vsplitter;
 pub (crate) mod vline;
+pub (crate) mod datepicker;

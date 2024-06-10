@@ -7,6 +7,7 @@ edition = "2021"
 [dev-dependencies]
 appcui = { version = "1.0.0", path = "../appcui" }
 AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"}
+chrono = "0.4.38"
 
 
 [[example]]
@@ -130,6 +131,10 @@ path = "hline/main.rs"
 [[example]]
 name = "vline"
 path = "vline/main.rs"
+
+[[example]]
+name = "datepicker"
+path = "datepicker/main.rs"
 
 [[example]]
 name = "splitter"
