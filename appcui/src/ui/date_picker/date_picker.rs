@@ -37,6 +37,7 @@ pub struct DatePicker {
     selected_date: NaiveDate,
     date_string: String,
     hover_date: HoveredDate,
+    virtual_date: NaiveDate,
 }
 
 impl DatePicker {
@@ -59,6 +60,7 @@ impl DatePicker {
             selected_date: date,
             date_string: Self::format_long_date(date),
             hover_date: HoveredDate::None,
+            virtual_date: date,
         };
         dp.set_size_bounds(6, 1, u16::MAX, 1);
         let date_len = dp.get_date_size();
@@ -136,7 +138,7 @@ impl DatePicker {
 
         new_date
     }
-    fn mouse_over_calendar(&self, x: i32, y: i32) -> HoveredDate {
+    fn mouse_over_calendar(&mut self, x: i32, y: i32) -> HoveredDate {
         if !self.is_expanded() {
             return HoveredDate::None;
         }
@@ -169,6 +171,7 @@ impl DatePicker {
             let day = i + 1;
 
             if (y == row) && (x == col || x == (col - 1)) {
+                self.virtual_date = self.virtual_date.with_day(day as u32).unwrap();
                 return HoveredDate::Day(day as u32);
             }
 
@@ -212,8 +215,8 @@ impl DatePicker {
     }
 
     fn days_in_month(&self) -> u32 {
-        let month = self.selected_date.month();
-        let year = self.selected_date.year();
+        let month = self.virtual_date.month();
+        let year = self.virtual_date.year();
         let next_month = if month == 12 { 1 } else { month + 1 };
         let next_month_year = if month == 12 { year + 1 } else { year };
 
@@ -224,7 +227,7 @@ impl DatePicker {
     }
 
     fn get_first_day_index(&self) -> i32 {
-        let first_day = self.selected_date.with_day(1).unwrap().format("%a").to_string();
+        let first_day = self.virtual_date.with_day(1).unwrap().format("%a").to_string();
         for i in 0..DatePicker::DAYS.len() {
             if first_day.starts_with(DatePicker::DAYS[i]) {
                 return i as i32;
@@ -291,7 +294,7 @@ impl OnPaint for DatePicker {
                 Character::with_attributes(SpecialChar::BoxMidleRight, col),
             );
 
-            let year = self.selected_date.year();
+            let year = self.virtual_date.year();
             let mut year_format = TextFormat::single_line(7, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             year_format.width = Some(4);
             surface.write_text(year.to_string().as_str(), &year_format);
@@ -371,7 +374,7 @@ impl OnPaint for DatePicker {
                 theme,
             );
 
-            let month = Self::MONTHS[self.selected_date.month0() as usize];
+            let month = Self::MONTHS[self.virtual_date.month0() as usize];
             let mut month_format = TextFormat::single_line(22, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             month_format.width = Some(3);
             surface.write_text(&month, &month_format);
@@ -387,7 +390,6 @@ impl OnPaint for DatePicker {
             let mut day_row = 4 + self.expanded_panel_y;
             let mut day_col = self.get_first_day_index() * 4 + 3;
 
-            let date_day = self.selected_date.day();
             let last_day = self.days_in_month();
 
             for i in 0..last_day {
@@ -396,14 +398,17 @@ impl OnPaint for DatePicker {
 
                 day_format.width = Some(2);
                 surface.write_text(day.to_string().as_str(), &day_format);
-                if day == date_day {
+                if day == self.selected_date.day()
+                    && self.selected_date.month() == self.virtual_date.month()
+                    && self.selected_date.year() == self.virtual_date.year()
+                {
                     surface.fill_horizontal_line_with_size(
                         day_col - 2,
                         day_row,
                         4,
                         Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
                     );
-                } else if self.hover_date == HoveredDate::Day(day) {
+                } else if self.virtual_date.day() == day {
                     surface.fill_horizontal_line_with_size(day_col - 2, day_row, 4, Character::with_attributes(0, theme.menu.text.hovered));
                 }
                 day_col += 4;
@@ -427,6 +432,7 @@ impl OnDefaultAction for DatePicker {
 }
 impl OnExpand for DatePicker {
     fn on_expand(&mut self, direction: ExpandedDirection) {
+        self.virtual_date = self.selected_date;
         match direction {
             ExpandedDirection::OnTop => {
                 self.expanded_panel_y = 0;
@@ -471,25 +477,25 @@ impl OnMouseEvent for DatePicker {
                 if hd != HoveredDate::None {
                     match hd {
                         HoveredDate::DoubleLeftArrow => {
-                            self.update_date(self.selected_date - Months::new(120));
+                            self.virtual_date = self.virtual_date - Months::new(120);
                         }
                         HoveredDate::LeftArrowYear => {
-                            self.update_date(self.selected_date - Months::new(12));
+                            self.virtual_date = self.virtual_date - Months::new(12);
                         }
                         HoveredDate::RightArrowYear => {
-                            self.update_date(self.selected_date + Months::new(12));
+                            self.virtual_date = self.virtual_date + Months::new(12);
                         }
                         HoveredDate::DoubleRightArrow => {
-                            self.update_date(self.selected_date + Months::new(120));
+                            self.virtual_date = self.virtual_date + Months::new(120);
                         }
                         HoveredDate::LeftArrowMonth => {
-                            self.update_date(self.selected_date - Months::new(1));
+                            self.virtual_date = self.virtual_date - Months::new(1);
                         }
                         HoveredDate::RightArrowMonth => {
-                            self.update_date(self.selected_date + Months::new(1));
+                            self.virtual_date = self.virtual_date + Months::new(1);
                         }
                         HoveredDate::Day(day) => {
-                            self.update_date(self.selected_date.with_day(day).unwrap());
+                            self.update_date(self.virtual_date.with_day(day).unwrap());
                             self.on_default_action();
                         }
 
@@ -524,36 +530,44 @@ impl OnKeyPressed for DatePicker {
                 return EventProcessStatus::Processed;
             }
 
-            key!("J") | key!("A") | key!("M") => {
+            key!("J") | key!("A") | key!("M") | key!("Shift+J") | key!("Shift+A") | key!("Shift+M") => {
+                let mut val = 1i32;
                 let month_char = match key.value() {
                     key!("J") => "J",
                     key!("A") => "A",
                     key!("M") => "M",
+                    key!("Shift+J") => { val = -1; "J" },
+                    key!("Shift+A") => { val = -1; "A" },
+                    key!("Shift+M") => { val = -1; "M" },
                     _ => unreachable!(),
                 };
                 let month = {
-                        let mut current_month = self.selected_date.month() + 1;
-                        if current_month > 12 {
-                            current_month = 1;
-                        }
-                        for _ in 0..Self::MONTHS.len(){
-                            if Self::MONTHS[(current_month - 1) as usize].starts_with(month_char){
-                                break;
+                    let mut current_month = self.selected_date.month() as i32 + val;
+                    if current_month > 12 {
+                        current_month = 1;
+                    }
+                    if current_month < 1 {
+                        current_month = 12;
+                    }
+                    for _ in 0..Self::MONTHS.len() {
+                        if Self::MONTHS[(current_month - 1) as usize].starts_with(month_char) {
+                            break;
+                        } else {
+                            current_month += val;
+                            if current_month > 12 {
+                                current_month = 1;
                             }
-                            else{
-                                current_month += 1;
-                                if current_month > 12 {
-                                    current_month = 1;
-                                }
+                            if current_month < 1 {
+                                current_month = 12;
                             }
                         }
-                        current_month
+                    }
+                    current_month
                 };
-                self.update_date(Self::jump_to_month(self.selected_date, month));
+                self.update_date(Self::jump_to_month(self.selected_date, month as u32));
                 return EventProcessStatus::Processed;
             }
 
-            
             _ => {}
         }
 
@@ -622,56 +636,57 @@ impl OnKeyPressed for DatePicker {
                 }
 
                 key!("Up") => {
-                    self.update_date(self.selected_date - Days::new(7));
+                    self.virtual_date = self.virtual_date - Days::new(7);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Down") => {
-                    self.update_date(self.selected_date + Days::new(7));
+                    self.virtual_date = self.virtual_date + Days::new(7);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Left") => {
-                    self.update_date(self.selected_date - Days::new(1));
+                    self.virtual_date = self.virtual_date - Days::new(1);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Right") => {
-                    self.update_date(self.selected_date + Days::new(1));
+                    self.virtual_date = self.virtual_date + Days::new(1);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Shift+Left") => {
-                    self.update_date(self.selected_date - Months::new(1));
+                    self.virtual_date = self.virtual_date - Months::new(1);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Shift+Right") => {
-                    self.update_date(self.selected_date + Months::new(1));
+                    self.virtual_date = self.virtual_date + Months::new(1);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Ctrl+Left") => {
-                    self.update_date(self.selected_date - Months::new(12));
+                    self.virtual_date = self.virtual_date - Months::new(12);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Ctrl+Right") => {
-                    self.update_date(self.selected_date + Months::new(12));
+                    self.virtual_date = self.virtual_date + Months::new(12);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Ctrl+Shift+Left") => {
-                    self.update_date(self.selected_date - Months::new(120));
+                    self.virtual_date = self.virtual_date - Months::new(120);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Ctrl+Shift+Right") => {
-                    self.update_date(self.selected_date + Months::new(120));
+                    self.virtual_date = self.virtual_date + Months::new(120);
                     return EventProcessStatus::Processed;
                 }
 
                 key!("Enter") => {
+                    self.update_date(self.virtual_date);
                     self.on_default_action();
                     return EventProcessStatus::Processed;
                 }
