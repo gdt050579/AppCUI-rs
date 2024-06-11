@@ -459,3 +459,8 @@ pub fn datepicker(input: TokenStream) -> TokenStream {
 pub fn vsplitter(input: TokenStream) -> TokenStream {
     crate::controls::vsplitter::create(input)
 }
+
+#[proc_macro]
+pub fn hsplitter(input: TokenStream) -> TokenStream {
+    crate::controls::hsplitter::create(input)
+}

@@ -182,7 +182,7 @@ impl DatePicker {
                 row += 1;
             }
         }
-        return HoveredDate::None;
+        HoveredDate::None
     }
 
     fn format_very_short_date(selected_date: NaiveDate) -> String {
@@ -378,7 +378,7 @@ impl OnPaint for DatePicker {
             let month = Self::MONTHS[self.virtual_date.month0() as usize];
             let mut month_format = TextFormat::single_line(22, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             month_format.width = Some(3);
-            surface.write_text(&month, &month_format);
+            surface.write_text(month, &month_format);
 
             let mut day_format = TextFormat::single_line(2, 3 + self.expanded_panel_y, col, TextAlignament::Left);
             day_format.width = Some(2);

@@ -32,6 +32,7 @@ pub use super::ui::canvas;
 pub use super::ui::imageviewer;
 pub use super::ui::password;
 pub use super::ui::vsplitter;
+pub use super::ui::hsplitter;
 pub use super::ui::password::events::PasswordEvents;
 pub use super::ui::common::traits::*;
 pub use super::ui::window::events::WindowEvents;
