@@ -18,8 +18,8 @@ enum State {
 
 #[CustomControl(overwrite=OnPaint + OnKeyPressed + OnMouseEvent + OnResize, internal = true)]
 pub struct HSplitter {
-    left: Handle<SplitterPanel>,
-    right: Handle<SplitterPanel>,
+    top: Handle<SplitterPanel>,
+    bottom: Handle<SplitterPanel>,
     min_left: Dimension,
     min_right: Dimension,
     pos: Coordonate,
@@ -34,8 +34,8 @@ impl HSplitter {
     {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            left: Handle::None,
-            right: Handle::None,
+            top: Handle::None,
+            bottom: Handle::None,
             pos: pos.into(),
             min_left: Dimension::Absolute(0),
             min_right: Dimension::Absolute(0),
@@ -44,8 +44,8 @@ impl HSplitter {
             preserve_pos: 0,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
-        obj.left = obj.add_child(SplitterPanel::new());
-        obj.right = obj.add_child(SplitterPanel::new());
+        obj.top = obj.add_child(SplitterPanel::new());
+        obj.bottom = obj.add_child(SplitterPanel::new());
         obj
     }
 
@@ -55,16 +55,16 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveTopPanelSize);
-    /// vs.add(vsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
-    /// vs.add(vsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));   
+    /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
+    /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));   
     /// ```
     #[inline(always)]
-    pub fn add<T>(&mut self, panel: vsplitter::Panel, control: T) -> Handle<T>
+    pub fn add<T>(&mut self, panel: hsplitter::Panel, control: T) -> Handle<T>
     where
         T: Control + NotWindow + NotDesktop + 'static,
     {
-        let h = if panel == vsplitter::Panel::Left { self.left } else { self.right };
+        let h = if panel == hsplitter::Panel::Top { self.top } else { self.bottom };
         let cm = RuntimeManager::get().get_controls_mut();
         if let Some(panel) = cm.get_mut(h.cast()) {
             panel.base_mut().add_child(control)
@@ -80,21 +80,21 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveTopPanelSize);
-    /// vs.add(vsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
-    /// vs.add(vsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
+    /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
+    /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 2 chars from Top
-    /// vs.set_min_width(vsplitter::Panel::Top,2);
+    /// vs.set_min_width(hsplitter::Panel::Top,2);
     /// // minim 20% from Bottom
-    /// vs.set_min_width(vsplitter::Panel::Bottom,0.2);
+    /// vs.set_min_width(hsplitter::Panel::Bottom,0.2);
     /// ```
-    pub fn set_min_width<T>(&mut self, panel: vsplitter::Panel, min_size: T)
+    pub fn set_min_width<T>(&mut self, panel: hsplitter::Panel, min_size: T)
     where
         Dimension: From<T>,
     {
         match panel {
-            vsplitter::Panel::Left => self.min_left = min_size.into(),
-            vsplitter::Panel::Right => self.min_right = min_size.into(),
+            hsplitter::Panel::Top => self.min_left = min_size.into(),
+            hsplitter::Panel::Bottom => self.min_right = min_size.into(),
         }
     }
 
@@ -114,17 +114,17 @@ impl HSplitter {
         self.update_position(self.pos, true);
     }
     fn update_position(&mut self, pos: Coordonate, upadate_preserve_position: bool) {
-        let right_most = self.size().height.saturating_sub(1) as u16;
-        let mut abs_value = pos.absolute(right_most);
-        let min_left_margin = self.min_left.absolute(right_most);
-        let min_right_margin = self.min_right.absolute(right_most);
-        if abs_value > (right_most as i32 - min_right_margin as i32) {
-            abs_value = right_most as i32 - min_right_margin as i32;
+        let bottom_most = self.size().height.saturating_sub(1) as u16;
+        let mut abs_value = pos.absolute(bottom_most);
+        let min_top_margin = self.min_left.absolute(bottom_most);
+        let min_bottom_margin = self.min_right.absolute(bottom_most);
+        if abs_value > (bottom_most as i32 - min_bottom_margin as i32) {
+            abs_value = bottom_most as i32 - min_bottom_margin as i32;
         }
-        abs_value = abs_value.max(min_left_margin as i32);
+        abs_value = abs_value.max(min_top_margin as i32);
         match self.resize_behavior {
             ResizeBehavior::PreserveAspectRatio => {
-                self.pos.update_with_absolute_value(abs_value as i16, right_most);
+                self.pos.update_with_absolute_value(abs_value as i16, bottom_most);
             }
             ResizeBehavior::PreserveTopPanelSize | ResizeBehavior::PreserveBottomPanelSize => {
                 // if the position is preserverd, there is no need to keep the percentage
@@ -135,10 +135,10 @@ impl HSplitter {
         if upadate_preserve_position {
             match self.resize_behavior {
                 ResizeBehavior::PreserveTopPanelSize => {
-                    self.preserve_pos = self.pos.absolute(right_most);
+                    self.preserve_pos = self.pos.absolute(bottom_most);
                 }
                 ResizeBehavior::PreserveBottomPanelSize => {
-                    self.preserve_pos = right_most as i32 - self.pos.absolute(right_most);
+                    self.preserve_pos = bottom_most as i32 - self.pos.absolute(bottom_most);
                 }
                 _ => {}
             }
@@ -146,27 +146,27 @@ impl HSplitter {
     }
     fn update_panel_sizes(&mut self, new_size: Size) {
         let spltter_pos = self.pos.absolute(new_size.height.saturating_sub(1) as u16).max(0) as u16;
-        let h = new_size.height as u16;
-        let h1 = self.left;
-        let h2 = self.right;
+        let w = new_size.width as u16;
+        let h1 = self.top;
+        let h2 = self.bottom;
         let rm = RuntimeManager::get();
         if let Some(p1) = rm.get_control_mut(h1) {
             p1.set_position(0, 0);
             if spltter_pos > 0 {
-                p1.set_size(spltter_pos, h);
+                p1.set_size(w, spltter_pos);
                 p1.set_visible(true);
             } else {
-                p1.set_size(0, h);
+                p1.set_size(w, 0);
                 p1.set_visible(false);
             }
         }
         if let Some(p2) = rm.get_control_mut(h2) {
             p2.set_position(spltter_pos as i32 + 1, 0);
             if (spltter_pos as i32) + 1 < (new_size.height as i32) {
-                p2.set_size(new_size.height as u16 - spltter_pos - 1, h);
+                p2.set_size(w, new_size.height as u16 - spltter_pos - 1);
                 p2.set_visible(true);
             } else {
-                p2.set_size(0, h);
+                p2.set_size(w, 0);
                 p2.set_visible(false);
             }
         }
@@ -174,16 +174,16 @@ impl HSplitter {
     fn mouse_to_state(&self, x: i32, y: i32, clicked: bool) -> State {
         let sz = self.size();
         let pos = self.pos.absolute(sz.height.saturating_sub(1) as u16);
-        if x != pos {
+        if y != pos {
             State::None
         } else if clicked {
-            match y {
+            match x {
                 1 => State::ClickedOnTopButton,
                 2 => State::ClickedOnBottomButton,
                 _ => State::Dragging,
             }
         } else {
-            match y {
+            match x {
                 1 => State::OverTopButton,
                 2 => State::OverBottomButton,
                 _ => State::OverSeparator,
@@ -327,7 +327,8 @@ impl OnResize for HSplitter {
             ResizeBehavior::PreserveBottomPanelSize => {
                 if previous_width == 0 {
                     // first resize (initialize the splitter preserved position)
-                    self.preserve_pos = (new_size.height.saturating_sub(1) as i32 - self.pos.absolute(new_size.height.saturating_sub(1) as u16)).max(0);
+                    self.preserve_pos =
+                        (new_size.height.saturating_sub(1) as i32 - self.pos.absolute(new_size.height.saturating_sub(1) as u16)).max(0);
                     let new_pos = (new_size.height.saturating_sub(1) as i32 - self.preserve_pos).max(0);
                     self.set_position(new_pos);
                 } else {
