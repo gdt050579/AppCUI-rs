@@ -73,6 +73,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut vs = vsplitter!("50%,d:c,w:100%,h:100%,resize:PreserveRightPanelSize");
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
     a.add_window(w);
     a.run();
     Ok(())
