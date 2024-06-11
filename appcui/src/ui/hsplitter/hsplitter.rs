@@ -43,7 +43,7 @@ impl HSplitter {
             resize_behavior,
             preserve_pos: 0,
         };
-        obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
+        obj.set_size_bounds(1, 3, u16::MAX, u16::MAX);
         obj.top = obj.add_child(SplitterPanel::new());
         obj.bottom = obj.add_child(SplitterPanel::new());
         obj
@@ -145,15 +145,15 @@ impl HSplitter {
         }
     }
     fn update_panel_sizes(&mut self, new_size: Size) {
-        let spltter_pos = self.pos.absolute(new_size.height.saturating_sub(1) as u16).max(0) as u16;
+        let splitter_pos = self.pos.absolute(new_size.height.saturating_sub(1) as u16).max(0) as u16;
         let w = new_size.width as u16;
         let h1 = self.top;
         let h2 = self.bottom;
         let rm = RuntimeManager::get();
         if let Some(p1) = rm.get_control_mut(h1) {
             p1.set_position(0, 0);
-            if spltter_pos > 0 {
-                p1.set_size(w, spltter_pos);
+            if splitter_pos > 0 {
+                p1.set_size(w, splitter_pos);
                 p1.set_visible(true);
             } else {
                 p1.set_size(w, 0);
@@ -161,9 +161,9 @@ impl HSplitter {
             }
         }
         if let Some(p2) = rm.get_control_mut(h2) {
-            p2.set_position(spltter_pos as i32 + 1, 0);
-            if (spltter_pos as i32) + 1 < (new_size.height as i32) {
-                p2.set_size(w, new_size.height as u16 - spltter_pos - 1);
+            p2.set_position(0, splitter_pos as i32 + 1);
+            if (splitter_pos as i32) + 1 < (new_size.height as i32) {
+                p2.set_size(w, new_size.height as u16 - splitter_pos - 1);
                 p2.set_visible(true);
             } else {
                 p2.set_size(w, 0);
@@ -289,7 +289,7 @@ impl OnMouseEvent for HSplitter {
             }
             MouseEvent::Drag(evn) => {
                 if self.state == State::Dragging {
-                    self.update_position(Coordonate::Absolute(evn.x), true);
+                    self.update_position(Coordonate::Absolute(evn.y), true);
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
