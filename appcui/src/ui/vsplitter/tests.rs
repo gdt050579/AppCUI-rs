@@ -11,9 +11,9 @@ fn check_create() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:51,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    let mut vs = VSplitter::new(0.5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -29,8 +29,8 @@ fn check_create_procmacro() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:51,h:10,flags: Sizeable");
     let mut vs = vsplitter!("50%,d:c,w:100%,h:100%");
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -63,11 +63,11 @@ fn check_keyboard_movement() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut vs = VSplitter::new(24, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -101,8 +101,8 @@ fn check_keyboard_movement_with_procmacro() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
     let mut vs = vsplitter!("pos:24,d:c,w:100%,h:100%,mlw:5,min-right-width:5");
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -126,11 +126,11 @@ fn check_mouse_buttons() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut vs = VSplitter::new(24, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -169,11 +169,11 @@ fn check_mouse_movement() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut vs = VSplitter::new(24, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -197,9 +197,9 @@ fn check_resize_preseve_aspect_ratio_with_percentage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    let mut vs = VSplitter::new(0.5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -223,9 +223,9 @@ fn check_resize_preseve_aspect_ratio_with_absolute() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(14,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveAspectRatio);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    let mut vs = VSplitter::new(14, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -267,9 +267,9 @@ fn check_resize_preseve_left_width_with_absolute() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(10,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveLeftPanelSize);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    let mut vs = VSplitter::new(10, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveLeftPanelSize);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -311,9 +311,9 @@ fn check_resize_preseve_left_width_with_percentage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.39,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveLeftPanelSize);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    let mut vs = VSplitter::new(0.39, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveLeftPanelSize);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -355,9 +355,9 @@ fn check_resize_preseve_right_width_with_absolute() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(14,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    let mut vs = VSplitter::new(14, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();
@@ -399,9 +399,54 @@ fn check_resize_preseve_right_width_with_percentage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.55,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
-    vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
-    vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    let mut vs = VSplitter::new(0.55, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_scrollbars() {
+    static CNN: &str = "
+A Convolutional Neural Network (CNN) is a type of deep learning neural network commonly used for analyzing visual imagery. Here's a breakdown of how a CNN works:
+1. Convolutional Layer
+Convolution Operation: The primary feature of this layer is the convolution operation, which involves a filter (or kernel) sliding over the input image to produce a feature map. Each filter detects a specific feature such as edges, textures, or colors.
+Activation Function: After the convolution operation, an activation function (typically ReLU) is applied to introduce non-linearity into the model.
+2. Pooling Layer
+Purpose: The pooling layer reduces the spatial dimensions (width and height) of the feature maps, which helps in reducing the computational complexity and also helps in making the detection invariant to small translations in the input image.
+Types: The most common pooling operation is max pooling, which takes the maximum value in each patch of the feature map.
+3. Stacking Layers
+Multiple convolutional and pooling layers are stacked together, allowing the network to learn hierarchical features. Early layers learn low-level features (e.g., edges), while deeper layers learn high-level features (e.g., objects or faces).
+    ";
+    let script = "
+        Paint.Enable(false)   
+        Paint('1. Initial state')   
+        CheckHash(0xACEBB5D97674A67B)
+        Mouse.Move(12,9)
+        Paint('2. Focus on horizontal scrollbar button')   
+        CheckHash(0xBF5BED8F09F85A92)
+        Mouse.Move(59,9)
+        Paint('3. Focus on window resize grip')   
+        CheckHash(0xA83215BE2822661A)
+        Mouse.Move(59,8)
+        Paint('4. Focus on vertical scrollbar button down')   
+        CheckHash(0x484A7B8722FDBE50)
+        Mouse.Click(59,8,left)
+        Paint('5. Text scroll down one line')   
+        CheckHash(0x2E9D6FA2E04D9AE7)
+        Mouse.Click(30,9,left)
+        Paint('6. Text scroll to the left')   
+        CheckHash(0xD318E759299D18DA)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:60,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    let mut c = canvas!("'80x300',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let s = c.get_drawing_surface();
+    s.write_string(0, 0, CNN, CharAttribute::with_color(Color::White, Color::Black), true);
+    vs.add(vsplitter::Panel::Right, c);
     w.add(vs);
     a.add_window(w);
     a.run();
