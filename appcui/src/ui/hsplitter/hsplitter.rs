@@ -28,6 +28,21 @@ pub struct HSplitter {
     state: State,
 }
 impl HSplitter {
+    /// Creates a new Horizontal Splitter control with the specified position, layout and resize behavior
+    /// The position can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
+    /// The resize behavior can be one of the following values:
+    /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when resizing the control
+    /// * `ResizeBehavior::PreserveTopPanelSize` - the size of the top panel is preserved when resizing the control
+    /// * `ResizeBehavior::PreserveBottomPanelSize` - the size of the bottom panel is preserved when resizing the control
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
+    /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
+    /// ```
     pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior) -> Self
     where
         Coordonate: From<T>,
@@ -98,6 +113,7 @@ impl HSplitter {
         }
     }
 
+    /// Returns the absolute position of the splitter (in characters)
     #[inline(always)]
     pub fn position(&self) -> i32 {
         self.pos.absolute(self.size().height.saturating_sub(1) as u16)

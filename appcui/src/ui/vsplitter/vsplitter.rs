@@ -28,6 +28,22 @@ pub struct VSplitter {
     state: State,
 }
 impl VSplitter {
+
+    /// Creates a new Vertical Splitter control with the specified position, layout and resize behavior
+    /// The position can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
+    /// The resize behavior can be one of the following values:
+    /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when the splitter is resized
+    /// * `ResizeBehavior::PreserveLeftPanelSize` - the size of the left panel is preserved when the splitter is resized
+    /// * `ResizeBehavior::PreserveRightPanelSize` - the size of the right panel is preserved when the splitter is resized
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
+    /// vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
+    /// ``` 
     pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior) -> Self
     where
         Coordonate: From<T>,
@@ -99,6 +115,7 @@ impl VSplitter {
         }
     }
 
+    /// Returns the absolute position of the splitter (in characters)
     #[inline(always)]
     pub fn position(&self) -> i32 {
         self.pos.absolute(self.size().width.saturating_sub(1) as u16) 
