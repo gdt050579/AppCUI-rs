@@ -1237,6 +1237,14 @@ impl MouseMethods for RuntimeManager {
                 return handle;
             }
         }
+        // check the focused one
+        if self.current_focus.is_some() {
+            let handle = self.current_focus.unwrap();
+            let handle = self.coordinates_to_child_control(handle, x, y, ignore_expanded);
+            if !handle.is_none() {
+                return handle;
+            }
+        }
         // check from root
         self.coordinates_to_child_control(self.get_root_control_handle(), x, y, ignore_expanded)
     }
