@@ -84,11 +84,11 @@ impl HSplitter {
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 2 chars from Top
-    /// vs.set_min_width(hsplitter::Panel::Top,2);
+    /// vs.set_min_height(hsplitter::Panel::Top,2);
     /// // minim 20% from Bottom
-    /// vs.set_min_width(hsplitter::Panel::Bottom,0.2);
+    /// vs.set_min_height(hsplitter::Panel::Bottom,0.2);
     /// ```
-    pub fn set_min_width<T>(&mut self, panel: hsplitter::Panel, min_size: T)
+    pub fn set_min_height<T>(&mut self, panel: hsplitter::Panel, min_size: T)
     where
         Dimension: From<T>,
     {
