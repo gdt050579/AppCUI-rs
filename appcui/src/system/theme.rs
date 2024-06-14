@@ -73,6 +73,15 @@ pub struct ScrollBarTheme {
     pub bar: ControlCharAttributesState,
     pub position: ControlCharAttributesState,
 }
+
+#[derive(Default)]
+pub struct ListCurentItemTheme {
+    pub focus: CharAttribute,
+    pub over_inactive: CharAttribute,
+    pub over_selection: CharAttribute,
+    pub normal: CharAttribute,
+}
+
 #[derive(Default)]
 pub struct Theme {
     pub accordion: AccordionTheme,
@@ -88,7 +97,8 @@ pub struct Theme {
     pub button: ButtonTheme,
     pub tab: TabTheme,
     pub scrollbar: ScrollBarTheme,
-    pub editor: ControlCharAttributesState
+    pub editor: ControlCharAttributesState,
+    pub list_current_item: ListCurentItemTheme,
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -256,7 +266,14 @@ impl Theme {
             hovered: CharAttribute::with_color(Color::Yellow, Color::Black),
             inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
             pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Magenta),
-        }
+        };
+
+        self.list_current_item = ListCurentItemTheme {
+            focus: CharAttribute::with_color(Color::Black, Color::White),
+            over_inactive: CharAttribute::with_color(Color::Gray, Color::White),
+            over_selection: CharAttribute::with_color(Color::Red, Color::Yellow),
+            normal: CharAttribute::with_color(Color::Yellow, Color::Transparent),
+        };
     }
 }
 //         inline void Set(focused, normal, inactive, hovered, pressedOrSelected)
