@@ -3,7 +3,7 @@ use AppCUIProcMacro::*;
 use super::Flags;
 use super::Item;
 
-#[CustomControl(overwrite = OnPaint+OnKeyPressed, internal = true)]
+#[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent, internal = true)]
 pub struct ListBox {
     items: Vec<Item>,
     flags: Flags,
@@ -35,6 +35,7 @@ impl ListBox {
         if self.items.len() == 1 {
             // when first item is added, we should select it
             self.update_position(0usize, false);
+            self.start_view = 0; // force the view to start from the first item
         }
     }
 
@@ -70,6 +71,18 @@ impl ListBox {
             //     EventType::Change,
             // )));
         }
+    }
+
+    fn mouse_to_pos(&self, x: i32, y: i32) -> Option<usize> {
+        let size = self.size();
+        if x < 0 || y < 0 || x >= size.width as i32 || y >= size.height as i32 {
+            return None;
+        }
+        let idx = self.start_view + y as usize;
+        if idx < self.items.len() {
+            return Some(idx);
+        }
+        None
     }
 }
 impl OnPaint for ListBox {
@@ -127,5 +140,29 @@ impl OnKeyPressed for ListBox {
             _ => {}
         }
         EventProcessStatus::Ignored
+    }
+}
+impl OnMouseEvent for ListBox {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => EventProcessStatus::Ignored,
+            MouseEvent::Over(_) => EventProcessStatus::Ignored,
+            MouseEvent::Pressed(d) | MouseEvent::DoubleClick(d) => {
+                if let Some(pos) = self.mouse_to_pos(d.x, d.y) {
+                    self.update_position(pos, true);
+                }
+                return EventProcessStatus::Processed;
+            }
+            MouseEvent::Released(_) => EventProcessStatus::Ignored,
+            MouseEvent::Drag(_) => EventProcessStatus::Ignored,
+            MouseEvent::Wheel(evn) => {
+                match evn {
+                    MouseWheelDirection::Up => self.update_position(self.pos.saturating_sub(self.size().height as usize), true),
+                    MouseWheelDirection::Down => self.update_position(self.pos.saturating_add(self.size().height as usize), true),
+                    _ => {}
+                }
+                return EventProcessStatus::Processed;
+            }
+        }
     }
 }
