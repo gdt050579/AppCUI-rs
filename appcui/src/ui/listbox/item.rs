@@ -3,6 +3,7 @@ pub struct Item {
     pub(super) count: u32,
     pub(super) left_char_offset: u32,
     pub(super) left: u32,
+    pub(super) checked: bool
 }
 
 impl Item {
@@ -12,6 +13,7 @@ impl Item {
             count: text.chars().count() as u32,
             left: 0,
             left_char_offset: 0,
+            checked: false
         }
     }
     #[inline(always)]

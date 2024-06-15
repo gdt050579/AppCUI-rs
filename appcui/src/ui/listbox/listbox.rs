@@ -170,13 +170,46 @@ impl OnPaint for ListBox {
         let count = self.items.len();
         let h = self.size().height as i32;
         let w = self.size().width as i32;
-        while (y < h) && (idx < count) {
-            surface.write_string(0, y, self.items[idx].text(), attr, false);
-            if has_focus && (idx == self.pos) {
-                surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
+        if self.flags.contains(Flags::CheckBoxes) {
+            let ch_checked = Character::with_attributes(
+                SpecialChar::CheckMark,
+                match () {
+                    _ if !self.is_active() => theme.text.inactive,
+                    _ if has_focus => theme.symbol.checked,
+                    _ => theme.text.normal,
+                },
+            );
+            let ch_unchecked = Character::with_attributes(
+                'x',
+                match () {
+                    _ if !self.is_active() => theme.text.inactive,
+                    _ if has_focus => theme.symbol.unchecked,
+                    _ => theme.text.normal,
+                },
+            );
+            while (y < h) && (idx < count) {
+                let item = &self.items[idx];
+                if item.checked {
+                    surface.write_char(0, y, ch_checked);
+                } else {
+                    surface.write_char(0, y, ch_unchecked);
+                }
+                surface.write_string(2, y, item.text(), attr, false);
+                if has_focus && (idx == self.pos) {
+                    surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
+                }
+                y += 1;
+                idx += 1;
             }
-            y += 1;
-            idx += 1;
+        } else {
+            while (y < h) && (idx < count) {
+                surface.write_string(0, y, self.items[idx].text(), attr, false);
+                if has_focus && (idx == self.pos) {
+                    surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
+                }
+                y += 1;
+                idx += 1;
+            }
         }
     }
 }
@@ -199,7 +232,9 @@ impl OnKeyPressed for ListBox {
                 return EventProcessStatus::Processed;
             }
             key!("Right") => {
-                self.left_view = (self.left_view + 1).min(self.max_chars.saturating_sub(self.size().width) as usize);
+                let d = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
+                let w = self.size().width.saturating_sub(d);
+                self.left_view = (self.left_view + 1).min(self.max_chars.saturating_sub(w) as usize);
                 self.update_left_position_for_items();
                 self.update_scrollbars();
                 return EventProcessStatus::Processed;
@@ -227,6 +262,14 @@ impl OnKeyPressed for ListBox {
             key!("PageDown") => {
                 self.update_position(self.pos.saturating_add(self.size().height as usize), true);
                 return EventProcessStatus::Processed;
+            }
+            key!("Space") | key!("Enter") => {
+                if self.flags.contains(Flags::CheckBoxes) {
+                    if let Some(item) = self.items.get_mut(self.pos) {
+                        item.checked = !item.checked;
+                    }
+                    return EventProcessStatus::Processed;
+                }
             }
 
             _ => {}
@@ -279,7 +322,8 @@ impl OnResize for ListBox {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.components.on_resize(&self.base);
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            s.update_count(new_size.width as u64, self.max_chars as u64);
+            let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
+            s.update_count(new_size.width.saturating_sub(extra) as u64, self.max_chars as u64);
         }
         if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
             s.update_count(new_size.height as u64, self.items.len() as u64);
