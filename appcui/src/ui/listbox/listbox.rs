@@ -180,6 +180,14 @@ impl OnKeyPressed for ListBox {
                 self.update_position(self.pos.saturating_add(1), true);
                 return EventProcessStatus::Processed;
             }
+            key!("Ctrl+Up") => {
+                self.move_scroll_to(self.top_view.saturating_sub(1));
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Down") => {
+                self.move_scroll_to(self.top_view.saturating_add(1));
+                return EventProcessStatus::Processed;
+            }
             key!("Home") => {
                 self.update_position(0, true);
                 return EventProcessStatus::Processed;
