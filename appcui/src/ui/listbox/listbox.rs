@@ -8,8 +8,10 @@ use AppCUIProcMacro::*;
 pub struct ListBox {
     items: Vec<Item>,
     flags: Flags,
-    start_view: usize,
+    top_view: usize,
+    left_view: usize,
     pos: usize,
+    max_chars: u32,
     components: ComponentsToolbar,
     horizontal_scrollbar: Handle<ScrollBar>,
     vertical_scrollbar: Handle<ScrollBar>,
@@ -27,7 +29,9 @@ impl ListBox {
         let mut lbox = Self {
             base: ControlBase::with_status_flags(layout, status_flags),
             items: Vec::new(),
-            start_view: 0,
+            top_view: 0,
+            left_view: 0,
+            max_chars: 0,
             pos: usize::MAX,
             flags,
             components: ComponentsToolbar::with_capacity(if flags.contains_one(Flags::ScrollBars | Flags::SearchBar) {
@@ -49,9 +53,13 @@ impl ListBox {
     pub fn add(&mut self, value: &str) {
         self.items.push(Item::new(value));
         if self.items.len() == 1 {
+            self.max_chars = self.items[0].count;
             // when first item is added, we should select it
             self.update_position(0usize, false);
-            self.start_view = 0; // force the view to start from the first item
+            self.top_view = 0; // force the view to start from the first item
+        } else {
+            self.max_chars = self.max_chars.max(self.items.last().unwrap().count);
+            self.update_scrollbars();
         }
     }
 
@@ -59,16 +67,17 @@ impl ListBox {
     #[inline(always)]
     pub fn clear(&mut self) {
         self.items.clear();
-        self.start_view = 0;
+        self.top_view = 0;
         self.pos = usize::MAX;
+        self.max_chars = 0;
     }
 
     fn update_scrollbars(&mut self) {
         if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            //s.set_index((-self.x) as u64);
+            s.set_index(self.left_view as u64);
         }
         if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-            s.set_index(self.start_view as u64);
+            s.set_index(self.top_view as u64);
         }
     }
     fn update_position(&mut self, new_pos: usize, emit_event: bool) {
@@ -77,13 +86,13 @@ impl ListBox {
             return;
         }
         let new_pos = new_pos.min(len - 1);
-        if new_pos < self.start_view {
-            self.start_view = new_pos;
+        if new_pos < self.top_view {
+            self.top_view = new_pos;
         } else {
-            let diff = new_pos - self.start_view;
+            let diff = new_pos - self.top_view;
             let h = self.size().height as usize;
             if diff >= h {
-                self.start_view = new_pos - h + 1;
+                self.top_view = new_pos - h + 1;
             }
         }
         // update scrollbars
@@ -104,7 +113,7 @@ impl ListBox {
         if x < 0 || y < 0 || x >= size.width as i32 || y >= size.height as i32 {
             return None;
         }
-        let idx = self.start_view + y as usize;
+        let idx = self.top_view + y as usize;
         if idx < self.items.len() {
             return Some(idx);
         }
@@ -115,15 +124,16 @@ impl ListBox {
             self.components.get(self.horizontal_scrollbar),
             self.components.get(self.vertical_scrollbar),
         ) {
-            self.start_view = (vert.get_index() as usize).min(self.items.len().saturating_sub(1));
+            self.top_view = (vert.get_index() as usize).min(self.items.len().saturating_sub(1));
+            
         }
     }
     fn move_scroll_to(&mut self, new_poz: usize) {
-        if new_poz == self.start_view {
+        if new_poz == self.top_view {
             return;
         }
         let max_value = self.items.len().saturating_sub(self.size().height as usize);
-        self.start_view = new_poz.min(max_value);
+        self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
     }
 }
@@ -144,12 +154,12 @@ impl OnPaint for ListBox {
             _ => theme.text.normal,
         };
         let mut y = 0;
-        let mut idx = self.start_view;
+        let mut idx = self.top_view;
         let count = self.items.len();
         let h = self.size().height as i32;
         let w = self.size().width as i32;
         while (y < h) && (idx < count) {
-            surface.write_string(0, y, &self.items[idx].value, attr, false);
+            surface.write_string(0, y, self.items[idx].text(), attr, false);
             if has_focus && (idx == self.pos) {
                 surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
             }
@@ -218,8 +228,8 @@ impl OnMouseEvent for ListBox {
             MouseEvent::Drag(_) => EventProcessStatus::Ignored,
             MouseEvent::Wheel(evn) => {
                 match evn {
-                    MouseWheelDirection::Up => self.move_scroll_to(self.start_view.saturating_sub(1)),
-                    MouseWheelDirection::Down => self.move_scroll_to(self.start_view.saturating_add(1)),
+                    MouseWheelDirection::Up => self.move_scroll_to(self.top_view.saturating_sub(1)),
+                    MouseWheelDirection::Down => self.move_scroll_to(self.top_view.saturating_add(1)),
                     _ => {}
                 }
                 EventProcessStatus::Processed
@@ -236,9 +246,9 @@ impl OnMouseEvent for ListBox {
 impl OnResize for ListBox {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.components.on_resize(&self.base);
-        // if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-        //     s.update_count(new_size.width as u64, paint_sz.width as u64)
-        // }
+        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
+            s.update_count(new_size.width as u64, self.max_chars as u64);
+        }
         if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
             s.update_count(new_size.height as u64, self.items.len() as u64);
         }
