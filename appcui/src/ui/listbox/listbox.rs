@@ -80,6 +80,16 @@ impl ListBox {
             s.set_index(self.top_view as u64);
         }
     }
+    fn update_left_position_for_items(&mut self) {
+        let len = self.items.len();
+        if len == 0 {
+            return;
+        }
+        let last_index = (len - 1).min(self.top_view + self.size().height as usize);
+        for i in self.items[self.top_view..=last_index].iter_mut() {
+            i.update_left_pos(self.left_view as u32);
+        }
+    }
     fn update_position(&mut self, new_pos: usize, emit_event: bool) {
         let len = self.items.len();
         if len == 0 {
@@ -97,6 +107,7 @@ impl ListBox {
         }
         // update scrollbars
         self.update_scrollbars();
+        self.update_left_position_for_items();
         let should_emit = (self.pos != new_pos) && emit_event;
         self.pos = new_pos;
         if should_emit {
@@ -125,7 +136,8 @@ impl ListBox {
             self.components.get(self.vertical_scrollbar),
         ) {
             self.top_view = (vert.get_index() as usize).min(self.items.len().saturating_sub(1));
-            
+            self.left_view = (horiz.get_index() as usize).min(self.max_chars as usize);
+            self.update_left_position_for_items();
         }
     }
     fn move_scroll_to(&mut self, new_poz: usize) {
@@ -180,11 +192,23 @@ impl OnKeyPressed for ListBox {
                 self.update_position(self.pos.saturating_add(1), true);
                 return EventProcessStatus::Processed;
             }
-            key!("Ctrl+Up") => {
+            key!("Left") => {
+                self.left_view = self.left_view.saturating_sub(1);
+                self.update_left_position_for_items();
+                self.update_scrollbars();
+                return EventProcessStatus::Processed;
+            }
+            key!("Right") => {
+                self.left_view = (self.left_view + 1).min(self.max_chars.saturating_sub(self.size().width) as usize);
+                self.update_left_position_for_items();
+                self.update_scrollbars();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Alt+Up") => {
                 self.move_scroll_to(self.top_view.saturating_sub(1));
                 return EventProcessStatus::Processed;
             }
-            key!("Ctrl+Down") => {
+            key!("Ctrl+Alt+Down") => {
                 self.move_scroll_to(self.top_view.saturating_add(1));
                 return EventProcessStatus::Processed;
             }
