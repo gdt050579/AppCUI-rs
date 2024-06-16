@@ -65,6 +65,17 @@ impl ComponentsToolbar {
         }
         res
     }
+    pub fn on_key_pressed(&mut self, key: Key, character: char) -> Handle<()> {
+        let count = self.items.allocated_objects();
+        for index in 0..count {
+            if let Some(item) = self.items.element_mut(index) {
+                if item.process_key_pressed(key, character) {
+                    return item.handle().cast();
+                }
+            }
+        }  
+        Handle::None
+    }
 
     pub fn on_resize(&mut self, control: &ControlBase) {
         let control_size = control.size();

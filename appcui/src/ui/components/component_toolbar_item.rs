@@ -1,6 +1,7 @@
 use super::ProcessEventResult;
 use crate::graphics::*;
 use crate::input::MouseEvent;
+use crate::input::Key;
 use crate::prelude::HandleSupport;
 use crate::system::*;
 use crate::ui::ControlBase;
@@ -35,6 +36,13 @@ impl ComponentToolbarItem {
         match self {
             ComponentToolbarItem::ScrollBar(item) => item.on_mouse_event(event),
             ComponentToolbarItem::SearchBar(item) => item.on_mouse_event(event),
+        }
+    }
+    #[inline(always)]
+    pub(super) fn process_key_pressed(&mut self, key: Key, character: char) -> bool {
+        match self {
+            ComponentToolbarItem::ScrollBar(_) => false,
+            ComponentToolbarItem::SearchBar(item) => item.process_key_pressed(key, character),
         }
     }
     #[inline(always)]

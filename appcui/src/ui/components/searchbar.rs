@@ -1,7 +1,8 @@
 use crate::graphics::*;
-use crate::prelude::{ControlBase, MouseEvent};
+use crate::prelude::ControlBase;
 use crate::system::*;
 use crate::ui::common::*;
+use crate::input::*;
 
 use self::traits::EventProcessStatus;
 
@@ -46,6 +47,9 @@ impl SearchBar {
     }
     pub fn on_mouse_event(&mut self, event: &MouseEvent) -> ProcessEventResult {
         ProcessEventResult::PassToControl
+    }
+    pub fn process_key_pressed(&mut self, key: Key, character: char) -> bool  {
+        false
     }
 }
 impl Component for SearchBar {
