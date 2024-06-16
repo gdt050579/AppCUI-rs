@@ -75,6 +75,13 @@ pub struct ScrollBarTheme {
 }
 
 #[derive(Default)]
+pub struct SearchBarTheme {
+    pub normal: CharAttribute,
+    pub focused: CharAttribute,
+    pub results: CharAttribute,
+}
+
+#[derive(Default)]
 pub struct ListCurentItemTheme {
     pub focus: CharAttribute,
     pub over_inactive: CharAttribute,
@@ -97,6 +104,7 @@ pub struct Theme {
     pub button: ButtonTheme,
     pub tab: TabTheme,
     pub scrollbar: ScrollBarTheme,
+    pub searchbar: SearchBarTheme,
     pub editor: ControlCharAttributesState,
     pub list_current_item: ListCurentItemTheme,
 }
@@ -258,6 +266,12 @@ impl Theme {
             hovered: CharAttribute::with_color(Color::Yellow, Color::DarkBlue),
             inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
             pressed_or_selectd: CharAttribute::with_color(Color::Green, Color::Teal),
+        };
+
+        self.searchbar = SearchBarTheme {
+            normal: CharAttribute::with_color(Color::Silver, Color::DarkRed),
+            focused: CharAttribute::with_color(Color::White, Color::DarkRed),
+            results: CharAttribute::with_color(Color::Gray, Color::DarkRed),
         };
 
         self.editor = ControlCharAttributesState {

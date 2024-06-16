@@ -32,6 +32,7 @@ impl ComponentsToolbar {
         if let Some(obj) = self.items.get(handle.cast()) {
             match obj {
                 ComponentToolbarItem::ScrollBar(obj) => return Some(unsafe { &(*((obj as *const super::ScrollBar) as *const T)) }),
+                ComponentToolbarItem::SearchBar(obj) => return Some(unsafe { &(*((obj as *const super::SearchBar) as *const T)) }),
             }
         }
         None
@@ -40,6 +41,7 @@ impl ComponentsToolbar {
         if let Some(obj) = self.items.get_mut(handle.cast()) {
             match obj {
                 ComponentToolbarItem::ScrollBar(obj) => return Some(unsafe { &mut (*((obj as *mut super::ScrollBar) as *mut T)) }),
+                ComponentToolbarItem::SearchBar(obj) => return Some(unsafe { &mut (*((obj as *mut super::SearchBar) as *mut T)) }),
             }
         }
         None
