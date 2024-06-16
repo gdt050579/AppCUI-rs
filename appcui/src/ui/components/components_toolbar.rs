@@ -79,13 +79,17 @@ impl ComponentsToolbar {
             if let Some(item) = self.items.element_mut(index) {
                 let vertical = item.is_vertical();
                 if vertical {
-                    let height = item.recompute_pos(y, h, control_size);
-                    y += height;
-                    h -= height;
+                    if h > 0 {
+                        let height = item.recompute_pos(y, h, control_size);
+                        y += height;
+                        h -= height;
+                    }
                 } else {
-                    let width = item.recompute_pos(x, w, control_size);
-                    x += width;
-                    w -= width;
+                    if w > 0 {
+                        let width = item.recompute_pos(x, w, control_size);
+                        x += width;
+                        w -= width;
+                    }
                 }
             }
         }

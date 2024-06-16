@@ -35,7 +35,7 @@ impl SearchBar {
         self.x = pos;
         self.y = control_size.height as i32;
         self.visible = true;
-        self.width as i32
+        (self.width as i32) + 1
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         if !self.visible {

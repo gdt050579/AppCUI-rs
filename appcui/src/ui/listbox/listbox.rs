@@ -2,6 +2,7 @@ use super::Flags;
 use super::Item;
 use crate::ui::components::ComponentsToolbar;
 use crate::ui::components::ScrollBar;
+use crate::ui::components::SearchBar;
 use AppCUIProcMacro::*;
 
 #[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal = true)]
@@ -15,6 +16,7 @@ pub struct ListBox {
     components: ComponentsToolbar,
     horizontal_scrollbar: Handle<ScrollBar>,
     vertical_scrollbar: Handle<ScrollBar>,
+    search_bar: Handle<SearchBar>,
 }
 impl ListBox {
     pub fn new(layout: Layout, flags: Flags) -> Self {
@@ -41,7 +43,11 @@ impl ListBox {
             }),
             horizontal_scrollbar: Handle::None,
             vertical_scrollbar: Handle::None,
+            search_bar: Handle::None,
         };
+        if flags.contains(Flags::SearchBar) {
+            lbox.search_bar = lbox.components.add(SearchBar::new(10));
+        }
         if flags.contains(Flags::ScrollBars) {
             lbox.horizontal_scrollbar = lbox.components.add(ScrollBar::new(0, false));
             lbox.vertical_scrollbar = lbox.components.add(ScrollBar::new(0, true));
