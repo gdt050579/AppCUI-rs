@@ -197,6 +197,7 @@ impl OnPaint for ListBox {
                 surface.write_string(2, y, item.text(), attr, false);
                 if has_focus && (idx == self.pos) {
                     surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
+                    surface.set_cursor(0, y);
                 }
                 y += 1;
                 idx += 1;
@@ -296,6 +297,11 @@ impl OnMouseEvent for ListBox {
             MouseEvent::Pressed(d) | MouseEvent::DoubleClick(d) => {
                 if let Some(pos) = self.mouse_to_pos(d.x, d.y) {
                     self.update_position(pos, true);
+                }
+                if (d.x==0) && (self.flags.contains(Flags::CheckBoxes)) {
+                    if let Some(item) = self.items.get_mut(self.pos) {
+                        item.checked = !item.checked;
+                    }
                 }
                 EventProcessStatus::Processed
             }
