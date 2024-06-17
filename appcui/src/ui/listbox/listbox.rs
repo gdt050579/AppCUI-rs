@@ -312,7 +312,8 @@ impl OnMouseEvent for ListBox {
 impl OnResize for ListBox {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
-        self.comp.resize(new_size.width.saturating_sub(extra) as u64, new_size.height as u64, &self.base);
+        self.comp.resize(self.max_chars as u64, self.items.len() as u64, &self.base);
+        
         // self.components.on_resize(&self.base);
         // if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
         //     let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
