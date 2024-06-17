@@ -19,7 +19,7 @@ impl ScrollBars {
         }
     }
     pub fn update(&mut self, horizontal_indexes: u64, vertical_indexes: u64, size: Size) {
-        self.horizontal.update_count(size.width as u64, horizontal_indexes);
+        self.horizontal.update(size.width as u64, horizontal_indexes);
         self.vertical.update_count(size.height as u64, vertical_indexes);
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
@@ -32,7 +32,7 @@ impl ScrollBars {
         self.should_paint = r.should_repaint();
         r.should_update()
     }
-    pub fn resize(&mut self, control: &ControlBase) {
+    pub fn resize(&mut self, horizontal_indexes: u64, vertical_indexes: u64, control: &ControlBase) {
         let control_size = control.size();
         let left_margin = control.left_components_margin as i32;
         let top_margin = control.top_components_margin as i32;
@@ -42,6 +42,7 @@ impl ScrollBars {
         let y = top_margin;
         self.horizontal.recompute_position(x, w, control_size);
         self.vertical.recompute_position(y, h, control_size);
+        self.update(horizontal_indexes, vertical_indexes, control_size);
     }
     pub fn should_repaint(&self) -> bool {
         self.should_paint

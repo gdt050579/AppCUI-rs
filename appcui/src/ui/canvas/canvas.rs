@@ -105,10 +105,9 @@ impl Canvas {
     }
 }
 impl OnResize for Canvas {
-    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
-        self.scrollbars.resize(&self.base);
+    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
         let paint_sz = self.surface.size();
-        self.scrollbars.update(paint_sz.width as u64, paint_sz.height as u64, new_size);
+        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64,&self.base);
         self.move_scroll_to(self.x, self.y);
     }
 }
