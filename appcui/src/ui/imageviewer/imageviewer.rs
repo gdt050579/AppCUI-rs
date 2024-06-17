@@ -122,8 +122,8 @@ impl ImageViewer {
             self.components.get(self.horizontal_scrollbar),
             self.components.get(self.vertical_scrollbar),
         ) {
-            let h = -(horiz.get_index() as i32);
-            let v = -(vert.get_index() as i32);
+            let h = -(horiz.index() as i32);
+            let v = -(vert.index() as i32);
             self.move_scroll_to(h, v);
         }
     }

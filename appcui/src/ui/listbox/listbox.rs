@@ -141,8 +141,8 @@ impl ListBox {
             self.components.get(self.horizontal_scrollbar),
             self.components.get(self.vertical_scrollbar),
         ) {
-            self.top_view = (vert.get_index() as usize).min(self.items.len().saturating_sub(1));
-            self.left_view = (horiz.get_index() as usize).min(self.max_chars as usize);
+            self.top_view = (vert.index() as usize).min(self.items.len().saturating_sub(1));
+            self.left_view = (horiz.index() as usize).min(self.max_chars as usize);
             self.update_left_position_for_items();
         }
     }

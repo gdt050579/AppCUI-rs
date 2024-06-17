@@ -5,37 +5,37 @@ const UPDATE_VALUE_BIT: u8 = 2;
 const PROCESSED_BY_COMPONENT_BIT: u8 = 4;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub struct ProcessEventResult {
+pub(crate) struct ProcessEventResult {
     value: u8,
 }
 impl ProcessEventResult {
     #[allow(non_upper_case_globals)]
-    pub const Repaint: ProcessEventResult = ProcessEventResult {
+    pub(crate) const Repaint: ProcessEventResult = ProcessEventResult {
         value: REPAINT_BIT | PROCESSED_BY_COMPONENT_BIT,
     };
     #[allow(non_upper_case_globals)]
-    pub const Update: ProcessEventResult = ProcessEventResult {
+    pub(crate) const Update: ProcessEventResult = ProcessEventResult {
         value: UPDATE_VALUE_BIT | PROCESSED_BY_COMPONENT_BIT,
     };
     #[allow(non_upper_case_globals)]
-    pub const PassToControl: ProcessEventResult = ProcessEventResult { value: 0 };
+    pub(crate) const PassToControl: ProcessEventResult = ProcessEventResult { value: 0 };
     #[allow(non_upper_case_globals)]
-    pub const PassToControlAndRepaint: ProcessEventResult = ProcessEventResult { value: REPAINT_BIT };
+    pub(crate) const PassToControlAndRepaint: ProcessEventResult = ProcessEventResult { value: REPAINT_BIT };
     #[allow(non_upper_case_globals)]
-    pub const Processed: ProcessEventResult = ProcessEventResult {
+    pub(crate) const Processed: ProcessEventResult = ProcessEventResult {
         value: PROCESSED_BY_COMPONENT_BIT,
     };
 
     #[inline(always)]
-    pub fn should_pass_to_control(&self) -> bool {
+    pub(crate) fn should_pass_to_control(&self) -> bool {
         (self.value & PROCESSED_BY_COMPONENT_BIT) == 0
     }
     #[inline(always)]
-    pub fn should_repaint(&self) -> bool {
+    pub(crate) fn should_repaint(&self) -> bool {
         (self.value & (REPAINT_BIT | UPDATE_VALUE_BIT)) != 0
     }
     #[inline(always)]
-    pub fn should_update(&self) -> bool {
+    pub(crate) fn should_update(&self) -> bool {
         (self.value & UPDATE_VALUE_BIT) != 0
     }
 }
