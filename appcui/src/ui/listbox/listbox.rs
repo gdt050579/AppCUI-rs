@@ -1,8 +1,6 @@
 use super::Flags;
 use super::Item;
-use crate::ui::components::ComponentsToolbar;
-use crate::ui::components::ScrollBar;
-use crate::ui::components::SearchBar;
+use crate::ui::components::ListScrollBars;
 use AppCUIProcMacro::*;
 
 #[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal = true)]
@@ -13,10 +11,7 @@ pub struct ListBox {
     left_view: usize,
     pos: usize,
     max_chars: u32,
-    components: ComponentsToolbar,
-    horizontal_scrollbar: Handle<ScrollBar>,
-    vertical_scrollbar: Handle<ScrollBar>,
-    search_bar: Handle<SearchBar>,
+    comp: ListScrollBars,
 }
 impl ListBox {
     pub fn new(layout: Layout, flags: Flags) -> Self {
@@ -36,22 +31,23 @@ impl ListBox {
             max_chars: 0,
             pos: usize::MAX,
             flags,
-            components: ComponentsToolbar::with_capacity(if flags.contains_one(Flags::ScrollBars | Flags::SearchBar) {
-                3
-            } else {
-                0
-            }),
-            horizontal_scrollbar: Handle::None,
-            vertical_scrollbar: Handle::None,
-            search_bar: Handle::None,
+            comp: ListScrollBars::new(flags.contains(Flags::ScrollBars)),
+            // components: ComponentsToolbar::with_capacity(if flags.contains_one(Flags::ScrollBars | Flags::SearchBar) {
+            //     3
+            // } else {
+            //     0
+            // }),
+            // horizontal_scrollbar: Handle::None,
+            // vertical_scrollbar: Handle::None,
+            // search_bar: Handle::None,
         };
-        if flags.contains(Flags::SearchBar) {
-            lbox.search_bar = lbox.components.add(SearchBar::new(10));
-        }
-        if flags.contains(Flags::ScrollBars) {
-            lbox.horizontal_scrollbar = lbox.components.add(ScrollBar::new(0, false));
-            lbox.vertical_scrollbar = lbox.components.add(ScrollBar::new(0, true));
-        }
+        // if flags.contains(Flags::SearchBar) {
+        //     lbox.search_bar = lbox.components.add(SearchBar::new(10));
+        // }
+        // if flags.contains(Flags::ScrollBars) {
+        //     lbox.horizontal_scrollbar = lbox.components.add(ScrollBar::new(0, false));
+        //     lbox.vertical_scrollbar = lbox.components.add(ScrollBar::new(0, true));
+        // }
         lbox
     }
 
@@ -79,12 +75,7 @@ impl ListBox {
     }
 
     fn update_scrollbars(&mut self) {
-        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            s.set_index(self.left_view as u64);
-        }
-        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-            s.set_index(self.top_view as u64);
-        }
+        self.comp.set_indexes(self.left_view as u64, self.top_view as u64);
     }
     fn update_left_position_for_items(&mut self) {
         let len = self.items.len();
@@ -137,14 +128,9 @@ impl ListBox {
         None
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
-        if let (Some(horiz), Some(vert)) = (
-            self.components.get(self.horizontal_scrollbar),
-            self.components.get(self.vertical_scrollbar),
-        ) {
-            self.top_view = (vert.index() as usize).min(self.items.len().saturating_sub(1));
-            self.left_view = (horiz.index() as usize).min(self.max_chars as usize);
-            self.update_left_position_for_items();
-        }
+        self.top_view = (self.comp.vertical_index() as usize).min(self.items.len().saturating_sub(1));
+        self.left_view = (self.comp.horizontal_index() as usize).min(self.max_chars as usize);
+        self.update_left_position_for_items();
     }
     fn move_scroll_to(&mut self, new_poz: usize) {
         if new_poz == self.top_view {
@@ -159,7 +145,7 @@ impl OnPaint for ListBox {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let has_focus = self.has_focus();
         if has_focus && (self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar)) {
-            self.components.paint(surface, theme, self);
+            self.comp.paint(surface, theme, self);
             if self.flags.contains(Flags::ScrollBars) {
                 surface.reduce_clip_by(0, 0, 1, 1);
             } else {
@@ -286,16 +272,9 @@ impl OnKeyPressed for ListBox {
 }
 impl OnMouseEvent for ListBox {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        let res = self.components.on_mouse_event(event);
-        if res.should_update() {
+        if self.comp.process_mouse_event(event) {
             self.update_scroll_pos_from_scrollbars();
-        }
-        if !res.should_pass_to_control() {
-            if res.should_repaint() {
-                return EventProcessStatus::Processed;
-            } else {
-                return EventProcessStatus::Ignored;
-            }
+            return EventProcessStatus::Processed;
         }
         let response = match event {
             MouseEvent::Enter | MouseEvent::Leave => EventProcessStatus::Ignored,
@@ -304,7 +283,7 @@ impl OnMouseEvent for ListBox {
                 if let Some(pos) = self.mouse_to_pos(d.x, d.y) {
                     self.update_position(pos, true);
                 }
-                if (d.x==0) && (self.flags.contains(Flags::CheckBoxes)) {
+                if (d.x == 0) && (self.flags.contains(Flags::CheckBoxes)) {
                     if let Some(item) = self.items.get_mut(self.pos) {
                         item.checked = !item.checked;
                     }
@@ -323,7 +302,7 @@ impl OnMouseEvent for ListBox {
             }
         };
         // if one of the components require a repaint, than we should repaint even if the canvas required us to ignore the event
-        if res.should_repaint() {
+        if self.comp.should_repaint() {
             EventProcessStatus::Processed
         } else {
             response
@@ -332,14 +311,16 @@ impl OnMouseEvent for ListBox {
 }
 impl OnResize for ListBox {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
-        self.components.on_resize(&self.base);
-        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
-            s.update_count(new_size.width.saturating_sub(extra) as u64, self.max_chars as u64);
-        }
-        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-            s.update_count(new_size.height as u64, self.items.len() as u64);
-        }
+        let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
+        self.comp.resize(new_size.width.saturating_sub(extra) as u64, new_size.height as u64, &self.base);
+        // self.components.on_resize(&self.base);
+        // if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
+        //     let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
+        //     s.update_count(new_size.width.saturating_sub(extra) as u64, self.max_chars as u64);
+        // }
+        // if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
+        //     s.update_count(new_size.height as u64, self.items.len() as u64);
+        // }
         self.update_position(self.pos, false);
     }
 }

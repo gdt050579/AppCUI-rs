@@ -4,9 +4,7 @@ use crate::system::*;
 use crate::ui::common::*;
 use crate::input::*;
 
-use self::traits::EventProcessStatus;
-
-use super::{Component, ProcessEventResult};
+use super::ProcessEventResult;
 
 pub struct SearchBar {
     x: i32,
@@ -52,9 +50,4 @@ impl SearchBar {
         false
     }
 }
-impl Component for SearchBar {
-    #[allow(private_interfaces)]
-    fn into_toolbar(self) -> super::component_toolbar_item::ComponentToolbarItem {
-        super::component_toolbar_item::ComponentToolbarItem::SearchBar(self)
-    }
-}
+
