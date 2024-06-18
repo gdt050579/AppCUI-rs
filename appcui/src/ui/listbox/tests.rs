@@ -123,3 +123,47 @@ fn check_horizontal_scroll_keys() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_horizontal_scroll_keys_no_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(20,3,left)
+        Paint('Initial state')
+        CheckHash(0x8E353010059659F2)
+        Key.Pressed(Right,3)
+        Paint('Text: long...')
+        CheckHash(0xF37B858D1F32F6E6)
+        Key.Pressed(Right,4)
+        Paint('Text ends with number 0 plus 2 spaces')
+        CheckHash(0xA35208251E5B262)
+        Key.Pressed(Left,2)
+        Paint('Text ends with number 0')
+        CheckHash(0xEFA93D65A82F9DDE)
+        Key.Pressed(Left,10)
+        Paint('Back to initial state')
+        CheckHash(0x8E353010059659F2)
+        Key.Pressed(Ctrl+Alt+Right)
+        Paint('(2) Text ends with number 0 plus two space')
+        CheckHash(0xA35208251E5B262)
+        Key.Pressed(End)
+        Paint('(2) Text ends with number 99 plus one space')
+        CheckHash(0x275F91C95C024736)
+        Key.Pressed(Ctrl+Alt+Left)
+        Paint('Text: My long 0 textual ...')
+        CheckHash(0xB5EF8D0830462D7F)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:35,h:11,flags: Sizeable");
+    let mut p = panel!("Test,l:1,t:1,b:1,r:1");
+    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars);
+    for i in 0..100 {
+        l.add(&format!("My long {} textual item number {}",i%11,i));
+    }
+    l.set_components_toolbar_margins(2, 0);
+    p.add(l);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
