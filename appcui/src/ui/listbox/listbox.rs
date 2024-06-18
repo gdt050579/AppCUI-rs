@@ -254,10 +254,26 @@ impl OnKeyPressed for ListBox {
                 self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
+            key!("Ctrl+Alt+Left") => {
+                self.left_view = 0;
+                self.update_left_position_for_items();
+                self.update_scrollbars();
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
             key!("Right") => {
                 let d = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
                 let w = self.size().width.saturating_sub(d);
                 self.left_view = (self.left_view + 1).min(self.max_chars.saturating_sub(w) as usize);
+                self.update_left_position_for_items();
+                self.update_scrollbars();
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Alt+Right") => {
+                let d = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
+                let w = self.size().width.saturating_sub(d);
+                self.left_view = self.max_chars.saturating_sub(w) as usize;
                 self.update_left_position_for_items();
                 self.update_scrollbars();
                 self.comp.exit_edit_mode();

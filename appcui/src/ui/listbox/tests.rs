@@ -80,3 +80,46 @@ fn check_movement_keys() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_horizontal_scroll_keys() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(20,3,left)
+        Paint('Initial state')
+        CheckHash(0x48187EA7A323BEB9)
+        Key.Pressed(Right,3)
+        Paint('Text: long...')
+        CheckHash(0x91A7B533331C0C5E)
+        Key.Pressed(Right,4)
+        Paint('Text ends with number 0 plus 2 spaces')
+        CheckHash(0x7CB43A82FA003A0F)
+        Key.Pressed(Left,2)
+        Paint('Text ends with number 0')
+        CheckHash(0x4D0E74FA48AD993A)
+        Key.Pressed(Left,10)
+        Paint('Back to initial state')
+        CheckHash(0x48187EA7A323BEB9)
+        Key.Pressed(Ctrl+Alt+Right)
+        Paint('(2) Text ends with number 0 plus two space')
+        CheckHash(0x7CB43A82FA003A0F)
+        Key.Pressed(End)
+        Paint('(2) Text ends with number 99 plus one space')
+        CheckHash(0x65673E7122B34563)
+        Key.Pressed(Ctrl+Alt+Left)
+        Paint('Text: My long 0 textual ...')
+        CheckHash(0xF552C5DD89A89A58)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:35,h:11,flags: Sizeable");
+    let mut p = panel!("Test,l:1,t:1,b:1,r:1");
+    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars|listbox::Flags::CheckBoxes|listbox::Flags::SearchBar);
+    for i in 0..100 {
+        l.add(&format!("My long {} textual item number {}",i%11,i));
+    }
+    l.set_components_toolbar_margins(2, 0);
+    p.add(l);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
