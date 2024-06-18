@@ -14,12 +14,12 @@ where
             free: Vec::with_capacity(8),
         }
     }
-    pub(crate) fn new() -> Self {
-        Self {
-            objects: Vec::new(),
-            free: Vec::new(),
-        }
-    }
+    // pub(crate) fn new() -> Self {
+    //     Self {
+    //         objects: Vec::new(),
+    //         free: Vec::new(),
+    //     }
+    // }
     pub(crate) fn add(&mut self, mut object: T) -> Handle<T> {
         if let Some(pos) = self.free.pop() {
             // add at pos
