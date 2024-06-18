@@ -78,7 +78,7 @@ pub struct ScrollBarTheme {
 pub struct SearchBarTheme {
     pub normal: CharAttribute,
     pub focused: CharAttribute,
-    pub results: CharAttribute,
+    pub count: CharAttribute,
 }
 
 #[derive(Default)]
@@ -271,7 +271,7 @@ impl Theme {
         self.searchbar = SearchBarTheme {
             normal: CharAttribute::with_color(Color::Silver, Color::DarkRed),
             focused: CharAttribute::with_color(Color::White, Color::DarkRed),
-            results: CharAttribute::with_color(Color::Gray, Color::DarkRed),
+            count: CharAttribute::with_color(Color::Gray, Color::DarkRed),
         };
 
         self.editor = ControlCharAttributesState {

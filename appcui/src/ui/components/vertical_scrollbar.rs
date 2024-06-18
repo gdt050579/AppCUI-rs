@@ -1,7 +1,6 @@
 use crate::graphics::*;
 use crate::prelude::{ControlBase, MouseEvent};
 use crate::system::*;
-use crate::ui::common::*;
 
 use super::ProcessEventResult;
 
@@ -181,26 +180,23 @@ impl VScrollBar {
         }
     }
     fn mouse_coords_to_scroll_pos(&self, x: i32, y: i32) -> MousePosition {
-
-            match () {
-                _ if self.x != x => MousePosition::OutsideScrollBar,
-                _ if self.y == y => MousePosition::MinimizeArrow,
-                _ if (self.y + (self.dimension as i32) - 1) == y => MousePosition::MaximizeArrow,
-                _ if (y > self.y) && (y < (self.y + (self.dimension as i32) - 1)) => MousePosition::Bar,
-                _ => MousePosition::OutsideScrollBar,
-            }
-
+        match () {
+            _ if self.x != x => MousePosition::OutsideScrollBar,
+            _ if self.y == y => MousePosition::MinimizeArrow,
+            _ if (self.y + (self.dimension as i32) - 1) == y => MousePosition::MaximizeArrow,
+            _ if (y > self.y) && (y < (self.y + (self.dimension as i32) - 1)) => MousePosition::Bar,
+            _ => MousePosition::OutsideScrollBar,
+        }
     }
     fn mouse_coords_to_scroll_pos_for_dragging(&self, x: i32, y: i32) -> MousePosition {
         // we will not force x to be equal cu self.x or y to self.y
 
-            match () {
-                _ if self.y == y => MousePosition::MinimizeArrow,
-                _ if (self.y + (self.dimension as i32) - 1) == y => MousePosition::MaximizeArrow,
-                _ if (y > self.y) && (y < (self.y + (self.dimension as i32) - 1)) => MousePosition::Bar,
-                _ => MousePosition::OutsideScrollBar,
-            }
-
+        match () {
+            _ if self.y == y => MousePosition::MinimizeArrow,
+            _ if (self.y + (self.dimension as i32) - 1) == y => MousePosition::MaximizeArrow,
+            _ if (y > self.y) && (y < (self.y + (self.dimension as i32) - 1)) => MousePosition::Bar,
+            _ => MousePosition::OutsideScrollBar,
+        }
     }
     fn get_hover_status(&mut self, x: i32, y: i32) -> MouseOnScrollbarStatus {
         match self.mouse_coords_to_scroll_pos(x, y) {
