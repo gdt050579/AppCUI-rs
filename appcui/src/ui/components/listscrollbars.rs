@@ -39,7 +39,7 @@ impl ListScrollBars {
             self.vertical.paint(surface, theme, control);
         }
         if self.has_searchbar {
-            self.search.paint(surface, theme, control);
+            self.search.paint(surface, theme);
         }
     }
     pub fn process_mouse_event(&mut self, event: &MouseEvent) -> bool {

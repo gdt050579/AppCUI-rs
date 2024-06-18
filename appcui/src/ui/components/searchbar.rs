@@ -1,6 +1,5 @@
 use crate::graphics::*;
 use crate::input::*;
-use crate::prelude::ControlBase;
 use crate::system::*;
 use AppCUIProcMacro::*;
 
@@ -93,7 +92,7 @@ impl SearchBar {
             _ => {}
         }
     }
-    pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
+    pub fn paint(&self, surface: &mut Surface, theme: &Theme) {
         if !self.visible {
             return;
         }

@@ -27,10 +27,6 @@ impl ProcessEventResult {
     };
 
     #[inline(always)]
-    pub(crate) fn should_pass_to_control(&self) -> bool {
-        (self.value & PROCESSED_BY_COMPONENT_BIT) == 0
-    }
-    #[inline(always)]
     pub(crate) fn should_repaint(&self) -> bool {
         (self.value & (REPAINT_BIT | UPDATE_VALUE_BIT)) != 0
     }
