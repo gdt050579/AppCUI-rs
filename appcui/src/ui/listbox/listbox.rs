@@ -362,9 +362,9 @@ impl OnMouseEvent for ListBox {
     }
 }
 impl OnResize for ListBox {
-    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
         let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
-        self.comp.resize(self.max_chars as u64, self.items.len() as u64, &self.base);
+        self.comp.resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base);
         self.update_position(self.pos, false);
     }
 }
