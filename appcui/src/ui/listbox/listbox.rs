@@ -142,14 +142,21 @@ impl ListBox {
     }
     fn search(&mut self) {
         let text_to_search = self.comp.search_text();
-        let mut count = 0usize;
-        for (idx, item) in self.items.iter().enumerate() {
-            if item.text().contains(text_to_search) {
-                count += 1;
-                return;
+        if text_to_search.is_empty() {
+            for item in self.items.iter_mut() {
+                item.filtered = true;
             }
+            self.comp.clear_match_count();
+        } else {
+            let mut count = 0usize;
+            for item in self.items.iter_mut() {
+                item.filtered = item.text().contains(text_to_search);
+                if item.filtered {
+                    count += 1;
+                }
+            }
+            self.comp.set_match_count(count);
         }
-        self.comp.set_match_count(count);
     }
 }
 impl OnPaint for ListBox {
@@ -168,6 +175,7 @@ impl OnPaint for ListBox {
             _ if has_focus => theme.text.focused,
             _ => theme.text.normal,
         };
+
         let mut y = 0;
         let mut idx = self.top_view;
         let count = self.items.len();
@@ -197,17 +205,22 @@ impl OnPaint for ListBox {
                 } else {
                     surface.write_char(0, y, ch_unchecked);
                 }
-                surface.write_string(2, y, item.text(), attr, false);
+                surface.write_string(2, y, item.text(), if item.filtered { attr } else { theme.text.inactive }, false);
                 if has_focus && (idx == self.pos) {
                     surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
-                    surface.set_cursor(0, y);
                 }
                 y += 1;
                 idx += 1;
             }
         } else {
             while (y < h) && (idx < count) {
-                surface.write_string(0, y, self.items[idx].text(), attr, false);
+                surface.write_string(
+                    0,
+                    y,
+                    self.items[idx].text(),
+                    if self.items[idx].filtered { attr } else { theme.text.inactive },
+                    false,
+                );
                 if has_focus && (idx == self.pos) {
                     surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
                 }
@@ -332,7 +345,7 @@ impl OnResize for ListBox {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
         self.comp.resize(self.max_chars as u64, self.items.len() as u64, &self.base);
-        
+
         // self.components.on_resize(&self.base);
         // if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
         //     let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };

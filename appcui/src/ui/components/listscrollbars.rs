@@ -92,19 +92,29 @@ impl ListScrollBars {
             self.vertical.set_index(vertical);
         }
     }
+    
     #[inline(always)]
     pub fn horizontal_index(&self) -> u64 {
         self.horizontal.index()
     }
+    
     #[inline(always)]
     pub fn vertical_index(&self) -> u64 {
         self.vertical.index()
     }
+    
     #[inline(always)]
     pub fn search_text(&self) -> &str {
         self.search.text()
     }
+
+    #[inline(always)]
     pub fn set_match_count(&mut self, count: usize) {
         self.search.set_match_count(count);
+    }
+
+    #[inline(always)]
+    pub fn clear_match_count(&mut self) {
+        self.search.clear_match_count();
     }
 }

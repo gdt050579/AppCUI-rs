@@ -15,6 +15,7 @@ pub struct SearchBar {
     edit_mode: bool,
     match_count: u8, // u8::MAX = no match count
     text_offset: u16,
+    cursor_offset: u8,
 }
 impl SearchBar {
     const MIN_WIDTH: u16 = 5;
@@ -30,6 +31,7 @@ impl SearchBar {
             edit_mode: false,
             match_count: u8::MAX,
             text_offset: 0,
+            cursor_offset: 0,
         }
     }
     #[inline(always)]
@@ -73,6 +75,7 @@ impl SearchBar {
                 self.text_offset = 0;
             }
         }
+        self.cursor_offset = (&self.text[self.text_offset as usize..]).chars().count() as u8;
     }
     fn paint_count(&self, surface: &mut Surface, attr: CharAttribute) {
         let r = self.x + self.width as i32 - 2;
@@ -103,6 +106,9 @@ impl SearchBar {
         surface.write_string(self.x + 1, self.y, &self.text[self.text_offset as usize..], attr, false);
         if (self.width >= SearchBar::DRAW_COUNT_MIN_WIDTH) && (self.match_count != u8::MAX) {
             self.paint_count(surface, theme.searchbar.count);
+        }
+        if self.edit_mode {
+            surface.set_cursor(self.x + 1 + self.cursor_offset as i32, self.y);
         }
     }
     pub fn on_mouse_event(&mut self, event: &MouseEvent) -> ProcessEventResult {
