@@ -23,7 +23,7 @@ impl ListBox {
         if flags.contains(Flags::SearchBar) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
         }
-        let mut lbox = Self {
+        Self {
             base: ControlBase::with_status_flags(layout, status_flags),
             items: Vec::new(),
             top_view: 0,
@@ -32,23 +32,7 @@ impl ListBox {
             pos: usize::MAX,
             flags,
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
-            // components: ComponentsToolbar::with_capacity(if flags.contains_one(Flags::ScrollBars | Flags::SearchBar) {
-            //     3
-            // } else {
-            //     0
-            // }),
-            // horizontal_scrollbar: Handle::None,
-            // vertical_scrollbar: Handle::None,
-            // search_bar: Handle::None,
-        };
-        // if flags.contains(Flags::SearchBar) {
-        //     lbox.search_bar = lbox.components.add(SearchBar::new(10));
-        // }
-        // if flags.contains(Flags::ScrollBars) {
-        //     lbox.horizontal_scrollbar = lbox.components.add(ScrollBar::new(0, false));
-        //     lbox.vertical_scrollbar = lbox.components.add(ScrollBar::new(0, true));
-        // }
-        lbox
+        }
     }
 
     /// Adds a new item to the list by providing a string value
@@ -381,15 +365,6 @@ impl OnResize for ListBox {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
         self.comp.resize(self.max_chars as u64, self.items.len() as u64, &self.base);
-
-        // self.components.on_resize(&self.base);
-        // if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-        //     let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
-        //     s.update_count(new_size.width.saturating_sub(extra) as u64, self.max_chars as u64);
-        // }
-        // if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-        //     s.update_count(new_size.height as u64, self.items.len() as u64);
-        // }
         self.update_position(self.pos, false);
     }
 }
