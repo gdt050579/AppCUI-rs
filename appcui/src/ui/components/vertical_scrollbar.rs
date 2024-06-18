@@ -63,26 +63,12 @@ impl VScrollBar {
         }
     }
     #[inline(always)]
-    pub fn set_visible(&mut self, visible: bool) {
-        self.visible = visible;
-    }
-    #[inline(always)]
-    pub fn set_enabled(&mut self, visible: bool) {
-        self.enabled = visible;
-    }
-    #[inline(always)]
     pub fn set_index(&mut self, value: u64) {
         self.index = if self.count > 0 { value.min(self.count - 1) } else { 0 };
     }
     #[inline(always)]
     pub fn index(&self) -> u64 {
         self.index
-    }
-    #[inline(always)]
-    pub fn set_count(&mut self, count: u64) {
-        self.count = count;
-        self.index = if self.count > 0 { self.index.min(self.count - 1) } else { 0 };
-        self.enabled = self.count > 0;
     }
     #[inline(always)]
     pub fn update_count(&mut self, visible_indexes: u64, total_indexes: u64) {
@@ -93,27 +79,6 @@ impl VScrollBar {
         }
         self.index = if self.count > 0 { self.index.min(self.count - 1) } else { 0 };
         self.enabled = self.count > 0;
-    }
-    #[inline(always)]
-    pub fn set_position(&mut self, x: i32, y: i32, dimension: u16) {
-        self.x = x;
-        self.y = y;
-        self.dimension = dimension.max(3);
-        if self.dimension <= 3 {
-            self.visible = false;
-        }
-    }
-    pub fn update_position(&mut self, control_size: Size, decrease_margin: i32, increase_margin: i32, outside_rectangle: bool) {
-        let w = control_size.width as i32;
-        let h = control_size.height as i32;
-        let dimension = h - (increase_margin + decrease_margin);
-        self.x = if outside_rectangle { w } else { w - 1 };
-        self.y = decrease_margin;
-        self.dimension = dimension.max(3) as u16;
-        self.visible = dimension >= 3;
-        if (w < 1) || (h < 1) {
-            self.visible = false;
-        }
     }
     #[inline(always)]
     pub(super) fn recompute_position(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
@@ -188,7 +153,7 @@ impl VScrollBar {
             _ => MousePosition::OutsideScrollBar,
         }
     }
-    fn mouse_coords_to_scroll_pos_for_dragging(&self, x: i32, y: i32) -> MousePosition {
+    fn mouse_coords_to_scroll_pos_for_dragging(&self, y: i32) -> MousePosition {
         // we will not force x to be equal cu self.x or y to self.y
 
         match () {
@@ -214,15 +179,15 @@ impl VScrollBar {
             MousePosition::OutsideScrollBar => MouseOnScrollbarStatus::None,
         }
     }
-    fn get_drag_status(&self, x: i32, y: i32) -> MouseOnScrollbarStatus {
-        match self.mouse_coords_to_scroll_pos_for_dragging(x, y) {
+    fn get_drag_status(&self, y: i32) -> MouseOnScrollbarStatus {
+        match self.mouse_coords_to_scroll_pos_for_dragging(y) {
             MousePosition::MinimizeArrow => MouseOnScrollbarStatus::PressedOnMinimizeArrow,
             MousePosition::MaximizeArrow => MouseOnScrollbarStatus::PressedOnMaximizeArrow,
             MousePosition::Bar => MouseOnScrollbarStatus::PressedOnBar,
             MousePosition::OutsideScrollBar => MouseOnScrollbarStatus::None,
         }
     }
-    fn update_index_for_mouse_pos(&mut self, x: i32, y: i32, new_status: MouseOnScrollbarStatus) {
+    fn update_index_for_mouse_pos(&mut self, y: i32, new_status: MouseOnScrollbarStatus) {
         match new_status {
             MouseOnScrollbarStatus::PressedOnMinimizeArrow => {
                 if self.index > 0 {
@@ -275,7 +240,7 @@ impl VScrollBar {
                 let new_status = self.get_press_status(data.x, data.y);
                 if !new_status.is_none() {
                     self.status = new_status;
-                    self.update_index_for_mouse_pos(data.x, data.y, self.status);
+                    self.update_index_for_mouse_pos(data.y, self.status);
                     return ProcessEventResult::Update;
                 }
                 if self.status != MouseOnScrollbarStatus::None {
@@ -295,10 +260,10 @@ impl VScrollBar {
                 }
             }
             MouseEvent::Drag(data) => {
-                let new_status = self.get_drag_status(data.x, data.y);
+                let new_status = self.get_drag_status(data.y);
                 if self.status.is_pressed() {
                     if (new_status == self.status) && (new_status == MouseOnScrollbarStatus::PressedOnBar) {
-                        self.update_index_for_mouse_pos(data.x, data.y, MouseOnScrollbarStatus::PressedOnBar);
+                        self.update_index_for_mouse_pos(data.y, MouseOnScrollbarStatus::PressedOnBar);
                         ProcessEventResult::Update
                     } else {
                         ProcessEventResult::Processed
@@ -323,7 +288,7 @@ impl VScrollBar {
                 let new_status = self.get_press_status(data.x, data.y);
                 if !new_status.is_none() {
                     self.status = new_status;
-                    self.update_index_for_mouse_pos(data.x, data.y, self.status);
+                    self.update_index_for_mouse_pos(data.y, self.status);
                     return ProcessEventResult::Update;
                 }
                 if self.status != MouseOnScrollbarStatus::None {
