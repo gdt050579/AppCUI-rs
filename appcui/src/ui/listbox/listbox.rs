@@ -140,6 +140,17 @@ impl ListBox {
         self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
     }
+    fn search(&mut self) {
+        let text_to_search = self.comp.search_text();
+        let mut count = 0usize;
+        for (idx, item) in self.items.iter().enumerate() {
+            if item.text().contains(text_to_search) {
+                count += 1;
+                return;
+            }
+        }
+        self.comp.set_match_count(count);
+    }
 }
 impl OnPaint for ListBox {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -208,7 +219,11 @@ impl OnPaint for ListBox {
 }
 
 impl OnKeyPressed for ListBox {
-    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        if self.comp.process_key_pressed(key, character) {
+            self.search();
+            return EventProcessStatus::Processed;
+        }
         match key.value() {
             key!("Up") => {
                 self.update_position(self.pos.saturating_sub(1), true);
@@ -267,7 +282,11 @@ impl OnKeyPressed for ListBox {
 
             _ => {}
         }
-        EventProcessStatus::Ignored
+        if self.comp.should_repaint() {
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
     }
 }
 impl OnMouseEvent for ListBox {

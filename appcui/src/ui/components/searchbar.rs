@@ -61,13 +61,17 @@ impl SearchBar {
         let match_count_width = if (self.width >= SearchBar::DRAW_COUNT_MIN_WIDTH) && (self.match_count != u8::MAX) {
             6
         } else {
-            0
+            2
         };
         let tx_chars = self.width.saturating_sub(match_count_width) as usize;
         if tx_chars == 0 {
             self.text_offset = self.text.len() as u16;
         } else {
-            self.text_offset = self.text.char_indices().rev().take(tx_chars).map(|(o, _)| o).min().unwrap() as u16;
+            if let Some(ofs) = self.text.char_indices().rev().take(tx_chars).map(|(o, _)| o).min() {
+                self.text_offset = ofs as u16;
+            } else {
+                self.text_offset = 0;
+            }
         }
     }
     fn paint_count(&self, surface: &mut Surface, attr: CharAttribute) {
@@ -129,5 +133,8 @@ impl SearchBar {
             return true;
         }
         false
+    }
+    pub fn text(&self) -> &str {
+        &self.text
     }
 }

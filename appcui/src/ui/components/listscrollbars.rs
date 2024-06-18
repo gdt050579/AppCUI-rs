@@ -100,4 +100,11 @@ impl ListScrollBars {
     pub fn vertical_index(&self) -> u64 {
         self.vertical.index()
     }
+    #[inline(always)]
+    pub fn search_text(&self) -> &str {
+        self.search.text()
+    }
+    pub fn set_match_count(&mut self, count: usize) {
+        self.search.set_match_count(count);
+    }
 }
