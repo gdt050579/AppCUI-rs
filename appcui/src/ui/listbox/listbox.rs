@@ -140,6 +140,18 @@ impl ListBox {
         self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
     }
+    fn find_first_item(&mut self, pos: usize) {
+        let mut i = if pos >= self.items.len() { 0 } else { pos };
+        let mut count = self.items.len();
+        while count > 0 {
+            if self.items[i].filtered {
+                self.update_position(i, true);
+                return;
+            }
+            i = (i + 1) % self.items.len();
+            count -= 1;
+        }
+    }
     fn search(&mut self) {
         let text_to_search = self.comp.search_text();
         if text_to_search.is_empty() {
@@ -156,6 +168,9 @@ impl ListBox {
                 }
             }
             self.comp.set_match_count(count);
+            if count > 0 {
+                self.find_first_item(self.pos);
+            }
         }
     }
 }
@@ -240,16 +255,19 @@ impl OnKeyPressed for ListBox {
         match key.value() {
             key!("Up") => {
                 self.update_position(self.pos.saturating_sub(1), true);
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("Down") => {
                 self.update_position(self.pos.saturating_add(1), true);
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("Left") => {
                 self.left_view = self.left_view.saturating_sub(1);
                 self.update_left_position_for_items();
                 self.update_scrollbars();
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("Right") => {
@@ -258,34 +276,52 @@ impl OnKeyPressed for ListBox {
                 self.left_view = (self.left_view + 1).min(self.max_chars.saturating_sub(w) as usize);
                 self.update_left_position_for_items();
                 self.update_scrollbars();
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Alt+Up") => {
                 self.move_scroll_to(self.top_view.saturating_sub(1));
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Alt+Down") => {
                 self.move_scroll_to(self.top_view.saturating_add(1));
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("Home") => {
                 self.update_position(0, true);
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("End") => {
                 self.update_position(self.items.len(), true);
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("PageUp") => {
                 self.update_position(self.pos.saturating_sub(self.size().height as usize), true);
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             key!("PageDown") => {
                 self.update_position(self.pos.saturating_add(self.size().height as usize), true);
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
-            key!("Space") | key!("Enter") => {
+            key!("Space") => {
                 if self.flags.contains(Flags::CheckBoxes) {
+                    if let Some(item) = self.items.get_mut(self.pos) {
+                        item.checked = !item.checked;
+                    }
+                    return EventProcessStatus::Processed;
+                }
+            }
+            key!("Enter") => {
+                if self.comp.is_in_edit_mode() {
+                    self.find_first_item(self.pos+1);
+                    return EventProcessStatus::Processed;
+                } else if self.flags.contains(Flags::CheckBoxes) {
                     if let Some(item) = self.items.get_mut(self.pos) {
                         item.checked = !item.checked;
                     }

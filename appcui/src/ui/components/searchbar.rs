@@ -112,6 +112,12 @@ impl SearchBar {
         }
     }
     pub fn on_mouse_event(&mut self, event: &MouseEvent) -> ProcessEventResult {
+        if let MouseEvent::Pressed(evn) = event {
+            if (evn.y == self.y) && (evn.x >= self.x) && (evn.x < (self.x + self.width as i32)) {
+                self.edit_mode = true;
+                return ProcessEventResult::Update;
+            }
+        }
         ProcessEventResult::PassToControl
     }
     pub fn process_key_pressed(&mut self, key: Key, character: char) -> bool {
@@ -143,4 +149,13 @@ impl SearchBar {
     pub fn text(&self) -> &str {
         &self.text
     }
+    #[inline(always)]
+    pub fn is_in_edit_mode(&self) -> bool {
+        self.edit_mode
+    }
+    #[inline(always)]
+    pub fn exit_edit_mode(&mut self) {
+        self.edit_mode = false;
+    }
+
 }

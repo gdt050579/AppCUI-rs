@@ -117,4 +117,14 @@ impl ListScrollBars {
     pub fn clear_match_count(&mut self) {
         self.search.clear_match_count();
     }
+
+    #[inline(always)]
+    pub fn is_in_edit_mode(&self) -> bool {
+        self.search.is_in_edit_mode()
+    }
+
+    #[inline(always)]
+    pub fn exit_edit_mode(&mut self) {
+        self.search.exit_edit_mode()
+    }
 }
