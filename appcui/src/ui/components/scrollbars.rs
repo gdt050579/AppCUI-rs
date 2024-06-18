@@ -40,7 +40,7 @@ impl ScrollBars {
         let h = (control_size.height as i32) - top_margin; // 1 space from bottom
         let x = left_margin;
         let y = top_margin;
-        self.horizontal.recompute_position(x, w, control_size);
+        self.horizontal.recompute_layout(x, w, control_size);
         self.vertical.recompute_position(y, h, control_size);
         self.update(horizontal_indexes, vertical_indexes, control_size);
     }

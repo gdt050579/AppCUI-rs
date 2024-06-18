@@ -12,24 +12,29 @@ pub struct SearchBar {
     width: u16,
     text: String,
     visible: bool,
-    pub(super) handle: Handle<UIElement>,
 }
 impl SearchBar {
-    pub fn new(width: u16) -> Self {
+    const MIN_WIDTH: u16 = 5;
+    const PREFERED_WIDTH: u16 = 14;
+    pub fn new(visible: bool) -> Self {
         Self {
             x: 0,
             y: 0,
-            width,
+            width: 0 ,
             text: String::new(),
-            handle: Handle::None,
-            visible: false,
+            visible,
         }
     }
     #[inline(always)]
-    pub(super) fn recompute_position(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
-        if pos + self.width as i32 + 1 >= available_size {
+    pub(super) fn recompute_layout(&mut self, pos: i32, available_space: i32, control_size: Size) -> i32 {
+        if available_space < Self::MIN_WIDTH as i32 {
             self.visible = false;
             return 0;
+        }
+        if available_space >= Self::PREFERED_WIDTH as i32 {
+            self.width = Self::PREFERED_WIDTH;
+        } else {
+            self.width = available_space as u16;
         }
         self.x = pos;
         self.y = control_size.height as i32;

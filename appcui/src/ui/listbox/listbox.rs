@@ -31,7 +31,7 @@ impl ListBox {
             max_chars: 0,
             pos: usize::MAX,
             flags,
-            comp: ListScrollBars::new(flags.contains(Flags::ScrollBars)),
+            comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
             // components: ComponentsToolbar::with_capacity(if flags.contains_one(Flags::ScrollBars | Flags::SearchBar) {
             //     3
             // } else {
