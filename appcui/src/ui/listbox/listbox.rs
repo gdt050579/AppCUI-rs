@@ -14,7 +14,42 @@ pub struct ListBox {
     comp: ListScrollBars,
 }
 impl ListBox {
+    /// Creates a new list box with the specified layout and flags
+    /// The flags can be a combination of the following values:
+    /// - `Flags::ScrollBars` - adds scrollbars to the list box
+    /// - `Flags::CheckBoxes` - adds checkboxes to the list box
+    /// - `Flags::SearchBar` - adds a search bar to the list box
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let lbox = ListBox::new(Layout::new("d:c"),
+    ///                         listbox::Flags::ScrollBars |
+    ///                         listbox::Flags::CheckBoxes |
+    ///                         listbox::Flags::SearchBar);
+    /// let simple_lbox = ListBox::new(Layout::new("d:c"),listbox::Flags::None);
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
+        Self::with_capacity(0, layout, flags)
+    }
+
+    /// Creates a new list box with the specified layout, flags and capacity
+    /// The flags can be a combination of the following values:
+    /// - `Flags::ScrollBars` - adds scrollbars to the list box
+    /// - `Flags::CheckBoxes` - adds checkboxes to the list box
+    /// - `Flags::SearchBar` - adds a search bar to the list box
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    ///
+    /// // a listbox with a capacity of 100 items, with scrollbars
+    /// let lbox = ListBox::with_capacity(100, 
+    ///                                   Layout::new("d:c"), 
+    ///                                   listbox::Flags::ScrollBars);
+    /// ```   
+    pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags) -> Self {
         let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
@@ -25,7 +60,7 @@ impl ListBox {
         }
         Self {
             base: ControlBase::with_status_flags(layout, status_flags),
-            items: Vec::new(),
+            items: if capacity == 0 { Vec::new() } else { Vec::with_capacity(capacity) },
             top_view: 0,
             left_view: 0,
             max_chars: 0,
@@ -319,7 +354,7 @@ impl OnKeyPressed for ListBox {
             }
             key!("Enter") => {
                 if self.comp.is_in_edit_mode() {
-                    self.find_first_item(self.pos+1);
+                    self.find_first_item(self.pos + 1);
                     return EventProcessStatus::Processed;
                 } else if self.flags.contains(Flags::CheckBoxes) {
                     if let Some(item) = self.items.get_mut(self.pos) {

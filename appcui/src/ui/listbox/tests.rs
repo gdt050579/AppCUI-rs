@@ -24,6 +24,46 @@ fn check_create() {
 }
 
 #[test]
+fn check_create_with_macro_1() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(10,3,left)
+        Paint('Initial state')
+        CheckHash(0x6063E984F2B99F35)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut p = panel!("Test,l:1,t:1,b:1,r:1");
+    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    for i in 0..100 {
+        l.add(&format!("My long {} textual item number {}",i%11,i));
+    }
+    p.add(l);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_create_with_macro_2() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(10,3,left)
+        Paint('Initial state')
+        CheckHash(0xB00B42A9B1771A31)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut p = panel!("Test,l:1,t:1,b:1,r:1");
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    p.add(l);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
 fn check_movement_keys() {
     let script = "
         Paint.Enable(false)
