@@ -172,7 +172,6 @@ fn check_horizontal_scroll_keys_no_checkboxes() {
 fn check_search() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Mouse.Click(10,3,left)
         Paint('Initial state')
         CheckHash(0x6063E984F2B99F35)
@@ -238,3 +237,69 @@ fn check_search() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_resize() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(10,3,left)
+        Paint('Initial state')
+        CheckHash(0x6063E984F2B99F35)
+        Key.TypeText('textual item')
+        Paint('99+ matches, filter contains: ual item')
+        CheckHash(0x1AAEFD071EA0A6AC)
+        CheckCursor(19,8)    
+        Mouse.Hold(54,10,left)    
+        Mouse.Move(53,10)
+        Paint('1. resize -1')
+        CheckHash(0x62CCB6C4ADF7A944)
+        Mouse.Move(43,10)
+        Paint('2. resize -11 (hscrollbar enabeled)')
+        CheckHash(0xA613C1648737F792)
+        Mouse.Move(33,10)
+        Paint('3. resize -21 (hscrollbar 4 characters)')
+        CheckHash(0xB26C43B1BE3E2AAC)
+        Mouse.Move(32,10)
+        Paint('4. resize -22 (searchbar: |al item 99+|)')
+        CheckHash(0xA79F143C4D6A2A24)
+        CheckCursor(18,8)
+        Mouse.Move(30,10)
+        Paint('5. resize -24 (searchbar: | item 99+|)')
+        CheckHash(0xCC8BDA112FEA5274)
+        CheckCursor(16,8)
+        Mouse.Move(29,10)
+        Paint('6. resize -25 (searchbar: |item 99+|)')
+        CheckHash(0x8AA1B5E6E52D57FC)
+        CheckCursor(15,8)
+        Mouse.Move(28,10)
+        Paint('7. resize -26 (searchbar: |tem 99+|)')
+        CheckHash(0xA5EFB2617AC4A6D9)
+        CheckCursor(14,8)
+        Mouse.Move(27,10)
+        Paint('8. resize -27 (searchbar: |l item| - count is not shown)')
+        CheckHash(0xBD85603D712F9F21)
+        CheckCursor(17,8)
+        Mouse.Move(25,10)
+        Paint('9. resize -29 (searchbar: |item| - count is not shown)')
+        CheckHash(0x10203BA9F674373C)
+        CheckCursor(15,8)
+        Mouse.Move(23,10)
+        Paint('10. resize -31 (searchbar is not visible)')
+        CheckHash(0x815B0867843C1DE0)
+        CheckCursor(hidden)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut p = panel!("Test,l:1,t:1,b:1,r:1");
+    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars|listbox::Flags::CheckBoxes|listbox::Flags::SearchBar);
+    for i in 0..100 {
+        l.add(&format!("My long {} textual item number {}",i%11,i));
+    }
+    l.set_components_toolbar_margins(2, 0);
+    p.add(l);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
