@@ -167,3 +167,74 @@ fn check_horizontal_scroll_keys_no_checkboxes() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_search() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Mouse.Click(10,3,left)
+        Paint('Initial state')
+        CheckHash(0x6063E984F2B99F35)
+        Key.Pressed(3)
+        Paint('item with number 3 selected')
+        CheckHash(0x77F2B2A16DC57592)
+        Key.Pressed(Enter)
+        Paint('item with number 13 selected')
+        CheckHash(0x6A06D517F0AFD720)
+        Key.Pressed(Enter)
+        Paint('My long 3 textual item number 14')
+        CheckHash(0x839A3B3FE1C88B62)
+        Key.Pressed(Enter)
+        Paint('item with number 23 selected')
+        CheckHash(0xF8FAEE7802252B2B)
+        CheckCursor(12,8)
+        Key.Pressed(4)
+        Paint('item with number 34 selected')
+        CheckHash(0xA310DECEF6DAD532)
+        CheckCursor(13,8)
+        Key.Pressed(Enter)
+        Paint('item with number 34 remains selected')
+        CheckHash(0xA310DECEF6DAD532)
+        CheckCursor(13,8)
+        Key.Pressed(Up)
+        Paint('item with number 33 selected')
+        CheckHash(0x321DDD364829236)
+        CheckCursor(hidden)
+        Key.Pressed(Backspace,2)
+        Paint('item with number 33 selected, nothing on filter')
+        CheckHash(0xC67D8535BB675FCC)
+        CheckCursor(11,8)
+        Key.TypeText('textual')
+        Paint('99+ matches, item with number 33 remains selected')
+        CheckHash(0xB326140771C7B175)
+        CheckCursor(18,8)
+        Key.TypeText(' item')
+        Paint('99+ matches, filter contains: ual item')
+        CheckHash(0xB9D4D59DB11028AD)
+        CheckCursor(19,8)
+        Key.Pressed(Backspace)
+        Paint('99+ matches, filter contains: tual ite')
+        CheckHash(0x557FB0D9EF43F0D4)
+        CheckCursor(19,8)
+        Key.Pressed(Escape)
+        Paint('Filter is cleared, item with number 33 remains selected')
+        CheckHash(0xD14E71E597E07A1C)
+        CheckCursor(hidden)
+        Key.Pressed(Escape)
+        Paint('Window is closed (in non-edit mode Escape is not proccessed)')
+        CheckHash(0x3900AF2CBDF4157D)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut p = panel!("Test,l:1,t:1,b:1,r:1");
+    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars|listbox::Flags::CheckBoxes|listbox::Flags::SearchBar);
+    for i in 0..100 {
+        l.add(&format!("My long {} textual item number {}",i%11,i));
+    }
+    l.set_components_toolbar_margins(2, 0);
+    p.add(l);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}

@@ -123,6 +123,8 @@ impl SearchBar {
         match key.value() {
             key!("Escape") => {
                 if self.edit_mode {
+                    self.text.clear();
+                    self.update_text_offset();
                     self.edit_mode = false;
                     return true;
                 }
