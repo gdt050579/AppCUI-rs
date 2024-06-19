@@ -35,16 +35,6 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             cb.add_line(format!("control.set_background({});", s).as_str());
         }
     }
-    let lsm = cb.get_i32("lsm").unwrap_or(0);
-    let tsm = cb.get_i32("tsm").unwrap_or(0);
-    if (lsm != 0) || (tsm != 0) {
-        if lsm < 0 {
-            panic!("Left scroll margin can not be a negative number");
-        }
-        if tsm < 0 {
-            panic!("Top scroll margin can not be a negative number");
-        }
-        cb.add_line(format!("control.set_components_toolbar_margins({},{});", lsm, tsm).as_str());
-    }
+    cb.add_scroll_margin_setup("lsm","tsm");
     cb.into()
 }

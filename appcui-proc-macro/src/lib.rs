@@ -464,3 +464,8 @@ pub fn vsplitter(input: TokenStream) -> TokenStream {
 pub fn hsplitter(input: TokenStream) -> TokenStream {
     crate::controls::hsplitter::create(input)
 }
+
+#[proc_macro]
+pub fn listbox(input: TokenStream) -> TokenStream {
+    crate::controls::listbox::create(input)
+}
