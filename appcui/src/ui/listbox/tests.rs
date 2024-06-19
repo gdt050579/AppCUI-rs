@@ -62,6 +62,21 @@ fn check_create_with_macro_2() {
     a.run();
 }
 
+#[test]
+fn check_create_with_macro_3() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x7C90380CED317D30)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:8,flags: Sizeable");
+    let l = listbox!("d:c,w:100%,h:100%,index:3,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
 
 #[test]
 fn check_movement_keys() {

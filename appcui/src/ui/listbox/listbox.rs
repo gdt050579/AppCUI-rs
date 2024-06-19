@@ -84,7 +84,7 @@ impl ListBox {
         }
     }
 
-    /// Cleras all items from the list
+    /// Clers all items from the list
     #[inline(always)]
     pub fn clear(&mut self) {
         self.items.clear();
@@ -92,6 +92,26 @@ impl ListBox {
         self.pos = usize::MAX;
         self.max_chars = 0;
     }
+
+    /// Returns the index of the current selected item from the listbox
+    #[inline(always)]
+    pub fn index(&self)->usize {
+        self.pos
+    }
+
+    /// Sets the new selected item from the listbox
+    pub fn set_index(&mut self, index: usize) {
+        if index<self.items.len() {
+            self.update_position(index, false);
+        }
+    }
+
+    /// Returns the total number of items fom the listbox
+    #[inline(always)]
+    pub fn count(&self)->usize {
+        self.items.len()
+    }
+
 
     fn update_scrollbars(&mut self) {
         self.comp.set_indexes(self.left_view as u64, self.top_view as u64);
