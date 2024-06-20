@@ -1,5 +1,7 @@
 use super::Flags;
 use super::Item;
+use super::events::EventData;
+use listbox::events::ListBoxEventTypes;
 use crate::ui::components::ListScrollBars;
 use AppCUIProcMacro::*;
 
@@ -71,6 +73,7 @@ impl ListBox {
     }
 
     /// Adds a new item to the list by providing a string value
+    /// if AutoScroll flag is set, the list will automatically scroll to the newly added item
     pub fn add(&mut self, value: &str) {
         self.items.push(Item::new(value));
         if self.items.len() == 1 {
@@ -81,6 +84,9 @@ impl ListBox {
         } else {
             self.max_chars = self.max_chars.max(self.items.last().unwrap().count);
             self.update_scrollbars();
+        }
+        if self.flags.contains(Flags::AutoScroll) {
+            self.update_position(self.items.len() - 1, false);
         }
     }
 
@@ -147,11 +153,15 @@ impl ListBox {
         let should_emit = (self.pos != new_pos) && emit_event;
         self.pos = new_pos;
         if should_emit {
-            // self.on_event(Event::Command(Command::new(
-            //     self.ID(),
-            //     self.pos as u32,
-            //     EventType::Change,
-            // )));
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::ListBox(EventData {
+                    event_type: ListBoxEventTypes::CurrentItemChanged,
+                    index: new_pos,
+                    checked: false, // not relevant for this event
+                }),
+            });
         }
     }
 
