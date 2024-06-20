@@ -226,6 +226,28 @@ fn check_glyph_previous_pos() {
 }
 
 #[test]
+fn check_glyph_ignore_case() {
+    let t = String::from("aBcDeFgH");
+    assert_eq!(t.index_ignoring_case("abcdefgh"), Some(0));
+    assert_eq!(t.index_ignoring_case("bcdefgh"), Some(1));
+    assert_eq!(t.index_ignoring_case("cdefgh"), Some(2));
+    assert_eq!(t.index_ignoring_case("defgh"), Some(3));
+    assert_eq!(t.index_ignoring_case("efgh"), Some(4));
+    assert_eq!(t.index_ignoring_case("fgh"), Some(5));
+    assert_eq!(t.index_ignoring_case("gh"), Some(6));
+    assert_eq!(t.index_ignoring_case("h"), Some(7));
+    assert_eq!(t.index_ignoring_case("a"), Some(0));
+    assert_eq!(t.index_ignoring_case("b"), Some(1));
+    assert_eq!(t.index_ignoring_case("c"), Some(2));
+    assert_eq!(t.index_ignoring_case("d"), Some(3));
+    assert_eq!(t.index_ignoring_case("XXX"), None);
+    assert_eq!(t.index_ignoring_case("aBcDeFgH"), Some(0));
+    assert_eq!(t.index_ignoring_case("AbCdEfGh"), Some(0));
+    assert_eq!(t.index_ignoring_case("AbCdEfE"), None);
+
+}
+
+#[test]
 fn check_format_number_decimal_unsigned() {
     let mut s = String::new();
     const F1: FormatNumber = FormatNumber::new(10);
