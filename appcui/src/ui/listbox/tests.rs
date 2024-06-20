@@ -392,3 +392,33 @@ fn check_search_ignore_case() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_search_use_space() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x711F311CB5D1D016)
+        Key.Pressed(Space)
+        Paint('Red is checked')
+        CheckHash(0xA2566D97A4924322)
+        Key.Pressed(K)
+        Paint('Edit mode - dark green is selected (2 matches)')
+        CheckHash(0xB7E19FA73A5AFB7A)
+        Key.Pressed(Backspace)
+        Key.Pressed(Space)
+        Paint('Edit mode - dark green is selected (3 matches that contain space)')
+        CheckHash(0x716D450967818537)
+        Key.Pressed(Down)
+        Key.Pressed(Space)
+        Paint('Normal mode - light green is checked')
+        CheckHash(0x9EC9834D8A0DDBB8)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light green',White,'Special Greeb',Black,Orange,Yellow,Purple]");    
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
