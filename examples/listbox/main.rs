@@ -3,7 +3,7 @@ use appcui::prelude::*;
 #[Window(events=ListBoxEvents)]
 struct MyWin {
     lbox: Handle<ListBox>,
-    log: Handle<ListBox>,    
+    log: Handle<ListBox>,
 }
 
 impl MyWin {
@@ -30,15 +30,21 @@ impl ListBoxEvents for MyWin {
         if self.lbox == handle {
             let h = self.log;
             if let Some(log) = self.control_mut(h) {
-                let idx = log.count()+1;
+                let idx = log.count() + 1;
                 log.add(&format!("{} => Current item changed to index: {}", idx, index));
             }
         }
         EventProcessStatus::Processed
     }
 
-    fn on_item_checked(&mut self, _handle: Handle<ListBox>, _index: usize, _checked: bool) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_item_checked(&mut self, handle: Handle<ListBox>, index: usize, checked: bool) -> EventProcessStatus {
+        if self.lbox == handle {
+            let h = self.log;
+            if let Some(log) = self.control_mut(h) {
+                log.add(&format!("Item with index: {} is {}", index, if checked { "checked" } else { "unchecked" }));   
+            }
+        }
+        EventProcessStatus::Processed
     }
 }
 

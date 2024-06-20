@@ -222,6 +222,17 @@ impl ListBox {
             }
         }
     }
+    fn send_checked_event(&mut self, index: usize, checked: bool) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::ListBox(EventData {
+                event_type: ListBoxEventTypes::ItemChecked,
+                index,
+                checked,
+            }),
+        });
+    }
 }
 impl OnPaint for ListBox {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -378,6 +389,8 @@ impl OnKeyPressed for ListBox {
                 if self.flags.contains(Flags::CheckBoxes) {
                     if let Some(item) = self.items.get_mut(self.pos) {
                         item.checked = !item.checked;
+                        let value = item.checked;
+                        self.send_checked_event(self.pos, value);
                     }
                     return EventProcessStatus::Processed;
                 }
@@ -389,6 +402,8 @@ impl OnKeyPressed for ListBox {
                 } else if self.flags.contains(Flags::CheckBoxes) {
                     if let Some(item) = self.items.get_mut(self.pos) {
                         item.checked = !item.checked;
+                        let value = item.checked;
+                        self.send_checked_event(self.pos, value);
                     }
                     return EventProcessStatus::Processed;
                 }
