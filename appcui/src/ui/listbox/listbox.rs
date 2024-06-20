@@ -85,6 +85,10 @@ impl ListBox {
             self.max_chars = self.max_chars.max(self.items.last().unwrap().count);
             self.update_scrollbars();
         }
+        // recompute the scroll bars
+        let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
+        self.comp.resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base);
+        // if auto scroll is enabled, we should scroll to the last item
         if self.flags.contains(Flags::AutoScroll) {
             self.update_position(self.items.len() - 1, false);
         }

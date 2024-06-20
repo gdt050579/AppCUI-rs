@@ -507,3 +507,53 @@ fn check_events() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_autoscroll() {
+    #[Window(events=ButtonEvents, internal: true)]
+    struct MyWin {
+        log: Handle<ListBox>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Title:'AutoScroll',d:c,w:60,h:10"),
+                log: Handle::None,
+            };
+            w.log = w.add(listbox!("x:50%,y:0,w:50%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar+AutoScroll"));
+            w.add(button!("Inc,x:1,y:1,w:10"));
+            w
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let h = self.log;
+            if let Some(log) = self.control_mut(h) {
+                let idx = log.count() + 1;
+                log.add(&format!("Item {}", idx));
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x50250C606662391B)
+        Key.Pressed(Enter)
+        Paint('Items: 1')
+        CheckHash(0x4F9BCD302EA34064)
+        Key.Pressed(Enter,5)
+        Paint('Items: 6')
+        CheckHash(0xB3C12E90A284F20)
+        Key.Pressed(Enter,10)
+        Paint('Items: 16 (last item index is 16)')
+        CheckHash(0x87CEEDA275074E5F)
+        Key.Pressed(Tab)
+        Paint('ListBox is focused and has vscroll enabled and position to last char')
+        CheckHash(0x2BA891709571BF8D)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
