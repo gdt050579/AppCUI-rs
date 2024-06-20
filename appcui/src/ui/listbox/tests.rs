@@ -358,3 +358,37 @@ fn check_resize() {
     a.run();
 }
 
+#[test]
+fn check_search_ignore_case() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0xB158DD83CDC989A2)
+        Key.TypeText('green')
+        Paint('4 matches, all green (now at Green)')
+        CheckHash(0x82A41F9E2DCA2055)
+        CheckCursor(14,10)
+        Key.Pressed(Enter)
+        Paint('4 matches, all green (now at dark green)')
+        CheckHash(0x1A61E75B7D994F7E)
+        CheckCursor(14,10)
+        Key.Pressed(Enter)
+        Paint('4 matches, all green (now at light GREEn)')
+        CheckHash(0x8C1D65C5086980E9)
+        CheckCursor(14,10)
+        Key.Pressed(Enter)
+        Paint('4 matches, all green (now at Special GrEeN)')
+        CheckHash(0xB1A0CB915D5EC26D)
+        CheckCursor(14,10)
+        Key.Pressed(Enter)
+        Paint('4 matches, all green (back to initial Green)')
+        CheckHash(0x82A41F9E2DCA2055)
+        CheckCursor(14,10)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light GREEn',White,'Special GrEeN',Black,Orange,Yellow,Purple]");    
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}

@@ -201,7 +201,7 @@ impl ListBox {
         } else {
             let mut count = 0usize;
             for item in self.items.iter_mut() {
-                item.filtered = item.text().contains(text_to_search);
+                item.filtered = item.text().index_ignoring_case(text_to_search).is_some();
                 if item.filtered {
                     count += 1;
                 }
