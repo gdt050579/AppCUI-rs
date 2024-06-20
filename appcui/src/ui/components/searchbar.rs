@@ -137,9 +137,17 @@ impl SearchBar {
                 self.edit_mode = true;
                 return true;
             }
+            key!("Space") => {
+                if self.edit_mode {
+                    self.text.push(' ');
+                    self.update_text_offset();
+                    return true;                
+                }
+                return false;
+            }
             _ => {}
         }
-        if ((character as u32) > 0) && (self.text.len() < 2048) {
+        if ((character as u32) > 32) && (self.text.len() < 2048) {
             self.text.push(character);
             self.update_text_offset();
             self.edit_mode = true;
