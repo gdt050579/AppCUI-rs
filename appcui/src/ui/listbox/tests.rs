@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-
 #[test]
 fn check_create() {
     let script = "
@@ -12,9 +11,12 @@ fn check_create() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars|listbox::Flags::CheckBoxes|listbox::Flags::SearchBar);
+    let mut l = ListBox::new(
+        Layout::new("d:c,w:100%,h:100%"),
+        listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
+    );
     for i in 0..100 {
-        l.add(&format!("My long {} textual item number {}",i%11,i));
+        l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
     l.set_components_toolbar_margins(2, 0);
     p.add(l);
@@ -36,7 +38,7 @@ fn check_create_with_macro_1() {
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
     for i in 0..100 {
-        l.add(&format!("My long {} textual item number {}",i%11,i));
+        l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
     p.add(l);
     w.add(p);
@@ -76,7 +78,6 @@ fn check_create_with_macro_3() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_movement_keys() {
@@ -125,9 +126,12 @@ fn check_movement_keys() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars|listbox::Flags::CheckBoxes|listbox::Flags::SearchBar);
+    let mut l = ListBox::new(
+        Layout::new("d:c,w:100%,h:100%"),
+        listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
+    );
     for i in 0..100 {
-        l.add(&format!("My long {} textual item number {}",i%11,i));
+        l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
     l.set_components_toolbar_margins(2, 0);
     p.add(l);
@@ -168,9 +172,12 @@ fn check_horizontal_scroll_keys() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:35,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars|listbox::Flags::CheckBoxes|listbox::Flags::SearchBar);
+    let mut l = ListBox::new(
+        Layout::new("d:c,w:100%,h:100%"),
+        listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
+    );
     for i in 0..100 {
-        l.add(&format!("My long {} textual item number {}",i%11,i));
+        l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
     l.set_components_toolbar_margins(2, 0);
     p.add(l);
@@ -178,7 +185,6 @@ fn check_horizontal_scroll_keys() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_horizontal_scroll_keys_no_checkboxes() {
@@ -212,9 +218,9 @@ fn check_horizontal_scroll_keys_no_checkboxes() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:35,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars);
+    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"), listbox::Flags::ScrollBars);
     for i in 0..100 {
-        l.add(&format!("My long {} textual item number {}",i%11,i));
+        l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
     l.set_components_toolbar_margins(2, 0);
     p.add(l);
@@ -282,9 +288,12 @@ fn check_search() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars|listbox::Flags::CheckBoxes|listbox::Flags::SearchBar);
+    let mut l = ListBox::new(
+        Layout::new("d:c,w:100%,h:100%"),
+        listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
+    );
     for i in 0..100 {
-        l.add(&format!("My long {} textual item number {}",i%11,i));
+        l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
     l.set_components_toolbar_margins(2, 0);
     p.add(l);
@@ -292,7 +301,6 @@ fn check_search() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_resize() {
@@ -347,9 +355,12 @@ fn check_resize() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"),listbox::Flags::ScrollBars|listbox::Flags::CheckBoxes|listbox::Flags::SearchBar);
+    let mut l = ListBox::new(
+        Layout::new("d:c,w:100%,h:100%"),
+        listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
+    );
     for i in 0..100 {
-        l.add(&format!("My long {} textual item number {}",i%11,i));
+        l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
     l.set_components_toolbar_margins(2, 0);
     p.add(l);
@@ -387,12 +398,11 @@ fn check_search_ignore_case() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light GREEn',White,'Special GrEeN',Black,Orange,Yellow,Purple]");    
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light GREEn',White,'Special GrEeN',Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_search_use_space() {
@@ -417,8 +427,83 @@ fn check_search_use_space() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light green',White,'Special Greeb',Black,Orange,Yellow,Purple]");    
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light green',White,'Special Greeb',Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_events() {
+    #[Window(events=ListBoxEvents, internal: true)]
+    struct MyWin {
+        lbox: Handle<ListBox>,
+        log: Handle<ListBox>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Title:'Colors',d:c,w:60,h:10,flags:Sizeable"),
+                lbox: Handle::None,
+                log: Handle::None,
+            };
+            let mut vs = vsplitter!("25%,d:c,w:100%,h:100%");
+            w.lbox = vs.add(
+                vsplitter::Panel::Left,
+                listbox!(
+                    "d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
+                ),
+            );
+            let mut p = panel!("caption:'Event logs',d:c,w:100%,h:100%,type: TopBar");
+            w.log = p.add(listbox!("d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
+            vs.add(vsplitter::Panel::Right, p);
+            w.add(vs);
+            w
+        }
+    }
+    impl ListBoxEvents for MyWin {
+        fn on_current_item_changed(&mut self, handle: Handle<ListBox>, index: usize) -> EventProcessStatus {
+            if self.lbox == handle {
+                let h = self.log;
+                if let Some(log) = self.control_mut(h) {
+                    let idx = log.count() + 1;
+                    log.add(&format!("{} => Current item changed to index: {}", idx, index));
+                }
+            }
+            EventProcessStatus::Processed
+        }
+
+        fn on_item_checked(&mut self, handle: Handle<ListBox>, index: usize, checked: bool) -> EventProcessStatus {
+            if self.lbox == handle {
+                let h = self.log;
+                if let Some(log) = self.control_mut(h) {
+                    log.add(&format!(
+                        "Item with index: {} is {}",
+                        index,
+                        if checked { "checked" } else { "unchecked" }
+                    ));
+                }
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(10,1,left)
+        Paint('Initial state')
+        CheckHash(0x869E551D2A656160)
+        Key.Pressed(Down)
+        Paint('One item in log')
+        CheckHash(0x79F6E686682C941E)
+        Key.Pressed(Space)
+        Paint('two items in log')
+        CheckHash(0xD180C851FE95ADD1)
+        Key.Pressed(Space)
+        Paint('three items in log')
+        CheckHash(0x6B1BBAB7CC71CFC9)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
