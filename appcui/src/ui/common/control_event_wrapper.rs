@@ -4,7 +4,7 @@ use super::traits::{Control, CustomEvents, EventProcessStatus};
 use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
-use crate::prelude::{colorpicker, combobox, datepicker, dropdownlist, keyselector, numericselector, selector, textfield, threestatebox, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
+use crate::prelude::{colorpicker, combobox, datepicker, dropdownlist, keyselector, numericselector, selector, textfield, threestatebox, listbox, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
 use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
@@ -14,6 +14,7 @@ use crate::ui::{
     dropdownlist::events::GenericDropDownListEvents,
     numericselector::events::GenericNumericSelectorEvents,
     datepicker::events::DatePickerEvents,
+    listbox::events::ListBoxEvents,
 };
 
 #[derive(Copy,Clone)]
@@ -37,6 +38,7 @@ pub(crate) enum ControlEventData {
     DropDownList(dropdownlist::events::EventData),
     NumericSelector(numericselector::events::EventData),
     DatePicker(datepicker::events::EventData),
+    ListBox(listbox::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -103,7 +105,18 @@ impl ControlEvent {
             },        
             ControlEventData::DatePicker(data) => {
                 DatePickerEvents::on_date_change(receiver, self.emitter.cast(), data.date)
-            }                 
+            },
+            ControlEventData::ListBox(data) => {
+                match data.event_type {
+                    listbox::events::ListBoxEventTypes::CurrentItemChanged => {
+                        ListBoxEvents::on_current_item_changed(receiver, self.emitter.cast(), data.index)
+                    },
+                    listbox::events::ListBoxEventTypes::ItemChecked => {
+                        ListBoxEvents::on_item_checked(receiver, self.emitter.cast(), data.index, data.checked)                    
+                    },
+                }
+                
+            },             
         }
     }
 }
