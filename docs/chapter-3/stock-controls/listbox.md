@@ -106,7 +106,7 @@ Any other key used while in search mode (such as arrow keys, page up, page down,
 
 ## Example
 
-The following example creates a Window with a ListBox that was populated with various animals and their speed. Selecting one animal from the list changes the title of the window to the name of that animal.
+The following example creates a Window with a ListBox that was populated with various animals.
 
 ```rs
 use appcui::prelude::*;
@@ -114,7 +114,22 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    a.add_window(MyWin::new());
+    let mut w = window!("Animals,d:c,w:50,h:11,flags: Sizeable");
+    let mut p = panel!("'List of animals',l:1,t:1,b:1,r:1");
+    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    l.add_item(Item::new("Dog", false));
+    l.add_item(Item::new("Cat", false));
+    l.add_item(Item::new("Elephant", true));
+    l.add_item(Item::new("Giraffe", false));
+    l.add_item(Item::new("Lion", true));
+    l.add_item(Item::new("Tiger", false));
+    l.add_item(Item::new("Zebra", false));
+    l.add_item(Item::new("Horse", false));
+    l.add_item(Item::new("Donkey", false));
+    l.add_item(Item::new("Cow", false));
+    p.add(l);
+    w.add(p);
+    a.add_window(w);
     a.run();
     Ok(())
 }
