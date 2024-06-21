@@ -123,6 +123,7 @@ impl ListBox {
     }
 
     /// Sets the new selected item from the listbox
+    /// if the index is invalid, the function will do nothing
     pub fn set_index(&mut self, index: usize) {
         if index < self.items.len() {
             self.update_position(index, false);

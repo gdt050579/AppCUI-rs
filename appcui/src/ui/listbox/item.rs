@@ -8,6 +8,12 @@ pub struct Item {
 }
 
 impl Item {
+    /// Creates a new item with the specified text and checked state.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// let item = Item::new("Item 1", false);
+    /// ```
     pub fn new(text: &str, checked: bool) -> Self {
         Item {
             value: String::from(text),
@@ -18,10 +24,14 @@ impl Item {
             filtered: true
         }
     }
+
+    /// Returns the text of the item.
     #[inline(always)]
     pub fn text(&self) -> &str {
         &self.value
     }
+
+    /// Returns true if the item is checked or false otherwise.
     #[inline(always)]
     pub fn is_checked(&self) -> bool {
         self.checked
