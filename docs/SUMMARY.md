@@ -55,6 +55,7 @@
         - [DatePicker](chapter-3/stock-controls/datepicker.md)
         - [DropDownList](chapter-3/stock-controls/dropdownlist.md)
         - [Label](chapter-3/stock-controls/label.md)
+        - [ListBox](chapter-3/stock-controls/listbox.md)
         - [ListView]()
         - [HLine](chapter-3/stock-controls/hline.md)
         - [HSplitter](chapter-3/stock-controls/hsplitter.md)
