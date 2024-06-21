@@ -38,6 +38,21 @@ fn check_panel_with_macro() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_panel_with_macro_no_title() {
+    let script = "
+        Paint.Enable(false)
+        Paint('No title panel')   
+        CheckHash(0x4718D94609DBF8B4)   
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:78,h:11");
+    w.add(panel!("l:1,r:1,t:1,b:1"));
+    a.add_window(w);
+    a.run();
+}
+
 #[test]
 fn check_panel_with_page() {
     let script = "
