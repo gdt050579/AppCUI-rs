@@ -285,7 +285,6 @@ fn check_complex_behavior() {
 
     let script = "
             Paint.Enable(false)
-            //Error.Disable(true)
             Paint('Initial state')
             CheckHash(0xEF14CE41B51A027A)
             Mouse.Move(27,3)

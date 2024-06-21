@@ -262,7 +262,6 @@ fn check_mouse_keymodifier_mouse() {
     }
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('Initial state')   
         CheckHash(0x614245CC84C42969)   
         Mouse.Drag(1,1,3,3);

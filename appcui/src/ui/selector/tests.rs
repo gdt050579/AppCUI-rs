@@ -209,7 +209,6 @@ fn check_expand_pack() {
 fn check_movement_keys_expand() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(Space)
         Paint('Mazda,Mercedes,Ford,[Ferari]')   
         CheckHash(0xEFFDEFE5806F6E75)
@@ -361,7 +360,6 @@ fn check_scroll_view() {
 fn check_quick_search_expanded() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(Space)
         Paint('Mazda,Mercedes,Ford,[Ferari]')   
         CheckHash(0xEFFDEFE5806F6E75)
@@ -550,7 +548,6 @@ fn check_none_value_scenario() {
 fn check_mouse_up_down_buttons() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('Initial state (closed)')   
         CheckHash(0x4D5DD26CD625E51C)
         Mouse.Click(16,1,left)     
