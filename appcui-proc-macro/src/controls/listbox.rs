@@ -22,6 +22,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_layout();
     cb.add_flags_parameter("flags", "listbox::Flags", &FLAGS);
     cb.finish_control_initialization();
+    cb.add_scroll_margin_setup("lsm","tsm");
     if cb.has_parameter("items") {
         let mut s = String::with_capacity(256);
         if let Some(list) = cb.get_list("items") {
@@ -43,7 +44,6 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             panic!("Invalid index (should be a positive number) for list box selection index parameter !");
         }
     }
-    cb.add_scroll_margin_setup("lsm","tsm");
     cb.add_basecontrol_operations();
     cb.into()
 }
