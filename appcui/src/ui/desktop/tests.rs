@@ -445,8 +445,7 @@ fn check_update_desktop_windows_count() {
         }
     }
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('Initial state (no windows)')
         CheckHash(0xC7E76D8C5E7F81DC)
         Key.Pressed(Insert)
@@ -521,8 +520,7 @@ fn check_auto_hotkey_on_desktop() {
         }
     }
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('Initial state (no windows)')
         CheckHash(0xC7E76D8C5E7F81DC)
         Key.Pressed(Insert)

@@ -666,7 +666,6 @@ fn check_insert_text() {
 fn check_insert_text_over_selection() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(Home)
         Key.Pressed(Right,2) 
         Paint('1.Initial state (He|l|lo worl)')   
@@ -790,7 +789,6 @@ fn check_move_to_next_word() {
 fn check_move_to_previous_word() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Key.Pressed(End)
         Paint('1.Visible:    test.set    uni〓code  twice    ||')   
         CheckHash(0x188AC9EB95C89126)
@@ -1044,7 +1042,6 @@ fn check_mouse_click_multi_line() {
 fn check_mouse_click_outside_bounds() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. Initial state')   
         CheckHash(0xCA13991A964D78E7)
         CheckCursor(25,3)

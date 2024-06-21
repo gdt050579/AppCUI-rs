@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[test]
 fn check_create() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         // ┌─ Left ─────────────┐
         // ┌─ Right ────────────┐
         Paint('Initial state')   
