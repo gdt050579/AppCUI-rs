@@ -80,19 +80,29 @@ impl Item {
 
 The following keys are processed by a `ListBox` control if it has focus:
 
-| Key                            | Purpose                                                                                                                                    |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Space` or `Enter`             | Expands or packs (collapses) the ListBox control.                                                                                          |
-| `Up`, `Down`, `Left`,  `Right` | Changes the current selected color from the ListBox.                                                                                       |
-| `PageUp`, `PageDown`           | Navigates through the list of variants page by page. If the control is not expanded, their behavior is similar to the keys `Up` and `Down` |
-| `Home`                         | Move the selection to the first variant                                                                                                    |
-| `End`                          | Move the selection to the last variant or to `None` if `AllowNoneVariant` flag was set upon initialization                                 |
-| `Ctrl`+`Up`   | Scroll the view to top. If the new view can not show the current selection, move the selection to the previous value so that it would be visible                                |
-| `Ctrl`+`Down` | Scroll the view to bottom. If the new view can not show the current selection, move the selection to the next value so that it would be visible                                 |
-| `Escape`      | Collapses the control. If the ListBox is already colapsed, this key will not be captured (meaning that one of the ListBox ancestors will be responsable with treating this key) |
+| Key                  | Purpose                                                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `Up`, `Down`         | Changes the current selected item from the ListBox.                                                                                |
+| `Left`, `Right`      | Scrolls the view to the left or to the right.                                                                                      |
+| `Space` or `Enter`   | Checks or unchecks the current selected item from the ListBox. If the `CheckBoxes` flag was not set, this key will have no effect. |
+| `Home`               | Move the selection to the first item                                                                                               |
+| `End`                | Move the selection to the last item                                                                                                |
+| `PageUp`, `PageDown` | Navigates through the list of items page by page.                                                                                  |
+| `Ctrl`+`Alt`+`Left`  | Scrolls the view to the left-most position                                                                                         |
+| `Ctrl`+`Alt`+`Right` | Scrolls the view to the right-most position                                                                                        |
+| `Ctrl`+`Alt`+`Up`    | Scrolls the view to the top with one position                                                                                      |
+| `Ctrl`+`Alt`+`Down`  | Scrolls the view to the bottom with one position                                                                                   |
 
-Besides this using any one of the following keys ascii keys will start a search in the listbox
+When pressing an ascii key, the ListBox will start a search in the list of items. All items that are matched (ignoring case) will be highlighted while the rest of them will be dimmed.
+While in search mode, the following keys can be used to navigate through the list of items:
 
+| Key         | Purpose                                                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `Enter`     | Go to the next item that matches the search criteria. If the search criteria is not met, the search will start from the beginning. |
+| `Escape`    | Exit the search mode.                                                                                                              |
+| `Backspace` | Remove the last character from the search criteria                                                                                 |
+
+Any other key used while in search mode (such as arrow keys, page up, page down, etc) will exit the search mode and will be processed as a normal key press.
 
 ## Example
 
