@@ -12,6 +12,7 @@ impl Item {
     /// 
     /// # Example
     /// ```rust, no_run
+    /// use appcui::ui::listbox::Item;
     /// let item = Item::new("Item 1", false);
     /// ```
     pub fn new(text: &str, checked: bool) -> Self {
