@@ -1,8 +1,8 @@
+use super::events::EventData;
 use super::Flags;
 use super::Item;
-use super::events::EventData;
-use listbox::events::ListBoxEventTypes;
 use crate::ui::components::ListScrollBars;
+use listbox::events::ListBoxEventTypes;
 use AppCUIProcMacro::*;
 
 #[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal = true)]
@@ -47,8 +47,8 @@ impl ListBox {
     /// use appcui::prelude::*;
     ///
     /// // a listbox with a capacity of 100 items, with scrollbars
-    /// let lbox = ListBox::with_capacity(100, 
-    ///                                   Layout::new("d:c"), 
+    /// let lbox = ListBox::with_capacity(100,
+    ///                                   Layout::new("d:c"),
     ///                                   listbox::Flags::ScrollBars);
     /// ```   
     pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags) -> Self {
@@ -112,23 +112,22 @@ impl ListBox {
 
     /// Returns the index of the current selected item from the listbox
     #[inline(always)]
-    pub fn index(&self)->usize {
+    pub fn index(&self) -> usize {
         self.pos
     }
 
     /// Sets the new selected item from the listbox
     pub fn set_index(&mut self, index: usize) {
-        if index<self.items.len() {
+        if index < self.items.len() {
             self.update_position(index, false);
         }
     }
 
     /// Returns the total number of items fom the listbox
     #[inline(always)]
-    pub fn count(&self)->usize {
+    pub fn count(&self) -> usize {
         self.items.len()
     }
-
 
     fn update_scrollbars(&mut self) {
         self.comp.set_indexes(self.left_view as u64, self.top_view as u64);
@@ -150,7 +149,7 @@ impl ListBox {
         }
         let new_pos = new_pos.min(len - 1);
         let h = self.size().height as usize;
-        
+
         // check the top view
         if self.top_view + h >= len {
             self.top_view = len.saturating_sub(h);
@@ -159,7 +158,7 @@ impl ListBox {
             self.top_view = new_pos;
         } else {
             let diff = new_pos - self.top_view;
-            if diff >= h {
+            if (diff >= h) && (h > 0) {
                 self.top_view = new_pos - h + 1;
             }
         }

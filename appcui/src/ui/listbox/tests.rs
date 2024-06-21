@@ -68,8 +68,8 @@ fn check_create_with_macro_2() {
 fn check_create_with_macro_3() {
     let script = "
         Paint.Enable(false)
-        Paint('Initial state')
-        CheckHash(0x7C90380CED317D30)
+        Paint('Initial state (White is selected,Red is the first item)')
+        CheckHash(0xE2D9A09340BE3EFD)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:40,h:8,flags: Sizeable");
