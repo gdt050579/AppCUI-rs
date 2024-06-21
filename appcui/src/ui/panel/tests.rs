@@ -27,9 +27,9 @@ fn check_panel_with_border() {
 #[test]
 fn check_panel_with_macro() {
     let script = "
-        //Paint.Enable(false)
-        Paint('Border panel')   
-        //CheckHash(0xDE639472091C422)   
+        Paint.Enable(false)
+        Paint('Border panel & Inactive panel')   
+        CheckHash(0xAB475871E6A0AD8A)   
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
     let mut w = window!("Title,d:c,w:78,h:11");
