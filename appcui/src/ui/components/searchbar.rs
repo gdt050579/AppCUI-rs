@@ -67,14 +67,12 @@ impl SearchBar {
         let tx_chars = self.width.saturating_sub(match_count_width) as usize;
         if tx_chars == 0 {
             self.text_offset = self.text.len() as u16;
+        } else if let Some(ofs) = self.text.char_indices().rev().take(tx_chars).map(|(o, _)| o).min() {
+            self.text_offset = ofs as u16;
         } else {
-            if let Some(ofs) = self.text.char_indices().rev().take(tx_chars).map(|(o, _)| o).min() {
-                self.text_offset = ofs as u16;
-            } else {
-                self.text_offset = 0;
-            }
+            self.text_offset = 0;
         }
-        self.cursor_offset = (&self.text[self.text_offset as usize..]).chars().count() as u8;
+        self.cursor_offset = self.text[self.text_offset as usize..].chars().count() as u8;
     }
     fn paint_count(&self, surface: &mut Surface, attr: CharAttribute) {
         let r = self.x + self.width as i32 - 2;
@@ -130,7 +128,7 @@ impl SearchBar {
                 }
             }
             key!("Backspace") => {
-                if self.text.len() > 0 {
+                if !self.text.is_empty() {
                     self.text.pop();
                     self.update_text_offset();
                 }

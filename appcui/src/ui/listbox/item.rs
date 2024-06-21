@@ -8,7 +8,7 @@ pub struct Item {
 }
 
 impl Item {
-    /// Creates a new item with the specified text and checked state.
+    /// Creates a new item with the specified text and checked state. 
     /// 
     /// # Example
     /// ```rust, no_run
@@ -49,16 +49,12 @@ impl Item {
             self.left = new_left;
             if new_left == 0 {
                 self.left_char_offset = 0;
+            } else if new_left > self.count {
+                self.left_char_offset = u32::MAX;
+            } else if let Some(offset) = self.value.char_indices().nth(new_left as usize).map(|(offset, _)| offset) {
+                self.left_char_offset = offset as u32;
             } else {
-                if new_left > self.count {
-                    self.left_char_offset = u32::MAX;
-                } else {
-                    if let Some(offset) = self.value.char_indices().nth(new_left as usize).map(|(offset, _)| offset) {
-                        self.left_char_offset = offset as u32;
-                    } else {
-                        self.left_char_offset = u32::MAX;
-                    }
-                }
+                self.left_char_offset = u32::MAX;
             }
         }
     }

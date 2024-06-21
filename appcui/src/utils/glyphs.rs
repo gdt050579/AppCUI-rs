@@ -14,7 +14,7 @@ fn is_variation_selector(c: char) -> bool {
 }
 #[inline(always)]
 fn to_ascii_lowercase(c: u8) -> u8 {
-    if c >= b'A' && c <= b'Z' {
+    if c.is_ascii_uppercase() {
         c + 32
     } else {
         c
