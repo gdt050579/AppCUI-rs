@@ -19,7 +19,15 @@ impl Item {
         }
     }
     #[inline(always)]
-    pub(super) fn text(&self) -> &str {
+    pub fn text(&self) -> &str {
+        &self.value
+    }
+    #[inline(always)]
+    pub fn is_checked(&self) -> bool {
+        self.checked
+    }
+    #[inline(always)]
+    pub(super) fn visible_text(&self) -> &str {
         if self.left_char_offset >= self.value.len() as u32 {
             ""
         } else {

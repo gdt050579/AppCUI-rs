@@ -103,6 +103,12 @@ impl ListBox {
         self.max_chars = 0;
     }
 
+    /// Returns the item from the listbox at the specified index
+    #[inline(always)]
+    pub fn item(&self, index: usize) -> Option<&Item> {
+        self.items.get(index)
+    }
+
     /// Returns the index of the current selected item from the listbox
     #[inline(always)]
     pub fn index(&self)->usize {
@@ -215,7 +221,7 @@ impl ListBox {
         } else {
             let mut count = 0usize;
             for item in self.items.iter_mut() {
-                item.filtered = item.text().index_ignoring_case(text_to_search).is_some();
+                item.filtered = item.visible_text().index_ignoring_case(text_to_search).is_some();
                 if item.filtered {
                     count += 1;
                 }
@@ -284,7 +290,7 @@ impl OnPaint for ListBox {
                 } else {
                     surface.write_char(0, y, ch_unchecked);
                 }
-                surface.write_string(2, y, item.text(), if item.filtered { attr } else { theme.text.inactive }, false);
+                surface.write_string(2, y, item.visible_text(), if item.filtered { attr } else { theme.text.inactive }, false);
                 if has_focus && (idx == self.pos) {
                     surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
                 }
@@ -296,7 +302,7 @@ impl OnPaint for ListBox {
                 surface.write_string(
                     0,
                     y,
-                    self.items[idx].text(),
+                    self.items[idx].visible_text(),
                     if self.items[idx].filtered { attr } else { theme.text.inactive },
                     false,
                 );
