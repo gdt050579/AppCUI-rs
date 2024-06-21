@@ -75,7 +75,13 @@ impl ListBox {
     /// Adds a new item to the list by providing a string value
     /// if AutoScroll flag is set, the list will automatically scroll to the newly added item
     pub fn add(&mut self, value: &str) {
-        self.items.push(Item::new(value));
+        self.add_item(listbox::Item::new(value, false));
+    }
+
+    /// Adds a new item to the list by providing a string value and a checked flag
+    /// if AutoScroll flag is set, the list will automatically scroll to the newly added item
+    pub fn add_item(&mut self, item: listbox::Item) {
+        self.items.push(item);
         if self.items.len() == 1 {
             self.max_chars = self.items[0].count;
             // when first item is added, we should select it
@@ -127,6 +133,31 @@ impl ListBox {
     #[inline(always)]
     pub fn count(&self) -> usize {
         self.items.len()
+    }
+
+    /// Returns the number of checked items from the listbox
+    /// This function is only relevant if the listbox was created with the CheckBoxes flag
+    /// If the CheckBoxes flag is not set, this function will always return 0
+    /// This method will iterate through all items from the listbox, so it might be slow for large lists
+    /// 
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut lbox = ListBox::new(Layout::new("d:c,w:100%,h:100%"), listbox::Flags::CheckBoxes);
+    /// lbox.add_item(listbox::Item::new("Item 1", false));
+    /// lbox.add_item(listbox::Item::new("Item 2", true));
+    /// lbox.add_item(listbox::Item::new("Item 3", false));
+    /// lbox.add_item(listbox::Item::new("Item 4", true));
+    /// let count = lbox.count_checked();
+    /// // we should have 2 checked items
+    /// ```
+    pub fn count_checked(&self) -> usize {
+        if self.flags.contains(Flags::CheckBoxes) {
+            self.items.iter().filter(|i| i.checked).count()
+        } else {
+            0
+        }
     }
 
     fn update_scrollbars(&mut self) {

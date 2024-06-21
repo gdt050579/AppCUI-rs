@@ -8,13 +8,13 @@ pub struct Item {
 }
 
 impl Item {
-    pub fn new(text: &str) -> Self {
+    pub fn new(text: &str, checked: bool) -> Self {
         Item {
             value: String::from(text),
             count: text.chars().count() as u32,
             left: 0,
             left_char_offset: 0,
-            checked: false,
+            checked,
             filtered: true
         }
     }
