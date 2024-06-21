@@ -101,6 +101,7 @@ impl ListBox {
         self.top_view = 0;
         self.pos = usize::MAX;
         self.max_chars = 0;
+        self.comp.resize(0, 0, &self.base);
     }
 
     /// Returns the item from the listbox at the specified index

@@ -557,3 +557,53 @@ fn check_autoscroll() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_clear() {
+    #[Window(events=ButtonEvents, internal: true)]
+    struct MyWin {
+        log: Handle<ListBox>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Title:'AutoScroll',d:c,w:60,h:10"),
+                log: Handle::None,
+            };
+            w.log = w.add(listbox!("x:50%,y:0,w:50%,h:100%,flags: ScrollBars+CheckBoxes, items=[1,2,3,4,5,6,7,8,9,10]"));
+            w.add(button!("Clear,x:1,y:1,w:10"));
+            w
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let h = self.log;
+            if let Some(log) = self.control_mut(h) {
+                log.clear();
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0xF6AD8317293168DA)
+        Key.Pressed(Tab)
+        Paint('Listbox has scrollbar and is focused')
+        CheckHash(0x88628681D2D53749)
+        Key.Pressed(End)
+        Paint('Listbox has scrollbar - last element selected')
+        CheckHash(0xDAB730F14A7DCA4E)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('Listbox is cleared')
+        CheckHash(0xC86821FC74AB4BA)
+        Key.Pressed(Tab)
+        Paint('Listbox has inactive vertical scrollbar')
+        CheckHash(0xB80B6F0694BA7F8B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
