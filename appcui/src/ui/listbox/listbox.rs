@@ -149,11 +149,16 @@ impl ListBox {
             return;
         }
         let new_pos = new_pos.min(len - 1);
+        let h = self.size().height as usize;
+        
+        // check the top view
+        if self.top_view + h >= len {
+            self.top_view = len.saturating_sub(h);
+        }
         if new_pos < self.top_view {
             self.top_view = new_pos;
         } else {
             let diff = new_pos - self.top_view;
-            let h = self.size().height as usize;
             if diff >= h {
                 self.top_view = new_pos - h + 1;
             }

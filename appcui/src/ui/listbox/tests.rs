@@ -570,7 +570,9 @@ fn check_clear() {
                 base: window!("Title:'AutoScroll',d:c,w:60,h:10"),
                 log: Handle::None,
             };
-            w.log = w.add(listbox!("x:50%,y:0,w:50%,h:100%,flags: ScrollBars+CheckBoxes, items=[1,2,3,4,5,6,7,8,9,10]"));
+            w.log = w.add(listbox!(
+                "x:50%,y:0,w:50%,h:100%,flags: ScrollBars+CheckBoxes, items=[1,2,3,4,5,6,7,8,9,10]"
+            ));
             w.add(button!("Clear,x:1,y:1,w:10"));
             w
         }
@@ -605,5 +607,20 @@ fn check_clear() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_autoscroll_on_create() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (15 should be selected and on the bottom of the window)')
+        CheckHash(0x64D5987E9F212984)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+AutoScroll, lsm:2, items:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]");
+    w.add(l);
+    a.add_window(w);
     a.run();
 }
