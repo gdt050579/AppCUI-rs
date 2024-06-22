@@ -314,7 +314,11 @@ impl OnPaint for ListBox {
 
         // empty message
         if (count == 0) && (!self.empty_message.is_empty()) {
-            let empty_attr = if self.is_active() { theme.text.normal } else { theme.text.inactive };
+            let empty_attr = match () {
+                _ if !self.is_active() => theme.text.inactive,
+                _ if has_focus => theme.text.highlighted,
+                _ => theme.text.inactive,
+            };
             let mut format = TextFormat::new(w / 2, h / 2, empty_attr, TextAlignament::Center, true);
             format.width = Some(w as u16);
             format.text_wrap = TextWrap::Word;

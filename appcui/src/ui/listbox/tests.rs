@@ -624,3 +624,27 @@ fn check_autoscroll_on_create() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_empty_list_message() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(10,3,left)
+        Paint('Initial state')
+        CheckHash(0x5D6BE4A96323ECD6)
+        Key.Pressed(Tab);
+        Paint('Width focus')
+        CheckHash(0x3D264DF35A9248A9)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut p = panel!("Test,l:10,t:1,b:1,r:1");
+    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    l.set_empty_message("No items in the list. Insert some items by pressing the 'Add' button.");
+    p.add(l);
+    w.add(p);
+    w.add(button!("Add,x:1,y:1,w:7,type:flat"));
+    a.add_window(w);
+    a.run();
+}
