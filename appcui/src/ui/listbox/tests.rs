@@ -888,6 +888,9 @@ fn check_items_checked_with_mouse() {
             if self.lbox == handle {
                 let h = self.log;
                 let cnt = self.control(self.lbox).map(|l| l.count_checked()).unwrap_or(0);
+                let log_cnt = self.control(self.log).map(|l| l.count_checked()).unwrap_or(usize::MAX);
+                // log does not have the Checkboxes flag set up --> so count_check() should return 0
+                assert_eq!(log_cnt,0);
                 if let Some(log) = self.control_mut(h) {
                     log.add(&format!(
                         "Item with index: {} is {}",
