@@ -62,6 +62,8 @@ Besides the [Common methods for all Controls](../common_methods.md) a listbox al
 | `count()`                | Returns the number of items from the ListBox                                                                                                               |
 | `count_checked()`        | Returns the number of checked items from the ListBox. This method will always return `0` if the flags `CheckBoxes` was **NOT** set when creating a ListBox |
 | `set_empty_message(...)` | Sets the message that will be displayed when the ListBox is empty                                                                                          |
+| `sort()`                 | Sorts the items from the ListBox alphabetically. The sorting is done based on the text of the items.                                                       |
+| `sort_by(...)`           | Sorts the items from the ListBox based on a custom comparison function. The function should have the following signature: `fn(&Item, &Item) -> Ordering`   |
 
 
 An item from the ListBox is represented by the following structure:
