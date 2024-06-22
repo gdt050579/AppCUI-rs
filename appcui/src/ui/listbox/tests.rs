@@ -723,3 +723,55 @@ fn check_sort() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_sort_by() {
+    #[Window(events=ButtonEvents, internal: true)]
+    struct MyWin {
+        log: Handle<ListBox>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Title:'Sort',d:c,w:60,h:10"),
+                log: Handle::None,
+            };
+            w.log = w.add(listbox!(
+                "x:50%,y:0,w:50%,h:100%,flags: ScrollBars+CheckBoxes, items=[Red,Green,Blue,Yellow,Black,White,Orange,Purple]"
+            ));
+            w.add(button!("Sort,x:1,y:1,w:10"));
+            w
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let h = self.log;
+            if let Some(log) = self.control_mut(h) {
+                log.sort_by(|a, b| a.text().len().cmp(&b.text().len()));
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0xC02891D8E535215)
+        Key.Pressed(Tab)
+        Paint('Listbox has scrollbar and is focused')
+        CheckHash(0xD3C19BA7590D076A)
+        Key.Pressed(Down,3)
+        Paint('Yellow is selected')
+        CheckHash(0xA851E23683C81495)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('List is sorted (based on length: Red,Blue,Greem,Black,White,Yellow,Orange,Purple)')
+        CheckHash(0xEC290E75D5C9A6C9)
+        Key.Pressed(Tab)
+        Paint('Listbox is sorted, Yellow is selected')
+        CheckHash(0x771AD5CC44C8F901)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
