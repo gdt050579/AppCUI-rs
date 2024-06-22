@@ -383,7 +383,7 @@ impl OnPaint for ListBox {
                 if idx == self.pos {
                     if has_focus {
                         surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
-                    } else if (self.flags.contains(Flags::HighlightSelectedItemWhenInactive)) && (!self.is_enabled()) {
+                    } else if (self.flags.contains(Flags::HighlightSelectedItemWhenInactive)) && (self.is_enabled()) {
                         surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.text.highlighted));
                     }
                 }
@@ -402,7 +402,7 @@ impl OnPaint for ListBox {
                 if idx == self.pos {
                     if has_focus {
                         surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
-                    } else if (self.flags.contains(Flags::HighlightSelectedItemWhenInactive)) && (!self.is_enabled()) {
+                    } else if (self.flags.contains(Flags::HighlightSelectedItemWhenInactive)) && (self.is_enabled()) {
                         surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.text.highlighted));
                     }
                 }

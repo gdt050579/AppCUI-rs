@@ -775,3 +775,31 @@ fn check_sort_by() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_empty_highlight_selected_when_inactive() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(10,3,left)
+        Paint('Initial state (1st item highlighed)')
+        CheckHash(0x8BF3E970899BE985)
+        Key.Pressed(Tab);
+        Paint('Width focus (first item)')    
+        CheckHash(0xE06F3CA0C8FEC6E9)
+        Key.Pressed(Down,3)
+        Paint('Width focus (4th item)')    
+        CheckHash(0x967F46130D49EB19)
+        Key.Pressed(Tab)
+        Paint('Button has focus (4th item is highlighet)')    
+        CheckHash(0x791D611DAE470635)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut p = panel!("Test,l:10,t:1,b:1,r:1");
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+HighlightSelectedItemWhenInactive, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
+    p.add(l);
+    w.add(p);
+    w.add(button!("Add,x:1,y:1,w:7,type:flat"));
+    a.add_window(w);
+    a.run();
+}
