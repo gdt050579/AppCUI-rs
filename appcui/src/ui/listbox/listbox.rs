@@ -22,6 +22,8 @@ impl ListBox {
     /// - `Flags::ScrollBars` - adds scrollbars to the list box
     /// - `Flags::CheckBoxes` - adds checkboxes to the list box
     /// - `Flags::SearchBar` - adds a search bar to the list box
+    /// - `Flags::AutoScroll` - automatically scrolls to the last item when a new item is added
+    /// - `Flags::HighlightSelectedItemWhenInactive` - highlights the selected item even when the listbox is not active
     ///
     /// # Example
     /// ```rust,no_run
@@ -42,6 +44,8 @@ impl ListBox {
     /// - `Flags::ScrollBars` - adds scrollbars to the list box
     /// - `Flags::CheckBoxes` - adds checkboxes to the list box
     /// - `Flags::SearchBar` - adds a search bar to the list box
+    /// - `Flags::AutoScroll` - automatically scrolls to the last item when a new item is added
+    /// - `Flags::HighlightSelectedItemWhenInactive` - highlights the selected item even when the listbox is not active
     ///
     /// # Example
     /// ```rust,no_run
@@ -376,8 +380,12 @@ impl OnPaint for ListBox {
                     surface.write_char(0, y, ch_unchecked);
                 }
                 surface.write_string(2, y, item.visible_text(), if item.filtered { attr } else { theme.text.inactive }, false);
-                if has_focus && (idx == self.pos) {
-                    surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
+                if idx == self.pos {
+                    if has_focus {
+                        surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
+                    } else if (self.flags.contains(Flags::HighlightSelectedItemWhenInactive)) && (!self.is_enabled()) {
+                        surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.text.highlighted));
+                    }
                 }
                 y += 1;
                 idx += 1;
@@ -391,9 +399,14 @@ impl OnPaint for ListBox {
                     if self.items[idx].filtered { attr } else { theme.text.inactive },
                     false,
                 );
-                if has_focus && (idx == self.pos) {
-                    surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
+                if idx == self.pos {
+                    if has_focus {
+                        surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.list_current_item.focus));
+                    } else if (self.flags.contains(Flags::HighlightSelectedItemWhenInactive)) && (!self.is_enabled()) {
+                        surface.fill_horizontal_line(0, y, w - 1, Character::with_attributes(0, theme.text.highlighted));
+                    }
                 }
+
                 y += 1;
                 idx += 1;
             }
