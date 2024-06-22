@@ -14,6 +14,8 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("lsm", "lsm", ParamType::Integer),
     NamedParameter::new("top-scroll-margin", "tsm", ParamType::Integer),
     NamedParameter::new("tsm", "tsm", ParamType::Integer),
+    NamedParameter::new("empty-message", "em", ParamType::String),
+    NamedParameter::new("em", "em", ParamType::String),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -43,6 +45,11 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         } else {
             panic!("Invalid index (should be a positive number) for list box selection index parameter !");
         }
+    }
+    if cb.has_parameter("em") {
+        cb.add("control.set_empty_message(");
+        cb.add_string_parameter("em", Some(""));
+        cb.add(");\n");
     }
     cb.add_basecontrol_operations();
     cb.into()
