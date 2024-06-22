@@ -1,10 +1,7 @@
-use std::hash::Hash;
-
 use super::events::EventData;
 use super::Flags;
 use super::Item;
 use crate::ui::components::ListScrollBars;
-use crate::utils;
 use listbox::events::ListBoxEventTypes;
 use AppCUIProcMacro::*;
 
@@ -172,12 +169,28 @@ impl ListBox {
         self.empty_message.push_str(message);
     }
 
+    /// Sorts the items from the listbox (alphabetically)
+    /// The current selected item will remain the same
     pub fn sort(&mut self) {
         if self.items.is_empty() {
             return;
         }
         let current_value = self.items[self.pos].value.clone();
         self.items.sort_by(|a, b| a.value.cmp(&b.value));
+        self.update_position(self.items.iter().position(|i| i.value == current_value).unwrap_or(0), false);
+    }
+
+    /// Sorts the items from the listbox using a custom function to compare two items
+    /// The current selected item will remain the same
+    pub fn sort_by<F>(&mut self, f: F)
+    where
+        F: FnMut(&Item, &Item) -> std::cmp::Ordering,
+    {
+        if self.items.is_empty() {
+            return;
+        }
+        let current_value = self.items[self.pos].value.clone();
+        self.items.sort_by(f);
         self.update_position(self.items.iter().position(|i| i.value == current_value).unwrap_or(0), false);
     }
 
