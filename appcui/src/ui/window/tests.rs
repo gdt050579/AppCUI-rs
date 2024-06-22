@@ -251,7 +251,7 @@ fn check_window_tag_and_split_title_2() {
 #[test]
 fn check_window_tag_and_title_first_letter() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         //expect: ╔[ABCDEFG]═ T… ═[x]╗
         Paint('title first letter and special char with 3 points')
         CheckHash(0x6F914F802B3B7B5D)
@@ -783,7 +783,7 @@ fn check_window_toolbar_button_events() {
 #[test]
 fn check_window_toolbar_checkbox() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         //expect: ╚[√ Task 1|  Task 2]═════[  Enable All]╝
         Paint('Task1 is checkes, Task2 + Enable all are not')
         CheckHash(0xF3733435595ED5E4)
@@ -1589,7 +1589,7 @@ fn check_window_keybeforechildren() {
 #[test]
 fn check_window_on_close_default() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('Two windows')
         CheckHash(0x782B90B5A3044A22)
         Mouse.Click(57,0,left)

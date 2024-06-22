@@ -1,7 +1,7 @@
-use crate::prelude::components::ComponentsToolbar;
 use crate::prelude::*;
 use crate::ui::canvas::initialization_flags::Flags;
-use crate::ui::components::ScrollBar;
+
+use self::components::ScrollBars;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct Canvas {
@@ -11,9 +11,7 @@ pub struct Canvas {
     background: Option<Character>,
     flags: Flags,
     drag_point: Option<Point>,
-    components: ComponentsToolbar,
-    horizontal_scrollbar: Handle<ScrollBar>,
-    vertical_scrollbar: Handle<ScrollBar>,
+    scrollbars: ScrollBars
 }
 impl Canvas {
     /// Creates a new canvas with the specified size, layout and flags.
@@ -28,7 +26,7 @@ impl Canvas {
     /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars); 
     /// ```
     pub fn new(canvas_size: Size, layout: Layout, flags: Flags) -> Self {
-        let mut canvas = Self {
+        Self {
             base: ControlBase::with_status_flags(
                 layout,
                 (StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput)
@@ -44,16 +42,8 @@ impl Canvas {
             flags,
             background: None,
             drag_point: None,
-            components: ComponentsToolbar::with_capacity(if flags == Flags::ScrollBars { 2 } else { 0 }),
-            horizontal_scrollbar: Handle::None,
-            vertical_scrollbar: Handle::None,
-        };
-        if flags == Flags::ScrollBars {
-            let sz = canvas.surface.size();
-            canvas.horizontal_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64, false));
-            canvas.vertical_scrollbar = canvas.components.add(ScrollBar::new(sz.width as u64, true));
+            scrollbars: ScrollBars::new(flags == Flags::ScrollBars)
         }
-        canvas
     }
 
 
@@ -67,15 +57,7 @@ impl Canvas {
     pub fn resize_surface(&mut self, new_size: Size) {
         self.surface.resize(new_size);
         let sz = self.surface.size();
-        let control_size = self.size();
-        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            //s.set_count(sz.width as u64);
-            s.update_count(control_size.width as u64, sz.width as u64);
-        }
-        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-            //s.set_count(sz.height as u64);
-            s.update_count(control_size.height as u64, sz.height as u64)
-        }
+        self.scrollbars.update(sz.width as u64, sz.height as u64, self.size());
         self.move_scroll_to(self.x, self.y);
     }
     #[inline(always)]
@@ -114,41 +96,25 @@ impl Canvas {
         };
         self.x = self.x.min(0);
         self.y = self.y.min(0);
-        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            s.set_index((-self.x) as u64);
-        }
-        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-            s.set_index((-self.y) as u64);
-        }
+        self.scrollbars.set_indexes((-self.x) as u64, (-self.y) as u64);
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
-        if let (Some(horiz), Some(vert)) = (
-            self.components.get(self.horizontal_scrollbar),
-            self.components.get(self.vertical_scrollbar),
-        ) {
-            let h = -(horiz.get_index() as i32);
-            let v = -(vert.get_index() as i32);
-            self.move_scroll_to(h, v);
-        }
+        let h = -(self.scrollbars.horizontal_index() as i32);
+        let v = -(self.scrollbars.vertical_index() as i32);
+        self.move_scroll_to(h,v);
     }
 }
 impl OnResize for Canvas {
-    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
-        self.components.on_resize(&self.base);
+    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
         let paint_sz = self.surface.size();
-        if let Some(s) = self.components.get_mut(self.horizontal_scrollbar) {
-            s.update_count(new_size.width as u64, paint_sz.width as u64)
-        }
-        if let Some(s) = self.components.get_mut(self.vertical_scrollbar) {
-            s.update_count(new_size.height as u64, paint_sz.height as u64);
-        }
+        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64,&self.base);
         self.move_scroll_to(self.x, self.y);
     }
 }
 impl OnPaint for Canvas {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
-            self.components.paint(surface, theme, self);
+            self.scrollbars.paint(surface, theme, self);
             surface.reduce_clip_by(0,0,1,1);
         }
         if let Some(back) = self.background {
@@ -222,17 +188,21 @@ impl OnKeyPressed for Canvas {
 }
 impl OnMouseEvent for Canvas {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        let res = self.components.on_mouse_event(event);
-        if res.should_update() {
+        if self.scrollbars.process_mouse_event(event) {
             self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
         }
-        if !res.should_pass_to_control() {
-            if res.should_repaint() {
-                return EventProcessStatus::Processed;
-            } else {
-                return EventProcessStatus::Ignored;
-            }
-        }
+        // let res = self.components.on_mouse_event(event);
+        // if res.should_update() {
+        //     self.update_scroll_pos_from_scrollbars();
+        // }
+        // if !res.should_pass_to_control() {
+        //     if res.should_repaint() {
+        //         return EventProcessStatus::Processed;
+        //     } else {
+        //         return EventProcessStatus::Ignored;
+        //     }
+        // }
         let response = match event {
             MouseEvent::Enter => EventProcessStatus::Ignored,
             MouseEvent::Leave => EventProcessStatus::Ignored,
@@ -274,7 +244,7 @@ impl OnMouseEvent for Canvas {
             }
         };
         // if one of the components require a repaint, than we should repaint even if the canvas required us to ignore the event
-        if res.should_repaint() {
+        if self.scrollbars.should_repaint() {
             EventProcessStatus::Processed
         } else {
             response

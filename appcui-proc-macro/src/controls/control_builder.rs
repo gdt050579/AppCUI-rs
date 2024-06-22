@@ -271,6 +271,21 @@ impl<'a> ControlBuilder<'a> {
             }
         }
     }
+
+    pub(super) fn add_scroll_margin_setup(&mut self, left: &str, top: &str) {
+        let lsm = self.get_i32(left).unwrap_or(0);
+        let tsm = self.get_i32(top).unwrap_or(0);
+        if (lsm != 0) || (tsm != 0) {
+            if lsm < 0 {
+                panic!("Left scroll margin can not be a negative number");
+            }
+            if tsm < 0 {
+                panic!("Top scroll margin can not be a negative number");
+            }
+            self.add_line(format!("control.set_components_toolbar_margins({},{});", lsm, tsm).as_str());
+        }
+    }
+
     pub(super) fn get_enum_value(&mut self, param_name: &str, available_variants: &FlagsSignature) -> Option<&str> {
         if let Some(value) = self.parser.get(param_name) {
             let variant = value.get_string();

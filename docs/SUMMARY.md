@@ -32,10 +32,6 @@
         - [Anchors](chapter-3/layout/anchors.md)
     - [Instantiate via Macros](chapter-3/instantiate_via_macros.md)
     - [Common methods for all Controls](chapter-3/common_methods.md)
-    - [Components]() <!-- (chapter-3/components.md) -->
-        - [ScrollBar]()
-        - [Options button]()
-        - [Text]()
     - [Event loop](chapter-3/event_loop.md)
         - [Window](chapter-3/event-loop/window.md)
         - [Toolbar](chapter-3/event-loop/toolbar.md)
@@ -55,6 +51,7 @@
         - [DatePicker](chapter-3/stock-controls/datepicker.md)
         - [DropDownList](chapter-3/stock-controls/dropdownlist.md)
         - [Label](chapter-3/stock-controls/label.md)
+        - [ListBox](chapter-3/stock-controls/listbox.md)
         - [ListView]()
         - [HLine](chapter-3/stock-controls/hline.md)
         - [HSplitter](chapter-3/stock-controls/hsplitter.md)
@@ -77,6 +74,7 @@
     - [Custom controls](chapter-3/custom_controls.md)
         - [Overwriteable traits](chapter-3/custon-controls/overwriteable_traits.md)
         - [Emitting events](chapter-3/custon-controls/emitting_events.md)
+        - [ScrollBars]()
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops](chapter-4/custom_desktop.md)

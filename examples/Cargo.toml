@@ -139,3 +139,7 @@ path = "datepicker/main.rs"
 [[example]]
 name = "splitter"
 path = "splitter/main.rs"
+
+[[example]]
+name = "listbox"
+path = "listbox/main.rs"

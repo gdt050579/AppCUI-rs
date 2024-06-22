@@ -20,6 +20,7 @@ use crate::{
         textfield::events::TextFieldEvents,
         threestatebox::events::ThreeStateBoxEvents,
         window::events::{ToolBarEvents, WindowEvents},
+        listbox::events::ListBoxEvents,
     },
 };
 
@@ -119,6 +120,7 @@ pub trait Control:
     + ComboBoxEvents
     + GenericNumericSelectorEvents
     + DatePickerEvents
+    + ListBoxEvents
 {
 }
 

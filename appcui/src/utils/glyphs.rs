@@ -5,11 +5,20 @@ pub(crate) trait GlyphParser {
     fn next_pos(&self, current_pos: usize, count_glyphs: usize) -> usize;
     fn previous_pos(&self, current_pos: usize, count_glyphs: usize) -> usize;
     fn word_range(&self, current_pos: usize, is_word_char: fn(char) -> bool) -> Option<(usize, usize)>;
+    fn index_ignoring_case(&self, to_find: &str)->Option<usize>;
 }
 
 #[inline(always)]
 fn is_variation_selector(c: char) -> bool {
     matches!(c, '\u{FE00}'..='\u{FE0F}' | '\u{E0100}'..='\u{E01EF}')
+}
+#[inline(always)]
+fn to_ascii_lowercase(c: u8) -> u8 {
+    if c.is_ascii_uppercase() {
+        c + 32
+    } else {
+        c
+    }
 }
 
 impl GlyphParser for str {
@@ -127,6 +136,31 @@ impl GlyphParser for str {
                 }
             }
             return Some((start,end));
+        }
+        None
+    }
+    fn index_ignoring_case(&self, to_find: &str)->Option<usize> {
+        let to_find_buf = to_find.as_bytes();
+        let self_buf = self.as_bytes();
+        if to_find_buf.len() > self_buf.len() {
+            return None;
+        }
+        if to_find_buf.is_empty() {
+            return Some(0);
+        }
+        let dif = self_buf.len() - to_find_buf.len();
+        let to_find_buf_size = to_find_buf.len();
+        for i in 0..=dif {
+            let mut match_found = true;
+            for j in 0..to_find_buf_size {
+                if to_ascii_lowercase(self_buf[i + j]) != to_ascii_lowercase(to_find_buf[j]) {
+                    match_found = false;
+                    break;
+                }
+            }
+            if match_found {
+                return Some(i);
+            }
         }
         None
     }
