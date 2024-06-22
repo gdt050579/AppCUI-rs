@@ -1,3 +1,5 @@
+use chrono::format;
+
 use crate::prelude::*;
 
 #[test]
@@ -801,5 +803,76 @@ fn check_empty_highlight_selected_when_inactive() {
     w.add(p);
     w.add(button!("Add,x:1,y:1,w:7,type:flat"));
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_items_checked_with_mouse() {
+    #[Window(events=ListBoxEvents, internal: true)]
+    struct MyWin {
+        lbox: Handle<ListBox>,
+        log: Handle<ListBox>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Title:'Colors',d:c,w:60,h:10,flags:Sizeable"),
+                lbox: Handle::None,
+                log: Handle::None,
+            };
+            let mut vs = vsplitter!("25%,d:c,w:100%,h:100%");
+            w.lbox = vs.add(
+                vsplitter::Panel::Left,
+                listbox!(
+                    "d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
+                ),
+            );
+            let mut p = panel!("caption:'Event logs',d:c,w:100%,h:100%,type: TopBar");
+            w.log = p.add(listbox!("d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
+            vs.add(vsplitter::Panel::Right, p);
+            w.add(vs);
+            w
+        }
+    }
+    impl ListBoxEvents for MyWin {
+
+        fn on_item_checked(&mut self, handle: Handle<ListBox>, index: usize, checked: bool) -> EventProcessStatus {
+            if self.lbox == handle {
+                let h = self.log;
+                let cnt = self.control(self.lbox).map(|l| l.count_checked()).unwrap_or(0);
+                if let Some(log) = self.control_mut(h) {
+                    log.add(&format!(
+                        "Item with index: {} is {}",
+                        index,
+                        if checked { "checked" } else { "unchecked" }
+                    ));
+                    log.add(&format!("Total checked items: {}", cnt));
+                    
+                }
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(10,1,left)
+        Paint('Initial state')
+        CheckHash(0x869E551D2A656160)
+        Mouse.Click(1,2,left)
+        Paint('Checked: Green, ItemsChecked: 1')
+        CheckHash(0xAE2962CC9B98DAFB)
+        Mouse.Click(1,4,left)
+        Paint('Checked: Green,Yellow, ItemsChecked: 2')
+        CheckHash(0x9DD60AF5535A49CC)
+        Mouse.Click(1,5,left)
+        Paint('Checked: Green,Yellow,Black, ItemsChecked: 3')
+        CheckHash(0x139815234DC93155)
+        Mouse.Click(1,5,left)
+        Paint('Checked: Green,Yellow, ItemsChecked: 2')
+        CheckHash(0x6855A969D5D764BC)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }

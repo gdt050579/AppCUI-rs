@@ -542,6 +542,8 @@ impl OnMouseEvent for ListBox {
                 if (d.x == 0) && (self.flags.contains(Flags::CheckBoxes)) {
                     if let Some(item) = self.items.get_mut(self.pos) {
                         item.checked = !item.checked;
+                        let value = item.checked;
+                        self.send_checked_event(self.pos, value);
                     }
                 }
                 EventProcessStatus::Processed
