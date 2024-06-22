@@ -479,6 +479,9 @@ fn check_events() {
     impl ListBoxEvents for MyWin {
         fn on_current_item_changed(&mut self, handle: Handle<ListBox>, index: usize) -> EventProcessStatus {
             if self.lbox == handle {
+                let idx = self.control(self.lbox).map(|l| l.index()).unwrap_or(usize::MAX);
+                // idx should be the sae of index
+                assert_eq!(idx, index);
                 let h = self.log;
                 if let Some(log) = self.control_mut(h) {
                     let idx = log.count() + 1;
@@ -490,6 +493,8 @@ fn check_events() {
 
         fn on_item_checked(&mut self, handle: Handle<ListBox>, index: usize, checked: bool) -> EventProcessStatus {
             if self.lbox == handle {
+                let correct_checked = self.control(self.lbox).map(|l| l.item(index).unwrap().is_checked()==checked).unwrap_or(false);
+                assert!(correct_checked);
                 let h = self.log;
                 if let Some(log) = self.control_mut(h) {
                     log.add(&format!(
