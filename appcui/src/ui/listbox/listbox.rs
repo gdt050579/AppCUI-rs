@@ -1,7 +1,10 @@
+use std::hash::Hash;
+
 use super::events::EventData;
 use super::Flags;
 use super::Item;
 use crate::ui::components::ListScrollBars;
+use crate::utils;
 use listbox::events::ListBoxEventTypes;
 use AppCUIProcMacro::*;
 
@@ -167,6 +170,15 @@ impl ListBox {
     pub fn set_empty_message(&mut self, message: &str) {
         self.empty_message.clear();
         self.empty_message.push_str(message);
+    }
+
+    pub fn sort(&mut self) {
+        if self.items.is_empty() {
+            return;
+        }
+        let current_value = self.items[self.pos].value.clone();
+        self.items.sort_by(|a, b| a.value.cmp(&b.value));
+        self.update_position(self.items.iter().position(|i| i.value == current_value).unwrap_or(0), false);
     }
 
     fn update_scrollbars(&mut self) {
