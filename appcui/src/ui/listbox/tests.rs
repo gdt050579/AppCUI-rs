@@ -671,3 +671,55 @@ fn check_empty_list_message_with_macro() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_sort() {
+    #[Window(events=ButtonEvents, internal: true)]
+    struct MyWin {
+        log: Handle<ListBox>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Title:'Sort',d:c,w:60,h:10"),
+                log: Handle::None,
+            };
+            w.log = w.add(listbox!(
+                "x:50%,y:0,w:50%,h:100%,flags: ScrollBars+CheckBoxes, items=[Red,Green,Blue,Yellow,Black,White,Orange,Purple]"
+            ));
+            w.add(button!("Sort,x:1,y:1,w:10"));
+            w
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let h = self.log;
+            if let Some(log) = self.control_mut(h) {
+                log.sort();
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0xC02891D8E535215)
+        Key.Pressed(Tab)
+        Paint('Listbox has scrollbar and is focused')
+        CheckHash(0xD3C19BA7590D076A)
+        Key.Pressed(Down,3)
+        Paint('Yellow is selected')
+        CheckHash(0xA851E23683C81495)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('List is sorted')
+        CheckHash(0x1C8CADCF8F9DBA81)
+        Key.Pressed(Tab)
+        Paint('Listbox is sorted, Yellow is selected')
+        CheckHash(0x118D927047A34629)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
