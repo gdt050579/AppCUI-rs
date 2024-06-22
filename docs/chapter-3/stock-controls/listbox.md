@@ -23,6 +23,7 @@ A listbox supports all common parameters (as they are described in [Instantiate 
 | `index` or `selected_index`   | Numeric | **No**               | The index of the selected item (it should be a value between 0 and number if items - 1)                                                                                                                                  |
 | `lsm` or `left-scroll-margin` | Numeric | **No**               | The left margin of the bottom scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `ScrollBars` or `SearchBar` flags were specified. |
 | `tsm` or `top-scroll-margin`  | Numeric | **No**               | The top margin of the right scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `ScrollBars` flags was used to create the control.  |
+| `em` or `empty-message`       | String  | **No**               | A message that will be displayed when the listbox is empty. This message will be centered in the listbox.                                                                                                                |
 
 
 A listbox supports the following initialization flags:
@@ -50,16 +51,17 @@ pub trait ListBoxEvents {
 
 Besides the [Common methods for all Controls](../common_methods.md) a listbox also has the following aditional methods:
 
-| Method            | Purpose                                                                                                                                                    |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `add(...)`        | Adds a new string to the list of items in the ListBox                                                                                                      |
-| `add_item(...)`   | Adds a new item (text and check status) to the list of items in the ListBox                                                                                |
-| `clear()`         | Clears the list of items available in the ListBox                                                                                                          |
-| `index()`         | Returns the selected index from the ListBox list                                                                                                           |
-| `item(...)`       | Returns the item from a specified index from the ListBox. If the index is invalid, `None` will be returned                                                 |
-| `set_index(...)`  | Selects a new element from the ListBox based on its index                                                                                                  |
-| `count()`         | Returns the number of items from the ListBox                                                                                                               |
-| `count_checked()` | Returns the number of checked items from the ListBox. This method will always return `0` if the flags `CheckBoxes` was **NOT** set when creating a ListBox |
+| Method                   | Purpose                                                                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `add(...)`               | Adds a new string to the list of items in the ListBox                                                                                                      |
+| `add_item(...)`          | Adds a new item (text and check status) to the list of items in the ListBox                                                                                |
+| `clear()`                | Clears the list of items available in the ListBox                                                                                                          |
+| `index()`                | Returns the selected index from the ListBox list                                                                                                           |
+| `item(...)`              | Returns the item from a specified index from the ListBox. If the index is invalid, `None` will be returned                                                 |
+| `set_index(...)`         | Selects a new element from the ListBox based on its index                                                                                                  |
+| `count()`                | Returns the number of items from the ListBox                                                                                                               |
+| `count_checked()`        | Returns the number of checked items from the ListBox. This method will always return `0` if the flags `CheckBoxes` was **NOT** set when creating a ListBox |
+| `set_empty_message(...)` | Sets the message that will be displayed when the ListBox is empty                                                                                          |
 
 
 An item from the ListBox is represented by the following structure:
