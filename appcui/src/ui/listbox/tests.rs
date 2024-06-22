@@ -80,6 +80,21 @@ fn check_create_with_macro_3() {
 }
 
 #[test]
+fn check_create_with_macro_4() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (White is selected,Red is the first item)')
+        CheckHash(0xAD52FAF15DEBDF73)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:8,flags: Sizeable");
+    let l = listbox!("d:c,w:100%,h:100%,index:3,flags: SearchBar, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_movement_keys() {
     let script = "
         Paint.Enable(false)
