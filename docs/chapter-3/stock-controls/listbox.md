@@ -31,6 +31,7 @@ A listbox supports the following initialization flags:
 * `listbox::Flags::SearchBar` or `SearchBar` (for macro initialization) - this enables a search bar that can be used to filter the list of items. The search bar is visible only when the control has focus
 * `listbox::Flags::CheckBoxes` or `CheckBoxes` (for macro initialization) - this enable a set of checkboxes that can be used to select multiple items from the list.
 * `listbox::Flags::AutoScroll` or `AutoScroll` (for macro initialization) - this will automatically scroll the listbox to the last item whenever a new item is being added. This flag is usefull for scenarios where the listbox is used as a log/event viewer. 
+* `listbox::Flags::HighlightSelectedItemWhenInactive` or `HighlightSelectedItemWhenInactive` (for macro initialization) - this will highlight the selected item even when the listbox does not have focus. This flag is usefull when the listbox is used as a navigation menu.
 
 ## Events
 
