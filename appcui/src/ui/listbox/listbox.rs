@@ -14,6 +14,7 @@ pub struct ListBox {
     pos: usize,
     max_chars: u32,
     comp: ListScrollBars,
+    empty_message: String,
 }
 impl ListBox {
     /// Creates a new list box with the specified layout and flags
@@ -68,6 +69,7 @@ impl ListBox {
             max_chars: 0,
             pos: usize::MAX,
             flags,
+            empty_message: String::new(),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
         }
     }
@@ -140,11 +142,11 @@ impl ListBox {
     /// This function is only relevant if the listbox was created with the CheckBoxes flag
     /// If the CheckBoxes flag is not set, this function will always return 0
     /// This method will iterate through all items from the listbox, so it might be slow for large lists
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut lbox = ListBox::new(Layout::new("d:c,w:100%,h:100%"), listbox::Flags::CheckBoxes);
     /// lbox.add_item(listbox::Item::new("Item 1", false));
     /// lbox.add_item(listbox::Item::new("Item 2", true));
@@ -159,6 +161,12 @@ impl ListBox {
         } else {
             0
         }
+    }
+
+    /// Sets the empty message that will be displayed when the listbox is empty
+    pub fn set_empty_message(&mut self, message: &str) {
+        self.empty_message.clear();
+        self.empty_message.push_str(message);
     }
 
     fn update_scrollbars(&mut self) {
@@ -303,6 +311,17 @@ impl OnPaint for ListBox {
         let count = self.items.len();
         let h = self.size().height as i32;
         let w = self.size().width as i32;
+
+        // empty message
+        if (count == 0) && (!self.empty_message.is_empty()) {
+            let empty_attr = if self.is_active() { theme.text.normal } else { theme.text.inactive };
+            let mut format = TextFormat::new(w / 2, h / 2, empty_attr, TextAlignament::Center, true);
+            format.width = Some(w as u16);
+            format.text_wrap = TextWrap::Word;
+            surface.write_text(&self.empty_message, &format);
+            return;
+        }
+
         if self.flags.contains(Flags::CheckBoxes) {
             let ch_checked = Character::with_attributes(
                 SpecialChar::CheckMark,
