@@ -597,6 +597,7 @@ fn check_clear() {
             let h = self.log;
             if let Some(log) = self.control_mut(h) {
                 log.clear();
+                log.sort(); // this wil do nothing, but will force the execution through a different path
             }
             EventProcessStatus::Processed
         }
