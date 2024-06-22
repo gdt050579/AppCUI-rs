@@ -953,3 +953,33 @@ fn check_scroll_from_scrollbar() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_scroll_from_mouse_wheel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (White is selected,Red is the first item)')
+        CheckHash(0x77D7DB5C1EE81C58)
+        Mouse.Wheel(20,5,down,1)
+        Paint('Scroll down by wheel: Green->Yellow')
+        CheckHash(0x92DB91CD71A7864F)
+        Mouse.Wheel(20,5,down,1)
+        Paint('Scroll down by wheel: Blue->Purple')
+        CheckHash(0xB63121D5EC6EF23D)
+        Mouse.Wheel(20,5,down,1)
+        Paint('Scroll down by wheel: Blue->Purple')
+        CheckHash(0xB63121D5EC6EF23D)
+        Mouse.Wheel(20,5,up,1)
+        Paint('Scroll down by wheel: Green->Yellow')
+        CheckHash(0x92DB91CD71A7864F)
+        Mouse.Wheel(20,5,up,100)
+        Paint('Back to initial state')
+        CheckHash(0x77D7DB5C1EE81C58)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:20,h:8,flags: Sizeable");
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
