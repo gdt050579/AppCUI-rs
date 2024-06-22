@@ -918,3 +918,33 @@ fn check_items_checked_with_mouse() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_scroll_from_scrollbar() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (White is selected,Red is the first item)')
+        CheckHash(0x77D7DB5C1EE81C58)
+        Mouse.Click(29,7,left)
+        Paint('Scroll: Green -> Yellow')
+        CheckHash(0x24ADD0AFDD88A744)
+        Mouse.Click(29,7,left)
+        Paint('Scroll: Blue -> Purple')
+        CheckHash(0xC761A8E1BB84BA1E)
+        Mouse.Click(20,5,left)
+        Paint('Scroll: Blue -> Purple, selected: Orange')
+        CheckHash(0x4718103A7AA79E79)
+        Mouse.Click(29,2,left)
+        Paint('Scroll: Green -> Yellow')
+        CheckHash(0x576DA8ED102C4F24)
+        Mouse.Click(29,2,left)
+        Paint('Scroll: Red -> Orange')
+        CheckHash(0x9C13452BDE1FBA10)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:20,h:8,flags: Sizeable");
+    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
