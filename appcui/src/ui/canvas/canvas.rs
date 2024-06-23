@@ -192,17 +192,6 @@ impl OnMouseEvent for Canvas {
             self.update_scroll_pos_from_scrollbars();
             return EventProcessStatus::Processed;
         }
-        // let res = self.components.on_mouse_event(event);
-        // if res.should_update() {
-        //     self.update_scroll_pos_from_scrollbars();
-        // }
-        // if !res.should_pass_to_control() {
-        //     if res.should_repaint() {
-        //         return EventProcessStatus::Processed;
-        //     } else {
-        //         return EventProcessStatus::Ignored;
-        //     }
-        // }
         let response = match event {
             MouseEvent::Enter => EventProcessStatus::Ignored,
             MouseEvent::Leave => EventProcessStatus::Ignored,

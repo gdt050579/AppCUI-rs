@@ -232,3 +232,94 @@ fn check_button_control_hotkey() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_button_methods() {
+    #[Window(events = ButtonEvents, internal=true)]
+    struct MyWin {
+        b: Handle<Button>,
+        count: i32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                b: Handle::None,
+                count: 0,
+            };
+            me.b = me.add(button!("&Press,x:2,y:2,w:40"));
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            self.count += 1;
+            let c = self.count;
+            let h = self.b;
+            if let Some(b) = self.control_mut(h) {
+                b.set_caption(format!("Pressed {} times", c).as_str());
+                assert!(b.caption().ends_with("times"));
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')   
+        CheckHash(0xDD94DF7CDA9CDD1E)   
+        Key.Pressed(Enter)
+        Paint('Text is: Pressed 1 times') 
+        CheckHash(0xC1A8FD4A7482CF5D) 
+        Key.Pressed(Enter,3)
+        Paint('Text is: Pressed 4 times') 
+        CheckHash(0x517BE60D35938E34) 
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_tool_tip() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (Button caption = large text for)')   
+        CheckHash(0x6E6CDEEDE309D115)
+        Mouse.Move(20,4)
+        Paint('Tool tip is visible (caption: A realy large text for a button)')   
+        CheckHash(0xCB2F5888BC193B75)
+    ";
+    let mut a = App::debug(70, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:10");
+    w.add(button!("'A realy large text for a button',x:2,y:3,w:15"));
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_mouse_drag_test() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xB10F054B07F2FF0)
+        Mouse.Hold(20,4,left)
+        Paint('Button is pressed')   
+        CheckHash(0x410B2EF7D0EB96E7)
+        Mouse.Move(20,4)
+        Paint('Drag inside --> remaints pressed')   
+        CheckHash(0x410B2EF7D0EB96E7)
+        Mouse.Move(50,7)
+        Paint('Drag outside button --> becomes unpressed')   
+        CheckHash(0xB10F054B07F2FF0)
+        Mouse.Release(50,7,left)
+        Paint('Back to initial state')   
+        CheckHash(0xB10F054B07F2FF0)
+    ";
+    let mut a = App::debug(70, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:10");
+    w.add(button!("'Test',x:2,y:3,w:15"));
+    a.add_window(w);
+    a.run();
+}

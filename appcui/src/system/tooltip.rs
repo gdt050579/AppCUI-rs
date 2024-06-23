@@ -50,7 +50,7 @@ impl ToolTip {
             w += 1;
             if w > max_width {
                 best_width = max_width;
-                w = 0;
+                w = 1; // the extra character is moved to the next line
                 nr_lines += 1;
             }
         }
