@@ -3,14 +3,14 @@ use crate::utils::*;
 
 pub struct Column {
     name: Caption,
-    width: u16,
+    pub(super) width: u8,
     alignment: TextAlignament,
     tooltip: String,
-    x: i32,
+    pub(super) x: i32,
 }
 
 impl Column {
-    pub fn new(name: &str, width: u16, alignment: TextAlignament) -> Self {
+    pub fn new(name: &str, width: u8, alignment: TextAlignament) -> Self {
         Self {
             name: Caption::new(name, ExtractHotKeyMethod::CtrlPlusKey),
             width,
@@ -29,7 +29,7 @@ impl Column {
     pub fn set_alignment(&mut self, alignment: TextAlignament) {
         self.alignment = alignment;
     }
-    pub fn set_width(&mut self, width: u16) {
+    pub fn set_width(&mut self, width: u8) {
         self.width = width;
     }
     pub fn name(&self) -> &str {
@@ -41,7 +41,7 @@ impl Column {
     pub fn alignment(&self) -> TextAlignament {
         self.alignment
     }
-    pub fn width(&self) -> u16 {
+    pub fn width(&self) -> u8 {
         self.width
     }
     pub fn on_paint(&self, surface: &mut Surface, theme: &Theme, x: i32, y: i32, width: u16, selected: bool) {
