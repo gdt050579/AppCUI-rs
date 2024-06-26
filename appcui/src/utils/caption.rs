@@ -6,6 +6,7 @@ pub(crate) enum ExtractHotKeyMethod {
     NoHotKey,
     Key,
     AltPlusKey,
+    CtrlPlusKey,
 }
 
 #[derive(Clone, Default)]
@@ -103,6 +104,7 @@ impl From<ExtractHotKeyMethod> for KeyModifier {
             ExtractHotKeyMethod::NoHotKey => KeyModifier::None,
             ExtractHotKeyMethod::Key => KeyModifier::None,
             ExtractHotKeyMethod::AltPlusKey => KeyModifier::Alt,
+            ExtractHotKeyMethod::CtrlPlusKey => KeyModifier::Ctrl,
         }
     }
 }

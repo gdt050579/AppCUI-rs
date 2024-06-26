@@ -12,7 +12,7 @@ pub struct Column {
 impl Column {
     pub fn new(name: &str, width: u16, alignment: TextAlignament) -> Self {
         Self {
-            name: Caption::new(name, ExtractHotKeyMethod::NoHotKey),
+            name: Caption::new(name, ExtractHotKeyMethod::CtrlPlusKey),
             width,
             alignment,
             tooltip: String::new(),
@@ -20,7 +20,7 @@ impl Column {
         }
     }
     pub fn set_name(&mut self, name: &str) {
-        self.name.set_text(name, ExtractHotKeyMethod::NoHotKey)
+        self.name.set_text(name, ExtractHotKeyMethod::CtrlPlusKey)
     }
     pub fn set_tooltip(&mut self, tooltip: &str) {
         self.tooltip.clear();
