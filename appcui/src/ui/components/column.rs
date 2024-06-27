@@ -1,11 +1,12 @@
+use crate::graphics::*;
 use crate::prelude::*;
 use crate::utils::*;
 
 pub struct Column {
-    name: Caption,
+    pub(super) name: Caption,
     pub(super) width: u8,
-    alignment: TextAlignament,
-    tooltip: String,
+    pub(super) alignment: TextAlignament,
+    pub(super) tooltip: String,
     pub(super) x: i32,
 }
 
@@ -29,9 +30,6 @@ impl Column {
     pub fn set_alignment(&mut self, alignment: TextAlignament) {
         self.alignment = alignment;
     }
-    pub fn set_width(&mut self, width: u8) {
-        self.width = width;
-    }
     pub fn name(&self) -> &str {
         self.name.text()
     }
@@ -44,21 +42,24 @@ impl Column {
     pub fn width(&self) -> u8 {
         self.width
     }
-    pub fn on_paint(&self, surface: &mut Surface, theme: &Theme, x: i32, y: i32, width: u16, selected: bool) {
-        // let mut format = TextFormat::new(x, y, theme.columns_header.text.normal, self.alignment);
-        // format.width = Some(width);
-        // if selected {
-        //     format.background = theme.columns_header.background.selected;
-        //     format.text = theme.columns_header.text.selected;
-        // }
-        // surface.write_text(self.name.text(), &format);
-    }
-    pub fn on_mouse_event(&self, event: &MouseEvent, x: i32, y: i32, width: u16) -> EventProcessStatus {
-        // if event.is_event(MouseEventType::Released) {
-        //     if event.x >= x && event.x < x + width as i32 {
-        //         return EventProcessStatus::Processed;
-        //     }
-        // }
-        EventProcessStatus::Ignored
+    pub(super) fn paint(&self, surface: &mut Surface, char_attr: CharAttribute, hotkey_attr: CharAttribute) {
+        let x = match self.alignment {
+            TextAlignament::Left => self.x + 1,
+            TextAlignament::Center => self.x + (self.width as i32) / 2,
+            TextAlignament::Right => self.x + (self.width as i32) - 1,
+        };
+        let format = TextFormat {
+            x,
+            y: 0,
+            width: Some(self.width as u16),
+            char_attr,
+            hotkey_attr: Some(hotkey_attr),
+            hotkey_pos: self.name.hotkey_pos(),
+            chars_count: Some(self.name.chars_count() as u16),
+            align: self.alignment,
+            text_wrap: TextWrap::None,
+            multi_line: false,
+        };
+        surface.write_text(self.name.text(), &format);
     }
 }
