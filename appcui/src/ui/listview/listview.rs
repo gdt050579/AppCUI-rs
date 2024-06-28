@@ -1,5 +1,5 @@
 use super::Flags;
-use components::ColumnsHeader;
+use components::{Column, ColumnsHeader};
 use listview::initialization_flags::ListItem;
 use AppCUIProcMacro::*;
 
@@ -25,11 +25,15 @@ where
             header: ColumnsHeader::with_capacity(4),
         }
     }
+    pub fn add_column(&mut self, column: Column) {
+        self.header.add(column);
+    }
 }
 
 impl<T> OnPaint for ListView<T> where T: ListItem {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         self.header.paint(surface, theme, &self.base);
+        self.header.paint_columns(surface, theme, &self.base);
     }
 }
 

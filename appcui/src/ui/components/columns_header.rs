@@ -38,4 +38,21 @@ impl ColumnsHeader {
             c.paint(surface, text, hotkey);            
         }
     }
+    pub fn paint_columns(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
+        let attr = match () {
+            _ if !control.is_active() => theme.lines.inactive,
+            _ if control.has_focus() => theme.lines.focused,
+            _ => theme.lines.normal,
+        };
+        let sz = control.size();
+        let width = sz.width as i32;
+        let height = sz.height as i32;
+        for c in &self.columns {
+            let r = c.x + c.width as i32;
+            if (r<0) || (c.x >= width) || (c.width==0) {
+                continue;
+            }
+            surface.draw_vertical_line(r, 0, height, LineType::Single, attr);         
+        }
+    }
 }

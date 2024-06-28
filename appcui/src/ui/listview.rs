@@ -6,4 +6,4 @@ mod tests;
 
 pub use self::listview::ListView;
 pub use self::initialization_flags::Flags;
-//pub use self::initialization_flags::EnumSelector;
+pub use self::initialization_flags::ListItem;

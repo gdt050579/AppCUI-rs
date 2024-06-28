@@ -64,7 +64,7 @@ impl Column {
         let format = TextFormat {
             x,
             y: 0,
-            width: Some(self.width as u16),
+            width: Some(w as u16),
             char_attr,
             hotkey_attr: Some(hotkey_attr),
             hotkey_pos: self.name.hotkey_pos(),
