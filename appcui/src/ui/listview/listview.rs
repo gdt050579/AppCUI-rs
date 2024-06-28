@@ -1,30 +1,38 @@
+use super::Flags;
+use components::ColumnsHeader;
 use listview::initialization_flags::ListItem;
 use AppCUIProcMacro::*;
-use super::Flags;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct ListView<T>
 where
-    T: ListItem
+    T: ListItem,
 {
     flags: Flags,
-    _phantom: std::marker::PhantomData<T>,
+    data: Vec<T>,
+    header: ColumnsHeader,
 }
 
-impl<T> OnPaint for ListView<T>
+impl<T> ListView<T>
 where
-    T: ListItem
+    T: ListItem,
 {
+    pub fn new(layout: Layout, flags: Flags) -> Self {
+        Self {
+            base: ControlBase::new(layout, true),
+            flags,
+            data: Vec::new(),
+            header: ColumnsHeader::with_capacity(4),
+        }
+    }
 }
 
-impl<T> OnKeyPressed for ListView<T>
-where
-    T: ListItem
-{
+impl<T> OnPaint for ListView<T> where T: ListItem {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        self.header.paint(surface, theme, &self.base);
+    }
 }
 
-impl<T> OnMouseEvent for ListView<T>
-where
-    T: ListItem
-{
-}
+impl<T> OnKeyPressed for ListView<T> where T: ListItem {}
+
+impl<T> OnMouseEvent for ListView<T> where T: ListItem {}

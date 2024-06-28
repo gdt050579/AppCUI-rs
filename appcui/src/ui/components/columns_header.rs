@@ -1,5 +1,3 @@
-use std::sync::atomic::AtomicPtr;
-
 use super::Column;
 use crate::graphics::*;
 use crate::system::*;
@@ -9,6 +7,11 @@ pub struct ColumnsHeader {
     columns: Vec<Column>,
 }
 impl ColumnsHeader {
+    pub fn with_capacity(capacity: usize) -> ColumnsHeader {
+        ColumnsHeader {
+            columns: Vec::with_capacity(capacity),
+        }
+    }
     pub fn add(&mut self, column: Column) {
         self.columns.push(column);
         if self.columns.len() == 1 {
