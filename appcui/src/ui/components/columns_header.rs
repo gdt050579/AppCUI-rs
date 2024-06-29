@@ -8,14 +8,14 @@ use crate::ui::ControlBase;
 enum SelectedComponent {
     #[default]
     None,
-    Header(usize),
-    Column(usize),
+    Header(u16),
+    Column(u16),
 }
-#[derive(Copy,Clone,PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum ColumnsHeaderAction {
     None,
     Repaint,
-    Sort(usize),
+    Sort(u16),
 }
 impl ColumnsHeaderAction {
     #[inline(always)]
@@ -29,23 +29,26 @@ impl ColumnsHeaderAction {
     pub fn is_processed(&self) -> bool {
         match self {
             ColumnsHeaderAction::None => false,
-            ColumnsHeaderAction::Repaint => false,  
+            ColumnsHeaderAction::Repaint => false,
             _ => true,
         }
     }
-    
 }
 pub struct ColumnsHeader {
     columns: Vec<Column>,
     hovered: SelectedComponent,
-    selected: SelectedComponent,
+    selected_column_index: u16,
+    sort_ascendent: bool,
+    selected_column_line_index: u16,
 }
 impl ColumnsHeader {
     pub fn with_capacity(capacity: usize) -> ColumnsHeader {
         ColumnsHeader {
             columns: Vec::with_capacity(capacity),
             hovered: SelectedComponent::None,
-            selected: SelectedComponent::None,
+            selected_column_index: u16::MAX,
+            selected_column_line_index: u16::MAX,
+            sort_ascendent: true,
         }
     }
     pub fn add(&mut self, column: Column) {
@@ -59,15 +62,15 @@ impl ColumnsHeader {
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         let is_active = control.is_active();
-        let (text, hotkey, symbol) = match () {
-            _ if !is_active => (theme.header.text.inactive, theme.header.hotkey.inactive, theme.header.symbol.inactive),
-            _ if control.has_focus() => (theme.header.text.focused, theme.header.hotkey.focused, theme.header.symbol.focused),
-            _ => (theme.header.text.normal, theme.header.hotkey.normal, theme.header.symbol.normal),
+        let (text, hotkey) = match () {
+            _ if !is_active => (theme.header.text.inactive, theme.header.hotkey.inactive),
+            _ if control.has_focus() => (theme.header.text.focused, theme.header.hotkey.focused),
+            _ => (theme.header.text.normal, theme.header.hotkey.normal),
         };
         // first draw an empty header
         let width = control.size().width as i32;
         let hovered_index = match self.hovered {
-            SelectedComponent::Header(index) => index,
+            SelectedComponent::Header(index) => index as usize,
             _ => usize::MAX,
         };
         surface.fill_horizontal_line(0, 0, width, Character::with_attributes(' ', text));
@@ -79,6 +82,39 @@ impl ColumnsHeader {
             if is_active {
                 if index == hovered_index {
                     c.paint(surface, theme.header.text.hovered, theme.header.hotkey.hovered, true);
+                    if index == self.selected_column_index as usize {
+                        surface.write_char(
+                            r - 1,
+                            0,
+                            Character::with_attributes(
+                                if self.sort_ascendent {
+                                    SpecialChar::ArrowUp
+                                } else {
+                                    SpecialChar::ArrowDown
+                                },
+                                theme.header.hotkey.hovered,
+                            ),
+                        );
+                    }
+                } else if index == self.selected_column_index as usize {
+                    c.paint(
+                        surface,
+                        theme.header.text.pressed_or_selectd,
+                        theme.header.hotkey.pressed_or_selectd,
+                        true,
+                    );
+                    surface.write_char(
+                        r - 1,
+                        0,
+                        Character::with_attributes(
+                            if self.sort_ascendent {
+                                SpecialChar::ArrowUp
+                            } else {
+                                SpecialChar::ArrowDown
+                            },
+                            theme.header.hotkey.pressed_or_selectd,
+                        ),
+                    );
                 } else {
                     c.paint(surface, text, hotkey, false);
                 }
@@ -98,10 +134,10 @@ impl ColumnsHeader {
         let width = sz.width as i32;
         let height = sz.height as i32;
         let hovered_index = match self.hovered {
-            SelectedComponent::Column(index) => index,
+            SelectedComponent::Column(index) => index as usize,
             _ => usize::MAX,
         };
-        for (index,c) in self.columns.iter().enumerate() {
+        for (index, c) in self.columns.iter().enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (c.x >= width) || (c.width == 0) {
                 continue;
@@ -123,10 +159,10 @@ impl ColumnsHeader {
             for (index, c) in self.columns.iter().enumerate() {
                 let r = c.x + c.width as i32;
                 if x == r {
-                    return SelectedComponent::Column(index);
+                    return SelectedComponent::Column(index as u16);
                 }
                 if x >= c.x && x < r {
-                    return SelectedComponent::Header(index);
+                    return SelectedComponent::Header(index as u16);
                 }
             }
         } else {
@@ -135,7 +171,7 @@ impl ColumnsHeader {
             for (index, c) in self.columns.iter().enumerate() {
                 let r = c.x + c.width as i32;
                 if x == r {
-                    return SelectedComponent::Column(index);
+                    return SelectedComponent::Column(index as u16);
                 }
             }
         }
@@ -160,11 +196,24 @@ impl ColumnsHeader {
                     ColumnsHeaderAction::None
                 }
             }
-            MouseEvent::Pressed(_) => todo!(),
-            MouseEvent::Released(_) => todo!(),
+            MouseEvent::Pressed(ev) => {
+                let status = self.mouse_to_state(ev.x, ev.y);
+                if let SelectedComponent::Header(index) = status {
+                    if self.selected_column_index == index {
+                        self.sort_ascendent = !self.sort_ascendent;
+                    } else {
+                        self.selected_column_index = index;
+                        self.sort_ascendent = true;
+                    }
+                    ColumnsHeaderAction::Sort(index)
+                } else {
+                    ColumnsHeaderAction::None
+                }
+            }
+            MouseEvent::Released(_) => ColumnsHeaderAction::None,
             MouseEvent::DoubleClick(_) => todo!(),
             MouseEvent::Drag(_) => todo!(),
-            MouseEvent::Wheel(_) => todo!(),
+            MouseEvent::Wheel(_) => ColumnsHeaderAction::None,
         }
     }
 }

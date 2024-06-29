@@ -1,12 +1,6 @@
 use crate::graphics::*;
 use crate::utils::*;
 
-#[derive(Copy, Clone, PartialEq)]
-enum SortOrder {
-    None,
-    Ascending,
-    Descending,
-}
 
 pub struct Column {
     pub(super) name: Caption,
@@ -14,7 +8,6 @@ pub struct Column {
     pub(super) alignment: TextAlignament,
     pub(super) tooltip: String,
     pub(super) x: i32,
-    pub(super) sort_order: SortOrder,
 }
 
 impl Column {
@@ -25,7 +18,6 @@ impl Column {
             alignment,
             tooltip: String::new(),
             x: 0,
-            sort_order: SortOrder::None,
         }
     }
     pub fn set_name(&mut self, name: &str) {
@@ -51,8 +43,7 @@ impl Column {
         self.width
     }
     pub(super) fn paint(&self, surface: &mut Surface, char_attr: CharAttribute, hotkey_attr: CharAttribute, fill: bool) {
-        let extra = if self.sort_order != SortOrder::None { 3 } else { 2 };
-        let w = self.width.saturating_sub(extra) as i32;
+        let w = self.width.saturating_sub(2) as i32;
         if w <= 0 {
             return;
         }
