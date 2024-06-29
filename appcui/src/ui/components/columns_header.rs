@@ -49,7 +49,7 @@ impl ColumnsHeader {
             _ => usize::MAX,
         };
         surface.fill_horizontal_line(0, 0, width, Character::with_attributes(' ', text));
-        for (index,c) in self.columns.iter().enumerate() {
+        for (index, c) in self.columns.iter().enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (c.x >= width) || (c.width == 0) {
                 continue;
@@ -66,20 +66,33 @@ impl ColumnsHeader {
         }
     }
     pub fn paint_columns(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
+        let is_active = control.is_active();
         let attr = match () {
-            _ if !control.is_active() => theme.lines.inactive,
+            _ if !is_active => theme.lines.inactive,
             _ if control.has_focus() => theme.lines.focused,
             _ => theme.lines.normal,
         };
         let sz = control.size();
         let width = sz.width as i32;
         let height = sz.height as i32;
-        for c in &self.columns {
+        let hovered_index = match self.hovered {
+            SelectedComponent::Column(index) => index,
+            _ => usize::MAX,
+        };
+        for (index,c) in self.columns.iter().enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (c.x >= width) || (c.width == 0) {
                 continue;
             }
-            surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
+            if is_active {
+                if index == hovered_index {
+                    surface.draw_vertical_line(r, 0, height, LineType::Single, theme.lines.hovered);
+                } else {
+                    surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
+                }
+            } else {
+                surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
+            }
         }
     }
     fn mouse_to_state(&self, x: i32, y: i32) -> SelectedComponent {
