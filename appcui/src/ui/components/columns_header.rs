@@ -11,11 +11,34 @@ enum SelectedComponent {
     Header(usize),
     Column(usize),
 }
+#[derive(Copy,Clone,PartialEq)]
+pub enum ColumnsHeaderAction {
+    None,
+    Repaint,
+    Sort(usize),
+}
+impl ColumnsHeaderAction {
+    #[inline(always)]
+    pub fn should_repaint(&self) -> bool {
+        match self {
+            ColumnsHeaderAction::None => false,
+            _ => true,
+        }
+    }
+    #[inline(always)]
+    pub fn is_processed(&self) -> bool {
+        match self {
+            ColumnsHeaderAction::None => false,
+            ColumnsHeaderAction::Repaint => false,  
+            _ => true,
+        }
+    }
+    
+}
 pub struct ColumnsHeader {
     columns: Vec<Column>,
     hovered: SelectedComponent,
     selected: SelectedComponent,
-    repaint: bool,
 }
 impl ColumnsHeader {
     pub fn with_capacity(capacity: usize) -> ColumnsHeader {
@@ -23,7 +46,6 @@ impl ColumnsHeader {
             columns: Vec::with_capacity(capacity),
             hovered: SelectedComponent::None,
             selected: SelectedComponent::None,
-            repaint: false,
         }
     }
     pub fn add(&mut self, column: Column) {
@@ -119,18 +141,24 @@ impl ColumnsHeader {
         }
         SelectedComponent::None
     }
-    pub fn process_mouse_event(&mut self, event: &MouseEvent) -> bool {
+    pub fn process_mouse_event(&mut self, event: &MouseEvent) -> ColumnsHeaderAction {
         match event {
             MouseEvent::Enter | MouseEvent::Leave => {
-                self.repaint = self.hovered != SelectedComponent::None;
-                self.hovered = SelectedComponent::None;
-                return false;
+                if self.hovered != SelectedComponent::None {
+                    self.hovered = SelectedComponent::None;
+                    ColumnsHeaderAction::Repaint
+                } else {
+                    ColumnsHeaderAction::None
+                }
             }
             MouseEvent::Over(p) => {
                 let status = self.mouse_to_state(p.x, p.y);
-                self.repaint = status != self.hovered;
-                self.hovered = status;
-                return status != SelectedComponent::None;
+                if status != self.hovered {
+                    self.hovered = status;
+                    ColumnsHeaderAction::Repaint
+                } else {
+                    ColumnsHeaderAction::None
+                }
             }
             MouseEvent::Pressed(_) => todo!(),
             MouseEvent::Released(_) => todo!(),

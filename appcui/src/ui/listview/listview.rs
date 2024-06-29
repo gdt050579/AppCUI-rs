@@ -1,5 +1,5 @@
 use super::Flags;
-use components::{Column, ColumnsHeader};
+use components::{Column, ColumnsHeader, ColumnsHeaderAction};
 use listview::initialization_flags::ListItem;
 use AppCUIProcMacro::*;
 
@@ -41,9 +41,20 @@ impl<T> OnKeyPressed for ListView<T> where T: ListItem {}
 
 impl<T> OnMouseEvent for ListView<T> where T: ListItem {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        if self.header.process_mouse_event(event) {
-            return EventProcessStatus::Processed;
+        let result = self.header.process_mouse_event(event);
+        match result {
+            ColumnsHeaderAction::Sort(index) => {
+                // sort data by column index
+                return EventProcessStatus::Processed;
+            }
+            ColumnsHeaderAction::None => {}
+            ColumnsHeaderAction::Repaint => {}
         }
-        EventProcessStatus::Ignored
+        // process mouse event for items
+        if result.should_repaint() {
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
     }
 }
