@@ -15,6 +15,7 @@ enum SelectedComponent {
 pub enum ColumnsHeaderAction {
     None,
     Repaint,
+    ResizeColumn,
     Sort(u16),
     AutoResize(u16),
 }
@@ -144,7 +145,9 @@ impl ColumnsHeader {
                 continue;
             }
             if is_active {
-                if index == hovered_index {
+                if index == self.selected_column_line_index as usize{
+                    surface.draw_vertical_line(r, 0, height, LineType::Single, theme.lines.pressed_or_selectd);
+                } else if index == hovered_index {
                     surface.draw_vertical_line(r, 0, height, LineType::Single, theme.lines.hovered);
                 } else {
                     surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
@@ -152,6 +155,16 @@ impl ColumnsHeader {
             } else {
                 surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
             }
+        }
+    }
+    fn update_column_positions(&mut self, start: i32) {
+        if self.columns.len() == 0 {
+            return;
+        }
+        let mut pos = start;
+        for c in self.columns.iter_mut() {
+            c.x = pos;
+            pos += 1 + c.width as i32;
         }
     }
     fn mouse_to_state(&self, x: i32, y: i32) -> SelectedComponent {
@@ -199,19 +212,34 @@ impl ColumnsHeader {
             }
             MouseEvent::Pressed(ev) => {
                 let status = self.mouse_to_state(ev.x, ev.y);
-                if let SelectedComponent::Header(index) = status {
-                    if self.selected_column_index == index {
-                        self.sort_ascendent = !self.sort_ascendent;
-                    } else {
-                        self.selected_column_index = index;
-                        self.sort_ascendent = true;
+                match status {
+                    SelectedComponent::Header(index) => {
+                        if self.selected_column_index == index {
+                            self.sort_ascendent = !self.sort_ascendent;
+                        } else {
+                            self.selected_column_index = index;
+                            self.sort_ascendent = true;
+                        }
+                        ColumnsHeaderAction::Sort(index)
                     }
-                    ColumnsHeaderAction::Sort(index)
+                    SelectedComponent::Column(index) => {
+                        self.selected_column_line_index = index;
+                        ColumnsHeaderAction::ResizeColumn
+                    }
+                    _ => ColumnsHeaderAction::None,
+                }
+            }
+            MouseEvent::Released(ev) => {
+                if self.selected_column_line_index != u16::MAX {
+                    let c = &mut self.columns[self.selected_column_line_index as usize];
+                    c.width = (ev.x - c.x).clamp(0, 255) as u8;
+                    self.update_column_positions(self.columns[0].x);
+                    self.selected_column_line_index = u16::MAX;
+                    ColumnsHeaderAction::ResizeColumn
                 } else {
                     ColumnsHeaderAction::None
                 }
             }
-            MouseEvent::Released(_) => ColumnsHeaderAction::None,
             MouseEvent::DoubleClick(ev) => {
                 let status = self.mouse_to_state(ev.x, ev.y);
                 if let SelectedComponent::Column(index) = status {
@@ -220,7 +248,16 @@ impl ColumnsHeader {
                     ColumnsHeaderAction::None
                 }            
             },
-            MouseEvent::Drag(_) => todo!(),
+            MouseEvent::Drag(ev) => {
+                if self.selected_column_line_index != u16::MAX {
+                    let c = &mut self.columns[self.selected_column_line_index as usize];
+                    c.width = (ev.x - c.x).clamp(0, 255) as u8;
+                    self.update_column_positions(self.columns[0].x);
+                    ColumnsHeaderAction::ResizeColumn
+                } else {
+                    ColumnsHeaderAction::None
+                }
+            }
             MouseEvent::Wheel(_) => ColumnsHeaderAction::None,
         }
     }

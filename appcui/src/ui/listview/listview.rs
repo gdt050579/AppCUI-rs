@@ -51,6 +51,10 @@ impl<T> OnMouseEvent for ListView<T> where T: ListItem {
                 // auto resize column
                 return EventProcessStatus::Processed;
             }
+            ColumnsHeaderAction::ResizeColumn => {
+                // nothing to do - exit with Processed
+                return EventProcessStatus::Processed;
+            }
             ColumnsHeaderAction::None => {}
             ColumnsHeaderAction::Repaint => {}
         }
