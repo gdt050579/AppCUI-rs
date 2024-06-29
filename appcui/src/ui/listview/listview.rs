@@ -39,4 +39,11 @@ impl<T> OnPaint for ListView<T> where T: ListItem {
 
 impl<T> OnKeyPressed for ListView<T> where T: ListItem {}
 
-impl<T> OnMouseEvent for ListView<T> where T: ListItem {}
+impl<T> OnMouseEvent for ListView<T> where T: ListItem {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.header.process_mouse_event(event) {
+            return EventProcessStatus::Processed;
+        }
+        EventProcessStatus::Ignored
+    }
+}
