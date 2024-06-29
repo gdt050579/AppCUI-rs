@@ -50,7 +50,7 @@ impl Column {
     pub fn width(&self) -> u8 {
         self.width
     }
-    pub(super) fn paint(&self, surface: &mut Surface, char_attr: CharAttribute, hotkey_attr: CharAttribute) {
+    pub(super) fn paint(&self, surface: &mut Surface, char_attr: CharAttribute, hotkey_attr: CharAttribute, fill: bool) {
         let extra = if self.sort_order != SortOrder::None { 3 } else { 2 };
         let w = self.width.saturating_sub(extra) as i32;
         if w <= 0 {
@@ -61,6 +61,9 @@ impl Column {
             TextAlignament::Center => self.x + 1 + (w / 2),
             TextAlignament::Right => self.x + w,
         };
+        if fill {
+            surface.fill_horizontal_line_with_size(self.x, 0, self.width as u32, Character::with_attributes(' ', char_attr));
+        }
         let format = TextFormat {
             x,
             y: 0,

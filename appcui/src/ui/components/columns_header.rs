@@ -56,12 +56,12 @@ impl ColumnsHeader {
             }
             if is_active {
                 if index == hovered_index {
-                    c.paint(surface, theme.header.text.hovered, theme.header.hotkey.hovered);
+                    c.paint(surface, theme.header.text.hovered, theme.header.hotkey.hovered, true);
                 } else {
-                    c.paint(surface, text, hotkey);
+                    c.paint(surface, text, hotkey, false);
                 }
             } else {
-                c.paint(surface, text, hotkey);
+                c.paint(surface, text, hotkey, false);
             }
         }
     }
