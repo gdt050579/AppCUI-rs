@@ -16,6 +16,7 @@ pub enum ColumnsHeaderAction {
     None,
     Repaint,
     Sort(u16),
+    AutoResize(u16),
 }
 impl ColumnsHeaderAction {
     #[inline(always)]
@@ -211,7 +212,14 @@ impl ColumnsHeader {
                 }
             }
             MouseEvent::Released(_) => ColumnsHeaderAction::None,
-            MouseEvent::DoubleClick(_) => todo!(),
+            MouseEvent::DoubleClick(ev) => {
+                let status = self.mouse_to_state(ev.x, ev.y);
+                if let SelectedComponent::Column(index) = status {
+                    ColumnsHeaderAction::AutoResize(index)
+                } else {
+                    ColumnsHeaderAction::None
+                }            
+            },
             MouseEvent::Drag(_) => todo!(),
             MouseEvent::Wheel(_) => ColumnsHeaderAction::None,
         }

@@ -47,6 +47,10 @@ impl<T> OnMouseEvent for ListView<T> where T: ListItem {
                 // sort data by column index
                 return EventProcessStatus::Processed;
             }
+            ColumnsHeaderAction::AutoResize(index) => {
+                // auto resize column
+                return EventProcessStatus::Processed;
+            }
             ColumnsHeaderAction::None => {}
             ColumnsHeaderAction::Repaint => {}
         }
