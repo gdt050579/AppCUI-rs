@@ -1,9 +1,9 @@
 use super::Flags;
-use components::{Column, ColumnsHeader, ColumnsHeaderAction};
+use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use listview::initialization_flags::ListItem;
 use AppCUIProcMacro::*;
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ListView<T>
 where
     T: ListItem,
@@ -11,6 +11,7 @@ where
     flags: Flags,
     data: Vec<T>,
     header: ColumnsHeader,
+    comp: ListScrollBars,
 }
 
 impl<T> ListView<T>
@@ -18,11 +19,21 @@ where
     T: ListItem,
 {
     pub fn new(layout: Layout, flags: Flags) -> Self {
+        let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
+        if flags.contains(Flags::ScrollBars) {
+            status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
+            status_flags |= StatusFlags::IncreaseRightMarginOnFocus;
+        }
+        if flags.contains(Flags::SearchBar) {
+            status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
+        }
+
         Self {
-            base: ControlBase::new(layout, true),
+            base: ControlBase::with_status_flags(layout, status_flags),
             flags,
             data: Vec::new(),
             header: ColumnsHeader::with_capacity(4),
+            comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
         }
     }
     pub fn add_column(&mut self, column: Column) {
@@ -34,6 +45,7 @@ impl<T> OnPaint for ListView<T> where T: ListItem {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         self.header.paint(surface, theme, &self.base);
         self.header.paint_columns(surface, theme, &self.base);
+        self.comp.paint(surface, theme, &self.base);
     }
 }
 
@@ -64,5 +76,10 @@ impl<T> OnMouseEvent for ListView<T> where T: ListItem {
         } else {
             EventProcessStatus::Ignored
         }
+    }
+}
+impl<T> OnResize for ListView<T> where T: ListItem {
+    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
+        self.comp.resize(self.header.width() as u64, 0, &self.base);
     }
 }

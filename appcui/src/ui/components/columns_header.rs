@@ -142,7 +142,7 @@ impl ColumnsHeader {
         };
         let sz = control.size();
         let width = sz.width as i32;
-        let height = sz.height as i32;
+        let height = sz.height.saturating_sub(1) as i32;
         let hovered_index = match self.hovered {
             SelectedComponent::Column(index) => index as usize,
             _ => usize::MAX,
