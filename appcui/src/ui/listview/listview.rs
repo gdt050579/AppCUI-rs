@@ -3,13 +3,24 @@ use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use listview::initialization_flags::ListItem;
 use AppCUIProcMacro::*;
 
+
+struct Item<T> where T: ListItem {
+    data: T,
+    selected: bool,
+}
+enum Filter {
+    Item(u32),
+    Group(u32),
+}
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ListView<T>
 where
     T: ListItem,
 {
     flags: Flags,
-    data: Vec<T>,
+    data: Vec<Item<T>>,
+    filter: Vec<Filter>,
     header: ColumnsHeader,
     comp: ListScrollBars,
 }
@@ -32,12 +43,31 @@ where
             base: ControlBase::with_status_flags(layout, status_flags),
             flags,
             data: Vec::new(),
+            filter: Vec::new(),
             header: ColumnsHeader::with_capacity(4),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
         }
     }
     pub fn add_column(&mut self, column: Column) {
         self.header.add(column);
+    }
+    pub fn add(&mut self, item: T) {
+        self.data.push(Item {
+            data: item,
+            selected: false,
+        });
+        // refiltering is required
+    }
+    pub fn add_items(&mut self, items: Vec<T>) {
+        self.data.reserve(items.len());
+        self.filter.reserve(items.len());
+        for item in items {
+            self.data.push(Item {
+                data: item,
+                selected: false,
+            });
+        }
+        // refiltering is required
     }
     fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
         // sort elements by column index
