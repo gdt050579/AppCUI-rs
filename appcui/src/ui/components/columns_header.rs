@@ -42,6 +42,7 @@ pub struct ColumnsHeader {
     selected_column_index: u16,
     sort_ascendent: bool,
     selected_column_line_index: u16,
+    width: u32,
 }
 impl ColumnsHeader {
     pub fn with_capacity(capacity: usize) -> ColumnsHeader {
@@ -51,16 +52,23 @@ impl ColumnsHeader {
             selected_column_index: u16::MAX,
             selected_column_line_index: u16::MAX,
             sort_ascendent: true,
+            width: 0,
         }
     }
     pub fn add(&mut self, column: Column) {
         self.columns.push(column);
         if self.columns.len() == 1 {
             self.columns[0].x = 0;
+            self.width = (self.columns[0].width as u32) + 1;
         } else {
             let last = self.columns.len() - 1;
             self.columns[last].x = self.columns[last - 1].x + 1 + self.columns[last - 1].width as i32;
+            self.width += (self.columns[last - 1].width as u32) + 1;
         }
+    }
+    #[inline(always)]
+    pub fn width(&self) -> u32 {
+        self.width
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         let is_active = control.is_active();
@@ -145,7 +153,7 @@ impl ColumnsHeader {
                 continue;
             }
             if is_active {
-                if index == self.selected_column_line_index as usize{
+                if index == self.selected_column_line_index as usize {
                     surface.draw_vertical_line(r, 0, height, LineType::Single, theme.lines.pressed_or_selectd);
                 } else if index == hovered_index {
                     surface.draw_vertical_line(r, 0, height, LineType::Single, theme.lines.hovered);
@@ -162,9 +170,11 @@ impl ColumnsHeader {
             return;
         }
         let mut pos = start;
+        self.width = 0;
         for c in self.columns.iter_mut() {
             c.x = pos;
             pos += 1 + c.width as i32;
+            self.width += (c.width as u32) + 1;
         }
     }
     fn mouse_to_state(&self, x: i32, y: i32) -> SelectedComponent {
@@ -246,8 +256,8 @@ impl ColumnsHeader {
                     ColumnsHeaderAction::AutoResize(index)
                 } else {
                     ColumnsHeaderAction::None
-                }            
-            },
+                }
+            }
             MouseEvent::Drag(ev) => {
                 if self.selected_column_line_index != u16::MAX {
                     let c = &mut self.columns[self.selected_column_line_index as usize];
