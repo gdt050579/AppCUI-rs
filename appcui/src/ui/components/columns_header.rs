@@ -16,7 +16,7 @@ pub enum ColumnsHeaderAction {
     None,
     Repaint,
     ResizeColumn,
-    Sort(u16),
+    Sort((u16,bool)),
     AutoResize(u16),
 }
 impl ColumnsHeaderAction {
@@ -230,7 +230,7 @@ impl ColumnsHeader {
                             self.selected_column_index = index;
                             self.sort_ascendent = true;
                         }
-                        ColumnsHeaderAction::Sort(index)
+                        ColumnsHeaderAction::Sort((index,self.sort_ascendent))
                     }
                     SelectedComponent::Column(index) => {
                         self.selected_column_line_index = index;

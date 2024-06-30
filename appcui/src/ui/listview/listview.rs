@@ -39,6 +39,12 @@ where
     pub fn add_column(&mut self, column: Column) {
         self.header.add(column);
     }
+    fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
+        // sort elements by column index
+    }
+    fn autoresize_column(&mut self, column_index: u16) {
+        // auto resize column
+    }
 }
 
 impl<T> OnPaint for ListView<T> where T: ListItem {
@@ -55,12 +61,12 @@ impl<T> OnMouseEvent for ListView<T> where T: ListItem {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         let result = self.header.process_mouse_event(event);
         match result {
-            ColumnsHeaderAction::Sort(index) => {
-                // sort data by column index
+            ColumnsHeaderAction::Sort((index,ascendent)) => {
+                self.sort_elements(index, ascendent);
                 return EventProcessStatus::Processed;
             }
             ColumnsHeaderAction::AutoResize(index) => {
-                // auto resize column
+                self.autoresize_column(index);
                 return EventProcessStatus::Processed;
             }
             ColumnsHeaderAction::ResizeColumn => {
