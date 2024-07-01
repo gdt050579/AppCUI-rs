@@ -181,6 +181,10 @@ impl ColumnsHeader {
             self.width += (c.width as u32) + 1;
         }
     }
+    #[inline(always)]
+    pub fn scroll_pos(&self) -> u32 {
+        self.left_scroll
+    }
     pub fn scroll_to(&mut self, pos: u32) {
         self.left_scroll = if self.control_size.width >= self.width {
             0

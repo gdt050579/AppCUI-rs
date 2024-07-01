@@ -80,6 +80,9 @@ where
         //self.top_view = (self.comp.vertical_index() as usize).min(self.items.len().saturating_sub(1));
         //self.update_left_position_for_items();
     }
+    fn update_scrollbars(&mut self) {
+        self.comp.resize(self.header.width() as u64, 0, &self.base);
+    }
 }
 
 impl<T> OnPaint for ListView<T> where T: ListItem {
@@ -102,14 +105,16 @@ impl<T> OnMouseEvent for ListView<T> where T: ListItem {
         match result {
             ColumnsHeaderAction::Sort((index,ascendent)) => {
                 self.sort_elements(index, ascendent);
+                self.update_scrollbars();
                 return EventProcessStatus::Processed;
             }
             ColumnsHeaderAction::AutoResize(index) => {
                 self.autoresize_column(index);
+                self.update_scrollbars();
                 return EventProcessStatus::Processed;
             }
             ColumnsHeaderAction::ResizeColumn => {
-                // nothing to do - exit with Processed
+                self.update_scrollbars();
                 return EventProcessStatus::Processed;
             }
             ColumnsHeaderAction::None => {}
