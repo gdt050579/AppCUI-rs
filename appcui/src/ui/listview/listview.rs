@@ -75,6 +75,11 @@ where
     fn autoresize_column(&mut self, column_index: u16) {
         // auto resize column
     }
+    fn update_scroll_pos_from_scrollbars(&mut self) {
+        self.header.scroll_to(self.comp.horizontal_index() as u32);
+        //self.top_view = (self.comp.vertical_index() as usize).min(self.items.len().saturating_sub(1));
+        //self.update_left_position_for_items();
+    }
 }
 
 impl<T> OnPaint for ListView<T> where T: ListItem {
@@ -89,6 +94,10 @@ impl<T> OnKeyPressed for ListView<T> where T: ListItem {}
 
 impl<T> OnMouseEvent for ListView<T> where T: ListItem {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.comp.process_mouse_event(event) {
+            self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
+        }
         let result = self.header.process_mouse_event(event);
         match result {
             ColumnsHeaderAction::Sort((index,ascendent)) => {
@@ -107,7 +116,7 @@ impl<T> OnMouseEvent for ListView<T> where T: ListItem {
             ColumnsHeaderAction::Repaint => {}
         }
         // process mouse event for items
-        if result.should_repaint() {
+        if (result.should_repaint()) || (self.comp.should_repaint()) {
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
@@ -115,7 +124,8 @@ impl<T> OnMouseEvent for ListView<T> where T: ListItem {
     }
 }
 impl<T> OnResize for ListView<T> where T: ListItem {
-    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
+    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+        self.header.resize(new_size);
         self.comp.resize(self.header.width() as u64, 0, &self.base);
     }
 }

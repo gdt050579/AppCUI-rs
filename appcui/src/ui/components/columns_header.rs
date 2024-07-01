@@ -16,7 +16,7 @@ pub enum ColumnsHeaderAction {
     None,
     Repaint,
     ResizeColumn,
-    Sort((u16,bool)),
+    Sort((u16, bool)),
     AutoResize(u16),
 }
 impl ColumnsHeaderAction {
@@ -43,6 +43,8 @@ pub struct ColumnsHeader {
     sort_ascendent: bool,
     selected_column_line_index: u16,
     width: u32,
+    left_scroll: u32,
+    control_size: Size,
 }
 impl ColumnsHeader {
     pub fn with_capacity(capacity: usize) -> ColumnsHeader {
@@ -53,6 +55,8 @@ impl ColumnsHeader {
             selected_column_line_index: u16::MAX,
             sort_ascendent: true,
             width: 0,
+            left_scroll: 0,
+            control_size: Size::new(0, 0),
         }
     }
     pub fn add(&mut self, column: Column) {
@@ -177,6 +181,20 @@ impl ColumnsHeader {
             self.width += (c.width as u32) + 1;
         }
     }
+    pub fn scroll_to(&mut self, pos: u32) {
+        self.left_scroll = if self.control_size.width >= self.width {
+            0
+        } else if pos + self.control_size.width >= self.width {
+            self.width - self.control_size.width
+        } else {
+            pos
+        };
+        self.update_column_positions(-(self.left_scroll as i32));
+    }
+    pub fn resize(&mut self, new_size: Size) {
+        self.control_size = new_size;
+        self.scroll_to(self.left_scroll);
+    }
     fn mouse_to_state(&self, x: i32, y: i32) -> SelectedComponent {
         if y == 0 {
             // headers and columns
@@ -230,7 +248,7 @@ impl ColumnsHeader {
                             self.selected_column_index = index;
                             self.sort_ascendent = true;
                         }
-                        ColumnsHeaderAction::Sort((index,self.sort_ascendent))
+                        ColumnsHeaderAction::Sort((index, self.sort_ascendent))
                     }
                     SelectedComponent::Column(index) => {
                         self.selected_column_line_index = index;
