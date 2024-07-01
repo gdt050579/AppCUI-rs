@@ -71,7 +71,7 @@ impl VScrollBar {
         self.index
     }
     #[inline(always)]
-    pub fn update_count(&mut self, visible_indexes: u64, total_indexes: u64) {
+    pub fn update(&mut self, visible_indexes: u64, total_indexes: u64) {
         if (visible_indexes <= total_indexes) && (visible_indexes != 0) {
             self.count = (total_indexes - visible_indexes) + 1;
         } else {

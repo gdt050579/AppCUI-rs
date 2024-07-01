@@ -31,7 +31,7 @@ impl ListScrollBars {
     }
     pub fn update(&mut self, horizontal_indexes: u64, vertical_indexes: u64, size: Size) {
         self.horizontal.update(size.width as u64, horizontal_indexes);
-        self.vertical.update_count(size.height as u64, vertical_indexes);
+        self.vertical.update(size.height as u64, vertical_indexes);
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         if self.has_scrollbars {

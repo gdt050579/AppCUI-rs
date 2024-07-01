@@ -81,7 +81,7 @@ where
         //self.update_left_position_for_items();
     }
     fn update_scrollbars(&mut self) {
-        self.comp.resize(self.header.width() as u64, 0, &self.base);
+        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base);
     }
 }
 
@@ -131,6 +131,6 @@ impl<T> OnMouseEvent for ListView<T> where T: ListItem {
 impl<T> OnResize for ListView<T> where T: ListItem {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.header.resize(new_size);
-        self.comp.resize(self.header.width() as u64, 0, &self.base);
+        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base);
     }
 }
