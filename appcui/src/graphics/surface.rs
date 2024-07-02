@@ -106,6 +106,15 @@ impl Surface {
     }
 
     #[inline(always)]
+    pub fn set_relative_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        self.clip.set(
+            i32::max(self.base_clip.left, self.base_origin.x + left),
+            i32::max(self.base_clip.top, self.base_origin.y + top),
+            i32::min(self.base_clip.right, self.base_origin.x + right),
+            i32::min(self.base_clip.bottom, self.base_origin.y + bottom),
+        );
+    }
+    #[inline(always)]
     pub fn set_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.clip.set(
             i32::max(self.base_clip.left, left),

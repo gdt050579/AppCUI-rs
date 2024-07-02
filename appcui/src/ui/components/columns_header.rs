@@ -77,6 +77,10 @@ impl ColumnsHeader {
         self.width
     }
     pub fn set_frozen_columns(&mut self, count: u16) {
+        if count as usize >= self.columns.len() {
+            self.freez_columns = 0;
+            return;
+        }
         self.freez_columns = count;
         self.update_column_positions(0);
     }
@@ -94,10 +98,19 @@ impl ColumnsHeader {
             _ => usize::MAX,
         };
         surface.fill_horizontal_line(0, 0, width, Character::with_attributes(' ', text));
+        let freez_clip_left = if self.freez_columns == 0 {
+            0
+        } else {
+            let c = &self.columns[self.freez_columns as usize - 1];
+            c.x + c.width as i32 + 1
+        };
         for (index, c) in self.columns.iter().enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (c.x >= width) || (c.width == 0) {
                 continue;
+            }
+            if index >= self.freez_columns as usize {
+                surface.set_relative_clip(c.x.max(freez_clip_left), 0, r.max(freez_clip_left), 0);
             }
             if is_active {
                 if index == hovered_index {
@@ -142,6 +155,7 @@ impl ColumnsHeader {
                 c.paint(surface, text, hotkey, false);
             }
         }
+        surface.reset_clip();
     }
     pub fn paint_columns(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         let is_active = control.is_active();
