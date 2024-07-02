@@ -69,6 +69,10 @@ where
         }
         // refiltering is required
     }
+    pub fn set_frozen_columns(&mut self, count: u16) {
+        self.header.set_frozen_columns(count);
+        self.update_scrollbars();
+    }
     fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
         // sort elements by column index
     }

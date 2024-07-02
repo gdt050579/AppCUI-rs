@@ -44,6 +44,7 @@ pub struct ColumnsHeader {
     selected_column_line_index: u16,
     width: u32,
     left_scroll: u32,
+    freez_columns: u16,
     control_size: Size,
 }
 impl ColumnsHeader {
@@ -56,6 +57,7 @@ impl ColumnsHeader {
             sort_ascendent: true,
             width: 0,
             left_scroll: 0,
+            freez_columns: 0,
             control_size: Size::new(0, 0),
         }
     }
@@ -73,6 +75,10 @@ impl ColumnsHeader {
     #[inline(always)]
     pub fn width(&self) -> u32 {
         self.width
+    }
+    pub fn set_frozen_columns(&mut self, count: u16) {
+        self.freez_columns = count;
+        self.update_column_positions(0);
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         let is_active = control.is_active();
@@ -151,18 +157,28 @@ impl ColumnsHeader {
             SelectedComponent::Column(index) => index as usize,
             _ => usize::MAX,
         };
+        let frozen_column_index = if self.freez_columns == 0 {
+            usize::MAX
+        } else {
+            self.freez_columns as usize - 1
+        };
         for (index, c) in self.columns.iter().enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (c.x >= width) || (c.width == 0) {
                 continue;
             }
             if is_active {
-                if index == self.selected_column_line_index as usize {
-                    surface.draw_vertical_line(r, 0, height, LineType::Single, theme.lines.pressed_or_selectd);
-                } else if index == hovered_index {
-                    surface.draw_vertical_line(r, 0, height, LineType::Single, theme.lines.hovered);
+                let line_type = if index == frozen_column_index {
+                    LineType::Double
                 } else {
-                    surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
+                    LineType::Single
+                };
+                if index == self.selected_column_line_index as usize {
+                    surface.draw_vertical_line(r, 0, height, line_type, theme.lines.pressed_or_selectd);
+                } else if index == hovered_index {
+                    surface.draw_vertical_line(r, 0, height, line_type, theme.lines.hovered);
+                } else {
+                    surface.draw_vertical_line(r, 0, height, line_type, attr);
                 }
             } else {
                 surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
@@ -171,15 +187,38 @@ impl ColumnsHeader {
     }
     fn update_column_positions(&mut self, start: i32) {
         if self.columns.len() == 0 {
+            self.left_scroll = 0;
             return;
         }
-        let mut pos = start;
-        self.width = 0;
-        for c in self.columns.iter_mut() {
-            c.x = pos;
-            pos += 1 + c.width as i32;
-            self.width += (c.width as u32) + 1;
+        if self.freez_columns == 0 {
+            let mut pos = start;
+            for c in self.columns.iter_mut() {
+                c.x = pos;
+                pos += 1 + c.width as i32;
+            }
+            let last = self.columns.last().unwrap();
+            self.width = 1 + (last.x + last.width as i32) as u32;
+        } else {
+            let mut pos = 0;
+            let fc = self.freez_columns as usize;
+            //let mut right_most = 0;
+            for (index, c) in self.columns.iter_mut().enumerate() {
+                if index < fc {
+                    c.x = pos;
+                } else {
+                    c.x = pos + start;
+                }
+                //right_most = (c.x + c.width as i32 + 1).max(right_most);
+                pos += 1 + c.width as i32;
+            }
+            self.width = pos as u32;
         }
+        // if (self.left_scroll > 0) && (self.left_scroll < self.width) {
+        //     let right_most = self.width - self.left_scroll;
+        //     if right_most <= self.control_size.width {
+        //         self.scroll_to(self.control_size.width - right_most);
+        //     }
+        // }
     }
     #[inline(always)]
     pub fn scroll_pos(&self) -> u32 {
