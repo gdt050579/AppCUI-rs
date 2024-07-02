@@ -176,9 +176,18 @@ impl ColumnsHeader {
         } else {
             self.freez_columns as usize - 1
         };
+        let freez_clip_left = if self.freez_columns == 0 {
+            0
+        } else {
+            let c = &self.columns[self.freez_columns as usize - 1];
+            c.x + c.width as i32 + 1
+        };
         for (index, c) in self.columns.iter().enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (c.x >= width) || (c.width == 0) {
+                continue;
+            }
+            if (index>frozen_column_index) && (r < freez_clip_left) {
                 continue;
             }
             if is_active {
