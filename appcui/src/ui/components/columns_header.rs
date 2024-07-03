@@ -3,6 +3,7 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
 use crate::ui::ControlBase;
+use AppCUIProcMacro::*;
 
 #[derive(Copy, Clone, Default, PartialEq)]
 enum SelectedComponent {
@@ -16,6 +17,7 @@ pub enum ColumnsHeaderAction {
     None,
     Repaint,
     ResizeColumn,
+    UpdateScroll,
     Sort((u16, bool)),
     AutoResize(u16),
 }
@@ -353,6 +355,23 @@ impl ColumnsHeader {
                 }
             }
             MouseEvent::Wheel(_) => ColumnsHeaderAction::None,
+        }
+    }
+    pub fn process_key_pressed(&mut self, key: Key) -> ColumnsHeaderAction {
+        if self.selected_column_line_index != u16::MAX {
+            ColumnsHeaderAction::None
+        } else {
+            match key.value() {
+                key!("Left") => {
+                    self.scroll_to(self.left_scroll.saturating_sub(1));
+                    ColumnsHeaderAction::UpdateScroll
+                }
+                key!("Right") => {
+                    self.scroll_to(self.left_scroll.saturating_add (1));
+                    ColumnsHeaderAction::UpdateScroll
+                }
+                _ => ColumnsHeaderAction::None
+            }            
         }
     }
 }
