@@ -189,7 +189,7 @@ impl ColumnsHeader {
             if (r < 0) || (c.x >= width) || (c.width == 0) {
                 continue;
             }
-            if (index>frozen_column_index) && (r < freez_clip_left) {
+            if (index > frozen_column_index) && (r < freez_clip_left) {
                 continue;
             }
             if is_active {
@@ -359,7 +359,31 @@ impl ColumnsHeader {
     }
     pub fn process_key_pressed(&mut self, key: Key) -> ColumnsHeaderAction {
         if self.selected_column_line_index != u16::MAX {
-            ColumnsHeaderAction::None
+            match key.value() {
+                key!("Left") => {
+                    let c = &mut self.columns[self.selected_column_line_index as usize];
+                    c.width = c.width.saturating_sub(1);
+                    self.update_column_positions(self.columns[0].x);
+                    ColumnsHeaderAction::ResizeColumn
+                }
+                key!("Right") => {
+                    let c = &mut self.columns[self.selected_column_line_index as usize];
+                    c.width = c.width.saturating_add(1);
+                    self.update_column_positions(self.columns[0].x);
+                    ColumnsHeaderAction::ResizeColumn
+                }
+                key!("Ctrl+Left") => {
+                    self.selected_column_line_index = self.selected_column_line_index.saturating_sub(1);
+                    ColumnsHeaderAction::UpdateScroll
+                }
+                key!("Ctrl+Right") => {
+                    if self.columns.len() > 0 {
+                        self.selected_column_line_index = (self.selected_column_line_index + 1).min((self.columns.len() - 1) as u16);
+                    }
+                    ColumnsHeaderAction::UpdateScroll
+                }
+                _ => ColumnsHeaderAction::None,
+            }
         } else {
             match key.value() {
                 key!("Left") => {
@@ -367,11 +391,14 @@ impl ColumnsHeader {
                     ColumnsHeaderAction::UpdateScroll
                 }
                 key!("Right") => {
-                    self.scroll_to(self.left_scroll.saturating_add (1));
+                    self.scroll_to(self.left_scroll.saturating_add(1));
                     ColumnsHeaderAction::UpdateScroll
                 }
-                _ => ColumnsHeaderAction::None
-            }            
+                _ => ColumnsHeaderAction::None,
+            }
         }
+    }
+    pub fn enter_resize_mode(&mut self) {
+        self.selected_column_line_index = 0;
     }
 }

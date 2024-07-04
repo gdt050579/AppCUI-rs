@@ -86,7 +86,7 @@ where
     }
     fn update_scrollbars(&mut self) {
         self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base);
-        self.comp.set_indexes(self.header.scroll_pos() as u64, 0);
+        self.comp.set_indexes(self.header.scroll_pos() as u64 , 0);
     }
     fn execute_column_header_action(&mut self, action: ColumnsHeaderAction)->bool {
         match action {
@@ -132,6 +132,13 @@ impl<T> OnKeyPressed for ListView<T> where T: ListItem {
             return EventProcessStatus::Processed;
         }
         // process key for items
+        match key.value() {
+            key!("Ctrl+Left") | key!("Ctrl+Right") => {
+                self.header.enter_resize_mode();
+                return EventProcessStatus::Processed;
+            }  
+            _ => {} 
+        }
         if (action.should_repaint()) || (self.comp.should_repaint()) {
             EventProcessStatus::Processed
         } else {
