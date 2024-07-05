@@ -108,6 +108,7 @@ where
                 self.update_scrollbars();
                 true
             }
+            ColumnsHeaderAction::Processed => true,
             ColumnsHeaderAction::None => false,
             ColumnsHeaderAction::Repaint => false,
         }

@@ -18,6 +18,7 @@ pub enum ColumnsHeaderAction {
     Repaint,
     ResizeColumn,
     UpdateScroll,
+    Processed,
     Sort((u16, bool)),
     AutoResize(u16),
 }
@@ -381,6 +382,10 @@ impl ColumnsHeader {
                         self.selected_column_line_index = (self.selected_column_line_index + 1).min((self.columns.len() - 1) as u16);
                     }
                     ColumnsHeaderAction::UpdateScroll
+                }
+                key!("Escape") => {
+                    self.selected_column_line_index = u16::MAX;
+                    ColumnsHeaderAction::Processed
                 }
                 _ => ColumnsHeaderAction::None,
             }
