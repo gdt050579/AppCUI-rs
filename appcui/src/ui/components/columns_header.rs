@@ -288,6 +288,29 @@ impl ColumnsHeader {
         }
         SelectedComponent::None
     }
+    fn ensure_visible(&mut self, index: u16) {
+        if (index as usize) >= self.columns.len() {
+            return;
+        }
+        let c = &self.columns[index as usize];
+        let left = c.x;
+        let right = left + c.width as i32;
+        let ls = -(self.left_scroll as i32);
+        // the entire column is visible
+        if left >= ls && right < ls + self.control_size.width as i32 {
+            return;
+        }
+        // if the column can fit into the view, try to position the scroll acordgly
+        if (c.width as u32) < self.control_size.width {
+            // try to position the column to start
+            let pos = (right - ((self.control_size.width as i32)+1)).max(0);
+            self.scroll_to(pos as u32);          
+        } else {
+            // make sure that the right margin is visible
+            let pos = (right - ((self.control_size.width as i32)+1)).max(0);
+            self.scroll_to((-pos) as u32);
+        }
+    }
     pub fn process_mouse_event(&mut self, event: &MouseEvent) -> ColumnsHeaderAction {
         match event {
             MouseEvent::Enter | MouseEvent::Leave => {
@@ -365,21 +388,25 @@ impl ColumnsHeader {
                     let c = &mut self.columns[self.selected_column_line_index as usize];
                     c.width = c.width.saturating_sub(1);
                     self.update_column_positions(self.columns[0].x);
+                    self.ensure_visible(self.selected_column_line_index);
                     ColumnsHeaderAction::ResizeColumn
                 }
                 key!("Right") => {
                     let c = &mut self.columns[self.selected_column_line_index as usize];
                     c.width = c.width.saturating_add(1);
                     self.update_column_positions(self.columns[0].x);
+                    self.ensure_visible(self.selected_column_line_index);
                     ColumnsHeaderAction::ResizeColumn
                 }
                 key!("Ctrl+Left") => {
                     self.selected_column_line_index = self.selected_column_line_index.saturating_sub(1);
+                    self.ensure_visible(self.selected_column_line_index);
                     ColumnsHeaderAction::UpdateScroll
                 }
                 key!("Ctrl+Right") => {
                     if self.columns.len() > 0 {
                         self.selected_column_line_index = (self.selected_column_line_index + 1).min((self.columns.len() - 1) as u16);
+                        self.ensure_visible(self.selected_column_line_index);
                     }
                     ColumnsHeaderAction::UpdateScroll
                 }
