@@ -1,4 +1,4 @@
-use super::Column;
+use super::column::*;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;

@@ -5,7 +5,7 @@ mod vertical_scrollbar;
 mod horizontal_scrollbar;
 mod scrollbars;
 mod listscrollbars;
-mod column;
+pub mod column;
 mod columns_header;
 
 pub(crate) use self::vertical_scrollbar::VScrollBar;

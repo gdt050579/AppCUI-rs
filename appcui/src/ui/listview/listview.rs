@@ -73,10 +73,10 @@ where
         self.header.set_frozen_columns(count);
         self.update_scrollbars();
     }
-    fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
+    fn sort_elements(&mut self, _column_index: u16, _ascendent: bool) {
         // sort elements by column index
     }
-    fn autoresize_column(&mut self, column_index: u16) {
+    fn autoresize_column(&mut self, _column_index: u16) {
         // auto resize column
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
