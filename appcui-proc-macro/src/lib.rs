@@ -1,5 +1,6 @@
 mod token_stream_to_string;
 mod chars;
+mod column;
 mod key;
 mod menu;
 mod procmacro_builder;
@@ -323,12 +324,17 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Modifiers can be used in combination with the simple `+` between them.
 #[proc_macro]
 pub fn key(input: TokenStream) -> TokenStream {
-    key::create(input)
+    crate::key::create(input)
 }
 
 #[proc_macro]
 pub fn char(input: TokenStream) -> TokenStream {
-    chars::create(input)
+    crate::chars::create(input)
+}
+
+#[proc_macro]
+pub fn headercolumn(input: TokenStream) -> TokenStream {
+    crate::column::create(input)
 }
 
 #[proc_macro]
