@@ -100,7 +100,7 @@ impl ColumnsHeader {
             SelectedComponent::Header(index) => index as usize,
             _ => usize::MAX,
         };
-        surface.fill_horizontal_line(0, 0, width, Character::with_attributes(' ', text));
+        surface.fill_horizontal_line(0, 0, width - 1, Character::with_attributes(' ', text));
         let freez_clip_left = if self.freez_columns == 0 {
             0
         } else {
@@ -303,11 +303,11 @@ impl ColumnsHeader {
         // if the column can fit into the view, try to position the scroll acordgly
         if (c.width as u32) < self.control_size.width {
             // try to position the column to start
-            let pos = (right - ((self.control_size.width as i32)+1)).max(0);
-            self.scroll_to(pos as u32);          
+            let pos = (right - ((self.control_size.width as i32) + 1)).max(0);
+            self.scroll_to(pos as u32);
         } else {
             // make sure that the right margin is visible
-            let pos = (right - ((self.control_size.width as i32)+1)).max(0);
+            let pos = (right - ((self.control_size.width as i32) + 1)).max(0);
             self.scroll_to((-pos) as u32);
         }
     }

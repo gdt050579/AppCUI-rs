@@ -37,6 +37,7 @@ pub use super::ui::vsplitter;
 pub use super::ui::hsplitter;
 pub use super::ui::password::events::PasswordEvents;
 pub use super::ui::common::traits::*;
+pub use super::ui::components::*;
 pub use super::ui::window::events::WindowEvents;
 pub use super::ui::window::events::ToolBarEvents;
 pub use super::ui::window::events::ModalWindowMethods;
