@@ -1,6 +1,5 @@
 use crate::graphics::*;
 use crate::utils::*;
-use super::Type;
 
 
 pub struct Column {
@@ -9,18 +8,16 @@ pub struct Column {
     pub(crate) alignment: TextAlignament,
     pub(crate) tooltip: String,
     pub(crate) x: i32,
-    pub(crate) column_type: Type,
 }
 
 impl Column {
-    pub fn new(name: &str, width: u8, alignment: TextAlignament, column_type: Type) -> Self {
+    pub fn new(name: &str, width: u8, alignment: TextAlignament) -> Self {
         Self {
             name: Caption::new(name, ExtractHotKeyMethod::CtrlPlusKey),
             width,
             alignment,
             tooltip: String::new(),
             x: 0,
-            column_type,
         }
     }
     pub fn set_name(&mut self, name: &str) {

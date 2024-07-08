@@ -71,14 +71,6 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
         // default to Left
         res.push_str("Left, ");
     }
-    // type
-    res.push_str("column::Type::");
-    if let Some(value) = dict.get("type") {
-        panic!("Logic not implemented yet for column type !");        
-    } else {
-        // default to String
-        res.push_str("String");
-    }
     // finalize
     res.push(')');
     res
