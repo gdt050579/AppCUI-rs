@@ -3,7 +3,7 @@ use crate::input::*;
 use crate::system::*;
 use AppCUIProcMacro::*;
 
-use super::ProcessEventResult;
+use super::scrollbars_components::ProcessEventResult;
 
 pub struct SearchBar {
     x: i32,

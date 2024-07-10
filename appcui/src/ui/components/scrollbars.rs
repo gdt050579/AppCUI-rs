@@ -1,5 +1,5 @@
-use super::HScrollBar;
-use super::VScrollBar;
+use super::scrollbars_components::HScrollBar;
+use super::scrollbars_components::VScrollBar;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::Theme;

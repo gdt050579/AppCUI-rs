@@ -81,7 +81,7 @@ impl VScrollBar {
         self.enabled = self.count > 0;
     }
     #[inline(always)]
-    pub(super) fn recompute_position(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
+    pub(crate) fn recompute_position(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
         if available_size <= 4 {
             self.visible = false;
             return 0;

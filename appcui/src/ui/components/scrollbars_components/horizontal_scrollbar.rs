@@ -81,7 +81,7 @@ impl HScrollBar {
         self.enabled = self.count > 0;
     }
     #[inline(always)]
-    pub(super) fn recompute_layout(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
+    pub(crate) fn recompute_layout(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
         if available_size <= 4 {
             self.visible = false;
             return 0;
@@ -263,7 +263,7 @@ impl HScrollBar {
                 let new_status = self.get_drag_status(data.x);
                 if self.status.is_pressed() {
                     if (new_status == self.status) && (new_status == MouseOnScrollbarStatus::PressedOnBar) {
-                        self.update_index_for_mouse_pos(data.x,  MouseOnScrollbarStatus::PressedOnBar);
+                        self.update_index_for_mouse_pos(data.x, MouseOnScrollbarStatus::PressedOnBar);
                         ProcessEventResult::Update
                     } else {
                         ProcessEventResult::Processed
