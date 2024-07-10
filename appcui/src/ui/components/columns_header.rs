@@ -49,6 +49,7 @@ pub struct ColumnsHeader {
     left_scroll: u32,
     freez_columns: u16,
     control_size: Size,
+    mouse_capture: bool,
 }
 impl ColumnsHeader {
     pub fn with_capacity(capacity: usize) -> ColumnsHeader {
@@ -62,6 +63,7 @@ impl ColumnsHeader {
             left_scroll: 0,
             freez_columns: 0,
             control_size: Size::new(0, 0),
+            mouse_capture: false,
         }
     }
     pub fn add(&mut self, column: Column) {
@@ -340,9 +342,11 @@ impl ColumnsHeader {
                             self.selected_column_index = index;
                             self.sort_ascendent = true;
                         }
+                        self.mouse_capture = true;
                         ColumnsHeaderAction::Sort((index, self.sort_ascendent))
                     }
                     SelectedComponent::Column(index) => {
+                        self.mouse_capture = true;
                         self.selected_column_line_index = index;
                         ColumnsHeaderAction::ResizeColumn
                     }
@@ -350,11 +354,12 @@ impl ColumnsHeader {
                 }
             }
             MouseEvent::Released(ev) => {
-                if self.selected_column_line_index != u16::MAX {
+                if self.mouse_capture && self.selected_column_line_index != u16::MAX {
                     let c = &mut self.columns[self.selected_column_line_index as usize];
                     c.width = (ev.x - c.x).clamp(0, 255) as u8;
                     self.update_column_positions(self.columns[0].x);
                     self.selected_column_line_index = u16::MAX;
+                    self.mouse_capture = false;
                     ColumnsHeaderAction::ResizeColumn
                 } else {
                     ColumnsHeaderAction::None
@@ -369,7 +374,7 @@ impl ColumnsHeader {
                 }
             }
             MouseEvent::Drag(ev) => {
-                if self.selected_column_line_index != u16::MAX {
+                if self.mouse_capture && self.selected_column_line_index != u16::MAX {
                     let c = &mut self.columns[self.selected_column_line_index as usize];
                     c.width = (ev.x - c.x).clamp(0, 255) as u8;
                     self.update_column_positions(self.columns[0].x);
