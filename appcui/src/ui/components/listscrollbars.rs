@@ -89,7 +89,7 @@ impl ListScrollBars {
     pub fn set_indexes(&mut self, horizontal: u64, vertical: u64) {
         if self.has_scrollbars {
             self.horizontal.set_index(horizontal);
-            self.vertical.set_index(vertical);
+            self.vertical.set_value(vertical);
         }
     }
     
@@ -100,7 +100,7 @@ impl ListScrollBars {
     
     #[inline(always)]
     pub fn vertical_index(&self) -> u64 {
-        self.vertical.index()
+        self.vertical.value()
     }
     
     #[inline(always)]

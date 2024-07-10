@@ -1,9 +1,218 @@
+use std::ops::{Deref, DerefMut};
+
+use super::generic_scrollbar::*;
+use super::ProcessEventResult;
 use crate::graphics::*;
 use crate::prelude::{ControlBase, MouseEvent};
 use crate::system::*;
 
-use super::ProcessEventResult;
+pub struct VScrollBar {
+    base: GenericScrollBar,
+}
+impl VScrollBar {
+    pub fn new(visible: bool) -> Self {
+        Self {
+            base: GenericScrollBar::new(visible),
+        }
+    }
+    pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
+        if !self.visible {
+            return;
+        }
+        let control_has_focus = control.has_focus();
+        let inactive = !(control.is_enabled() && self.enabled);
+        let col_minimize_arrow = match () {
+            _ if inactive => theme.scrollbar.arrow.inactive,
+            _ if self.status == MouseOnScrollbarStatus::HoverOnMinimizeArrow => theme.scrollbar.arrow.hovered,
+            _ if self.status == MouseOnScrollbarStatus::PressedOnMinimizeArrow => theme.scrollbar.arrow.pressed_or_selectd,
+            _ if control_has_focus => theme.scrollbar.arrow.focused,
+            _ => theme.scrollbar.arrow.normal,
+        };
+        let col_maximize_arrow = match () {
+            _ if inactive => theme.scrollbar.arrow.inactive,
+            _ if self.status == MouseOnScrollbarStatus::HoverOnMaximizeArrow => theme.scrollbar.arrow.hovered,
+            _ if self.status == MouseOnScrollbarStatus::PressedOnMaximizeArrow => theme.scrollbar.arrow.pressed_or_selectd,
+            _ if control_has_focus => theme.scrollbar.arrow.focused,
+            _ => theme.scrollbar.arrow.normal,
+        };
+        let col_bar = match () {
+            _ if inactive => theme.scrollbar.bar.inactive,
+            _ if self.status == MouseOnScrollbarStatus::HoverOnBar => theme.scrollbar.bar.hovered,
+            _ if self.status == MouseOnScrollbarStatus::PressedOnBar => theme.scrollbar.bar.pressed_or_selectd,
+            _ if control_has_focus => theme.scrollbar.bar.focused,
+            _ => theme.scrollbar.bar.normal,
+        };
 
+        let bottom_y = self.y + (self.dimension as i32) - 1;
+        surface.fill_vertical_line(self.x, self.y, bottom_y, Character::with_attributes(SpecialChar::Block50, col_bar));
+        surface.write_char(self.x, self.y, Character::with_attributes(SpecialChar::TriangleUp, col_minimize_arrow));
+        surface.write_char(
+            self.x,
+            bottom_y,
+            Character::with_attributes(SpecialChar::TriangleDown, col_maximize_arrow),
+        );
+        if !inactive {
+            let col_position = match () {
+                _ if inactive => theme.scrollbar.position.inactive,
+                _ if self.status == MouseOnScrollbarStatus::HoverOnBar => theme.scrollbar.position.hovered,
+                _ if self.status == MouseOnScrollbarStatus::PressedOnBar => theme.scrollbar.position.pressed_or_selectd,
+                _ if control_has_focus => theme.scrollbar.position.focused,
+                _ => theme.scrollbar.position.normal,
+            };
+            surface.write_char(
+                self.x,
+                self.y + 1 + self.value_to_screen_offset(),
+                Character::with_attributes(SpecialChar::BlockCentered, col_position),
+            );
+        }
+    }
+    #[inline(always)]
+    pub(crate) fn recompute_position(&mut self, pos: i32, available_space: i32, control_size: Size) -> i32 {
+        self.base.recompute_layout(control_size.width as i32, pos, available_space as u16) as i32
+    }
+    fn mouse_coords_to_scroll_pos(&self, x: i32, y: i32) -> MousePosition {
+        match () {
+            _ if self.x != x => MousePosition::OutsideScrollBar,
+            _ if self.y == y => MousePosition::MinimizeArrow,
+            _ if (self.y + (self.dimension as i32) - 1) == y => MousePosition::MaximizeArrow,
+            _ if (y > self.y) && (y < (self.y + (self.dimension as i32) - 1)) => MousePosition::Bar,
+            _ => MousePosition::OutsideScrollBar,
+        }
+    }
+    fn mouse_coords_to_scroll_pos_for_dragging(&self, y: i32) -> MousePosition {
+        // we will not force x to be equal cu self.x or y to self.y
+
+        match () {
+            _ if self.y == y => MousePosition::MinimizeArrow,
+            _ if (self.y + (self.dimension as i32) - 1) == y => MousePosition::MaximizeArrow,
+            _ if (y > self.y) && (y < (self.y + (self.dimension as i32) - 1)) => MousePosition::Bar,
+            _ => MousePosition::OutsideScrollBar,
+        }
+    }
+    fn get_hover_status(&mut self, x: i32, y: i32) -> MouseOnScrollbarStatus {
+        match self.mouse_coords_to_scroll_pos(x, y) {
+            MousePosition::MinimizeArrow => MouseOnScrollbarStatus::HoverOnMinimizeArrow,
+            MousePosition::MaximizeArrow => MouseOnScrollbarStatus::HoverOnMaximizeArrow,
+            MousePosition::Bar => MouseOnScrollbarStatus::HoverOnBar,
+            MousePosition::OutsideScrollBar => MouseOnScrollbarStatus::None,
+        }
+    }
+    fn get_press_status(&self, x: i32, y: i32) -> MouseOnScrollbarStatus {
+        match self.mouse_coords_to_scroll_pos(x, y) {
+            MousePosition::MinimizeArrow => MouseOnScrollbarStatus::PressedOnMinimizeArrow,
+            MousePosition::MaximizeArrow => MouseOnScrollbarStatus::PressedOnMaximizeArrow,
+            MousePosition::Bar => MouseOnScrollbarStatus::PressedOnBar,
+            MousePosition::OutsideScrollBar => MouseOnScrollbarStatus::None,
+        }
+    }
+    fn get_drag_status(&self, y: i32) -> MouseOnScrollbarStatus {
+        match self.mouse_coords_to_scroll_pos_for_dragging(y) {
+            MousePosition::MinimizeArrow => MouseOnScrollbarStatus::PressedOnMinimizeArrow,
+            MousePosition::MaximizeArrow => MouseOnScrollbarStatus::PressedOnMaximizeArrow,
+            MousePosition::Bar => MouseOnScrollbarStatus::PressedOnBar,
+            MousePosition::OutsideScrollBar => MouseOnScrollbarStatus::None,
+        }
+    }
+    pub fn on_mouse_event(&mut self, event: &MouseEvent) -> ProcessEventResult {
+        if !(self.visible && self.enabled) {
+            // if scroll bar is invisible --> pass the event to control
+            return ProcessEventResult::PassToControl;
+        }
+        match event {
+            MouseEvent::Over(data) => {
+                let new_status = self.get_hover_status(data.x, data.y);
+                if new_status != self.status {
+                    self.status = new_status;
+                    if new_status.is_none() {
+                        return ProcessEventResult::PassToControlAndRepaint;
+                    } else {
+                        return ProcessEventResult::Repaint;
+                    }
+                }
+                ProcessEventResult::Processed
+            }
+            MouseEvent::Pressed(data) => {
+                let new_status = self.get_press_status(data.x, data.y);
+                if !new_status.is_none() {
+                    let dif = data.y - (self.base.y + 1);
+                    self.status = new_status;
+                    self.update_value_from_mouse(dif, new_status);
+                    return ProcessEventResult::Update;
+                }
+                if self.status != MouseOnScrollbarStatus::None {
+                    self.status = new_status;
+                    return ProcessEventResult::PassToControlAndRepaint;
+                }
+                ProcessEventResult::PassToControl
+            }
+            MouseEvent::Released(data) => {
+                let new_status = self.get_hover_status(data.x, data.y);
+                if self.status.is_pressed() {
+                    self.status = new_status;
+                    ProcessEventResult::Repaint
+                } else {
+                    self.status = new_status;
+                    ProcessEventResult::PassToControlAndRepaint
+                }
+            }
+            MouseEvent::Drag(data) => {
+                let new_status = self.get_drag_status(data.y);
+                if self.status.is_pressed() {
+                    if (new_status == self.status) && (new_status == MouseOnScrollbarStatus::PressedOnBar) {
+                        let dif = data.y - (self.y + 1);
+                        self.update_value_from_mouse(dif, MouseOnScrollbarStatus::PressedOnBar);
+                        ProcessEventResult::Update
+                    } else {
+                        ProcessEventResult::Processed
+                    }
+                } else {
+                    ProcessEventResult::PassToControl
+                }
+            }
+            MouseEvent::Enter => {
+                self.status = MouseOnScrollbarStatus::None;
+                ProcessEventResult::PassToControlAndRepaint
+            }
+            MouseEvent::Leave => {
+                if !self.status.is_none() {
+                    self.status = MouseOnScrollbarStatus::None;
+                    ProcessEventResult::PassToControlAndRepaint
+                } else {
+                    ProcessEventResult::PassToControl
+                }
+            }
+            MouseEvent::DoubleClick(data) => {
+                let new_status = self.get_press_status(data.x, data.y);
+                if !new_status.is_none() {
+                    let dif = data.y - (self.y + 1);
+                    self.status = new_status;                    
+                    self.update_value_from_mouse(dif, new_status);
+                    return ProcessEventResult::Update;
+                }
+                if self.status != MouseOnScrollbarStatus::None {
+                    self.status = new_status;
+                    return ProcessEventResult::PassToControlAndRepaint;
+                }
+                ProcessEventResult::PassToControl
+            }
+            MouseEvent::Wheel(_) => ProcessEventResult::PassToControl,
+        }
+    }
+}
+impl Deref for VScrollBar {
+    type Target = GenericScrollBar;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
+impl DerefMut for VScrollBar {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.base
+    }
+}
+
+/*
 #[repr(u8)]
 #[derive(Eq, PartialEq, Copy, Clone)]
 enum MouseOnScrollbarStatus {
@@ -315,3 +524,4 @@ impl VScrollBar {
         }
     }
 }
+*/

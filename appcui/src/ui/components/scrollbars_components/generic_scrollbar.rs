@@ -6,7 +6,7 @@ use super::ProcessEventResult;
 
 #[repr(u8)]
 #[derive(Eq, PartialEq, Copy, Clone)]
-enum MouseOnScrollbarStatus {
+pub(crate) enum MouseOnScrollbarStatus {
     None,
     HoverOnMinimizeArrow,
     PressedOnMinimizeArrow,
@@ -18,11 +18,11 @@ enum MouseOnScrollbarStatus {
 
 impl MouseOnScrollbarStatus {
     #[inline(always)]
-    fn is_none(&self) -> bool {
+    pub(crate) fn is_none(&self) -> bool {
         *self == MouseOnScrollbarStatus::None
     }
     #[inline(always)]
-    fn is_pressed(&self) -> bool {
+    pub(crate) fn is_pressed(&self) -> bool {
         matches!(
             self,
             MouseOnScrollbarStatus::PressedOnMinimizeArrow | MouseOnScrollbarStatus::PressedOnMaximizeArrow | MouseOnScrollbarStatus::PressedOnBar
@@ -32,7 +32,7 @@ impl MouseOnScrollbarStatus {
 
 #[repr(C)]
 #[derive(PartialEq, Eq, Copy, Clone)]
-enum MousePosition {
+pub(super) enum MousePosition {
     MinimizeArrow,
     MaximizeArrow,
     Bar,
@@ -40,14 +40,14 @@ enum MousePosition {
 }
 
 pub struct GenericScrollBar {
-    x: i32,
-    y: i32,
-    dimension: u16,
-    enabled: bool,
-    visible: bool,
-    count: u64,
-    index: u64,
-    status: MouseOnScrollbarStatus,
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) dimension: u16,
+    pub(crate) enabled: bool,
+    pub(crate) visible: bool,
+    pub(crate) max_value: u64,
+    pub(crate) value: u64,
+    pub(crate) status: MouseOnScrollbarStatus,
 }
 impl GenericScrollBar {
     pub fn new(visible: bool) -> Self {
@@ -55,83 +55,84 @@ impl GenericScrollBar {
             x: 0,
             y: 0,
             enabled: false,
-            index: 0,
+            value: 0,
             visible,
-            count: 0,
+            max_value: 0,
             dimension: 3,
             status: MouseOnScrollbarStatus::None,
         }
     }
     #[inline(always)]
-    pub fn set_index(&mut self, value: u64) {
-        self.index = if self.count > 0 { value.min(self.count - 1) } else { 0 };
+    pub fn set_value(&mut self, value: u64) {
+        self.value = value.min(self.max_value);
     }
     #[inline(always)]
-    pub fn index(&self) -> u64 {
-        self.index
+    pub fn value(&self) -> u64 {
+        self.value
     }
     #[inline(always)]
-    pub fn update(&mut self, visible_indexes: u64, total_indexes: u64) {
-        if (visible_indexes < total_indexes) && (visible_indexes != 0) {
-            self.count = (total_indexes - visible_indexes) + 1;
+    pub fn update(&mut self, visible_values: u64, available_values: u64) {
+        if (visible_values < available_values) && (visible_values != 0) {
+            self.max_value = available_values - visible_values;
         } else {
-            self.count = 0;
+            self.max_value = 0;
         }
-        self.index = if self.count > 0 { self.index.min(self.count - 1) } else { 0 };
-        self.enabled = self.count > 0;
+        self.value = self.value.min(self.max_value);
+        self.enabled = self.max_value > 0;
     }
     #[inline(always)]
-    pub(super) fn recompute_layout(&mut self, pos: i32, available_size: i32, control_size: Size) -> i32 {
-        if available_size <= 4 {
+    pub(super) fn recompute_layout(&mut self, x: i32, y: i32,  available_space: u16) -> u16 {
+        if available_space <= 4 {
             self.visible = false;
             return 0;
         }
-        self.y = control_size.height as i32;
-        self.x = pos;
-        self.dimension = available_size as u16;
+        self.y = y;
+        self.x = x;
+        self.dimension = available_space;
         self.visible = true;
-        available_size
+        available_space
     }
-    fn update_index_for_mouse_pos(&mut self, x: i32, new_status: MouseOnScrollbarStatus) {
+    #[inline(always)]
+    pub(super) fn update_value_from_mouse(&mut self, mouse_pos: i32, new_status: MouseOnScrollbarStatus) {
         match new_status {
             MouseOnScrollbarStatus::PressedOnMinimizeArrow => {
-                if self.index > 0 {
-                    self.set_index(self.index - 1);
+                if self.value > 0 {
+                    self.set_value(self.value - 1);
                 }
             }
             MouseOnScrollbarStatus::PressedOnMaximizeArrow => {
-                self.set_index(self.index + 1);
+                self.set_value(self.value + 1);
             }
             MouseOnScrollbarStatus::PressedOnBar => {
-                let poz = x - (self.x + 1);
+  
                 // sanity check & shaddowing
-                let poz = poz.max(0) as u128;
-                if (self.dimension > 3) && (self.count > 0) {
+                let poz = mouse_pos.max(0) as u128;
+                if (self.dimension > 3) && (self.max_value > 0) {
                     let dim = ((self.dimension as u64) - 3) as u128;
-                    let cnt = (self.count - 1) as u128;
+                    let cnt = self.max_value as u128;
                     let mut new_index = (poz.min(dim) * cnt) / dim;
                     let rest = (poz.min(dim) * cnt) % dim;
                     if rest != 0 {
                         new_index += 1;
                     }
-                    self.set_index(new_index as u64);
+                    self.set_value(new_index as u64);
                     //eprintln!("new_poz={new_index},count={},dim={},y={y},self.y={}", self.count, self.dimension, self.y);
                 } else {
-                    self.set_index(0);
+                    self.set_value(0);
                 }
             }
             _ => {}
         }
     }
     #[inline(always)]
-    fn index_to_screen_offset(&self) -> i32 {
-        if (self.count < 2) || (self.dimension <= 3) {
+    pub(super) fn value_to_screen_offset(&self) -> i32 {
+        if (self.max_value==0) || (self.dimension <= 3) {
             return 0;
         }
         let dim = (self.dimension as u64) - 3;
-        let cnt = self.count - 1;
-        let idx = self.index.min(cnt); // safety check
-        if self.count > 0x0000_0FFF_FFFF_FFFFu64 {
+        let cnt = self.max_value ;
+        let idx = self.value.min(cnt); // safety check
+        if self.max_value > 0x0000_0FFF_FFFF_FFFFu64 {
             ((((idx as u128) * (dim as u128)) / (cnt as u128)) as u16) as i32
         } else {
             (((idx * dim) / cnt) as u16) as i32

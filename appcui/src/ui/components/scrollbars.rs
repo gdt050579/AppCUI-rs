@@ -49,7 +49,7 @@ impl ScrollBars {
     }
     pub fn set_indexes(&mut self, horizontal: u64, vertical: u64) {
         self.horizontal.set_index(horizontal);
-        self.vertical.set_index(vertical);
+        self.vertical.set_value(vertical);
     }
     #[inline(always)]
     pub fn horizontal_index(&self) -> u64 {
@@ -57,6 +57,6 @@ impl ScrollBars {
     }
     #[inline(always)]
     pub fn vertical_index(&self) -> u64 {
-        self.vertical.index()
+        self.vertical.value()
     }
 }
