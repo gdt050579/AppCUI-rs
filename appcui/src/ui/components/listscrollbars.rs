@@ -75,9 +75,9 @@ impl ListScrollBars {
         if self.has_searchbar && self.has_scrollbars {
             // leave 6 characters for the search bar
             let search_width = self.search.recompute_layout(x, w - 6, control_size);
-            self.horizontal.recompute_layout(x + search_width, w - search_width, control_size);
+            self.horizontal.recompute_position(x + search_width, w - search_width, control_size);
         } else if self.has_scrollbars {
-            self.horizontal.recompute_layout(x, w, control_size);
+            self.horizontal.recompute_position(x, w, control_size);
         } else if self.has_searchbar {
             self.search.recompute_layout(x, w, control_size);
         }
@@ -88,14 +88,14 @@ impl ListScrollBars {
     }
     pub fn set_indexes(&mut self, horizontal: u64, vertical: u64) {
         if self.has_scrollbars {
-            self.horizontal.set_index(horizontal);
+            self.horizontal.set_value(horizontal);
             self.vertical.set_value(vertical);
         }
     }
     
     #[inline(always)]
     pub fn horizontal_index(&self) -> u64 {
-        self.horizontal.index()
+        self.horizontal.value()
     }
     
     #[inline(always)]

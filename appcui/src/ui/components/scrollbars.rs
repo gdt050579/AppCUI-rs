@@ -40,7 +40,7 @@ impl ScrollBars {
         let h = (control_size.height as i32) - top_margin; // 1 space from bottom
         let x = left_margin;
         let y = top_margin;
-        self.horizontal.recompute_layout(x, w, control_size);
+        self.horizontal.recompute_position(x, w, control_size);
         self.vertical.recompute_position(y, h, control_size);
         self.update(horizontal_indexes, vertical_indexes, control_size);
     }
@@ -48,12 +48,12 @@ impl ScrollBars {
         self.should_paint
     }
     pub fn set_indexes(&mut self, horizontal: u64, vertical: u64) {
-        self.horizontal.set_index(horizontal);
+        self.horizontal.set_value(horizontal);
         self.vertical.set_value(vertical);
     }
     #[inline(always)]
     pub fn horizontal_index(&self) -> u64 {
-        self.horizontal.index()
+        self.horizontal.value()
     }
     #[inline(always)]
     pub fn vertical_index(&self) -> u64 {
