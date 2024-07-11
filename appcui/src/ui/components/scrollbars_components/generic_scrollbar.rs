@@ -2,7 +2,7 @@ use crate::prelude::MouseEvent;
 use super::ProcessEventResult;
 
 #[repr(u8)]
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub(crate) enum MouseOnScrollbarStatus {
     None,
     HoverOnMinimizeArrow,
@@ -221,7 +221,9 @@ impl GenericScrollBar {
                 if !new_status.is_none() {
                     let dif = if vertical { data.y - (self.y + 1) } else { data.x - (self.x + 1) };
                     self.status = new_status;
+                    //print!("Status:{:?}, max={}, value={}, dif={} ",new_status,self.max_value,self.value,dif);
                     self.update_value_from_mouse(dif, new_status);
+                    //println!("=> value={}",self.value);
                     return ProcessEventResult::Update;
                 }
                 if self.status != MouseOnScrollbarStatus::None {

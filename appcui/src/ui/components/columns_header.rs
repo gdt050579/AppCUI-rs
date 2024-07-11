@@ -220,15 +220,16 @@ impl ColumnsHeader {
         }
         if self.freez_columns == 0 {
             let mut pos = start;
+            self.width = 0;
             for c in self.columns.iter_mut() {
                 c.x = pos;
                 pos += 1 + c.width as i32;
+                self.width += 1 + c.width as u32;
             }
-            let last = self.columns.last().unwrap();
-            self.width = 1 + (last.x + last.width as i32) as u32;
         } else {
             let mut pos = 0;
             let fc = self.freez_columns as usize;
+            self.width = 0;
             //let mut right_most = 0;
             for (index, c) in self.columns.iter_mut().enumerate() {
                 if index < fc {
@@ -238,8 +239,8 @@ impl ColumnsHeader {
                 }
                 //right_most = (c.x + c.width as i32 + 1).max(right_most);
                 pos += 1 + c.width as i32;
+                self.width += 1 + c.width as u32;
             }
-            self.width = pos as u32;
         }
         // if (self.left_scroll > 0) && (self.left_scroll < self.width) {
         //     let right_most = self.width - self.left_scroll;
