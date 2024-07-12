@@ -159,3 +159,47 @@ fn check_column_ensure_visible_when_changing_columns() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_column_resize_outside_visible() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xA6F8DC05418FA9A5)
+        Key.Pressed(Ctrl+Right,3)
+        Paint('2. C3 selected')
+        CheckHash(0x7A19C8ECD3975FC9)
+        Key.Pressed(Right);
+        Paint('3. C3 increased by 1')
+        CheckHash(0x1205B31BB5A2E8E6)
+        Key.Pressed(Right,4);
+        Paint('4. C3 increased by 4, C2 line under T from Test')
+        CheckHash(0xBE314AF843DA7B17)
+        Key.Pressed(Right,18);
+        Paint('5. C3 increased by 18, C3 has the entire width of the window')
+        CheckHash(0x88EB41332D598118)
+        Key.Pressed(Right);
+        Paint('6. C3 increased by 1, Header starts with C3..., right line visible')
+        CheckHash(0xFE373AA6CB9FCB9C)
+        Key.Pressed(Right);
+        Paint('7. C3 increased by 1, Header starts with 3..., right line visible')
+        CheckHash(0xC99586142C1EE75B)
+        Key.Pressed(Left,2);
+        Paint('8. C3 decreased by 2 - should take the entire width of the window')
+        CheckHash(0x88EB41332D598118)
+        Key.Pressed(Left,20);
+        Paint('9. C3 decreased by 20, Line under letter T from Test')
+        CheckHash(0x886948F2CFA28E07)
+        Key.Pressed(Ctrl+Left);
+        Paint('10. C2 is visible')
+        CheckHash(0x1D6B48ED61CF0D6A)
+   ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    w.add(listview!(
+        "TestItem,d:c,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
+    ));
+    a.add_window(w);
+    a.run();
+}
