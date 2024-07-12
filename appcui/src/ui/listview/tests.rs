@@ -110,3 +110,52 @@ fn check_column_resize_with_keys() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_column_ensure_visible_when_changing_columns() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xA6F8DC05418FA9A5)
+        Key.Pressed(Ctrl+Right)
+        Paint('2. C1 selected')
+        CheckHash(0xA854AE3EEBECBE79)
+        Key.Pressed(Ctrl+Right)
+        Paint('3. C2 selected')
+        CheckHash(0x1B2BF1D59A37B3C1)
+        Key.Pressed(Ctrl+Right)
+        Paint('4. C3 selected (header starts with C1-10, C3 is fully visible at the end)')
+        CheckHash(0x7A19C8ECD3975FC9)
+        Key.Pressed(Ctrl+Right)
+        Paint('5. C4 selected (C4 is visible at the end of the header)')
+        CheckHash(0x12531D79D88BFB31)
+        Key.Pressed(Ctrl+Right)
+        Paint('6. C5 selected (C5 is visible at the end of the header)')
+        CheckHash(0x2610F5BA8B809EAB)
+        Key.Pressed(Ctrl+Right)
+        Paint('7. C5 remains selected (same as 6)')
+        CheckHash(0x2610F5BA8B809EAB)
+        Key.Pressed(Ctrl+Left)
+        Paint('8. C4 selected (view is not changed)')
+        CheckHash(0xBFEE2A312CD05D53)
+        Key.Pressed(Ctrl+Left)
+        Paint('9. C3 selected (from the start of the header)')
+        CheckHash(0xF0A53B98F0DD9917)
+        Key.Pressed(Ctrl+Left)
+        Paint('10. C2 selected (from the start of the header)')
+        CheckHash(0xEC65923D88D014E2)
+        Key.Pressed(Ctrl+Left)
+        Paint('11. C1 selected (from the start of the header)')
+        CheckHash(0xA854AE3EEBECBE79)
+        Key.Pressed(Ctrl+Left)
+        Paint('12. C1 remains selected (view is not changed)')
+        CheckHash(0xA854AE3EEBECBE79)
+   ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    w.add(listview!(
+        "TestItem,d:c,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
+    ));
+    a.add_window(w);
+    a.run();
+}
