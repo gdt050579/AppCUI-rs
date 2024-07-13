@@ -300,3 +300,45 @@ fn check_column_click() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_column_left_right_scroll() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xD91C4D1725F901B4)
+        Key.Pressed(Right)
+        Paint('2. Scroll to right')
+        CheckHash(0xF2231DF83A92FFDC)   
+        Key.Pressed(Right,2)
+        Paint('3. Scroll to right (C1 is not visible)')
+        CheckHash(0x3073E33BB34F3EDE)   
+        Key.Pressed(Right,12)
+        Paint('4. Scroll to right (C2 is first on header)')
+        CheckHash(0x903858619D4CE328)   
+        Key.Pressed(Right,2)
+        Paint('5. Scroll to right most - C5 is fully visible')
+        CheckHash(0xA1F242FCA8DDE105)   
+        Key.Pressed(Right)
+        Paint('6. Scroll to right most - nothing changes')
+        CheckHash(0xA1F242FCA8DDE105)   
+        Key.Pressed(Left)
+        Paint('7. Scroll to left - C5 bar is no longer visible')
+        CheckHash(0xDD6D52AB8FFB4FCF)   
+        Key.Pressed(Left,10)
+        Paint('8. Scroll to left - 10 pos')
+        CheckHash(0x5F47E2CF754E559A)   
+        Key.Pressed(Left,10)
+        Paint('9. Scroll to left - back to the initial state')
+        CheckHash(0xD91C4D1725F901B4)   
+   ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    w.add(listview!(
+        "TestItem,d:c,flags: ScrollBars,columns=[{C1,10,L},{C2,10,C},{C3,10,R},{C4,10},{C5,10}]"
+    ));
+    a.add_window(w);
+    a.run();
+}
+
+
