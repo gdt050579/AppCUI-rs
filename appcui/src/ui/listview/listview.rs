@@ -8,6 +8,7 @@ where
 {
     data: T,
     selected: bool,
+    attr: Option<CharAttribute>,
 }
 enum Filter {
     Item(u32),
@@ -53,14 +54,14 @@ where
         self.header.add(column);
     }
     pub fn add(&mut self, item: T) {
-        self.data.push(Item { data: item, selected: false });
+        self.data.push(Item { data: item, selected: false, attr: None});
         // refiltering is required
     }
     pub fn add_items(&mut self, items: Vec<T>) {
         self.data.reserve(items.len());
         self.filter.reserve(items.len());
         for item in items {
-            self.data.push(Item { data: item, selected: false });
+            self.data.push(Item { data: item, selected: false, attr: None});
         }
         // refiltering is required
     }
@@ -108,7 +109,7 @@ where
             ColumnsHeaderAction::Repaint => false,
         }
     }
-    fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme) {
+    fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, focus: bool, attr: CharAttribute) {
         let width = self.header.width() as i32;
         let frozen_columns = self.header.frozen_columns();
         let columns = self.header.columns();
@@ -121,6 +122,11 @@ where
             let c = &columns[frozen_columns as usize - 1];
             c.x + c.width as i32 + 1
         };
+        let a = if focus {
+            item.attr
+        } else {
+            Some(attr)
+        };
         for (index, c) in columns.iter().enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (r < min_left) || (c.x >= width) || (c.width == 0) {
@@ -128,7 +134,7 @@ where
             }
             surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
             if let Some(render_method) = ListItem::render_method(&item.data, index as u32) {
-                if !render_method.paint(surface, theme, c.alignment) {
+                if !render_method.paint(surface, theme, c.alignment, c.width as u16, a) {
                     // custom paint required
                     ListItem::paint(&item.data, index as u32, c.width as u16, surface, theme)
                 }
