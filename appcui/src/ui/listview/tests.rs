@@ -232,3 +232,30 @@ fn check_column_move_scroll_when_enter_column_resize_mode() {
     a.add_window(w);
     a.run();
 }
+#[test]
+fn check_column_scroll_update_when_control_is_resized() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (h-scroll inactive)')
+        CheckHash(0x9CC1A20A64CF25BC)
+        Mouse.Drag(49,9,40,9)
+        Paint('2. Resize window (h-scroll active)')
+        CheckHash(0x96AD3061803219B9)   
+        Key.Pressed(Right,100)     
+        Paint('3. Move h-scroll to end (starts with | C2...)')
+        CheckHash(0x1C85B6AB50E32DB9) 
+        Mouse.Drag(40,9,30,9)  
+        Paint('4. Move h-scroll to middle but still (starts with | C2...)')
+        CheckHash(0x53F55F8778EDFF3F) 
+        Mouse.Drag(30,9,60,9)  
+        Paint('5. Scroll bar is not inactive (starts with C1 ...)')
+        CheckHash(0x6CA64A075D529384) 
+   ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    w.add(listview!(
+        "TestItem,d:c,flags: ScrollBars,columns=[{C1,6},{C2,6},{C3,6},{C4,6},{C5,6}]"
+    ));
+    a.add_window(w);
+    a.run();
+}
