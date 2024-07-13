@@ -442,5 +442,6 @@ impl ColumnsHeader {
     }
     pub fn enter_resize_mode(&mut self) {
         self.selected_column_line_index = 0;
+        self.ensure_visible(0, true);
     }
 }

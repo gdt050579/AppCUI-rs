@@ -136,6 +136,7 @@ impl<T> OnKeyPressed for ListView<T> where T: ListItem {
         match key.value() {
             key!("Ctrl+Left") | key!("Ctrl+Right") => {
                 self.header.enter_resize_mode();
+                self.update_scrollbars();
                 return EventProcessStatus::Processed;
             }  
             _ => {} 

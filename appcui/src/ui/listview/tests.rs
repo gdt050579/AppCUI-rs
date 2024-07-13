@@ -203,3 +203,32 @@ fn check_column_resize_outside_visible() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_column_move_scroll_when_enter_column_resize_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xA6F8DC05418FA9A5)
+        Key.Pressed(Ctrl+Right,3)
+        Paint('2. C3 selected')
+        CheckHash(0x7A19C8ECD3975FC9)
+        Key.Pressed(Right,10);
+        Paint('3. C3 increased by 10')
+        CheckHash(0x5836CFFB8679E7A7)
+        Key.Pressed(Escape)
+        Paint('4. No column selected')
+        CheckHash(0x4663870AFB3F133B)
+        Key.Pressed(Ctrl+Right)
+        Paint('5. Fist column selected and scroll moved')
+        CheckHash(0xA854AE3EEBECBE79)
+   ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    w.add(listview!(
+        "TestItem,d:c,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
+    ));
+    a.add_window(w);
+    a.run();
+}
