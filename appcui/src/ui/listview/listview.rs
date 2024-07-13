@@ -136,6 +136,7 @@ where
                 continue;
             }
             surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
+            surface.set_origin(c.x, y);
             if let Some(render_method) = ListItem::render_method(&item.data, index as u32) {
                 if !render_method.paint(surface, theme, c.alignment, c.width as u16, attr) {
                     // custom paint required
@@ -164,6 +165,8 @@ where
             y += 1;
             idx += 1;
         }
+        surface.reset_clip();
+        surface.reset_origin();
     }
 }
 
