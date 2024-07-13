@@ -81,6 +81,10 @@ impl ColumnsHeader {
     pub fn width(&self) -> u32 {
         self.width
     }
+    #[inline(always)]
+    pub fn frozen_columns(&self) -> u16 {
+        self.freez_columns
+    }
     pub fn set_frozen_columns(&mut self, count: u16) {
         if count as usize >= self.columns.len() {
             self.freez_columns = 0;
@@ -444,5 +448,9 @@ impl ColumnsHeader {
     pub fn enter_resize_mode(&mut self) {
         self.selected_column_line_index = 0;
         self.ensure_visible(0, true);
+    }
+    #[inline(always)]
+    pub fn columns(&self) -> &Vec<Column> {
+        &self.columns
     }
 }

@@ -1,7 +1,11 @@
 use crate::prelude::*;
 
 struct TestItem {}
-impl listview::ListItem for TestItem {}
+impl listview::ListItem for TestItem {
+    fn render_method(&self, _column_index: u32)->Option<listview::RenderMethod> {
+        Some(listview::RenderMethod::Text("abc"))
+    }
+}
 
 #[test]
 fn check_create() {

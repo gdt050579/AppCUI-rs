@@ -1,5 +1,8 @@
 use EnumBitFlags::EnumBitFlags;
 
+use crate::prelude::{Surface, Theme};
+use super::RenderMethod;
+
 #[EnumBitFlags(bits=8)]
 pub enum Flags {
     ScrollBars = 0x01,
@@ -9,4 +12,6 @@ pub enum Flags {
 }   
 
 pub trait ListItem {
+    fn paint(&self, column_index: u32, width: u16, surface: &mut Surface, theme: &Theme) {}
+    fn render_method(&self, column_index: u32)->Option<RenderMethod>;
 }
