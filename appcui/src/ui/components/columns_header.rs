@@ -347,6 +347,7 @@ impl ColumnsHeader {
                             self.selected_column_index = index;
                             self.sort_ascendent = true;
                         }
+                        self.ensure_visible(self.selected_column_index, false);
                         self.mouse_capture = true;
                         ColumnsHeaderAction::Sort((index, self.sort_ascendent))
                     }

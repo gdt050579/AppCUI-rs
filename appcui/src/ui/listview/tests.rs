@@ -259,3 +259,44 @@ fn check_column_scroll_update_when_control_is_resized() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_column_click() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (h-scroll inactive)')
+        CheckHash(0xD91C4D1725F901B4)
+        Mouse.Move(20,2)
+        Paint('2. C1-hover')
+        CheckHash(0xBCF1AC194596E088)   
+        Mouse.Move(26,2)
+        Paint('3. C2-hover')
+        CheckHash(0x8B967934E497DCF4)   
+        Mouse.Move(40,2)
+        Paint('4. C3-hover')
+        CheckHash(0xF97A147330A43988)   
+        Mouse.Click(40,2,left)
+        Paint('5. C3-hover, clicked, sorted up')
+        CheckHash(0xB1A45A7496098B32)   
+        Mouse.Click(40,2,left)
+        Paint('6. C3-hover, clicked, sorted down')
+        CheckHash(0x93AB741282C03DC4)   
+        Mouse.Move(44,2)
+        Paint('7. C4-hover, C3-selected and sorted down')
+        CheckHash(0xC0D6BDF3C435DEA6)   
+        Mouse.Click(44,2,left)
+        Paint('8. C4-hover, clicked, sorted down, scroll move to see C3 entirely at the end')
+        CheckHash(0x33D2C0CF30EAEE5C)   
+        Mouse.Move(0,0)
+        Paint('9. C4-clicked, sorted down, scroll move to see C3 entirely at the end')
+        CheckHash(0x70C7CCCB3A1B805D)   
+   ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    w.add(listview!(
+        "TestItem,d:c,flags: ScrollBars,columns=[{C1,10,L},{C2,10,C},{C3,10,R},{C4,10},{C5,10}]"
+    ));
+    a.add_window(w);
+    a.run();
+}
