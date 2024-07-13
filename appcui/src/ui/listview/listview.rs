@@ -1,4 +1,4 @@
-use super::{Flags,ListItem,RenderMethod};
+use super::{Flags, ListItem, RenderMethod};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
 
@@ -54,14 +54,22 @@ where
         self.header.add(column);
     }
     pub fn add(&mut self, item: T) {
-        self.data.push(Item { data: item, selected: false, attr: None});
+        self.data.push(Item {
+            data: item,
+            selected: false,
+            attr: None,
+        });
         // refiltering is required
     }
     pub fn add_items(&mut self, items: Vec<T>) {
         self.data.reserve(items.len());
         self.filter.reserve(items.len());
         for item in items {
-            self.data.push(Item { data: item, selected: false, attr: None});
+            self.data.push(Item {
+                data: item,
+                selected: false,
+                attr: None,
+            });
         }
         // refiltering is required
     }
@@ -109,7 +117,7 @@ where
             ColumnsHeaderAction::Repaint => false,
         }
     }
-    fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, focus: bool, attr: CharAttribute) {
+    fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         let width = self.header.width() as i32;
         let frozen_columns = self.header.frozen_columns();
         let columns = self.header.columns();
@@ -122,11 +130,6 @@ where
             let c = &columns[frozen_columns as usize - 1];
             c.x + c.width as i32 + 1
         };
-        let a = if focus {
-            item.attr
-        } else {
-            Some(attr)
-        };
         for (index, c) in columns.iter().enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (r < min_left) || (c.x >= width) || (c.width == 0) {
@@ -134,11 +137,32 @@ where
             }
             surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
             if let Some(render_method) = ListItem::render_method(&item.data, index as u32) {
-                if !render_method.paint(surface, theme, c.alignment, c.width as u16, a) {
+                if !render_method.paint(surface, theme, c.alignment, c.width as u16, attr) {
                     // custom paint required
                     ListItem::paint(&item.data, index as u32, c.width as u16, surface, theme)
                 }
             }
+        }
+    }
+    fn paint_items(&self, surface: &mut Surface, theme: &Theme) {
+        let has_focus = self.base.has_focus();
+        let attr = if !self.is_enabled() {
+            Some(theme.text.inactive)
+        } else if !has_focus {
+            Some(theme.text.normal)
+        } else {
+            None
+        };
+        let mut y = 1;
+        let max_y = self.size().height as i32;
+        let mut idx = 0;
+        let max_idx = self.data.len();
+        // very simply code
+        while (y < max_y) && (idx < max_idx) {
+            let item = &self.data[idx];
+            self.paint_item(item, y, surface, theme, attr);
+            y += 1;
+            idx += 1;
         }
     }
 }
@@ -148,8 +172,13 @@ where
     T: ListItem,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        // paint columns
         self.header.paint(surface, theme, &self.base);
+        // paint items
+        self.paint_items(surface, theme);
+        // paint separation lines (columns)
         self.header.paint_columns(surface, theme, &self.base);
+        // paint scroll bars and searh bars
         self.comp.paint(surface, theme, &self.base);
     }
 }
