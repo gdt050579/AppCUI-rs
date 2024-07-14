@@ -18,6 +18,8 @@ where
     filter: Vec<Filter>,
     header: ColumnsHeader,
     comp: ListScrollBars,
+    top_view: usize,
+    pos: usize,
 }
 
 impl<T> ListView<T>
@@ -40,6 +42,8 @@ where
         Self {
             base: ControlBase::with_status_flags(layout, status_flags),
             flags,
+            top_view: 0,
+            pos: 0,
             data: Vec::with_capacity(capacity),
             filter: Vec::with_capacity(capacity),
             header: ColumnsHeader::with_capacity(4),
@@ -152,7 +156,7 @@ where
         };
         let mut y = 1;
         let max_y = self.size().height as i32;
-        let mut idx = 0;
+        let mut idx = self.top_view;
         let max_idx = self.filter.len();
         // very simply code
         while (y < max_y) && (idx < max_idx) {
@@ -165,11 +169,55 @@ where
                     self.paint_item(item, y, surface, theme, attr);
                 }
             }
+            if (has_focus) && (idx == self.pos) {
+                surface.reset_clip();
+                surface.reset_origin();
+                surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, theme.list_current_item.focus));
+            }
             y += 1;
             idx += 1;
         }
         surface.reset_clip();
         surface.reset_origin();
+    }
+    fn update_position(&mut self, new_pos: usize, emit_event: bool) {
+        let len = self.filter.len();
+        if len == 0 {
+            return;
+        }
+        let new_pos = new_pos.min(len - 1);
+        let h = (self.size().height.saturating_sub(1)) as usize;
+        if h==0 {
+            return;
+        }
+
+        // check the top view
+        if self.top_view + h >= len {
+            self.top_view = len.saturating_sub(h);
+        }
+        if new_pos < self.top_view {
+            self.top_view = new_pos;
+        } else {
+            let diff = new_pos - self.top_view;
+            if (diff >= h) && (h > 0) {
+                self.top_view = new_pos - h + 1;
+            }
+        }
+        // update scrollbars
+        self.update_scrollbars();
+        let should_emit = (self.pos != new_pos) && emit_event;
+        self.pos = new_pos;
+        if should_emit {
+            // self.raise_event(ControlEvent {
+            //     emitter: self.handle,
+            //     receiver: self.event_processor,
+            //     data: ControlEventData::ListBox(EventData {
+            //         event_type: ListBoxEventTypes::CurrentItemChanged,
+            //         index: new_pos,
+            //         checked: false, // not relevant for this event
+            //     }),
+            // });
+        }
     }
 }
 
