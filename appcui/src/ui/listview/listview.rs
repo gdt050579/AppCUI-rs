@@ -1,15 +1,8 @@
-use super::{Flags, ListItem, RenderMethod};
+use super::{Flags, ListItem, Item};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
 
-struct Item<T>
-where
-    T: ListItem,
-{
-    data: T,
-    selected: bool,
-    attr: Option<CharAttribute>,
-}
+
 enum Filter {
     Item(u32),
     Group(u32),
@@ -54,22 +47,22 @@ where
         self.header.add(column);
     }
     pub fn add(&mut self, item: T) {
-        self.data.push(Item {
-            data: item,
-            selected: false,
-            attr: None,
-        });
+        self.add_item(Item::from(item));
+    }
+    pub fn add_item(&mut self, item: Item<T>) {
+        let index = self.data.len() as u32;
+        self.data.push(item);
+        self.filter.push(Filter::Item(index));
         // refiltering is required
     }
     pub fn add_items(&mut self, items: Vec<T>) {
+        let mut index = self.data.len() as u32;
         self.data.reserve(items.len());
         self.filter.reserve(items.len());
         for item in items {
-            self.data.push(Item {
-                data: item,
-                selected: false,
-                attr: None,
-            });
+            self.data.push(Item::from(item));
+            self.filter.push(Filter::Item(index));
+            index += 1;
         }
         // refiltering is required
     }
@@ -137,10 +130,10 @@ where
             }
             surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
             surface.set_origin(c.x, y);
-            if let Some(render_method) = ListItem::render_method(&item.data, index as u32) {
+            if let Some(render_method) = ListItem::render_method(item.value(), index as u32) {
                 if !render_method.paint(surface, theme, c.alignment, c.width as u16, attr) {
                     // custom paint required
-                    ListItem::paint(&item.data, index as u32, c.width as u16, surface, theme)
+                    ListItem::paint(item.value(), index as u32, c.width as u16, surface, theme)
                 }
             }
         }
@@ -157,11 +150,18 @@ where
         let mut y = 1;
         let max_y = self.size().height as i32;
         let mut idx = 0;
-        let max_idx = self.data.len();
+        let max_idx = self.filter.len();
         // very simply code
         while (y < max_y) && (idx < max_idx) {
-            let item = &self.data[idx];
-            self.paint_item(item, y, surface, theme, attr);
+            match self.filter[idx] {
+                Filter::Group(_) => {
+                    // paint group
+                }
+                Filter::Item(index) => {
+                    let item = &self.data[index as usize];
+                    self.paint_item(item, y, surface, theme, attr);
+                }
+            }
             y += 1;
             idx += 1;
         }
