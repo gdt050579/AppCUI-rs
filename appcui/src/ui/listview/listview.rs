@@ -1,7 +1,6 @@
-use super::{Flags, ListItem, Item};
+use super::{Flags, Item, ListItem};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
-
 
 enum Filter {
     Item(u32),
@@ -29,7 +28,7 @@ where
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(16, layout, flags)
     }
-    pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags)->Self {
+    pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags) -> Self {
         let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
@@ -187,7 +186,7 @@ where
         }
         let new_pos = new_pos.min(len - 1);
         let h = (self.size().height.saturating_sub(1)) as usize;
-        if h==0 {
+        if h == 0 {
             return;
         }
 
@@ -218,6 +217,14 @@ where
             //     }),
             // });
         }
+    }
+    fn move_scroll_to(&mut self, new_poz: usize) {
+        if new_poz == self.top_view {
+            return;
+        }
+        let max_value = self.filter.len().saturating_sub(self.size().height.saturating_sub(1) as usize);
+        self.top_view = new_poz.min(max_value);
+        self.update_scrollbars();
     }
 }
 
@@ -254,6 +261,46 @@ where
             key!("Ctrl+Left") | key!("Ctrl+Right") => {
                 self.header.enter_resize_mode();
                 self.update_scrollbars();
+                return EventProcessStatus::Processed;
+            }
+            key!("Up") => {
+                self.update_position(self.pos.saturating_sub(1), true);
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("Down") => {
+                self.update_position(self.pos.saturating_add(1), true);
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Alt+Up") => {
+                self.move_scroll_to(self.top_view.saturating_sub(1));
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Alt+Down") => {
+                self.move_scroll_to(self.top_view.saturating_add(1));
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("Home") => {
+                self.update_position(0, true);
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("End") => {
+                self.update_position(self.filter.len(), true);
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("PageUp") => {
+                self.update_position(self.pos.saturating_sub(self.size().height.saturating_sub(1) as usize), true);
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("PageDown") => {
+                self.update_position(self.pos.saturating_add(self.size().height.saturating_sub(1) as usize), true);
+                self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }
             _ => {}
