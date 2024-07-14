@@ -25,6 +25,9 @@ where
     T: ListItem,
 {
     pub fn new(layout: Layout, flags: Flags) -> Self {
+        Self::with_capacity(16, layout, flags)
+    }
+    pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags)->Self {
         let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
@@ -37,8 +40,8 @@ where
         Self {
             base: ControlBase::with_status_flags(layout, status_flags),
             flags,
-            data: Vec::new(),
-            filter: Vec::new(),
+            data: Vec::with_capacity(capacity),
+            filter: Vec::with_capacity(capacity),
             header: ColumnsHeader::with_capacity(4),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
         }
