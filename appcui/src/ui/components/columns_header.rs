@@ -429,7 +429,10 @@ impl ColumnsHeader {
                     self.selected_column_line_index = u16::MAX;
                     ColumnsHeaderAction::Processed
                 }
-                _ => ColumnsHeaderAction::None,
+                _ => {
+                    self.selected_column_line_index = u16::MAX;
+                    ColumnsHeaderAction::Repaint 
+                }
             }
         } else {
             match key.value() {
