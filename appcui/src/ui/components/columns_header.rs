@@ -431,7 +431,7 @@ impl ColumnsHeader {
                 }
                 _ => {
                     self.selected_column_line_index = u16::MAX;
-                    ColumnsHeaderAction::Repaint 
+                    ColumnsHeaderAction::Repaint     
                 }
             }
         } else {

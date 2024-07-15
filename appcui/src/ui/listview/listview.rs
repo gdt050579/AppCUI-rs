@@ -84,12 +84,12 @@ where
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
         self.header.scroll_to(self.comp.horizontal_index() as u32);
-        //self.top_view = (self.comp.vertical_index() as usize).min(self.items.len().saturating_sub(1));
+        self.top_view = (self.comp.vertical_index() as usize).min(self.filter.len());
         //self.update_left_position_for_items();
     }
     fn update_scrollbars(&mut self) {
-        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base);
-        self.comp.set_indexes(self.header.scroll_pos() as u64, 0);
+        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, 1);
+        self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
     }
     fn execute_column_header_action(&mut self, action: ColumnsHeaderAction) -> bool {
         match action {
@@ -341,6 +341,6 @@ where
 {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.header.resize(new_size);
-        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base);
+        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, 1);
     }
 }

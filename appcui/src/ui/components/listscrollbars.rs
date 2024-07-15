@@ -63,7 +63,7 @@ impl ListScrollBars {
             false
         }
     }
-    pub fn resize(&mut self, horizontal_indexes: u64, vertical_indexes: u64, control: &ControlBase) {
+    pub fn resize(&mut self, horizontal_indexes: u64, vertical_indexes: u64, control: &ControlBase, header_height: u32) {
         let control_size = control.size();
         let left_margin = control.left_components_margin as i32;
         let top_margin = control.top_components_margin as i32;
@@ -81,7 +81,8 @@ impl ListScrollBars {
         } else if self.has_searchbar {
             self.search.recompute_layout(x, w, control_size);
         }
-        self.update(horizontal_indexes, vertical_indexes, control_size);
+        let visible_space = Size::new(control_size.width,control_size.height.saturating_sub(header_height));
+        self.update(horizontal_indexes, vertical_indexes, visible_space);
     }
     pub fn should_repaint(&self) -> bool {
         self.should_paint
