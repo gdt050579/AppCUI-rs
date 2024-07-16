@@ -203,6 +203,11 @@ where
                 Filter::Item(index) => {
                     let item = &self.data[index as usize];
                     self.paint_item(item, y, surface, theme, attr);
+                    if (item.is_checked()) && (has_focus) && (!self.flags.contains(Flags::CheckBoxes)) {
+                        surface.reset_clip();
+                        surface.reset_origin();
+                        surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, theme.list_current_item.selected));        
+                    }
                 }
             }
             if (has_focus) && (idx == self.pos) {
