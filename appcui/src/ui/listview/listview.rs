@@ -1,7 +1,13 @@
 use super::{Flags, Item, ListItem};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
+use listview::item;
 use AppCUIProcMacro::*;
 
+enum CheckMode {
+    True,
+    False,
+    Reverse
+}
 enum Filter {
     Item(u32),
     Group(u32),
@@ -257,6 +263,22 @@ where
         self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
     }
+    fn check_item(&mut self, pos: usize, mode: CheckMode) {
+        if pos>=self.filter.len() {
+            return;
+        }
+        match self.filter[pos] {
+            Filter::Item(index) => {
+                let item = &mut self.data[index as usize];
+                match mode {
+                    CheckMode::True => item.set_checked(true),
+                    CheckMode::False => item.set_checked(false),
+                    CheckMode::Reverse => item.set_checked(!item.is_checked()),
+                }
+            },
+            Filter::Group(_) => todo!(),
+        }
+    }
 }
 
 impl<T> OnPaint for ListView<T>
@@ -331,6 +353,19 @@ where
             }
             key!("PageDown") => {
                 self.update_position(self.pos.saturating_add(self.size().height.saturating_sub(1) as usize), true);
+                self.comp.exit_edit_mode();
+                return EventProcessStatus::Processed;
+            }
+            key!("Space") => {
+                if self.flags.contains(Flags::CheckBoxes) {
+                    self.check_item(self.pos, CheckMode::Reverse);
+                    self.comp.exit_edit_mode();
+                    return EventProcessStatus::Processed;
+                }
+            }
+            key!("Insert")=> {
+                self.check_item(self.pos, CheckMode::Reverse);
+                self.update_position(self.pos.saturating_add(1), true);
                 self.comp.exit_edit_mode();
                 return EventProcessStatus::Processed;
             }

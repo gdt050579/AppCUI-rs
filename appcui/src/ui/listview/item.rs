@@ -40,6 +40,10 @@ impl<T> Item<T> where T: ListItem {
     pub(super) fn x_offset(&self) -> i32 {
         self.x_ofs as i32
     }
+    #[inline(always)]
+    pub(super) fn set_checked(&mut self, value: bool) {
+        self.checked = value;
+    }
 }
 impl<T> From<T> for Item<T> where T: ListItem {
     fn from(value: T) -> Self {
