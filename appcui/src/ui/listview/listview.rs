@@ -129,7 +129,38 @@ where
             let c = &columns[frozen_columns as usize - 1];
             c.x + c.width as i32 + 1
         };
-        for (index, c) in columns.iter().enumerate() {
+        // first column
+        let c = &columns[0];
+        let l = c.x + item.x_offset();
+        let r = c.x + c.width as i32;
+        let mut extra = 0;
+        if (r >= 0) && (r >= min_left) && (l < width) && (c.width != 0) {
+            surface.set_relative_clip(l.max(min_left), y, r.max(min_left), y);
+            surface.set_origin(l, y);
+            if self.flags.contains(Flags::CheckBoxes) {
+                if item.is_checked() {
+                    surface.write_char(
+                        l,
+                        0,
+                        Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
+                    );
+                } else {
+                    surface.write_char(l, 0, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+                }
+                extra = 2;
+            }
+            if extra > 0 {
+                surface.set_relative_clip((l + extra).max(min_left), y, r.max(min_left), y);
+                surface.set_origin(l + extra, y);
+            }            
+            if let Some(render_method) = ListItem::render_method(item.value(), 0) {
+                if !render_method.paint(surface, theme, c.alignment, c.width as u16, attr) {
+                    // custom paint required
+                    ListItem::paint(item.value(), 0, c.width as u16, surface, theme)
+                }
+            }
+        }
+        for (index, c) in columns.iter().skip(1).enumerate() {
             let r = c.x + c.width as i32;
             if (r < 0) || (r < min_left) || (c.x >= width) || (c.width == 0) {
                 continue;
