@@ -122,6 +122,69 @@ where
             ColumnsHeaderAction::Repaint => false,
         }
     }
+    fn process_key_pressed(&mut self, key: Key)->bool {
+        // process key for items
+        match key.value() {
+            // movements
+            key!("Ctrl+Left") | key!("Ctrl+Right") => {
+                self.header.enter_resize_mode();
+                true
+            }
+            key!("Up") => {
+                self.update_position(self.pos.saturating_sub(1), true);
+                true
+            }
+            key!("Down") => {
+                self.update_position(self.pos.saturating_add(1), true);
+                true
+            }
+            key!("Ctrl+Alt+Up") => {
+                self.move_scroll_to(self.top_view.saturating_sub(1));
+                true
+            }
+            key!("Ctrl+Alt+Down") => {
+                self.move_scroll_to(self.top_view.saturating_add(1));
+                true
+            }
+            key!("Home") => {
+                self.update_position(0, true);
+                true
+            }
+            key!("End") => {
+                self.update_position(self.filter.len(), true);
+                true
+            }
+            key!("PageUp") => {
+                self.update_position(self.pos.saturating_sub(self.size().height.saturating_sub(1) as usize), true);
+                true
+            }
+            key!("PageDown") => {
+                self.update_position(self.pos.saturating_add(self.size().height.saturating_sub(1) as usize), true);
+                true
+            }
+
+            // Selection
+            key!("Space") => {
+                if self.flags.contains(Flags::CheckBoxes) {
+                    self.check_item(self.pos, CheckMode::Reverse);
+                    true
+                } else {
+                    false
+                }
+            }
+            key!("Insert") | key!("Shift+Down") => {
+                self.check_item(self.pos, CheckMode::Reverse);
+                self.update_position(self.pos.saturating_add(1), true);                
+                true
+            }
+            key!("Shift+Up") => {
+                self.check_item(self.pos, CheckMode::Reverse);
+                self.update_position(self.pos.saturating_sub(1), true);                
+                true
+            }
+            _ => false
+        }
+    }
     fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         let width = self.header.width() as i32;
         let frozen_columns = self.header.frozen_columns();
@@ -208,12 +271,17 @@ where
                         surface.reset_origin();
                         surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, theme.list_current_item.selected));        
                     }
+                    if (has_focus) && (idx == self.pos) {
+                        surface.reset_clip();
+                        surface.reset_origin();
+                        let current_item_attr = match () {
+                            _ if self.flags.contains(Flags::CheckBoxes) => theme.list_current_item.focus,
+                            _ if item.is_checked() => theme.list_current_item.over_selection,
+                            _ => theme.list_current_item.focus,
+                        };
+                        surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, current_item_attr));
+                    }
                 }
-            }
-            if (has_focus) && (idx == self.pos) {
-                surface.reset_clip();
-                surface.reset_origin();
-                surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, theme.list_current_item.focus));
             }
             y += 1;
             idx += 1;
@@ -314,67 +382,9 @@ where
         if self.comp.process_key_pressed(key, character) {
             return EventProcessStatus::Processed;
         }
-        // process key for items
-        match key.value() {
-            key!("Ctrl+Left") | key!("Ctrl+Right") => {
-                self.header.enter_resize_mode();
-                self.update_scrollbars();
-                return EventProcessStatus::Processed;
-            }
-            key!("Up") => {
-                self.update_position(self.pos.saturating_sub(1), true);
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            key!("Down") => {
-                self.update_position(self.pos.saturating_add(1), true);
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            key!("Ctrl+Alt+Up") => {
-                self.move_scroll_to(self.top_view.saturating_sub(1));
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            key!("Ctrl+Alt+Down") => {
-                self.move_scroll_to(self.top_view.saturating_add(1));
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            key!("Home") => {
-                self.update_position(0, true);
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            key!("End") => {
-                self.update_position(self.filter.len(), true);
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            key!("PageUp") => {
-                self.update_position(self.pos.saturating_sub(self.size().height.saturating_sub(1) as usize), true);
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            key!("PageDown") => {
-                self.update_position(self.pos.saturating_add(self.size().height.saturating_sub(1) as usize), true);
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            key!("Space") => {
-                if self.flags.contains(Flags::CheckBoxes) {
-                    self.check_item(self.pos, CheckMode::Reverse);
-                    self.comp.exit_edit_mode();
-                    return EventProcessStatus::Processed;
-                }
-            }
-            key!("Insert")=> {
-                self.check_item(self.pos, CheckMode::Reverse);
-                self.update_position(self.pos.saturating_add(1), true);
-                self.comp.exit_edit_mode();
-                return EventProcessStatus::Processed;
-            }
-            _ => {}
+        if self.process_key_pressed(key) {
+            self.comp.exit_edit_mode();
+            return EventProcessStatus::Processed;
         }
         if (action.should_repaint()) || (self.comp.should_repaint()) {
             EventProcessStatus::Processed

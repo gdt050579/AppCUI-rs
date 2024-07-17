@@ -294,7 +294,7 @@ impl Theme {
         self.list_current_item = ListCurentItemTheme {
             focus: CharAttribute::with_color(Color::Black, Color::White),
             over_inactive: CharAttribute::with_color(Color::Gray, Color::White),
-            over_selection: CharAttribute::with_color(Color::Red, Color::Yellow),
+            over_selection: CharAttribute::with_color(Color::Red, Color::White),
             normal: CharAttribute::with_color(Color::Yellow, Color::Transparent),
             selected: CharAttribute::with_color(Color::Transparent, Color::Black),            
         };
