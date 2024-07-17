@@ -1,12 +1,12 @@
 use super::{Flags, Item, ListItem};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
-use listview::item;
 use AppCUIProcMacro::*;
 
+#[derive(Clone, Copy)]
 enum CheckMode {
     True,
     False,
-    Reverse
+    Reverse,
 }
 enum Filter {
     Item(u32),
@@ -122,7 +122,42 @@ where
             ColumnsHeaderAction::Repaint => false,
         }
     }
-    fn process_key_pressed(&mut self, key: Key)->bool {
+    #[inline(always)]
+    fn visible_items(&self) -> usize {
+        self.size().height.saturating_sub(1) as usize
+    }
+    #[inline(always)]
+    fn toggle_current_item_selection(&self) -> CheckMode {
+        if self.pos < self.filter.len() {
+            match self.filter[self.pos] {
+                Filter::Item(index) => {
+                    if self.data[index as usize].is_checked() {
+                        CheckMode::False
+                    } else {
+                        CheckMode::True
+                    }
+                }
+                Filter::Group(_) => CheckMode::False,
+            }
+        } else {
+            CheckMode::False
+        }
+    }
+    #[inline(always)]
+    fn is_entire_list_selected(&self) -> bool {
+        for item in &self.filter {
+            match item {
+                Filter::Item(idx) => {
+                    if !self.data[*idx as usize].is_checked() {
+                        return false;
+                    }
+                }
+                _ => {}
+            }
+        }
+        return true;
+    }
+    fn process_key_pressed(&mut self, key: Key) -> bool {
         // process key for items
         match key.value() {
             // movements
@@ -155,11 +190,11 @@ where
                 true
             }
             key!("PageUp") => {
-                self.update_position(self.pos.saturating_sub(self.size().height.saturating_sub(1) as usize), true);
+                self.update_position(self.pos.saturating_sub(self.visible_items()), true);
                 true
             }
             key!("PageDown") => {
-                self.update_position(self.pos.saturating_add(self.size().height.saturating_sub(1) as usize), true);
+                self.update_position(self.pos.saturating_add(self.visible_items()), true);
                 true
             }
 
@@ -174,15 +209,51 @@ where
             }
             key!("Insert") | key!("Shift+Down") => {
                 self.check_item(self.pos, CheckMode::Reverse);
-                self.update_position(self.pos.saturating_add(1), true);                
+                self.update_position(self.pos.saturating_add(1), true);
                 true
             }
             key!("Shift+Up") => {
                 self.check_item(self.pos, CheckMode::Reverse);
-                self.update_position(self.pos.saturating_sub(1), true);                
+                self.update_position(self.pos.saturating_sub(1), true);
                 true
             }
-            _ => false
+            key!("Shift+Home") => {
+                let start = self.pos;
+                let mode = self.toggle_current_item_selection();
+                self.update_position(0, true);
+                self.check_items(start, self.pos, mode);
+                true
+            }
+            key!("Shift+End") => {
+                let start = self.pos;
+                let mode = self.toggle_current_item_selection();
+                self.update_position(self.filter.len(), true);
+                self.check_items(start, self.pos, mode);
+                true
+            }
+            key!("Shift+PageUp") => {
+                let start = self.pos;
+                let mode = self.toggle_current_item_selection();
+                self.update_position(self.pos.saturating_sub(self.visible_items()), true);
+                self.check_items(start, self.pos, mode);
+                true
+            }
+            key!("Shift+PageDown") => {
+                let start = self.pos;
+                let mode = self.toggle_current_item_selection();
+                self.update_position(self.pos.saturating_add(self.visible_items()), true);
+                self.check_items(start, self.pos, mode);
+                true
+            }
+            key!("Ctrl+A") => {
+                if self.is_entire_list_selected() {
+                    self.check_items(0, self.filter.len(), CheckMode::False);
+                } else {
+                    self.check_items(0, self.filter.len(), CheckMode::True);
+                }
+                true
+            }
+            _ => false,
         }
     }
     fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
@@ -221,7 +292,7 @@ where
             if extra > 0 {
                 surface.set_relative_clip((l + extra).max(min_left), y, r.max(min_left), y);
                 surface.set_origin(l + extra, y);
-            }            
+            }
             if let Some(render_method) = ListItem::render_method(item.value(), 0) {
                 if !render_method.paint(surface, theme, c.alignment, c.width as u16, attr) {
                     // custom paint required
@@ -269,7 +340,12 @@ where
                     if (item.is_checked()) && (has_focus) && (!self.flags.contains(Flags::CheckBoxes)) {
                         surface.reset_clip();
                         surface.reset_origin();
-                        surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, theme.list_current_item.selected));        
+                        surface.fill_horizontal_line_with_size(
+                            0,
+                            y,
+                            self.size().width,
+                            Character::with_attributes(0, theme.list_current_item.selected),
+                        );
                     }
                     if (has_focus) && (idx == self.pos) {
                         surface.reset_clip();
@@ -337,7 +413,7 @@ where
         self.update_scrollbars();
     }
     fn check_item(&mut self, pos: usize, mode: CheckMode) {
-        if pos>=self.filter.len() {
+        if pos >= self.filter.len() {
             return;
         }
         match self.filter[pos] {
@@ -348,8 +424,19 @@ where
                     CheckMode::False => item.set_checked(false),
                     CheckMode::Reverse => item.set_checked(!item.is_checked()),
                 }
-            },
+            }
             Filter::Group(_) => todo!(),
+        }
+    }
+    fn check_items(&mut self, start: usize, end: usize, mode: CheckMode) {
+        let len = self.filter.len();
+        if len == 0 {
+            return;
+        }
+        let p_start = start.min(end).min(len - 1);
+        let p_end = end.max(start).min(len - 1);
+        for pos in p_start..=p_end {
+            self.check_item(pos, mode);
         }
     }
 }
