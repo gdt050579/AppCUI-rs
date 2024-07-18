@@ -44,6 +44,14 @@ impl<T> Item<T> where T: ListItem {
     pub(super) fn set_checked(&mut self, value: bool) {
         self.checked = value;
     }
+    #[inline(always)]
+    pub(super) fn icon_first_character(&self) -> char {
+        self.icon[0]
+    }
+    #[inline(always)]
+    pub(super) fn icon_second_character(&self) -> char {
+        self.icon[1]
+    }
 }
 impl<T> From<T> for Item<T> where T: ListItem {
     fn from(value: T) -> Self {

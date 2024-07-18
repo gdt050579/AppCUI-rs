@@ -25,6 +25,7 @@ where
     comp: ListScrollBars,
     top_view: usize,
     pos: usize,
+    icon_width: u8,
 }
 
 impl<T> ListView<T>
@@ -53,6 +54,13 @@ where
             filter: Vec::with_capacity(capacity),
             header: ColumnsHeader::with_capacity(4),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
+            icon_width: if flags.contains(Flags::LargeIcon) {
+                3 // includes the extra space
+            } else if flags.contains(Flags::SmallIcon) {
+                2 // includes the extra space
+            } else {
+                0 // No extra space
+            },
         }
     }
     pub fn add_column(&mut self, column: Column) {
@@ -289,6 +297,18 @@ where
                 }
                 extra = 2;
             }
+            // icon
+            match self.icon_width {
+                3 => {
+                    surface.write_char(l + extra, y, Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)));
+                    surface.write_char(l + extra + 1, y, Character::with_attributes(item.icon_second_character(), attr.unwrap_or(theme.text.focused)));
+                },
+                2 => {
+                    surface.write_char(l + extra, y, Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)));
+                },
+                _ => {}
+            }
+            extra += self.icon_width as i32;
             if extra > 0 {
                 surface.set_relative_clip((l + extra).max(min_left), y, r.max(min_left), y);
                 surface.set_origin(l + extra, y);
