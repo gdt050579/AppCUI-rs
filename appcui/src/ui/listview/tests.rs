@@ -2,8 +2,11 @@ use crate::prelude::*;
 
 struct TestItem {}
 impl listview::ListItem for TestItem {
-    fn render_method(&self, _column_index: u32)->Option<listview::RenderMethod> {
+    fn render_method(&self, _column_index: u16)->Option<listview::RenderMethod> {
         Some(listview::RenderMethod::Text("abc"))
+    }
+    fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+        std::cmp::Ordering::Equal    
     }
 }
 

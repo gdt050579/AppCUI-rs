@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use super::{Flags, Group, GroupInformation, Item, ListItem};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
@@ -8,6 +10,7 @@ enum CheckMode {
     False,
     Reverse,
 }
+#[derive(Clone, Copy)]
 enum Filter {
     Item(u32),
     Group(u32),
@@ -70,7 +73,10 @@ where
     }
     pub fn add_group(&mut self, name: &str) -> Group {
         let index = self.groups.len() as u16;
-        self.groups.push(GroupInformation { name: String::from(name), items_count: 0 });
+        self.groups.push(GroupInformation {
+            name: String::from(name),
+            items_count: 0,
+        });
         Group::new(index)
     }
     pub fn add_column(&mut self, column: Column) {
@@ -100,8 +106,29 @@ where
         self.header.set_frozen_columns(count);
         self.update_scrollbars();
     }
-    fn sort_elements(&mut self, _column_index: u16, _ascendent: bool) {
+    fn compare_items(a: Filter, b: Filter, column_index: u16, data: &Vec<Item<T>>) -> Ordering
+    where
+        T: ListItem,
+    {
+        match (a, b) {
+            (Filter::Item(index_a), Filter::Item(index_b)) => {
+                let item_a = data[index_a as usize].value();
+                let item_b = data[index_b as usize].value();
+                ListItem::compare(item_a, item_b, column_index)
+            }
+            (Filter::Group(index_a), Filter::Group(index_b)) => index_a.cmp(&index_b),
+            (Filter::Item(_), Filter::Group(_)) => Ordering::Less,
+            (Filter::Group(_), Filter::Item(_)) => Ordering::Greater,
+        }
+    }
+    fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
         // sort elements by column index
+        let data = &self.data;
+        if ascendent {
+            self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data));
+        } else {
+            self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data).reverse());
+        }
     }
     fn autoresize_column(&mut self, _column_index: u16) {
         // auto resize column
@@ -342,14 +369,14 @@ where
                 }
             }
         }
-        for (index, c) in columns.iter().skip(1).enumerate() {
+        for (index, c) in columns.iter().enumerate().skip(1) {
             let r = c.x + c.width as i32;
             if (r < 0) || (r < min_left) || (c.x >= width) || (c.width == 0) {
                 continue;
             }
             surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
             surface.set_origin(c.x, y);
-            if let Some(render_method) = ListItem::render_method(item.value(), index as u32) {
+            if let Some(render_method) = ListItem::render_method(item.value(), index as u16) {
                 if !render_method.paint(surface, theme, c.alignment, c.width as u16, attr) {
                     // custom paint required
                     ListItem::paint(item.value(), index as u32, c.width as u16, surface, theme)
