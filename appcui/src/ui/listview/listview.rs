@@ -1,4 +1,4 @@
-use super::{Flags, Item, ListItem};
+use super::{Flags, Group, GroupInformation, Item, ListItem};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
 
@@ -21,6 +21,7 @@ where
     flags: Flags,
     data: Vec<Item<T>>,
     filter: Vec<Filter>,
+    groups: Vec<GroupInformation>,
     header: ColumnsHeader,
     comp: ListScrollBars,
     top_view: usize,
@@ -45,12 +46,13 @@ where
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
         }
 
-        Self {
+        let mut lv = Self {
             base: ControlBase::with_status_flags(layout, status_flags),
             flags,
             top_view: 0,
             pos: 0,
             data: Vec::with_capacity(capacity),
+            groups: Vec::new(),
             filter: Vec::with_capacity(capacity),
             header: ColumnsHeader::with_capacity(4),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
@@ -61,7 +63,15 @@ where
             } else {
                 0 // No extra space
             },
-        }
+        };
+        // add a default group
+        lv.groups.push(GroupInformation::default());
+        lv
+    }
+    pub fn add_group(&mut self, name: &str) -> Group {
+        let index = self.groups.len() as u16;
+        self.groups.push(GroupInformation { name: String::from(name), items_count: 0 });
+        Group::new(index)
     }
     pub fn add_column(&mut self, column: Column) {
         self.header.add(column);
@@ -300,12 +310,24 @@ where
             // icon
             match self.icon_width {
                 3 => {
-                    surface.write_char(l + extra, y, Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)));
-                    surface.write_char(l + extra + 1, y, Character::with_attributes(item.icon_second_character(), attr.unwrap_or(theme.text.focused)));
-                },
+                    surface.write_char(
+                        l + extra,
+                        y,
+                        Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
+                    );
+                    surface.write_char(
+                        l + extra + 1,
+                        y,
+                        Character::with_attributes(item.icon_second_character(), attr.unwrap_or(theme.text.focused)),
+                    );
+                }
                 2 => {
-                    surface.write_char(l + extra, y, Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)));
-                },
+                    surface.write_char(
+                        l + extra,
+                        y,
+                        Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
+                    );
+                }
                 _ => {}
             }
             extra += self.icon_width as i32;

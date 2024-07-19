@@ -1,4 +1,5 @@
 use super::ListItem;
+use super::Group;
 use crate::graphics::CharAttribute;
 
 pub struct Item<T>
@@ -14,14 +15,24 @@ where
 }
 
 impl<T> Item<T> where T: ListItem {
-    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, x_offset: i8, icon_chars: [char;2]) -> Self {
+    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, x_offset: i8, icon_chars: [char;2], group: Group) -> Self {
         Self {
             data,
             checked,
             attr,
-            group_id: 0,
+            group_id: group.index(),
             x_ofs: x_offset,
             icon: icon_chars,
+        }
+    }
+    pub fn with_group(data: T, group: Group) -> Self {
+        Self {
+            data,
+            checked: false,
+            attr: None,
+            group_id: group.index(),
+            x_ofs: 0,
+            icon: [0 as char, 0 as char],
         }
     }
     #[inline(always)]
