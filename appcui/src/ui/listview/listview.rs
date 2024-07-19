@@ -112,9 +112,14 @@ where
     {
         match (a, b) {
             (Filter::Item(index_a), Filter::Item(index_b)) => {
-                let item_a = data[index_a as usize].value();
-                let item_b = data[index_b as usize].value();
-                ListItem::compare(item_a, item_b, column_index)
+                let rezult = data[index_a as usize].group_id().cmp(&data[index_b as usize].group_id());
+                if rezult != Ordering::Equal {
+                    rezult
+                } else {
+                    let item_a = data[index_a as usize].value();
+                    let item_b = data[index_b as usize].value();
+                    ListItem::compare(item_a, item_b, column_index)
+                }
             }
             (Filter::Group(index_a), Filter::Group(index_b)) => index_a.cmp(&index_b),
             (Filter::Item(_), Filter::Group(_)) => Ordering::Less,

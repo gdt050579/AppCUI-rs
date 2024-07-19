@@ -63,6 +63,10 @@ impl<T> Item<T> where T: ListItem {
     pub(super) fn icon_second_character(&self) -> char {
         self.icon[1]
     }
+    #[inline(always)]
+    pub(super) fn group_id(&self) -> u16 {
+        self.group_id
+    }
 }
 impl<T> From<T> for Item<T> where T: ListItem {
     fn from(value: T) -> Self {
