@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use crate::utils;
+
 use super::{Flags, Group, GroupInformation, Item, ListItem};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
@@ -96,7 +98,7 @@ where
             panic!("Invalid group id `{}`. Have you reused a group id from a previous instantiation ?", gid);
         }
         let count = self.groups[gid].items_count();
-        self.groups[gid].set_items_count(count+1);
+        self.groups[gid].set_items_count(count + 1);
         self.data.push(item);
         // refilter everything
         self.refilter();
@@ -377,12 +379,53 @@ where
     fn paint_group(&self, gi: &GroupInformation, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         let w = self.size().width;
         surface.draw_horizontal_line_with_size(0, y, w, LineType::Single, attr.unwrap_or(theme.lines.focused));
-        let x = 2;
-        let w = gi.name_chars_count();
-        let mut format = TextFormat::single_line(x, y, attr.unwrap_or(theme.text.focused), TextAlignament::Left);
-        format.chars_count = Some(gi.name_chars_count());
-        format.width = Some(w);
-        surface.write_text(gi.name(), &format);
+        let mut left = 1;
+        if gi.is_collapsed() {
+            surface.write_char(
+                left,
+                y,
+                Character::with_attributes(SpecialChar::TriangleRight, attr.unwrap_or(theme.symbol.arrows)),
+            );
+        } else {
+            surface.write_char(
+                left,
+                y,
+                Character::with_attributes(SpecialChar::TriangleDown, attr.unwrap_or(theme.symbol.arrows)),
+            );
+        }
+        left += 2;
+        let items_in_group = gi.items_count();
+        let digits = utils::FormatNumber::number_of_digits(items_in_group as u64) as i32;
+        let right = if (w as i32) - digits - 7 >= left {
+            (w as i32) - digits - 3
+        } else {
+            (w as i32) - 2
+        };
+        if left + 3 < right {
+            let mut format = TextFormat::single_line(left + 1, y, attr.unwrap_or(theme.text.focused), TextAlignament::Left);
+            let txwidth = gi.name_chars_count() as i32;
+            let space_width = if left + 3 + txwidth <= right { txwidth } else { right - left - 3 };
+            format.width = Some(space_width as u16);
+            surface.write_text(gi.name(), &format);
+            surface.write_char(left, y, Character::with_attributes('[', attr.unwrap_or(theme.text.focused)));
+            surface.write_char(
+                left + space_width + 1,
+                y,
+                Character::with_attributes(']', attr.unwrap_or(theme.text.focused)),
+            );
+            if left + txwidth + 3 > right {
+                surface.write_char(left + space_width, y, Character::with_char(SpecialChar::ThreePointsHorizontal));
+            }
+            left += space_width + 3;
+        }
+        if (left < right) && (right + digits + 3 <= w as i32) {
+            surface.write_char(right, y, Character::with_attributes('[', attr.unwrap_or(theme.text.focused)));
+            surface.write_char(right + digits + 1, y, Character::with_attributes(']', attr.unwrap_or(theme.text.focused)));
+            // utils::FormatNumber::write_unsigned(&self, value, writer);
+            // let mut format = TextFormat::single_line(left, y, attr.unwrap_or(theme.text.focused), TextAlignament::Right);
+            // format.width = Some((right - left) as u16);
+            // surface.write_text(&format.number(items_in_group as u64), &format);
+        }
     }
     fn paint_groups(&self, surface: &mut Surface, theme: &Theme) {
         let has_focus = self.base.has_focus();
@@ -408,8 +451,7 @@ where
                         surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, theme.list_current_item.focus));
                     }
                 }
-                Filter::Item(_) => {
-                }
+                Filter::Item(_) => {}
             }
             y += 1;
             idx += 1;

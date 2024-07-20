@@ -9,6 +9,25 @@ pub(crate) struct FormatNumber {
 }
 
 impl FormatNumber {
+    pub(crate) fn number_of_digits(value: u64) -> u8 {
+        // calculates the number of digits for a number using a intervals (0-9, 10-99, 100-999, 1000-9999, etc)
+        match value {
+            0..=9 => 1,
+            10..=99 => 2,
+            100..=999 => 3,
+            1000..=9999 => 4,
+            10000..=99999 => 5,
+            _ => {
+                let mut result = 1;
+                let mut value = value / 10;
+                while value > 0 {
+                    result += 1;
+                    value /= 10;
+                }
+                result
+            }
+        }
+    }
     pub(crate) const fn new(base: u8) -> Self {
         match base {
             2 | 8 | 10 | 16 => (),
@@ -63,26 +82,26 @@ impl FormatNumber {
     pub(crate) const fn representation_digits(mut self, value: u8) -> Self {
         match self.base {
             2 => {
-                if value>128 {
+                if value > 128 {
                     panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 128 for base 2)");
                 }
-            },
+            }
             8 => {
-                if value>43 {
+                if value > 43 {
                     panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 43 for base 8)");
                 }
-            },
+            }
             10 => {
-                if value>39 {
+                if value > 39 {
                     panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 39 for base 10)");
                 }
-            },
+            }
             16 => {
-                if value>32 {
+                if value > 32 {
                     panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 32 for base 16)");
                 }
-            },
-            _ => { }
+            }
+            _ => {}
         }
         self.representation_digits = value;
         self
@@ -248,7 +267,7 @@ impl FormatNumber {
         let mut buffer = [0u8; 40];
         let mut index = 0;
         let mut value = value;
-        if value<0.0 {
+        if value < 0.0 {
             value = -value;
             write.push('-');
         }
@@ -279,7 +298,7 @@ impl FormatNumber {
                 let digit = fract_part.trunc() as u8;
                 fract_part = fract_part.fract();
                 write.push((digit + 48) as char);
-            }            
+            }
         }
     }
 }
