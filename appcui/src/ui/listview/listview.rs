@@ -88,27 +88,33 @@ where
     pub fn add_column(&mut self, column: Column) {
         self.header.add(column);
     }
+    #[inline(always)]
     pub fn add(&mut self, item: T) {
         self.add_item(Item::from(item));
     }
+    #[inline(always)]
     pub fn add_item(&mut self, item: Item<T>) {
-        let index = self.data.len() as u32;
+        let gid = item.group_id() as usize;
+        if gid >= self.groups.len() {
+            panic!("Invalid group id `{}`. Have you reused a group id from a previous instantiation ?", gid);
+        }
+        self.groups[gid].items_count += 1;
         self.data.push(item);
-        self.filter.push(Filter::Item(index));
+        // refilter everything
         self.refilter();
     }
     pub fn add_items(&mut self, items: Vec<T>) {
-        let mut index = self.data.len() as u32;
         self.data.reserve(items.len());
         self.filter.reserve(items.len());
         for item in items {
-            self.data.push(Item::from(item));
-            self.filter.push(Filter::Item(index));
-            index += 1;
+            self.add_item(Item::from(item));
         }
         self.refilter();
     }
-    pub fn add_batch<F>(&mut self, f: F) where F: FnOnce(&mut Self) {
+    pub fn add_batch<F>(&mut self, f: F)
+    where
+        F: FnOnce(&mut Self),
+    {
         self.refilter_enabled = false;
         f(self);
         self.refilter_enabled = true;
@@ -157,13 +163,25 @@ where
         self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
     }
     fn refilter(&mut self) {
+        if !self.refilter_enabled {
+            return;
+        }
         // refilter elements
         self.filter.clear();
+        // reserve space for the entire list + groups
+        self.filter.reserve(self.data.len() + self.groups.len());
         // if show groups is present --> add all groups first
         if self.flags.contains(Flags::ShowGroups) {
-            for index in self.groups.iter().enumerate().filter(|(_, g)| !g.is_empty()).map(|(i, _)| i) {
-                self.filter.push(Filter::Group(index as u16));
+            if self.flags.contains(Flags::DisplayEmptyGroups) {
+                for (index, _) in self.groups.iter().enumerate() {
+                    self.filter.push(Filter::Group(index as u16));
+                }
+            } else {
+                for index in self.groups.iter().enumerate().filter(|(_, g)| !g.is_empty()).map(|(i, _)| i) {
+                    self.filter.push(Filter::Group(index as u16));
+                }
             }
+
         }
         // add items
         for (index, _) in self.data.iter().enumerate() {
