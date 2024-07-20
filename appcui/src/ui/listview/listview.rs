@@ -104,20 +104,33 @@ where
         self.refilter();
     }
     pub fn add_items(&mut self, items: Vec<T>) {
+        self.add_multiple_items(items, Group::None, [0 as char, 0 as char]);
+    }
+    pub fn add_items_to_group(&mut self, items: Vec<T>, group: Group) {
+        self.add_multiple_items(items, group, [0 as char, 0 as char]);
+    }
+    fn add_multiple_items(&mut self, items: Vec<T>, group: Group, icon: [char; 2]) {
+        // disable refiltering while adding all elements
+        let old_refilter = self.refilter_enabled;
+        self.refilter_enabled = false;
         self.data.reserve(items.len());
         self.filter.reserve(items.len());
         for item in items {
-            self.add_item(Item::from(item));
+            self.add_item(Item::new(item, false, None, 0, icon, group));
         }
+        // restore original refilter state
+        self.refilter_enabled = old_refilter;
         self.refilter();
     }
     pub fn add_batch<F>(&mut self, f: F)
     where
         F: FnOnce(&mut Self),
     {
+        let old_refilter = self.refilter_enabled;
         self.refilter_enabled = false;
         f(self);
-        self.refilter_enabled = true;
+        // restore original refilter state
+        self.refilter_enabled = old_refilter;
         self.refilter();
     }
     pub fn set_frozen_columns(&mut self, count: u16) {
@@ -181,7 +194,6 @@ where
                     self.filter.push(Filter::Group(index as u16));
                 }
             }
-
         }
         // add items
         for (index, _) in self.data.iter().enumerate() {
