@@ -14,21 +14,46 @@ impl Group {
 }
 
 pub(crate) struct GroupInformation {
-    pub(super) name: String,
-    pub(super) items_count: u32,
+    name: String,
+    name_chars_count: u16,
+    items_count: u32,
 }
 
 impl GroupInformation {
+    pub(super) fn new(name: &str) -> GroupInformation {
+        GroupInformation {
+            name: String::from(name),
+            name_chars_count: name.chars().count() as u16,
+            items_count: 0,
+        }
+    }
     #[inline(always)]   
     pub(super) fn is_empty(&self) -> bool {
         self.items_count == 0
     }
+    #[inline(always)]
+    pub(super) fn name(&self) -> &str {
+        &self.name
+    }
+    #[inline(always)]
+    pub(super) fn name_chars_count(&self) -> u16 {
+        self.name_chars_count
+    }
+    #[inline(always)]
+    pub(super) fn items_count(&self) -> u32 {
+        self.items_count
+    }
+    #[inline(always)]
+    pub(super) fn set_items_count(&mut self, value: u32) {
+        self.items_count = value;
+    }   
 }
 
 impl Default for GroupInformation {
     fn default() -> Self {
         Self {
             name: String::new(),
+            name_chars_count: 0,
             items_count: 0,
         }
     }

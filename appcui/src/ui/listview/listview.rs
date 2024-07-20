@@ -75,10 +75,7 @@ where
     }
     pub fn add_group(&mut self, name: &str) -> Group {
         let index = self.groups.len() as u16;
-        self.groups.push(GroupInformation {
-            name: String::from(name),
-            items_count: 0,
-        });
+        self.groups.push(GroupInformation::new(name));
         if self.flags.contains(Flags::ShowGroups) {
             // if groups are being shouwn -> we need to refilter intems
             self.refilter();
@@ -98,7 +95,8 @@ where
         if gid >= self.groups.len() {
             panic!("Invalid group id `{}`. Have you reused a group id from a previous instantiation ?", gid);
         }
-        self.groups[gid].items_count += 1;
+        let count = self.groups[gid].items_count();
+        self.groups[gid].set_items_count(count+1);
         self.data.push(item);
         // refilter everything
         self.refilter();
@@ -376,6 +374,47 @@ where
             _ => false,
         }
     }
+    fn paint_group(&self, gi: &GroupInformation, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
+        let w = self.size().width;
+        surface.draw_horizontal_line_with_size(0, y, w, LineType::Single, attr.unwrap_or(theme.lines.focused));
+        let x = 2;
+        let w = gi.name_chars_count();
+        let mut format = TextFormat::single_line(x, y, attr.unwrap_or(theme.text.focused), TextAlignament::Left);
+        format.chars_count = Some(gi.name_chars_count());
+        format.width = Some(w);
+        surface.write_text(gi.name(), &format);
+    }
+    fn paint_groups(&self, surface: &mut Surface, theme: &Theme) {
+        let has_focus = self.base.has_focus();
+        let attr = if !self.is_enabled() {
+            Some(theme.text.inactive)
+        } else if !has_focus {
+            Some(theme.text.normal)
+        } else {
+            None
+        };
+        let mut y = 1;
+        let max_y = self.size().height as i32;
+        let mut idx = self.top_view;
+        let max_idx = self.filter.len();
+        surface.reset_clip();
+        surface.reset_origin();
+        while (y < max_y) && (idx < max_idx) {
+            match self.filter[idx] {
+                Filter::Group(group_id) => {
+                    self.paint_group(&self.groups[group_id as usize], y, surface, theme, attr);
+                    // paint group
+                }
+                Filter::Item(_) => {
+                }
+            }
+            y += 1;
+            idx += 1;
+        }
+        surface.reset_clip();
+        surface.reset_origin();
+    }
+
     fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         let width = self.header.width() as i32;
         let frozen_columns = self.header.frozen_columns();
@@ -459,7 +498,7 @@ where
             }
         }
     }
-    fn paint_items(&self, surface: &mut Surface, theme: &Theme) {
+    fn paint_items(&self, surface: &mut Surface, theme: &Theme) -> bool {
         let has_focus = self.base.has_focus();
         let attr = if !self.is_enabled() {
             Some(theme.text.inactive)
@@ -468,6 +507,7 @@ where
         } else {
             None
         };
+        let mut found_groups = false;
         let mut y = 1;
         let max_y = self.size().height as i32;
         let mut idx = self.top_view;
@@ -476,7 +516,7 @@ where
         while (y < max_y) && (idx < max_idx) {
             match self.filter[idx] {
                 Filter::Group(_) => {
-                    // paint group
+                    found_groups = true;
                 }
                 Filter::Item(index) => {
                     let item = &self.data[index as usize];
@@ -508,6 +548,7 @@ where
         }
         surface.reset_clip();
         surface.reset_origin();
+        found_groups
     }
     fn update_position(&mut self, new_pos: usize, emit_event: bool) {
         let len = self.filter.len();
@@ -593,9 +634,13 @@ where
         // paint columns
         self.header.paint(surface, theme, &self.base);
         // paint items
-        self.paint_items(surface, theme);
+        let has_groups = self.paint_items(surface, theme);
         // paint separation lines (columns)
         self.header.paint_columns(surface, theme, &self.base);
+        // paint groups if visible
+        if has_groups {
+            self.paint_groups(surface, theme);
+        }
         // paint scroll bars and searh bars
         self.comp.paint(surface, theme, &self.base);
     }
