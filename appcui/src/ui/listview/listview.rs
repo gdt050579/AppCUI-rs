@@ -404,6 +404,9 @@ where
                 Filter::Group(group_id) => {
                     self.paint_group(&self.groups[group_id as usize], y, surface, theme, attr);
                     // paint group
+                    if (has_focus) && (idx == self.pos) {
+                        surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, theme.list_current_item.focus));
+                    }
                 }
                 Filter::Item(_) => {
                 }

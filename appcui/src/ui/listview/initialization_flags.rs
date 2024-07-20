@@ -17,7 +17,7 @@ pub enum Flags {
 }
 
 pub trait ListItem {
-    fn paint(&self, column_index: u32, width: u16, surface: &mut Surface, theme: &Theme) {}
+    fn paint(&self, _column_index: u32, _width: u16, _surface: &mut Surface, _theme: &Theme) {}
     fn render_method(&self, column_index: u16) -> Option<RenderMethod>;
     fn compare(&self, other: &Self, column_index: u16) -> Ordering;
 }
