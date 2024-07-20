@@ -13,7 +13,7 @@ enum CheckMode {
 #[derive(Clone, Copy)]
 enum Filter {
     Item(u32),
-    Group(u32),
+    Group(u16),
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
@@ -106,7 +106,7 @@ where
         self.header.set_frozen_columns(count);
         self.update_scrollbars();
     }
-    fn compare_items(a: Filter, b: Filter, column_index: u16, data: &Vec<Item<T>>) -> Ordering
+    fn compare_items(a: Filter, b: Filter, column_index: u16, data: &Vec<Item<T>>, ascendent: bool) -> Ordering
     where
         T: ListItem,
     {
@@ -118,22 +118,31 @@ where
                 } else {
                     let item_a = data[index_a as usize].value();
                     let item_b = data[index_b as usize].value();
-                    ListItem::compare(item_a, item_b, column_index)
+                    let rezult = ListItem::compare(item_a, item_b, column_index);
+                    if ascendent { rezult } else { rezult.reverse() }
                 }
             }
             (Filter::Group(index_a), Filter::Group(index_b)) => index_a.cmp(&index_b),
-            (Filter::Item(_), Filter::Group(_)) => Ordering::Less,
-            (Filter::Group(_), Filter::Item(_)) => Ordering::Greater,
+            (Filter::Item(index), Filter::Group(group_id)) => {
+                match data[index as usize].group_id().cmp(&group_id) {
+                    Ordering::Equal => Ordering::Greater,
+                    Ordering::Greater => Ordering::Greater,
+                    Ordering::Less => Ordering::Less,
+                }
+            }
+            (Filter::Group(group_id), Filter::Item(index)) => {
+                match group_id.cmp(&data[index as usize].group_id()) {
+                    Ordering::Equal => Ordering::Less,
+                    Ordering::Greater => Ordering::Greater,
+                    Ordering::Less => Ordering::Less,
+                }
+            }
         }
     }
     fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
         // sort elements by column index
         let data = &self.data;
-        if ascendent {
-            self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data));
-        } else {
-            self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data).reverse());
-        }
+        self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
     }
     fn autoresize_column(&mut self, _column_index: u16) {
         // auto resize column
