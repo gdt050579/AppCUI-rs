@@ -18,6 +18,13 @@ pub(crate) struct GroupInformation {
     pub(super) items_count: u32,
 }
 
+impl GroupInformation {
+    #[inline(always)]   
+    pub(super) fn is_empty(&self) -> bool {
+        self.items_count == 0
+    }
+}
+
 impl Default for GroupInformation {
     fn default() -> Self {
         Self {

@@ -30,6 +30,7 @@ where
     top_view: usize,
     pos: usize,
     icon_width: u8,
+    refilter_enabled: bool,
 }
 
 impl<T> ListView<T>
@@ -66,6 +67,7 @@ where
             } else {
                 0 // No extra space
             },
+            refilter_enabled: true,
         };
         // add a default group
         lv.groups.push(GroupInformation::default());
@@ -77,6 +79,10 @@ where
             name: String::from(name),
             items_count: 0,
         });
+        if self.flags.contains(Flags::ShowGroups) {
+            // if groups are being shouwn -> we need to refilter intems
+            self.refilter();
+        }
         Group::new(index)
     }
     pub fn add_column(&mut self, column: Column) {
@@ -89,7 +95,7 @@ where
         let index = self.data.len() as u32;
         self.data.push(item);
         self.filter.push(Filter::Item(index));
-        // refiltering is required
+        self.refilter();
     }
     pub fn add_items(&mut self, items: Vec<T>) {
         let mut index = self.data.len() as u32;
@@ -100,7 +106,13 @@ where
             self.filter.push(Filter::Item(index));
             index += 1;
         }
-        // refiltering is required
+        self.refilter();
+    }
+    pub fn add_batch<F>(&mut self, f: F) where F: FnOnce(&mut Self) {
+        self.refilter_enabled = false;
+        f(self);
+        self.refilter_enabled = true;
+        self.refilter();
     }
     pub fn set_frozen_columns(&mut self, count: u16) {
         self.header.set_frozen_columns(count);
@@ -119,30 +131,49 @@ where
                     let item_a = data[index_a as usize].value();
                     let item_b = data[index_b as usize].value();
                     let rezult = ListItem::compare(item_a, item_b, column_index);
-                    if ascendent { rezult } else { rezult.reverse() }
+                    if ascendent {
+                        rezult
+                    } else {
+                        rezult.reverse()
+                    }
                 }
             }
             (Filter::Group(index_a), Filter::Group(index_b)) => index_a.cmp(&index_b),
-            (Filter::Item(index), Filter::Group(group_id)) => {
-                match data[index as usize].group_id().cmp(&group_id) {
-                    Ordering::Equal => Ordering::Greater,
-                    Ordering::Greater => Ordering::Greater,
-                    Ordering::Less => Ordering::Less,
-                }
-            }
-            (Filter::Group(group_id), Filter::Item(index)) => {
-                match group_id.cmp(&data[index as usize].group_id()) {
-                    Ordering::Equal => Ordering::Less,
-                    Ordering::Greater => Ordering::Greater,
-                    Ordering::Less => Ordering::Less,
-                }
-            }
+            (Filter::Item(index), Filter::Group(group_id)) => match data[index as usize].group_id().cmp(&group_id) {
+                Ordering::Equal => Ordering::Greater,
+                Ordering::Greater => Ordering::Greater,
+                Ordering::Less => Ordering::Less,
+            },
+            (Filter::Group(group_id), Filter::Item(index)) => match group_id.cmp(&data[index as usize].group_id()) {
+                Ordering::Equal => Ordering::Less,
+                Ordering::Greater => Ordering::Greater,
+                Ordering::Less => Ordering::Less,
+            },
         }
     }
     fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
         // sort elements by column index
         let data = &self.data;
         self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
+    }
+    fn refilter(&mut self) {
+        // refilter elements
+        self.filter.clear();
+        // if show groups is present --> add all groups first
+        if self.flags.contains(Flags::ShowGroups) {
+            for index in self.groups.iter().enumerate().filter(|(_, g)| !g.is_empty()).map(|(i, _)| i) {
+                self.filter.push(Filter::Group(index as u16));
+            }
+        }
+        // add items
+        for (index, _) in self.data.iter().enumerate() {
+            self.filter.push(Filter::Item(index as u32));
+        }
+        if let Some(column_index) = self.header.sort_column() {
+            self.sort_elements(column_index, self.header.should_sort_ascendent());
+        } else {
+            self.sort_elements(u16::MAX, true);
+        }
     }
     fn autoresize_column(&mut self, _column_index: u16) {
         // auto resize column

@@ -431,7 +431,7 @@ impl ColumnsHeader {
                 }
                 _ => {
                     self.selected_column_line_index = u16::MAX;
-                    ColumnsHeaderAction::Repaint     
+                    ColumnsHeaderAction::Repaint
                 }
             }
         } else {
@@ -455,5 +455,15 @@ impl ColumnsHeader {
     #[inline(always)]
     pub fn columns(&self) -> &Vec<Column> {
         &self.columns
+    }
+    pub fn sort_column(&self) -> Option<u16> {
+        if self.selected_column_index as usize >= self.columns.len() {
+            None
+        } else {
+            Some(self.selected_column_index)
+        }
+    }
+    pub fn should_sort_ascendent(&self) -> bool {
+        self.sort_ascendent
     }
 }

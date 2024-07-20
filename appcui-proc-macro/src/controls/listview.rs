@@ -2,7 +2,15 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars", "SearchBar", "CheckBoxes", "Groups", "SmallIcon", "LargeIcon"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&[
+    "ScrollBars",
+    "SearchBar",
+    "CheckBoxes",
+    "ShowGroups",
+    "DisplayEmptyGroups",
+    "SmallIcon",
+    "LargeIcon",
+]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("type", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
