@@ -104,19 +104,19 @@ where
         self.refilter();
     }
     pub fn add_items(&mut self, items: Vec<T>) {
-        self.add_multiple_items(items, Group::None, [0 as char, 0 as char]);
+        self.add_multiple_items(items, Group::None, [0 as char, 0 as char], 0);
     }
-    pub fn add_items_to_group(&mut self, items: Vec<T>, group: Group) {
-        self.add_multiple_items(items, group, [0 as char, 0 as char]);
+    pub fn add_to_group(&mut self, items: Vec<T>, group: Group, x_offset: u8) {
+        self.add_multiple_items(items, group, [0 as char, 0 as char], x_offset);
     }
-    fn add_multiple_items(&mut self, items: Vec<T>, group: Group, icon: [char; 2]) {
+    fn add_multiple_items(&mut self, items: Vec<T>, group: Group, icon: [char; 2], x_offset: u8) {
         // disable refiltering while adding all elements
         let old_refilter = self.refilter_enabled;
         self.refilter_enabled = false;
         self.data.reserve(items.len());
         self.filter.reserve(items.len());
         for item in items {
-            self.add_item(Item::new(item, false, None, 0, icon, group));
+            self.add_item(Item::new(item, false, None, x_offset, icon, group));
         }
         // restore original refilter state
         self.refilter_enabled = old_refilter;
@@ -418,12 +418,12 @@ where
                 surface.write_string(left, y, "[ ]", attr.unwrap_or(theme.text.focused), false);
                 if gi.is_checked() {
                     surface.write_char(
-                        left+1,
+                        left + 1,
                         y,
                         Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
                     );
                 } else {
-                    surface.write_char(left+1, y, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+                    surface.write_char(left + 1, y, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
                 }
                 left += 4;
             }
@@ -516,12 +516,12 @@ where
             if self.flags.contains(Flags::CheckBoxes) {
                 if item.is_checked() {
                     surface.write_char(
-                        l,
+                        0,
                         0,
                         Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
                     );
                 } else {
-                    surface.write_char(l, 0, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+                    surface.write_char(0, 0, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
                 }
                 extra = 2;
             }

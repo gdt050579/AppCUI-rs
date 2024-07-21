@@ -10,12 +10,12 @@ where
     checked: bool,
     attr: Option<CharAttribute>,
     group_id: u16,
-    x_ofs: i8,
+    x_ofs: u8,
     icon: [char;2],
 }
 
 impl<T> Item<T> where T: ListItem {
-    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, x_offset: i8, icon_chars: [char;2], group: Group) -> Self {
+    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, x_offset: u8, icon_chars: [char;2], group: Group) -> Self {
         Self {
             data,
             checked,
