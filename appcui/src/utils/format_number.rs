@@ -9,6 +9,23 @@ pub(crate) struct FormatNumber {
 }
 
 impl FormatNumber {
+    pub(crate) fn write_to_buffer(value: u64, buf: &mut [u8]) -> &[u8] {
+        let len = buf.len();
+        if len == 0 {
+            return buf;
+        }
+        let mut pos = len - 1;
+        let mut value = value;
+        loop {
+            buf[pos] = (value % 10 + 48) as u8;
+            value = value / 10;
+            if (value == 0) || (pos == 0) {
+                break;
+            }
+            pos -= 1;
+        }
+        &buf[pos..]
+    }
     pub(crate) fn number_of_digits(value: u64) -> u8 {
         // calculates the number of digits for a number using a intervals (0-9, 10-99, 100-999, 1000-9999, etc)
         match value {

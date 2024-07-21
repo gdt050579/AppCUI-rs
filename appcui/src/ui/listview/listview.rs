@@ -396,13 +396,13 @@ where
         left += 2;
         let items_in_group = gi.items_count();
         let digits = utils::FormatNumber::number_of_digits(items_in_group as u64) as i32;
-        let right = if (w as i32) - digits - 7 >= left {
+        let right = if (w as i32) - digits - 8 >= left {
             (w as i32) - digits - 3
         } else {
-            (w as i32) - 2
+            w as i32
         };
         if left + 3 < right {
-            let mut format = TextFormat::single_line(left + 1, y, attr.unwrap_or(theme.text.focused), TextAlignament::Left);
+            let mut format = TextFormat::single_line(left + 1, y, attr.unwrap_or(theme.text.hovered), TextAlignament::Left);
             let txwidth = gi.name_chars_count() as i32;
             let space_width = if left + 3 + txwidth <= right { txwidth } else { right - left - 3 };
             format.width = Some(space_width as u16);
@@ -416,15 +416,13 @@ where
             if left + txwidth + 3 > right {
                 surface.write_char(left + space_width, y, Character::with_char(SpecialChar::ThreePointsHorizontal));
             }
-            left += space_width + 3;
         }
-        if (left < right) && (right + digits + 3 <= w as i32) {
+        if right + digits + 3 <= w as i32 {
             surface.write_char(right, y, Character::with_attributes('[', attr.unwrap_or(theme.text.focused)));
             surface.write_char(right + digits + 1, y, Character::with_attributes(']', attr.unwrap_or(theme.text.focused)));
-            // utils::FormatNumber::write_unsigned(&self, value, writer);
-            // let mut format = TextFormat::single_line(left, y, attr.unwrap_or(theme.text.focused), TextAlignament::Right);
-            // format.width = Some((right - left) as u16);
-            // surface.write_text(&format.number(items_in_group as u64), &format);
+            let mut temp_buf: [u8; 40] = [0; 40];
+            let to_print_buf = utils::FormatNumber::write_to_buffer(items_in_group as u64, &mut temp_buf);
+            surface.write_ascii(right + 1, y, to_print_buf, attr.unwrap_or(theme.text.normal), false);
         }
     }
     fn paint_groups(&self, surface: &mut Surface, theme: &Theme) {

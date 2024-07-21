@@ -364,6 +364,39 @@ impl Surface {
         }
     }
 
+    pub fn write_ascii(&mut self, x:i32, y:i32, ascii_buffer: &[u8], attr: CharAttribute, multi_line: bool) {
+        let mut c = Character::with_attributes(' ', attr);
+        if !multi_line {
+            // single line support
+            if !self.clip.contains_y(y + self.origin.y) {
+                return; // no need to draw
+            }
+            let mut p_x = x;
+            for ch in ascii_buffer {
+                if let Some(pos) = self.coords_to_position(p_x, y) {
+                    c.code = *ch as char;
+                    self.chars[pos].set(c);
+                }
+                p_x += 1;
+            }
+        } else {
+            let mut p_x = x;
+            let mut p_y = y;
+            for ch in ascii_buffer {
+                if (*ch == b'\n') || (*ch == b'\r') {
+                    p_y += 1;
+                    p_x = x;
+                    continue;
+                }
+                if let Some(pos) = self.coords_to_position(p_x, p_y) {
+                    c.code = *ch as char;
+                    self.chars[pos].set(c);
+                }
+                p_x += 1;
+            }
+        }     
+    }
+
     fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormat) {
         if !self.clip.contains_y(y + self.origin.y) {
             return; // no need to draw
