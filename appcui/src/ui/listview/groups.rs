@@ -57,6 +57,10 @@ impl GroupInformation {
     pub(super) fn set_collapsed(&mut self, value: bool) {
         self.collapsed = value;
     }
+    #[inline(always)]
+    pub(super) fn is_checked(&self) -> bool {
+        true
+    }
 }
 
 impl Default for GroupInformation {

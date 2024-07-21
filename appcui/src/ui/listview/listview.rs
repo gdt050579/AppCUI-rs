@@ -413,6 +413,21 @@ where
             );
         }
         left += 2;
+        if self.flags.contains(Flags::CheckBoxes) {
+            if left + 4 < w as i32 {
+                surface.write_string(left, y, "[ ]", attr.unwrap_or(theme.text.focused), false);
+                if gi.is_checked() {
+                    surface.write_char(
+                        left+1,
+                        y,
+                        Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
+                    );
+                } else {
+                    surface.write_char(left+1, y, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+                }
+                left += 4;
+            }
+        }
         let items_in_group = gi.items_count();
         let digits = utils::FormatNumber::number_of_digits(items_in_group as u64) as i32;
         let right = if (w as i32) - digits - 8 >= left {
@@ -426,11 +441,11 @@ where
             let space_width = if left + 3 + txwidth <= right { txwidth } else { right - left - 3 };
             format.width = Some(space_width as u16);
             surface.write_text(gi.name(), &format);
-            surface.write_char(left, y, Character::with_attributes('[', attr.unwrap_or(theme.text.focused)));
+            surface.write_char(left, y, Character::with_attributes(' ', attr.unwrap_or(theme.text.focused)));
             surface.write_char(
                 left + space_width + 1,
                 y,
-                Character::with_attributes(']', attr.unwrap_or(theme.text.focused)),
+                Character::with_attributes(' ', attr.unwrap_or(theme.text.focused)),
             );
             if left + txwidth + 3 > right {
                 surface.write_char(left + space_width, y, Character::with_char(SpecialChar::ThreePointsHorizontal));
