@@ -175,6 +175,14 @@ where
         let data = &self.data;
         self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
     }
+    fn is_item_filtered_out(&self, index: usize) -> bool {
+        let item = &self.data[index];
+        if self.groups[item.group_id() as usize].is_collapsed() {
+            return true;
+        }
+        // check if content is filtered out
+        false
+    }
     fn refilter(&mut self) {
         if !self.refilter_enabled {
             return;
@@ -197,6 +205,9 @@ where
         }
         // add items
         for (index, _) in self.data.iter().enumerate() {
+            if self.is_item_filtered_out(index) {
+                continue;
+            }
             self.filter.push(Filter::Item(index as u32));
         }
         if let Some(column_index) = self.header.sort_column() {
@@ -324,7 +335,15 @@ where
                     self.check_item(self.pos, CheckMode::Reverse);
                     true
                 } else {
-                    false
+                    if let Some(Filter::Group(gid)) = self.filter.get(self.pos) {
+                        let group = &mut self.groups[*gid as usize];
+                        group.set_collapsed(!group.is_collapsed());
+                        self.refilter();
+                        self.update_position(self.pos, true);
+                        true
+                    } else {
+                        false
+                    }
                 }
             }
             key!("Insert") | key!("Shift+Down") => {
