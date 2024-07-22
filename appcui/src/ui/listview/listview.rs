@@ -104,19 +104,19 @@ where
         self.refilter();
     }
     pub fn add_items(&mut self, items: Vec<T>) {
-        self.add_multiple_items(items, Group::None, [0 as char, 0 as char], 0);
+        self.add_multiple_items(items, Group::None, [0 as char, 0 as char]);
     }
-    pub fn add_to_group(&mut self, items: Vec<T>, group: Group, x_offset: u8) {
-        self.add_multiple_items(items, group, [0 as char, 0 as char], x_offset);
+    pub fn add_to_group(&mut self, items: Vec<T>, group: Group) {
+        self.add_multiple_items(items, group, [0 as char, 0 as char]);
     }
-    fn add_multiple_items(&mut self, items: Vec<T>, group: Group, icon: [char; 2], x_offset: u8) {
+    fn add_multiple_items(&mut self, items: Vec<T>, group: Group, icon: [char; 2]) {
         // disable refiltering while adding all elements
         let old_refilter = self.refilter_enabled;
         self.refilter_enabled = false;
         self.data.reserve(items.len());
         self.filter.reserve(items.len());
         for item in items {
-            self.add_item(Item::new(item, false, None, x_offset, icon, group));
+            self.add_item(Item::new(item, false, None, icon, group));
         }
         // restore original refilter state
         self.refilter_enabled = old_refilter;
@@ -507,7 +507,7 @@ where
         };
         // first column
         let c = &columns[0];
-        let l = c.x + item.x_offset();
+        let l = c.x + if self.flags.contains(Flags::ShowGroups) { 2 } else { 0 };
         let r = c.x + c.width as i32;
         let mut extra = 0;
         if (r >= 0) && (r >= min_left) && (l < width) && (c.width != 0) {

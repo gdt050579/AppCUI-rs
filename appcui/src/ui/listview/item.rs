@@ -10,18 +10,16 @@ where
     checked: bool,
     attr: Option<CharAttribute>,
     group_id: u16,
-    x_ofs: u8,
     icon: [char;2],
 }
 
 impl<T> Item<T> where T: ListItem {
-    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, x_offset: u8, icon_chars: [char;2], group: Group) -> Self {
+    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, icon_chars: [char;2], group: Group) -> Self {
         Self {
             data,
             checked,
             attr,
             group_id: group.index(),
-            x_ofs: x_offset,
             icon: icon_chars,
         }
     }
@@ -31,7 +29,6 @@ impl<T> Item<T> where T: ListItem {
             checked: false,
             attr: None,
             group_id: group.index(),
-            x_ofs: 0,
             icon: [0 as char, 0 as char],
         }
     }
@@ -46,10 +43,6 @@ impl<T> Item<T> where T: ListItem {
     #[inline(always)]
     pub fn is_checked(&self) -> bool {
         self.checked
-    }
-    #[inline(always)]
-    pub(super) fn x_offset(&self) -> i32 {
-        self.x_ofs as i32
     }
     #[inline(always)]
     pub(super) fn set_checked(&mut self, value: bool) {
@@ -75,7 +68,6 @@ impl<T> From<T> for Item<T> where T: ListItem {
             checked: false,
             attr: None,
             group_id: 0,
-            x_ofs: 0,
             icon: [0 as char, 0 as char],
         }
     }
