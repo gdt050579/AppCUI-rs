@@ -536,7 +536,6 @@ where
         surface.reset_clip();
         surface.reset_origin();
     }
-
     fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         let width = self.header.width() as i32;
         let frozen_columns = self.header.frozen_columns();
