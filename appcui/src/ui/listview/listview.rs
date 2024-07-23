@@ -251,6 +251,15 @@ where
         self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, 1);
         self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
     }
+    fn toggle_group_collapse_status(&mut self, gid: u16) {
+        if gid as usize >= self.groups.len() {
+            return;
+        }
+        let group = &mut self.groups[gid as usize];
+        group.set_collapsed(!group.is_collapsed());
+        self.refilter();
+        self.update_position(self.pos, true);
+    }
     fn execute_column_header_action(&mut self, action: ColumnsHeaderAction) -> bool {
         match action {
             ColumnsHeaderAction::Sort((index, ascendent)) => {
@@ -359,10 +368,7 @@ where
                     true
                 } else {
                     if let Some(Filter::Group(gid)) = self.filter.get(self.pos) {
-                        let group = &mut self.groups[*gid as usize];
-                        group.set_collapsed(!group.is_collapsed());
-                        self.refilter();
-                        self.update_position(self.pos, true);
+                        self.toggle_group_collapse_status(*gid);
                         true
                     } else {
                         false
@@ -412,6 +418,18 @@ where
                     self.check_items(0, self.filter.len(), CheckMode::False);
                 } else {
                     self.check_items(0, self.filter.len(), CheckMode::True);
+                }
+                true
+            }
+
+            // Action
+            key!("Enter") => {
+                match self.filter.get(self.pos) {
+                    Some(Filter::Item(_)) => {
+                        // emit event
+                    }
+                    Some(Filter::Group(gid)) => self.toggle_group_collapse_status(*gid),
+                    _ => {}
                 }
                 true
             }
