@@ -216,6 +216,29 @@ where
             self.sort_elements(u16::MAX, true);
         }
     }
+    fn update_check_count_for_groups(&mut self) {
+        // if ShowGroups is not present, we do not need to update the check count for groups
+        if !self.flags.contains(Flags::ShowGroups) {
+            return;
+        }
+        // clear all check counts
+        for group in &mut self.groups {
+            group.set_items_checked_count(0);
+        }
+        // iterate over each item from the filtered list and update the check count for group it belongs to
+        for item in &self.filter {
+            match item {
+                Filter::Item(index) => {
+                    let group_id = self.data[*index as usize].group_id();
+                    let group = &mut self.groups[group_id as usize];
+                    if self.data[*index as usize].is_checked() {
+                        group.set_items_checked_count(group.items_checked_count() + 1);
+                    }
+                }
+                Filter::Group(_) => {}
+            }
+        }
+    }
     fn autoresize_column(&mut self, _column_index: u16) {
         // auto resize column
     }
@@ -332,7 +355,7 @@ where
             // Selection
             key!("Space") => {
                 if self.flags.contains(Flags::CheckBoxes) {
-                    self.check_item(self.pos, CheckMode::Reverse);
+                    self.check_item(self.pos, CheckMode::Reverse, true);
                     true
                 } else {
                     if let Some(Filter::Group(gid)) = self.filter.get(self.pos) {
@@ -347,12 +370,12 @@ where
                 }
             }
             key!("Insert") | key!("Shift+Down") => {
-                self.check_item(self.pos, CheckMode::Reverse);
+                self.check_item(self.pos, CheckMode::Reverse, true);
                 self.update_position(self.pos.saturating_add(1), true);
                 true
             }
             key!("Shift+Up") => {
-                self.check_item(self.pos, CheckMode::Reverse);
+                self.check_item(self.pos, CheckMode::Reverse, true);
                 self.update_position(self.pos.saturating_sub(1), true);
                 true
             }
@@ -416,14 +439,18 @@ where
         if self.flags.contains(Flags::CheckBoxes) {
             if left + 4 < w as i32 {
                 surface.write_string(left, y, "[ ]", attr.unwrap_or(theme.text.focused), false);
-                if gi.is_checked() {
+                let count = gi.items_count();
+                let checked = gi.items_checked_count();
+                if (count == checked) && (count > 0) {
                     surface.write_char(
                         left + 1,
                         y,
                         Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
                     );
-                } else {
+                } else if checked == 0 {
                     surface.write_char(left + 1, y, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+                } else {
+                    surface.write_char(left + 1, y, Character::with_attributes('?', attr.unwrap_or(theme.symbol.unknown)));
                 }
                 left += 4;
             }
@@ -674,7 +701,7 @@ where
         self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
     }
-    fn check_item(&mut self, pos: usize, mode: CheckMode) {
+    fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool) {
         if pos >= self.filter.len() {
             return;
         }
@@ -686,8 +713,28 @@ where
                     CheckMode::False => item.set_checked(false),
                     CheckMode::Reverse => item.set_checked(!item.is_checked()),
                 }
+                if update_group_check_count {
+                    self.update_check_count_for_groups();
+                }
             }
-            Filter::Group(_) => todo!(),
+            Filter::Group(gid) => {
+                let group = &mut self.groups[gid as usize];
+                let checked = group.items_checked_count();
+                let count = group.items_count();
+                for itm in self.filter.iter().skip(pos + 1) {
+                    if let Filter::Item(index) = itm {
+                        let item = &mut self.data[*index as usize];
+                        if item.group_id() == gid {
+                            item.set_checked(checked < count);
+                        } else {
+                            break; // we've reached another group
+                        }
+                    } else {
+                        break; // we've reached another group
+                    }
+                }
+                group.set_items_checked_count(if checked < count { count } else { 0 });
+            }
         }
     }
     fn check_items(&mut self, start: usize, end: usize, mode: CheckMode) {
@@ -698,8 +745,9 @@ where
         let p_start = start.min(end).min(len - 1);
         let p_end = end.max(start).min(len - 1);
         for pos in p_start..=p_end {
-            self.check_item(pos, mode);
+            self.check_item(pos, mode, false);
         }
+        self.update_check_count_for_groups();
     }
 }
 

@@ -17,6 +17,7 @@ pub(crate) struct GroupInformation {
     name: String,
     name_chars_count: u16,
     items_count: u32,
+    items_check_count: u32,
     collapsed: bool,
 }
 
@@ -26,6 +27,7 @@ impl GroupInformation {
             name: String::from(name),
             name_chars_count: name.chars().count() as u16,
             items_count: 0,
+            items_check_count: 0,
             collapsed: false,
         }
     }
@@ -50,16 +52,20 @@ impl GroupInformation {
         self.items_count = value;
     }   
     #[inline(always)]
+    pub(super) fn items_checked_count(&self) -> u32 {
+        self.items_check_count
+    }
+    #[inline(always)]
+    pub(super) fn set_items_checked_count(&mut self, value: u32) {
+        self.items_check_count = value;
+    }  
+    #[inline(always)]
     pub(super) fn is_collapsed(&self) -> bool {
         self.collapsed
     }
     #[inline(always)]
     pub(super) fn set_collapsed(&mut self, value: bool) {
         self.collapsed = value;
-    }
-    #[inline(always)]
-    pub(super) fn is_checked(&self) -> bool {
-        true
     }
 }
 
@@ -69,6 +75,7 @@ impl Default for GroupInformation {
             name: String::new(),
             name_chars_count: 0,
             items_count: 0,
+            items_check_count: 0,
             collapsed: false,
         }
     }
