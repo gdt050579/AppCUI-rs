@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use crate::utils;
 
-use super::{Flags, Group, GroupInformation, Item, ListItem};
+use super::{Flags, Group, GroupInformation, Item, ListItem, ViewMode};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
 
@@ -33,6 +33,7 @@ where
     pos: usize,
     icon_width: u8,
     refilter_enabled: bool,
+    view_mode: ViewMode,
 }
 
 impl<T> ListView<T>
@@ -70,6 +71,7 @@ where
                 0 // No extra space
             },
             refilter_enabled: true,
+            view_mode: ViewMode::Details,
         };
         // add a default group
         lv.groups.push(GroupInformation::default());
@@ -287,7 +289,23 @@ where
     }
     #[inline(always)]
     fn visible_items(&self) -> usize {
-        self.size().height.saturating_sub(1) as usize
+        match self.view_mode {
+            ViewMode::Details => self.size().height.saturating_sub(1) as usize,
+            ViewMode::Columns(count) => self.size().height.saturating_sub(1) as usize * (count as usize),
+        }
+    }
+    #[inline(always)]
+    fn item_width(&self) -> u32 {
+        match self.view_mode {
+            ViewMode::Details => self.size().width,
+            ViewMode::Columns(count) => {
+                if count == 0 {
+                    0
+                } else {
+                    (self.size().width.saturating_sub(count as u32 - 1) / (count as u32)).max(1)
+                }
+            }
+        }
     }
     #[inline(always)]
     fn toggle_current_item_selection(&self) -> CheckMode {
@@ -619,6 +637,74 @@ where
             }
         }
     }
+    fn paint_item_for_fist_column(
+        &self,
+        item: &Item<T>,
+        x: i32,
+        y: i32,
+        width: u32,
+        surface: &mut Surface,
+        theme: &Theme,
+        attr: Option<CharAttribute>,
+    ) {
+        // assume that x and y are valid and possitve (this will be ensured by the caller)
+        let c = &self.header.columns()[0];
+        let l = x + if self.flags.contains(Flags::ShowGroups) { 2 } else { 0 };
+        let r = x + width.saturating_sub(1) as i32;
+        let mut extra = 0;
+
+        surface.set_relative_clip(l, y, r, y);
+        surface.set_origin(l, y);
+        if self.flags.contains(Flags::CheckBoxes) {
+            if item.is_checked() {
+                surface.write_char(
+                    0,
+                    0,
+                    Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
+                );
+            } else {
+                surface.write_char(0, 0, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+            }
+            extra = 2;
+        }
+        // icon
+        match self.icon_width {
+            3 => {
+                surface.write_char(
+                    l + extra,
+                    y,
+                    Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
+                );
+                surface.write_char(
+                    l + extra + 1,
+                    y,
+                    Character::with_attributes(item.icon_second_character(), attr.unwrap_or(theme.text.focused)),
+                );
+            }
+            2 => {
+                surface.write_char(
+                    l + extra,
+                    y,
+                    Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
+                );
+            }
+            _ => {}
+        }
+        extra += self.icon_width as i32;
+        if l + extra < r {
+            if extra > 0 {
+                surface.set_relative_clip(l + extra, y, r, y);
+                surface.set_origin(l + extra, y);
+            }
+            let item_render_width = (r - l - extra) as u16;
+            if let Some(render_method) = ListItem::render_method(item.value(), 0) {
+                if !render_method.paint(surface, theme, c.alignment, item_render_width, attr) {
+                    // custom paint required
+                    ListItem::paint(item.value(), 0, item_render_width, surface, theme);
+                }
+            }
+        }
+    }
     fn paint_items(&self, surface: &mut Surface, theme: &Theme) -> bool {
         let has_focus = self.base.has_focus();
         let attr = if !self.is_enabled() {
@@ -630,27 +716,29 @@ where
         };
         let mut found_groups = false;
         let mut y = 1;
+        let mut x = 0;
+        let item_size = self.item_width();
         let max_y = self.size().height as i32;
         let mut idx = self.top_view;
         let max_idx = self.filter.len();
+        let visible_items = self.visible_items();
+        let mut item_count = 0;
         // very simply code
-        while (y < max_y) && (idx < max_idx) {
+        while (item_count < visible_items) && (idx < max_idx) {
             match self.filter[idx] {
                 Filter::Group(_) => {
                     found_groups = true;
                 }
                 Filter::Item(index) => {
                     let item = &self.data[index as usize];
-                    self.paint_item(item, y, surface, theme, attr);
+                    match self.view_mode {
+                        ViewMode::Details => self.paint_item(item, y, surface, theme, attr),
+                        ViewMode::Columns(_) => self.paint_item_for_fist_column(item, x, y, item_size, surface, theme, attr),
+                    };
                     if (item.is_checked()) && (has_focus) && (!self.flags.contains(Flags::CheckBoxes)) {
                         surface.reset_clip();
                         surface.reset_origin();
-                        surface.fill_horizontal_line_with_size(
-                            0,
-                            y,
-                            self.size().width,
-                            Character::with_attributes(0, theme.list_current_item.selected),
-                        );
+                        surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.selected));
                     }
                     if (has_focus) && (idx == self.pos) {
                         surface.reset_clip();
@@ -660,12 +748,17 @@ where
                             _ if item.is_checked() => theme.list_current_item.over_selection,
                             _ => theme.list_current_item.focus,
                         };
-                        surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, current_item_attr));
+                        surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, current_item_attr));
                     }
                 }
             }
             y += 1;
             idx += 1;
+            item_count += 1;
+            if y >= max_y {
+                y = 1;
+                x += item_size as i32 + 1;
+            }
         }
         surface.reset_clip();
         surface.reset_origin();
