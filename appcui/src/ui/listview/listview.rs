@@ -462,10 +462,10 @@ where
             _ => false,
         }
     }
-    fn paint_group(&self, gi: &GroupInformation, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
-        let w = self.size().width;
-        surface.draw_horizontal_line_with_size(0, y, w, LineType::Single, attr.unwrap_or(theme.lines.focused));
-        let mut left = 1;
+    fn paint_group(&self, gi: &GroupInformation, x: i32, y: i32, width: u32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
+        let w = width;
+        surface.draw_horizontal_line_with_size(x, y, w, LineType::Single, attr.unwrap_or(theme.lines.focused));
+        let mut left = x + 1;
         if gi.is_collapsed() {
             surface.write_char(
                 left,
@@ -501,10 +501,10 @@ where
         }
         let items_in_group = gi.items_count();
         let digits = utils::FormatNumber::number_of_digits(items_in_group as u64) as i32;
-        let right = if (w as i32) - digits - 8 >= left {
-            (w as i32) - digits - 3
+        let right = if (x + w as i32) - digits - 8 >= left {
+            (x + w as i32) - digits - 3
         } else {
-            w as i32
+            x + w as i32
         };
         if left + 3 < right {
             let mut format = TextFormat::single_line(left + 1, y, attr.unwrap_or(theme.text.hovered), TextAlignament::Left);
@@ -522,7 +522,7 @@ where
                 surface.write_char(left + space_width, y, Character::with_char(SpecialChar::ThreePointsHorizontal));
             }
         }
-        if right + digits + 3 <= w as i32 {
+        if right + digits + 3 <= x + w as i32 {
             surface.write_char(right, y, Character::with_attributes('[', attr.unwrap_or(theme.text.focused)));
             surface.write_char(right + digits + 1, y, Character::with_attributes(']', attr.unwrap_or(theme.text.focused)));
             let mut temp_buf: [u8; 40] = [0; 40];
@@ -540,24 +540,33 @@ where
             None
         };
         let mut y = 1;
+        let mut x = 0;
         let max_y = self.size().height as i32;
+        let item_size = self.item_width();
         let mut idx = self.top_view;
         let max_idx = self.filter.len();
+        let visible_items = self.visible_items();
+        let mut item_count = 0;
         surface.reset_clip();
         surface.reset_origin();
-        while (y < max_y) && (idx < max_idx) {
+        while (item_count < visible_items) && (idx < max_idx) {
             match self.filter[idx] {
                 Filter::Group(group_id) => {
-                    self.paint_group(&self.groups[group_id as usize], y, surface, theme, attr);
+                    self.paint_group(&self.groups[group_id as usize], x, y, item_size, surface, theme, attr);
                     // paint group
                     if (has_focus) && (idx == self.pos) {
-                        surface.fill_horizontal_line_with_size(0, y, self.size().width, Character::with_attributes(0, theme.list_current_item.focus));
+                        surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.focus));
                     }
                 }
                 Filter::Item(_) => {}
             }
             y += 1;
             idx += 1;
+            item_count += 1;
+            if y >= max_y {
+                y = 1;
+                x += item_size as i32 + 1;
+            }
         }
         surface.reset_clip();
         surface.reset_origin();
@@ -778,7 +787,7 @@ where
             return;
         }
         let new_pos = new_pos.min(len - 1);
-        let h = (self.size().height.saturating_sub(1)) as usize;
+        let h = self.visible_items();
         if h == 0 {
             return;
         }
@@ -874,16 +883,28 @@ where
     T: ListItem,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        // paint columns
-        self.header.paint(surface, theme, &self.base);
-        // paint items
-        let has_groups = self.paint_items(surface, theme);
-        // paint separation lines (columns)
-        self.header.paint_columns(surface, theme, &self.base);
-        // paint groups if visible
-        if has_groups {
-            self.paint_groups(surface, theme);
+        match self.view_mode {
+            ViewMode::Details => {
+                // paint columns
+                self.header.paint(surface, theme, &self.base);
+                // paint items
+                let has_groups = self.paint_items(surface, theme);
+                // paint separation lines (columns)
+                self.header.paint_columns(surface, theme, &self.base);
+                // paint groups if visible
+                if has_groups {
+                    self.paint_groups(surface, theme);
+                }
+            }
+            ViewMode::Columns(_) => {
+                // paint items & groups
+                if self.paint_items(surface, theme) {
+                    self.paint_groups(surface, theme);
+                }
+                // paint a header and columns
+            }
         }
+
         // paint scroll bars and searh bars
         self.comp.paint(surface, theme, &self.base);
     }
