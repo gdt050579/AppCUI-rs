@@ -139,6 +139,14 @@ where
         self.header.set_frozen_columns(count);
         self.update_scrollbars();
     }
+    pub fn set_view_mode(&mut self, mode: ViewMode) {
+        // safety check
+        if mode == ViewMode::Columns(0) {
+            panic!("Invalid view mode. Columns count must be greater than 0 !");
+        }
+        self.view_mode = mode;
+        self.update_scrollbars();
+    }
     fn compare_items(a: Filter, b: Filter, column_index: u16, data: &Vec<Item<T>>, ascendent: bool) -> Ordering
     where
         T: ListItem,
