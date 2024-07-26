@@ -261,6 +261,12 @@ where
         self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, 1);
         self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
     }
+    fn select_until_position(&mut self, new_pos: usize) {
+        let start = self.pos;
+        let mode = self.toggle_current_item_selection();
+        self.update_position(new_pos, true);
+        self.check_items(start, self.pos, mode);
+    }
     fn toggle_group_collapse_status(&mut self, gid: u16) {
         if gid as usize >= self.groups.len() {
             return;
@@ -386,6 +392,14 @@ where
                 self.update_position(self.pos.saturating_add(self.visible_items()), true);
                 true
             }
+            key!("Left") => {
+                self.update_position(self.pos.saturating_sub(self.size().height as usize), true);
+                true 
+            }
+            key!("Right") => {
+                self.update_position(self.pos.saturating_add(self.size().height as usize), true);
+                true 
+            }
 
             // Selection
             key!("Space") => {
@@ -412,33 +426,30 @@ where
                 true
             }
             key!("Shift+Home") => {
-                let start = self.pos;
-                let mode = self.toggle_current_item_selection();
-                self.update_position(0, true);
-                self.check_items(start, self.pos, mode);
+                self.select_until_position(0);
                 true
             }
             key!("Shift+End") => {
-                let start = self.pos;
-                let mode = self.toggle_current_item_selection();
-                self.update_position(self.filter.len(), true);
-                self.check_items(start, self.pos, mode);
+                self.select_until_position(self.filter.len());
                 true
             }
             key!("Shift+PageUp") => {
-                let start = self.pos;
-                let mode = self.toggle_current_item_selection();
-                self.update_position(self.pos.saturating_sub(self.visible_items()), true);
-                self.check_items(start, self.pos, mode);
+                self.select_until_position(self.pos.saturating_sub(self.visible_items()));
                 true
             }
             key!("Shift+PageDown") => {
-                let start = self.pos;
-                let mode = self.toggle_current_item_selection();
-                self.update_position(self.pos.saturating_add(self.visible_items()), true);
-                self.check_items(start, self.pos, mode);
+                self.select_until_position(self.pos.saturating_add(self.visible_items()));
                 true
             }
+            key!("Shift+Left") => {
+                self.select_until_position(self.pos.saturating_sub(self.size().height as usize));
+                true
+            }
+            key!("Shift+Right") => {
+                self.select_until_position(self.pos.saturating_add(self.size().height as usize));
+                true
+            }
+            
             key!("Ctrl+A") => {
                 if self.is_entire_list_selected() {
                     self.check_items(0, self.filter.len(), CheckMode::False);
@@ -939,7 +950,11 @@ where
     T: ListItem,
 {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
-        let action = self.header.process_key_pressed(key);
+        let action = if self.view_mode == ViewMode::Details {
+            self.header.process_key_pressed(key)
+        } else {
+            ColumnsHeaderAction::None
+        };
         if self.execute_column_header_action(action) {
             return EventProcessStatus::Processed;
         }
