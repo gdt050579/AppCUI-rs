@@ -299,7 +299,7 @@ where
     fn visible_items(&self) -> usize {
         match self.view_mode {
             ViewMode::Details => self.size().height.saturating_sub(1) as usize,
-            ViewMode::Columns(count) => self.size().height.saturating_sub(1) as usize * (count as usize),
+            ViewMode::Columns(count) => self.size().height as usize * (count as usize),
         }
     }
     #[inline(always)]
@@ -539,7 +539,8 @@ where
         } else {
             None
         };
-        let mut y = 1;
+        let start_y_poz = if self.view_mode == ViewMode::Details { 1 } else { 0 };
+        let mut y = start_y_poz;
         let mut x = 0;
         let max_y = self.size().height as i32;
         let item_size = self.item_width();
@@ -564,7 +565,7 @@ where
             idx += 1;
             item_count += 1;
             if y >= max_y {
-                y = 1;
+                y = start_y_poz;
                 x += item_size as i32 + 1;
             }
         }
@@ -722,6 +723,27 @@ where
             }
         }
     }
+    fn paint_column_lines(&self, surface: &mut Surface, theme: &Theme) {
+        if let ViewMode::Columns(count) = self.view_mode {
+            if count < 2 {
+                return;
+            }
+            let attr = match () {
+                _ if !self.is_enabled() => theme.lines.inactive,
+                _ if self.has_focus() => theme.lines.focused,
+                _ => theme.lines.normal,
+            };
+            let count = count - 1;
+            let mut x = 0;
+            let item_size = self.item_width() as i32;
+            let h = self.size().height;
+            for _ in 0..count {
+                x += item_size;
+                surface.draw_vertical_line_with_size(x, 0, h, LineType::Single, attr);
+                x += 1;
+            }
+        }
+    }
     fn paint_items(&self, surface: &mut Surface, theme: &Theme) -> bool {
         let has_focus = self.base.has_focus();
         let attr = if !self.is_enabled() {
@@ -732,7 +754,8 @@ where
             None
         };
         let mut found_groups = false;
-        let mut y = 1;
+        let start_y_poz = if self.view_mode == ViewMode::Details { 1 } else { 0 };
+        let mut y = start_y_poz;
         let mut x = 0;
         let item_size = self.item_width();
         let max_y = self.size().height as i32;
@@ -773,7 +796,7 @@ where
             idx += 1;
             item_count += 1;
             if y >= max_y {
-                y = 1;
+                y = start_y_poz;
                 x += item_size as i32 + 1;
             }
         }
@@ -902,6 +925,7 @@ where
                     self.paint_groups(surface, theme);
                 }
                 // paint a header and columns
+                self.paint_column_lines(surface, theme);
             }
         }
 
