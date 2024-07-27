@@ -356,10 +356,6 @@ where
         // process key for items
         match key.value() {
             // movements
-            key!("Ctrl+Left") | key!("Ctrl+Right") => {
-                self.header.enter_resize_mode();
-                true
-            }
             key!("Up") => {
                 self.update_position(self.pos.saturating_sub(1), true);
                 true

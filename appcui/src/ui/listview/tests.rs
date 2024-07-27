@@ -5,7 +5,7 @@ impl listview::ListItem for TestItem {
     fn render_method(&self, _column_index: u16)->Option<listview::RenderMethod> {
         Some(listview::RenderMethod::Text("abc"))
     }
-    fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+    fn compare(&self, _other: &Self, _column_index: u16) -> std::cmp::Ordering {
         std::cmp::Ordering::Equal    
     }
 }
@@ -211,7 +211,6 @@ fn check_column_resize_outside_visible() {
     a.run();
 }
 
-
 #[test]
 fn check_column_move_scroll_when_enter_column_resize_mode() {
     let script = "
@@ -239,6 +238,7 @@ fn check_column_move_scroll_when_enter_column_resize_mode() {
     a.add_window(w);
     a.run();
 }
+
 #[test]
 fn check_column_scroll_update_when_control_is_resized() {
     let script = "

@@ -444,6 +444,10 @@ impl ColumnsHeader {
                     self.scroll_to(self.left_scroll.saturating_add(1));
                     ColumnsHeaderAction::UpdateScroll
                 }
+                key!("Ctrl+Left") | key!("Ctrl+Right") => {
+                    self.enter_resize_mode();
+                    ColumnsHeaderAction::UpdateScroll
+                }
                 _ => ColumnsHeaderAction::None,
             }
         }
