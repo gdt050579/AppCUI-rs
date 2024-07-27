@@ -29,9 +29,9 @@ impl ListScrollBars {
             has_searchbar: searchbar,
         }
     }
-    pub fn update(&mut self, horizontal_indexes: u64, vertical_indexes: u64, size: Size) {
-        self.horizontal.update(size.width as u64, horizontal_indexes);
-        self.vertical.update(size.height as u64, vertical_indexes);
+    pub fn update(&mut self, horizontal_values: u64, vertical_values: u64, size: Size) {
+        self.horizontal.update(size.width as u64, horizontal_values);
+        self.vertical.update(size.height as u64, vertical_values);
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         if self.has_scrollbars {
@@ -63,7 +63,7 @@ impl ListScrollBars {
             false
         }
     }
-    pub fn resize(&mut self, horizontal_indexes: u64, vertical_indexes: u64, control: &ControlBase, header_height: u32) {
+    pub fn resize(&mut self, horizontal_values: u64, vertical_values: u64, control: &ControlBase, visible_space: Size) {
         let control_size = control.size();
         let left_margin = control.left_components_margin as i32;
         let top_margin = control.top_components_margin as i32;
@@ -81,8 +81,7 @@ impl ListScrollBars {
         } else if self.has_searchbar {
             self.search.recompute_layout(x, w, control_size);
         }
-        let visible_space = Size::new(control_size.width,control_size.height.saturating_sub(header_height));
-        self.update(horizontal_indexes, vertical_indexes, visible_space);
+        self.update(horizontal_values, vertical_values, visible_space);
     }
     pub fn should_repaint(&self) -> bool {
         self.should_paint

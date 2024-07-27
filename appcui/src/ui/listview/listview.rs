@@ -255,11 +255,18 @@ where
     fn update_scroll_pos_from_scrollbars(&mut self) {
         self.header.scroll_to(self.comp.horizontal_index() as u32);
         self.top_view = (self.comp.vertical_index() as usize).min(self.filter.len());
-        //self.update_left_position_for_items();
     }
     fn update_scrollbars(&mut self) {
-        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, 1);
-        self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
+        match self.view_mode {
+            ViewMode::Details => {
+                self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
+                self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
+            }
+            ViewMode::Columns(_) => {
+                self.comp.resize(0, self.filter.len() as u64, &self.base, self.visible_space());
+                self.comp.set_indexes(0, self.top_view as u64);
+            }
+        }
     }
     fn select_until_position(&mut self, new_pos: usize) {
         let start = self.pos;
@@ -319,6 +326,13 @@ where
                     (self.size().width.saturating_sub(count as u32 - 1) / (count as u32)).max(1)
                 }
             }
+        }
+    }
+    #[inline(always)]
+    fn visible_space(&self) -> Size {
+        match self.view_mode {
+            ViewMode::Details => Size::new(self.size().width, self.size().height.saturating_sub(1)),
+            ViewMode::Columns(count) => Size::new(self.item_width(), self.size().height * count as u32),
         }
     }
     #[inline(always)]
@@ -390,11 +404,11 @@ where
             }
             key!("Left") => {
                 self.update_position(self.pos.saturating_sub(self.size().height as usize), true);
-                true 
+                true
             }
             key!("Right") => {
                 self.update_position(self.pos.saturating_add(self.size().height as usize), true);
-                true 
+                true
             }
 
             // Selection
@@ -445,7 +459,7 @@ where
                 self.select_until_position(self.pos.saturating_add(self.size().height as usize));
                 true
             }
-            
+
             key!("Ctrl+A") => {
                 if self.is_entire_list_selected() {
                     self.check_items(0, self.filter.len(), CheckMode::False);
@@ -997,6 +1011,13 @@ where
 {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.header.resize(new_size);
-        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, 1);
+        match self.view_mode {
+            ViewMode::Details => {
+                self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
+            }
+            ViewMode::Columns(_) => {
+                self.comp.resize(0, self.filter.len() as u64, &self.base, self.visible_space());
+            }
+        }
     }
 }
