@@ -69,6 +69,49 @@ fn check_column_navigate_with_keys() {
     a.run();
 }
 
+
+#[test]
+fn check_column_sort_with_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x74843BBEF41FE568)
+        Key.Pressed(Ctrl+N)
+        Paint('2. Sort by Name, ascending')
+        CheckHash(0x13077B05CC85E1FB)
+        Key.Pressed(Ctrl+N)
+        Paint('3. Sort by Name, descending')
+        CheckHash(0x9D6ABDB48B9E12D1)
+        Key.Pressed(Ctrl+N)
+        Paint('4. Sort by Name, ascending (again)')
+        CheckHash(0x13077B05CC85E1FB)
+        Key.Pressed(Ctrl+A)
+        Paint('5. Sort by Age, ascending')
+        CheckHash(0xC6A1C5264E888EF)
+        Key.Pressed(Ctrl+A)
+        Paint('6. Sort by Age, descending')
+        CheckHash(0xDC85EFD1D900459D)
+        Key.Pressed(Ctrl+C)
+        Paint('7. Sort by City, ascending, scroll moved to view City column')
+        CheckHash(0x5B4578ED022A0523)
+        Key.Pressed(Ctrl+C)
+        Paint('8. Sort by City, descending, scroll moved to view City column')
+        CheckHash(0x65980AC71BB1FCCD)
+        Key.Pressed(Ctrl+N)
+        Paint('9. Sort by Name, ascending, scroll moved to view Name column')
+        CheckHash(0x13077B05CC85E1FB)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:30,h:9,flags: Sizeable");
+    w.add(listview!(
+        "TestItem,d:c,flags: ScrollBars,columns=[{&Name,15,Left},{&Age,10,Right},{&City,10,Center}]"
+    ));
+    a.add_window(w);
+    a.run();
+}
+
+
+
 #[test]
 fn check_column_resize_with_keys() {
     let script = "

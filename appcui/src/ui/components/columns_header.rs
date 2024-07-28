@@ -448,7 +448,24 @@ impl ColumnsHeader {
                     self.enter_resize_mode();
                     ColumnsHeaderAction::UpdateScroll
                 }
-                _ => ColumnsHeaderAction::None,
+                _ => {
+                    // check if we have pressed Ctrl+{column hotkey}
+                    if key.modifier == KeyModifier::Ctrl {
+                        for (index, c) in self.columns.iter().enumerate() {
+                            if c.name.hotkey() == key {
+                                if self.selected_column_index == index as u16 {
+                                    self.sort_ascendent = !self.sort_ascendent;
+                                } else {
+                                    self.selected_column_index = index as u16;
+                                    self.sort_ascendent = true;
+                                }
+                                self.ensure_visible(self.selected_column_index, false);
+                                return ColumnsHeaderAction::Sort((self.selected_column_index, self.sort_ascendent));
+                            }
+                        }
+                    }
+                    return ColumnsHeaderAction::None;
+                }
             }
         }
     }
