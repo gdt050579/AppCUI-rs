@@ -12,11 +12,30 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "LargeIcon",
 ]);
 
+static VIEW_MODES: FlagsSignature = FlagsSignature::new(&[
+    "Details",
+    "Columns(1)",
+    "Columns(2)",
+    "Columns(3)",
+    "Columns(4)",
+    "Columns(5)",
+    "Columns(6)",
+    "Columns(7)",
+    "Columns(8)",
+    "Columns(9)",
+    "Columns(10)",    
+]);
+
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("type", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("class", "type", ParamType::String),
     NamedParameter::new("columns", "columns", ParamType::List),
+
+    NamedParameter::new("view", "view", ParamType::String),
+    NamedParameter::new("viewmode", "view", ParamType::String),
+    NamedParameter::new("vm", "view", ParamType::String),
+
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("left-scroll-margin", "lsm", ParamType::Integer),
     NamedParameter::new("lsm", "lsm", ParamType::Integer),
@@ -31,6 +50,11 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_flags_parameter("flags", "listview::Flags", &FLAGS);
     cb.finish_control_initialization();
     cb.add_scroll_margin_setup("lsm", "tsm");
+    if cb.has_parameter("view") {
+        cb.add("control.set_view_mode(");
+        cb.add_enum_parameter("view", "listview::ViewMode", &VIEW_MODES, Some("Details"));
+        cb.add(");\n");
+    }
     if cb.has_parameter("columns") {
         let mut s = String::with_capacity(256);
         let mut temp_s = String::with_capacity(64);
