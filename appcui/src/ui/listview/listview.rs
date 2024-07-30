@@ -259,7 +259,8 @@ where
     fn update_scrollbars(&mut self) {
         match self.view_mode {
             ViewMode::Details => {
-                self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
+                self.comp
+                    .resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
                 self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
             }
             ViewMode::Columns(_) => {
@@ -920,6 +921,25 @@ where
         }
         self.update_check_count_for_groups();
     }
+    fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
+        match self.view_mode {
+            ViewMode::Details => {
+                if (y >= 1) && (x >= 0) && (x < self.size().width as i32) {
+                    let new_pos = self.top_view + (y - 1) as usize;
+                    if new_pos < self.filter.len() {
+                        Some(new_pos)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            }
+            ViewMode::Columns(count) => {
+                
+            },
+        }
+    }
 }
 
 impl<T> OnPaint for ListView<T>
@@ -1013,7 +1033,8 @@ where
         self.header.resize(new_size);
         match self.view_mode {
             ViewMode::Details => {
-                self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
+                self.comp
+                    .resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
             }
             ViewMode::Columns(_) => {
                 self.comp.resize(0, self.filter.len() as u64, &self.base, self.visible_space());
