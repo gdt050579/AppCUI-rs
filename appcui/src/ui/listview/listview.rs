@@ -869,7 +869,8 @@ where
         if new_poz == self.top_view {
             return;
         }
-        let max_value = self.filter.len().saturating_sub(self.size().height.saturating_sub(1) as usize);
+        let visible_items = self.visible_items();;
+        let max_value = self.filter.len().saturating_sub(visible_items);
         self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
     }
@@ -935,9 +936,42 @@ where
                     None
                 }
             }
-            ViewMode::Columns(count) => {
-                
-            },
+            ViewMode::Columns(_) => {
+                let item_width = (self.item_width() + 1) as i32;
+                let column = x / item_width;
+                let index = self.top_view as i32 + column * (self.size().height as i32) + y;
+                if (index >= 0) && ((index as usize) < self.filter.len()) {
+                    Some(index as usize)
+                } else {
+                    None
+                }
+            }
+        }
+    }
+    fn process_mouse_event(&mut self, event: &MouseEvent) -> bool {
+        match event {
+            MouseEvent::Enter => false,
+            MouseEvent::Leave => false,
+            MouseEvent::Over(_) => false,
+            MouseEvent::Pressed(ev) => {
+                if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
+                    if pos != self.pos {
+                        self.update_position(pos, true);
+                    }
+                }
+                true
+            }
+            MouseEvent::Released(_) => true,
+            MouseEvent::DoubleClick(_) => todo!(),
+            MouseEvent::Drag(_) => todo!(),
+            MouseEvent::Wheel(dir) => {
+                match dir {
+                    MouseWheelDirection::Up => self.move_scroll_to(self.top_view.saturating_sub(1)),
+                    MouseWheelDirection::Down => self.move_scroll_to(self.top_view.saturating_add(1)),
+                    _ => {}
+                }
+                true
+            }
         }
     }
 }
@@ -1016,8 +1050,10 @@ where
         if self.execute_column_header_action(action) {
             return EventProcessStatus::Processed;
         }
-
         // process mouse event for items
+        if self.process_mouse_event(event) {
+            return EventProcessStatus::Processed;
+        }
         if (action.should_repaint()) || (self.comp.should_repaint()) {
             EventProcessStatus::Processed
         } else {
