@@ -34,6 +34,8 @@ where
     icon_width: u8,
     refilter_enabled: bool,
     view_mode: ViewMode,
+    start_mouse_select: usize,
+    mouse_check_mode: CheckMode,
 }
 
 impl<T> ListView<T>
@@ -72,6 +74,8 @@ where
             },
             refilter_enabled: true,
             view_mode: ViewMode::Details,
+            start_mouse_select: 0,
+            mouse_check_mode: CheckMode::False,
         };
         // add a default group
         lv.groups.push(GroupInformation::default());
@@ -869,7 +873,7 @@ where
         if new_poz == self.top_view {
             return;
         }
-        let visible_items = self.visible_items();;
+        let visible_items = self.visible_items();
         let max_value = self.filter.len().saturating_sub(visible_items);
         self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
@@ -958,12 +962,26 @@ where
                     if pos != self.pos {
                         self.update_position(pos, true);
                     }
+                    self.start_mouse_select = self.pos;
+                    self.mouse_check_mode = self.toggle_current_item_selection();
+                } else {
+                    self.start_mouse_select = usize::MAX;
                 }
                 true
             }
             MouseEvent::Released(_) => true,
             MouseEvent::DoubleClick(_) => todo!(),
-            MouseEvent::Drag(_) => todo!(),
+            MouseEvent::Drag(ev) => {
+                if self.start_mouse_select != usize::MAX {
+                    if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
+                        if pos != self.pos {
+                            self.update_position(pos, true);
+                            self.check_items(self.start_mouse_select, pos, self.mouse_check_mode);
+                        }
+                    }
+                }
+                true
+            }
             MouseEvent::Wheel(dir) => {
                 match dir {
                     MouseWheelDirection::Up => self.move_scroll_to(self.top_view.saturating_sub(1)),
