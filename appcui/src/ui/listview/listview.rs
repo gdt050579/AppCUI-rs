@@ -18,6 +18,14 @@ enum Filter {
     Group(u16),
 }
 
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum MousePosOnItem {
+    None,
+    ItemCheckMark(i32),
+    GroupCheckMark,
+    FoldButton(i32, u8),
+}
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ListView<T>
 where
@@ -36,6 +44,7 @@ where
     view_mode: ViewMode,
     start_mouse_select: usize,
     mouse_check_mode: CheckMode,
+    mouse_pos_on_current_item: MousePosOnItem,
 }
 
 const X_OFFSET_FOR_GROUP_ITEMS: i32 = 2;
@@ -78,6 +87,7 @@ where
             view_mode: ViewMode::Details,
             start_mouse_select: 0,
             mouse_check_mode: CheckMode::False,
+            mouse_pos_on_current_item: MousePosOnItem::None,
         };
         // add a default group
         lv.groups.push(GroupInformation::default());
@@ -779,7 +789,8 @@ where
     }
     fn paint_items(&self, surface: &mut Surface, theme: &Theme) -> bool {
         let has_focus = self.base.has_focus();
-        let attr = if !self.is_enabled() {
+        let is_enabled = self.is_enabled();
+        let attr = if !is_enabled {
             Some(theme.text.inactive)
         } else if !has_focus {
             Some(theme.text.normal)
@@ -813,15 +824,20 @@ where
                         surface.reset_origin();
                         surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.selected));
                     }
-                    if (has_focus) && (idx == self.pos) {
+                    if (is_enabled) && (idx == self.pos) {
                         surface.reset_clip();
                         surface.reset_origin();
-                        let current_item_attr = match () {
-                            _ if self.flags.contains(Flags::CheckBoxes) => theme.list_current_item.focus,
-                            _ if item.is_checked() => theme.list_current_item.over_selection,
-                            _ => theme.list_current_item.focus,
-                        };
-                        surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, current_item_attr));
+                        if has_focus {
+                            let current_item_attr = match () {
+                                _ if self.flags.contains(Flags::CheckBoxes) => theme.list_current_item.focus,
+                                _ if item.is_checked() => theme.list_current_item.over_selection,
+                                _ => theme.list_current_item.focus,
+                            };
+                            surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, current_item_attr));    
+                        }
+                        if let MousePosOnItem::ItemCheckMark(p_x) =  self.mouse_pos_on_current_item {                        
+                            surface.write_char(p_x, y, Character::with_attributes(0, theme.button.text.hovered));
+                        }
                     }
                 }
             }
@@ -959,11 +975,48 @@ where
             }
         }
     }
+    fn mouse_pos_on_item(&self, pos: usize, x: i32) -> MousePosOnItem {
+        if (pos >= self.filter.len()) || (self.header.columns().is_empty()) {
+            return MousePosOnItem::None;
+        }
+        match self.filter[pos] {
+            Filter::Item(_) => {
+                if self.flags.contains(Flags::CheckBoxes) {
+                    let mut left = self.header.columns()[0].x;
+                    left += if self.flags.contains(Flags::ShowGroups) {
+                        X_OFFSET_FOR_GROUP_ITEMS
+                    } else {
+                        0
+                    };
+                    if x == left {
+                        MousePosOnItem::ItemCheckMark(left)
+                    } else {
+                        MousePosOnItem::None
+                    }
+                } else {
+                    MousePosOnItem::None
+                }
+            }
+            Filter::Group(_) => todo!(),
+        }
+    }
     fn process_mouse_event(&mut self, event: &MouseEvent) -> bool {
         match event {
             MouseEvent::Enter => false,
             MouseEvent::Leave => false,
-            MouseEvent::Over(_) => false,
+            MouseEvent::Over(point) => {
+                let new_pos = if let Some(pos) = self.mouse_pos_to_index(point.x, point.y) {
+                    self.mouse_pos_on_item(pos, point.x)
+                } else {
+                    MousePosOnItem::None
+                };
+                if new_pos != self.mouse_pos_on_current_item {
+                    self.mouse_pos_on_current_item = new_pos;
+                    true
+                } else {
+                    false
+                }
+            }
             MouseEvent::Pressed(ev) => {
                 if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
                     if pos != self.pos {
@@ -987,7 +1040,7 @@ where
                                 self.toggle_group_collapse_status(gid);
                             }
                             if self.flags.contains(Flags::CheckBoxes) {
-                                if ev.x >=3 && ev.x <= 5 {
+                                if ev.x >= 3 && ev.x <= 5 {
                                     self.check_item(self.pos, CheckMode::Reverse, true);
                                 }
                             }
