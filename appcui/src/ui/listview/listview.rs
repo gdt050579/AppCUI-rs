@@ -38,6 +38,8 @@ where
     mouse_check_mode: CheckMode,
 }
 
+const X_OFFSET_FOR_GROUP_ITEMS: i32 = 2;
+
 impl<T> ListView<T>
 where
     T: ListItem,
@@ -613,7 +615,12 @@ where
         };
         // first column
         let c = &columns[0];
-        let l = c.x + if self.flags.contains(Flags::ShowGroups) { 2 } else { 0 };
+        let l = c.x
+            + if self.flags.contains(Flags::ShowGroups) {
+                X_OFFSET_FOR_GROUP_ITEMS
+            } else {
+                0
+            };
         let r = c.x + c.width as i32;
         let mut extra = 0;
         if (r >= 0) && (r >= min_left) && (l < width) && (c.width != 0) {
@@ -961,6 +968,30 @@ where
                 if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
                     if pos != self.pos {
                         self.update_position(pos, true);
+                    }
+                    match self.filter[self.pos] {
+                        Filter::Item(_) => {
+                            if self.flags.contains(Flags::CheckBoxes) {
+                                let l = if self.flags.contains(Flags::ShowGroups) {
+                                    X_OFFSET_FOR_GROUP_ITEMS
+                                } else {
+                                    0
+                                };
+                                if ev.x == l {
+                                    self.check_item(self.pos, CheckMode::Reverse, true);
+                                }
+                            }
+                        }
+                        Filter::Group(gid) => {
+                            if ev.x == 1 {
+                                self.toggle_group_collapse_status(gid);
+                            }
+                            if self.flags.contains(Flags::CheckBoxes) {
+                                if ev.x >=3 && ev.x <= 5 {
+                                    self.check_item(self.pos, CheckMode::Reverse, true);
+                                }
+                            }
+                        }
                     }
                     self.start_mouse_select = self.pos;
                     self.mouse_check_mode = self.toggle_current_item_selection();
