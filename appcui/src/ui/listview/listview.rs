@@ -26,7 +26,6 @@ enum HoverStatus {
     OverGroupFoldButton(i32, usize),
 }
 
-
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ListView<T>
 where
@@ -571,7 +570,8 @@ where
     }
     fn paint_groups(&self, surface: &mut Surface, theme: &Theme) {
         let has_focus = self.base.has_focus();
-        let attr = if !self.is_enabled() {
+        let is_enabled = self.is_enabled();
+        let attr = if !is_enabled {
             Some(theme.text.inactive)
         } else if !has_focus {
             Some(theme.text.normal)
@@ -587,6 +587,11 @@ where
         let max_idx = self.filter.len();
         let visible_items = self.visible_items();
         let mut item_count = 0;
+        let (hover_left, hover_right, hover_pos) = match self.hover_status {
+            HoverStatus::OverGroupCheckMark(x, pos) => (x, x + 2, pos),
+            HoverStatus::OverGroupFoldButton(x, pos) => (x, x, pos),
+            _ => (0, 0, usize::MAX),
+        };
         surface.reset_clip();
         surface.reset_origin();
         while (item_count < visible_items) && (idx < max_idx) {
@@ -594,8 +599,13 @@ where
                 Filter::Group(group_id) => {
                     self.paint_group(&self.groups[group_id as usize], x, y, item_size, surface, theme, attr);
                     // paint group
-                    if (has_focus) && (idx == self.pos) {
-                        surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.focus));
+                    if is_enabled {
+                        if (has_focus) && (idx == self.pos) {
+                            surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.focus));
+                        }
+                        if idx == hover_pos {
+                            surface.fill_horizontal_line(hover_left, y, hover_right, Character::with_attributes(0, theme.button.text.hovered));
+                        }
                     }
                 }
                 Filter::Item(_) => {}
@@ -1006,7 +1016,16 @@ where
                     HoverStatus::None
                 }
             }
-            Filter::Group(_) => todo!(),
+            Filter::Group(_) => {
+                let left = self.header.columns()[0].x;
+                if x == left + 1 {
+                    HoverStatus::OverGroupFoldButton(left + 1, pos)
+                } else if x >= left + 3 && x <= left + 5 {
+                    HoverStatus::OverGroupCheckMark(left + 3, pos)
+                } else {
+                    HoverStatus::None
+                }
+            }
         }
     }
     fn process_mouse_event(&mut self, event: &MouseEvent) -> bool {
@@ -1019,7 +1038,6 @@ where
                     false
                 }
             }
-            MouseEvent::Leave => false,
             MouseEvent::Over(point) => {
                 let new_hover_status = if let Some(pos) = self.mouse_pos_to_index(point.x, point.y) {
                     self.hover_status_for_mouse_pos(pos, point.x)
