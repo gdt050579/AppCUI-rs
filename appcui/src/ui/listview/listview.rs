@@ -519,7 +519,7 @@ where
         }
         left += 2;
         if self.flags.contains(Flags::CheckBoxes) {
-            if left + 4 < w as i32 {
+            if left + 4 < x + w as i32 {
                 surface.write_string(left, y, "[ ]", attr.unwrap_or(theme.text.focused), false);
                 let count = gi.items_count();
                 let checked = gi.items_checked_count();
@@ -998,10 +998,17 @@ where
         if (pos >= self.filter.len()) || (self.header.columns().is_empty()) {
             return HoverStatus::None;
         }
+        let left_pos = match self.view_mode {
+            ViewMode::Details => self.header.columns()[0].x,
+            ViewMode::Columns(_) => {
+                let item_width = (self.item_width() + 1) as i32;
+                (x / item_width) * item_width
+            }
+        };
         match self.filter[pos] {
             Filter::Item(_) => {
                 if self.flags.contains(Flags::CheckBoxes) {
-                    let mut left = self.header.columns()[0].x;
+                    let mut left = left_pos;
                     left += if self.flags.contains(Flags::ShowGroups) {
                         X_OFFSET_FOR_GROUP_ITEMS
                     } else {
@@ -1017,11 +1024,11 @@ where
                 }
             }
             Filter::Group(_) => {
-                let left = self.header.columns()[0].x;
-                if x == left + 1 {
-                    HoverStatus::OverGroupFoldButton(left + 1, pos)
-                } else if x >= left + 3 && x <= left + 5 {
-                    HoverStatus::OverGroupCheckMark(left + 3, pos)
+                let l = if self.view_mode == ViewMode::Details { 0 } else { left_pos };
+                if x == l + 1 {
+                    HoverStatus::OverGroupFoldButton(l + 1, pos)
+                } else if x >= l + 3 && x <= l + 5 {
+                    HoverStatus::OverGroupCheckMark(l + 3, pos)
                 } else {
                     HoverStatus::None
                 }
@@ -1056,6 +1063,13 @@ where
                     if pos != self.pos {
                         self.update_position(pos, true);
                     }
+                    let left_pos = match self.view_mode {
+                        ViewMode::Details => self.header.columns()[0].x,
+                        ViewMode::Columns(_) => {
+                            let item_width = (self.item_width() + 1) as i32;
+                            (ev.x / item_width) * item_width
+                        }
+                    };
                     match self.filter[self.pos] {
                         Filter::Item(_) => {
                             if self.flags.contains(Flags::CheckBoxes) {
@@ -1064,17 +1078,18 @@ where
                                 } else {
                                     0
                                 };
-                                if ev.x == l {
+                                if ev.x == l + left_pos {
                                     self.check_item(self.pos, CheckMode::Reverse, true);
                                 }
                             }
                         }
                         Filter::Group(gid) => {
-                            if ev.x == 1 {
+                            let l = if self.view_mode == ViewMode::Details { 0 } else { left_pos };
+                            if ev.x == l + 1 {
                                 self.toggle_group_collapse_status(gid);
                             }
                             if self.flags.contains(Flags::CheckBoxes) {
-                                if ev.x >= 3 && ev.x <= 5 {
+                                if ev.x >= l + 3 && ev.x <= l + 5 {
                                     self.check_item(self.pos, CheckMode::Reverse, true);
                                 }
                             }
