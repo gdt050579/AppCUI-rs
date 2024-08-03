@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, u64};
 
 use crate::utils;
 
@@ -19,12 +19,13 @@ enum Filter {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-enum MousePosOnItem {
+enum HoverStatus {
     None,
-    ItemCheckMark(i32),
-    GroupCheckMark,
-    FoldButton(i32, u8),
+    OverItemCheckMark(i32, usize),
+    OverGroupCheckMark(i32, usize),
+    OverGroupFoldButton(i32, usize),
 }
+
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ListView<T>
@@ -44,7 +45,7 @@ where
     view_mode: ViewMode,
     start_mouse_select: usize,
     mouse_check_mode: CheckMode,
-    mouse_pos_on_current_item: MousePosOnItem,
+    hover_status: HoverStatus,
 }
 
 const X_OFFSET_FOR_GROUP_ITEMS: i32 = 2;
@@ -87,7 +88,7 @@ where
             view_mode: ViewMode::Details,
             start_mouse_select: 0,
             mouse_check_mode: CheckMode::False,
-            mouse_pos_on_current_item: MousePosOnItem::None,
+            hover_status: HoverStatus::None,
         };
         // add a default group
         lv.groups.push(GroupInformation::default());
@@ -807,6 +808,10 @@ where
         let max_idx = self.filter.len();
         let visible_items = self.visible_items();
         let mut item_count = 0;
+        let (hover_checkmark_x, hover_pos) = match self.hover_status {
+            HoverStatus::OverItemCheckMark(x, pos) => (x, pos),
+            _ => (0, usize::MAX),
+        };
         // very simply code
         while (item_count < visible_items) && (idx < max_idx) {
             match self.filter[idx] {
@@ -824,19 +829,23 @@ where
                         surface.reset_origin();
                         surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.selected));
                     }
-                    if (is_enabled) && (idx == self.pos) {
-                        surface.reset_clip();
-                        surface.reset_origin();
-                        if has_focus {
-                            let current_item_attr = match () {
-                                _ if self.flags.contains(Flags::CheckBoxes) => theme.list_current_item.focus,
-                                _ if item.is_checked() => theme.list_current_item.over_selection,
-                                _ => theme.list_current_item.focus,
-                            };
-                            surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, current_item_attr));    
+                    if is_enabled {
+                        if idx == self.pos {
+                            surface.reset_clip();
+                            surface.reset_origin();
+                            if has_focus {
+                                let current_item_attr = match () {
+                                    _ if self.flags.contains(Flags::CheckBoxes) => theme.list_current_item.focus,
+                                    _ if item.is_checked() => theme.list_current_item.over_selection,
+                                    _ => theme.list_current_item.focus,
+                                };
+                                surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, current_item_attr));
+                            }
                         }
-                        if let MousePosOnItem::ItemCheckMark(p_x) =  self.mouse_pos_on_current_item {                        
-                            surface.write_char(p_x, y, Character::with_attributes(0, theme.button.text.hovered));
+                        if idx == hover_pos {
+                            surface.reset_clip();
+                            surface.reset_origin();
+                            surface.write_char(hover_checkmark_x, y, Character::with_attributes(0, theme.button.text.hovered));
                         }
                     }
                 }
@@ -975,9 +984,9 @@ where
             }
         }
     }
-    fn mouse_pos_on_item(&self, pos: usize, x: i32) -> MousePosOnItem {
+    fn hover_status_for_mouse_pos(&self, pos: usize, x: i32) -> HoverStatus {
         if (pos >= self.filter.len()) || (self.header.columns().is_empty()) {
-            return MousePosOnItem::None;
+            return HoverStatus::None;
         }
         match self.filter[pos] {
             Filter::Item(_) => {
@@ -989,12 +998,12 @@ where
                         0
                     };
                     if x == left {
-                        MousePosOnItem::ItemCheckMark(left)
+                        HoverStatus::OverItemCheckMark(left, pos)
                     } else {
-                        MousePosOnItem::None
+                        HoverStatus::None
                     }
                 } else {
-                    MousePosOnItem::None
+                    HoverStatus::None
                 }
             }
             Filter::Group(_) => todo!(),
@@ -1002,16 +1011,23 @@ where
     }
     fn process_mouse_event(&mut self, event: &MouseEvent) -> bool {
         match event {
-            MouseEvent::Enter => false,
+            MouseEvent::Enter | MouseEvent::Leave => {
+                if self.hover_status != HoverStatus::None {
+                    self.hover_status = HoverStatus::None;
+                    true
+                } else {
+                    false
+                }
+            }
             MouseEvent::Leave => false,
             MouseEvent::Over(point) => {
-                let new_pos = if let Some(pos) = self.mouse_pos_to_index(point.x, point.y) {
-                    self.mouse_pos_on_item(pos, point.x)
+                let new_hover_status = if let Some(pos) = self.mouse_pos_to_index(point.x, point.y) {
+                    self.hover_status_for_mouse_pos(pos, point.x)
                 } else {
-                    MousePosOnItem::None
+                    HoverStatus::None
                 };
-                if new_pos != self.mouse_pos_on_current_item {
-                    self.mouse_pos_on_current_item = new_pos;
+                if new_hover_status != self.hover_status {
+                    self.hover_status = new_hover_status;
                     true
                 } else {
                     false
