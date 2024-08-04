@@ -2,11 +2,85 @@ use crate::prelude::*;
 
 struct TestItem {}
 impl listview::ListItem for TestItem {
-    fn render_method(&self, _column_index: u16)->Option<listview::RenderMethod> {
+    fn render_method(&self, _column_index: u16) -> Option<listview::RenderMethod> {
         Some(listview::RenderMethod::Text("abc"))
     }
     fn compare(&self, _other: &Self, _column_index: u16) -> std::cmp::Ordering {
-        std::cmp::Ordering::Equal    
+        std::cmp::Ordering::Equal
+    }
+}
+
+struct Person {
+    name: &'static str,
+    age: &'static str,
+    city: &'static str,
+}
+impl Person {
+    fn new(name: &'static str, age: &'static str, city: &'static str) -> Self {
+        Self { name, age, city }
+    }
+    fn populate(l: &mut ListView<Person>) {
+        let g1 = l.add_group("USA");
+        let g2 = l.add_group("Europe");
+        let g3 = l.add_group("Asia");
+        let g4 = l.add_group("Romania");
+        l.add_to_group(
+            Vec::from([
+                Person::new("John", "25", "New York"),
+                Person::new("Mike", "70", "Washington"),
+                Person::new("Todd", "85", "San Francisco"),
+            ]),
+            g1,
+        );
+        l.add_to_group(
+            Vec::from([
+                Person::new("Sancez", "30", "Madrid"),
+                Person::new("Etiene", "65", "Paris"),
+                Person::new("Karl", "45", "Berlin"),
+                Person::new("Jonas", "22", "Norway"),
+            ]),
+            g2,
+        );
+        l.add_to_group(
+            Vec::from([
+                Person::new("Yu Law", "33", "Tokyo"),
+                Person::new("Kai", "45", "Beijing"),
+                Person::new("Chen", "55", "Shanghai"),
+                Person::new("Chan Li", "55", "Vietnam"),
+                Person::new("Chen Li", "55", "Vietnam"),
+            ]),
+            g3,
+        );
+        l.add_to_group(
+            Vec::from([
+                Person::new("Andrei", "20", "Iasi"),
+                Person::new("Mihai", "35", "Brasov"),
+                Person::new("Vlad", "40", "Cluj"),
+                Person::new("Ion", "45", "Bucharest"),
+                Person::new("Gheorghe", "50", "Timisoara"),
+                Person::new("Marin", "55", "Bucharest"),
+                Person::new("Teodor", "60", "Arad"),
+            ]),
+            g4,
+        );
+    }
+}
+impl listview::ListItem for Person {
+    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        match column_index {
+            0 => Some(listview::RenderMethod::Text(self.name)),
+            1 => Some(listview::RenderMethod::Text(self.age)),
+            2 => Some(listview::RenderMethod::Text(self.city)),
+            _ => None,
+        }
+    }
+    fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+        match column_index {
+            0 => self.name.cmp(other.name),
+            1 => self.age.cmp(other.age),
+            2 => self.city.cmp(other.city),
+            _ => std::cmp::Ordering::Equal,
+        }
     }
 }
 
@@ -69,7 +143,6 @@ fn check_column_navigate_with_keys() {
     a.run();
 }
 
-
 #[test]
 fn check_column_sort_with_keys() {
     let script = "
@@ -109,8 +182,6 @@ fn check_column_sort_with_keys() {
     a.add_window(w);
     a.run();
 }
-
-
 
 #[test]
 fn check_column_resize_with_keys() {
@@ -210,7 +281,6 @@ fn check_column_ensure_visible_when_changing_columns() {
     a.run();
 }
 
-
 #[test]
 fn check_column_resize_outside_visible() {
     let script = "
@@ -303,13 +373,10 @@ fn check_column_scroll_update_when_control_is_resized() {
    ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:c,flags: ScrollBars,columns=[{C1,6},{C2,6},{C3,6},{C4,6},{C5,6}]"
-    ));
+    w.add(listview!("TestItem,d:c,flags: ScrollBars,columns=[{C1,6},{C2,6},{C3,6},{C4,6},{C5,6}]"));
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_column_click() {
@@ -391,4 +458,57 @@ fn check_column_left_right_scroll() {
     a.run();
 }
 
-
+#[test]
+fn check_navigate_keys_mode_details() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from USA)')
+        CheckHash(0x26CAF8B68785A02E)
+        Key.Pressed(Down)
+        Paint('2. Cursor on John')
+        CheckHash(0x301A8308DA139160)
+        Key.Pressed(Down,3)
+        Paint('3. Cursor on Europe')
+        CheckHash(0xD6C610938F9C72A)
+        Key.Pressed(Down)
+        Paint('4. Cursor on Sancez')
+        CheckHash(0xE1A70659B8D510E4)
+        Key.Pressed(Down)
+        Paint('5. Cursor on Etiene (scroll starts from John)')
+        CheckHash(0x8D44731FF0A10E46)
+        Key.Pressed(PageDown)
+        Paint('6. Cursor on Chen (scroll starts from Karl)')
+        CheckHash(0x8FE3F71236F08FBF)
+        Key.Pressed(Up,3)
+        Paint('7. Cursor on Asia (scroll starts from Karl)')
+        CheckHash(0x2FC0D55F820F6B29)
+        Key.Pressed(PageUp)
+        Paint('8. Cursor on Todd (scroll starts from Todd)')
+        CheckHash(0x18BEF8422643688E)
+        Key.Pressed(PageDown,2)
+        Paint('9. Cursor on Romania (scroll starts from Yu Law)')
+        CheckHash(0xF2A08AF4AC654EF0)
+        Key.Pressed(PageDown,1)
+        Paint('10. Cursor on Marin (scroll starts from Andrei)')
+        CheckHash(0xA24264FFCA9BC64F)
+        Key.Pressed(Down)
+        Paint('11. Cursor on Teodor (scroll starts from Mihai)')
+        CheckHash(0xF1971EDE81CFFDA9)
+        Key.Pressed(Down,2)
+        Paint('12. Cursor remains on Teodor (scroll starts from Mihai)')
+        CheckHash(0xF1971EDE81CFFDA9)
+        Key.Pressed(Home)
+        Paint('13. Back to initial state (scroll starts from USA)')
+        CheckHash(0x26CAF8B68785A02E)
+        Key.Pressed(End)
+        Paint('14. Cursor on Teodor (scroll starts from Mihai)')
+        CheckHash(0xF1971EDE81CFFDA9)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags: ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
