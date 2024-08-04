@@ -512,3 +512,113 @@ fn check_navigate_keys_mode_details() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_navigate_keys_mode_details_no_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from USA)')
+        CheckHash(0x44D6237F035CB4)
+        Key.Pressed(Down)
+        Paint('2. Cursor on John')
+        CheckHash(0x4FF67D3ED33528DC)
+        Key.Pressed(Down,3)
+        Paint('3. Cursor on Europe')
+        CheckHash(0xD15C9F9836A5F800)
+        Key.Pressed(Down)
+        Paint('4. Cursor on Sancez')
+        CheckHash(0x4C68E6453D9DC020)
+        Key.Pressed(Down)
+        Paint('5. Cursor on Etiene (scroll starts from John)')
+        CheckHash(0xC10EE32199F7F18D)
+        Key.Pressed(PageDown)
+        Paint('6. Cursor on Chen (scroll starts from Karl)')
+        CheckHash(0x4D388B4A5B13AF5C)
+        Key.Pressed(Up,3)
+        Paint('7. Cursor on Asia (scroll starts from Karl)')
+        CheckHash(0xA5CC3CFE29AAA254)
+        Key.Pressed(PageUp)
+        Paint('8. Cursor on Todd (scroll starts from Todd)')
+        CheckHash(0x1DE1FDA6045B5C81)
+        Key.Pressed(PageDown,2)
+        Paint('9. Cursor on Romania (scroll starts from Yu Law)')
+        CheckHash(0xE5BC67F9B74C0971)
+        Key.Pressed(PageDown,1)
+        Paint('10. Cursor on Marin (scroll starts from Andrei)')
+        CheckHash(0x21A49DA95E68A6CA)
+        Key.Pressed(Down)
+        Paint('11. Cursor on Teodor (scroll starts from Mihai)')
+        CheckHash(0xBE2A1EC6ECF34E3C)
+        Key.Pressed(Down,2)
+        Paint('12. Cursor remains on Teodor (scroll starts from Mihai)')
+        CheckHash(0xBE2A1EC6ECF34E3C)
+        Key.Pressed(Home)
+        Paint('13. Back to initial state (scroll starts from USA)')
+        CheckHash(0x44D6237F035CB4)
+        Key.Pressed(End)
+        Paint('14. Cursor on Teodor (scroll starts from Mihai)')
+        CheckHash(0xBE2A1EC6ECF34E3C)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_navigate_keys_mode_details_no_checkboxes_no_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from John)')
+        CheckHash(0xF73F60131F7F0467)
+        Key.Pressed(Down)
+        Paint('2. Cursor on Mike')
+        CheckHash(0xBF4735812C9CD2DB)
+        Key.Pressed(Down,3)
+        Paint('3. Cursor on Etiene')
+        CheckHash(0x2A2068FA8E607478)
+        Key.Pressed(Down)
+        Paint('4. Cursor on Karl')
+        CheckHash(0x26B57503482F9B93)
+        Key.Pressed(Down)
+        Paint('5. Cursor on Jonas (scroll starts from Mike)')
+        CheckHash(0x68340B9ED77B19D1)
+        Key.Pressed(PageDown)
+        Paint('6. Cursor on Andrei (scroll starts from Yu Law)')
+        CheckHash(0x2B11F3A179CD4F81)
+        Key.Pressed(Up,3)
+        Paint('7. Cursor on Chen (scroll starts from Yu Law)')
+        CheckHash(0xAC5B9F570F67E521)
+        Key.Pressed(PageUp)
+        Paint('8. Cursor on Sances (scroll starts from Sancez)')
+        CheckHash(0x1D734C68954DFB8D)
+        Key.Pressed(PageDown,2)
+        Paint('9. Cursor on Ion (scroll starts from Chan Li)')
+        CheckHash(0xEF826F07A56D06EA)
+        Key.Pressed(PageDown,1)
+        Paint('10. Cursor on Teodor (scroll starts from Mihai)')
+        CheckHash(0x2AE34EBB0F458B7C)
+        Key.Pressed(Down,2)
+        Paint('11. Cursor remains on Teodor (scroll starts from Mihai)')
+        CheckHash(0x2AE34EBB0F458B7C)
+        Key.Pressed(Home)
+        Paint('12. Back to initial state (scroll starts from USA)')
+        CheckHash(0xF73F60131F7F0467)
+        Key.Pressed(Up)
+        Paint('13. Remains on initial state (scroll starts from USA)')
+        CheckHash(0xF73F60131F7F0467)
+        Key.Pressed(End)
+        Paint('14. Cursor on Teodor (scroll starts from Mihai)')
+        CheckHash(0x2AE34EBB0F458B7C)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
