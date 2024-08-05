@@ -906,3 +906,79 @@ fn check_navigate_keys_mode_columns_3_no_checkboxes() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_empty_list_navigation_view_details() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from USA)')
+        CheckHash(0xD23097345BC6E84)
+        Key.Pressed(Down,3)
+        Key.Pressed(Up,2)
+        Key.Pressed(Left,3)
+        Key.Pressed(Right,2)
+        Key.Pressed(PageDown)
+        Key.Pressed(Home)
+        Key.Pressed(PageUp)
+        Key.Pressed(End)
+        Paint('2. State remains the same')
+        CheckHash(0xD23097345BC6E84)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let lv = listview!("Person,d:c,view:Details,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_empty_list_navigation_view_columns_2() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from USA)')
+        CheckHash(0x9F818C330754220D)
+        Key.Pressed(Down,3)
+        Key.Pressed(Up,2)
+        Key.Pressed(Left,3)
+        Key.Pressed(Right,2)
+        Key.Pressed(PageDown)
+        Key.Pressed(Home)
+        Key.Pressed(PageUp)
+        Key.Pressed(End)
+        Paint('2. State remains the same')
+        CheckHash(0x9F818C330754220D)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let lv = listview!("Person,d:c,view:Columns(2),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_empty_list_navigation_view_columns_4() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from USA)')
+        CheckHash(0xACF4FE52E73E65AD)
+        Key.Pressed(Down,3)
+        Key.Pressed(Up,2)
+        Key.Pressed(Left,3)
+        Key.Pressed(Right,2)
+        Key.Pressed(PageDown)
+        Key.Pressed(Home)
+        Key.Pressed(PageUp)
+        Key.Pressed(End)
+        Paint('2. State remains the same')
+        CheckHash(0xACF4FE52E73E65AD)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let lv = listview!("Person,d:c,view:Columns(4),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
