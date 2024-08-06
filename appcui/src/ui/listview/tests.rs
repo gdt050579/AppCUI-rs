@@ -982,3 +982,69 @@ fn check_empty_list_navigation_view_columns_4() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_navigate_keys_mode_columns_2_no_checkboxes_no_groups() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Initial state (scroll starts from John)')
+        CheckHash(0x1FF6D1E0707A694D)
+        Key.Pressed(Down)
+        Paint('2. Cursor on Mke')
+        CheckHash(0x7F062EB63E123D61)
+        Key.Pressed(Down,4)
+        Paint('3. Cursor on Karl')
+        CheckHash(0x15D0346B0F03A37D)
+        Key.Pressed(Down,2)
+        Paint('4. Cursor on Yu Law (second column)')
+        CheckHash(0x8F1CCA3480CF4A51)
+        Key.Pressed(Down)
+        Paint('5. Cursor on Kay [column:2] - (scroll starts from John)')
+        CheckHash(0xE925FC7CF494E7CA)
+        Key.Pressed(PageDown)
+        Paint('6. Cursor on Teodor (scroll starts from Karl)')
+        CheckHash(0xEE17AB263D429E21)
+        Key.Pressed(Up,3)
+        Paint('7. Cursor on Ion (scroll starts from Karl)')
+        CheckHash(0x9D027C0106B8652E)
+        Key.Pressed(PageUp)
+        Paint('8. Cursor on Mike (scroll starts from Mike)')
+        CheckHash(0xEF5EA31F6C5E0B65)
+        Key.Pressed(Right)
+        Paint('9. Cursor on Kai [Column:2] (scroll starts from Mike)')
+        CheckHash(0x2BFC39436CB5DD7A)
+        Key.Pressed(Right)
+        Paint('10. Cursor on IOn [Column:2,last] (scroll starts from Todd)')
+        CheckHash(0x6E131F53141C63C3)
+        Key.Pressed(Left)
+        Paint('11. Cursor on Kai [Column:1] (scroll starts from Todd)')
+        CheckHash(0x5A2224983DCB672B)
+        Key.Pressed(Left)
+        Paint('12. Cursor on Mike [Column:1] (scroll starts from Mike)')
+        CheckHash(0xEF5EA31F6C5E0B65)
+        Key.Pressed(Right,3)
+        Paint('13. Cursor on Teodor [Column:2,last] (scroll starts from Karl)')
+        CheckHash(0xEE17AB263D429E21)
+        Key.Pressed(Right,3)
+        Paint('14. Cursor remains on Teodor [Column:2,last] (scroll starts from Karl)')
+        CheckHash(0xEE17AB263D429E21)
+        Key.Pressed(PageDown)
+        Paint('15. Cursor remains on Teodor [Column:2,last] (scroll starts from Karl)')
+        CheckHash(0xEE17AB263D429E21)
+        Key.Pressed(Home)
+        Paint('16. Cursor back to initial state')
+        CheckHash(0x1FF6D1E0707A694D)
+        Key.Pressed(End)
+        Paint('17. Cursor back on Teodor [Column:2,last] (scroll starts from Karl)')
+        CheckHash(0xEE17AB263D429E21)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(2),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
