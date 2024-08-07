@@ -988,7 +988,6 @@ fn check_empty_list_navigation_view_columns_4() {
 fn check_navigate_keys_mode_columns_2_no_checkboxes_no_groups() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. Initial state (scroll starts from John)')
         CheckHash(0x1FF6D1E0707A694D)
         Key.Pressed(Down)
@@ -1048,3 +1047,120 @@ fn check_navigate_keys_mode_columns_2_no_checkboxes_no_groups() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_changing_scroll_with_keys_viewmode_details() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from John,cursor on John)')
+        CheckHash(0xF73F60131F7F0467)
+        Key.Pressed(Ctrl+Alt+Down)
+        Paint('2. Scroll starts with Mke (selection is not visible)')
+        CheckHash(0x5A3081E291EE83D6)
+        Key.Pressed(Ctrl+Alt+Down,4)
+        Paint('3. Scroll starts with on Karl')
+        CheckHash(0x78569F84D9FAC3CC)
+        Key.Pressed(Down,2)
+        // the first Down key restore the scroll position
+        // the second just moves the cursor
+        Paint('4. Scroll starts with Mike, Selection is on Todd')
+        CheckHash(0xF7174883C3455E5E)
+        Key.Pressed(Down,3)
+        Key.Pressed(Ctrl+Alt+Down,5)
+        Paint('5. Scroll starts with Jonas (seletion not visible)')
+        CheckHash(0x8A110AE9F8257F26)
+        Key.Pressed(Ctrl+Alt+Up,3)
+        Paint('6. Scroll starts with Sancez (cursor on Karl)')
+        CheckHash(0x9FB87E41DC728305)
+        Key.Pressed(Ctrl+Alt+Up,100)
+        Paint('7. Scroll starts with John (cursor on Karl)')
+        CheckHash(0x26B57503482F9B93)
+        Key.Pressed(Ctrl+Alt+Down,100)
+        Paint('9. Scroll starts with Mihai (cursor not visible)')
+        CheckHash(0xF0D100CA0D8572E8)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_changing_scroll_with_keys_viewmode_columns_3() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from John,cursor on John)')
+        CheckHash(0xA79704A84622FE8)
+        Key.Pressed(Ctrl+Alt+Down)
+        Paint('2. Nothing happens (all items are visible)')
+        CheckHash(0xA79704A84622FE8)
+        Key.Pressed(Ctrl+Alt+Up,100)
+        Paint('3. Nothing happens (all items are visible)')
+        CheckHash(0xA79704A84622FE8)
+        Key.Pressed(Ctrl+Alt+Down,100)
+        Paint('4. Nothing happens (all items are visible)')
+        CheckHash(0xA79704A84622FE8)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_changing_scroll_with_keys_viewmode_columns_2() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from John,cursor on John)')
+        CheckHash(0x1FF6D1E0707A694D)
+        Key.Pressed(Ctrl+Alt+Down)
+        Paint('2. Scroll starts with Mke (selection is not visible)')
+        CheckHash(0x14D74B1E74093625)
+        Key.Pressed(Ctrl+Alt+Down,4)
+        Paint('3. Scroll starts with on Karl')
+        CheckHash(0xCED2467A7C73CC1D)
+        Key.Pressed(Down,2)
+        // the first Down key restore the scroll position
+        // the second just moves the cursor
+        Paint('4. Scroll starts with on Mike, Selection is on Todd')
+        CheckHash(0x2C05D94E78980379)
+        Key.Pressed(Down,2)
+        Key.Pressed(Ctrl+Alt+Down,4)
+        Paint('5. Scroll starts with on Karl (seletion not visible)')
+        CheckHash(0xCED2467A7C73CC1D)
+        Key.Pressed(Ctrl+Alt+Up,3)
+        Paint('6. Scroll starts with on Todd (cursor or Etienne)')
+        CheckHash(0x7A858D4B7295B16C)
+        Key.Pressed(Ctrl+Alt+Up,100)
+        Paint('7. Scroll starts with on JOhn (cursor on Etienne)')
+        CheckHash(0x6DAA747E7F6FA299)
+        Key.Pressed(Ctrl+Alt+Down,100)
+        Paint('8. Scroll starts with on Karl (cursor not visible)')
+        CheckHash(0xCED2467A7C73CC1D)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(2),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+
+// to add
+// - check groups folding (with keys and mouse) with different views
+// - [DONE] check view scroll with keys
+// - check item selection with keys and mouse
+// - check group selection with keys and mouse with groups
+// - check sorting with keys and mouse
+// - check filtering with keys
+// - check resize window with listview
