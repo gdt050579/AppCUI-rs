@@ -1154,7 +1154,59 @@ fn check_changing_scroll_with_keys_viewmode_columns_2() {
     a.run();
 }
 
+#[test]
+fn check_item_select_with_mouse_viewmode_details() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from John,cursor on John)')
+        CheckHash(0xF73F60131F7F0467)
+        Mouse.Click(14,7,left)
+        Paint('2. Selected: Etiene')
+        CheckHash(0x2A2068FA8E607478)
+        Mouse.Click(40,4,left)
+        Paint('3. Selected: Mike')
+        CheckHash(0xBF4735812C9CD2DB)
+        Mouse.Click(44,5,left)
+        Paint('4. Selected: Todd')
+        CheckHash(0x97CFE2808BE3E483)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
+
+#[test]
+fn check_item_select_with_mouse_viewmode_colums_3() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from John,cursor on John)')
+        CheckHash(0xA79704A84622FE8)
+        Mouse.Click(14,7,left)
+        Paint('2. Selected: Karl')
+        CheckHash(0x5A977164B3434178)
+        Mouse.Click(40,4,left)
+        Paint('3. Selected: Gheorghe')
+        CheckHash(0xED518AB3281FBAB8)
+        Mouse.Click(44,5,left)
+        Paint('4. Selected: Marin')
+        CheckHash(0xD98AFEAD0115DF63)
+        Mouse.Click(28,7,left)
+        Paint('5. Selected: Andrei')
+        CheckHash(0x4EF079CB13627C50)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
 // to add
 // - check groups folding (with keys and mouse) with different views
