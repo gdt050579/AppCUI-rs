@@ -1208,6 +1208,65 @@ fn check_item_select_with_mouse_viewmode_colums_3() {
     a.run();
 }
 
+
+#[test]
+fn check_item_select_with_mouse_viewmode_details_with_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from USA,cursor on USA)')
+        CheckHash(0x44D6237F035CB4)
+        Mouse.Click(14,7,left)
+        Paint('2. Selected: Europe Group')
+        CheckHash(0xD15C9F9836A5F800)
+        Mouse.Click(40,4,left)
+        Paint('3. Selected: John')
+        CheckHash(0x4FF67D3ED33528DC)
+        Mouse.Click(44,5,left)
+        Paint('4. Selected: Mike')
+        CheckHash(0x9ED84080FA5D6E8)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_item_select_with_mouse_viewmode_colums_3_with_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from USA,cursor on USA)')
+        CheckHash(0xE13E48CE0A47B95C)
+        Mouse.Click(14,6,left)
+        Paint('2. Selected: Europe group')
+        CheckHash(0xF6BB083B07DE4BF8)
+        Mouse.Click(40,4,left)
+        Paint('3. Selected: Andrei')
+        CheckHash(0xB0C7FF24585E02BA)
+        Mouse.Click(44,5,left)
+        Paint('4. Selected: Mihai')
+        CheckHash(0xA6D0974B957768E1)
+        Mouse.Click(28,7,left)
+        Paint('5. Selected: Chen')
+        CheckHash(0x719FF1F63D3DAAB2)
+        Mouse.Click(34,4,left)
+        Paint('6. Selected: Asia group')
+        CheckHash(0xE31AD6B686C17620)        
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:50,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+
 // to add
 // - check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys

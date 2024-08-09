@@ -1027,7 +1027,7 @@ where
                 let l = if self.view_mode == ViewMode::Details { 0 } else { left_pos };
                 if x == l + 1 {
                     HoverStatus::OverGroupFoldButton(l + 1, pos)
-                } else if x >= l + 3 && x <= l + 5 {
+                } else if x >= l + 3 && x <= l + 5 && self.flags.contains(Flags::CheckBoxes) {
                     HoverStatus::OverGroupCheckMark(l + 3, pos)
                 } else {
                     HoverStatus::None
