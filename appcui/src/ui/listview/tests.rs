@@ -1265,6 +1265,36 @@ fn check_item_select_with_mouse_viewmode_colums_3_with_groups() {
     a.run();
 }
 
+#[test]
+fn check_resize_window_view_columns_3() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC3AF94EDA108D941)     
+        Mouse.Drag(39,8,50,8) 
+        Paint('2. Resized')
+        CheckHash(0xFDB09C3407374AAB)     
+        Mouse.Drag(50,8,59,8) 
+        Paint('3. Resized')
+        CheckHash(0x715076E1432BC0A4)     
+        Mouse.Drag(59,8,19,8) 
+        Paint('4. Resized')
+        CheckHash(0xBFD6895C71103C1E)     
+        Mouse.Drag(19,8,19,10) 
+        Paint('5. Height increased')
+        CheckHash(0x7782B8C451B181C9)     
+        Mouse.Drag(19,10,59,10) 
+        Paint('6. Height increased & resized')
+        CheckHash(0x426BD2A131C85C3)     
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
 
 // to add
