@@ -274,7 +274,7 @@ impl Terminal for DebugTerminal {
                 self.temp_str.push((48u8 + digit) as char);
             }
         }
-        println!("{} |", self.temp_str);
+        println!("{}\x1b[0m |", self.temp_str);
         self.temp_str.clear();
 
         // last digit
@@ -288,7 +288,7 @@ impl Terminal for DebugTerminal {
             }
             self.temp_str.push((48u8 + ((i % 10) as u8)) as char);
         }
-        println!("{} |", self.temp_str);
+        println!("{}\x1b[0m |", self.temp_str);
         self.temp_str.clear();
 
         // separator line
