@@ -1296,6 +1296,46 @@ fn check_resize_window_view_columns_3() {
     a.run();
 }
 
+#[test]
+fn check_resize_window_view_columns_3_from_end_width_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(End)
+        Paint('1. Initial state')
+        CheckHash(0xE4993796134F0B69)     
+        Mouse.Drag(39,8,50,8) 
+        Paint('2. Resized')
+        CheckHash(0xB86DDA803EA56BBD)     
+        Mouse.Drag(50,8,59,8) 
+        Paint('3. Resized')
+        CheckHash(0xEBF753AFB3027CC5)     
+        Mouse.Drag(59,8,19,8) 
+        Paint('4. Resized (just x nothing else)')
+        CheckHash(0x60575ED72DBCB516)     
+        Mouse.Drag(19,8,19,10) 
+        Paint('5. Height increased')
+        CheckHash(0x597ED679C93FA214)     
+        Mouse.Drag(19,10,59,10) 
+        Paint('6. Height increased & resized')
+        CheckHash(0x2B7002EAA7237AF3)     
+        Mouse.Drag(59,10,59,6) 
+        Paint('7. Height decreased (selection is not visible)')
+        CheckHash(0x7EB4328ED146EBDA)    
+        Key.Pressed(Up) 
+        Paint('8. Selection is visible (at Marin, scroll starts from Karl)')
+        CheckHash(0xA53E52B8F3CAD4A8)    
+        Key.Pressed(Down) 
+        Paint('9. Selection is visible (at Teodor, scroll starts from Jonas)')
+        CheckHash(0x94E5EA9F2F544358)    
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
 // to add
 // - check groups folding (with keys and mouse) with different views
