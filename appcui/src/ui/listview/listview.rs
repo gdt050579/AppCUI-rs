@@ -1197,7 +1197,11 @@ where
             self.update_scroll_pos_from_scrollbars();
             return EventProcessStatus::Processed;
         }
-        let action = self.header.process_mouse_event(event);
+        let action = if (self.view_mode == ViewMode::Details) {
+            self.header.process_mouse_event(event)
+        } else {
+            ColumnsHeaderAction::None
+        };
         if self.execute_column_header_action(action) {
             return EventProcessStatus::Processed;
         }

@@ -1365,6 +1365,63 @@ fn check_hover_on_items_view_details() {
     a.run();
 }
 
+#[test]
+fn check_hover_on_items_view_columns_3() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x7643ACC81F1299EF)     
+        Mouse.Move(3,3) 
+        Paint('2. Hover over Checkbox of Mike')
+        CheckHash(0x3B8A9DF94913744E)       
+        Mouse.Move(41,4) 
+        Paint('3. Hover over Checkbox of Marin')
+        CheckHash(0x218F4C7A00BA82CE)       
+        Mouse.Move(5,5) 
+        Paint('4. Hover over Checkbox of Europe')
+        CheckHash(0x1759181AD5188D7A)       
+        Mouse.Move(2,5) 
+        Paint('5. Hover over Collapse from Europe')
+        CheckHash(0x1E47CABD03FB6609)       
+        Mouse.Move(25,1) 
+        Paint('6. Hover over Checkbox from Asia')
+        CheckHash(0x920A175AE663AC2E)       
+        Mouse.Move(21,1) 
+        Paint('7. Hover over Collapse from Asia')
+        CheckHash(0xEC6C7F255C3B02AD)       
+        Mouse.Move(21,7) 
+        Paint('8. Hover over Collapse from Romania')
+        CheckHash(0xEF6824047808E96D)       
+        Mouse.Move(23,7) 
+        Paint('9. Hover over CheckBox from Romania')
+        CheckHash(0xD2D6E880C63AC376)
+        Mouse.Move(2,1) 
+        Paint('10. Hover over Collapse from USA')
+        CheckHash(0x458DE426E8429F94)       
+        Mouse.Move(5,1) 
+        Paint('11. Hover over CheckBox from USA')
+        CheckHash(0x4A75556AFD43CC90)       
+        Mouse.Click(2,1,left) 
+        Paint('12. Collapse USA group')
+        CheckHash(0x8BC7D199CFC4E928)       
+        Mouse.Move(2,2) 
+        Paint('13. Hover over Collapse from Europe')
+        CheckHash(0xD2D9184AFBA550A5)       
+        Mouse.Move(24,4) 
+        Paint('14. Hover over CheckBox from Romania')
+        CheckHash(0x942FB17B2D95584A)       
+        Mouse.Move(41,2) 
+        Paint('15. Hover over CheckBox from Teodor')
+        CheckHash(0xBD7FC79FC8422A06)       
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
 // to add
 // - check groups folding (with keys and mouse) with different views
