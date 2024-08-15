@@ -1337,6 +1337,35 @@ fn check_resize_window_view_columns_3_from_end_width_checkboxes() {
     a.run();
 }
 
+#[test]
+fn check_hover_on_items_view_details() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5985022EA6C2FAFE)     
+        Mouse.Move(3,3) 
+        Paint('2. Hover over Checkbox of John')
+        CheckHash(0x88C320739D191D2B)       
+        Mouse.Move(3,5) 
+        Paint('3. Hover over Checkbox of Todd')
+        CheckHash(0xC6A9F47B2236ADBF)       
+        Mouse.Move(5,6) 
+        Paint('4. Hover over Checkbox of Europe')
+        CheckHash(0xF4BD6ABEC424C94F)       
+        Mouse.Move(2,6) 
+        Paint('5. Hover over Collapse from Europe')
+        CheckHash(0xDBB0BE8ACC8F62D4)       
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
 // to add
 // - check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
@@ -1344,4 +1373,4 @@ fn check_resize_window_view_columns_3_from_end_width_checkboxes() {
 // - check group selection with keys and mouse with groups
 // - check sorting with keys and mouse
 // - check filtering with keys
-// - check resize window with listview
+// - [DONE] check resize window with listview
