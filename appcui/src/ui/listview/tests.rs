@@ -64,6 +64,16 @@ impl Person {
             g4,
         );
     }
+    fn populate_for_sort(l: &mut ListView<Person>) {
+        l.add(Person::new("Dragos", "90", "Zanzibar"));
+        l.add(Person::new("Zig", "70", "Albania"));
+        l.add(Person::new("Bruce", "40", "Bucharest"));
+        l.add(Person::new("Conrad", "80", "Dresden"));
+        l.add(Person::new("Peter", "20", "Estonia"));
+        l.add(Person::new("Tom", "30", "Iasi"));
+        l.add(Person::new("John", "50", "Madrid"));
+        l.add(Person::new("Alex", "10", "Cairo"));
+    }
 }
 impl listview::ListItem for Person {
     fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
@@ -1423,9 +1433,54 @@ fn check_hover_on_items_view_columns_3() {
     a.run();
 }
 
+#[test]
+fn check_sort_no_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xD478C89C88EB3A43)  
+        Mouse.Click(14,2,left)   
+        Paint('2. Sort by name (ascendent) cursor on Dragos')
+        CheckHash(0x55D548C867D25465)  
+        Mouse.Click(14,2,left)   
+        Paint('3. Sort by name (descendent) cursor on Dragos')
+        CheckHash(0x38A1122D44D9752C)  
+        Key.Pressed(Down,2)
+        Paint('4. Now cursor on Bruce')
+        CheckHash(0x9BB34118E2A15658)  
+        Mouse.Click(35,2,left)   
+        Paint('5. Sort by city (ascendent) cursor on Bruce')
+        CheckHash(0x9451DB3381206649)  
+        Mouse.Click(35,2,left)   
+        Paint('6. Sort by city (descendent) cursor on Bruce')
+        CheckHash(0x651A5FDAFB45DD7F)  
+        Key.Pressed(Home)
+        Paint('7. Now cursor on Dragos (from Zanzibar descending)')
+        CheckHash(0x765886DE6E162CFE)  
+        Key.Pressed(Ctrl+N)
+        Paint('8. Sort by name (ascendent) cursor on Dragos')
+        CheckHash(0x612571FC4FD23D58)  
+        Key.Pressed(Ctrl+S)
+        Paint('9. Sort by size (ascendent) cursor on Dragos')
+        CheckHash(0x4BB0CFA7D1F5D1F3)  
+        Key.Pressed(Ctrl+S)
+        Paint('10. Sort by size (descendent) cursor on Dragos')
+        CheckHash(0x173E33D8E1484115)  
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:8,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
+    Person::populate_for_sort(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
 // to add
 // - check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
+// - [DONE] hovering over groups and items
 // - check item selection with keys and mouse
 // - check group selection with keys and mouse with groups
 // - check sorting with keys and mouse

@@ -12,7 +12,7 @@ enum CheckMode {
     False,
     Reverse,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 enum Filter {
     Item(u32),
     Group(u16),
@@ -197,9 +197,23 @@ where
         }
     }
     fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
+        if self.filter.len() == 0 {
+            // no need to sort
+            return;
+        }
+        let current_item = if self.pos < self.filter.len() { Some(self.filter[self.pos]) } else { None };   
         // sort elements by column index
         let data = &self.data;
         self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
+        if let Some(current_item) = current_item {
+            // find the new position after sorting
+            for (index, item) in self.filter.iter().enumerate() {
+                if *item == current_item {
+                    self.update_position(index, false);
+                    break;
+                }
+            }
+        }
     }
     fn is_item_filtered_out(&self, index: usize) -> bool {
         let item = &self.data[index];
@@ -1197,7 +1211,7 @@ where
             self.update_scroll_pos_from_scrollbars();
             return EventProcessStatus::Processed;
         }
-        let action = if (self.view_mode == ViewMode::Details) {
+        let action = if self.view_mode == ViewMode::Details {
             self.header.process_mouse_event(event)
         } else {
             ColumnsHeaderAction::None
