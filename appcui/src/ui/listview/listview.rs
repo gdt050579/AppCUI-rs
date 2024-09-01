@@ -196,7 +196,7 @@ where
             },
         }
     }
-    fn sort_elements(&mut self, column_index: u16, ascendent: bool) {
+    pub fn sort(&mut self, column_index: u16, ascendent: bool) {
         if self.filter.len() == 0 {
             // no need to sort
             return;
@@ -251,9 +251,9 @@ where
             self.filter.push(Filter::Item(index as u32));
         }
         if let Some(column_index) = self.header.sort_column() {
-            self.sort_elements(column_index, self.header.should_sort_ascendent());
+            self.sort(column_index, self.header.should_sort_ascendent());
         } else {
-            self.sort_elements(u16::MAX, true);
+            self.sort(u16::MAX, true);
         }
     }
     fn update_check_count_for_groups(&mut self) {
@@ -317,7 +317,7 @@ where
     fn execute_column_header_action(&mut self, action: ColumnsHeaderAction) -> bool {
         match action {
             ColumnsHeaderAction::Sort((index, ascendent)) => {
-                self.sort_elements(index, ascendent);
+                self.sort(index, ascendent);
                 self.update_scrollbars();
                 true
             }

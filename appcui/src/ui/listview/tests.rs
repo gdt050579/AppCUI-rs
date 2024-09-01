@@ -74,6 +74,35 @@ impl Person {
         l.add(Person::new("John", "50", "Madrid"));
         l.add(Person::new("Alex", "10", "Cairo"));
     }
+    fn populate_for_sort2(l: &mut ListView<Person>) {
+        l.add(Person::new("Dragos", "90", "Zanzibar"));
+        l.add(Person::new("Zig", "70", "Albania"));
+        l.add(Person::new("Bruce", "40", "Bucharest"));
+        l.add(Person::new("Conrad", "80", "Dresden"));
+        l.add(Person::new("Peter", "20", "Estonia"));
+        l.add(Person::new("Tom", "30", "Iasi"));
+        l.add(Person::new("John", "50", "Madrid"));
+        l.add(Person::new("Alex", "10", "Cairo"));
+        l.add(Person::new("George", "5", "Brasov"));
+        l.add(Person::new("Mihai", "35", "Brasov"));
+        l.add(Person::new("Vlad", "40", "Cluj"));
+        l.add(Person::new("Ion", "45", "Bucharest"));
+        l.add(Person::new("Gheorghe", "50", "Timisoara"));
+        l.add(Person::new("Marin", "55", "Bucharest"));
+        l.add(Person::new("Teodor", "60", "Arad"));
+        l.add(Person::new("Andrei", "20", "Iasi"));
+        l.add(Person::new("Mircea", "35", "Brasov"));
+        l.add(Person::new("Vasile", "40", "Cluj"));
+        l.add(Person::new("Ilie", "45", "Bucharest"));
+        l.add(Person::new("Gigi", "50", "Timisoara"));
+        l.add(Person::new("Marian", "55", "Bucharest"));
+        l.add(Person::new("Tudor", "60", "Arad"));
+        l.add(Person::new("Marius", "20", "Iasi"));
+        l.add(Person::new("Mihaela", "35", "Brasov"));
+        l.add(Person::new("Viorica", "40", "Cluj"));
+        l.add(Person::new("Ileana", "45", "Bucharest"));
+        l.add(Person::new("Geta", "50", "Timisoara"));
+    }
 }
 impl listview::ListItem for Person {
     fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
@@ -690,7 +719,8 @@ fn check_navigate_keys_mode_columns_2() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(2),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(2),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -832,7 +862,8 @@ fn check_navigate_keys_mode_columns_3() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -917,7 +948,6 @@ fn check_navigate_keys_mode_columns_3_no_checkboxes() {
     a.run();
 }
 
-
 #[test]
 fn check_empty_list_navigation_view_details() {
     let script = "
@@ -992,7 +1022,6 @@ fn check_empty_list_navigation_view_columns_4() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_navigate_keys_mode_columns_2_no_checkboxes_no_groups() {
@@ -1098,7 +1127,6 @@ fn check_changing_scroll_with_keys_viewmode_details() {
     a.run();
 }
 
-
 #[test]
 fn check_changing_scroll_with_keys_viewmode_columns_3() {
     let script = "
@@ -1189,7 +1217,6 @@ fn check_item_select_with_mouse_viewmode_details() {
     a.run();
 }
 
-
 #[test]
 fn check_item_select_with_mouse_viewmode_colums_3() {
     let script = "
@@ -1217,7 +1244,6 @@ fn check_item_select_with_mouse_viewmode_colums_3() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_item_select_with_mouse_viewmode_details_with_groups() {
@@ -1340,7 +1366,8 @@ fn check_resize_window_view_columns_3_from_end_width_checkboxes() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -1368,7 +1395,8 @@ fn check_hover_on_items_view_details() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Details,flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Details,flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -1426,7 +1454,8 @@ fn check_hover_on_items_view_columns_3() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -1476,6 +1505,84 @@ fn check_sort_no_groups() {
     a.run();
 }
 
+#[test]
+fn check_sort_no_groups_3_columns() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3032B710D6D3752)  
+        Key.Pressed(Ctrl+N)
+        Paint('2. Nothing should happen (as we are on a list view mode)')
+        CheckHash(0x3032B710D6D3752)  
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:8,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
+    Person::populate_for_sort2(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_sort_no_groups_3_columns_with_commands() {
+    #[Window(events: CommandBarEvents, internal: true, commands:[ByName,ByCity,BySize])]
+    struct MyWin {
+        lv: Handle<ListView<Person>>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:40,h:8,flags: Sizeable"),
+                lv: Handle::None,
+            };
+            let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
+            Person::populate_for_sort2(&mut lv);
+            w.lv = w.add(lv);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Sort by name", mywin::Commands::ByName);
+            commandbar.set(key!("F2"), "Sort by age", mywin::Commands::BySize);
+            commandbar.set(key!("F3"), "Sort by city", mywin::Commands::ByCity);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            let h = self.lv;
+            match command_id {
+                mywin::Commands::ByName => {
+                    self.control_mut(h).map(|c| c.sort(0, true));
+                }
+                mywin::Commands::ByCity => {
+                    self.control_mut(h).map(|c| c.sort(2, true));
+                }
+                mywin::Commands::BySize => {
+                    self.control_mut(h).map(|c| c.sort(1, true));
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0x493F449BF2AB2E62)  
+        Key.Pressed(F1)
+        Paint('2. Sort by name (ascendent) cursor on Dragos')
+        CheckHash(0x60FE67CF20690673)  
+        Key.Pressed(F2)
+        Paint('3. Sort by age (ascendent) cursor on Dragos')
+        CheckHash(0xB0CC910515391AE8)  
+        Key.Pressed(F3)
+        Paint('4. Sort by city (ascendent) cursor on Dragos')
+        CheckHash(0xE68EB359CA5885EC) 
+    ";
+    let mut a = App::debug(60, 11, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
 
 // to add
 // - check groups folding (with keys and mouse) with different views
