@@ -1584,12 +1584,44 @@ fn check_sort_no_groups_3_columns_with_commands() {
     a.run();
 }
 
+#[test]
+fn check_sort_groups_details() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0x242A1971CD3A8F69)  
+        Key.Pressed(Ctrl+N)
+        Paint('2. Sort by name but withing the grops (ascendent) cursor on USA')
+        CheckHash(0x9B82DD7A98DB388A)  
+        Key.Pressed(Down,5)
+        Paint('3. cursor on Etiene')
+        CheckHash(0xD50D7122063D6C19)  
+        Key.Pressed(Ctrl+S)
+        Paint('4. Sort by size but withing the grops (ascendent) cursor on Etiene (last from group)')
+        CheckHash(0xC2B87EBA596BC4A5)  
+        Mouse.Click(30,1,left)
+        Paint('5. Sort by city but withing the grops (ascendent) cursor on Etiene')
+        CheckHash(0x1C2E94E45BFC87FB)  
+        Mouse.Click(30,1,left)
+        Paint('5. Sort by city but withing the grops (descendent) cursor on Etiene')
+        CheckHash(0xFE8457732E43FDB6)  
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 // to add
 // - check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
 // - [DONE] hovering over groups and items
 // - check item selection with keys and mouse
 // - check group selection with keys and mouse with groups
-// - check sorting with keys and mouse
+// - [DONE] check sorting with keys and mouse
 // - check filtering with keys
 // - [DONE] check resize window with listview

@@ -3,6 +3,7 @@ pub struct Group {
     index: u16
 }
 impl Group {
+    #[allow(non_upper_case_globals)]
     pub const None: Group = Group { index: 0 };
     pub(super) fn new(index: u16) -> Group {
         Group { index }
