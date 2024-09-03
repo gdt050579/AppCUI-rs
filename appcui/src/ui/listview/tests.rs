@@ -1616,6 +1616,50 @@ fn check_sort_groups_details() {
     a.run();
 }
 
+#[test]
+fn check_fold_groups_details_with_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x71ADDF80B0EFE8B2)  
+        Key.Pressed(Space)
+        Paint('2. USA group collapsed')
+        CheckHash(0x535F3B7FE3F4D04D)
+        Key.Pressed(Down,6)
+        Paint('3. Cursor on Asia group')
+        CheckHash(0x9CAFE69E0B109B55)
+        Key.Pressed(Space)
+        Paint('4. Asia group collapsed (cursor on Asia)')
+        CheckHash(0x1CBA3D43D2DBB54A)
+        Key.Pressed(Up,5)
+        Paint('5. Cursor on Europe group')
+        CheckHash(0x6A0FDCBDA65DD476)
+        Key.Pressed(Space)
+        Paint('6. Europe group collapsed (cursor on Europe)')
+        CheckHash(0xC9BC26938B2FB7FF)
+        Key.Pressed(Home)
+        Paint('7. Cusor on USA group')
+        CheckHash(0x6C10887728CA5353)
+        Key.Pressed(Space)
+        Paint('8. USA group unfold (cursor on USA)')
+        CheckHash(0x67E9B5D4C5E675AF)
+        Key.Pressed(Down,5)
+        Paint('9. Cursor on Asia group')
+        CheckHash(0xB28030965912FC8F)
+        Key.Pressed(Space)
+        Paint('10. Asia group unfold (cursor on Asia)')
+        CheckHash(0x155538C17E24C351)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
 // to add
 // - check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys

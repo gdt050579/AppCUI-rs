@@ -310,9 +310,10 @@ where
             return;
         }
         let group = &mut self.groups[gid as usize];
+        let pos = self.pos;
         group.set_collapsed(!group.is_collapsed());
         self.refilter();
-        self.update_position(self.pos, true);
+        self.update_position(pos, true);
     }
     fn execute_column_header_action(&mut self, action: ColumnsHeaderAction) -> bool {
         match action {
