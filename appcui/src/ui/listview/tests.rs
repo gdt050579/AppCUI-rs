@@ -1749,13 +1749,54 @@ fn check_fold_groups_details_with_mouse() {
 }
 
 
-
+#[test]
+fn check_fold_groups_3_columns_with_keys_and_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x978DA3298F62537B)  
+        Key.Pressed(Enter)
+        Paint('2. USA group collapsed')
+        CheckHash(0xA059090C47309633)
+        Key.Pressed(Down,6)
+        Paint('3. Cursor on Asia group')
+        CheckHash(0xE8BE3E2ECD5B51AF)
+        Key.Pressed(Enter)
+        Paint('4. Asia group collapsed (cursor on Asia)')
+        CheckHash(0x31D20DE72F108377)
+        Key.Pressed(Up,5)
+        Paint('5. Cursor on Europe group')
+        CheckHash(0xCDE0075A36C6BA07)
+        Key.Pressed(Enter)
+        Paint('6. Europe group collapsed (cursor on Europe)')
+        CheckHash(0xF99FEE798FACC7F5)
+        Key.Pressed(Home)
+        Paint('7. Cusor on USA group')
+        CheckHash(0x42ADC0354B23819)
+        Key.Pressed(Enter)
+        Paint('8. USA group unfold (cursor on USA)')
+        CheckHash(0x5A9FA8E4B9CB8399)
+        Key.Pressed(Down,5)
+        Paint('9. Cursor on Asia group')
+        CheckHash(0x23F803CF70244BBD)
+        Key.Pressed(Enter)
+        Paint('10. Asia group unfold (cursor on Asia)')
+        CheckHash(0x33C6D10E6AD0565D)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
 // to add
 // - check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
 // - [DONE] hovering over groups and items
-// - check item selection with keys and mouse
+// - [DONE] check item selection with keys and mouse
 // - check group selection with keys and mouse with groups
 // - [DONE] check sorting with keys and mouse
 // - check filtering with keys
