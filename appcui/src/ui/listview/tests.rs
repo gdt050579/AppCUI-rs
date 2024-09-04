@@ -1659,6 +1659,52 @@ fn check_fold_groups_details_with_keys() {
     a.run();
 }
 
+
+
+#[test]
+fn check_fold_groups_details_with_keys_and_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x50422D61A602CC20)  
+        Key.Pressed(Enter)
+        Paint('2. USA group collapsed')
+        CheckHash(0xDE22812284FE93D4)
+        Key.Pressed(Down,6)
+        Paint('3. Cursor on Asia group')
+        CheckHash(0xFD2CFC2BA7BE00F0)
+        Key.Pressed(Enter)
+        Paint('4. Asia group collapsed (cursor on Asia)')
+        CheckHash(0x9240A66A407C5C08)
+        Key.Pressed(Up,5)
+        Paint('5. Cursor on Europe group')
+        CheckHash(0xCB7455B23017C7D4)
+        Key.Pressed(Enter)
+        Paint('6. Europe group collapsed (cursor on Europe)')
+        CheckHash(0xEA4756A25DD61F68)
+        Key.Pressed(Home)
+        Paint('7. Cusor on USA group')
+        CheckHash(0xFB9073E8ED3DCA68)
+        Key.Pressed(Enter)
+        Paint('8. USA group unfold (cursor on USA)')
+        CheckHash(0x4BBC1B520F8ED749)
+        Key.Pressed(Down,5)
+        Paint('9. Cursor on Asia group')
+        CheckHash(0x177CC811829ADF49)
+        Key.Pressed(Enter)
+        Paint('10. Asia group unfold (cursor on Asia)')
+        CheckHash(0xEF2D25D25D5E0188)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
 #[test]
 fn check_fold_groups_details_with_mouse() {
     let script = "
@@ -1701,6 +1747,8 @@ fn check_fold_groups_details_with_mouse() {
     a.add_window(w);
     a.run();
 }
+
+
 
 
 // to add
