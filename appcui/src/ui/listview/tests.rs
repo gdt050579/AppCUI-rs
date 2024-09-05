@@ -1792,11 +1792,121 @@ fn check_fold_groups_3_columns_with_keys_and_checkboxes() {
     a.run();
 }
 
+#[test]
+fn check_item_check_with_keys_no_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x71D21AC2A0917A86)  
+        Key.Pressed(Down)
+        Key.Pressed(Insert)
+        Paint('2. Checked (Zig), cursor on Bruce')
+        CheckHash(0x9A10FA4CEFE397B6)  
+        Key.Pressed(Shift+Down,3)
+        Paint('3. Checked (Zig,Bruce,Conrad,Peter), cursor on Tom')
+        CheckHash(0x3995C25A1D9C18CD)  
+        Key.Pressed(Down)
+        Key.Pressed(Shift+Down,2)
+        Paint('4. Aditional Checked (John,Alex), cursor on Alex')
+        CheckHash(0x18B483F4346B4DEF)  
+        Key.Pressed(Insert)
+        Paint('5. Now Alex is no longer checked, cursor on Alex')
+        CheckHash(0xAB5945A018A01483)  
+        Key.Pressed(Ctrl+A)
+        Paint('6. All items checked, cursor on Alex')
+        CheckHash(0xED20BB8656251D7)  
+        Key.Pressed(Ctrl+A)
+        Paint('7. All items un-checked, cursor on Alex')
+        CheckHash(0x2F99E654D801BEFF)  
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate_for_sort(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_item_check_with_keys_no_groups_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x1465916A8FFC10CE)  
+        Key.Pressed(Down)
+        Key.Pressed(Insert)
+        Paint('2. Checked (Zig), cursor on Bruce')
+        CheckHash(0x6F32BFF77BBE6E6C)  
+        Key.Pressed(Shift+Down,3)
+        Paint('3. Checked (Zig,Bruce,Conrad,Peter), cursor on Tom')
+        CheckHash(0xBD93EF3FDB5FA981)  
+        Key.Pressed(Down)
+        Key.Pressed(Shift+Down,2)
+        Paint('4. Aditional Checked (John,Alex), cursor on Alex')
+        CheckHash(0x2EB2B5A762E89AE9)  
+        Key.Pressed(Insert)
+        Paint('5. Now Alex is no longer checked, cursor on Alex')
+        CheckHash(0xA47409A0D9A90D41)  
+        Key.Pressed(Ctrl+A)
+        Paint('6. All items checked, cursor on Alex')
+        CheckHash(0x8F928AC3B9D296E3)  
+        Key.Pressed(Ctrl+A)
+        Paint('7. All items un-checked, cursor on Alex')
+        CheckHash(0xDF4BEC272C349C3F)  
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate_for_sort(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_item_check_with_keys_no_groups_columns_2() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xAE1344FF63648BFF)  
+        Key.Pressed(Down)
+        Key.Pressed(Insert)
+        Paint('2. Checked (Mike), cursor on Todd')
+        CheckHash(0x77944DF19376DFDF)  
+        Key.Pressed(Shift+Down,3)
+        Paint('3. Checked (Mike,Todd,Sancez,Etiene), cursor on Karl')
+        CheckHash(0x164D3CE5EE1DC0EF)  
+        Key.Pressed(Down)
+        Key.Pressed(Shift+Down,2)
+        Paint('4. Aditional Checked (Jonas,Yu Law), cursor on Kai')
+        CheckHash(0xEC9E634BE3565948)  
+        Key.Pressed(Down,2)
+        Key.Pressed(Shift+Right,1)
+        Paint('5. Aditioanl checked (Chan Li -> Teodor), cursor on Teodor')
+        CheckHash(0x6C2B5D5912B3144D)  
+        Key.Pressed(Ctrl+A)
+        Paint('6. All items checked, cursor on Teodor')
+        CheckHash(0x8284190F3F743821)  
+        Key.Pressed(Ctrl+A)
+        Paint('7. All items un-checked, cursor on Teodor')
+        CheckHash(0xB4DC008E98FB2E95)  
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(2),flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
 // to add
-// - check groups folding (with keys and mouse) with different views
+// - [DONE] check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
 // - [DONE] hovering over groups and items
-// - [DONE] check item selection with keys and mouse
+// - check item selection with keys and mouse
 // - check group selection with keys and mouse with groups
 // - [DONE] check sorting with keys and mouse
 // - check filtering with keys
