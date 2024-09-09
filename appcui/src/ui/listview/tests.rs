@@ -1901,6 +1901,137 @@ fn check_item_check_with_keys_no_groups_columns_2() {
     a.run();
 }
 
+#[test]
+fn check_item_check_with_keys_and_groups_details() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xFE38CA7939ABB271)  
+        Key.Pressed(Space)
+        Paint('2. All items under USA checked (cursor on USA)')
+        CheckHash(0xFCD452704760FDB7)  
+        Key.Pressed(Down,2)
+        Key.Pressed(Space)
+        Paint('3. Cursor on Mike, MIke is not checked, USA is partially checked [?]')
+        CheckHash(0x7796299CD2A6A152)  
+        Key.Pressed(Up,1)
+        Key.Pressed(Space)
+        Paint('4. Cursor on John, John is not checked, USA is partially checked [?]')
+        CheckHash(0xA0DC5F386E00ECC)  
+        Key.Pressed(Down,2)
+        Key.Pressed(Space)
+        Paint('5. Cursor on Todd, Todd is not checked, USA is NOT checked')
+        CheckHash(0x4BB58C50C5A54978)  
+        Key.Pressed(Space)
+        Paint('6. Cursor on Todd, Todd IS checked, USA is partially checked [?]')
+        CheckHash(0x5CDAE3CD95977039)  
+        Key.Pressed(Up,3)
+        Key.Pressed(Space)
+        Paint('7. Cursor on USA, USA (and all items from group) are checked')
+        CheckHash(0xFCD452704760FDB7)  
+        Key.Pressed(Space)
+        Paint('8. Cursor on USA, USA (and all items from group) are NOT checked')
+        CheckHash(0xFE38CA7939ABB271)
+        Key.Pressed(Down,10)  
+        Key.Pressed(Space)
+        Paint('9. Cursor on Yu Law, Yu Law is CHECKED, Asia group is partially checked [?]')
+        CheckHash(0x7BE6764444725CA)
+        Key.Pressed(Up,6)
+        Paint('10. Cursor on Europe group')
+        CheckHash(0xE9C2B6DC0B08EAF1)
+        Key.Pressed(Insert)
+        Paint('11. Cursor on Sancez, Europe group is CHECKED, Sancez is CHECKED')
+        CheckHash(0x48F56FFBFF8C20B)
+        Key.Pressed(Shift+Down,2)
+        Paint('12. Cursor on Karl, Sancez and Etiene are NOT checked, Europe group is partially checked [?]')
+        CheckHash(0xBAF0CB5D3F573110)
+        Key.Pressed(Down,2)
+        Key.Pressed(Shift+Down)
+        Paint('13. Cursor on Yu Law, entire Asia Group is checked')
+        CheckHash(0xCC5A2ECB64768F48)
+        Key.Pressed(Up)
+        Key.Pressed(Shift+Down)
+        Paint('14. Cursor on Yu Law, entire Asia Group is NOT checked')
+        CheckHash(0x935CE1341C87F596)
+        Key.Pressed(Shift+End)
+        Paint('15. Cursor on Teodor, Everything from Yu Law until Teodor are checked')
+        CheckHash(0x182B8ADA67A9D620)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_item_check_with_keys_and_groups_3_columns() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x978DA3298F62537B)  
+        Key.Pressed(Space)
+        Paint('2. All items under USA checked (cursor on USA)')
+        CheckHash(0x42800E01138F6BB1)  
+        Key.Pressed(Down,2)
+        Key.Pressed(Space)
+        Paint('3. Cursor on Mike, MIke is not checked, USA is partially checked [?]')
+        CheckHash(0xE0F57F230BB4474)  
+        Key.Pressed(Up,1)
+        Key.Pressed(Space)
+        Paint('4. Cursor on John, John is not checked, USA is partially checked [?]')
+        CheckHash(0x7DCC3D9301D68142)  
+        Key.Pressed(Down,2)
+        Key.Pressed(Space)
+        Paint('5. Cursor on Todd, Todd is not checked, USA is NOT checked')
+        CheckHash(0x64701E617B8ADE85)  
+        Key.Pressed(Space)
+        Paint('6. Cursor on Todd, Todd IS checked, USA is partially checked [?]')
+        CheckHash(0xCA4FD09FD78B5D3C)  
+        Key.Pressed(Up,3)
+        Key.Pressed(Space)
+        Paint('7. Cursor on USA, USA (and all items from group) are checked')
+        CheckHash(0x42800E01138F6BB1)  
+        Key.Pressed(Space)
+        Paint('8. Cursor on USA, USA (and all items from group) are NOT checked')
+        CheckHash(0x978DA3298F62537B)
+        Key.Pressed(Down,10)  
+        Key.Pressed(Space)
+        Paint('9. Cursor on Yu Law, Yu Law is CHECKED, Asia group is partially checked [?]')
+        CheckHash(0x7B1CC85F09967CE0)
+        Key.Pressed(Up,6)
+        Paint('10. Cursor on Europe group')
+        CheckHash(0x485349D41CD03558)
+        Key.Pressed(Insert)
+        Paint('11. Cursor on Sancez, Europe group is CHECKED, Sancez is CHECKED')
+        CheckHash(0x4EF76BCD88430F8E)
+        Key.Pressed(Shift+Down,2)
+        Paint('12. Cursor on Karl, Sancez and Etiene are NOT checked, Europe group is partially checked [?]')
+        CheckHash(0xEDE4A47E1B7A85C9)
+        Key.Pressed(Down,2)
+        Key.Pressed(Shift+Down)
+        Paint('13. Cursor on Yu Law, entire Asia Group is checked')
+        CheckHash(0x532FB9AD91F6988A)
+        Key.Pressed(Up)
+        Key.Pressed(Shift+Down)
+        Paint('14. Cursor on Yu Law, entire Asia Group is NOT checked')
+        CheckHash(0xB3C1122B99B50E00)
+        Key.Pressed(Shift+End)
+        Paint('15. Cursor on Teodor, Everything from Yu Law until Teodor are checked')
+        CheckHash(0xF244A913EB6F0A26)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views
