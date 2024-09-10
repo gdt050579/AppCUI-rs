@@ -986,7 +986,8 @@ where
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
         match self.view_mode {
             ViewMode::Details => {
-                if (y >= 1) && (x >= 0) && (x < self.size().width as i32) {
+                let sz = self.size();
+                if (y >= 1) && (x >= 0) && (x < sz.width as i32) && (y < sz.height as i32) {
                     let new_pos = self.top_view + (y - 1) as usize;
                     if new_pos < self.filter.len() {
                         Some(new_pos)

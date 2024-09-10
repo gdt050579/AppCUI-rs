@@ -2032,6 +2032,55 @@ fn check_item_check_with_keys_and_groups_3_columns() {
     a.run();
 }
 
+#[test]
+fn check_item_check_with_mouse_and_groups_details() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0xFE38CA7939ABB271)  
+        Mouse.Click(5,2,left)
+        Paint('2. All items under USA checked (cursor on USA)')
+        CheckHash(0xDEB1E877BA139A50)  
+        Mouse.Click(3,4,left)        
+        Paint('3. Cursor on Mike, MIke is not checked, USA is partially checked [?]')
+        CheckHash(0xB67F230F678231F9)  
+        Mouse.Click(3,3,left)
+        Paint('4. Cursor on John, John is not checked, USA is partially checked [?]')
+        CheckHash(0xF83AB5CBED2C25D3)  
+        Mouse.Click(3,5,left)
+        Paint('5. Cursor on Todd, Todd is not checked, USA is NOT checked')
+        CheckHash(0x6DD6CE76D4526683)  
+        Mouse.Click(3,5,left)
+        Paint('6. Cursor on Todd, Todd IS checked, USA is partially checked [?]')
+        CheckHash(0x992DB861555C4ACE)  
+        Mouse.Click(6,2,left)
+        Paint('7. Cursor on USA, USA (and all items from group) are checked')
+        CheckHash(0xDEB1E877BA139A50)  
+        Mouse.Click(4,2,left)
+        Paint('8. Cursor on USA, USA (and all items from group) are NOT checked')
+        CheckHash(0xB6A7F5858E3BE05E)
+        // click outside the listvew (on the deactivated scroll bar)
+        Mouse.Click(3,9,left)
+        Paint('9. Nothing happens: Cursor on USA, USA (and all items from group) are NOT checked')
+        CheckHash(0xFE38CA7939ABB271)
+        Mouse.Wheel(20,5,down,1)
+        Mouse.Click(3,8,left)
+        Paint('10. Cursor on Karl; Karl is CHECKED, Europe group is partially checked [?]')
+        CheckHash(0x5288789D13EDB1FC)
+        Mouse.Click(3,8,left)
+        Paint('11. Cursor on Karl, Karl is CHECKED, Europe group is NOT checked')
+        CheckHash(0xBA5F5EA77525A1D5)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views
