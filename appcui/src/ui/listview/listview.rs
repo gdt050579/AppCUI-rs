@@ -201,7 +201,11 @@ where
             // no need to sort
             return;
         }
-        let current_item = if self.pos < self.filter.len() { Some(self.filter[self.pos]) } else { None };   
+        let current_item = if self.pos < self.filter.len() {
+            Some(self.filter[self.pos])
+        } else {
+            None
+        };
         // sort elements by column index
         let data = &self.data;
         self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
@@ -999,11 +1003,16 @@ where
                 }
             }
             ViewMode::Columns(_) => {
-                let item_width = (self.item_width() + 1) as i32;
-                let column = x / item_width;
-                let index = self.top_view as i32 + column * (self.size().height as i32) + y;
-                if (index >= 0) && ((index as usize) < self.filter.len()) {
-                    Some(index as usize)
+                let sz = self.size();
+                if (y >= 0) && (x >= 0) && (x < sz.width as i32) && (y < sz.height as i32) {
+                    let item_width = (self.item_width() + 1) as i32;
+                    let column = x / item_width;
+                    let index = self.top_view as i32 + column * (self.size().height as i32) + y;
+                    if (index >= 0) && ((index as usize) < self.filter.len()) {
+                        Some(index as usize)
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 }

@@ -2082,6 +2082,72 @@ fn check_item_check_with_mouse_and_groups_details() {
 }
 
 
+#[test]
+fn check_item_check_with_mouse_and_groups_2_columns() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x12903703CFE1E8FC)  
+        Mouse.Click(5,1,left)
+        Paint('2. All items under USA checked (cursor on USA)')
+        CheckHash(0xED44841F41F3FD2D)  
+        Mouse.Click(3,3,left)        
+        Paint('3. Cursor on Mike, MIke is not checked, USA is partially checked [?]')
+        CheckHash(0x387C8EECCCB9799C)  
+        Mouse.Click(3,2,left)
+        Paint('4. Cursor on John, John is not checked, USA is partially checked [?]')
+        CheckHash(0xD046C4670EF97AEE)  
+        Mouse.Click(3,4,left)
+        Paint('5. Cursor on Todd, Todd is not checked, USA is NOT checked')
+        CheckHash(0x7361598DD13BAE41)  
+        Mouse.Click(3,4,left)
+        Paint('6. Cursor on Todd, Todd IS checked, USA is partially checked [?]')
+        CheckHash(0xEF25AC57F70BAA60)  
+        Mouse.Click(6,1,left)
+        Paint('7. Cursor on USA, USA (and all items from group) are checked')
+        CheckHash(0xED44841F41F3FD2D)  
+        Mouse.Click(4,1,left)
+        Paint('8. Cursor on USA, USA (and all items from group) are NOT checked')
+        CheckHash(0x2EFAB7CE3FAAFCF3)
+        // click outside the listvew (on the deactivated scroll bar)
+        Mouse.Click(3,9,left)
+        Paint('9. Nothing happens: Cursor on USA, USA (and all items from group) are NOT checked')
+        CheckHash(0x12903703CFE1E8FC)
+        Mouse.Wheel(20,5,down,1)
+        Mouse.Click(3,8,left)
+        Paint('10. Cursor on Jonas; Jonas is CHECKED, Europe group is partially checked [?]')
+        CheckHash(0xE6F54937614C904F)
+        Mouse.Click(3,8,left)
+        Paint('11. Cursor on Jonas, Jonas is CHECKED, Europe group is NOT checked')
+        CheckHash(0xC9B7230B891373A6)
+        Mouse.Click(34,1,left)
+        Paint('12. Cursor on Asia, Asia group is checked')
+        CheckHash(0x9AB839D34AF7B771)
+        Mouse.Click(32,3,left)
+        Paint('13. Cursor on Kai, Kai is not Checked, Asia group is partially checked [?]')
+        CheckHash(0x81B6DB7A22EFE80B)
+        Mouse.Click(31,1,left)
+        Paint('14. Cursor on Asia, Asia group is Folded')
+        CheckHash(0xD63CEE5AC1373074)
+        Mouse.Click(32,8,left)
+        Paint('15. Cursor on Marin, Marin is checked, Romania group is partially checked [?]')
+        CheckHash(0x4BA0D17034FCE2B7)
+        Mouse.Wheel(20,5,down,1)
+        Paint('16. Cursor on Marin, Marin is NOT checked, Romania group is partially checked [?], View statys from Mike')
+        CheckHash(0xA7A4854C58820250)
+        Mouse.Click(2,8,left)
+        Paint('17. Asia group is unfolded, cursor on Asia')
+        CheckHash(0xFC94AD7FE5C436EE)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(2),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
