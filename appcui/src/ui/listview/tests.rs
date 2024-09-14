@@ -2159,7 +2159,7 @@ fn check_datetime() {
         fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
             match column_index {
                 0 => Some(listview::RenderMethod::Text(self.name)),
-                1 => Some(listview::RenderMethod::DateTime(self.born)),
+                1 => Some(listview::RenderMethod::DateTime(self.born, listview::DateTimeFormat::Normal)),
                 _ => None,
             }
         }
