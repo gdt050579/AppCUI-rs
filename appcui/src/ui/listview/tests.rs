@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use chrono::{NaiveDate, NaiveDateTime};
 
 struct TestItem {}
 impl listview::ListItem for TestItem {
@@ -2148,12 +2149,80 @@ fn check_item_check_with_mouse_and_groups_2_columns() {
     a.run();
 }
 
+#[test]
+fn check_datetime() {
+    struct Student {
+        name: &'static str,
+        born: NaiveDateTime,
+    }
+    impl listview::ListItem for Student {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Text(self.name)),
+                1 => Some(listview::RenderMethod::DateTime(self.born)),
+                _ => None,
+            }
+        }
+    
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 => self.born.cmp(&other.born),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5B1C10DAD00281CD) 
+        Mouse.Click(5,1,left) 
+        Paint('2. Sort by name (ascendent) - cursor on John')
+        CheckHash(0x7C578B003F18F032) 
+        Mouse.Click(5,1,left) 
+        Paint('3. Sort by name (descendent) - cursor on John')
+        CheckHash(0x6DF5332E78517E18) 
+        Mouse.Click(35,1,left) 
+        Paint('4. Sort by datetime (ascendent) - cursor on John')
+        CheckHash(0x7D9E569032489D4E) 
+        Mouse.Click(35,1,left) 
+        Paint('5. Sort by datetime (descendent) - cursor on John')
+        CheckHash(0x4CA258340F6023C4) 
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Student,d:c,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
+
+    let students = vec![
+        Student {
+            name: "John",
+            born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
+        },
+        Student {
+            name: "Mike",
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(), 
+        },
+        Student {
+            name: "Alex",
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
+        },
+        Student {
+            name: "Zig",
+            born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
 // - [DONE] hovering over groups and items
-// - check item selection with keys and mouse
-// - check group selection with keys and mouse with groups
+// - [DONE] check item selection with keys and mouse
+// - [DONE] check group selection with keys and mouse with groups
 // - [DONE] check sorting with keys and mouse
 // - check filtering with keys
 // - [DONE] check resize window with listview
