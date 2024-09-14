@@ -283,8 +283,36 @@ where
             }
         }
     }
-    fn autoresize_column(&mut self, _column_index: u16) {
-        // auto resize column
+    fn autoresize_column(&mut self, column_index: u16) {
+        let mut new_width = 0u32;
+        let mut found = false;
+        for item in self.filter.iter() {
+            match item {
+                Filter::Item(index) => {
+                    let item = &self.data[*index as usize];
+                    if let Some(rm) = item.value().render_method(column_index) {
+                        new_width = new_width.max(listview::RenderMethod::min_width(&rm));
+                        found = true;
+                    }
+                }
+                Filter::Group(_) => {}
+            }
+        }
+        if found {
+            if column_index == 0 {
+                // add extra spaces required
+                if self.flags.contains(Flags::ShowGroups) {
+                    new_width += 2
+                };
+                if self.flags.contains(Flags::CheckBoxes) {
+                    new_width += 2
+                };
+                if self.icon_width > 0 {
+                    new_width += (self.icon_width as u32) + 1;
+                }
+            }
+            self.header.set_column_width(column_index, new_width.min(u8::MAX as u32) as u8);
+        }
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
         self.header.scroll_to(self.comp.horizontal_index() as u32);

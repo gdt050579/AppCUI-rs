@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::utils::FormatDateTime;
-use chrono::{Datelike, NaiveDate, NaiveDateTime, Timelike};
+use chrono::NaiveDateTime;
 
-#[derive(Copy,Clone,Eq,PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum DateTimeFormat {
     Full,
     Normal,
@@ -14,7 +14,7 @@ pub enum RenderMethod<'a> {
     DateTime(NaiveDateTime, DateTimeFormat),
     Custom,
 }
-impl RenderMethod<'_> {
+impl<'a> RenderMethod<'a> {
     #[inline(always)]
     fn paint_text(txt: &str, surface: &mut Surface, theme: &Theme, alignment: TextAlignament, width: u16, attr: Option<CharAttribute>) {
         let format = TextFormat {
@@ -56,41 +56,45 @@ impl RenderMethod<'_> {
         surface.write_text(txt, &format);
     }
     #[inline(always)]
-    fn paint_datetime(
-        dt: &NaiveDateTime,
-        format: DateTimeFormat,
-        surface: &mut Surface,
-        theme: &Theme,
-        alignment: TextAlignament,
-        width: u16,
-        attr: Option<CharAttribute>,
-    ) {
-        let mut inner_buffer: [u8; 40] = [0; 40];
-        let txt = match format {
-            DateTimeFormat::Full => FormatDateTime::full(dt, &mut inner_buffer),
-            DateTimeFormat::Normal => FormatDateTime::normal(dt, &mut inner_buffer),
-            DateTimeFormat::Short => FormatDateTime::short(dt, &mut inner_buffer),
-        };
-        if let Some(txt) = txt {
-            RenderMethod::paint_ascii(txt, surface, theme, alignment, width, attr);
-        }
-    }
-    #[inline(always)]
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, alignment: TextAlignament, width: u16, attr: Option<CharAttribute>) -> bool {
         match self {
             RenderMethod::Text(txt) => {
                 RenderMethod::paint_text(txt, surface, theme, alignment, width, attr);
                 true
             }
-            RenderMethod::Ascii(txt) => {
-                RenderMethod::paint_ascii(txt, surface, theme, alignment, width, attr);
-                true
-            }
-            RenderMethod::DateTime(dt, format) => {
-                RenderMethod::paint_datetime(dt, *format, surface, theme, alignment, width, attr);
-                true
+            RenderMethod::Ascii(_) | RenderMethod::DateTime(_, _) => {
+                let mut output: [u8; 256] = [0; 256];
+                if let Some(str_rep) = self.string_representation(&mut output) {
+                    RenderMethod::paint_ascii(str_rep, surface, theme, alignment, width, attr);
+                    true
+                } else {
+                    false
+                }
             }
             RenderMethod::Custom => false,
+        }
+    }
+    pub(super) fn string_representation(&self, output: &'a mut [u8]) -> Option<&'a str> {
+        match self {
+            RenderMethod::Text(txt) => Some(txt),
+            RenderMethod::Ascii(txt) => Some(txt),
+            RenderMethod::DateTime(dt, format) => {
+                let txt = match format {
+                    DateTimeFormat::Full => FormatDateTime::full(dt, output),
+                    DateTimeFormat::Normal => FormatDateTime::normal(dt, output),
+                    DateTimeFormat::Short => FormatDateTime::short(dt, output),
+                };
+                txt
+            }
+            RenderMethod::Custom => None,
+        }
+    }
+    pub(super) fn min_width(&self) -> u32 {
+        match self {
+            RenderMethod::Text(txt) => txt.chars().count() as u32,
+            RenderMethod::Ascii(txt) => txt.len() as u32,
+            RenderMethod::DateTime(_, _) => 19,
+            RenderMethod::Custom => 0,
         }
     }
 }

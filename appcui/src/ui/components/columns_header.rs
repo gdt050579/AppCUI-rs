@@ -322,6 +322,13 @@ impl ColumnsHeader {
         //println!("Ensure visible: left:{} , right:{} , dif:{} , new_scroll: {}, current_scroll: {}", left, right, dif, new_scroll,self.left_scroll);
         self.scroll_to(new_scroll);
     }
+    pub fn set_column_width(&mut self, index: u16, new_width: u8) {
+        if (index as usize) >= self.columns.len() {
+            return;
+        }
+        self.columns[index as usize].width = new_width;
+        self.update_column_positions(self.columns[0].x);
+    }
     pub fn process_mouse_event(&mut self, event: &MouseEvent) -> ColumnsHeaderAction {
         match event {
             MouseEvent::Enter | MouseEvent::Leave => {
