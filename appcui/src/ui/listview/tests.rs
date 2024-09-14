@@ -2150,7 +2150,7 @@ fn check_item_check_with_mouse_and_groups_2_columns() {
 }
 
 #[test]
-fn check_datetime() {
+fn check_datetime_normal() {
     struct Student {
         name: &'static str,
         born: NaiveDateTime,
@@ -2216,6 +2216,146 @@ fn check_datetime() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_datetime_short() {
+    struct Student {
+        name: &'static str,
+        born: NaiveDateTime,
+    }
+    impl listview::ListItem for Student {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Text(self.name)),
+                1 => Some(listview::RenderMethod::DateTime(self.born, listview::DateTimeFormat::Short)),
+                _ => None,
+            }
+        }
+    
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 => self.born.cmp(&other.born),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        //Error.Disable(true)
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x4554C81261452634) 
+        Mouse.Click(5,1,left) 
+        Paint('2. Sort by name (ascendent) - cursor on John')
+        CheckHash(0x3145CFCC818A291B) 
+        Mouse.Click(5,1,left) 
+        Paint('3. Sort by name (descendent) - cursor on John')
+        CheckHash(0xA203F179479E3459) 
+        Mouse.Click(35,1,left) 
+        Paint('4. Sort by datetime (ascendent) - cursor on John')
+        CheckHash(0x509F3FB14B0C86B7) 
+        Mouse.Click(35,1,left) 
+        Paint('5. Sort by datetime (descendent) - cursor on John')
+        CheckHash(0xC647BD4ABEBDAEF5) 
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Student,d:c,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
+
+    let students = vec![
+        Student {
+            name: "John",
+            born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
+        },
+        Student {
+            name: "Mike",
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(), 
+        },
+        Student {
+            name: "Alex",
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
+        },
+        Student {
+            name: "Zig",
+            born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_datetime_full() {
+    struct Student {
+        name: &'static str,
+        born: NaiveDateTime,
+    }
+    impl listview::ListItem for Student {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Text(self.name)),
+                1 => Some(listview::RenderMethod::DateTime(self.born, listview::DateTimeFormat::Full)),
+                _ => None,
+            }
+        }
+    
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 => self.born.cmp(&other.born),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        //Error.Disable(true)
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3B552F39E1B2838) 
+        Mouse.Click(5,1,left) 
+        Paint('2. Sort by name (ascendent) - cursor on John')
+        CheckHash(0xD966E7A05562E6B7) 
+        Mouse.Click(5,1,left) 
+        Paint('3. Sort by name (descendent) - cursor on John')
+        CheckHash(0x413A21454B652FD) 
+        Mouse.Click(35,1,left) 
+        Paint('4. Sort by datetime (ascendent) - cursor on John')
+        CheckHash(0x27D7CADCCBE1383B) 
+        Mouse.Click(35,1,left) 
+        Paint('5. Sort by datetime (descendent) - cursor on John')
+        CheckHash(0x59264D9D3D81C531) 
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Student,d:c,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
+
+    let students = vec![
+        Student {
+            name: "John",
+            born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
+        },
+        Student {
+            name: "Mike",
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(), 
+        },
+        Student {
+            name: "Alex",
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
+        },
+        Student {
+            name: "Zig",
+            born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views
