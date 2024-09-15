@@ -53,6 +53,10 @@ impl GroupInformation {
         self.items_count = value;
     }   
     #[inline(always)]
+    pub(super) fn increment_items_count(&mut self) {
+        self.items_count += 1;
+    }
+    #[inline(always)]
     pub(super) fn items_checked_count(&self) -> u32 {
         self.items_check_count
     }

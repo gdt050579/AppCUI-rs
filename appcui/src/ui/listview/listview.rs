@@ -233,8 +233,7 @@ where
         }
         return false;
     }
-    fn is_item_filtered_out(&self, index: usize) -> bool {
-        let item = &self.data[index];
+    fn is_item_filtered_out(&self, item: &Item<T>) -> bool {
         if self.groups[item.group_id() as usize].is_collapsed() {
             return true;
         }
@@ -269,23 +268,51 @@ where
         // reserve space for the entire list + groups
         self.filter.reserve(self.data.len() + self.groups.len());
         // if show groups is present --> add all groups first
-        if self.flags.contains(Flags::ShowGroups) {
-            if self.flags.contains(Flags::DisplayEmptyGroups) {
-                for (index, _) in self.groups.iter().enumerate() {
-                    self.filter.push(Element::Group(index as u16));
-                }
-            } else {
-                for index in self.groups.iter().enumerate().filter(|(_, g)| !g.is_empty()).map(|(i, _)| i) {
-                    self.filter.push(Element::Group(index as u16));
-                }
-            }
-        }
+        // if self.flags.contains(Flags::ShowGroups) {
+        //     if self.flags.contains(Flags::DisplayEmptyGroups) {
+        //         for (index, _) in self.groups.iter().enumerate() {
+        //             self.filter.push(Element::Group(index as u16));
+        //         }
+        //     } else {
+        //         for index in self.groups.iter().enumerate().filter(|(_, g)| !g.is_empty()).map(|(i, _)| i) {
+        //             self.filter.push(Element::Group(index as u16));
+        //         }
+        //     }
+        // }
         // add items
-        for (index, _) in self.data.iter().enumerate() {
-            if self.is_item_filtered_out(index) {
-                continue;
+        if self.flags.contains(Flags::ShowGroups) {
+            // clear counter in groups
+            for group in &mut self.groups {
+                group.set_items_count(0);
             }
-            self.filter.push(Element::Item(index as u32));
+            // add items
+            for (index, item) in self.data.iter().enumerate() {
+                if self.is_item_filtered_out(item) {
+                    continue;
+                }
+                let group = &mut self.groups[item.group_id() as usize];
+                if group.items_count() == 0 {
+                    // first encounter of a grooup
+                    self.filter.push(Element::Group(item.group_id()));
+                }
+                group.increment_items_count();
+                self.filter.push(Element::Item(index as u32));
+            }
+            // add empty groups at the end
+            if self.flags.contains(Flags::DisplayEmptyGroups) {
+                for (index, group) in self.groups.iter().enumerate() {
+                    if group.items_count() == 0 {
+                        self.filter.push(Element::Group(index as u16));
+                    }
+                }
+            }
+        } else {
+            for (index, item) in self.data.iter().enumerate() {
+                if self.is_item_filtered_out(item) {
+                    continue;
+                }
+                self.filter.push(Element::Item(index as u32));
+            }
         }
         if let Some(column_index) = self.header.sort_column() {
             self.sort(column_index, self.header.should_sort_ascendent());
