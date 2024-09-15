@@ -26,7 +26,7 @@ impl Element {
             _ => false,
         }
     }
-}   
+}
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum HoverStatus {
@@ -238,23 +238,27 @@ where
         if self.groups[item.group_id() as usize].is_collapsed() {
             return true;
         }
-        // check if content is filtered out
-        let value = item.value();
-        let search_text = self.comp.search_text();
-        if search_text.is_empty() {
-            return false;
-        }
-        let mut output: [u8; 256] = [0; 256];
-        for column_index in 0..self.header.columns().len() {
-            if let Some(rm) = value.render_method(column_index as u16) {
-                if let Some(item_text) = rm.string_representation(&mut output) {
-                    if item_text.index_ignoring_case(search_text).is_some() {
-                        return false;
+        if self.flags.contains(Flags::CustomFilter) {
+            !item.value().matches(self.comp.search_text())
+        } else {
+            // check if content is filtered out
+            let value = item.value();
+            let search_text = self.comp.search_text();
+            if search_text.is_empty() {
+                return false;
+            }
+            let mut output: [u8; 256] = [0; 256];
+            for column_index in 0..self.header.columns().len() {
+                if let Some(rm) = value.render_method(column_index as u16) {
+                    if let Some(item_text) = rm.string_representation(&mut output) {
+                        if item_text.index_ignoring_case(search_text).is_some() {
+                            return false;
+                        }
                     }
                 }
             }
+            true
         }
-        true
     }
     fn refilter(&mut self) {
         if !self.refilter_enabled {
@@ -293,11 +297,11 @@ where
         if self.data.is_empty() {
             return;
         }
-        let (current_element,is_group) = if self.pos < self.filter.len() {
+        let (current_element, is_group) = if self.pos < self.filter.len() {
             let el = self.filter[self.pos];
-            (Some(el),el.is_group())
+            (Some(el), el.is_group())
         } else {
-            (None,false)
+            (None, false)
         };
         self.refilter();
         let found = if let Some(current_element) = current_element {
