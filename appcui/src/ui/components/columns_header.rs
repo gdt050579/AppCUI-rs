@@ -25,18 +25,11 @@ pub enum ColumnsHeaderAction {
 impl ColumnsHeaderAction {
     #[inline(always)]
     pub fn should_repaint(&self) -> bool {
-        match self {
-            ColumnsHeaderAction::None => false,
-            _ => true,
-        }
+        !matches!(self, ColumnsHeaderAction::None)
     }
     #[inline(always)]
     pub fn is_processed(&self) -> bool {
-        match self {
-            ColumnsHeaderAction::None => false,
-            ColumnsHeaderAction::Repaint => false,
-            _ => true,
-        }
+        !matches!(self, ColumnsHeaderAction::None | ColumnsHeaderAction::Repaint)
     }
 }
 pub struct ColumnsHeader {
@@ -218,7 +211,7 @@ impl ColumnsHeader {
         }
     }
     fn update_column_positions(&mut self, start: i32) {
-        if self.columns.len() == 0 {
+        if self.columns.is_empty() {
             self.left_scroll = 0;
             return;
         }
@@ -426,7 +419,7 @@ impl ColumnsHeader {
                     ColumnsHeaderAction::UpdateScroll
                 }
                 key!("Ctrl+Right") => {
-                    if self.columns.len() > 0 {
+                    if !self.columns.is_empty() {
                         self.selected_column_line_index = (self.selected_column_line_index + 1).min((self.columns.len() - 1) as u16);
                         self.ensure_visible(self.selected_column_line_index, true);
                     }
@@ -471,7 +464,7 @@ impl ColumnsHeader {
                             }
                         }
                     }
-                    return ColumnsHeaderAction::None;
+                    ColumnsHeaderAction::None
                 }
             }
         }

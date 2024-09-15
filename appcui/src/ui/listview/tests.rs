@@ -1554,13 +1554,13 @@ fn check_sort_no_groups_3_columns_with_commands() {
             let h = self.lv;
             match command_id {
                 mywin::Commands::ByName => {
-                    self.control_mut(h).map(|c| c.sort(0, true));
+                    if let Some(c) = self.control_mut(h) { c.sort(0, true) }
                 }
                 mywin::Commands::ByCity => {
-                    self.control_mut(h).map(|c| c.sort(2, true));
+                    if let Some(c) = self.control_mut(h) { c.sort(2, true) }
                 }
                 mywin::Commands::BySize => {
-                    self.control_mut(h).map(|c| c.sort(1, true));
+                    if let Some(c) = self.control_mut(h) { c.sort(1, true) }
                 }
             }
         }
@@ -2481,7 +2481,7 @@ fn check_filter_columns_search_age() {
     let mut a = App::debug(60, 12, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
+    Person::populate(&mut lv); 
     w.add(lv);
     a.add_window(w);
     a.run();

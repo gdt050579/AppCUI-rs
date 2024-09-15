@@ -1,13 +1,12 @@
 use super::TextAlignament;
 use crate::{
-    parameter_parser::{self, color::Color, *},
+    parameter_parser::{self, *},
     token_stream_to_string::TokenStreamToString,
 };
 use proc_macro::*;
 use std::fmt::Write;
 use std::str::FromStr;
 
-static mut TEXT_ALIGM: FlagsSignature = FlagsSignature::new(&["Left", "Right", "Center"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("caption", ParamType::String),

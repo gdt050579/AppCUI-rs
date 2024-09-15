@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, u64};
+use std::cmp::Ordering;
 
 use crate::utils;
 
@@ -21,10 +21,7 @@ enum Element {
 impl Element {
     #[inline(always)]
     fn is_group(&self) -> bool {
-        match self {
-            Element::Group(_) => true,
-            _ => false,
-        }
+        matches!(self, Element::Group(_))
     }
 }
 
@@ -207,7 +204,7 @@ where
         }
     }
     pub fn sort(&mut self, column_index: u16, ascendent: bool) {
-        if self.filter.len() == 0 {
+        if self.filter.is_empty() {
             // no need to sort
             return;
         }
@@ -231,7 +228,7 @@ where
                 return true;
             }
         }
-        return false;
+        false
     }
     fn is_item_filtered_out(&self, item: &Item<T>) -> bool {
         if self.flags.contains(Flags::CustomFilter) {
@@ -510,7 +507,7 @@ where
                 _ => {}
             }
         }
-        return true;
+        true
     }
     fn process_key_pressed(&mut self, key: Key) -> bool {
         // process key for items
@@ -754,7 +751,7 @@ where
         let width = self.header.width() as i32;
         let frozen_columns = self.header.frozen_columns();
         let columns = self.header.columns();
-        if columns.len() == 0 {
+        if columns.is_empty() {
             return;
         }
         let min_left = if frozen_columns == 0 {
@@ -1223,10 +1220,8 @@ where
                             if ev.x == l + 1 {
                                 self.toggle_group_collapse_status(gid);
                             }
-                            if self.flags.contains(Flags::CheckBoxes) {
-                                if ev.x >= l + 3 && ev.x <= l + 5 {
-                                    self.check_item(self.pos, CheckMode::Reverse, true);
-                                }
+                            if self.flags.contains(Flags::CheckBoxes) && ev.x >= l + 3 && ev.x <= l + 5 {
+                                self.check_item(self.pos, CheckMode::Reverse, true);
                             }
                         }
                     }
