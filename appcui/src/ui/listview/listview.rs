@@ -299,13 +299,13 @@ where
                 self.filter.push(Element::Item(index as u32));
             }
             // add empty groups at the end
-            if self.flags.contains(Flags::DisplayEmptyGroups) {
-                for (index, group) in self.groups.iter().enumerate() {
-                    if group.items_count() == 0 {
-                        self.filter.push(Element::Group(index as u16));
-                    }
-                }
-            }
+            // if self.flags.contains(Flags::ShowEmptyGroups) {
+            //     for (index, group) in self.groups.iter().enumerate() {
+            //         if group.is_empty() {
+            //             self.filter.push(Element::Group(index as u16));
+            //         }
+            //     }
+            // }
         } else {
             for (index, item) in self.data.iter().enumerate() {
                 if self.is_item_filtered_out(item) {

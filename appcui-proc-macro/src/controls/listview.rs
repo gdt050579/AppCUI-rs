@@ -7,9 +7,9 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "SearchBar",
     "CheckBoxes",
     "ShowGroups",
-    "DisplayEmptyGroups",
     "SmallIcon",
     "LargeIcon",
+    "CustomFilter",
 ]);
 
 static VIEW_MODES: FlagsSignature = FlagsSignature::new(&[

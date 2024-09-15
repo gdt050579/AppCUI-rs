@@ -11,17 +11,16 @@ pub enum Flags {
     SearchBar = 0x02,
     CheckBoxes = 0x04,
     ShowGroups = 0x08,
-    DisplayEmptyGroups = 0x10,
-    SmallIcon = 0x20,
-    LargeIcon = 0x40,
-    CustomFilter = 0x80,
+    SmallIcon = 0x10,
+    LargeIcon = 0x20,
+    CustomFilter = 0x40,
 }
 
 pub trait ListItem {
     fn paint(&self, _column_index: u32, _width: u16, _surface: &mut Surface, _theme: &Theme) {}
     fn render_method(&self, column_index: u16) -> Option<RenderMethod>;
     fn compare(&self, other: &Self, column_index: u16) -> Ordering;
-    fn matches(&self, filter_text: &str) -> bool {
+    fn matches(&self, _text: &str) -> bool {
         true
     }
 }

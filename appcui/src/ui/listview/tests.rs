@@ -2311,7 +2311,6 @@ fn check_datetime_full() {
         }
     }
     let script = "
-        //Error.Disable(true)
         Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0x3B552F39E1B2838) 
@@ -2357,6 +2356,71 @@ fn check_datetime_full() {
 }
 
 
+
+#[test]
+fn check_filter_details_without_groups() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0xCC575D7AD387F6A5)  
+        Key.TypeText('mi')
+        Paint('2. Cursor on Mike, [Mike,Mihai and Gheorghe are visible]')
+        CheckHash(0x5707D2B5B51914B3)
+        CheckCursor(4,11)
+        Key.Pressed(Escape)  
+        Paint('3. All items (curson on Mike)')
+        CheckHash(0x24EE099411C373FD)  
+        Key.TypeText('3')
+        Paint('4. Cursor on Sancez, [Sancez, Yu Law and Mihai are visible] ')
+        CheckHash(0xCEDF6F82B6C5CFC2)
+        Key.Pressed(Escape)
+        Key.TypeText('Bucharest')
+        Paint('5. Cursor on Ion, [Ion and Marin are visible]')
+        CheckHash(0x5C51D19861045FDD)
+        CheckCursor(11,11)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_filter_details_with_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x68027AE2F1046FCD)  
+        Key.TypeText('mi')
+        Paint('2. Cursor on Mike, USA and Romania groups are visible')
+        CheckHash(0x72A1E99690D4D151)
+        CheckCursor(4,11)
+        Key.Pressed(Escape)  
+        Paint('3. All items (curson on Mike)')
+        CheckHash(0x93075CC668AB036B)  
+        Key.TypeText('3')
+        Paint('4. Cursor on Sancez, Europe/Asia/Romania groups are visible (with 1 item each) ')
+        CheckHash(0xFCDD19BD738E0FB4)
+        Key.Pressed(Escape)
+        Key.TypeText('Bucharest')
+        Paint('5. Cursor on Ion, Romania group is visible with two items')
+        CheckHash(0x4DC512A82409096)
+        CheckCursor(11,11)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
@@ -2367,3 +2431,6 @@ fn check_datetime_full() {
 // - check filtering with keys
 // - check auto resize columns
 // - [DONE] check resize window with listview
+// - check flags for ListView
+// - check icons and autoresize columns
+// - check if filtering should work on all coluns ir viewmode is not Details
