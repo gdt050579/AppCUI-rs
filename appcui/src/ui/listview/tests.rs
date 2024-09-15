@@ -2445,8 +2445,7 @@ fn check_filter_details_with_groups_no_result_search() {
 #[test]
 fn check_filter_details_without_groups_no_result_search() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0xCC575D7AD387F6A5)  
         Key.TypeText('xyztBC')
@@ -2465,6 +2464,28 @@ fn check_filter_details_without_groups_no_result_search() {
     a.run();
 }
 
+
+#[test]
+fn check_filter_columns_search_age() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x9A8829E6C6794A19)  
+        Key.TypeText('3')
+        Paint('2. No items visible (even if there are items with 3 in the age)')
+        CheckHash(0xB93C3D60914AF1C4)
+        Key.Pressed(Escape)  
+        Paint('3. All items (cursor on John)')
+        CheckHash(0x9A8829E6C6794A19)  
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views

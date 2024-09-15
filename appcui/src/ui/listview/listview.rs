@@ -244,7 +244,12 @@ where
                 return false;
             }
             let mut output: [u8; 256] = [0; 256];
-            for column_index in 0..self.header.columns().len() {
+            let columns_count = if self.view_mode == ViewMode::Details {
+                self.header.columns().len()
+            } else {
+                1
+            };
+            for column_index in 0..columns_count {
                 if let Some(rm) = value.render_method(column_index as u16) {
                     if let Some(item_text) = rm.string_representation(&mut output) {
                         if item_text.index_ignoring_case(search_text).is_some() {
