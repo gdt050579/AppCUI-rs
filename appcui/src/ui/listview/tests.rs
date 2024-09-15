@@ -2420,6 +2420,51 @@ fn check_filter_details_with_groups() {
     a.run();
 }
 
+#[test]
+fn check_filter_details_with_groups_no_result_search() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x68027AE2F1046FCD)  
+        Key.TypeText('xyztBC')
+        Paint('2. No items visible')
+        CheckHash(0x8A741CE652294875)
+        Key.Pressed(Escape)  
+        Paint('3. All items (curson on John)')
+        CheckHash(0x6657F8ED70CD626B)  
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_filter_details_without_groups_no_result_search() {
+    let script = "
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0xCC575D7AD387F6A5)  
+        Key.TypeText('xyztBC')
+        Paint('2. No items visible')
+        CheckHash(0x8A741CE652294875)
+        Key.Pressed(Escape)  
+        Paint('3. All items (curson on John)')
+        CheckHash(0xCC575D7AD387F6A5)  
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views

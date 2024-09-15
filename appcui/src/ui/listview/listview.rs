@@ -234,9 +234,6 @@ where
         return false;
     }
     fn is_item_filtered_out(&self, item: &Item<T>) -> bool {
-        if self.groups[item.group_id() as usize].is_collapsed() {
-            return true;
-        }
         if self.flags.contains(Flags::CustomFilter) {
             !item.value().matches(self.comp.search_text())
         } else {
@@ -267,18 +264,6 @@ where
         self.filter.clear();
         // reserve space for the entire list + groups
         self.filter.reserve(self.data.len() + self.groups.len());
-        // if show groups is present --> add all groups first
-        // if self.flags.contains(Flags::ShowGroups) {
-        //     if self.flags.contains(Flags::DisplayEmptyGroups) {
-        //         for (index, _) in self.groups.iter().enumerate() {
-        //             self.filter.push(Element::Group(index as u16));
-        //         }
-        //     } else {
-        //         for index in self.groups.iter().enumerate().filter(|(_, g)| !g.is_empty()).map(|(i, _)| i) {
-        //             self.filter.push(Element::Group(index as u16));
-        //         }
-        //     }
-        // }
         // add items
         if self.flags.contains(Flags::ShowGroups) {
             // clear counter in groups
@@ -296,6 +281,9 @@ where
                     self.filter.push(Element::Group(item.group_id()));
                 }
                 group.increment_items_count();
+                if group.is_collapsed() {
+                    continue;
+                }
                 self.filter.push(Element::Item(index as u32));
             }
             // add empty groups at the end
