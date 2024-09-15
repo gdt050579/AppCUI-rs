@@ -2365,4 +2365,5 @@ fn check_datetime_full() {
 // - [DONE] check group selection with keys and mouse with groups
 // - [DONE] check sorting with keys and mouse
 // - check filtering with keys
+// - check auto resize columns
 // - [DONE] check resize window with listview

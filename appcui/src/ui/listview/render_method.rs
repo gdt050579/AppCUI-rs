@@ -12,6 +12,19 @@ pub enum RenderMethod<'a> {
     Text(&'a str),
     Ascii(&'a str),
     DateTime(NaiveDateTime, DateTimeFormat),
+    /*
+    Date(NaiveDate,format),
+    Time(NaiveTime,format),
+    Bool(bool,format)
+    Int(i64,...),
+    Float(f64,...),
+    UInt(u64,...),
+    Percentage(f64,zecimals),
+    Size(u64,format),
+    Progress(f64),
+    Currency(f64,currency),
+    
+    */
     Custom,
 }
 impl<'a> RenderMethod<'a> {

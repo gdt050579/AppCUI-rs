@@ -13,10 +13,20 @@ enum CheckMode {
     Reverse,
 }
 #[derive(Clone, Copy, Eq, PartialEq)]
-enum Filter {
+enum Element {
     Item(u32),
     Group(u16),
 }
+
+impl Element {
+    #[inline(always)]
+    fn is_group(&self) -> bool {
+        match self {
+            Element::Group(_) => true,
+            _ => false,
+        }
+    }
+}   
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum HoverStatus {
@@ -33,7 +43,7 @@ where
 {
     flags: Flags,
     data: Vec<Item<T>>,
-    filter: Vec<Filter>,
+    filter: Vec<Element>,
     groups: Vec<GroupInformation>,
     header: ColumnsHeader,
     comp: ListScrollBars,
@@ -163,12 +173,12 @@ where
         self.view_mode = mode;
         self.update_scrollbars();
     }
-    fn compare_items(a: Filter, b: Filter, column_index: u16, data: &Vec<Item<T>>, ascendent: bool) -> Ordering
+    fn compare_items(a: Element, b: Element, column_index: u16, data: &Vec<Item<T>>, ascendent: bool) -> Ordering
     where
         T: ListItem,
     {
         match (a, b) {
-            (Filter::Item(index_a), Filter::Item(index_b)) => {
+            (Element::Item(index_a), Element::Item(index_b)) => {
                 let rezult = data[index_a as usize].group_id().cmp(&data[index_b as usize].group_id());
                 if rezult != Ordering::Equal {
                     rezult
@@ -183,13 +193,13 @@ where
                     }
                 }
             }
-            (Filter::Group(index_a), Filter::Group(index_b)) => index_a.cmp(&index_b),
-            (Filter::Item(index), Filter::Group(group_id)) => match data[index as usize].group_id().cmp(&group_id) {
+            (Element::Group(index_a), Element::Group(index_b)) => index_a.cmp(&index_b),
+            (Element::Item(index), Element::Group(group_id)) => match data[index as usize].group_id().cmp(&group_id) {
                 Ordering::Equal => Ordering::Greater,
                 Ordering::Greater => Ordering::Greater,
                 Ordering::Less => Ordering::Less,
             },
-            (Filter::Group(group_id), Filter::Item(index)) => match group_id.cmp(&data[index as usize].group_id()) {
+            (Element::Group(group_id), Element::Item(index)) => match group_id.cmp(&data[index as usize].group_id()) {
                 Ordering::Equal => Ordering::Less,
                 Ordering::Greater => Ordering::Greater,
                 Ordering::Less => Ordering::Less,
@@ -209,15 +219,19 @@ where
         // sort elements by column index
         let data = &self.data;
         self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
+        // find the new position after sorting
         if let Some(current_item) = current_item {
-            // find the new position after sorting
-            for (index, item) in self.filter.iter().enumerate() {
-                if *item == current_item {
-                    self.update_position(index, false);
-                    break;
-                }
+            self.goto_element(current_item);
+        }
+    }
+    fn goto_element(&mut self, element: Element) -> bool {
+        for (index, item) in self.filter.iter().enumerate() {
+            if *item == element {
+                self.update_position(index, false);
+                return true;
             }
         }
+        return false;
     }
     fn is_item_filtered_out(&self, index: usize) -> bool {
         let item = &self.data[index];
@@ -225,7 +239,22 @@ where
             return true;
         }
         // check if content is filtered out
-        false
+        let value = item.value();
+        let search_text = self.comp.search_text();
+        if search_text.is_empty() {
+            return false;
+        }
+        let mut output: [u8; 256] = [0; 256];
+        for column_index in 0..self.header.columns().len() {
+            if let Some(rm) = value.render_method(column_index as u16) {
+                if let Some(item_text) = rm.string_representation(&mut output) {
+                    if item_text.index_ignoring_case(search_text).is_some() {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
     }
     fn refilter(&mut self) {
         if !self.refilter_enabled {
@@ -239,11 +268,11 @@ where
         if self.flags.contains(Flags::ShowGroups) {
             if self.flags.contains(Flags::DisplayEmptyGroups) {
                 for (index, _) in self.groups.iter().enumerate() {
-                    self.filter.push(Filter::Group(index as u16));
+                    self.filter.push(Element::Group(index as u16));
                 }
             } else {
                 for index in self.groups.iter().enumerate().filter(|(_, g)| !g.is_empty()).map(|(i, _)| i) {
-                    self.filter.push(Filter::Group(index as u16));
+                    self.filter.push(Element::Group(index as u16));
                 }
             }
         }
@@ -252,12 +281,41 @@ where
             if self.is_item_filtered_out(index) {
                 continue;
             }
-            self.filter.push(Filter::Item(index as u32));
+            self.filter.push(Element::Item(index as u32));
         }
         if let Some(column_index) = self.header.sort_column() {
             self.sort(column_index, self.header.should_sort_ascendent());
         } else {
             self.sort(u16::MAX, true);
+        }
+    }
+    fn filter_items(&mut self) {
+        if self.data.is_empty() {
+            return;
+        }
+        let (current_element,is_group) = if self.pos < self.filter.len() {
+            let el = self.filter[self.pos];
+            (Some(el),el.is_group())
+        } else {
+            (None,false)
+        };
+        self.refilter();
+        let found = if let Some(current_element) = current_element {
+            self.goto_element(current_element)
+        } else {
+            false
+        };
+        if (!found) || (is_group) {
+            // move to the first non_group element
+            for (index, element) in self.filter.iter().enumerate() {
+                match element {
+                    Element::Item(_) => {
+                        self.update_position(index, false);
+                        break;
+                    }
+                    _ => {}
+                }
+            }
         }
     }
     fn update_check_count_for_groups(&mut self) {
@@ -272,14 +330,14 @@ where
         // iterate over each item from the filtered list and update the check count for group it belongs to
         for item in &self.filter {
             match item {
-                Filter::Item(index) => {
+                Element::Item(index) => {
                     let group_id = self.data[*index as usize].group_id();
                     let group = &mut self.groups[group_id as usize];
                     if self.data[*index as usize].is_checked() {
                         group.set_items_checked_count(group.items_checked_count() + 1);
                     }
                 }
-                Filter::Group(_) => {}
+                Element::Group(_) => {}
             }
         }
     }
@@ -288,14 +346,14 @@ where
         let mut found = false;
         for item in self.filter.iter() {
             match item {
-                Filter::Item(index) => {
+                Element::Item(index) => {
                     let item = &self.data[*index as usize];
                     if let Some(rm) = item.value().render_method(column_index) {
                         new_width = new_width.max(listview::RenderMethod::min_width(&rm));
                         found = true;
                     }
                 }
-                Filter::Group(_) => {}
+                Element::Group(_) => {}
             }
         }
         if found {
@@ -403,14 +461,14 @@ where
     fn toggle_current_item_selection(&self) -> CheckMode {
         if self.pos < self.filter.len() {
             match self.filter[self.pos] {
-                Filter::Item(index) => {
+                Element::Item(index) => {
                     if self.data[index as usize].is_checked() {
                         CheckMode::False
                     } else {
                         CheckMode::True
                     }
                 }
-                Filter::Group(_) => CheckMode::False,
+                Element::Group(_) => CheckMode::False,
             }
         } else {
             CheckMode::False
@@ -420,7 +478,7 @@ where
     fn is_entire_list_selected(&self) -> bool {
         for item in &self.filter {
             match item {
-                Filter::Item(idx) => {
+                Element::Item(idx) => {
                     if !self.data[*idx as usize].is_checked() {
                         return false;
                     }
@@ -481,7 +539,7 @@ where
                     self.check_item(self.pos, CheckMode::Reverse, true);
                     true
                 } else {
-                    if let Some(Filter::Group(gid)) = self.filter.get(self.pos) {
+                    if let Some(Element::Group(gid)) = self.filter.get(self.pos) {
                         self.toggle_group_collapse_status(*gid);
                         true
                     } else {
@@ -536,10 +594,10 @@ where
             // Action
             key!("Enter") => {
                 match self.filter.get(self.pos) {
-                    Some(Filter::Item(_)) => {
+                    Some(Element::Item(_)) => {
                         // emit event
                     }
-                    Some(Filter::Group(gid)) => self.toggle_group_collapse_status(*gid),
+                    Some(Element::Group(gid)) => self.toggle_group_collapse_status(*gid),
                     _ => {}
                 }
                 true
@@ -643,7 +701,7 @@ where
         surface.reset_origin();
         while (item_count < visible_items) && (idx < max_idx) {
             match self.filter[idx] {
-                Filter::Group(group_id) => {
+                Element::Group(group_id) => {
                     self.paint_group(&self.groups[group_id as usize], x, y, item_size, surface, theme, attr);
                     // paint group
                     if is_enabled {
@@ -655,7 +713,7 @@ where
                         }
                     }
                 }
-                Filter::Item(_) => {}
+                Element::Item(_) => {}
             }
             y += 1;
             idx += 1;
@@ -872,10 +930,10 @@ where
         // very simply code
         while (item_count < visible_items) && (idx < max_idx) {
             match self.filter[idx] {
-                Filter::Group(_) => {
+                Element::Group(_) => {
                     found_groups = true;
                 }
-                Filter::Item(index) => {
+                Element::Item(index) => {
                     let item = &self.data[index as usize];
                     match self.view_mode {
                         ViewMode::Details => self.paint_item(item, y, surface, theme, attr),
@@ -972,7 +1030,7 @@ where
             return;
         }
         match self.filter[pos] {
-            Filter::Item(index) => {
+            Element::Item(index) => {
                 let item = &mut self.data[index as usize];
                 match mode {
                     CheckMode::True => item.set_checked(true),
@@ -983,12 +1041,12 @@ where
                     self.update_check_count_for_groups();
                 }
             }
-            Filter::Group(gid) => {
+            Element::Group(gid) => {
                 let group = &mut self.groups[gid as usize];
                 let checked = group.items_checked_count();
                 let count = group.items_count();
                 for itm in self.filter.iter().skip(pos + 1) {
-                    if let Filter::Item(index) = itm {
+                    if let Element::Item(index) = itm {
                         let item = &mut self.data[*index as usize];
                         if item.group_id() == gid {
                             item.set_checked(checked < count);
@@ -1059,7 +1117,7 @@ where
             }
         };
         match self.filter[pos] {
-            Filter::Item(_) => {
+            Element::Item(_) => {
                 if self.flags.contains(Flags::CheckBoxes) {
                     let mut left = left_pos;
                     left += if self.flags.contains(Flags::ShowGroups) {
@@ -1076,7 +1134,7 @@ where
                     HoverStatus::None
                 }
             }
-            Filter::Group(_) => {
+            Element::Group(_) => {
                 let l = if self.view_mode == ViewMode::Details { 0 } else { left_pos };
                 if x == l + 1 {
                     HoverStatus::OverGroupFoldButton(l + 1, pos)
@@ -1124,7 +1182,7 @@ where
                         }
                     };
                     match self.filter[self.pos] {
-                        Filter::Item(_) => {
+                        Element::Item(_) => {
                             if self.flags.contains(Flags::CheckBoxes) {
                                 let l = if self.flags.contains(Flags::ShowGroups) {
                                     X_OFFSET_FOR_GROUP_ITEMS
@@ -1136,7 +1194,7 @@ where
                                 }
                             }
                         }
-                        Filter::Group(gid) => {
+                        Element::Group(gid) => {
                             let l = if self.view_mode == ViewMode::Details { 0 } else { left_pos };
                             if ev.x == l + 1 {
                                 self.toggle_group_collapse_status(gid);
@@ -1227,6 +1285,7 @@ where
             return EventProcessStatus::Processed;
         }
         if self.comp.process_key_pressed(key, character) {
+            self.filter_items();
             return EventProcessStatus::Processed;
         }
         if self.process_key_pressed(key) {
