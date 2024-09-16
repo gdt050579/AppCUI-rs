@@ -2487,6 +2487,81 @@ fn check_filter_columns_search_age() {
     a.run();
 }
 
+#[test]
+fn check_columns_autoresize_double_click_with_groups_with_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x147356C458F6062E)  
+        Mouse.DoubleClick(11,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0xCFEC96AD446AD7A2)  
+        Mouse.DoubleClick(24,1,left)
+        Paint('3. Second column auto-resized')
+        CheckHash(0x51BD609B37E3766)  
+        Mouse.DoubleClick(27,1,left)
+        Paint('4. Fourth column auto-resized')
+        CheckHash(0x42E317708303853E)  
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv); 
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_columns_autoresize_double_click_without_groups_with_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xD2238E5F6838AE09)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x7FC371038C3A9B6E)  
+        Mouse.DoubleClick(17,1,left)
+        Paint('3. Second column auto-resized')
+        CheckHash(0xD80A9DD7B6AC354C)  
+        Mouse.DoubleClick(20,1,left)
+        Paint('4. Fourth column auto-resized')
+        CheckHash(0x996E9331B3B8B186)  
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate(&mut lv); 
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_columns_autoresize_double_click_without_groups_without_checkboxes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC763EBB1152DC0CF)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x1782931BF7F0EC66)  
+        Mouse.DoubleClick(15,1,left)
+        Paint('3. Second column auto-resized')
+        CheckHash(0x2675D88BDD8AED8C)  
+        Mouse.DoubleClick(18,1,left)
+        Paint('4. Fourth column auto-resized')
+        CheckHash(0x8606E26D34ED1136)  
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate(&mut lv); 
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views
 // - [DONE] check view scroll with keys
@@ -2495,8 +2570,10 @@ fn check_filter_columns_search_age() {
 // - [DONE] check group selection with keys and mouse with groups
 // - [DONE] check sorting with keys and mouse
 // - check filtering with keys
-// - check auto resize columns
+// - [DONE] check auto resize columns
 // - [DONE] check resize window with listview
 // - check flags for ListView
 // - check icons and autoresize columns
 // - check if filtering should work on all coluns ir viewmode is not Details
+// - check double click on a column (currently is TODO!)
+// - check for other todo macros in the listview.rs file
