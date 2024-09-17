@@ -18,7 +18,7 @@ impl FormatNumber {
         let mut value = value;
         loop {
             buf[pos] = (value % 10 + 48) as u8;
-            value = value / 10;
+            value /= 10;
             if (value == 0) || (pos == 0) {
                 break;
             }

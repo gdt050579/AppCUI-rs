@@ -104,6 +104,31 @@ impl Person {
         l.add(Person::new("Ileana", "45", "Bucharest"));
         l.add(Person::new("Geta", "50", "Timisoara"));
     }
+    fn populate_with_icon(l: &mut ListView<Person>) {
+        let g1 = l.add_group("Group 1");
+        l.add_item(listview::Item::new(
+            Person {
+                name: "Popescu",
+                age: "20",
+                city: "Barcelona",
+            },
+            false,
+            None,
+            ['*', '*'],
+            g1,
+        ));
+        l.add_item(listview::Item::new(
+            Person {
+                name: "Marin",
+                age: "30",
+                city: "Iasi",
+            },
+            false,
+            None,
+            ['@', '@'],
+            g1,
+        ));
+    }
 }
 impl listview::ListItem for Person {
     fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
@@ -1554,13 +1579,19 @@ fn check_sort_no_groups_3_columns_with_commands() {
             let h = self.lv;
             match command_id {
                 mywin::Commands::ByName => {
-                    if let Some(c) = self.control_mut(h) { c.sort(0, true) }
+                    if let Some(c) = self.control_mut(h) {
+                        c.sort(0, true)
+                    }
                 }
                 mywin::Commands::ByCity => {
-                    if let Some(c) = self.control_mut(h) { c.sort(2, true) }
+                    if let Some(c) = self.control_mut(h) {
+                        c.sort(2, true)
+                    }
                 }
                 mywin::Commands::BySize => {
-                    if let Some(c) = self.control_mut(h) { c.sort(1, true) }
+                    if let Some(c) = self.control_mut(h) {
+                        c.sort(1, true)
+                    }
                 }
             }
         }
@@ -1660,8 +1691,6 @@ fn check_fold_groups_details_with_keys() {
     a.run();
 }
 
-
-
 #[test]
 fn check_fold_groups_details_with_keys_and_checkboxes() {
     let script = "
@@ -1698,13 +1727,13 @@ fn check_fold_groups_details_with_keys_and_checkboxes() {
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Details,flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_fold_groups_details_with_mouse() {
@@ -1749,7 +1778,6 @@ fn check_fold_groups_details_with_mouse() {
     a.run();
 }
 
-
 #[test]
 fn check_fold_groups_3_columns_with_keys_and_checkboxes() {
     let script = "
@@ -1786,7 +1814,8 @@ fn check_fold_groups_3_columns_with_keys_and_checkboxes() {
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(3),flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -1960,13 +1989,13 @@ fn check_item_check_with_keys_and_groups_details() {
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_item_check_with_keys_and_groups_3_columns() {
@@ -2026,7 +2055,8 @@ fn check_item_check_with_keys_and_groups_3_columns() {
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -2075,13 +2105,13 @@ fn check_item_check_with_mouse_and_groups_details() {
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_item_check_with_mouse_and_groups_2_columns() {
@@ -2142,7 +2172,8 @@ fn check_item_check_with_mouse_and_groups_2_columns() {
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(2),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(2),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -2163,7 +2194,7 @@ fn check_datetime_normal() {
                 _ => None,
             }
         }
-    
+
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
@@ -2200,7 +2231,7 @@ fn check_datetime_normal() {
         },
         Student {
             name: "Mike",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(), 
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
         },
         Student {
             name: "Alex",
@@ -2231,7 +2262,7 @@ fn check_datetime_short() {
                 _ => None,
             }
         }
-    
+
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
@@ -2269,7 +2300,7 @@ fn check_datetime_short() {
         },
         Student {
             name: "Mike",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(), 
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
         },
         Student {
             name: "Alex",
@@ -2286,7 +2317,6 @@ fn check_datetime_short() {
     a.run();
 }
 
-
 #[test]
 fn check_datetime_full() {
     struct Student {
@@ -2301,7 +2331,7 @@ fn check_datetime_full() {
                 _ => None,
             }
         }
-    
+
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
@@ -2338,7 +2368,7 @@ fn check_datetime_full() {
         },
         Student {
             name: "Mike",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(), 
+            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
         },
         Student {
             name: "Alex",
@@ -2354,8 +2384,6 @@ fn check_datetime_full() {
     a.add_window(w);
     a.run();
 }
-
-
 
 #[test]
 fn check_filter_details_without_groups() {
@@ -2413,7 +2441,8 @@ fn check_filter_details_with_groups() {
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("Person,d:c,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -2435,7 +2464,8 @@ fn check_filter_details_with_groups_no_result_search() {
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("Person,d:c,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -2464,7 +2494,6 @@ fn check_filter_details_without_groups_no_result_search() {
     a.run();
 }
 
-
 #[test]
 fn check_filter_columns_search_age() {
     let script = "
@@ -2480,8 +2509,9 @@ fn check_filter_columns_search_age() {
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv); 
+    let mut lv =
+        listview!("Person,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
     a.run();
@@ -2505,8 +2535,9 @@ fn check_columns_autoresize_double_click_with_groups_with_checkboxes() {
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv); 
+    let mut lv =
+        listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
     a.run();
@@ -2531,7 +2562,7 @@ fn check_columns_autoresize_double_click_without_groups_with_checkboxes() {
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate(&mut lv); 
+    Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
     a.run();
@@ -2556,7 +2587,28 @@ fn check_columns_autoresize_double_click_without_groups_without_checkboxes() {
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate(&mut lv); 
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_columns_autoresize_with_icon_small() {
+    let script = "
+        //Error.Disable(true)
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xEF9616CEA8404352)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x313922DD4A1C38C0)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+SmallIcon,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate_with_icon(&mut lv);
+
     w.add(lv);
     a.add_window(w);
     a.run();
@@ -2569,11 +2621,11 @@ fn check_columns_autoresize_double_click_without_groups_without_checkboxes() {
 // - [DONE] check item selection with keys and mouse
 // - [DONE] check group selection with keys and mouse with groups
 // - [DONE] check sorting with keys and mouse
-// - check filtering with keys
+// - [DONE] check filtering with keys
 // - [DONE] check auto resize columns
 // - [DONE] check resize window with listview
 // - check flags for ListView
 // - check icons and autoresize columns
-// - check if filtering should work on all coluns ir viewmode is not Details
+// - [DONE] check if filtering should work on all coluns ir viewmode is not Details
 // - check double click on a column (currently is TODO!)
 // - check for other todo macros in the listview.rs file

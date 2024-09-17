@@ -26,7 +26,7 @@ extern crate proc_macro;
 /// * OnDefaultAction
 /// * OnResize
 /// * OnFocus
-///and the **events** parameter is a list of events that could be received by the new control:
+/// and the **events** parameter is a list of events that could be received by the new control:
 /// * CommandBarEvents
 /// * MenuEvents
 ///

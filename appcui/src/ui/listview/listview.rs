@@ -329,12 +329,9 @@ where
         if (!found) || (is_group) {
             // move to the first non_group element
             for (index, element) in self.filter.iter().enumerate() {
-                match element {
-                    Element::Item(_) => {
-                        self.update_position(index, false);
-                        break;
-                    }
-                    _ => {}
+                if let Element::Item(_) = element {
+                    self.update_position(index, false);
+                    break;
                 }
             }
         }
@@ -386,9 +383,7 @@ where
                 if self.flags.contains(Flags::CheckBoxes) {
                     new_width += 2
                 };
-                if self.icon_width > 0 {
-                    new_width += (self.icon_width as u32) + 1;
-                }
+                new_width += self.icon_width as u32;
             }
             self.header.set_column_width(column_index, new_width.min(u8::MAX as u32) as u8);
         }
@@ -498,13 +493,10 @@ where
     #[inline(always)]
     fn is_entire_list_selected(&self) -> bool {
         for item in &self.filter {
-            match item {
-                Element::Item(idx) => {
-                    if !self.data[*idx as usize].is_checked() {
-                        return false;
-                    }
+            if let Element::Item(idx) = item {
+                if !self.data[*idx as usize].is_checked() {
+                    return false;
                 }
-                _ => {}
             }
         }
         true
@@ -789,20 +781,20 @@ where
             match self.icon_width {
                 3 => {
                     surface.write_char(
-                        l + extra,
-                        y,
+                        extra,
+                        0,
                         Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
                     );
                     surface.write_char(
-                        l + extra + 1,
-                        y,
+                        extra + 1,
+                        0,
                         Character::with_attributes(item.icon_second_character(), attr.unwrap_or(theme.text.focused)),
                     );
                 }
                 2 => {
                     surface.write_char(
-                        l + extra,
-                        y,
+                        extra,
+                        0,
                         Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
                     );
                 }

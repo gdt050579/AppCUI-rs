@@ -14,6 +14,7 @@ impl Group {
     }
 }
 
+#[derive(Default)]
 pub(crate) struct GroupInformation {
     name: String,
     name_chars_count: u16,
@@ -71,17 +72,5 @@ impl GroupInformation {
     #[inline(always)]
     pub(super) fn set_collapsed(&mut self, value: bool) {
         self.collapsed = value;
-    }
-}
-
-impl Default for GroupInformation {
-    fn default() -> Self {
-        Self {
-            name: String::new(),
-            name_chars_count: 0,
-            items_count: 0,
-            items_check_count: 0,
-            collapsed: false,
-        }
     }
 }
