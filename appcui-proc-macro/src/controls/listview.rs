@@ -7,8 +7,8 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "SearchBar",
     "CheckBoxes",
     "ShowGroups",
-    "SmallIcon",
-    "LargeIcon",
+    "SmallIcons",
+    "LargeIcons",
     "CustomFilter",
 ]);
 

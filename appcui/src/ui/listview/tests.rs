@@ -2594,19 +2594,19 @@ fn check_columns_autoresize_double_click_without_groups_without_checkboxes() {
 }
 
 #[test]
-fn check_columns_autoresize_with_icon_small() {
+fn check_columns_autoresize_with_icon_small_details_no_checboxes_no_groups() {
     let script = "
         //Error.Disable(true)
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xEF9616CEA8404352)  
+        CheckHash(0x17100C2B7B5B024E)  
         Mouse.DoubleClick(6,1,left)
         Paint('2. First column auto-resized')
-        CheckHash(0x313922DD4A1C38C0)   
+        CheckHash(0xC6B07B4F773B3674)   
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+SmallIcon,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+SmallIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
     Person::populate_with_icon(&mut lv);
 
     w.add(lv);

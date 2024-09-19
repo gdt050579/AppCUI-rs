@@ -11,8 +11,8 @@ pub enum Flags {
     SearchBar = 0x02,
     CheckBoxes = 0x04,
     ShowGroups = 0x08,
-    SmallIcon = 0x10,
-    LargeIcon = 0x20,
+    SmallIcons = 0x10,
+    LargeIcons = 0x20,
     CustomFilter = 0x40,
 }
 

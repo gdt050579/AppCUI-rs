@@ -83,9 +83,9 @@ where
             filter: Vec::with_capacity(capacity),
             header: ColumnsHeader::with_capacity(4),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
-            icon_width: if flags.contains(Flags::LargeIcon) {
+            icon_width: if flags.contains(Flags::LargeIcons) {
                 3 // includes the extra space
-            } else if flags.contains(Flags::SmallIcon) {
+            } else if flags.contains(Flags::SmallIcons) {
                 2 // includes the extra space
             } else {
                 0 // No extra space
@@ -739,6 +739,32 @@ where
         surface.reset_clip();
         surface.reset_origin();
     }
+    #[inline(always)]
+    fn paint_icon(&self, x: i32, item: &Item<T>, attr: Option<CharAttribute>, surface: &mut Surface, theme: &Theme) {
+        let attr = attr.unwrap_or(theme.list_current_item.icon);
+        match self.icon_width {
+            3 => {
+                surface.write_char(
+                    x,
+                    0,
+                    Character::with_attributes(item.icon_first_character(), attr),
+                );
+                surface.write_char(
+                    x + 1,
+                    0,
+                    Character::with_attributes(item.icon_second_character(), attr),
+                );
+            }
+            2 => {
+                surface.write_char(
+                    x,
+                    0,
+                    Character::with_attributes(item.icon_first_character(), attr),
+                );
+            }
+            _ => {}
+        }
+    }
     fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         let width = self.header.width() as i32;
         let frozen_columns = self.header.frozen_columns();
@@ -778,29 +804,10 @@ where
                 extra = 2;
             }
             // icon
-            match self.icon_width {
-                3 => {
-                    surface.write_char(
-                        extra,
-                        0,
-                        Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
-                    );
-                    surface.write_char(
-                        extra + 1,
-                        0,
-                        Character::with_attributes(item.icon_second_character(), attr.unwrap_or(theme.text.focused)),
-                    );
-                }
-                2 => {
-                    surface.write_char(
-                        extra,
-                        0,
-                        Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
-                    );
-                }
-                _ => {}
+            if self.icon_width > 0 {
+                self.paint_icon(extra, item, attr, surface, theme);
+                extra += self.icon_width as i32;
             }
-            extra += self.icon_width as i32;
             if extra > 0 {
                 surface.set_relative_clip((l + extra).max(min_left), y, r.max(min_left), y);
                 surface.set_origin(l + extra, y);
@@ -858,29 +865,10 @@ where
             extra = 2;
         }
         // icon
-        match self.icon_width {
-            3 => {
-                surface.write_char(
-                    l + extra,
-                    y,
-                    Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
-                );
-                surface.write_char(
-                    l + extra + 1,
-                    y,
-                    Character::with_attributes(item.icon_second_character(), attr.unwrap_or(theme.text.focused)),
-                );
-            }
-            2 => {
-                surface.write_char(
-                    l + extra,
-                    y,
-                    Character::with_attributes(item.icon_first_character(), attr.unwrap_or(theme.text.focused)),
-                );
-            }
-            _ => {}
+        if self.icon_width > 0 {
+            self.paint_icon(extra, item, attr, surface, theme);
+            extra += self.icon_width as i32;
         }
-        extra += self.icon_width as i32;
         if l + extra < r {
             if extra > 0 {
                 surface.set_relative_clip(l + extra, y, r, y);

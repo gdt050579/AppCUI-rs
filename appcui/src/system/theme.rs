@@ -88,6 +88,7 @@ pub struct ListCurentItemTheme {
     pub over_selection: CharAttribute,
     pub normal: CharAttribute,
     pub selected: CharAttribute,
+    pub icon: CharAttribute,
 }
 
 #[derive(Default)]
@@ -296,7 +297,8 @@ impl Theme {
             over_inactive: CharAttribute::with_color(Color::Gray, Color::White),
             over_selection: CharAttribute::with_color(Color::Red, Color::White),
             normal: CharAttribute::with_color(Color::Yellow, Color::Transparent),
-            selected: CharAttribute::with_color(Color::Transparent, Color::Black),            
+            selected: CharAttribute::with_color(Color::Transparent, Color::Black),   
+            icon: CharAttribute::with_color(Color::Aqua, Color::Transparent),         
         };
 
         self.header.text = ControlCharAttributesState {
