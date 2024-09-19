@@ -2596,7 +2596,6 @@ fn check_columns_autoresize_double_click_without_groups_without_checkboxes() {
 #[test]
 fn check_columns_autoresize_with_icon_small_details_no_checboxes_no_groups() {
     let script = "
-        //Error.Disable(true)
         Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0x17100C2B7B5B024E)  
@@ -2613,6 +2612,152 @@ fn check_columns_autoresize_with_icon_small_details_no_checboxes_no_groups() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_columns_autoresize_with_icon_small_details_no_checboxes_with_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x97B4CEA673F134B8)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x52DB5FE005D711DA)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+SmallIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate_with_icon(&mut lv);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_columns_autoresize_with_icon_small_details_with_checboxes_with_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC5DD39381C542B08)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x2BE25D50F47BD397)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+SmallIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate_with_icon(&mut lv);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_columns_autoresize_with_icon_small_details_with_checboxes_without_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3C69A16A94AD801E)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0xE5941496700CD360)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+SmallIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate_with_icon(&mut lv);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+////////////////////////
+
+
+#[test]
+fn check_columns_autoresize_with_icon_large_details_no_checboxes_no_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC86741106818EBCE)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x58141EFF73E68E75)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+LargeIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate_with_icon(&mut lv);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_columns_autoresize_with_icon_large_details_no_checboxes_with_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3360AF925AAB2A8F)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x75C1F9304674E084)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+LargeIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate_with_icon(&mut lv);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_columns_autoresize_with_icon_large_details_with_checboxes_with_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC5DD39381C542B08)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x78039A575E457BE1)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate_with_icon(&mut lv);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_columns_autoresize_with_icon_large_details_with_checboxes_without_groups() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xFC318D489409A585)  
+        Mouse.DoubleClick(6,1,left)
+        Paint('2. First column auto-resized')
+        CheckHash(0x8FD1D236E8DE1A41)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    Person::populate_with_icon(&mut lv);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+
 
 // to add
 // - [DONE] check groups folding (with keys and mouse) with different views
