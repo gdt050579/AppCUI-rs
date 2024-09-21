@@ -318,4 +318,56 @@ impl FormatNumber {
             }
         }
     }
+    pub(crate) fn write_number<'a>(&self, value: i128, buffer: &'a mut [u8]) -> Option<&'a str> {
+        let len = buffer.len();
+        if len == 0 {
+            return None;
+        }
+        let mut pos = len - 1;
+        let mut cnt = 0;
+        let negative;
+        let mut value = if value < 0 {
+            negative = true;
+            -value
+        } else {
+            negative = false;
+            value
+        };
+
+        let mut result = loop {
+            buffer[pos] = (value % 10 + 48) as u8;
+            value /= 10;
+            if value == 0 {
+                break true;
+            }
+            pos -= 1;
+            if pos == 0 {
+                break false
+            }
+            if self.group_size > 0 {
+                cnt += 1;
+                if cnt >= self.group_size {
+                    buffer[pos - 1] = self.separator_char;
+                    pos -= 1;
+                    cnt = 0;
+                    if pos == 0 {
+                        break false;
+                    }
+                }
+            }
+        };
+        if !result {
+            None
+        } else {
+            if negative {
+                if pos == 0 {
+                    return None;
+                } else {
+                    pos -= 1;
+                    buffer[pos] = b'-';
+                }
+            }
+            Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
+        }
+    }
 }

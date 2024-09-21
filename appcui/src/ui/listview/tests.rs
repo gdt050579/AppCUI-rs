@@ -2645,7 +2645,8 @@ fn check_columns_autoresize_with_icon_small_details_with_checboxes_with_groups()
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+SmallIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv =
+        listview!("Person,d:c,flags:ScrollBars+SearchBar+SmallIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
     Person::populate_with_icon(&mut lv);
 
     w.add(lv);
@@ -2725,7 +2726,8 @@ fn check_columns_autoresize_with_icon_large_details_with_checboxes_with_groups()
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv =
+        listview!("Person,d:c,flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
     Person::populate_with_icon(&mut lv);
 
     w.add(lv);
@@ -2753,8 +2755,6 @@ fn check_columns_autoresize_with_icon_large_details_with_checboxes_without_group
     a.run();
 }
 
-
-
 #[test]
 fn check_icon_small_3_columns_no_checboxes_no_groups() {
     let script = "
@@ -2764,7 +2764,8 @@ fn check_icon_small_3_columns_no_checboxes_no_groups() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
     Person::populate_with_icon(&mut lv);
 
     w.add(lv);
@@ -2781,7 +2782,9 @@ fn check_icon_small_3_columns_no_checboxes_with_groups() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv = listview!(
+        "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+    );
     Person::populate_with_icon(&mut lv);
 
     w.add(lv);
@@ -2815,16 +2818,15 @@ fn check_icon_small_3_columns_with_checboxes_without_groups() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv = listview!(
+        "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+    );
     Person::populate_with_icon(&mut lv);
 
     w.add(lv);
     a.add_window(w);
     a.run();
 }
-
-
-
 
 #[test]
 fn check_icon_large_3_columns_no_checboxes_no_groups() {
@@ -2835,7 +2837,8 @@ fn check_icon_large_3_columns_no_checboxes_no_groups() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv =
+        listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
     Person::populate_with_icon(&mut lv);
 
     w.add(lv);
@@ -2852,7 +2855,9 @@ fn check_icon_large_3_columns_no_checboxes_with_groups() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv = listview!(
+        "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+    );
     Person::populate_with_icon(&mut lv);
 
     w.add(lv);
@@ -2886,9 +2891,71 @@ fn check_icon_large_3_columns_with_checboxes_without_groups() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    let mut lv = listview!(
+        "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+    );
     Person::populate_with_icon(&mut lv);
 
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_custom_filter() {
+    struct Student {
+        name: &'static str,
+        grade: i32,
+    }
+    impl listview::ListItem for Student {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Text(self.name)),
+                1 => Some(listview::RenderMethod::Int(self.grade as i64, listview::NumericFormat::Normal)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 => self.grade.cmp(&other.grade),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+
+        fn matches(&self, text: &str) -> bool {
+            if let Ok(number) = text.parse() {
+                self.grade >= number
+            } else {
+                false
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xEA6531BEDEBEEDB7)
+        Key.TypeText('8')
+        // only values bigger than 8 should be provided
+        Paint('2. John and Zig are visible')
+        CheckHash(0x2F06B7915860706B)
+        Key.Pressed(Escape)
+        Key.TypeText('6')
+        Paint('3. John,Alex and Zig are visible')
+        CheckHash(0xFC5BE975A3ECC1A5)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Student,d:c,flags:ScrollBars+SearchBar+CustomFilter,columns=[{&Name,10,Left},{&Grade,10,Right}]");
+
+    let students = vec![
+        Student { name: "John", grade: 10 },
+        Student { name: "Mike", grade: 5 },
+        Student { name: "Alex", grade: 7 },
+        Student { name: "Zig", grade: 8 },
+    ];
+    lv.add_items(students);
     w.add(lv);
     a.add_window(w);
     a.run();

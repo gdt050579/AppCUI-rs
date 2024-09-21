@@ -232,7 +232,12 @@ where
     }
     fn is_item_filtered_out(&self, item: &Item<T>) -> bool {
         if self.flags.contains(Flags::CustomFilter) {
-            !item.value().matches(self.comp.search_text())
+            let search_text = self.comp.search_text(); 
+            if search_text.is_empty() {
+                false
+            } else {
+                !item.value().matches(self.comp.search_text())
+            }
         } else {
             // check if content is filtered out
             let value = item.value();
