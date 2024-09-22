@@ -113,8 +113,8 @@ impl<'a> RenderMethod<'a> {
             }
             RenderMethod::Int(value, format) => {
                 let txt = match format {
-                    NumericFormat::Normal => DECIMAL_FORMAT.write_int64(*value as i64, output),
-                    NumericFormat::Separator => DECIMAL_FORMAT_SEPARATIR.write_int64(*value as i64, output),
+                    NumericFormat::Normal => DECIMAL_FORMAT.write_i64(*value as i64, output),
+                    NumericFormat::Separator => DECIMAL_FORMAT_SEPARATIR.write_i64(*value as i64, output),
                 };
                 txt
             }
@@ -129,8 +129,8 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Int(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 let txt = match format {
-                    NumericFormat::Normal => DECIMAL_FORMAT.write_int64(*value as i64, &mut output),
-                    NumericFormat::Separator => DECIMAL_FORMAT_SEPARATIR.write_int64(*value as i64, &mut output),
+                    NumericFormat::Normal => DECIMAL_FORMAT.write_i64(*value as i64, &mut output),
+                    NumericFormat::Separator => DECIMAL_FORMAT_SEPARATIR.write_i64(*value as i64, &mut output),
                 };
                 if let Some(txt) = txt {
                     txt.len() as u32

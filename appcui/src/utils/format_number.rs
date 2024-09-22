@@ -324,85 +324,8 @@ impl FormatNumber {
             }
         }
     }
-    #[inline(always)]
-    fn write_unsigned_dec(&self, value: u128, prefix: &'static str, writer: &mut String) {
-        let mut buffer = [0u8; 40];
-        let mut index = 0;
-        let mut value = value;
-        loop {
-            let digit = (value % 10) as u8;
-            value /= 10;
-            buffer[index] = digit + 48;
-            index += 1;
-            if value == 0 {
-                break;
-            }
-        }
-        if self.representation_digits as usize > index {
-            let mut fill = self.representation_digits as usize - index;
-            while fill > 0 {
-                buffer[index] = 48;
-                index += 1;
-                fill -= 1;
-            }
-        }
-        self.add_buffer_to_string(&buffer[0..index], prefix, writer);
-    }
-    #[inline(always)]
-    fn write_unsigned_hex(&self, value: u128, prefix: &'static str, writer: &mut String) {
-        let mut buffer = [0u8; 40];
-        let mut index = 0;
-        let mut value = value;
-        loop {
-            let digit = (value % 16) as u8;
-            value /= 16;
-            buffer[index] = if digit < 10 { digit + 48 } else { digit + 55 };
-            index += 1;
-            if value == 0 {
-                break;
-            }
-        }
-        if self.representation_digits as usize > index {
-            let mut fill = self.representation_digits as usize - index;
-            while fill > 0 {
-                buffer[index] = 48;
-                index += 1;
-                fill -= 1;
-            }
-        }
-        self.add_buffer_to_string(&buffer[0..index], prefix, writer);
-    }
-    #[inline(always)]
-    fn write_unsigned_bin(&self, value: u128, prefix: &'static str, writer: &mut String) {
-        let mut buffer = [0u8; 132];
-        let mut index = 0;
-        let mut value = value;
-        loop {
-            let digit = (value % 2) as u8;
-            value /= 2;
-            buffer[index] = digit + 48;
-            index += 1;
-            if value == 0 {
-                break;
-            }
-        }
-        if self.representation_digits as usize > index {
-            let mut fill = self.representation_digits as usize - index;
-            while fill > 0 {
-                buffer[index] = 48;
-                index += 1;
-                fill -= 1;
-            }
-        }
-        self.add_buffer_to_string(&buffer[0..index], prefix, writer);
-    }
+
     pub(crate) fn write_unsigned(&self, value: u128, writer: &mut String) {
-        // match self.base {
-        //     2 => self.write_unsigned_bin(value, "0b", writer),
-        //     10 => self.write_unsigned_dec(value, "", writer),
-        //     16 => self.write_unsigned_hex(value, "0x", writer),
-        //     _ => {}
-        // }
         let mut output: [u8;256] = [0;256];
         if let Some(str_rep) = self.write_u128(value, &mut output) {
             writer.push_str(str_rep);
@@ -410,18 +333,11 @@ impl FormatNumber {
     }
     pub(crate) fn write_signed(&self, value: i128, writer: &mut String) {
         if value >= 0 {
-            match self.base {
-                2 => self.write_unsigned_bin(value as u128, "0b", writer),
-                10 => self.write_unsigned_dec(value as u128, "", writer),
-                16 => self.write_unsigned_hex(value as u128, "0x", writer),
-                _ => {}
-            }
+            self.write_unsigned(value as u128, writer)
         } else {
-            match self.base {
-                2 => self.write_unsigned_bin((-value) as u128, "-0b", writer),
-                10 => self.write_unsigned_dec((-value) as u128, "-", writer),
-                16 => self.write_unsigned_hex((-value) as u128, "-0x", writer),
-                _ => {}
+            let mut output: [u8;256] = [0;256];
+            if let Some(str_rep) = self.write_i128(value, &mut output) {
+                writer.push_str(str_rep);
             }
         }
     }
@@ -463,7 +379,7 @@ impl FormatNumber {
             }
         }
     }
-    pub(crate) fn write_int64<'a>(&self, value: i64, buffer: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn write_i64<'a>(&self, value: i64, buffer: &'a mut [u8]) -> Option<&'a str> {
         let len = buffer.len();
         if len == 0 {
             return None;
@@ -478,6 +394,32 @@ impl FormatNumber {
         };
         let pos = self.write_str(self.suffix, len, buffer)?;
         let pos = self.write_number(value as u64, pos, buffer)?;
+        let mut pos = self.write_str(&self.prefix, pos, buffer)?;
+        if negative {
+            if pos == 0 {
+                return None;
+            }
+            pos -= 1;
+            buffer[pos] = b'-';
+        }
+        let pos = self.write_fill_char(pos, buffer)?;
+        Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
+    }
+    pub(crate) fn write_i128<'a>(&self, value: i128, buffer: &'a mut [u8]) -> Option<&'a str> {
+        let len = buffer.len();
+        if len == 0 {
+            return None;
+        }
+        let negative;
+        let value = if value < 0 {
+            negative = true;
+            -value as u128
+        } else {
+            negative = false;
+            value as u128
+        };
+        let pos = self.write_str(self.suffix, len, buffer)?;
+        let pos = self.write_number(value as u128, pos, buffer)?;
         let mut pos = self.write_str(&self.prefix, pos, buffer)?;
         if negative {
             if pos == 0 {
