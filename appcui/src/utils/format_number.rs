@@ -457,52 +457,26 @@ impl FormatNumber {
         if len == 0 {
             return None;
         }
-        let mut pos = len - 1;
-        let mut cnt = 0;
         let negative;
-        let mut value = if value < 0 {
+        let value = if value < 0 {
             negative = true;
-            -value
+            -value as u64
         } else {
             negative = false;
-            value
+            value as u64
         };
-
-        let result = loop {
-            buffer[pos] = (value % 10 + 48) as u8;
-            value /= 10;
-            if value == 0 {
-                break true;
+        let pos = self.write_str(self.suffix, len, buffer)?;
+        let pos = self.write_number(value as u64, pos, buffer)?;
+        let mut pos = self.write_str(&self.prefix, pos, buffer)?;
+        if negative {
+            if pos == 0 {
+                return None;
             }
             pos -= 1;
-            if pos == 0 {
-                break false;
-            }
-            if self.group_size > 0 {
-                cnt += 1;
-                if cnt >= self.group_size {
-                    buffer[pos - 1] = self.separator_char;
-                    pos -= 1;
-                    cnt = 0;
-                    if pos == 0 {
-                        break false;
-                    }
-                }
-            }
-        };
-        if !result {
-            None
-        } else {
-            if negative {
-                if pos == 0 {
-                    return None;
-                } else {
-                    pos -= 1;
-                    buffer[pos] = b'-';
-                }
-            }
-            Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
+            buffer[pos] = b'-';
         }
+        let pos = self.write_fill_char(pos, buffer)?;
+        Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
     }
 
     pub(crate) fn write_uint64<'a>(&self, value: u64, buffer: &'a mut [u8]) -> Option<&'a str> {

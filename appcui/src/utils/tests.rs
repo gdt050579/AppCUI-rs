@@ -559,3 +559,134 @@ fn check_write_unsigned() {
         Some("00C0FFEEh")
     );
 }
+
+#[test]
+fn check_write_signed_positive() {
+    let mut output: [u8; 64] = [0; 64];
+    assert_eq!(FormatNumber::new(10).group(3, b',').write_int64(123, &mut output), Some("123"));
+    assert_eq!(FormatNumber::new(10).group(3, b',').write_int64(1234, &mut output), Some("1,234"));
+    assert_eq!(FormatNumber::new(10).group(4, b'-').write_int64(1234, &mut output), Some("1234"));
+    assert_eq!(FormatNumber::new(10).group(4, b'-').write_int64(123456, &mut output), Some("12-3456"));
+    assert_eq!(
+        FormatNumber::new(10).group(4, b'-').write_int64(12345678, &mut output),
+        Some("1234-5678")
+    );
+    assert_eq!(
+        FormatNumber::new(10).group(3, b':').write_int64(12345678, &mut output),
+        Some("12:345:678")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(3, b':')
+            .representation_digits(8)
+            .write_int64(123, &mut output),
+        Some("00:000:123")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(4, b'=')
+            .representation_digits(8)
+            .write_int64(123456, &mut output),
+        Some("0012=3456")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(4, b'=')
+            .representation_digits(8)
+            .prefix("PFX")
+            .suffix("ABCD")
+            .write_int64(123456, &mut output),
+        Some("PFX0012=3456ABCD")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(3, b'=')
+            .representation_digits(8)
+            .prefix("PFX")
+            .suffix("ABCD")
+            .fill(20, b'*')
+            .write_int64(123456, &mut output),
+        Some("***PFX00=123=456ABCD")
+    );
+    assert_eq!(
+        FormatNumber::new(16)
+            .group(4, b' ')
+            .representation_digits(8)
+            .prefix("0x")
+            .write_int64(0x123456, &mut output),
+        Some("0x0012 3456")
+    );
+    assert_eq!(
+        FormatNumber::new(16)
+            .representation_digits(8)
+            .suffix("h")
+            .write_int64(0xC0FFEE, &mut output),
+        Some("00C0FFEEh")
+    );
+}
+
+
+#[test]
+fn check_write_signed_negative() {
+    let mut output: [u8; 64] = [0; 64];
+    assert_eq!(FormatNumber::new(10).group(3, b',').write_int64(-123, &mut output), Some("-123"));
+    assert_eq!(FormatNumber::new(10).group(3, b',').write_int64(-1234, &mut output), Some("-1,234"));
+    assert_eq!(FormatNumber::new(10).group(4, b'-').write_int64(-1234, &mut output), Some("-1234"));
+    assert_eq!(FormatNumber::new(10).group(4, b'-').write_int64(-123456, &mut output), Some("-12-3456"));
+    assert_eq!(
+        FormatNumber::new(10).group(4, b'-').write_int64(-12345678, &mut output),
+        Some("-1234-5678")
+    );
+    assert_eq!(
+        FormatNumber::new(10).group(3, b':').write_int64(-12345678, &mut output),
+        Some("-12:345:678")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(3, b':')
+            .representation_digits(8)
+            .write_int64(-123, &mut output),
+        Some("-00:000:123")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(4, b'=')
+            .representation_digits(8)
+            .write_int64(-123456, &mut output),
+        Some("-0012=3456")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(4, b'=')
+            .representation_digits(8)
+            .prefix("PFX")
+            .suffix("ABCD")
+            .write_int64(-123456, &mut output),
+        Some("-PFX0012=3456ABCD")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(3, b'=')
+            .representation_digits(8)
+            .prefix("PFX")
+            .suffix("ABCD")
+            .fill(20, b'*')
+            .write_int64(-123456, &mut output),
+        Some("**-PFX00=123=456ABCD")
+    );
+    assert_eq!(
+        FormatNumber::new(16)
+            .group(4, b' ')
+            .representation_digits(8)
+            .prefix("0x")
+            .write_int64(-0x123456, &mut output),
+        Some("-0x0012 3456")
+    );
+    assert_eq!(
+        FormatNumber::new(16)
+            .representation_digits(8)
+            .suffix("h")
+            .write_int64(-0xC0FFEE, &mut output),
+        Some("-00C0FFEEh")
+    );
+}
