@@ -368,10 +368,10 @@ fn check_format_number_decimal_signed() {
 #[test]
 fn check_format_number_hex_unsigned() {
     let mut s = String::new();
-    const F1: FormatNumber = FormatNumber::new(16);
+    const F1: FormatNumber = FormatNumber::new(16).prefix("0x");
     F1.write_unsigned(0x123, &mut s);
     assert_eq!(s, "0x123");
-    const F2: FormatNumber = FormatNumber::new(16).group(4, b'_');
+    const F2: FormatNumber = FormatNumber::new(16).group(4, b'_').prefix("0x");
     let data: &[(u64, &'static str)] = &[
         (0x1234, "0x1234"),
         (0x123456, "0x12_3456"),
@@ -386,7 +386,7 @@ fn check_format_number_hex_unsigned() {
         F2.write_unsigned(*value as u128, &mut s);
         assert_eq!(s, *expect);
     }
-    const F3: FormatNumber = FormatNumber::new(16).fill(10, b'#');
+    const F3: FormatNumber = FormatNumber::new(16).fill(10, b'#').prefix("0x");
     let data: &[(u64, &'static str)] = &[
         (0x1234, "####0x1234"),
         (0x123456, "##0x123456"),
@@ -405,7 +405,7 @@ fn check_format_number_hex_unsigned() {
 #[test]
 fn check_format_number_hex() {
     let mut s = String::new();
-    const F1: FormatNumber = FormatNumber::new(16).representation_digits(8);
+    const F1: FormatNumber = FormatNumber::new(16).representation_digits(8).prefix("0x");
     let data: &[(u64, &'static str)] = &[
         (0x1234, "0x00001234"),
         (0x123456, "0x00123456"),
@@ -425,7 +425,7 @@ fn check_format_number_hex() {
 #[test]
 fn check_format_number_bin() {
     let mut s = String::new();
-    const F1: FormatNumber = FormatNumber::new(2).representation_digits(8);
+    const F1: FormatNumber = FormatNumber::new(2).representation_digits(8).prefix("0b");
     let data: &[(u64, &'static str)] = &[
         (0b10, "0b00000010"),
         (0b1010, "0b00001010"),
@@ -498,30 +498,30 @@ fn check_format_number_float() {
 #[test]
 fn check_write_unsigned() {
     let mut output: [u8; 64] = [0; 64];
-    assert_eq!(FormatNumber::new(10).group(3, b',').write_uint64(123, &mut output), Some("123"));
-    assert_eq!(FormatNumber::new(10).group(3, b',').write_uint64(1234, &mut output), Some("1,234"));
-    assert_eq!(FormatNumber::new(10).group(4, b'-').write_uint64(1234, &mut output), Some("1234"));
-    assert_eq!(FormatNumber::new(10).group(4, b'-').write_uint64(123456, &mut output), Some("12-3456"));
+    assert_eq!(FormatNumber::new(10).group(3, b',').write_u64(123, &mut output), Some("123"));
+    assert_eq!(FormatNumber::new(10).group(3, b',').write_u64(1234, &mut output), Some("1,234"));
+    assert_eq!(FormatNumber::new(10).group(4, b'-').write_u64(1234, &mut output), Some("1234"));
+    assert_eq!(FormatNumber::new(10).group(4, b'-').write_u64(123456, &mut output), Some("12-3456"));
     assert_eq!(
-        FormatNumber::new(10).group(4, b'-').write_uint64(12345678, &mut output),
+        FormatNumber::new(10).group(4, b'-').write_u64(12345678, &mut output),
         Some("1234-5678")
     );
     assert_eq!(
-        FormatNumber::new(10).group(3, b':').write_uint64(12345678, &mut output),
+        FormatNumber::new(10).group(3, b':').write_u64(12345678, &mut output),
         Some("12:345:678")
     );
     assert_eq!(
         FormatNumber::new(10)
             .group(3, b':')
             .representation_digits(8)
-            .write_uint64(123, &mut output),
+            .write_u64(123, &mut output),
         Some("00:000:123")
     );
     assert_eq!(
         FormatNumber::new(10)
             .group(4, b'=')
             .representation_digits(8)
-            .write_uint64(123456, &mut output),
+            .write_u64(123456, &mut output),
         Some("0012=3456")
     );
     assert_eq!(
@@ -530,7 +530,7 @@ fn check_write_unsigned() {
             .representation_digits(8)
             .prefix("PFX")
             .suffix("ABCD")
-            .write_uint64(123456, &mut output),
+            .write_u64(123456, &mut output),
         Some("PFX0012=3456ABCD")
     );
     assert_eq!(
@@ -540,7 +540,7 @@ fn check_write_unsigned() {
             .prefix("PFX")
             .suffix("ABCD")
             .fill(20, b'*')
-            .write_uint64(123456, &mut output),
+            .write_u64(123456, &mut output),
         Some("***PFX00=123=456ABCD")
     );
     assert_eq!(
@@ -548,14 +548,14 @@ fn check_write_unsigned() {
             .group(4, b' ')
             .representation_digits(8)
             .prefix("0x")
-            .write_uint64(0x123456, &mut output),
+            .write_u64(0x123456, &mut output),
         Some("0x0012 3456")
     );
     assert_eq!(
         FormatNumber::new(16)
             .representation_digits(8)
             .suffix("h")
-            .write_uint64(0xC0FFEE, &mut output),
+            .write_u64(0xC0FFEE, &mut output),
         Some("00C0FFEEh")
     );
 }

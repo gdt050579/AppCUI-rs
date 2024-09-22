@@ -1,3 +1,5 @@
+use std::ops::{Add, DivAssign, Rem};
+
 // order
 // suffix
 // number (from right to left + groups)
@@ -169,24 +171,29 @@ impl FormatNumber {
         buffer[pos..offset].copy_from_slice(value.as_bytes());
         Some(pos)
     }
-    fn write_number(&self, mut value: u64, offset: usize, buffer: &mut [u8]) -> Option<usize> {
+    fn write_number<T: Copy + Add + PartialOrd + Ord + PartialEq + Eq + DivAssign + IntoU8 + Rem<Output = T> + From<u8>>(
+        &self,
+        mut value: T,
+        offset: usize,
+        buffer: &mut [u8],
+    ) -> Option<usize> {
         if (offset > buffer.len()) || (offset == 0) {
             return None;
         }
         let mut pos = offset - 1;
         let mut digits = 0u8;
 
-        let base = self.base as u64;
+        let base: T = T::from(self.base);
         loop {
-            let v = value % base;
+            let v: u8 = (value % base).into_u8();
             value /= base;
-            if v < 10 {
-                buffer[pos] = (v as u8) + 48u8;
+            if v < 10.into() {
+                buffer[pos] = v + 48u8;
             } else {
-                buffer[pos] = (v as u8) + 55u8;
+                buffer[pos] = v + 55u8;
             }
             digits += 1;
-            if value == 0 {
+            if value == 0.into() {
                 break;
             }
             pos -= 1;
@@ -390,11 +397,15 @@ impl FormatNumber {
         self.add_buffer_to_string(&buffer[0..index], prefix, writer);
     }
     pub(crate) fn write_unsigned(&self, value: u128, writer: &mut String) {
-        match self.base {
-            2 => self.write_unsigned_bin(value, "0b", writer),
-            10 => self.write_unsigned_dec(value, "", writer),
-            16 => self.write_unsigned_hex(value, "0x", writer),
-            _ => {}
+        // match self.base {
+        //     2 => self.write_unsigned_bin(value, "0b", writer),
+        //     10 => self.write_unsigned_dec(value, "", writer),
+        //     16 => self.write_unsigned_hex(value, "0x", writer),
+        //     _ => {}
+        // }
+        let mut output: [u8;256] = [0;256];
+        if let Some(str_rep) = self.write_u128(value, &mut output) {
+            writer.push_str(str_rep);
         }
     }
     pub(crate) fn write_signed(&self, value: i128, writer: &mut String) {
@@ -479,7 +490,7 @@ impl FormatNumber {
         Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
     }
 
-    pub(crate) fn write_uint64<'a>(&self, value: u64, buffer: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn write_u64<'a>(&self, value: u64, buffer: &'a mut [u8]) -> Option<&'a str> {
         let len = buffer.len();
         if len == 0 {
             return None;
@@ -489,5 +500,31 @@ impl FormatNumber {
         let pos = self.write_str(&self.prefix, pos, buffer)?;
         let pos = self.write_fill_char(pos, buffer)?;
         Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
+    }
+    pub(crate) fn write_u128<'a>(&self, value: u128, buffer: &'a mut [u8]) -> Option<&'a str> {
+        let len = buffer.len();
+        if len == 0 {
+            return None;
+        }
+        let pos = self.write_str(self.suffix, len, buffer)?;
+        let pos = self.write_number(value, pos, buffer)?;
+        let pos = self.write_str(&self.prefix, pos, buffer)?;
+        let pos = self.write_fill_char(pos, buffer)?;
+        Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
+    }
+}
+
+
+trait IntoU8 {
+    fn into_u8(self) -> u8;
+}
+impl IntoU8 for u64 {
+    fn into_u8(self) -> u8 {
+        self as u8
+    }
+}
+impl IntoU8 for u128 {
+    fn into_u8(self) -> u8 {
+        self as u8
     }
 }
