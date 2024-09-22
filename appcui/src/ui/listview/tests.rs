@@ -2911,7 +2911,7 @@ fn check_custom_filter() {
         fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
             match column_index {
                 0 => Some(listview::RenderMethod::Text(self.name)),
-                1 => Some(listview::RenderMethod::Int(self.grade as i64, listview::NumericFormat::Normal)),
+                1 => Some(listview::RenderMethod::Int64(self.grade as i64, listview::NumericFormat::Normal)),
                 _ => None,
             }
         }
@@ -2960,3 +2960,74 @@ fn check_custom_filter() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_numeric_formater_renderer() {
+    struct Employee {
+        name: &'static str,
+        salary: u64,
+        rgb: u32,
+        debt: i64,
+    }
+    impl listview::ListItem for Employee {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::UInt64(self.salary, listview::NumericFormat::Separator)),
+                2 => Some(listview::RenderMethod::UInt64(self.rgb as u64, listview::NumericFormat::Hex32)),
+                3 => Some(listview::RenderMethod::Int64(self.debt, listview::NumericFormat::Normal)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 => self.salary.cmp(&other.salary),
+                2 => self.rgb.cmp(&other.rgb),
+                3 => self.debt.cmp(&other.debt),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x2856BE886DE7BDDE)
+        Key.TypeText('1,0')
+        Paint('2. Alex is visible')
+        CheckHash(0x1CD641E5712E4D26)
+        Key.Pressed(Escape)
+        Key.TypeText('FFFF')
+        Paint('3. Alex and Zig are visible')
+        CheckHash(0x1FD2B0113FA2344B)
+        Key.Pressed(Escape)
+        Mouse.DoubleClick(22,1,left)
+        Paint('4. Salary column auto-resized')
+        CheckHash(0x7158F839E845EB0E)
+        Mouse.DoubleClick(34,1,left)
+        Paint('5. RGB column auto-resized')
+        CheckHash(0x127C73F6B58F3962)
+        Mouse.DoubleClick(43,1,left)
+        Paint('6. Debt column auto-resized')
+        CheckHash(0xFD92A12162C24BA)
+        Mouse.Click(17,1,left)
+        Paint('6. Sort by salary (ascendent)')
+        CheckHash(0xB6204AF8F9D68E2C)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Employee,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{&Salary,10,Right},{&RGB,12,Center},{&Debt,10,Right}]");
+
+    let students = vec![
+        Employee { name: "John", salary: 150000, rgb: 0xFFAABB, debt: 0 },
+        Employee { name: "Mike", salary: 45000, rgb: 0xAA, debt: -3000  },
+        Employee { name: "Alex", salary: 1000000, rgb: 0xFFFF, debt: -123456  },
+        Employee { name: "Zig", salary: 12500, rgb: 0xFFFF0000, debt: -25  },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+

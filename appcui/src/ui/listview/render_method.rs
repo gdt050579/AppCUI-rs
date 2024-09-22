@@ -14,16 +14,38 @@ pub enum DateTimeFormat {
 pub enum NumericFormat {
     Normal,
     Separator,
+    Hex,
+    Hex16,
+    Hex32,
+    Hex64,
+}
+
+impl NumericFormat {
+    const fn formatter(&self) -> &'static FormatNumber {
+        match self {
+            NumericFormat::Normal => &DECIMAL_FORMAT,
+            NumericFormat::Separator => &DECIMAL_FORMAT_SEPARATIR,
+            NumericFormat::Hex => &HEX_FORMAT,
+            NumericFormat::Hex16 => &HEX_16_FORMAT,
+            NumericFormat::Hex32 => &HEX_32_FORMAT,
+            NumericFormat::Hex64 => &HEX_64_FORMAT,
+        }
+    }
 }
 
 const DECIMAL_FORMAT: FormatNumber = FormatNumber::new(10);
 const DECIMAL_FORMAT_SEPARATIR: FormatNumber = FormatNumber::new(10).group(3, b',');
+const HEX_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x");
+const HEX_16_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(4);
+const HEX_32_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(8);
+const HEX_64_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(16);
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
     Ascii(&'a str),
     DateTime(NaiveDateTime, DateTimeFormat),
-    Int(i64, NumericFormat),
+    Int64(i64, NumericFormat),
+    UInt64(u64, NumericFormat),
     /*
     Date(NaiveDate,format),
     Time(NaiveTime,format),
@@ -87,7 +109,10 @@ impl<'a> RenderMethod<'a> {
                 RenderMethod::paint_text(txt, surface, theme, alignment, width, attr);
                 true
             }
-            RenderMethod::Ascii(_) | RenderMethod::DateTime(_, _) | RenderMethod::Int(_, _) => {
+            RenderMethod::Ascii(_) | 
+            RenderMethod::DateTime(_, _) | 
+            RenderMethod::Int64(_, _) | 
+            RenderMethod::UInt64(_, _) => {
                 let mut output: [u8; 256] = [0; 256];
                 if let Some(str_rep) = self.string_representation(&mut output) {
                     RenderMethod::paint_ascii(str_rep, surface, theme, alignment, width, attr);
@@ -111,13 +136,8 @@ impl<'a> RenderMethod<'a> {
                 };
                 txt
             }
-            RenderMethod::Int(value, format) => {
-                let txt = match format {
-                    NumericFormat::Normal => DECIMAL_FORMAT.write_i64(*value as i64, output),
-                    NumericFormat::Separator => DECIMAL_FORMAT_SEPARATIR.write_i64(*value as i64, output),
-                };
-                txt
-            }
+            RenderMethod::Int64(value, format) => format.formatter().write_i64(*value as i64, output),
+            RenderMethod::UInt64(value, format) => format.formatter().write_u64(*value as u64, output),
             RenderMethod::Custom => None,
         }
     }
@@ -126,17 +146,21 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Text(txt) => txt.chars().count() as u32,
             RenderMethod::Ascii(txt) => txt.len() as u32,
             RenderMethod::DateTime(_, _) => 19,
-            RenderMethod::Int(value, format) => {
+            RenderMethod::Int64(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
-                let txt = match format {
-                    NumericFormat::Normal => DECIMAL_FORMAT.write_i64(*value as i64, &mut output),
-                    NumericFormat::Separator => DECIMAL_FORMAT_SEPARATIR.write_i64(*value as i64, &mut output),
-                };
-                if let Some(txt) = txt {
-                    txt.len() as u32
-                } else {
-                    0
-                }
+                format
+                    .formatter()
+                    .write_i64(*value as i64, &mut output)
+                    .map(|p| p.len() as u32)
+                    .unwrap_or(0)
+            }
+            RenderMethod::UInt64(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format
+                    .formatter()
+                    .write_u64(*value as u64, &mut output)
+                    .map(|p| p.len() as u32)
+                    .unwrap_or(0)
             }
             RenderMethod::Custom => 0,
         }
