@@ -16,6 +16,7 @@ pub use self::initialization_flags::ListItem;
 pub use self::render_method::RenderMethod;
 pub use self::render_method::DateTimeFormat;
 pub use self::render_method::NumericFormat;
+pub use self::render_method::BoolFormat;
 pub use self::item::Item;
 pub use self::groups::Group;   
 pub use self::view_mode::ViewMode; 

@@ -40,6 +40,26 @@ const HEX_16_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").represent
 const HEX_32_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(8);
 const HEX_64_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(16);
 
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum BoolFormat {
+    TrueFalse,
+    YesNo,
+    XMinux,
+    CheckmarkMinux,
+}
+
+impl BoolFormat {
+    fn text(&self, value: bool)->&'static str {
+        match self {
+            BoolFormat::TrueFalse => if value { "True" } else { "False" },
+            BoolFormat::YesNo => if value { "Yes" } else { "No" },
+            BoolFormat::XMinux => if value { "X" } else { "-" },
+            BoolFormat::CheckmarkMinux => if value { "\u{221A}" } else { "-" },
+        }
+    }
+}
+
 pub enum RenderMethod<'a> {
     Text(&'a str),
     Ascii(&'a str),
@@ -50,9 +70,7 @@ pub enum RenderMethod<'a> {
     Date(NaiveDate,format),
     Time(NaiveTime,format),
     Bool(bool,format)
-    Int(i64,...),
     Float(f64,...),
-    UInt(u64,...),
     Percentage(f64,zecimals),
     Size(u64,format),
     Progress(f64),
