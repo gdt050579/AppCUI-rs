@@ -1,3 +1,9 @@
+// order
+// suffix
+// number (from right to left + groups)
+// representation_digis
+// prefix
+// fill
 pub(crate) struct FormatNumber {
     base: u8, // 2, 8, 10, 16
     group_size: u8,
@@ -6,6 +12,8 @@ pub(crate) struct FormatNumber {
     fill_char: u8,
     representation_digits: u8,
     number_of_decimals: u8,
+    prefix: &'static str,
+    suffix: &'static str,
 }
 
 impl FormatNumber {
@@ -45,6 +53,7 @@ impl FormatNumber {
             }
         }
     }
+    #[inline(always)]
     pub(crate) const fn new(base: u8) -> Self {
         match base {
             2 | 8 | 10 | 16 => (),
@@ -59,8 +68,11 @@ impl FormatNumber {
             fill_char: 0,
             number_of_decimals: 0,
             representation_digits: 0,
+            prefix: "",
+            suffix: "",
         }
     }
+    #[inline(always)]
     pub(crate) const fn group(mut self, size: u8, separator: u8) -> Self {
         match size {
             0 | 3 | 4 => (),
@@ -81,6 +93,7 @@ impl FormatNumber {
         self.separator_char = separator;
         self
     }
+    #[inline(always)]
     pub(crate) const fn fill(mut self, size: u8, fill_char: u8) -> Self {
         match size {
             0 => match fill_char {
@@ -96,6 +109,7 @@ impl FormatNumber {
         self.fill_char = fill_char;
         self
     }
+    #[inline(always)]
     pub(crate) const fn representation_digits(mut self, value: u8) -> Self {
         match self.base {
             2 => {
@@ -123,10 +137,130 @@ impl FormatNumber {
         self.representation_digits = value;
         self
     }
+
+    #[inline(always)]
+    pub(crate) const fn suffix(mut self, suffix: &'static str) -> Self {
+        self.suffix = suffix;
+        self
+    }
+    #[inline(always)]
+    pub(crate) const fn prefix(mut self, prefix: &'static str) -> Self {
+        self.prefix = prefix;
+        self
+    }
     pub(crate) const fn decimals(mut self, value: u8) -> Self {
         self.number_of_decimals = value;
         self
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    fn write_str(&self, value: &str, offset: usize, buffer: &mut [u8]) -> Option<usize> {
+        if offset > buffer.len() {
+            return None;
+        }
+        if value.len() == 0 {
+            return Some(offset);
+        }
+        if value.len() > offset {
+            return None;
+        }
+        // bitwise copy value into buffer[offset - value.len()]
+        let pos = offset - value.len();
+        buffer[pos..offset].copy_from_slice(value.as_bytes());
+        Some(pos)
+    }
+    fn write_number(&self, mut value: u64, offset: usize, buffer: &mut [u8]) -> Option<usize> {
+        if (offset > buffer.len()) || (offset == 0) {
+            return None;
+        }
+        let mut pos = offset - 1;
+        let mut digits = 0u8;
+
+        let base = self.base as u64;
+        loop {
+            let v = value % base;
+            value /= base;
+            if v < 10 {
+                buffer[pos] = (v as u8) + 48u8;
+            } else {
+                buffer[pos] = (v as u8) + 55u8;
+            }
+            digits += 1;
+            if value == 0 {
+                break;
+            }
+            pos -= 1;
+            if pos == 0 {
+                return None;
+            }
+            if self.group_size > 0 {
+                if digits % self.group_size == 0 {
+                    buffer[pos] = self.separator_char;
+                    pos -= 1;
+                    if pos == 0 {
+                        return None;
+                    }
+                }
+            }
+        }
+        if digits < self.representation_digits {
+            if pos == 0 {
+                return None;
+            }
+            pos -= 1;
+            if self.group_size > 0 {
+                if digits % self.group_size == 0 {
+                    buffer[pos] = self.separator_char;
+                    pos -= 1;
+                    if pos == 0 {
+                        return None;
+                    }
+                }
+            }
+            loop {
+                buffer[pos] = b'0';
+                digits += 1;
+                if digits == self.representation_digits {
+                    break;
+                }
+                pos -= 1;
+                if pos == 0 {
+                    return None;
+                }
+                if self.group_size > 0 {
+                    if digits % self.group_size == 0 {
+                        buffer[pos] = self.separator_char;
+                        pos -= 1;
+                        if pos == 0 {
+                            return None;
+                        }
+                    }
+                }
+            }
+        }
+        Some(pos)
+    }
+    fn write_fill_char(&self, offset: usize, buffer: &mut [u8]) -> Option<usize> {
+        if offset >= buffer.len() {
+            return None;
+        }
+        let w = self.width as usize;
+        if self.width == 0 {
+            return Some(offset);
+        }
+        if w > buffer.len() {
+            return None;
+        }
+        let start_pos = buffer.len() - w;
+        if start_pos >= offset {
+            return Some(offset);
+        }
+        for i in start_pos..offset {
+            buffer[i] = self.fill_char;
+        }
+        Some(start_pos)
+    }
+
     #[inline(always)]
     fn add_buffer_to_string(&self, buffer: &[u8], prefix: &'static str, writer: &mut String) {
         let index = buffer.len();
@@ -318,7 +452,7 @@ impl FormatNumber {
             }
         }
     }
-    pub(crate) fn write_number<'a>(&self, value: i128, buffer: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn write_int64<'a>(&self, value: i64, buffer: &'a mut [u8]) -> Option<&'a str> {
         let len = buffer.len();
         if len == 0 {
             return None;
@@ -334,7 +468,7 @@ impl FormatNumber {
             value
         };
 
-        let mut result = loop {
+        let result = loop {
             buffer[pos] = (value % 10 + 48) as u8;
             value /= 10;
             if value == 0 {
@@ -342,7 +476,7 @@ impl FormatNumber {
             }
             pos -= 1;
             if pos == 0 {
-                break false
+                break false;
             }
             if self.group_size > 0 {
                 cnt += 1;
@@ -369,5 +503,17 @@ impl FormatNumber {
             }
             Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
         }
+    }
+
+    pub(crate) fn write_uint64<'a>(&self, value: u64, buffer: &'a mut [u8]) -> Option<&'a str> {
+        let len = buffer.len();
+        if len == 0 {
+            return None;
+        }
+        let pos = self.write_str(self.suffix, len, buffer)?;
+        let pos = self.write_number(value, pos, buffer)?;
+        let pos = self.write_str(&self.prefix, pos, buffer)?;
+        let pos = self.write_fill_char(pos, buffer)?;
+        Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
     }
 }

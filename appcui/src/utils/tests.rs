@@ -244,7 +244,6 @@ fn check_glyph_ignore_case() {
     assert_eq!(t.index_ignoring_case("aBcDeFgH"), Some(0));
     assert_eq!(t.index_ignoring_case("AbCdEfGh"), Some(0));
     assert_eq!(t.index_ignoring_case("AbCdEfE"), None);
-
 }
 
 #[test]
@@ -264,7 +263,7 @@ fn check_format_number_decimal_unsigned() {
         (10, "10"),
         (100, "100"),
         (1000, "1,000"),
-        (1234567890,"1,234,567,890")
+        (1234567890, "1,234,567,890"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -278,7 +277,7 @@ fn check_format_number_decimal_unsigned() {
         (0, "#########0"),
         (9, "#########9"),
         (10, "########10"),
-        (1234567890,"1234567890")
+        (1234567890, "1234567890"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -296,7 +295,7 @@ fn check_format_number_decimal_unsigned() {
         (10, "********10"),
         (100, "*******100"),
         (1000, "*****1,000"),
-        (1234567890,"1,234,567,890")
+        (1234567890, "1,234,567,890"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -325,7 +324,7 @@ fn check_format_number_decimal_signed() {
         (-10, "-10"),
         (-100, "-100"),
         (-1000, "-1,000"),
-        (-1234567890,"-1,234,567,890")
+        (-1234567890, "-1,234,567,890"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -339,7 +338,7 @@ fn check_format_number_decimal_signed() {
         (0, "#########0"),
         (-9, "########-9"),
         (-10, "#######-10"),
-        (-1234567890,"-1234567890")
+        (-1234567890, "-1234567890"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -357,7 +356,7 @@ fn check_format_number_decimal_signed() {
         (10, "********10"),
         (-100, "******-100"),
         (1000, "*****1,000"),
-        (-1234567890,"-1,234,567,890")
+        (-1234567890, "-1,234,567,890"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -380,7 +379,7 @@ fn check_format_number_hex_unsigned() {
         (0, "0x0"),
         (9, "0x9"),
         (10, "0xA"),
-        (0xFFFFFFFF, "0xFFFF_FFFF")
+        (0xFFFFFFFF, "0xFFFF_FFFF"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -394,7 +393,7 @@ fn check_format_number_hex_unsigned() {
         (0, "#######0x0"),
         (9, "#######0x9"),
         (10, "#######0xA"),
-        (0x1234567890,"0x1234567890")
+        (0x1234567890, "0x1234567890"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -414,7 +413,7 @@ fn check_format_number_hex() {
         (0, "0x00000000"),
         (9, "0x00000009"),
         (10, "0x0000000A"),
-        (0xFFFFFFFF, "0xFFFFFFFF")
+        (0xFFFFFFFF, "0xFFFFFFFF"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -434,7 +433,10 @@ fn check_format_number_bin() {
         (0b10101010, "0b10101010"),
         (0b1010101010101010, "0b1010101010101010"),
         (0b10101010101010101010101010101010, "0b10101010101010101010101010101010"),
-        (0b1010101010101010101010101010101010101010101010101010101010101010, "0b1010101010101010101010101010101010101010101010101010101010101010")
+        (
+            0b1010101010101010101010101010101010101010101010101010101010101010,
+            "0b1010101010101010101010101010101010101010101010101010101010101010",
+        ),
     ];
     for (value, expect) in data.iter() {
         s.clear();
@@ -484,11 +486,76 @@ fn check_format_number_float() {
         (0.0000000000000005, "0.000"),
         (0.0000000000000004, "0.000"),
         (0.0000000000000006, "0.000"),
-        (0.0000000000000000, "0.000"),        
+        (0.0000000000000000, "0.000"),
     ];
     for (value, expect) in data.iter() {
         s.clear();
         F1.write_float(*value, &mut s);
         assert_eq!(s, *expect);
     }
+}
+
+#[test]
+fn check_write_unsigned() {
+    let mut output: [u8; 64] = [0; 64];
+    assert_eq!(FormatNumber::new(10).group(3, b',').write_uint64(123, &mut output), Some("123"));
+    assert_eq!(FormatNumber::new(10).group(3, b',').write_uint64(1234, &mut output), Some("1,234"));
+    assert_eq!(FormatNumber::new(10).group(4, b'-').write_uint64(1234, &mut output), Some("1234"));
+    assert_eq!(FormatNumber::new(10).group(4, b'-').write_uint64(123456, &mut output), Some("12-3456"));
+    assert_eq!(
+        FormatNumber::new(10).group(4, b'-').write_uint64(12345678, &mut output),
+        Some("1234-5678")
+    );
+    assert_eq!(
+        FormatNumber::new(10).group(3, b':').write_uint64(12345678, &mut output),
+        Some("12:345:678")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(3, b':')
+            .representation_digits(8)
+            .write_uint64(123, &mut output),
+        Some("00:000:123")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(4, b'=')
+            .representation_digits(8)
+            .write_uint64(123456, &mut output),
+        Some("0012=3456")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(4, b'=')
+            .representation_digits(8)
+            .prefix("PFX")
+            .suffix("ABCD")
+            .write_uint64(123456, &mut output),
+        Some("PFX0012=3456ABCD")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .group(3, b'=')
+            .representation_digits(8)
+            .prefix("PFX")
+            .suffix("ABCD")
+            .fill(20, b'*')
+            .write_uint64(123456, &mut output),
+        Some("***PFX00=123=456ABCD")
+    );
+    assert_eq!(
+        FormatNumber::new(16)
+            .group(4, b' ')
+            .representation_digits(8)
+            .prefix("0x")
+            .write_uint64(0x123456, &mut output),
+        Some("0x0012 3456")
+    );
+    assert_eq!(
+        FormatNumber::new(16)
+            .representation_digits(8)
+            .suffix("h")
+            .write_uint64(0xC0FFEE, &mut output),
+        Some("00C0FFEEh")
+    );
 }
