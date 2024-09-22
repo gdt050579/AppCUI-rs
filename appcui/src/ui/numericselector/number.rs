@@ -10,7 +10,7 @@ pub trait Number: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + Parti
 
 const DECIMAL_FORMAT: FormatNumber = FormatNumber::new(10);
 const DIGIT_GROUPING_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
-const HEX_FORMAT: FormatNumber = FormatNumber::new(16);
+const HEX_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x");
 const FLOAT_FORMAT: FormatNumber = FormatNumber::new(10).decimals(2);
 
 fn format_signed_number(value: i128, format: Format, writer: &mut String) {
