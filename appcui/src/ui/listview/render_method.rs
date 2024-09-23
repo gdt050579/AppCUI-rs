@@ -40,22 +40,45 @@ const HEX_16_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").represent
 const HEX_32_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(8);
 const HEX_64_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(16);
 
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum BoolFormat {
     TrueFalse,
     YesNo,
-    XMinux,
-    CheckmarkMinux,
+    XMinus,
+    CheckmarkMinus,
 }
 
 impl BoolFormat {
-    fn text(&self, value: bool)->&'static str {
+    fn text(&self, value: bool) -> &'static str {
         match self {
-            BoolFormat::TrueFalse => if value { "True" } else { "False" },
-            BoolFormat::YesNo => if value { "Yes" } else { "No" },
-            BoolFormat::XMinux => if value { "X" } else { "-" },
-            BoolFormat::CheckmarkMinux => if value { "\u{221A}" } else { "-" },
+            BoolFormat::TrueFalse => {
+                if value {
+                    "True"
+                } else {
+                    "False"
+                }
+            }
+            BoolFormat::YesNo => {
+                if value {
+                    "Yes"
+                } else {
+                    "No"
+                }
+            }
+            BoolFormat::XMinus => {
+                if value {
+                    "X"
+                } else {
+                    "-"
+                }
+            }
+            BoolFormat::CheckmarkMinus => {
+                if value {
+                    "\u{221A}"
+                } else {
+                    "-"
+                }
+            }
         }
     }
 }
@@ -66,10 +89,10 @@ pub enum RenderMethod<'a> {
     DateTime(NaiveDateTime, DateTimeFormat),
     Int64(i64, NumericFormat),
     UInt64(u64, NumericFormat),
+    Bool(bool, BoolFormat),
     /*
     Date(NaiveDate,format),
     Time(NaiveTime,format),
-    Bool(bool,format)
     Float(f64,...),
     Percentage(f64,zecimals),
     Size(u64,format),
@@ -127,10 +150,20 @@ impl<'a> RenderMethod<'a> {
                 RenderMethod::paint_text(txt, surface, theme, alignment, width, attr);
                 true
             }
-            RenderMethod::Ascii(_) | 
-            RenderMethod::DateTime(_, _) | 
-            RenderMethod::Int64(_, _) | 
-            RenderMethod::UInt64(_, _) => {
+            RenderMethod::Bool(_, _) => {
+                let mut output: [u8; 16] = [0; 16];
+                if let Some(str_rep) = self.string_representation(&mut output) {
+                    RenderMethod::paint_text(str_rep, surface, theme, alignment, width, attr);
+                    true
+                } else {
+                    false
+                }
+            }
+            RenderMethod::Ascii(_)
+            | RenderMethod::DateTime(_, _)
+            | RenderMethod::Int64(_, _)
+            | RenderMethod::UInt64(_, _)
+             => {
                 let mut output: [u8; 256] = [0; 256];
                 if let Some(str_rep) = self.string_representation(&mut output) {
                     RenderMethod::paint_ascii(str_rep, surface, theme, alignment, width, attr);
@@ -156,6 +189,7 @@ impl<'a> RenderMethod<'a> {
             }
             RenderMethod::Int64(value, format) => format.formatter().write_i64(*value as i64, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_u64(*value as u64, output),
+            RenderMethod::Bool(value, format) => Some(format.text(*value)),
             RenderMethod::Custom => None,
         }
     }
@@ -180,6 +214,7 @@ impl<'a> RenderMethod<'a> {
                     .map(|p| p.len() as u32)
                     .unwrap_or(0)
             }
+            RenderMethod::Bool(value, format) => format.text(*value).chars().count() as u32,
             RenderMethod::Custom => 0,
         }
     }

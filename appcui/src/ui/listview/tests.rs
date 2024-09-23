@@ -3012,7 +3012,7 @@ fn check_numeric_formater_renderer() {
         Paint('6. Debt column auto-resized')
         CheckHash(0xFD92A12162C24BA)
         Mouse.Click(17,1,left)
-        Paint('6. Sort by salary (ascendent)')
+        Paint('7. Sort by salary (ascendent)')
         CheckHash(0xB6204AF8F9D68E2C)
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
@@ -3031,3 +3031,75 @@ fn check_numeric_formater_renderer() {
     a.run();
 }
 
+#[test]
+fn check_bool_formater_renderer() {
+    struct Employee {
+        name: &'static str,
+        v1: bool,
+        v2: bool,
+        v3: bool,
+        v4: bool,
+    }
+    impl listview::ListItem for Employee {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Bool(self.v1, listview::BoolFormat::YesNo)),
+                2 => Some(listview::RenderMethod::Bool(self.v2, listview::BoolFormat::CheckmarkMinus)),
+                3 => Some(listview::RenderMethod::Bool(self.v3, listview::BoolFormat::XMinus)),
+                4 => Some(listview::RenderMethod::Bool(self.v3, listview::BoolFormat::TrueFalse)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 => self.v1.cmp(&other.v1),
+                2 => self.v2.cmp(&other.v2),
+                3 => self.v3.cmp(&other.v3),
+                4 => self.v4.cmp(&other.v4),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC85DD31B270D0817)
+        Key.TypeText('Yes')
+        Paint('2. John and Alex are visible')
+        CheckHash(0x4F0E518AA32CE80D)
+        Key.Pressed(Escape)
+        Key.TypeText('False')
+        Paint('3. Alex and Mike are visible')
+        CheckHash(0x9FFDE6A6BFC6FB)
+        Key.Pressed(Escape)
+        Mouse.DoubleClick(22,1,left)
+        Paint('4. V1 column auto-resized')
+        CheckHash(0x4F86FC3EEC855E9)
+        Mouse.DoubleClick(28,1,left)
+        Paint('5. V2 column auto-resized')
+        CheckHash(0x925D038E06172181)
+        Mouse.DoubleClick(39,1,left)
+        Paint('6. V4 column auto-resized')
+        CheckHash(0x605B0CAD9048DEE9)
+        Mouse.Click(31,1,left)
+        Paint('7. Sort by V4 (ascendent)')
+        CheckHash(0xFA349DBE6072BFEE)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Employee,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{V1,10,Right},{V2,12,Center},{V3,10,Right},{V4,10,Right}]");
+
+    let students = vec![
+        Employee { name: "John", v1: true, v2: false, v3: true, v4: false },
+        Employee { name: "Mike", v1: false, v2: true, v3: false, v4: true },
+        Employee { name: "Alex", v1: true, v2: true, v3: false, v4: true },
+        Employee { name: "Zig", v1: false, v2: false, v3: true, v4: false },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
