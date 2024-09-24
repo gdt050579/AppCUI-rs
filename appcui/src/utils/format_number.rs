@@ -171,12 +171,7 @@ impl FormatNumber {
         buffer[pos..offset].copy_from_slice(value.as_bytes());
         Some(pos)
     }
-    fn write_number<T: Copy + Add + PartialOrd + Ord + PartialEq + Eq + DivAssign + IntoU8 + Rem<Output = T> + From<u8>>(
-        &self,
-        mut value: T,
-        offset: usize,
-        buffer: &mut [u8],
-    ) -> Option<usize> {
+    fn write_integer_number<T: WriteableNumber>(&self, mut value: T, offset: usize, buffer: &mut [u8]) -> Option<usize> {
         if (offset > buffer.len()) || (offset == 0) {
             return None;
         }
@@ -185,7 +180,7 @@ impl FormatNumber {
 
         let base: T = T::from(self.base);
         loop {
-            let v: u8 = (value % base).into_u8();
+            let v = T::digit(value, base);
             value /= base;
             if v < 10.into() {
                 buffer[pos] = v + 48u8;
@@ -325,22 +320,6 @@ impl FormatNumber {
         }
     }
 
-    pub(crate) fn write_unsigned(&self, value: u128, writer: &mut String) {
-        let mut output: [u8;256] = [0;256];
-        if let Some(str_rep) = self.write_u128(value, &mut output) {
-            writer.push_str(str_rep);
-        }
-    }
-    pub(crate) fn write_signed(&self, value: i128, writer: &mut String) {
-        if value >= 0 {
-            self.write_unsigned(value as u128, writer)
-        } else {
-            let mut output: [u8;256] = [0;256];
-            if let Some(str_rep) = self.write_i128(value, &mut output) {
-                writer.push_str(str_rep);
-            }
-        }
-    }
     pub(crate) fn write_float(&self, value: f64, write: &mut String) {
         let mut buffer = [0u8; 40];
         let mut index = 0;
@@ -379,94 +358,134 @@ impl FormatNumber {
             }
         }
     }
-    pub(crate) fn write_i64<'a>(&self, value: i64, buffer: &'a mut [u8]) -> Option<&'a str> {
-        let len = buffer.len();
+
+
+    pub(crate) fn write_number<'a, T: WriteableNumber>(&self, value: T, output_buffer: &'a mut [u8]) -> Option<&'a str> {
+        let len = output_buffer.len();
         if len == 0 {
             return None;
         }
-        let negative;
-        let value = if value < 0 {
-            negative = true;
-            -value as u64
-        } else {
-            negative = false;
-            value as u64
-        };
-        let pos = self.write_str(self.suffix, len, buffer)?;
-        let pos = self.write_number(value as u64, pos, buffer)?;
-        let mut pos = self.write_str(&self.prefix, pos, buffer)?;
+        let negative = value.is_negative();
+        let value = value.abs_value();
+        let pos = self.write_str(self.suffix, len, output_buffer)?;
+        let pos = self.write_integer_number(value, pos, output_buffer)?;
+        let mut pos = self.write_str(&self.prefix, pos, output_buffer)?;
         if negative {
             if pos == 0 {
                 return None;
             }
             pos -= 1;
-            buffer[pos] = b'-';
+            output_buffer[pos] = b'-';
         }
-        let pos = self.write_fill_char(pos, buffer)?;
-        Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
+        let pos = self.write_fill_char(pos, output_buffer)?;
+        Some(unsafe { std::str::from_utf8_unchecked(&output_buffer[pos..]) })
     }
-    pub(crate) fn write_i128<'a>(&self, value: i128, buffer: &'a mut [u8]) -> Option<&'a str> {
-        let len = buffer.len();
-        if len == 0 {
-            return None;
+    pub(crate) fn write_number_to_string<T: WriteableNumber>(&self, value: T, output: &mut String) {
+        let mut output_inner_buffer: [u8; 256] = [0; 256];
+        if let Some(str_rep) = self.write_number(value, &mut output_inner_buffer) {
+            output.push_str(str_rep);
         }
-        let negative;
-        let value = if value < 0 {
-            negative = true;
-            -value as u128
+    }
+}
+
+pub(crate) trait WriteableNumber: Copy + Add + PartialOrd + Ord + PartialEq + Eq + DivAssign + Rem + From<u8> {
+    fn abs_value(self) -> Self;
+    fn is_negative(self) -> bool;
+    fn digit(value: Self, divider: Self) -> u8;
+}
+impl WriteableNumber for u32 {
+    #[inline(always)]
+    fn abs_value(self) -> Self {
+        self
+    }
+    #[inline(always)]
+    fn is_negative(self) -> bool {
+        false
+    }
+    #[inline(always)]
+    fn digit(value: Self, divider: Self) -> u8 {
+        (value % divider) as u8
+    }
+}
+impl WriteableNumber for u64 {
+    #[inline(always)]
+    fn abs_value(self) -> Self {
+        self
+    }
+    #[inline(always)]
+    fn is_negative(self) -> bool {
+        false
+    }
+    #[inline(always)]
+    fn digit(value: Self, divider: Self) -> u8 {
+        (value % divider) as u8
+    }
+}
+impl WriteableNumber for u128 {
+    #[inline(always)]
+    fn abs_value(self) -> Self {
+        self
+    }
+    #[inline(always)]
+    fn is_negative(self) -> bool {
+        false
+    }
+    #[inline(always)]
+    fn digit(value: Self, divider: Self) -> u8 {
+        (value % divider) as u8
+    }
+}
+impl WriteableNumber for i32 {
+    #[inline(always)]
+    fn abs_value(self) -> Self {
+        if self < 0 {
+            -self
         } else {
-            negative = false;
-            value as u128
-        };
-        let pos = self.write_str(self.suffix, len, buffer)?;
-        let pos = self.write_number(value as u128, pos, buffer)?;
-        let mut pos = self.write_str(&self.prefix, pos, buffer)?;
-        if negative {
-            if pos == 0 {
-                return None;
-            }
-            pos -= 1;
-            buffer[pos] = b'-';
+            self
         }
-        let pos = self.write_fill_char(pos, buffer)?;
-        Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
     }
-
-    pub(crate) fn write_u64<'a>(&self, value: u64, buffer: &'a mut [u8]) -> Option<&'a str> {
-        let len = buffer.len();
-        if len == 0 {
-            return None;
-        }
-        let pos = self.write_str(self.suffix, len, buffer)?;
-        let pos = self.write_number(value, pos, buffer)?;
-        let pos = self.write_str(&self.prefix, pos, buffer)?;
-        let pos = self.write_fill_char(pos, buffer)?;
-        Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
+    #[inline(always)]
+    fn is_negative(self) -> bool {
+        self < 0
     }
-    pub(crate) fn write_u128<'a>(&self, value: u128, buffer: &'a mut [u8]) -> Option<&'a str> {
-        let len = buffer.len();
-        if len == 0 {
-            return None;
-        }
-        let pos = self.write_str(self.suffix, len, buffer)?;
-        let pos = self.write_number(value, pos, buffer)?;
-        let pos = self.write_str(&self.prefix, pos, buffer)?;
-        let pos = self.write_fill_char(pos, buffer)?;
-        Some(unsafe { std::str::from_utf8_unchecked(&buffer[pos..]) })
+    #[inline(always)]
+    fn digit(value: Self, divider: Self) -> u8 {
+        (value % divider) as u8
     }
 }
-
-
-trait IntoU8 {
-    fn into_u8(self) -> u8;
-}
-impl IntoU8 for u64 {
-    fn into_u8(self) -> u8 {
-        self as u8
+impl WriteableNumber for i64 {
+    #[inline(always)]
+    fn abs_value(self) -> Self {
+        if self < 0 {
+            -self
+        } else {
+            self
+        }
+    }
+    #[inline(always)]
+    fn is_negative(self) -> bool {
+        self < 0
+    }
+    #[inline(always)]
+    fn digit(value: Self, divider: Self) -> u8 {
+        (value % divider) as u8
     }
 }
-impl IntoU8 for u128 {
-    fn into_u8(self) -> u8 {
-        self as u8
+impl WriteableNumber for i128 {
+    #[inline(always)]
+    fn abs_value(self) -> Self {
+        if self < 0 {
+            -self
+        } else {
+            self
+        }
+    }
+    #[inline(always)]
+    fn is_negative(self) -> bool {
+        self < 0
+    }
+    #[inline(always)]
+    fn digit(value: Self, divider: Self) -> u8 {
+        (value % divider) as u8
     }
 }

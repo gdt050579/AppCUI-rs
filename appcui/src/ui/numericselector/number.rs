@@ -16,28 +16,28 @@ const FLOAT_FORMAT: FormatNumber = FormatNumber::new(10).decimals(2);
 fn format_signed_number(value: i128, format: Format, writer: &mut String) {
     writer.clear();
     match format {
-        Format::Decimal => DECIMAL_FORMAT.write_signed(value, writer),
+        Format::Decimal => DECIMAL_FORMAT.write_number_to_string(value, writer),
         Format::Percentage => { 
-            DECIMAL_FORMAT.write_signed(value, writer);
+            DECIMAL_FORMAT.write_number_to_string(value, writer);
             writer.push('%');
         },
-        Format::DigitGrouping => DIGIT_GROUPING_FORMAT.write_signed(value, writer),
-        Format::Hex => HEX_FORMAT.write_signed(value, writer),
+        Format::DigitGrouping => DIGIT_GROUPING_FORMAT.write_number_to_string(value, writer),
+        Format::Hex => HEX_FORMAT.write_number_to_string(value, writer),
         Format::Size => { 
             if value < 1024 {
-                DIGIT_GROUPING_FORMAT.write_signed(value, writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value, writer);
                 writer.push_str(" B");
             } else if value < 1024 * 1024 {
-                DIGIT_GROUPING_FORMAT.write_signed(value / 1024, writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value / 1024, writer);
                 writer.push_str(" KB");
             } else if value < 1024 * 1024 * 1024 {
-                DIGIT_GROUPING_FORMAT.write_signed(value / (1024 * 1024), writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value / (1024 * 1024), writer);
                 writer.push_str(" MB");
             } else if value < 1024 * 1024 * 1024 * 1024 {
-                DIGIT_GROUPING_FORMAT.write_signed(value / (1024 * 1024 * 1024), writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value / (1024 * 1024 * 1024), writer);
                 writer.push_str(" GB");
             } else {
-                DIGIT_GROUPING_FORMAT.write_signed(value / (1024 * 1024 * 1024 * 1024), writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value / (1024 * 1024 * 1024 * 1024), writer);
                 writer.push_str(" TB");
             }
         }
@@ -46,28 +46,28 @@ fn format_signed_number(value: i128, format: Format, writer: &mut String) {
 fn format_unsigned_number(value: u128, format: Format, writer: &mut String) {
     writer.clear();
     match format {
-        Format::Decimal => DECIMAL_FORMAT.write_unsigned(value, writer),
+        Format::Decimal => DECIMAL_FORMAT.write_number_to_string(value, writer),
         Format::Percentage => { 
-            DECIMAL_FORMAT.write_unsigned(value, writer);
+            DECIMAL_FORMAT.write_number_to_string(value, writer);
             writer.push('%');
         },
-        Format::DigitGrouping => DIGIT_GROUPING_FORMAT.write_unsigned(value, writer),
-        Format::Hex => HEX_FORMAT.write_unsigned(value, writer),
+        Format::DigitGrouping => DIGIT_GROUPING_FORMAT.write_number_to_string(value, writer),
+        Format::Hex => HEX_FORMAT.write_number_to_string(value, writer),
         Format::Size => { 
             if value < 1024 {
-                DIGIT_GROUPING_FORMAT.write_unsigned(value, writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value, writer);
                 writer.push_str(" B");
             } else if value < 1024 * 1024 {
-                DIGIT_GROUPING_FORMAT.write_unsigned(value / 1024, writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value / 1024, writer);
                 writer.push_str(" KB");
             } else if value < 1024 * 1024 * 1024 {
-                DIGIT_GROUPING_FORMAT.write_unsigned(value / (1024 * 1024), writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value / (1024 * 1024), writer);
                 writer.push_str(" MB");
             } else if value < 1024 * 1024 * 1024 * 1024 {
-                DIGIT_GROUPING_FORMAT.write_unsigned(value / (1024 * 1024 * 1024), writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value / (1024 * 1024 * 1024), writer);
                 writer.push_str(" GB");
             } else {
-                DIGIT_GROUPING_FORMAT.write_unsigned(value / (1024 * 1024 * 1024 * 1024), writer);
+                DIGIT_GROUPING_FORMAT.write_number_to_string(value / (1024 * 1024 * 1024 * 1024), writer);
                 writer.push_str(" TB");
             }
         },
