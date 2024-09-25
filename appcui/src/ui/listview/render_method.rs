@@ -1,14 +1,7 @@
 use crate::prelude::*;
 use crate::utils::FormatDateTime;
 use chrono::NaiveDateTime;
-use super::{BoolFormat,NumericFormat};
-
-#[derive(Copy, Clone, Eq, PartialEq)]
-pub enum DateTimeFormat {
-    Full,
-    Normal,
-    Short,
-}
+use super::{BoolFormat,NumericFormat, DateTimeFormat};
 
 
 pub enum RenderMethod<'a> {
