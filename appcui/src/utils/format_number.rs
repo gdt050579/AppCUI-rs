@@ -164,7 +164,7 @@ impl FormatNumber {
         if offset > buffer.len() {
             return None;
         }
-        if value.len() == 0 {
+        if value.is_empty() {
             return Some(offset);
         }
         if value.len() > offset {
@@ -186,7 +186,7 @@ impl FormatNumber {
         loop {
             let v = T::digit(value, base);
             value /= base;
-            if v < 10.into() {
+            if v < 10 {
                 buffer[pos] = v + 48u8;
             } else {
                 buffer[pos] = v + 55u8;
@@ -199,13 +199,11 @@ impl FormatNumber {
             if pos == 0 {
                 return None;
             }
-            if self.group_size > 0 {
-                if digits % self.group_size == 0 {
-                    buffer[pos] = self.separator_char;
-                    pos -= 1;
-                    if pos == 0 {
-                        return None;
-                    }
+            if self.group_size > 0 && digits % self.group_size == 0 {
+                buffer[pos] = self.separator_char;
+                pos -= 1;
+                if pos == 0 {
+                    return None;
                 }
             }
         }
@@ -214,13 +212,11 @@ impl FormatNumber {
                 return None;
             }
             pos -= 1;
-            if self.group_size > 0 {
-                if digits % self.group_size == 0 {
-                    buffer[pos] = self.separator_char;
-                    pos -= 1;
-                    if pos == 0 {
-                        return None;
-                    }
+            if self.group_size > 0 && digits % self.group_size == 0 {
+                buffer[pos] = self.separator_char;
+                pos -= 1;
+                if pos == 0 {
+                    return None;
                 }
             }
             loop {
@@ -233,13 +229,11 @@ impl FormatNumber {
                 if pos == 0 {
                     return None;
                 }
-                if self.group_size > 0 {
-                    if digits % self.group_size == 0 {
-                        buffer[pos] = self.separator_char;
-                        pos -= 1;
-                        if pos == 0 {
-                            return None;
-                        }
+                if self.group_size > 0 && digits % self.group_size == 0 {
+                    buffer[pos] = self.separator_char;
+                    pos -= 1;
+                    if pos == 0 {
+                        return None;
                     }
                 }
             }
@@ -332,7 +326,7 @@ impl FormatNumber {
         let pos = self.write_str(self.suffix, len, output_buffer)?;
         let pos = self.write_decimals(decimans, pos, output_buffer)?;
         let pos = self.write_integer_number(int_part, pos, output_buffer)?;
-        let mut pos = self.write_str(&self.prefix, pos, output_buffer)?;
+        let mut pos = self.write_str(self.prefix, pos, output_buffer)?;
         if negative {
             if pos == 0 {
                 return None;
@@ -353,7 +347,7 @@ impl FormatNumber {
         let value = value.abs_value();
         let pos = self.write_str(self.suffix, len, output_buffer)?;
         let pos = self.write_integer_number(value, pos, output_buffer)?;
-        let mut pos = self.write_str(&self.prefix, pos, output_buffer)?;
+        let mut pos = self.write_str(self.prefix, pos, output_buffer)?;
         if negative {
             if pos == 0 {
                 return None;
@@ -392,7 +386,7 @@ impl FormatNumber {
         let pos = self.write_str(self.suffix, len, output_buffer)?;
         let pos = self.write_decimals(decimans, pos, output_buffer)?;
         let pos = self.write_integer_number(value, pos, output_buffer)?;
-        let mut pos = self.write_str(&self.prefix, pos, output_buffer)?;
+        let mut pos = self.write_str(self.prefix, pos, output_buffer)?;
         if negative {
             if pos == 0 {
                 return None;

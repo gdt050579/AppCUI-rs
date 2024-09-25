@@ -3103,3 +3103,5 @@ fn check_bool_formater_renderer() {
     a.add_window(w);
     a.run();
 }
+
+

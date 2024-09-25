@@ -556,13 +556,11 @@ where
                 if self.flags.contains(Flags::CheckBoxes) {
                     self.check_item(self.pos, CheckMode::Reverse, true);
                     true
+                } else if let Some(Element::Group(gid)) = self.filter.get(self.pos) {
+                    self.toggle_group_collapse_status(*gid);
+                    true
                 } else {
-                    if let Some(Element::Group(gid)) = self.filter.get(self.pos) {
-                        self.toggle_group_collapse_status(*gid);
-                        true
-                    } else {
-                        false
-                    }
+                    false
                 }
             }
             key!("Insert") | key!("Shift+Down") => {

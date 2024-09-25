@@ -108,8 +108,8 @@ impl<'a> RenderMethod<'a> {
                 };
                 txt
             }
-            RenderMethod::Int64(value, format) => format.formatter().write_number(*value as i64, output),
-            RenderMethod::UInt64(value, format) => format.formatter().write_number(*value as u64, output),
+            RenderMethod::Int64(value, format) => format.formatter().write_number(*value, output),
+            RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
             RenderMethod::Size(value, format) => format.write(*value, output),
             RenderMethod::Custom => None,
@@ -124,7 +124,7 @@ impl<'a> RenderMethod<'a> {
                 let mut output: [u8; 64] = [0; 64];
                 format
                     .formatter()
-                    .write_number(*value as i64, &mut output)
+                    .write_number(*value, &mut output)
                     .map(|p| p.len() as u32)
                     .unwrap_or(0)
             }
@@ -132,7 +132,7 @@ impl<'a> RenderMethod<'a> {
                 let mut output: [u8; 64] = [0; 64];
                 format
                     .formatter()
-                    .write_number(*value as u64, &mut output)
+                    .write_number(*value, &mut output)
                     .map(|p| p.len() as u32)
                     .unwrap_or(0)
             }
