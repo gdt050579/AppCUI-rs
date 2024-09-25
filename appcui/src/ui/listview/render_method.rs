@@ -1,8 +1,8 @@
+use super::{BoolFormat, DateTimeFormat, NumericFormat};
 use crate::prelude::*;
 use crate::utils::FormatDateTime;
 use chrono::NaiveDateTime;
-use super::{BoolFormat,NumericFormat, DateTimeFormat};
-
+use listview::SizeFormat;
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
@@ -11,12 +11,12 @@ pub enum RenderMethod<'a> {
     Int64(i64, NumericFormat),
     UInt64(u64, NumericFormat),
     Bool(bool, BoolFormat),
+    Size(u64, SizeFormat),
     /*
     Date(NaiveDate,format),
     Time(NaiveTime,format),
     Float(f64,...),
     Percentage(f64,zecimals),
-    Size(u64,format),
     Progress(f64),
     Currency(f64,currency),
 
@@ -84,7 +84,7 @@ impl<'a> RenderMethod<'a> {
             | RenderMethod::DateTime(_, _)
             | RenderMethod::Int64(_, _)
             | RenderMethod::UInt64(_, _)
-             => {
+            | RenderMethod::Size(_, _) => {
                 let mut output: [u8; 256] = [0; 256];
                 if let Some(str_rep) = self.string_representation(&mut output) {
                     RenderMethod::paint_ascii(str_rep, surface, theme, alignment, width, attr);
@@ -111,6 +111,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Int64(value, format) => format.formatter().write_number(*value as i64, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value as u64, output),
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
+            RenderMethod::Size(value, format) => format.write(*value, output),
             RenderMethod::Custom => None,
         }
     }
@@ -134,6 +135,10 @@ impl<'a> RenderMethod<'a> {
                     .write_number(*value as u64, &mut output)
                     .map(|p| p.len() as u32)
                     .unwrap_or(0)
+            }
+            RenderMethod::Size(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Bool(value, format) => format.text(*value).chars().count() as u32,
             RenderMethod::Custom => 0,
