@@ -248,10 +248,9 @@ fn check_glyph_ignore_case() {
 
 #[test]
 fn check_format_number_decimal_unsigned() {
-    let mut s = String::new();
-    const F1: FormatNumber = FormatNumber::new(10);
-    F1.write_number_to_string(123, &mut s);
-    assert_eq!(s, "123");
+    let mut output: [u8; 64] = [0; 64];
+    const F1: FormatNumber = FormatNumber::new(10);    
+    assert_eq!(F1.write_number(123, &mut output), Some("123"));
     const F2: FormatNumber = FormatNumber::new(10).group(3, b',');
     let data: &[(u32, &'static str)] = &[
         (1234, "1,234"),
@@ -266,9 +265,7 @@ fn check_format_number_decimal_unsigned() {
         (1234567890, "1,234,567,890"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F2.write_number_to_string(*value as u128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F2.write_number(*value as u128, &mut output), Some(*expect));
     }
     const F3: FormatNumber = FormatNumber::new(10).fill(10, b'#');
     let data: &[(u32, &'static str)] = &[
@@ -280,9 +277,7 @@ fn check_format_number_decimal_unsigned() {
         (1234567890, "1234567890"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F3.write_number_to_string(*value as u128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F3.write_number(*value as u128, &mut output), Some(*expect));
     }
     const F4: FormatNumber = FormatNumber::new(10).group(3, b',').fill(10, b'*');
     let data: &[(u32, &'static str)] = &[
@@ -298,21 +293,16 @@ fn check_format_number_decimal_unsigned() {
         (1234567890, "1,234,567,890"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F4.write_number_to_string(*value as u128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F4.write_number(*value as u128, &mut output), Some(*expect));
     }
 }
 
 #[test]
 fn check_format_number_decimal_signed() {
-    let mut s = String::new();
+    let mut output: [u8; 64] = [0; 64];
     const F1: FormatNumber = FormatNumber::new(10);
-    F1.write_number_to_string(123, &mut s);
-    assert_eq!(s, "123");
-    s.clear();
-    F1.write_number_to_string(-123, &mut s);
-    assert_eq!(s, "-123");
+    assert_eq!(F1.write_number(123i32, &mut output), Some("123"));
+    assert_eq!(F1.write_number(-123i32, &mut output), Some("-123"));
     const F2: FormatNumber = FormatNumber::new(10).group(3, b',');
     let data: &[(i64, &'static str)] = &[
         (-1234, "-1,234"),
@@ -327,9 +317,7 @@ fn check_format_number_decimal_signed() {
         (-1234567890, "-1,234,567,890"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F2.write_number_to_string(*value as i128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F2.write_number(*value, &mut output), Some(*expect));
     }
     const F3: FormatNumber = FormatNumber::new(10).fill(10, b'#');
     let data: &[(i32, &'static str)] = &[
@@ -341,9 +329,7 @@ fn check_format_number_decimal_signed() {
         (-1234567890, "-1234567890"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F3.write_number_to_string(*value as i128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F3.write_number(*value, &mut output), Some(*expect));
     }
     const F4: FormatNumber = FormatNumber::new(10).group(3, b',').fill(10, b'*');
     let data: &[(i64, &'static str)] = &[
@@ -359,18 +345,15 @@ fn check_format_number_decimal_signed() {
         (-1234567890, "-1,234,567,890"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F4.write_number_to_string(*value as i128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F4.write_number(*value, &mut output), Some(*expect));
     }
 }
 
 #[test]
 fn check_format_number_hex_unsigned() {
-    let mut s = String::new();
+    let mut output: [u8; 64] = [0; 64];
     const F1: FormatNumber = FormatNumber::new(16).prefix("0x");
-    F1.write_number_to_string(0x123, &mut s);
-    assert_eq!(s, "0x123");
+    assert_eq!(F1.write_number(0x123, &mut output), Some("0x123"));
     const F2: FormatNumber = FormatNumber::new(16).group(4, b'_').prefix("0x");
     let data: &[(u64, &'static str)] = &[
         (0x1234, "0x1234"),
@@ -382,9 +365,7 @@ fn check_format_number_hex_unsigned() {
         (0xFFFFFFFF, "0xFFFF_FFFF"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F2.write_number_to_string(*value as u128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F2.write_number(*value as u128, &mut output), Some(*expect));
     }
     const F3: FormatNumber = FormatNumber::new(16).fill(10, b'#').prefix("0x");
     let data: &[(u64, &'static str)] = &[
@@ -396,15 +377,13 @@ fn check_format_number_hex_unsigned() {
         (0x1234567890, "0x1234567890"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F3.write_number_to_string(*value as u128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F3.write_number(*value as u128, &mut output), Some(*expect));
     }
 }
 
 #[test]
 fn check_format_number_hex() {
-    let mut s = String::new();
+    let mut output: [u8; 256] = [0; 256];
     const F1: FormatNumber = FormatNumber::new(16).representation_digits(8).prefix("0x");
     let data: &[(u64, &'static str)] = &[
         (0x1234, "0x00001234"),
@@ -416,15 +395,13 @@ fn check_format_number_hex() {
         (0xFFFFFFFF, "0xFFFFFFFF"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F1.write_number_to_string(*value as u128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F1.write_number(*value as u128, &mut output), Some(*expect));
     }
 }
 
 #[test]
 fn check_format_number_bin() {
-    let mut s = String::new();
+    let mut output: [u8; 256] = [0; 256];
     const F1: FormatNumber = FormatNumber::new(2).representation_digits(8).prefix("0b");
     let data: &[(u64, &'static str)] = &[
         (0b10, "0b00000010"),
@@ -439,9 +416,7 @@ fn check_format_number_bin() {
         ),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F1.write_number_to_string(*value as u128, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F1.write_number(*value as u128, &mut output), Some(*expect));
     }
 }
 

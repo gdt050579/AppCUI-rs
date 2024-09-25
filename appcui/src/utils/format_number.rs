@@ -462,12 +462,12 @@ impl FormatNumber {
         let pos = self.write_fill_char(pos, output_buffer)?;
         Some(unsafe { std::str::from_utf8_unchecked(&output_buffer[pos..]) })
     }
-    pub(crate) fn write_number_to_string<T: WriteableNumber>(&self, value: T, output: &mut String) {
-        let mut output_inner_buffer: [u8; 256] = [0; 256];
-        if let Some(str_rep) = self.write_number(value, &mut output_inner_buffer) {
-            output.push_str(str_rep);
-        }
-    }
+    // pub(crate) fn write_number_to_string<T: WriteableNumber>(&self, value: T, output: &mut String) {
+    //     let mut output_inner_buffer: [u8; 256] = [0; 256];
+    //     if let Some(str_rep) = self.write_number(value, &mut output_inner_buffer) {
+    //         output.push_str(str_rep);
+    //     }
+    // }
 }
 
 pub(crate) trait WriteableNumber:
