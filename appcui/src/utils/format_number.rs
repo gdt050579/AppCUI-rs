@@ -175,7 +175,7 @@ impl FormatNumber {
         buffer[pos..offset].copy_from_slice(value.as_bytes());
         Some(pos)
     }
-    fn write_integer_number<T: WriteableNumber>(&self, mut value: T, offset: usize, buffer: &mut [u8]) -> Option<usize> {
+    fn write_integer_number<T: FormatableInteger>(&self, mut value: T, offset: usize, buffer: &mut [u8]) -> Option<usize> {
         if (offset > buffer.len()) || (offset == 0) {
             return None;
         }
@@ -307,103 +307,44 @@ impl FormatNumber {
         Some(pos)
     }
 
-    #[inline(always)]
-    fn add_buffer_to_string(&self, buffer: &[u8], prefix: &'static str, writer: &mut String) {
-        let index = buffer.len();
-        if self.group_size > 0 {
-            if self.width > 0 {
-                let fill_char = self.fill_char as char;
-                let width = self.width as usize;
-                let prefix_len = prefix.len();
-                let buffer_len = index + (index - 1) / self.group_size as usize;
-                let total_len = prefix_len + buffer_len;
-                if width > total_len {
-                    let fill_len = width - total_len;
-                    for _ in 0..fill_len {
-                        writer.push(fill_char);
-                    }
-                }
-            }
-            if !prefix.is_empty() {
-                writer.push_str(prefix);
-            }
-            let mut group_index = self.group_size - (index % self.group_size as usize) as u8;
-            if group_index == self.group_size {
-                group_index = 0;
-            }
-            for i in (0..index).rev() {
-                writer.push(buffer[i] as char);
-                group_index += 1;
-                if group_index == self.group_size {
-                    if i > 0 {
-                        writer.push(self.separator_char as char);
-                    }
-                    group_index = 0;
-                }
-            }
+    pub(crate) fn write_float<'a>(&self, value: f64, output_buffer: &'a mut [u8]) -> Option<&'a str> {
+        let len = output_buffer.len();
+        if len == 0 {
+            return None;
+        }
+        let negative = value.is_sign_negative();
+        let int_part = value.trunc().abs() as u64;
+        let decimans = if self.number_of_decimals == 0 {
+            0
         } else {
-            if self.width > 0 {
-                let fill_char = self.fill_char as char;
-                let width = self.width as usize;
-                let prefix_len = prefix.len();
-                let buffer_len = index;
-                let total_len = prefix_len + buffer_len;
-                if width > total_len {
-                    let fill_len = width - total_len;
-                    for _ in 0..fill_len {
-                        writer.push(fill_char);
-                    }
-                }
+            let factor = match self.number_of_decimals {
+                1 => 10f64,
+                2 => 100f64,
+                3 => 1000f64,
+                4 => 10000f64,
+                5 => 100000f64,
+                6 => 1000000f64,
+                7 => 10000000f64,
+                _ => 100000000f64,
+            };
+            (value.fract().abs() * factor) as u64
+        };
+        let pos = self.write_str(self.suffix, len, output_buffer)?;
+        let pos = self.write_decimals(decimans, pos, output_buffer)?;
+        let pos = self.write_integer_number(int_part, pos, output_buffer)?;
+        let mut pos = self.write_str(&self.prefix, pos, output_buffer)?;
+        if negative {
+            if pos == 0 {
+                return None;
             }
-            if !prefix.is_empty() {
-                writer.push_str(prefix);
-            }
-            for i in (0..index).rev() {
-                writer.push(buffer[i] as char);
-            }
+            pos -= 1;
+            output_buffer[pos] = b'-';
         }
+        let pos = self.write_fill_char(pos, output_buffer)?;
+        Some(unsafe { std::str::from_utf8_unchecked(&output_buffer[pos..]) })
     }
 
-    pub(crate) fn write_float(&self, value: f64, write: &mut String) {
-        let mut buffer = [0u8; 40];
-        let mut index = 0;
-        let mut value = value;
-        if value < 0.0 {
-            value = -value;
-            write.push('-');
-        }
-        let mut int_part = value.trunc() as i64;
-        let mut fract_part = value.fract();
-        loop {
-            let digit = (int_part % 10) as u8;
-            int_part /= 10;
-            buffer[index] = digit + 48;
-            index += 1;
-            if int_part == 0 {
-                break;
-            }
-        }
-        if self.representation_digits as usize > index {
-            let mut fill = self.representation_digits as usize - index;
-            while fill > 0 {
-                buffer[index] = 48;
-                index += 1;
-                fill -= 1;
-            }
-        }
-        self.add_buffer_to_string(&buffer[0..index], "", write);
-        if self.number_of_decimals > 0 {
-            write.push('.');
-            for _ in 0..self.number_of_decimals {
-                fract_part *= 10.0;
-                let digit = fract_part.trunc() as u8;
-                fract_part = fract_part.fract();
-                write.push((digit + 48) as char);
-            }
-        }
-    }
-
-    pub(crate) fn write_number<'a, T: WriteableNumber>(&self, value: T, output_buffer: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn write_number<'a, T: FormatableInteger>(&self, value: T, output_buffer: &'a mut [u8]) -> Option<&'a str> {
         let len = output_buffer.len();
         if len == 0 {
             return None;
@@ -423,7 +364,7 @@ impl FormatNumber {
         let pos = self.write_fill_char(pos, output_buffer)?;
         Some(unsafe { std::str::from_utf8_unchecked(&output_buffer[pos..]) })
     }
-    pub(crate) fn write_fraction<'a, T: WriteableNumber>(&self, value: T, devider: T, output_buffer: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn write_fraction<'a, T: FormatableInteger>(&self, value: T, devider: T, output_buffer: &'a mut [u8]) -> Option<&'a str> {
         let len = output_buffer.len();
         if (len == 0) || (devider == 0.into()) {
             return None;
@@ -462,15 +403,9 @@ impl FormatNumber {
         let pos = self.write_fill_char(pos, output_buffer)?;
         Some(unsafe { std::str::from_utf8_unchecked(&output_buffer[pos..]) })
     }
-    // pub(crate) fn write_number_to_string<T: WriteableNumber>(&self, value: T, output: &mut String) {
-    //     let mut output_inner_buffer: [u8; 256] = [0; 256];
-    //     if let Some(str_rep) = self.write_number(value, &mut output_inner_buffer) {
-    //         output.push_str(str_rep);
-    //     }
-    // }
 }
 
-pub(crate) trait WriteableNumber:
+pub(crate) trait FormatableInteger:
     Copy + Add + PartialOrd + Ord + PartialEq + Eq + DivAssign + Rem + Div<Output = Self> + Mul<Output = Self> + Sub<Output = Self> + From<u8>
 {
     fn abs_value(self) -> Self;
@@ -481,7 +416,7 @@ pub(crate) trait WriteableNumber:
 
 macro_rules! IMPL_FOR_UNSIGNED {
     ($t: ty) => {
-        impl WriteableNumber for $t {
+        impl FormatableInteger for $t {
             #[inline(always)]
             fn abs_value(self) -> Self {
                 self
@@ -494,6 +429,7 @@ macro_rules! IMPL_FOR_UNSIGNED {
             fn digit(value: Self, divider: Self) -> u8 {
                 (value % divider) as u8
             }
+            #[inline(always)]
             fn into_u64(self) -> u64 {
                 self as u64
             }
@@ -503,7 +439,7 @@ macro_rules! IMPL_FOR_UNSIGNED {
 
 macro_rules! IMPL_FOR_SIGNED {
     ($t: ty) => {
-        impl WriteableNumber for $t {
+        impl FormatableInteger for $t {
             #[inline(always)]
             fn abs_value(self) -> Self {
                 if self < 0 {
@@ -520,6 +456,7 @@ macro_rules! IMPL_FOR_SIGNED {
             fn digit(value: Self, divider: Self) -> u8 {
                 (value % divider) as u8
             }
+            #[inline(always)]
             fn into_u64(self) -> u64 {
                 if self < 0 {
                     -self as u64

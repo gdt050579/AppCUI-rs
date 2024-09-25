@@ -72,14 +72,19 @@ fn format_unsigned_number(value: u128, format: Format, writer: &mut String) {
     }
 }
 fn format_float_number(value: f64, format: Format, writer: &mut String) {
+    let mut output: [u8; 32] = [0; 32];
     writer.clear();
     match format {
-        Format::Decimal => FLOAT_FORMAT.write_float(value, writer),
-        Format::Percentage => {
-            FLOAT_FORMAT.write_float(value * 100.0f64, writer);
-            writer.push('%');
+        Format::Decimal | Format::DigitGrouping => {
+            if let Some(txt) = FLOAT_FORMAT.write_float(value, &mut output) {
+                writer.push_str(txt);
+            }
         }
-        Format::DigitGrouping => FLOAT_FORMAT.write_float(value, writer),
+        Format::Percentage => {
+            if let Some(txt) = FLOAT_FORMAT.write_float(value * 100.0f64, &mut output) {
+                writer.push_str(txt);
+            }
+        }
         Format::Hex => {
             let v = value as i128;
             format_signed_number(v, Format::Hex, writer);

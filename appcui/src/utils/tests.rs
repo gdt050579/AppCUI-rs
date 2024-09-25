@@ -422,7 +422,7 @@ fn check_format_number_bin() {
 
 #[test]
 fn check_format_number_float() {
-    let mut s = String::new();
+    let mut ouput: [u8; 64] = [0; 64];
     const F1: FormatNumber = FormatNumber::new(10).decimals(3);
     let data: &[(f64, &'static str)] = &[
         (1.0, "1.000"),
@@ -464,9 +464,7 @@ fn check_format_number_float() {
         (0.0000000000000000, "0.000"),
     ];
     for (value, expect) in data.iter() {
-        s.clear();
-        F1.write_float(*value, &mut s);
-        assert_eq!(s, *expect);
+        assert_eq!(F1.write_float(*value, &mut ouput), Some(*expect));
     }
 }
 
