@@ -1,4 +1,5 @@
-use std::ops::{Add, DivAssign, Rem};
+use core::panic;
+use std::ops::{Add, Div, DivAssign, Mul, Rem, Sub};
 
 // order
 // suffix
@@ -151,6 +152,9 @@ impl FormatNumber {
         self
     }
     pub(crate) const fn decimals(mut self, value: u8) -> Self {
+        if value > 8 {
+            panic!("Invalid number of decimals for FormatNumber (maximum number of decimals is 8)");
+        }
         self.number_of_decimals = value;
         self
     }
@@ -262,6 +266,46 @@ impl FormatNumber {
         }
         Some(start_pos)
     }
+    fn write_decimals(&self, value: u64, offset: usize, buffer: &mut [u8]) -> Option<usize> {
+        if offset > buffer.len() {
+            return None;
+        }
+        if self.number_of_decimals == 0 {
+            return Some(offset);
+        }
+        if offset == 0 {
+            return None;
+        }
+        if self.number_of_decimals as usize + 1 > offset {
+            return None;
+        }
+        let mut buf: [u8; 32] = [0; 32];
+        let mut count_digits = 0;
+        let mut value = value;
+        loop {
+            buf[count_digits] = (value % 10) as u8 + 48;
+            value /= 10;
+            count_digits += 1;
+            if value == 0 {
+                break;
+            }
+        }
+        let max_digits = self.number_of_decimals.min(count_digits as u8);
+        let mut pos = offset - 1;
+        let mut cnt = 0;
+        while cnt < max_digits {
+            buffer[pos] = buf[cnt as usize];
+            pos -= 1;
+            cnt += 1;
+        }
+        while cnt < self.number_of_decimals {
+            buffer[pos] = b'0';
+            pos -= 1;
+            cnt += 1;
+        }
+        buffer[pos] = b'.';
+        Some(pos)
+    }
 
     #[inline(always)]
     fn add_buffer_to_string(&self, buffer: &[u8], prefix: &'static str, writer: &mut String) {
@@ -359,7 +403,6 @@ impl FormatNumber {
         }
     }
 
-
     pub(crate) fn write_number<'a, T: WriteableNumber>(&self, value: T, output_buffer: &'a mut [u8]) -> Option<&'a str> {
         let len = output_buffer.len();
         if len == 0 {
@@ -380,6 +423,45 @@ impl FormatNumber {
         let pos = self.write_fill_char(pos, output_buffer)?;
         Some(unsafe { std::str::from_utf8_unchecked(&output_buffer[pos..]) })
     }
+    pub(crate) fn write_fraction<'a, T: WriteableNumber>(&self, value: T, devider: T, output_buffer: &'a mut [u8]) -> Option<&'a str> {
+        let len = output_buffer.len();
+        if (len == 0) || (devider == 0.into()) {
+            return None;
+        }
+        let int_part: T = value / devider;
+        let decimans = if self.number_of_decimals == 0 {
+            0
+        } else {
+            let reminder: u64 = (value - (int_part * devider)).into_u64();
+            let devider = devider.into_u64();
+            let factor = match self.number_of_decimals {
+                1 => 10u64,
+                2 => 100u64,
+                3 => 1000u64,
+                4 => 10000u64,
+                5 => 100000u64,
+                6 => 1000000u64,
+                7 => 10000000u64,
+                _ => 100000000u64,
+            };
+            (reminder * factor) / devider
+        };
+        let negative = value.is_negative() != devider.is_negative();
+        let value = int_part.abs_value();
+        let pos = self.write_str(self.suffix, len, output_buffer)?;
+        let pos = self.write_decimals(decimans, pos, output_buffer)?;
+        let pos = self.write_integer_number(value, pos, output_buffer)?;
+        let mut pos = self.write_str(&self.prefix, pos, output_buffer)?;
+        if negative {
+            if pos == 0 {
+                return None;
+            }
+            pos -= 1;
+            output_buffer[pos] = b'-';
+        }
+        let pos = self.write_fill_char(pos, output_buffer)?;
+        Some(unsafe { std::str::from_utf8_unchecked(&output_buffer[pos..]) })
+    }
     pub(crate) fn write_number_to_string<T: WriteableNumber>(&self, value: T, output: &mut String) {
         let mut output_inner_buffer: [u8; 256] = [0; 256];
         if let Some(str_rep) = self.write_number(value, &mut output_inner_buffer) {
@@ -388,104 +470,72 @@ impl FormatNumber {
     }
 }
 
-pub(crate) trait WriteableNumber: Copy + Add + PartialOrd + Ord + PartialEq + Eq + DivAssign + Rem + From<u8> {
+pub(crate) trait WriteableNumber:
+    Copy + Add + PartialOrd + Ord + PartialEq + Eq + DivAssign + Rem + Div<Output = Self> + Mul<Output = Self> + Sub<Output = Self> + From<u8>
+{
     fn abs_value(self) -> Self;
     fn is_negative(self) -> bool;
     fn digit(value: Self, divider: Self) -> u8;
+    fn into_u64(self) -> u64;
 }
-impl WriteableNumber for u32 {
-    #[inline(always)]
-    fn abs_value(self) -> Self {
-        self
-    }
-    #[inline(always)]
-    fn is_negative(self) -> bool {
-        false
-    }
-    #[inline(always)]
-    fn digit(value: Self, divider: Self) -> u8 {
-        (value % divider) as u8
-    }
-}
-impl WriteableNumber for u64 {
-    #[inline(always)]
-    fn abs_value(self) -> Self {
-        self
-    }
-    #[inline(always)]
-    fn is_negative(self) -> bool {
-        false
-    }
-    #[inline(always)]
-    fn digit(value: Self, divider: Self) -> u8 {
-        (value % divider) as u8
-    }
-}
-impl WriteableNumber for u128 {
-    #[inline(always)]
-    fn abs_value(self) -> Self {
-        self
-    }
-    #[inline(always)]
-    fn is_negative(self) -> bool {
-        false
-    }
-    #[inline(always)]
-    fn digit(value: Self, divider: Self) -> u8 {
-        (value % divider) as u8
-    }
-}
-impl WriteableNumber for i32 {
-    #[inline(always)]
-    fn abs_value(self) -> Self {
-        if self < 0 {
-            -self
-        } else {
-            self
+
+macro_rules! IMPL_FOR_UNSIGNED {
+    ($t: ty) => {
+        impl WriteableNumber for $t {
+            #[inline(always)]
+            fn abs_value(self) -> Self {
+                self
+            }
+            #[inline(always)]
+            fn is_negative(self) -> bool {
+                false
+            }
+            #[inline(always)]
+            fn digit(value: Self, divider: Self) -> u8 {
+                (value % divider) as u8
+            }
+            fn into_u64(self) -> u64 {
+                self as u64
+            }
         }
-    }
-    #[inline(always)]
-    fn is_negative(self) -> bool {
-        self < 0
-    }
-    #[inline(always)]
-    fn digit(value: Self, divider: Self) -> u8 {
-        (value % divider) as u8
-    }
+    };
 }
-impl WriteableNumber for i64 {
-    #[inline(always)]
-    fn abs_value(self) -> Self {
-        if self < 0 {
-            -self
-        } else {
-            self
+
+macro_rules! IMPL_FOR_SIGNED {
+    ($t: ty) => {
+        impl WriteableNumber for $t {
+            #[inline(always)]
+            fn abs_value(self) -> Self {
+                if self < 0 {
+                    -self
+                } else {
+                    self
+                }
+            }
+            #[inline(always)]
+            fn is_negative(self) -> bool {
+                self < 0
+            }
+            #[inline(always)]
+            fn digit(value: Self, divider: Self) -> u8 {
+                (value % divider) as u8
+            }
+            fn into_u64(self) -> u64 {
+                if self < 0 {
+                    -self as u64
+                } else {
+                    self as u64
+                }
+            }
         }
-    }
-    #[inline(always)]
-    fn is_negative(self) -> bool {
-        self < 0
-    }
-    #[inline(always)]
-    fn digit(value: Self, divider: Self) -> u8 {
-        (value % divider) as u8
-    }
+    };
 }
-impl WriteableNumber for i128 {
-    #[inline(always)]
-    fn abs_value(self) -> Self {
-        if self < 0 {
-            -self
-        } else {
-            self
-        }
-    }
-    #[inline(always)]
-    fn is_negative(self) -> bool {
-        self < 0
-    }
-    #[inline(always)]
-    fn digit(value: Self, divider: Self) -> u8 {
-        (value % divider) as u8
-    }
-}
+
+IMPL_FOR_UNSIGNED!(u16);
+IMPL_FOR_UNSIGNED!(u32);
+IMPL_FOR_UNSIGNED!(u64);
+IMPL_FOR_UNSIGNED!(u128);
+IMPL_FOR_SIGNED!(i16);
+IMPL_FOR_SIGNED!(i32);
+IMPL_FOR_SIGNED!(i64);
+IMPL_FOR_SIGNED!(i128);

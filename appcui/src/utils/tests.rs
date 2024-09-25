@@ -690,3 +690,24 @@ fn check_write_number_to_string_negative() {
         Some("-00C0FFEEh")
     );
 }
+
+#[test]
+fn check_fraction() {
+    let mut output: [u8; 64] = [0; 64];
+    assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(123, 1000, &mut output), Some("0.123"));
+    assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(12345, 1000, &mut output), Some("12.345"));
+    assert_eq!(FormatNumber::new(10).decimals(1).write_fraction(1234, 1000, &mut output), Some("1.2"));
+    assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(-123, 1000, &mut output), Some("-0.123"));
+    assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(-12345, 1000, &mut output), Some("-12.345"));
+    assert_eq!(FormatNumber::new(10).decimals(1).write_fraction(-1234, 1000, &mut output), Some("-1.2"));
+    assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(-123, -1000, &mut output), Some("0.123"));
+    assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(-12345, -1000, &mut output), Some("12.345"));
+    assert_eq!(FormatNumber::new(10).decimals(1).write_fraction(-1234, -1000, &mut output), Some("1.2"));
+    assert_eq!(FormatNumber::new(10).decimals(2).suffix(" KB").write_fraction(1234u128, 1024u128, &mut output), Some("1.20 KB"));
+    assert_eq!(FormatNumber::new(10).decimals(2).suffix(" KB").write_fraction(1024u64, 1024u64, &mut output), Some("1.00 KB"));
+    // no decimals
+    assert_eq!(FormatNumber::new(10).write_fraction(123, 1000, &mut output), Some("0"));
+    assert_eq!(FormatNumber::new(10).write_fraction(123, 100, &mut output), Some("1"));
+    assert_eq!(FormatNumber::new(10).write_fraction(123, 10, &mut output), Some("12"));
+
+}
