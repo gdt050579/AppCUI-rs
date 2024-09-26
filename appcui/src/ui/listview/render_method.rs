@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::utils::{FormatDateTime, FormatTime, FormatDate};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use listview::formats::percentage_format::PercentageFormat;
 use listview::{BoolFormat, DateTimeFormat, NumericFormat, SizeFormat, TimeFormat, DateFormat};
 
 pub enum RenderMethod<'a> {
@@ -13,9 +14,9 @@ pub enum RenderMethod<'a> {
     UInt64(u64, NumericFormat),
     Bool(bool, BoolFormat),
     Size(u64, SizeFormat),
+    Percentage(f64, PercentageFormat),
     /*
     Float(f64,...),
-    Percentage(f64,zecimals),
     Progress(f64),
     Currency(f64,currency),
     */
@@ -84,6 +85,7 @@ impl<'a> RenderMethod<'a> {
             | RenderMethod::Date(_, _)
             | RenderMethod::Int64(_, _)
             | RenderMethod::UInt64(_, _)
+            | RenderMethod::Percentage(_, _)
             | RenderMethod::Size(_, _) => {
                 let mut output: [u8; 256] = [0; 256];
                 if let Some(str_rep) = self.string_representation(&mut output) {
@@ -123,6 +125,7 @@ impl<'a> RenderMethod<'a> {
             }            
             RenderMethod::Int64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
+            RenderMethod::Percentage(value, format) => format.formatter().write_float(*value * 100.0, output),
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
             RenderMethod::Size(value, format) => format.write(*value, output),
             RenderMethod::Custom => None,
@@ -158,6 +161,10 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Size(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
+            }
+            RenderMethod::Percentage(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.formatter().write_float(*value * 100.0, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Bool(value, format) => format.text(*value).chars().count() as u32,
             RenderMethod::Custom => 0,
