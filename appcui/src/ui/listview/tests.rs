@@ -3020,10 +3020,30 @@ fn check_numeric_formater_renderer() {
     let mut lv = listview!("Employee,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{&Salary,10,Right},{&RGB,12,Center},{&Debt,10,Right}]");
 
     let students = vec![
-        Employee { name: "John", salary: 150000, rgb: 0xFFAABB, debt: 0 },
-        Employee { name: "Mike", salary: 45000, rgb: 0xAA, debt: -3000  },
-        Employee { name: "Alex", salary: 1000000, rgb: 0xFFFF, debt: -123456  },
-        Employee { name: "Zig", salary: 12500, rgb: 0xFFFF0000, debt: -25  },
+        Employee {
+            name: "John",
+            salary: 150000,
+            rgb: 0xFFAABB,
+            debt: 0,
+        },
+        Employee {
+            name: "Mike",
+            salary: 45000,
+            rgb: 0xAA,
+            debt: -3000,
+        },
+        Employee {
+            name: "Alex",
+            salary: 1000000,
+            rgb: 0xFFFF,
+            debt: -123456,
+        },
+        Employee {
+            name: "Zig",
+            salary: 12500,
+            rgb: 0xFFFF0000,
+            debt: -25,
+        },
     ];
     lv.add_items(students);
     w.add(lv);
@@ -3090,13 +3110,93 @@ fn check_bool_formater_renderer() {
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Employee,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{V1,10,Right},{V2,12,Center},{V3,10,Right},{V4,10,Right}]");
+    let mut lv =
+        listview!("Employee,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{V1,10,Right},{V2,12,Center},{V3,10,Right},{V4,10,Right}]");
 
     let students = vec![
-        Employee { name: "John", v1: true, v2: false, v3: true, v4: false },
-        Employee { name: "Mike", v1: false, v2: true, v3: false, v4: true },
-        Employee { name: "Alex", v1: true, v2: true, v3: false, v4: true },
-        Employee { name: "Zig", v1: false, v2: false, v3: true, v4: false },
+        Employee {
+            name: "John",
+            v1: true,
+            v2: false,
+            v3: true,
+            v4: false,
+        },
+        Employee {
+            name: "Mike",
+            v1: false,
+            v2: true,
+            v3: false,
+            v4: true,
+        },
+        Employee {
+            name: "Alex",
+            v1: true,
+            v2: true,
+            v3: false,
+            v4: true,
+        },
+        Employee {
+            name: "Zig",
+            v1: false,
+            v2: false,
+            v3: true,
+            v4: false,
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_size_formater_renderer_simple() {
+    struct FileInfo {
+        name: &'static str,
+        size: u64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::Bytes)),
+                2 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::KiloBytes)),
+                3 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::MegaBytes)),
+                4 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::GigaBytes)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 | 2 | 3 | 4 => self.size.cmp(&other.size),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x580385D00925B270)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv =
+        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,10,Right},{GB,10,Right}]");
+
+    let students = vec![
+        FileInfo { name: "NUll", size: 0 },
+        FileInfo { name: "Small", size: 300 },
+        FileInfo {
+            name: "Regular",
+            size: 12345,
+        },
+        FileInfo { name: "Song", size: 3200000 },
+        FileInfo {
+            name: "Movie",
+            size: 7950000000,
+        },
     ];
     lv.add_items(students);
     w.add(lv);
@@ -3105,3 +3205,111 @@ fn check_bool_formater_renderer() {
 }
 
 
+#[test]
+fn check_size_formater_renderer_with_decimals() {
+    struct FileInfo {
+        name: &'static str,
+        size: u64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::Bytes)),
+                2 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::KiloBytesWithDecimals)),
+                3 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::MegaBytesWithDecimals)),
+                4 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::GigaBytesWithDecimals)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 | 2 | 3 | 4 => self.size.cmp(&other.size),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xBF3A416D456E4D96)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv =
+        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,12,Right},{GB,10,Right}]");
+
+    let students = vec![
+        FileInfo { name: "NUll", size: 0 },
+        FileInfo { name: "Small", size: 345 },
+        FileInfo {
+            name: "Regular",
+            size: 12345,
+        },
+        FileInfo { name: "Song", size: 3_123_456 },
+        FileInfo {
+            name: "Movie",
+            size: 7_950_123_456,
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_size_formater_renderer_with_auto() {
+    struct FileInfo {
+        name: &'static str,
+        size: u64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::Bytes)),
+                2 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::Auto)),
+                3 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::AutoWithDecimals)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 | 2 | 3 => self.size.cmp(&other.size),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xD59FF1A8E969B065)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv =
+        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{Auto,20,Right},{AutoDec,20,Right}]");
+
+    let students = vec![
+        FileInfo { name: "NUll", size: 0 },
+        FileInfo { name: "Small", size: 345 },
+        FileInfo {
+            name: "Regular",
+            size: 12_345,
+        },
+        FileInfo { name: "Song", size: 3_123_456 },
+        FileInfo {
+            name: "Movie",
+            size: 7_950_123_456,
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
