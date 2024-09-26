@@ -4,3 +4,18 @@ pub enum DateTimeFormat {
     Normal,
     Short,
 }
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum TimeFormat {
+    Short,
+    AMPM,
+    Normal,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum DateFormat {
+    Full,
+    Large,
+    Normal,
+    Short,
+}

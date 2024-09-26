@@ -20,4 +20,7 @@ pub (crate) use self::handle_manager::HandleManager;
 pub (crate) use self::glyphs::GlyphParser;
 pub (crate) use self::format_number::FormatNumber;
 pub (crate) use self::format_datetime::FormatDateTime;
+pub (crate) use self::format_datetime::FormatTime;
+pub (crate) use self::format_datetime::FormatDate;
+
 

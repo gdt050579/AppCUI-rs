@@ -1,25 +1,23 @@
-use super::{BoolFormat, DateTimeFormat, NumericFormat};
 use crate::prelude::*;
-use crate::utils::FormatDateTime;
-use chrono::NaiveDateTime;
-use listview::SizeFormat;
+use crate::utils::{FormatDateTime, FormatTime, FormatDate};
+use chrono::{NaiveDateTime, NaiveTime};
+use listview::{BoolFormat, DateTimeFormat, NumericFormat, SizeFormat, TimeFormat};
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
     Ascii(&'a str),
     DateTime(NaiveDateTime, DateTimeFormat),
+    Time(NaiveTime, TimeFormat),
     Int64(i64, NumericFormat),
     UInt64(u64, NumericFormat),
     Bool(bool, BoolFormat),
     Size(u64, SizeFormat),
     /*
     Date(NaiveDate,format),
-    Time(NaiveTime,format),
     Float(f64,...),
     Percentage(f64,zecimals),
     Progress(f64),
     Currency(f64,currency),
-
     */
     Custom,
 }
@@ -82,6 +80,7 @@ impl<'a> RenderMethod<'a> {
             }
             RenderMethod::Ascii(_)
             | RenderMethod::DateTime(_, _)
+            | RenderMethod::Time(_, _)
             | RenderMethod::Int64(_, _)
             | RenderMethod::UInt64(_, _)
             | RenderMethod::Size(_, _) => {
@@ -101,12 +100,18 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Text(txt) => Some(txt),
             RenderMethod::Ascii(txt) => Some(txt),
             RenderMethod::DateTime(dt, format) => {
-                let txt = match format {
+                match format {
                     DateTimeFormat::Full => FormatDateTime::full(dt, output),
                     DateTimeFormat::Normal => FormatDateTime::normal(dt, output),
                     DateTimeFormat::Short => FormatDateTime::short(dt, output),
-                };
-                txt
+                }
+            }
+            RenderMethod::Time(dt, format) => {
+                match format {
+                    TimeFormat::Short => FormatTime::short(dt, output),
+                    TimeFormat::AMPM => FormatTime::am_pm(dt, output),
+                    TimeFormat::Normal => FormatTime::normal(dt, output),                
+                }
             }
             RenderMethod::Int64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
@@ -120,21 +125,20 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Text(txt) => txt.chars().count() as u32,
             RenderMethod::Ascii(txt) => txt.len() as u32,
             RenderMethod::DateTime(_, _) => 19,
+            RenderMethod::Time(_, format) => {
+                match format {
+                    TimeFormat::Short => 5,
+                    TimeFormat::AMPM => 8,
+                    TimeFormat::Normal => 8,                 
+                }
+            }
             RenderMethod::Int64(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
-                format
-                    .formatter()
-                    .write_number(*value, &mut output)
-                    .map(|p| p.len() as u32)
-                    .unwrap_or(0)
+                format.formatter().write_number(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::UInt64(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
-                format
-                    .formatter()
-                    .write_number(*value, &mut output)
-                    .map(|p| p.len() as u32)
-                    .unwrap_or(0)
+                format.formatter().write_number(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Size(value, format) => {
                 let mut output: [u8; 64] = [0; 64];

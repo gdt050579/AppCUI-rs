@@ -1,11 +1,9 @@
-use chrono::{Datelike, NaiveDateTime, Timelike};
+use chrono::{Datelike, NaiveDateTime, NaiveTime, Timelike};
 
 static SHORT_MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-static WEEK_DATS: [&str;7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+static WEEK_DATS: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-pub struct FormatDateTime {
-
-}
+pub struct FormatDateTime;
 impl FormatDateTime {
     pub fn normal<'a>(dt: &NaiveDateTime, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 20 {
@@ -23,7 +21,7 @@ impl FormatDateTime {
         buf[7] = month[2];
         buf[8] = b'-';
         let day = dt.day();
-        buf[9] = ((day / 10) as u8) + 48;  
+        buf[9] = ((day / 10) as u8) + 48;
         buf[10] = ((day % 10) as u8) + 48;
         buf[11] = b' ';
         let hour = dt.hour();
@@ -68,7 +66,7 @@ impl FormatDateTime {
         buf[12] = month[2];
         buf[13] = b'-';
         let day = dt.day();
-        buf[14] = ((day / 10) as u8) + 48;  
+        buf[14] = ((day / 10) as u8) + 48;
         buf[15] = ((day % 10) as u8) + 48;
         buf[16] = b' ';
         let hour = dt.hour();
@@ -100,11 +98,11 @@ impl FormatDateTime {
         buf[3] = (year % 10) as u8 + 48;
         buf[4] = b'-';
         let month = dt.month();
-        buf[5] = ((month / 10) as u8) + 48;  
+        buf[5] = ((month / 10) as u8) + 48;
         buf[6] = ((month % 10) as u8) + 48;
         buf[7] = b'-';
         let day = dt.day();
-        buf[8] = ((day / 10) as u8) + 48;  
+        buf[8] = ((day / 10) as u8) + 48;
         buf[9] = ((day % 10) as u8) + 48;
         buf[10] = b' ';
         let hour = dt.hour();
@@ -120,5 +118,84 @@ impl FormatDateTime {
         buf[15] = ((minute % 10) as u8) + 48;
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..16]) })
+    }
+}
+
+pub struct FormatTime;
+impl FormatTime {
+    pub fn short<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
+        if buf.len() < 5 {
+            return None;
+        }
+        let hour = dt.hour();
+        if hour < 10 {
+            buf[0] = b' ';
+        } else {
+            buf[0] = ((hour / 10) as u8) + 48;
+        }
+        buf[1] = ((hour % 10) as u8) + 48;
+        buf[2] = b':';
+        let minute = dt.minute();
+        buf[3] = ((minute / 10) as u8) + 48;
+        buf[4] = ((minute % 10) as u8) + 48;
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[..5]) })
+    }
+    pub fn am_pm<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
+        if buf.len() < 8 {
+            return None;
+        }
+        let hour_24 = dt.hour();
+        let hour = if hour_24 > 12 { hour_24 - 12 } else { hour_24 };
+
+        if hour < 10 {
+            buf[0] = b' ';
+        } else {
+            buf[0] = ((hour / 10) as u8) + 48;
+        }
+        buf[1] = ((hour % 10) as u8) + 48;
+        buf[2] = b':';
+        let minute = dt.minute();
+        buf[3] = ((minute / 10) as u8) + 48;
+        buf[4] = ((minute % 10) as u8) + 48;
+        buf[5] = b' ';
+        if hour_24>=12 {
+            buf[6] = b'P';
+            buf[7] = b'M';
+        } else {
+            buf[6] = b'A';
+            buf[7] = b'M';
+        }
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[..8]) })
+    }
+    pub fn normal<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
+        if buf.len() < 8 {
+            return None;
+        }
+        let hour = dt.hour();
+        if hour < 10 {
+            buf[0] = b' ';
+        } else {
+            buf[0] = ((hour / 10) as u8) + 48;
+        }
+        buf[1] = ((hour % 10) as u8) + 48;
+        buf[2] = b':';
+        let minute = dt.minute();
+        buf[3] = ((minute / 10) as u8) + 48;
+        buf[4] = ((minute % 10) as u8) + 48;
+        buf[5] = b':';
+        let seconds = dt.second();
+        buf[6] = ((seconds / 10) as u8) + 48;
+        buf[7] = ((seconds % 10) as u8) + 48;
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[..8]) })
+    }
+}
+
+pub struct FormatDate;
+impl FormatDate {
+    pub fn short<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
+        todo!()
     }
 }

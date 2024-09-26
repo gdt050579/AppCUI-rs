@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use chrono::{NaiveDate, NaiveDateTime};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 struct TestItem {}
 impl listview::ListItem for TestItem {
@@ -3182,8 +3182,7 @@ fn check_size_formater_renderer_simple() {
     ";
     let mut a = App::debug(80, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv =
-        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,10,Right},{GB,10,Right}]");
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,10,Right},{GB,10,Right}]");
 
     let students = vec![
         FileInfo { name: "NUll", size: 0 },
@@ -3203,7 +3202,6 @@ fn check_size_formater_renderer_simple() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_size_formater_renderer_with_decimals() {
@@ -3238,8 +3236,7 @@ fn check_size_formater_renderer_with_decimals() {
     ";
     let mut a = App::debug(80, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv =
-        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,12,Right},{GB,10,Right}]");
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,12,Right},{GB,10,Right}]");
 
     let students = vec![
         FileInfo { name: "NUll", size: 0 },
@@ -3248,7 +3245,10 @@ fn check_size_formater_renderer_with_decimals() {
             name: "Regular",
             size: 12345,
         },
-        FileInfo { name: "Song", size: 3_123_456 },
+        FileInfo {
+            name: "Song",
+            size: 3_123_456,
+        },
         FileInfo {
             name: "Movie",
             size: 7_950_123_456,
@@ -3292,8 +3292,7 @@ fn check_size_formater_renderer_with_auto() {
     ";
     let mut a = App::debug(80, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv =
-        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{Auto,20,Right},{AutoDec,20,Right}]");
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{Auto,20,Right},{AutoDec,20,Right}]");
 
     let students = vec![
         FileInfo { name: "NUll", size: 0 },
@@ -3302,13 +3301,82 @@ fn check_size_formater_renderer_with_auto() {
             name: "Regular",
             size: 12_345,
         },
-        FileInfo { name: "Song", size: 3_123_456 },
+        FileInfo {
+            name: "Song",
+            size: 3_123_456,
+        },
         FileInfo {
             name: "Movie",
             size: 7_950_123_456,
         },
     ];
     lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_time_formater_renderer() {
+    struct FileInfo {
+        name: &'static str,
+        tm: NaiveTime,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Time(self.tm, listview::TimeFormat::Short)),
+                2 => Some(listview::RenderMethod::Time(self.tm, listview::TimeFormat::AMPM)),
+                3 => Some(listview::RenderMethod::Time(self.tm, listview::TimeFormat::Normal)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 | 2 | 3 => self.tm.cmp(&other.tm),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x2A167C2A8155CCF)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Short,20,Right},{AM-PM,20,Right},{Normal,20,Right}]");
+
+    let files = vec![
+        FileInfo {
+            name: "f1",
+            tm: NaiveTime::from_hms_milli_opt(18, 32, 20, 123).unwrap(),
+        },
+        FileInfo {
+            name: "f2",
+            tm: NaiveTime::from_hms_milli_opt(23, 59, 59, 999).unwrap(),
+        },
+        FileInfo {
+            name: "f3",
+            tm: NaiveTime::from_hms_milli_opt(00, 00, 00, 000).unwrap(),
+        },
+        FileInfo {
+            name: "f4",
+            tm: NaiveTime::from_hms_milli_opt(12, 00, 00, 000).unwrap(),
+        },
+        FileInfo {
+            name: "f5",
+            tm: NaiveTime::from_hms_milli_opt(5, 20, 30, 234).unwrap(),
+        },
+        FileInfo {
+            name: "f6",
+            tm: NaiveTime::from_hms_milli_opt(21, 50, 01, 005).unwrap(),
+        },
+    ];
+    lv.add_items(files);
     w.add(lv);
     a.add_window(w);
     a.run();
