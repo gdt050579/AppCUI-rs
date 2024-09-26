@@ -1,4 +1,4 @@
-use chrono::{Datelike, NaiveDateTime, NaiveTime, Timelike};
+use chrono::{Datelike, NaiveDateTime, NaiveTime, Timelike, NaiveDate};
 
 static SHORT_MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 static WEEK_DATS: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -195,7 +195,76 @@ impl FormatTime {
 
 pub struct FormatDate;
 impl FormatDate {
-    pub fn short<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
-        todo!()
+    pub fn ymd<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
+        if buf.len() < 10 {
+            return None;
+        }
+        let year = dt.year();
+        buf[0] = (year / 1000) as u8 + 48;
+        buf[1] = ((year % 1000) / 100) as u8 + 48;
+        buf[2] = ((year % 100) / 10) as u8 + 48;
+        buf[3] = (year % 10) as u8 + 48;
+        buf[4] = b'-';
+        let month = dt.month();
+        buf[5] = ((month / 10) as u8) + 48;
+        buf[6] = ((month % 10) as u8) + 48;
+        buf[7] = b'-';
+        let day = dt.day();
+        buf[8] = ((day / 10) as u8) + 48;
+        buf[9] = ((day % 10) as u8) + 48;
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[..10]) })
     }
+    pub fn dmy<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
+        if buf.len() < 10 {
+            return None;
+        }
+        let day = dt.day();
+        buf[0] = ((day / 10) as u8) + 48;
+        buf[1] = ((day % 10) as u8) + 48;
+        buf[2] = b'-';
+        let month = dt.month();
+        buf[3] = ((month / 10) as u8) + 48;
+        buf[4] = ((month % 10) as u8) + 48;
+        buf[5] = b'-';
+        let year = dt.year();
+        buf[6] = (year / 1000) as u8 + 48;
+        buf[7] = ((year % 1000) / 100) as u8 + 48;
+        buf[8] = ((year % 100) / 10) as u8 + 48;
+        buf[9] = (year % 10) as u8 + 48;
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[..10]) })
+    }
+
+    pub fn full<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
+        if buf.len() < 16 {
+            return None;
+        }
+
+        let wday = WEEK_DATS[dt.weekday() as usize].as_bytes();
+        buf[0] = wday[0];
+        buf[1] = wday[1];
+        buf[2] = wday[2];
+        buf[3] = b',';
+        buf[4] = b' ';
+
+        let year = dt.year();
+        buf[5] = (year / 1000) as u8 + 48;
+        buf[6] = ((year % 1000) / 100) as u8 + 48;
+        buf[7] = ((year % 100) / 10) as u8 + 48;
+        buf[8] = (year % 10) as u8 + 48;
+        buf[9] = b'-';
+        let month = SHORT_MONTHS[dt.month().saturating_sub(1) as usize].as_bytes();
+        buf[10] = month[0];
+        buf[11] = month[1];
+        buf[12] = month[2];
+        buf[13] = b'-';
+        let day = dt.day();
+        buf[14] = ((day / 10) as u8) + 48;
+        buf[15] = ((day % 10) as u8) + 48;
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[..16]) })
+    }
+
+
 }

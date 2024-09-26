@@ -3381,3 +3381,70 @@ fn check_time_formater_renderer() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_date_formater_renderer() {
+    struct FileInfo {
+        name: &'static str,
+        dt: NaiveDate,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Date(self.dt, listview::DateFormat::Full)),
+                2 => Some(listview::RenderMethod::Date(self.dt, listview::DateFormat::DayMonthYear)),
+                3 => Some(listview::RenderMethod::Date(self.dt, listview::DateFormat::YearMonthDay)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 | 2 | 3 => self.dt.cmp(&other.dt),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xA57A8DA7D0578F54)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Full,20,Right},{YMD,20,Right},{DMY,20,Right}]");
+
+    let files = vec![
+        FileInfo {
+            name: "f1",
+            dt: NaiveDate::from_ymd_opt(2024, 12, 30).unwrap()
+        },
+        FileInfo {
+            name: "f2",
+            dt: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap()
+        },
+        FileInfo {
+            name: "f3",
+            dt: NaiveDate::from_ymd_opt(2024, 5, 5).unwrap()
+        },
+        FileInfo {
+            name: "f4",
+            dt: NaiveDate::from_ymd_opt(2024, 3, 4).unwrap()
+        },
+        FileInfo {
+            name: "f5",
+            dt: NaiveDate::from_ymd_opt(2024, 10, 21).unwrap()
+        },
+        FileInfo {
+            name: "f6",
+            dt: NaiveDate::from_ymd_opt(2024, 4, 2).unwrap()
+        },
+    ];
+    lv.add_items(files);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}

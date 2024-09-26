@@ -1,19 +1,19 @@
 use crate::prelude::*;
 use crate::utils::{FormatDateTime, FormatTime, FormatDate};
-use chrono::{NaiveDateTime, NaiveTime};
-use listview::{BoolFormat, DateTimeFormat, NumericFormat, SizeFormat, TimeFormat};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use listview::{BoolFormat, DateTimeFormat, NumericFormat, SizeFormat, TimeFormat, DateFormat};
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
     Ascii(&'a str),
     DateTime(NaiveDateTime, DateTimeFormat),
     Time(NaiveTime, TimeFormat),
+    Date(NaiveDate, DateFormat),
     Int64(i64, NumericFormat),
     UInt64(u64, NumericFormat),
     Bool(bool, BoolFormat),
     Size(u64, SizeFormat),
     /*
-    Date(NaiveDate,format),
     Float(f64,...),
     Percentage(f64,zecimals),
     Progress(f64),
@@ -81,6 +81,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Ascii(_)
             | RenderMethod::DateTime(_, _)
             | RenderMethod::Time(_, _)
+            | RenderMethod::Date(_, _)
             | RenderMethod::Int64(_, _)
             | RenderMethod::UInt64(_, _)
             | RenderMethod::Size(_, _) => {
@@ -113,6 +114,13 @@ impl<'a> RenderMethod<'a> {
                     TimeFormat::Normal => FormatTime::normal(dt, output),                
                 }
             }
+            RenderMethod::Date(dt, format) => {
+                match format {
+                    DateFormat::Full => FormatDate::full(dt, output),
+                    DateFormat::YearMonthDay => FormatDate::ymd(dt, output),
+                    DateFormat::DayMonthYear => FormatDate::dmy(dt, output),                    
+                }
+            }            
             RenderMethod::Int64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
@@ -132,6 +140,13 @@ impl<'a> RenderMethod<'a> {
                     TimeFormat::Normal => 8,                 
                 }
             }
+            RenderMethod::Date(_, format) => {
+                match format {
+                    DateFormat::Full => 16,
+                    DateFormat::YearMonthDay => 10,
+                    DateFormat::DayMonthYear => 10,                    
+                }                
+            }            
             RenderMethod::Int64(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.formatter().write_number(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)

@@ -15,7 +15,6 @@ pub enum TimeFormat {
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum DateFormat {
     Full,
-    Large,
-    Normal,
-    Short,
+    YearMonthDay,
+    DayMonthYear
 }
