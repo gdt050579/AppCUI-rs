@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::utils::{FormatDateTime, FormatTime, FormatDate};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
-use listview::{BoolFormat, DateTimeFormat, NumericFormat, SizeFormat, TimeFormat, DateFormat};
+use listview::{BoolFormat, DateTimeFormat, NumericFormat, SizeFormat, TimeFormat, DateFormat, FloatFormat};
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
@@ -15,6 +15,7 @@ pub enum RenderMethod<'a> {
     Bool(bool, BoolFormat),
     Size(u64, SizeFormat),
     Percentage(f64, PercentageFormat),
+    Float(f64, FloatFormat),
     /*
     Float(f64,...),
     Progress(f64),
@@ -85,6 +86,7 @@ impl<'a> RenderMethod<'a> {
             | RenderMethod::Date(_, _)
             | RenderMethod::Int64(_, _)
             | RenderMethod::UInt64(_, _)
+            | RenderMethod::Float(_, _)    
             | RenderMethod::Percentage(_, _)
             | RenderMethod::Size(_, _) => {
                 let mut output: [u8; 256] = [0; 256];
@@ -125,6 +127,7 @@ impl<'a> RenderMethod<'a> {
             }            
             RenderMethod::Int64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
+            RenderMethod::Float(value, format) => format.formatter().write_float(*value, output),
             RenderMethod::Percentage(value, format) => format.formatter().write_float(*value * 100.0, output),
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
             RenderMethod::Size(value, format) => format.write(*value, output),
@@ -157,6 +160,10 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::UInt64(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.formatter().write_number(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
+            }
+            RenderMethod::Float(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.formatter().write_float(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Size(value, format) => {
                 let mut output: [u8; 64] = [0; 64];

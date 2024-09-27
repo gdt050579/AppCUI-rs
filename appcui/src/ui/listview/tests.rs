@@ -3493,3 +3493,52 @@ fn check_percentage_formater_renderer() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_float_formater_renderer() {
+    struct FileInfo {
+        name: &'static str,
+        value: f64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Float(self.value, listview::FloatFormat::Normal)),
+                2 => Some(listview::RenderMethod::Float(self.value, listview::FloatFormat::TwoDigits)),
+                3 => Some(listview::RenderMethod::Float(self.value, listview::FloatFormat::ThreeDigits)),
+                4 => Some(listview::RenderMethod::Float(self.value, listview::FloatFormat::FourDigits)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xE9C5BED230AEFA5E)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Normal,15,Right},{Two,15,Right},{Three,15,Right},{Four,15,Right}]");
+
+    let files = vec![
+        FileInfo { name: "f1", value: 0.123456 },
+        FileInfo { name: "f2", value: 0.0 },
+        FileInfo { name: "f3", value: -1.9876 },
+        FileInfo { name: "f4", value: 12345.125 },
+        FileInfo { name: "f5", value: 123456.0625 },
+        FileInfo { name: "f6", value: 0.5 },
+    ];
+    lv.add_items(files);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
