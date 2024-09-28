@@ -17,9 +17,14 @@ pub enum RenderMethod<'a> {
     Percentage(f64, PercentageFormat),
     Float(f64, FloatFormat),
     /*
-    Float(f64,...),
     Progress(f64),
     Currency(f64,currency),
+    Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile
+    Temperature(f64,temperature), // Celsius, Fahrenheit, Kelvin
+    Speed(f64,speed), // km/h, m/s, mph, knot
+    Weight(f64,weight), // kg, g, mg, t, lb, oz
+    Volume(f64,volume), // l, ml, cm3, m3, gal, pt, qt, fl oz
+    Area(f64,area), // m2, cm2, km2, ha, a, ft2, in2, yd2, mi2    
     */
     Custom,
 }

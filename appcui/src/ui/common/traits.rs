@@ -21,6 +21,7 @@ use crate::{
         threestatebox::events::ThreeStateBoxEvents,
         window::events::{ToolBarEvents, WindowEvents},
         listbox::events::ListBoxEvents,
+        listview::events::GenericListViewEvents,
     },
 };
 
@@ -121,6 +122,7 @@ pub trait Control:
     + GenericNumericSelectorEvents
     + DatePickerEvents
     + ListBoxEvents
+    + GenericListViewEvents
 {
 }
 

@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 
 use crate::utils;
-
+use super::events::*;
 use super::{Flags, Group, GroupInformation, Item, ListItem, ViewMode};
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
@@ -36,7 +36,7 @@ enum HoverStatus {
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ListView<T>
 where
-    T: ListItem,
+    T: ListItem + 'static,
 {
     flags: Flags,
     data: Vec<Item<T>>,
@@ -58,7 +58,7 @@ const X_OFFSET_FOR_GROUP_ITEMS: i32 = 2;
 
 impl<T> ListView<T>
 where
-    T: ListItem,
+    T: ListItem + 'static,
 {
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(16, layout, flags)
@@ -1009,15 +1009,14 @@ where
         let should_emit = (self.pos != new_pos) && emit_event;
         self.pos = new_pos;
         if should_emit {
-            // self.raise_event(ControlEvent {
-            //     emitter: self.handle,
-            //     receiver: self.event_processor,
-            //     data: ControlEventData::ListBox(EventData {
-            //         event_type: ListBoxEventTypes::CurrentItemChanged,
-            //         index: new_pos,
-            //         checked: false, // not relevant for this event
-            //     }),
-            // });
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::ListView(EventData {
+                    event_type: listview::events::ListViewEventTypes::CurrentItemChanged,
+                    type_id: std::any::TypeId::of::<T>(),
+                }),
+            });
         }
     }
     fn move_scroll_to(&mut self, new_poz: usize) {
@@ -1242,7 +1241,7 @@ where
 
 impl<T> OnPaint for ListView<T>
 where
-    T: ListItem,
+    T: ListItem + 'static,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         match self.view_mode {
@@ -1275,7 +1274,7 @@ where
 
 impl<T> OnKeyPressed for ListView<T>
 where
-    T: ListItem,
+    T: ListItem + 'static,
 {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         let action = if self.view_mode == ViewMode::Details {
@@ -1304,7 +1303,7 @@ where
 
 impl<T> OnMouseEvent for ListView<T>
 where
-    T: ListItem,
+    T: ListItem + 'static,
 {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if self.comp.process_mouse_event(event) {
@@ -1332,7 +1331,7 @@ where
 }
 impl<T> OnResize for ListView<T>
 where
-    T: ListItem,
+    T: ListItem + 'static,
 {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.header.resize(new_size);

@@ -4,7 +4,7 @@ use super::traits::{Control, CustomEvents, EventProcessStatus};
 use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
-use crate::prelude::{colorpicker, combobox, datepicker, dropdownlist, keyselector, numericselector, selector, textfield, threestatebox, listbox, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
+use crate::prelude::{colorpicker, combobox, datepicker, dropdownlist, keyselector, numericselector, selector, textfield, threestatebox, listbox, listview, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
 use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
@@ -15,6 +15,7 @@ use crate::ui::{
     numericselector::events::GenericNumericSelectorEvents,
     datepicker::events::DatePickerEvents,
     listbox::events::ListBoxEvents,
+    listview::events::GenericListViewEvents,
 };
 
 #[derive(Copy,Clone)]
@@ -39,6 +40,7 @@ pub(crate) enum ControlEventData {
     NumericSelector(numericselector::events::EventData),
     DatePicker(datepicker::events::EventData),
     ListBox(listbox::events::EventData),
+    ListView(listview::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -114,9 +116,15 @@ impl ControlEvent {
                     listbox::events::ListBoxEventTypes::ItemChecked => {
                         ListBoxEvents::on_item_checked(receiver, self.emitter.cast(), data.index, data.checked)                    
                     },
-                }
-                
-            },             
+                }                
+            },   
+            ControlEventData::ListView(data) => {
+                match data.event_type {
+                    listview::events::ListViewEventTypes::CurrentItemChanged => {
+                        GenericListViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id)
+                    },
+                }                
+            },          
         }
     }
 }

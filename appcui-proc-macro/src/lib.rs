@@ -95,6 +95,8 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -167,6 +169,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
@@ -215,6 +218,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -288,6 +292,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
