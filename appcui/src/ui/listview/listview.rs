@@ -1,8 +1,8 @@
 use std::cmp::Ordering;
 
-use crate::utils;
 use super::events::*;
 use super::{Flags, Group, GroupInformation, Item, ListItem, ViewMode};
+use crate::utils;
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use AppCUIProcMacro::*;
 
@@ -221,10 +221,10 @@ where
             self.goto_element(current_item);
         }
     }
-    
+
     /// Returns a reference to the current item from the list view
     /// if the list view is empty or the current position refers to a group, None is returned
-    pub fn current_item(&self)->Option<&T> {
+    pub fn current_item(&self) -> Option<&T> {
         if self.pos < self.filter.len() {
             match self.filter[self.pos] {
                 Element::Item(index) => Some(self.data[index as usize].value()),
@@ -237,7 +237,7 @@ where
 
     /// Returns a mutable reference to the current item from the list view
     /// if the list view is empty or the current position refers to a group, None is returned
-    pub fn current_item_mut(&mut self)->Option<&mut T> {
+    pub fn current_item_mut(&mut self) -> Option<&mut T> {
         if self.pos < self.filter.len() {
             match self.filter[self.pos] {
                 Element::Item(index) => Some(self.data[index as usize].value_mut()),
@@ -247,9 +247,27 @@ where
             None
         }
     }
-    
-    
-    
+
+    /// Returns the current group (for the current selection for for the item).
+    /// If the number of items in the listview is 0 or no group has been associated with the current item, None is returned
+    pub fn current_group(&self) -> Option<Group> {
+        if self.pos < self.filter.len() {
+            match self.filter[self.pos] {
+                Element::Item(index) => {
+                    let gid = self.data[index as usize].group_id();
+                    if gid > 0 {
+                        Some(Group::new(gid))
+                    } else {
+                        None
+                    }
+                }
+                Element::Group(gid) => Some(Group::new(gid)),
+            }
+        } else {
+            None
+        }
+    }
+
     fn goto_element(&mut self, element: Element) -> bool {
         for (index, item) in self.filter.iter().enumerate() {
             if *item == element {
@@ -261,7 +279,7 @@ where
     }
     fn is_item_filtered_out(&self, item: &Item<T>) -> bool {
         if self.flags.contains(Flags::CustomFilter) {
-            let search_text = self.comp.search_text(); 
+            let search_text = self.comp.search_text();
             if search_text.is_empty() {
                 false
             } else {
@@ -776,23 +794,11 @@ where
         let attr = attr.unwrap_or(theme.list_current_item.icon);
         match self.icon_width {
             3 => {
-                surface.write_char(
-                    x,
-                    0,
-                    Character::with_attributes(item.icon_first_character(), attr),
-                );
-                surface.write_char(
-                    x + 1,
-                    0,
-                    Character::with_attributes(item.icon_second_character(), attr),
-                );
+                surface.write_char(x, 0, Character::with_attributes(item.icon_first_character(), attr));
+                surface.write_char(x + 1, 0, Character::with_attributes(item.icon_second_character(), attr));
             }
             2 => {
-                surface.write_char(
-                    x,
-                    0,
-                    Character::with_attributes(item.icon_first_character(), attr),
-                );
+                surface.write_char(x, 0, Character::with_attributes(item.icon_first_character(), attr));
             }
             _ => {}
         }
