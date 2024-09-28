@@ -221,6 +221,35 @@ where
             self.goto_element(current_item);
         }
     }
+    
+    /// Returns a reference to the current item from the list view
+    /// if the list view is empty or the current position refers to a group, None is returned
+    pub fn current_item(&self)->Option<&T> {
+        if self.pos < self.filter.len() {
+            match self.filter[self.pos] {
+                Element::Item(index) => Some(self.data[index as usize].value()),
+                Element::Group(_) => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Returns a mutable reference to the current item from the list view
+    /// if the list view is empty or the current position refers to a group, None is returned
+    pub fn current_item_mut(&mut self)->Option<&mut T> {
+        if self.pos < self.filter.len() {
+            match self.filter[self.pos] {
+                Element::Item(index) => Some(self.data[index as usize].value_mut()),
+                Element::Group(_) => None,
+            }
+        } else {
+            None
+        }
+    }
+    
+    
+    
     fn goto_element(&mut self, element: Element) -> bool {
         for (index, item) in self.filter.iter().enumerate() {
             if *item == element {
