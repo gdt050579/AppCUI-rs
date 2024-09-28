@@ -298,3 +298,24 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
     return EventProcessStatus::Ignored;
 }
 ";
+
+
+pub(crate) static LISTVIEWT_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return ListViewEvents::<$(TYPE)>::on_current_item_changed(self, h);
+}
+";
+
+pub(crate) static LISTVIEW_TRAIT_DEF: &str = "
+trait ListViewEvents<T: listview::ListItem+'static> {
+    fn on_current_item_changed(&mut self, handle: Handle<ListView<T>>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+
+    fn on_current_item_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_CURRENT_ITEM_CHANGED)
+        return EventProcessStatus::Ignored;
+    }
+}
+";

@@ -94,10 +94,10 @@ impl AppCUITrait {
             AppCUITrait::GenericSelectorEvents => "SelectorEvents", // important to be without Generic
             AppCUITrait::ComboBoxEvents => "ComboBoxEvents",
             AppCUITrait::GenericDropDownListEvents => "DropDownListEvents", // important to be without Generic
-            AppCUITrait::GenericNumericSelectorEvents => "NumericSelectorEvents", // important to be without Generic            
-            AppCUITrait::DatePickerEvents => "DatePickerEvents",      
-            AppCUITrait::ListBoxEvents => "ListBoxEvents",   
-            AppCUITrait::GenericListViewEvents => "ListViewEvents", // important to be without Generic 
+            AppCUITrait::GenericNumericSelectorEvents => "NumericSelectorEvents", // important to be without Generic
+            AppCUITrait::DatePickerEvents => "DatePickerEvents",
+            AppCUITrait::ListBoxEvents => "ListBoxEvents",
+            AppCUITrait::GenericListViewEvents => "ListViewEvents", // important to be without Generic
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -236,7 +236,13 @@ impl AppCUITrait {
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
-        matches!(self, AppCUITrait::GenericSelectorEvents | AppCUITrait::GenericDropDownListEvents | AppCUITrait::GenericNumericSelectorEvents)
+        matches!(
+            self,
+            AppCUITrait::GenericSelectorEvents
+                | AppCUITrait::GenericDropDownListEvents
+                | AppCUITrait::GenericNumericSelectorEvents
+                | AppCUITrait::GenericListViewEvents
+        )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
         match name {
@@ -313,8 +319,8 @@ impl AppCUITrait {
             31 => Some(AppCUITrait::GenericSelectorEvents),
             32 => Some(AppCUITrait::ComboBoxEvents),
             33 => Some(AppCUITrait::GenericDropDownListEvents),
-            34 => Some(AppCUITrait::GenericNumericSelectorEvents), 
-            35 => Some(AppCUITrait::DatePickerEvents), 
+            34 => Some(AppCUITrait::GenericNumericSelectorEvents),
+            35 => Some(AppCUITrait::DatePickerEvents),
             36 => Some(AppCUITrait::ListBoxEvents),
             37 => Some(AppCUITrait::GenericListViewEvents),
             _ => None,

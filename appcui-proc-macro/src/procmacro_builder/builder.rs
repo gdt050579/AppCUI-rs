@@ -125,23 +125,40 @@ pub(crate) fn generate_custom_event_traits(a: &mut Arguments) -> String {
 fn generate_selector_events(a: &mut Arguments) -> String {
     let mut s = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericSelectorEvents].iter() {
-        s.push_str(templates::SELECT_ON_SELECTION_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());        
+        s.push_str(templates::SELECT_ON_SELECTION_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());
     }
     return templates::SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_SELECTOR)", s.as_str());
 }
 fn generate_dropdownlist_events(a: &mut Arguments) -> String {
     let mut s = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericDropDownListEvents].iter() {
-        s.push_str(templates::SELECT_ON_DROPDOWNLIST_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());        
+        s.push_str(templates::SELECT_ON_DROPDOWNLIST_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());
     }
     return templates::DROPDOWNLIST_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_DROPDOWNLIST)", s.as_str());
 }
 fn generate_numeric_selector_events(a: &mut Arguments) -> String {
+    if a.template_events.contains_key(&AppCUITrait::GenericNumericSelectorEvents) == false {
+        panic!("Missing generic type for NumericSelectorEvents event (Have you used evets=NumericSelectorEvents<Type> ?)");
+    }
     let mut s = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericNumericSelectorEvents].iter() {
-        s.push_str(templates::NUMERIC_SELECT_ON_VALUE_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());        
+        s.push_str(templates::NUMERIC_SELECT_ON_VALUE_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());
     }
     return templates::NUMERIC_SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_NUMERIC_SELECTOR)", s.as_str());
+}
+
+fn generate_listview_events(a: &mut Arguments) -> String {
+    if a.template_events.contains_key(&AppCUITrait::GenericListViewEvents) == false {
+        panic!("Missing generic type for ListView event (Have you used evets=ListVewEvents<Type> ?)");
+    }
+    let mut on_current_item_changed_code = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericListViewEvents].iter() {
+        on_current_item_changed_code.push_str(templates::LISTVIEWT_ON_CURRENT_ITEM_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    return templates::LISTVIEW_TRAIT_DEF.replace(
+        "$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_CURRENT_ITEM_CHANGED)",
+        on_current_item_changed_code.as_str(),
+    );
 }
 
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
@@ -192,6 +209,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericSelectorEvents => code.push_str(generate_selector_events(&mut a).as_str()),
                         AppCUITrait::GenericDropDownListEvents => code.push_str(generate_dropdownlist_events(&mut a).as_str()),
                         AppCUITrait::GenericNumericSelectorEvents => code.push_str(generate_numeric_selector_events(&mut a).as_str()),
+                        AppCUITrait::GenericListViewEvents => code.push_str(generate_listview_events(&mut a).as_str()),
                         _ => {}
                     }
                 }
