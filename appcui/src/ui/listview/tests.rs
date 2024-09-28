@@ -3494,7 +3494,6 @@ fn check_percentage_formater_renderer() {
     a.run();
 }
 
-
 #[test]
 fn check_float_formater_renderer() {
     struct FileInfo {
@@ -3527,18 +3526,87 @@ fn check_float_formater_renderer() {
     ";
     let mut a = App::debug(80, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Normal,15,Right},{Two,15,Right},{Three,15,Right},{Four,15,Right}]");
+    let mut lv = listview!(
+        "FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Normal,15,Right},{Two,15,Right},{Three,15,Right},{Four,15,Right}]"
+    );
 
     let files = vec![
         FileInfo { name: "f1", value: 0.123456 },
         FileInfo { name: "f2", value: 0.0 },
         FileInfo { name: "f3", value: -1.9876 },
-        FileInfo { name: "f4", value: 12345.125 },
-        FileInfo { name: "f5", value: 123456.0625 },
+        FileInfo {
+            name: "f4",
+            value: 12345.125,
+        },
+        FileInfo {
+            name: "f5",
+            value: 123456.0625,
+        },
         FileInfo { name: "f6", value: 0.5 },
     ];
     lv.add_items(files);
     w.add(lv);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_on_change_current_item_event() {
+    #[Window(events=ListViewEvents<Person>, internal: true)]
+    struct MyWin {}
+    impl ListViewEvents<Person> for MyWin {
+        fn on_current_item_changed(&mut self, handle: Handle<ListView<Person>>) -> EventProcessStatus {
+            let name = if let Some(lv) = self.control(handle) {
+                if let Some(item) = lv.current_item() {
+                    item.name.to_string()
+                } else {
+                    "None".to_string()
+                }
+            } else {
+                "None".to_string()
+            };
+            self.set_title(&format!("Person: {}", name));
+            return EventProcessStatus::Processed;
+        }
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut lv = listview!(
+                "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+            );
+            Person::populate(&mut lv);
+            w.add(lv);
+            w
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xBD45D8B7079B61BA)     
+        Key.Pressed(Down)
+        Paint('2. Title is John')
+        CheckHash(0xF142CB62EEFE710)     
+        Key.Pressed(Right)
+        Paint('3. Title is None (curson on Asia group)')
+        CheckHash(0x8EC8CEB7874BE721)     
+        Key.Pressed(Down)
+        Paint('4. Title is Yu Law')
+        CheckHash(0x1B935153863C86E1)     
+        Key.TypeText('Gheo')
+        Paint('5. Title is Gheorghe')
+        CheckHash(0xA2144919E5610F47)   
+        Key.Pressed(Escape)  
+        Paint('6. Cursor on Gheorghe')
+        CheckHash(0xEE12444688EA14DE)   
+        Mouse.Click(25,4,left)
+        Paint('7. Title is Kai')
+        CheckHash(0x1AC178C84EC4FB24)   
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }

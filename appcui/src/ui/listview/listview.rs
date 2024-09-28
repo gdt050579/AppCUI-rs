@@ -218,7 +218,8 @@ where
         self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
         // find the new position after sorting
         if let Some(current_item) = current_item {
-            self.goto_element(current_item);
+            // on the same item --> no need to emit an event
+            self.goto_element(current_item, false);
         }
     }
 
@@ -268,10 +269,10 @@ where
         }
     }
 
-    fn goto_element(&mut self, element: Element) -> bool {
+    fn goto_element(&mut self, element: Element, emit_event: bool) -> bool {
         for (index, item) in self.filter.iter().enumerate() {
             if *item == element {
-                self.update_position(index, false);
+                self.update_position(index, emit_event);
                 return true;
             }
         }
@@ -374,7 +375,7 @@ where
         };
         self.refilter();
         let found = if let Some(current_element) = current_element {
-            self.goto_element(current_element)
+            self.goto_element(current_element, true)
         } else {
             false
         };
@@ -382,7 +383,7 @@ where
             // move to the first non_group element
             for (index, element) in self.filter.iter().enumerate() {
                 if let Element::Item(_) = element {
-                    self.update_position(index, false);
+                    self.update_position(index, true);
                     break;
                 }
             }
