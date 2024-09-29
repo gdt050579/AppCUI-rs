@@ -269,6 +269,39 @@ where
         }
     }
 
+    /// Returns the item from the list view at the specified index
+    pub fn item(&self, index: usize) -> Option<&T> {
+        if index < self.data.len() {
+            Some(self.data[index].value())
+        } else {
+            None
+        }
+    }
+
+    /// Returns a mutable reference to the item from the list view at the specified index
+    /// if the index is out of bounds, None is returned
+    pub fn item_mut(&mut self, index: usize) -> Option<&mut T> {
+        if index < self.data.len() {
+            Some(self.data[index].value_mut())
+        } else {
+            None
+        }
+    }
+
+    /// Returns the number of items in the list view
+    pub fn items_count(&self) -> usize {
+        self.data.len()
+    }
+
+    /// Returns `true` if the item at the specified index is checked, `false` otherwise
+    pub fn is_item_checked(&self, index: usize) -> bool {
+        if index < self.data.len() {
+            self.data[index].is_checked()
+        } else {
+            false
+        }
+    }
+
     fn goto_element(&mut self, element: Element, emit_event: bool) -> bool {
         for (index, item) in self.filter.iter().enumerate() {
             if *item == element {
