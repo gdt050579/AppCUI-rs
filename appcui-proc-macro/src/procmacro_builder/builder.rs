@@ -152,13 +152,20 @@ fn generate_listview_events(a: &mut Arguments) -> String {
         panic!("Missing generic type for ListView event (Have you used evets=ListVewEvents<Type> ?)");
     }
     let mut on_current_item_changed_code = String::new();
+    let mut on_group_collapsed_code = String::new();
+    let mut on_group_expanded_code = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericListViewEvents].iter() {
         on_current_item_changed_code.push_str(templates::LISTVIEWT_ON_CURRENT_ITEM_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_group_collapsed_code.push_str(templates::LISTVIEWT_ON_GROUP_COLLAPSED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_group_expanded_code.push_str(templates::LISTVIEWT_ON_GROUP_EXPANDED_DEF.replace("$(TYPE)", trait_name).as_str());
     }
-    return templates::LISTVIEW_TRAIT_DEF.replace(
-        "$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_CURRENT_ITEM_CHANGED)",
-        on_current_item_changed_code.as_str(),
-    );
+    return templates::LISTVIEW_TRAIT_DEF
+        .replace(
+            "$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_CURRENT_ITEM_CHANGED)",
+            &on_current_item_changed_code,
+        )
+        .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_COLLAPSED)", &on_group_collapsed_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_EXPANDED)", &on_group_expanded_code);
 }
 
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {

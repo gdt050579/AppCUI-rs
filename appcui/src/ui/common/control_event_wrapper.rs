@@ -6,6 +6,7 @@ use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
 use crate::prelude::{colorpicker, combobox, datepicker, dropdownlist, keyselector, numericselector, selector, textfield, threestatebox, listbox, listview, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
 use crate::system::Handle;
+use crate::ui::listview::Group;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
     radiobox::events::RadioBoxEvents,
@@ -123,6 +124,13 @@ impl ControlEvent {
                     listview::events::ListViewEventTypes::CurrentItemChanged => {
                         GenericListViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id)
                     },
+                    listview::events::ListViewEventTypes::GroupFoldedOrUnfolded(group, collapsed) => {
+                        if collapsed {
+                            GenericListViewEvents::on_group_collapsed(receiver, self.emitter.cast(), data.type_id, group)
+                        } else {
+                            GenericListViewEvents::on_group_expanded(receiver, self.emitter.cast(), data.type_id, group)
+                        }
+                    }
                 }                
             },          
         }

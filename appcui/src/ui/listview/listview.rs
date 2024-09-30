@@ -249,6 +249,24 @@ where
         }
     }
 
+    /// Returns the index of the current item from the list view or None if the list view is empty or the current selection is on a group
+    pub fn current_item_index(&self) -> Option<usize> {
+        if self.pos < self.filter.len() {
+            match self.filter[self.pos] {
+                Element::Item(index) => {
+                    if (index as usize) < self.data.len() {
+                        Some(index as usize)
+                    } else {
+                        None
+                    }
+                }
+                Element::Group(_) => None,
+            }
+        } else {
+            None
+        }
+    }
+
     /// Returns the current group (for the current selection for for the item).
     /// If the number of items in the listview is 0 or no group has been associated with the current item, None is returned
     pub fn current_group(&self) -> Option<Group> {
@@ -266,6 +284,19 @@ where
             }
         } else {
             None
+        }
+    }
+
+    /// Returns the name of the group or None if the group object is invalid
+    pub fn group_name(&self, group: Group) -> Option<&str> {
+        if group.index() as usize >= self.groups.len() {
+            None
+        } else {
+            if group.index() == 0 {
+                None
+            } else {
+                Some(self.groups[group.index() as usize].name())
+            }
         }
     }
 
@@ -497,15 +528,26 @@ where
         self.update_position(new_pos, true);
         self.check_items(start, self.pos, mode);
     }
-    fn toggle_group_collapse_status(&mut self, gid: u16) {
+    fn toggle_group_collapse_status(&mut self, gid: u16, emit_event: bool) {
         if gid as usize >= self.groups.len() {
             return;
         }
         let group = &mut self.groups[gid as usize];
         let pos = self.pos;
         group.set_collapsed(!group.is_collapsed());
+        let is_collapsed = group.is_collapsed();
         self.refilter();
         self.update_position(pos, true);
+        if emit_event {
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::ListView(EventData {
+                    event_type: listview::events::ListViewEventTypes::GroupFoldedOrUnfolded(Group::new(gid), is_collapsed), 
+                    type_id: std::any::TypeId::of::<T>(),
+                }),
+            });
+        }
     }
     fn execute_column_header_action(&mut self, action: ColumnsHeaderAction) -> bool {
         match action {
@@ -638,7 +680,7 @@ where
                     self.check_item(self.pos, CheckMode::Reverse, true);
                     true
                 } else if let Some(Element::Group(gid)) = self.filter.get(self.pos) {
-                    self.toggle_group_collapse_status(*gid);
+                    self.toggle_group_collapse_status(*gid, true);
                     true
                 } else {
                     false
@@ -694,7 +736,7 @@ where
                     Some(Element::Item(_)) => {
                         // emit event
                     }
-                    Some(Element::Group(gid)) => self.toggle_group_collapse_status(*gid),
+                    Some(Element::Group(gid)) => self.toggle_group_collapse_status(*gid, true),
                     _ => {}
                 }
                 true
@@ -1269,7 +1311,7 @@ where
                         Element::Group(gid) => {
                             let l = if self.view_mode == ViewMode::Details { 0 } else { left_pos };
                             if ev.x == l + 1 {
-                                self.toggle_group_collapse_status(gid);
+                                self.toggle_group_collapse_status(gid, true);
                             }
                             if self.flags.contains(Flags::CheckBoxes) && ev.x >= l + 3 && ev.x <= l + 5 {
                                 self.check_item(self.pos, CheckMode::Reverse, true);
