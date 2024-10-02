@@ -23,6 +23,8 @@ pub use self::formats::bool_format::BoolFormat;
 pub use self::formats::size_format::SizeFormat;
 pub use self::formats::percentage_format::PercentageFormat;
 pub use self::formats::float_format::FloatFormat;   
+pub use self::formats::status_format::Status;
+pub use self::formats::status_format::StatusFormat;
 pub use self::item::Item;
 pub use self::groups::Group;   
 pub use self::view_mode::ViewMode; 
