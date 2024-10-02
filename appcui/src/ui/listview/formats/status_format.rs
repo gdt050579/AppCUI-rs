@@ -14,22 +14,31 @@ pub enum Status {
 pub enum StatusFormat {
     Hashtag,
     Graphical,
-    Arrow,
+    Arrow,    
 }
 
 const PERCENTAGE_RUNNING: FormatNumber = FormatNumber::new(10).suffix("%").fill(4, b' ');
 const PERCENTAGE_PAUSED: FormatNumber = FormatNumber::new(10).suffix("%)").prefix("Paused (");
 
-
 impl Status {
+    #[inline(always)]
+    pub(crate) fn proc(value: f32) -> f64 {
+        if value < 0.0 {
+            0.0
+        } else if value > 1.0 {
+            100.0
+        } else {
+            (value * 100.0) as f64
+        }
+    }
     pub(crate) fn to_str<'a>(&self, output_buffer: &'a mut [u8]) -> &'a str {
         match self {
-            Status::Paused(value) => PERCENTAGE_PAUSED.write_float(*value as f64, output_buffer).unwrap_or(""),
+            Status::Paused(value) => PERCENTAGE_PAUSED.write_float(Status::proc(*value), output_buffer).unwrap_or(""),
             Status::Completed => "Completed",
-            Status::Running(value) => PERCENTAGE_RUNNING.write_float(*value as f64, output_buffer).unwrap_or(""),
+            Status::Running(value) => PERCENTAGE_RUNNING.write_float(Status::proc(*value), output_buffer).unwrap_or(""),
             Status::Error => "Error",
             Status::Queued => "Queued",
             Status::Stopped => "Stopped",
         }
-    }  
+    }
 }

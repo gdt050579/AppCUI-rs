@@ -18,7 +18,6 @@ pub enum RenderMethod<'a> {
     Float(f64, FloatFormat),
     Status(Status, StatusFormat),
     /*
-    Progress(f64),
     Currency(f64,currency),
     Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile
     Temperature(f64,temperature), // Celsius, Fahrenheit, Kelvin
@@ -81,15 +80,32 @@ impl<'a> RenderMethod<'a> {
         width: u16,
         attr: Option<CharAttribute>,
     ) {
-        if let Status::Running(_) = status {
+        if let Status::Running(value) = status {
             let mut output: [u8; 32] = [0; 32];
             let txt = status.to_str(&mut output);
             if (width >= 10) && (txt.len() >= 4) {
                 // [xxx]<space>xxx% => 7 chars
                 let attr = attr.unwrap_or(theme.text.focused);
                 surface.write_char(0, 0, Character::with_attributes('[', attr));
-                surface.write_char(width as i32 - 5, 0, Character::with_attributes(']', attr));
+                surface.write_char(width as i32 - 5, 0, Character::with_attributes(' ', attr));
+                surface.write_char(width as i32 - 6, 0, Character::with_attributes(']', attr));
                 surface.write_string((width as i32) - 4, 0, &txt[(txt.len() - 4)..], attr, false);
+                let sz = (((width - 7) as f64 * Status::proc(value) / 100.0) as u32).min((width as u32) - 7);
+                match format {
+                    StatusFormat::Hashtag => {
+                        surface.fill_horizontal_line_with_size(1, 0, width as u32 - 7, Character::with_attributes('-', attr));
+                        surface.fill_horizontal_line_with_size(1, 0, sz, Character::with_attributes('#', attr));
+                    }
+                    StatusFormat::Graphical => {
+                        surface.fill_horizontal_line_with_size(1, 0, width as u32 - 7, Character::with_attributes(SpecialChar::Block25, attr));
+                        surface.fill_horizontal_line_with_size(1, 0, sz, Character::with_attributes(SpecialChar::Block100, attr));
+                    }
+                    StatusFormat::Arrow => {
+                        surface.fill_horizontal_line_with_size(1, 0, width as u32 - 7, Character::with_attributes(' ', attr));
+                        surface.fill_horizontal_line_with_size(1, 0, sz, Character::with_attributes('=', attr));
+                        surface.write_char(1 + (sz.saturating_sub(1) as i32), 0, Character::with_attributes('>', attr));
+                    }
+                }
             } else {
                 RenderMethod::paint_ascii(txt, surface, theme, alignment, width, attr);
             }
