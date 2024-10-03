@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::utils::{FormatDate, FormatDateTime, FormatTime};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
-use listview::{BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, SizeFormat, Status, StatusFormat, TimeFormat};
+use listview::{BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, SizeFormat, Status, StatusFormat, TimeFormat, TemperatureFormat};
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
@@ -17,10 +17,10 @@ pub enum RenderMethod<'a> {
     Percentage(f64, PercentageFormat),
     Float(f64, FloatFormat),
     Status(Status, StatusFormat),
+    Temperature(f64, TemperatureFormat),
     /*
     Currency(f64,currency),
     Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile
-    Temperature(f64,temperature), // Celsius, Fahrenheit, Kelvin
     Speed(f64,speed), // km/h, m/s, mph, knot
     Weight(f64,weight), // kg, g, mg, t, lb, oz
     Volume(f64,volume), // l, ml, cm3, m3, gal, pt, qt, fl oz
@@ -123,8 +123,9 @@ impl<'a> RenderMethod<'a> {
                 RenderMethod::paint_text(txt, surface, theme, alignment, width, attr);
                 true
             }
-            RenderMethod::Bool(_, _) => {
-                let mut output: [u8; 16] = [0; 16];
+            RenderMethod::Bool(_, _) 
+            | RenderMethod::Temperature(_, _) => {
+                let mut output: [u8; 32] = [0; 32];
                 if let Some(str_rep) = self.string_representation(&mut output) {
                     RenderMethod::paint_text(str_rep, surface, theme, alignment, width, attr);
                     true
@@ -179,6 +180,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::Float(value, format) => format.formatter().write_float(*value, output),
             RenderMethod::Percentage(value, format) => format.formatter().write_float(*value * 100.0, output),
+            RenderMethod::Temperature(value, format) => format.formatter().write_float(*value, output),
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
             RenderMethod::Size(value, format) => format.write(*value, output),
             RenderMethod::Status(status, _) => Some(status.to_str(output)),
@@ -209,6 +211,10 @@ impl<'a> RenderMethod<'a> {
                 format.formatter().write_number(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Float(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.formatter().write_float(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
+            }
+            RenderMethod::Temperature(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.formatter().write_float(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }

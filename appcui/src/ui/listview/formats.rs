@@ -5,3 +5,4 @@ pub(super) mod size_format;
 pub(super) mod percentage_format;
 pub(super) mod float_format;
 pub(super) mod status_format;
+pub(super) mod temperature_format;

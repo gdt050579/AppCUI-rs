@@ -3663,3 +3663,51 @@ fn check_status_formater_renderer() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_temperature_formater_renderer() {
+    struct FileInfo {
+        name: &'static str,
+        temperature: f64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Temperature(self.temperature, listview::TemperatureFormat::Celsius)),
+                2 => Some(listview::RenderMethod::Temperature(self.temperature, listview::TemperatureFormat::Fahrenheit)),
+                3 => Some(listview::RenderMethod::Temperature(self.temperature, listview::TemperatureFormat::Kelvin)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xD28567B414CAD555)
+    ";
+    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!(
+        "FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Celsius,20,Right},{Fahrenheit,20,Right},{Kelvin,20,Right}]"
+    );
+
+    let files = vec![
+        FileInfo { name: "f1", temperature: 37.0},
+        FileInfo { name: "f2", temperature: 100.5},
+        FileInfo { name: "f3", temperature: -20.4},
+        FileInfo { name: "f4", temperature: 0.0},
+    ];
+    lv.add_items(files);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
