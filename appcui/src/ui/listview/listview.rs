@@ -526,7 +526,7 @@ where
         let start = self.pos;
         let mode = self.toggle_current_item_selection();
         self.update_position(new_pos, true);
-        self.check_items(start, self.pos, mode);
+        self.check_items(start, self.pos, mode, true);
     }
     fn toggle_group_collapse_status(&mut self, gid: u16, emit_event: bool) {
         if gid as usize >= self.groups.len() {
@@ -543,7 +543,7 @@ where
                 emitter: self.handle,
                 receiver: self.event_processor,
                 data: ControlEventData::ListView(EventData {
-                    event_type: listview::events::ListViewEventTypes::GroupFoldedOrUnfolded(Group::new(gid), is_collapsed), 
+                    event_type: listview::events::ListViewEventTypes::GroupFoldedOrUnfolded(Group::new(gid), is_collapsed),
                     type_id: std::any::TypeId::of::<T>(),
                 }),
             });
@@ -677,7 +677,7 @@ where
             // Selection
             key!("Space") => {
                 if self.flags.contains(Flags::CheckBoxes) {
-                    self.check_item(self.pos, CheckMode::Reverse, true);
+                    self.check_item(self.pos, CheckMode::Reverse, true, true);
                     true
                 } else if let Some(Element::Group(gid)) = self.filter.get(self.pos) {
                     self.toggle_group_collapse_status(*gid, true);
@@ -687,12 +687,12 @@ where
                 }
             }
             key!("Insert") | key!("Shift+Down") => {
-                self.check_item(self.pos, CheckMode::Reverse, true);
+                self.check_item(self.pos, CheckMode::Reverse, true, true);
                 self.update_position(self.pos.saturating_add(1), true);
                 true
             }
             key!("Shift+Up") => {
-                self.check_item(self.pos, CheckMode::Reverse, true);
+                self.check_item(self.pos, CheckMode::Reverse, true, true);
                 self.update_position(self.pos.saturating_sub(1), true);
                 true
             }
@@ -723,9 +723,9 @@ where
 
             key!("Ctrl+A") => {
                 if self.is_entire_list_selected() {
-                    self.check_items(0, self.filter.len(), CheckMode::False);
+                    self.check_items(0, self.filter.len(), CheckMode::False, true);
                 } else {
-                    self.check_items(0, self.filter.len(), CheckMode::True);
+                    self.check_items(0, self.filter.len(), CheckMode::True, true);
                 }
                 true
             }
@@ -1139,18 +1139,33 @@ where
         self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
     }
-    fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool) {
+    fn emit_selection_update_event(&self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::ListView(EventData {
+                event_type: listview::events::ListViewEventTypes::SelectionChanged,
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }
+
+    /// Returns true if the selection has been changed, false otherwise
+    fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool, emit_event: bool)->bool {
         if pos >= self.filter.len() {
-            return;
+            return false;
         }
+        let mut selection_has_changed = false;  
         match self.filter[pos] {
             Element::Item(index) => {
                 let item = &mut self.data[index as usize];
+                let status = item.is_checked();
                 match mode {
                     CheckMode::True => item.set_checked(true),
                     CheckMode::False => item.set_checked(false),
-                    CheckMode::Reverse => item.set_checked(!item.is_checked()),
+                    CheckMode::Reverse => item.set_checked(!status),
                 }
+                selection_has_changed = item.is_checked() != status;
                 if update_group_check_count {
                     self.update_check_count_for_groups();
                 }
@@ -1163,7 +1178,9 @@ where
                     if let Element::Item(index) = itm {
                         let item = &mut self.data[*index as usize];
                         if item.group_id() == gid {
+                            let status = item.is_checked();
                             item.set_checked(checked < count);
+                            selection_has_changed |= status != item.is_checked();
                         } else {
                             break; // we've reached another group
                         }
@@ -1174,18 +1191,27 @@ where
                 group.set_items_checked_count(if checked < count { count } else { 0 });
             }
         }
+        if (emit_event) && (selection_has_changed) {
+            self.emit_selection_update_event();
+        }
+        selection_has_changed
+
     }
-    fn check_items(&mut self, start: usize, end: usize, mode: CheckMode) {
+    fn check_items(&mut self, start: usize, end: usize, mode: CheckMode, emit_event: bool) {
         let len = self.filter.len();
         if len == 0 {
             return;
         }
         let p_start = start.min(end).min(len - 1);
         let p_end = end.max(start).min(len - 1);
+        let mut selection_has_changed = false;
         for pos in p_start..=p_end {
-            self.check_item(pos, mode, false);
+            selection_has_changed |= self.check_item(pos, mode, false, false);
         }
         self.update_check_count_for_groups();
+        if (emit_event) && (selection_has_changed) {
+            self.emit_selection_update_event();
+        }
     }
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
         match self.view_mode {
@@ -1304,7 +1330,7 @@ where
                                     0
                                 };
                                 if ev.x == l + left_pos {
-                                    self.check_item(self.pos, CheckMode::Reverse, true);
+                                    self.check_item(self.pos, CheckMode::Reverse, true, true);
                                 }
                             }
                         }
@@ -1314,7 +1340,7 @@ where
                                 self.toggle_group_collapse_status(gid, true);
                             }
                             if self.flags.contains(Flags::CheckBoxes) && ev.x >= l + 3 && ev.x <= l + 5 {
-                                self.check_item(self.pos, CheckMode::Reverse, true);
+                                self.check_item(self.pos, CheckMode::Reverse, true, true);
                             }
                         }
                     }
@@ -1332,7 +1358,7 @@ where
                     if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
                         if pos != self.pos {
                             self.update_position(pos, true);
-                            self.check_items(self.start_mouse_select, pos, self.mouse_check_mode);
+                            self.check_items(self.start_mouse_select, pos, self.mouse_check_mode, true);
                         }
                     }
                 }
