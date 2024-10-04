@@ -130,7 +130,10 @@ impl ControlEvent {
                         } else {
                             GenericListViewEvents::on_group_expanded(receiver, self.emitter.cast(), data.type_id, group)
                         }
-                    }
+                    },
+                    listview::events::ListViewEventTypes::SelectionChanged => {
+                        GenericListViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
+                    },
                 }                
             },          
         }
