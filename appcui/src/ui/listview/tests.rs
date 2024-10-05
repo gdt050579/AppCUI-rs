@@ -3642,28 +3642,55 @@ fn check_status_formater_renderer() {
     ";
     let mut a = App::debug(80, 12, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!(
-        "FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Normal,20,Right},{Two,20,Right},{Three,20,Right}]"
-    );
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Normal,20,Right},{Two,20,Right},{Three,20,Right}]");
 
     let files = vec![
-        FileInfo { name: "f1", status: listview::Status::Running(0.5)},
-        FileInfo { name: "f2", status: listview::Status::Running(0.75)},
-        FileInfo { name: "f3", status: listview::Status::Running(0.0)},
-        FileInfo { name: "f4", status: listview::Status::Running(1.0)},
-        FileInfo { name: "f5", status: listview::Status::Completed},
-        FileInfo { name: "f6", status: listview::Status::Error},
-        FileInfo { name: "f7", status: listview::Status::Paused(0.33)},
-        FileInfo { name: "f8", status: listview::Status::Paused(0.99)},
-        FileInfo { name: "f9", status: listview::Status::Stopped},
-        FileInfo { name: "f1-", status: listview::Status::Queued},
+        FileInfo {
+            name: "f1",
+            status: listview::Status::Running(0.5),
+        },
+        FileInfo {
+            name: "f2",
+            status: listview::Status::Running(0.75),
+        },
+        FileInfo {
+            name: "f3",
+            status: listview::Status::Running(0.0),
+        },
+        FileInfo {
+            name: "f4",
+            status: listview::Status::Running(1.0),
+        },
+        FileInfo {
+            name: "f5",
+            status: listview::Status::Completed,
+        },
+        FileInfo {
+            name: "f6",
+            status: listview::Status::Error,
+        },
+        FileInfo {
+            name: "f7",
+            status: listview::Status::Paused(0.33),
+        },
+        FileInfo {
+            name: "f8",
+            status: listview::Status::Paused(0.99),
+        },
+        FileInfo {
+            name: "f9",
+            status: listview::Status::Stopped,
+        },
+        FileInfo {
+            name: "f1-",
+            status: listview::Status::Queued,
+        },
     ];
     lv.add_items(files);
     w.add(lv);
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_temperature_formater_renderer() {
@@ -3675,8 +3702,14 @@ fn check_temperature_formater_renderer() {
         fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
-                1 => Some(listview::RenderMethod::Temperature(self.temperature, listview::TemperatureFormat::Celsius)),
-                2 => Some(listview::RenderMethod::Temperature(self.temperature, listview::TemperatureFormat::Fahrenheit)),
+                1 => Some(listview::RenderMethod::Temperature(
+                    self.temperature,
+                    listview::TemperatureFormat::Celsius,
+                )),
+                2 => Some(listview::RenderMethod::Temperature(
+                    self.temperature,
+                    listview::TemperatureFormat::Fahrenheit,
+                )),
                 3 => Some(listview::RenderMethod::Temperature(self.temperature, listview::TemperatureFormat::Kelvin)),
                 _ => None,
             }
@@ -3696,18 +3729,94 @@ fn check_temperature_formater_renderer() {
     ";
     let mut a = App::debug(80, 12, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!(
-        "FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Celsius,20,Right},{Fahrenheit,20,Right},{Kelvin,20,Right}]"
-    );
+    let mut lv =
+        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Celsius,20,Right},{Fahrenheit,20,Right},{Kelvin,20,Right}]");
 
     let files = vec![
-        FileInfo { name: "f1", temperature: 37.0},
-        FileInfo { name: "f2", temperature: 100.5},
-        FileInfo { name: "f3", temperature: -20.4},
-        FileInfo { name: "f4", temperature: 0.0},
+        FileInfo {
+            name: "f1",
+            temperature: 37.0,
+        },
+        FileInfo {
+            name: "f2",
+            temperature: 100.5,
+        },
+        FileInfo {
+            name: "f3",
+            temperature: -20.4,
+        },
+        FileInfo {
+            name: "f4",
+            temperature: 0.0,
+        },
     ];
     lv.add_items(files);
     w.add(lv);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_on_selection_changed_event() {
+    #[Window(events=ListViewEvents<Person>, internal: true)]
+    struct MyWin {}
+    impl ListViewEvents<Person> for MyWin {
+        fn on_selection_changed(&mut self, handle: Handle<ListView<Person>>) -> EventProcessStatus {
+            let data = if let Some(lv) = self.control(handle) {
+               format!("{}/{}",lv.selected_items_count(), lv.items_count())
+            } else {
+                "?".to_string()
+            };
+            self.set_title(&data);
+            return EventProcessStatus::Processed;
+        }
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut lv = listview!(
+                "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+            );
+            Person::populate(&mut lv);
+            w.add(lv);
+            w
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x39603D1E8E3FDC2E) 
+        Mouse.Click(5,1,left)      
+        Paint('2. Usa group selected (3/19) in title')
+        CheckHash(0xB2F707F4D8D99119) 
+        Key.Pressed(Down,2)
+        Key.Pressed(Insert)
+        Paint('3. Cursor on Todd, Mike is not selected (2/19) in title')
+        CheckHash(0xB106D78FE8BEDA4F) 
+        Key.Pressed(Right)
+        Key.Pressed(Insert,3)
+        Paint('4. Cursor on Chen Li, (5/19) in title')
+        CheckHash(0x773CD4F7667F489E) 
+        Key.Pressed(Ctrl+A)
+        Paint('5. All selected, (19/19) in title')
+        CheckHash(0xF24EA396455B2322) 
+        Key.Pressed(Ctrl+A)
+        Paint('6. All clear, (0/19) in title')
+        CheckHash(0x2C7437424D694517) 
+        Key.Pressed(Shift+Home)
+        Paint('7. Cursor on USA, USA+Europa+Asia group selected, (12/19) in title')
+        CheckHash(0x5A053793E9C9EB8)
+        Mouse.Click(41,4,left) 
+        Paint('8. Ion Selected, (13/19) in title')
+        CheckHash(0x39347317263325BF)
+        Mouse.Click(41,4,left) 
+        Paint('8. Ion un-Selected, (12/19) in title')
+        CheckHash(0x5ADEEB27CB2DACE7)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }

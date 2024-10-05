@@ -52,6 +52,7 @@ where
     start_mouse_select: usize,
     mouse_check_mode: CheckMode,
     hover_status: HoverStatus,
+    selected_items_count: usize,
 }
 
 const X_OFFSET_FOR_GROUP_ITEMS: i32 = 2;
@@ -95,6 +96,7 @@ where
             start_mouse_select: 0,
             mouse_check_mode: CheckMode::False,
             hover_status: HoverStatus::None,
+            selected_items_count: 0,
         };
         // add a default group
         lv.groups.push(GroupInformation::default());
@@ -325,12 +327,17 @@ where
     }
 
     /// Returns `true` if the item at the specified index is checked, `false` otherwise
-    pub fn is_item_checked(&self, index: usize) -> bool {
+    pub fn is_item_selected(&self, index: usize) -> bool {
         if index < self.data.len() {
             self.data[index].is_checked()
         } else {
             false
         }
+    }
+
+    /// Returns the number of selected (checked) items
+    pub fn selected_items_count(&self) -> usize {
+        self.selected_items_count
     }
 
     fn goto_element(&mut self, element: Element, emit_event: bool) -> bool {
@@ -1151,11 +1158,11 @@ where
     }
 
     /// Returns true if the selection has been changed, false otherwise
-    fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool, emit_event: bool)->bool {
+    fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool, emit_event: bool) -> bool {
         if pos >= self.filter.len() {
             return false;
         }
-        let mut selection_has_changed = false;  
+        let mut selection_has_changed = false;
         match self.filter[pos] {
             Element::Item(index) => {
                 let item = &mut self.data[index as usize];
@@ -1166,6 +1173,13 @@ where
                     CheckMode::Reverse => item.set_checked(!status),
                 }
                 selection_has_changed = item.is_checked() != status;
+                if selection_has_changed {
+                    if item.is_checked() {
+                        self.selected_items_count += 1;
+                    } else {
+                        self.selected_items_count -= 1;
+                    }
+                }
                 if update_group_check_count {
                     self.update_check_count_for_groups();
                 }
@@ -1179,8 +1193,16 @@ where
                         let item = &mut self.data[*index as usize];
                         if item.group_id() == gid {
                             let status = item.is_checked();
-                            item.set_checked(checked < count);
-                            selection_has_changed |= status != item.is_checked();
+                            let new_status = checked < count;
+                            item.set_checked(new_status);
+                            selection_has_changed |= status != new_status;
+                            if status != new_status {
+                                if new_status {
+                                    self.selected_items_count += 1;
+                                } else {
+                                    self.selected_items_count -= 1;
+                                }
+                            }
                         } else {
                             break; // we've reached another group
                         }
@@ -1195,7 +1217,6 @@ where
             self.emit_selection_update_event();
         }
         selection_has_changed
-
     }
     fn check_items(&mut self, start: usize, end: usize, mode: CheckMode, emit_event: bool) {
         let len = self.filter.len();
