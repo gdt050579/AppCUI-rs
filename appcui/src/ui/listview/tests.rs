@@ -3820,3 +3820,65 @@ fn check_on_selection_changed_event() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+
+
+#[test]
+fn check_on_item_action_event() {
+    #[Window(events=ListViewEvents<Person>, internal: true)]
+    struct MyWin {}
+    impl ListViewEvents<Person> for MyWin {
+        fn on_item_action(&mut self, handle: Handle<ListView<Person>>, index: usize) -> EventProcessStatus {
+            let txt = if let Some(lv) = self.control(handle) {
+                if let Some(p) = lv.item(index) {
+                    format!("idx: {} -> {}",index,p.name)
+                } else {
+                    "??".to_string()
+                }
+            } else { "?".to_string() };
+            self.set_title(&txt);
+            return EventProcessStatus::Processed;
+        }
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut lv = listview!(
+                "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+            );
+            Person::populate(&mut lv);
+            w.add(lv);
+            w
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x39603D1E8E3FDC2E)  
+        Key.Pressed(Down,2)
+        Key.Pressed(Enter)       
+        Paint('2. Title: idx: 1 -> Mike')
+        CheckHash(0x9325B0C7B506A531)  
+        Mouse.DoubleClick(7,7,left)
+        Paint('3. Title: idx: 4 -> Etiene')
+        CheckHash(0x40E86D7984F481B0)  
+        Mouse.DoubleClick(30,2,left)
+        Paint('4. Asia group folded')
+        CheckHash(0x893167EC1EFCEEBE)
+        Key.Pressed(Enter)       
+        Paint('5. Asia group un-folded')
+        CheckHash(0x242F515807D881E)          
+        Mouse.DoubleClick(41,1,left)
+        Paint('6. Title: idx: 12 -> Andrei (Andrei is not checked)')
+        CheckHash(0xEC9291622870C230)          
+        Mouse.Click(41,1,left)
+        Paint('7. Andrei is checked')
+        CheckHash(0x8C0624825955E4B1)          
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
