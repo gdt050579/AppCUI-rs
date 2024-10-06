@@ -328,6 +328,13 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 
+pub(crate) static LISTVIEW_ON_ITEM_ACTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return ListViewEvents::<$(TYPE)>::on_item_action(self, h, index);
+}
+";
+
 pub(crate) static LISTVIEW_TRAIT_DEF: &str = "
 trait ListViewEvents<T: listview::ListItem+'static> {
     fn on_current_item_changed(&mut self, handle: Handle<ListView<T>>) -> EventProcessStatus {
@@ -340,6 +347,9 @@ trait ListViewEvents<T: listview::ListItem+'static> {
         EventProcessStatus::Ignored
     }
     fn on_selection_changed(&mut self, handle: Handle<ListView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_item_action(&mut self, handle: Handle<ListView<T>>, item_index: usize) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
@@ -364,6 +374,11 @@ impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
         $(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_SELECTION_CHANGED)
         return EventProcessStatus::Ignored;
     }
+
+    fn on_item_action(&mut self, handle: Handle<()>, type_id: std::any::TypeId, index: usize) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_ITEM_ACTION)
+        return EventProcessStatus::Ignored;
+    }    
 
 }
 ";

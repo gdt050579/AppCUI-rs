@@ -134,6 +134,9 @@ impl ControlEvent {
                     listview::events::ListViewEventTypes::SelectionChanged => {
                         GenericListViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
                     },
+                    listview::events::ListViewEventTypes::ItemAction(index) => {
+                        GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index)
+                    }
                 }                
             },          
         }

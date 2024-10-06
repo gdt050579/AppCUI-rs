@@ -740,8 +740,8 @@ where
             // Action
             key!("Enter") => {
                 match self.filter.get(self.pos) {
-                    Some(Element::Item(_)) => {
-                        // emit event
+                    Some(Element::Item(index)) => {
+                        self.emit_item_action_event(*index as usize)
                     }
                     Some(Element::Group(gid)) => self.toggle_group_collapse_status(*gid, true),
                     _ => {}
@@ -1156,6 +1156,18 @@ where
             }),
         });
     }
+    fn emit_item_action_event(&self, index: usize) {
+        if index < self.data.len() {
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::ListView(EventData {
+                    event_type: listview::events::ListViewEventTypes::ItemAction(index),
+                    type_id: std::any::TypeId::of::<T>(),
+                }),
+            });
+        }
+    }
 
     /// Returns true if the selection has been changed, false otherwise
     fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool, emit_event: bool) -> bool {
@@ -1373,7 +1385,22 @@ where
                 true
             }
             MouseEvent::Released(_) => true,
-            MouseEvent::DoubleClick(_) => todo!(),
+            MouseEvent::DoubleClick(ev) => {
+                if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
+                    if pos != self.pos {
+                        self.update_position(pos, true);
+                    }
+                    match self.filter[self.pos] {
+                        Element::Item(index) => {
+                            self.emit_item_action_event(index as usize);
+                        }
+                        Element::Group(gid) => {
+                            self.toggle_group_collapse_status(gid, true);
+                        }
+                    }
+                }
+                true
+            }
             MouseEvent::Drag(ev) => {
                 if self.start_mouse_select != usize::MAX {
                     if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {

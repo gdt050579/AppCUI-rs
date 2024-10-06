@@ -15,6 +15,9 @@ pub trait GenericListViewEvents {
     fn on_selection_changed(&mut self, _handle: Handle<()>, _type_id: TypeId) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    fn on_item_action(&mut self, _handle: Handle<()>, _type_id: TypeId, _index: usize) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
 
 }
 
@@ -23,6 +26,7 @@ pub(crate) enum ListViewEventTypes {
     CurrentItemChanged,
     GroupFoldedOrUnfolded(Group, bool),
     SelectionChanged,
+    ItemAction(usize),
 }
 
 #[derive(Copy, Clone)]

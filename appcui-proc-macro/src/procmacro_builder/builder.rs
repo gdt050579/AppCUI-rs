@@ -155,11 +155,13 @@ fn generate_listview_events(a: &mut Arguments) -> String {
     let mut on_group_collapsed_code = String::new();
     let mut on_group_expanded_code = String::new();
     let mut on_selection_changed_code = String::new();
+    let mut on_item_action_code = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericListViewEvents].iter() {
         on_current_item_changed_code.push_str(templates::LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
         on_group_collapsed_code.push_str(templates::LISTVIEW_ON_GROUP_COLLAPSED_DEF.replace("$(TYPE)", trait_name).as_str());
         on_group_expanded_code.push_str(templates::LISTVIEW_ON_GROUP_EXPANDED_DEF.replace("$(TYPE)", trait_name).as_str());
         on_selection_changed_code.push_str(templates::LISTVIEW_ON_SELECTION_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_item_action_code.push_str(templates::LISTVIEW_ON_ITEM_ACTION_DEF.replace("$(TYPE)", trait_name).as_str());
     }
     return templates::LISTVIEW_TRAIT_DEF
         .replace(
@@ -168,7 +170,8 @@ fn generate_listview_events(a: &mut Arguments) -> String {
         )
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_COLLAPSED)", &on_group_collapsed_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_EXPANDED)", &on_group_expanded_code)
-        .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code);
+        .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_ITEM_ACTION)", &on_item_action_code);
 }
 
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
