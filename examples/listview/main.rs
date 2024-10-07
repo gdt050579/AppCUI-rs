@@ -39,8 +39,8 @@ impl MyDesktop {
 }
 impl OnPaint for MyDesktop {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        surface.clear(theme.desktop.character);
         let attr = CharAttribute::with_color(theme.desktop.character.foreground,theme.desktop.character.background);
+        surface.clear(Character::with_attributes(' ', attr));
         let x = (surface.size().width as i32) - 57;
         let mut y = (surface.size().height as i32)  - 7;
         for line in LOGO {
@@ -89,11 +89,17 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::Vertical => self.update_arrange_windows_method(Some(desktop::ArrangeWindowsMethod::Vertical)),
             mydesktop::Commands::Horizontal => self.update_arrange_windows_method(Some(desktop::ArrangeWindowsMethod::Horizontal)),
             mydesktop::Commands::Grid => self.update_arrange_windows_method(Some(desktop::ArrangeWindowsMethod::Grid)),
+            _ => {}
+        }
+    }
+    fn on_command(&mut self, _menu:Handle<Menu>, _item:Handle<menu::Command>,command:mydesktop::Commands) {
+        match command {
             mydesktop::Commands::ShowCountries => todo!(),
-            mydesktop::Commands::Exit => todo!(),
+            mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
                 dialogs::message("List View Example", "This is an example of a list view control in AppCUI");
-            },            
+            },     
+            _ => { }      
         }
     }
 
