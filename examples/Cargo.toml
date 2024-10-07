@@ -143,3 +143,8 @@ path = "splitter/main.rs"
 [[example]]
 name = "listbox"
 path = "listbox/main.rs"
+
+[[example]]
+name = "listview"
+path = "listview/main.rs"
+
