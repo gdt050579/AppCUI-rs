@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+mod countries;
 
 const LOGO: [&str; 6] = [
     "██╗     ██╗███████╗████████╗██╗   ██╗██╗███████╗██╗    ██╗",
@@ -94,7 +95,9 @@ impl MenuEvents for MyDesktop {
     }
     fn on_command(&mut self, _menu:Handle<Menu>, _item:Handle<menu::Command>,command:mydesktop::Commands) {
         match command {
-            mydesktop::Commands::ShowCountries => todo!(),
+            mydesktop::Commands::ShowCountries => { 
+                self.add_window(countries::Win::new());
+            },
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
                 dialogs::message("List View Example", "This is an example of a list view control in AppCUI");
