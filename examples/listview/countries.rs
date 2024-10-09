@@ -12,6 +12,7 @@ impl listview::ListItem for Country {
             0 => Some(listview::RenderMethod::Text(self.name)),
             1 => Some(listview::RenderMethod::Text(&self.capital)),
             2 => Some(listview::RenderMethod::UInt64(self.population as u64, listview::NumericFormat::Separator)),
+            3 => Some(listview::RenderMethod::Area(self.area as u64, listview::AreaFormat::SquaredKilometers)),
             _ => None,
         }
     }
@@ -412,7 +413,7 @@ impl Win {
         let mut me = Self {
             base: window!("Countries,d:c,w:70,h:10,flags: Sizeable"),
         };
-        let mut lv = listview!("class: Country,x:0,y:0,w:100%,h:100%,flags: ScrollBars+SearchBar, columns:[{&Name,20,l},{&Capital,20,l}, {&Population,14,r}]");
+        let mut lv = listview!("class: Country,x:0,y:0,w:100%,h:100%,flags: ScrollBars+SearchBar, columns:[{&Name,20,l},{&Capital,16,l}, {&Population,14,r}, {&Area,14,r}]");
         lv.add_items(data());
         me.add(lv);
         me
