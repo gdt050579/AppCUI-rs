@@ -2,7 +2,9 @@ use crate::prelude::*;
 use crate::utils::{FormatDate, FormatDateTime, FormatTime};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
-use listview::{BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, SizeFormat, Status, StatusFormat, TimeFormat, TemperatureFormat};
+use listview::{
+    AreaFormat, BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat,
+};
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
@@ -18,13 +20,13 @@ pub enum RenderMethod<'a> {
     Float(f64, FloatFormat),
     Status(Status, StatusFormat),
     Temperature(f64, TemperatureFormat),
+    Area(u64, AreaFormat),
     /*
     Currency(f64,currency),
     Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile
     Speed(f64,speed), // km/h, m/s, mph, knot
     Weight(f64,weight), // kg, g, mg, t, lb, oz
     Volume(f64,volume), // l, ml, cm3, m3, gal, pt, qt, fl oz
-    Area(f64,area), // m2, cm2, km2, ha, a, ft2, in2, yd2, mi2
     */
     Custom,
 }
@@ -123,8 +125,7 @@ impl<'a> RenderMethod<'a> {
                 RenderMethod::paint_text(txt, surface, theme, alignment, width, attr);
                 true
             }
-            RenderMethod::Bool(_, _) 
-            | RenderMethod::Temperature(_, _) => {
+            RenderMethod::Bool(_, _) | RenderMethod::Temperature(_, _) | RenderMethod::Area(_, _) => {
                 let mut output: [u8; 32] = [0; 32];
                 if let Some(str_rep) = self.string_representation(&mut output) {
                     RenderMethod::paint_text(str_rep, surface, theme, alignment, width, attr);
@@ -183,6 +184,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Temperature(value, format) => format.formatter().write_float(*value, output),
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
             RenderMethod::Size(value, format) => format.write(*value, output),
+            RenderMethod::Area(value, format) => format.write(*value, output),
             RenderMethod::Status(status, _) => Some(status.to_str(output)),
             RenderMethod::Custom => None,
         }
@@ -219,6 +221,10 @@ impl<'a> RenderMethod<'a> {
                 format.formatter().write_float(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Size(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
+            }
+            RenderMethod::Area(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
