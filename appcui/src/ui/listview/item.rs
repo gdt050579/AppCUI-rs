@@ -29,7 +29,7 @@ impl<T> Item<T> where T: ListItem {
             checked: false,
             attr: None,
             group_id: group.index(),
-            icon: [0 as char, 0 as char],
+            icon: [0u8 as char, 0u8 as char],
         }
     }
     #[inline(always)]
@@ -68,7 +68,7 @@ impl<T> From<T> for Item<T> where T: ListItem {
             checked: false,
             attr: None,
             group_id: 0,
-            icon: [0 as char, 0 as char],
+            icon: [0u8 as char, 0u8 as char],
         }
     }
 }
