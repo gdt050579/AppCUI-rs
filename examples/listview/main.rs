@@ -1,5 +1,6 @@
 use appcui::prelude::*;
 mod countries;
+mod music;
 
 const LOGO: [&str; 6] = [
     "██╗     ██╗███████╗████████╗██╗   ██╗██╗███████╗██╗    ██╗",
@@ -12,7 +13,7 @@ const LOGO: [&str; 6] = [
 
 #[Desktop(events    = [MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [ShowCountries, Exit, About, NoArrange, Cascade, Vertical, Horizontal, Grid])]
+          commands  = [ShowCountries, ShowMusic, Exit, About, NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
@@ -72,6 +73,7 @@ impl DesktopEvents for MyDesktop {
         self.menu_example = self.register_menu(menu!("
             &Example,class: MyDesktop, items:[
                 {&Countries,cmd: ShowCountries},
+                {&Music,cmd: ShowMusic},
             ]
         "));
         self.menu_help = self.register_menu(menu!("
@@ -98,6 +100,9 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::ShowCountries => { 
                 self.add_window(countries::Win::new());
             },
+            mydesktop::Commands::ShowMusic => { 
+                self.add_window(music::Win::new());
+            },
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
                 dialogs::message("List View Example", "This is an example of a list view control in AppCUI");
@@ -107,8 +112,8 @@ impl MenuEvents for MyDesktop {
     }
 
     fn on_update_menubar(&self,menubar: &mut MenuBar) {
-        menubar.add(self.menu_arrange);
         menubar.add(self.menu_example);
+        menubar.add(self.menu_arrange);
         menubar.add(self.menu_help);
     }
 }
