@@ -3936,3 +3936,57 @@ fn check_area_formater_renderer_simple() {
     a.add_window(w);
     a.run();
 }
+
+
+
+#[test]
+fn check_rating_formater_renderer_simple() {
+    struct FileInfo {
+        name: &'static str,
+        r: u32,
+        scor: u32,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Rating(self.r, listview::RatingFormat::Stars(5))),
+                2 => Some(listview::RenderMethod::Rating(self.r, listview::RatingFormat::Circles(5))),
+                3 => Some(listview::RenderMethod::Rating(self.r, listview::RatingFormat::Asterix(5))),
+                4 => Some(listview::RenderMethod::Rating(self.r, listview::RatingFormat::Numerical(5))),
+                5 => Some(listview::RenderMethod::Rating(self.scor, listview::RatingFormat::Numerical(1000))),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 | 2 | 3 | 4 => self.r.cmp(&other.r),
+                5 => self.scor.cmp(&other.scor),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xDF3716DCCA6AE2E1)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Stars,10,c},{Circle,10,c},{Asterix,10,c},{Numric,10,c},{Scor,10,r}]");
+
+    let students = vec![
+        FileInfo { name: "#1", r: 0, scor: 123 },
+        FileInfo { name: "#2", r: 2, scor: 999 },
+        FileInfo { name: "#3", r: 5, scor: 0 },
+        FileInfo { name: "#4", r: 4, scor: 1000 },
+        FileInfo { name: "#5", r: 1, scor: 150 },
+        FileInfo { name: "#6", r: 3, scor: 200 },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}

@@ -250,7 +250,7 @@ fn check_glyph_ignore_case() {
 #[test]
 fn check_format_number_decimal_unsigned() {
     let mut output: [u8; 64] = [0; 64];
-    const F1: FormatNumber = FormatNumber::new(10);    
+    const F1: FormatNumber = FormatNumber::new(10);
     assert_eq!(F1.write_number(123, &mut output), Some("123"));
     const F2: FormatNumber = FormatNumber::new(10).group(3, b',');
     let data: &[(u32, &'static str)] = &[
@@ -475,7 +475,10 @@ fn check_write_number_to_string() {
     assert_eq!(FormatNumber::new(10).group(3, b',').write_number(123u64, &mut output), Some("123"));
     assert_eq!(FormatNumber::new(10).group(3, b',').write_number(1234u64, &mut output), Some("1,234"));
     assert_eq!(FormatNumber::new(10).group(4, b'-').write_number(1234u64, &mut output), Some("1234"));
-    assert_eq!(FormatNumber::new(10).group(4, b'-').write_number(123456u128, &mut output), Some("12-3456"));
+    assert_eq!(
+        FormatNumber::new(10).group(4, b'-').write_number(123456u128, &mut output),
+        Some("12-3456")
+    );
     assert_eq!(
         FormatNumber::new(10).group(4, b'-').write_number(12345678u64, &mut output),
         Some("1234-5678")
@@ -599,7 +602,6 @@ fn check_write_number_to_string_positive() {
     );
 }
 
-
 #[test]
 fn check_write_number_to_string_negative() {
     let mut output: [u8; 64] = [0; 64];
@@ -672,57 +674,70 @@ fn check_fraction() {
     assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(12345, 1000, &mut output), Some("12.345"));
     assert_eq!(FormatNumber::new(10).decimals(1).write_fraction(1234, 1000, &mut output), Some("1.2"));
     assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(-123, 1000, &mut output), Some("-0.123"));
-    assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(-12345, 1000, &mut output), Some("-12.345"));
+    assert_eq!(
+        FormatNumber::new(10).decimals(3).write_fraction(-12345, 1000, &mut output),
+        Some("-12.345")
+    );
     assert_eq!(FormatNumber::new(10).decimals(1).write_fraction(-1234, 1000, &mut output), Some("-1.2"));
     assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(-123, -1000, &mut output), Some("0.123"));
-    assert_eq!(FormatNumber::new(10).decimals(3).write_fraction(-12345, -1000, &mut output), Some("12.345"));
+    assert_eq!(
+        FormatNumber::new(10).decimals(3).write_fraction(-12345, -1000, &mut output),
+        Some("12.345")
+    );
     assert_eq!(FormatNumber::new(10).decimals(1).write_fraction(-1234, -1000, &mut output), Some("1.2"));
-    assert_eq!(FormatNumber::new(10).decimals(2).suffix(" KB").write_fraction(1234u128, 1024u128, &mut output), Some("1.20 KB"));
-    assert_eq!(FormatNumber::new(10).decimals(2).suffix(" KB").write_fraction(1024u64, 1024u64, &mut output), Some("1.00 KB"));
+    assert_eq!(
+        FormatNumber::new(10)
+            .decimals(2)
+            .suffix(" KB")
+            .write_fraction(1234u128, 1024u128, &mut output),
+        Some("1.20 KB")
+    );
+    assert_eq!(
+        FormatNumber::new(10)
+            .decimals(2)
+            .suffix(" KB")
+            .write_fraction(1024u64, 1024u64, &mut output),
+        Some("1.00 KB")
+    );
     // no decimals
     assert_eq!(FormatNumber::new(10).write_fraction(123, 1000, &mut output), Some("0"));
     assert_eq!(FormatNumber::new(10).write_fraction(123, 100, &mut output), Some("1"));
     assert_eq!(FormatNumber::new(10).write_fraction(123, 10, &mut output), Some("12"));
-
 }
 
 #[test]
 fn check_rating_report() {
-    let mut buf_3: [u8;3] = [0; 3];
-    let mut buf_4: [u8;4] = [0; 4];
-    let mut buf_5: [u8;5] = [0; 5];
-    let mut buf: [u8;20] = [0; 20];
+    let mut buf_3: [u8; 3] = [0; 3];
+    let mut buf_4: [u8; 4] = [0; 4];
+    let mut buf_5: [u8; 5] = [0; 5];
+    let mut buf: [u8; 20] = [0; 20];
 
+    assert_eq!(FormatRatings::raport(0, 3, &mut buf_3), Some("0/3"));
+    assert_eq!(FormatRatings::raport(2, 3, &mut buf_3), Some("2/3"));
+    assert_eq!(FormatRatings::raport(2, 3, &mut buf_4), Some("2/3"));
+    assert_eq!(FormatRatings::raport(2, 3, &mut buf_5), Some("2/3"));
+    assert_eq!(FormatRatings::raport(22, 33, &mut buf_5), Some("22/33"));
 
-    assert_eq!(FormatRatings::raport(0,3,&mut buf_3), Some("0/3"));
-    assert_eq!(FormatRatings::raport(2,3,&mut buf_3), Some("2/3"));
-    assert_eq!(FormatRatings::raport(2,3,&mut buf_4), Some("2/3"));
-    assert_eq!(FormatRatings::raport(2,3,&mut buf_5), Some("2/3"));
-    assert_eq!(FormatRatings::raport(22,33,&mut buf_5), Some("22/33"));
-
-    assert_eq!(FormatRatings::raport(1234,12345,&mut buf), Some("1234/12345"));
-    assert_eq!(FormatRatings::raport(0,0,&mut buf_3), Some("0/0"));
-    assert_eq!(FormatRatings::raport(10,10,&mut buf_3), None);
-    assert_eq!(FormatRatings::raport(5,10,&mut buf_3), None);
-    assert_eq!(FormatRatings::raport(5,10,&mut buf_4), Some("5/10"));
+    assert_eq!(FormatRatings::raport(1234, 12345, &mut buf), Some("1234/12345"));
+    assert_eq!(FormatRatings::raport(0, 0, &mut buf_3), Some("0/0"));
+    assert_eq!(FormatRatings::raport(10, 10, &mut buf_3), None);
+    assert_eq!(FormatRatings::raport(5, 10, &mut buf_3), None);
+    assert_eq!(FormatRatings::raport(5, 10, &mut buf_4), Some("5/10"));
 }
 
 #[test]
 fn check_rating_two_chars() {
-    let mut buf_3: [u8;3] = [0; 3];
-    let mut buf_4: [u8;4] = [0; 4];
-    let mut buf_5: [u8;5] = [0; 5];
-    let mut buf: [u8;20] = [0; 20];
+    let mut buf_3: [u8; 3] = [0; 3];
+    let mut buf_4: [u8; 4] = [0; 4];
+    let mut buf_5: [u8; 5] = [0; 5];
+    let mut buf: [u8; 20] = [0; 20];
 
+    assert_eq!(FormatRatings::two_chars(' ', '+', 0, 3, 3, &mut buf), Some("   "));
+    assert_eq!(FormatRatings::two_chars(' ', '+', 0, 3, 3, &mut buf_3), Some("   "));
+    assert_eq!(FormatRatings::two_chars('-', '+', 1, 3, 3, &mut buf_3), Some("+--"));
+    assert_eq!(FormatRatings::two_chars('-', '+', 3, 3, 3, &mut buf_3), Some("+++"));
+    assert_eq!(FormatRatings::two_chars('-', '+', 3, 4, 4, &mut buf_4), Some("+++-"));
+    assert_eq!(FormatRatings::two_chars('-', '+', 20, 100, 5, &mut buf_5), Some("+----"));
 
-    assert_eq!(FormatRatings::two_chars(' ','+',0,3,0,3,&mut buf), Some("   "));
-    assert_eq!(FormatRatings::two_chars(' ','+',0,3,0,3,&mut buf_3), Some("   "));
-    assert_eq!(FormatRatings::two_chars('-','+',1,3,0,3,&mut buf_3), Some("+--"));
-    assert_eq!(FormatRatings::two_chars('-','+',3,3,0,3,&mut buf_3), Some("+++"));
-    assert_eq!(FormatRatings::two_chars('-','+',3,4,0,4,&mut buf_4), Some("+++-"));
-    assert_eq!(FormatRatings::two_chars('-','+',20,100,0,5,&mut buf_5), Some("+----"));
-
-
-    assert_eq!(FormatRatings::two_chars(' ','+',0,3,0,5,&mut buf_3), None);
-
+    assert_eq!(FormatRatings::two_chars(' ', '+', 0, 3, 5, &mut buf_3), None);
 }

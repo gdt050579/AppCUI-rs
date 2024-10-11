@@ -182,12 +182,12 @@ impl<'a> RenderMethod<'a> {
                 DateFormat::DayMonthYear => FormatDate::dmy(dt, output),
             },
             RenderMethod::Rating(value, format) => match format {
-                RatingFormat::Numerical(_) => todo!(),
-                RatingFormat::Stars(count) => FormatRatings::two_chars('☆', '★', *value, *count, *count as u8, MAX_RATING_STARS, output),
+                RatingFormat::Numerical(max_value) => FormatRatings::raport(*value, *max_value, output),
+                RatingFormat::Stars(count) => FormatRatings::two_chars('☆', '★', *value, *count, (*count as u8).min(MAX_RATING_STARS), output),
                 RatingFormat::Circles(count) => {
-                    FormatRatings::two_chars('\u{25CB}', '\u{25CF}', *value, *count, *count as u8, MAX_RATING_STARS, output)
+                    FormatRatings::two_chars('\u{25CB}', '\u{25CF}', *value, *count, (*count as u8).min(MAX_RATING_STARS), output)
                 }
-                RatingFormat::Asterix(count) => FormatRatings::two_chars(' ', '*', *value, *count, *count as u8, MAX_RATING_STARS, output),
+                RatingFormat::Asterix(count) => FormatRatings::two_chars(' ', '*', *value, *count, (*count as u8).min(MAX_RATING_STARS), output),
             },
             RenderMethod::Int64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
@@ -254,7 +254,12 @@ impl<'a> RenderMethod<'a> {
                 status.to_str(&mut output).len() as u32
             }
             RenderMethod::Rating(value, format) => match format {
-                RatingFormat::Numerical(_) => todo!(),
+                RatingFormat::Numerical(max_value) => {
+                    let mut output: [u8; 32] = [0; 32];
+                    FormatRatings::raport(*value, *max_value, &mut output)
+                        .map(|p| p.len() as u32)
+                        .unwrap_or(0)
+                }
                 RatingFormat::Stars(count) | RatingFormat::Circles(count) | RatingFormat::Asterix(count) => {
                     (*count as u32).min(MAX_RATING_STARS as u32)
                 }
