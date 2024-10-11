@@ -1,10 +1,13 @@
 use crate::prelude::*;
-use crate::utils::{FormatDate, FormatDateTime, FormatTime};
+use crate::utils::{FormatDate, FormatDateTime, FormatRatings, FormatTime};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
 use listview::{
-    AreaFormat, BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat
+    AreaFormat, BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status, StatusFormat,
+    TemperatureFormat, TimeFormat,
 };
+
+const MAX_RATING_STARS: u8 = 10;
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
@@ -21,7 +24,7 @@ pub enum RenderMethod<'a> {
     Status(Status, StatusFormat),
     Temperature(f64, TemperatureFormat),
     Area(u64, AreaFormat),
-    RatingFormat(u32, RatingFormat),
+    Rating(u32, RatingFormat),
     /*
     Currency(f64,currency),
     Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile
@@ -126,7 +129,7 @@ impl<'a> RenderMethod<'a> {
                 RenderMethod::paint_text(txt, surface, theme, alignment, width, attr);
                 true
             }
-            RenderMethod::Bool(_, _) | RenderMethod::Temperature(_, _) | RenderMethod::Area(_, _) => {
+            RenderMethod::Bool(_, _) | RenderMethod::Temperature(_, _) | RenderMethod::Area(_, _) | RenderMethod::Rating(_, _) => {
                 let mut output: [u8; 32] = [0; 32];
                 if let Some(str_rep) = self.string_representation(&mut output) {
                     RenderMethod::paint_text(str_rep, surface, theme, alignment, width, attr);
@@ -177,6 +180,11 @@ impl<'a> RenderMethod<'a> {
                 DateFormat::Full => FormatDate::full(dt, output),
                 DateFormat::YearMonthDay => FormatDate::ymd(dt, output),
                 DateFormat::DayMonthYear => FormatDate::dmy(dt, output),
+            },
+            RenderMethod::Rating(value, format) => match format {
+                RatingFormat::Numerical(_) => todo!(),
+                RatingFormat::Stars(count) => FormatRatings::two_chars('☆', '★', *value, *count, *count as u8, MAX_RATING_STARS, output),
+                RatingFormat::Circles(count) => FormatRatings::two_chars('☆', '★', *value, *count, *count as u8, MAX_RATING_STARS, output),
             },
             RenderMethod::Int64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
@@ -242,6 +250,11 @@ impl<'a> RenderMethod<'a> {
                 let mut output: [u8; 32] = [0; 32];
                 status.to_str(&mut output).len() as u32
             }
+            RenderMethod::Rating(value, format) => match format {
+                RatingFormat::Numerical(_) => todo!(),
+                RatingFormat::Stars(count) => (*count as u32).min(MAX_RATING_STARS as u32),
+                RatingFormat::Circles(count) => (*count as u32).min(MAX_RATING_STARS as u32),
+            },
             RenderMethod::Custom => 0,
         }
     }
