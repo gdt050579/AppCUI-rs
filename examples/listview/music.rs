@@ -13,6 +13,7 @@ impl listview::ListItem for Melody {
             0 => Some(listview::RenderMethod::Text(self.name)),
             1 => Some(listview::RenderMethod::Text(&self.author)),
             2 => Some(listview::RenderMethod::UInt64(self.year as u64, listview::NumericFormat::Normal)),
+            3 => Some(listview::RenderMethod::Rating(self.stars as u32, listview::RatingFormat::Stars(5))),
             _ => None,
         }
     }
@@ -22,6 +23,7 @@ impl listview::ListItem for Melody {
             0 => self.name.cmp(other.name),
             1 => self.author.cmp(other.author),
             2 => self.year.cmp(&other.year),
+            3 => self.stars.cmp(&other.stars),
             _ => std::cmp::Ordering::Equal,
         }
     }
@@ -47,7 +49,7 @@ impl Win {
         let mut me = Self {
             base: window!("Music,d:c,w:70,h:10,flags: Sizeable"),
         };
-        let mut lv = listview!("class: Melody,x:0,y:0,w:100%,h:100%,flags: ScrollBars+SearchBar+ShowGroups, columns:[{&Name,20,l},{&Author,16,l}, {&Year,6,c}]");
+        let mut lv = listview!("class: Melody,x:0,y:0,w:100%,h:100%,flags: ScrollBars+SearchBar+ShowGroups, columns:[{&Name,20,l},{&Author,16,l}, {&Year,6,c}, {&Stars,7,c}]");
         populate_listview(&mut lv);
         me.add(lv);
         me
