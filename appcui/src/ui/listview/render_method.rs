@@ -184,7 +184,10 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Rating(value, format) => match format {
                 RatingFormat::Numerical(_) => todo!(),
                 RatingFormat::Stars(count) => FormatRatings::two_chars('☆', '★', *value, *count, *count as u8, MAX_RATING_STARS, output),
-                RatingFormat::Circles(count) => FormatRatings::two_chars('☆', '★', *value, *count, *count as u8, MAX_RATING_STARS, output),
+                RatingFormat::Circles(count) => {
+                    FormatRatings::two_chars('\u{25CB}', '\u{25CF}', *value, *count, *count as u8, MAX_RATING_STARS, output)
+                }
+                RatingFormat::Asterix(count) => FormatRatings::two_chars(' ', '*', *value, *count, *count as u8, MAX_RATING_STARS, output),
             },
             RenderMethod::Int64(value, format) => format.formatter().write_number(*value, output),
             RenderMethod::UInt64(value, format) => format.formatter().write_number(*value, output),
@@ -252,8 +255,9 @@ impl<'a> RenderMethod<'a> {
             }
             RenderMethod::Rating(value, format) => match format {
                 RatingFormat::Numerical(_) => todo!(),
-                RatingFormat::Stars(count) => (*count as u32).min(MAX_RATING_STARS as u32),
-                RatingFormat::Circles(count) => (*count as u32).min(MAX_RATING_STARS as u32),
+                RatingFormat::Stars(count) | RatingFormat::Circles(count) | RatingFormat::Asterix(count) => {
+                    (*count as u32).min(MAX_RATING_STARS as u32)
+                }
             },
             RenderMethod::Custom => 0,
         }
