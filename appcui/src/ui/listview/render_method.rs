@@ -3,7 +3,7 @@ use crate::utils::{FormatDate, FormatDateTime, FormatTime};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
 use listview::{
-    AreaFormat, BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat,
+    AreaFormat, BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat
 };
 
 pub enum RenderMethod<'a> {
@@ -21,6 +21,7 @@ pub enum RenderMethod<'a> {
     Status(Status, StatusFormat),
     Temperature(f64, TemperatureFormat),
     Area(u64, AreaFormat),
+    RatingFormat(u32, RatingFormat),
     /*
     Currency(f64,currency),
     Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile

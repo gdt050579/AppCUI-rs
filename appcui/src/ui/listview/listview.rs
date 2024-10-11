@@ -131,10 +131,10 @@ where
         self.refilter();
     }
     pub fn add_items(&mut self, items: Vec<T>) {
-        self.add_multiple_items(items, Group::None, [0 as char, 0 as char]);
+        self.add_multiple_items(items, Group::None, [0u8 as char, 0u8 as char]);
     }
     pub fn add_to_group(&mut self, items: Vec<T>, group: Group) {
-        self.add_multiple_items(items, group, [0 as char, 0 as char]);
+        self.add_multiple_items(items, group, [0u8 as char, 0u8 as char]);
     }
     fn add_multiple_items(&mut self, items: Vec<T>, group: Group, icon: [char; 2]) {
         // disable refiltering while adding all elements
