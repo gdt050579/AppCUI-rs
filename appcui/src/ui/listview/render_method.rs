@@ -187,7 +187,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Duration(duration, format) => match format {
                 DurationFormat::Auto => FormatDuration::auto_hms(duration, output),
                 DurationFormat::Seconds => DurationFormat::seconds(duration, output),
-                DurationFormat::Detailed => FormatDuration::details(duration, output),
+                DurationFormat::Details => FormatDuration::details(duration, output),
             },
             RenderMethod::Rating(value, format) => match format {
                 RatingFormat::Numerical(max_value) => FormatRatings::raport(*value, *max_value, output),

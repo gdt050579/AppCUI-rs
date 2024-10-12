@@ -4003,7 +4003,7 @@ fn check_duration_formater_renderer() {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Duration(self.d, listview::DurationFormat::Auto)),
-                2 => Some(listview::RenderMethod::Duration(self.d, listview::DurationFormat::Detailed)),
+                2 => Some(listview::RenderMethod::Duration(self.d, listview::DurationFormat::Details)),
                 3 => Some(listview::RenderMethod::Duration(self.d, listview::DurationFormat::Seconds)),
                 _ => None,
             }

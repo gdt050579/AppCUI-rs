@@ -27,7 +27,7 @@ pub enum DateFormat {
 pub enum DurationFormat {
     Auto,
     Seconds,
-    Detailed
+    Details
 }
 
 const SECONDS: FormatNumber = FormatNumber::new(10).suffix(" sec");
