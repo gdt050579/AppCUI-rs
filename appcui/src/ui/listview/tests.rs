@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Duration};
 
 struct TestItem {}
 impl listview::ListItem for TestItem {
@@ -3986,6 +3986,58 @@ fn check_rating_formater_renderer_simple() {
         FileInfo { name: "#6", r: 3, scor: 200 },
     ];
     lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_duration_formater_renderer() {
+    struct ItemInfo {
+        name: &'static str,
+        d: Duration,
+    }
+    impl listview::ListItem for ItemInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Duration(self.d, listview::DurationFormat::Auto)),
+                2 => Some(listview::RenderMethod::Duration(self.d, listview::DurationFormat::Detailed)),
+                3 => Some(listview::RenderMethod::Duration(self.d, listview::DurationFormat::Seconds)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 | 2 | 3 | 4 => self.d.cmp(&other.d),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x920AA22037535EF1)
+    ";
+    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("ItemInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Auto,15,r},{Detailes,20,r},{Seconds,15,r}]");
+
+    let items = vec![
+        ItemInfo { name: "#1", d: Duration::seconds(6) },
+        ItemInfo { name: "#2", d: Duration::seconds(15) },
+        ItemInfo { name: "#3", d: Duration::seconds(123) },
+        ItemInfo { name: "#4", d: Duration::minutes(42)+Duration::seconds(12) },
+        ItemInfo { name: "#5", d: Duration::minutes(2) },
+        ItemInfo { name: "#6", d: Duration::hours(1)+Duration::minutes(42)+Duration::seconds(12) },
+        ItemInfo { name: "#7", d: Duration::hours(19)+Duration::minutes(42)+Duration::seconds(12) },
+        ItemInfo { name: "#8", d: Duration::days(5)+Duration::hours(1)+Duration::minutes(42)+Duration::seconds(12) },
+        ItemInfo { name: "#9", d: Duration::days(123)+Duration::hours(15)+Duration::minutes(42)+Duration::seconds(12) },
+    ];
+    lv.add_items(items);
     w.add(lv);
     a.add_window(w);
     a.run();

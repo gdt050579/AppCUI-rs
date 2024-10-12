@@ -1,9 +1,10 @@
 use crate::prelude::*;
+use crate::utils::format_datetime::FormatDuration;
 use crate::utils::{FormatDate, FormatDateTime, FormatRatings, FormatTime};
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Duration};
 use listview::formats::percentage_format::PercentageFormat;
 use listview::{
-    AreaFormat, BoolFormat, DateFormat, DateTimeFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status, StatusFormat,
+    AreaFormat, BoolFormat, DateFormat, DateTimeFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status, StatusFormat,
     TemperatureFormat, TimeFormat,
 };
 
@@ -15,6 +16,7 @@ pub enum RenderMethod<'a> {
     DateTime(NaiveDateTime, DateTimeFormat),
     Time(NaiveTime, TimeFormat),
     Date(NaiveDate, DateFormat),
+    Duration(Duration, DurationFormat),
     Int64(i64, NumericFormat),
     UInt64(u64, NumericFormat),
     Bool(bool, BoolFormat),
@@ -142,6 +144,7 @@ impl<'a> RenderMethod<'a> {
             | RenderMethod::DateTime(_, _)
             | RenderMethod::Time(_, _)
             | RenderMethod::Date(_, _)
+            | RenderMethod::Duration(_, _)
             | RenderMethod::Int64(_, _)
             | RenderMethod::UInt64(_, _)
             | RenderMethod::Float(_, _)
@@ -181,6 +184,11 @@ impl<'a> RenderMethod<'a> {
                 DateFormat::YearMonthDay => FormatDate::ymd(dt, output),
                 DateFormat::DayMonthYear => FormatDate::dmy(dt, output),
             },
+            RenderMethod::Duration(duration, format) => match format {
+                DurationFormat::Auto => FormatDuration::auto_hms(duration, output),
+                DurationFormat::Seconds => DurationFormat::seconds(duration, output),
+                DurationFormat::Detailed => FormatDuration::details(duration, output),
+            },
             RenderMethod::Rating(value, format) => match format {
                 RatingFormat::Numerical(max_value) => FormatRatings::raport(*value, *max_value, output),
                 RatingFormat::Stars(count) => FormatRatings::two_chars('☆', '★', *value, *count, (*count as u8).min(MAX_RATING_STARS), output),
@@ -216,6 +224,10 @@ impl<'a> RenderMethod<'a> {
                 DateFormat::YearMonthDay => 10,
                 DateFormat::DayMonthYear => 10,
             },
+            RenderMethod::Duration(_, _) => {
+                let mut output: [u8; 64] = [0; 64];
+                self.string_representation(&mut output).map(|p| p.len() as u32).unwrap_or(0)
+            }
             RenderMethod::Int64(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.formatter().write_number(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)

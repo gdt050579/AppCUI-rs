@@ -1,4 +1,6 @@
-use chrono::{Datelike, NaiveDateTime, NaiveTime, Timelike, NaiveDate};
+use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
+
+use crate::ui::numericselector::Format;
 
 static SHORT_MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 static WEEK_DATS: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -159,7 +161,7 @@ impl FormatTime {
         buf[3] = ((minute / 10) as u8) + 48;
         buf[4] = ((minute % 10) as u8) + 48;
         buf[5] = b' ';
-        if hour_24>=12 {
+        if hour_24 >= 12 {
             buf[6] = b'P';
             buf[7] = b'M';
         } else {
@@ -265,6 +267,146 @@ impl FormatDate {
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..16]) })
     }
+}
 
+pub struct FormatDuration;
+impl FormatDuration {
+    pub fn auto_hms<'a>(d: &Duration, buf: &'a mut [u8]) -> Option<&'a str> {
+        let mut seconds = d.num_seconds();
+        if seconds < 60 {
+            if buf.len() < 3 {
+                return None;
+            }
+            buf[0] = b':';
+            buf[1] = ((seconds / 10) as u8) + 48;
+            buf[2] = ((seconds % 10) as u8) + 48;
+            return Some(unsafe { core::str::from_utf8_unchecked(&buf[..3]) });
+        }
+        let mut minutes = seconds / 60;
+        seconds = seconds % 60;
+        if minutes < 60 {
+            if minutes < 10 {
+                if buf.len() < 4 {
+                    return None;
+                }
+                buf[0] = (minutes as u8) + 48;
+                buf[1] = b':';
+                buf[2] = ((seconds / 10) as u8) + 48;
+                buf[3] = ((seconds % 10) as u8) + 48;
+                return Some(unsafe { core::str::from_utf8_unchecked(&buf[..4]) });
+            } else {
+                if buf.len() < 5 {
+                    return None;
+                }
+                buf[0] = ((minutes / 10) as u8) + 48;
+                buf[1] = ((minutes % 10) as u8) + 48;
+                buf[2] = b':';
+                buf[3] = ((seconds / 10) as u8) + 48;
+                buf[4] = ((seconds % 10) as u8) + 48;
+                return Some(unsafe { core::str::from_utf8_unchecked(&buf[..5]) });
+            }
+        }
+        let mut hours = minutes / 60;
+        minutes = minutes % 60;
+        if buf.len() < 7 {
+            return None;
+        }
+        let mut index = buf.len() - 1;
+        buf[index] = ((seconds % 10) as u8) + 48;
+        index -= 1;
+        buf[index] = ((seconds / 10) as u8) + 48;
+        index -= 1;
+        buf[index] = b':';
+        index -= 1;
+        buf[index] = ((minutes % 10) as u8) + 48;
+        index -= 1;
+        buf[index] = ((minutes / 10) as u8) + 48;
+        index -= 1;
+        buf[index] = b':';
+        index -= 1;
+        loop {
+            buf[index] = ((hours % 10) as u8) + 48;
+            hours /= 10;
+            if hours == 0 {
+                break;
+            }
+            index -= 1;
+            if index == 0 {
+                return None;
+            }
+        }
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[index..]) })
+    }
+    #[inline(always)]
+    fn write_number(value: i64, suffix: u8, pos: usize, output: &mut [u8]) -> Option<usize> {
+        if output.len() <= pos {
+            return None;
+        }
+        output[pos] = suffix;
+        if pos == 0 {
+            return None;
+        }
+        let mut index = pos - 1;
+        let mut value = value;
+        loop {
+            output[index] = ((value % 10) as u8) + 48;
+            value /= 10;
+            if value == 0 {
+                break;
+            }
+            index -= 1;
+            if index == 0 {
+                return None;
+            }
+        }
+        Some(index)
+    }
+    #[inline(always)]
+    fn write_space_ahead(index: usize, output: &mut [u8]) -> Option<usize> {
+        if index < 2 {
+            return None;
+        }
+        output[index - 1] = b' ';
+        Some(index - 2)
+    }
+    pub fn details<'a>(d: &Duration, buf: &'a mut [u8]) -> Option<&'a str> {
+        if buf.len() < 2 {
+            return None;
+        }
+        let mut index = buf.len() - 1;
+        let mut seconds = d.num_seconds();
 
+        // just seconds
+        if seconds < 60 {
+            index = FormatDuration::write_number(seconds, b's', index, buf)?;
+            return Some(unsafe { core::str::from_utf8_unchecked(&buf[index..]) });
+        }
+        let mut minutes = seconds / 60;
+        seconds %= 60;
+        index = FormatDuration::write_number(seconds, b's', index, buf)?;
+        index = FormatDuration::write_space_ahead(index, buf)?;
+
+        // just minutes and seconds
+        if minutes < 60 {
+            index = FormatDuration::write_number(minutes, b'm', index, buf)?;
+            return Some(unsafe { core::str::from_utf8_unchecked(&buf[index..]) });
+        }
+        let mut hours = minutes / 60;
+        minutes %= 60;
+        index = FormatDuration::write_number(minutes, b'm', index, buf)?;
+        index = FormatDuration::write_space_ahead(index, buf)?;
+
+        // just hours, minutes and seconds
+        if hours < 24 {
+            index = FormatDuration::write_number(hours, b'h', index, buf)?;
+            return Some(unsafe { core::str::from_utf8_unchecked(&buf[index..]) });
+        }
+        let days = hours / 24;
+        hours %= 24;
+        index = FormatDuration::write_number(hours, b'h', index, buf)?;
+        index = FormatDuration::write_space_ahead(index, buf)?;
+        index = FormatDuration::write_number(days, b'd', index, buf)?;
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[index..]) })
+    }
 }
