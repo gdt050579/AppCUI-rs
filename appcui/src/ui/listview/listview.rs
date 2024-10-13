@@ -934,12 +934,14 @@ where
                 surface.set_origin(l + extra, y);
             }
             if let Some(render_method) = ListItem::render_method(item.value(), 0) {
-                if !render_method.paint(surface, theme, c.alignment, c.width as u16, attr) {
+                let item_attr = if attr.is_none() { item.render_attr() } else { attr };
+                if !render_method.paint(surface, theme, c.alignment, c.width as u16, item_attr) {
                     // custom paint required
                     ListItem::paint(item.value(), 0, c.width as u16, surface, theme)
                 }
             }
         }
+        let item_attr = if attr.is_none() { item.render_attr() } else { attr };
         for (index, c) in columns.iter().enumerate().skip(1) {
             let r = c.x + c.width as i32;
             if (r < 0) || (r < min_left) || (c.x >= width) || (c.width == 0) {
@@ -948,7 +950,7 @@ where
             surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
             surface.set_origin(c.x, y);
             if let Some(render_method) = ListItem::render_method(item.value(), index as u16) {
-                if !render_method.paint(surface, theme, c.alignment, c.width as u16, attr) {
+                if !render_method.paint(surface, theme, c.alignment, c.width as u16, item_attr) {
                     // custom paint required
                     ListItem::paint(item.value(), index as u32, c.width as u16, surface, theme)
                 }
@@ -996,8 +998,9 @@ where
                 surface.set_origin(l + extra, y);
             }
             let item_render_width = (r - l - extra) as u16;
+            let item_attr = if attr.is_none() { item.render_attr() } else { attr };
             if let Some(render_method) = ListItem::render_method(item.value(), 0) {
-                if !render_method.paint(surface, theme, c.alignment, item_render_width, attr) {
+                if !render_method.paint(surface, theme, c.alignment, item_render_width, item_attr) {
                     // custom paint required
                     ListItem::paint(item.value(), 0, item_render_width, surface, theme);
                 }
@@ -1033,7 +1036,7 @@ where
         } else if !has_focus {
             Some(theme.text.normal)
         } else {
-            None
+            None            
         };
         let mut found_groups = false;
         let start_y_poz = if self.view_mode == ViewMode::Details { 1 } else { 0 };

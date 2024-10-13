@@ -60,6 +60,10 @@ impl<T> Item<T> where T: ListItem {
     pub(super) fn group_id(&self) -> u16 {
         self.group_id
     }
+    #[inline(always)]
+    pub(super) fn render_attr(&self) -> Option<CharAttribute> {
+        self.attr
+    }
 }
 impl<T> From<T> for Item<T> where T: ListItem {
     fn from(value: T) -> Self {

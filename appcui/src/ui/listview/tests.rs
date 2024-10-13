@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Duration};
+use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
+use listview::Group;
 
 struct TestItem {}
 impl listview::ListItem for TestItem {
@@ -144,6 +145,167 @@ impl listview::ListItem for Person {
             0 => self.name.cmp(other.name),
             1 => self.age.cmp(other.age),
             2 => self.city.cmp(other.city),
+            _ => std::cmp::Ordering::Equal,
+        }
+    }
+}
+
+struct ColorInfo {
+    name: &'static str,
+    value: u32,
+    b: bool,
+}
+impl ColorInfo {
+    fn populate(lv: &mut ListView<ColorInfo>) {
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Red",
+                value: 0xFF0000,
+                b: true,
+            },
+            true,
+            Some(CharAttribute::with_fore_color(Color::Red)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Green",
+                value: 0xFF00,
+                b: true,
+            },
+            true,
+            Some(CharAttribute::with_fore_color(Color::Green)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Blue",
+                value: 0xFF,
+                b: true,
+            },
+            false,
+            Some(CharAttribute::with_fore_color(Color::Blue)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "White",
+                value: 0xFFFFFF,
+                b: false,
+            },
+            true,
+            Some(CharAttribute::with_fore_color(Color::White)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Yellow",
+                value: 0xFFFF00,
+                b: false,
+            },
+            false,
+            Some(CharAttribute::with_fore_color(Color::Yellow)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Dark Red",
+                value: 0x800000,
+                b: false,
+            },
+            true,
+            Some(CharAttribute::with_fore_color(Color::DarkRed)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Dark Blue on Yellow",
+                value: 0x80,
+                b: true,
+            },
+            true,
+            Some(CharAttribute::with_color(Color::DarkBlue, Color::Yellow)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Dark Green",
+                value: 0x8000,
+                b: false,
+            },
+            true,
+            Some(CharAttribute::with_fore_color(Color::DarkGreen)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Black",
+                value: 0x00,
+                b: false,
+            },
+            true,
+            Some(CharAttribute::with_fore_color(Color::Black)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Aqua",
+                value: 0x8080,
+                b: false,
+            },
+            true,
+            Some(CharAttribute::with_fore_color(Color::Aqua)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Silver",
+                value: 0xC0C0C0,
+                b: true,
+            },
+            false,
+            Some(CharAttribute::with_fore_color(Color::Silver)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            ColorInfo {
+                name: "Gray",
+                value: 0x808080,
+                b: true,
+            },
+            false,
+            Some(CharAttribute::with_fore_color(Color::Gray)),
+            [0u8 as char, 0u8 as char],
+            Group::None,
+        ));
+    }
+}
+impl listview::ListItem for ColorInfo {
+    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        match column_index {
+            0 => Some(listview::RenderMethod::Ascii(self.name)),
+            1 => Some(listview::RenderMethod::UInt64(self.value as u64, listview::NumericFormat::Hex32)),
+            2 => Some(listview::RenderMethod::Bool(self.b, listview::BoolFormat::CheckmarkMinus)),
+            _ => None,
+        }
+    }
+
+    fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+        match column_index {
+            0 => self.name.cmp(other.name),
+            1 => self.value.cmp(&other.value),
+            2 => self.b.cmp(&other.b),
             _ => std::cmp::Ordering::Equal,
         }
     }
@@ -3763,7 +3925,7 @@ fn check_on_selection_changed_event() {
     impl ListViewEvents<Person> for MyWin {
         fn on_selection_changed(&mut self, handle: Handle<ListView<Person>>) -> EventProcessStatus {
             let data = if let Some(lv) = self.control(handle) {
-               format!("{}/{}",lv.selected_items_count(), lv.items_count())
+                format!("{}/{}", lv.selected_items_count(), lv.items_count())
             } else {
                 "?".to_string()
             };
@@ -3829,11 +3991,13 @@ fn check_on_item_action_event() {
         fn on_item_action(&mut self, handle: Handle<ListView<Person>>, index: usize) -> EventProcessStatus {
             let txt = if let Some(lv) = self.control(handle) {
                 if let Some(p) = lv.item(index) {
-                    format!("idx: {} -> {}",index,p.name)
+                    format!("idx: {} -> {}", index, p.name)
                 } else {
                     "??".to_string()
                 }
-            } else { "?".to_string() };
+            } else {
+                "?".to_string()
+            };
             self.set_title(&txt);
             return EventProcessStatus::Processed;
         }
@@ -3881,8 +4045,6 @@ fn check_on_item_action_event() {
     a.run();
 }
 
-
-
 #[test]
 fn check_area_formater_renderer_simple() {
     struct FileInfo {
@@ -3916,7 +4078,8 @@ fn check_area_formater_renderer_simple() {
     ";
     let mut a = App::debug(80, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KMP,20,Right},{FTP,15,Right},{CMP,10,Right},{YD,10,Right}]");
+    let mut lv =
+        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KMP,20,Right},{FTP,15,Right},{CMP,10,Right},{YD,10,Right}]");
 
     let students = vec![
         FileInfo { name: "NUll", size: 0 },
@@ -3936,8 +4099,6 @@ fn check_area_formater_renderer_simple() {
     a.add_window(w);
     a.run();
 }
-
-
 
 #[test]
 fn check_rating_formater_renderer_simple() {
@@ -3975,13 +4136,19 @@ fn check_rating_formater_renderer_simple() {
     ";
     let mut a = App::debug(80, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Stars,10,c},{Circle,10,c},{Asterix,10,c},{Numric,10,c},{Scor,10,r}]");
+    let mut lv = listview!(
+        "FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Stars,10,c},{Circle,10,c},{Asterix,10,c},{Numric,10,c},{Scor,10,r}]"
+    );
 
     let students = vec![
         FileInfo { name: "#1", r: 0, scor: 123 },
         FileInfo { name: "#2", r: 2, scor: 999 },
         FileInfo { name: "#3", r: 5, scor: 0 },
-        FileInfo { name: "#4", r: 4, scor: 1000 },
+        FileInfo {
+            name: "#4",
+            r: 4,
+            scor: 1000,
+        },
         FileInfo { name: "#5", r: 1, scor: 150 },
         FileInfo { name: "#6", r: 3, scor: 200 },
     ];
@@ -3990,7 +4157,6 @@ fn check_rating_formater_renderer_simple() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_duration_formater_renderer() {
@@ -4027,17 +4193,76 @@ fn check_duration_formater_renderer() {
     let mut lv = listview!("ItemInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Auto,15,r},{Detailes,20,r},{Seconds,15,r}]");
 
     let items = vec![
-        ItemInfo { name: "#1", d: Duration::seconds(6) },
-        ItemInfo { name: "#2", d: Duration::seconds(15) },
-        ItemInfo { name: "#3", d: Duration::seconds(123) },
-        ItemInfo { name: "#4", d: Duration::minutes(42)+Duration::seconds(12) },
-        ItemInfo { name: "#5", d: Duration::minutes(2) },
-        ItemInfo { name: "#6", d: Duration::hours(1)+Duration::minutes(42)+Duration::seconds(12) },
-        ItemInfo { name: "#7", d: Duration::hours(19)+Duration::minutes(42)+Duration::seconds(12) },
-        ItemInfo { name: "#8", d: Duration::days(5)+Duration::hours(1)+Duration::minutes(42)+Duration::seconds(12) },
-        ItemInfo { name: "#9", d: Duration::days(123)+Duration::hours(15)+Duration::minutes(42)+Duration::seconds(12) },
+        ItemInfo {
+            name: "#1",
+            d: Duration::seconds(6),
+        },
+        ItemInfo {
+            name: "#2",
+            d: Duration::seconds(15),
+        },
+        ItemInfo {
+            name: "#3",
+            d: Duration::seconds(123),
+        },
+        ItemInfo {
+            name: "#4",
+            d: Duration::minutes(42) + Duration::seconds(12),
+        },
+        ItemInfo {
+            name: "#5",
+            d: Duration::minutes(2),
+        },
+        ItemInfo {
+            name: "#6",
+            d: Duration::hours(1) + Duration::minutes(42) + Duration::seconds(12),
+        },
+        ItemInfo {
+            name: "#7",
+            d: Duration::hours(19) + Duration::minutes(42) + Duration::seconds(12),
+        },
+        ItemInfo {
+            name: "#8",
+            d: Duration::days(5) + Duration::hours(1) + Duration::minutes(42) + Duration::seconds(12),
+        },
+        ItemInfo {
+            name: "#9",
+            d: Duration::days(123) + Duration::hours(15) + Duration::minutes(42) + Duration::seconds(12),
+        },
     ];
     lv.add_items(items);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_custom_attribute_for_items_3_columns_view() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xCC70B68242ACB2DD)
+    ";
+    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("ColorInfo,d:c,view:Columns(3),flags:ScrollBars+SearchBar+CheckBoxes,columns=[{&Name,15,Left},{Value,15,r},{Bool,7,r}]");
+    ColorInfo::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_custom_attribute_for_items_detail_view() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xAC7AF095CF9BFFC1)
+    ";
+    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("ColorInfo,d:c,flags:ScrollBars+SearchBar+CheckBoxes,columns=[{&Name,30,Left},{Value,15,r},{Bool,7,r}]");
+    ColorInfo::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
     a.run();
