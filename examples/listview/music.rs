@@ -11,7 +11,7 @@ impl listview::ListItem for Melody {
     fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
         match column_index {
             0 => Some(listview::RenderMethod::Text(self.name)),
-            1 => Some(listview::RenderMethod::Text(&self.author)),
+            1 => Some(listview::RenderMethod::Text(self.author)),
             2 => Some(listview::RenderMethod::UInt64(self.year as u64, listview::NumericFormat::Normal)),
             3 => Some(listview::RenderMethod::Rating(self.stars as u32, listview::RatingFormat::Stars(5))),
             4 => Some(listview::RenderMethod::Duration(self.duration, listview::DurationFormat::Details)),

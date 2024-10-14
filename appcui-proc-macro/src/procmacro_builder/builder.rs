@@ -137,7 +137,7 @@ fn generate_dropdownlist_events(a: &mut Arguments) -> String {
     return templates::DROPDOWNLIST_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_DROPDOWNLIST)", s.as_str());
 }
 fn generate_numeric_selector_events(a: &mut Arguments) -> String {
-    if a.template_events.contains_key(&AppCUITrait::GenericNumericSelectorEvents) == false {
+    if !a.template_events.contains_key(&AppCUITrait::GenericNumericSelectorEvents) {
         panic!("Missing generic type for NumericSelectorEvents event (Have you used evets=NumericSelectorEvents<Type> ?)");
     }
     let mut s = String::new();
@@ -148,7 +148,7 @@ fn generate_numeric_selector_events(a: &mut Arguments) -> String {
 }
 
 fn generate_listview_events(a: &mut Arguments) -> String {
-    if a.template_events.contains_key(&AppCUITrait::GenericListViewEvents) == false {
+    if !a.template_events.contains_key(&AppCUITrait::GenericListViewEvents) {
         panic!("Missing generic type for ListView event (Have you used evets=ListVewEvents<Type> ?)");
     }
     let mut on_current_item_changed_code = String::new();
@@ -163,7 +163,7 @@ fn generate_listview_events(a: &mut Arguments) -> String {
         on_selection_changed_code.push_str(templates::LISTVIEW_ON_SELECTION_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
         on_item_action_code.push_str(templates::LISTVIEW_ON_ITEM_ACTION_DEF.replace("$(TYPE)", trait_name).as_str());
     }
-    return templates::LISTVIEW_TRAIT_DEF
+    templates::LISTVIEW_TRAIT_DEF
         .replace(
             "$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_CURRENT_ITEM_CHANGED)",
             &on_current_item_changed_code,
@@ -171,7 +171,7 @@ fn generate_listview_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_COLLAPSED)", &on_group_collapsed_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_EXPANDED)", &on_group_expanded_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
-        .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_ITEM_ACTION)", &on_item_action_code);
+        .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_ITEM_ACTION)", &on_item_action_code)
 }
 
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {

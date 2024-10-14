@@ -35,7 +35,7 @@ impl GroupInformation {
     }
     #[inline(always)]   
     pub(super) fn is_empty(&self) -> bool {
-        self.items_count == 0
+        self.items_count == 0 
     }
     #[inline(always)]
     pub(super) fn name(&self) -> &str {

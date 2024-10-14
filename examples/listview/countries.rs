@@ -10,7 +10,7 @@ impl listview::ListItem for Country {
     fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
         match column_index {
             0 => Some(listview::RenderMethod::Text(self.name)),
-            1 => Some(listview::RenderMethod::Text(&self.capital)),
+            1 => Some(listview::RenderMethod::Text(self.capital)),
             2 => Some(listview::RenderMethod::UInt64(self.population as u64, listview::NumericFormat::Separator)),
             3 => Some(listview::RenderMethod::Area(self.area as u64, listview::AreaFormat::SquaredKilometers)),
             _ => None,

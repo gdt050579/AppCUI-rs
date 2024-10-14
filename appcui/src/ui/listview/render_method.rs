@@ -273,7 +273,7 @@ impl<'a> RenderMethod<'a> {
                         .unwrap_or(0)
                 }
                 RatingFormat::Stars(count) | RatingFormat::Circles(count) | RatingFormat::Asterix(count) => {
-                    (*count as u32).min(MAX_RATING_STARS as u32)
+                    (*count).min(MAX_RATING_STARS as u32)
                 }
             },
             RenderMethod::Custom => 0,

@@ -281,7 +281,7 @@ impl FormatDuration {
             return Some(unsafe { core::str::from_utf8_unchecked(&buf[..3]) });
         }
         let mut minutes = seconds / 60;
-        seconds = seconds % 60;
+        seconds %= 60;
         if minutes < 60 {
             if minutes < 10 {
                 if buf.len() < 4 {
@@ -305,7 +305,7 @@ impl FormatDuration {
             }
         }
         let mut hours = minutes / 60;
-        minutes = minutes % 60;
+        minutes %= 60;
         if buf.len() < 7 {
             return None;
         }

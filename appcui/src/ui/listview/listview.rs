@@ -291,14 +291,10 @@ where
 
     /// Returns the name of the group or None if the group object is invalid
     pub fn group_name(&self, group: Group) -> Option<&str> {
-        if group.index() as usize >= self.groups.len() {
+        if (group.index() as usize >= self.groups.len()) || (group.index() == 0) {
             None
         } else {
-            if group.index() == 0 {
-                None
-            } else {
-                Some(self.groups[group.index() as usize].name())
-            }
+            Some(self.groups[group.index() as usize].name())
         }
     }
 
@@ -769,24 +765,22 @@ where
             );
         }
         left += 2;
-        if self.flags.contains(Flags::CheckBoxes) {
-            if left + 4 < x + w as i32 {
-                surface.write_string(left, y, "[ ]", attr.unwrap_or(theme.text.focused), false);
-                let count = gi.items_count();
-                let checked = gi.items_checked_count();
-                if (count == checked) && (count > 0) {
-                    surface.write_char(
-                        left + 1,
-                        y,
-                        Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
-                    );
-                } else if checked == 0 {
-                    surface.write_char(left + 1, y, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
-                } else {
-                    surface.write_char(left + 1, y, Character::with_attributes('?', attr.unwrap_or(theme.symbol.unknown)));
-                }
-                left += 4;
+        if self.flags.contains(Flags::CheckBoxes) && left + 4 < x + w as i32 {
+            surface.write_string(left, y, "[ ]", attr.unwrap_or(theme.text.focused), false);
+            let count = gi.items_count();
+            let checked = gi.items_checked_count();
+            if (count == checked) && (count > 0) {
+                surface.write_char(
+                    left + 1,
+                    y,
+                    Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
+                );
+            } else if checked == 0 {
+                surface.write_char(left + 1, y, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+            } else {
+                surface.write_char(left + 1, y, Character::with_attributes('?', attr.unwrap_or(theme.symbol.unknown)));
             }
+            left += 4;
         }
         let items_in_group = gi.items_count();
         let digits = utils::FormatNumber::number_of_digits(items_in_group as u64) as i32;

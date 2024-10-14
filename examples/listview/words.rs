@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-static WORDS: &[&'static str] = &[
+static WORDS: &[&str] = &[
     "a",
     "abandon",
     "ability",
@@ -3032,7 +3032,7 @@ impl Win {
         };
         let mut lv = listview!("class: Word,x:0,y:0,w:100%,h:100%,view: Columns(3),flags: ScrollBars+SearchBar, columns:[{&Value,20,l}]");
         for word in WORDS {
-            lv.add(Word { value: *word });
+            lv.add(Word { value: word });
         }
         me.add(lv);
         me

@@ -3332,7 +3332,7 @@ fn check_size_formater_renderer_simple() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 | 2 | 3 | 4 => self.size.cmp(&other.size),
+                1..=4 => self.size.cmp(&other.size),
                 _ => std::cmp::Ordering::Equal,
             }
         }
@@ -3386,7 +3386,7 @@ fn check_size_formater_renderer_with_decimals() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 | 2 | 3 | 4 => self.size.cmp(&other.size),
+                1..=4 => self.size.cmp(&other.size),
                 _ => std::cmp::Ordering::Equal,
             }
         }
@@ -3442,7 +3442,7 @@ fn check_size_formater_renderer_with_auto() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 | 2 | 3 => self.size.cmp(&other.size),
+                1..=3 => self.size.cmp(&other.size),
                 _ => std::cmp::Ordering::Equal,
             }
         }
@@ -3498,7 +3498,7 @@ fn check_time_formater_renderer() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 | 2 | 3 => self.tm.cmp(&other.tm),
+                1..=3 => self.tm.cmp(&other.tm),
                 _ => std::cmp::Ordering::Equal,
             }
         }
@@ -3535,7 +3535,7 @@ fn check_time_formater_renderer() {
         },
         FileInfo {
             name: "f6",
-            tm: NaiveTime::from_hms_milli_opt(21, 50, 01, 005).unwrap(),
+            tm: NaiveTime::from_hms_milli_opt(21, 50, 1, 5).unwrap(),
         },
     ];
     lv.add_items(files);
@@ -3564,7 +3564,7 @@ fn check_date_formater_renderer() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 | 2 | 3 => self.dt.cmp(&other.dt),
+                1..=3 => self.dt.cmp(&other.dt),
                 _ => std::cmp::Ordering::Equal,
             }
         }
@@ -3728,7 +3728,7 @@ fn check_on_change_current_item_event() {
                 "None".to_string()
             };
             self.set_title(&format!("Person: {}", name));
-            return EventProcessStatus::Processed;
+            EventProcessStatus::Processed
         }
     }
     impl MyWin {
@@ -3930,7 +3930,7 @@ fn check_on_selection_changed_event() {
                 "?".to_string()
             };
             self.set_title(&data);
-            return EventProcessStatus::Processed;
+            EventProcessStatus::Processed
         }
     }
     impl MyWin {
@@ -3999,7 +3999,7 @@ fn check_on_item_action_event() {
                 "?".to_string()
             };
             self.set_title(&txt);
-            return EventProcessStatus::Processed;
+            EventProcessStatus::Processed
         }
     }
     impl MyWin {
@@ -4066,7 +4066,7 @@ fn check_area_formater_renderer_simple() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 | 2 | 3 | 4 => self.size.cmp(&other.size),
+                1..=4 => self.size.cmp(&other.size),
                 _ => std::cmp::Ordering::Equal,
             }
         }
@@ -4123,7 +4123,7 @@ fn check_rating_formater_renderer_simple() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 | 2 | 3 | 4 => self.r.cmp(&other.r),
+                1..=4 => self.r.cmp(&other.r),
                 5 => self.scor.cmp(&other.scor),
                 _ => std::cmp::Ordering::Equal,
             }
@@ -4178,7 +4178,7 @@ fn check_duration_formater_renderer() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 | 2 | 3 | 4 => self.d.cmp(&other.d),
+                1..=4 => self.d.cmp(&other.d),
                 _ => std::cmp::Ordering::Equal,
             }
         }
