@@ -32,6 +32,7 @@ pub mod hline;
 pub mod vline;
 pub mod datepicker;
 pub mod listbox;
+pub mod textarea;
 
 // re-export
 pub use common::ControlBase;
@@ -64,3 +65,4 @@ pub use hline::HLine;
 pub use vline::VLine;
 pub use datepicker::DatePicker;
 pub use listbox::ListBox;
+pub use textarea::TextArea;
