@@ -100,6 +100,10 @@ where
         };
         // add a default group
         lv.groups.push(GroupInformation::default());
+        // add columnes (if described in the type T)
+        for i in 0..T::COLUMNS_COUNT {
+            lv.header.add(T::column(i));        
+        }
         lv
     }
     pub fn add_group(&mut self, name: &str) -> Group {
