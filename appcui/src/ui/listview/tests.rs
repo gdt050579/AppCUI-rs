@@ -3798,7 +3798,7 @@ fn check_status_formater_renderer() {
         }
     }
     let script = "
-        Paint.Enable(false)
+        Paint.Enable(false) 
         Paint('1. Initial state')
         CheckHash(0x3C5D207D90FE87F8)
     ";

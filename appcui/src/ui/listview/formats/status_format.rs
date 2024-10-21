@@ -31,7 +31,7 @@ impl Status {
             (value * 100.0) as f64
         }
     }
-    pub(crate) fn to_str<'a>(&self, output_buffer: &'a mut [u8]) -> &'a str {
+    pub(crate) fn string_representation<'a>(&self, output_buffer: &'a mut [u8]) -> &'a str {
         match self {
             Status::Paused(value) => PERCENTAGE_PAUSED.write_float(Status::proc(*value), output_buffer).unwrap_or(""),
             Status::Completed => "Completed",

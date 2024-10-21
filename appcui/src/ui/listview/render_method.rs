@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::format_datetime::FormatDuration;
 use crate::utils::{FormatDate, FormatDateTime, FormatRatings, FormatTime};
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Duration};
+use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
 use listview::{
     AreaFormat, BoolFormat, DateFormat, DateTimeFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status, StatusFormat,
@@ -9,6 +9,13 @@ use listview::{
 };
 
 const MAX_RATING_STARS: u8 = 10;
+
+pub(crate) struct RenderData<'a> {
+    pub(crate) theme: &'a Theme,
+    pub(crate) alignment: TextAlignament,
+    pub(crate) width: u16,
+    pub(crate) attr: Option<CharAttribute>,
+}
 
 pub enum RenderMethod<'a> {
     Text(&'a str),
@@ -38,40 +45,40 @@ pub enum RenderMethod<'a> {
 }
 impl<'a> RenderMethod<'a> {
     #[inline(always)]
-    fn paint_text(txt: &str, surface: &mut Surface, theme: &Theme, alignment: TextAlignament, width: u16, attr: Option<CharAttribute>) {
+    fn paint_text(txt: &str, surface: &mut Surface, rd: &RenderData) {
         let format = TextFormat {
-            x: match alignment {
+            x: match rd.alignment {
                 TextAlignament::Left => 0,
-                TextAlignament::Center => (width as i32) / 2,
-                TextAlignament::Right => (width as i32) - 1,
+                TextAlignament::Center => (rd.width as i32) / 2,
+                TextAlignament::Right => (rd.width as i32) - 1,
             },
             y: 0,
-            width: Some(width),
-            char_attr: attr.unwrap_or(theme.text.focused),
+            width: Some(rd.width),
+            char_attr: rd.attr.unwrap_or(rd.theme.text.focused),
             hotkey_attr: None,
             hotkey_pos: None,
             chars_count: None,
-            align: alignment,
+            align: rd.alignment,
             text_wrap: TextWrap::None,
             multi_line: false,
         };
         surface.write_text(txt, &format);
     }
     #[inline(always)]
-    fn paint_ascii(txt: &str, surface: &mut Surface, theme: &Theme, alignment: TextAlignament, width: u16, attr: Option<CharAttribute>) {
+    fn paint_ascii(txt: &str, surface: &mut Surface, rd: &RenderData) {
         let format = TextFormat {
-            x: match alignment {
+            x: match rd.alignment {
                 TextAlignament::Left => 0,
-                TextAlignament::Center => (width as i32) / 2,
-                TextAlignament::Right => (width as i32) - 1,
+                TextAlignament::Center => (rd.width as i32) / 2,
+                TextAlignament::Right => (rd.width as i32) - 1,
             },
             y: 0,
-            width: Some(width),
-            char_attr: attr.unwrap_or(theme.text.focused),
+            width: Some(rd.width),
+            char_attr: rd.attr.unwrap_or(rd.theme.text.focused),
             hotkey_attr: None,
             hotkey_pos: None,
             chars_count: Some(txt.len() as u16),
-            align: alignment,
+            align: rd.alignment,
             text_wrap: TextWrap::None,
             multi_line: false,
         };
@@ -79,62 +86,56 @@ impl<'a> RenderMethod<'a> {
     }
 
     #[inline(always)]
-    fn paint_status(
-        status: Status,
-        format: StatusFormat,
-        surface: &mut Surface,
-        theme: &Theme,
-        alignment: TextAlignament,
-        width: u16,
-        attr: Option<CharAttribute>,
-    ) {
+    fn paint_status(status: Status, format: StatusFormat, surface: &mut Surface, rd: &RenderData) {
         if let Status::Running(value) = status {
             let mut output: [u8; 32] = [0; 32];
-            let txt = status.to_str(&mut output);
+            let txt = status.string_representation(&mut output);
+            let width = rd.width as i32;
             if (width >= 10) && (txt.len() >= 4) {
                 // [xxx]<space>xxx% => 7 chars
-                let attr = attr.unwrap_or(theme.text.focused);
+                let attr = rd.attr.unwrap_or(rd.theme.text.focused);
                 surface.write_char(0, 0, Character::with_attributes('[', attr));
-                surface.write_char(width as i32 - 5, 0, Character::with_attributes(' ', attr));
-                surface.write_char(width as i32 - 6, 0, Character::with_attributes(']', attr));
-                surface.write_string((width as i32) - 4, 0, &txt[(txt.len() - 4)..], attr, false);
-                let sz = (((width - 7) as f64 * Status::proc(value) / 100.0) as u32).min((width as u32) - 7);
+                surface.write_char(width - 5, 0, Character::with_attributes(' ', attr));
+                surface.write_char(width - 6, 0, Character::with_attributes(']', attr));
+                surface.write_string(width - 4, 0, &txt[(txt.len() - 4)..], attr, false);
+                let draw_sz = (width as u32) - 7;
+                let sz = (((draw_sz as f64) * Status::proc(value) / 100.0) as u32).min(draw_sz);
                 match format {
                     StatusFormat::Hashtag => {
-                        surface.fill_horizontal_line_with_size(1, 0, width as u32 - 7, Character::with_attributes('-', attr));
+                        surface.fill_horizontal_line_with_size(1, 0, draw_sz, Character::with_attributes('-', attr));
                         surface.fill_horizontal_line_with_size(1, 0, sz, Character::with_attributes('#', attr));
                     }
                     StatusFormat::Graphical => {
-                        surface.fill_horizontal_line_with_size(1, 0, width as u32 - 7, Character::with_attributes(SpecialChar::Block25, attr));
+                        surface.fill_horizontal_line_with_size(1, 0, draw_sz, Character::with_attributes(SpecialChar::Block25, attr));
                         surface.fill_horizontal_line_with_size(1, 0, sz, Character::with_attributes(SpecialChar::Block100, attr));
                     }
                     StatusFormat::Arrow => {
-                        surface.fill_horizontal_line_with_size(1, 0, width as u32 - 7, Character::with_attributes(' ', attr));
+                        surface.fill_horizontal_line_with_size(1, 0, draw_sz, Character::with_attributes(' ', attr));
                         surface.fill_horizontal_line_with_size(1, 0, sz, Character::with_attributes('=', attr));
                         surface.write_char(1 + (sz.saturating_sub(1) as i32), 0, Character::with_attributes('>', attr));
                     }
                 }
             } else {
-                RenderMethod::paint_ascii(txt, surface, theme, alignment, width, attr);
+                RenderMethod::paint_ascii(txt, surface, rd);
             }
         } else {
             let mut output: [u8; 32] = [0; 32];
-            let txt = status.to_str(&mut output);
-            RenderMethod::paint_ascii(txt, surface, theme, alignment, width, attr);
+            let txt = status.string_representation(&mut output);
+            RenderMethod::paint_ascii(txt, surface, rd);
         }
     }
 
     #[inline(always)]
-    pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, alignment: TextAlignament, width: u16, attr: Option<CharAttribute>) -> bool {
+    pub(super) fn paint(&self, surface: &mut Surface, rd: &RenderData) -> bool {
         match self {
             RenderMethod::Text(txt) => {
-                RenderMethod::paint_text(txt, surface, theme, alignment, width, attr);
+                RenderMethod::paint_text(txt, surface, rd);
                 true
             }
             RenderMethod::Bool(_, _) | RenderMethod::Temperature(_, _) | RenderMethod::Area(_, _) | RenderMethod::Rating(_, _) => {
                 let mut output: [u8; 32] = [0; 32];
                 if let Some(str_rep) = self.string_representation(&mut output) {
-                    RenderMethod::paint_text(str_rep, surface, theme, alignment, width, attr);
+                    RenderMethod::paint_text(str_rep, surface, rd);
                     true
                 } else {
                     false
@@ -152,14 +153,14 @@ impl<'a> RenderMethod<'a> {
             | RenderMethod::Size(_, _) => {
                 let mut output: [u8; 256] = [0; 256];
                 if let Some(str_rep) = self.string_representation(&mut output) {
-                    RenderMethod::paint_ascii(str_rep, surface, theme, alignment, width, attr);
+                    RenderMethod::paint_ascii(str_rep, surface, rd);
                     true
                 } else {
                     false
                 }
             }
             RenderMethod::Status(status, format) => {
-                RenderMethod::paint_status(*status, *format, surface, theme, alignment, width, attr);
+                RenderMethod::paint_status(*status, *format, surface, rd);
                 true
             }
             RenderMethod::Custom => false,
@@ -205,7 +206,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
             RenderMethod::Size(value, format) => format.write(*value, output),
             RenderMethod::Area(value, format) => format.write(*value, output),
-            RenderMethod::Status(status, _) => Some(status.to_str(output)),
+            RenderMethod::Status(status, _) => Some(status.string_representation(output)),
             RenderMethod::Custom => None,
         }
     }
@@ -263,7 +264,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Bool(value, format) => format.text(*value).chars().count() as u32,
             RenderMethod::Status(status, _) => {
                 let mut output: [u8; 32] = [0; 32];
-                status.to_str(&mut output).len() as u32
+                status.string_representation(&mut output).len() as u32
             }
             RenderMethod::Rating(value, format) => match format {
                 RatingFormat::Numerical(max_value) => {
@@ -272,9 +273,7 @@ impl<'a> RenderMethod<'a> {
                         .map(|p| p.len() as u32)
                         .unwrap_or(0)
                 }
-                RatingFormat::Stars(count) | RatingFormat::Circles(count) | RatingFormat::Asterix(count) => {
-                    (*count).min(MAX_RATING_STARS as u32)
-                }
+                RatingFormat::Stars(count) | RatingFormat::Circles(count) | RatingFormat::Asterix(count) => (*count).min(MAX_RATING_STARS as u32),
             },
             RenderMethod::Custom => 0,
         }
