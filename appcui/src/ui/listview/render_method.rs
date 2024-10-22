@@ -4,8 +4,8 @@ use crate::utils::{FormatDate, FormatDateTime, FormatRatings, FormatTime};
 use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
 use listview::{
-    AreaFormat, BoolFormat, DateFormat, DateTimeFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status, StatusFormat,
-    TemperatureFormat, TimeFormat,
+    AreaFormat, BoolFormat, CurrencyFormat, DateFormat, DateTimeFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status,
+    StatusFormat, TemperatureFormat, TimeFormat,
 };
 
 const MAX_RATING_STARS: u8 = 10;
@@ -34,6 +34,7 @@ pub enum RenderMethod<'a> {
     Temperature(f64, TemperatureFormat),
     Area(u64, AreaFormat),
     Rating(u32, RatingFormat),
+    Currency(f64, CurrencyFormat),
     /*
     Currency(f64,currency),
     Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile
