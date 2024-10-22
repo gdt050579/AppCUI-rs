@@ -4267,3 +4267,67 @@ fn check_custom_attribute_for_items_detail_view() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_currency_formater_renderer() {
+    struct ItemInfo {
+        name: &'static str,
+        sum: f64,
+    }
+    impl listview::ListItem for ItemInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::USDWithSymbol)),
+                2 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::USD)),
+                3 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::EUR)),
+                4 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::EURWithSymbol)),
+                5 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::Bitcoin)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x88CAA81438278221)
+    ";
+    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("ItemInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{USD,15,r},{USD,10,r},{EUR,15,r},{EUR,15,r},{BTC,15,r}]");
+
+    let items = vec![
+        ItemInfo { name: "#1", sum: 0.0 },
+        ItemInfo { name: "#2", sum: 123.45 },
+        ItemInfo { name: "#3", sum: 12345.67 },
+        ItemInfo { name: "#4", sum: 123456.78 },
+        ItemInfo { name: "#5", sum: 1234567.89 },
+        ItemInfo {
+            name: "#6",
+            sum: 12345678.90,
+        },
+        ItemInfo {
+            name: "#7",
+            sum: 123456789.01,
+        },
+        ItemInfo {
+            name: "#8",
+            sum: 1234567890.12,
+        },
+        ItemInfo {
+            name: "#9",
+            sum: 12345678901.23,
+        },
+    ];
+    lv.add_items(items);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}

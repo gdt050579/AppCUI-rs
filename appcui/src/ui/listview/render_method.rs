@@ -36,7 +36,6 @@ pub enum RenderMethod<'a> {
     Rating(u32, RatingFormat),
     Currency(f64, CurrencyFormat),
     /*
-    Currency(f64,currency),
     Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile
     Speed(f64,speed), // km/h, m/s, mph, knot
     Weight(f64,weight), // kg, g, mg, t, lb, oz
@@ -87,6 +86,17 @@ impl<'a> RenderMethod<'a> {
     }
 
     #[inline(always)]
+    fn paint_currency(value: f64, format: &CurrencyFormat, surface: &mut Surface, rd: &RenderData) {
+        let (currency_name,len) = format.name();
+        let mut output: [u8; 48] = [0; 48];
+        let txt = CurrencyFormat::NUMERIC_FORMAT.write_float(value, &mut output).unwrap_or("?");
+        let attr = rd.attr.unwrap_or(rd.theme.text.focused);
+        surface.write_string(0,0,currency_name,attr,false);
+        let pos = ((rd.width as i32) - (txt.len() as i32)).max(len as i32 + 1);
+        surface.write_string(pos,0,txt,attr,false);
+    }
+
+    #[inline(always)]
     fn paint_status(status: Status, format: StatusFormat, surface: &mut Surface, rd: &RenderData) {
         if let Status::Running(value) = status {
             let mut output: [u8; 32] = [0; 32];
@@ -131,6 +141,10 @@ impl<'a> RenderMethod<'a> {
         match self {
             RenderMethod::Text(txt) => {
                 RenderMethod::paint_text(txt, surface, rd);
+                true
+            }
+            RenderMethod::Currency(value, format) => {
+                RenderMethod::paint_currency(*value, format, surface, rd);
                 true
             }
             RenderMethod::Bool(_, _) | RenderMethod::Temperature(_, _) | RenderMethod::Area(_, _) | RenderMethod::Rating(_, _) => {
@@ -208,6 +222,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Size(value, format) => format.write(*value, output),
             RenderMethod::Area(value, format) => format.write(*value, output),
             RenderMethod::Status(status, _) => Some(status.string_representation(output)),
+            RenderMethod::Currency(value, format) => format.formatter().write_float(*value, output),
             RenderMethod::Custom => None,
         }
     }
@@ -261,6 +276,10 @@ impl<'a> RenderMethod<'a> {
                     .write_float(*value * 100.0, &mut output)
                     .map(|p| p.len() as u32)
                     .unwrap_or(0)
+            }
+            RenderMethod::Currency(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.formatter().write_float(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Bool(value, format) => format.text(*value).chars().count() as u32,
             RenderMethod::Status(status, _) => {
