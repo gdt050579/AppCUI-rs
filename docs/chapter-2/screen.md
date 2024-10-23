@@ -73,6 +73,7 @@ The list of all special characters that are supported by AppCUI (as described in
 | `SpecialCharacter::BoxHorizontalSingleLine`               | 0x2500       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2500;</td></tr></table> |
 | `SpecialCharacter::BoxVerticalSingleLine`                 | 0x2502       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2502;</td></tr></table> |
 | `SpecialCharacter::BoxCrossSingleLine`                    | 0x253C       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x253C;</td></tr></table> |
+| `SpecialCharacter::SingleLineDownT`                       | 0x252C       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x252C;</td></tr></table> |
 
 ## Arrows
 
@@ -194,6 +195,7 @@ You can also specify special characters by either using their specific name from
 | <&#x7c;                                  | `SpecialCharacter::TriangleLeft`                          | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25C4;</td></tr></table> |
 | &#x7c;>                                  | `SpecialCharacter::TriangleRight`                         | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25BA;</td></tr></table> |
 | `...`                                    | `SpecialCharacter::ThreePointsHorizontal`                 | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2026;</td></tr></table> |
+| ^&#x7c;^                                 | `SpecialCharacter::SingleLineDownT`                       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x252C;</td></tr></table> |
 
 
 # Examples

@@ -45,6 +45,7 @@ pub(crate) enum SpecialCharacter {
     BoxMidleTop = 41,
     BoxMidleRight = 42,
     BoxMidleBottom = 43,
+    SingleLineDownT = 44,
 }
 
 static HASH_TO_ALIGNAMENT: [Option<SpecialCharacter>; 779] = [
@@ -263,7 +264,7 @@ static HASH_TO_ALIGNAMENT: [Option<SpecialCharacter>; 779] = [
     None,
     None,
     None,
-    None,
+    Some(SpecialCharacter::SingleLineDownT),
     None,
     None,
     None,
@@ -658,7 +659,7 @@ static HASH_TO_ALIGNAMENT: [Option<SpecialCharacter>; 779] = [
     None,
     None,
     None,
-    None,
+    Some(SpecialCharacter::SingleLineDownT),
     Some(SpecialCharacter::CheckMark),
     Some(SpecialCharacter::Block50),
     None,
@@ -1045,7 +1046,7 @@ static HASH_COLISION_VALIDATOR: [u64; 779] = [
     0x0,
     0x0,
     0x0,
-    0x0,
+    0xC3E19E1A136476DB,
     0x0,
     0x0,
     0x0,
@@ -1440,7 +1441,7 @@ static HASH_COLISION_VALIDATOR: [u64; 779] = [
     0x0,
     0x0,
     0x0,
-    0x0,
+    0x215CB6413D6F9D01,
     0x830CF17637260A67,
     0x800C45595048A91F,
     0x0,
@@ -1617,7 +1618,7 @@ impl SpecialCharacter {
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        HASH_TO_ALIGNAMENT[entry_index]
+        return HASH_TO_ALIGNAMENT[entry_index];
     }
     pub fn get_name(&self) -> &'static str {
         match self {
@@ -1665,6 +1666,7 @@ impl SpecialCharacter {
             SpecialCharacter::BoxMidleTop => "BoxMidleTop",
             SpecialCharacter::BoxMidleRight => "BoxMidleRight",
             SpecialCharacter::BoxMidleBottom => "BoxMidleBottom",
+            SpecialCharacter::SingleLineDownT => "SingleLineDownT",
         }
     }
 }
