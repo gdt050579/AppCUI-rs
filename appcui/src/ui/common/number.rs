@@ -1,8 +1,16 @@
-use super::Format;
 use crate::utils::FormatNumber;
 use std::fmt::Display;
 use std::ops::{Add, Sub};
 use std::str::FromStr;
+
+#[derive(Clone, Copy)]
+pub enum Format {
+    Decimal,
+    Percentage,
+    DigitGrouping,
+    Hex,
+    Size, 
+}
 
 pub trait Number: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display + FromStr {
     fn write_to_string(&self, writer: &mut String, format: Format);

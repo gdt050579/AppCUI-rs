@@ -32,6 +32,7 @@ pub mod hline;
 pub mod vline;
 pub mod datepicker;
 pub mod listbox;
+pub mod numericslider;
 
 // re-export
 pub use common::ControlBase;
