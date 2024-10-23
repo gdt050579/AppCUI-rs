@@ -4278,10 +4278,10 @@ fn check_currency_formater_renderer() {
         fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
-                1 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::USDWithSymbol)),
+                1 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::USDSymbol)),
                 2 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::USD)),
                 3 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::EUR)),
-                4 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::EURWithSymbol)),
+                4 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::EURSymbol)),
                 5 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::Bitcoin)),
                 _ => None,
             }

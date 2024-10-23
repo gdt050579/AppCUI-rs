@@ -17,15 +17,15 @@ const RON: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2).prefi
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum CurrencyFormat {
     USD,
-    USDWithSymbol,
+    USDSymbol,
     EUR,
-    EURWithSymbol,
+    EURSymbol,
     GBP,
-    GBPWithSymbol,
+    GBPSymbol,
     YEN,
-    YENWithSymbol,
+    YENSymbol,
     Bitcoin,
-    BitcoinWithSymbol,
+    BitcoinSymbol,
     RON,    
 }
 
@@ -34,30 +34,30 @@ impl CurrencyFormat {
     pub(crate) const fn name(&self)->(&'static str, usize){
         match self {
             CurrencyFormat::USD => ("USD", 3),
-            CurrencyFormat::USDWithSymbol => ("$", 1),
+            CurrencyFormat::USDSymbol => ("$", 1),
             CurrencyFormat::EUR => ("EUR", 3),
-            CurrencyFormat::EURWithSymbol => ("€", 1),
+            CurrencyFormat::EURSymbol => ("€", 1),
             CurrencyFormat::GBP => ("GBP", 3),
-            CurrencyFormat::GBPWithSymbol => ("£", 1),
+            CurrencyFormat::GBPSymbol => ("£", 1),
             CurrencyFormat::YEN => ("YEN", 3),
-            CurrencyFormat::YENWithSymbol => ("¥", 1),
+            CurrencyFormat::YENSymbol => ("¥", 1),
             CurrencyFormat::Bitcoin => ("BTC", 3),
-            CurrencyFormat::BitcoinWithSymbol => ("₿", 1),
+            CurrencyFormat::BitcoinSymbol => ("₿", 1),
             CurrencyFormat::RON => ("RON", 3),            
         }
     }
     pub(crate) const fn formatter(&self) -> &'static FormatNumber {
         match self {
             CurrencyFormat::USD => &USD,
-            CurrencyFormat::USDWithSymbol => &USD_SYMBOL,
+            CurrencyFormat::USDSymbol => &USD_SYMBOL,
             CurrencyFormat::EUR => &EUR,
-            CurrencyFormat::EURWithSymbol => &EUR_SYMBOL,
+            CurrencyFormat::EURSymbol => &EUR_SYMBOL,
             CurrencyFormat::GBP => &GBP,
-            CurrencyFormat::GBPWithSymbol => &GBP_SYMBOL,
+            CurrencyFormat::GBPSymbol => &GBP_SYMBOL,
             CurrencyFormat::YEN => &YEN,
-            CurrencyFormat::YENWithSymbol => &YEM_SYMBOL,
+            CurrencyFormat::YENSymbol => &YEM_SYMBOL,
             CurrencyFormat::Bitcoin => &BTC,
-            CurrencyFormat::BitcoinWithSymbol => &BTC_SYMBOL,
+            CurrencyFormat::BitcoinSymbol => &BTC_SYMBOL,
             CurrencyFormat::RON => &RON,
         }
     }

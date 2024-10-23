@@ -2,6 +2,7 @@ use appcui::prelude::*;
 mod countries;
 mod music;
 mod words;
+mod salaries;
 
 const LOGO: [&str; 6] = [
     "██╗     ██╗███████╗████████╗██╗   ██╗██╗███████╗██╗    ██╗",
@@ -14,7 +15,9 @@ const LOGO: [&str; 6] = [
 
 #[Desktop(events    = [MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [ShowCountries, ShowMusic, ShowWords, Exit, About, NoArrange, Cascade, Vertical, Horizontal, Grid])]
+          commands  = [ShowCountries, ShowMusic, ShowWords, ShowSalaries, 
+                       Exit, About, 
+                       NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
@@ -76,6 +79,7 @@ impl DesktopEvents for MyDesktop {
                 {&Countries,cmd: ShowCountries},
                 {&Music,cmd: ShowMusic},
                 {&Words,cmd: ShowWords},
+                {&Salaries,cmd: ShowSalaries},
             ]
         "));
         self.menu_help = self.register_menu(menu!("
@@ -107,6 +111,9 @@ impl MenuEvents for MyDesktop {
             },
             mydesktop::Commands::ShowWords => { 
                 self.add_window(words::Win::new());
+            },
+            mydesktop::Commands::ShowSalaries => { 
+                self.add_window(salaries::Win::new());
             },
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
