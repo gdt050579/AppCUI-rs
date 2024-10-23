@@ -4331,3 +4331,61 @@ fn check_currency_formater_renderer() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_one_frozen_columns() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x22C1646F5C353990)
+        Key.Pressed(Right,3) 
+        Paint('2. Scroll to the right (+3)')
+        CheckHash(0x50885C1E81B85F41)
+        Key.Pressed(Right,3) 
+        Paint('3. Scroll to the right (+6)')
+        CheckHash(0xFF41F67BA5B335E3)
+        Key.Pressed(Right,5) 
+        Paint('4. Scroll to the right (+11)')
+        CheckHash(0xED73BC0A861B2DCF)
+        Key.Pressed(Right,5) 
+        Paint('5. Scroll to the right (+16)')
+        CheckHash(0xE9B89F0C42BBFEF)
+    ";
+    let mut a = App::debug(30, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+    lv.set_frozen_columns(1);
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_two_frozen_columns() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x1BB3696F21FF26F)
+        Key.Pressed(Right,3) 
+        Paint('2. Scroll to the right (+3)')
+        CheckHash(0x6018648802FBF734)   
+        Key.Pressed(Right,3) 
+        Paint('3. Scroll to the right (+6)')
+        CheckHash(0xB306B4AAFE5EAD3A)
+        Key.Pressed(Right,5) 
+        Paint('4. Scroll to the right (+11)')
+        CheckHash(0x73704811ECA7AEAD)
+        Key.Pressed(Right,5) 
+        Paint('5. Scroll remains the same')
+        CheckHash(0x73704811ECA7AEAD)
+    ";
+    let mut a = App::debug(35, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+    lv.set_frozen_columns(2);
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}

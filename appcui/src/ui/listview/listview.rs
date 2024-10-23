@@ -912,9 +912,16 @@ where
             width: 0,
             attr: None,
         };
-        if (r >= 0) && (r >= min_left) && (l < width) && (c.width != 0) {
-            surface.set_relative_clip(l.max(min_left), y, r.max(min_left), y);
-            surface.set_origin(l, y);
+        if (r >= 0) && (l < width) && (c.width != 0)
+        /*&& (r >= min_left)*/
+        {
+            if frozen_columns == 0 {
+                surface.set_relative_clip(l.max(min_left), y, r.max(min_left), y);
+                surface.set_origin(l, y);
+            } else {
+                surface.set_relative_clip(l, y, r, y);
+                surface.set_origin(l, y);
+            }
             if self.flags.contains(Flags::CheckBoxes) {
                 if item.is_checked() {
                     surface.write_char(
@@ -933,8 +940,13 @@ where
                 extra += self.icon_width as i32;
             }
             if extra > 0 {
-                surface.set_relative_clip((l + extra).max(min_left), y, r.max(min_left), y);
-                surface.set_origin(l + extra, y);
+                if frozen_columns == 0 {
+                    surface.set_relative_clip((l + extra).max(min_left), y, r.max(min_left), y);
+                    surface.set_origin(l + extra, y);
+                } else {
+                    surface.set_relative_clip(l + extra, y, r, y);
+                    surface.set_origin(l + extra, y);
+                }
             }
             if let Some(render_method) = ListItem::render_method(item.value(), 0) {
                 rd.width = c.width as u16;
@@ -949,10 +961,14 @@ where
         rd.attr = if attr.is_none() { item.render_attr() } else { attr };
         for (index, c) in columns.iter().enumerate().skip(1) {
             let r = c.x + c.width as i32;
-            if (r < 0) || (r < min_left) || (c.x >= width) || (c.width == 0) {
+            if (r < 0) /*|| (r < min_left)*/ || (c.x >= width) || (c.width == 0) {
                 continue;
             }
-            surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
+            if index < frozen_columns as usize {
+                surface.set_relative_clip(c.x, y, r, y);
+            } else {
+                surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
+            }
             surface.set_origin(c.x, y);
             if let Some(render_method) = ListItem::render_method(item.value(), index as u16) {
                 rd.width = c.width as u16;

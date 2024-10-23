@@ -110,7 +110,7 @@ impl Win {
                                 ]"
         );
         lv.set_frozen_columns(1);
-        lv.set_components_toolbar_margins(6, 1);
+        lv.set_components_toolbar_margins(8, 1);
         populate_listview(&mut lv);
         me.lv = me.add(lv);
 
@@ -121,7 +121,7 @@ impl Win {
     }
     fn update_info(&mut self) {
         let (checked, total) = if let Some(lv) = self.control(self.lv) {
-            (lv.checked_items_count(), lv.items_count())
+            (lv.selected_items_count(), lv.items_count())
         } else {
             (0, 0)
         };
