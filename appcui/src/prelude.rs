@@ -46,6 +46,8 @@ pub use super::ui::command_bar::events::GenericCommandBarEvents;
 pub use super::ui::menu::events::GenericMenuEvents;
 pub use super::ui::menu::Menu;
 pub use super::ui::menu::MenuBar;
+pub use super::ui::timepicker::TimePicker;
+pub use super::ui::timepicker::events::TimePickerEvents;
 pub use super::graphics::*;
 pub use super::system::*;
 pub use super::input::*;
