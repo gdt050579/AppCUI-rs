@@ -6,6 +6,8 @@ use chrono::TimeDelta;
 use super::Flags;
 use crate::prelude::*;
 
+// simplificare flags
+
 trait MillisecondsSupport {
     fn milliseconds(&self) -> u32;
 }
@@ -27,7 +29,7 @@ enum Components {
     M,
     S,
     Ms,
-    AMPM,
+    AMPM
 }
 
 #[CustomControl(overwrite=[OnPaint,OnKeyPressed,OnMouseEvent],internal=true)]
@@ -39,34 +41,38 @@ pub struct TimePicker {
     cursor: u8,
     hover: u8,
     inscope: Option<Components>,
+
+    ampm: bool,
 }
 
 impl TimePicker {
-    #[inline]
+    #[inline(always)]
     fn get_min_width(&self) -> u16 {
-        match () {
-            _ if self.flags.contains(Flags::Miliseconds | Flags::AMPMFormat) => 15,
-            _ if self.flags.contains(Flags::Seconds | Flags::AMPMFormat) => 11,
-            _ if self.flags.contains(Flags::Miliseconds) => 12,
-            _ if self.flags.contains(Flags::Seconds) => 8,
-            _ if self.flags.contains(Flags::AMPMFormat) => 8,
+        let mut width = match () {
+            _ if self.flags.contains(Flags::HMS_MS_AMPM) => 15,
+            _ if self.flags.contains(Flags::HMS_AMPM) => 11,
+            _ if self.flags.contains(Flags::HMS_MS) => 12,
+            _ if self.flags.contains(Flags::HMS) => 8,
+            _ if self.flags.contains(Flags::HM_AMPM) => 8,
             _ => 5,
-        }
+        };
+        width += 2; //one space each side
+        width
     }
 
+    #[inline(always)]
     fn get_comp_list(flags: &Flags) -> Vec<Components> {
         match () {
-            _ if flags.contains(Flags::Miliseconds | Flags::AMPMFormat) => {
-                vec![Components::H, Components::M, Components::S, Components::Ms, Components::AMPM]
-            }
-            _ if flags.contains(Flags::Seconds | Flags::AMPMFormat) => vec![Components::H, Components::M, Components::S, Components::AMPM],
-            _ if flags.contains(Flags::Miliseconds) => vec![Components::H, Components::M, Components::S, Components::Ms],
-            _ if flags.contains(Flags::Seconds) => vec![Components::H, Components::M, Components::S],
-            _ if flags.contains(Flags::AMPMFormat) => vec![Components::H, Components::M, Components::AMPM],
+            _ if flags.contains(Flags::HMS_MS_AMPM) => vec![Components::H, Components::M, Components::S, Components::Ms, Components::AMPM],
+            _ if flags.contains(Flags::HMS_AMPM) => vec![Components::H, Components::M, Components::S, Components::AMPM],
+            _ if flags.contains(Flags::HMS_MS) => vec![Components::H, Components::M, Components::S, Components::Ms],
+            _ if flags.contains(Flags::HMS) => vec![Components::H, Components::M, Components::S],
+            _ if flags.contains(Flags::HM_AMPM) => vec![Components::H, Components::M, Components::AMPM],
             _ => vec![Components::H, Components::M],
         }
     }
 
+    #[inline(always)]
     fn set_current_time(&mut self) {
         let local: DateTime<Utc> = Utc::now(); 
         self.time = local.naive_utc().time();
@@ -74,15 +80,21 @@ impl TimePicker {
 
     pub fn new(time: NaiveTime, layout: Layout, flags: Flags) -> Self {
         let comp_list = TimePicker::get_comp_list(&flags);
+        let ampm = flags.contains_one(Flags::HMS_AMPM | Flags::HMS_MS_AMPM | Flags::HM_AMPM);
+        let mut corrected_flags = flags;
+        if corrected_flags.is_empty() {
+            corrected_flags = Flags::HM;
+        }
 
         let mut control = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            flags,
+            flags: corrected_flags,
             time,
             list_of_comp: comp_list,
             cursor: 0,
             hover: 0,
             inscope: None,
+            ampm,
         };
         let min_width = control.get_min_width();
         control.set_size_bounds(min_width, 1, u16::MAX, 1);
@@ -94,64 +106,76 @@ impl TimePicker {
         self.time
     }
 
+    #[inline(always)]
     pub fn add_miliseconds(&mut self, ms: u32) {
         let res = self.time.overflowing_add_signed(TimeDelta::try_milliseconds(ms as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn add_seconds(&mut self, s:u32) {
         let res = self.time.overflowing_add_signed(TimeDelta::try_seconds(s as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn add_minutes(&mut self, m:u32) {
         let res = self.time.overflowing_add_signed(TimeDelta::try_minutes(m as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn add_hours(&mut self, h:u32) {
         let res = self.time.overflowing_add_signed(TimeDelta::try_hours(h as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn sub_miliseconds(&mut self, ms: u32) {
         let res = self.time.overflowing_sub_signed(TimeDelta::try_milliseconds(ms as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn sub_seconds(&mut self, s:u32) {
         let res = self.time.overflowing_sub_signed(TimeDelta::try_seconds(s as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn sub_minutes(&mut self, m:u32) {
         let res = self.time.overflowing_sub_signed(TimeDelta::try_minutes(m as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn sub_hours(&mut self, h:u32) {
         let res = self.time.overflowing_sub_signed(TimeDelta::try_hours(h as i64).unwrap());
         self.time = res.0;
     }
 
+    #[inline(always)]
     pub fn set_miliseconds(&mut self, ms: u32) {
         let res = self.time.overflowing_sub_signed(TimeDelta::try_milliseconds(self.time.milliseconds() as i64).unwrap());
         let res = res.0.overflowing_add_signed(TimeDelta::try_milliseconds(ms as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn set_seconds(&mut self, s:u32) {
         let res = self.time.overflowing_sub_signed(TimeDelta::try_seconds(self.time.second() as i64).unwrap());
         let res = res.0.overflowing_add_signed(TimeDelta::try_seconds(s as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn set_minutes(&mut self, m:u32) {
         let res = self.time.overflowing_sub_signed(TimeDelta::try_minutes(self.time.minute() as i64).unwrap());
         let res = res.0.overflowing_add_signed(TimeDelta::try_minutes(m as i64).unwrap());
         self.time = res.0;
     }
     
+    #[inline(always)]
     pub fn set_hours(&mut self, h:u32) {
         let res = self.time.overflowing_sub_signed(TimeDelta::try_hours(self.time.hour() as i64).unwrap());
         let res = res.0.overflowing_add_signed(TimeDelta::try_hours(h as i64).unwrap());
@@ -171,12 +195,13 @@ impl OnPaint for TimePicker {
 
         struct PainterInput {
             write_prefix: bool,
+            ampm: bool,
             prefix: &'static str,
             datasize: u8,
             data: u16,
         };
 
-        let mut paint_offset: i32 = 0;
+        let mut paint_offset: i32 = 1;
         let mut component_offset: u8 = 1;
         let mut paint_component = |input: &PainterInput| {
             let zatheme = match self.cursor {
@@ -188,7 +213,7 @@ impl OnPaint for TimePicker {
             };
 
             if input.write_prefix{
-                surface.write_string(paint_offset as i32, 0, input.prefix, zatheme, false);
+                surface.write_string(paint_offset as i32, 0, input.prefix, basetheme, false);
                 paint_offset += 1;
             }
 
@@ -206,6 +231,22 @@ impl OnPaint for TimePicker {
                     buff[1] = (input.data % 10 + 48) as u8;
                     unsafe {str::from_utf8_unchecked(&buff[..2])}
                 },
+                0 => {
+                    if input.ampm {
+                        if input.data == 1 {
+                            buff[0] = 0x41; // A
+                            buff[1] = 0x4D; // M
+                        }
+                        else {
+                            buff[0] = 0x50; // P
+                            buff[1] = 0x4D; // M
+                        }
+                        unsafe {str::from_utf8_unchecked(&buff[..2])}
+                    }
+                    else {
+                        return;
+                    }
+                },
                 _ => {
                     return;
                 }
@@ -218,11 +259,12 @@ impl OnPaint for TimePicker {
 
         //hours
         let mut hours = self.time.hour();
-        if self.flags.contains(Flags::AMPMFormat) {
+        if self.ampm {
             hours = hours % 12;
         }
         let tpl = PainterInput {
             write_prefix: false,
+            ampm: false,
             prefix: "",
             datasize: 2,
             data: hours as u16,
@@ -232,16 +274,18 @@ impl OnPaint for TimePicker {
         //minutes
         let tpl = PainterInput {
             write_prefix: true,
+            ampm: false,
             prefix: ":",
             datasize: 2,
             data: self.time.minute() as u16,
         };
         paint_component(&tpl);
-
+        
         //seconds
-        if self.flags.contains_one(Flags::Seconds | Flags::Miliseconds) {
+        if self.flags.contains_one(Flags::HMS | Flags::HMS_AMPM | Flags::HMS_MS | Flags::HMS_MS_AMPM) {
             let tpl = PainterInput {
                 write_prefix: true,
+                ampm: false,
                 prefix: ":",
                 datasize: 2,
                 data: self.time.second() as u16,
@@ -250,9 +294,10 @@ impl OnPaint for TimePicker {
         }
 
         // ms
-        if self.flags.contains(Flags::Miliseconds) {
+        if self.flags.contains_one(Flags::HMS_MS | Flags::HMS_MS_AMPM) {
             let tpl = PainterInput {
                 write_prefix: true,
+                ampm: false,
                 prefix: ".",
                 datasize: 3,
                 data: self.time.milliseconds() as u16,
@@ -261,17 +306,18 @@ impl OnPaint for TimePicker {
         }
 
         // am/pm
-        if self.flags.contains(Flags::AMPMFormat) {
-            let mut pref = " AM"; 
+        if self.ampm {
+            let mut data = 1; 
             if self.time.hour() >= 12 {
-                pref = " PM";
+                data = 2;
             }
 
             let tpl = PainterInput {
                 write_prefix: true,
-                prefix: pref,
+                ampm: true,
+                prefix: " ",
                 datasize: 0,
-                data: 0,
+                data: data,
             };
             paint_component(&tpl);
         }
@@ -390,6 +436,15 @@ impl OnMouseEvent for TimePicker {
                 }
 
                 EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(data) => {   
+                match data {
+                    MouseWheelDirection::None => EventProcessStatus::Ignored,
+                    MouseWheelDirection::Left => EventProcessStatus::Ignored,
+                    MouseWheelDirection::Right => EventProcessStatus::Ignored,
+                    MouseWheelDirection::Up => OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Up, KeyModifier::None), 0 as char),
+                    MouseWheelDirection::Down => OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Down, KeyModifier::None), 0 as char),
+                }
             }
             _ => EventProcessStatus::Ignored,
         }
