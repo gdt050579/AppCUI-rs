@@ -4208,6 +4208,60 @@ fn check_volume_formater_renderer_simple() {
 }
 
 #[test]
+fn check_weight_formater_renderer_simple() {
+    struct FileInfo {
+        name: &'static str,
+        w: u64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Weight(self.w, listview::WeightFormat::Kilograms)),
+                2 => Some(listview::RenderMethod::Weight(self.w, listview::WeightFormat::Pounds)),
+                3 => Some(listview::RenderMethod::Weight(self.w, listview::WeightFormat::Tons)),
+                4 => Some(listview::RenderMethod::Weight(self.w, listview::WeightFormat::Milligrams)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1..=4 => self.w.cmp(&other.w),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF708A8445B8E4B4E)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!(
+        "FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KG,20,Right},{Pounds,15,Right},{Tons,10,Right},{Millgrams,15,Right}]"
+    );
+
+    let students = vec![
+        FileInfo { name: "NUll", w: 0 },
+        FileInfo { name: "Small", w: 300 },
+        FileInfo { name: "Regular", w: 12345 },
+        FileInfo { name: "Large", w: 3200000 },
+        FileInfo {
+            name: "Huge",
+            w: 795000000,
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
 fn check_rating_formater_renderer_simple() {
     struct FileInfo {
         name: &'static str,

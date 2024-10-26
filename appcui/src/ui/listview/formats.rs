@@ -11,3 +11,4 @@ pub(super) mod rating_format;
 pub(super) mod currency_format;
 pub(super) mod distance_format;
 pub(super) mod volume_format;
+pub(super) mod weight_format;

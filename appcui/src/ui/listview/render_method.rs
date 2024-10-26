@@ -5,7 +5,7 @@ use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
 use listview::{
     AreaFormat, BoolFormat, CurrencyFormat, DateFormat, DateTimeFormat, DistanceFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat,
-    SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat, VolumeFormat,
+    SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat, VolumeFormat, WeightFormat,
 };
 
 const MAX_RATING_STARS: u8 = 10;
@@ -37,10 +37,9 @@ pub enum RenderMethod<'a> {
     Currency(f64, CurrencyFormat),
     Distance(u64, DistanceFormat),
     Volume(u64, VolumeFormat),
+    Weight(u64, WeightFormat),
     /*
     Speed(f64,speed), // km/h, m/s, mph, knot
-    Weight(f64,weight), // kg, g, mg, t, lb, oz
-    Volume(f64,volume), // l, ml, cm3, m3, gal, pt, qt, fl oz
     */
     Custom,
 }
@@ -171,6 +170,7 @@ impl<'a> RenderMethod<'a> {
             | RenderMethod::Float(_, _)
             | RenderMethod::Percentage(_, _)
             | RenderMethod::Distance(_, _)
+            | RenderMethod::Weight(_, _)
             | RenderMethod::Size(_, _) => {
                 let mut output: [u8; 256] = [0; 256];
                 if let Some(str_rep) = self.string_representation(&mut output) {
@@ -229,6 +229,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Area(value, format) => format.write(*value, output),
             RenderMethod::Distance(value, format) => format.write(*value, output),
             RenderMethod::Volume(value, format) => format.write(*value, output),
+            RenderMethod::Weight(value, format) => format.write(*value, output),
             RenderMethod::Status(status, _) => Some(status.string_representation(output)),
             RenderMethod::Currency(value, format) => format.formatter().write_float(*value, output),
             RenderMethod::Custom => None,
@@ -282,6 +283,10 @@ impl<'a> RenderMethod<'a> {
                 format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Volume(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
+            }
+            RenderMethod::Weight(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
