@@ -4104,16 +4104,16 @@ fn check_area_formater_renderer_simple() {
 fn check_distance_formater_renderer_simple() {
     struct FileInfo {
         name: &'static str,
-        size: u64,
+        dist: u64,
     }
     impl listview::ListItem for FileInfo {
         fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
-                1 => Some(listview::RenderMethod::Distance(self.size, listview::DistanceFormat::Centimeters)),
-                2 => Some(listview::RenderMethod::Distance(self.size, listview::DistanceFormat::Meters)),
-                3 => Some(listview::RenderMethod::Distance(self.size, listview::DistanceFormat::Inches)),
-                4 => Some(listview::RenderMethod::Distance(self.size, listview::DistanceFormat::Feet)),
+                1 => Some(listview::RenderMethod::Distance(self.dist, listview::DistanceFormat::Centimeters)),
+                2 => Some(listview::RenderMethod::Distance(self.dist, listview::DistanceFormat::Meters)),
+                3 => Some(listview::RenderMethod::Distance(self.dist, listview::DistanceFormat::Inches)),
+                4 => Some(listview::RenderMethod::Distance(self.dist, listview::DistanceFormat::Feet)),
                 _ => None,
             }
         }
@@ -4121,7 +4121,7 @@ fn check_distance_formater_renderer_simple() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1..=4 => self.size.cmp(&other.size),
+                1..=4 => self.dist.cmp(&other.dist),
                 _ => std::cmp::Ordering::Equal,
             }
         }
@@ -4133,20 +4133,19 @@ fn check_distance_formater_renderer_simple() {
     ";
     let mut a = App::debug(80, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv =
-        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{CM,20,Right},{M,15,Right},{IN,10,Right},{FT,10,Right}]");
+    let mut lv = listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{CM,20,Right},{M,15,Right},{IN,10,Right},{FT,10,Right}]");
 
     let students = vec![
-        FileInfo { name: "NUll", size: 0 },
-        FileInfo { name: "Small", size: 300 },
+        FileInfo { name: "NUll", dist: 0 },
+        FileInfo { name: "Small", dist: 300 },
         FileInfo {
             name: "Regular",
-            size: 12345,
+            dist: 12345,
         },
-        FileInfo { name: "Song", size: 3200000 },
+        FileInfo { name: "Song", dist: 3200000 },
         FileInfo {
             name: "Movie",
-            size: 7950000000,
+            dist: 7950000000,
         },
     ];
     lv.add_items(students);
@@ -4155,7 +4154,58 @@ fn check_distance_formater_renderer_simple() {
     a.run();
 }
 
+#[test]
+fn check_volume_formater_renderer_simple() {
+    struct FileInfo {
+        name: &'static str,
+        vol: u64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Volume(self.vol, listview::VolumeFormat::CubicCentimeters)),
+                2 => Some(listview::RenderMethod::Volume(self.vol, listview::VolumeFormat::Liters)),
+                3 => Some(listview::RenderMethod::Volume(self.vol, listview::VolumeFormat::Gallons)),
+                4 => Some(listview::RenderMethod::Volume(self.vol, listview::VolumeFormat::CubicFeet)),
+                _ => None,
+            }
+        }
 
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1..=4 => self.vol.cmp(&other.vol),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5DE42374940E54E)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!(
+        "FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{CM**3,20,Right},{Liters,15,Right},{Galons,10,Right},{CubicFeets,15,Right}]"
+    );
+
+    let students = vec![
+        FileInfo { name: "NUll", vol: 0 },
+        FileInfo { name: "Small", vol: 300 },
+        FileInfo { name: "Regular", vol: 12345 },
+        FileInfo { name: "Large", vol: 3200000 },
+        FileInfo {
+            name: "Huge",
+            vol: 795000000,
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
 #[test]
 fn check_rating_formater_renderer_simple() {

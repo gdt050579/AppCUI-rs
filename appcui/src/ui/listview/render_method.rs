@@ -5,7 +5,7 @@ use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
 use listview::{
     AreaFormat, BoolFormat, CurrencyFormat, DateFormat, DateTimeFormat, DistanceFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat,
-    SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat,
+    SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat, VolumeFormat,
 };
 
 const MAX_RATING_STARS: u8 = 10;
@@ -36,6 +36,7 @@ pub enum RenderMethod<'a> {
     Rating(u32, RatingFormat),
     Currency(f64, CurrencyFormat),
     Distance(u64, DistanceFormat),
+    Volume(u64, VolumeFormat),
     /*
     Speed(f64,speed), // km/h, m/s, mph, knot
     Weight(f64,weight), // kg, g, mg, t, lb, oz
@@ -147,7 +148,11 @@ impl<'a> RenderMethod<'a> {
                 RenderMethod::paint_currency(*value, format, surface, rd);
                 true
             }
-            RenderMethod::Bool(_, _) | RenderMethod::Temperature(_, _) | RenderMethod::Area(_, _) | RenderMethod::Rating(_, _) => {
+            RenderMethod::Bool(_, _)
+            | RenderMethod::Temperature(_, _)
+            | RenderMethod::Area(_, _)
+            | RenderMethod::Rating(_, _)
+            | RenderMethod::Volume(_, _) => {
                 let mut output: [u8; 32] = [0; 32];
                 if let Some(str_rep) = self.string_representation(&mut output) {
                     RenderMethod::paint_text(str_rep, surface, rd);
@@ -223,6 +228,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Size(value, format) => format.write(*value, output),
             RenderMethod::Area(value, format) => format.write(*value, output),
             RenderMethod::Distance(value, format) => format.write(*value, output),
+            RenderMethod::Volume(value, format) => format.write(*value, output),
             RenderMethod::Status(status, _) => Some(status.string_representation(output)),
             RenderMethod::Currency(value, format) => format.formatter().write_float(*value, output),
             RenderMethod::Custom => None,
@@ -272,6 +278,10 @@ impl<'a> RenderMethod<'a> {
                 format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Distance(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
+            }
+            RenderMethod::Volume(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
