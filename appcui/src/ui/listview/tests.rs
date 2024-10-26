@@ -4389,3 +4389,73 @@ fn check_two_frozen_columns() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_folding_and_filtering() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x9E3C11ECF6744DC9)
+        Mouse.Click(2,2,left)
+        Paint('2. USA group folded (has 3 items)')
+        CheckHash(0x7B7A27AC3DA2D909)
+        Key.TypeText('5')
+        Paint('3. USA group folded (now with 2 items)')
+        CheckHash(0x8C68CEC5F34F1974)
+        Mouse.Click(5,2,left)
+        Paint('4. USA group checked (all 2 items) and folded')
+        CheckHash(0x50838713A6A6E95C)
+        Mouse.Click(2,2,left)
+        Paint('5. USA group un-folded and checked (has 2 items - cheked)')
+        CheckHash(0x6E8813699531D03E)
+        Key.Pressed(Backspace)
+        Paint('6. USA group un-folded and partially checked, (3 items in total / 2 checked)')
+        CheckHash(0x7CDF4998CFDC03A2)
+        Key.TypeText('5')
+        Paint('7. USA group not-folded but fully checked (with 2 items - both checked)')
+        CheckHash(0x74242E241371D8E1)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+    lv.set_frozen_columns(2);
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_filtering_and_select_while_folded() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x9E3C11ECF6744DC9)
+        Mouse.Click(2,2,left)
+        Paint('2. USA group folded (has 3 items)')
+        CheckHash(0x7B7A27AC3DA2D909)
+        Key.TypeText('5')
+        Paint('3. USA group folded (now with 2 items)')
+        CheckHash(0x8C68CEC5F34F1974)
+        Mouse.Click(5,2,left)
+        Paint('4. USA group folded and checked (has 2 items - cheked)')
+        CheckHash(0x50838713A6A6E95C)
+        Mouse.Click(2,2,left)
+        Paint('5. USA group un-folded checked, (2 items in total / 2 checked)')
+        CheckHash(0x6E8813699531D03E)
+        Key.Pressed(Backspace)
+        Paint('6. USA group un-folded and partially checked, (3 items in total / 2 checked)')
+        CheckHash(0x7CDF4998CFDC03A2)
+        Key.TypeText('5')
+        Paint('7. USA group not-folded but fully checked (with 2 items - both checked)')
+        CheckHash(0x74242E241371D8E1)
+    ";
+    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+    lv.set_frozen_columns(2);
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}

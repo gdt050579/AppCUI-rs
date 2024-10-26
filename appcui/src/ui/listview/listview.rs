@@ -1201,6 +1201,22 @@ where
         }
     }
 
+    #[inline(always)]
+    fn select_item_and_update_count(&mut self, data_index: usize, value: bool) -> bool {
+        let item = &mut self.data[data_index];
+        let status = item.is_checked();
+        item.set_checked(value);
+        if status != value {
+            if value {
+                self.selected_items_count += 1;
+            } else {
+                self.selected_items_count -= 1;
+            }
+            true
+        } else {
+            false
+        }
+    }
     /// Returns true if the selection has been changed, false otherwise
     fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool, emit_event: bool) -> bool {
         if pos >= self.filter.len() {
@@ -1232,28 +1248,38 @@ where
                 let group = &mut self.groups[gid as usize];
                 let checked = group.items_checked_count();
                 let count = group.items_count();
-                for itm in self.filter.iter().skip(pos + 1) {
-                    if let Element::Item(index) = itm {
-                        let item = &mut self.data[*index as usize];
-                        if item.group_id() == gid {
-                            let status = item.is_checked();
-                            let new_status = checked < count;
-                            item.set_checked(new_status);
-                            selection_has_changed |= status != new_status;
-                            if status != new_status {
-                                if new_status {
-                                    self.selected_items_count += 1;
-                                } else {
-                                    self.selected_items_count -= 1;
-                                }
-                            }
-                        } else {
-                            break; // we've reached another group
+                let new_status = checked < count;
+                if group.is_collapsed() {
+                    // iterate through all items that and check if they are filtered or not and check them
+                    let len = self.data.len();
+                    for idx in 0..len {
+                        let item = &self.data[idx];
+                        if item.group_id() != gid {
+                            continue;
                         }
-                    } else {
-                        break; // we've reached another group
+                        if self.is_item_filtered_out(item) {
+                            continue;
+                        }
+                        selection_has_changed |= self.select_item_and_update_count(idx, new_status);
+                    }
+                } else {
+                    let len = self.filter.len();
+                    for idx in pos+1..len {
+                        match self.filter[idx] {
+                            Element::Item(index) => {
+                                let item = &self.data[index as usize];
+                                if item.group_id() != gid {
+                                    break;
+                                }
+                                selection_has_changed |= self.select_item_and_update_count(index as usize, new_status);
+                            }
+                            _ => {
+                                break;
+                            }
+                        }
                     }
                 }
+                let group = &mut self.groups[gid as usize];
                 group.set_items_checked_count(if checked < count { count } else { 0 });
             }
         }
