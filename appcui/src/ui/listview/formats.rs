@@ -9,3 +9,4 @@ pub(super) mod temperature_format;
 pub(super) mod area_format;
 pub(super) mod rating_format;
 pub(super) mod currency_format;
+pub(super) mod distance_format;

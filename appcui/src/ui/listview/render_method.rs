@@ -4,8 +4,8 @@ use crate::utils::{FormatDate, FormatDateTime, FormatRatings, FormatTime};
 use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
 use listview::formats::percentage_format::PercentageFormat;
 use listview::{
-    AreaFormat, BoolFormat, CurrencyFormat, DateFormat, DateTimeFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat, SizeFormat, Status,
-    StatusFormat, TemperatureFormat, TimeFormat,
+    AreaFormat, BoolFormat, CurrencyFormat, DateFormat, DateTimeFormat, DistanceFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat,
+    SizeFormat, Status, StatusFormat, TemperatureFormat, TimeFormat,
 };
 
 const MAX_RATING_STARS: u8 = 10;
@@ -35,8 +35,8 @@ pub enum RenderMethod<'a> {
     Area(u64, AreaFormat),
     Rating(u32, RatingFormat),
     Currency(f64, CurrencyFormat),
+    Distance(u64, DistanceFormat),
     /*
-    Metrics(f64,metrics), // km, m, cm, mm, inch, foot, yard, mile
     Speed(f64,speed), // km/h, m/s, mph, knot
     Weight(f64,weight), // kg, g, mg, t, lb, oz
     Volume(f64,volume), // l, ml, cm3, m3, gal, pt, qt, fl oz
@@ -87,13 +87,13 @@ impl<'a> RenderMethod<'a> {
 
     #[inline(always)]
     fn paint_currency(value: f64, format: &CurrencyFormat, surface: &mut Surface, rd: &RenderData) {
-        let (currency_name,len) = format.name();
+        let (currency_name, len) = format.name();
         let mut output: [u8; 48] = [0; 48];
         let txt = CurrencyFormat::NUMERIC_FORMAT.write_float(value, &mut output).unwrap_or("?");
         let attr = rd.attr.unwrap_or(rd.theme.text.focused);
-        surface.write_string(0,0,currency_name,attr,false);
+        surface.write_string(0, 0, currency_name, attr, false);
         let pos = ((rd.width as i32) - (txt.len() as i32)).max(len as i32 + 1);
-        surface.write_string(pos,0,txt,attr,false);
+        surface.write_string(pos, 0, txt, attr, false);
     }
 
     #[inline(always)]
@@ -165,6 +165,7 @@ impl<'a> RenderMethod<'a> {
             | RenderMethod::UInt64(_, _)
             | RenderMethod::Float(_, _)
             | RenderMethod::Percentage(_, _)
+            | RenderMethod::Distance(_, _)
             | RenderMethod::Size(_, _) => {
                 let mut output: [u8; 256] = [0; 256];
                 if let Some(str_rep) = self.string_representation(&mut output) {
@@ -221,6 +222,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Bool(value, format) => Some(format.text(*value)),
             RenderMethod::Size(value, format) => format.write(*value, output),
             RenderMethod::Area(value, format) => format.write(*value, output),
+            RenderMethod::Distance(value, format) => format.write(*value, output),
             RenderMethod::Status(status, _) => Some(status.string_representation(output)),
             RenderMethod::Currency(value, format) => format.formatter().write_float(*value, output),
             RenderMethod::Custom => None,
@@ -266,6 +268,10 @@ impl<'a> RenderMethod<'a> {
                 format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }
             RenderMethod::Area(value, format) => {
+                let mut output: [u8; 64] = [0; 64];
+                format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
+            }
+            RenderMethod::Distance(value, format) => {
                 let mut output: [u8; 64] = [0; 64];
                 format.write(*value, &mut output).map(|p| p.len() as u32).unwrap_or(0)
             }

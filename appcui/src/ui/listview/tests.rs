@@ -4101,6 +4101,63 @@ fn check_area_formater_renderer_simple() {
 }
 
 #[test]
+fn check_distance_formater_renderer_simple() {
+    struct FileInfo {
+        name: &'static str,
+        size: u64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Distance(self.size, listview::DistanceFormat::Centimeters)),
+                2 => Some(listview::RenderMethod::Distance(self.size, listview::DistanceFormat::Meters)),
+                3 => Some(listview::RenderMethod::Distance(self.size, listview::DistanceFormat::Inches)),
+                4 => Some(listview::RenderMethod::Distance(self.size, listview::DistanceFormat::Feet)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1..=4 => self.size.cmp(&other.size),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5B6BB90EC503446A)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv =
+        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{CM,20,Right},{M,15,Right},{IN,10,Right},{FT,10,Right}]");
+
+    let students = vec![
+        FileInfo { name: "NUll", size: 0 },
+        FileInfo { name: "Small", size: 300 },
+        FileInfo {
+            name: "Regular",
+            size: 12345,
+        },
+        FileInfo { name: "Song", size: 3200000 },
+        FileInfo {
+            name: "Movie",
+            size: 7950000000,
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+
+
+#[test]
 fn check_rating_formater_renderer_simple() {
     struct FileInfo {
         name: &'static str,

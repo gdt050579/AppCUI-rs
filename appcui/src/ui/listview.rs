@@ -30,6 +30,7 @@ pub use self::formats::temperature_format::TemperatureFormat;
 pub use self::formats::area_format::AreaFormat;
 pub use self::formats::rating_format::RatingFormat;
 pub use self::formats::currency_format::CurrencyFormat; 
+pub use self::formats::distance_format::DistanceFormat;
 pub use self::item::Item;
 pub use self::groups::Group;   
 pub use self::view_mode::ViewMode; 
