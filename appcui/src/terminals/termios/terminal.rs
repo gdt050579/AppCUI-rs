@@ -2,7 +2,7 @@
 //! API to set it into raw mode. Targeted for UNIX systems, including `linux` and `mac`
 
 use super::super::{ SystemEvent, Terminal };
-use crate::{ graphics::*, system::Error, prelude::{Key, KeyModifier}, terminals::KeyPressedEvent };
+use crate::{ graphics::*, input::MouseButton, prelude::{Key, KeyModifier}, system::Error, terminals::{KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent} };
 
 #[cfg(target_family = "unix")]
 use super::api::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios};
@@ -42,12 +42,20 @@ impl TermiosTerminal {
                 "TermiosTerminal is not yet implemented to support custom sizes".to_owned(),
             ));
         }
+
+        print!("\x1b[?1003h"); // capture mouse events
         Ok(Box::new(t))
+    }
+
+    fn clear(&mut self) {
+        print!("\x1b[2J");
     }
 }
 
 impl Terminal for TermiosTerminal {
     fn update_screen(&mut self, surface: &Surface) {
+        self.clear();
+        
         let mut s = String::new();
         let sz = surface.size();
         for y in 0..sz.height {
@@ -94,6 +102,16 @@ impl Terminal for TermiosTerminal {
                 if ansi_key.modifier() == KeyModifier::Ctrl
                     && ansi_key.code() == AnsiKeyCode::Letter(Letter::Q) {
                     return SystemEvent::AppClose;
+                }
+
+                if let AnsiKeyCode::MouseButton(ev) = ansi_key.code() {
+                    match ev.button {
+                        MouseButton::None => return SystemEvent::MouseButtonUp(MouseButtonUpEvent {x: ev.x.into(), y: ev.y.into(), button: MouseButton::None}),
+                        other => return SystemEvent::MouseButtonDown(MouseButtonDownEvent {button: other, x: ev.x.into(), y: ev.y.into()})
+                    }
+                }
+                if let AnsiKeyCode::MouseMove(ev) = ansi_key.code() {
+                    return SystemEvent::MouseMove(MouseMoveEvent { x: ev.x.into(), y: ev.y.into(), button: ev.button });
                 }
 
                 // We take the initial 4 bytes an we try to convert them into an `u32`

@@ -125,7 +125,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
 ///     // custom data
 /// }
 /// impl MyWindow { /* specific methods */}
-/// impl ButtonEvens for MyWindow { /* ... */ }
+/// impl ButtonEvents for MyWindow { /* ... */ }
 /// impl WindowEvents for MyWindow { /* ... */ }
 /// ```
 #[allow(non_snake_case)]

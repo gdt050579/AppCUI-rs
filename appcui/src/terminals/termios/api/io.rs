@@ -1,7 +1,5 @@
 use crate::{
-    prelude::KeyCode,
-    input::{Key, KeyModifier},
-    terminals::termios::api::TermiosError,
+    input::{Key, KeyModifier, MouseButton}, prelude::KeyCode, terminals::termios::api::TermiosError
 };
 
 // Define C system binding calls
@@ -23,6 +21,13 @@ pub struct AnsiKey {
     modifier: KeyModifier,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct MouseButtonEvent {
+    pub (crate) button: MouseButton, // None => release (in x-term documentation there is no None)
+    pub (crate) x: u8,
+    pub (crate) y: u8,
+}
+
 impl AnsiKey {
     pub fn bytes(&self) -> &[u8] {
         &self.bytes
@@ -40,6 +45,8 @@ impl AnsiKey {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AnsiKeyCode {
     Letter(Letter),
+    MouseButton(MouseButtonEvent),
+    MouseMove(MouseButtonEvent),
     Comma,
     Dot,
     Slash,
@@ -244,7 +251,30 @@ impl Into<Key> for AnsiKey {
 // taken into condideration.
 const _CTRL_KEY_MASK: u8 = 0b0001_1111;
 
-impl TermiosReader {
+impl TermiosReader {  
+    fn parse_mouse_event() -> Result<AnsiKey, TermiosError> {
+        let (mut button_code, x, y) = (checked_stdin_read()? - 32, checked_stdin_read()? - 32, checked_stdin_read()? - 32); // all of them are "encoded" by adding 32 to the actual value
+        
+        let is_motion_event = button_code >= 32;  // the way we differentiate between a simple mouse move event and simple mouse press/release event is this
+        if is_motion_event { button_code -= 32; }
+        
+        let button_bits = button_code & 0b11;
+        let button: MouseButton = match button_bits {
+            0 => MouseButton::Left,
+            1 => MouseButton::Right,
+            2 => MouseButton::Center,
+            _ => MouseButton::None
+        };
+
+        let event = MouseButtonEvent {button, x: x - 1, y: y - 1};  // coordinates start at 1 in the codes
+        
+        Ok(AnsiKey {
+            bytes: [27, 91, 77, button_code, 0], 
+            code: if is_motion_event {AnsiKeyCode::MouseMove(event)} else {AnsiKeyCode::MouseButton(event)},
+            modifier: KeyModifier::None
+        })
+    }
+    
     pub fn read_key() -> Result<AnsiKey, TermiosError> {
         while let Ok(c) = checked_stdin_read() {
             if c == 0 {
@@ -257,7 +287,8 @@ impl TermiosReader {
                     // If character is 27, this means a function key was pressed and following
                     // is a sequence of characters.
                     match c {
-                        1..=26 => {
+                        9 => ([c, 0, 0, 0, 0], AnsiKeyCode::_Tab, KeyModifier::None),
+                        1..=8 | 10..=26 => {
                             let key = AnsiKeyCode::Letter(Letter::try_from(c)?);
                             ([c, 0, 0, 0, 0], key, modifier)
                         }
@@ -323,9 +354,15 @@ impl TermiosReader {
                                             };
                                             ([c, byte_2, byte_3, byte_4, byte_5], key, modifier)
                                         }
+                                        65 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Up, modifier),
+                                        66 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Down, modifier),
+                                        67 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Right, modifier),
+                                        68 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Left, modifier),
+                                        77 => return Self::parse_mouse_event(),
                                         _ => return Err(TermiosError::UnknownKey(byte_3)),
                                     }
                                 }
+                                0 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::_Escape, modifier),
                                 _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
                             }
                         }
@@ -768,5 +805,6 @@ pub fn checked_stdin_read() -> Result<u8, TermiosError> {
         let err = std::io::Error::last_os_error();
         return Err(TermiosError::ReadStdInFailed(err));
     }
+    // println!("{}", byte);
     Ok(byte)
 }
