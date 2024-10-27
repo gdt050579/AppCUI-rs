@@ -701,6 +701,22 @@ impl Terminal for WindowsTerminal {
                     MOUSE_MOVED => {
                         return SystemEvent::MouseMove(MouseMoveEvent { x, y, button });
                     }
+                    MOUSE_HWHEELED => {
+                        //println!("HWHEEL {}", ir.event.mouse_event.button_state);
+                        if ir.event.mouse_event.button_state >= 0x80000000 {
+                            return SystemEvent::MouseWheel(MouseWheelEvent {
+                                x,
+                                y,
+                                direction: MouseWheelDirection::Left,
+                            });
+                        } else {
+                            return SystemEvent::MouseWheel(MouseWheelEvent {
+                                x,
+                                y,
+                                direction: MouseWheelDirection::Right,
+                            });
+                        }
+                    }
                     MOUSE_WHEELED => {
                         if ir.event.mouse_event.button_state >= 0x80000000 {
                             return SystemEvent::MouseWheel(MouseWheelEvent {
