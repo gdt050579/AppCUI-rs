@@ -175,7 +175,8 @@ where
             panic!("Invalid view mode. Columns count must be greater than 0 !");
         }
         self.view_mode = mode;
-        self.update_scrollbars();
+        self.update_scrollbars();   
+        self.update_position(self.pos, false);     
     }
     fn compare_items(a: Element, b: Element, column_index: u16, data: &Vec<Item<T>>, ascendent: bool) -> Ordering
     where

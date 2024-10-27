@@ -5059,9 +5059,8 @@ fn check_dynamically_change_view() {
         Key.Pressed(Insert,4)
         Key.Pressed(Alt+D)
         Key.Pressed(Tab,3)
-        Key.Pressed(Down)
-        Paint('5. Cursor on Kapa, View: Details [Zeta,Eta and Theta are checked]')
-        CheckHash(0x9BBF756A57453AA6)
+        Paint('5. Cursor on Iota, View: Details [Zeta,Eta and Theta are checked]')
+        CheckHash(0x7EB1F66DAB6DCDC5)
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     a.add_window(Win::new());
