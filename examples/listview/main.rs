@@ -4,6 +4,7 @@ mod music;
 mod words;
 mod salaries;
 mod planets;
+mod animals;
 
 const LOGO: [&str; 6] = [
     "██╗     ██╗███████╗████████╗██╗   ██╗██╗███████╗██╗    ██╗",
@@ -16,7 +17,7 @@ const LOGO: [&str; 6] = [
 
 #[Desktop(events    = [MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [ShowCountries, ShowMusic, ShowWords, ShowSalaries, ShowPlanets,
+          commands  = [ShowCountries, ShowMusic, ShowWords, ShowSalaries, ShowPlanets, ShowAnimals,
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -82,6 +83,7 @@ impl DesktopEvents for MyDesktop {
                 {&Words,cmd: ShowWords},
                 {&Salaries,cmd: ShowSalaries},
                 {&Planets,cmd: ShowPlanets},
+                {&Animals,cmd: ShowAnimals},
             ]
         "));
         self.menu_help = self.register_menu(menu!("
@@ -119,6 +121,9 @@ impl MenuEvents for MyDesktop {
             },
             mydesktop::Commands::ShowPlanets => { 
                 self.add_window(planets::Win::new());
+            },
+            mydesktop::Commands::ShowAnimals => { 
+                self.add_window(animals::Win::new());
             },
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
