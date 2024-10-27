@@ -41,12 +41,12 @@ impl listview::ListItem for Person {
     fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
         match column_index {
             0 => self.name.cmp(other.name),
-            1 => self.position.cmp(&other.position),
+            1 => self.position.cmp(other.position),
             2 => self.salary.cmp(&other.salary),
             3 => self.hire_date.cmp(&other.hire_date),
             4 => self.age.cmp(&other.age),
             5 => self.evaluation.cmp(&other.evaluation),
-            6 => self.location.cmp(&other.location),
+            6 => self.location.cmp(other.location),
             _ => std::cmp::Ordering::Equal,
         }
     }

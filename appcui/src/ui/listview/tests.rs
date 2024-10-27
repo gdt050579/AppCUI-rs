@@ -4747,7 +4747,7 @@ fn check_dynamically_change_view() {
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
-                1 => self.description.cmp(&other.description),
+                1 => self.description.cmp(other.description),
                 _ => std::cmp::Ordering::Equal,
             }
         }

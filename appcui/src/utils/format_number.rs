@@ -255,8 +255,8 @@ impl FormatNumber {
         if start_pos >= offset {
             return Some(offset);
         }
-        for i in start_pos..offset {
-            buffer[i] = self.fill_char;
+        for item in buffer.iter_mut().take(offset).skip(start_pos) {
+            *item = self.fill_char;
         }
         Some(start_pos)
     }
