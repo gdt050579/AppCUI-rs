@@ -40,7 +40,7 @@ pub(crate) struct Win {}
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("Countries,d:c,w:70,h:10,flags: Sizeable"),
+            base: window!("Animals,d:c,w:70,h:10,flags: Sizeable"),
         };
         let mut lv = listview!("class: Animal,x:0,y:0,w:100%,h:100%,flags: ScrollBars+SearchBar+SmallIcons+CheckBoxes, columns:[{&Name,15,l},{&Speed,12,r}, {&Weight,12,r}, {&Predator,12,c}]");
         lv.add_item(listview::Item::new(
