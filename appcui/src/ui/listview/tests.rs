@@ -4249,10 +4249,7 @@ fn check_weight_formater_renderer_simple() {
         FileInfo { name: "Small", w: 300 },
         FileInfo { name: "Regular", w: 12345 },
         FileInfo { name: "Large", w: 3200000 },
-        FileInfo {
-            name: "Huge",
-            w: 795000000,
-        },
+        FileInfo { name: "Huge", w: 795000000 },
     ];
     lv.add_items(students);
     w.add(lv);
@@ -4260,6 +4257,57 @@ fn check_weight_formater_renderer_simple() {
     a.run();
 }
 
+#[test]
+fn check_speed_formater_renderer_simple() {
+    struct FileInfo {
+        name: &'static str,
+        speed: u64,
+    }
+    impl listview::ListItem for FileInfo {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Ascii(self.name)),
+                1 => Some(listview::RenderMethod::Speed(self.speed, listview::SpeedFormat::KilometersPerHour)),
+                2 => Some(listview::RenderMethod::Speed(self.speed, listview::SpeedFormat::Mach)),
+                3 => Some(listview::RenderMethod::Speed(self.speed, listview::SpeedFormat::MilesPerHour)),
+                4 => Some(listview::RenderMethod::Speed(self.speed, listview::SpeedFormat::MetersPerSecond)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1..=4 => self.speed.cmp(&other.speed),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xCBF8030B31CD0A41)
+    ";
+    let mut a = App::debug(80, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv =
+        listview!("FileInfo,d:c,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KM/H,20,Right},{Mach,15,Right},{MPH,10,Right},{M/S,15,Right}]");
+
+    let students = vec![
+        FileInfo { name: "NUll", speed: 0 },
+        FileInfo { name: "Small", speed: 140 },
+        FileInfo {
+            name: "Regular",
+            speed: 1800,
+        },
+        FileInfo { name: "Large", speed: 32000 },
+        FileInfo { name: "Huge", speed: 79500 },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
 
 #[test]
 fn check_rating_formater_renderer_simple() {
