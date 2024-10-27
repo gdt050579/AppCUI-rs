@@ -4668,3 +4668,63 @@ fn check_filtering_and_select_while_folded() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_mouse_wheel_details() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x936838B8F2CC884C)
+        Mouse.Wheel(20,5,down,1)
+        Paint('2. MOve scroll down +1 (starts with John)')
+        CheckHash(0x55826CA1E6C2BD04)
+        Mouse.Wheel(20,5,down,3)
+        Paint('3. MOve scroll down +4 (starts with Europe)')
+        CheckHash(0x27E6B994F8F94109)
+        Mouse.Wheel(20,5,up,2)
+        Paint('4. MOve scroll up +2 (starts with Mike)')
+        CheckHash(0x7431930EE340A2A5)
+        Mouse.Wheel(20,5,right,2)
+        Paint('5. MOve scroll right +2')
+        CheckHash(0x86C5AF4111531E4E)
+        Mouse.Wheel(20,5,right,4)
+        Paint('6. MOve scroll right +4')
+        CheckHash(0x8272911FBFE6BE84)
+        Mouse.Wheel(20,5,left,2)
+        Paint('7. MOve scroll left +2')
+        CheckHash(0x9B2A2A7535388CE)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_wheel_columns_3() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x2D99F3E095A0F36F)
+        Mouse.Wheel(20,5,right,2)
+        Paint('2. MOve scroll right +2 (on Andrei)')
+        CheckHash(0xA2A1CC2DF5835B84)
+        Mouse.Wheel(20,5,right,1)
+        Paint('3. MOve scroll right +1 (on Teodor - last)')
+        CheckHash(0x4836C241C9E5126C)
+        Mouse.Wheel(20,5,left,2)
+        Paint('4. MOve scroll left +2 (on Etiene)')
+        CheckHash(0xF71865097312AB18)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view: Columns(3),flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}

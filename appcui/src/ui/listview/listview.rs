@@ -1264,7 +1264,7 @@ where
                     }
                 } else {
                     let len = self.filter.len();
-                    for idx in pos+1..len {
+                    for idx in pos + 1..len {
                         match self.filter[idx] {
                             Element::Item(index) => {
                                 let item = &self.data[index as usize];
@@ -1474,6 +1474,12 @@ where
                 match dir {
                     MouseWheelDirection::Up => self.move_scroll_to(self.top_view.saturating_sub(1)),
                     MouseWheelDirection::Down => self.move_scroll_to(self.top_view.saturating_add(1)),
+                    MouseWheelDirection::Left => {
+                        OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Left, KeyModifier::None), 0 as char);
+                    }
+                    MouseWheelDirection::Right => {
+                        OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Right, KeyModifier::None), 0 as char);
+                    }
                     _ => {}
                 }
                 true
