@@ -984,69 +984,69 @@ fn check_navigate_keys_mode_columns_3() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state (scroll starts from USA)')
-        CheckHash(0xDE38EF2D63376D71)
+        CheckHash(0xF678FC0FAD8F3DEF)
         Key.Pressed(Down)
         Paint('2. Cursor on John')
-        CheckHash(0xAE41C62BD807A816)
+        CheckHash(0xDC5C08DC80FFDA68)
         Key.Pressed(Down,3)
         Paint('3. Cursor on Europe')
-        CheckHash(0xE7AC7A2C64C3D969)
+        CheckHash(0x3ECD2C4091135017)
         Key.Pressed(Down,2)
         Paint('4. Cursor on Etiene')
-        CheckHash(0x5CF3BF08D75BA24A)
+        CheckHash(0x3AA89DF3DFA5895C)
         Key.Pressed(Down)
         Paint('5. Cursor on Karl [column:2] - (scroll starts from USA)')
-        CheckHash(0x9E5A82AF0C58C30E)
+        CheckHash(0xACCF1076BFEEE270)
         Key.Pressed(PageDown)
         Paint('6. Cursor on Teodor (scroll starts from MIke)')
-        CheckHash(0xCD47E11CB847CC91)
+        CheckHash(0x800820C35EA0583)
         Key.Pressed(Up,3)
         Paint('7. Cursor on Ion[Column:3] (scroll starts from Mike)')
-        CheckHash(0xCA813C48430A1FD6)
+        CheckHash(0x27035D1EDABABE1C)
         Key.Pressed(PageUp)
         Paint('8. Cursor on USA (scroll starts from USA)')
-        CheckHash(0xDE38EF2D63376D71)
+        CheckHash(0xF678FC0FAD8F3DEF)
         Key.Pressed(Right)
         Paint('9. Cursor on Karl [Column:2] (scroll starts from USA)')
-        CheckHash(0x9E5A82AF0C58C30E)
+        CheckHash(0xACCF1076BFEEE270)
         Key.Pressed(Right)
         Paint('10. Cursor on Chen Li [Column:3] (scroll starts from USA)')
-        CheckHash(0xE611C2E03D0EE7F9)
+        CheckHash(0x51FD55B0D2974627)
         Key.Pressed(Left)
         Paint('11. Cursor on Karl [Column:2] (scroll starts from USA)')
-        CheckHash(0x9E5A82AF0C58C30E)
+        CheckHash(0xACCF1076BFEEE270)
         Key.Pressed(Down,3)
         Key.Pressed(Left)
         Paint('12. Cursor on Todd [Column:1] (scroll starts from USA)')
-        CheckHash(0xEBEB48203E6D98F6)
+        CheckHash(0xD52B1C7B8CE54E48)
         Key.Pressed(Right,3)
         Paint('13. Cursor on Teodor [Column:3,last] (scroll starts from Mike)')
-        CheckHash(0xCD47E11CB847CC91)
+        CheckHash(0x800820C35EA0583)
         Key.Pressed(Right,3)
         Paint('14. Cursor remains on Teodor [Column:3,last] (scroll starts from Mike)')
-        CheckHash(0xCD47E11CB847CC91)
+        CheckHash(0x800820C35EA0583)
         Key.Pressed(PageDown)
         Paint('15. Cursor remains on Teodor [Column:3,last] (scroll starts from Mike)')
-        CheckHash(0xCD47E11CB847CC91)
+        CheckHash(0x800820C35EA0583)
         Key.Pressed(Home)
         Paint('16. Cursor back to initial state')
-        CheckHash(0xDE38EF2D63376D71)
+        CheckHash(0xF678FC0FAD8F3DEF)
         Key.Pressed(Down,4)
         Key.Pressed(Right)
         Paint('17. Cursor on Kai [Column:2] (scroll starts from USA)')
-        CheckHash(0x41DF9B4FD337688D)
+        CheckHash(0xB9F9EE8A9C47A8AB)
         Key.Pressed(Right)
         Paint('18. Cursor on Vlad [Column:3] (scroll starts from USA)')
-        CheckHash(0x83180EB431A3362)
+        CheckHash(0x3981DEA800956584)
         Key.Pressed(Left,2)
         Paint('19. Cursor on Europe [Column:1] (scroll starts from USA)')
-        CheckHash(0xE7AC7A2C64C3D969)
+        CheckHash(0x3ECD2C4091135017)
         Key.Pressed(Left)
         Paint('20. Cursor on USA [Column:1,first] (scroll starts from USA)')
-        CheckHash(0xDE38EF2D63376D71)
+        CheckHash(0xF678FC0FAD8F3DEF)
         Key.Pressed(End)
         Paint('21. Cursor back on Teodor [Column:3,last] (scroll starts from Mike)')
-        CheckHash(0xCD47E11CB847CC91)
+        CheckHash(0x800820C35EA0583)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
@@ -1503,10 +1503,10 @@ fn check_resize_window_view_columns_3() {
         CheckHash(0x715076E1432BC0A4)     
         Mouse.Drag(59,8,19,8) 
         Paint('4. Resized')
-        CheckHash(0xBFD6895C71103C1E)     
+        CheckHash(0xB569C25F98391083)     
         Mouse.Drag(19,8,19,10) 
         Paint('5. Height increased')
-        CheckHash(0x7782B8C451B181C9)     
+        CheckHash(0x2D0F2E9B2F5BE149)     
         Mouse.Drag(19,10,59,10) 
         Paint('6. Height increased & resized')
         CheckHash(0x426BD2A131C85C3)     
@@ -1526,7 +1526,7 @@ fn check_resize_window_view_columns_3_from_end_width_checkboxes() {
         Paint.Enable(false)
         Key.Pressed(End)
         Paint('1. Initial state')
-        CheckHash(0xE4993796134F0B69)     
+        CheckHash(0x5CD50C2F808C5543)     
         Mouse.Drag(39,8,50,8) 
         Paint('2. Resized')
         CheckHash(0xB86DDA803EA56BBD)     
@@ -4669,7 +4669,6 @@ fn check_filtering_and_select_while_folded() {
     a.run();
 }
 
-
 #[test]
 fn check_mouse_wheel_details() {
     let script = "
@@ -4709,20 +4708,22 @@ fn check_mouse_wheel_columns_3() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x2D99F3E095A0F36F)
+        CheckHash(0x55D64E63B3A6C855)
         Mouse.Wheel(20,5,right,2)
-        Paint('2. MOve scroll right +2 (on Andrei)')
-        CheckHash(0xA2A1CC2DF5835B84)
+        Paint('2. Move scroll right +2 (on Andrei)')
+        CheckHash(0x8F1B6B93F51BA08E)
         Mouse.Wheel(20,5,right,1)
-        Paint('3. MOve scroll right +1 (on Teodor - last)')
-        CheckHash(0x4836C241C9E5126C)
+        Paint('3. Move scroll right +1 (on Teodor - last)')
+        CheckHash(0x95AA6943E1770B3E)
         Mouse.Wheel(20,5,left,2)
-        Paint('4. MOve scroll left +2 (on Etiene)')
-        CheckHash(0xF71865097312AB18)
+        Paint('4. Move scroll left +2 (on Etiene)')
+        CheckHash(0xB2BBCFA0C87610BA)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("Person,d:c,view: Columns(3),flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+    let mut lv = listview!(
+        "Person,d:c,view: Columns(3),flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]"
+    );
     Person::populate(&mut lv);
     w.add(lv);
     a.add_window(w);
@@ -4743,7 +4744,7 @@ fn check_dynamically_change_view() {
                 _ => None,
             }
         }
-    
+
         fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
             match column_index {
                 0 => self.name.cmp(other.name),
@@ -4753,15 +4754,15 @@ fn check_dynamically_change_view() {
         }
     }
     #[Window(events = RadioBoxEvents, internal = true)]
-     struct Win {
+    struct Win {
         rb_detailed: Handle<RadioBox>,
         rb_columns_2: Handle<RadioBox>,
         rb_columns_3: Handle<RadioBox>,
         lv: Handle<ListView<GreekLetter>>,
     }
-    
+
     impl Win {
-         fn new() -> Self {
+        fn new() -> Self {
             let mut me = Self {
                 base: window!("'Greek Letters',d:c,w:70,h:15,flags: Sizeable"),
                 rb_detailed: Handle::None,
@@ -4769,7 +4770,9 @@ fn check_dynamically_change_view() {
                 rb_columns_3: Handle::None,
                 lv: Handle::None,
             };
-            let mut lv = listview!("class: GreekLetter,l:0,t:5,r:0,b:0,flags: ScrollBars+SearchBar+LargeIcons+CheckBoxes, columns:[{&Name,15,l},{&Description,80,l}]");
+            let mut lv = listview!(
+                "class: GreekLetter,l:0,t:5,r:0,b:0,flags: ScrollBars+SearchBar+LargeIcons+CheckBoxes, columns:[{&Name,15,l},{&Description,80,l}]"
+            );
             lv.add_item(listview::Item::new(
                 GreekLetter {
                     name: "Alpha",
@@ -5003,13 +5006,13 @@ fn check_dynamically_change_view() {
             lv.add_item(listview::Item::new(
                 GreekLetter {
                     name: "Omega",
-                    description: "The twenty-fourth letter of the Greek alphabet, used to denote the twenty-fourth element in a sequence.", 
+                    description: "The twenty-fourth letter of the Greek alphabet, used to denote the twenty-fourth element in a sequence.",
                 },
                 false,
                 None,
                 ['ω', 'Ω'],
                 listview::Group::None,
-            ));        
+            ));
             me.add(hline!("l:0,t:4,r:0"));
             me.rb_detailed = me.add(radiobox!("'&Detailed view',x:1,y:1,w:20,selected: true"));
             me.rb_columns_2 = me.add(radiobox!("'&2 columns view',x:1,y:2,w:20,selected: false"));
@@ -5018,7 +5021,7 @@ fn check_dynamically_change_view() {
             me
         }
     }
-    
+
     impl RadioBoxEvents for Win {
         fn on_selected(&mut self, handle: Handle<RadioBox>) -> EventProcessStatus {
             let lvh = self.lv;
@@ -5064,5 +5067,219 @@ fn check_dynamically_change_view() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     a.add_window(Win::new());
+    a.run();
+}
+
+#[test]
+fn check_item_custom_paint() {
+    struct MyItem {
+        name: &'static str,
+        size: u32,
+        city: &'static str,
+    }
+    impl listview::ListItem for MyItem {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Text(self.name)),
+                1 => Some(listview::RenderMethod::Custom),
+                2 => Some(listview::RenderMethod::Text(self.city)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.name.cmp(other.name),
+                1 => self.size.cmp(&other.size),
+                2 => self.city.cmp(other.city),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+
+        fn paint(&self, column_index: u32, width: u16, surface: &mut Surface, _theme: &Theme, attr: Option<CharAttribute>) {
+            if column_index != 1 {
+                return;
+            }
+            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White,Color::Black));
+            surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
+            surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
+            surface.write_char(width as i32 - 1,0,char!(">,red,black"));            
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        //|10++++   >|
+        // width should be 10
+        Paint('1. Initial state')
+        CheckHash(0x29F74CEB38FFCAF9)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("MyItem,d:c,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
+    lv.add(MyItem {
+        name: "John",
+        size: 5,
+        city: "New York",
+    });
+    lv.add(MyItem {
+        name: "Mike",
+        size: 4,
+        city: "Los Angeles",
+    });
+    lv.add(MyItem {
+        name: "Etiene",
+        size: 2,
+        city: "Chicago",
+    });
+    lv.add(MyItem {
+        name: "Andrei",
+        size: 6,
+        city: "San Francisco",
+    });
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_item_custom_paint_first_column_details() {
+    struct MyItem {
+        name: &'static str,
+        size: u32,
+        city: &'static str,
+    }
+    impl listview::ListItem for MyItem {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Custom),
+                1 => Some(listview::RenderMethod::Text(self.name)),
+                2 => Some(listview::RenderMethod::Text(self.city)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.size.cmp(&other.size),
+                1 => self.name.cmp(other.name),
+                2 => self.city.cmp(other.city),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+
+        fn paint(&self, column_index: u32, width: u16, surface: &mut Surface, _theme: &Theme, attr: Option<CharAttribute>) {
+            if column_index != 0 {
+                return;
+            }
+            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White,Color::Black));
+            surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
+            surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
+            surface.write_char(width as i32 - 1,0,char!(">,red,black"));
+        }
+    }
+    let script = "
+        //Paint.Enable(false)
+        //│x 13+++       >│
+        // 123456789012345
+        // the width should be 13 (as we have the 'x ' prefix)
+        Paint('1. Initial state')
+        CheckHash(0x45E307F308558E86)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("MyItem,d:c,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
+    lv.add(MyItem {
+        name: "John",
+        size: 5,
+        city: "New York",
+    });
+    lv.add(MyItem {
+        name: "Mike",
+        size: 7,
+        city: "Los Angeles",
+    });
+    lv.add(MyItem {
+        name: "Etiene",
+        size: 8,
+        city: "Chicago",
+    });
+    lv.add(MyItem {
+        name: "Andrei",
+        size: 6,
+        city: "San Francisco",
+    });
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_item_custom_paint_first_column_columns_3() {
+    struct MyItem {
+        name: &'static str,
+        size: u32,
+        city: &'static str,
+    }
+    impl listview::ListItem for MyItem {
+        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+            match column_index {
+                0 => Some(listview::RenderMethod::Custom),
+                1 => Some(listview::RenderMethod::Text(self.name)),
+                2 => Some(listview::RenderMethod::Text(self.city)),
+                _ => None,
+            }
+        }
+
+        fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
+            match column_index {
+                0 => self.size.cmp(&other.size),
+                1 => self.name.cmp(other.name),
+                2 => self.city.cmp(other.city),
+                _ => std::cmp::Ordering::Equal,
+            }
+        }
+
+        fn paint(&self, column_index: u32, width: u16, surface: &mut Surface, _theme: &Theme, attr: Option<CharAttribute>) {
+            if column_index != 0 {
+                return;
+            }
+            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White,Color::Black));
+            surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
+            surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
+            surface.write_char(width as i32 - 1,0,char!(">,red,black"));
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        //│x 10++++   >│
+        // the width should be 10 (12 if we count the 'x ' prefix)
+        Paint('1. Initial state')
+        CheckHash(0x99664F10C2C18948)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("MyItem,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
+    lv.add(MyItem {
+        name: "John",
+        size: 5,
+        city: "New York",
+    });
+    lv.add(MyItem {
+        name: "Mike",
+        size: 7,
+        city: "Los Angeles",
+    });
+    lv.add(MyItem {
+        name: "Etiene",
+        size: 8,
+        city: "Chicago",
+    });
+    lv.add(MyItem {
+        name: "Andrei",
+        size: 6,
+        city: "San Francisco",
+    });
+    w.add(lv);
+    a.add_window(w);
     a.run();
 }

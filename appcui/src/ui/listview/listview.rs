@@ -175,8 +175,8 @@ where
             panic!("Invalid view mode. Columns count must be greater than 0 !");
         }
         self.view_mode = mode;
-        self.update_scrollbars();   
-        self.update_position(self.pos, false);     
+        self.update_scrollbars();
+        self.update_position(self.pos, false);
     }
     fn compare_items(a: Element, b: Element, column_index: u16, data: &Vec<Item<T>>, ascendent: bool) -> Ordering
     where
@@ -955,7 +955,7 @@ where
                 rd.attr = if attr.is_none() { item.render_attr() } else { attr };
                 if !render_method.paint(surface, &rd) {
                     // custom paint required
-                    ListItem::paint(item.value(), 0, c.width as u16, surface, theme)
+                    ListItem::paint(item.value(), 0, c.width.saturating_sub(extra as u8) as u16, surface, theme, rd.attr)
                 }
             }
         }
@@ -977,7 +977,7 @@ where
 
                 if !render_method.paint(surface, &rd) {
                     // custom paint required
-                    ListItem::paint(item.value(), index as u32, c.width as u16, surface, theme)
+                    ListItem::paint(item.value(), index as u32, c.width as u16, surface, theme, rd.attr)
                 }
             }
         }
@@ -1022,7 +1022,7 @@ where
                 surface.set_relative_clip(l + extra, y, r, y);
                 surface.set_origin(l + extra, y);
             }
-            let item_render_width = (r - l - extra) as u16;
+            let item_render_width = (r + 1 - l - extra) as u16;
             if let Some(render_method) = ListItem::render_method(item.value(), 0) {
                 let rd = RenderData {
                     theme,
@@ -1032,7 +1032,7 @@ where
                 };
                 if !render_method.paint(surface, &rd) {
                     // custom paint required
-                    ListItem::paint(item.value(), 0, item_render_width, surface, theme);
+                    ListItem::paint(item.value(), 0, item_render_width, surface, theme, rd.attr);
                 }
             }
         }
