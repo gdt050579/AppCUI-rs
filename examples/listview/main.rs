@@ -6,6 +6,7 @@ mod salaries;
 mod planets;
 mod animals;
 mod greek_letters;
+mod custom_filter;
 
 const LOGO: [&str; 6] = [
     "██╗     ██╗███████╗████████╗██╗   ██╗██╗███████╗██╗    ██╗",
@@ -18,7 +19,8 @@ const LOGO: [&str; 6] = [
 
 #[Desktop(events    = [MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [ShowCountries, ShowMusic, ShowWords, ShowSalaries, ShowPlanets, ShowAnimals, ShowGreekLetters,
+          commands  = [ShowCountries, ShowMusic, ShowWords, ShowSalaries, ShowPlanets, ShowAnimals, 
+                       ShowGreekLetters, ShowCustomFilter,
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -86,6 +88,8 @@ impl DesktopEvents for MyDesktop {
                 {&Planets,cmd: ShowPlanets},
                 {&Animals,cmd: ShowAnimals},
                 {'&Greek Letters',cmd: ShowGreekLetters},
+                {---},
+                {'Custom Filter', cmd: ShowCustomFilter}
             ]
         "));
         self.menu_help = self.register_menu(menu!("
@@ -129,6 +133,9 @@ impl MenuEvents for MyDesktop {
             },
             mydesktop::Commands::ShowGreekLetters => { 
                 self.add_window(greek_letters::Win::new());
+            },
+            mydesktop::Commands::ShowCustomFilter => { 
+                self.add_window(custom_filter::Win::new());
             },
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
