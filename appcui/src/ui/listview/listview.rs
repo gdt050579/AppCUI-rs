@@ -212,6 +212,7 @@ where
         }
     }
     pub fn sort(&mut self, column_index: u16, ascendent: bool) {
+        self.header.set_sort_column(column_index, ascendent, true);
         if self.filter.is_empty() {
             // no need to sort
             return;

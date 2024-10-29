@@ -487,4 +487,15 @@ impl ColumnsHeader {
     pub fn should_sort_ascendent(&self) -> bool {
         self.sort_ascendent
     }
+    pub(crate) fn set_sort_column(&mut self, column_index: u16, ascendent: bool, ensure_visible: bool) {
+        if column_index < self.columns.len() as u16 {
+            self.selected_column_index = column_index;
+            self.sort_ascendent = ascendent;
+            if ensure_visible {
+                self.ensure_visible(column_index, false);
+            }
+        } else {
+            self.selected_column_index = u16::MAX;
+        }
+    }
 }
