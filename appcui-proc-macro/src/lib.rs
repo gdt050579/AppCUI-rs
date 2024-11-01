@@ -5,6 +5,7 @@ mod key;
 mod menu;
 mod procmacro_builder;
 mod parameter_parser;
+mod derives;
 mod controls;
 mod utils;
 use proc_macro::*;
@@ -301,6 +302,12 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
 
     procmacro_builder::build(args, input, BaseControlType::Desktop, &mut config)
+}
+
+
+#[proc_macro_derive(ListViewItem, attributes(Column))]
+pub fn derive_describe(input: TokenStream) -> TokenStream {
+    crate::derives::listview_item::derive(input)
 }
 
 /// Use to quickly identify a key or a combination via a string
