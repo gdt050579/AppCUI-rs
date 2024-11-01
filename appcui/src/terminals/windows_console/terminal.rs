@@ -599,24 +599,19 @@ impl Terminal for WindowsTerminal {
             match ch.code as u32 {
                 0 => {
                     screen_char.code = 32;
-                    pos += 1;
-                }
-                0x0001..=31 => {
-                    screen_char.code = ch.code as u16;
-                    pos += 1;
-                }
-                32 => {
-                    // skip first space if surrogates are being used
-                    screen_char.code = 32;
-                    if surrogate_used == 0 {
-                        pos += 1;
-                    } else {
+                    if surrogate_used > 0 {
                         surrogate_used -= 1;
+                    } else {
+                        pos += 1;
                     }
                 }
-                33..=0xD7FF => {
+                0x0001..=0xD7FF => {
                     screen_char.code = ch.code as u16;
-                    pos += 1;
+                    if surrogate_used > 0 {
+                        surrogate_used -= 1;
+                    } else {
+                        pos += 1;
+                    }
                 }
                 0x10000..=0x10FFFF => {
                     // surrogate pair
@@ -635,7 +630,11 @@ impl Terminal for WindowsTerminal {
                 _ => {
                     // unknown character --> use '?'
                     screen_char.code = b'?' as u16;
-                    pos += 1;
+                    if surrogate_used > 0 {
+                        surrogate_used -= 1;
+                    } else {
+                        pos += 1;
+                    }
                 }
             }
             x += 1;
