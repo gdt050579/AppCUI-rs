@@ -513,8 +513,10 @@ impl WindowsTerminal {
             visible_region: info.window,
             _original_mode_flags: original_mode_flags,
         };
-        term.chars
-            .resize((term.size.width as usize) * (term.size.height as usize), CHAR_INFO { code: 32, attr: 0 });
+        term.chars.resize(
+            (term.size.width as usize) * (term.size.height as usize) * 2,
+            CHAR_INFO { code: 32, attr: 0 },
+        );
         //println!("Init(size:{:?},visible:{:?})", term.size, info.window);
         Ok(term)
     }
@@ -527,9 +529,39 @@ impl WindowsTerminal {
             //     self.size, info.window
             // );
             self.visible_region = info.window;
-            self.chars.resize((w as usize) * (h as usize), CHAR_INFO { code: 32, attr: 0 });
+            self.chars.resize((w as usize) * (h as usize) * 2, CHAR_INFO { code: 32, attr: 0 });
             self.size = Size::new(w, h);
         }
+    }
+    #[inline(always)]
+    fn update_char_info(screen_char: &mut CHAR_INFO, ch: &Character) -> bool {
+        screen_char.attr = 0;
+        if ch.foreground != Color::Transparent {
+            screen_char.attr = (ch.foreground as u8) as u16;
+        }
+        if ch.background != Color::Transparent {
+            screen_char.attr |= ((ch.background as u8) as u16) << 4;
+        }
+        if ch.flags.contains(CharFlags::Underline) {
+            screen_char.attr |= COMMON_LVB_UNDERSCORE;
+        }
+
+        match ch.code as u32 {
+            0 => {
+                screen_char.code = 32;
+            }
+            0x0001..=0xD7FF => {
+                screen_char.code = ch.code as u16;
+            }
+            0x10000..=0x10FFFF => {
+                return false;
+            }
+            _ => {
+                // unknown character --> use '?'
+                screen_char.code = b'?' as u16;
+            }
+        }
+        true
     }
 }
 
@@ -539,17 +571,20 @@ impl Terminal for WindowsTerminal {
         if surface.size != self.size {
             panic!("Invalid size !!!");
         }
+        // check if allocated space si twice the size (to account for surrogates)
+        if self.chars.len() != (self.size.width as usize) * (self.size.height as usize) * 2 {
+            panic!("Invalid size for CHAR_INFO buffer !!!");
+        }
 
         // copy surface into CHAR_INFO
-        let sz = self.chars.len();
-        for i in 0..sz {
-            let ch = &surface.chars[i];
-            let screen_char = &mut (self.chars[i]);
-            if ch.code != (0 as char) {
-                screen_char.code = ch.code as u16;
-            } else {
-                screen_char.code = 32; // fallback to space
-            }
+        let mut pos = 0;
+        let mut x = 0;
+        let mut y = 0;
+        let mut start_y = 0;
+        let w = surface.size.width as i32;
+        let mut surrogate_used = 0;
+        for ch in surface.chars.iter() {
+            let screen_char = &mut (self.chars[pos]);
             screen_char.attr = 0;
             if ch.foreground != Color::Transparent {
                 screen_char.attr = (ch.foreground as u8) as u16;
@@ -560,14 +595,96 @@ impl Terminal for WindowsTerminal {
             if ch.flags.contains(CharFlags::Underline) {
                 screen_char.attr |= COMMON_LVB_UNDERSCORE;
             }
+
+            match ch.code as u32 {
+                0 => {
+                    screen_char.code = 32;
+                    pos += 1;
+                }
+                0x0001..=31 => {
+                    screen_char.code = ch.code as u16;
+                    pos += 1;
+                }
+                32 => {
+                    // skip first space if surrogates are being used
+                    screen_char.code = 32;
+                    if surrogate_used == 0 {
+                        pos += 1;
+                    } else {
+                        surrogate_used -= 1;
+                    }
+                }
+                33..=0xD7FF => {
+                    screen_char.code = ch.code as u16;
+                    pos += 1;
+                }
+                0x10000..=0x10FFFF => {
+                    // surrogate pair
+                    let v = (ch.code as u32) - 0x10000;
+                    let h = v / 0x400 + 0xD800;
+                    let l = v % 0x400 + 0xDC00;
+                    screen_char.code = h as u16;
+                    let attr = screen_char.attr;
+                    pos += 1;
+                    let screen_char = &mut (self.chars[pos]);
+                    screen_char.attr = attr;
+                    screen_char.code = l as u16;
+                    pos += 1;
+                    surrogate_used += 1;
+                }
+                _ => {
+                    // unknown character --> use '?'
+                    screen_char.code = b'?' as u16;
+                    pos += 1;
+                }
+            }
+            x += 1;
+            if x >= w {
+                x = 0;
+                y += 1;
+                if surrogate_used > 0 {
+                    let sz = COORD {
+                        x: w as i16,
+                        y: y as i16 - start_y as i16,
+                    };
+                    let vis_region = SMALL_RECT {
+                        left: self.visible_region.left,
+                        top: self.visible_region.top + start_y,
+                        right: self.visible_region.right,
+                        bottom: self.visible_region.top + y - 1,
+                    };
+                    unsafe {
+                        winapi::WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
+                    }
+                    pos = 0;
+                    start_y = y;
+                }
+                surrogate_used = 0;
+            }
         }
-        //
-        let sz = COORD {
-            x: self.size.width as i16,
-            y: self.size.height as i16,
-        };
-        unsafe {
-            winapi::WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &self.visible_region);
+        if start_y == 0 {
+            // no surrogates --> write the entire buffer
+            let sz = COORD {
+                x: self.size.width as i16,
+                y: self.size.height as i16,
+            };
+            unsafe {
+                winapi::WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &self.visible_region);
+            }
+        } else if start_y < y {
+            let sz = COORD {
+                x: w as i16,
+                y: y as i16 - start_y as i16,
+            };
+            let vis_region = SMALL_RECT {
+                left: self.visible_region.left,
+                top: self.visible_region.top + start_y,
+                right: self.visible_region.right,
+                bottom: self.visible_region.top + y - 1,
+            };
+            unsafe {
+                winapi::WriteConsoleOutputW(self.stdout_handle, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
+            }
         }
         // update the cursor
         if surface.cursor.is_visible() {
