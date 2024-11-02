@@ -29,6 +29,100 @@ impl listview::ListItem for $(STRUCT_NAME) {
 }
 "#;
 
+
+
+#[derive(Debug, Copy, Clone)]
+enum RenderMethod {
+    Text,
+    Ascii,
+    Int64(&'static str),    
+    UInt64(&'static str),    
+}
+
+impl RenderMethod {
+    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 6] = [
+        ("Text", Self::Text),
+        ("Ascii", Self::Ascii),
+        ("Int64", Self::Int64("Normal")),
+        ("Int", Self::Int64("Normal")),
+        ("UInt64", Self::UInt64("Normal")),
+        ("UInt", Self::UInt64("Normal")),
+    ];
+
+    const NUMERIC_FORMATS: [&'static str; 6] = ["Normal", "Separator", "Hex", "Hex16", "Hex32", "Hex64"];
+
+    fn validate_format(self, fmt: &str, available: &[&'static str]) -> &'static str {
+        for f in available {
+            if crate::utils::equal_ignore_case(fmt, f) {
+                return f;
+            }
+        }
+        panic!(
+            "Invalid format value: '{}' for render method '{}'. Available values are: {}",
+            fmt,
+            self.name(),
+            available.join(", ")
+        );
+    }
+
+    fn from_type(vartype: &str)->Option<Self> {
+        match vartype {
+            "String" | "&str" => Some(Self::Text),
+            "i8" | "i16" | "i32" | "i64" => Some(Self::Int64("Normal")),
+            "u8" | "u16" | "u32" | "u64" => Some(Self::UInt64("Normal")),
+            "u128" | "usize" | "i128" | "isize" => None,
+            "f32" | "f64" => None,
+            "bool" => None,
+            _ => None,
+        }
+    }
+    fn from_str(value: &str) -> Option<Self> {
+        for (text, variant) in &Self::NAME_TO_RENDER_METHOD {
+            if crate::utils::equal_ignore_case(value, text) {
+                return Some(*variant);
+            }
+        }
+        None
+    }
+    fn name(&self) -> &'static str {
+        match self {
+            Self::Text => "Text",
+            Self::Ascii => "Ascii",
+            Self::Int64(_) => "Int64",
+            Self::UInt64(_) => "UInt64",
+        }
+    }
+    fn update_format(&self, fmt: &str) -> Self {
+        match self {
+            Self::Text | Self::Ascii => *self,
+            Self::Int64(_) => Self::Int64(self.validate_format(fmt, RenderMethod::NUMERIC_FORMATS.as_slice())),
+            Self::UInt64(_) => Self::UInt64(self.validate_format(fmt, RenderMethod::NUMERIC_FORMATS.as_slice())),
+        }
+    }
+    fn renderer_code(&self, index: usize, varname: &str, vartype: &str) -> String {
+        match self {           
+            Self::Text | Self::Ascii => {
+                match vartype {
+                    "String" | "&str" => format!("{} => Some(listview::RenderMethod::{}(self.{})),\n", index,self.name(),varname),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Int64(fmt) => {
+                match vartype {
+                    "u8" | "u16" | "u32" | "i8" | "i16" | "i32" | "i64"  => format!("{} => Some(listview::RenderMethod::{}(self.{} as i64, listview::NumericFormat::{})),\n", index,self.name(),varname, *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::UInt64(fmt) => {
+                match vartype {
+                    "u8" | "u16" | "u32" | "u64"  => format!("{} => Some(listview::RenderMethod::{}(self.{} as u64, listview::NumericFormat::{})),\n", index,self.name(),varname, *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+        }
+    }
+}
+
 struct Column {
     name: String,
     width: u16,
@@ -36,6 +130,7 @@ struct Column {
     align: &'static str,
     varname: String,
     vartype: String,
+    render: RenderMethod,
 }
 impl Column {
     fn align(value: &str) -> Option<&'static str> {
@@ -63,6 +158,8 @@ impl Column {
         let mut align = None;
         let mut width = None;
         let mut idx = u32::MAX;
+        let mut render = None;
+        let mut format = None;
         for (attr_name, value) in field.attributes.iter() {
             if !attr_name.starts_with("Column.") {
                 continue;
@@ -100,9 +197,22 @@ impl Column {
                         panic!("Invalid numerical value for column index: '{}' for field '{}'", value, field.name);
                     }
                 }
+                "render" | "r" => {
+                    if let Some(render_method) = RenderMethod::from_str(value) {
+                        render = Some(render_method);
+                    } else {
+                        panic!(
+                            "Unknown render method: '{}' for field '{}'. Available render methods are: 'text', 'ascii', 'int64', 'int' !",
+                            value, field.name
+                        );
+                    }
+                }
+                "format" | "fmt" | "f" => {
+                    format = Some(value.as_str());
+                }
                 _ => {
                     panic!(
-                        "Unknown attribute: '{}' for field '{}'. Available attributes are: 'name', 'align', 'width'",
+                        "Unknown attribute: '{}' for field '{}'. Available attributes are: 'name', 'align', 'width', 'index', 'render' and 'format' !",
                         &attr_name[7..],
                         field.name
                     );
@@ -111,7 +221,27 @@ impl Column {
         }
         if name.is_none() {
             panic!("Missing 'name' attribute for field '{}'", field.name);
+        }   
+        if render.is_none() {
+            if format.is_some() {
+                panic!(
+                    "Missing 'render' attribute for field '{}', but 'format' attribute is specified. You need to specify the rendering method !",
+                    field.name
+                );
+            }
+            render = RenderMethod::from_type(&field.ty);
+            if render.is_none() {
+                panic!(
+                    "There is no default rendering method for field '{}' of type '{}'. You need to manually implement ListItem and specify the rendering method !",
+                    field.name, field.ty
+                );
+            }
         }
+        let r = if let Some(fmt) = format {
+            render.unwrap().update_format(fmt)
+        } else {
+            render.unwrap()
+        };
         Some(Self {
             name: name.unwrap(),
             index: idx,
@@ -119,6 +249,7 @@ impl Column {
             align: align.unwrap_or("Left"),
             varname: field.name.clone(),
             vartype: field.ty.clone(),
+            render: r,
         })
     }
     fn to_column_code(&self, index: usize) -> String {
@@ -130,10 +261,7 @@ impl Column {
     fn to_compare_code(&self, index: usize) -> String {
         match self.vartype.as_str() {
             "u8" | "u16" | "u32" | "u64" | "u128" | "usize" | "i8" | "i16" | "i32" | "i64" | "i128" | "isize" => {
-                format!(
-                    "{} => self.{}.cmp(&other.{}),\n",
-                    index, self.varname, self.varname
-                )
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             "f32" | "f64" => {
                 format!(
@@ -142,37 +270,25 @@ impl Column {
                 )
             }
             "bool" => {
-                format!(
-                    "{} => self.{}.cmp(&other.{}),\n",
-                    index, self.varname, self.varname
-                )
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             "char" => {
-                format!(
-                    "{} => self.{}.cmp(&other.{}),\n",
-                    index, self.varname, self.varname
-                )
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             "String" => {
-                format!(
-                    "{} => self.{}.cmp(&other.{}),\n",
-                    index, self.varname, self.varname
-                )
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             "&str" => {
-                format!(
-                    "{} => self.{}.cmp(other.{}),\n",
-                    index, self.varname, self.varname
-                )
+                format!("{} => self.{}.cmp(other.{}),\n", index, self.varname, self.varname)
             }
-            _ => panic!("Unsupported type '{}' for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.vartype, self.varname),
+            _ => panic!(
+                "Unsupported type '{}' for field '{}'. Implement ListItem manually to provide explicit implementation for this type !",
+                self.vartype, self.varname
+            ),
         }
     }
     fn to_render_code(&self, index: usize) -> String {
-        format!(
-            "{} => Some(listview::RenderMethod::Text(self.{})),\n",
-            index, self.varname
-        )
+        self.render.renderer_code(index, &self.varname, &self.vartype)
     }
 }
 
