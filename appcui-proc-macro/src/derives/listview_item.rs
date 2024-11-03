@@ -36,20 +36,47 @@ enum RenderMethod {
     Text,
     Ascii,
     Int64(&'static str),    
-    UInt64(&'static str),    
+    UInt64(&'static str),   
+    Float(&'static str), 
+    Bool(&'static str),
+    // ---------
+    Size(&'static str),
+    Area(&'static str),
+    Distance(&'static str),
+    Volume(&'static str),
+    Weight(&'static str),
+    Speed(&'static str),
 }
 
 impl RenderMethod {
-    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 6] = [
+    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 16] = [
         ("Text", Self::Text),
         ("Ascii", Self::Ascii),
         ("Int64", Self::Int64("Normal")),
         ("Int", Self::Int64("Normal")),
         ("UInt64", Self::UInt64("Normal")),
         ("UInt", Self::UInt64("Normal")),
+        ("Float", Self::Float("Normal")),
+        ("Bool", Self::Bool("CheckmarkMinus")),
+        ("Boolean", Self::Bool("CheckmarkMinus")),
+        ("Checkmark", Self::Bool("CheckmarkMinus")),
+        ("Size", Self::Size("Auto")),
+        ("Area", Self::Area("SquaredMeters")),
+        ("Distance", Self::Distance("Meters")),
+        ("Volume", Self::Volume("CubicMeters")),
+        ("Weight", Self::Weight("Kilograms")),
+        ("Speed", Self::Speed("KilometersPerHour")),
     ];
 
     const NUMERIC_FORMATS: [&'static str; 6] = ["Normal", "Separator", "Hex", "Hex16", "Hex32", "Hex64"];
+    const FLOAT_FORMATS: [&'static str; 4] = ["Normal","TwoDigits", "ThreeDigits", "FourDigits",];
+    const BOOL_FORMATS: [&'static str; 4] = ["TrueFalse", "YesNo", "XMinus", "CheckmarkMinus"];
+    const SIZE_FORMATS: [&'static str; 11] = ["Bytes","KiloBytes","MegaBytes","GigaBytes","TeraBytes","KiloBytesWithDecimals","MegaBytesWithDecimals","GigaBytesWithDecimals","TeraBytesWithDecimals","Auto","AutoWithDecimals"];
+    const AREA_FORMATS: [&'static str; 10] = ["SquaredMillimeters","SquaredCentimeters","SquaredMeters","SquaredKilometers","Hectares","Ares","SquareFeet","SquareInches","SquareYards","SquareMiles"];
+    const DISTANCE_FORMATS: [&'static str; 8] = ["Kilometers","Meters","Centimeters","Millimeters","Inches","Feet","Yards","Miles",];
+    const VOLUME_FORMATS: [&'static str; 11] = ["CubicMilimeters","CubicCentimeters","CubicMeters","CubicKilometers","Liters","Milliliters","Gallons","CubicFeet","CubicInches","CubicYards","CubicMiles",];
+    const WEIGHT_FORMATS: [&'static str; 5] = ["Grans","Milligrams","Kilograms","Pounds","Tons",];
+    const SPEED_FORMATS: [&'static str; 9] = ["KilometersPerHour","MetersPerHour","KilometersPerSecond","MetersPerSecond","MilesPerHour","MilesPerSecond","Knots","FeetPerSecond","Mach",  ];
 
     fn validate_format(self, fmt: &str, available: &[&'static str]) -> &'static str {
         for f in available {
@@ -70,9 +97,9 @@ impl RenderMethod {
             "String" | "&str" => Some(Self::Text),
             "i8" | "i16" | "i32" | "i64" => Some(Self::Int64("Normal")),
             "u8" | "u16" | "u32" | "u64" => Some(Self::UInt64("Normal")),
+            "f32" | "f64" => Some(Self::Float("Normal")),
             "u128" | "usize" | "i128" | "isize" => None,
-            "f32" | "f64" => None,
-            "bool" => None,
+            "bool" => Some(Self::Bool("CheckmarkMinus")),
             _ => None,
         }
     }
@@ -90,6 +117,14 @@ impl RenderMethod {
             Self::Ascii => "Ascii",
             Self::Int64(_) => "Int64",
             Self::UInt64(_) => "UInt64",
+            Self::Float(_) => "Float",
+            Self::Bool(_) => "Bool",
+            Self::Size(_) => "Size",
+            Self::Area(_) => "Area",
+            Self::Distance(_) => "Distance",
+            Self::Volume(_) => "Volume",
+            Self::Weight(_) => "Weight",
+            Self::Speed(_) => "Speed",
         }
     }
     fn update_format(&self, fmt: &str) -> Self {
@@ -97,6 +132,14 @@ impl RenderMethod {
             Self::Text | Self::Ascii => *self,
             Self::Int64(_) => Self::Int64(self.validate_format(fmt, RenderMethod::NUMERIC_FORMATS.as_slice())),
             Self::UInt64(_) => Self::UInt64(self.validate_format(fmt, RenderMethod::NUMERIC_FORMATS.as_slice())),
+            Self::Float(_) => Self::Float(self.validate_format(fmt, RenderMethod::FLOAT_FORMATS.as_slice())),
+            Self::Bool(_) => Self::Bool(self.validate_format(fmt, RenderMethod::BOOL_FORMATS.as_slice())),
+            Self::Size(_) => Self::Size(self.validate_format(fmt, RenderMethod::SIZE_FORMATS.as_slice())),
+            Self::Area(_) => Self::Area(self.validate_format(fmt, RenderMethod::AREA_FORMATS.as_slice())),
+            Self::Distance(_) => Self::Distance(self.validate_format(fmt, RenderMethod::DISTANCE_FORMATS.as_slice())),
+            Self::Volume(_) => Self::Volume(self.validate_format(fmt, RenderMethod::VOLUME_FORMATS.as_slice())),
+            Self::Weight(_) => Self::Weight(self.validate_format(fmt, RenderMethod::WEIGHT_FORMATS.as_slice())),
+            Self::Speed(_) => Self::Speed(self.validate_format(fmt, RenderMethod::SPEED_FORMATS.as_slice())),
         }
     }
     fn renderer_code(&self, index: usize, varname: &str, vartype: &str) -> String {
@@ -119,6 +162,28 @@ impl RenderMethod {
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
+            Self::Float(fmt) => {
+                match vartype {
+                    "f32" | "f64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::FloatFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::FloatFormat::{})),\n", index,self.name(),varname, *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Bool(fmt) => {
+                match vartype {
+                    "bool" => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::BoolFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}(self.{} != 0, listview::BoolFormat::{})),\n", index,self.name(),varname, *fmt), 
+                    "usize" | "u128" | "i128" | "isize" => format!("{} => Some(listview::RenderMethod::{}(self.{} != 0, listview::BoolFormat::{})),\n", index,self.name(),varname, *fmt),   
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Area(fmt)|Self::Size(fmt)|Self::Distance(fmt)|Self::Volume(fmt)|Self::Weight(fmt)|Self::Speed(fmt) => {
+                match vartype {
+                    "u8" | "u16" | "u32" | "u64"  => format!("{} => Some(listview::RenderMethod::{}(self.{} as u64, listview::{}Format::{})),\n", index,self.name(),varname,self.name(), *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+
         }
     }
 }

@@ -533,36 +533,6 @@ impl WindowsTerminal {
             self.size = Size::new(w, h);
         }
     }
-    #[inline(always)]
-    fn update_char_info(screen_char: &mut CHAR_INFO, ch: &Character) -> bool {
-        screen_char.attr = 0;
-        if ch.foreground != Color::Transparent {
-            screen_char.attr = (ch.foreground as u8) as u16;
-        }
-        if ch.background != Color::Transparent {
-            screen_char.attr |= ((ch.background as u8) as u16) << 4;
-        }
-        if ch.flags.contains(CharFlags::Underline) {
-            screen_char.attr |= COMMON_LVB_UNDERSCORE;
-        }
-
-        match ch.code as u32 {
-            0 => {
-                screen_char.code = 32;
-            }
-            0x0001..=0xD7FF => {
-                screen_char.code = ch.code as u16;
-            }
-            0x10000..=0x10FFFF => {
-                return false;
-            }
-            _ => {
-                // unknown character --> use '?'
-                screen_char.code = b'?' as u16;
-            }
-        }
-        true
-    }
 }
 
 impl Terminal for WindowsTerminal {
