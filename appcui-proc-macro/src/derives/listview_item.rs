@@ -48,10 +48,11 @@ enum RenderMethod {
     Percentage(&'static str),
     Temperature(&'static str),
     Currency(&'static str),
+    Rating(&'static str, u32),
 }
 
 impl RenderMethod {
-    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 19] = [
+    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 20] = [
         ("Text", Self::Text),
         ("Ascii", Self::Ascii),
         ("Int64", Self::Int64("Normal")),
@@ -71,6 +72,7 @@ impl RenderMethod {
         ("Percentage", Self::Percentage("Normal")),
         ("Temperature", Self::Temperature("Celsius")),
         ("Currency", Self::Currency("USD")),
+        ("Rating", Self::Rating("Stars", 5)),
     ];
 
     const NUMERIC_FORMATS: [&'static str; 6] = ["Normal", "Separator", "Hex", "Hex16", "Hex32", "Hex64"];
@@ -85,7 +87,7 @@ impl RenderMethod {
     const PERCENTAGE_FORMATS: [&'static str; 2] = ["Normal","Decimals"];
     const TEMPERATURE_FORMATS: [&'static str; 3] = ["Celsius","Fahrenheit","Kelvin"];
     const CURRENCY_FORMATS: [&'static str; 11] = ["USD","USDSymbol","EUR","EURSymbol","GBP","GBPSymbol","YEN","YENSymbol","Bitcoin","BitcoinSymbol","RON"];
-
+    const RATNG_FORMATS: [&'static str; 4] = ["Numerical","Stars","Circles","Asterix"];
 
     fn validate_format(self, fmt: &str, available: &[&'static str]) -> &'static str {
         for f in available {
@@ -99,6 +101,50 @@ impl RenderMethod {
             self.name(),
             available.join(", ")
         );
+    }
+
+    fn validate_rating(self, fmt: &str) -> (&'static str, u32) {
+        let r_type = {
+            let mut result = "";
+            for f in RenderMethod::RATNG_FORMATS {
+                if f.len() == fmt.len() && crate::utils::equal_ignore_case(f, fmt) {
+                    // default case
+                    return (f, 5);
+                } else if f.len()<fmt.len() && crate::utils::equal_ignore_case(&fmt[..f.len()], f) {
+                    result = f;
+                    break;
+                }
+            }
+            if result.is_empty() {
+                panic!(
+                    "Invalid rating format value: '{}' for render method '{}'. Available values are: {}",
+                    fmt,
+                    self.name(),
+                    RenderMethod::RATNG_FORMATS.join(", ")
+                );
+            }
+            result
+        };
+        let extra_part = fmt[r_type.len()..].trim();
+        if !extra_part.starts_with('(') {
+            panic!("Invalid rating format value: '{}' for render method '{}'. Expected format is: '{}(number)'", fmt, self.name(), r_type);
+        }
+        if !extra_part.ends_with(')') {
+            panic!("Invalid rating format value: '{}' for render method '{}'. Expected format is: '{}(number)'", fmt, self.name(), r_type);
+        }
+        let number_representation = &extra_part[1..extra_part.len() - 1].trim();
+        match number_representation.parse::<u32>() {
+            Ok(v) => {
+                if v==0 {
+                    panic!("Invalid rating format value: '{}' for render method '{}'. The number of ratings must be greater than 0", fmt, self.name());
+                }
+                (r_type, v)
+            },
+            Err(_) => panic!(
+                "Invalid numeric format value: '{}' for render method '{}'. Expected format is: '{}(number)'",
+                fmt, self.name(), r_type
+            ),
+        }
     }
 
     fn from_type(vartype: &str)->Option<Self> {
@@ -137,6 +183,7 @@ impl RenderMethod {
             Self::Percentage(_) => "Percentage",
             Self::Temperature(_) => "Temperature",
             Self::Currency(_) => "Currency",
+            Self::Rating(_,_) => "Rating",
         }
     }
     fn update_format(&self, fmt: &str) -> Self {
@@ -155,6 +202,10 @@ impl RenderMethod {
             Self::Percentage(_) => Self::Percentage(self.validate_format(fmt, RenderMethod::PERCENTAGE_FORMATS.as_slice())),
             Self::Temperature(_) => Self::Temperature(self.validate_format(fmt, RenderMethod::TEMPERATURE_FORMATS.as_slice())),
             Self::Currency(_) => Self::Currency(self.validate_format(fmt, RenderMethod::CURRENCY_FORMATS.as_slice())),
+            Self::Rating(_,_) => {
+                let (r_type, number) = self.validate_rating(fmt);
+                Self::Rating(r_type, number)
+            }
         }
     }
     fn renderer_code(&self, index: usize, varname: &str, vartype: &str) -> String {
@@ -208,6 +259,12 @@ impl RenderMethod {
             Self::Temperature(fmt)|Self::Currency(fmt) => {
                 match vartype {
                     "f32" | "f64" | "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::{}Format::{})),\n", index,self.name(),varname,self.name(), *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Rating(fmt, number) => {
+                match vartype {
+                    "u8" | "u16" | "u32"   => format!("{} => Some(listview::RenderMethod::{}(self.{} as u32, listview::RatingFormat::{}({}))),\n", index,self.name(),varname, *fmt, number),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
