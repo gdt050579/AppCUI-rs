@@ -1,6 +1,6 @@
 use crate::utils::FormatNumber;
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub enum Status {
     Running(f32),
     Queued,
@@ -8,6 +8,18 @@ pub enum Status {
     Stopped,
     Error,
     Completed,
+}
+impl Ord for Status {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        if let Some(res) = self.partial_cmp(other) {
+            res
+        } else {
+            std::cmp::Ordering::Equal
+        }
+    }
+}
+impl Eq for Status {
+    
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]

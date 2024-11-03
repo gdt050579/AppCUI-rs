@@ -49,10 +49,11 @@ enum RenderMethod {
     Temperature(&'static str),
     Currency(&'static str),
     Rating(&'static str, u32),
+    Status(&'static str),
 }
 
 impl RenderMethod {
-    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 20] = [
+    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 21] = [
         ("Text", Self::Text),
         ("Ascii", Self::Ascii),
         ("Int64", Self::Int64("Normal")),
@@ -73,6 +74,7 @@ impl RenderMethod {
         ("Temperature", Self::Temperature("Celsius")),
         ("Currency", Self::Currency("USD")),
         ("Rating", Self::Rating("Stars", 5)),
+        ("Status", Self::Status("Graphical")),
     ];
 
     const NUMERIC_FORMATS: [&'static str; 6] = ["Normal", "Separator", "Hex", "Hex16", "Hex32", "Hex64"];
@@ -88,6 +90,7 @@ impl RenderMethod {
     const TEMPERATURE_FORMATS: [&'static str; 3] = ["Celsius","Fahrenheit","Kelvin"];
     const CURRENCY_FORMATS: [&'static str; 11] = ["USD","USDSymbol","EUR","EURSymbol","GBP","GBPSymbol","YEN","YENSymbol","Bitcoin","BitcoinSymbol","RON"];
     const RATNG_FORMATS: [&'static str; 4] = ["Numerical","Stars","Circles","Asterix"];
+    const STATUS_FORMATS: [&'static str; 3] = ["Hashtag","Graphical","Arrow"];
 
     fn validate_format(self, fmt: &str, available: &[&'static str]) -> &'static str {
         for f in available {
@@ -155,6 +158,7 @@ impl RenderMethod {
             "f32" | "f64" => Some(Self::Float("Normal")),
             "u128" | "usize" | "i128" | "isize" => None,
             "bool" => Some(Self::Bool("CheckmarkMinus")),
+            "Status" | "listview::Status" => Some(Self::Status("Graphical")),
             _ => None,
         }
     }
@@ -184,6 +188,7 @@ impl RenderMethod {
             Self::Temperature(_) => "Temperature",
             Self::Currency(_) => "Currency",
             Self::Rating(_,_) => "Rating",
+            Self::Status(_) => "Status",
         }
     }
     fn update_format(&self, fmt: &str) -> Self {
@@ -206,6 +211,7 @@ impl RenderMethod {
                 let (r_type, number) = self.validate_rating(fmt);
                 Self::Rating(r_type, number)
             }
+            Self::Status(_) => Self::Status(self.validate_format(fmt, RenderMethod::STATUS_FORMATS.as_slice())),
         }
     }
     fn renderer_code(&self, index: usize, varname: &str, vartype: &str) -> String {
@@ -265,6 +271,12 @@ impl RenderMethod {
             Self::Rating(fmt, number) => {
                 match vartype {
                     "u8" | "u16" | "u32"   => format!("{} => Some(listview::RenderMethod::{}(self.{} as u32, listview::RatingFormat::{}({}))),\n", index,self.name(),varname, *fmt, number),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Status(fmt) => {
+                match vartype {
+                    "Status" | "listview::Status" => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::StatusFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
@@ -430,6 +442,9 @@ impl Column {
             }
             "&str" => {
                 format!("{} => self.{}.cmp(other.{}),\n", index, self.varname, self.varname)
+            }
+            "Status" | "listview::Status" => {
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             _ => panic!(
                 "Unsupported type '{}' for field '{}'. Implement ListItem manually to provide explicit implementation for this type !",
