@@ -39,17 +39,19 @@ enum RenderMethod {
     UInt64(&'static str),   
     Float(&'static str), 
     Bool(&'static str),
-    // ---------
     Size(&'static str),
     Area(&'static str),
     Distance(&'static str),
     Volume(&'static str),
     Weight(&'static str),
     Speed(&'static str),
+    Percentage(&'static str),
+    Temperature(&'static str),
+    Currency(&'static str),
 }
 
 impl RenderMethod {
-    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 16] = [
+    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 19] = [
         ("Text", Self::Text),
         ("Ascii", Self::Ascii),
         ("Int64", Self::Int64("Normal")),
@@ -66,6 +68,9 @@ impl RenderMethod {
         ("Volume", Self::Volume("CubicMeters")),
         ("Weight", Self::Weight("Kilograms")),
         ("Speed", Self::Speed("KilometersPerHour")),
+        ("Percentage", Self::Percentage("Normal")),
+        ("Temperature", Self::Temperature("Celsius")),
+        ("Currency", Self::Currency("USD")),
     ];
 
     const NUMERIC_FORMATS: [&'static str; 6] = ["Normal", "Separator", "Hex", "Hex16", "Hex32", "Hex64"];
@@ -77,6 +82,10 @@ impl RenderMethod {
     const VOLUME_FORMATS: [&'static str; 11] = ["CubicMilimeters","CubicCentimeters","CubicMeters","CubicKilometers","Liters","Milliliters","Gallons","CubicFeet","CubicInches","CubicYards","CubicMiles",];
     const WEIGHT_FORMATS: [&'static str; 5] = ["Grans","Milligrams","Kilograms","Pounds","Tons",];
     const SPEED_FORMATS: [&'static str; 9] = ["KilometersPerHour","MetersPerHour","KilometersPerSecond","MetersPerSecond","MilesPerHour","MilesPerSecond","Knots","FeetPerSecond","Mach",  ];
+    const PERCENTAGE_FORMATS: [&'static str; 2] = ["Normal","Decimals"];
+    const TEMPERATURE_FORMATS: [&'static str; 3] = ["Celsius","Fahrenheit","Kelvin"];
+    const CURRENCY_FORMATS: [&'static str; 11] = ["USD","USDSymbol","EUR","EURSymbol","GBP","GBPSymbol","YEN","YENSymbol","Bitcoin","BitcoinSymbol","RON"];
+
 
     fn validate_format(self, fmt: &str, available: &[&'static str]) -> &'static str {
         for f in available {
@@ -125,6 +134,9 @@ impl RenderMethod {
             Self::Volume(_) => "Volume",
             Self::Weight(_) => "Weight",
             Self::Speed(_) => "Speed",
+            Self::Percentage(_) => "Percentage",
+            Self::Temperature(_) => "Temperature",
+            Self::Currency(_) => "Currency",
         }
     }
     fn update_format(&self, fmt: &str) -> Self {
@@ -140,6 +152,9 @@ impl RenderMethod {
             Self::Volume(_) => Self::Volume(self.validate_format(fmt, RenderMethod::VOLUME_FORMATS.as_slice())),
             Self::Weight(_) => Self::Weight(self.validate_format(fmt, RenderMethod::WEIGHT_FORMATS.as_slice())),
             Self::Speed(_) => Self::Speed(self.validate_format(fmt, RenderMethod::SPEED_FORMATS.as_slice())),
+            Self::Percentage(_) => Self::Percentage(self.validate_format(fmt, RenderMethod::PERCENTAGE_FORMATS.as_slice())),
+            Self::Temperature(_) => Self::Temperature(self.validate_format(fmt, RenderMethod::TEMPERATURE_FORMATS.as_slice())),
+            Self::Currency(_) => Self::Currency(self.validate_format(fmt, RenderMethod::CURRENCY_FORMATS.as_slice())),
         }
     }
     fn renderer_code(&self, index: usize, varname: &str, vartype: &str) -> String {
@@ -183,7 +198,20 @@ impl RenderMethod {
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
-
+            Self::Percentage(fmt) => {
+                match vartype {
+                    "f32" | "f64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::PercentageFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}((self.{} as f64)/100.0, listview::PercentageFormat::{})),\n", index,self.name(),varname, *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Temperature(fmt)|Self::Currency(fmt) => {
+                match vartype {
+                    "f32" | "f64" | "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::{}Format::{})),\n", index,self.name(),varname,self.name(), *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            
         }
     }
 }
