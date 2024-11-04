@@ -50,10 +50,11 @@ enum RenderMethod {
     Currency(&'static str),
     Rating(&'static str, u32),
     Status(&'static str),
+    DateTime(&'static str),
 }
 
 impl RenderMethod {
-    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 21] = [
+    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 22] = [
         ("Text", Self::Text),
         ("Ascii", Self::Ascii),
         ("Int64", Self::Int64("Normal")),
@@ -75,6 +76,7 @@ impl RenderMethod {
         ("Currency", Self::Currency("USD")),
         ("Rating", Self::Rating("Stars", 5)),
         ("Status", Self::Status("Graphical")),
+        ("DateTime", Self::DateTime("Normal")),
     ];
 
     const NUMERIC_FORMATS: [&'static str; 6] = ["Normal", "Separator", "Hex", "Hex16", "Hex32", "Hex64"];
@@ -91,6 +93,8 @@ impl RenderMethod {
     const CURRENCY_FORMATS: [&'static str; 11] = ["USD","USDSymbol","EUR","EURSymbol","GBP","GBPSymbol","YEN","YENSymbol","Bitcoin","BitcoinSymbol","RON"];
     const RATNG_FORMATS: [&'static str; 4] = ["Numerical","Stars","Circles","Asterix"];
     const STATUS_FORMATS: [&'static str; 3] = ["Hashtag","Graphical","Arrow"];
+    const DATEFIME_FORMATS: [&'static str; 3] = ["Full","Normal","Short"];
+
 
     fn validate_format(self, fmt: &str, available: &[&'static str]) -> &'static str {
         for f in available {
@@ -156,9 +160,9 @@ impl RenderMethod {
             "i8" | "i16" | "i32" | "i64" => Some(Self::Int64("Normal")),
             "u8" | "u16" | "u32" | "u64" => Some(Self::UInt64("Normal")),
             "f32" | "f64" => Some(Self::Float("Normal")),
-            "u128" | "usize" | "i128" | "isize" => None,
             "bool" => Some(Self::Bool("CheckmarkMinus")),
             "Status" | "listview::Status" => Some(Self::Status("Graphical")),
+            "chrono::NaiveDateTime" | "NaiveDateTime" => Some(Self::DateTime("Normal")),
             _ => None,
         }
     }
@@ -189,6 +193,7 @@ impl RenderMethod {
             Self::Currency(_) => "Currency",
             Self::Rating(_,_) => "Rating",
             Self::Status(_) => "Status",
+            Self::DateTime(_) => "DateTime",
         }
     }
     fn update_format(&self, fmt: &str) -> Self {
@@ -212,6 +217,7 @@ impl RenderMethod {
                 Self::Rating(r_type, number)
             }
             Self::Status(_) => Self::Status(self.validate_format(fmt, RenderMethod::STATUS_FORMATS.as_slice())),
+            Self::DateTime(_) => Self::DateTime(self.validate_format(fmt, RenderMethod::DATEFIME_FORMATS.as_slice())),
         }
     }
     fn renderer_code(&self, index: usize, varname: &str, vartype: &str) -> String {
@@ -277,6 +283,12 @@ impl RenderMethod {
             Self::Status(fmt) => {
                 match vartype {
                     "Status" | "listview::Status" => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::StatusFormat::{})),\n", index,self.name(),varname, *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::DateTime(fmt) => {
+                match vartype {
+                    "chrono::NaiveDateTime" | "NaiveDateTime"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::DateTimeFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
@@ -444,6 +456,9 @@ impl Column {
                 format!("{} => self.{}.cmp(other.{}),\n", index, self.varname, self.varname)
             }
             "Status" | "listview::Status" => {
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
+            }
+            "chrono::NaiveDateTime" | "NaiveDateTime" => {
                 format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             _ => panic!(
