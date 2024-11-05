@@ -51,10 +51,13 @@ enum RenderMethod {
     Rating(&'static str, u32),
     Status(&'static str),
     DateTime(&'static str),
+    Date(&'static str),
+    Time(&'static str),
+    Duration(&'static str),
 }
 
 impl RenderMethod {
-    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 22] = [
+    const NAME_TO_RENDER_METHOD: [(&'static str, Self); 26] = [
         ("Text", Self::Text),
         ("Ascii", Self::Ascii),
         ("Int64", Self::Int64("Normal")),
@@ -77,6 +80,10 @@ impl RenderMethod {
         ("Rating", Self::Rating("Stars", 5)),
         ("Status", Self::Status("Graphical")),
         ("DateTime", Self::DateTime("Normal")),
+        ("Date", Self::Date("Full")),
+        ("Time", Self::Time("Normal")),
+        ("Duration", Self::Duration("Auto")),
+        ("TimeDelta", Self::Duration("Auto")),
     ];
 
     const NUMERIC_FORMATS: [&'static str; 6] = ["Normal", "Separator", "Hex", "Hex16", "Hex32", "Hex64"];
@@ -93,8 +100,10 @@ impl RenderMethod {
     const CURRENCY_FORMATS: [&'static str; 11] = ["USD","USDSymbol","EUR","EURSymbol","GBP","GBPSymbol","YEN","YENSymbol","Bitcoin","BitcoinSymbol","RON"];
     const RATNG_FORMATS: [&'static str; 4] = ["Numerical","Stars","Circles","Asterix"];
     const STATUS_FORMATS: [&'static str; 3] = ["Hashtag","Graphical","Arrow"];
-    const DATEFIME_FORMATS: [&'static str; 3] = ["Full","Normal","Short"];
-
+    const DATETIME_FORMATS: [&'static str; 3] = ["Full","Normal","Short"];
+    const TIME_FORMATS: [&'static str; 3] = ["Short","AMPM","Normal"];
+    const DATE_FORMATS: [&'static str; 3] = ["Full","YearMonthDay","DayMonthYear"];
+    const DURATION_FORMATS: [&'static str; 3] = ["Auto","Seconds","Details"];
 
     fn validate_format(self, fmt: &str, available: &[&'static str]) -> &'static str {
         for f in available {
@@ -163,6 +172,9 @@ impl RenderMethod {
             "bool" => Some(Self::Bool("CheckmarkMinus")),
             "Status" | "listview::Status" => Some(Self::Status("Graphical")),
             "chrono::NaiveDateTime" | "NaiveDateTime" => Some(Self::DateTime("Normal")),
+            "chrono::NaiveDate" | "NaiveDate" => Some(Self::Date("Full")),
+            "chrono::NaiveTime" | "NaiveTime" => Some(Self::Time("Normal")),
+            "chrono::Duration" | "Duration" => Some(Self::Duration("Auto")),
             _ => None,
         }
     }
@@ -194,6 +206,9 @@ impl RenderMethod {
             Self::Rating(_,_) => "Rating",
             Self::Status(_) => "Status",
             Self::DateTime(_) => "DateTime",
+            Self::Date(_) => "Date",
+            Self::Time(_) => "Time",
+            Self::Duration(_) => "Duration",
         }
     }
     fn update_format(&self, fmt: &str) -> Self {
@@ -217,7 +232,10 @@ impl RenderMethod {
                 Self::Rating(r_type, number)
             }
             Self::Status(_) => Self::Status(self.validate_format(fmt, RenderMethod::STATUS_FORMATS.as_slice())),
-            Self::DateTime(_) => Self::DateTime(self.validate_format(fmt, RenderMethod::DATEFIME_FORMATS.as_slice())),
+            Self::DateTime(_) => Self::DateTime(self.validate_format(fmt, RenderMethod::DATETIME_FORMATS.as_slice())),
+            Self::Date(_) => Self::Date(self.validate_format(fmt, RenderMethod::DATE_FORMATS.as_slice())),
+            Self::Time(_) => Self::Time(self.validate_format(fmt, RenderMethod::TIME_FORMATS.as_slice())),
+            Self::Duration(_) => Self::Duration(self.validate_format(fmt, RenderMethod::DURATION_FORMATS.as_slice())),
         }
     }
     fn renderer_code(&self, index: usize, varname: &str, vartype: &str) -> String {
@@ -289,6 +307,25 @@ impl RenderMethod {
             Self::DateTime(fmt) => {
                 match vartype {
                     "chrono::NaiveDateTime" | "NaiveDateTime"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::DateTimeFormat::{})),\n", index,self.name(),varname, *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Date(fmt) => {
+                match vartype {
+                    "chrono::NaiveDate" | "NaiveDate"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::DateFormat::{})),\n", index,self.name(),varname, *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Time(fmt) => {
+                match vartype {
+                    "chrono::NaiveTime" | "NaiveTime"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::TimeFormat::{})),\n", index,self.name(),varname, *fmt),
+                    _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
+                }
+            }
+            Self::Duration(fmt) => {
+                match vartype {
+                    "chrono::Duration" | "Duration"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::DurationFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" => format!("{} => Some(listview::RenderMethod::{}(chrono::Duration::seconds(self.{} as i64) , listview::DurationFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
@@ -459,6 +496,15 @@ impl Column {
                 format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             "chrono::NaiveDateTime" | "NaiveDateTime" => {
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
+            }
+            "chrono::NaiveDate" | "NaiveDate" => {
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
+            }
+            "chrono::NaiveTime" | "NaiveTime" => {
+                format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
+            }
+            "chrono::Duration" | "Duration" => {
                 format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             _ => panic!(
