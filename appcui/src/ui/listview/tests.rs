@@ -3214,6 +3214,80 @@ fn check_numeric_formater_renderer() {
 }
 
 #[test]
+fn check_numeric_formater_renderer_with_macro() {
+    #[derive(ListViewItem)]
+    struct Employee {
+        #[Column(name = "&Name", align = "Left", size = 10)]
+        name: &'static str,
+        #[Column(name = "&Salary", align = "Right", size = 10, render: "UInt64", format: "Separator")]
+        salary: u64,
+        #[Column(name = "&RGB", align = "Center", size = 12, render: "UInt64", format: "Hex32")]
+        rgb: u32,
+        #[Column(name = "&Debt", align = "Right", size = 10, render: "Int64", format: "Normal")]
+        debt: i64,
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x2856BE886DE7BDDE)
+        Key.TypeText('1,0')
+        Paint('2. Alex is visible')
+        CheckHash(0x1CD641E5712E4D26)
+        Key.Pressed(Escape)
+        Key.TypeText('FFFF')
+        Paint('3. Alex and Zig are visible')
+        CheckHash(0x1FD2B0113FA2344B)
+        Key.Pressed(Escape)
+        Mouse.DoubleClick(22,1,left)
+        Paint('4. Salary column auto-resized')
+        CheckHash(0x7158F839E845EB0E)
+        Mouse.DoubleClick(34,1,left)
+        Paint('5. RGB column auto-resized')
+        CheckHash(0x127C73F6B58F3962)
+        Mouse.DoubleClick(43,1,left)
+        Paint('6. Debt column auto-resized')
+        CheckHash(0xFD92A12162C24BA)
+        Mouse.Click(17,1,left)
+        Paint('7. Sort by salary (ascendent)')
+        CheckHash(0xB6204AF8F9D68E2C)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Employee,d:c,flags:ScrollBars+SearchBar");
+
+    let students = vec![
+        Employee {
+            name: "John",
+            salary: 150000,
+            rgb: 0xFFAABB,
+            debt: 0,
+        },
+        Employee {
+            name: "Mike",
+            salary: 45000,
+            rgb: 0xAA,
+            debt: -3000,
+        },
+        Employee {
+            name: "Alex",
+            salary: 1000000,
+            rgb: 0xFFFF,
+            debt: -123456,
+        },
+        Employee {
+            name: "Zig",
+            salary: 12500,
+            rgb: 0xFFFF0000,
+            debt: -25,
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_bool_formater_renderer() {
     struct Employee {
         name: &'static str,
