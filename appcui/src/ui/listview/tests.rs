@@ -3401,7 +3401,7 @@ fn check_bool_formater_renderer_with_macro() {
         #[Column(name: "V4", w:10, a:r, render: bool, format: TrueFalse)]
         v4: bool,
     }
-    
+
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
@@ -3429,8 +3429,7 @@ fn check_bool_formater_renderer_with_macro() {
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv =
-        listview!("Employee,d:c,flags:ScrollBars+SearchBar");
+    let mut lv = listview!("Employee,d:c,flags:ScrollBars+SearchBar");
 
     let students = vec![
         Employee {
@@ -3467,7 +3466,6 @@ fn check_bool_formater_renderer_with_macro() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_size_formater_renderer_simple() {
@@ -5258,10 +5256,10 @@ fn check_item_custom_paint() {
             if column_index != 1 {
                 return;
             }
-            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White,Color::Black));
+            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White, Color::Black));
             surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
             surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
-            surface.write_char(width as i32 - 1,0,char!(">,red,black"));            
+            surface.write_char(width as i32 - 1, 0, char!(">,red,black"));
         }
     }
     let script = "
@@ -5329,10 +5327,10 @@ fn check_item_custom_paint_first_column_details() {
             if column_index != 0 {
                 return;
             }
-            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White,Color::Black));
+            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White, Color::Black));
             surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
             surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
-            surface.write_char(width as i32 - 1,0,char!(">,red,black"));
+            surface.write_char(width as i32 - 1, 0, char!(">,red,black"));
         }
     }
     let script = "
@@ -5401,10 +5399,10 @@ fn check_item_custom_paint_first_column_columns_3() {
             if column_index != 0 {
                 return;
             }
-            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White,Color::Black));
+            let attr = attr.unwrap_or(CharAttribute::with_color(Color::White, Color::Black));
             surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
             surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
-            surface.write_char(width as i32 - 1,0,char!(">,red,black"));
+            surface.write_char(width as i32 - 1, 0, char!(">,red,black"));
         }
     }
     let script = "
@@ -5416,7 +5414,8 @@ fn check_item_custom_paint_first_column_columns_3() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut lv = listview!("MyItem,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
+    let mut lv =
+        listview!("MyItem,d:c,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
     lv.add(MyItem {
         name: "John",
         size: 5,
@@ -5438,6 +5437,187 @@ fn check_item_custom_paint_first_column_columns_3() {
         city: "San Francisco",
     });
     w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_proc_macro_listviewitem() {
+    #[derive(ListViewItem)]
+    struct DownloadItem {
+        #[Column(name: "&Name", width: 12, align: Left)]
+        name: &'static str,
+        #[Column(name: "&Age", width: 10, align: Center)]
+        age: u32,
+        #[Column(name: "&Server")]
+        server: &'static str,
+        #[Column(name: "&Stars", width: 10, align: Center, render: Rating, format:Stars)]
+        stars: u8,
+        #[Column(name: "Download", width:15)]
+        download: listview::Status,
+        #[Column(name: "Created", w: 20, align: Center, render: DateTime, format: Short)]
+        created: chrono::NaiveDateTime,
+        #[Column(name: "Enabled", align: Center)]
+        enabled: bool,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3F9D82EE992A190)
+    ";
+    let mut a = App::debug(100, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("DownloadItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    l.add(DownloadItem {
+        name: "John.mp3",
+        age: 21,
+        server: "London",
+        stars: 4,
+        download: listview::Status::Running(0.5),
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: true,
+    });
+    l.add(DownloadItem {
+        name: "Mihai.png",
+        age: 30,
+        server: "Bucharest",
+        stars: 3,
+        download: listview::Status::Paused(0.25),
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: false,
+    });
+    l.add(DownloadItem {
+        name: "Ion.exe",
+        age: 40,
+        server: "Bucharest",
+        stars: 5,
+        download: listview::Status::Completed,
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: true,
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_proc_macro_listviewitem_order_from_1() {
+    #[derive(ListViewItem)]
+    struct DownloadItem {
+        #[Column(name: "&Name", width: 12, align: Left, index: 2)]
+        name: &'static str,
+        #[Column(name: "&Age", width: 10, align: Center, index:4)]
+        age: u32,
+        #[Column(name: "&Server", idx: 1)]
+        server: &'static str,
+        #[Column(name: "&Stars", width: 10, align: Center, render: Rating, format:Stars, idx: 3)]
+        stars: u8,
+        #[Column(name: "Download", width:15, idx: 7)]
+        download: listview::Status,
+        #[Column(name: "Created", w: 20, align: Center, render: DateTime, format: Short, index: 6)]
+        created: chrono::NaiveDateTime,
+        #[Column(name: "Enabled", align: Center, index: 5)]
+        enabled: bool,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x232187AB9FA9838)
+    ";
+    let mut a = App::debug(100, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("DownloadItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    l.add(DownloadItem {
+        name: "John.mp3",
+        age: 21,
+        server: "London",
+        stars: 4,
+        download: listview::Status::Running(0.5),
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: true,
+    });
+    l.add(DownloadItem {
+        name: "Mihai.png",
+        age: 30,
+        server: "Bucharest",
+        stars: 3,
+        download: listview::Status::Paused(0.25),
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: false,
+    });
+    l.add(DownloadItem {
+        name: "Ion.exe",
+        age: 40,
+        server: "Bucharest",
+        stars: 5,
+        download: listview::Status::Completed,
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: true,
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_proc_macro_listviewitem_order_from_0() {
+    #[derive(ListViewItem)]
+    struct DownloadItem {
+        #[Column(name: "&Name", width: 12, align: Left, index: 1)]
+        name: &'static str,
+        #[Column(name: "&Age", width: 10, align: Center, index:3)]
+        age: u32,
+        #[Column(name: "&Server", idx: 0)]
+        server: &'static str,
+        #[Column(name: "&Stars", width: 10, align: Center, render: Rating, format:Stars, idx: 2)]
+        stars: u8,
+        #[Column(name: "Download", width:15, idx: 6)]
+        download: listview::Status,
+        #[Column(name: "Created", w: 20, align: Center, render: DateTime, format: Short, index: 5)]
+        created: chrono::NaiveDateTime,
+        #[Column(name: "Enabled", align: Center, index: 4)]
+        enabled: bool,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x232187AB9FA9838)
+    ";
+    let mut a = App::debug(100, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("DownloadItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    l.add(DownloadItem {
+        name: "John.mp3",
+        age: 21,
+        server: "London",
+        stars: 4,
+        download: listview::Status::Running(0.5),
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: true,
+    });
+    l.add(DownloadItem {
+        name: "Mihai.png",
+        age: 30,
+        server: "Bucharest",
+        stars: 3,
+        download: listview::Status::Paused(0.25),
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: false,
+    });
+    l.add(DownloadItem {
+        name: "Ion.exe",
+        age: 40,
+        server: "Bucharest",
+        stars: 5,
+        download: listview::Status::Completed,
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: true,
+    });
+    w.add(l);
     a.add_window(w);
     a.run();
 }

@@ -521,7 +521,8 @@ impl Column {
 fn build_derive_code(s: &Structure) -> TokenStream {
     let mut columns = Vec::with_capacity(s.fields.len());
     let mut last_index = u32::MAX;
-    let mut first_index = u32::MAX;
+    let mut max_index = 0;
+    let mut min_index = u32::MAX;
     for field in &s.fields {
         if let Some(mut column) = Column::try_from(field) {
             if column.index == u32::MAX {
@@ -531,9 +532,8 @@ fn build_derive_code(s: &Structure) -> TokenStream {
                     column.index = last_index + 1;
                 }
             }
-            if first_index == u32::MAX {
-                first_index = column.index;
-            }
+            min_index = min_index.min(column.index);
+            max_index = max_index.max(column.index);
             last_index = column.index;
             columns.push(column);
         }
@@ -544,11 +544,11 @@ fn build_derive_code(s: &Structure) -> TokenStream {
             s.name
         );
     }
-    if first_index > 1 {
-        panic!("Invalid column index. The first column index must be 0 or 1, but it is {}", first_index);
+    if min_index > 1 {
+        panic!("Invalid column index. The first column index must be 0 or 1, but it is {}", min_index);
     }
-    if last_index + 1 - first_index != columns.len() as u32 {
-        panic!("Invalid column indexes. Make sure that all column indexes are unique and sequential starting from 0 or 1");
+    if max_index + 1 - min_index != columns.len() as u32 {
+        panic!("Invalid column indexes. Make sure that all column indexes are unique and sequential starting from 0 or 1. Total indexes is {}, but the total number of columns is {} !", max_index + 1 - min_index, columns.len());
     }
     columns.sort_by(|a, b| a.index.cmp(&b.index));
     let mut columns_code = String::new();
