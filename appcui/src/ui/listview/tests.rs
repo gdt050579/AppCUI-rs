@@ -3303,7 +3303,7 @@ fn check_bool_formater_renderer() {
                 1 => Some(listview::RenderMethod::Bool(self.v1, listview::BoolFormat::YesNo)),
                 2 => Some(listview::RenderMethod::Bool(self.v2, listview::BoolFormat::CheckmarkMinus)),
                 3 => Some(listview::RenderMethod::Bool(self.v3, listview::BoolFormat::XMinus)),
-                4 => Some(listview::RenderMethod::Bool(self.v3, listview::BoolFormat::TrueFalse)),
+                4 => Some(listview::RenderMethod::Bool(self.v4, listview::BoolFormat::TrueFalse)),
                 _ => None,
             }
         }
@@ -3322,27 +3322,27 @@ fn check_bool_formater_renderer() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xC85DD31B270D0817)
+        CheckHash(0x436B2F176AEDC868)
         Key.TypeText('Yes')
         Paint('2. John and Alex are visible')
-        CheckHash(0x4F0E518AA32CE80D)
+        CheckHash(0x7A6AF8F43FABC95E)
         Key.Pressed(Escape)
         Key.TypeText('False')
         Paint('3. Alex and Mike are visible')
-        CheckHash(0x9FFDE6A6BFC6FB)
+        CheckHash(0x57ACA971D48BC22)
         Key.Pressed(Escape)
         Mouse.DoubleClick(22,1,left)
         Paint('4. V1 column auto-resized')
-        CheckHash(0x4F86FC3EEC855E9)
+        CheckHash(0x94C0D0AC7DF68702)
         Mouse.DoubleClick(28,1,left)
         Paint('5. V2 column auto-resized')
-        CheckHash(0x925D038E06172181)
+        CheckHash(0xC0889D8BCBAF323E)
         Mouse.DoubleClick(39,1,left)
         Paint('6. V4 column auto-resized')
-        CheckHash(0x605B0CAD9048DEE9)
+        CheckHash(0x28A6BDE924E5114E)
         Mouse.Click(31,1,left)
         Paint('7. Sort by V4 (ascendent)')
-        CheckHash(0xFA349DBE6072BFEE)
+        CheckHash(0xD53023C5C3820831)
     ";
     let mut a = App::debug(60, 8, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
@@ -3384,6 +3384,90 @@ fn check_bool_formater_renderer() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_bool_formater_renderer_with_macro() {
+    // columns=[{&Name,10,Left},{V1,10,Right},{V2,12,Center},{V3,10,Right},{V4,10,Right}]
+    #[derive(ListViewItem)]
+    struct Employee {
+        #[Column(name: "&Name", w: 10, a: l, r:Ascii)]
+        name: &'static str,
+        #[Column(name: "V1", w:10, a:r, render: bool, format: YesNo)]
+        v1: bool,
+        #[Column(name: "V2", w:12, a:c, render: bool, format: CheckmarkMinus)]
+        v2: bool,
+        #[Column(name: "V3", w:10, a:r, render: bool, format: XMinus)]
+        v3: bool,
+        #[Column(name: "V4", w:10, a:r, render: bool, format: TrueFalse)]
+        v4: bool,
+    }
+    
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x436B2F176AEDC868)
+        Key.TypeText('Yes')
+        Paint('2. John and Alex are visible')
+        CheckHash(0x7A6AF8F43FABC95E)
+        Key.Pressed(Escape)
+        Key.TypeText('False')
+        Paint('3. Alex and Mike are visible')
+        CheckHash(0x57ACA971D48BC22)
+        Key.Pressed(Escape)
+        Mouse.DoubleClick(22,1,left)
+        Paint('4. V1 column auto-resized')
+        CheckHash(0x94C0D0AC7DF68702)
+        Mouse.DoubleClick(28,1,left)
+        Paint('5. V2 column auto-resized')
+        CheckHash(0xC0889D8BCBAF323E)
+        Mouse.DoubleClick(39,1,left)
+        Paint('6. V4 column auto-resized')
+        CheckHash(0x28A6BDE924E5114E)
+        Mouse.Click(31,1,left)
+        Paint('7. Sort by V4 (ascendent)')
+        CheckHash(0xD53023C5C3820831)
+    ";
+    let mut a = App::debug(60, 8, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv =
+        listview!("Employee,d:c,flags:ScrollBars+SearchBar");
+
+    let students = vec![
+        Employee {
+            name: "John",
+            v1: true,
+            v2: false,
+            v3: true,
+            v4: false,
+        },
+        Employee {
+            name: "Mike",
+            v1: false,
+            v2: true,
+            v3: false,
+            v4: true,
+        },
+        Employee {
+            name: "Alex",
+            v1: true,
+            v2: true,
+            v3: false,
+            v4: true,
+        },
+        Employee {
+            name: "Zig",
+            v1: false,
+            v2: false,
+            v3: true,
+            v4: false,
+        },
+    ];
+    lv.add_items(students);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
 
 #[test]
 fn check_size_formater_renderer_simple() {
