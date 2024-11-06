@@ -62,9 +62,47 @@ impl<T> ListView<T>
 where
     T: ListItem + 'static,
 {
+
+
+    /// Creates a new list view with the specified layout and flags
+    /// The list view will have a default capacity of 16 items
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListViewItem)]
+    /// struct Student {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Grade", width=10)]
+    ///    grade: u32
+    /// }
+    /// 
+    /// let lv: ListView::<Student> = ListView::new(Layout::new("d:c,w:100%,h:100%"), listview::Flags::ScrollBars);
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(16, layout, flags)
     }
+
+
+    /// Creates a new list view with the specified layout, flags and capacity
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListViewItem)]
+    /// struct Student {
+    ///   #[Column(name="Name", width=20)]
+    ///   name: &'static str,
+    ///   #[Column(name="Grade", width=10)]
+    ///   grade: u32
+    /// }
+    /// 
+    /// let mut lv: ListView::<Student> = ListView::with_capacity(100, Layout::new("d:c,w:100%,h:100%"), listview::Flags::ScrollBars);
+    /// lv.add(Student { name: "John", grade: 10 });
+    /// lv.add(Student { name: "Alice", grade: 9 });
+    /// lv.add(Student { name: "Bob", grade: 8 });
+    /// ```
     pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags) -> Self {
         let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
