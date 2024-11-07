@@ -62,8 +62,6 @@ impl<T> ListView<T>
 where
     T: ListItem + 'static,
 {
-
-
     /// Creates a new list view with the specified layout and flags
     /// The list view will have a default capacity of 16 items
     /// # Example
@@ -83,7 +81,6 @@ where
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(16, layout, flags)
     }
-
 
     /// Creates a new list view with the specified layout, flags and capacity
     /// # Example
@@ -145,6 +142,27 @@ where
         }
         lv
     }
+    
+    /// Creates a new group with a specified name and returns a gourp identifier. The grpup identifier can be used to add items to the group
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListViewItem)]
+    /// struct Student {
+    ///     #[Column(name="Name", width=20)]
+    ///     name: &'static str,
+    ///     #[Column(name="Grade", width=10)]
+    ///     grade: u32
+    /// }
+    /// 
+    /// let mut lv = listview!("Student, d:c,w:100%,h:100%,flags:ShowGroups");
+    /// let group = lv.add_group("Group 1");
+    /// let students = vec![Student { name: "John", grade: 10 }, 
+    ///                     Student { name: "Alice", grade: 9 }];
+    /// lv.add_to_group(students, group);
+    /// ```
     pub fn add_group(&mut self, name: &str) -> Group {
         let index = self.groups.len() as u16;
         self.groups.push(GroupInformation::new(name));
@@ -154,13 +172,88 @@ where
         }
         Group::new(index)
     }
+    
+    /// Adds a new column to the listview. The column will be added after the last existing column.
+    /// This method is useful when you manually implement ListItem trait for a type and you want to add columns to the list view. Normally, implementing the ListItem trait (via `#[derive(ListViewItem)]`) for a type will automatically add columns to the list view.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// struct Student {
+    ///     name: &'static str,
+    ///     grade: u32
+    /// }
+    /// 
+    /// impl listview::ListItem for Student {
+    ///    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+    ///       match column_index {
+    ///          0 => Some(listview::RenderMethod::Text(self.name)),
+    ///          1 => Some(listview::RenderMethod::UInt64(self.grade as u64, listview::NumericFormat::Normal)),  
+    ///          _ => None,
+    ///       }
+    ///    }
+    /// }
+    /// 
+    /// let mut lv = listview!("Student, d:c,w:100%,h:100%");
+    /// lv.add_column(Column::new("Name", 10, TextAlignament::Left));
+    /// lv.add_column(Column::new("Grade", 6, TextAlignament::Right));
+    /// ```
     pub fn add_column(&mut self, column: Column) {
         self.header.add(column);
     }
+    
+    /// Adds a new item to the list view.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListViewItem)]
+    /// struct Student {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Grade", width=10)]
+    ///    grade: u32
+    /// }
+    /// 
+    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
+    /// lv.add(Student { name: "John", grade: 10 });
+    /// lv.add(Student { name: "Alice", grade: 9 });
+    /// ```
     #[inline(always)]
     pub fn add(&mut self, item: T) {
         self.add_item(Item::from(item));
     }
+    
+    /// Adds a new item to the list view. This method allows one to specify the group, icon, color and selection state for the item upon adding it to the list view.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListViewItem)]
+    /// struct Student {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Grade", width=10)]
+    ///    grade: u32
+    /// }
+    /// 
+    /// let mut lv = listview!("type: Student, d:c, flags: ShowGroups+LargeIcons");
+    /// lv.add_item(listview::Item::new(
+    ///                       Student { name: "John", grade: 10 }, 
+    ///                       false, 
+    ///                       None, 
+    ///                       ['📁', ' '], 
+    ///                       listview::Group::None));
+    /// lv.add_item(listview::Item::new(
+    ///                       Student { name: "Alice", grade: 9 }, 
+    ///                       true, 
+    ///                       Some(CharAttribute::with_fore_color(Color::White)), 
+    ///                       ['📁', ' '], 
+    ///                       listview::Group::None));
+    /// ```
     #[inline(always)]
     pub fn add_item(&mut self, item: Item<T>) {
         let gid = item.group_id() as usize;
@@ -173,9 +266,59 @@ where
         // refilter everything
         self.refilter();
     }
+    
+    /// Adds multiple items to the list view. The items will be added after the last existing item.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListViewItem)]
+    /// struct Student {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Grade", width=10)]
+    ///    grade: u32
+    /// }
+    /// 
+    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
+    /// let items = vec![
+    ///         Student { name: "John", grade: 10 }, 
+    ///         Student { name: "Alice", grade: 9 },
+    ///         Student { name: "Bob", grade: 8 },
+    ///         Student { name: "Charlie", grade: 7 }
+    ///     ];
+    /// lv.add_items(items);
+    /// ```
     pub fn add_items(&mut self, items: Vec<T>) {
         self.add_multiple_items(items, Group::None, [0u8 as char, 0u8 as char]);
     }
+    
+    
+    /// Adds multiple items to the list view and associate them with a specific group.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListViewItem)]
+    /// struct Student {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Grade", width=10)]
+    ///    grade: u32
+    /// }
+    /// 
+    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
+    /// let items = vec![
+    ///         Student { name: "John", grade: 10 }, 
+    ///         Student { name: "Alice", grade: 9 },
+    ///         Student { name: "Bob", grade: 8 },
+    ///         Student { name: "Charlie", grade: 7 }
+    ///     ];
+    /// let group = lv.add_group("Group 1");
+    /// lv.add_to_group(items, group);
+    /// ```
     pub fn add_to_group(&mut self, items: Vec<T>, group: Group) {
         self.add_multiple_items(items, group, [0u8 as char, 0u8 as char]);
     }
@@ -192,6 +335,29 @@ where
         self.refilter_enabled = old_refilter;
         self.refilter();
     }
+    
+    
+    /// Adds multiple items to the listview. When an item is added to a listview, it is imediatly filtered based on the current search text. If you want to add multiple items (using various methods) and then filter them, you can use the add_batch method.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListViewItem)]
+    /// struct Student {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Grade", width=10)]
+    ///    grade: u32
+    /// }
+    /// 
+    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%"); 
+    /// lv.add_batch(|lv| {
+    ///    lv.add(Student { name: "John", grade: 10 });
+    ///    lv.add(Student { name: "Alice", grade: 9 });
+    ///    lv.add(Student { name: "Bob", grade: 8 });
+    /// });
+    /// ```  
     pub fn add_batch<F>(&mut self, f: F)
     where
         F: FnOnce(&mut Self),

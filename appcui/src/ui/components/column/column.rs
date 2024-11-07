@@ -2,6 +2,7 @@ use crate::graphics::*;
 use crate::utils::*;
 
 
+/// Represents a column in a control that supports such components. A column has a name, a width, an alignment and a tooltip.
 pub struct Column {
     pub(crate) name: Caption,
     pub(crate) width: u8,
@@ -11,6 +12,8 @@ pub struct Column {
 }
 
 impl Column {
+    /// Creates a new column with the specified name, width and alignment.
+    /// The tooltip is empty, but can further be set using the `set_tooltip` method.
     pub fn new(name: &str, width: u8, alignment: TextAlignament) -> Self {
         Self {
             name: Caption::new(name, ExtractHotKeyMethod::CtrlPlusKey),
@@ -20,25 +23,39 @@ impl Column {
             x: 0,
         }
     }
+
+    /// Sets the name (caption) of the column.
     pub fn set_name(&mut self, name: &str) {
         self.name.set_text(name, ExtractHotKeyMethod::CtrlPlusKey)
     }
+
+    /// Sets the tooltip of the column.
     pub fn set_tooltip(&mut self, tooltip: &str) {
         self.tooltip.clear();
         self.tooltip.push_str(tooltip);
     }
+
+    /// Sets the alignment of the column (left, center or right).
     pub fn set_alignment(&mut self, alignment: TextAlignament) {
         self.alignment = alignment;
     }
+    /// Returns the name (caption) of the column.
+    #[inline(always)]
     pub fn name(&self) -> &str {
         self.name.text()
     }
+    /// Returns the tooltip of the column.
+    #[inline(always)]
     pub fn tooltip(&self) -> &str {
         &self.tooltip
     }
+    /// Returns the alignment of the column (left, center or right).
+    #[inline(always)]
     pub fn alignment(&self) -> TextAlignament {
         self.alignment
     }
+    /// Returns the width of the column in characters.
+    #[inline(always)]
     pub fn width(&self) -> u8 {
         self.width
     }

@@ -89,3 +89,116 @@ pub trait ListViewEvents<T: listview::ListItem + 'static> {
     }
 }
 ```
+
+## Methods
+
+Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
+
+| Method              | Purpose                                                                                                                                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `add_group(...)`    | Creates a new group with a specified name and return a group identifier. You can further used the group identified to add an item to a group.                                                                                                          |
+| `add_column(...)`   | Adds a new column to the ListView control. This method is in particular usefull when you need to create a custom listview.                                                                                                                             |
+| `add(...)`          | Adds a new item to the ListView control.                                                                                                                                                                                                               |
+| `add_item(...)`     | Adds a new item to the ListView control. This methods allows you to specify the color, icon, group and selection state for that item.                                                                                                                  |
+| `add_items(...)`    | Adds a vector of items to the ListView control.                                                                                                                                                                                                        |
+| `add_to_group(...)` | Adds a vector if items to the ListView control and associate all of them to a group                                                                                                                                                                    |
+| `add_batch(...)`    | Adds multiple items to the listview. When an item is added to a listview, it is imediatly filtered based on the current search text. If you want to add multiple items (using various methods) and then filter them, you can use the add_batch method. |
+
+
+## Key association
+
+The following keys are processed by a `ListView` control if it has focus:
+
+| Key                  | Purpose                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `Up`, `Down`         | Changes the current item from the ListBox.                                                                                     |
+| `Left`, `Right`      | Scrolls the view to the left or to the right (when the view is `Details` or changes the current item if the view is `Columns`) |
+| `PageUp`, `PageDown` | Navigates through the list of items page by page.                                                                              |
+| `Home`               | Moves the current item to the first element in the list                                                                        |
+| `End`                | Moves the current item to the last element in the list                                                                         |
+
+
+
+## List view items
+- cum se implementeaza ListItem
+- rendering methods
+- macro listview!
+- custom filtering
+  
+## Populating a litsview
+- cum se adauga items eficient intr-un listview (diferente dintre diverse metode)
+
+## View modes
+- poze cu diferite view modes
+
+## Example
+
+The following example shows how to create a listview with a custom item type and how to add items to it.
+The item used in the example is a `DownloadItem` that has the following fields:
+* `name` - the name of the item
+* `age` - the age of the item
+* `server` - the server from which the item is downloaded
+* `stars` - the rating of the item
+* `download` - the download status of the item
+* `created` - the creation date of the item
+* `enabled` - a flag that indicates if the item is enabled or not
+  
+
+```rs
+use appcui::prelude::*;
+
+#[derive(ListViewItem)]
+struct DownloadItem {
+    #[Column(name: "&Name", width: 12, align: Left)]
+    name: &'static str,
+    #[Column(name: "&Age", width: 10, align: Center)]
+    age: u32,
+    #[Column(name: "&Server")]
+    server: &'static str,
+    #[Column(name: "&Stars", width: 10, align: Center, render: Rating, format:Stars)]
+    stars: u8,
+    #[Column(name: "Download", width:15)]
+    download: listview::Status,
+    #[Column(name: "Created", w: 20, align: Center, render: DateTime, format: Short)]
+    created: chrono::NaiveDateTime,
+    #[Column(name: "Enabled", align: Center)]
+    enabled: bool,
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut a = App::new().build()?;
+    let mut w = window!("Download,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("DownloadItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    l.add(DownloadItem {
+        name: "music.mp3",
+        age: 21,
+        server: "London",
+        stars: 4,
+        download: listview::Status::Running(0.5),
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: true,
+    });
+    l.add(DownloadItem {
+        name: "picture.png",
+        age: 30,
+        server: "Bucharest",
+        stars: 3,
+        download: listview::Status::Paused(0.25),
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: false,
+    });
+    l.add(DownloadItem {
+        name: "game.exe",
+        age: 40,
+        server: "Bucharest",
+        stars: 5,
+        download: listview::Status::Completed,
+        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+        enabled: true,
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+    Ok(())
+}
+```
