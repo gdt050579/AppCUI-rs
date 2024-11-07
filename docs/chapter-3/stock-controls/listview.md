@@ -109,15 +109,31 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 
 The following keys are processed by a `ListView` control if it has focus:
 
-| Key                  | Purpose                                                                                                                        |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `Up`, `Down`         | Changes the current item from the ListBox.                                                                                     |
-| `Left`, `Right`      | Scrolls the view to the left or to the right (when the view is `Details` or changes the current item if the view is `Columns`) |
-| `PageUp`, `PageDown` | Navigates through the list of items page by page.                                                                              |
-| `Home`               | Moves the current item to the first element in the list                                                                        |
-| `End`                | Moves the current item to the last element in the list                                                                         |
+| Key                                                                          | Purpose                                                                                                                                                                                                                                         |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Up`, `Down`                                                                 | Changes the current item from the ListBox.                                                                                                                                                                                                      |
+| `Left`, `Right`                                                              | Scrolls the view to the left or to the right (when the view is `Details` or changes the current item if the view is `Columns`)                                                                                                                  |
+| `PageUp`, `PageDown`                                                         | Navigates through the list of items page by page.                                                                                                                                                                                               |
+| `Home`                                                                       | Moves the current item to the first element in the list                                                                                                                                                                                         |
+| `End`                                                                        | Moves the current item to the last element in the list                                                                                                                                                                                          |
+| `Shift`+{`Up`, `Down`, `Left`, `Right`, `PageUp`, `PageDown`, `Home`, `End`} | Selects multiple items in the list. If the flag `CheckBoxes` is prezent, the items will be checked, otherwise will be colored with a different color to indicare that they are selected.                                                        |
+| `Insert`                                                                     | If the flag `CheckBoxes` is present, this will toggle the selection state of the current item. Once the selection is toggled, the cursor will me moved to the next item in the list.                                                            |
+| `Space`                                                                      | If the flag `CheckBoxes` is present, this will toggle the selection state of the current item. If the flag `CheckBoxes` is not present, and the current item is a group, this will expand or collapse the group.                                |
+| `Ctrl`+`A`                                                                   | Selects all items in the list. If the flag `CheckBoxes` is present, all items will be checked, otherwise will be colored with a different color to indicare that they are selected.                                                             |
+| `Ctrl`+`Alt`+{`Up`, `Down`}                                                  | Moves the scroll up or down                                                                                                                                                                                                                     |
+| `Enter`                                                                      | if the current item is a group, this will expand or collapse the group. If the current item is an element from the list, this will trigger the `ListViewEvents::on_item_action` event.                                                          |
+| `Ctrl`+{`A`..`Z`, `0`..`9`}                                                  | If a column has a hot key associated (by using the `&` character in the column name), this will sort all items bsed on that column. If that column is already selected, this will reverse the order of the sort items (ascendent or descendent) |
+| `Ctrl`+`Alt`+{`Left`, `Right`}                                               | Enter in the column resize mode.                                                                                                                                                                                                                |
 
+Aditionally, typing any character will trigger the search bar (if the flag `SearchBar` is present) and will filter the items based on the search text. While the search bar is active, the following keys are processed:
+* `Backspace` - removes the last character from the search text
+* `Escape` - clears the search text and closes the search bar
+* Movement keys (such as `Up`, `Down`, `Left`, `Right`, `PageUp`, `PageDown`, `Home`, `End`) - will disable the search bar, but will keep the search text
 
+While in the column resize mode, the following keys are processed:
+* `Left`, `Right` - increases or decreases the width of the current column
+* `Ctrl`+`Alt`+`Left`, `Ctrl`+`Alt`+`Right` - moves the focus to the previous or next column
+* `Escape` or movement keys - exits the column resize mode
 
 ## List view items
 - cum se implementeaza ListItem
