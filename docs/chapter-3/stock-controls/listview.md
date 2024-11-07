@@ -129,7 +129,20 @@ The following keys are processed by a `ListView` control if it has focus:
 - cum se adauga items eficient intr-un listview (diferente dintre diverse metode)
 
 ## View modes
-- poze cu diferite view modes
+
+The listview control has two ways to display the items:
+* `Details` - the items are displayed in a table with multiple columns. Each column can have a different width and alignment and contain information about various fields of the item.
+* `Columns` - the items are displayed in a table with multiple columns. Each column has one item and represents the fist content of the first column in the Details view mode.
+
+You can change the view mode of the listview by using the `view` parameter in the `listview!` macro or by using the `set_view_mode` method programatically. The default view mode is `Details`.
+
+| View mode       | Enum                           | Example                                         |
+| --------------- | ------------------------------ | ----------------------------------------------- |
+| Details         | listview::ViewMode::Details    | <img src="img/listview-details.png" width=300/> |
+| Columns (three) | listview::ViewMode::Columns(3) | <img src="img/listview-columns.png" width=300/> |
+
+
+## Groups
 
 ## Example
 
