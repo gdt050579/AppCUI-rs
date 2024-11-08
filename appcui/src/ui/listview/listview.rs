@@ -369,10 +369,16 @@ where
         self.refilter_enabled = old_refilter;
         self.refilter();
     }
+    
+    /// Sets the number of frozen columns. Frozen columns are columns that are always visible, even when the list view is scrolled horizontally. The frozen columns are always the first columns in the list view. Using the value 0 will disable frozen columns.
     pub fn set_frozen_columns(&mut self, count: u16) {
         self.header.set_frozen_columns(count);
         self.update_scrollbars();
     }
+    
+    /// Sets the view mode for the list view. The view mode can be one of the following:
+    /// - `ViewMode::Details` - displays the list view in details (each column displays a different property of the item)
+    /// - `ViewMode::Columns(n)` - the items are displayed in a table with multiple columns. Each column has one item and represents the fist content of the first column in the Details view mode.
     pub fn set_view_mode(&mut self, mode: ViewMode) {
         // safety check
         if mode == ViewMode::Columns(0) {
@@ -415,6 +421,9 @@ where
             },
         }
     }
+    
+    
+    /// Sorts the items in the list view based on the specified column index. If the column index is invalid, the method will do nothing. 
     pub fn sort(&mut self, column_index: u16, ascendent: bool) {
         self.header.set_sort_column(column_index, ascendent, true);
         if self.filter.is_empty() {
