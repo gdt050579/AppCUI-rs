@@ -460,7 +460,61 @@ struct Student {
 
 ### Custom filtering
 
-### Custom rendering  
+The filtering mechanism takes the string from the search bar and tries to see if any of the fields that are displayed contain that string (ignoring the case).
+While this method will be good enough for most cases, there might be scearious where you want to implement a custom filtering algorithm.
+
+For example, lets consider that we want to filter the student based on the name that **starts with** the specified text written in the search bar.
+In this case, we have to implement the `matches` method from the `ListItem` trait:
+
+```rs
+impl ListItem for Student {
+    fn matches(&self, text: &str) -> bool {
+        self.name.starts_with(text)
+    }       
+}
+```
+
+We will also need to make sure that the `CustomFilter` flag is set when creating the listview:
+
+```rs
+let lv = listview!("class:Student, d:c, flags: CustomFilter");
+```
+
+
+### Custom rendering 
+
+If you want to have a custom rendering for the items in the listview, you can use the `RenderMethod::Custom` variant. This variant will trigger the `paint` method from the `ListItem` trait. 
+It is important to notice that you don't need to implement the `paint` method for all fields (only for the ones where the response from the `render_method` method is `RenderMethod::Custom`).
+
+In the next example, we will atempt to print the grade differently based on the value of the grade. If the grade is greater than 5, we will print the grade in green, otherwise in red.
+
+```rs
+impl ListItem for Student {
+    fn render_method(&self, column_index: u16) -> Option<RenderMethod> {
+        match column_index {
+            0 => Some(RenderMethod::Text(&self.name)),
+            1 => Some(RenderMethod::Custom)),
+            2 => Some(RenderMethod::Rating(self.stars as u32, RatingFormat::Stars(5))),
+            _ => None,
+        }
+    } 
+    fn paint(&self, column_index: u32, width: u16, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
+        if column_index == 2 {
+            // the grade column
+            let color = if self.grade > 5 { Color::Green } else { Color::Red };
+            // if the attr is provided, we will use it, otherwise we 
+            // will use the color variable (Green or Red)
+            let a = attr.unwrap_or(CharAttribute::with_fore_color(color));
+            // prepare a string with the grade
+            // normally this is not indicated as it would allocate memory 
+            // everytime the paint method is called
+            let t = format!("{}", self.grade);
+            // print the string in the surface
+            surface.write_string(0, 0, &t, a, false);
+        }
+    }      
+}
+```
 
 ## View modes
 
