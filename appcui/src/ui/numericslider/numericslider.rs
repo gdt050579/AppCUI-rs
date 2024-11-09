@@ -48,7 +48,7 @@ where
         }
 
         let clamped_value = Self::to_interval(value, min, max);
-        let control = Self {
+        let mut control = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             flags,
             min,
@@ -57,6 +57,7 @@ where
             value: clamped_value,
             format,
         };
+        control.set_size_bounds(2, 3, u16::MAX, 3);
         control
     }
 
@@ -115,6 +116,10 @@ where
         }
         values
     }
+    fn test()
+    {
+        let mut buff: [u8;32] = [0;32];
+    }
 }
 impl<T> OnPaint for NumericSlider<T>
 where
@@ -122,6 +127,7 @@ where
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         //surface.clear(Character::new(SpecialChar::SingleLineDownT, Color::Blue, Color::Black, CharFlags::None));
+        surface.clear(char!("' ',red,black"));
         let current_character_set: CharSet = self.get_charset_based_on_theme(theme);
         let bound: i32 = {
             if (self.flags.contains(Flags::HorizontalSlider)) {
