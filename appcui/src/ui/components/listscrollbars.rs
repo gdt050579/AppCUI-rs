@@ -1,7 +1,7 @@
-use super::process_event_result::ProcessEventResult;
+use super::scrollbars_components::ProcessEventResult;
 use super::searchbar::SearchBar;
-use super::HScrollBar;
-use super::VScrollBar;
+use super::scrollbars_components::HScrollBar;
+use super::scrollbars_components::VScrollBar;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::Theme;
@@ -29,9 +29,9 @@ impl ListScrollBars {
             has_searchbar: searchbar,
         }
     }
-    pub fn update(&mut self, horizontal_indexes: u64, vertical_indexes: u64, size: Size) {
-        self.horizontal.update(size.width as u64, horizontal_indexes);
-        self.vertical.update_count(size.height as u64, vertical_indexes);
+    pub fn update(&mut self, horizontal_values: u64, vertical_values: u64, size: Size) {
+        self.horizontal.update(size.width as u64, horizontal_values);
+        self.vertical.update(size.height as u64, vertical_values);
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         if self.has_scrollbars {
@@ -63,7 +63,7 @@ impl ListScrollBars {
             false
         }
     }
-    pub fn resize(&mut self, horizontal_indexes: u64, vertical_indexes: u64, control: &ControlBase) {
+    pub fn resize(&mut self, horizontal_values: u64, vertical_values: u64, control: &ControlBase, visible_space: Size) {
         let control_size = control.size();
         let left_margin = control.left_components_margin as i32;
         let top_margin = control.top_components_margin as i32;
@@ -75,32 +75,32 @@ impl ListScrollBars {
         if self.has_searchbar && self.has_scrollbars {
             // leave 6 characters for the search bar
             let search_width = self.search.recompute_layout(x, w - 6, control_size);
-            self.horizontal.recompute_layout(x + search_width, w - search_width, control_size);
+            self.horizontal.recompute_position(x + search_width, w - search_width, control_size);
         } else if self.has_scrollbars {
-            self.horizontal.recompute_layout(x, w, control_size);
+            self.horizontal.recompute_position(x, w, control_size);
         } else if self.has_searchbar {
             self.search.recompute_layout(x, w, control_size);
         }
-        self.update(horizontal_indexes, vertical_indexes, control_size);
+        self.update(horizontal_values, vertical_values, visible_space);
     }
     pub fn should_repaint(&self) -> bool {
         self.should_paint
     }
     pub fn set_indexes(&mut self, horizontal: u64, vertical: u64) {
         if self.has_scrollbars {
-            self.horizontal.set_index(horizontal);
-            self.vertical.set_index(vertical);
+            self.horizontal.set_value(horizontal);
+            self.vertical.set_value(vertical);
         }
     }
     
     #[inline(always)]
     pub fn horizontal_index(&self) -> u64 {
-        self.horizontal.index()
+        self.horizontal.value()
     }
     
     #[inline(always)]
     pub fn vertical_index(&self) -> u64 {
-        self.vertical.index()
+        self.vertical.value()
     }
     
     #[inline(always)]

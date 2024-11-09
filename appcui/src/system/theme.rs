@@ -87,6 +87,15 @@ pub struct ListCurentItemTheme {
     pub over_inactive: CharAttribute,
     pub over_selection: CharAttribute,
     pub normal: CharAttribute,
+    pub selected: CharAttribute,
+    pub icon: CharAttribute,
+}
+
+#[derive(Default)]
+pub struct HeaderTheme {
+    pub text: ControlCharAttributesState,
+    pub hotkey: ControlCharAttributesState,
+    pub symbol: ControlCharAttributesState,
 }
 
 #[derive(Default)]
@@ -107,6 +116,7 @@ pub struct Theme {
     pub searchbar: SearchBarTheme,
     pub editor: ControlCharAttributesState,
     pub list_current_item: ListCurentItemTheme,
+    pub header: HeaderTheme,
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -285,9 +295,27 @@ impl Theme {
         self.list_current_item = ListCurentItemTheme {
             focus: CharAttribute::with_color(Color::Black, Color::White),
             over_inactive: CharAttribute::with_color(Color::Gray, Color::White),
-            over_selection: CharAttribute::with_color(Color::Red, Color::Yellow),
+            over_selection: CharAttribute::with_color(Color::Red, Color::White),
             normal: CharAttribute::with_color(Color::Yellow, Color::Transparent),
+            selected: CharAttribute::with_color(Color::Transparent, Color::Black),   
+            icon: CharAttribute::with_color(Color::Aqua, Color::Transparent),         
         };
+
+        self.header.text = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Silver, Color::Magenta),
+            focused: CharAttribute::with_color(Color::White, Color::Magenta),
+            hovered: CharAttribute::with_color(Color::DarkRed, Color::Silver),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::with_color(Color::White, Color::Pink),
+        };
+        self.header.hotkey = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Yellow, Color::Magenta),
+            focused: CharAttribute::with_color(Color::Yellow, Color::Magenta),
+            hovered: CharAttribute::with_color(Color::Red, Color::Silver),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Pink),
+        };
+        self.header.symbol = self.header.text;
     }
 }
 //         inline void Set(focused, normal, inactive, hovered, pressedOrSelected)

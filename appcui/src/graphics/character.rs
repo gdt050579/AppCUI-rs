@@ -10,6 +10,7 @@ static UNICODE_CODES: [char; 44] = [
     '\u{25B2}', '\u{25BC}', '\u{25C4}', '\u{25BA}', // Trangles
     '\u{25CF}', '\u{25CB}', '\u{221A}', '\u{2261}', '\u{205E}', '\u{2026}', // symbols
     '\u{251C}', '\u{252C}', '\u{2524}', '\u{2534}', // middle single line box
+    
 ];
 
 #[repr(u8)]

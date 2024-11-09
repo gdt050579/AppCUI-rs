@@ -78,6 +78,7 @@ impl<T> CustomEvents for ModalWindow<T> {}
 impl<T> GenericSelectorEvents for ModalWindow<T> {}
 impl<T> GenericDropDownListEvents for ModalWindow<T> {}
 impl<T> GenericNumericSelectorEvents for ModalWindow<T> {}
+impl<T> GenericListViewEvents for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
 impl<T> WindowControl for ModalWindow<T> {}
 impl<T> OnExpand for ModalWindow<T> {}

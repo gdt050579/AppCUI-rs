@@ -139,7 +139,7 @@ impl<'a> ControlBuilder<'a> {
         let value = self.parser.get(param_name);
         if let Some(str_value) = value {
             unsafe {
-                let x = std::mem::transmute(str_value.get_string());
+                let x = std::mem::transmute::<&str, &str>(str_value.get_string());
                 self.content.push_str(x);
             }        
         } else {
@@ -154,7 +154,7 @@ impl<'a> ControlBuilder<'a> {
         let value = self.parser.get(param_name);
         if let Some(str_value) = value {
             unsafe {
-                let x = std::mem::transmute(str_value.get_string());
+                let x = std::mem::transmute::<&str, &str>(str_value.get_string());
                 self.add_text(x);
             }
         } else if let Some(default_value) = default {
@@ -247,7 +247,7 @@ impl<'a> ControlBuilder<'a> {
             if !txt.is_empty() {
                 self.content.push_str("control.set_tooltip(");
                 unsafe {
-                    let x = std::mem::transmute(txt);
+                    let x = std::mem::transmute::<&str, &str>(txt);
                     self.add_text(x);
                 }
                 self.content.push_str(");\n\t");

@@ -33,7 +33,7 @@ fn check_clear() {
 fn check_clear_with_clipping() {
     let mut s = SurfaceTester::new(40, 10);
     s.clear(Character::new(
-        'x',
+        'x',    
         Color::White,
         Color::Black,
         CharFlags::None,

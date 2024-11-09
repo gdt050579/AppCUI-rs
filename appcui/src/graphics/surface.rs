@@ -106,6 +106,15 @@ impl Surface {
     }
 
     #[inline(always)]
+    pub fn set_relative_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        self.clip.set(
+            i32::max(self.base_clip.left, self.base_origin.x + left),
+            i32::max(self.base_clip.top, self.base_origin.y + top),
+            i32::min(self.base_clip.right, self.base_origin.x + right),
+            i32::min(self.base_clip.bottom, self.base_origin.y + bottom),
+        );
+    }
+    #[inline(always)]
     pub fn set_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.clip.set(
             i32::max(self.base_clip.left, left),
@@ -353,6 +362,39 @@ impl Surface {
                 p_x += 1;
             }
         }
+    }
+
+    pub fn write_ascii(&mut self, x:i32, y:i32, ascii_buffer: &[u8], attr: CharAttribute, multi_line: bool) {
+        let mut c = Character::with_attributes(' ', attr);
+        if !multi_line {
+            // single line support
+            if !self.clip.contains_y(y + self.origin.y) {
+                return; // no need to draw
+            }
+            let mut p_x = x;
+            for ch in ascii_buffer {
+                if let Some(pos) = self.coords_to_position(p_x, y) {
+                    c.code = *ch as char;
+                    self.chars[pos].set(c);
+                }
+                p_x += 1;
+            }
+        } else {
+            let mut p_x = x;
+            let mut p_y = y;
+            for ch in ascii_buffer {
+                if (*ch == b'\n') || (*ch == b'\r') {
+                    p_y += 1;
+                    p_x = x;
+                    continue;
+                }
+                if let Some(pos) = self.coords_to_position(p_x, p_y) {
+                    c.code = *ch as char;
+                    self.chars[pos].set(c);
+                }
+                p_x += 1;
+            }
+        }     
     }
 
     fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormat) {
