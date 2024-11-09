@@ -5621,3 +5621,66 @@ fn check_proc_macro_listviewitem_order_from_0() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_select_item_method() {
+    #[Window(events=ListViewEvents<Person>, internal: true)]
+    struct MyWin {}
+    impl ListViewEvents<Person> for MyWin {
+        fn on_item_action(&mut self, handle: Handle<ListView<Person>>, index: usize) -> EventProcessStatus {
+            let txt = if let Some(lv) = self.control_mut(handle) {
+                let status = lv.is_item_selected(index);
+                lv.select_item(index, !status);
+                let count = lv.items_count();
+                let count_selected = lv.selected_items_count();
+                format!("{}/{}", count_selected, count)
+            } else {
+                "?".to_string()
+            };
+            self.set_title(&txt);
+            EventProcessStatus::Processed
+        }
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut lv = listview!(
+                "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+            );
+            Person::populate(&mut lv);
+            w.add(lv);
+            w
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x39603D1E8E3FDC2E)  
+        Key.Pressed(Down,2)
+        Key.Pressed(Enter)       
+        Paint('2. Title: idx: 1/19 -> cursor at: Mike')
+        CheckHash(0x2A9E3C47926E86F1)  
+        Mouse.DoubleClick(7,7,left)
+        Paint('3. Title: idx: 2/19 -> cursor at: Etiene')
+        CheckHash(0xA68B0D8A9786CC61)  
+        Mouse.DoubleClick(30,2,left)
+        Paint('4. Asia group folded')
+        CheckHash(0x7385F8EC17FB9F6D)
+        Key.Pressed(Enter)       
+        Paint('5. Asia group un-folded')
+        CheckHash(0xF8048EA09FD73499)          
+        Mouse.DoubleClick(41,1,left)
+        Paint('6. Title: 3/12 -> cursor at: Andrei')
+        CheckHash(0xF2BAC8A723FBC04)          
+        Mouse.DoubleClick(41,1,left)
+        Paint('7. Title: 2/12 -> cursor at: Andrei')
+        CheckHash(0x59B04A60BB56A8C)          
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

@@ -119,6 +119,8 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | `items_count()`          | Returns the number of items in the listview.                                                                       |
 | `is_item_selected(...)`  | Returns true if the item is selected or false otherwise. If the index is invalid, false will be returned.          |
 | `selected_items_count()` | Returns the number of selected items in the listview.                                                              |
+| `select_item(...)`       | Selects or deselects an item based on its index.                                                                   |
+
 
 ### Group manipulation
 
@@ -429,19 +431,19 @@ Alternatively, you can use the `ListViewItem` derive macro to automatically impl
 
 If the `render` parameter is not provided, the render method will be automatically identified based on the field type. The following field types are supported:
 
-| Field type                | Render method | Default variant  |
-| ------------------------- | ------------- | ---------------- |
-| `&str`                    | `Text`        |                  |
-| `String`                  | `Text`        |                  |
-| `i8`, `i16`, `i32`, `i64` | `Int64`       | `Normal`         |
-| `u8`, `u16`, `u32`, `u64` | `UInt64`      | `Normal`         |
-| `f32`, `f64`              | `Float`       | `Normal`         |
-| `bool`                    | `Bool`        | `CheckmarkMinus` |
-| `NaiveDateTime`           | `DateTime`    | `Normal`         |
-| `NaiveTime`               | `Time`        | `Normal`         |
-| `NaiveDate`               | `Date`        | `Full`           |
-| `Duration`                | `Duration`    | `Auto`           |
-| `Status`                  | `Status`      | `Graphical`      |
+| Field type                | Render method | Default variant |
+| ------------------------- | ------------- | --------------- |
+| `&str`                    | Text          |                 |
+| `String`                  | Text          |                 |
+| `i8`, `i16`, `i32`, `i64` | Int64         | Normal          |
+| `u8`, `u16`, `u32`, `u64` | UInt64        | Normal          |
+| `f32`, `f64`              | Float         | Normal          |
+| `bool`                    | Bool          | CheckmarkMinus  |
+| `NaiveDateTime`           | DateTime      | Normal          |
+| `NaiveTime`               | Time          | Normal          |
+| `NaiveDate`               | Date          | Full            |
+| `Duration`                | Duration      | Auto            |
+| `Status`                  | Status        | Graphical       |
 
 
 This means that the previous `Student` structure can be rewritten as follows:

@@ -551,6 +551,13 @@ where
         }
     }
 
+    /// Change the selection state of the item at the specified index
+    pub fn select_item(&mut self, index: usize, selected: bool) {
+        if self.select_item_and_update_count(index, selected) {
+            self.update_check_count_for_groups();
+        }
+    }
+
     /// Returns the number of selected (checked) items
     pub fn selected_items_count(&self) -> usize {
         self.selected_items_count
