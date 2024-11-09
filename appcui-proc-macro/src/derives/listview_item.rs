@@ -3,7 +3,6 @@ use super::structure::StructureField;
 use core::panic;
 use proc_macro::*;
 use std::str::FromStr;
-use std::u32;
 
 static TEMPLATE: &str = r#"
 impl listview::ListItem for $(STRUCT_NAME) {
@@ -345,18 +344,12 @@ struct Column {
 }
 impl Column {
     fn align(value: &str) -> Option<&'static str> {
-        if crate::utils::equal_ignore_case(value, "left") {
+        if crate::utils::equal_ignore_case(value, "left") || crate::utils::equal_ignore_case(value, "l") {
             Some("Left")
-        } else if crate::utils::equal_ignore_case(value, "l") {
-            return Some("Left");
-        } else if crate::utils::equal_ignore_case(value, "right") {
-            return Some("Right");
-        } else if crate::utils::equal_ignore_case(value, "r") {
-            return Some("Right");
-        } else if crate::utils::equal_ignore_case(value, "center") {
-            return Some("Center");
-        } else if crate::utils::equal_ignore_case(value, "c") {
-            return Some("Center");
+        } else if crate::utils::equal_ignore_case(value, "right") || crate::utils::equal_ignore_case(value, "r") {
+            Some("Right")
+        } else if crate::utils::equal_ignore_case(value, "center") || crate::utils::equal_ignore_case(value, "c") {
+            Some("Center")
         } else {
             None
         }

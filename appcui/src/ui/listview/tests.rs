@@ -5257,7 +5257,7 @@ fn check_item_custom_paint() {
                 return;
             }
             let attr = attr.unwrap_or(CharAttribute::with_color(Color::White, Color::Black));
-            surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
+            surface.fill_horizontal_line_with_size(0, 0, self.size, Character::with_attributes('+', attr));
             surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
             surface.write_char(width as i32 - 1, 0, char!(">,red,black"));
         }
@@ -5328,7 +5328,7 @@ fn check_item_custom_paint_first_column_details() {
                 return;
             }
             let attr = attr.unwrap_or(CharAttribute::with_color(Color::White, Color::Black));
-            surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
+            surface.fill_horizontal_line_with_size(0, 0, self.size, Character::with_attributes('+', attr));
             surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
             surface.write_char(width as i32 - 1, 0, char!(">,red,black"));
         }
@@ -5400,7 +5400,7 @@ fn check_item_custom_paint_first_column_columns_3() {
                 return;
             }
             let attr = attr.unwrap_or(CharAttribute::with_color(Color::White, Color::Black));
-            surface.fill_horizontal_line_with_size(0, 0, self.size as u32, Character::with_attributes('+', attr));
+            surface.fill_horizontal_line_with_size(0, 0, self.size, Character::with_attributes('+', attr));
             surface.write_string(0, 0, format!("{width}").as_str(), attr, false);
             surface.write_char(width as i32 - 1, 0, char!(">,red,black"));
         }

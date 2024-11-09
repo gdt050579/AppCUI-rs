@@ -614,7 +614,7 @@ impl Terminal for WindowsTerminal {
                 if surrogate_used > 0 {
                     let sz = COORD {
                         x: w as i16,
-                        y: y as i16 - start_y as i16,
+                        y: y - start_y,
                     };
                     let vis_region = SMALL_RECT {
                         left: self.visible_region.left,
@@ -643,7 +643,7 @@ impl Terminal for WindowsTerminal {
         } else if start_y < y {
             let sz = COORD {
                 x: w as i16,
-                y: y as i16 - start_y as i16,
+                y: y - start_y,
             };
             let vis_region = SMALL_RECT {
                 left: self.visible_region.left,

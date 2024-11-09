@@ -456,7 +456,7 @@ struct Student {
     #[Column(name: "&Grade", width: 5, align: Center)]
     grade: u8,
     #[Column(name: "&Stars", width: 5, align: Center, render: Rating, format: Stars)]
-    stars: u8,
+    stars: u8, 
 }
 ```
 

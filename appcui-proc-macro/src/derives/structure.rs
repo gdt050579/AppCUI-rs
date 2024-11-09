@@ -15,13 +15,13 @@ enum TokenType {
     GroupWithParenthesis,
 }
 
-#[derive(Debug,Eq,PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 enum TokenTreeType {
     Ident,
     Punct,
     Literal,
     Group,
-    None
+    None,
 }
 
 impl TokenType {
@@ -79,23 +79,15 @@ pub(crate) struct StructureField {
 #[derive(Debug)]
 pub(crate) struct Structure {
     pub(crate) name: String,
-    pub(crate) generics: String,
+    pub(crate) _generics: String,
     pub(crate) fields: Vec<StructureField>,
 }
 impl Structure {
-    fn parse_one_attribute(
-        tokens: &[TokenTree],
-        start: usize,
-        prefix: &str,
-        attr: &mut HashMap<String, String>,
-    ) -> Result<usize, String> {
+    fn parse_one_attribute(tokens: &[TokenTree], start: usize, prefix: &str, attr: &mut HashMap<String, String>) -> Result<usize, String> {
         let mut index = start;
         let token_type = TokenType::try_from(tokens, index, "Expecting a valid attribute name")?;
         if token_type != TokenType::Name {
-            return Err(format!(
-                "Expecting an attribute name definition but found: '{:?}'",
-                &tokens[index]
-            ));
+            return Err(format!("Expecting an attribute name definition but found: '{:?}'", &tokens[index]));
         };
         let key = if prefix.is_empty() {
             Self::token_to_string(&tokens[index])
@@ -111,16 +103,12 @@ impl Structure {
             attr.insert(key, String::new());
             return Ok(tokens.len());
         }
-        let token_type =
-            TokenType::try_from(tokens, index, "Expecting a valid attribute definition")?;
+        let token_type = TokenType::try_from(tokens, index, "Expecting a valid attribute definition")?;
         match token_type {
             TokenType::Equal | TokenType::TwoPoints => {
                 index += 1;
                 if index >= tokens.len() {
-                    return Err(
-                        "Unexpected end of token stream (expecting a valid attribute value)"
-                            .to_string(),
-                    );
+                    return Err("Unexpected end of token stream (expecting a valid attribute value)".to_string());
                 }
                 attr.insert(key, Self::token_to_string(&tokens[index]));
                 index += 1;
@@ -136,18 +124,14 @@ impl Structure {
                     index += 1;
                 }
                 _ => {
-                    return Err(format!(
-                        "Expecting a group with parenthesis but found: '{:?}'",
-                        tokens[index]
-                    ));
+                    return Err(format!("Expecting a group with parenthesis but found: '{:?}'", tokens[index]));
                 }
             },
             _ => {
                 return Err(format!(
-                        "Expecting an equal sign or a value definition but found: '{:?}' for attribute: '{}'",
-                        &tokens[index],
-                        key
-                    ));
+                    "Expecting an equal sign or a value definition but found: '{:?}' for attribute: '{}'",
+                    &tokens[index], key
+                ));
             }
         }
         if index >= tokens.len() {
@@ -155,18 +139,11 @@ impl Structure {
         }
         let token_type = TokenType::try_from(tokens, index, "Expecting a comma")?;
         if token_type != TokenType::Comma {
-            return Err(format!(
-                "Expecting a comma but found: '{:?}'",
-                &tokens[index]
-            ));
+            return Err(format!("Expecting a comma but found: '{:?}'", &tokens[index]));
         }
         Ok(index + 1)
     }
-    fn parse_attributes_params(
-        ast: TokenStream,
-        prefix: &str,
-        attr: &mut HashMap<String, String>,
-    ) -> Result<(), String> {
+    fn parse_attributes_params(ast: TokenStream, prefix: &str, attr: &mut HashMap<String, String>) -> Result<(), String> {
         // allowed formats: key = value, key: value, key, key_group(...)
         let v: Vec<_> = ast.clone().into_iter().collect();
         let mut index = 0;
@@ -175,11 +152,7 @@ impl Structure {
         }
         Ok(())
     }
-    fn parse_attributes(
-        tokens: &[TokenTree],
-        start: usize,
-        attr: Option<&mut HashMap<String, String>>,
-    ) -> Result<usize, String> {
+    fn parse_attributes(tokens: &[TokenTree], start: usize, attr: Option<&mut HashMap<String, String>>) -> Result<usize, String> {
         // assume that the first token is a # character
         if start >= tokens.len() {
             return Err(format!(
@@ -191,15 +164,16 @@ impl Structure {
         // assume that the first token is a # character
         if let TokenTree::Punct(punct) = &tokens[start] {
             if punct.as_char() != '#' {
-                return Err(format!(
-                    "Expecting a '#' character but found: '{}'",
-                    punct.as_char()
-                ));
+                return Err(format!("Expecting a '#' character but found: '{}'", punct.as_char()));
             }
         }
         // the next token should be a gourp with [...]
         if start + 1 >= tokens.len() {
-            return Err(format!("Unexpected end of token stream. Expecting a [..] after # character (provided index: {}, tokens size: {}",start+1,tokens.len()));
+            return Err(format!(
+                "Unexpected end of token stream. Expecting a [..] after # character (provided index: {}, tokens size: {}",
+                start + 1,
+                tokens.len()
+            ));
         }
         if let TokenTree::Group(group) = &tokens[start + 1] {
             if group.delimiter() != proc_macro::Delimiter::Bracket {
@@ -244,10 +218,7 @@ impl Structure {
                 return Ok(start + 1);
             }
         }
-        return Err(format!(
-            "Expecting 'pub' keyword but found: '{:?}'",
-            tokens[start]
-        ));
+        Err(format!("Expecting 'pub' keyword but found: '{:?}'", tokens[start]))
     }
     fn token_to_string(token: &TokenTree) -> String {
         match token {
@@ -255,9 +226,7 @@ impl Structure {
             TokenTree::Punct(punct) => punct.to_string(),
             TokenTree::Literal(literal) => {
                 let mut res = literal.to_string();
-                if (res.starts_with("\"") && res.ends_with("\""))
-                    || (res.starts_with("'") && res.ends_with("'"))
-                {
+                if (res.starts_with("\"") && res.ends_with("\"")) || (res.starts_with("'") && res.ends_with("'")) {
                     res.truncate(res.len() - 1);
                     if res.len() > 1 {
                         res.remove(0);
@@ -268,20 +237,19 @@ impl Structure {
             TokenTree::Group(group) => group.stream().to_string(),
         }
     }
-    fn tokens_to_generics(tokens: &[TokenTree], start: usize, end: usize)->String {
+    fn tokens_to_generics(tokens: &[TokenTree], start: usize, end: usize) -> String {
         let mut s = String::new();
         let mut last_token_type = TokenTreeType::None;
-        for i in start..end {
-            let token = &tokens[i];
-            let (content,token_type) = match token {
+        for token in tokens.iter().take(end).skip(start) {
+            let (content, token_type) = match token {
                 TokenTree::Group(group) => (group.stream().to_string(), TokenTreeType::Group),
                 TokenTree::Ident(ident) => (ident.to_string(), TokenTreeType::Ident),
                 TokenTree::Punct(punct) => (punct.to_string(), TokenTreeType::Punct),
                 TokenTree::Literal(literal) => (literal.to_string(), TokenTreeType::Literal),
             };
-            if (token_type==last_token_type) && (token_type != TokenTreeType::Punct) {
+            if (token_type == last_token_type) && (token_type != TokenTreeType::Punct) {
                 s.push(' ');
-            } 
+            }
             s.push_str(&content);
             last_token_type = token_type;
         }
@@ -304,8 +272,7 @@ impl Structure {
                             proc_macro::Delimiter::None => (" ", " "),
                         };
                         let group_tokens: Vec<_> = group.stream().clone().into_iter().collect();
-                        let inner_str =
-                            Self::type_to_string(group_tokens.as_slice(), 0, group_tokens.len());
+                        let inner_str = Self::type_to_string(group_tokens.as_slice(), 0, group_tokens.len());
                         Some(format!("{}{}{}", l, inner_str.as_str(), r))
                     }
                     TokenTree::Ident(ident) => Some(ident.to_string()),
@@ -334,49 +301,38 @@ impl Structure {
                 if group.delimiter() == proc_macro::Delimiter::Brace {
                     Ok(group.stream())
                 } else {
-                    Err(format!(
-                        "Unexpected token: '{:?}' -> Expecting a brace '{{' !",
-                        group.delimiter()
-                    ))
+                    Err(format!("Unexpected token: '{:?}' -> Expecting a brace '{{' !", group.delimiter()))
                 }
             }
-            _ => Err(format!(
-                "Unexpected token: '{}' -> Expecting a brace '{{' !",
-                token.to_string()
-            )),
+            _ => Err(format!("Unexpected token: '{}' -> Expecting a brace '{{' !", token)),
         }
     }
     fn parse_field_type(tokens: &[TokenTree], start: usize) -> Result<usize, String> {
         let mut depth = 0;
         let t = &tokens[start..];
         for (index, token) in t.iter().enumerate() {
-            match token {
-                TokenTree::Punct(punct) => {
-                    let value = punct.as_char();
-                    match value {
-                        ',' => {
-                            if depth == 0 {
-                                return Ok(index + start);
-                            }
+            if let TokenTree::Punct(punct) = token {
+                let value = punct.as_char();
+                match value {
+                    ',' => {
+                        if depth == 0 {
+                            return Ok(index + start);
                         }
-                        '<' => {
-                            depth += 1;
-                        }
-                        '>' => {
-                            depth -= 1;
-                            if depth < 0 {
-                                return Err(
-                                    "Unexpected '>' character in field definition ".to_string()
-                                );
-                            }
-                        }
-                        '#' => {
-                            return Err("Invalid attribute in field definition ('#')".to_string());
-                        }
-                        _ => {}
                     }
+                    '<' => {
+                        depth += 1;
+                    }
+                    '>' => {
+                        depth -= 1;
+                        if depth < 0 {
+                            return Err("Unexpected '>' character in field definition ".to_string());
+                        }
+                    }
+                    '#' => {
+                        return Err("Invalid attribute in field definition ('#')".to_string());
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
         if depth != 0 {
@@ -384,28 +340,22 @@ impl Structure {
         }
         Ok(tokens.len())
     }
-    fn parse_field(
-        tokens: &[TokenTree],
-        start: usize,
-        fields: &mut Vec<StructureField>,
-    ) -> Result<usize, String> {
+    fn parse_field(tokens: &[TokenTree], start: usize, fields: &mut Vec<StructureField>) -> Result<usize, String> {
         let mut index = start;
         let mut attributes = HashMap::new();
         let name;
         loop {
             if index >= tokens.len() {
-                return Err(
-                    "Unexpected end of token stream (expecting a field definition)".to_string(),
-                );
+                return Err("Unexpected end of token stream (expecting a field definition)".to_string());
             }
             let token = &tokens[index];
             let token_type = TokenType::from(token);
             match token_type {
                 TokenType::Attribute => {
-                    index = Self::parse_attributes(&tokens, index, Some(&mut attributes))?;
+                    index = Self::parse_attributes(tokens, index, Some(&mut attributes))?;
                 }
                 TokenType::Vizibility => {
-                    index = Self::skip_visibility(&tokens, index)?;
+                    index = Self::skip_visibility(tokens, index)?;
                 }
                 TokenType::Name => {
                     name = Self::token_to_string(token);
@@ -413,38 +363,28 @@ impl Structure {
                     break;
                 }
                 _ => {
-                    return Err(format!(
-                        "Expecting a valid field definition but found: '{:?}'",
-                        token
-                    ));
+                    return Err(format!("Expecting a valid field definition but found: '{:?}'", token));
                 }
             }
         }
         if index >= tokens.len() {
-            return Err(
-                "Unexpected end of token stream (expecting a field type definition after field name)".to_string(),
-            );
+            return Err("Unexpected end of token stream (expecting a field type definition after field name)".to_string());
         }
         let token = &tokens[index];
         let token_type = TokenType::from(token);
         if token_type != TokenType::TwoPoints {
-            return Err(format!(
-                "Expecting a colon (:) after the field name but found: '{:?}'",
-                token
-            ));
+            return Err(format!("Expecting a colon (:) after the field name but found: '{:?}'", token));
         }
         index += 1;
         if index >= tokens.len() {
-            return Err(
-                "Unexpected end of token stream (expecting a field type definition)".to_string(),
-            );
+            return Err("Unexpected end of token stream (expecting a field type definition)".to_string());
         }
-        let next = Self::parse_field_type(&tokens, index)?;
+        let next = Self::parse_field_type(tokens, index)?;
 
         fields.push(StructureField {
-            name: name,
-            ty: Self::type_to_string(&tokens, index, next),
-            attributes: attributes,
+            name,
+            ty: Self::type_to_string(tokens, index, next),
+            attributes,
         });
         Ok((next + 1).min(tokens.len()))
     }
@@ -457,10 +397,7 @@ impl Structure {
         }
         Ok(result)
     }
-    fn parse_struct_generics_and_lifetime(
-        tokens: &[TokenTree],
-        start: usize,
-    ) -> Result<usize, String> {
+    fn parse_struct_generics_and_lifetime(tokens: &[TokenTree], start: usize) -> Result<usize, String> {
         // skip the generics definition
         let mut depth = 0;
         let mut index = start;
@@ -469,20 +406,17 @@ impl Structure {
                 return Err("Unexpected end of token stream (expecting a stuct definition with a lifetime/generics: `struct Name <lifetime or generics> {...}`".to_string());
             }
             let token = &tokens[index];
-            match token {
-                TokenTree::Punct(punct) => {
-                    let value = punct.as_char();
-                    match value {
-                        '<' => {
-                            depth += 1;
-                        }
-                        '>' => {
-                            depth -= 1;
-                        }
-                        _ => {}
+            if let TokenTree::Punct(punct) = token {
+                let value = punct.as_char();
+                match value {
+                    '<' => {
+                        depth += 1;
                     }
+                    '>' => {
+                        depth -= 1;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
             if depth == 0 {
                 break;
@@ -514,7 +448,10 @@ impl Structure {
                     break;
                 }
                 _ => {
-                    return Err(format!("Expecting a valid structure definition (with the keyword 'struct'), but found: '{:?}'",token));
+                    return Err(format!(
+                        "Expecting a valid structure definition (with the keyword 'struct'), but found: '{:?}'",
+                        token
+                    ));
                 }
             }
         }
@@ -540,10 +477,6 @@ impl Structure {
         let content = Self::group_to_stream(&v[index])?;
         let fields = Self::parse_fileds(content)?;
 
-        Ok(Self {
-            name: name,
-            generics: generics,
-            fields: fields,
-        })
+        Ok(Self { name, _generics: generics, fields })
     }
 }

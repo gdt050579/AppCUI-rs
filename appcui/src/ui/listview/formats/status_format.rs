@@ -1,6 +1,6 @@
 use crate::utils::FormatNumber;
 
-#[derive(Copy, Clone, PartialEq, PartialOrd)]
+#[derive(Copy, Clone)]
 pub enum Status {
     Running(f32),
     Queued,
@@ -9,24 +9,90 @@ pub enum Status {
     Error,
     Completed,
 }
-impl Ord for Status {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        if let Some(res) = self.partial_cmp(other) {
-            res
-        } else {
-            std::cmp::Ordering::Equal
+impl Status {
+    fn order(&self) -> u32 {
+        match self {
+            Status::Running(_) => 0,
+            Status::Paused(_) => 1,
+            Status::Queued => 2,
+            Status::Stopped => 3,
+            Status::Error => 4,
+            Status::Completed => 5,
+        }
+    }
+    fn value(&self) -> f32 {
+        match self {
+            Status::Running(value) => *value,
+            Status::Paused(value) => *value,
+            _ => 0.0,
         }
     }
 }
-impl Eq for Status {
-    
+impl PartialEq for Status {
+    fn eq(&self, other: &Self) -> bool {
+        match self {
+            Status::Running(_) => {
+                matches!(other, Status::Running(_))
+            }
+            Status::Paused(_) => {
+                matches!(other, Status::Paused(_))
+            }
+            Status::Queued => {
+                matches!(other, Status::Queued)
+            }
+            Status::Stopped => {
+                matches!(other, Status::Stopped)
+            }
+            Status::Error => {
+                matches!(other, Status::Error)
+            }
+            Status::Completed => {
+                matches!(other, Status::Completed)
+            }
+        }
+    }
+}
+impl Eq for Status {}
+impl Ord for Status {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let self_order = self.order();
+        let other_order = other.order();
+        if self_order == other_order {
+            match self {
+                Status::Running(value) => {
+                    if let Some(result) = value.partial_cmp(&other.value()) {
+                        result
+                    } else {
+                        std::cmp::Ordering::Equal
+                    }
+                }
+                Status::Paused(value) => {
+                    if let Some(result) = value.partial_cmp(&other.value()) {
+                        result
+                    } else {
+                        std::cmp::Ordering::Equal
+                    }
+                }
+                _ => std::cmp::Ordering::Equal,
+            }
+        } else if self_order < other_order {
+            std::cmp::Ordering::Less
+        } else {
+            std::cmp::Ordering::Greater
+        }
+    }
+}
+impl PartialOrd for Status {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum StatusFormat {
     Hashtag,
     Graphical,
-    Arrow,    
+    Arrow,
 }
 
 const PERCENTAGE_RUNNING: FormatNumber = FormatNumber::new(10).suffix("%").fill(4, b' ');

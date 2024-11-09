@@ -388,7 +388,7 @@ where
         self.update_scrollbars();
         self.update_position(self.pos, false);
     }
-    fn compare_items(a: Element, b: Element, column_index: u16, data: &Vec<Item<T>>, ascendent: bool) -> Ordering
+    fn compare_items(a: Element, b: Element, column_index: u16, data: &[Item<T>], ascendent: bool) -> Ordering
     where
         T: ListItem,
     {
@@ -551,7 +551,7 @@ where
         }
     }
 
-    /// Change the selection state of the item at the specified index
+    /// Change the selection state of the item at the specified index 
     pub fn select_item(&mut self, index: usize, selected: bool) {
         if self.select_item_and_update_count(index, selected) {
             self.update_check_count_for_groups();
