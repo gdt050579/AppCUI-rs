@@ -229,6 +229,15 @@ impl Surface {
         self.cursor.hide();
     }
 
+
+    /// Writes a character at the specified position. If the position is outside the clip area, the character will not be drawn.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, Character, Color, CharFlags};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.write_char(10, 10, Character::new('A', Color::White, Color::Black, CharFlags::None));
+    /// ```
     #[inline(always)]
     pub fn write_char(&mut self, x: i32, y: i32, ch: Character) {
         if let Some(pos) = self.coords_to_position(x, y) {
@@ -236,12 +245,14 @@ impl Surface {
         }
     }
 
+    /// Returns the character at the specified position. If the position is outside the clip area, `None` will be returned.
     #[inline]
-    pub fn get(&self, x: i32, y: i32) -> Option<&Character> {
+    pub fn char(&self, x: i32, y: i32) -> Option<&Character> {
         let pos = self.coords_to_position(x, y)?;
         Some(&(self.chars[pos]))
     }
 
+    /// Clears/Fills the entire clip area with the specified character. If the clip area is not visible, the surface will not be cleared. 
     pub fn clear(&mut self, ch: Character) {
         if !self.clip.is_visible() {
             return;
