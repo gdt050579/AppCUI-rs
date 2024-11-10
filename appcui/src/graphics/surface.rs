@@ -100,11 +100,22 @@ impl Surface {
         let pos = y_p * (self.size.width as usize) + x_p;
         Some(pos)
     }
+    
+    /// Sets the origin of the surface. The origin is used to draw text and images relative to a specific point.    
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.set_origin(10, 10);
+    /// ```
     #[inline]
     pub fn set_origin(&mut self, x: i32, y: i32) {
         self.origin.x = x + self.base_origin.x;
         self.origin.y = y + self.base_origin.y;
     }
+    
+    /// Resets the origin of the surface to the base origin.
     #[inline]
     pub fn reset_origin(&mut self) {
         self.origin.x = self.base_origin.x;
@@ -125,6 +136,15 @@ impl Surface {
             i32::min(self.base_clip.bottom, self.base_origin.y + bottom),
         );
     }
+    
+    /// Sets the clip area of the surface. The clip area is used to restrict the drawing operations to a specific area of the surface.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.set_clip(10, 10, 20, 20);
+    /// ```
     #[inline(always)]
     pub fn set_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.clip.set(
@@ -134,6 +154,20 @@ impl Surface {
             i32::min(self.base_clip.bottom, bottom),
         );
     }
+
+    /// Reduces the clip area of the surface by the specified margins. This is useful when you want to draw a border around the surface.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.set_clip(10, 10, 20, 20);
+    /// // draw a border from (10,10) to (20,20)
+    /// // reduce the clip area by one character to make sure
+    /// // the border will not be overwritten by other drawing 
+    /// // operations
+    /// surface.reduce_clip_by(1, 1, 1, 1);
+    /// ```
     #[inline(always)]
     pub fn reduce_clip_by(&mut self, left_margin: u32, top_margin: u32, right_margin: u32, bottom_margin: u32) {
         self.set_clip(
@@ -143,6 +177,8 @@ impl Surface {
             self.base_clip.bottom - bottom_margin as i32,
         );
     }
+
+    /// Resets the clip area of the surface to the base clip area.
     #[inline(always)]
     pub fn reset_clip(&mut self) {
         self.clip = self.base_clip;
