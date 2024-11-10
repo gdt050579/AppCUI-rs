@@ -1,11 +1,15 @@
 //! Module representing an `TermiosTerminal` abstraction over the ANSI protocol using the termios
 //! API to set it into raw mode. Targeted for UNIX systems, including `linux` and `mac`
 
-use super::super::{ SystemEvent, Terminal };
-use crate::{ graphics::*, input::MouseButton, prelude::{Key, KeyModifier}, system::Error, terminals::{KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent} };
+use std::{fs::File, io::Write, path::Path};
 
+
+use super::super::{ SystemEvent, Terminal };
+use crate::{ graphics::*, input::MouseButton, prelude::{Key, KeyModifier}, system::Error, terminals::{termios::api::sizing::listen_for_resizes, KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent} };
+
+use self::sizing::{get_terminal_size, RESIZE_EVENT};
 #[cfg(target_family = "unix")]
-use super::api::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios};
+use super::api::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios, sizing};
 
 /// Represents a terminal interface that has support for termios API terminals, supported by unix
 /// family and outputs ANSI escape codes and receives input from
@@ -16,6 +20,8 @@ pub struct TermiosTerminal {
     // We keep the original `Termios` structure, such that before the application exits, we return
     // the terminal as the user had it initially.
     _orig_termios: Termios,
+
+    file: File
 }
 
 impl TermiosTerminal {
@@ -31,7 +37,15 @@ impl TermiosTerminal {
         let mut t = TermiosTerminal {
             size: Size::new(80, 30),
             _orig_termios,
+            file: File::create(Path::new("/Users/alstoica/uni/AppCUI-rs/debug.txt")).unwrap()
         };
+
+        if let Err(err) = listen_for_resizes() {
+            return Err(Error::new(
+                crate::system::ErrorKind::InitializationFailure,
+                format!("Failed to setup terminal resize listener: {:?}", err)));
+        }
+        
         if let Some(sz) = builder.size {
             t.size = sz;
 
@@ -49,6 +63,11 @@ impl TermiosTerminal {
 
     fn clear(&mut self) {
         print!("\x1b[2J");
+    }
+
+    fn update_size(&mut self) -> Result<(), std::io::Error> {
+        self.size = get_terminal_size()?;
+        Ok(())
     }
 }
 
@@ -85,7 +104,10 @@ impl Terminal for TermiosTerminal {
                     s.push_str("\x1b[0m");
                 }
             }
-            s.push('\n');
+
+            if y < sz.height - 1 {
+                s.push('\n');
+            }
         }
         print!("{}", s);
     }
@@ -95,6 +117,15 @@ impl Terminal for TermiosTerminal {
     }
 
     fn get_system_event(&mut self) -> SystemEvent {
+        if RESIZE_EVENT.load(std::sync::atomic::Ordering::SeqCst) {
+            RESIZE_EVENT.store(false, std::sync::atomic::Ordering::SeqCst);
+            if let Err(_) = self.update_size() {
+                return SystemEvent::None;
+            };
+
+            return SystemEvent::Resize(self.size);
+        }
+        
         #[cfg(target_family = "unix")]
         match TermiosReader::read_key() {
             Ok(ansi_key) => {
@@ -105,12 +136,14 @@ impl Terminal for TermiosTerminal {
                 }
 
                 if let AnsiKeyCode::MouseButton(ev) = ansi_key.code() {
+                    self.file.write_all(format!("{}, {}\n", ev.x, ev.y).as_bytes());
                     match ev.button {
                         MouseButton::None => return SystemEvent::MouseButtonUp(MouseButtonUpEvent {x: ev.x.into(), y: ev.y.into(), button: MouseButton::None}),
                         other => return SystemEvent::MouseButtonDown(MouseButtonDownEvent {button: other, x: ev.x.into(), y: ev.y.into()})
                     }
                 }
                 if let AnsiKeyCode::MouseMove(ev) = ansi_key.code() {
+                    self.file.write_all(format!("{}, {}\n", ev.x, ev.y).as_bytes());
                     return SystemEvent::MouseMove(MouseMoveEvent { x: ev.x.into(), y: ev.y.into(), button: ev.button });
                 }
 

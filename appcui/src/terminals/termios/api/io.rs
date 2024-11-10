@@ -23,7 +23,7 @@ pub struct AnsiKey {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MouseButtonEvent {
-    pub (crate) button: MouseButton, // None => release (in x-term documentation there is no None)
+    pub (crate) button: MouseButton, // None => release (in xterm documentation there is no None)
     pub (crate) x: u8,
     pub (crate) y: u8,
 }
