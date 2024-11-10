@@ -53,7 +53,17 @@ pub struct Surface {
     bottom_most: i32,
 }
 
-impl Surface {
+impl Surface {  
+
+    /// Creates a new surface with the specified width and height. The surface will be filled with space (empty) character with White foreground and Black background.
+    /// The surface will have the origin set to `(0,0)` and the clip area will be the entire surface.
+    /// The width and height of the surface will be clamped between `1` and `10000`.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface};
+    /// let mut surface = Surface::new(100, 50);
+    /// ```
     pub fn new(width: u32, height: u32) -> Surface {
         let w = width.clamp(1, MAX_SURFACE_WIDTH);
         let h = height.clamp(1, MAX_SURFACE_HEIGHT);
@@ -73,6 +83,7 @@ impl Surface {
         s
     }
 
+    /// Returns the size of the surface (width and height).
     #[inline]
     pub fn size(&self) -> Size {
         self.size
