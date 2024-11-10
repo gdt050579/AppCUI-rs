@@ -203,6 +203,15 @@ impl Surface {
         self.reset_origin();
     }
 
+
+    /// Sets the position of the cursor relativ to the origin point. If the cursor is within the clip area, it will be visible. Otherwise it will be hidden.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.set_cursor(10, 10);
+    /// ```
     #[inline]
     pub fn set_cursor(&mut self, x: i32, y: i32) {
         let x = x + self.origin.x;
@@ -213,6 +222,8 @@ impl Surface {
             self.cursor.hide();
         }
     }
+
+    /// Hides the cursor.
     #[inline]
     pub fn hide_cursor(&mut self) {
         self.cursor.hide();
