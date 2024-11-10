@@ -321,6 +321,16 @@ impl Surface {
         }
     }
 
+    /// Draws a vertical line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, LineType, CharAttribute, Color};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.draw_vertical_line(10, 10, 20, 
+    ///                            LineType::Single, 
+    ///                            CharAttribute::with_color(Color::White, Color::Black));
+    /// ```
     pub fn draw_vertical_line(&mut self, x: i32, top: i32, bottom: i32, line_type: LineType, attr: CharAttribute) {
         self.fill_vertical_line(
             x,
@@ -330,6 +340,8 @@ impl Surface {
         );
     }
 
+    /// Draws a vertical line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.  
+    /// if the height is bigger than 0, this method will call `draw_vertical_line` method
     pub fn draw_vertical_line_with_size(&mut self, x: i32, y: i32, height: u32, line_type: LineType, attr: CharAttribute) {
         if height > 0 {
             self.fill_vertical_line(
@@ -341,6 +353,16 @@ impl Surface {
         }
     }
 
+    /// Draws a horizontal line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, LineType, CharAttribute, Color};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.draw_horizontal_line(10, 10, 20, 
+    ///                              LineType::Single, 
+    ///                              CharAttribute::with_color(Color::White, Color::Black));
+    /// ```
     pub fn draw_horizontal_line(&mut self, left: i32, y: i32, right: i32, line_type: LineType, attr: CharAttribute) {
         self.fill_horizontal_line(
             left,
@@ -350,6 +372,8 @@ impl Surface {
         );
     }
 
+    /// Draws a horizontal line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.  
+    /// if the height is bigger than 0, this method will call `draw_horizontal_line` method
     pub fn draw_horizontal_line_with_size(&mut self, x: i32, y: i32, width: u32, line_type: LineType, attr: CharAttribute) {
         if width > 0 {
             self.fill_horizontal_line(
