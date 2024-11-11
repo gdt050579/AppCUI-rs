@@ -467,6 +467,19 @@ impl Surface {
         }
     }
 
+    /// Writes a string at the specified position, from left to right using a specific character attribute. If the text is outside the clip area, it will not be drawn.
+    /// The `multi-line` parameter specifices if the text should interpret new line characters as a new line or not. if set to `false` the code of this method is optimized to write the text faster.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, CharAttribute, Color};
+    /// 
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.write_string(10, 10, 
+    ///                      "Hello World!", 
+    ///                      CharAttribute::with_color(Color::White, Color::Black), 
+    ///                      false);
+    /// ```
     pub fn write_string(&mut self, x: i32, y: i32, text: &str, attr: CharAttribute, multi_line: bool) {
         let mut c = Character::new(' ', attr.foreground, attr.background, attr.flags);
         if !multi_line {
@@ -500,6 +513,19 @@ impl Surface {
         }
     }
 
+    /// Writes an ASCII buffer at the specified position, from left to right using a specific character attribute. If the text is outside the clip area, it will not be drawn.  
+    /// The `multi-line` parameter specifices if the text should interpret new line characters as a new line or not. if set to `false` the code of this method is optimized to write the text faster.   
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, CharAttribute, Color};
+    /// 
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.write_ascii(10, 10,
+    ///                    b"Hello World!",
+    ///                    CharAttribute::with_color(Color::White, Color::Black),
+    ///                    false);
+    /// ```
     pub fn write_ascii(&mut self, x:i32, y:i32, ascii_buffer: &[u8], attr: CharAttribute, multi_line: bool) {
         let mut c = Character::with_attributes(' ', attr);
         if !multi_line {
