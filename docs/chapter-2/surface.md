@@ -119,3 +119,67 @@ surface.clear(Character::new('*', Color::Silver, Color::Black, CharFlags::None))
 // point (10,10) => the character will be drawn at position (15,15)
 surface.write_char(5, 5, Character::new('A', Color::Yellow, Color::DarkBlue, CharFlags::None));
 ```
+
+## Drawing Lines and Rectangles
+
+Drawing lines and rectangles is a common operation when building a UI. The following methods can be used to draw lines and rectangles on a surface
+
+1. Methods that allow drawing a line
+
+    | Method                                | Description                                                                                                                                        |
+    | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `draw_horizontal_line(...)`           | Draws a horizontal line on the surface. The line will be drawn from left to right.                                                                 |
+    | `draw_vertical_line(...)`             | Draws a vertical line on the surface. The line will be drawn from top to bottom.                                                                   |
+    | `draw_horizontal_line_with_size(...)` | Draws a horizontal line on the surface with a specific length. The line will be drawn from left to right, starting from a given point and a width. |
+    | `draw_vertical_line_with_size(...)`   | Draws a vertical line on the surface with a specific length. The line will be drawn from top to bottom, starting from a given point and a width.   |
+
+    These methods take a parameter `line_type` that specifies the type of line that will be drawn. The line type can be one of the following values:
+
+    | Value         | Characters being used                                 |
+    | ------------- | ----------------------------------------------------- |
+    | `Single`      | `─`, `│`, `┌`, `┐`, `└`, `┘`, `├`, `┤`, `┬`, `┴`, `┼` |
+    | `Double`      | `═`, `║`, `╔`, `╗`, `╚`, `╝`, `╠`, `╣`, `╦`, `╩`, `╬` |
+    | `SingleThick` | `━`, `┃`, `┏`, `┓`, `┗`, `┛`, `┣`, `┫`, `┳`, `┻`, `╋` |
+    | `Border`      | `▄`, `▀`, `█`                                         |
+    | `Ascii`       | `\|`, `-`, `+`                                        |
+    | `AsciiRound`  | `\|`, `-`, `+`, `\\` , `\/`                           |
+    | `SingleRound` | `╭`, `╮`, `╯`, `╰`, `─`, `│`                          |
+
+    Example:
+
+    ```rust
+    use appcui::graphics::{Surface, LineType, CharAttribute, Color};
+    
+    let mut surface = Surface::new(100, 50);
+    surface.draw_vertical_line(10, 10, 20, 
+                               LineType::Single, 
+                               CharAttribute::with_color(Color::White, Color::Black));
+    ```
+
+2. Methods that allow filling a line using a specific character
+
+    | Method                                | Description                                                                                                                                                |
+    | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `fill_horizontal_line(...)`           | Fills a horizontal line on the surface. The line will be filled from left to right with a provided [Character](screen.md#character)                        |
+    | `fill_vertical_line(...)`             | Fills a vertical line on the surface. The line will be filled from top to bottom with a provided [Character](screen.md#character)                          |
+    | `fill_horizontal_line_with_size(...)` | Fills a horizontal line on the surface with a specific length. The line will be filled from left to right with a provided [Character](screen.md#character) |
+    | `fill_vertical_line_with_size(...)`   | Fills a vertical line on the surface with a specific length. The line will be filled from top to bottom with a provided [Character](screen.md#character)   |
+
+    Example:
+
+    ```rust
+    use appcui::graphics::{Surface, CharAttribute, Color, Character};
+
+    let mut surface = Surface::new(100, 50);
+    let c = Character::new('=', Color::White, Color::Black, CharFlags::None);
+    surface.fill_horizontal_line(10, 10, 20, c);
+    ```
+
+3. Methods that allow drawing a rectangle
+
+    | Method           | Description                                                                                                |
+    | ---------------- | ---------------------------------------------------------------------------------------------------------- |
+    | `draw_rect(...)` | Draws a rectangle on the surface by providing a `rectangle` object, a line type and a character attribute. |
+    | `fill_rect(...)` | Fills a rectangle on the surface by providing a `rectangle` object and a character attribute.              |
+    
+   

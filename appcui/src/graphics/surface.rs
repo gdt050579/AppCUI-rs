@@ -277,20 +277,14 @@ impl Surface {
         }
     }
 
-    pub fn fill_rect(&mut self, rect: Rect, ch: Character) {
-        let left = rect.left();
-        let right = rect.right();
-        let top = rect.top();
-        let bottom = rect.bottom();
-        for x in left..=right {
-            for y in top..=bottom {
-                if let Some(pos) = self.coords_to_position(x, y) {
-                    self.chars[pos].set(ch);
-                }
-            }
-        }
-    }
-
+    /// Fills a horizontal line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, Character, Color, CharFlags};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.fill_horizontal_line(10, 10, 20, Character::new('-', Color::White, Color::Black, CharFlags::None));
+    /// ```
     pub fn fill_horizontal_line(&mut self, left: i32, y: i32, right: i32, ch: Character) {
         let mut x = left;
         while x <= right {
@@ -300,12 +294,23 @@ impl Surface {
             x += 1;
         }
     }
+    
+    /// Fills a horizontal line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
+    /// if the width is bigger than 0, this method will call `fill_horizontal_line` method
     pub fn fill_horizontal_line_with_size(&mut self, x: i32, y: i32, width: u32, ch: Character) {
         if width > 0 {
             self.fill_horizontal_line(x, y, x + ((width - 1) as i32), ch);
         }
     }
 
+    /// Fills a vertical line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, Character, Color, CharFlags};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.fill_vertical_line(10, 10, 20, Character::new('|', Color::White, Color::Black, CharFlags::None));
+    /// ```
     pub fn fill_vertical_line(&mut self, x: i32, top: i32, bottom: i32, ch: Character) {
         let mut y = top;
         while y <= bottom {
@@ -315,6 +320,9 @@ impl Surface {
             y += 1;
         }
     }
+    
+    /// Fills a vertical line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
+    /// if the height is bigger than 0, this method will call `fill_vertical_line` method
     pub fn fill_vertical_line_width_size(&mut self, x: i32, y: i32, height: u32, ch: Character) {
         if height > 0 {
             self.fill_vertical_line(x, y, y + ((height - 1) as i32), ch);
@@ -385,6 +393,16 @@ impl Surface {
         }
     }
 
+    /// Draws a rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, LineType, CharAttribute, Color};
+    /// 
+    /// let mut surface = Surface::new(100, 50);
+    /// let r = Rect::new(10, 10, 20, 20);
+    /// surface.draw_rect(r,Linetype::Single, CharAttribute::with_color(Color::White, Color::Black));
+    /// ```
     pub fn draw_rect(&mut self, rect: Rect, line_type: LineType, attr: CharAttribute) {
         let left = rect.left();
         let right = rect.right();
@@ -409,6 +427,30 @@ impl Surface {
         self.write_char(right, bottom, ch);
         ch.code = line_chars.corner_bottom_left;
         self.write_char(left, bottom, ch);
+    }
+
+    /// Fills a rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, CharAttribute, Color};
+    /// 
+    /// let mut surface = Surface::new(100, 50);
+    /// let r = Rect::new(10, 10, 20, 20);
+    /// surface.fill_rect(r, Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    /// ```
+    pub fn fill_rect(&mut self, rect: Rect, ch: Character) {
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
+        for x in left..=right {
+            for y in top..=bottom {
+                if let Some(pos) = self.coords_to_position(x, y) {
+                    self.chars[pos].set(ch);
+                }
+            }
+        }
     }
 
     pub fn draw_surface(&mut self, x: i32, y: i32, surface: &Surface) {
