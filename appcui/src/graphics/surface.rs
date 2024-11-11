@@ -38,6 +38,7 @@ impl From<char> for CharacterType {
     }
 }
 
+
 const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
 
@@ -397,11 +398,11 @@ impl Surface {
     /// 
     /// Example:
     /// ```rust
-    /// use appcui::graphics::{Surface, LineType, CharAttribute, Color};
+    /// use appcui::graphics::*;
     /// 
     /// let mut surface = Surface::new(100, 50);
     /// let r = Rect::new(10, 10, 20, 20);
-    /// surface.draw_rect(r,Linetype::Single, CharAttribute::with_color(Color::White, Color::Black));
+    /// surface.draw_rect(r, LineType::Single, CharAttribute::with_color(Color::White, Color::Black));
     /// ```
     pub fn draw_rect(&mut self, rect: Rect, line_type: LineType, attr: CharAttribute) {
         let left = rect.left();
@@ -433,7 +434,7 @@ impl Surface {
     /// 
     /// Example:
     /// ```rust
-    /// use appcui::graphics::{Surface, CharAttribute, Color};
+    /// use appcui::graphics::*;
     /// 
     /// let mut surface = Surface::new(100, 50);
     /// let r = Rect::new(10, 10, 20, 20);

@@ -21,6 +21,8 @@ pub struct Rect {
     bottom: i32,
 }
 impl Rect {
+    /// Creates a new rectangle with the specified coordinates. The coordinates are automatically
+    /// adjusted to ensure that left <= right and top <= bottom.
     pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
         Self {
             left: left.min(right),
@@ -29,6 +31,8 @@ impl Rect {
             bottom: bottom.max(top),
         }
     }
+
+    /// Creates a new rectangle with the specified coordinates and size. 
     pub fn with_size(x: i32, y: i32, width: u16, height: u16) -> Self {
         Self {
             left: x,
@@ -37,6 +41,18 @@ impl Rect {
             bottom: y + (height as i32).max(1) - 1,
         }
     }
+
+    /// Creates a new rectangle with the specified coordinates, size and alignament.
+    /// The alignament can have the following values:
+    /// - `TopLeft`: the x,y coordinates are the top-left corner of the rectangle
+    /// - `Top`: the x,y coordinates are the top-center of the rectangle
+    /// - `TopRight`: the x,y coordinates are the top-right corner of the rectangle
+    /// - `Right`: the x,y coordinates are the right-center of the rectangle
+    /// - `BottomRight`: the x,y coordinates are the bottom-right corner of the rectangle
+    /// - `Bottom`: the x,y coordinates are the bottom-center of the rectangle
+    /// - `BottomLeft`: the x,y coordinates are the bottom-left corner of the rectangle
+    /// - `Left`: the x,y coordinates are the left-center of the rectangle
+    /// - `Center`: the x,y coordinates are the center of the rectangle
     pub fn with_alignament(x: i32, y: i32, width: u16, height: u16, align: Alignament) -> Self {
         let x = match align {
             Alignament::TopLeft => x,
@@ -67,6 +83,9 @@ impl Rect {
             bottom: y + (height as i32).max(1) - 1,
         }
     }
+
+    /// Creates a new rectangle with the specified coordinates and size.
+    /// The coordonates are represented by a Point and are considered the top-left corner of the rectangle.
     pub fn with_point_and_size(point: Point, size: Size)->Self {
         Rect {
             left: point.x,
@@ -75,34 +94,50 @@ impl Rect {
             bottom: point.y + (size.height as i32).max(1) - 1,
         }
     }
+
+    /// Returns the rectangle left coordinate.
     #[inline]
     pub fn left(&self) -> i32 {
         self.left
     }
+
+    /// Returns the rectangle right coordinate.
     #[inline]
     pub fn right(&self) -> i32 {
         self.right
     }
+
+    /// Returns the rectangle top coordinate.
     #[inline]
     pub fn top(&self) -> i32 {
         self.top
     }
+
+    /// Returns the rectangle bottom coordinate.
     #[inline]
     pub fn bottom(&self) -> i32 {
         self.bottom
     }
+
+    /// Returns the rectangle width.
     #[inline]
     pub fn width(&self) -> u32 {
         ((self.right - self.left) as u32) + 1u32
     }
+
+    /// Returns the rectangle height.
     #[inline]
     pub fn height(&self) -> u32 {
         ((self.bottom - self.top) as u32) + 1u32
     }
+
+    /// Returns the rectangle X-axis center.
     #[inline]
     pub fn center_x(&self) -> i32 {
         (self.right+self.left)/2
     }
+
+    /// Returns the rectangle Y-axis center.
     #[inline]
     pub fn center_y(&self) -> i32 {
         (self.bottom+self.top)/2
