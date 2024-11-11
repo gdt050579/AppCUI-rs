@@ -740,6 +740,26 @@ impl Surface {
         }
     }
 
+    /// Draws an image at the specified position. The image will be drawn using the specified rendering method and scale method.
+    /// The rendering method can be `SmallBlocks`, `LargeBlocks64Colors`, `GrayScale` or `AsciiArt`.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut surface = Surface::new(100, 50);
+    /// let heart = r#"
+    ///         |..rr.rr..|
+    ///         |.rrrrrrr.|
+    ///         |.rrrrrrr.|
+    ///         |..rrrrr..|
+    ///         |...rrr...|
+    ///         |....r....|"#;
+    /// let image = Image::with_str(heart).unwrap();
+    /// surface.draw_image(10, 10, &image, 
+    ///                            image::RenderMethod::LargeBlocks64Colors, 
+    ///                            image::Scale::NoScale);
+    /// ```
     pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: image::RenderMethod, scale_method: image::Scale) {
         let rap = scale_method as u32;
         match rendering_method {
