@@ -186,6 +186,18 @@ impl TextFormatNew {
         self.x = x;
         self.y = y;
     }
+    #[inline(always)]
+    pub fn set_hotkey(&mut self, attr: CharAttribute, pos: u32) {
+        self.hotkey_attr = attr;
+        self.hotkey_pos = pos;
+        self.flags.set(TextFormatFlags::Hotkey);
+    }
+    #[inline(always)]
+    pub fn set_wrap(&mut self, wrap: TextWrap, width: u16) {
+        self.text_wrap = wrap;
+        self.width = width;
+        self.flags.set(TextFormatFlags::Width | TextFormatFlags::MultiLine);
+    }
 }
 
 impl Default for TextFormatNew {
@@ -244,9 +256,10 @@ impl TextFormatBuilder {
     }
     #[inline(always)]
     pub fn hotkey(mut self, attr: CharAttribute, pos: u32) -> Self {
-        self.format.hotkey_attr = attr;
-        self.format.hotkey_pos = pos;
-        self.format.flags.set(TextFormatFlags::Hotkey);
+        self.format.set_hotkey(attr, pos);
+        // self.format.hotkey_attr = attr;
+        // self.format.hotkey_pos = pos;
+        // self.format.flags.set(TextFormatFlags::Hotkey);
         self
     }
     #[inline(always)]
@@ -262,9 +275,10 @@ impl TextFormatBuilder {
     }
     #[inline(always)]
     pub fn wrap(mut self, wrap: TextWrap, width: u16) -> Self {
-        self.format.text_wrap = wrap;
-        self.format.width = width;
-        self.format.flags.set(TextFormatFlags::Width | TextFormatFlags::MultiLine);
+        self.format.set_wrap(wrap, width);
+        // self.format.text_wrap = wrap;
+        // self.format.width = width;
+        // self.format.flags.set(TextFormatFlags::Width | TextFormatFlags::MultiLine);
         self
     }
     #[inline(always)]
