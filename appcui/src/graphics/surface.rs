@@ -749,6 +749,20 @@ impl Surface {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
+    
+    /// Writes a text using a specific format that allows specifying alignment, hotkey position and attributes, width, and height.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::*;
+    /// 
+    /// let mut surface = Surface::new(100, 50);
+    /// let format = TextFormat::new(10, 10, 
+    ///                              CharAttribute::with_color(Color::White, Color::Black), 
+    ///                              TextAlignament::Left, 
+    ///                              false);
+    /// surface.write_text("Hello World!", &format);
+    /// ```
     pub fn write_text(&mut self, text: &str, format: &TextFormat) {
         if format.multi_line {
             match format.text_wrap {

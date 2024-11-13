@@ -58,3 +58,41 @@ surface.write_ascii(10, 10,
                    CharAttribute::with_color(Color::White, Color::Black),
                    false);
 ```
+
+## Write a formatted text
+
+In some cases, you may need to write a text that is formatted in a specific way (like alignament, wrapping, etc). The `write_text(...)` method allows you to do this. The method has the following signature:
+
+```rust
+pub fn write_text(&mut self, text: &str, format: &TextFormat)
+```
+
+with the `TextFormat` structure defined as follows:
+
+```rust
+pub struct TextFormat {
+    pub x: i32,
+    pub y: i32,
+    pub width: Option<u16>,
+    pub char_attr: CharAttribute,
+    pub hotkey_attr: Option<CharAttribute>,
+    pub hotkey_pos: Option<usize>,
+    pub chars_count: Option<u16>,
+    pub align: TextAlignament,
+    pub text_wrap: TextWrap,
+    pub multi_line: bool,
+}
+```
+
+where:
+- `x` and `y` represent the starting position of the text
+- `width` represents the maximum width of the text (if `None`, the text will be written until a new line character is found or until the end of the text)
+- `char_attr` represents the character attribute that will be used to write the text
+- `hotkey_attr` represents the character attribute that will be used to write the hotkey (if exists) or `None` if no hotkey is present
+- `hotkey_pos` represents the position of the hotkey in the text (if exists) or `None` if no hotkey is present
+- `chars_count` represents the number of characters in the provided text. If not provided it will be computed automatically upon writing the text. This is useful as a performance optimization (especially if the text is in Ascii - and the number of characters is the same as the number of bytes) or the number of characters is known in advance.
+- `align` represents the alignament of the text (left, right, center, etc)
+- `text_wrap` represents the text wrapping mode (word, character, none). This method ensures that the text will not be written outside the provided width.
+- `multi_line` specifies if the text should interpret new line characters as a new line or not.
+
+All of these fields are public and can be modified directly. However, since the `TextFormat` structure is quite complex, it is recommended to use the `TextFormatBuilder` to create a new `TextFormat` object.
