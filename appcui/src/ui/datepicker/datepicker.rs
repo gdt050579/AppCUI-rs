@@ -257,13 +257,13 @@ impl OnPaint for DatePicker {
         format.width = Some((size.width - MIN_WIDTH_FOR_DATE_NAME) as u16);
         match date_size {
             DateSize::Large => {
-                surface.write_text(Self::format_long_date(self.selected_date).as_str(), &format);
+                surface.write_text_old(Self::format_long_date(self.selected_date).as_str(), &format);
             }
             DateSize::Small => {
-                surface.write_text(Self::format_short_date(self.selected_date).as_str(), &format);
+                surface.write_text_old(Self::format_short_date(self.selected_date).as_str(), &format);
             }
             DateSize::VerySmall => {
-                surface.write_text(Self::format_very_short_date(self.selected_date).as_str(), &format);
+                surface.write_text_old(Self::format_very_short_date(self.selected_date).as_str(), &format);
             }
         }
 
@@ -298,7 +298,7 @@ impl OnPaint for DatePicker {
             let year = self.virtual_date.year();
             let mut year_format = TextFormat::single_line(7, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             year_format.width = Some(4);
-            surface.write_text(year.to_string().as_str(), &year_format);
+            surface.write_text_old(year.to_string().as_str(), &year_format);
 
             fn set_char(surface: &mut Surface, x: i32, y: i32, char_or_special: CharOrSpecialChar, condition: bool, theme: &Theme) {
                 let attr = if condition { theme.menu.text.hovered } else { theme.menu.text.normal };
@@ -378,13 +378,13 @@ impl OnPaint for DatePicker {
             let month = Self::MONTHS[self.virtual_date.month0() as usize];
             let mut month_format = TextFormat::single_line(22, 1 + self.expanded_panel_y, col, TextAlignament::Left);
             month_format.width = Some(3);
-            surface.write_text(month, &month_format);
+            surface.write_text_old(month, &month_format);
 
             let mut day_format = TextFormat::single_line(2, 3 + self.expanded_panel_y, col, TextAlignament::Left);
             day_format.width = Some(2);
             for i in 0..7 {
                 day_format.char_attr = theme.menu.text.inactive;
-                surface.write_text(DatePicker::DAYS[i], &day_format);
+                surface.write_text_old(DatePicker::DAYS[i], &day_format);
                 day_format.x += 4;
             }
 
@@ -398,7 +398,7 @@ impl OnPaint for DatePicker {
                 let mut day_format = TextFormat::single_line(day_col, day_row, col, TextAlignament::Right);
 
                 day_format.width = Some(2);
-                surface.write_text(day.to_string().as_str(), &day_format);
+                surface.write_text_old(day.to_string().as_str(), &day_format);
                 if day == self.selected_date.day()
                     && self.selected_date.month() == self.virtual_date.month()
                     && self.selected_date.year() == self.virtual_date.year()

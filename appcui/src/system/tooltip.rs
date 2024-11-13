@@ -80,7 +80,7 @@ impl ToolTip {
             self.format.text_wrap = TextWrap::Word;
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
-            self.canvas.write_text(text, &self.format);
+            self.canvas.write_text_old(text, &self.format);
             self.visible = true;
             return true;
         }
@@ -103,7 +103,7 @@ impl ToolTip {
             self.format.text_wrap = TextWrap::Word;
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
-            self.canvas.write_text(text, &self.format);
+            self.canvas.write_text_old(text, &self.format);
             self.visible = true;
         }
         false

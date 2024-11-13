@@ -1,4 +1,5 @@
 use super::CharAttribute;
+use EnumBitFlags::EnumBitFlags; 
 
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
@@ -13,12 +14,32 @@ pub enum TextAlignament {
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub enum TextWrap {
     #[default]
-    None,
     Character,
     Word,
 }
 
+#[EnumBitFlags(bits = 8)]
+enum TextFormatFlags {
+    Hotkey = 0x01,
+    MultiLine = 0x02,
+    CharsCount = 0x04,
+    Width = 0x08,
+}
+
 /// A structure that contains information about how a text should be displayed on the screen.
+pub struct TextFormatNew {
+    pub(crate) flags: TextFormatFlags,
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) width: u16,
+    pub(crate) char_attr: CharAttribute,
+    pub(crate) hotkey_attr: CharAttribute,
+    pub(crate) hotkey_pos: u32,
+    pub(crate) chars_count: u16,
+    pub(crate) align: TextAlignament,
+    pub(crate) text_wrap: TextWrap,
+}
+
 pub struct TextFormat {
     pub(crate) x: i32,
     pub(crate) y: i32,
@@ -109,6 +130,59 @@ impl TextFormat {
     }
 }
 
+impl TextFormatNew {
+    pub(super) fn from_old(format: &TextFormat) -> Self {
+        Self {
+            flags: if format.hotkey_attr.is_some() { TextFormatFlags::Hotkey } else { TextFormatFlags::None }
+                | if format.chars_count.is_some() { TextFormatFlags::CharsCount } else { TextFormatFlags::None }
+                | if format.width.is_some() { TextFormatFlags::Width } else { TextFormatFlags::None }
+                | if format.multi_line { TextFormatFlags::MultiLine } else { TextFormatFlags::None },
+            x: format.x,
+            y: format.y,
+            width: format.width.unwrap_or(0),
+            char_attr: format.char_attr,
+            hotkey_attr: format.hotkey_attr.unwrap_or_default(),
+            hotkey_pos: format.hotkey_pos.unwrap_or(0) as u32,
+            chars_count: format.chars_count.unwrap_or(0),
+            align: format.align,
+            text_wrap: format.text_wrap,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn has_hotkey(&self) -> bool {
+        self.flags.contains(TextFormatFlags::Hotkey)
+    }
+    #[inline(always)]
+    pub(super) fn has_chars_count(&self) -> bool {
+        self.flags.contains(TextFormatFlags::CharsCount)
+    }
+    #[inline(always)]
+    pub(super) fn has_width(&self) -> bool {
+        self.flags.contains(TextFormatFlags::Width)
+    }
+    #[inline(always)]
+    pub(super) fn is_multi_line(&self) -> bool {
+        self.flags.contains(TextFormatFlags::MultiLine)
+    }
+}
+
+impl Default for TextFormatNew {
+    fn default() -> Self {
+        Self {
+            flags: TextFormatFlags::None,
+            x: 0,
+            y: 0,
+            width: 0,
+            char_attr: Default::default(),
+            hotkey_attr: Default::default(),
+            hotkey_pos: 0,
+            chars_count: 0,
+            align: TextAlignament::Left,
+            text_wrap: TextWrap::Character,
+        }
+    }
+}
+
 impl Default for TextFormat {
     fn default() -> Self {
         Self {
@@ -120,14 +194,16 @@ impl Default for TextFormat {
             hotkey_pos: None,
             chars_count: None,
             align: TextAlignament::Left,
-            text_wrap: TextWrap::None,
+            text_wrap: TextWrap::Character,
             multi_line: false,
         }
     }
 }
 
+
+
 pub struct TextFormatBuilder {
-    format: TextFormat,
+    format: TextFormatNew,
 }
 
 impl TextFormatBuilder {
@@ -149,9 +225,10 @@ impl TextFormatBuilder {
         self
     }
     #[inline(always)]
-    pub fn hotkey(mut self, attr: CharAttribute, pos: usize) -> Self {
-        self.format.hotkey_attr = Some(attr);
-        self.format.hotkey_pos = Some(pos);
+    pub fn hotkey(mut self, attr: CharAttribute, pos: u32) -> Self {
+        self.format.hotkey_attr = attr;
+        self.format.hotkey_pos = pos;
+        self.format.flags.set(TextFormatFlags::Hotkey);
         self
     }
     #[inline(always)]
@@ -160,7 +237,34 @@ impl TextFormatBuilder {
         self
     }
     #[inline(always)]
-    pub fn build(self) -> TextFormat {
+    pub fn chars_count(mut self, value: u16) -> Self {
+        self.format.chars_count = value;
+        self.format.flags.set(TextFormatFlags::CharsCount);
+        self
+    }
+    #[inline(always)]
+    pub fn wrap(mut self, wrap: TextWrap, width: u16) -> Self {
+        self.format.text_wrap = wrap;
+        self.format.width = width;
+        self.format.flags.set(TextFormatFlags::Width | TextFormatFlags::MultiLine);
+        self
+    }
+    #[inline(always)]
+    pub fn multi_line(mut self) -> Self {
+        self.format.width = 0;
+        self.format.flags.set(TextFormatFlags::MultiLine);
+        self.format.flags.remove(TextFormatFlags::Width);
+        self
+    }
+    #[inline(always)]
+    pub fn truncate(mut self, width: u16) -> Self {
+        self.format.width = width;
+        self.format.flags.remove(TextFormatFlags::MultiLine);
+        self.format.flags.set(TextFormatFlags::Width);
+        self
+    }
+    #[inline(always)]
+    pub fn build(self) -> TextFormatNew {
         self.format
     }
 }

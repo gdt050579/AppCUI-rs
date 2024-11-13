@@ -134,7 +134,7 @@ impl OnPaint for ColorPicker {
             if size.width > MIN_WIDTH_FOR_COLOR_NAME {
                 let mut format = TextFormat::single_line(3, self.header_y_ofs, col_text, TextAlignament::Left);
                 format.width = Some((size.width - MIN_WIDTH_FOR_COLOR_NAME) as u16);
-                surface.write_text(self.color.name(), &format);
+                surface.write_text_old(self.color.name(), &format);
             }
         }
         if size.width >= MINSPACE_FOR_DROPBUTTON_DRAWING {

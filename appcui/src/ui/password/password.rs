@@ -43,7 +43,7 @@ impl OnPaint for Password {
             if sz > 0 {
                 let mut f = TextFormat::single_line(1, 0, attr, TextAlignament::Left);
                 f.width = Some(sz as u16);
-                surface.write_text(&self.pass, &f);
+                surface.write_text_old(&self.pass, &f);
             }
             surface.write_char(
                 w as i32 - 1,

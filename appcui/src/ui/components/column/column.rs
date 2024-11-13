@@ -81,9 +81,9 @@ impl Column {
             hotkey_pos: self.name.hotkey_pos(),
             chars_count: Some(self.name.chars_count() as u16),
             align: self.alignment,
-            text_wrap: TextWrap::None,
+            text_wrap: TextWrap::Character,
             multi_line: false,
         };
-        surface.write_text(self.name.text(), &format);
+        surface.write_text_old(self.name.text(), &format);
     }
 }

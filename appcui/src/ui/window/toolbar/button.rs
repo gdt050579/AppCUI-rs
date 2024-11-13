@@ -44,7 +44,7 @@ impl Button {
         if self.caption.has_hotkey() {
             format.hotkey_attr = Some(st.get_hotkey_attr(theme));
         }
-        surface.write_text(self.caption.text(), &format);
+        surface.write_text_old(self.caption.text(), &format);
     }
     add_toolbaritem_basic_methods!();
 }

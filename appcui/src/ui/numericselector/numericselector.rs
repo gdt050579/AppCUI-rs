@@ -224,20 +224,20 @@ where
                 if chars_count <= vis_chars {
                     format.chars_count = Some(chars_count as u16);
                     format.width = Some(vis_chars as u16);
-                    surface.write_text(&self.txt, &format);
+                    surface.write_text_old(&self.txt, &format);
                     surface.set_cursor(l + chars_count + 1, 0);
                 } else {
                     let start = chars_count - vis_chars;
                     format.chars_count = Some(vis_chars as u16);
                     format.width = Some(vis_chars as u16);
-                    surface.write_text(&self.txt[start as usize..], &format);
+                    surface.write_text_old(&self.txt[start as usize..], &format);
                     surface.set_cursor(r, 0);
                 }
             } else {
                 let mut format = TextFormat::new((l + r) / 2, 0, attr, TextAlignament::Center, false);
                 format.chars_count = Some(self.txtlen as u16);
                 format.width = Some((r - (l + 1)) as u16);
-                surface.write_text(&self.txt, &format);
+                surface.write_text_old(&self.txt, &format);
             }
         }
     }

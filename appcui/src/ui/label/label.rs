@@ -48,6 +48,6 @@ impl OnPaint for Label {
             format.width = Some(sz.width as u16);
         }
         format.chars_count = Some(self.caption.chars_count() as u16);
-        surface.write_text(self.caption.text(), &format);
+        surface.write_text_old(self.caption.text(), &format);
     }
 }

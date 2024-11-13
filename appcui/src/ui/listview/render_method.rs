@@ -57,10 +57,10 @@ impl<'a> RenderMethod<'a> {
             hotkey_pos: None,
             chars_count: None,
             align: rd.alignment,
-            text_wrap: TextWrap::None,
+            text_wrap: TextWrap::Character,
             multi_line: false,
         };
-        surface.write_text(txt, &format);
+        surface.write_text_old(txt, &format);
     }
     #[inline(always)]
     fn paint_ascii(txt: &str, surface: &mut Surface, rd: &RenderData) {
@@ -77,10 +77,10 @@ impl<'a> RenderMethod<'a> {
             hotkey_pos: None,
             chars_count: Some(txt.len() as u16),
             align: rd.alignment,
-            text_wrap: TextWrap::None,
+            text_wrap: TextWrap::Character,
             multi_line: false,
         };
-        surface.write_text(txt, &format);
+        surface.write_text_old(txt, &format);
     }
 
     #[inline(always)]

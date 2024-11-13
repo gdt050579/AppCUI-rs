@@ -68,7 +68,7 @@ impl Command {
             surface.fill_horizontal_line_with_size(1, format.y, width as u32, Character::with_attributes(' ', color.text.hovered));
         }
         format.x = 2;
-        surface.write_text(self.caption.text(), format);
+        surface.write_text_old(self.caption.text(), format);
         if self.shortcut.code != KeyCode::None {
             super::utils::paint_shortcut(self.shortcut, surface, format, width, self.enabled, current_item, color);
         }

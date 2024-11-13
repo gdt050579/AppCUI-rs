@@ -169,7 +169,7 @@ impl OnPaint for Accordion {
             y: 1,
             width: Some(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 }),
             align: TextAlignament::Left,
-            text_wrap: TextWrap::None,
+            text_wrap: TextWrap::Character,
             multi_line: false,
             ..Default::default()
         };
@@ -193,7 +193,7 @@ impl OnPaint for Accordion {
             surface.fill_horizontal_line_with_size(0, format.y, sz.width, Character::with_attributes(' ', text_attr));
 
             // write the text
-            surface.write_text(page.text(), &format);
+            surface.write_text_old(page.text(), &format);
         }
     }
 }

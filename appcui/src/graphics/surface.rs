@@ -14,6 +14,7 @@ use super::LineType;
 use super::Point;
 use super::TextAlignament;
 use super::TextFormat;
+use super::TextFormatNew;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -559,7 +560,7 @@ impl Surface {
         }     
     }
 
-    fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormat) {
+    fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormatNew) {
         if !self.clip.contains_y(y + self.origin.y) {
             return; // no need to draw
         }
@@ -568,7 +569,12 @@ impl Surface {
             TextAlignament::Center => format.x - (chars_count / 2) as i32,
             TextAlignament::Right => format.x + 1 - chars_count as i32,
         };
-        let width = u16::min(format.width.unwrap_or(chars_count), chars_count);
+        let width = if format.has_width() {
+            u16::min(format.width, chars_count)
+        } else {
+            chars_count
+        };
+        //let width = u16::min(format.width.unwrap_or(chars_count), chars_count);
         let left_margin = match format.align {
             TextAlignament::Left => format.x,
             TextAlignament::Center => format.x - (width / 2) as i32,
@@ -577,14 +583,14 @@ impl Surface {
         let right_margin = left_margin + (width as i32);
         let mut c = Character::with_attributes(' ', format.char_attr);
 
-        if format.hotkey_pos.is_some() && format.hotkey_attr.is_some() {
-            let hkpos = format.hotkey_pos.unwrap();
+        if format.has_hotkey() {
+            let hkpos = format.hotkey_pos as usize;
             let mut cpos = ch_index;
             for ch in text.chars() {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
                         if cpos == hkpos {
-                            self.chars[pos].set(Character::with_attributes(ch, format.hotkey_attr.unwrap()));
+                            self.chars[pos].set(Character::with_attributes(ch, format.hotkey_attr));
                         } else {
                             c.code = ch;
                             self.chars[pos].set(c);
@@ -606,7 +612,7 @@ impl Surface {
             }
         }
     }
-    fn write_text_multi_line_no_wrap(&mut self, text: &str, format: &TextFormat) {
+    fn write_text_multi_line_no_wrap(&mut self, text: &str, format: &TextFormatNew) {
         let mut y = format.y;
         let mut start_ofs = 0usize;
         let mut chars_count = 0u16;
@@ -628,11 +634,8 @@ impl Surface {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
-    fn write_text_multi_line_character_wrap(&mut self, text: &str, format: &TextFormat) {
-        if format.width.is_none() {
-            panic!("Using TextWrap::Character requires to fill the field width from TextFormat")
-        }
-        let width = format.width.unwrap();
+    fn write_text_multi_line_character_wrap(&mut self, text: &str, format: &TextFormatNew) {
+        let width = format.width;
         if width == 0 {
             return; // nothing to draw
         }
@@ -665,11 +668,8 @@ impl Surface {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
-    fn write_text_multi_line_word_wrap(&mut self, text: &str, format: &TextFormat) {
-        if format.width.is_none() {
-            panic!("Using TextWrap::Word requires to fill the field width from TextFormat")
-        }
-        let width = format.width.unwrap();
+    fn write_text_multi_line_word_wrap(&mut self, text: &str, format: &TextFormatNew) {
+        let width = format.width;
         if width == 0 {
             return; // nothing to draw
         }
@@ -763,22 +763,29 @@ impl Surface {
     ///                              false);
     /// surface.write_text("Hello World!", &format);
     /// ```
-    pub fn write_text(&mut self, text: &str, format: &TextFormat) {
-        if format.multi_line {
-            match format.text_wrap {
-                TextWrap::None => self.write_text_multi_line_no_wrap(text, format),
-                TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),
-                TextWrap::Word => self.write_text_multi_line_word_wrap(text, format),
+    pub fn write_text_new(&mut self, text: &str, format: &TextFormatNew) {
+        if format.is_multi_line() {
+            if format.has_width() { 
+                match format.text_wrap {
+                    TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),
+                    TextWrap::Word => self.write_text_multi_line_word_wrap(text, format),
+                }
+            } else {
+                self.write_text_multi_line_no_wrap(text, format);
             }
         } else {
-            let chars_count = if format.chars_count.is_some() {
-                format.chars_count.unwrap()
+            let chars_count = if format.has_chars_count() {
+                format.chars_count
             } else {
                 text.chars().count() as u16
             };
             self.write_text_single_line(text, format.y, chars_count, 0, format);
         }
     }
+    pub fn write_text_old(&mut self, text: &str, format: &TextFormat) {
+        let tx = TextFormatNew::from_old(format);
+        self.write_text_new(text, &tx);
+    }   
 
     /// Draws an image at the specified position. The image will be drawn using the specified rendering method and scale method.
     /// The rendering method can be `SmallBlocks`, `LargeBlocks64Colors`, `GrayScale` or `AsciiArt`.

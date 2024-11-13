@@ -351,7 +351,7 @@ impl OnPaint for ListBox {
             let mut format = TextFormat::new(w / 2, h / 2, empty_attr, TextAlignament::Center, true);
             format.width = Some(w as u16);
             format.text_wrap = TextWrap::Word;
-            surface.write_text(&self.empty_message, &format);
+            surface.write_text_old(&self.empty_message, &format);
             return;
         }
 

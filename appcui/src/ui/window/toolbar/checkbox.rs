@@ -57,7 +57,7 @@ impl CheckBox {
             format.hotkey_attr = Some(st.get_hotkey_attr(theme));
         }
         surface.write_string(x, y, "  ", text_attr, false);
-        surface.write_text(self.caption.text(), &format);
+        surface.write_text_old(self.caption.text(), &format);
         if self.checked {
             surface.write_char(
                 x,

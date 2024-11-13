@@ -437,15 +437,15 @@ fn check_write_text_single_line_simple() {
         CharAttribute::with_color(Color::Yellow, Color::DarkRed),
         TextAlignament::Left,
     );
-    s.write_text("Left Align at 30", &format);
+    s.write_text_old("Left Align at 30", &format);
     format.align = TextAlignament::Center;
     format.y = 3;
     format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkGreen);
-    s.write_text("Centered! at 30", &format);
+    s.write_text_old("Centered! at 30", &format);
     format.align = TextAlignament::Right;
     format.y = 5;
     format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
-    s.write_text("Right align ends at 30", &format);
+    s.write_text_old("Right align ends at 30", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x8DFA95B692742714);
@@ -469,15 +469,15 @@ fn check_write_text_single_line_width() {
         TextAlignament::Left,
     );
     format.width = Some(6);
-    s.write_text("123456xxxxxxx", &format);
+    s.write_text_old("123456xxxxxxx", &format);
     format.align = TextAlignament::Center;
     format.y = 3;
     format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkGreen);
-    s.write_text("----123456----", &format);
+    s.write_text_old("----123456----", &format);
     format.align = TextAlignament::Right;
     format.y = 5;
     format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
-    s.write_text("--------------------123456", &format);
+    s.write_text_old("--------------------123456", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xC503745C2440B5F6);
@@ -501,17 +501,17 @@ fn check_write_text_single_line_hot_key() {
         4,
         TextAlignament::Left,
     );
-    s.write_text("HotKey is 'E'", &format);
+    s.write_text_old("HotKey is 'E'", &format);
     format.align = TextAlignament::Center;
     format.y = 3;
     format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkGreen);
     format.hotkey_pos = Some(0);
-    s.write_text("Centered (hotkey='C')", &format);
+    s.write_text_old("Centered (hotkey='C')", &format);
     format.align = TextAlignament::Right;
     format.y = 5;
     format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
     format.hotkey_pos = Some(20);
-    s.write_text("Right align ends at 30", &format);
+    s.write_text_old("Right align ends at 30", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x19AE9890D9B9E3AF);
@@ -547,19 +547,19 @@ fn check_write_text_multi_line_no_wrap() {
         CharAttribute::with_color(Color::Yellow, Color::DarkRed),
         TextAlignament::Left,
     );
-    s.write_text(
+    s.write_text_old(
         "This is a\nmulti-line text\nwith 4 lines\nall left-aligned !",
         &format,
     );
     format.align = TextAlignament::Center;
     format.x = 40;
-    s.write_text(
+    s.write_text_old(
         "This is a\nmulti-line text\nwith 5 lines\n\nall centered !",
         &format,
     );
     format.align = TextAlignament::Right;
     format.x = 78;
-    s.write_text(
+    s.write_text_old(
         "This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right",
         &format,
     );
@@ -600,7 +600,7 @@ fn check_write_text_multi_line_no_wrap_how_key() {
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkRed));
     format.hotkey_pos = Some(11);
-    s.write_text(
+    s.write_text_old(
         "This is a\nmulti-line text\nwith 5 lines\nall left-aligned !\nand with hot key 'u'",
         &format,
     );
@@ -608,7 +608,7 @@ fn check_write_text_multi_line_no_wrap_how_key() {
     format.x = 40;
     format.hotkey_pos = Some(26);
     format.char_attr = CharAttribute::with_color(Color::White, Color::Gray);
-    s.write_text(
+    s.write_text_old(
         "This is a\nmulti-line text\nwith 5 lines\nall centered at y=40\nand with hot key 'w'",
         &format,
     );
@@ -616,7 +616,7 @@ fn check_write_text_multi_line_no_wrap_how_key() {
     format.x = 78;
     format.hotkey_pos = Some(75);
     format.char_attr = CharAttribute::with_color(Color::White, Color::DarkGreen);
-    s.write_text(
+    s.write_text_old(
         "This is a\nmulti-line text\nwith 6 lines\naligned to right\n\nand with hot key 'x'",
         &format,
     );
@@ -658,15 +658,15 @@ fn check_write_text_multi_line_character_wrap() {
         TextAlignament::Left,
         TextWrap::Character,
     );
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
     format.align = TextAlignament::Center;
     format.x = 40;
     format.width = Some(30);
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
     format.align = TextAlignament::Right;
     format.x = 78;
     format.width = Some(7);
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
@@ -705,15 +705,15 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
         TextAlignament::Left,
         TextWrap::Character,
     );
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
     format.align = TextAlignament::Center;
     format.x = 40;
     format.width = Some(30);
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
     format.align = TextAlignament::Right;
     format.x = 78;
     format.width = Some(7);
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7A3A6A4DED903CC);
@@ -753,7 +753,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkRed));
     format.hotkey_pos = Some(17);
-    s.write_text(
+    s.write_text_old(
         "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'",
         &format,
     );
@@ -761,7 +761,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     format.x = 40;
     format.width = Some(30);
     format.hotkey_pos = Some(28);
-    s.write_text(
+    s.write_text_old(
         "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'",
         &format,
     );
@@ -769,7 +769,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     format.x = 78;
     format.width = Some(15);
     format.hotkey_pos = Some(67);
-    s.write_text(
+    s.write_text_old(
         "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'",
         &format,
     );
@@ -803,35 +803,35 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize) -> 
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
     format.hotkey_pos = Some(hotkey_pos);
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(11);
     format.x = 14;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(12);
     format.x = 27;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(13);
     format.x = 41;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(14);
     format.x = 56;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(6);
     format.x = 72;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(3);
     format.x = 80;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(1);
     format.x = 85;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     s
 }
@@ -903,17 +903,17 @@ fn check_write_text_multi_line_word_wrap_aligned() {
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
     format.hotkey_pos = Some(16);
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(20);
     format.x = 45;
     format.align = TextAlignament::Center;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(15);
     format.x = 88;
     format.align = TextAlignament::Right;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x70526C060A7E28C6);
@@ -947,17 +947,17 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
     );
     format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
     format.hotkey_pos = Some(16);
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(20);
     format.x = 45;
     format.align = TextAlignament::Center;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     format.width = Some(15);
     format.x = 88;
     format.align = TextAlignament::Right;
-    s.write_text(txt, &format);
+    s.write_text_old(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7682D58B284C726);

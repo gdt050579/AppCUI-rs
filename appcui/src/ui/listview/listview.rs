@@ -1019,7 +1019,7 @@ where
             let txwidth = gi.name_chars_count() as i32;
             let space_width = if left + 3 + txwidth <= right { txwidth } else { right - left - 3 };
             format.width = Some(space_width as u16);
-            surface.write_text(gi.name(), &format);
+            surface.write_text_old(gi.name(), &format);
             surface.write_char(left, y, Character::with_attributes(' ', attr.unwrap_or(theme.text.focused)));
             surface.write_char(
                 left + space_width + 1,

@@ -75,7 +75,7 @@ impl CheckBox {
             surface.fill_horizontal_line_with_size(1, format.y, width as u32, Character::with_attributes(' ', color.text.hovered));
         }
         format.x = 4;
-        surface.write_text(self.caption.text(), format);
+        surface.write_text_old(self.caption.text(), format);
         if self.checked {
             let attr = super::utils::get_symbol_attr(self.enabled, current_item, color);
             surface.write_char(2, format.y, Character::with_attributes(SpecialChar::CheckMark, attr));

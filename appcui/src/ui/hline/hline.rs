@@ -47,7 +47,7 @@ impl OnPaint for HLine {
             let attr2 = if self.is_enabled() { theme.text.normal } else { theme.text.inactive };
             let mut format = TextFormat::new(w as i32 / 2, 0, attr2, TextAlignament::Center, false);
             format.width = Some(w as u16 - 4);
-            surface.write_text(&self.title, &format);
+            surface.write_text_old(&self.title, &format);
         }
     }
 }

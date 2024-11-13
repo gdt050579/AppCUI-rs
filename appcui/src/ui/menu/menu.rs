@@ -253,7 +253,7 @@ impl Menu {
         let mut format = TextFormat {
             width: Some(self.text_width),
             align: TextAlignament::Left,
-            text_wrap: TextWrap::None,
+            text_wrap: TextWrap::Character,
             multi_line: false,
             ..Default::default()
         };

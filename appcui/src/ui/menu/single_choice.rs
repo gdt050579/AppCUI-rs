@@ -84,7 +84,7 @@ impl SingleChoice {
             surface.fill_horizontal_line_with_size(1, format.y, width as u32, Character::with_attributes(' ', color.text.hovered));
         }
         format.x = 4;
-        surface.write_text(self.caption.text(), format);
+        surface.write_text_old(self.caption.text(), format);
         let attr = super::utils::get_symbol_attr(self.enabled, current_item, color);
         let symbol = if self.selected {
             SpecialChar::CircleFilled

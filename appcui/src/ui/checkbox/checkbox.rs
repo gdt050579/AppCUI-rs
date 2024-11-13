@@ -70,7 +70,7 @@ impl OnPaint for CheckBox {
                 format.hotkey_attr = Some(col_hot_key);
             }
             format.chars_count = Some(self.caption.chars_count() as u16);
-            surface.write_text(self.caption.text(), &format);
+            surface.write_text_old(self.caption.text(), &format);
         }
         if self.checked {
             let col = if self.is_enabled() {
