@@ -1,9 +1,10 @@
 use AppCUIProcMacro::*;
 
-use crate::graphics::Size;
-use crate::graphics::TextWrap;
+use crate::graphics::text_format::TextFormatBuilder;
 use crate::graphics::Point;
 use crate::graphics::Rect;
+use crate::graphics::Size;
+use crate::graphics::TextWrap;
 use crate::prelude::SpecialChar;
 
 use super::CharAttribute;
@@ -12,32 +13,22 @@ use super::Character;
 use super::Color;
 use super::LineType;
 use super::Surface;
+use super::SurfaceTester;
 use super::TextAlignament;
 use super::TextFormat;
-use super::SurfaceTester;
-
+use super::TextFormatNew;
 
 #[test]
 fn check_clear() {
     let mut s = SurfaceTester::new(20, 5);
-    s.clear(Character::new(
-        'x',
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
+    s.clear(Character::new('x', Color::White, Color::Black, CharFlags::None));
     //s.print();
     assert_eq!(s.compute_hash(), 0x19B0E1632DAE6325);
 }
 #[test]
 fn check_clear_with_clipping() {
     let mut s = SurfaceTester::new(40, 10);
-    s.clear(Character::new(
-        'x',    
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
+    s.clear(Character::new('x', Color::White, Color::Black, CharFlags::None));
     //s.print();
     assert_eq!(s.compute_hash(), 0xD82E620861132325);
     s.set_clip(2, 2, 10, 6);
@@ -56,16 +47,8 @@ fn check_clear_with_clipping() {
 #[test]
 fn check_fill_rect() {
     let mut s = SurfaceTester::new(20, 5);
-    s.clear(Character::new(
-        '.',
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
-    s.fill_rect(
-        Rect::new(2, 2, 4, 4),
-        Character::new('@', Color::Aqua, Color::Red, CharFlags::Bold),
-    );
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.fill_rect(Rect::new(2, 2, 4, 4), Character::new('@', Color::Aqua, Color::Red, CharFlags::Bold));
     //s.print();
     assert_eq!(s.compute_hash(), 0x9E357B7ADEDEB720);
     s.fill_rect(Rect::with_size(4, 1, 10, 2), Character::with_char('X'));
@@ -75,12 +58,7 @@ fn check_fill_rect() {
 #[test]
 fn check_draw_rect() {
     let mut s = SurfaceTester::new(40, 10);
-    s.clear(Character::new(
-        ' ',
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     s.draw_rect(
         Rect::new(2, 2, 10, 4),
         LineType::Single,
@@ -122,17 +100,8 @@ fn check_draw_rect() {
 #[test]
 fn check_draw_rect_with_size() {
     let mut s = SurfaceTester::new(40, 10);
-    s.clear(Character::new(
-        ' ',
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
-    s.draw_rect(
-        Rect::with_size(1, 1, 20, 5),
-        LineType::Double,
-        CharAttribute::default(),
-    );
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    s.draw_rect(Rect::with_size(1, 1, 20, 5), LineType::Double, CharAttribute::default());
     //s.print();
     assert_eq!(s.compute_hash(), 0xB2DEA1E9B27FD8B1);
 }
@@ -140,12 +109,7 @@ fn check_draw_rect_with_size() {
 #[test]
 fn check_draw_vertical_line() {
     let mut s = SurfaceTester::new(15, 7);
-    s.clear(Character::new(
-        ' ',
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     s.draw_vertical_line(1, 1, 5, LineType::Single, CharAttribute::default());
     s.draw_vertical_line(3, 1, 5, LineType::Double, CharAttribute::default());
     s.draw_vertical_line(5, 1, 5, LineType::SingleThick, CharAttribute::default());
@@ -160,12 +124,7 @@ fn check_draw_vertical_line() {
 #[test]
 fn check_draw_vertical_line_with_size() {
     let mut s = SurfaceTester::new(15, 7);
-    s.clear(Character::new(
-        ' ',
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     s.draw_vertical_line_with_size(1, 1, 5, LineType::Single, CharAttribute::default());
     s.draw_vertical_line_with_size(3, 1, 5, LineType::Double, CharAttribute::default());
     s.draw_vertical_line_with_size(5, 1, 5, LineType::SingleThick, CharAttribute::default());
@@ -180,12 +139,7 @@ fn check_draw_vertical_line_with_size() {
 #[test]
 fn check_draw_horizontal_line() {
     let mut s = SurfaceTester::new(20, 15);
-    s.clear(Character::new(
-        ' ',
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     s.draw_horizontal_line(1, 1, 15, LineType::Single, CharAttribute::default());
     s.draw_horizontal_line(1, 3, 15, LineType::Double, CharAttribute::default());
     s.draw_horizontal_line(1, 5, 15, LineType::SingleThick, CharAttribute::default());
@@ -200,12 +154,7 @@ fn check_draw_horizontal_line() {
 #[test]
 fn check_draw_horizontal_line_with_size() {
     let mut s = SurfaceTester::new(20, 15);
-    s.clear(Character::new(
-        ' ',
-        Color::White,
-        Color::Black,
-        CharFlags::None,
-    ));
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     s.draw_horizontal_line_with_size(1, 1, 15, LineType::Single, CharAttribute::default());
     s.draw_horizontal_line_with_size(1, 3, 15, LineType::Double, CharAttribute::default());
     s.draw_horizontal_line_with_size(1, 5, 15, LineType::SingleThick, CharAttribute::default());
@@ -244,12 +193,7 @@ fn check_cursor() {
 fn check_draw_surface() {
     let mut s = SurfaceTester::new(20, 15);
     let mut s2 = Surface::new(8, 6);
-    s2.clear(Character::new(
-        'X',
-        Color::Yellow,
-        Color::Black,
-        CharFlags::None,
-    ));
+    s2.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
     s2.draw_rect(
         Rect::new(0, 0, 7, 5),
         LineType::Double,
@@ -279,36 +223,12 @@ fn check_draw_surface() {
 #[test]
 fn check_colors() {
     let mut s = SurfaceTester::new(40, 5);
-    s.write_char(
-        1,
-        1,
-        Character::new('A', Color::White, Color::Red, CharFlags::None),
-    );
-    s.write_char(
-        2,
-        1,
-        Character::new('A', Color::Red, Color::Black, CharFlags::None),
-    );
-    s.write_char(
-        3,
-        1,
-        Character::new('B', Color::Yellow, Color::Blue, CharFlags::None),
-    );
-    s.write_char(
-        4,
-        1,
-        Character::new('B', Color::Blue, Color::Yellow, CharFlags::None),
-    );
-    s.write_char(
-        5,
-        1,
-        Character::new('C', Color::Yellow, Color::DarkBlue, CharFlags::None),
-    );
-    s.write_char(
-        6,
-        1,
-        Character::new('B', Color::Black, Color::Magenta, CharFlags::None),
-    );
+    s.write_char(1, 1, Character::new('A', Color::White, Color::Red, CharFlags::None));
+    s.write_char(2, 1, Character::new('A', Color::Red, Color::Black, CharFlags::None));
+    s.write_char(3, 1, Character::new('B', Color::Yellow, Color::Blue, CharFlags::None));
+    s.write_char(4, 1, Character::new('B', Color::Blue, Color::Yellow, CharFlags::None));
+    s.write_char(5, 1, Character::new('C', Color::Yellow, Color::DarkBlue, CharFlags::None));
+    s.write_char(6, 1, Character::new('B', Color::Black, Color::Magenta, CharFlags::None));
     s.fill_rect(
         Rect::new(10, 1, 30, 3),
         Character::new(' ', Color::Yellow, Color::DarkBlue, CharFlags::None),
@@ -322,43 +242,18 @@ fn check_colors() {
     assert_eq!(s.compute_hash(), 0xF47F25A9A2342269);
 }
 
-
 #[test]
 fn check_write_string_single_line() {
     let mut s = SurfaceTester::new(40, 10);
-    s.write_string(
-        1,
-        1,
-        "text",
-        CharAttribute::with_color(Color::White, Color::DarkRed),
-        false,
-    );
+    s.write_string(1, 1, "text", CharAttribute::with_color(Color::White, Color::DarkRed), false);
     s.set_clip(6, 1, 10, 1);
     s.set_origin(6, 1);
-    s.write_string(
-        0,
-        0,
-        "A longer text",
-        CharAttribute::with_color(Color::White, Color::DarkRed),
-        false,
-    );
+    s.write_string(0, 0, "A longer text", CharAttribute::with_color(Color::White, Color::DarkRed), false);
     s.reset_clip();
-    s.write_string(
-        0,
-        2,
-        "A longer text",
-        CharAttribute::with_color(Color::White, Color::DarkBlue),
-        false,
-    );
+    s.write_string(0, 2, "A longer text", CharAttribute::with_color(Color::White, Color::DarkBlue), false);
     s.set_clip(6, 4, 10, 4);
     s.set_origin(6, 4);
-    s.write_string(
-        -2,
-        0,
-        "A longer text",
-        CharAttribute::with_color(Color::White, Color::Magenta),
-        false,
-    );
+    s.write_string(-2, 0, "A longer text", CharAttribute::with_color(Color::White, Color::Magenta), false);
     //s.print();
     assert_eq!(s.compute_hash(), 0x8D311DA4D1D1666E);
 }
@@ -398,7 +293,7 @@ fn check_resize() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xB015E3D08D4D238B);
     s.resize(Size::new(20, 5));
-    assert_eq!(s.size(), Size::new(20,5));
+    assert_eq!(s.size(), Size::new(20, 5));
     s.write_string(
         1,
         1,
@@ -423,29 +318,25 @@ fn check_resize() {
 #[test]
 fn check_write_text_single_line_simple() {
     let mut s = SurfaceTester::new(60, 7);
-    s.draw_vertical_line(
-        30,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-
-    let mut format = TextFormat::single_line(
-        30,
-        1,
-        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
-        TextAlignament::Left,
-    );
-    s.write_text_old("Left Align at 30", &format);
-    format.align = TextAlignament::Center;
-    format.y = 3;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkGreen);
-    s.write_text_old("Centered! at 30", &format);
-    format.align = TextAlignament::Right;
-    format.y = 5;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
-    s.write_text_old("Right align ends at 30", &format);
+    s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let format = TextFormatBuilder::new()
+        .position(30, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Left)
+        .build();
+    s.write_text_new("Left Align at 30", &format);
+    let format = TextFormatBuilder::new()
+        .position(30, 3)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkGreen))
+        .align(TextAlignament::Center)
+        .build();
+    s.write_text_new("Centered! at 30", &format);
+    let format = TextFormatBuilder::new()
+        .position(30, 5)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
+        .align(TextAlignament::Right)
+        .build();
+    s.write_text_new("Right align ends at 30", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x8DFA95B692742714);
@@ -454,30 +345,28 @@ fn check_write_text_single_line_simple() {
 #[test]
 fn check_write_text_single_line_width() {
     let mut s = SurfaceTester::new(60, 7);
-    s.draw_vertical_line(
-        30,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-
-    let mut format = TextFormat::single_line(
-        30,
-        1,
-        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
-        TextAlignament::Left,
-    );
-    format.width = Some(6);
-    s.write_text_old("123456xxxxxxx", &format);
-    format.align = TextAlignament::Center;
-    format.y = 3;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkGreen);
-    s.write_text_old("----123456----", &format);
-    format.align = TextAlignament::Right;
-    format.y = 5;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
-    s.write_text_old("--------------------123456", &format);
+    s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let format = TextFormatBuilder::new()
+        .position(30, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Left)
+        .truncate(6)
+        .build();
+    s.write_text_new("123456xxxxxxx", &format);
+    let format = TextFormatBuilder::new()
+        .position(30, 3)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkGreen))
+        .align(TextAlignament::Center)
+        .truncate(6)
+        .build();
+    s.write_text_new("----123456----", &format);
+    let format = TextFormatBuilder::new()
+        .position(30, 5)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
+        .align(TextAlignament::Right)
+        .truncate(6)
+        .build();
+    s.write_text_new("--------------------123456", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xC503745C2440B5F6);
@@ -485,33 +374,29 @@ fn check_write_text_single_line_width() {
 #[test]
 fn check_write_text_single_line_hot_key() {
     let mut s = SurfaceTester::new(60, 7);
-    s.draw_vertical_line(
-        30,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
+    s.draw_vertical_line(30, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
 
-    let mut format = TextFormat::single_line_with_hotkey(
-        30,
-        1,
-        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
-        CharAttribute::with_color(Color::Black, Color::Yellow),
-        4,
-        TextAlignament::Left,
-    );
-    s.write_text_old("HotKey is 'E'", &format);
-    format.align = TextAlignament::Center;
-    format.y = 3;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkGreen);
-    format.hotkey_pos = Some(0);
-    s.write_text_old("Centered (hotkey='C')", &format);
-    format.align = TextAlignament::Right;
-    format.y = 5;
-    format.char_attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
-    format.hotkey_pos = Some(20);
-    s.write_text_old("Right align ends at 30", &format);
+    let format = TextFormatBuilder::new()
+        .position(30, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Left)
+        .hotkey(CharAttribute::with_color(Color::Black, Color::Yellow), 4)
+        .build();
+    s.write_text_new("HotKey is 'E'", &format);
+    let format = TextFormatBuilder::new()
+        .position(30, 3)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkGreen))
+        .align(TextAlignament::Center)
+        .hotkey(CharAttribute::with_color(Color::Black, Color::Yellow), 0)
+        .build();
+    s.write_text_new("Centered (hotkey='C')", &format);
+    let format = TextFormatBuilder::new()
+        .position(30, 5)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
+        .align(TextAlignament::Right)
+        .hotkey(CharAttribute::with_color(Color::Black, Color::Yellow), 20)
+        .build();
+    s.write_text_new("Right align ends at 30", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x19AE9890D9B9E3AF);
@@ -520,103 +405,64 @@ fn check_write_text_single_line_hot_key() {
 #[test]
 fn check_write_text_multi_line_no_wrap() {
     let mut s = SurfaceTester::new(80, 7);
-    s.draw_vertical_line(
-        2,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        40,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        78,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    let mut format = TextFormat::multi_line(
-        2,
-        1,
-        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
-        TextAlignament::Left,
-    );
-    s.write_text_old(
-        "This is a\nmulti-line text\nwith 4 lines\nall left-aligned !",
-        &format,
-    );
-    format.align = TextAlignament::Center;
-    format.x = 40;
-    s.write_text_old(
-        "This is a\nmulti-line text\nwith 5 lines\n\nall centered !",
-        &format,
-    );
-    format.align = TextAlignament::Right;
-    format.x = 78;
-    s.write_text_old(
-        "This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right",
-        &format,
-    );
+    s.draw_vertical_line(2, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    //let mut format = TextFormat::multi_line(2, 1, CharAttribute::with_color(Color::Yellow, Color::DarkRed), TextAlignament::Left);
+    let mut format = TextFormatBuilder::new()
+        .position(2, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Left)
+        .multi_line()
+        .build();
+    s.write_text_new("This is a\nmulti-line text\nwith 4 lines\nall left-aligned !", &format);
+    format.set_align(TextAlignament::Center);
+    format.set_position(40, 1);
+    s.write_text_new("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format);
+    format.set_align(TextAlignament::Right);
+    format.set_position(78, 1);
+    s.write_text_new("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x5CA9237E8FF59BAF);
 }
 
 #[test]
-fn check_write_text_multi_line_no_wrap_how_key() {
+fn check_write_text_multi_line_no_wrap_hot_key() {
     let mut s = SurfaceTester::new(80, 7);
-    s.draw_vertical_line(
-        2,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        40,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        78,
-        0,
-        7,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    let mut format = TextFormat::multi_line(
-        2,
-        1,
-        CharAttribute::with_color(Color::Yellow, Color::DarkBlue),
-        TextAlignament::Left,
-    );
-    format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkRed));
-    format.hotkey_pos = Some(11);
-    s.write_text_old(
+    s.draw_vertical_line(2, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 7, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let format = TextFormatBuilder::new()
+        .position(2, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
+        .align(TextAlignament::Left)
+        .multi_line()
+        .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 11)
+        .build();
+    s.write_text_new(
         "This is a\nmulti-line text\nwith 5 lines\nall left-aligned !\nand with hot key 'u'",
         &format,
     );
-    format.align = TextAlignament::Center;
-    format.x = 40;
-    format.hotkey_pos = Some(26);
-    format.char_attr = CharAttribute::with_color(Color::White, Color::Gray);
-    s.write_text_old(
+    let format = TextFormatBuilder::new()
+        .position(40, 1)
+        .attribute(CharAttribute::with_color(Color::White, Color::Gray))
+        .align(TextAlignament::Center)
+        .multi_line()
+        .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 26)
+        .build();
+    s.write_text_new(
         "This is a\nmulti-line text\nwith 5 lines\nall centered at y=40\nand with hot key 'w'",
         &format,
     );
-    format.align = TextAlignament::Right;
-    format.x = 78;
-    format.hotkey_pos = Some(75);
-    format.char_attr = CharAttribute::with_color(Color::White, Color::DarkGreen);
-    s.write_text_old(
+    let format = TextFormatBuilder::new()
+        .position(78, 1)
+        .attribute(CharAttribute::with_color(Color::White, Color::DarkGreen))
+        .align(TextAlignament::Right)
+        .multi_line()
+        .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 75)
+        .build();
+    s.write_text_new(
         "This is a\nmulti-line text\nwith 6 lines\naligned to right\n\nand with hot key 'x'",
         &format,
     );
@@ -629,44 +475,36 @@ fn check_write_text_multi_line_no_wrap_how_key() {
 fn check_write_text_multi_line_character_wrap() {
     let mut s = SurfaceTester::new(80, 10);
     let txt = "This is a line that will be wrapped on multiple lines on a given character width";
-    s.draw_vertical_line(
-        2,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        40,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        78,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    let mut format = TextFormat::multi_line_with_text_wrap(
-        2,
-        1,
-        10,
-        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
-        TextAlignament::Left,
-        TextWrap::Character,
-    );
-    s.write_text_old(txt, &format);
-    format.align = TextAlignament::Center;
-    format.x = 40;
-    format.width = Some(30);
-    s.write_text_old(txt, &format);
-    format.align = TextAlignament::Right;
-    format.x = 78;
-    format.width = Some(7);
-    s.write_text_old(txt, &format);
+    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+
+    let format = TextFormatBuilder::new()
+        .position(2, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Left)
+        .wrap(TextWrap::Character, 10)
+        .build();
+
+    s.write_text_new(txt, &format);
+
+    let format = TextFormatBuilder::new()
+        .position(40, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Center)
+        .wrap(TextWrap::Character, 30)
+        .build();
+
+    s.write_text_new(txt, &format);
+
+    let format = TextFormatBuilder::new()
+        .position(78, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Right)
+        .wrap(TextWrap::Character, 7)
+        .build();
+
+    s.write_text_new(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
@@ -676,44 +514,32 @@ fn check_write_text_multi_line_character_wrap() {
 fn check_write_text_multi_line_character_wrap_new_lines() {
     let mut s = SurfaceTester::new(80, 10);
     let txt = "This is a line\nthat will be wrapped on multiple lines\non a\ngiven character width";
-    s.draw_vertical_line(
-        2,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        40,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        78,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    let mut format = TextFormat::multi_line_with_text_wrap(
-        2,
-        1,
-        10,
-        CharAttribute::with_color(Color::Yellow, Color::DarkRed),
-        TextAlignament::Left,
-        TextWrap::Character,
-    );
-    s.write_text_old(txt, &format);
-    format.align = TextAlignament::Center;
-    format.x = 40;
-    format.width = Some(30);
-    s.write_text_old(txt, &format);
-    format.align = TextAlignament::Right;
-    format.x = 78;
-    format.width = Some(7);
-    s.write_text_old(txt, &format);
+    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let format = TextFormatBuilder::new()
+        .position(2, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Left)
+        .wrap(TextWrap::Character, 10)
+        .build();
+    s.write_text_new(txt, &format);
+
+    let format = TextFormatBuilder::new()
+        .position(40, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Center)
+        .wrap(TextWrap::Character, 30)
+        .build();
+    s.write_text_new(txt, &format);
+
+    let format = TextFormatBuilder::new()
+        .position(78, 1)
+        .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
+        .align(TextAlignament::Right)
+        .wrap(TextWrap::Character, 7)
+        .build();
+    s.write_text_new(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7A3A6A4DED903CC);
@@ -722,57 +548,35 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
 #[test]
 fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
     let mut s = SurfaceTester::new(80, 10);
-    s.draw_vertical_line(
-        2,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        40,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    s.draw_vertical_line(
-        78,
-        0,
-        10,
-        LineType::Double,
-        CharAttribute::with_fore_color(Color::White),
-    );
-    let mut format = TextFormat::multi_line_with_text_wrap(
-        2,
-        1,
-        10,
-        CharAttribute::with_color(Color::Black, Color::Silver),
-        TextAlignament::Left,
-        TextWrap::Character,
-    );
-    format.hotkey_attr = Some(CharAttribute::with_color(Color::Yellow, Color::DarkRed));
-    format.hotkey_pos = Some(17);
-    s.write_text_old(
-        "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'",
-        &format,
-    );
-    format.align = TextAlignament::Center;
-    format.x = 40;
-    format.width = Some(30);
-    format.hotkey_pos = Some(28);
-    s.write_text_old(
-        "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'",
-        &format,
-    );
-    format.align = TextAlignament::Right;
-    format.x = 78;
-    format.width = Some(15);
-    format.hotkey_pos = Some(67);
-    s.write_text_old(
-        "This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'",
-        &format,
-    );
+    s.draw_vertical_line(2, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(40, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    s.draw_vertical_line(78, 0, 10, LineType::Double, CharAttribute::with_fore_color(Color::White));
+    let format = TextFormatBuilder::new()
+        .position(2, 1)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .align(TextAlignament::Left)
+        .wrap(TextWrap::Character, 10)
+        .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 17)
+        .build();
+    s.write_text_new("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'", &format);
+
+    let format = TextFormatBuilder::new()
+        .position(40, 1)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .align(TextAlignament::Center)
+        .wrap(TextWrap::Character, 30)
+        .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 28)
+        .build();
+    s.write_text_new("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'", &format);
+
+    let format = TextFormatBuilder::new()
+        .position(78, 1)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .align(TextAlignament::Right)
+        .wrap(TextWrap::Character, 15)
+        .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 67)
+        .build();
+    s.write_text_new("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x3CE81721E1BB64FA);
@@ -780,98 +584,59 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
 
 fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize) -> SurfaceTester {
     let mut s = SurfaceTester::new(width, height);
-    s.write_string(
-        0,
-        0,
-        "Hotkey is: ",
-        CharAttribute::with_color(Color::Yellow, Color::Red),
-        false,
-    );
+    s.write_string(0, 0, "Hotkey is: ", CharAttribute::with_color(Color::Yellow, Color::Red), false);
     let ch = txt.chars().nth(hotkey_pos).unwrap();
-    s.write_char(
-        12,
-        0,
-        Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),
-    );
-    let mut format = TextFormat::multi_line_with_text_wrap(
-        2,
-        1,
-        10,
-        CharAttribute::with_color(Color::Black, Color::Silver),
-        TextAlignament::Left,
-        TextWrap::Word,
-    );
-    format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
-    format.hotkey_pos = Some(hotkey_pos);
-    s.write_text_old(txt, &format);
+    s.write_char(12, 0, Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None));
 
-    format.width = Some(11);
-    format.x = 14;
-    s.write_text_old(txt, &format);
+    let mut print = |x: i32, w: u16| {
+        let format = TextFormatBuilder::new()
+            .position(x, 1)
+            .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+            .align(TextAlignament::Left)
+            .wrap(TextWrap::Word, w)
+            .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), hotkey_pos as u32)
+            .build();
+        s.write_text_new(txt, &format);
+    };
 
-    format.width = Some(12);
-    format.x = 27;
-    s.write_text_old(txt, &format);
-
-    format.width = Some(13);
-    format.x = 41;
-    s.write_text_old(txt, &format);
-
-    format.width = Some(14);
-    format.x = 56;
-    s.write_text_old(txt, &format);
-
-    format.width = Some(6);
-    format.x = 72;
-    s.write_text_old(txt, &format);
-
-    format.width = Some(3);
-    format.x = 80;
-    s.write_text_old(txt, &format);
-
-    format.width = Some(1);
-    format.x = 85;
-    s.write_text_old(txt, &format);
+    print(2, 10);
+    print(14, 11);
+    print(27, 12);
+    print(41, 13);
+    print(56, 14);
+    print(72, 6);
+    print(80, 3);
+    print(85, 1);
 
     s
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_1() {
-    let s = print_word_wrapped("This is     a line that       will be wrapped    on multiple lines on a given long-character width", 90, 20, 16);
+    let s = print_word_wrapped(
+        "This is     a line that       will be wrapped    on multiple lines on a given long-character width",
+        90,
+        20,
+        16,
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0x4F03DE6BBFE0E049);
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_2() {
-    let s = print_word_wrapped(
-        "+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc",
-        90,
-        20,
-        12,
-    );
+    let s = print_word_wrapped("+abc+ 123456789   1+2+3+4+5+6+7+8 abc123=+-*123abc", 90, 20, 12);
     //s.print();
     assert_eq!(s.compute_hash(), 0xB123507C204CAE78);
 }
 #[test]
 fn check_write_text_multi_line_word_wrap_3() {
-    let s = print_word_wrapped(
-        "Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line",
-        90,
-        20,
-        18,
-    );
+    let s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 18);
     //s.print();
     assert_eq!(s.compute_hash(), 0x6FBCFB162D486AEE);
 }
 
 #[test]
 fn check_write_text_multi_line_word_wrap_4() {
-    let s = print_word_wrapped(
-        "Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line",
-        90,
-        20,
-        42,
-    );
+    let s = print_word_wrapped("Hello world, from\nRust\n\ncode\n 1. one\n 2. two\n 3. a really long line", 90, 20, 42);
     //s.print();
     assert_eq!(s.compute_hash(), 0x1C1D4F88EB2DFAEB);
 }
@@ -880,40 +645,36 @@ fn check_write_text_multi_line_word_wrap_4() {
 fn check_write_text_multi_line_word_wrap_aligned() {
     let txt = "This is     a line that       will be wrapped    on multiple lines on a given long-character width";
     let mut s = SurfaceTester::new(90, 15);
-    s.write_string(
-        0,
-        0,
-        "Hotkey is: ",
-        CharAttribute::with_color(Color::Yellow, Color::Red),
-        false,
-    );
+    s.write_string(0, 0, "Hotkey is: ", CharAttribute::with_color(Color::Yellow, Color::Red), false);
     let ch = txt.chars().nth(16).unwrap();
-    s.write_char(
-        12,
-        0,
-        Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),
-    );
-    let mut format = TextFormat::multi_line_with_text_wrap(
-        2,
-        1,
-        12,
-        CharAttribute::with_color(Color::Black, Color::Silver),
-        TextAlignament::Left,
-        TextWrap::Word,
-    );
-    format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
-    format.hotkey_pos = Some(16);
-    s.write_text_old(txt, &format);
+    s.write_char(12, 0, Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None));
 
-    format.width = Some(20);
-    format.x = 45;
-    format.align = TextAlignament::Center;
-    s.write_text_old(txt, &format);
+    let format = TextFormatBuilder::new()
+        .position(2, 1)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .align(TextAlignament::Left)
+        .wrap(TextWrap::Word, 12)
+        .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
+        .build();
+    s.write_text_new(txt, &format);
 
-    format.width = Some(15);
-    format.x = 88;
-    format.align = TextAlignament::Right;
-    s.write_text_old(txt, &format);
+    let format = TextFormatBuilder::new()
+        .position(45, 1)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .align(TextAlignament::Center)
+        .wrap(TextWrap::Word, 20)
+        .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
+        .build();
+    s.write_text_new(txt, &format);
+
+    let format = TextFormatBuilder::new()
+        .position(88, 1)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .align(TextAlignament::Right)
+        .wrap(TextWrap::Word, 15)
+        .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
+        .build();
+    s.write_text_new(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x70526C060A7E28C6);
@@ -924,40 +685,36 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
     let txt = "This is     a line that       will be wrapped    on multiple lines on a given long-character width";
     let mut s = SurfaceTester::new(100, 15);
     s.set_origin(2, 2);
-    s.write_string(
-        0,
-        0,
-        "Hotkey is: ",
-        CharAttribute::with_color(Color::Yellow, Color::Red),
-        false,
-    );
+    s.write_string(0, 0, "Hotkey is: ", CharAttribute::with_color(Color::Yellow, Color::Red), false);
     let ch = txt.chars().nth(16).unwrap();
-    s.write_char(
-        12,
-        0,
-        Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None),
-    );
-    let mut format = TextFormat::multi_line_with_text_wrap(
-        2,
-        1,
-        12,
-        CharAttribute::with_color(Color::Black, Color::Silver),
-        TextAlignament::Left,
-        TextWrap::Word,
-    );
-    format.hotkey_attr = Some(CharAttribute::with_color(Color::White, Color::DarkGreen));
-    format.hotkey_pos = Some(16);
-    s.write_text_old(txt, &format);
+    s.write_char(12, 0, Character::new(ch, Color::White, Color::DarkBlue, CharFlags::None));
 
-    format.width = Some(20);
-    format.x = 45;
-    format.align = TextAlignament::Center;
-    s.write_text_old(txt, &format);
+    let format = TextFormatBuilder::new()
+        .position(2, 1)
+        .align(TextAlignament::Left)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .wrap(TextWrap::Word, 12)
+        .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
+        .build();
+    s.write_text_new(txt, &format);
 
-    format.width = Some(15);
-    format.x = 88;
-    format.align = TextAlignament::Right;
-    s.write_text_old(txt, &format);
+    let format = TextFormatBuilder::new()
+        .position(45, 1)
+        .align(TextAlignament::Center)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .wrap(TextWrap::Word, 20)
+        .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
+        .build();
+    s.write_text_new(txt, &format);
+
+    let format = TextFormatBuilder::new()
+        .position(88, 1)
+        .align(TextAlignament::Right)
+        .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
+        .wrap(TextWrap::Word, 15)
+        .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
+        .build();    
+    s.write_text_new(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7682D58B284C726);
@@ -1094,22 +851,40 @@ fn check_rect_with_alignament() {
 
 #[test]
 fn check_char_macro() {
-    assert_eq!(char!("X,Red,Green"),Character::new('X',Color::Red, Color::Green,CharFlags::None));
-    assert_eq!(char!("'+',white,pinK"),Character::new('+',Color::White, Color::Pink,CharFlags::None));
-    assert_eq!(char!("A,g,r"),Character::new('A',Color::Green, Color::Red,CharFlags::None));
-    assert_eq!(char!("'!',back=dr"),Character::new('!',Color::Transparent, Color::DarkRed,CharFlags::None));
-    assert_eq!(char!("'',fore=w"),Character::new(0,Color::White, Color::Transparent,CharFlags::None));
-    assert_eq!(char!("char=X,fore=Olive,back=Aqua"),Character::new('X',Color::Olive, Color::Aqua,CharFlags::None));
-    assert_eq!(char!("B"),Character::new('B',Color::Transparent, Color::Transparent,CharFlags::None));
-    assert_eq!(char!("B,attr=Bold"),Character::new('B',Color::Transparent, Color::Transparent,CharFlags::Bold));
-    assert_eq!(char!("X,attr=Italic+Bold"),Character::new('X',Color::Transparent, Color::Transparent,CharFlags::Bold|CharFlags::Italic));
-    assert_eq!(char!("Y,attr=[Italic,Underline]"),Character::new('Y',Color::Transparent, Color::Transparent,CharFlags::Underline|CharFlags::Italic));
-    assert_eq!(char!("code=41"),Character::new('A',Color::Transparent, Color::Transparent,CharFlags::None));
-    assert_eq!(char!("->"),Character::with_char(SpecialChar::ArrowRight));
-    assert_eq!(char!("<->"),Character::with_char(SpecialChar::ArrowLeftRight));
-    assert_eq!(char!("<-"),Character::with_char(SpecialChar::ArrowLeft));
-    assert_eq!(char!("'=='"),Character::with_char(SpecialChar::BoxHorizontalDoubleLine));
-    assert_eq!(char!("||"),Character::with_char(SpecialChar::BoxVerticalDoubleLine));
-    assert_eq!(char!("|_"),Character::with_char(SpecialChar::BoxBottomLeftCornerSingleLine));
-    assert_eq!(char!("_|"),Character::with_char(SpecialChar::BoxBottomRightCornerSingleLine));
+    assert_eq!(char!("X,Red,Green"), Character::new('X', Color::Red, Color::Green, CharFlags::None));
+    assert_eq!(char!("'+',white,pinK"), Character::new('+', Color::White, Color::Pink, CharFlags::None));
+    assert_eq!(char!("A,g,r"), Character::new('A', Color::Green, Color::Red, CharFlags::None));
+    assert_eq!(
+        char!("'!',back=dr"),
+        Character::new('!', Color::Transparent, Color::DarkRed, CharFlags::None)
+    );
+    assert_eq!(char!("'',fore=w"), Character::new(0, Color::White, Color::Transparent, CharFlags::None));
+    assert_eq!(
+        char!("char=X,fore=Olive,back=Aqua"),
+        Character::new('X', Color::Olive, Color::Aqua, CharFlags::None)
+    );
+    assert_eq!(char!("B"), Character::new('B', Color::Transparent, Color::Transparent, CharFlags::None));
+    assert_eq!(
+        char!("B,attr=Bold"),
+        Character::new('B', Color::Transparent, Color::Transparent, CharFlags::Bold)
+    );
+    assert_eq!(
+        char!("X,attr=Italic+Bold"),
+        Character::new('X', Color::Transparent, Color::Transparent, CharFlags::Bold | CharFlags::Italic)
+    );
+    assert_eq!(
+        char!("Y,attr=[Italic,Underline]"),
+        Character::new('Y', Color::Transparent, Color::Transparent, CharFlags::Underline | CharFlags::Italic)
+    );
+    assert_eq!(
+        char!("code=41"),
+        Character::new('A', Color::Transparent, Color::Transparent, CharFlags::None)
+    );
+    assert_eq!(char!("->"), Character::with_char(SpecialChar::ArrowRight));
+    assert_eq!(char!("<->"), Character::with_char(SpecialChar::ArrowLeftRight));
+    assert_eq!(char!("<-"), Character::with_char(SpecialChar::ArrowLeft));
+    assert_eq!(char!("'=='"), Character::with_char(SpecialChar::BoxHorizontalDoubleLine));
+    assert_eq!(char!("||"), Character::with_char(SpecialChar::BoxVerticalDoubleLine));
+    assert_eq!(char!("|_"), Character::with_char(SpecialChar::BoxBottomLeftCornerSingleLine));
+    assert_eq!(char!("_|"), Character::with_char(SpecialChar::BoxBottomRightCornerSingleLine));
 }

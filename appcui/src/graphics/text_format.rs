@@ -1,5 +1,5 @@
 use super::CharAttribute;
-use EnumBitFlags::EnumBitFlags; 
+use EnumBitFlags::EnumBitFlags;
 
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
@@ -28,7 +28,7 @@ enum TextFormatFlags {
 
 /// A structure that contains information about how a text should be displayed on the screen.
 pub struct TextFormatNew {
-    pub(crate) flags: TextFormatFlags,
+    flags: TextFormatFlags,
     pub(crate) x: i32,
     pub(crate) y: i32,
     pub(crate) width: u16,
@@ -57,7 +57,7 @@ impl TextFormat {
     /// Creates a new text format structure with a coordinate, character attribute, alignment and multi-line flag.
     /// The rest of the fields are set to default values.
     pub fn new(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament, multi_line: bool) -> Self {
-        TextFormat {
+        Self {
             x,
             y,
             char_attr,
@@ -77,7 +77,7 @@ impl TextFormat {
         hotkey_pos: usize,
         align: TextAlignament,
     ) -> Self {
-        TextFormat {
+        Self {
             x,
             y,
             char_attr,
@@ -92,7 +92,7 @@ impl TextFormat {
     /// Creates a new text format structure with a coordinate, character attribute, and text alignment.
     /// The text is displayed on a single line.
     pub fn single_line(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament) -> Self {
-        TextFormat {
+        Self {
             x,
             y,
             char_attr,
@@ -105,7 +105,7 @@ impl TextFormat {
     /// Creates a new text format structure with a coordinate, character attribute, and text alignment.
     /// The text is displayed on multiple lines
     pub fn multi_line(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament) -> Self {
-        TextFormat {
+        Self {
             x,
             y,
             char_attr,
@@ -117,7 +117,7 @@ impl TextFormat {
 
     /// Creates a new text format structure with a coordinate, character attribute, text alignment, and text wrap type.
     pub fn multi_line_with_text_wrap(x: i32, y: i32, width: u16, char_attr: CharAttribute, align: TextAlignament, text_wrap: TextWrap) -> Self {
-        TextFormat {
+        Self {
             x,
             y,
             char_attr,
@@ -133,10 +133,23 @@ impl TextFormat {
 impl TextFormatNew {
     pub(super) fn from_old(format: &TextFormat) -> Self {
         Self {
-            flags: if format.hotkey_attr.is_some() { TextFormatFlags::Hotkey } else { TextFormatFlags::None }
-                | if format.chars_count.is_some() { TextFormatFlags::CharsCount } else { TextFormatFlags::None }
-                | if format.width.is_some() { TextFormatFlags::Width } else { TextFormatFlags::None }
-                | if format.multi_line { TextFormatFlags::MultiLine } else { TextFormatFlags::None },
+            flags: if format.hotkey_attr.is_some() && format.hotkey_pos.is_some() {
+                TextFormatFlags::Hotkey
+            } else {
+                TextFormatFlags::None
+            } | if format.chars_count.is_some() {
+                TextFormatFlags::CharsCount
+            } else {
+                TextFormatFlags::None
+            } | if format.width.is_some() {
+                TextFormatFlags::Width
+            } else {
+                TextFormatFlags::None
+            } | if format.multi_line {
+                TextFormatFlags::MultiLine
+            } else {
+                TextFormatFlags::None
+            },
             x: format.x,
             y: format.y,
             width: format.width.unwrap_or(0),
@@ -163,6 +176,15 @@ impl TextFormatNew {
     #[inline(always)]
     pub(super) fn is_multi_line(&self) -> bool {
         self.flags.contains(TextFormatFlags::MultiLine)
+    }
+    #[inline(always)]
+    pub fn set_align(&mut self, align: TextAlignament) {
+        self.align = align;
+    }
+    #[inline(always)]
+    pub fn set_position(&mut self, x: i32, y: i32) {
+        self.x = x;
+        self.y = y;
     }
 }
 
@@ -200,8 +222,6 @@ impl Default for TextFormat {
     }
 }
 
-
-
 pub struct TextFormatBuilder {
     format: TextFormatNew,
 }
@@ -209,9 +229,7 @@ pub struct TextFormatBuilder {
 impl TextFormatBuilder {
     #[inline(always)]
     pub fn new() -> Self {
-        Self {
-            format: Default::default(),
-        }
+        Self { format: Default::default() }
     }
     #[inline(always)]
     pub fn position(mut self, x: i32, y: i32) -> Self {
