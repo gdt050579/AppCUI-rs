@@ -389,9 +389,7 @@ impl OnPaint for DatePicker {
             );
 
             let month = Self::MONTHS[self.virtual_date.month0() as usize];
-            let mut month_format = TextFormat::single_line(22, 1 + self.expanded_panel_y, col, TextAlignament::Left);
-            month_format.width = Some(3);
-            surface.write_text_old(month, &month_format);
+            surface.write_ascii(22, 1 + self.expanded_panel_y, month.as_bytes(), col, false);
 
             let mut x = 2;
             for i in 0..7 {
