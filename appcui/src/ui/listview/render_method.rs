@@ -57,7 +57,7 @@ impl<'a> RenderMethod<'a> {
             .align(rd.alignment)
             .truncate(rd.width)
             .build();
-        surface.write_text_new(txt, &format);
+        surface.write_text(txt, &format);
     }
     #[inline(always)]
     fn paint_ascii(txt: &str, surface: &mut Surface, rd: &RenderData) {
@@ -75,7 +75,7 @@ impl<'a> RenderMethod<'a> {
             .truncate(rd.width)
             .chars_count(txt.len() as u16)
             .build();
-        surface.write_text_new(txt, &format);
+        surface.write_text(txt, &format);
     }
 
     #[inline(always)]

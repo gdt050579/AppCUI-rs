@@ -228,13 +228,13 @@ where
                 if chars_count <= vis_chars {
                     format.set_chars_count(chars_count as u16);
                     format.set_truncate_width(vis_chars as u16);
-                    surface.write_text_new(&self.txt, &format);
+                    surface.write_text(&self.txt, &format);
                     surface.set_cursor(l + chars_count + 1, 0);
                 } else {
                     let start = chars_count - vis_chars;
                     format.set_chars_count(vis_chars as u16);
                     format.set_truncate_width(vis_chars as u16);
-                    surface.write_text_new(&self.txt[start as usize..], &format);
+                    surface.write_text(&self.txt[start as usize..], &format);
                     surface.set_cursor(r, 0);
                 }
             } else {
@@ -245,7 +245,7 @@ where
                     .chars_count(self.txtlen as u16)
                     .truncate((r - (l + 1)) as u16)
                     .build();
-                surface.write_text_new(&self.txt, &format);
+                surface.write_text(&self.txt, &format);
             }
         }
     }

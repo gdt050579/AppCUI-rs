@@ -75,7 +75,7 @@ impl ToolTip {
                 .build();
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
-            self.canvas.write_text_new(text, &format);
+            self.canvas.write_text(text, &format);
             self.visible = true;
             return true;
         }
@@ -98,7 +98,7 @@ impl ToolTip {
                 .build();
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
-            self.canvas.write_text_new(text, &format);
+            self.canvas.write_text(text, &format);
             self.visible = true;
         }
         false

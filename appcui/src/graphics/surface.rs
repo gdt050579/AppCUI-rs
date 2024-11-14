@@ -14,7 +14,6 @@ use super::LineType;
 use super::Point;
 use super::TextAlignament;
 use super::TextFormat;
-use super::TextFormatNew;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -560,7 +559,7 @@ impl Surface {
         }     
     }
 
-    fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormatNew) {
+    fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormat) {
         if !self.clip.contains_y(y + self.origin.y) {
             return; // no need to draw
         }
@@ -612,7 +611,7 @@ impl Surface {
             }
         }
     }
-    fn write_text_multi_line_no_wrap(&mut self, text: &str, format: &TextFormatNew) {
+    fn write_text_multi_line_no_wrap(&mut self, text: &str, format: &TextFormat) {
         let mut y = format.y;
         let mut start_ofs = 0usize;
         let mut chars_count = 0u16;
@@ -634,7 +633,7 @@ impl Surface {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
-    fn write_text_multi_line_character_wrap(&mut self, text: &str, format: &TextFormatNew) {
+    fn write_text_multi_line_character_wrap(&mut self, text: &str, format: &TextFormat) {
         let width = format.width;
         if width == 0 {
             return; // nothing to draw
@@ -668,7 +667,7 @@ impl Surface {
             self.write_text_single_line(&text[start_ofs..], y, chars_count, ch_index, format);
         }
     }
-    fn write_text_multi_line_word_wrap(&mut self, text: &str, format: &TextFormatNew) {
+    fn write_text_multi_line_word_wrap(&mut self, text: &str, format: &TextFormat) {
         let width = format.width;
         if width == 0 {
             return; // nothing to draw
@@ -763,7 +762,7 @@ impl Surface {
     ///                              false);
     /// surface.write_text("Hello World!", &format);
     /// ```
-    pub fn write_text_new(&mut self, text: &str, format: &TextFormatNew) {
+    pub fn write_text(&mut self, text: &str, format: &TextFormat) {
         if format.is_multi_line() {
             if format.has_width() { 
                 match format.text_wrap {
@@ -782,10 +781,6 @@ impl Surface {
             self.write_text_single_line(text, format.y, chars_count, 0, format);
         }
     }
-    pub fn write_text_old(&mut self, text: &str, format: &TextFormat) {
-        let tx = TextFormatNew::from_old(format);
-        self.write_text_new(text, &tx);
-    }   
 
     /// Draws an image at the specified position. The image will be drawn using the specified rendering method and scale method.
     /// The rendering method can be `SmallBlocks`, `LargeBlocks64Colors`, `GrayScale` or `AsciiArt`.

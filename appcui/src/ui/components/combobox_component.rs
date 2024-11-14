@@ -270,7 +270,7 @@ where
                 if self.symbol_size > 0 {
                     format.set_truncate_width(self.symbol_size as u16);
                     if let Some(value) = data.symbol(self.current_index) {
-                        surface.write_text_new(value, &format);
+                        surface.write_text(value, &format);
                     }
                     format.x += self.symbol_size as i32;
                     format.x += 1;
@@ -286,9 +286,9 @@ where
                 }
                 if paint_next {
                     if let Some(value) = data.name(self.current_index) {
-                        surface.write_text_new(value, &format);
+                        surface.write_text(value, &format);
                     } else if !self.none_repr.is_empty() {
-                        surface.write_text_new(&self.none_repr, &format);
+                        surface.write_text(&self.none_repr, &format);
                     }
                 }
             }
@@ -347,13 +347,13 @@ where
                 for i in self.start_index..self.start_index + visible_items {
                     if self.symbol_size > 0 {
                         if let Some(value) = data.symbol(i) {
-                            surface.write_text_new(value, &format_symbol);
+                            surface.write_text(value, &format_symbol);
                         }
                     }
                     if display_value {
                         if let Some(value) = data.name(i) {
                             format.char_attr = theme.menu.text.normal;
-                            surface.write_text_new(value, &format);
+                            surface.write_text(value, &format);
                             if self.show_description {
                                 if let Some(desc) = data.description(i) {
                                     if !desc.is_empty() {
@@ -364,7 +364,7 @@ where
                                         if format.x < (size.width as i32) - 2 {
                                             format.set_truncate_width((size.width as i32 - (2 + format.x)) as u16);
                                             format.char_attr = theme.menu.text.inactive;
-                                            surface.write_text_new(desc, &format);
+                                            surface.write_text(desc, &format);
                                         }
                                         format.set_truncate_width(old_width);
                                         format.x = old_x;
@@ -373,7 +373,7 @@ where
                             }
                         } else if !self.none_repr.is_empty() {
                             format.char_attr = theme.menu.text.inactive;
-                            surface.write_text_new(&self.none_repr, &format);
+                            surface.write_text(&self.none_repr, &format);
                         }
                     }
                     if i == self.current_index {

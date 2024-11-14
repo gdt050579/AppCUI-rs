@@ -83,7 +83,7 @@ impl Panel {
                 .truncate((sz.width - 6) as u16)
                 .chars_count(chars_count as u16)
                 .build();
-            surface.write_text_new(self.caption.text(), &format);
+            surface.write_text(self.caption.text(), &format);
             surface.write_char(2, 0, Character::with_char(' '));
             if chars_count > (sz.width - 6) as usize {
                 surface.write_char((sz.width - 3) as i32, 0, Character::with_char(' '));
@@ -110,14 +110,14 @@ impl Panel {
                 .build();
             
             if chars_count > (sz.width - 6) as usize {
-                surface.write_text_new(self.caption.text(), &format);
+                surface.write_text(self.caption.text(), &format);
                 surface.write_char(2, 0, Character::with_char(' '));
                 surface.write_char((sz.width - 3) as i32, 0, Character::with_char(' '));
                 surface.write_char((sz.width - 4) as i32, 0, Character::with_char(SpecialChar::ThreePointsHorizontal));
             } else {
                 let x = ((sz.width / 2) as i32) - ((chars_count + 2) as i32) / 2;
                 format.x = x + 1;
-                surface.write_text_new(self.caption.text(), &format);
+                surface.write_text(self.caption.text(), &format);
                 surface.write_char(x, 0, Character::with_char(' '));
                 surface.write_char(x + 1 + chars_count as i32, 0, Character::with_char(' '));
             }
@@ -151,14 +151,14 @@ impl Panel {
                 .chars_count(chars_count as u16)
                 .build();
             if chars_count > (sz.width - 6) as usize {
-                surface.write_text_new(self.caption.text(), &format);
+                surface.write_text(self.caption.text(), &format);
                 surface.write_char(2, 0, Character::with_char(' '));
                 surface.write_char((sz.width - 3) as i32, 0, Character::with_char(' '));
                 surface.write_char((sz.width - 4) as i32, 0, Character::with_char(SpecialChar::ThreePointsHorizontal));
             } else {
                 let x = ((sz.width / 2) as i32) - ((chars_count + 2) as i32) / 2;
                 format.x = x + 1;
-                surface.write_text_new(self.caption.text(), &format);
+                surface.write_text(self.caption.text(), &format);
                 surface.write_char(x, 0, Character::with_char(' '));
                 surface.write_char(x + 1 + chars_count as i32, 0, Character::with_char(' '));
             }

@@ -198,7 +198,7 @@ impl OnPaint for Accordion {
             surface.fill_horizontal_line_with_size(0, format.y, sz.width, Character::with_attributes(' ', text_attr));
 
             // write the text
-            surface.write_text_new(page.text(), &format);
+            surface.write_text(page.text(), &format);
         }
     }
 }

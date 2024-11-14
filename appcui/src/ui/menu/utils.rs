@@ -1,7 +1,7 @@
 use crate::{
     graphics::{CharAttribute, Surface},
     input::Key,
-    prelude::TextFormatNew,
+    prelude::TextFormat,
     system::MenuTheme,
     utils::Caption,
 };
@@ -53,7 +53,7 @@ pub(super) fn paint_shortcut(shortcut: Key, surface: &mut Surface, y: i32, width
 }
 
 #[inline(always)]
-pub(super) fn update_format_with_caption(caption: &Caption, format: &mut TextFormatNew, enabled: bool, current_item: bool, color: &MenuTheme) {
+pub(super) fn update_format_with_caption(caption: &Caption, format: &mut TextFormat, enabled: bool, current_item: bool, color: &MenuTheme) {
     format.set_hotkey_from_caption(get_hotkey_attr(enabled, current_item, color), caption);
     format.set_attribute(get_text_attr(enabled, current_item, color));
     format.set_chars_count(caption.chars_count() as u16);

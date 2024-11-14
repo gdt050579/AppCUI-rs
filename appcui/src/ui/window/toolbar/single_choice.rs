@@ -70,7 +70,7 @@ impl SingleChoice {
         if self.caption.has_hotkey() {
             format.set_hotkey(st.get_hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
         }
-        surface.write_text_new(self.caption.text(), &format);
+        surface.write_text(self.caption.text(), &format);
     }
     add_toolbaritem_basic_methods!();
 }

@@ -82,6 +82,6 @@ impl Column {
         if self.name.has_hotkey() {
             format.set_hotkey(hotkey_attr, self.name.hotkey_pos().unwrap() as u32);
         }
-        surface.write_text_new(self.name.text(), &format);
+        surface.write_text(self.name.text(), &format);
     }
 }

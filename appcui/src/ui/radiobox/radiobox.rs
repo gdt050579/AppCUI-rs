@@ -70,7 +70,7 @@ impl OnPaint for RadioBox {
             if self.caption.has_hotkey() {
                 format.set_hotkey(col_hot_key, self.caption.hotkey_pos().unwrap() as u32);
             }
-            surface.write_text_new(self.caption.text(), &format);
+            surface.write_text(self.caption.text(), &format);
         }
         if self.selected {
             let col = if self.is_enabled() {

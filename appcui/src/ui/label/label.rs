@@ -39,6 +39,6 @@ impl OnPaint for Label {
             format.set_wrap(TextWrap::Word, sz.width as u16);
         }
 
-        surface.write_text_new(self.caption.text(), &format);
+        surface.write_text(self.caption.text(), &format);
     }
 }

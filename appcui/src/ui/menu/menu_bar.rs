@@ -242,7 +242,7 @@ impl MenuBar {
                     Character::with_attributes(' ', format.char_attr),
                 );
             }
-            surface.write_text_new(item.caption.text(), &format);
+            surface.write_text(item.caption.text(), &format);
         }
     }
 }

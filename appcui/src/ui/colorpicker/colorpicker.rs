@@ -138,7 +138,7 @@ impl OnPaint for ColorPicker {
                     .align(TextAlignament::Left)
                     .truncate((size.width - MIN_WIDTH_FOR_COLOR_NAME) as u16)
                     .build();
-                surface.write_text_new(self.color.name(), &format);
+                surface.write_text(self.color.name(), &format);
             }
         }
         if size.width >= MINSPACE_FOR_DROPBUTTON_DRAWING {

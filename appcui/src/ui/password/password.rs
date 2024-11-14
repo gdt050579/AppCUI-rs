@@ -47,7 +47,7 @@ impl OnPaint for Password {
                     .align(TextAlignament::Left)
                     .truncate(sz as u16)
                     .build();
-                surface.write_text_new(&self.pass, &format);
+                surface.write_text(&self.pass, &format);
             }
             surface.write_char(
                 w as i32 - 1,

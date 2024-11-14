@@ -31,7 +31,7 @@ enum TextFormatFlags {
 // only members that don't have an associated flag are public(crate)
 
 /// A structure that contains information about how a text should be displayed on the screen.
-pub struct TextFormatNew {
+pub struct TextFormat {
     flags: TextFormatFlags,
     pub(crate) x: i32,
     pub(crate) y: i32,
@@ -44,127 +44,7 @@ pub struct TextFormatNew {
     pub(super) text_wrap: TextWrap,
 }
 
-pub struct TextFormat {
-    pub(crate) x: i32,
-    pub(crate) y: i32,
-    pub(crate) width: Option<u16>,
-    pub(crate) char_attr: CharAttribute,
-    pub(crate) hotkey_attr: Option<CharAttribute>,
-    pub(crate) hotkey_pos: Option<usize>,
-    pub(crate) chars_count: Option<u16>,
-    pub(crate) align: TextAlignament,
-    pub(crate) text_wrap: TextWrap,
-    pub(crate) multi_line: bool,
-}
-
 impl TextFormat {
-    /// Creates a new text format structure with a coordinate, character attribute, alignment and multi-line flag.
-    /// The rest of the fields are set to default values.
-    pub fn new(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament, multi_line: bool) -> Self {
-        Self {
-            x,
-            y,
-            char_attr,
-            align,
-            multi_line,
-            ..Default::default()
-        }
-    }
-
-    /// Creates a new text format structure with a coordinate, character attribute, alignment, multi-line flag and hotkey information (attribute & position).
-    /// The rest of the fields are set to default values.
-    pub fn single_line_with_hotkey(
-        x: i32,
-        y: i32,
-        char_attr: CharAttribute,
-        hotkey_attr: CharAttribute,
-        hotkey_pos: usize,
-        align: TextAlignament,
-    ) -> Self {
-        Self {
-            x,
-            y,
-            char_attr,
-            align,
-            multi_line: false,
-            hotkey_attr: Some(hotkey_attr),
-            hotkey_pos: Some(hotkey_pos),
-            ..Default::default()
-        }
-    }
-
-    /// Creates a new text format structure with a coordinate, character attribute, and text alignment.
-    /// The text is displayed on a single line.
-    pub fn single_line(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament) -> Self {
-        Self {
-            x,
-            y,
-            char_attr,
-            align,
-            multi_line: false,
-            ..Default::default()
-        }
-    }
-
-    /// Creates a new text format structure with a coordinate, character attribute, and text alignment.
-    /// The text is displayed on multiple lines
-    pub fn multi_line(x: i32, y: i32, char_attr: CharAttribute, align: TextAlignament) -> Self {
-        Self {
-            x,
-            y,
-            char_attr,
-            align,
-            multi_line: true,
-            ..Default::default()
-        }
-    }
-
-    /// Creates a new text format structure with a coordinate, character attribute, text alignment, and text wrap type.
-    pub fn multi_line_with_text_wrap(x: i32, y: i32, width: u16, char_attr: CharAttribute, align: TextAlignament, text_wrap: TextWrap) -> Self {
-        Self {
-            x,
-            y,
-            char_attr,
-            align,
-            text_wrap,
-            multi_line: true,
-            width: Some(width),
-            ..Default::default()
-        }
-    }
-}
-
-impl TextFormatNew {
-    pub(super) fn from_old(format: &TextFormat) -> Self {
-        Self {
-            flags: if format.hotkey_attr.is_some() && format.hotkey_pos.is_some() {
-                TextFormatFlags::Hotkey
-            } else {
-                TextFormatFlags::None
-            } | if format.chars_count.is_some() {
-                TextFormatFlags::CharsCount
-            } else {
-                TextFormatFlags::None
-            } | if format.width.is_some() {
-                TextFormatFlags::Width
-            } else {
-                TextFormatFlags::None
-            } | if format.multi_line {
-                TextFormatFlags::MultiLine
-            } else {
-                TextFormatFlags::None
-            },
-            x: format.x,
-            y: format.y,
-            width: format.width.unwrap_or(0),
-            char_attr: format.char_attr,
-            hotkey_attr: format.hotkey_attr.unwrap_or_default(),
-            hotkey_pos: format.hotkey_pos.unwrap_or(0) as u32,
-            chars_count: format.chars_count.unwrap_or(0),
-            align: format.align,
-            text_wrap: format.text_wrap,
-        }
-    }
     #[inline(always)]
     pub(super) fn has_hotkey(&self) -> bool {
         self.flags.contains(TextFormatFlags::Hotkey)
@@ -237,7 +117,7 @@ impl TextFormatNew {
     }
 }
 
-impl Default for TextFormatNew {
+impl Default for TextFormat {
     fn default() -> Self {
         Self {
             flags: TextFormatFlags::None,
@@ -254,25 +134,8 @@ impl Default for TextFormatNew {
     }
 }
 
-impl Default for TextFormat {
-    fn default() -> Self {
-        Self {
-            x: 0,
-            y: 0,
-            width: None,
-            char_attr: Default::default(),
-            hotkey_attr: None,
-            hotkey_pos: None,
-            chars_count: None,
-            align: TextAlignament::Left,
-            text_wrap: TextWrap::Character,
-            multi_line: false,
-        }
-    }
-}
-
 pub struct TextFormatBuilder {
-    format: TextFormatNew,
+    format: TextFormat,
 }
 
 impl TextFormatBuilder {
@@ -324,7 +187,7 @@ impl TextFormatBuilder {
         self
     }
     #[inline(always)]
-    pub fn build(self) -> TextFormatNew {
+    pub fn build(self) -> TextFormat {
         self.format
     }
 }

@@ -15,8 +15,6 @@ use super::LineType;
 use super::Surface;
 use super::SurfaceTester;
 use super::TextAlignament;
-use super::TextFormat;
-use super::TextFormatNew;
 
 #[test]
 fn check_clear() {
@@ -324,19 +322,19 @@ fn check_write_text_single_line_simple() {
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Left)
         .build();
-    s.write_text_new("Left Align at 30", &format);
+    s.write_text("Left Align at 30", &format);
     let format = TextFormatBuilder::new()
         .position(30, 3)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkGreen))
         .align(TextAlignament::Center)
         .build();
-    s.write_text_new("Centered! at 30", &format);
+    s.write_text("Centered! at 30", &format);
     let format = TextFormatBuilder::new()
         .position(30, 5)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
         .align(TextAlignament::Right)
         .build();
-    s.write_text_new("Right align ends at 30", &format);
+    s.write_text("Right align ends at 30", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x8DFA95B692742714);
@@ -352,21 +350,21 @@ fn check_write_text_single_line_width() {
         .align(TextAlignament::Left)
         .truncate(6)
         .build();
-    s.write_text_new("123456xxxxxxx", &format);
+    s.write_text("123456xxxxxxx", &format);
     let format = TextFormatBuilder::new()
         .position(30, 3)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkGreen))
         .align(TextAlignament::Center)
         .truncate(6)
         .build();
-    s.write_text_new("----123456----", &format);
+    s.write_text("----123456----", &format);
     let format = TextFormatBuilder::new()
         .position(30, 5)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
         .align(TextAlignament::Right)
         .truncate(6)
         .build();
-    s.write_text_new("--------------------123456", &format);
+    s.write_text("--------------------123456", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xC503745C2440B5F6);
@@ -382,21 +380,21 @@ fn check_write_text_single_line_hot_key() {
         .align(TextAlignament::Left)
         .hotkey(CharAttribute::with_color(Color::Black, Color::Yellow), 4)
         .build();
-    s.write_text_new("HotKey is 'E'", &format);
+    s.write_text("HotKey is 'E'", &format);
     let format = TextFormatBuilder::new()
         .position(30, 3)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkGreen))
         .align(TextAlignament::Center)
         .hotkey(CharAttribute::with_color(Color::Black, Color::Yellow), 0)
         .build();
-    s.write_text_new("Centered (hotkey='C')", &format);
+    s.write_text("Centered (hotkey='C')", &format);
     let format = TextFormatBuilder::new()
         .position(30, 5)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
         .align(TextAlignament::Right)
         .hotkey(CharAttribute::with_color(Color::Black, Color::Yellow), 20)
         .build();
-    s.write_text_new("Right align ends at 30", &format);
+    s.write_text("Right align ends at 30", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x19AE9890D9B9E3AF);
@@ -415,13 +413,13 @@ fn check_write_text_multi_line_no_wrap() {
         .align(TextAlignament::Left)
         .multi_line()
         .build();
-    s.write_text_new("This is a\nmulti-line text\nwith 4 lines\nall left-aligned !", &format);
+    s.write_text("This is a\nmulti-line text\nwith 4 lines\nall left-aligned !", &format);
     format.set_align(TextAlignament::Center);
     format.set_position(40, 1);
-    s.write_text_new("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format);
+    s.write_text("This is a\nmulti-line text\nwith 5 lines\n\nall centered !", &format);
     format.set_align(TextAlignament::Right);
     format.set_position(78, 1);
-    s.write_text_new("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format);
+    s.write_text("This is a\nmulti-line text\n\nwith 6 lines\n\nall alligned to the right", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x5CA9237E8FF59BAF);
@@ -440,7 +438,7 @@ fn check_write_text_multi_line_no_wrap_hot_key() {
         .multi_line()
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 11)
         .build();
-    s.write_text_new(
+    s.write_text(
         "This is a\nmulti-line text\nwith 5 lines\nall left-aligned !\nand with hot key 'u'",
         &format,
     );
@@ -451,7 +449,7 @@ fn check_write_text_multi_line_no_wrap_hot_key() {
         .multi_line()
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 26)
         .build();
-    s.write_text_new(
+    s.write_text(
         "This is a\nmulti-line text\nwith 5 lines\nall centered at y=40\nand with hot key 'w'",
         &format,
     );
@@ -462,7 +460,7 @@ fn check_write_text_multi_line_no_wrap_hot_key() {
         .multi_line()
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 75)
         .build();
-    s.write_text_new(
+    s.write_text(
         "This is a\nmulti-line text\nwith 6 lines\naligned to right\n\nand with hot key 'x'",
         &format,
     );
@@ -486,7 +484,7 @@ fn check_write_text_multi_line_character_wrap() {
         .wrap(TextWrap::Character, 10)
         .build();
 
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     let format = TextFormatBuilder::new()
         .position(40, 1)
@@ -495,7 +493,7 @@ fn check_write_text_multi_line_character_wrap() {
         .wrap(TextWrap::Character, 30)
         .build();
 
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     let format = TextFormatBuilder::new()
         .position(78, 1)
@@ -504,7 +502,7 @@ fn check_write_text_multi_line_character_wrap() {
         .wrap(TextWrap::Character, 7)
         .build();
 
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x5C5090CB807A653);
@@ -523,7 +521,7 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
         .align(TextAlignament::Left)
         .wrap(TextWrap::Character, 10)
         .build();
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     let format = TextFormatBuilder::new()
         .position(40, 1)
@@ -531,7 +529,7 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
         .align(TextAlignament::Center)
         .wrap(TextWrap::Character, 30)
         .build();
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     let format = TextFormatBuilder::new()
         .position(78, 1)
@@ -539,7 +537,7 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
         .align(TextAlignament::Right)
         .wrap(TextWrap::Character, 7)
         .build();
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7A3A6A4DED903CC);
@@ -558,7 +556,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
         .wrap(TextWrap::Character, 10)
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 17)
         .build();
-    s.write_text_new("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'", &format);
+    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'", &format);
 
     let format = TextFormatBuilder::new()
         .position(40, 1)
@@ -567,7 +565,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
         .wrap(TextWrap::Character, 30)
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 28)
         .build();
-    s.write_text_new("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'", &format);
+    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'", &format);
 
     let format = TextFormatBuilder::new()
         .position(78, 1)
@@ -576,7 +574,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
         .wrap(TextWrap::Character, 15)
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 67)
         .build();
-    s.write_text_new("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'", &format);
+    s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'", &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x3CE81721E1BB64FA);
@@ -596,7 +594,7 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize) -> 
             .wrap(TextWrap::Word, w)
             .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), hotkey_pos as u32)
             .build();
-        s.write_text_new(txt, &format);
+        s.write_text(txt, &format);
     };
 
     print(2, 10);
@@ -656,7 +654,7 @@ fn check_write_text_multi_line_word_wrap_aligned() {
         .wrap(TextWrap::Word, 12)
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     let format = TextFormatBuilder::new()
         .position(45, 1)
@@ -665,7 +663,7 @@ fn check_write_text_multi_line_word_wrap_aligned() {
         .wrap(TextWrap::Word, 20)
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     let format = TextFormatBuilder::new()
         .position(88, 1)
@@ -674,7 +672,7 @@ fn check_write_text_multi_line_word_wrap_aligned() {
         .wrap(TextWrap::Word, 15)
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0x70526C060A7E28C6);
@@ -696,7 +694,7 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
         .wrap(TextWrap::Word, 12)
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     let format = TextFormatBuilder::new()
         .position(45, 1)
@@ -705,7 +703,7 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
         .wrap(TextWrap::Word, 20)
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     let format = TextFormatBuilder::new()
         .position(88, 1)
@@ -714,7 +712,7 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
         .wrap(TextWrap::Word, 15)
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();    
-    s.write_text_new(txt, &format);
+    s.write_text(txt, &format);
 
     //s.print();
     assert_eq!(s.compute_hash(), 0xB7682D58B284C726);

@@ -1,6 +1,6 @@
 use super::{menu_item::MenuItem, MenuItemWrapper};
 use crate::{
-    graphics::{Character, SpecialChar, Surface, TextFormatNew},
+    graphics::{Character, SpecialChar, Surface, TextFormat},
     input::{Key, KeyCode},
     system::MenuTheme,
     ui::common::traits::CommandID,
@@ -77,14 +77,14 @@ impl SingleChoice {
         self.shortcut = Key::from(shortcut)
     }
     
-    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormatNew, width: u16, current_item: bool, color: &MenuTheme) {
+    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
         if current_item && self.enabled {
             // highlight current item
             surface.fill_horizontal_line_with_size(1, format.y, width as u32, Character::with_attributes(' ', color.text.hovered));
         }
         format.x = 4;
-        surface.write_text_new(self.caption.text(), format);
+        surface.write_text(self.caption.text(), format);
         let attr = super::utils::get_symbol_attr(self.enabled, current_item, color);
         let symbol = if self.selected {
             SpecialChar::CircleFilled

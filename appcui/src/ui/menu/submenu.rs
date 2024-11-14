@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, SpecialChar, Surface, TextFormatNew},
+    graphics::{Character, SpecialChar, Surface, TextFormat},
     system::{Handle, MenuTheme, RuntimeManager},
     utils::Caption,
     utils::ExtractHotKeyMethod
@@ -47,14 +47,14 @@ impl SubMenu {
         self.enabled = value;
     }
 
-    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormatNew, width: u16, current_item: bool, color: &MenuTheme) {
+    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
         if current_item && self.enabled {
             // highlight current item
             surface.fill_horizontal_line_with_size(1, format.y, width as u32, Character::with_attributes(' ', color.text.hovered));
         }
         format.x = 2;
-        surface.write_text_new(self.caption.text(), format);
+        surface.write_text(self.caption.text(), format);
         surface.write_char(
             width as i32,
             format.y,

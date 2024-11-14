@@ -102,14 +102,14 @@ impl OnPaint for Button {
         }
         if flat {
             surface.clear(Character::with_attributes(' ', col_text));
-            surface.write_text_new(self.caption.text(), &format);
+            surface.write_text(self.caption.text(), &format);
         } else if self.pressed {
             surface.fill_horizontal_line_with_size(1, 0, w, Character::with_attributes(' ', col_text));
             format.x += 1;
-            surface.write_text_new(self.caption.text(), &format);
+            surface.write_text(self.caption.text(), &format);
         } else {
             surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
-            surface.write_text_new(self.caption.text(), &format);
+            surface.write_text(self.caption.text(), &format);
             surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
             surface.write_char(w as i32, 0, Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow));
         }

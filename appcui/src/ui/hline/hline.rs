@@ -50,7 +50,7 @@ impl OnPaint for HLine {
                 .align(TextAlignament::Center)
                 .truncate(w as u16 - 4)
                 .build();
-            surface.write_text_new(&self.title, &format);
+            surface.write_text(&self.title, &format);
         }
     }
 }

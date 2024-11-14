@@ -2,7 +2,7 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 use crate::{
     graphics::{Character, SpecialChar, Surface},
     input::{Key, KeyCode},
-    prelude::TextFormatNew,
+    prelude::TextFormat,
     system::{Handle, MenuTheme},
     ui::{common::traits::CommandID, menu::Menu},
     utils::{Caption, ExtractHotKeyMethod},
@@ -69,14 +69,14 @@ impl CheckBox {
         self.shortcut = Key::from(shortcut)
     }
 
-    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormatNew, width: u16, current_item: bool, color: &MenuTheme) {
+    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
         if current_item && self.enabled {
             // highlight current item
             surface.fill_horizontal_line_with_size(1, format.y, width as u32, Character::with_attributes(' ', color.text.hovered));
         }
         format.x = 4;
-        surface.write_text_new(self.caption.text(), format);
+        surface.write_text(self.caption.text(), format);
         if self.checked {
             let attr = super::utils::get_symbol_attr(self.enabled, current_item, color);
             surface.write_char(2, format.y, Character::with_attributes(SpecialChar::CheckMark, attr));

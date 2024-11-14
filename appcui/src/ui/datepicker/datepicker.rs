@@ -262,18 +262,18 @@ impl OnPaint for DatePicker {
         let mut buf: [u8; 32] = [0; 32];
         match date_size {
             DateSize::Large => {
-                surface.write_text_new(Self::format_long_date(self.selected_date).as_str(), &format);
+                surface.write_text(Self::format_long_date(self.selected_date).as_str(), &format);
             }
             DateSize::Small => {
                 if let Some(txt) = crate::utils::FormatDate::dmy(&self.selected_date, &mut buf, b'.') {
                     format.set_chars_count(txt.len() as u16);
-                    surface.write_text_new(txt, &format);
+                    surface.write_text(txt, &format);
                 }
             }
             DateSize::VerySmall => {
                 if let Some(txt) = crate::utils::FormatDate::short(&self.selected_date, &mut buf, b'.') {
                     format.set_chars_count(txt.len() as u16);
-                    surface.write_text_new(txt, &format);
+                    surface.write_text(txt, &format);
                 }
             }
         }

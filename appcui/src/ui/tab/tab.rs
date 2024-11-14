@@ -223,7 +223,7 @@ impl Tab {
 
             // print the text
             format.x += s1;
-            surface.write_text_new(page.text(), &format);
+            surface.write_text(page.text(), &format);
             format.x += s2 + 1;
         }
     }
@@ -256,7 +256,7 @@ impl Tab {
             surface.fill_horizontal_line_with_size(0, format.y, self.tab_width as u32, Character::with_attributes(' ', text_attr));
 
             // write the text
-            surface.write_text_new(page.text(), &format);
+            surface.write_text(page.text(), &format);
             // next pos
             format.y += 1;
         }
