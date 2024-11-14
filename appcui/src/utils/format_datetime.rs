@@ -215,18 +215,18 @@ impl FormatDate {
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..10]) })
     }
-    pub fn dmy<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub fn dmy<'a>(dt: &NaiveDate, buf: &'a mut [u8], separator: u8) -> Option<&'a str> {
         if buf.len() < 10 {
             return None;
         }
         let day = dt.day();
         buf[0] = ((day / 10) as u8) + 48;
         buf[1] = ((day % 10) as u8) + 48;
-        buf[2] = b'-';
+        buf[2] = separator;
         let month = dt.month();
         buf[3] = ((month / 10) as u8) + 48;
         buf[4] = ((month % 10) as u8) + 48;
-        buf[5] = b'-';
+        buf[5] = separator;
         let year = dt.year();
         buf[6] = (year / 1000) as u8 + 48;
         buf[7] = ((year % 1000) / 100) as u8 + 48;
@@ -234,6 +234,25 @@ impl FormatDate {
         buf[9] = (year % 10) as u8 + 48;
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..10]) })
+    }
+
+    pub fn short<'a>(dt: &NaiveDate, buf: &'a mut [u8], separator: u8) -> Option<&'a str> {
+        if buf.len() < 10 {
+            return None;
+        }
+        let day = dt.day();
+        buf[0] = ((day / 10) as u8) + 48;
+        buf[1] = ((day % 10) as u8) + 48;
+        buf[2] = separator;
+        let month = dt.month();
+        buf[3] = ((month / 10) as u8) + 48;
+        buf[4] = ((month % 10) as u8) + 48;
+        buf[5] = separator;
+        let year = dt.year() % 100;
+        buf[6] = (year / 10) as u8 + 48;
+        buf[7] = (year % 10) as u8 + 48;
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[..8]) })
     }
 
     pub fn full<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {

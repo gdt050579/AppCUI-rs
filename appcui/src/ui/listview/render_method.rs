@@ -198,7 +198,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Date(dt, format) => match format {
                 DateFormat::Full => FormatDate::full(dt, output),
                 DateFormat::YearMonthDay => FormatDate::ymd(dt, output),
-                DateFormat::DayMonthYear => FormatDate::dmy(dt, output),
+                DateFormat::DayMonthYear => FormatDate::dmy(dt, output, b'-'),
             },
             RenderMethod::Duration(duration, format) => match format {
                 DurationFormat::Auto => FormatDuration::auto_hms(duration, output),
