@@ -25,6 +25,8 @@ enum TextFormatFlags {
     CharsCount = 0x04,
     Width = 0x08,
 }
+//  X,Y, char_attr, align are left pub(crate) to allow direct access to those filed within the crate
+// only members that don't have an associated flag are public(crate)
 
 /// A structure that contains information about how a text should be displayed on the screen.
 pub struct TextFormatNew {
@@ -32,7 +34,7 @@ pub struct TextFormatNew {
     pub(crate) x: i32,
     pub(crate) y: i32,
     pub(super) width: u16,
-    pub(super) char_attr: CharAttribute,
+    pub(crate) char_attr: CharAttribute,
     pub(super) hotkey_attr: CharAttribute,
     pub(super) hotkey_pos: u32,
     pub(super) chars_count: u16,
@@ -198,6 +200,18 @@ impl TextFormatNew {
         self.width = width;
         self.flags.set(TextFormatFlags::Width | TextFormatFlags::MultiLine);
     }
+    #[inline(always)]
+    pub fn set_truncate_width(&mut self, width: u16) {
+        self.width = width;
+        self.flags.remove(TextFormatFlags::MultiLine);
+        self.flags.set(TextFormatFlags::Width);        
+    }
+
+    // inner methods
+    #[inline(always)]
+    pub(crate) fn width(&self) -> u16 {
+        self.width
+    }
 }
 
 impl Default for TextFormatNew {
@@ -290,9 +304,10 @@ impl TextFormatBuilder {
     }
     #[inline(always)]
     pub fn truncate(mut self, width: u16) -> Self {
-        self.format.width = width;
-        self.format.flags.remove(TextFormatFlags::MultiLine);
-        self.format.flags.set(TextFormatFlags::Width);
+        self.format.set_truncate_width(width);
+        // self.format.width = width;
+        // self.format.flags.remove(TextFormatFlags::MultiLine);
+        // self.format.flags.set(TextFormatFlags::Width);
         self
     }
     #[inline(always)]
