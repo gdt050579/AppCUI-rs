@@ -1,7 +1,7 @@
 use std::ptr::NonNull;
 
 use crate::{
-    graphics::{Surface, TextAlignament, TextFormat},
+    graphics::{Surface, TextAlignament, TextFormatBuilder},
     system::{Handle, Theme},
     utils::Caption,
     utils::ExtractHotKeyMethod
@@ -61,18 +61,16 @@ impl SingleChoice {
         if (self.selected) && (data.focused) {
             st = SymbolAttrState::Pressed;
         }
-        let mut format = TextFormat::single_line(
-            self.base.get_left(),
-            self.base.get_y(),
-            st.get_button_attr(theme),
-            TextAlignament::Left,
-        );
-        format.width = Some(self.caption.chars_count() as u16);
-        format.hotkey_pos = self.caption.hotkey_pos();
+        let mut format = TextFormatBuilder::new()
+            .position(self.base.get_left(), self.base.get_y())
+            .attribute(st.get_button_attr(theme))
+            .align(TextAlignament::Left)
+            .truncate(self.caption.chars_count() as u16)
+            .build();
         if self.caption.has_hotkey() {
-            format.hotkey_attr = Some(st.get_hotkey_attr(theme));
+            format.set_hotkey(st.get_hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
         }
-        surface.write_text_old(self.caption.text(), &format);
+        surface.write_text_new(self.caption.text(), &format);
     }
     add_toolbaritem_basic_methods!();
 }
