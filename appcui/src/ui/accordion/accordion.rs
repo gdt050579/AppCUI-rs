@@ -185,7 +185,7 @@ impl OnPaint for Accordion {
             let (text_attr, hotkey_attr) = self.get_panelattr(theme, index);
             format.set_chars_count(page.chars_count() as u16);
             format.set_attribute(text_attr);
-            format.set_holkey_from_caption(hotkey_attr, page);
+            format.set_hotkey_from_caption(hotkey_attr, page);
             
             // position
             if index <= cidx {

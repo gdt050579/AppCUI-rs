@@ -228,7 +228,7 @@ impl TextFormatNew {
         self.width
     }
     #[inline(always)]
-    pub(crate) fn set_holkey_from_caption(&mut self, attr: CharAttribute, caption: &Caption) {
+    pub(crate) fn set_hotkey_from_caption(&mut self, attr: CharAttribute, caption: &Caption) {
         if caption.has_hotkey() {
             self.set_hotkey(attr, caption.hotkey_pos().unwrap() as u32);
         } else {
