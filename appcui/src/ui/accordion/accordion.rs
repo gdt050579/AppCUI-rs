@@ -164,24 +164,29 @@ impl OnPaint for Accordion {
             surface.clear(Character::with_attributes(' ', self.get_backattr(theme)));
         }
         let sz = self.size();
-        let mut format = TextFormat {
-            x: 1,
-            y: 1,
-            width: Some(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 }),
-            align: TextAlignament::Left,
-            text_wrap: TextWrap::Character,
-            multi_line: false,
-            ..Default::default()
-        };
+        // let mut format = TextFormat {
+        //     x: 1,
+        //     y: 1,
+        //     width: Some(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 }),
+        //     align: TextAlignament::Left,
+        //     text_wrap: TextWrap::Character,
+        //     multi_line: false,
+        //     ..Default::default()
+        // };
+        let mut format = TextFormatBuilder::new()
+            .position(1, 1)
+            .truncate(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 })
+            .align(TextAlignament::Left)
+            .build();
 
         let cidx = self.base.focused_child_index.index();
         let count = self.base.children.len();
         for (index, page) in self.panels.iter().enumerate() {
             let (text_attr, hotkey_attr) = self.get_panelattr(theme, index);
-            format.chars_count = Some(page.chars_count() as u16);
-            format.hotkey_pos = page.hotkey_pos();
-            format.char_attr = text_attr;
-            format.hotkey_attr = Some(hotkey_attr);
+            format.set_chars_count(page.chars_count() as u16);
+            format.set_attribute(text_attr);
+            format.set_holkey_from_caption(hotkey_attr, page);
+            
             // position
             if index <= cidx {
                 format.y = index as i32;
@@ -193,7 +198,7 @@ impl OnPaint for Accordion {
             surface.fill_horizontal_line_with_size(0, format.y, sz.width, Character::with_attributes(' ', text_attr));
 
             // write the text
-            surface.write_text_old(page.text(), &format);
+            surface.write_text_new(page.text(), &format);
         }
     }
 }

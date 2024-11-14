@@ -1,3 +1,5 @@
+use crate::utils::Caption;
+
 use super::CharAttribute;
 use EnumBitFlags::EnumBitFlags;
 
@@ -184,6 +186,10 @@ impl TextFormatNew {
         self.align = align;
     }
     #[inline(always)]
+    pub fn set_attribute(&mut self, attr: CharAttribute) {
+        self.char_attr = attr;
+    }
+    #[inline(always)]
     pub fn set_position(&mut self, x: i32, y: i32) {
         self.x = x;
         self.y = y;
@@ -193,6 +199,10 @@ impl TextFormatNew {
         self.hotkey_attr = attr;
         self.hotkey_pos = pos;
         self.flags.set(TextFormatFlags::Hotkey);
+    }
+    #[inline(always)]
+    pub fn clear_hotkey(&mut self) {
+        self.flags.remove(TextFormatFlags::Hotkey);
     }
     #[inline(always)]
     pub fn set_wrap(&mut self, wrap: TextWrap, width: u16) {
@@ -206,11 +216,24 @@ impl TextFormatNew {
         self.flags.remove(TextFormatFlags::MultiLine);
         self.flags.set(TextFormatFlags::Width);        
     }
+    #[inline(always)]
+    pub fn set_chars_count(&mut self, value: u16) {
+        self.chars_count = value;
+        self.flags.set(TextFormatFlags::CharsCount);
+    }
 
     // inner methods
     #[inline(always)]
     pub(crate) fn width(&self) -> u16 {
         self.width
+    }
+    #[inline(always)]
+    pub(crate) fn set_holkey_from_caption(&mut self, attr: CharAttribute, caption: &Caption) {
+        if caption.has_hotkey() {
+            self.set_hotkey(attr, caption.hotkey_pos().unwrap() as u32);
+        } else {
+            self.clear_hotkey();
+        }
     }
 }
 
@@ -271,9 +294,6 @@ impl TextFormatBuilder {
     #[inline(always)]
     pub fn hotkey(mut self, attr: CharAttribute, pos: u32) -> Self {
         self.format.set_hotkey(attr, pos);
-        // self.format.hotkey_attr = attr;
-        // self.format.hotkey_pos = pos;
-        // self.format.flags.set(TextFormatFlags::Hotkey);
         self
     }
     #[inline(always)]
@@ -283,16 +303,12 @@ impl TextFormatBuilder {
     }
     #[inline(always)]
     pub fn chars_count(mut self, value: u16) -> Self {
-        self.format.chars_count = value;
-        self.format.flags.set(TextFormatFlags::CharsCount);
+        self.format.set_chars_count(value);
         self
     }
     #[inline(always)]
     pub fn wrap(mut self, wrap: TextWrap, width: u16) -> Self {
         self.format.set_wrap(wrap, width);
-        // self.format.text_wrap = wrap;
-        // self.format.width = width;
-        // self.format.flags.set(TextFormatFlags::Width | TextFormatFlags::MultiLine);
         self
     }
     #[inline(always)]
@@ -305,9 +321,6 @@ impl TextFormatBuilder {
     #[inline(always)]
     pub fn truncate(mut self, width: u16) -> Self {
         self.format.set_truncate_width(width);
-        // self.format.width = width;
-        // self.format.flags.remove(TextFormatFlags::MultiLine);
-        // self.format.flags.set(TextFormatFlags::Width);
         self
     }
     #[inline(always)]
