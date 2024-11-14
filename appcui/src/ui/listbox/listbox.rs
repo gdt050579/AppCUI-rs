@@ -2,7 +2,6 @@ use super::events::EventData;
 use super::Flags;
 use super::Item;
 use crate::ui::components::ListScrollBars;
-use chrono::format;
 use listbox::events::ListBoxEventTypes;
 use AppCUIProcMacro::*;
 

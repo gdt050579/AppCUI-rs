@@ -66,17 +66,19 @@ impl OnPaint for ThreeStateBox {
         let sz = self.size();
 
         if sz.width > 4 {
-            let mut format = TextFormat::new(4, 0, col_text, TextAlignament::Left, sz.height > 1);
-            if format.multi_line {
-                format.text_wrap = TextWrap::Word;
-                format.width = Some(sz.width as u16 - 4);
+            let mut format = TextFormatBuilder::new()
+                .position(4, 0)
+                .attribute(col_text)
+                .align(TextAlignament::Left)
+                .chars_count(self.caption.chars_count() as u16)
+                .build();
+            if sz.height > 1 {
+                format.set_wrap(TextWrap::Word, sz.width as u16 - 4);
             }
             if self.caption.has_hotkey() {
-                format.hotkey_pos = self.caption.hotkey_pos();
-                format.hotkey_attr = Some(col_hot_key);
+                format.set_hotkey(col_hot_key, self.caption.hotkey_pos().unwrap() as u32);
             }
-            format.chars_count = Some(self.caption.chars_count() as u16);
-            surface.write_text_old(self.caption.text(), &format);
+            surface.write_text_new(self.caption.text(), &format);            
         }
 
         match self.state {
