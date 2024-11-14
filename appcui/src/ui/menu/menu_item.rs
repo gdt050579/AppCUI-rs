@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Surface, TextFormat},
+    graphics::{Surface, TextFormatNew},
     input::{Key, KeyCode},
     system::{Handle, MenuTheme}, prelude::common::UIElement,
 };
@@ -20,7 +20,7 @@ pub(crate) enum MenuItemWrapper {
 }
 
 impl MenuItemWrapper {
-    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
+    pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormatNew, width: u16, current_item: bool, color: &MenuTheme) {
         match self {
             MenuItemWrapper::Command(item) => item.paint(surface, format, width, current_item, color),
             MenuItemWrapper::CheckBox(item) => item.paint(surface, format, width, current_item, color),

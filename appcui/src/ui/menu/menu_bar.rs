@@ -1,6 +1,7 @@
 use crate::{
-    graphics::{Character, Surface, TextAlignament, TextFormat},
+    graphics::{Character, Surface, TextAlignament},
     input::{Key, KeyCode, KeyModifier},
+    prelude::TextFormatBuilder,
     system::{Handle, RuntimeManager, Theme},
     ui::common::{traits::EventProcessStatus, UIElement},
     utils::{Strategy, VectorIndex},
@@ -165,9 +166,7 @@ impl MenuBar {
                 }
                 EventProcessStatus::Processed
             }
-            _ => {
-                EventProcessStatus::Ignored
-            }
+            _ => EventProcessStatus::Ignored,
         }
     }
     pub(crate) fn on_key_event(&mut self, key: Key, menu_is_opened: bool) -> EventProcessStatus {
@@ -209,7 +208,11 @@ impl MenuBar {
 
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.fill_horizontal_line_with_size(self.x, self.y, self.width, Character::with_attributes(' ', theme.menu.text.normal));
-        let mut format = TextFormat::single_line(0, self.y, theme.menu.text.normal, TextAlignament::Left);
+        let mut format = TextFormatBuilder::new()
+            .position(0, self.y)
+            .attribute(theme.menu.text.normal)
+            .align(TextAlignament::Left)
+            .build();
         let open_idx = self.opened_item.index();
         let hover_idx = self.hovered_item.index();
         for (index, item) in self.items.iter().enumerate() {
@@ -217,20 +220,20 @@ impl MenuBar {
                 break;
             }
             format.x = self.x + item.x + 1;
-            format.hotkey_pos = item.caption.hotkey_pos();
-            format.chars_count = Some(item.caption.chars_count() as u16);
+            format.set_chars_count(item.caption.chars_count() as u16);
             format.char_attr = match () {
                 _ if index == open_idx => theme.menu.text.pressed_or_selectd,
                 _ if index == hover_idx => theme.menu.text.hovered,
                 _ => theme.menu.text.normal,
             };
-            if item.caption.has_hotkey() {
-                format.hotkey_attr = Some(match () {
+            format.set_hotkey_from_caption(
+                match () {
                     _ if index == open_idx => theme.menu.hotkey.pressed_or_selectd,
                     _ if index == hover_idx => theme.menu.hotkey.hovered,
                     _ => theme.menu.hotkey.normal,
-                });
-            }
+                },
+                &item.caption,
+            );
             if (index == open_idx) || (index == hover_idx) {
                 surface.fill_horizontal_line(
                     format.x - 1,
@@ -239,7 +242,7 @@ impl MenuBar {
                     Character::with_attributes(' ', format.char_attr),
                 );
             }
-            surface.write_text_old(item.caption.text(), &format);
+            surface.write_text_new(item.caption.text(), &format);
         }
     }
 }
