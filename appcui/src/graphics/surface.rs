@@ -756,10 +756,11 @@ impl Surface {
     /// use appcui::graphics::*;
     /// 
     /// let mut surface = Surface::new(100, 50);
-    /// let format = TextFormat::new(10, 10, 
-    ///                              CharAttribute::with_color(Color::White, Color::Black), 
-    ///                              TextAlignament::Left, 
-    ///                              false);
+    /// let format = TextFormatBuilder::new()
+    ///                 .position(10, 10)
+    ///                 .attribute(CharAttribute::with_color(Color::White, Color::Black))
+    ///                 .align(TextAlignament::Left)
+    ///                 .build();
     /// surface.write_text("Hello World!", &format);
     /// ```
     pub fn write_text(&mut self, text: &str, format: &TextFormat) {
