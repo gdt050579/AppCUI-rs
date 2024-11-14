@@ -44,43 +44,38 @@ pub enum RenderMethod<'a> {
 impl<'a> RenderMethod<'a> {
     #[inline(always)]
     fn paint_text(txt: &str, surface: &mut Surface, rd: &RenderData) {
-        let format = TextFormat {
-            x: match rd.alignment {
-                TextAlignament::Left => 0,
-                TextAlignament::Center => (rd.width as i32) / 2,
-                TextAlignament::Right => (rd.width as i32) - 1,
-            },
-            y: 0,
-            width: Some(rd.width),
-            char_attr: rd.attr.unwrap_or(rd.theme.text.focused),
-            hotkey_attr: None,
-            hotkey_pos: None,
-            chars_count: None,
-            align: rd.alignment,
-            text_wrap: TextWrap::Character,
-            multi_line: false,
-        };
-        surface.write_text_old(txt, &format);
+        let format = TextFormatBuilder::new()
+            .position(
+                match rd.alignment {
+                    TextAlignament::Left => 0,
+                    TextAlignament::Center => (rd.width as i32) / 2,
+                    TextAlignament::Right => (rd.width as i32) - 1,
+                },
+                0,
+            )
+            .attribute(rd.attr.unwrap_or(rd.theme.text.focused))
+            .align(rd.alignment)
+            .truncate(rd.width)
+            .build();
+        surface.write_text_new(txt, &format);
     }
     #[inline(always)]
     fn paint_ascii(txt: &str, surface: &mut Surface, rd: &RenderData) {
-        let format = TextFormat {
-            x: match rd.alignment {
-                TextAlignament::Left => 0,
-                TextAlignament::Center => (rd.width as i32) / 2,
-                TextAlignament::Right => (rd.width as i32) - 1,
-            },
-            y: 0,
-            width: Some(rd.width),
-            char_attr: rd.attr.unwrap_or(rd.theme.text.focused),
-            hotkey_attr: None,
-            hotkey_pos: None,
-            chars_count: Some(txt.len() as u16),
-            align: rd.alignment,
-            text_wrap: TextWrap::Character,
-            multi_line: false,
-        };
-        surface.write_text_old(txt, &format);
+        let format = TextFormatBuilder::new()
+            .position(
+                match rd.alignment {
+                    TextAlignament::Left => 0,
+                    TextAlignament::Center => (rd.width as i32) / 2,
+                    TextAlignament::Right => (rd.width as i32) - 1,
+                },
+                0,
+            )
+            .attribute(rd.attr.unwrap_or(rd.theme.text.focused))
+            .align(rd.alignment)
+            .truncate(rd.width)
+            .chars_count(txt.len() as u16)
+            .build();
+        surface.write_text_new(txt, &format);
     }
 
     #[inline(always)]
