@@ -41,9 +41,13 @@ impl OnPaint for Password {
         surface.fill_horizontal_line(0, 0, w as i32, Character::with_attributes(' ', attr));
         if self.visible {
             if sz > 0 {
-                let mut f = TextFormat::single_line(1, 0, attr, TextAlignament::Left);
-                f.width = Some(sz as u16);
-                surface.write_text_old(&self.pass, &f);
+                let format = TextFormatBuilder::new()
+                    .position(1, 0)
+                    .attribute(attr)
+                    .align(TextAlignament::Left)
+                    .truncate(sz as u16)
+                    .build();
+                surface.write_text_new(&self.pass, &format);
             }
             surface.write_char(
                 w as i32 - 1,

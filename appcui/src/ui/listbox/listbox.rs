@@ -2,6 +2,7 @@ use super::events::EventData;
 use super::Flags;
 use super::Item;
 use crate::ui::components::ListScrollBars;
+use chrono::format;
 use listbox::events::ListBoxEventTypes;
 use AppCUIProcMacro::*;
 
@@ -348,10 +349,13 @@ impl OnPaint for ListBox {
                 _ if has_focus => theme.text.highlighted,
                 _ => theme.text.inactive,
             };
-            let mut format = TextFormat::new(w / 2, h / 2, empty_attr, TextAlignament::Center, true);
-            format.width = Some(w as u16);
-            format.text_wrap = TextWrap::Word;
-            surface.write_text_old(&self.empty_message, &format);
+            let format = TextFormatBuilder::new()
+                .position(w / 2, h / 2)
+                .attribute(empty_attr)
+                .align(TextAlignament::Center)
+                .wrap(TextWrap::Word, w as u16)
+                .build();
+            surface.write_text_new(&self.empty_message, &format);
             return;
         }
 

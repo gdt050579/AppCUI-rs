@@ -13,11 +13,11 @@ impl Panel {
     /// * `Type::Window` - a panel with a border around it and a title bar
     /// * `Type::Page` - a panel without a border, used to group controls
     /// * `Type::TopBar` - a panel without a border, used to group controls and to display a title bar
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut panel = Panel::new("Panel", Layout::new("x:1,y:1,w:20,h:10"), panel::Type::Border);
     /// ```
     pub fn new(caption: &str, layout: Layout, panel_type: Type) -> Self {
@@ -34,7 +34,7 @@ impl Panel {
         }
         panel
     }
-    /// Sets the title of the panel. The title is displayed only if the panel type is `Type::Window` , `Type::TopBar` or 
+    /// Sets the title of the panel. The title is displayed only if the panel type is `Type::Window` , `Type::TopBar` or
     pub fn set_title(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::NoHotKey);
     }
@@ -48,16 +48,16 @@ impl Panel {
     /// Returns the type of the panel
     #[inline(always)]
     pub fn get_type(&self) -> Type {
-        self.panel_type        
+        self.panel_type
     }
 
     /// Adds a new control to the panel. The control will be added as a child of the panel and will be automatically removed when the panel is destroyed.
     /// Returns a handle to the newly created control.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut panel = Panel::new("Panel", Layout::new("x:1,y:1,w:10,h:10"), panel::Type::Border);
     /// let handle_button = panel.add(Button::new("Button", Layout::new("x:1,y:1,w:8"), button::Type::Normal));
     /// ```
@@ -74,12 +74,16 @@ impl Panel {
         let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
         surface.clear(Character::with_char(' '));
         surface.draw_rect(Rect::with_point_and_size(Point::ORIGIN, sz), LineType::Single, border_color);
-        if (self.caption.chars_count() > 0) && (sz.width > 7) {
-            let text_color = if self.is_enabled() { theme.text.normal } else { theme.text.inactive };
-            let mut format = TextFormat::new(3, 0, text_color, TextAlignament::Left, false);
-            format.width = Some((sz.width - 6) as u16);
-            let chars_count = self.caption.chars_count();
-            surface.write_text_old(self.caption.text(), &format);
+        let chars_count = self.caption.chars_count();
+        if (chars_count > 0) && (sz.width > 7) {
+            let format = TextFormatBuilder::new()
+                .position(3, 0)
+                .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
+                .align(TextAlignament::Left)
+                .truncate((sz.width - 6) as u16)
+                .chars_count(chars_count as u16)
+                .build();
+            surface.write_text_new(self.caption.text(), &format);
             surface.write_char(2, 0, Character::with_char(' '));
             if chars_count > (sz.width - 6) as usize {
                 surface.write_char((sz.width - 3) as i32, 0, Character::with_char(' '));
@@ -95,20 +99,25 @@ impl Panel {
         let border_color = if self.is_enabled() { theme.border.normal } else { theme.border.inactive };
         surface.clear(Character::with_char(' '));
         surface.draw_rect(Rect::with_point_and_size(Point::ORIGIN, sz), LineType::Single, border_color);
-        if (self.caption.chars_count() > 0) && (sz.width > 7) {
-            let text_color = if self.is_enabled() { theme.text.normal } else { theme.text.inactive };
-            let mut format = TextFormat::new(3, 0, text_color, TextAlignament::Left, false);
-            format.width = Some((sz.width - 6) as u16);
-            let chars_count = self.caption.chars_count();
+        let chars_count = self.caption.chars_count();
+        if (chars_count > 0) && (sz.width > 7) {
+            let mut format = TextFormatBuilder::new()
+                .position(3, 0)
+                .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
+                .align(TextAlignament::Left)
+                .truncate((sz.width - 6) as u16)
+                .chars_count(chars_count as u16)
+                .build();
+            
             if chars_count > (sz.width - 6) as usize {
-                surface.write_text_old(self.caption.text(), &format);
+                surface.write_text_new(self.caption.text(), &format);
                 surface.write_char(2, 0, Character::with_char(' '));
                 surface.write_char((sz.width - 3) as i32, 0, Character::with_char(' '));
                 surface.write_char((sz.width - 4) as i32, 0, Character::with_char(SpecialChar::ThreePointsHorizontal));
             } else {
                 let x = ((sz.width / 2) as i32) - ((chars_count + 2) as i32) / 2;
                 format.x = x + 1;
-                surface.write_text_old(self.caption.text(), &format);
+                surface.write_text_new(self.caption.text(), &format);
                 surface.write_char(x, 0, Character::with_char(' '));
                 surface.write_char(x + 1 + chars_count as i32, 0, Character::with_char(' '));
             }
@@ -132,20 +141,24 @@ impl Panel {
         } else {
             surface.clear(Character::with_char(' '));
         }
-        if (self.caption.chars_count() > 0) && (sz.width > 7) {
-            let text_color = if self.is_enabled() { theme.tab.text.normal } else { theme.text.inactive };
-            let mut format = TextFormat::new(3, 0, text_color, TextAlignament::Left, false);
-            format.width = Some((sz.width - 6) as u16);
-            let chars_count = self.caption.chars_count();
+        let chars_count = self.caption.chars_count();
+        if (chars_count > 0) && (sz.width > 7) {
+            let mut format = TextFormatBuilder::new()
+                .position(3, 0)
+                .attribute(if self.is_enabled() { theme.tab.text.normal } else { theme.text.inactive })
+                .align(TextAlignament::Left)
+                .truncate((sz.width - 6) as u16)
+                .chars_count(chars_count as u16)
+                .build();
             if chars_count > (sz.width - 6) as usize {
-                surface.write_text_old(self.caption.text(), &format);
+                surface.write_text_new(self.caption.text(), &format);
                 surface.write_char(2, 0, Character::with_char(' '));
                 surface.write_char((sz.width - 3) as i32, 0, Character::with_char(' '));
                 surface.write_char((sz.width - 4) as i32, 0, Character::with_char(SpecialChar::ThreePointsHorizontal));
             } else {
                 let x = ((sz.width / 2) as i32) - ((chars_count + 2) as i32) / 2;
                 format.x = x + 1;
-                surface.write_text_old(self.caption.text(), &format);
+                surface.write_text_new(self.caption.text(), &format);
                 surface.write_char(x, 0, Character::with_char(' '));
                 surface.write_char(x + 1 + chars_count as i32, 0, Character::with_char(' '));
             }

@@ -31,13 +31,13 @@ pub struct TextFormatNew {
     flags: TextFormatFlags,
     pub(crate) x: i32,
     pub(crate) y: i32,
-    pub(crate) width: u16,
-    pub(crate) char_attr: CharAttribute,
-    pub(crate) hotkey_attr: CharAttribute,
-    pub(crate) hotkey_pos: u32,
-    pub(crate) chars_count: u16,
+    pub(super) width: u16,
+    pub(super) char_attr: CharAttribute,
+    pub(super) hotkey_attr: CharAttribute,
+    pub(super) hotkey_pos: u32,
+    pub(super) chars_count: u16,
     pub(crate) align: TextAlignament,
-    pub(crate) text_wrap: TextWrap,
+    pub(super) text_wrap: TextWrap,
 }
 
 pub struct TextFormat {

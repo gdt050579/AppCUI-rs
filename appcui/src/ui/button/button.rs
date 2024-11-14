@@ -65,7 +65,7 @@ impl OnKeyPressed for Button {
                 self.on_default_action();
                 EventProcessStatus::Processed
             }
-            _ => EventProcessStatus::Ignored
+            _ => EventProcessStatus::Ignored,
         }
     }
 }
@@ -80,34 +80,38 @@ impl OnPaint for Button {
         };
         let flat = self.button_type == super::Type::Flat;
         let w = if flat { self.size().width } else { self.size().width - 1 };
-        let mut format = TextFormat::single_line((w / 2) as i32, 0, col_text, TextAlignament::Center);
-        format.chars_count = Some(self.caption.chars_count() as u16);
-        format.width = Some(w as u16);
+        let x = (w / 2) as i32;
+        let mut format = TextFormatBuilder::new()
+            .position(x, 0)
+            .attribute(col_text)
+            .align(TextAlignament::Center)
+            .chars_count(self.caption.chars_count() as u16)
+            .truncate(w as u16)
+            .build();
+
         if self.caption.has_hotkey() {
-            format.hotkey_attr = Some(match () {
-                _ if !self.is_enabled() => theme.button.hotkey.inactive,
-                _ if self.has_focus() => theme.button.hotkey.focused,
-                _ if self.is_mouse_over() => theme.button.hotkey.hovered,
-                _ => theme.button.hotkey.normal,
-            });
-            format.hotkey_pos = self.caption.hotkey_pos();
+            format.set_hotkey(
+                match () {
+                    _ if !self.is_enabled() => theme.button.hotkey.inactive,
+                    _ if self.has_focus() => theme.button.hotkey.focused,
+                    _ if self.is_mouse_over() => theme.button.hotkey.hovered,
+                    _ => theme.button.hotkey.normal,
+                },
+                self.caption.hotkey_pos().unwrap() as u32,
+            );
         }
         if flat {
             surface.clear(Character::with_attributes(' ', col_text));
-            surface.write_text_old(self.caption.text(), &format);
+            surface.write_text_new(self.caption.text(), &format);
         } else if self.pressed {
             surface.fill_horizontal_line_with_size(1, 0, w, Character::with_attributes(' ', col_text));
             format.x += 1;
-            surface.write_text_old(self.caption.text(), &format);
+            surface.write_text_new(self.caption.text(), &format);
         } else {
             surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
-            surface.write_text_old(self.caption.text(), &format);
+            surface.write_text_new(self.caption.text(), &format);
             surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
-            surface.write_char(
-                w as i32,
-                0,
-                Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow),
-            );
+            surface.write_char(w as i32, 0, Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow));
         }
     }
 }
