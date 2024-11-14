@@ -1,8 +1,10 @@
 use crate::{
-    graphics::{Surface, TextAlignament, TextFormat}, prelude::TextFormatBuilder, system::{Handle, Theme}, utils::{Caption, ExtractHotKeyMethod}
+    graphics::{Surface, TextAlignament, TextFormatBuilder},
+    system::{Handle, Theme},
+    utils::{Caption, ExtractHotKeyMethod},
 };
 
-use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Group};
+use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 pub struct Button {
     pub(super) base: ItemBase,
