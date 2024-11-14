@@ -72,18 +72,16 @@ impl Column {
         if fill {
             surface.fill_horizontal_line_with_size(self.x, 0, self.width as u32, Character::with_attributes(' ', char_attr));
         }
-        let format = TextFormat {
-            x,
-            y: 0,
-            width: Some(w as u16),
-            char_attr,
-            hotkey_attr: Some(hotkey_attr),
-            hotkey_pos: self.name.hotkey_pos(),
-            chars_count: Some(self.name.chars_count() as u16),
-            align: self.alignment,
-            text_wrap: TextWrap::Character,
-            multi_line: false,
-        };
-        surface.write_text_old(self.name.text(), &format);
+        let mut format = TextFormatBuilder::new()
+            .position(x, 0)
+            .attribute(char_attr)
+            .align(self.alignment)
+            .chars_count(self.name.chars_count() as u16)
+            .truncate(w as u16)
+            .build();
+        if self.name.has_hotkey() {
+            format.set_hotkey(hotkey_attr, self.name.hotkey_pos().unwrap() as u32);
+        }
+        surface.write_text_new(self.name.text(), &format);
     }
 }
