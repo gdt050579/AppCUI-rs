@@ -375,7 +375,7 @@ impl ListItem for Student {
     fn render_method(&self, column_index: u16) -> Option<RenderMethod> {
         match column_index {
             0 => Some(RenderMethod::Text(&self.name)),
-            1 => Some(RenderMethod::UInt64(self.grade as i64, NumericFormat::Normal)),
+            1 => Some(RenderMethod::UInt64(self.grade as u64, NumericFormat::Normal)),
             2 => Some(RenderMethod::Rating(self.stars as u32, RatingFormat::Stars(5))),
             _ => None,
         }
