@@ -490,7 +490,7 @@ fn check_write_text_multi_line_character_wrap() {
         .position(40, 1)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Center)
-        .wrap(WrapType::CharacterWrap(10))
+        .wrap(WrapType::CharacterWrap(30))
         .build();
 
     s.write_text(txt, &format);
