@@ -4,7 +4,7 @@ use crate::graphics::text_format::TextFormatBuilder;
 use crate::graphics::Point;
 use crate::graphics::Rect;
 use crate::graphics::Size;
-use crate::graphics::TextWrap;
+use crate::graphics::WrapType;
 use crate::prelude::SpecialChar;
 
 use super::CharAttribute;
@@ -481,7 +481,7 @@ fn check_write_text_multi_line_character_wrap() {
         .position(2, 1)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Left)
-        .wrap(TextWrap::Character, 10)
+        .wrap(WrapType::CharacterWrap(10))
         .build();
 
     s.write_text(txt, &format);
@@ -490,7 +490,7 @@ fn check_write_text_multi_line_character_wrap() {
         .position(40, 1)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Center)
-        .wrap(TextWrap::Character, 30)
+        .wrap(WrapType::CharacterWrap(10))
         .build();
 
     s.write_text(txt, &format);
@@ -499,7 +499,7 @@ fn check_write_text_multi_line_character_wrap() {
         .position(78, 1)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Right)
-        .wrap(TextWrap::Character, 7)
+        .wrap(WrapType::CharacterWrap(7))
         .build();
 
     s.write_text(txt, &format);
@@ -519,7 +519,7 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
         .position(2, 1)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Left)
-        .wrap(TextWrap::Character, 10)
+        .wrap(WrapType::CharacterWrap(10))
         .build();
     s.write_text(txt, &format);
 
@@ -527,7 +527,7 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
         .position(40, 1)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Center)
-        .wrap(TextWrap::Character, 30)
+        .wrap(WrapType::CharacterWrap(30))
         .build();
     s.write_text(txt, &format);
 
@@ -535,7 +535,7 @@ fn check_write_text_multi_line_character_wrap_new_lines() {
         .position(78, 1)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Right)
-        .wrap(TextWrap::Character, 7)
+        .wrap(WrapType::CharacterWrap(7))
         .build();
     s.write_text(txt, &format);
 
@@ -553,7 +553,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
         .position(2, 1)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
         .align(TextAlignament::Left)
-        .wrap(TextWrap::Character, 10)
+        .wrap(WrapType::CharacterWrap(10))
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 17)
         .build();
     s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'a'", &format);
@@ -562,7 +562,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
         .position(40, 1)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
         .align(TextAlignament::Center)
-        .wrap(TextWrap::Character, 30)
+        .wrap(WrapType::CharacterWrap(30))
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 28)
         .build();
     s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'w'", &format);
@@ -571,7 +571,7 @@ fn check_write_text_multi_line_character_wrap_new_lines_hotkey() {
         .position(78, 1)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
         .align(TextAlignament::Right)
-        .wrap(TextWrap::Character, 15)
+        .wrap(WrapType::CharacterWrap(15))
         .hotkey(CharAttribute::with_color(Color::Yellow, Color::DarkRed), 67)
         .build();
     s.write_text("This is a line\nthat will be wrapped on multiple lines\n\nHot key is 'x'", &format);
@@ -591,7 +591,7 @@ fn print_word_wrapped(txt: &str, width: u32, height: u32, hotkey_pos: usize) -> 
             .position(x, 1)
             .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
             .align(TextAlignament::Left)
-            .wrap(TextWrap::Word, w)
+            .wrap(WrapType::WordWrap(w))
             .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), hotkey_pos as u32)
             .build();
         s.write_text(txt, &format);
@@ -651,7 +651,7 @@ fn check_write_text_multi_line_word_wrap_aligned() {
         .position(2, 1)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
         .align(TextAlignament::Left)
-        .wrap(TextWrap::Word, 12)
+        .wrap(WrapType::WordWrap(12))
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
     s.write_text(txt, &format);
@@ -660,7 +660,7 @@ fn check_write_text_multi_line_word_wrap_aligned() {
         .position(45, 1)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
         .align(TextAlignament::Center)
-        .wrap(TextWrap::Word, 20)
+        .wrap(WrapType::WordWrap(20))
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
     s.write_text(txt, &format);
@@ -669,7 +669,7 @@ fn check_write_text_multi_line_word_wrap_aligned() {
         .position(88, 1)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
         .align(TextAlignament::Right)
-        .wrap(TextWrap::Word, 15)
+        .wrap(WrapType::WordWrap(15))
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
     s.write_text(txt, &format);
@@ -691,7 +691,7 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
         .position(2, 1)
         .align(TextAlignament::Left)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
-        .wrap(TextWrap::Word, 12)
+        .wrap(WrapType::WordWrap(12))
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
     s.write_text(txt, &format);
@@ -700,7 +700,7 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
         .position(45, 1)
         .align(TextAlignament::Center)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
-        .wrap(TextWrap::Word, 20)
+        .wrap(WrapType::WordWrap(20))
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();
     s.write_text(txt, &format);
@@ -709,7 +709,7 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
         .position(88, 1)
         .align(TextAlignament::Right)
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
-        .wrap(TextWrap::Word, 15)
+        .wrap(WrapType::WordWrap(15))
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
         .build();    
     s.write_text(txt, &format);

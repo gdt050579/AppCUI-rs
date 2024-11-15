@@ -36,7 +36,7 @@ impl OnPaint for Label {
             );
         }
         if sz.height > 1 {
-            format.set_wrap(TextWrap::Word, sz.width as u16);
+            format.set_wrap_type(WrapType::WordWrap(sz.width as u16));
         }
 
         surface.write_text(self.caption.text(), &format);

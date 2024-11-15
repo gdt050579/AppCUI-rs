@@ -65,7 +65,7 @@ impl OnPaint for RadioBox {
                 .chars_count(self.caption.chars_count() as u16)
                 .build();
             if sz.height > 1 {
-                format.set_wrap(TextWrap::Word, sz.width as u16 - 4);
+                format.set_wrap_type(WrapType::WordWrap(sz.width as u16 - 4));
             }
             if self.caption.has_hotkey() {
                 format.set_hotkey(col_hot_key, self.caption.hotkey_pos().unwrap() as u32);

@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, Point, Rect, Size, SpecialChar, Surface, TextAlignament, TextWrap},
+    graphics::{Character, Point, Rect, Size, SpecialChar, Surface, TextAlignament, WrapType},
     prelude::TextFormatBuilder,
 };
 
@@ -71,7 +71,7 @@ impl ToolTip {
                 .attribute(theme.tooltip.text)
                 .align(TextAlignament::Left)
                 .chars_count(chars_count as u16)
-                .wrap(TextWrap::Word, (best_width - 2) as u16)
+                .wrap(WrapType::WordWrap((best_width - 2) as u16))
                 .build();
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
@@ -94,7 +94,7 @@ impl ToolTip {
                 .attribute(theme.tooltip.text)
                 .align(TextAlignament::Left)
                 .chars_count(chars_count as u16)
-                .wrap(TextWrap::Word, (best_width - 2) as u16)
+                .wrap(WrapType::WordWrap((best_width - 2) as u16))
                 .build();
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));

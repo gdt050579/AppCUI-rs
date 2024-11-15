@@ -352,7 +352,7 @@ impl OnPaint for ListBox {
                 .position(w / 2, h / 2)
                 .attribute(empty_attr)
                 .align(TextAlignament::Center)
-                .wrap(TextWrap::Word, w as u16)
+                .wrap(WrapType::WordWrap(w as u16))
                 .build();
             surface.write_text(&self.empty_message, &format);
             return;
