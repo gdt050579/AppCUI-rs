@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Surface, TextAlignament, TextFormatBuilder},
+    graphics::{Surface, TextAlignament, TextFormatBuilder, WrapType},
     system::{Handle, Theme},
     utils::{Caption, ExtractHotKeyMethod},
 };
@@ -36,7 +36,7 @@ impl Button {
             .position(self.base.get_left(), self.base.get_y())
             .attribute(st.get_button_attr(theme))
             .align(TextAlignament::Left)
-            .singleline_width(self.caption.chars_count() as u16)
+            .wrap(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {
             format.set_hotkey(st.get_hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);

@@ -3,7 +3,7 @@ use super::{
     Separator, SingleChoice, SubMenu,
 };
 use crate::{
-    graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament, TextFormatBuilder},
+    graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament, TextFormatBuilder, WrapType},
     input::{Key, KeyCode, MouseWheelDirection},
     prelude::KeyModifier,
     system::{Handle, HandleSupport, RuntimeManager, Theme},
@@ -257,7 +257,10 @@ impl Menu {
         //     multi_line: false,
         //     ..Default::default()
         // };
-        let mut format = TextFormatBuilder::new().singleline_width(self.text_width).align(TextAlignament::Left).build();
+        let mut format = TextFormatBuilder::new()
+            .wrap(WrapType::SingleLineWrap(self.text_width))
+            .align(TextAlignament::Left)
+            .build();
 
         let start = self.first_visible_item as usize;
         let end = self.items.len().min((self.first_visible_item + self.visible_items_count) as usize);

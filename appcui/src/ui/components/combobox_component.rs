@@ -268,7 +268,7 @@ where
                     .align(TextAlignament::Left)
                     .build();
                 if self.symbol_size > 0 {
-                    format.set_truncate_width(self.symbol_size as u16);
+                    format.set_wrap_type(WrapType::SingleLineWrap(self.symbol_size as u16));
                     if let Some(value) = data.symbol(self.current_index) {
                         surface.write_text(value, &format);
                     }
@@ -277,12 +277,12 @@ where
                     // recompute the new width
                     let w = (size.width - MIN_WIDTH_VARIANT_NAME) as i32 - self.symbol_size as i32 - 1;
                     if w > 0 {
-                        format.set_truncate_width(w as u16);
+                        format.set_wrap_type(WrapType::SingleLineWrap(w as u16));
                     } else {
                         paint_next = false;
                     }
                 } else {
-                    format.set_truncate_width((size.width - MIN_WIDTH_VARIANT_NAME) as u16);
+                    format.set_wrap_type(WrapType::SingleLineWrap((size.width - MIN_WIDTH_VARIANT_NAME) as u16));
                 }
                 if paint_next {
                     if let Some(value) = data.name(self.current_index) {
@@ -328,20 +328,20 @@ where
                     .position(2, self.expanded_panel_y + 1)
                     .attribute(theme.menu.symbol.normal)
                     .align(TextAlignament::Left)
-                    .singleline_width(self.symbol_size as u16)
+                    .wrap(WrapType::SingleLineWrap(self.symbol_size as u16))
                     .build();
                 if self.symbol_size > 0 {
                     format.x += self.symbol_size as i32;
                     format.x += 1;
                     let space_left = (size.width as i32) - (5 + self.symbol_size as i32);
                     if space_left > 0 {
-                        format.set_truncate_width(space_left as u16);
+                        format.set_wrap_type(WrapType::SingleLineWrap(space_left as u16));
                     } else {
-                        format.set_truncate_width(0);
+                        format.set_wrap_type(WrapType::SingleLineWrap(0));
                         display_value = false;
                     }
                 } else {
-                    format.set_truncate_width((size.width - 4) as u16);
+                    format.set_wrap_type(WrapType::SingleLineWrap((size.width - 4) as u16));
                 }
 
                 for i in self.start_index..self.start_index + visible_items {
@@ -362,11 +362,11 @@ where
                                         let old_x = format.x;
                                         format.x += 1 + sz as i32;
                                         if format.x < (size.width as i32) - 2 {
-                                            format.set_truncate_width((size.width as i32 - (2 + format.x)) as u16);
+                                            format.set_wrap_type(WrapType::SingleLineWrap((size.width as i32 - (2 + format.x)) as u16));
                                             format.char_attr = theme.menu.text.inactive;
                                             surface.write_text(desc, &format);
                                         }
-                                        format.set_truncate_width(old_width);
+                                        format.set_wrap_type(WrapType::SingleLineWrap(old_width));
                                         format.x = old_x;
                                     }
                                 }

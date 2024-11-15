@@ -48,7 +48,7 @@ impl OnPaint for HLine {
                 .position(w as i32 / 2, 0)
                 .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
                 .align(TextAlignament::Center)
-                .singleline_width(w as u16 - 4)
+                .wrap(WrapType::SingleLineWrap(w as u16 - 4))
                 .build();
             surface.write_text(&self.title, &format);
         }

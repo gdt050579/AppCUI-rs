@@ -55,7 +55,7 @@ impl<'a> RenderMethod<'a> {
             )
             .attribute(rd.attr.unwrap_or(rd.theme.text.focused))
             .align(rd.alignment)
-            .singleline_width(rd.width)
+            .wrap(WrapType::SingleLineWrap(rd.width))
             .build();
         surface.write_text(txt, &format);
     }
@@ -72,7 +72,7 @@ impl<'a> RenderMethod<'a> {
             )
             .attribute(rd.attr.unwrap_or(rd.theme.text.focused))
             .align(rd.alignment)
-            .singleline_width(rd.width)
+            .wrap(WrapType::SingleLineWrap(rd.width))
             .chars_count(txt.len() as u16)
             .build();
         surface.write_text(txt, &format);

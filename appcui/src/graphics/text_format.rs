@@ -12,14 +12,6 @@ pub enum TextAlignament {
     Right,
 }
 
-// #[repr(u8)]
-// #[derive(Copy, Clone, Debug, PartialEq, Default)]
-// pub enum WrapType {
-//     #[default]
-//     Character,
-//     Word,
-// }
-
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub enum WrapType {
@@ -34,9 +26,7 @@ pub enum WrapType {
 #[EnumBitFlags(bits = 8)]
 enum TextFormatFlags {
     Hotkey = 0x01,
-    MultiLine = 0x02,
-    CharsCount = 0x04,
-    Width = 0x08,
+    CharsCount = 0x02,
 }
 //  X,Y, char_attr, align are left pub(crate) to allow direct access to those filed within the crate
 // only members that don't have an associated flag are public(crate)
@@ -46,13 +36,11 @@ pub struct TextFormat {
     flags: TextFormatFlags,
     pub(crate) x: i32,
     pub(crate) y: i32,
-    //pub(super) width: u16,
     pub(crate) char_attr: CharAttribute,
     pub(super) hotkey_attr: CharAttribute,
     pub(super) hotkey_pos: u32,
     pub(super) chars_count: u16,
     pub(crate) align: TextAlignament,
-    //pub(super) text_wrap: TextWrap,
     pub(crate) wrap_type: WrapType,
 }
 
@@ -105,15 +93,6 @@ impl TextFormat {
     #[inline(always)]
     pub fn set_wrap_type(&mut self, wrap_type: WrapType) {
         self.wrap_type = wrap_type;
-        // self.text_wrap = wrap;
-        // self.width = width;
-        // self.flags.set(TextFormatFlags::Width | TextFormatFlags::MultiLine);
-    }
-    #[inline(always)]
-    pub fn set_truncate_width(&mut self, width: u16) {
-        // self.width = width;
-        // self.flags.remove(TextFormatFlags::MultiLine);
-        // self.flags.set(TextFormatFlags::Width);        
     }
 
     /// Sets the number of characters in the text buffer. This is usefull to perform some optimizations in particular for unicode characters.
@@ -147,7 +126,6 @@ impl Default for TextFormat {
             flags: TextFormatFlags::None,
             x: 0,
             y: 0,
-            //width: 0,
             char_attr: Default::default(),
             hotkey_attr: Default::default(),
             hotkey_pos: 0,
@@ -210,25 +188,6 @@ impl TextFormatBuilder {
     #[inline(always)]
     pub fn wrap(mut self, wrap_type: WrapType) -> Self {
         self.format.set_wrap_type(wrap_type);
-        self
-    }
-
-    /// Sets the text to be multi-line. This means that special characters like '\n' will be interpreted as new lines.
-    #[inline(always)]
-    pub fn multi_line(mut self) -> Self {
-        self.format.wrap_type = WrapType::MultiLine;
-        // self.format.width = 0;
-        // self.format.flags.set(TextFormatFlags::MultiLine);
-        // self.format.flags.remove(TextFormatFlags::Width);
-        self
-    }
-
-    /// Sets the width of the text. When this value is being used, the text will be truncated if it exceeds the width.
-    /// Using this method will implies that the text is considered single line (any '\n' character will be ignored).
-    #[inline(always)]
-    pub fn singleline_width(mut self, width: u16) -> Self {
-        //self.format.set_truncate_width(width);
-        self.format.wrap_type = WrapType::SingleLineWrap(width);
         self
     }
 

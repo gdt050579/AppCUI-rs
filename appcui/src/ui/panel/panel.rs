@@ -80,7 +80,7 @@ impl Panel {
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
                 .align(TextAlignament::Left)
-                .singleline_width((sz.width - 6) as u16)
+                .wrap(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
             surface.write_text(self.caption.text(), &format);
@@ -105,7 +105,7 @@ impl Panel {
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
                 .align(TextAlignament::Left)
-                .singleline_width((sz.width - 6) as u16)
+                .wrap(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
             
@@ -147,7 +147,7 @@ impl Panel {
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.tab.text.normal } else { theme.text.inactive })
                 .align(TextAlignament::Left)
-                .singleline_width((sz.width - 6) as u16)
+                .wrap(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
             if chars_count > (sz.width - 6) as usize {
