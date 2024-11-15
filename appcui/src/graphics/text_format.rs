@@ -61,29 +61,42 @@ impl TextFormat {
     pub(super) fn is_multi_line(&self) -> bool {
         self.flags.contains(TextFormatFlags::MultiLine)
     }
+    /// Sets the alignment of the text. It can be Left, Center or Right.
     #[inline(always)]
     pub fn set_align(&mut self, align: TextAlignament) {
         self.align = align;
     }
+
+    /// Sets the attribute of the text (foreground , background color and flags such as Bold, Italic, etc).
     #[inline(always)]
     pub fn set_attribute(&mut self, attr: CharAttribute) {
         self.char_attr = attr;
     }
+
+    /// Sets the position of the text on the screen.
     #[inline(always)]
     pub fn set_position(&mut self, x: i32, y: i32) {
         self.x = x;
         self.y = y;
     }
+
+    /// Sets the hotkey attribute and position (index) of the hotkey in the text buffer.
     #[inline(always)]
     pub fn set_hotkey(&mut self, attr: CharAttribute, pos: u32) {
         self.hotkey_attr = attr;
         self.hotkey_pos = pos;
         self.flags.set(TextFormatFlags::Hotkey);
     }
+
+    /// Clears the hotkey attribute and position.
     #[inline(always)]
     pub fn clear_hotkey(&mut self) {
         self.flags.remove(TextFormatFlags::Hotkey);
     }
+
+    /// Sets the wrap mode of the text. It can be `Character`` or `Word``. If the wrap mode is set, the width of the text should be set as well.
+    /// If the wrap mode is set, the text will be wrapped to the next line if it exceeds the width.
+    /// Setting the wrap mode implies that the text is multi-line ('\n' characters are interpreted as new lines).   
     #[inline(always)]
     pub fn set_wrap(&mut self, wrap: TextWrap, width: u16) {
         self.text_wrap = wrap;
@@ -96,6 +109,8 @@ impl TextFormat {
         self.flags.remove(TextFormatFlags::MultiLine);
         self.flags.set(TextFormatFlags::Width);        
     }
+
+    /// Sets the number of characters in the text buffer. This is usefull to perform some optimizations in particular for unicode characters.
     #[inline(always)]
     pub fn set_chars_count(&mut self, value: u16) {
         self.chars_count = value;
@@ -139,41 +154,57 @@ pub struct TextFormatBuilder {
 }
 
 impl TextFormatBuilder {
+    /// Creates a new instance of the TextFormatBuilder.
     #[inline(always)]
     pub fn new() -> Self {
         Self { format: Default::default() }
     }
+
+    /// Sets the position of the text on the screen.
     #[inline(always)]
     pub fn position(mut self, x: i32, y: i32) -> Self {
         self.format.x = x;
         self.format.y = y;
         self
     }
+
+    /// Sets the attribute of the text.
     #[inline(always)]
     pub fn attribute(mut self, attr: CharAttribute) -> Self {
         self.format.char_attr = attr;
         self
     }
+
+    /// Sets the hotkey attribute and position (index) of the hotkey in the text buffer.
     #[inline(always)]
     pub fn hotkey(mut self, attr: CharAttribute, pos: u32) -> Self {
         self.format.set_hotkey(attr, pos);
         self
     }
+
+    /// Sets the alignment of the text. It can be Left, Center or Right.
     #[inline(always)]
     pub fn align(mut self, align: TextAlignament) -> Self {
         self.format.align = align;
         self
     }
+
+    /// Sets the number of characters in the text buffer. This is usefull to perform some optimizations in particular for unicode characters.
     #[inline(always)]
     pub fn chars_count(mut self, value: u16) -> Self {
         self.format.set_chars_count(value);
         self
     }
+
+    /// Sets the wrap mode of the text. It can be Character or Word. If the wrap mode is set, the width of the text should be set as well.
+    /// If the wrap mode is set, the text will be wrapped to the next line if it exceeds the width.
     #[inline(always)]
     pub fn wrap(mut self, wrap: TextWrap, width: u16) -> Self {
         self.format.set_wrap(wrap, width);
         self
     }
+
+    /// Sets the text to be multi-line. This means that special characters like '\n' will be interpreted as new lines.
     #[inline(always)]
     pub fn multi_line(mut self) -> Self {
         self.format.width = 0;
@@ -181,11 +212,16 @@ impl TextFormatBuilder {
         self.format.flags.remove(TextFormatFlags::Width);
         self
     }
+
+    /// Sets the width of the text. When this value is being used, the text will be truncated if it exceeds the width.
+    /// Using this method will implies that the text is considered single line (any '\n' character will be ignored).
     #[inline(always)]
-    pub fn truncate(mut self, width: u16) -> Self {
+    pub fn singleline_width(mut self, width: u16) -> Self {
         self.format.set_truncate_width(width);
         self
     }
+
+    /// Builds the TextFormat instance.
     #[inline(always)]
     pub fn build(self) -> TextFormat {
         self.format

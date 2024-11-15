@@ -348,21 +348,21 @@ fn check_write_text_single_line_width() {
         .position(30, 1)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkRed))
         .align(TextAlignament::Left)
-        .truncate(6)
+        .singleline_width(6)
         .build();
     s.write_text("123456xxxxxxx", &format);
     let format = TextFormatBuilder::new()
         .position(30, 3)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkGreen))
         .align(TextAlignament::Center)
-        .truncate(6)
+        .singleline_width(6)
         .build();
     s.write_text("----123456----", &format);
     let format = TextFormatBuilder::new()
         .position(30, 5)
         .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
         .align(TextAlignament::Right)
-        .truncate(6)
+        .singleline_width(6)
         .build();
     s.write_text("--------------------123456", &format);
 

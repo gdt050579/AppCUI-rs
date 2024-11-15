@@ -257,7 +257,7 @@ impl Menu {
         //     multi_line: false,
         //     ..Default::default()
         // };
-        let mut format = TextFormatBuilder::new().truncate(self.text_width).align(TextAlignament::Left).build();
+        let mut format = TextFormatBuilder::new().singleline_width(self.text_width).align(TextAlignament::Left).build();
 
         let start = self.first_visible_item as usize;
         let end = self.items.len().min((self.first_visible_item + self.visible_items_count) as usize);

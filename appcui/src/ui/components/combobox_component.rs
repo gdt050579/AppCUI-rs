@@ -328,7 +328,7 @@ where
                     .position(2, self.expanded_panel_y + 1)
                     .attribute(theme.menu.symbol.normal)
                     .align(TextAlignament::Left)
-                    .truncate(self.symbol_size as u16)
+                    .singleline_width(self.symbol_size as u16)
                     .build();
                 if self.symbol_size > 0 {
                     format.x += self.symbol_size as i32;

@@ -243,7 +243,7 @@ where
                     .attribute(attr)
                     .align(TextAlignament::Center)
                     .chars_count(self.txtlen as u16)
-                    .truncate((r - (l + 1)) as u16)
+                    .singleline_width((r - (l + 1)) as u16)
                     .build();
                 surface.write_text(&self.txt, &format);
             }

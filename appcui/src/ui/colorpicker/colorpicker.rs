@@ -136,7 +136,7 @@ impl OnPaint for ColorPicker {
                     .position(3, self.header_y_ofs)
                     .attribute(col_text)
                     .align(TextAlignament::Left)
-                    .truncate((size.width - MIN_WIDTH_FOR_COLOR_NAME) as u16)
+                    .singleline_width((size.width - MIN_WIDTH_FOR_COLOR_NAME) as u16)
                     .build();
                 surface.write_text(self.color.name(), &format);
             }

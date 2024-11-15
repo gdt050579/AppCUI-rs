@@ -1018,7 +1018,7 @@ where
                 .position(left + 1, y)
                 .align(TextAlignament::Left)
                 .attribute(attr.unwrap_or(theme.text.hovered))
-                .truncate(space_width as u16)
+                .singleline_width(space_width as u16)
                 .build();
             surface.write_text(gi.name(), &format);
             surface.write_char(left, y, Character::with_attributes(' ', attr.unwrap_or(theme.text.focused)));

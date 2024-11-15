@@ -86,7 +86,7 @@ impl OnPaint for Button {
             .attribute(col_text)
             .align(TextAlignament::Center)
             .chars_count(self.caption.chars_count() as u16)
-            .truncate(w as u16)
+            .singleline_width(w as u16)
             .build();
 
         if self.caption.has_hotkey() {

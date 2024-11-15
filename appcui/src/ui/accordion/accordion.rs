@@ -175,7 +175,7 @@ impl OnPaint for Accordion {
         // };
         let mut format = TextFormatBuilder::new()
             .position(1, 1)
-            .truncate(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 })
+            .singleline_width(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 })
             .align(TextAlignament::Left)
             .build();
 

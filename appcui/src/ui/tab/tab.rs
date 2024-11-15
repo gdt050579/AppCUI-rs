@@ -192,7 +192,7 @@ impl Tab {
     fn paint_horizontal_tab(&self, surface: &mut Surface, theme: &Theme, y: i32) {
         let mut format = TextFormatBuilder::new()
             .position(1, y)
-            .truncate(self.tab_width as u16 - 2)
+            .singleline_width(self.tab_width as u16 - 2)
             .align(TextAlignament::Center)
             .build();
 
@@ -242,7 +242,7 @@ impl Tab {
         }
         let mut format = TextFormatBuilder::new()
             .position(1, 1)
-            .truncate(self.tab_width as u16 - 2)
+            .singleline_width(self.tab_width as u16 - 2)
             .align(TextAlignament::Left)
             .build();
 
