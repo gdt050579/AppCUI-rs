@@ -5,7 +5,7 @@ Writing text on a surface is a common task in GUI programming, that can be achie
 2. `write_ascii(...)` - similar to **write_string**, but it writes only ASCII characters.
 3. `write_text(...)` - a more complex method that allows alignament, wrapping and text formatting.
 
-## Wriring a string
+## Write a string
 
 The `write_string(...)` method writes a string on the surface starting from a specific position. The method has the following signature:
 
@@ -32,7 +32,7 @@ surface.write_string(10, 10,
                     false);
 ```
 
-## Wriring an ASCII string
+## Write an ASCII string
 
 The `write_ascii(...)` method writes an ASCII string on the surface starting from a specific position. The method has the following signature:
 
