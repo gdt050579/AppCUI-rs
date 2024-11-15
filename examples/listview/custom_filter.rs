@@ -25,36 +25,37 @@ impl listview::ListItem for Student {
         if text.is_empty() {
             return true;
         }
-        if text.starts_with(">=") {
-            if let Ok(value) = text[2..].parse::<u32>() {
+
+        if let Some(text_value) = text.strip_prefix(">=") {
+            if let Ok(value) = text_value.parse::<u32>() {
                 return self.grade >= value;
             } else {
                 return false;
             }
         }
-        if text.starts_with(">") {
-            if let Ok(value) = text[1..].parse::<u32>() {
+        if let Some(text_value) = text.strip_prefix(">") {
+            if let Ok(value) = text_value.parse::<u32>() {
                 return self.grade > value;
             } else {
                 return false;
             }
         }
-        if text.starts_with("<=") {
-            if let Ok(value) = text[2..].parse::<u32>() {
+        if let Some(text_value) = text.strip_prefix("<=") {
+            if let Ok(value) = text_value.parse::<u32>() {
                 return self.grade <= value;
             } else {
                 return false;
             }
         }
-        if text.starts_with("<") {
-            if let Ok(value) = text[1..].parse::<u32>() {
+        if let Some(text_value) = text.strip_prefix("<") {
+            if let Ok(value) = text_value.parse::<u32>() {
                 return self.grade < value;
             } else {
                 return false;
             }
         }
-        if text.starts_with("=") {
-            if let Ok(value) = text[1..].parse::<u32>() {
+        if let Some(text_value) = text.strip_prefix("=") {
+            if let Ok(value) = text_value.parse::<u32>() {
                 return self.grade == value;
             } else {
                 return false;
