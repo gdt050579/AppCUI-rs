@@ -208,7 +208,7 @@ impl Win {
         lv.add_item(listview::Item::new(
             File {
                 name: "MyCV.docx",
-                size: 1024 * 1024 * 1,
+                size: 1024 * 1024,
                 created: NaiveDate::from_ymd_opt(2021, 1, 1).unwrap(),
             },
             false,

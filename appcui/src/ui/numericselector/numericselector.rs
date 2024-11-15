@@ -11,7 +11,7 @@ use std::str::FromStr;
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct NumericSelector<T>
 where
-    T: Number + 'static,
+    T: Number + 'static, 
 {
     value: T,
     min: T,

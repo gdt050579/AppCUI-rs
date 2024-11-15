@@ -1,5 +1,3 @@
-use std::u16;
-
 use super::image;
 use super::Renderer;
 

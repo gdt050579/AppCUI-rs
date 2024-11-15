@@ -26,35 +26,35 @@ impl listview::ListItem for Student {
             return true;
         }
         if text.starts_with(">=") {
-            if let Ok(value) = (&text[2..]).parse::<u32>() {
+            if let Ok(value) = text[2..].parse::<u32>() {
                 return self.grade >= value;
             } else {
                 return false;
             }
         }
         if text.starts_with(">") {
-            if let Ok(value) = (&text[1..]).parse::<u32>() {
+            if let Ok(value) = text[1..].parse::<u32>() {
                 return self.grade > value;
             } else {
                 return false;
             }
         }
         if text.starts_with("<=") {
-            if let Ok(value) = (&text[2..]).parse::<u32>() {
+            if let Ok(value) = text[2..].parse::<u32>() {
                 return self.grade <= value;
             } else {
                 return false;
             }
         }
         if text.starts_with("<") {
-            if let Ok(value) = (&text[1..]).parse::<u32>() {
+            if let Ok(value) = text[1..].parse::<u32>() {
                 return self.grade < value;
             } else {
                 return false;
             }
         }
         if text.starts_with("=") {
-            if let Ok(value) = (&text[1..]).parse::<u32>() {
+            if let Ok(value) = text[1..].parse::<u32>() {
                 return self.grade == value;
             } else {
                 return false;
