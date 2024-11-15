@@ -186,7 +186,7 @@ impl TextFormatBuilder {
     /// Sets the wrap mode of the text. It can be Character or Word. If the wrap mode is set, the width of the text should be set as well.
     /// If the wrap mode is set, the text will be wrapped to the next line if it exceeds the width.
     #[inline(always)]
-    pub fn wrap(mut self, wrap_type: WrapType) -> Self {
+    pub fn wrap_type(mut self, wrap_type: WrapType) -> Self {
         self.format.set_wrap_type(wrap_type);
         self
     }

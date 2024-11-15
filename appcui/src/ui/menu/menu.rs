@@ -258,7 +258,7 @@ impl Menu {
         //     ..Default::default()
         // };
         let mut format = TextFormatBuilder::new()
-            .wrap(WrapType::SingleLineWrap(self.text_width))
+            .wrap_type(WrapType::SingleLineWrap(self.text_width))
             .align(TextAlignament::Left)
             .build();
 

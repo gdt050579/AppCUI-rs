@@ -77,7 +77,7 @@ impl Column {
             .attribute(char_attr)
             .align(self.alignment)
             .chars_count(self.name.chars_count() as u16)
-            .wrap(WrapType::SingleLineWrap(w as u16))
+            .wrap_type(WrapType::SingleLineWrap(w as u16))
             .build();
         if self.name.has_hotkey() {
             format.set_hotkey(hotkey_attr, self.name.hotkey_pos().unwrap() as u32);

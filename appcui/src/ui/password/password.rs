@@ -45,7 +45,7 @@ impl OnPaint for Password {
                     .position(1, 0)
                     .attribute(attr)
                     .align(TextAlignament::Left)
-                    .wrap(WrapType::SingleLineWrap(sz as u16))
+                    .wrap_type(WrapType::SingleLineWrap(sz as u16))
                     .build();
                 surface.write_text(&self.pass, &format);
             }

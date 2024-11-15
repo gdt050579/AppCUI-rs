@@ -71,7 +71,7 @@ impl ToolTip {
                 .attribute(theme.tooltip.text)
                 .align(TextAlignament::Left)
                 .chars_count(chars_count as u16)
-                .wrap(WrapType::WordWrap((best_width - 2) as u16))
+                .wrap_type(WrapType::WordWrap((best_width - 2) as u16))
                 .build();
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
@@ -94,7 +94,7 @@ impl ToolTip {
                 .attribute(theme.tooltip.text)
                 .align(TextAlignament::Left)
                 .chars_count(chars_count as u16)
-                .wrap(WrapType::WordWrap((best_width - 2) as u16))
+                .wrap_type(WrapType::WordWrap((best_width - 2) as u16))
                 .build();
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));

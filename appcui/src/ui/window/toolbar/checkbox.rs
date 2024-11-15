@@ -54,7 +54,7 @@ impl CheckBox {
             .position(x + 2, y)
             .attribute(text_attr)
             .align(TextAlignament::Left)
-            .wrap(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
+            .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {
             format.set_hotkey(st.get_hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
