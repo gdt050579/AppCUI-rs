@@ -237,7 +237,7 @@ impl FormatDate {
     }
 
     pub fn short<'a>(dt: &NaiveDate, buf: &'a mut [u8], separator: u8) -> Option<&'a str> {
-        if buf.len() < 10 {
+        if buf.len() < 8 {
             return None;
         }
         let day = dt.day();
@@ -253,6 +253,31 @@ impl FormatDate {
         buf[7] = (year % 10) as u8 + 48;
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..8]) })
+    }
+
+    pub fn normal<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
+        if buf.len() < 13 {
+            return None;
+        }
+
+        let year = dt.year();
+        buf[0] = (year / 1000) as u8 + 48;
+        buf[1] = ((year % 1000) / 100) as u8 + 48;
+        buf[2] = ((year % 100) / 10) as u8 + 48;
+        buf[3] = (year % 10) as u8 + 48;
+        buf[4] = b',';
+        buf[5] = b' ';
+        let month = SHORT_MONTHS[dt.month().saturating_sub(1) as usize].as_bytes();
+        buf[6] = month[0];
+        buf[7] = month[1];
+        buf[8] = month[2];
+        buf[9] = b',';
+        buf[10] = b' ';
+        let day = dt.day();
+        buf[11] = ((day / 10) as u8) + 48;
+        buf[12] = ((day % 10) as u8) + 48;
+
+        Some(unsafe { core::str::from_utf8_unchecked(&buf[..13]) })
     }
 
     pub fn full<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {

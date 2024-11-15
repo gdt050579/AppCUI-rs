@@ -259,10 +259,13 @@ impl OnPaint for DatePicker {
             .truncate((size.width - MIN_WIDTH_FOR_DATE_NAME) as u16)
             .build();
         surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_DATE_DRAWING) as i32, space_char);
-        let mut buf: [u8; 32] = [0; 32];
+        let mut buf: [u8; 16] = [0; 16];
         match date_size {
             DateSize::Large => {
-                surface.write_text(Self::format_long_date(self.selected_date).as_str(), &format);
+                if let Some(txt) = crate::utils::FormatDate::normal(&self.selected_date, &mut buf) {
+                    format.set_chars_count(txt.len() as u16);
+                    surface.write_text(txt, &format);
+                }
             }
             DateSize::Small => {
                 if let Some(txt) = crate::utils::FormatDate::dmy(&self.selected_date, &mut buf, b'.') {
