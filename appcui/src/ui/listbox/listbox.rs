@@ -348,9 +348,12 @@ impl OnPaint for ListBox {
                 _ if has_focus => theme.text.highlighted,
                 _ => theme.text.inactive,
             };
-            let mut format = TextFormat::new(w / 2, h / 2, empty_attr, TextAlignament::Center, true);
-            format.width = Some(w as u16);
-            format.text_wrap = TextWrap::Word;
+            let format = TextFormatBuilder::new()
+                .position(w / 2, h / 2)
+                .attribute(empty_attr)
+                .align(TextAlignament::Center)
+                .wrap_type(WrapType::WordWrap(w as u16))
+                .build();
             surface.write_text(&self.empty_message, &format);
             return;
         }

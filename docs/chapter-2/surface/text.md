@@ -67,32 +67,79 @@ In some cases, you may need to write a text that is formatted in a specific way 
 pub fn write_text(&mut self, text: &str, format: &TextFormat)
 ```
 
-with the `TextFormat` structure defined as follows:
+where the `TextFormat` structure can be created using the `TextFormatBuilder` in the following way:
+
+| Method             | Description                                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `new()`            | Creates a new `TextFormatBuilder` object                                                                                           |
+| `position(...)`    | Sets the position where the text will be written (X and Y axes)                                                                    |
+| `attribute(...)`   | Sets the character attribute for the text (forecolor, backcolor and other attributes)                                              |
+| `hotkey(...)`      | Sets the hotkey attribute and position for the text (if any)                                                                       |
+| `align(...)`       | Sets the text alignament (left, right, center)                                                                                     |
+| `wrap_type(...)`   | Sets the text wrapping type of the code (`WrapType` enum)                                                                          |
+| `chars_count(...)` | Sets the number of characters in the text (this is useful to optimize several operations especially if this value is aready known) |
+| `build()`          | Builds the `TextFormat` object                                                                                                     |
+
+Example:
 
 ```rust
-pub struct TextFormat {
-    pub x: i32,
-    pub y: i32,
-    pub width: Option<u16>,
-    pub char_attr: CharAttribute,
-    pub hotkey_attr: Option<CharAttribute>,
-    pub hotkey_pos: Option<usize>,
-    pub chars_count: Option<u16>,
-    pub align: TextAlignament,
-    pub text_wrap: TextWrap,
-    pub multi_line: bool,
+use appcui::graphics::{Surface, CharAttribute, Color, TextFormatBuilder, WrapType};
+let format = TextFormatBuilder::new()
+    .position(10, 10)
+    .attribute(CharAttribute::with_color(Color::White, Color::Black))
+    .align(Alignment::Center)
+    .wrap_type(WrapType::Word(20))
+    .build();
+surface.write_text("Hello World!", &format);
+```
+
+Once a `TextFormat` object is created, you can modify it and use it using the following methods:
+
+| Method                 | Description                                                                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `set_position(...)`    | Sets the position where the text will be written (X and Y axes)                                                                    |
+| `set_attribute(...)`   | Sets the character attribute for the text (forecolor, backcolor and other attributes)                                              |
+| `set_hotkey(...)`      | Sets the hotkey attribute and position for the text (if any)                                                                       |
+| `clear_hotkey()`       | Clears the hotkey attribute from the text                                                                                          |
+| `set_align(...)`       | Sets the text alignament (left, right, center)                                                                                     |
+| `set_wrap_type(...)`   | Sets the text wrapping type of the code (`WrapType` enum)                                                                          |
+| `set_chars_count(...)` | Sets the number of characters in the text (this is useful to optimize several operations especially if this value is aready known) |
+
+The `WrapType` enum is defined as follows:
+
+```rust
+pub enum WrapType {
+    WordWrap(u16),
+    CharacterWrap(u16),
+    MultiLine,
+    SingleLine,
+    SingleLineWrap(u16),
 }
 ```
 
-where:
-- `x` and `y` represent the starting position of the text
-- `width` represents the maximum width of the text (if `None`, the text will be written until a new line character is found or until the end of the text)
-- `char_attr` represents the character attribute that will be used to write the text
-- `hotkey_attr` represents the character attribute that will be used to write the hotkey (if exists) or `None` if no hotkey is present
-- `hotkey_pos` represents the position of the hotkey in the text (if exists) or `None` if no hotkey is present
-- `chars_count` represents the number of characters in the provided text. If not provided it will be computed automatically upon writing the text. This is useful as a performance optimization (especially if the text is in Ascii - and the number of characters is the same as the number of bytes) or the number of characters is known in advance.
-- `align` represents the alignament of the text (left, right, center, etc)
-- `text_wrap` represents the text wrapping mode (word, character, none). This method ensures that the text will not be written outside the provided width.
-- `multi_line` specifies if the text should interpret new line characters as a new line or not.
+with the following meaning:
 
-All of these fields are public and can be modified directly. However, since the `TextFormat` structure is quite complex, it is recommended to use the `TextFormatBuilder` to create a new `TextFormat` object.
+| Method                  | Multi-line | Description                                                                                                                                                                                                                                              |
+| ----------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WordWrap(`width`)       | Yes        | Wraps the text around a specific `width` not separating words. The text will be printed on the next line if a new line character (`CR` or `LF` or combinations) is encountered or if the current word if printed will be outside the specfied width.     |
+| CharacterWrap(`width`)  | Yes        | Wraps the text around a specific `width` separating words. The text will be printed on the next line if a new line character (`CR` or `LF` or combinations) is encountered or when the position of the current character is outside the specified width. |
+| MultiLine               | Yes        | The text will be printed on the next line only if a new line character (`CR` or `LF` or combinations) is encountered.                                                                                                                                    |
+| SingleLine              | No         | The text will be printed on the same line, ignoring any new line characters.                                                                                                                                                                             |
+| SingleLineWrap(`width`) | No         | The text will be printed on the same line, but it will be wrapped around a specific `width`. One the `width` is reach, the printing stops.                                                                                                               |
+
+Let's consider the following string `Hello World!\nFrom AppCUI`. This text will be printed as follows:
+
+| WrapType                     | Result                                      |
+| ---------------------------- | ------------------------------------------- |
+| WrapType::WordWrap(10)       | Hello<br>World!<br><br>From <br>AppCUI      |
+| WrapType::WordWrap(20)       | Hello World!<br>From AppCUI                 |
+| WrapType::CharacterWrap(10)  | Hello Worl<br>d!<br>From AppC<br>UI         |
+| WrapType::CharacterWrap(20)  | Hello World!<br>From AppCUI                 |
+| WrapType::CharacterWrap(5)   | Hello<br> Worl<br>d!<br>From <br>AppCU<br>I |
+| WrapType::MultiLine          | Hello World!<br>From AppCUI                 |
+| WrapType::SingleLine         | Hello World!`\n`From AppCUI                 |
+| WrapType::SingleLineWrap(5)  | Hello                                       |
+| WrapType::SingleLineWrap(10) | Hello Worl                                  |
+| WrapType::SingleLineWrap(20) | Hello World!`\n`From Ap                     |
+
+

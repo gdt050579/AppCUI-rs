@@ -7,8 +7,8 @@ A ListView is a templetize (generics based) control that allows you to view a li
 It can be created using `ListView::new(...)` and `ListView::with_capacity(...)` methods or with the `listview!` macro. 
 
 ```rs
-let l1: T = ListView::new(Layout::new("..."),listview::Flags::None);
-let l2: T = ListView::with_capacity(10,Layout::new("..."),listview::Flags::ScrollBars);
+let l1: ListView<T> = ListView::new(Layout::new("..."),listview::Flags::None);
+let l2: ListView<T> = ListView::with_capacity(10,Layout::new("..."),listview::Flags::ScrollBars);
 let l3 = listview!("class: T, flags: Scrollbar, d:c, w:100%, h:100%");
 let l4 = listview!("type: T, flags: Scrollbar, d:c, view:Columns(3)");
 let l5 = listview!("T, d:c, view:Details, columns:[{Name,10,left},{Age,5,right},{City,20,center}]");
@@ -375,7 +375,7 @@ impl ListItem for Student {
     fn render_method(&self, column_index: u16) -> Option<RenderMethod> {
         match column_index {
             0 => Some(RenderMethod::Text(&self.name)),
-            1 => Some(RenderMethod::UInt64(self.grade as i64, NumericFormat::Normal)),
+            1 => Some(RenderMethod::UInt64(self.grade as u64, NumericFormat::Normal)),
             2 => Some(RenderMethod::Rating(self.stars as u32, RatingFormat::Stars(5))),
             _ => None,
         }
@@ -501,7 +501,7 @@ impl ListItem for Student {
         }
     } 
     fn paint(&self, column_index: u32, width: u16, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
-        if column_index == 2 {
+        if column_index == 1 {
             // the grade column
             let color = if self.grade > 5 { Color::Green } else { Color::Red };
             // if the attr is provided, we will use it, otherwise we 

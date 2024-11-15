@@ -67,7 +67,7 @@ where
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListViewItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
@@ -75,7 +75,7 @@ where
     ///    #[Column(name="Grade", width=10)]
     ///    grade: u32
     /// }
-    /// 
+    ///
     /// let lv: ListView::<Student> = ListView::new(Layout::new("d:c,w:100%,h:100%"), listview::Flags::ScrollBars);
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
@@ -86,7 +86,7 @@ where
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListViewItem)]
     /// struct Student {
     ///   #[Column(name="Name", width=20)]
@@ -94,7 +94,7 @@ where
     ///   #[Column(name="Grade", width=10)]
     ///   grade: u32
     /// }
-    /// 
+    ///
     /// let mut lv: ListView::<Student> = ListView::with_capacity(100, Layout::new("d:c,w:100%,h:100%"), listview::Flags::ScrollBars);
     /// lv.add(Student { name: "John", grade: 10 });
     /// lv.add(Student { name: "Alice", grade: 9 });
@@ -142,13 +142,13 @@ where
         }
         lv
     }
-    
+
     /// Creates a new group with a specified name and returns a gourp identifier. The grpup identifier can be used to add items to the group
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListViewItem)]
     /// struct Student {
     ///     #[Column(name="Name", width=20)]
@@ -156,10 +156,10 @@ where
     ///     #[Column(name="Grade", width=10)]
     ///     grade: u32
     /// }
-    /// 
+    ///
     /// let mut lv = listview!("Student, d:c,w:100%,h:100%,flags:ShowGroups");
     /// let group = lv.add_group("Group 1");
-    /// let students = vec![Student { name: "John", grade: 10 }, 
+    /// let students = vec![Student { name: "John", grade: 10 },
     ///                     Student { name: "Alice", grade: 9 }];
     /// lv.add_to_group(students, group);
     /// ```
@@ -172,19 +172,19 @@ where
         }
         Group::new(index)
     }
-    
+
     /// Adds a new column to the listview. The column will be added after the last existing column.
     /// This method is useful when you manually implement ListItem trait for a type and you want to add columns to the list view. Normally, implementing the ListItem trait (via `#[derive(ListViewItem)]`) for a type will automatically add columns to the list view.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// struct Student {
     ///     name: &'static str,
     ///     grade: u32
     /// }
-    /// 
+    ///
     /// impl listview::ListItem for Student {
     ///    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
     ///       match column_index {
@@ -194,7 +194,7 @@ where
     ///       }
     ///    }
     /// }
-    /// 
+    ///
     /// let mut lv = listview!("Student, d:c,w:100%,h:100%");
     /// lv.add_column(Column::new("Name", 10, TextAlignament::Left));
     /// lv.add_column(Column::new("Grade", 6, TextAlignament::Right));
@@ -202,13 +202,13 @@ where
     pub fn add_column(&mut self, column: Column) {
         self.header.add(column);
     }
-    
+
     /// Adds a new item to the list view.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListViewItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
@@ -216,7 +216,7 @@ where
     ///    #[Column(name="Grade", width=10)]
     ///    grade: u32
     /// }
-    /// 
+    ///
     /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
     /// lv.add(Student { name: "John", grade: 10 });
     /// lv.add(Student { name: "Alice", grade: 9 });
@@ -225,13 +225,13 @@ where
     pub fn add(&mut self, item: T) {
         self.add_item(Item::from(item));
     }
-    
+
     /// Adds a new item to the list view. This method allows one to specify the group, icon, color and selection state for the item upon adding it to the list view.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListViewItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
@@ -239,19 +239,19 @@ where
     ///    #[Column(name="Grade", width=10)]
     ///    grade: u32
     /// }
-    /// 
+    ///
     /// let mut lv = listview!("type: Student, d:c, flags: ShowGroups+LargeIcons");
     /// lv.add_item(listview::Item::new(
-    ///                       Student { name: "John", grade: 10 }, 
-    ///                       false, 
-    ///                       None, 
-    ///                       ['📁', ' '], 
+    ///                       Student { name: "John", grade: 10 },
+    ///                       false,
+    ///                       None,
+    ///                       ['📁', ' '],
     ///                       listview::Group::None));
     /// lv.add_item(listview::Item::new(
-    ///                       Student { name: "Alice", grade: 9 }, 
-    ///                       true, 
-    ///                       Some(CharAttribute::with_fore_color(Color::White)), 
-    ///                       ['📁', ' '], 
+    ///                       Student { name: "Alice", grade: 9 },
+    ///                       true,
+    ///                       Some(CharAttribute::with_fore_color(Color::White)),
+    ///                       ['📁', ' '],
     ///                       listview::Group::None));
     /// ```
     #[inline(always)]
@@ -266,13 +266,13 @@ where
         // refilter everything
         self.refilter();
     }
-    
+
     /// Adds multiple items to the list view. The items will be added after the last existing item.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListViewItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
@@ -280,10 +280,10 @@ where
     ///    #[Column(name="Grade", width=10)]
     ///    grade: u32
     /// }
-    /// 
+    ///
     /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
     /// let items = vec![
-    ///         Student { name: "John", grade: 10 }, 
+    ///         Student { name: "John", grade: 10 },
     ///         Student { name: "Alice", grade: 9 },
     ///         Student { name: "Bob", grade: 8 },
     ///         Student { name: "Charlie", grade: 7 }
@@ -293,14 +293,13 @@ where
     pub fn add_items(&mut self, items: Vec<T>) {
         self.add_multiple_items(items, Group::None, [0u8 as char, 0u8 as char]);
     }
-    
-    
+
     /// Adds multiple items to the list view and associate them with a specific group.
     ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListViewItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
@@ -308,10 +307,10 @@ where
     ///    #[Column(name="Grade", width=10)]
     ///    grade: u32
     /// }
-    /// 
+    ///
     /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
     /// let items = vec![
-    ///         Student { name: "John", grade: 10 }, 
+    ///         Student { name: "John", grade: 10 },
     ///         Student { name: "Alice", grade: 9 },
     ///         Student { name: "Bob", grade: 8 },
     ///         Student { name: "Charlie", grade: 7 }
@@ -335,14 +334,13 @@ where
         self.refilter_enabled = old_refilter;
         self.refilter();
     }
-    
-    
+
     /// Adds multiple items to the listview. When an item is added to a listview, it is imediatly filtered based on the current search text. If you want to add multiple items (using various methods) and then filter them, you can use the add_batch method.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListViewItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
@@ -350,8 +348,8 @@ where
     ///    #[Column(name="Grade", width=10)]
     ///    grade: u32
     /// }
-    /// 
-    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%"); 
+    ///
+    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
     /// lv.add_batch(|lv| {
     ///    lv.add(Student { name: "John", grade: 10 });
     ///    lv.add(Student { name: "Alice", grade: 9 });
@@ -369,13 +367,13 @@ where
         self.refilter_enabled = old_refilter;
         self.refilter();
     }
-    
+
     /// Sets the number of frozen columns. Frozen columns are columns that are always visible, even when the list view is scrolled horizontally. The frozen columns are always the first columns in the list view. Using the value 0 will disable frozen columns.
     pub fn set_frozen_columns(&mut self, count: u16) {
         self.header.set_frozen_columns(count);
         self.update_scrollbars();
     }
-    
+
     /// Sets the view mode for the list view. The view mode can be one of the following:
     /// - `ViewMode::Details` - displays the list view in details (each column displays a different property of the item)
     /// - `ViewMode::Columns(n)` - the items are displayed in a table with multiple columns. Each column has one item and represents the fist content of the first column in the Details view mode.
@@ -421,9 +419,8 @@ where
             },
         }
     }
-    
-    
-    /// Sorts the items in the list view based on the specified column index. If the column index is invalid, the method will do nothing. 
+
+    /// Sorts the items in the list view based on the specified column index. If the column index is invalid, the method will do nothing.
     pub fn sort(&mut self, column_index: u16, ascendent: bool) {
         self.header.set_sort_column(column_index, ascendent, true);
         if self.filter.is_empty() {
@@ -551,7 +548,7 @@ where
         }
     }
 
-    /// Change the selection state of the item at the specified index 
+    /// Change the selection state of the item at the specified index
     pub fn select_item(&mut self, index: usize, selected: bool) {
         if self.select_item_and_update_count(index, selected) {
             self.update_check_count_for_groups();
@@ -1015,10 +1012,14 @@ where
             x + w as i32
         };
         if left + 3 < right {
-            let mut format = TextFormat::single_line(left + 1, y, attr.unwrap_or(theme.text.hovered), TextAlignament::Left);
             let txwidth = gi.name_chars_count() as i32;
             let space_width = if left + 3 + txwidth <= right { txwidth } else { right - left - 3 };
-            format.width = Some(space_width as u16);
+            let format = TextFormatBuilder::new()
+                .position(left + 1, y)
+                .align(TextAlignament::Left)
+                .attribute(attr.unwrap_or(theme.text.hovered))
+                .wrap_type(WrapType::SingleLineWrap(space_width as u16))
+                .build();
             surface.write_text(gi.name(), &format);
             surface.write_char(left, y, Character::with_attributes(' ', attr.unwrap_or(theme.text.focused)));
             surface.write_char(

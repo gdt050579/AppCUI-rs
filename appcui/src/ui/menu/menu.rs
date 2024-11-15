@@ -3,7 +3,7 @@ use super::{
     Separator, SingleChoice, SubMenu,
 };
 use crate::{
-    graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament, TextFormat, TextWrap},
+    graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament, TextFormatBuilder, WrapType},
     input::{Key, KeyCode, MouseWheelDirection},
     prelude::KeyModifier,
     system::{Handle, HandleSupport, RuntimeManager, Theme},
@@ -158,7 +158,7 @@ impl Menu {
             // make sure that this->CurrentItem is part of the list
             let mut current_idx = VectorIndex::Invalid;
             let mut best_diff = usize::MAX;
-            for (index,item) in idx.iter().enumerate().take(idx_count) {
+            for (index, item) in idx.iter().enumerate().take(idx_count) {
                 let val = *item;
                 let diff = if val < self.current.index() {
                     self.current.index() - val
@@ -204,7 +204,7 @@ impl Menu {
             if !item.is_enabled() {
                 continue;
             }
-            if let Some(shortcut) = item.shortcut() {                
+            if let Some(shortcut) = item.shortcut() {
                 if shortcut == key {
                     self.run_item_action(index, receiver_control_handle);
                     return true;
@@ -250,13 +250,17 @@ impl Menu {
             surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::TriangleDown, c));
         }
         // write items
-        let mut format = TextFormat {
-            width: Some(self.text_width),
-            align: TextAlignament::Left,
-            text_wrap: TextWrap::None,
-            multi_line: false,
-            ..Default::default()
-        };
+        // let mut format = TextFormat {
+        //     width: Some(self.text_width),
+        //     align: TextAlignament::Left,
+        //     text_wrap: TextWrap::Character,
+        //     multi_line: false,
+        //     ..Default::default()
+        // };
+        let mut format = TextFormatBuilder::new()
+            .wrap_type(WrapType::SingleLineWrap(self.text_width))
+            .align(TextAlignament::Left)
+            .build();
 
         let start = self.first_visible_item as usize;
         let end = self.items.len().min((self.first_visible_item + self.visible_items_count) as usize);
@@ -369,7 +373,7 @@ impl Menu {
         }
         // if click on a valid item, apply the action and close the menu
         if mpi.item_index.is_valid() {
-            self.run_item_action(mpi.item_index.index() ,self.receiver_control_handle);
+            self.run_item_action(mpi.item_index.index(), self.receiver_control_handle);
             return MousePressedMenuResult::Repaint;
         }
 

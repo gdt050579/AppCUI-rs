@@ -44,42 +44,37 @@ pub enum RenderMethod<'a> {
 impl<'a> RenderMethod<'a> {
     #[inline(always)]
     fn paint_text(txt: &str, surface: &mut Surface, rd: &RenderData) {
-        let format = TextFormat {
-            x: match rd.alignment {
-                TextAlignament::Left => 0,
-                TextAlignament::Center => (rd.width as i32) / 2,
-                TextAlignament::Right => (rd.width as i32) - 1,
-            },
-            y: 0,
-            width: Some(rd.width),
-            char_attr: rd.attr.unwrap_or(rd.theme.text.focused),
-            hotkey_attr: None,
-            hotkey_pos: None,
-            chars_count: None,
-            align: rd.alignment,
-            text_wrap: TextWrap::None,
-            multi_line: false,
-        };
+        let format = TextFormatBuilder::new()
+            .position(
+                match rd.alignment {
+                    TextAlignament::Left => 0,
+                    TextAlignament::Center => (rd.width as i32) / 2,
+                    TextAlignament::Right => (rd.width as i32) - 1,
+                },
+                0,
+            )
+            .attribute(rd.attr.unwrap_or(rd.theme.text.focused))
+            .align(rd.alignment)
+            .wrap_type(WrapType::SingleLineWrap(rd.width))
+            .build();
         surface.write_text(txt, &format);
     }
     #[inline(always)]
     fn paint_ascii(txt: &str, surface: &mut Surface, rd: &RenderData) {
-        let format = TextFormat {
-            x: match rd.alignment {
-                TextAlignament::Left => 0,
-                TextAlignament::Center => (rd.width as i32) / 2,
-                TextAlignament::Right => (rd.width as i32) - 1,
-            },
-            y: 0,
-            width: Some(rd.width),
-            char_attr: rd.attr.unwrap_or(rd.theme.text.focused),
-            hotkey_attr: None,
-            hotkey_pos: None,
-            chars_count: Some(txt.len() as u16),
-            align: rd.alignment,
-            text_wrap: TextWrap::None,
-            multi_line: false,
-        };
+        let format = TextFormatBuilder::new()
+            .position(
+                match rd.alignment {
+                    TextAlignament::Left => 0,
+                    TextAlignament::Center => (rd.width as i32) / 2,
+                    TextAlignament::Right => (rd.width as i32) - 1,
+                },
+                0,
+            )
+            .attribute(rd.attr.unwrap_or(rd.theme.text.focused))
+            .align(rd.alignment)
+            .wrap_type(WrapType::SingleLineWrap(rd.width))
+            .chars_count(txt.len() as u16)
+            .build();
         surface.write_text(txt, &format);
     }
 
@@ -203,7 +198,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Date(dt, format) => match format {
                 DateFormat::Full => FormatDate::full(dt, output),
                 DateFormat::YearMonthDay => FormatDate::ymd(dt, output),
-                DateFormat::DayMonthYear => FormatDate::dmy(dt, output),
+                DateFormat::DayMonthYear => FormatDate::dmy(dt, output, b'-'),
             },
             RenderMethod::Duration(duration, format) => match format {
                 DurationFormat::Auto => FormatDuration::auto_hms(duration, output),
