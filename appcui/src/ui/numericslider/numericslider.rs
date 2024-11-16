@@ -1,3 +1,4 @@
+use std::string;
 use std::thread::current;
 
 use super::initialization_flags::Flags;
@@ -100,25 +101,28 @@ where
         panic!("Invalid flags received for character set!");
     }
 
-    fn get_values_vector(&self, max_count: i32, string_max_size: &mut usize) -> Vec<String> {
-        let mut current_value = self.min;
-        let mut values: Vec<String> = Vec::new();
-        *string_max_size = 0;
-        while (current_value <= self.max && (values.len() as i32) < max_count) {
-            let mut val_as_string: String = String::new();
-            current_value.write_to_string(&mut val_as_string, self.format);
-            if (val_as_string.len() > *string_max_size) {
-                *string_max_size = val_as_string.len();
-            }
-
-            values.push(val_as_string);
-            current_value = current_value + self.step;
-        }
-        values
+    fn get_values_count_with_custom_step(&self, step: T) -> u32{
+        return ((self.max - self.min) / step).cast_to_u32() + 1;
     }
-    fn test()
-    {
-        let mut buff: [u8;32] = [0;32];
+
+    fn find_ok_step(&self, bound: i32) -> T {
+        let mut max_value = String::new();
+        self.max.write_to_string(&mut max_value, self.format);
+
+        let size_per_entry = max_value.len() + 1; // las un spatiu intre numere
+        let mut current_step = self.step;
+        let mut total_size = self.get_values_count_with_custom_step(current_step) * size_per_entry as u32;
+
+        if total_size <= bound as u32 {
+            return self.step;
+        }
+
+        while total_size > bound as u32 && current_step < self.max {
+            current_step = current_step + T::one();
+            total_size = self.get_values_count_with_custom_step(current_step) * size_per_entry as u32;
+        }
+
+        current_step
     }
 }
 impl<T> OnPaint for NumericSlider<T>
@@ -136,8 +140,12 @@ where
                 surface.size().height as i32
             }
         };
-        let mut max_size: usize = 0;
-        let values = self.get_values_vector(bound, &mut max_size);
+
+        let mut string_buffer = String::with_capacity(32);
+
+        self.max.write_to_string(&mut string_buffer, self.format);
+        let mut max_size: usize = string_buffer.len();
+        let ok_step = self.find_ok_step(bound);
 
         let mut selected_value_as_str: String = String::new();
         self.value.write_to_string(&mut selected_value_as_str, self.format);
@@ -145,31 +153,56 @@ where
         //printez valorile
         // x = coloana
         // y = rand
+        let mut current_value = self.min;
+
         let mut value_X = 0;
         let value_Y = 2;
-        let mut index = 0;
         let mut last_column = 0;
         let mut first_column = 0;
-        for value in values.iter() {
-            surface.write_string(value_X, value_Y, value, theme.text.normal, false);
+        // for value in values.iter() {
+        //     surface.write_string(value_X, value_Y, value, theme.text.normal, false);
 
-            let indicator_pos_X = value_X + (value.len() as i32) / 2;
-            if index == 0 {
+        //     let indicator_pos_X = value_X + (value.len() as i32) / 2;
+        //     if index == 0 {
+        //         surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.start_char);
+        //         first_column = indicator_pos_X;
+        //     } else if index == ((values.len() - 1) as i32) {
+        //         surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.end_char);
+        //         last_column = indicator_pos_X;
+        //     } else {
+        //         surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.value_indicator);
+        //     }
+
+        //     if (*value == selected_value_as_str) {
+        //         surface.write_char(indicator_pos_X, value_Y - 2, current_character_set.selected_value_indicator);
+        //     }
+
+        //     value_X = value_X + value.len() as i32 + ((max_size - value.len() + 2) as i32);
+        //     index += 1;
+        // }
+
+        while current_value < self.max {
+            current_value.write_to_string(&mut string_buffer, self.format);
+
+            surface.write_string(value_X, value_Y, &string_buffer, theme.text.normal, false);
+
+            let indicator_pos_X = value_X + (string_buffer.len() as i32) / 2;
+            if current_value == self.min {
                 surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.start_char);
                 first_column = indicator_pos_X;
-            } else if index == ((values.len() - 1) as i32) {
+            } else if (current_value + ok_step) >= self.max {
                 surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.end_char);
                 last_column = indicator_pos_X;
             } else {
                 surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.value_indicator);
             }
 
-            if (*value == selected_value_as_str) {
+            if *string_buffer == selected_value_as_str {
                 surface.write_char(indicator_pos_X, value_Y - 2, current_character_set.selected_value_indicator);
             }
 
-            value_X = value_X + value.len() as i32 + ((max_size - value.len() + 2) as i32);
-            index += 1;
+            value_X = value_X + string_buffer.len() as i32 + ((max_size - string_buffer.len() + 1) as i32);
+            current_value = current_value + ok_step;
         }
 
         for i in first_column+1..last_column {

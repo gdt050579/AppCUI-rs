@@ -1,6 +1,7 @@
 use crate::utils::FormatNumber;
 use std::fmt::Display;
-use std::ops::{Add, Sub};
+use std::ops::{Add, Sub, Div};
+use num_traits::One;
 use std::str::FromStr;
 
 #[derive(Clone, Copy)]
@@ -12,9 +13,10 @@ pub enum Format {
     Size,
 }
 
-pub trait Number: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display + FromStr {
+pub trait Number: Add<Output = Self> + Sub<Output = Self> + Div<Output = Self> + One + Copy + Clone + PartialOrd + PartialEq + Display + FromStr {
     fn write_to_string(&self, writer: &mut String, format: Format);
     fn is_zero(&self) -> bool;
+    fn cast_to_u32(&self) -> u32;
 }
 
 const DECIMAL_FORMAT: FormatNumber = FormatNumber::new(10);
@@ -111,6 +113,10 @@ impl Number for i8 {
     fn is_zero(&self) -> bool {
         return *self == 0;
     }
+    
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
+    }
 }
 impl Number for i16 {
     fn write_to_string(&self, writer: &mut String, format: Format) {
@@ -119,6 +125,10 @@ impl Number for i16 {
 
     fn is_zero(&self) -> bool {
         return *self == 0;
+    }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
     }
 }
 impl Number for i32 {
@@ -129,6 +139,10 @@ impl Number for i32 {
     fn is_zero(&self) -> bool {
         return *self == 0;
     }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
+    }
 }
 impl Number for i64 {
     fn write_to_string(&self, writer: &mut String, format: Format) {
@@ -137,6 +151,10 @@ impl Number for i64 {
 
     fn is_zero(&self) -> bool {
         return *self == 0;
+    }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
     }
 }
 impl Number for i128 {
@@ -147,6 +165,10 @@ impl Number for i128 {
     fn is_zero(&self) -> bool {
         return *self == 0;
     }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
+    }
 }
 impl Number for u8 {
     fn write_to_string(&self, writer: &mut String, format: Format) {
@@ -155,6 +177,10 @@ impl Number for u8 {
 
     fn is_zero(&self) -> bool {
         return *self == 0;
+    }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
     }
 }
 impl Number for u16 {
@@ -165,6 +191,10 @@ impl Number for u16 {
     fn is_zero(&self) -> bool {
         return *self == 0;
     }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
+    }
 }
 impl Number for u32 {
     fn write_to_string(&self, writer: &mut String, format: Format) {
@@ -173,6 +203,10 @@ impl Number for u32 {
 
     fn is_zero(&self) -> bool {
         return *self == 0;
+    }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self;
     }
 }
 impl Number for u64 {
@@ -183,6 +217,10 @@ impl Number for u64 {
     fn is_zero(&self) -> bool {
         return *self == 0;
     }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
+    }
 }
 impl Number for u128 {
     fn write_to_string(&self, writer: &mut String, format: Format) {
@@ -191,6 +229,10 @@ impl Number for u128 {
 
     fn is_zero(&self) -> bool {
         return *self == 0;
+    }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
     }
 }
 impl Number for usize {
@@ -201,6 +243,10 @@ impl Number for usize {
     fn is_zero(&self) -> bool {
         return *self == 0;
     }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
+    }
 }
 impl Number for isize {
     fn write_to_string(&self, writer: &mut String, format: Format) {
@@ -209,6 +255,10 @@ impl Number for isize {
 
     fn is_zero(&self) -> bool {
         return *self == 0;
+    }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
     }
 }
 impl Number for f32 {
@@ -219,6 +269,10 @@ impl Number for f32 {
     fn is_zero(&self) -> bool {
         return *self == 0.0f32;
     }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
+    }
 }
 impl Number for f64 {
     fn write_to_string(&self, writer: &mut String, format: Format) {
@@ -227,5 +281,9 @@ impl Number for f64 {
 
     fn is_zero(&self) -> bool {
         return *self == 0.0f64;
+    }
+
+    fn cast_to_u32(&self) -> u32 {
+        return *self as u32;
     }
 }
