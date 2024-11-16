@@ -1,61 +1,40 @@
 use crate::prelude::*;
-use crate::ui::button::{events::EventData, Type};
+use crate::ui::togglebutton::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct ToggleButton {
-    button_type: Type,
-    caption: Caption,
-    pressed: bool,
+    caption: String,
+    tooltip: String,
+    state: bool,
 }
 impl ToggleButton {
-    /// Creates a new button with the specified caption, layout and flags
-    /// # Examples
-    /// ```rust,no_run
-    /// use appcui::prelude::*;
-    /// let mut button = ToggleButton::new("Click me!", Layout::new("x:1,y:1,w:15"), button::Type::Normal);
-    /// ```
-    pub fn new(caption: &str, layout: Layout, button_type: Type) -> Self {
-        let mut but = ToggleButton {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
-            button_type,
-            pressed: false,
-        };
+    // pub fn new(caption: &str, tooltip: &str, layout: Layout) -> Self {
+    //     let mut but = ToggleButton {
+    //         base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+    //         caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
+    //         state: false,
+    //     };
 
-        if button_type == super::Type::Flat {
-            but.set_size_bounds(3, 1, u16::MAX, 1);
-        } else {
-            but.set_size_bounds(4, 2, u16::MAX, 2);
-        }
-        let hotkey = but.caption.hotkey();
-        but.set_hotkey(hotkey);
-        but
-    }
-    /// Sets the caption of a button. Using `&` in the provided text followed by a letter or a number will automatically assign Alt+**<number|letter>** hotkey to that button.
-    /// # Examples
-    /// ```rust,no_run
-    /// use appcui::prelude::*;
-    /// let mut button = button!("one,x:1,y:1,w:15"); // the caption is `one`
-    /// button.set_caption("&two");   // now the caption is `two` and Alt+T is a hotkey
-    /// button.set_caption("three");  // caption is `three`, and no hot-key
-    /// ```
-    pub fn set_caption(&mut self, caption: &str) {
-        self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
-        let hotkey = self.caption.hotkey();
-        self.set_hotkey(hotkey);
-    }
-    /// Returns the button caption.
-    pub fn caption(&self) -> &str {
-        self.caption.text()
-    }
+    //     but.set_size_bounds(1, 1, u16::MAX, 1);
+    //     but
+    // }
+    // pub fn set_caption(&mut self, caption: &str) {
+    //     self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
+    //     let hotkey = self.caption.hotkey();
+    //     self.set_hotkey(hotkey);
+    // }
+    // /// Returns the toggle button caption.
+    // pub fn caption(&self) -> &str {
+    //     self.caption.text()
+    // }
 }
 impl OnDefaultAction for ToggleButton {
     fn on_default_action(&mut self) {
-        self.raise_event(ControlEvent {
-            emitter: self.handle,
-            receiver: self.event_processor,
-            data: ControlEventData::ToggleButton(EventData {}),
-        });
+        // self.raise_event(ControlEvent {
+        //     emitter: self.handle,
+        //     receiver: self.event_processor,
+        //     data: ControlEventData::ToggleButton(EventData {}),
+        // });
     }
 }
 impl OnKeyPressed for ToggleButton {
@@ -78,69 +57,29 @@ impl OnPaint for ToggleButton {
             _ if self.is_mouse_over() => theme.button.text.hovered,
             _ => theme.button.text.normal,
         };
-        let flat = self.button_type == super::Type::Flat;
-        let w = if flat { self.size().width } else { self.size().width - 1 };
-        let x = (w / 2) as i32;
-        let mut format = TextFormatBuilder::new()
-            .position(x, 0)
-            .attribute(col_text)
-            .align(TextAlignament::Center)
-            .chars_count(self.caption.chars_count() as u16)
-            .wrap_type(WrapType::SingleLineWrap(w as u16))
-            .build();
+        // let w = self.size().width;
+        // let mut format = TextFormatBuilder::new()
+        //     .position((w / 2) as i32, 0)
+        //     .attribute(col_text)
+        //     .align(TextAlignament::Center)
+        //     .chars_count(self.caption.chars_count() as u16)
+        //     .wrap_type(WrapType::SingleLineWrap(w as u16))
+        //     .build();
 
-        if self.caption.has_hotkey() {
-            format.set_hotkey(
-                match () {
-                    _ if !self.is_enabled() => theme.button.hotkey.inactive,
-                    _ if self.has_focus() => theme.button.hotkey.focused,
-                    _ if self.is_mouse_over() => theme.button.hotkey.hovered,
-                    _ => theme.button.hotkey.normal,
-                },
-                self.caption.hotkey_pos().unwrap() as u32,
-            );
-        }
-        if flat {
-            surface.clear(Character::with_attributes(' ', col_text));
-            surface.write_text(self.caption.text(), &format);
-        } else if self.pressed {
-            surface.fill_horizontal_line_with_size(1, 0, w, Character::with_attributes(' ', col_text));
-            format.x += 1;
-            surface.write_text(self.caption.text(), &format);
-        } else {
-            surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
-            surface.write_text(self.caption.text(), &format);
-            surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
-            surface.write_char(w as i32, 0, Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow));
-        }
+        // surface.clear(Character::with_attributes(' ', col_text));
+        // surface.write_text(self.caption.text(), &format);
     }
 }
 impl OnMouseEvent for ToggleButton {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter => {
-                if self.caption.chars_count() > (self.size().width - 2) as usize {
-                    self.show_tooltip(self.caption.text());
-                }
+                self.show_tooltip(&self.tooltip);
                 EventProcessStatus::Processed
             }
             MouseEvent::Leave => EventProcessStatus::Processed,
-            MouseEvent::Released(data) => {
-                self.pressed = false;
-                if self.is_coord_in_control(data.x, data.y) {
-                    self.on_default_action();
-                }
-                EventProcessStatus::Processed
-            }
-            MouseEvent::Drag(data) => {
-                if self.pressed && (!self.is_coord_in_control(data.x, data.y)) {
-                    self.pressed = false;
-                    return EventProcessStatus::Processed;
-                }
-                EventProcessStatus::Ignored
-            }
             MouseEvent::Pressed(_) => {
-                self.pressed = true;
+                self.on_default_action();
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
