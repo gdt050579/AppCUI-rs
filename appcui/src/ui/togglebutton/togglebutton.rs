@@ -11,26 +11,32 @@ pub struct ToggleButton {
 }
 impl ToggleButton {
     pub fn new(caption: &str, tooltip: &str, layout: Layout, button_type: Type) -> Self {
-        Self::with_selection(caption, tooltip, layout, button_type, false)
-    }
-    pub fn with_selection(caption: &str, tooltip: &str, layout: Layout, button_type: Type, selected: bool) -> Self {
         let mut but = ToggleButton {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             caption: FlatString::from_str(caption),
             tooltip: tooltip.to_string(),
-            state: selected,
+            state: false,
             button_type,
         };
 
         but.set_size_bounds(1, 2, u16::MAX, 2);
         but
     }
+    /// Sets the caption of a toggle button.
     pub fn set_caption(&mut self, caption: &str) {
         self.caption.set(caption);
     }
     /// Returns the toggle button caption.
     pub fn caption(&self) -> &str {
         self.caption.as_str()
+    }
+    /// Returns the state of the toggle button (pressed or not)
+    pub fn is_selected(&self) -> bool {
+        self.state
+    }
+    /// Sets the state of the toggle button (pressed or not)
+    pub fn set_selected(&mut self, selected: bool) {
+        self.state = selected;
     }
 }
 impl OnDefaultAction for ToggleButton {
