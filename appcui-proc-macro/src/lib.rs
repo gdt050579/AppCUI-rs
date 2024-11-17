@@ -500,3 +500,8 @@ pub fn listbox(input: TokenStream) -> TokenStream {
 pub fn listview(input: TokenStream) -> TokenStream {
     crate::controls::listview::create(input)
 }
+
+#[proc_macro]
+pub fn togglebutton(input: TokenStream) -> TokenStream {
+    crate::controls::togglebutton::create(input)
+}

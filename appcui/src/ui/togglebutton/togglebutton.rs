@@ -10,12 +10,12 @@ pub struct ToggleButton {
     button_type: Type,
 }
 impl ToggleButton {
-    pub fn new(caption: &str, tooltip: &str, layout: Layout, button_type: Type) -> Self {
+    pub fn new(caption: &str, tooltip: &str, layout: Layout, selected: bool, button_type: Type) -> Self {
         let mut but = ToggleButton {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             caption: FlatString::from_str(caption),
             tooltip: tooltip.to_string(),
-            state: false,
+            state: selected,
             button_type,
         };
 
