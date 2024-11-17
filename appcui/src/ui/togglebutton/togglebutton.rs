@@ -1,13 +1,13 @@
-use flat_string::FlatString;
 use crate::prelude::*;
 use crate::ui::togglebutton::{events::EventData, Type};
+use flat_string::FlatString;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct ToggleButton {
     caption: FlatString<22>,
     tooltip: String,
     state: bool,
-    button_type: Type,  
+    button_type: Type,
 }
 impl ToggleButton {
     pub fn new(caption: &str, tooltip: &str, layout: Layout, button_type: Type) -> Self {
@@ -42,11 +42,11 @@ impl ToggleButton {
 impl OnDefaultAction for ToggleButton {
     fn on_default_action(&mut self) {
         self.state = !self.state;
-        // self.raise_event(ControlEvent {
-        //     emitter: self.handle,
-        //     receiver: self.event_processor,
-        //     data: ControlEventData::ToggleButton(EventData {}),
-        // });
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::ToggleButton(EventData { status: self.state }),
+        });
     }
 }
 impl OnKeyPressed for ToggleButton {
@@ -71,7 +71,7 @@ impl OnPaint for ToggleButton {
                 } else {
                     CharAttribute::with_color(Color::Black, Color::Silver)
                 }
-            },
+            }
             _ if self.is_mouse_over() => theme.button.text.hovered,
             _ => {
                 if self.state {
@@ -79,7 +79,7 @@ impl OnPaint for ToggleButton {
                 } else {
                     CharAttribute::with_color(Color::Silver, Color::Transparent)
                 }
-            },
+            }
         };
         let w = self.size().width;
         let format = TextFormatBuilder::new()
