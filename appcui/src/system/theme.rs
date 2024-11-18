@@ -99,6 +99,12 @@ pub struct HeaderTheme {
 }
 
 #[derive(Default)]
+pub struct ToggleButtonTheme {
+    pub selected: ControlCharAttributesState,
+    pub unselected: ControlCharAttributesState,
+}
+
+#[derive(Default)]
 pub struct Theme {
     pub accordion: AccordionTheme,
     pub desktop: DesktopTheme,
@@ -117,6 +123,7 @@ pub struct Theme {
     pub editor: ControlCharAttributesState,
     pub list_current_item: ListCurentItemTheme,
     pub header: HeaderTheme,
+    pub toggle_button: ToggleButtonTheme,
 }
 impl Theme {
     pub(crate) fn new() -> Self {
@@ -316,6 +323,21 @@ impl Theme {
             pressed_or_selectd: CharAttribute::with_color(Color::Yellow, Color::Pink),
         };
         self.header.symbol = self.header.text;
+
+        self.toggle_button.unselected = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Silver, Color::Transparent),
+            focused: CharAttribute::with_color(Color::Black, Color::White),
+            hovered: CharAttribute::with_color(Color::Black, Color::Yellow),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::default(),
+        };
+        self.toggle_button.selected = ControlCharAttributesState {
+            normal: CharAttribute::with_color(Color::Aqua, Color::Transparent),
+            focused: CharAttribute::with_color(Color::DarkRed, Color::White),
+            hovered: CharAttribute::with_color(Color::DarkRed, Color::Yellow),
+            inactive: CharAttribute::with_color(Color::Gray, Color::Transparent),
+            pressed_or_selectd: CharAttribute::default(),
+        };        
     }
 }
 //         inline void Set(focused, normal, inactive, hovered, pressedOrSelected)

@@ -19,7 +19,10 @@ impl ToggleButton {
             button_type,
         };
 
-        but.set_size_bounds(1, 2, u16::MAX, 2);
+        match button_type {
+            Type::Normal => but.set_size_bounds(1, 1, u16::MAX, 1),
+            Type::Underlined => but.set_size_bounds(1, 2, u16::MAX, 2),
+        }
         but
     }
     /// Sets the caption of a toggle button.
@@ -63,23 +66,16 @@ impl OnKeyPressed for ToggleButton {
 
 impl OnPaint for ToggleButton {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        let state_cols = if self.state {
+            &theme.toggle_button.selected
+        } else {
+            &theme.toggle_button.unselected
+        };
         let col_text = match () {
-            _ if !self.is_enabled() => theme.button.text.inactive,
-            _ if self.has_focus() => {
-                if self.state {
-                    CharAttribute::with_color(Color::Black, Color::Yellow)
-                } else {
-                    CharAttribute::with_color(Color::Black, Color::Silver)
-                }
-            }
-            _ if self.is_mouse_over() => theme.button.text.hovered,
-            _ => {
-                if self.state {
-                    CharAttribute::with_color(Color::Yellow, Color::Transparent)
-                } else {
-                    CharAttribute::with_color(Color::Silver, Color::Transparent)
-                }
-            }
+            _ if !self.is_enabled() => state_cols.hovered,
+            _ if self.has_focus() => state_cols.focused,
+            _ if self.is_mouse_over() => state_cols.hovered,
+            _ => state_cols.normal,
         };
         let w = self.size().width;
         let format = TextFormatBuilder::new()
@@ -90,10 +86,19 @@ impl OnPaint for ToggleButton {
             .wrap_type(WrapType::SingleLineWrap(w as u16))
             .build();
 
-        surface.clear(Character::with_attributes(' ', col_text));
+        surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
         surface.write_text(self.caption.as_str(), &format);
-        if self.state {
-            surface.fill_horizontal_line(0, 1, self.size().width as i32, Character::with_attributes('▔', col_text));
+        if self.button_type == Type::Underlined {
+            if self.state {
+                surface.fill_horizontal_line(
+                    0,
+                    1,
+                    self.size().width as i32,
+                    Character::with_attributes(SpecialChar::LineOnTop, state_cols.normal),
+                );
+            } else {
+                surface.fill_horizontal_line(0, 1, self.size().width as i32, Character::with_attributes(' ', state_cols.normal));
+            }
         }
     }
 }

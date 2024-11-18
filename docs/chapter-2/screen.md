@@ -104,6 +104,10 @@ The list of all special characters that are supported by AppCUI (as described in
 | `SpecialCharacter::BlockLeftHalf`                         | 0x258C       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x258C;</td></tr></table> |
 | `SpecialCharacter::BlockRightHalf`                        | 0x2590       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2590;</td></tr></table> |
 | `SpecialCharacter::BlockCentered`                         | 0x25A0       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25A0;</td></tr></table> |
+| `SpecialCharacter::LineOnTop`                             | 0x2594       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2594;</td></tr></table> |
+| `SpecialCharacter::LineOnBottom`                          | 0x2581       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2581;</td></tr></table> |
+| `SpecialCharacter::LineOnLeft`                            | 0x258F       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x258F;</td></tr></table> |
+| `SpecialCharacter::LineOnRight`                           | 0x2595       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2595;</td></tr></table> |
 
 ## Other
 
