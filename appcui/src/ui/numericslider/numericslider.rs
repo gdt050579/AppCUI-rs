@@ -25,6 +25,10 @@ where
     step: T,
     value: T,
     format: Format,
+    bound: i32,
+    ok_step: T,
+    max_size_per_entry: usize,
+    last_pressed_coods: Point,
 }
 impl<T> NumericSlider<T>
 where
@@ -47,7 +51,6 @@ where
         if min >= max {
             panic!("Min value can't be greater or equal to the Max value");
         }
-
         let clamped_value = Self::to_interval(value, min, max);
         let mut control = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -57,6 +60,10 @@ where
             step,
             value: clamped_value,
             format,
+            bound: 0,
+            ok_step: T::one(),
+            max_size_per_entry: 0,
+            last_pressed_coods: Point::new(-1, -1)
         };
         control.set_size_bounds(2, 3, u16::MAX, 3);
         control
@@ -102,10 +109,12 @@ where
     }
 
     fn get_values_count_with_custom_step(&self, step: T) -> u32{
-        return ((self.max - self.min) / step).cast_to_u32() + 1;
+        let mut error =  ((self.max - self.min).cast_to_u32() % step.cast_to_u32() != 0) as u32;
+
+        return ((self.max - self.min) / step).cast_to_u32() + 1 + error;
     }
 
-    fn find_ok_step(&self, bound: i32) -> T {
+    fn find_ok_step(&mut self) {
         let mut max_value = String::new();
         self.max.write_to_string(&mut max_value, self.format);
 
@@ -113,16 +122,55 @@ where
         let mut current_step = self.step;
         let mut total_size = self.get_values_count_with_custom_step(current_step) * size_per_entry as u32;
 
-        if total_size <= bound as u32 {
-            return self.step;
+        if total_size <= self.bound as u32 {
+            self.ok_step = self.step;
+            return;
         }
 
-        while total_size > bound as u32 && current_step < self.max {
+        while total_size > self.bound as u32 && current_step < self.max {
             current_step = current_step + T::one();
             total_size = self.get_values_count_with_custom_step(current_step) * size_per_entry as u32;
         }
 
-        current_step
+        self.ok_step = current_step;
+    }
+
+    fn compute_size_per_entru(&mut self) {
+        let mut string_buffer = String::with_capacity(32);
+        self.max.write_to_string(&mut string_buffer, self.format);
+        let last_nr_size: i32 = string_buffer.len() as i32;
+        if self.ok_step != self.step {
+            self.max_size_per_entry = string_buffer.len() + 1;
+            return;
+        }
+
+        let nr_of_entries: i32 = self.get_values_count_with_custom_step(self.step) as i32 - 1;
+
+        let error : i32 = {
+            if self.bound % nr_of_entries == 0 {
+                0
+            }
+            else{
+                self.bound % nr_of_entries / nr_of_entries as i32
+            }
+        };
+        println!("bound = {}, nr of entries = {}, error = {}, calcul magic = {}", self.bound, nr_of_entries, error, (last_nr_size / nr_of_entries + last_nr_size % nr_of_entries));
+        let error_last_element: i32 = {
+            if last_nr_size / nr_of_entries == 0{
+                1
+            }
+            else{
+                last_nr_size / nr_of_entries + last_nr_size % nr_of_entries
+            }
+        };
+        self.max_size_per_entry = (self.bound / nr_of_entries + error - error_last_element) as usize;
+    }
+
+    pub fn set_selected_value(&mut self, value: T){
+        self.value = value;
+    }
+    pub fn get_selected_value(&self) -> T{
+        self.value
     }
 }
 impl<T> OnPaint for NumericSlider<T>
@@ -133,22 +181,11 @@ where
         //surface.clear(Character::new(SpecialChar::SingleLineDownT, Color::Blue, Color::Black, CharFlags::None));
         surface.clear(char!("' ',red,black"));
         let current_character_set: CharSet = self.get_charset_based_on_theme(theme);
-        let bound: i32 = {
-            if (self.flags.contains(Flags::HorizontalSlider)) {
-                surface.size().width as i32
-            } else {
-                surface.size().height as i32
-            }
-        };
 
         let mut string_buffer = String::with_capacity(32);
 
-        self.max.write_to_string(&mut string_buffer, self.format);
-        let mut max_size: usize = string_buffer.len();
-        let ok_step = self.find_ok_step(bound);
-
-        let mut selected_value_as_str: String = String::new();
-        self.value.write_to_string(&mut selected_value_as_str, self.format);
+        surface.write_string(0, 0, &self.last_pressed_coods.x.to_string(), theme.text.normal, false);
+        surface.write_string(5, 0, &self.last_pressed_coods.y.to_string(), theme.text.normal, false);
 
         //printez valorile
         // x = coloana
@@ -159,50 +196,40 @@ where
         let value_Y = 2;
         let mut last_column = 0;
         let mut first_column = 0;
-        // for value in values.iter() {
-        //     surface.write_string(value_X, value_Y, value, theme.text.normal, false);
 
-        //     let indicator_pos_X = value_X + (value.len() as i32) / 2;
-        //     if index == 0 {
-        //         surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.start_char);
-        //         first_column = indicator_pos_X;
-        //     } else if index == ((values.len() - 1) as i32) {
-        //         surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.end_char);
-        //         last_column = indicator_pos_X;
-        //     } else {
-        //         surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.value_indicator);
-        //     }
-
-        //     if (*value == selected_value_as_str) {
-        //         surface.write_char(indicator_pos_X, value_Y - 2, current_character_set.selected_value_indicator);
-        //     }
-
-        //     value_X = value_X + value.len() as i32 + ((max_size - value.len() + 2) as i32);
-        //     index += 1;
-        // }
-
-        while current_value < self.max {
+        while current_value <= self.max {
             current_value.write_to_string(&mut string_buffer, self.format);
 
             surface.write_string(value_X, value_Y, &string_buffer, theme.text.normal, false);
 
             let indicator_pos_X = value_X + (string_buffer.len() as i32) / 2;
+            //let indicator_pos_X = value_X;
             if current_value == self.min {
                 surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.start_char);
                 first_column = indicator_pos_X;
-            } else if (current_value + ok_step) >= self.max {
+            } else if current_value == self.max {
                 surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.end_char);
                 last_column = indicator_pos_X;
             } else {
                 surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.value_indicator);
             }
 
-            if *string_buffer == selected_value_as_str {
+            if indicator_pos_X == self.last_pressed_coods.x && (value_Y - 1) == self.last_pressed_coods.y {
+                //self.set_selected_value(current_value);
+                surface.write_char(indicator_pos_X, value_Y - 2, current_character_set.selected_value_indicator);
+            }
+            else if current_value == self.value {
                 surface.write_char(indicator_pos_X, value_Y - 2, current_character_set.selected_value_indicator);
             }
 
-            value_X = value_X + string_buffer.len() as i32 + ((max_size - string_buffer.len() + 1) as i32);
-            current_value = current_value + ok_step;
+            value_X = value_X + string_buffer.len() as i32 + ((self.max_size_per_entry - string_buffer.len()) as i32);
+            if current_value == self.max{
+                break;
+            }
+            current_value = current_value + self.ok_step;
+            if current_value > self.max {
+                current_value = self.max;
+            }
         }
 
         for i in first_column+1..last_column {
@@ -232,7 +259,23 @@ where
     T: Number + 'static,
 {
     fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+        match _event {
+            MouseEvent::Enter => return EventProcessStatus::Ignored,
+            MouseEvent::Leave => return EventProcessStatus::Ignored,
+            MouseEvent::Over(point) => return EventProcessStatus::Ignored,
+            MouseEvent::Released(mouse_event_data) => return EventProcessStatus::Ignored,
+            MouseEvent::DoubleClick(mouse_event_data) => return EventProcessStatus::Ignored,
+            MouseEvent::Drag(mouse_event_data) => return EventProcessStatus::Ignored,
+            MouseEvent::Wheel(mouse_wheel_direction) => return EventProcessStatus::Ignored,
+            MouseEvent::Pressed(mouse_event_data) => {
+                if mouse_event_data.button != MouseButton::Left {
+                    return EventProcessStatus::Ignored;
+                }
+                self.last_pressed_coods.x = mouse_event_data.x;
+                self.last_pressed_coods.y = mouse_event_data.y;
+                return EventProcessStatus::Processed;
+            }
+        };
     }
 }
 
@@ -240,5 +283,15 @@ impl<T> OnResize for NumericSlider<T>
 where
     T: Number + 'static,
 {
-    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {}
+    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
+        self.bound = {
+            if self.flags.contains(Flags::HorizontalSlider) {
+                _new_size.width as i32
+            } else {
+                _new_size.height as i32
+            }
+        };
+        self.find_ok_step();
+        self.compute_size_per_entru();
+    }
 }
