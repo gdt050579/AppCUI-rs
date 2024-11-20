@@ -55,3 +55,25 @@ fn check_keyboard_underlined() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_mouse_hover_normal() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x142F4584D04C8610)
+        Mouse.Move(19,3)
+        Paint('Hover over AB')
+        CheckHash(0xB0F4840FAB2A1BF2)
+        Mouse.Move(22,3)
+        Paint('Hover over CD')
+        CheckHash(0xEF3CCBA28E4FB9BD)
+    ";
+    let mut a = App::debug(70, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:10");
+    w.add(togglebutton!("text:AB,desc:'Push Me',x:2,y:2,w:2"));
+    w.add(togglebutton!("CD,'Push Me',x:5,y:2,w:2"));
+    w.add(button!("'Test',x:2,y:6,w:15"));
+    a.add_window(w);
+    a.run();
+}
