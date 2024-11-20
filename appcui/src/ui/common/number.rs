@@ -14,6 +14,7 @@ pub enum Format {
 }
 
 pub trait Number: Add<Output = Self> + Sub<Output = Self> + Div<Output = Self> + One + Copy + Clone + PartialOrd + PartialEq + Display + FromStr {
+    const ONE: Self;
     fn write_to_string(&self, writer: &mut String, format: Format);
     fn is_zero(&self) -> bool;
     fn cast_to_u32(&self) -> u32;
@@ -104,186 +105,257 @@ fn format_float_number(value: f64, format: Format, writer: &mut String) {
     }
 }
 
-// default implementation for numeric types
-impl Number for i8 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_signed_number(*self as i128, format, writer)
-    }
+macro_rules! IMPLEMENT_FOR_SIGNED {
+    ($t: ty) => {
+        impl Number for $t {
+            const ONE: $t = 1;
+            fn write_to_string(&self, writer: &mut String, format: Format) {
+                format_signed_number(*self as i128, format, writer)
+            }
+        
+            fn is_zero(&self) -> bool {
+                return *self == 0;
+            }
+            
+            fn cast_to_u32(&self) -> u32 {
+                return *self as u32;
+            }
+        }
+    };
+}
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+macro_rules! IMPLEMENT_FOR_UNSIGNED {
+    ($t: ty) => {
+        impl Number for $t {
+            const ONE: $t = 1;
+            fn write_to_string(&self, writer: &mut String, format: Format) {
+                format_unsigned_number(*self as u128, format, writer)
+            }
+        
+            fn is_zero(&self) -> bool {
+                return *self == 0;
+            }
+            
+            fn cast_to_u32(&self) -> u32 {
+                return *self as u32;
+            }
+        }
+    };
+}
+
+macro_rules! IMPLEMENT_FOR_FLOAT {
+    ($t: ty) => {
+        impl Number for $t {
+            const ONE: $t = 1.0;
+            fn write_to_string(&self, writer: &mut String, format: Format) {
+                format_float_number(*self as f64, format, writer)
+            }
+        
+            fn is_zero(&self) -> bool {
+                return *self == 0.0;
+            }
+            
+            fn cast_to_u32(&self) -> u32 {
+                return *self as u32;
+            }
+        }
+    };
+}
+
+IMPLEMENT_FOR_SIGNED!(i8);
+IMPLEMENT_FOR_SIGNED!(i16);
+IMPLEMENT_FOR_SIGNED!(i32);
+IMPLEMENT_FOR_SIGNED!(i64);
+IMPLEMENT_FOR_SIGNED!(i128);
+IMPLEMENT_FOR_UNSIGNED!(u8);
+IMPLEMENT_FOR_UNSIGNED!(u16);
+IMPLEMENT_FOR_UNSIGNED!(u32);
+IMPLEMENT_FOR_UNSIGNED!(u64);
+IMPLEMENT_FOR_UNSIGNED!(u128);
+IMPLEMENT_FOR_FLOAT!(f32);
+IMPLEMENT_FOR_FLOAT!(f64);
+
+// // default implementation for numeric types
+// impl Number for i8 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_signed_number(*self as i128, format, writer)
+//     }
+
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
     
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for i16 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_signed_number(*self as i128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for i16 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_signed_number(*self as i128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for i32 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_signed_number(*self as i128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for i32 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_signed_number(*self as i128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for i64 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_signed_number(*self as i128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for i64 {
+//     const ONE:i64 = 1;
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_signed_number(*self as i128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for i128 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_signed_number(*self, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for i128 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_signed_number(*self, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for u8 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_unsigned_number(*self as u128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for u8 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_unsigned_number(*self as u128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for u16 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_unsigned_number(*self as u128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for u16 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_unsigned_number(*self as u128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for u32 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_unsigned_number(*self as u128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for u32 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_unsigned_number(*self as u128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self;
-    }
-}
-impl Number for u64 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_unsigned_number(*self as u128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self;
+//     }
+// }
+// impl Number for u64 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_unsigned_number(*self as u128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for u128 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_unsigned_number(*self, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for u128 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_unsigned_number(*self, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for usize {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_unsigned_number(*self as u128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for usize {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_unsigned_number(*self as u128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for isize {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_signed_number(*self as i128, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for isize {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_signed_number(*self as i128, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for f32 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_float_number(*self as f64, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for f32 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_float_number(*self as f64, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0.0f32;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0.0f32;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
-impl Number for f64 {
-    fn write_to_string(&self, writer: &mut String, format: Format) {
-        format_float_number(*self, format, writer)
-    }
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
+// impl Number for f64 {
+//     fn write_to_string(&self, writer: &mut String, format: Format) {
+//         format_float_number(*self, format, writer)
+//     }
 
-    fn is_zero(&self) -> bool {
-        return *self == 0.0f64;
-    }
+//     fn is_zero(&self) -> bool {
+//         return *self == 0.0f64;
+//     }
 
-    fn cast_to_u32(&self) -> u32 {
-        return *self as u32;
-    }
-}
+//     fn cast_to_u32(&self) -> u32 {
+//         return *self as u32;
+//     }
+// }
