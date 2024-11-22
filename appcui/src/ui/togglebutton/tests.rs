@@ -77,3 +77,73 @@ fn check_mouse_hover_normal() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_events() {
+    #[Window(events = ToggleButtonEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        but1: Handle<ToggleButton>,
+        but2: Handle<ToggleButton>,
+        but3: Handle<ToggleButton>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                info: Handle::None,
+                but1: Handle::None,
+                but2: Handle::None,
+                but3: Handle::None,
+            };
+            me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:35")));
+            me.but1 = me.add(togglebutton!("<>,'Some button',x:1,y:3,w:2"));
+            me.but2 = me.add(togglebutton!("(),'Some button 2',x:4,y:3,w:2"));
+            let mut b3 = togglebutton!("Update,'Some button 2',x:10,y:3,w:8");
+            b3.set_enabled(false);
+            me.but3 = me.add(b3);
+            me
+        }
+        fn set_info(&mut self, txt: &str) {
+            let h_label = self.info;
+            if let Some(label) = self.control_mut(h_label) {
+                label.set_caption(txt);
+            }
+        }
+    }
+    impl ToggleButtonEvents for MyWin {
+        fn on_selection_changed(&mut self, handle: Handle<ToggleButton>, selected: bool) -> EventProcessStatus {
+            if handle == self.but1 {
+                self.set_info(format!("Button <> was pressed -> {}", selected).as_str());
+            } else if handle == self.but2 {
+                self.set_info(format!("Button () was pressed -> {}", selected).as_str());
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+
+
+    let script = "
+        Paint.Enable(false)
+        Paint('Button () has focus (default)')   
+        CheckHash(0xB30105347DAB4CF8)   
+        Key.Pressed(Tab)
+        Paint('Button <> has focus (default)') 
+        CheckHash(0xA7AA3274BE5B67EC) 
+        Key.Pressed(Enter)
+        Paint('Message: Button <> was pressed -> true')
+        CheckHash(0x144E815C6F5EC959) 
+        Mouse.Move(13,6)
+        Paint('Button () is hovered')
+        CheckHash(0xAE9B6DC41EF0E793) 
+        Mouse.Click(13,6,left)
+        Paint('Button () was pressed -> Button () was pressed -> true')
+        CheckHash(0x7EA0CD4C1C6DF0AE)
+        Mouse.Click(13,6,left)
+        Paint('Button () was pressed -> Button () was pressed -> false')
+        CheckHash(0x146C22653FBA0A06)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

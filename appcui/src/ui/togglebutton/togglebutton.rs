@@ -72,7 +72,7 @@ impl OnPaint for ToggleButton {
             &theme.toggle_button.unselected
         };
         let col_text = match () {
-            _ if !self.is_enabled() => state_cols.hovered,
+            _ if !self.is_enabled() => state_cols.inactive,
             _ if self.has_focus() => state_cols.focused,
             _ if self.is_mouse_over() => state_cols.hovered,
             _ => state_cols.normal,
