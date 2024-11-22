@@ -74,6 +74,7 @@
         - [TextField](chapter-3/stock-controls/textfield.md)
         - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
+        - [ToggleButton](chapter-3/stock-controls/togglebutton.md)
         - [TreeView]()
         - [VLine](chapter-3/stock-controls/vline.md)
         - [VSplitter](chapter-3/stock-controls/vsplitter.md)
