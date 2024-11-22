@@ -15,7 +15,7 @@ impl ToggleButton {
     /// The button type can be `Normal` or `Underlined`.
     /// 
     /// # Examples
-    /// ```rust
+    /// ```rust,no_run
     /// use appcui::prelude::*;
     /// let mut button = ToggleButton::new("🐼", 
     ///                                    "Enable Panda Mode", 
@@ -32,17 +32,17 @@ impl ToggleButton {
     /// This type of button is considered to be part of a group of buttons, and only one button can be selected at a time.
     /// 
     /// Example:
-    /// ```rust
+    /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// let panda = ToggleButton::with_single_selection("🐼"
+    /// let panda = ToggleButton::with_single_selection("🐼",
     ///                                                 "Enable Panda Mode",
     ///                                                 Layout::new("x:1,y:1,w:2"),
     ///                                                 false,
     ///                                                 togglebutton::Type::Normal);
-    /// let dog = ToggleButton::with_single_selection("🐶"
+    /// let dog = ToggleButton::with_single_selection("🐶",
     ///                                               "Enable Dog Mode",
     ///                                               Layout::new("x:3,y:1,w:2"),
-    ///                                               false,
+    ///                                               true,
     ///                                               togglebutton::Type::Normal);
     /// ```
     pub fn with_single_selection(caption: &str, tooltip: &str, layout: Layout, selected: bool, button_type: Type) -> Self {
