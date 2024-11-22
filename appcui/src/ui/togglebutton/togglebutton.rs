@@ -2,21 +2,29 @@ use crate::prelude::*;
 use crate::ui::togglebutton::{events::EventData, Type};
 use flat_string::FlatString;
 
-#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnSiblingSelected, internal=true)]
 pub struct ToggleButton {
     caption: FlatString<22>,
     tooltip: String,
     state: bool,
     button_type: Type,
+    single_selection: bool,
 }
 impl ToggleButton {
     pub fn new(caption: &str, tooltip: &str, layout: Layout, selected: bool, button_type: Type) -> Self {
+        Self::inner_new(caption, tooltip, layout, selected, button_type, false)
+    }
+    pub fn with_single_selection(caption: &str, tooltip: &str, layout: Layout, selected: bool, button_type: Type) -> Self {
+        Self::inner_new(caption, tooltip, layout, selected, button_type, true)
+    }
+    fn inner_new(caption: &str, tooltip: &str, layout: Layout, selected: bool, button_type: Type, single_selection: bool) -> Self {
         let mut but = ToggleButton {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             caption: FlatString::from_str(caption),
             tooltip: tooltip.to_string(),
             state: selected,
             button_type,
+            single_selection,
         };
 
         match button_type {
@@ -39,12 +47,26 @@ impl ToggleButton {
     }
     /// Sets the state of the toggle button (pressed or not)
     pub fn set_selected(&mut self, selected: bool) {
-        self.state = selected;
+        if self.single_selection {
+            if (!selected) || self.handle.is_none() {
+                return;
+            }
+            self.state = true;
+            if let Some(parent) = RuntimeManager::get().get_controls_mut().get(self.parent) {
+                parent.base().notify_children_of_selection(self.handle);
+            }
+        } else {
+            self.state = selected;
+        }
     }
 }
 impl OnDefaultAction for ToggleButton {
     fn on_default_action(&mut self) {
-        self.state = !self.state;
+        if self.single_selection {
+            self.set_selected(true);
+        } else {
+            self.set_selected(!self.state);
+        }
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
@@ -115,6 +137,14 @@ impl OnMouseEvent for ToggleButton {
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
+        }
+    }
+}
+impl OnSiblingSelected for ToggleButton {
+    #[allow(private_interfaces)]
+    fn on_sibling_selected(&mut self, handle: Handle<UIElement>) {
+        if self.single_selection {
+            self.state = self.handle == handle;
         }
     }
 }

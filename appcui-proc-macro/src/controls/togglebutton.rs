@@ -18,11 +18,18 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("select", "select", ParamType::Bool),
     NamedParameter::new("selected", "select", ParamType::Bool),
+    NamedParameter::new("group", "group", ParamType::Bool),
+    NamedParameter::new("single_selection", "group", ParamType::Bool),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("togglebutton", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
-    cb.init_control("ToggleButton::new");
+    let has_group = cb.get_bool("group").unwrap_or(false);
+    if has_group {
+        cb.init_control("ToggleButton::with_single_selection");
+    } else {
+        cb.init_control("ToggleButton::new");
+    }
     cb.add_string_parameter("caption", None);
     cb.add_string_parameter("tooltip", None);
     cb.add_layout();

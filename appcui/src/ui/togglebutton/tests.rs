@@ -147,3 +147,36 @@ fn check_events() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_events_single_selection() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial State')   
+        CheckHash(0x5F20CF032E36FB91)  
+        Key.Pressed(Enter)
+        Paint('2. Update is selected (underlined)')   
+        CheckHash(0xC3E317298CA63C61)  
+        Key.Pressed(Tab)
+        Key.Pressed(Space)
+        Paint('3. <> is selected, () & {} are not, Update is still selected')   
+        CheckHash(0xB1A37854E603B011)  
+        Key.Pressed(Tab)
+        Key.Pressed(Space)
+        Paint('4. () is selected, <> & {} are not, Update is still selected')   
+        CheckHash(0x8842F6BFD83CD8A5)  
+        Key.Pressed(Tab)
+        Key.Pressed(Space)
+        Paint('5. {} is selected, () & <> are not, Update is still selected')   
+        CheckHash(0xBEFCBDB7BF12FF5D)  
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%");
+    w.add(togglebutton!("<>,'Some button',x:1,y:3,w:2, group: true, type: Underlined"));
+    w.add(togglebutton!("(),'Some button 2',x:4,y:3,w:2, group: true, type: Underlined"));
+    w.add(togglebutton!("'{}','Some button 3',x:7,y:3,w:2, single_selection: true, type: Underlined"));
+    w.add(togglebutton!("'Update','Some button 4',x:30,y:3,w:6, type: Underlined"));
+
+    a.add_window(w);
+    a.run();
+}

@@ -387,6 +387,10 @@ impl<'a> ControlBuilder<'a> {
         self.parser.get_mut(name)?.get_i32()
     }
     #[inline(always)]
+    pub(super) fn get_bool(&mut self, name: &str) -> Option<bool> {
+        self.parser.get_mut(name)?.get_bool()
+    }
+    #[inline(always)]
     pub(super) fn get_percentage(&mut self, name: &str) -> Option<f32> {
         self.parser.get_mut(name)?.get_percentage()
     }
