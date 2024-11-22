@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-EnumBitFlags = "1.0.8"
+EnumBitFlags = "1.0.10"
 flat_string = "1.0.0"
 chrono = "0.4.38"
 AppCUIProcMacro = {path = "../appcui-proc-macro"}
