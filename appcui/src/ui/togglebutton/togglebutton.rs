@@ -11,9 +11,40 @@ pub struct ToggleButton {
     single_selection: bool,
 }
 impl ToggleButton {
+    /// Creates a new toggle button with the specified caption, tooltip, layout, selected state and button type.    
+    /// The button type can be `Normal` or `Underlined`.
+    /// 
+    /// # Examples
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// let mut button = ToggleButton::new("🐼", 
+    ///                                    "Enable Panda Mode", 
+    ///                                    Layout::new("x:1,y:1,w:2"), 
+    ///                                    false, 
+    ///                                    togglebutton::Type::Normal);
+    /// ```
     pub fn new(caption: &str, tooltip: &str, layout: Layout, selected: bool, button_type: Type) -> Self {
         Self::inner_new(caption, tooltip, layout, selected, button_type, false)
     }
+
+    /// Creates a new toggle button with the specified caption, tooltip, layout, selected state and button type.
+    /// The button type can be `Normal` or `Underlined`.
+    /// This type of button is considered to be part of a group of buttons, and only one button can be selected at a time.
+    /// 
+    /// Example:
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// let panda = ToggleButton::with_single_selection("🐼"
+    ///                                                 "Enable Panda Mode",
+    ///                                                 Layout::new("x:1,y:1,w:2"),
+    ///                                                 false,
+    ///                                                 togglebutton::Type::Normal);
+    /// let dog = ToggleButton::with_single_selection("🐶"
+    ///                                               "Enable Dog Mode",
+    ///                                               Layout::new("x:3,y:1,w:2"),
+    ///                                               false,
+    ///                                               togglebutton::Type::Normal);
+    /// ```
     pub fn with_single_selection(caption: &str, tooltip: &str, layout: Layout, selected: bool, button_type: Type) -> Self {
         Self::inner_new(caption, tooltip, layout, selected, button_type, true)
     }
@@ -45,7 +76,9 @@ impl ToggleButton {
     pub fn is_selected(&self) -> bool {
         self.state
     }
-    /// Sets the state of the toggle button (pressed or not)
+    /// Sets the state of the toggle button (pressed or not).
+    /// 
+    /// If the button is part of a group of buttons, only one button can be selected at a time. As such, calling this function in this case with a `false` value will have no effect.
     pub fn set_selected(&mut self, selected: bool) {
         if self.single_selection {
             if (!selected) || self.handle.is_none() {
