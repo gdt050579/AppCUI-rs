@@ -18,6 +18,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("select", "select", ParamType::Bool),
     NamedParameter::new("selected", "select", ParamType::Bool),
+    NamedParameter::new("state", "select", ParamType::Bool),
     NamedParameter::new("group", "group", ParamType::Bool),
     NamedParameter::new("single_selection", "group", ParamType::Bool),
 ];
