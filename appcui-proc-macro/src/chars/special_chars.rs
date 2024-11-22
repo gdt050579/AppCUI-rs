@@ -1737,7 +1737,7 @@ impl SpecialCharacter {
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        return HASH_TO_ALIGNAMENT[entry_index];
+        HASH_TO_ALIGNAMENT[entry_index]
     }
     pub fn get_name(&self) -> &'static str {
         match self {
