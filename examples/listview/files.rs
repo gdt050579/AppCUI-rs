@@ -1,40 +1,34 @@
 use appcui::prelude::*;
 use chrono::NaiveDate;
 
+#[derive(ListViewItem)]
 struct File {
+    #[Column(name: "&Name", width: 25)]
     name: &'static str,
+    #[Column(name: "&Size", width: 12, align: right, render: size, format: auto)]
     size: u64,
+    #[Column(name: "&Created", width: 12, align: center, render: date, format: YearMonthDay)]
     created: NaiveDate,
 }
-impl listview::ListItem for File {
-    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
-        match column_index {
-            0 => Some(listview::RenderMethod::Text(self.name)),
-            1 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::Auto)),
-            2 => Some(listview::RenderMethod::Date(self.created, listview::DateFormat::YearMonthDay)),
-            _ => None,
-        }
-    }
 
-    fn compare(&self, other: &Self, column_index: u16) -> std::cmp::Ordering {
-        match column_index {
-            0 => self.name.cmp(other.name),
-            1 => self.size.cmp(&other.size),
-            2 => self.created.cmp(&other.created),
-            _ => std::cmp::Ordering::Equal,
-        }
-    }
+#[Window(events = ToggleButtonEvents)]
+pub(crate) struct Win { 
+    l: Handle<ListView<File>>,
+    details: Handle<ToggleButton>,
+    columns: Handle<ToggleButton>,   
 }
-
-#[Window()]
-pub(crate) struct Win {}
 
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
             base: window!("Files,d:c,w:70,h:10,flags: Sizeable"),
+            l: Handle::None,
+            details: Handle::None,
+            columns: Handle::None,
         };
-        let mut lv = listview!("class: File,x:0,y:0,w:100%,h:100%,flags: ScrollBars+SearchBar+LargeIcons, columns:[{&Name,25,l},{&Size,12,r}, {&Created,12,c}]");
+        me.details = me.add(togglebutton!("'▤','Show details for each file',r:1,t:0,w:1, selected: true, group: true"));
+        me.columns = me.add(togglebutton!("'‖','Simplified mode (only the file name on multiple columns)',r:2,t:0,w:1,group:true "));
+        let mut lv = listview!("class: File,l:0,t:1,r:0,b:0,flags: ScrollBars+SearchBar+LargeIcons");
 
         let g_folder = lv.add_group("Folders");
         lv.add_item(listview::Item::new(
@@ -241,7 +235,25 @@ impl Win {
             g_other,
         ));
 
-        me.add(lv);
+        me.l = me.add(lv);
         me
+    }
+    fn set_view_mode(&mut self, mode: listview::ViewMode) {
+        let h = self.l;
+        if let Some(lv) = self.control_mut(h) {
+            lv.set_view_mode(mode);
+            lv.request_focus();
+        }
+    }
+}
+
+impl ToggleButtonEvents for Win {
+    fn on_selection_changed(&mut self, handle: Handle<ToggleButton>, _selected: bool) -> EventProcessStatus {
+        if handle == self.details {
+            self.set_view_mode(listview::ViewMode::Details);
+        } else if handle == self.columns {
+            self.set_view_mode(listview::ViewMode::Columns(3));
+        }
+        EventProcessStatus::Processed
     }
 }

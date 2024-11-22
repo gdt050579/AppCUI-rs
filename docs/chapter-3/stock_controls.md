@@ -27,6 +27,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [Tab](stock-controls/tab.md)                         | ui::Tab                      | `tab!`             | <img src="stock-controls/img/tab.png" width=300/>             |
 | [TextField](stock-controls/textField.md)             | ui::TextField                | `textfield!`       | <img src="stock-controls/img/textfield.png" width=300/>       |
 | [ThreeStateBox](stock-controls/threestatebox.md)     | ui::ThreeStateBox            | `threestatebox!`   | <img src="stock-controls/img/threestatebox.png" width=300/>   |
+| [ToggleButton](stock-controls/togglebutton.md)       | ui::ToggleButton             | `togglebutton!`    | <img src="stock-controls/img/togglebutton.png" width=300/>    |
 | [VLine](stock-controls/vline.md)                     | ui::VLine                    | `vline!`           | <img src="stock-controls/img/vline.png" width=300/>           |
 | [VSplitter](stock-controls/vsplitter.md)             | ui::VSplitter                | `vsplitter!`       | <img src="stock-controls/img/vsplitter.png" width=300/>       |
 

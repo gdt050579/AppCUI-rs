@@ -2,7 +2,7 @@ use super::CharAttribute;
 use super::CharFlags;
 use super::Color;
 
-static UNICODE_CODES: [char; 44] = [
+static UNICODE_CODES: [char; 48] = [
     '\u{2554}', '\u{2557}', '\u{255D}', '\u{255A}', '\u{2550}', '\u{2551}', '\u{256C}', // double line box
     '\u{250C}', '\u{2510}', '\u{2518}', '\u{2514}', '\u{2500}', '\u{2502}', '\u{253C}', // single line box
     '\u{2191}', '\u{2193}', '\u{2190}', '\u{2192}', '\u{2195}', '\u{2194}', // arrows
@@ -10,6 +10,7 @@ static UNICODE_CODES: [char; 44] = [
     '\u{25B2}', '\u{25BC}', '\u{25C4}', '\u{25BA}', // Trangles
     '\u{25CF}', '\u{25CB}', '\u{221A}', '\u{2261}', '\u{205E}', '\u{2026}', // symbols
     '\u{251C}', '\u{252C}', '\u{2524}', '\u{2534}', // middle single line box
+    '\u{2594}', '\u{2587}', '\u{2595}', '\u{2581}', // middle single line box
     
 ];
 
@@ -72,6 +73,12 @@ pub enum SpecialChar {
     BoxMidleTop,
     BoxMidleRight,
     BoxMidleBottom,
+
+    // boxes
+    LineOnTop,
+    LineOnLeft,
+    LineOnRight,
+    LineOnBottom,
 }
 
 impl From<SpecialChar> for char {

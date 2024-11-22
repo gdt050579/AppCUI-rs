@@ -11,17 +11,18 @@ use crate::{
         datepicker::events::DatePickerEvents,
         desktop::events::DesktopEvents,
         dropdownlist::events::GenericDropDownListEvents,
-        numericselector::events::GenericNumericSelectorEvents,
         keyselector::events::KeySelectorEvents,
+        listbox::events::ListBoxEvents,
+        listview::events::GenericListViewEvents,
         menu::events::GenericMenuEvents,
+        numericselector::events::GenericNumericSelectorEvents,
         password::events::PasswordEvents,
         radiobox::events::RadioBoxEvents,
         selector::events::GenericSelectorEvents,
         textfield::events::TextFieldEvents,
         threestatebox::events::ThreeStateBoxEvents,
+        togglebutton::events::ToggleButtonEvents,
         window::events::{ToolBarEvents, WindowEvents},
-        listbox::events::ListBoxEvents,
-        listview::events::GenericListViewEvents,
     },
 };
 
@@ -105,6 +106,7 @@ pub trait Control:
     + ButtonEvents
     + CheckBoxEvents
     + RadioBoxEvents
+    + ToggleButtonEvents
     + PasswordEvents
     + ThreeStateBoxEvents
     + ColorPickerEvents

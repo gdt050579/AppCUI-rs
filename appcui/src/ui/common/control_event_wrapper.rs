@@ -4,25 +4,23 @@ use super::traits::{Control, CustomEvents, EventProcessStatus};
 use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
-use crate::prelude::{colorpicker, combobox, datepicker, dropdownlist, keyselector, numericselector, selector, textfield, threestatebox, listbox, listview, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents};
+use crate::prelude::{
+    colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, selector, textfield, threestatebox,
+    togglebutton, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents,
+};
 use crate::system::Handle;
 
 use crate::ui::{
-    button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, password, password::events::PasswordEvents, radiobox,
-    radiobox::events::RadioBoxEvents,
-    textfield::events::TextFieldEvents,
-    combobox::events::ComboBoxEvents,
-    dropdownlist::events::GenericDropDownListEvents,
-    numericselector::events::GenericNumericSelectorEvents,
-    datepicker::events::DatePickerEvents,
-    listbox::events::ListBoxEvents,
-    listview::events::GenericListViewEvents,
+    button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents,
+    datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
+    listview::events::GenericListViewEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents,
+    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents,
 };
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub(crate) struct CustomEventData {
     pub(crate) class_hash: u64,
-    pub(crate) event_id: u32
+    pub(crate) event_id: u32,
 }
 
 pub(crate) enum ControlEventData {
@@ -30,6 +28,7 @@ pub(crate) enum ControlEventData {
     Button(button::events::EventData),
     CheckBox(checkbox::events::EventData),
     RadioBox(radiobox::events::EventData),
+    ToggleButton(togglebutton::events::EventData),
     ThreeStateBox(threestatebox::events::EventData),
     ColorPicker(colorpicker::events::EventData),
     Password(password::events::EventData),
@@ -53,21 +52,12 @@ pub(crate) struct ControlEvent {
 impl ControlEvent {
     pub(crate) fn invoke(&self, receiver: &mut dyn Control) -> EventProcessStatus {
         match &self.data {
-            ControlEventData::Button(_) => {
-                ButtonEvents::on_pressed(receiver, self.emitter.cast())
-            }
-            ControlEventData::CheckBox(data) => {
-                CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked)
-            }
-            ControlEventData::RadioBox(_) => {
-                RadioBoxEvents::on_selected(receiver, self.emitter.cast())
-            }
-            ControlEventData::ColorPicker(data) => {
-                ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color)
-            }
-            ControlEventData::ThreeStateBox(data) => {
-                ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state)
-            }
+            ControlEventData::Button(_) => ButtonEvents::on_pressed(receiver, self.emitter.cast()),
+            ControlEventData::CheckBox(data) => CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked),
+            ControlEventData::RadioBox(_) => RadioBoxEvents::on_selected(receiver, self.emitter.cast()),
+            ControlEventData::ToggleButton(data) => togglebutton::events::ToggleButtonEvents::on_selection_changed(receiver, self.emitter.cast(), data.status),        
+            ControlEventData::ColorPicker(data) => ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color),
+            ControlEventData::ThreeStateBox(data) => ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state),
             ControlEventData::Password(data) => {
                 if data.accept {
                     PasswordEvents::on_accept(receiver, self.emitter.cast())
@@ -75,9 +65,7 @@ impl ControlEvent {
                     PasswordEvents::on_cancel(receiver, self.emitter.cast())
                 }
             }
-            ControlEventData::KeySelector(data) => {
-                KeySelectorEvents::on_key_changed(receiver, self.emitter.cast(), data.new_key, data.old_key )
-            },
+            ControlEventData::KeySelector(data) => KeySelectorEvents::on_key_changed(receiver, self.emitter.cast(), data.new_key, data.old_key),
             ControlEventData::TextField(data) => {
                 let h: Handle<TextField> = self.emitter.cast();
                 match data.evtype {
@@ -87,58 +75,42 @@ impl ControlEvent {
                         } else {
                             EventProcessStatus::Ignored
                         }
-                    },
+                    }
                     //textfield::events::TextFieldEventsType::OnTextChanged => todo!(),
                 }
+            }
+            ControlEventData::Custom(data) => CustomEvents::on_event(receiver, self.emitter.cast(), data.class_hash, data.event_id),
+            ControlEventData::Selector(data) => GenericSelectorEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id),
+            ControlEventData::ComboBox(_) => ComboBoxEvents::on_selection_changed(receiver, self.emitter.cast()),
+            ControlEventData::DropDownList(data) => GenericDropDownListEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id),
+            ControlEventData::NumericSelector(data) => GenericNumericSelectorEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
+            ControlEventData::DatePicker(data) => DatePickerEvents::on_date_change(receiver, self.emitter.cast(), data.date),
+            ControlEventData::ListBox(data) => match data.event_type {
+                listbox::events::ListBoxEventTypes::CurrentItemChanged => {
+                    ListBoxEvents::on_current_item_changed(receiver, self.emitter.cast(), data.index)
+                }
+                listbox::events::ListBoxEventTypes::ItemChecked => {
+                    ListBoxEvents::on_item_checked(receiver, self.emitter.cast(), data.index, data.checked)
+                }
             },
-            ControlEventData::Custom(data) => {
-                CustomEvents::on_event(receiver, self.emitter.cast(),data.class_hash, data.event_id)
-            },
-            ControlEventData::Selector(data) => {
-                GenericSelectorEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
-            },
-            ControlEventData::ComboBox(_) => {
-                ComboBoxEvents::on_selection_changed(receiver, self.emitter.cast())
-            },
-            ControlEventData::DropDownList(data) => {
-                GenericDropDownListEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
-            },        
-            ControlEventData::NumericSelector(data) => {
-                GenericNumericSelectorEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id)
-            },        
-            ControlEventData::DatePicker(data) => {
-                DatePickerEvents::on_date_change(receiver, self.emitter.cast(), data.date)
-            },
-            ControlEventData::ListBox(data) => {
-                match data.event_type {
-                    listbox::events::ListBoxEventTypes::CurrentItemChanged => {
-                        ListBoxEvents::on_current_item_changed(receiver, self.emitter.cast(), data.index)
-                    },
-                    listbox::events::ListBoxEventTypes::ItemChecked => {
-                        ListBoxEvents::on_item_checked(receiver, self.emitter.cast(), data.index, data.checked)                    
-                    },
-                }                
-            },   
-            ControlEventData::ListView(data) => {
-                match data.event_type {
-                    listview::events::ListViewEventTypes::CurrentItemChanged => {
-                        GenericListViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id)
-                    },
-                    listview::events::ListViewEventTypes::GroupFoldedOrUnfolded(group, collapsed) => {
-                        if collapsed {
-                            GenericListViewEvents::on_group_collapsed(receiver, self.emitter.cast(), data.type_id, group)
-                        } else {
-                            GenericListViewEvents::on_group_expanded(receiver, self.emitter.cast(), data.type_id, group)
-                        }
-                    },
-                    listview::events::ListViewEventTypes::SelectionChanged => {
-                        GenericListViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
-                    },
-                    listview::events::ListViewEventTypes::ItemAction(index) => {
-                        GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index)
+            ControlEventData::ListView(data) => match data.event_type {
+                listview::events::ListViewEventTypes::CurrentItemChanged => {
+                    GenericListViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id)
+                }
+                listview::events::ListViewEventTypes::GroupFoldedOrUnfolded(group, collapsed) => {
+                    if collapsed {
+                        GenericListViewEvents::on_group_collapsed(receiver, self.emitter.cast(), data.type_id, group)
+                    } else {
+                        GenericListViewEvents::on_group_expanded(receiver, self.emitter.cast(), data.type_id, group)
                     }
-                }                
-            },          
+                }
+                listview::events::ListViewEventTypes::SelectionChanged => {
+                    GenericListViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
+                }
+                listview::events::ListViewEventTypes::ItemAction(index) => {
+                    GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index)
+                }
+            },
         }
     }
 }

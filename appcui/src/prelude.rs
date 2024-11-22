@@ -5,6 +5,8 @@ pub use super::ui::tab;
 pub use super::ui::accordion;
 pub use super::ui::checkbox;
 pub use super::ui::checkbox::events::CheckBoxEvents;
+pub use super::ui::togglebutton;
+pub use super::ui::togglebutton::events::ToggleButtonEvents;
 pub use super::ui::radiobox;
 pub use super::ui::radiobox::events::RadioBoxEvents;
 pub use super::ui::threestatebox;

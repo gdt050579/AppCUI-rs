@@ -33,6 +33,7 @@ pub mod vline;
 pub mod datepicker;
 pub mod listbox;
 pub mod listview;
+pub mod togglebutton;
 
 // re-export
 pub use common::ControlBase;
@@ -66,3 +67,4 @@ pub use vline::VLine;
 pub use datepicker::DatePicker;
 pub use listbox::ListBox;
 pub use listview::ListView;
+pub use togglebutton::ToggleButton;

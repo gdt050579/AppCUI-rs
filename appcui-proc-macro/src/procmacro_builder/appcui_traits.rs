@@ -44,6 +44,7 @@ pub(crate) enum AppCUITrait {
     DatePickerEvents = 35,
     ListBoxEvents = 36,
     GenericListViewEvents = 37,
+    ToggleButtonEvents = 38,
 }
 
 #[repr(u8)]
@@ -98,6 +99,7 @@ impl AppCUITrait {
             AppCUITrait::DatePickerEvents => "DatePickerEvents",
             AppCUITrait::ListBoxEvents => "ListBoxEvents",
             AppCUITrait::GenericListViewEvents => "ListViewEvents", // important to be without Generic
+            AppCUITrait::ToggleButtonEvents => "ToggleButtonEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -143,6 +145,7 @@ impl AppCUITrait {
             AppCUITrait::DatePickerEvents => TraitType::ControlEvent,
             AppCUITrait::ListBoxEvents => TraitType::ControlEvent,
             AppCUITrait::GenericListViewEvents => TraitType::ControlEvent,
+            AppCUITrait::ToggleButtonEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -188,6 +191,7 @@ impl AppCUITrait {
             AppCUITrait::DatePickerEvents => "",
             AppCUITrait::ListBoxEvents => "",
             AppCUITrait::GenericListViewEvents => "",
+            AppCUITrait::ToggleButtonEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -233,6 +237,7 @@ impl AppCUITrait {
             AppCUITrait::DatePickerEvents => "impl$(TEMPLATE_TYPE) DatePickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::ListBoxEvents => "impl$(TEMPLATE_TYPE) ListBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericListViewEvents => "impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::ToggleButtonEvents => "impl$(TEMPLATE_TYPE) ToggleButtonEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -277,6 +282,7 @@ impl AppCUITrait {
             "DatePickerEvents" | "DatePicker" => Some(AppCUITrait::DatePickerEvents),
             "ListBoxEvents" | "ListBox" => Some(AppCUITrait::ListBoxEvents),
             "ListViewEvents" | "ListView" => Some(AppCUITrait::GenericListViewEvents),
+            "ToggleButtonEvents" | "ToggleButton" => Some(AppCUITrait::ToggleButtonEvents),
             _ => None,
         }
     }
@@ -323,6 +329,7 @@ impl AppCUITrait {
             35 => Some(AppCUITrait::DatePickerEvents),
             36 => Some(AppCUITrait::ListBoxEvents),
             37 => Some(AppCUITrait::GenericListViewEvents),
+            38 => Some(AppCUITrait::ToggleButtonEvents),
             _ => None,
         };
         result?;
