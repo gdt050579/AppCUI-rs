@@ -241,7 +241,8 @@ impl RenderMethod {
         match self {           
             Self::Text | Self::Ascii => {
                 match vartype {
-                    "String" | "&str" => format!("{} => Some(listview::RenderMethod::{}(self.{})),\n", index,self.name(),varname),
+                    "&str" => format!("{} => Some(listview::RenderMethod::{}(self.{})),\n", index,self.name(),varname),
+                    "String" => format!("{} => Some(listview::RenderMethod::{}(self.{}.as_str())),\n", index,self.name(),varname),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
