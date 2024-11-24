@@ -1,12 +1,15 @@
 mod dialog_buttons;
 mod dialog_result;
 mod generic_alert_dialog;
+mod open_save_dialog;
+mod file_info;
 #[cfg(test)]
 mod tests;
 
 use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
 use generic_alert_dialog::GenericAlertDialog;
+use file_info::FileInfo;
 
 use crate::prelude::{window, ModalWindowMethods};
 
@@ -60,4 +63,8 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
         }
     }
     ValidateOrCancelResult::Cancel
+}
+
+pub fn save(name: &str, root: &str, filter:(), flags: u32) -> Option<String> {
+    None
 }
