@@ -106,6 +106,27 @@ impl Terminal for TermiosTerminal {
                         Color::White => s.push_str("\x1b[97m"),
                         Color::Transparent => {}
                     }
+
+                    match c.background {
+                        Color::Black => s.push_str("\x1b[40m"),
+                        Color::DarkBlue => s.push_str("\x1b[44m"),
+                        Color::DarkGreen => s.push_str("\x1b[42m"),
+                        Color::Teal => s.push_str("\x1b[46m"),
+                        Color::DarkRed => s.push_str("\x1b[41m"),
+                        Color::Magenta => s.push_str("\x1b[45m"),
+                        Color::Olive => s.push_str("\x1b[43m"),
+                        Color::Silver => s.push_str("\x1b[47m"),
+                        Color::Gray => s.push_str("\x1b[100m"),
+                        Color::Blue => s.push_str("\x1b[104m"),
+                        Color::Green => s.push_str("\x1b[102m"),
+                        Color::Aqua => s.push_str("\x1b[106m"),
+                        Color::Red => s.push_str("\x1b[101m"),
+                        Color::Pink => s.push_str("\x1b[105m"),
+                        Color::Yellow => s.push_str("\x1b[103m"),
+                        Color::White => s.push_str("\x1b[107m"),
+                        Color::Transparent => {}
+                    }
+                    
                     s.push(c.code);
                     s.push_str("\x1b[0m");
                 }
