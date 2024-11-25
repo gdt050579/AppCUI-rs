@@ -63,12 +63,12 @@ impl TermiosTerminal {
             ));
         }
 
-        t.stdout.write("\x1b[?1003h".as_bytes()); // capture mouse events
+        let _ = t.stdout.write("\x1b[?1003h".as_bytes()); // capture mouse events
         Ok(Box::new(t))
     }
 
     fn clear(&mut self) {
-        self.stdout.write("\x1b[2J".as_bytes());
+        let _ = self.stdout.write("\x1b[2J".as_bytes());
     }
 
     fn update_size(&mut self) -> Result<(), std::io::Error> {
@@ -136,7 +136,7 @@ impl Terminal for TermiosTerminal {
                 s.push('\n');
             }
         }
-        self.stdout.write(s.as_bytes());
+        let _ = self.stdout.write(s.as_bytes());
     }
 
     fn get_size(&self) -> Size {
