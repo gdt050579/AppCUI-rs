@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use super::FileInfo;
+use super::{FileInfo,DialogResult};
 
-#[Window(events = ToggleButtonEvents+ButtonEvents, internal: true)]
+#[ModalWindow(events = ToggleButtonEvents+ButtonEvents, response: DialogResult, internal: true)]
 pub(super) struct FileExplorer {
     list: Handle<ListView<FileInfo>>,
     details: Handle<ToggleButton>,
@@ -14,7 +14,7 @@ pub(super) struct FileExplorer {
 impl FileExplorer {
     pub(super) fn new(title: &str)->Self {
         let mut w = Self {
-            base: Window::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
+            base: ModalWindow::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
             list: Handle::None,
             details: Handle::None,
             columns: Handle::None,
@@ -23,6 +23,12 @@ impl FileExplorer {
             b_cancel: Handle::None,
             mask: Handle::None,            
         };
+        w.add(label!("&Name,l:1,b:3,w:4"));
+        w.name = w.add(TextField::new("",Layout::new("l:6,b:3,r:11"),textfield::Flags::None));
+        w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
+        w.add(label!("&Type,l:1,b:1,w:4"));
+        //w.mask = w.add(TextField::new("",Layout::new("l:6,b:3,r:10"),textfield::Flags::None));
+        w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
         w.set_size_bounds(40, 10, u16::MAX, u16::MAX);
         w       
     }

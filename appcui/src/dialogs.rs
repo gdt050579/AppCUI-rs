@@ -10,6 +10,7 @@ use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
 use generic_alert_dialog::GenericAlertDialog;
 use file_info::FileInfo;
+use open_save_dialog::FileExplorer;
 
 use crate::prelude::{window, ModalWindowMethods};
 
@@ -65,6 +66,8 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
     ValidateOrCancelResult::Cancel
 }
 
-pub fn save(name: &str, root: &str, filter:(), flags: u32) -> Option<String> {
+pub fn save(file_name: &str, root: &str, /*filter:(), flags: u32*/) -> Option<String> {
+    let w = FileExplorer::new("Save");
+    w.show();
     None
 }
