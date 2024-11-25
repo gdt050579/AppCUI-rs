@@ -1,8 +1,10 @@
 //! Module representing an `TermiosTerminal` abstraction over the ANSI protocol using the termios
 //! API to set it into raw mode. Targeted for UNIX systems, including `linux` and `mac`
 
-use std::{fs::File, io::Write, path::Path};
+use std::{fs::File, io::Write, os::unix::io::FromRawFd};
 
+
+use libc::STDOUT_FILENO;
 
 use super::super::{ SystemEvent, Terminal };
 use crate::{ graphics::*, input::MouseButton, prelude::{Key, KeyModifier}, system::Error, terminals::{termios::api::sizing::listen_for_resizes, KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent} };
@@ -21,7 +23,7 @@ pub struct TermiosTerminal {
     // the terminal as the user had it initially.
     _orig_termios: Termios,
 
-    file: File
+    stdout: File
 }
 
 impl TermiosTerminal {
@@ -34,10 +36,14 @@ impl TermiosTerminal {
             ));
         };
 
+        let mut stdout = unsafe {
+            File::from_raw_fd(STDOUT_FILENO)
+        };
+
         let mut t = TermiosTerminal {
             size: Size::new(80, 30),
             _orig_termios,
-            file: File::create(Path::new("/Users/alstoica/uni/AppCUI-rs/debug.txt")).unwrap()
+            stdout
         };
 
         if let Err(err) = listen_for_resizes() {
@@ -57,12 +63,12 @@ impl TermiosTerminal {
             ));
         }
 
-        print!("\x1b[?1003h"); // capture mouse events
+        t.stdout.write("\x1b[?1003h".as_bytes()); // capture mouse events
         Ok(Box::new(t))
     }
 
     fn clear(&mut self) {
-        print!("\x1b[2J");
+        self.stdout.write("\x1b[2J".as_bytes());
     }
 
     fn update_size(&mut self) -> Result<(), std::io::Error> {
@@ -109,7 +115,7 @@ impl Terminal for TermiosTerminal {
                 s.push('\n');
             }
         }
-        print!("{}", s);
+        self.stdout.write(s.as_bytes());
     }
 
     fn get_size(&self) -> Size {
@@ -136,14 +142,12 @@ impl Terminal for TermiosTerminal {
                 }
 
                 if let AnsiKeyCode::MouseButton(ev) = ansi_key.code() {
-                    self.file.write_all(format!("{}, {}\n", ev.x, ev.y).as_bytes());
                     match ev.button {
                         MouseButton::None => return SystemEvent::MouseButtonUp(MouseButtonUpEvent {x: ev.x.into(), y: ev.y.into(), button: MouseButton::None}),
                         other => return SystemEvent::MouseButtonDown(MouseButtonDownEvent {button: other, x: ev.x.into(), y: ev.y.into()})
                     }
                 }
                 if let AnsiKeyCode::MouseMove(ev) = ansi_key.code() {
-                    self.file.write_all(format!("{}, {}\n", ev.x, ev.y).as_bytes());
                     return SystemEvent::MouseMove(MouseMoveEvent { x: ev.x.into(), y: ev.y.into(), button: ev.button });
                 }
 
