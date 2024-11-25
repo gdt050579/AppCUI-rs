@@ -2,7 +2,7 @@
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use libc::{ioctl, sighandler_t, signal, SIGWINCH, SIG_ERR, STDOUT_FILENO, TIOCGWINSZ};
+use libc::{ioctl, sighandler_t, signal, SIGWINCH, SIG_ERR, STDOUT_FILENO, TIOCGWINSZ, TIOCSWINSZ};
 
 use crate::prelude::Size;
 
@@ -36,11 +36,28 @@ pub(crate) fn listen_for_resizes () -> Result<(), std::io::Error> {
     Ok(())
 }
 
-pub(crate) fn get_terminal_size () -> Result<Size, std::io::Error> {
+pub(crate) fn get_terminal_size() -> Result<Size, std::io::Error> {
     let mut w_size = Winsize::empty();
     if unsafe { ioctl(STDOUT_FILENO, TIOCGWINSZ, &mut w_size) } == -1 {
         return Err(std::io::Error::last_os_error());
     }
 
     Ok(Size::new(w_size.ws_col.into(), w_size.ws_row.into()))
+}
+
+pub(crate) fn set_terminal_size(size: &Size) -> Result<(), std::io::Error> {
+    let w_size = Winsize {
+        ws_col: size.width as u16,
+        ws_row: size.height as u16,
+        ws_xpixel: 0,
+        ws_ypixel: 0
+    };
+
+    if unsafe {
+        ioctl(STDOUT_FILENO, TIOCSWINSZ, &w_size)
+    } == -1 {
+        return Err(std::io::Error::last_os_error());
+    }
+
+    Ok(())
 }

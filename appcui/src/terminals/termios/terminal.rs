@@ -9,7 +9,7 @@ use libc::STDOUT_FILENO;
 use super::super::{ SystemEvent, Terminal };
 use crate::{ graphics::*, input::MouseButton, prelude::{Key, KeyModifier}, system::Error, terminals::{termios::api::sizing::listen_for_resizes, KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent} };
 
-use self::sizing::{get_terminal_size, RESIZE_EVENT};
+use self::sizing::{get_terminal_size, set_terminal_size, RESIZE_EVENT};
 #[cfg(target_family = "unix")]
 use super::api::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios, sizing};
 
@@ -36,7 +36,7 @@ impl TermiosTerminal {
             ));
         };
 
-        let mut stdout = unsafe {
+        let stdout = unsafe {
             File::from_raw_fd(STDOUT_FILENO)
         };
 
@@ -54,13 +54,18 @@ impl TermiosTerminal {
         
         if let Some(sz) = builder.size {
             t.size = sz;
-
-            // If the terminal size is invalid, we will return an error
-            // However, we are returning an `Err` without checking that :-?
-            return Err(Error::new(
-                crate::prelude::ErrorKind::InvalidFeature,
-                "TermiosTerminal is not yet implemented to support custom sizes".to_owned(),
-            ));
+        }
+        
+        match get_terminal_size() {
+            Err(err) => { return Err(Error::new(crate::system::ErrorKind::InitializationFailure, err.to_string())); }
+            Ok(size) => {
+                if size != t.size {
+                    if let Err(err) = set_terminal_size(&size) {
+                        return Err(Error::new(crate::system::ErrorKind::InitializationFailure, err.to_string()));;
+                    }
+                }
+                t.size = size;
+            }
         }
 
         let _ = t.stdout.write("\x1b[?1003h".as_bytes()); // capture mouse events
