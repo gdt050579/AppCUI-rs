@@ -3,6 +3,7 @@ mod dialog_result;
 mod generic_alert_dialog;
 mod open_save_dialog;
 mod file_info;
+mod file_mask;
 #[cfg(test)]
 mod tests;
 

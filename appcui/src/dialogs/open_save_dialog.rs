@@ -23,11 +23,19 @@ impl FileExplorer {
             b_cancel: Handle::None,
             mask: Handle::None,            
         };
+        w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
+        let mut p = panel!("l:1,t:3,r:1,b:5");
+        let mut lv = listview!("FileInfo,d:c,w:100%,h:100%,flags: ScrollBars+SearchBar");
+        p.add(lv);
+        w.add(p);
         w.add(label!("&Name,l:1,b:3,w:4"));
         w.name = w.add(TextField::new("",Layout::new("l:6,b:3,r:11"),textfield::Flags::None));
         w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
         w.add(label!("&Type,l:1,b:1,w:4"));
-        //w.mask = w.add(TextField::new("",Layout::new("l:6,b:3,r:10"),textfield::Flags::None));
+        let mut mask = ComboBox::new(Layout::new("l:6,b:1,r:11"), combobox::Flags::None);
+        mask.add("All files");
+        mask.set_index(0);
+        w.mask = w.add(mask);
         w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
         w.set_size_bounds(40, 10, u16::MAX, u16::MAX);
         w       
