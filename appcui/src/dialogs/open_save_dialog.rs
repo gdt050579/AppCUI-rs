@@ -1,3 +1,5 @@
+use dialogs::file_mask::FileMask;
+
 use crate::prelude::*;
 use super::{FileInfo,DialogResult};
 
@@ -10,9 +12,10 @@ pub(super) struct FileExplorer {
     b_ok: Handle<Button>,
     b_cancel: Handle<Button>,
     mask: Handle<ComboBox>,
+    extension_mask: Vec<FileMask>,
 }
 impl FileExplorer {
-    pub(super) fn new(title: &str)->Self {
+    pub(super) fn new(title: &str, extension_mask: Vec<FileMask>)->Self {
         let mut w = Self {
             base: ModalWindow::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
             list: Handle::None,
@@ -21,7 +24,8 @@ impl FileExplorer {
             name: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None,
-            mask: Handle::None,            
+            mask: Handle::None,  
+            extension_mask,          
         };
         w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
         let mut p = panel!("l:1,t:3,r:1,b:5");
@@ -33,6 +37,9 @@ impl FileExplorer {
         w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
         w.add(label!("&Type,l:1,b:1,w:4"));
         let mut mask = ComboBox::new(Layout::new("l:6,b:1,r:11"), combobox::Flags::None);
+        for m in &w.extension_mask {
+            mask.add(m.name());
+        }
         mask.add("All files");
         mask.set_index(0);
         w.mask = w.add(mask);
