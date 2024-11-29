@@ -2,8 +2,8 @@ use std::u16;
 
 use crate::prelude::textfield::selection::Selection;
 
-use super::initialization_flags::Flags;
 use super::finder::Finder;
+use super::initialization_flags::Flags;
 use crate::prelude::*;
 
 struct TextArea {
@@ -11,6 +11,7 @@ struct TextArea {
     start: usize,
     end: usize,
     path: String,
+    prev: String,
     char_count: u32,
     selection: Selection,
     is_readonly: bool,
@@ -22,6 +23,7 @@ struct ResultsArea {
     header_y_ofs: i32,
     expanded_panel_y: i32,
     width: u32,
+    selected: u16,
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnExpand+OnFocus, internal=true)]
@@ -29,7 +31,7 @@ pub struct PathFinder {
     flags: Flags,
     text_area: TextArea,
     results_area: ResultsArea,
-    finder: Finder,    
+    finder: Finder,
 }
 
 impl TextArea {
@@ -38,6 +40,17 @@ impl TextArea {
     const PADDING: u16 = Self::PADDING_LEFT + Self::PADDING_RIGHT;
     const PATH_CHAR_SEPARTOR: SpecialChar = SpecialChar::TriangleRight;
     const PATH_CHAR_DOTS: SpecialChar = SpecialChar::ThreePointsHorizontal;
+
+    fn set_path(&mut self, text: &str, overwrite_prev: bool) {
+        if overwrite_prev {
+            self.prev = self.path.clone();
+        }
+        self.path = text.to_string();
+    }
+
+    fn restore_previous_path(&mut self) {
+        self.path = self.prev.clone();
+    }
 
     #[inline(always)]
     fn update_char_count(&mut self, update_size: i32) {
@@ -161,25 +174,29 @@ impl ResultsArea {
 impl PathFinder {
     pub fn new(file_path: &str, layout: Layout, flags: Flags) -> Self {
         let mut c = Self {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(
+                layout, 
+                StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             flags,
             text_area: TextArea {
                 path: String::from(file_path),
+                prev: String::from(file_path),
                 char_count: file_path.chars().count() as u32,
                 cursor: 0,
                 start: 0,
                 end: 0,
                 selection: Selection::NONE,
                 is_readonly: flags.contains(Flags::ReadOnly),
-                width: 0,                
+                width: 0,
             },
             results_area: ResultsArea {
                 paths: vec![],
                 header_y_ofs: 0,
                 expanded_panel_y: 1,
                 width: 0,
+                selected: 0,
             },
-            finder: Finder::new(flags.contains(Flags::ReadOnly)),            
+            finder: Finder::new(flags.contains(Flags::ReadOnly)),
         };
         c.set_size_bounds(4, 1, u16::MAX, u16::MAX);
         c
@@ -256,7 +273,7 @@ impl PathFinder {
         }
     }
 
-    fn paint_results_area(&self, surface: &mut Surface, attr: CharAttribute, _attr_selected: CharAttribute) {
+    fn paint_results_area(&self, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
         let size = self.expanded_size();
         surface.fill_rect(
             Rect::with_size(0, self.results_area.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
@@ -268,9 +285,21 @@ impl PathFinder {
             attr,
         );
 
+        if self.results_area.selected > 0 {
+            surface.fill_rect(
+                Rect::with_size(
+                    ResultsArea::PADDING_LEFT as i32,
+                    self.results_area.expanded_panel_y + self.results_area.selected as i32,
+                    size.width as u16 - ResultsArea::PADDING,
+                    1,
+                ),
+                Character::with_attributes(' ', attr_selected),
+            );
+        }
+
         let mut y = self.results_area.expanded_panel_y + 1;
         for path in &self.results_area.paths {
-            if y > ResultsArea::PATH_FINDER_VISIBLE_RESULTS as i32 {
+            if y - 1 > ResultsArea::PATH_FINDER_VISIBLE_RESULTS as i32 {
                 break;
             }
             // paint fitting part of the current path
@@ -285,25 +314,53 @@ impl PathFinder {
                 }
                 count_chars += 1;
             }
-            surface.write_string(ResultsArea::PADDING_LEFT as i32, y, &path[..offset], attr, false);
+
+            let style = if self.results_area.selected as i32 == y - 1 {
+                attr_selected
+            } else {
+                attr
+            };            
+            surface.write_string(ResultsArea::PADDING_LEFT as i32, y, &path[..offset], style, false);
             y += 1;
         }
-    }    
+    }
 
     fn expand_results_area(&self) {
-        println!("[expand_results_area][PRE expand_results_area] is_expanded = {}, has_focus = {}", self.is_expanded(), self.has_focus());
         if !self.is_expanded() {
             self.expand(
-                Size::new(self.size().width, (ResultsArea::PATH_FINDER_VISIBLE_RESULTS + ResultsArea::PATH_FINDER_RESULTS_Y_OFFSET) as u32),
-                Size::new(self.size().width, (ResultsArea::PATH_FINDER_VISIBLE_RESULTS + ResultsArea::PATH_FINDER_RESULTS_Y_OFFSET) as u32),
+                Size::new(
+                    self.size().width,
+                    (ResultsArea::PATH_FINDER_VISIBLE_RESULTS + ResultsArea::PATH_FINDER_RESULTS_Y_OFFSET + 1) as u32,
+                ),
+                Size::new(
+                    self.size().width,
+                    (ResultsArea::PATH_FINDER_VISIBLE_RESULTS + ResultsArea::PATH_FINDER_RESULTS_Y_OFFSET + 1) as u32,
+                ),
             );
-        }        
+        }
+    }
+
+    fn update_results_selection(&mut self, offset: i32) -> Option<String> {
+        let result: i32 = self.results_area.selected as i32 + offset;
+        let max_visible_selected = self.results_area.paths.len()
+            .min(ResultsArea::PATH_FINDER_VISIBLE_RESULTS as usize);
+
+        if result <= 0 {
+            self.results_area.selected = 0;
+        } else if result < max_visible_selected as i32 {
+            self.results_area.selected = result as u16;
+        } else {
+            self.results_area.selected = max_visible_selected as u16;
+        }
+        if self.results_area.selected > 0 {
+            return Some(self.results_area.paths[self.results_area.selected as usize - 1].clone());
+        }
+        None
     }
 }
 
 impl OnPaint for PathFinder {
-    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        println!("[on_paint] is_expanded = {}, has_focus = {}", self.is_expanded(), self.has_focus());
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {        
         let attr = match () {
             _ if !self.is_enabled() => theme.editor.inactive,
             _ if self.has_focus() => theme.editor.focused,
@@ -313,9 +370,9 @@ impl OnPaint for PathFinder {
         surface.clear(Character::with_attributes(' ', attr));
         // paint
         if self.has_focus() {
-            self.paint_textbox_in_focus(surface, attr, theme.editor.pressed_or_selectd);            
+            self.paint_textbox_in_focus(surface, attr, theme.editor.pressed_or_selectd);
             if self.is_expanded() {
-                self.paint_results_area(surface, attr, theme.editor.pressed_or_selectd);            
+                self.paint_results_area(surface, attr, theme.editor.pressed_or_selectd);
             }
         } else {
             self.paint_textbox_out_of_focus(surface, attr);
@@ -329,6 +386,8 @@ impl OnKeyPressed for PathFinder {
             key!("Backspace") => {
                 self.text_area.delete_previous_character();
                 self.text_area.update_char_count(-1);
+                self.results_area.paths = self.finder.get_path_items(&self.text_area.path);
+                self.expand_results_area();
                 return EventProcessStatus::Processed;
             }
             key!("Delete") => {
@@ -361,15 +420,31 @@ impl OnKeyPressed for PathFinder {
                     return EventProcessStatus::Processed;
                 }
             }
+            key!("Up") => {
+                if let Some(selected_path) = self.update_results_selection(-1) {
+                    self.text_area.set_path(&selected_path, false);                    
+                } else {
+                    self.text_area.restore_previous_path();                    
+                }
+                return EventProcessStatus::Processed;
+            }
+            key!("Down") => {
+                if let Some(selected_path) = self.update_results_selection(1) {
+                    self.text_area.set_path(&selected_path, false);
+                } else {
+                    self.text_area.restore_previous_path();
+                }
+                return EventProcessStatus::Processed;
+            }
             _ => {
                 if character > 0 as char {
                     self.text_area.path.push(character);
                     self.text_area.update_char_count(1);
                     self.text_area.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
 
-                    // TODO: delete this, is for debug purposes                    
-                    self.results_area.paths.push(self.text_area.path.clone());                    
-                    self.expand_results_area();                    
+                    self.results_area.selected = 0;
+                    self.results_area.paths = self.finder.get_path_items(&self.text_area.path);
+                    self.expand_results_area();
                     return EventProcessStatus::Processed;
                 }
             }
@@ -386,7 +461,6 @@ impl OnResize for PathFinder {
 
 impl OnExpand for PathFinder {
     fn on_expand(&mut self, direction: ExpandedDirection) {
-        println!("[on_expand] is_expanded = {}, has_focus = {}", self.is_expanded(), self.has_focus());
         match direction {
             ExpandedDirection::OnTop => {
                 self.results_area.expanded_panel_y = -1;
@@ -399,9 +473,7 @@ impl OnExpand for PathFinder {
         }
     }
 
-    fn on_pack(&mut self) {
-        println!("[on_pack] is_expanded = {}, has_focus = {}", self.is_expanded(), self.has_focus());
-    }
+    fn on_pack(&mut self) {}
 }
 
 impl OnFocus for PathFinder {
