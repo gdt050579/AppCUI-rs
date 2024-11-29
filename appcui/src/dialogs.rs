@@ -71,8 +71,8 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
 pub fn save(file_name: &str, root: &str, extension_mask: &str /*flags: u32*/) -> Option<String> {
     match FileMask::parse(extension_mask) {
         Ok(mask_list) => {
-            let w = FileExplorer::new("Save", mask_list);
-            w.show();
+            //let w = FileExplorer::new("Save", mask_list);
+            //w.show();
             None
         }
         Err(err_msg) => {

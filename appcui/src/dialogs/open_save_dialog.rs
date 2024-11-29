@@ -1,10 +1,18 @@
+use std::marker::PhantomData;
+
 use dialogs::file_mask::FileMask;
 
+use super::{DialogResult, FileInfo};
 use crate::prelude::*;
-use super::{FileInfo,DialogResult};
+use crate::utils::*;
 
 #[ModalWindow(events = ToggleButtonEvents+ButtonEvents, response: DialogResult, internal: true)]
-pub(super) struct FileExplorer {
+pub(super) struct FileExplorer<T, E, R>
+where
+    T: Navigator<E, R> + 'static,
+    E: NavigatorEntry + 'static,
+    R: NavigatorRoot + 'static,
+{
     list: Handle<ListView<FileInfo>>,
     details: Handle<ToggleButton>,
     columns: Handle<ToggleButton>,
@@ -13,9 +21,21 @@ pub(super) struct FileExplorer {
     b_cancel: Handle<Button>,
     mask: Handle<ComboBox>,
     extension_mask: Vec<FileMask>,
+    nav: T,
+    _e: PhantomData<E>,
+    _r: PhantomData<R>,
 }
-impl FileExplorer {
-    pub(super) fn new(title: &str, extension_mask: Vec<FileMask>)->Self {
+
+// ====================================================================================================================
+// ====================================================================================================================
+
+impl<T, E, R> FileExplorer<T, E, R>
+where
+    T: Navigator<E, R>,
+    E: NavigatorEntry,
+    R: NavigatorRoot,
+{
+    pub(super) fn new(title: &str, extension_mask: Vec<FileMask>, nav: T) -> Self {
         let mut w = Self {
             base: ModalWindow::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
             list: Handle::None,
@@ -24,8 +44,11 @@ impl FileExplorer {
             name: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None,
-            mask: Handle::None,  
-            extension_mask,          
+            mask: Handle::None,
+            extension_mask,
+            nav,
+            _e: PhantomData,
+            _r: PhantomData,
         };
         w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
         let mut p = panel!("l:1,t:3,r:1,b:5");
@@ -33,7 +56,7 @@ impl FileExplorer {
         p.add(lv);
         w.add(p);
         w.add(label!("&Name,l:1,b:3,w:4"));
-        w.name = w.add(TextField::new("",Layout::new("l:6,b:3,r:11"),textfield::Flags::None));
+        w.name = w.add(TextField::new("", Layout::new("l:6,b:3,r:11"), textfield::Flags::None));
         w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
         w.add(label!("&Type,l:1,b:1,w:4"));
         let mut mask = ComboBox::new(Layout::new("l:6,b:1,r:11"), combobox::Flags::None);
@@ -45,15 +68,25 @@ impl FileExplorer {
         w.mask = w.add(mask);
         w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
         w.set_size_bounds(40, 10, u16::MAX, u16::MAX);
-        w       
+        w
     }
 }
-impl ButtonEvents for FileExplorer {
+impl<T, E, R> ButtonEvents for FileExplorer<T, E, R>
+where
+    T: Navigator<E, R>,
+    E: NavigatorEntry,
+    R: NavigatorRoot,
+{
     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
-impl ToggleButtonEvents for FileExplorer {
+impl<T, E, R> ToggleButtonEvents for FileExplorer<T, E, R>
+where
+    T: Navigator<E, R>,
+    E: NavigatorEntry,
+    R: NavigatorRoot,
+{
     fn on_selection_changed(&mut self, _handle: Handle<ToggleButton>, _selected: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
