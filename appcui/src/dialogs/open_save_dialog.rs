@@ -1,17 +1,14 @@
-use std::marker::PhantomData;
-
 use dialogs::file_mask::FileMask;
 
 use super::{DialogResult, FileInfo};
 use crate::prelude::*;
-use crate::utils::*;
+use crate::utils::Navigator;
+use crate::utils::fs::{Entry, Root};
 
 #[ModalWindow(events = ToggleButtonEvents+ButtonEvents, response: DialogResult, internal: true)]
-pub(super) struct FileExplorer<T, E, R>
+pub(super) struct FileExplorer<T>
 where
-    T: Navigator<E, R> + 'static,
-    E: NavigatorEntry + 'static,
-    R: NavigatorRoot + 'static,
+    T: Navigator<Entry, Root> + 'static,
 {
     list: Handle<ListView<FileInfo>>,
     details: Handle<ToggleButton>,
@@ -22,18 +19,14 @@ where
     mask: Handle<ComboBox>,
     extension_mask: Vec<FileMask>,
     nav: T,
-    _e: PhantomData<E>,
-    _r: PhantomData<R>,
 }
 
 // ====================================================================================================================
 // ====================================================================================================================
 
-impl<T, E, R> FileExplorer<T, E, R>
+impl<T> FileExplorer<T>
 where
-    T: Navigator<E, R>,
-    E: NavigatorEntry,
-    R: NavigatorRoot,
+    T: Navigator<Entry, Root> + 'static,
 {
     pub(super) fn new(title: &str, extension_mask: Vec<FileMask>, nav: T) -> Self {
         let mut w = Self {
@@ -47,8 +40,6 @@ where
             mask: Handle::None,
             extension_mask,
             nav,
-            _e: PhantomData,
-            _r: PhantomData,
         };
         w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
         let mut p = panel!("l:1,t:3,r:1,b:5");
@@ -71,21 +62,17 @@ where
         w
     }
 }
-impl<T, E, R> ButtonEvents for FileExplorer<T, E, R>
+impl<T> ButtonEvents for FileExplorer<T>
 where
-    T: Navigator<E, R>,
-    E: NavigatorEntry,
-    R: NavigatorRoot,
+    T: Navigator<Entry, Root> + 'static,
 {
     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
-impl<T, E, R> ToggleButtonEvents for FileExplorer<T, E, R>
+impl<T> ToggleButtonEvents for FileExplorer<T>
 where
-    T: Navigator<E, R>,
-    E: NavigatorEntry,
-    R: NavigatorRoot,
+    T: Navigator<Entry, Root> + 'static,
 {
     fn on_selection_changed(&mut self, _handle: Handle<ToggleButton>, _selected: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored

@@ -5,7 +5,7 @@ use crate::prelude::*;
 
 #[derive(Debug, ListViewItem)]
 pub(crate) struct Entry {
-    //#[Column(name : "&Name", width : 20)]
+    #[Column(name : "&Name", width : 20)]
     pub(crate) name: String,
     #[Column(name : "&Size", width : 10, align: right)]
     pub(crate) size: u64,
