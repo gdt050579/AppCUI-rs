@@ -105,6 +105,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | `add_items(...)`    | Adds a vector of items to the ListView control.                                                                                                                                                                                                        |
 | `add_to_group(...)` | Adds a vector if items to the ListView control and associate all of them to a group                                                                                                                                                                    |
 | `add_batch(...)`    | Adds multiple items to the listview. When an item is added to a listview, it is imediatly filtered based on the current search text. If you want to add multiple items (using various methods) and then filter them, you can use the add_batch method. |
+| `clear()`           | Clears all items from the listview                                                                                                                                                                                                                     |
 
 
 ### Item manipulation
