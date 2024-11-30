@@ -1,6 +1,5 @@
 mod dialog_buttons;
 mod dialog_result;
-mod file_info;
 mod file_mask;
 mod generic_alert_dialog;
 mod open_save_dialog;
@@ -9,7 +8,6 @@ mod tests;
 
 use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
-use file_info::FileInfo;
 use file_mask::FileMask;
 use generic_alert_dialog::GenericAlertDialog;
 use open_save_dialog::FileExplorer;
@@ -68,13 +66,12 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
     ValidateOrCancelResult::Cancel
 }
 
-static VFS: &str = "
-";
+static VFS: &str = include_str!("E:\\Lucru\\Personal\\AppCUI-rs\\scripts\\vfs.csv");
 
 pub fn save(file_name: &str, root: &str, extension_mask: &str /*flags: u32*/) -> Option<String> {
     match FileMask::parse(extension_mask) {
         Ok(mask_list) => {
-            let w = FileExplorer::new("Save", mask_list,utils::fs::NavSimulator::with_csv(VFS));
+            let w = FileExplorer::new("Save", "C:\\",mask_list,utils::fs::NavSimulator::with_csv(VFS));
             w.show();
             None
         }
