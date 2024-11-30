@@ -70,7 +70,7 @@ where
         mask.set_index(0);
         w.mask = w.add(mask);
         w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
-        w.set_size_bounds(40, 10, u16::MAX, u16::MAX);
+        w.set_size_bounds(40, 17, u16::MAX, u16::MAX);
         w
     }
     fn populate(&mut self) {
