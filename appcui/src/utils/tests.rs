@@ -3,6 +3,8 @@ use super::FormatRatings;
 use super::GlyphParser;
 use super::KeyValueParser;
 use super::Strategy;
+use super::TempBuffer;
+use super::TempString;
 use super::ValueType;
 use super::VectorIndex;
 use crate::system::Handle;
@@ -740,4 +742,24 @@ fn check_rating_two_chars() {
     assert_eq!(FormatRatings::two_chars('-', '+', 20, 100, 5, &mut buf_5), Some("+----"));
 
     assert_eq!(FormatRatings::two_chars(' ', '+', 0, 3, 5, &mut buf_3), None);
+}
+
+#[test]
+fn check_temp_string() {
+    let t: TempString<10> = TempString::new("1234567890");
+    assert_eq!(t.as_str(), "1234567890");
+    assert_eq!(t.is_on_heap(), false);
+    let t: TempString<10> = TempString::new("1234567890A");
+    assert_eq!(t.as_str(), "1234567890A");
+    assert_eq!(t.is_on_heap(), true);
+}
+
+#[test]
+fn check_temp_buffer() {
+    let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert_eq!(buf.is_on_heap(), false);
+    let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    assert_eq!(buf.is_on_heap(), true);
 }
