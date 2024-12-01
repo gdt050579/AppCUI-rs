@@ -8,7 +8,7 @@ use crate::prelude::*;
 use crate::utils::fs::{Entry, Root};
 use crate::utils::Navigator;
 
-#[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>, response: DialogResult, internal: true)]
+#[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: DialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where
     T: Navigator<Entry, Root> + 'static,
@@ -28,9 +28,6 @@ where
     g_folders: listview::Group,
     path: PathBuf,
 }
-
-// ====================================================================================================================
-// ====================================================================================================================
 
 impl<T> FileExplorer<T>
 where
@@ -80,7 +77,17 @@ where
     }
     fn populate(&mut self) {
         let is_root = self.path.is_absolute() && self.path.parent().is_none();
-        let entries = self.nav.entries(self.path.as_os_str().to_str().unwrap_or_default());
+        let mut entries = self.nav.entries(self.path.as_os_str().to_str().unwrap_or_default());
+        let filter_idx = if let Some(mask) = self.control(self.mask) {
+            mask.index().unwrap_or_default() as usize
+        } else {
+            0
+        };
+        if filter_idx < self.extension_mask.len() {
+            // we need to filter the files
+            let filter = &self.extension_mask[filter_idx];
+            entries.retain(|e| (e.entry_type != EntryType::File) || filter.matches(&e.name));
+        }
 
         let h = self.list;
         let g_folders = self.g_folders;
@@ -146,6 +153,14 @@ where
         ActionRequest::Allow
     }
 }
+impl<T> ComboBoxEvents for FileExplorer<T> where T: Navigator<Entry, Root> + 'static {
+    fn on_selection_changed(&mut self, handle: Handle<ComboBox>) -> EventProcessStatus {
+        if handle == self.mask {
+            self.populate();
+        }
+        EventProcessStatus::Processed
+    }
+}
 impl<T> ListViewEvents<Entry> for FileExplorer<T>
 where
     T: Navigator<Entry, Root> + 'static,
@@ -172,7 +187,7 @@ where
             self.path.push(name.as_str());
             repopulate = true;
         }
-        if repopulate{
+        if repopulate {
             self.path.push("");
             let h = self.path_viewer;
             let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
