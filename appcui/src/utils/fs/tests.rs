@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use super::NavSimulator;
-use crate::utils::{Navigator,NavigatorRoot,NavigatorEntry};
+use crate::utils::{fs::entry::EntryType, Navigator, NavigatorEntry, NavigatorRoot};
 
 #[test]
 fn check_simulator() {
@@ -33,20 +33,20 @@ fn check_simulator() {
     assert!(e.len() == 1);
     assert!(e[0].name() == "Program Files");
     assert!(e[0].size == 0);
-    assert!(e[0].folder);
+    assert!(e[0].entry_type == EntryType::Folder);
     assert!(e[0].created == NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap());    
     let e = nav.entries("C:\\Program Files\\");
     assert!(e.len() == 3);
     assert!(e[0].name() == "runme.exe");
     assert!(e[0].size == 123);
-    assert!(!e[0].folder);
+    assert!(e[0].entry_type == EntryType::File);
     assert!(e[0].created == NaiveDateTime::parse_from_str("2024-01-10 12:31:55", "%Y-%m-%d %H:%M:%S").unwrap());
     assert!(e[1].name() == "readme.txt");
     assert!(e[1].size == 123456);
-    assert!(!e[1].folder);
+    assert!(e[1].entry_type == EntryType::File);
     assert!(e[1].created == NaiveDateTime::parse_from_str("2023-02-05 09:12:25", "%Y-%m-%d %H:%M:%S").unwrap());
     assert!(e[2].name() == "Windows");
     assert!(e[2].size == 0);
-    assert!(e[2].folder);
+    assert!(e[2].entry_type == EntryType::Folder);
     assert!(e[2].created == NaiveDateTime::parse_from_str("2024-01-10 12:31:55", "%Y-%m-%d %H:%M:%S").unwrap());
 }

@@ -2,21 +2,28 @@ use crate::prelude::*;
 use crate::utils::NavigatorEntry;
 use chrono::NaiveDateTime;
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub(crate) enum EntryType {
+    UpDir,
+    File,
+    Folder,
+}
+
 #[derive(Debug)]
 pub(crate) struct Entry {
     pub(crate) name: String,
     pub(crate) size: u64,
     pub(crate) created: NaiveDateTime,
-    pub(crate) folder: bool,
+    pub(crate) entry_type: EntryType,
 }
 
 impl Entry {
-    pub(super) fn new(name: &str, size: u64, created: NaiveDateTime, folder: bool) -> Self {
+    pub(crate) fn new(name: &str, size: u64, created: NaiveDateTime, entry_type: EntryType) -> Self {
         Self {
             name: name.to_string(),
             size,
             created,
-            folder,
+            entry_type,
         }
     }
     pub(super) fn from_csv_line(line: &str, path: &str) -> Option<Self> {
@@ -48,7 +55,7 @@ impl Entry {
             name: full_path[path.len()..].to_string(),
             size,
             created,
-            folder,
+            entry_type: if folder { EntryType::Folder } else { EntryType::File },
         })
     }
 }
@@ -58,7 +65,7 @@ impl NavigatorEntry for Entry {
         &self.name
     }
     fn is_container(&self) -> bool {
-        self.folder
+        self.entry_type == EntryType::Folder
     }
 }
 
@@ -69,13 +76,18 @@ impl listview::ListItem for Entry {
         match column_index {
             0 => Some(listview::RenderMethod::Text(&self.name)),
             1 => {
-                if self.folder {
-                    Some(listview::RenderMethod::Ascii("Folder"))
-                } else {
-                    Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::AutoWithDecimals))
+                match self.entry_type {
+                    EntryType::UpDir => return Some(listview::RenderMethod::Ascii("UpDir")),
+                    EntryType::Folder => return Some(listview::RenderMethod::Ascii("Folder")),
+                    EntryType::File => return Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::AutoWithDecimals)),
                 }
             }
-            2 => Some(listview::RenderMethod::DateTime(self.created, listview::DateTimeFormat::Short)),
+            2 => {
+                match self.entry_type {
+                    EntryType::UpDir => return Some(listview::RenderMethod::Ascii("-")),
+                    _ => return Some(listview::RenderMethod::DateTime(self.created, listview::DateTimeFormat::Short)),
+                }
+            }
             _ => None,
         }
     }

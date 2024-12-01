@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use dialogs::file_mask::FileMask;
+use fs::EntryType;
 
 use super::DialogResult;
 use crate::prelude::*;
@@ -78,21 +79,32 @@ where
         w
     }
     fn populate(&mut self) {
+        let is_root = self.path.is_absolute() && self.path.parent().is_none();
         let entries = self.nav.entries(self.path.as_os_str().to_str().unwrap_or_default());
 
         let h = self.list;
         let g_folders = self.g_folders;
         let g_files = self.g_files;
+        let g_updir = self.g_updir;
         if let Some(lv) = self.control_mut(h) {
             lv.add_batch(|lv| {
                 lv.clear();
+                if !is_root {
+                    lv.add_item(listview::Item::new(
+                        Entry::new("..", 0, chrono::NaiveDateTime::default(), crate::utils::fs::EntryType::UpDir),
+                        false,
+                        None,
+                        ['🔙', ' '],
+                        g_updir,
+                    ));
+                }
                 for e in entries {
                     let is_folder = e.is_container();
                     lv.add_item(listview::Item::new(
                         e,
                         false,
                         None,
-                        [if is_folder { '📁' } else { '🗔' }, ' '],
+                        [if is_folder { '📁' } else { '📄' }, ' '],
                         if is_folder { g_folders } else { g_files },
                     ));
                 }
@@ -139,21 +151,28 @@ where
     T: Navigator<Entry, Root> + 'static,
 {
     fn on_item_action(&mut self, handle: Handle<ListView<Entry>>, item_index: usize) -> EventProcessStatus {
-        let data: Option<TempString<128>> = if let Some(lv) = self.control(handle) {
+        let (data, etype): (Option<TempString<128>>, EntryType) = if let Some(lv) = self.control(handle) {
             if let Some(e) = lv.item(item_index) {
                 if e.is_container() {
-                    Some(TempString::new(e.name()))
+                    (Some(TempString::new(e.name())), e.entry_type)
                 } else {
-                    None
+                    (None, e.entry_type)
                 }
             } else {
-                None
+                (None, EntryType::File)
             }
         } else {
-            None
+            (None, EntryType::File)
         };
-        if let Some(name) = data {
+        let mut repopulate = false;
+        if etype == EntryType::UpDir {
+            self.path.pop();
+            repopulate = true;
+        } else if let Some(name) = data {
             self.path.push(name.as_str());
+            repopulate = true;
+        }
+        if repopulate{
             self.path.push("");
             let h = self.path_viewer;
             let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
@@ -162,6 +181,6 @@ where
             }
             self.populate();
         }
-        EventProcessStatus::Ignored
+        EventProcessStatus::Processed
     }
 }
