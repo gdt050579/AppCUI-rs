@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use dialogs::file_mask::FileMask;
 
 use super::DialogResult;
@@ -5,13 +7,13 @@ use crate::prelude::*;
 use crate::utils::fs::{Entry, Root};
 use crate::utils::Navigator;
 
-#[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents, response: DialogResult, internal: true)]
+#[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>, response: DialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where
     T: Navigator<Entry, Root> + 'static,
 {
     list: Handle<ListView<Entry>>,
-    path: Handle<TextField>,
+    path_viewer: Handle<TextField>,
     details: Handle<ToggleButton>,
     columns: Handle<ToggleButton>,
     name: Handle<TextField>,
@@ -23,6 +25,7 @@ where
     g_updir: listview::Group,
     g_files: listview::Group,
     g_folders: listview::Group,
+    path: PathBuf,
 }
 
 // ====================================================================================================================
@@ -42,15 +45,16 @@ where
             b_ok: Handle::None,
             b_cancel: Handle::None,
             mask: Handle::None,
-            path: Handle::None,
+            path_viewer: Handle::None,
             extension_mask,
             nav,
             g_updir: listview::Group::None,
             g_files: listview::Group::None,
             g_folders: listview::Group::None,
+            path: PathBuf::from(path),
         };
         w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
-        w.path = w.add(TextField::new(path, Layout::new("l:9,t:1,r:1"), textfield::Flags::Readonly));
+        w.path_viewer = w.add(TextField::new(path, Layout::new("l:9,t:1,r:1"), textfield::Flags::Readonly));
         let mut p = panel!("l:1,t:3,r:1,b:5");
         let mut lv = listview!("Entry,d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+LargeIcons");
         w.g_updir = lv.add_group("UpDir");
@@ -74,17 +78,14 @@ where
         w
     }
     fn populate(&mut self) {
-        let entries = if let Some(path) = self.control(self.path) {
-            self.nav.entries(path.text())
-        } else {
-            Vec::new()
-        };
+        let entries = self.nav.entries(self.path.as_os_str().to_str().unwrap_or_default());
+
         let h = self.list;
         let g_folders = self.g_folders;
         let g_files = self.g_files;
         if let Some(lv) = self.control_mut(h) {
             lv.add_batch(|lv| {
-                //lv.clear();
+                lv.clear();
                 for e in entries {
                     let is_folder = e.is_container();
                     lv.add_item(listview::Item::new(
@@ -131,5 +132,36 @@ where
 
     fn on_cancel(&mut self) -> ActionRequest {
         ActionRequest::Allow
+    }
+}
+impl<T> ListViewEvents<Entry> for FileExplorer<T>
+where
+    T: Navigator<Entry, Root> + 'static,
+{
+    fn on_item_action(&mut self, handle: Handle<ListView<Entry>>, item_index: usize) -> EventProcessStatus {
+        let data: Option<TempString<128>> = if let Some(lv) = self.control(handle) {
+            if let Some(e) = lv.item(item_index) {
+                if e.is_container() {
+                    Some(TempString::new(e.name()))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        if let Some(name) = data {
+            self.path.push(name.as_str());
+            self.path.push("");
+            let h = self.path_viewer;
+            let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
+            if let Some(pv) = self.control_mut(h) {
+                pv.set_text(ts.as_str());
+            }
+            self.populate();
+        }
+        EventProcessStatus::Ignored
     }
 }
