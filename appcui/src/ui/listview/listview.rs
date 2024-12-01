@@ -376,6 +376,9 @@ where
         for group in &mut self.groups {
             group.set_items_count(0);
         }
+        self.top_view = 0;
+        self.pos = 0;
+        self.selected_items_count = 0;
         self.update_scrollbars();
         self.update_position(0, false);
     }
