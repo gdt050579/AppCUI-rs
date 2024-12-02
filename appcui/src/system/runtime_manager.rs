@@ -155,6 +155,10 @@ impl RuntimeManager {
 
         Ok(())
     }
+    #[inline(always)]
+    pub(crate) fn theme(&self) -> &Theme {
+        &self.theme
+    }   
     pub(crate) fn is_instantiated() -> bool {
         unsafe { RUNTIME_MANAGER.is_some() }
     }

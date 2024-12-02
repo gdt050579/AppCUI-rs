@@ -11,6 +11,7 @@ use crate::ui::{
     window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
+use crate::system::Theme;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 16)]
@@ -604,6 +605,11 @@ impl ControlBase {
             return menu.get_mut(menuitem_handle);
         }
         None
+    }
+
+    #[inline(always)]
+    pub fn theme(&self) -> &Theme {
+        RuntimeManager::get().theme()
     }
 }
 // default implementations

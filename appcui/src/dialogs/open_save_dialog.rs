@@ -93,6 +93,9 @@ where
         let g_folders = self.g_folders;
         let g_files = self.g_files;
         let g_updir = self.g_updir;
+        let theme = self.theme();
+        let c_files = theme.text.normal;
+        let c_folders = theme.text.focused;
         if let Some(lv) = self.control_mut(h) {
             lv.add_batch(|lv| {
                 lv.clear();
@@ -100,7 +103,7 @@ where
                     lv.add_item(listview::Item::new(
                         Entry::new("..", 0, chrono::NaiveDateTime::default(), crate::utils::fs::EntryType::UpDir),
                         false,
-                        None,
+                        Some(c_folders),
                         ['🔙', ' '],
                         g_updir,
                     ));
@@ -110,7 +113,7 @@ where
                     lv.add_item(listview::Item::new(
                         e,
                         false,
-                        None,
+                        if is_folder { Some(c_folders) } else { Some(c_files) },
                         [if is_folder { '📁' } else { '📄' }, ' '],
                         if is_folder { g_folders } else { g_files },
                     ));
@@ -153,7 +156,10 @@ where
         ActionRequest::Allow
     }
 }
-impl<T> ComboBoxEvents for FileExplorer<T> where T: Navigator<Entry, Root> + 'static {
+impl<T> ComboBoxEvents for FileExplorer<T>
+where
+    T: Navigator<Entry, Root> + 'static,
+{
     fn on_selection_changed(&mut self, handle: Handle<ComboBox>) -> EventProcessStatus {
         if handle == self.mask {
             self.populate();
