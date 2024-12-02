@@ -6,13 +6,16 @@ mod open_save_dialog;
 #[cfg(test)]
 mod tests;
 
+use crate::{
+    prelude::{window, ModalWindowMethods},
+    utils,
+};
 use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
 use file_mask::FileMask;
 use generic_alert_dialog::GenericAlertDialog;
 use open_save_dialog::FileExplorer;
-
-use crate::{prelude::{window, ModalWindowMethods}, utils};
+use EnumBitFlags::EnumBitFlags;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum ValidateOrCancelResult {
@@ -68,17 +71,58 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
 
 static VFS: &str = include_str!("E:\\Lucru\\Personal\\AppCUI-rs\\scripts\\vfs.csv");
 
-pub fn save(file_name: &str, root: &str, extension_mask: &str /*flags: u32*/) -> Option<String> {
-    match FileMask::parse(extension_mask) {
+pub enum Location<'a> {
+    Current,
+    Last,
+    Path(&'a str),
+}
+
+#[EnumBitFlags(bits = 8)]
+pub enum SaveFileDialogFlags {
+    Icons = 1,
+    ValidateOverwrite = 2,
+    SaveAs = 4,
+}
+// save:
+//     - file_name: &str
+//     - loction: Current, Last, Specific (path)
+//     - extension_mask: Option<&str> (None inseamna all files)
+//     - flags: u32 -> Icons, ValidateOverwrite, SaveAs (daca e setat, se va deschide cu numele save as, altfel cu save)
+// returneaza: Option<PathBuf>
+// DisableSelection trebuie adaugat si setat la ListView
+// Button de new folder
+
+// open:
+//     - file_name: &str
+//     - location: Current, Last, Specific (path)
+//     - extension_mask: Option<&str> (None inseamna all files)
+//     - flags: u32 -> Icons,
+// returneaza: Option<PathBuf>
+// DisableSelection trebuie adaugat si setat la ListView
+
+// open_multiple:
+//     - location: Current, Last, Specific (path)
+//     - extension_mask: Option<&str> (None inseamna all files)
+//     - flags: u32 -> Icons
+// returneaza: Option<Vec<PathBuf>>
+// nu are campul de file_name
+pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<String> {
+    let ext_mask = extension_mask.unwrap_or_default();
+    match FileMask::parse(ext_mask) {
         Ok(mask_list) => {
-            let w = FileExplorer::new("Save", "C:\\",mask_list,utils::fs::NavSimulator::with_csv(VFS));
+            let title = if flags.contains(SaveFileDialogFlags::SaveAs) {
+                "Save As"
+            } else {
+                "Save"
+            };
+            let w = FileExplorer::new(title, "C:\\", mask_list, utils::fs::NavSimulator::with_csv(VFS));
             w.show();
             None
         }
         Err(err_msg) => {
             panic!(
                 "Error parsing file mask: '{}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{}",
-                extension_mask, err_msg
+                ext_mask, err_msg
             );
         }
     }
