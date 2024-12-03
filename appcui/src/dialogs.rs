@@ -6,6 +6,8 @@ mod open_save_dialog;
 #[cfg(test)]
 mod tests;
 
+use std::path::{Path, PathBuf};
+
 use crate::{
     prelude::{window, ModalWindowMethods},
     utils,
@@ -74,7 +76,7 @@ static VFS: &str = include_str!("E:\\Lucru\\Personal\\AppCUI-rs\\scripts\\vfs.cs
 pub enum Location<'a> {
     Current,
     Last,
-    Path(&'a str),
+    Path(&'a Path),
 }
 
 #[EnumBitFlags(bits = 8)]
@@ -106,7 +108,7 @@ pub enum SaveFileDialogFlags {
 //     - flags: u32 -> Icons
 // returneaza: Option<Vec<PathBuf>>
 // nu are campul de file_name
-pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<String> {
+pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
     let ext_mask = extension_mask.unwrap_or_default();
     match FileMask::parse(ext_mask) {
         Ok(mask_list) => {
@@ -115,7 +117,14 @@ pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, f
             } else {
                 "Save"
             };
-            let w = FileExplorer::new(title, "C:\\", mask_list, utils::fs::NavSimulator::with_csv(VFS));
+            let w = FileExplorer::new(
+                file_name,
+                title,
+                location,
+                mask_list,
+                utils::fs::NavSimulator::with_csv(VFS),
+                flags.contains(SaveFileDialogFlags::Icons),
+            );
             w.show();
             None
         }

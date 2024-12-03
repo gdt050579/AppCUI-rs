@@ -1,12 +1,16 @@
 use std::path::PathBuf;
+use std::sync::OnceLock;
 
 use dialogs::file_mask::FileMask;
 use fs::EntryType;
 
 use super::DialogResult;
+use super::Location;
 use crate::prelude::*;
 use crate::utils::fs::{Entry, Root};
 use crate::utils::Navigator;
+
+static last_path: OnceLock<PathBuf> = OnceLock::new();
 
 #[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: DialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
@@ -33,7 +37,7 @@ impl<T> FileExplorer<T>
 where
     T: Navigator<Entry, Root> + 'static,
 {
-    pub(super) fn new(title: &str, path: &str, extension_mask: Vec<FileMask>, nav: T) -> Self {
+    pub(super) fn new(file_name: &str, title: &str, location: Location, extension_mask: Vec<FileMask>, nav: T, icons: bool) -> Self {
         let mut w = Self {
             base: ModalWindow::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
             list: Handle::None,
@@ -49,19 +53,27 @@ where
             g_updir: listview::Group::None,
             g_files: listview::Group::None,
             g_folders: listview::Group::None,
-            path: PathBuf::from(path),
+            path: PathBuf::new(),
+        };
+        w.path = match location {
+            Location::Current => std::env::current_dir().unwrap_or_default(),
+            Location::Last => last_path.get_or_init(|| std::env::current_dir().unwrap_or_default()).clone(),
+            Location::Path(p) => p.to_path_buf(),
         };
         w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
-        w.path_viewer = w.add(TextField::new(path, Layout::new("l:9,t:1,r:1"), textfield::Flags::Readonly));
+        w.path_viewer = w.add(TextField::new("???", Layout::new("l:9,t:1,r:1"), textfield::Flags::Readonly));
         let mut p = panel!("l:1,t:3,r:1,b:5");
-        let mut lv = listview!("Entry,d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+LargeIcons");
+        let mut lv: ListView<Entry> = ListView::new(
+            Layout::new("d:c,w:100%,h:100%"),
+            listview::Flags::SearchBar | listview::Flags::ScrollBars | if icons { listview::Flags::LargeIcons } else { listview::Flags::None },
+        );
         w.g_updir = lv.add_group("UpDir");
         w.g_folders = lv.add_group("Folders");
         w.g_files = lv.add_group("Files");
         w.list = p.add(lv);
         w.add(p);
         w.add(label!("&Name,l:1,b:3,w:4"));
-        w.name = w.add(TextField::new("", Layout::new("l:6,b:3,r:11"), textfield::Flags::None));
+        w.name = w.add(TextField::new(file_name, Layout::new("l:6,b:3,r:11"), textfield::Flags::None));
         w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
         w.add(label!("&Type,l:1,b:1,w:4"));
         let mut mask = ComboBox::new(Layout::new("l:6,b:1,r:11"), combobox::Flags::None);
