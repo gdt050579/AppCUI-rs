@@ -5,12 +5,16 @@ mod listscrollbars;
 mod scrollbars;
 pub mod column;
 mod columns_header;
+mod navigator_component;
 
 // pub(crate) use self::scrollbars::VScrollBar;
 // pub(crate) use self::horizontal_scrollbar::HScrollBar;
 // use self::process_event_result::ProcessEventResult;
 pub(crate) use self::combobox_component::ComboBoxComponent;
 pub(crate) use self::combobox_component::ComboBoxComponentDataProvider;
+pub(crate) use self::navigator_component::NavigatorComponent;
+pub(crate) use self::navigator_component::NavigatorComponentControlFunctions;
+pub(crate) use self::navigator_component::NavigatorComponentPaintFunctions;
 
 pub use self::scrollbars::ScrollBars;
 pub use self::listscrollbars::ListScrollBars;

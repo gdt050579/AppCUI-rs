@@ -1,6 +1,5 @@
 mod pathfinder;
 mod initialization_flags;
-mod finder;
 pub mod events;
 #[cfg(test)]
 mod tests;

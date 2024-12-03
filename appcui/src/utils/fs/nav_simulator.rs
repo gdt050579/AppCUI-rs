@@ -28,4 +28,7 @@ impl crate::utils::Navigator<Entry,Root> for NavSimulator {
         }
         v
     }
+    fn new() -> Self {
+        Self { data: String::new() }
+    }
 }

@@ -28,7 +28,7 @@ impl Entry {
         let mut parts = line.split(',');
         let entry_type = parts.next()?;
         let full_path = parts.next()?;
-        if full_path.starts_with(path) == false {
+        if !full_path.starts_with(path) {
             return None;
         }
         if full_path.len() <= path.len() {
