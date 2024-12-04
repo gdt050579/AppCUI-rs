@@ -62,7 +62,7 @@ where
             value: clamped_value,
             format,
             bound: 0,
-            ok_step: T::one(),
+            ok_step: T::ONE,
             max_size_per_entry: 0,
             poz_triunghi: 0,
             last_pressed_coods: Point::new(-1, -1),
@@ -174,6 +174,14 @@ where
     }
     fn update_cursor_pos(&mut self, x: i32) {
         self.poz_triunghi = (x / self.max_size_per_entry as i32) * self.max_size_per_entry as i32;
+        //self.value = self.min + self.step * (x / self.max_size_per_entry as i32);
+        let mut c = 0;
+        let mut newVal = self.min;
+        while c < (x / self.max_size_per_entry as i32){
+            newVal = newVal + self.ok_step;
+            c += 1;
+        }
+        self.value = Self::to_interval(newVal, self.min, self.max);
     }
 }
 impl<T> OnPaint for NumericSlider<T>
@@ -187,7 +195,7 @@ where
 
         let mut string_buffer = String::with_capacity(32);
 
-        //surface.write_string(0, 0, &self.last_pressed_coods.x.to_string(), theme.text.normal, false);
+        surface.write_string(5, 0, &self.value.to_string(), theme.text.normal, false);
         //surface.write_string(5, 0, &self.last_pressed_coods.y.to_string(), theme.text.normal, false);
 
         //printez valorile
@@ -207,8 +215,8 @@ where
 
             surface.write_string(value_X, value_Y, &string_buffer, theme.text.normal, false);
 
-            let indicator_pos_X = value_X + (string_buffer.len() as i32) / 2;
-            //let indicator_pos_X = value_X;
+            //let indicator_pos_X = value_X + (string_buffer.len() as i32) / 2;
+            let indicator_pos_X = value_X;
             if current_value == self.min {
                 surface.write_char(indicator_pos_X, value_Y - 1, current_character_set.start_char);
                 first_column = indicator_pos_X;
@@ -299,10 +307,7 @@ where
         };
         self.find_ok_step();
         self.compute_size_per_entru();
-        if old_size.width > 0 {
-            self.poz_triunghi = self.poz_triunghi * new_size.width as i32 / old_size.width as i32;
-        } else {
-            self.poz_triunghi = 0;
-        }
+        self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.max_size_per_entry as u32) as i32;
+        self.value = Self::to_interval(self.min + self.ok_step * ((self.value - self.min) / self.ok_step), self.min, self.max);
     }
 }
