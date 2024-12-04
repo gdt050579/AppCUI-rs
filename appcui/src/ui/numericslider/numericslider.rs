@@ -130,7 +130,7 @@ where
         }
 
         while total_size > self.bound as u32 && current_step < self.max {
-            current_step = current_step + T::one();
+            current_step = current_step + T::ONE;
             total_size = self.get_values_count_with_custom_step(current_step) * size_per_entry as u32;
         }
 

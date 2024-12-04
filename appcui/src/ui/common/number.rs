@@ -1,6 +1,6 @@
 use crate::utils::FormatNumber;
 use std::fmt::Display;
-use std::ops::{Add, Sub, Div};
+use std::ops::{Add, Sub, Div, Mul};
 use std::str::FromStr;
 
 #[derive(Clone, Copy)]
@@ -12,7 +12,7 @@ pub enum Format {
     Size,
 }
 
-pub trait Number: Add<Output = Self> + Sub<Output = Self> + Div<Output = Self>  + Copy + Clone + PartialOrd + PartialEq + Display + FromStr {
+pub trait Number: Add<Output = Self> + Sub<Output = Self> + Div<Output = Self> + Mul<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display + FromStr {
     const ONE: Self;
     fn write_to_string(&self, writer: &mut String, format: Format);
     fn is_zero(&self) -> bool;
