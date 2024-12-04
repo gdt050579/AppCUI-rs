@@ -4,15 +4,20 @@ use std::sync::OnceLock;
 use dialogs::file_mask::FileMask;
 use fs::EntryType;
 
-use super::DialogResult;
 use super::Location;
 use crate::prelude::*;
 use crate::utils::fs::{Entry, Root};
 use crate::utils::Navigator;
 
+pub(super) enum OpenSaveDialogResult {
+    Path(PathBuf),
+    MultiplePaths(Vec<PathBuf>),
+    Cancel,
+}
+
 static last_path: OnceLock<PathBuf> = OnceLock::new();
 
-#[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: DialogResult, internal: true)]
+#[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where
     T: Navigator<Entry, Root> + 'static,
@@ -133,12 +138,23 @@ where
             });
         }
     }
+    fn return_result(&mut self) {
+        self.exit_with(OpenSaveDialogResult::Cancel);
+    }
 }
 impl<T> ButtonEvents for FileExplorer<T>
 where
     T: Navigator<Entry, Root> + 'static,
 {
-    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+    fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
+        if handle == self.b_cancel {
+            self.exit_with(OpenSaveDialogResult::Cancel);
+            return EventProcessStatus::Processed;
+        }
+        if handle == self.b_ok {
+            self.return_result();
+            return EventProcessStatus::Processed;
+        }
         EventProcessStatus::Ignored
     }
 }
@@ -162,7 +178,9 @@ where
 
     fn on_deactivate(&mut self) {}
 
-    fn on_accept(&mut self) {}
+    fn on_accept(&mut self) {
+        self.return_result();
+    }
 
     fn on_cancel(&mut self) -> ActionRequest {
         ActionRequest::Allow

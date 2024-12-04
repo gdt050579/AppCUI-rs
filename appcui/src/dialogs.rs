@@ -16,7 +16,7 @@ use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
 use file_mask::FileMask;
 use generic_alert_dialog::GenericAlertDialog;
-use open_save_dialog::FileExplorer;
+use open_save_dialog::{FileExplorer, OpenSaveDialogResult};
 use EnumBitFlags::EnumBitFlags;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -125,8 +125,11 @@ pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, f
                 utils::fs::NavSimulator::with_csv(VFS),
                 flags.contains(SaveFileDialogFlags::Icons),
             );
-            w.show();
-            None
+            let result = w.show();
+            match result {
+                Some(OpenSaveDialogResult::Path(path)) => Some(path),
+                _ => None,
+            }
         }
         Err(err_msg) => {
             panic!(
