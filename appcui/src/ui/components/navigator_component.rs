@@ -3,7 +3,6 @@ use crate::prelude::*;
 use crate::utils::glyphs::GlyphParser;
 use std::marker::PhantomData;
 
-
 //TODO: make separate cfgs for different OS
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
 
@@ -41,10 +40,10 @@ where
         &self.suggestions
     }
     fn update_suggestions(&mut self, path: &str, navigator: &T) {
-        println!("path = {}", path);
+        // println!("path = {}", path);
         // get folder for the input path
         let folder = Self::get_folder(path);
-        println!("folder = {}", folder);
+        // println!("folder = {}", folder);
         if folder != self.cached_path {
             // create cache for this folder
             let folder_contents = navigator.entries(folder);
@@ -56,8 +55,7 @@ where
                         let mut container_path = entry.name().to_string();
                         container_path.push(PLATFORM_SEPARATOR_CHARACTER);
                         self.cached_items.push(container_path);
-                    }
-                    else {
+                    } else {
                         self.cached_items.push(entry.name().to_string());
                     }
                 }
@@ -84,7 +82,7 @@ where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
     T: crate::utils::Navigator<E, R>,
-{   
+{
     is_readonly: bool,
     navigator_cacher: NavigatorDataCacher<T, E, R>,
 
@@ -98,10 +96,11 @@ where
     char_count: u32,
     selection: Selection,
 
-    // suggestions area    
+    // suggestions area
     header_y_ofs: i32,
     expanded_panel_y: i32,
-    selected: u16,
+    selected_suggestion_pos: u16,
+    start_suggestions_pos: u16,
 
     // unused
     _phantom_t: std::marker::PhantomData<T>,
@@ -156,7 +155,8 @@ where
             //suggestions: vec![],
             header_y_ofs: 0,
             expanded_panel_y: 1,
-            selected: 0,
+            selected_suggestion_pos: 0,
+            start_suggestions_pos: 1,
             navigator_cacher: NavigatorDataCacher::new(),
             _phantom_r: PhantomData,
             _phantom_t: PhantomData,
@@ -287,24 +287,32 @@ where
             return char::from(Self::PATH_CHAR_DOTS);
         }
         match ch {
-            PLATFORM_SEPARATOR_CHARACTER => char::from(Self::PATH_CHAR_SEPARTOR),            
+            PLATFORM_SEPARATOR_CHARACTER => char::from(Self::PATH_CHAR_SEPARTOR),
             _ => ch,
         }
     }
 
-    fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {
-        let result: i32 = self.selected as i32 + offset;
-        let max_visible_selected = self.navigator_cacher.suggestions.len().min(Self::PATH_FINDER_VISIBLE_RESULTS as usize);
+    fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {        
+        let suggestions = self.navigator_cacher.get_suggestions();
+        let new_pos: i32 = self.selected_suggestion_pos as i32 + offset;
+        let end_visible_pos = (self.start_suggestions_pos + Self::PATH_FINDER_VISIBLE_RESULTS - 1).min(suggestions.len() as u16);
 
-        if result <= 0 {
-            self.selected = 0;
-        } else if result < max_visible_selected as i32 {
-            self.selected = result as u16;
-        } else {
-            self.selected = max_visible_selected as u16;
-        }
-        if self.selected > 0 {
-            return Some(self.navigator_cacher.suggestions[self.selected as usize - 1].clone());
+        // println!("suggestions.len() = {}, selected = {}, start = {} end_visible_pos = {}", 
+        // suggestions.len(), self.selected_suggestion_pos, self.start_suggestions_pos, end_visible_pos);
+
+        (self.selected_suggestion_pos, self.start_suggestions_pos) = match () {
+            _ if suggestions.is_empty() => (0, 1),
+            _ if new_pos <= 0 => (0, 1),
+            _ if new_pos < self.start_suggestions_pos as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
+            _ if new_pos <= end_visible_pos as i32 => (new_pos as u16, self.start_suggestions_pos),
+            _ if new_pos <= suggestions.len() as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
+            _ => (suggestions.len() as u16,  self.start_suggestions_pos),
+        };
+
+        // println!("RESULTED -> selected = {}, start = {} ", self.selected_suggestion_pos, self.start_suggestions_pos);
+
+        if self.selected_suggestion_pos > 0 {
+            return Some(suggestions[self.selected_suggestion_pos as usize - 1].clone());
         }
         None
     }
@@ -390,15 +398,17 @@ where
                     self.restore_path_from_backup();
                 }
                 self.move_cursor_to(self.input_path.len(), false, false);
+
                 return EventProcessStatus::Processed;
             }
             _ => {
-                if character > 0 as char {                    
+                if character > 0 as char {
                     self.input_path.push(character);
                     self.update_char_count(1, false);
                     self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
 
-                    self.selected = 0;
+                    self.selected_suggestion_pos = 0;
+                    self.start_suggestions_pos = 1;
                     self.navigator_cacher.update_suggestions(&self.input_path, navigator);
                     self.expand_suggestions_area(control);
                     return EventProcessStatus::Processed;
@@ -536,11 +546,11 @@ where
             attr,
         );
 
-        if self.selected > 0 {
+        if self.selected_suggestion_pos > 0 {
             surface.fill_rect(
                 Rect::with_size(
                     Self::PADDING_LEFT as i32,
-                    self.expanded_panel_y + self.selected as i32,
+                    self.expanded_panel_y + self.selected_suggestion_pos as i32 - self.start_suggestions_pos as i32 + 1,
                     size.width as u16 - Self::PADDING,
                     1,
                 ),
@@ -549,7 +559,10 @@ where
         }
 
         let mut y = self.expanded_panel_y + 1;
-        for path_entry in self.navigator_cacher.get_suggestions() {
+        let suggestions = self.navigator_cacher.get_suggestions();
+        let start_index: usize = self.start_suggestions_pos as usize - 1;
+        let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());       
+        for path_entry in &suggestions[start_index..end_index] {
             let path = path_entry;
             if y - 1 > Self::PATH_FINDER_VISIBLE_RESULTS as i32 {
                 break;
@@ -567,7 +580,7 @@ where
                 count_chars += 1;
             }
 
-            let style = if self.selected as i32 == y - 1 { attr_selected } else { attr };
+            let style = if self.selected_suggestion_pos as i32 - self.start_suggestions_pos as i32 == y - 2  { attr_selected } else { attr };
             surface.write_string(Self::PADDING_LEFT as i32, y, &path[..offset], style, false);
             y += 1;
         }

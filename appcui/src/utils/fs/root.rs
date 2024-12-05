@@ -1,4 +1,5 @@
 use crate::utils::NavigatorRoot;
+#[derive(Debug)]
 pub(crate) struct Root {
     pub(crate) name: String,
     pub(crate) size: u64,

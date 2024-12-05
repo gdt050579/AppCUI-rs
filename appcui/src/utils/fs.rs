@@ -1,7 +1,11 @@
+
 mod navigator;
 mod root;
 mod entry;
 mod nav_simulator;
+
+#[cfg(target_os="windows")]
+mod windows;
 #[cfg(test)]
 mod tests;
 
@@ -9,3 +13,6 @@ pub(crate) use navigator::Navigator;
 pub(crate) use nav_simulator::NavSimulator;
 pub(crate) use root::Root;
 pub(crate) use entry::Entry;
+
+#[cfg(target_os="windows")]
+pub(self) use windows::get_os_roots;

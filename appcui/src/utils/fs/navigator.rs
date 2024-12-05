@@ -6,6 +6,8 @@ use std::os::windows::fs::MetadataExt;
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+
+
 pub(crate) struct Navigator {   
 }
 
@@ -15,7 +17,7 @@ impl crate::utils::Navigator<Entry, Root> for Navigator {
     }
 
     fn roots(&self) -> Vec<Root> {
-        todo!()
+        super::get_os_roots()
     }
     fn new() -> Self {
         Self {  }
