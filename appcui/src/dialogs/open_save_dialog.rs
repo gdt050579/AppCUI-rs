@@ -155,8 +155,18 @@ where
             });
         }
     }
-    fn return_result(&mut self) {
+    fn return_result_from_save(&mut self) {
         self.exit_with(OpenSaveDialogResult::Cancel);
+    }
+    fn return_result_from_open(&mut self) {
+        self.exit_with(OpenSaveDialogResult::Cancel);
+    }
+    fn return_result(&mut self) {
+        if self.flags.contains(InnerFlags::Save) {
+            self.return_result_from_save()
+        } else {
+            self.return_result_from_open()
+        }
     }
 }
 impl<T> ButtonEvents for FileExplorer<T>
@@ -249,6 +259,25 @@ where
             }
             self.populate();
         }
+        EventProcessStatus::Processed
+    }
+
+    fn on_current_item_changed(&mut self, handle: Handle<ListView<Entry>>) -> EventProcessStatus {
+        let current_item = if let Some(lv) = self.control(handle) {
+            if let Some(e) = lv.current_item() {
+                if e.entry_type == EntryType::File {
+                    e.name()
+                } else { "" }
+            } else { "" }
+        } else {
+            ""
+        };
+        let temp_string: TempString<128> = TempString::new(current_item);
+        let h = self.name;
+        if let Some(tf) = self.control_mut(h) {
+            tf.set_text(temp_string.as_str());
+        }
+
         EventProcessStatus::Processed
     }
 }
