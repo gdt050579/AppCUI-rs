@@ -16,7 +16,7 @@ use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
 use file_mask::FileMask;
 use generic_alert_dialog::GenericAlertDialog;
-use open_save_dialog::{FileExplorer, OpenSaveDialogResult};
+use open_save_dialog::{FileExplorer, OpenSaveDialogResult, InnerFlags};
 use EnumBitFlags::EnumBitFlags;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -108,7 +108,10 @@ pub enum SaveFileDialogFlags {
 //     - flags: u32 -> Icons
 // returneaza: Option<Vec<PathBuf>>
 // nu are campul de file_name
-pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
+pub(super) fn inner_save<T>(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags, nav: T) -> Option<PathBuf>
+where
+    T: crate::utils::Navigator<crate::utils::fs::Entry, crate::utils::fs::Root> + 'static,
+{
     let ext_mask = extension_mask.unwrap_or_default();
     match FileMask::parse(ext_mask) {
         Ok(mask_list) => {
@@ -117,14 +120,15 @@ pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, f
             } else {
                 "Save"
             };
-            let w = FileExplorer::new(
-                file_name,
-                title,
-                location,
-                mask_list,
-                utils::fs::NavSimulator::with_csv(VFS),
-                flags.contains(SaveFileDialogFlags::Icons),
-            );
+            let mut inner_flags = InnerFlags::Save;
+            if flags.contains(SaveFileDialogFlags::Icons) {
+                inner_flags |= InnerFlags::Icons;
+            }
+            if flags.contains(SaveFileDialogFlags::ValidateOverwrite) {
+                inner_flags |= InnerFlags::ValidateOverwrite;
+            }
+
+            let w = FileExplorer::new(file_name, title, location, mask_list, nav, inner_flags);
             let result = w.show();
             match result {
                 Some(OpenSaveDialogResult::Path(path)) => Some(path),
@@ -138,4 +142,8 @@ pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, f
             );
         }
     }
+}
+
+pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
+    inner_save(file_name, location, extension_mask, flags, utils::fs::NavSimulator::with_csv(VFS))
 }

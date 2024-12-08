@@ -8,6 +8,7 @@ use super::Location;
 use crate::prelude::*;
 use crate::utils::fs::{Entry, Root};
 use crate::utils::Navigator;
+use EnumBitFlags::EnumBitFlags;
 
 pub(super) enum OpenSaveDialogResult {
     Path(PathBuf),
@@ -15,7 +16,15 @@ pub(super) enum OpenSaveDialogResult {
     Cancel,
 }
 
-static last_path: OnceLock<PathBuf> = OnceLock::new();
+#[EnumBitFlags(bits = 8)]
+pub(super) enum InnerFlags {
+    Save = 1,
+    Icons = 2,
+    MultipleOpen = 4,
+    ValidateOverwrite = 8,
+}
+
+static LAST_PATH: OnceLock<PathBuf> = OnceLock::new();
 
 #[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
@@ -36,13 +45,14 @@ where
     g_files: listview::Group,
     g_folders: listview::Group,
     path: PathBuf,
+    flags: InnerFlags,
 }
 
 impl<T> FileExplorer<T>
 where
     T: Navigator<Entry, Root> + 'static,
 {
-    pub(super) fn new(file_name: &str, title: &str, location: Location, extension_mask: Vec<FileMask>, nav: T, icons: bool) -> Self {
+    pub(super) fn new(file_name: &str, title: &str, location: Location, extension_mask: Vec<FileMask>, nav: T, flags: InnerFlags) -> Self {
         let mut w = Self {
             base: ModalWindow::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
             list: Handle::None,
@@ -59,10 +69,11 @@ where
             g_files: listview::Group::None,
             g_folders: listview::Group::None,
             path: PathBuf::new(),
+            flags,
         };
         w.path = match location {
             Location::Current => std::env::current_dir().unwrap_or_default(),
-            Location::Last => last_path.get_or_init(|| std::env::current_dir().unwrap_or_default()).clone(),
+            Location::Last => LAST_PATH.get_or_init(|| std::env::current_dir().unwrap_or_default()).clone(),
             Location::Path(p) => p.to_path_buf(),
         };
         w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
@@ -70,7 +81,13 @@ where
         let mut p = panel!("l:1,t:3,r:1,b:5");
         let mut lv: ListView<Entry> = ListView::new(
             Layout::new("d:c,w:100%,h:100%"),
-            listview::Flags::SearchBar | listview::Flags::ScrollBars | if icons { listview::Flags::LargeIcons } else { listview::Flags::None },
+            listview::Flags::SearchBar
+                | listview::Flags::ScrollBars
+                | if flags.contains(InnerFlags::Icons) {
+                    listview::Flags::LargeIcons
+                } else {
+                    listview::Flags::None
+                },
         );
         w.g_updir = lv.add_group("UpDir");
         w.g_folders = lv.add_group("Folders");
