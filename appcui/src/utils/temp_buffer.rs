@@ -26,14 +26,23 @@ impl<const N: usize> TempBuffer<N> {
             },
         }
     }
+    #[inline(always)]
     pub(crate) fn as_slice(&self) -> &[u8] {
         match &self.inner {
             InnerTempBuffer::StackBuffer(buffer) => &buffer.buffer[..buffer.len],
             InnerTempBuffer::HeapBuffer(buffer) => buffer.as_slice(),
         }
     }
+    #[inline(always)]
     pub(crate) fn is_on_heap(&self) -> bool {
         matches!(&self.inner, InnerTempBuffer::HeapBuffer(_))
+    }
+    #[inline(always)]
+    pub(crate) fn is_empty(&self) -> bool {
+        match &self.inner {
+            InnerTempBuffer::StackBuffer(buffer) => buffer.len == 0,
+            InnerTempBuffer::HeapBuffer(buffer) => buffer.is_empty(),
+        }
     }
 }
 
@@ -53,5 +62,9 @@ impl<const N: usize> TempString<N> {
     #[inline(always)]
     pub(crate) fn is_on_heap(&self) -> bool {
         self.buffer.is_on_heap()
+    }
+    #[inline(always)]
+    pub(crate) fn is_empty(&self) -> bool {
+        self.buffer.is_empty()
     }
 }

@@ -267,17 +267,22 @@ where
             if let Some(e) = lv.current_item() {
                 if e.entry_type == EntryType::File {
                     e.name()
-                } else { "" }
-            } else { "" }
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
         } else {
             ""
         };
         let temp_string: TempString<128> = TempString::new(current_item);
-        let h = self.name;
-        if let Some(tf) = self.control_mut(h) {
-            tf.set_text(temp_string.as_str());
+        if !temp_string.is_empty() {
+            let h = self.name;
+            if let Some(tf) = self.control_mut(h) {
+                tf.set_text(temp_string.as_str());
+            }
         }
-
         EventProcessStatus::Processed
     }
 }
