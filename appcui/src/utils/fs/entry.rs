@@ -110,3 +110,14 @@ impl listview::ListItem for Entry {
         }
     }
 }
+
+impl Default for Entry {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            size: 0,
+            created: NaiveDateTime::default(),
+            entry_type: EntryType::File,
+        }
+    }
+}

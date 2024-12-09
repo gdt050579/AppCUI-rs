@@ -157,18 +157,22 @@ where
     }
     fn return_result_from_save(&mut self) {
         // get the file name
-        let file_name = if let Some(tf) = self.control(self.name) {
-            tf.text()
+        let mut entry = Entry::default();
+        if let Some(tf) = self.control(self.name) {
+            entry.name.push_str(tf.text());
         } else {
-            ""
-        };
-        if file_name.is_empty() {
             return;
+        };
+        if let Some(result) = self.nav.join(&self.path, &entry) {
+            if self.flags.contains(InnerFlags::ValidateOverwrite) {
+                if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str()) == false {
+                    return;
+                }
+            }
+            self.exit_with(OpenSaveDialogResult::Path(result));
+        } else {
+            crate::dialogs::error("Error", format!("Fail to join current path: '{}' with file name: '{}'", self.path.display(), entry.name.as_str()).as_str());
         }
-        let fname = TempString::<256>::new(file_name);
-        let fname_path = PathBuf::from(fname.as_str());
-        
-        //self.exit_with(OpenSaveDialogResult::Path(()));
     }
     fn return_result_from_open(&mut self) {
         self.exit_with(OpenSaveDialogResult::Cancel);
