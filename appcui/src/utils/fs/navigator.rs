@@ -18,5 +18,9 @@ impl crate::utils::Navigator<Entry,Root, PathBuf> for Navigator {
         todo!()
     }
     
+    fn exists(&self, path: &PathBuf) -> Option<bool> {
+        todo!()
+    }
+    
 }
 

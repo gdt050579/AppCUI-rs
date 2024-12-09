@@ -35,4 +35,9 @@ impl crate::utils::Navigator<Entry,Root, PathBuf> for NavSimulator {
         todo!()
     }
     
+    fn exists(&self, path: &PathBuf) -> Option<bool> {
+        todo!()
+    }
+
+
 }
