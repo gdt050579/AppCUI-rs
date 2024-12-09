@@ -51,13 +51,7 @@ where
                 self.cached_items.clear();
                 self.cached_path = folder.to_string();
                 for entry in folder_contents {
-                    if entry.is_container() && !entry.name().ends_with(PLATFORM_SEPARATOR_CHARACTER) {
-                        let mut container_path = entry.name().to_string();
-                        container_path.push(PLATFORM_SEPARATOR_CHARACTER);
-                        self.cached_items.push(container_path);
-                    } else {
-                        self.cached_items.push(entry.name().to_string());
-                    }
+                    self.cached_items.push(entry.name().to_string());
                 }
             }
         }
@@ -118,6 +112,7 @@ where
     fn on_focus(&mut self, control: &mut ControlBase);
     fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus;
     fn expand_suggestions_area(&self, control: &mut ControlBase);
+    fn pack_suggestions_area(&self, control: &mut ControlBase);
 }
 
 pub(crate) trait NavigatorComponentPaintFunctions {
@@ -125,6 +120,10 @@ pub(crate) trait NavigatorComponentPaintFunctions {
     fn paint_textbox_in_focus(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute);
     fn paint_textbox_out_of_focus(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute);
     fn paint_suggestions_area(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute);
+    fn paint_text_at(&self, surface: &mut Surface, attr: CharAttribute, text: &str, pos: usize);
+    fn text_fits_textbox(&self, control: &ControlBase, text: &str) -> (bool, String);
+    fn paint_fitting_text(&self, surface: &mut Surface, attr: CharAttribute, text: &str);
+    fn paint_trimmed_text(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, text: &str);
 }
 
 impl<T, E, R> NavigatorComponent<T, E, R>
@@ -137,7 +136,7 @@ where
     const PADDING_RIGHT: u16 = 1;
     const PADDING: u16 = Self::PADDING_LEFT + Self::PADDING_RIGHT;
     const PATH_CHAR_SEPARTOR: SpecialChar = SpecialChar::TriangleRight;
-    const PATH_CHAR_DOTS: SpecialChar = SpecialChar::ThreePointsHorizontal;
+    const PATH_CHAR_DOTS: SpecialChar = SpecialChar::ThreePointsHorizontal;    
     const PATH_FINDER_VISIBLE_RESULTS: u16 = 5;
     const PATH_FINDER_RESULTS_Y_OFFSET: u16 = 2;
 
@@ -152,7 +151,6 @@ where
             selection: Selection::NONE,
             is_readonly: readonly,
             width: 0,
-            //suggestions: vec![],
             header_y_ofs: 0,
             expanded_panel_y: 1,
             selected_suggestion_pos: 0,
@@ -281,23 +279,13 @@ where
             self.delete_selection();
         }
     }
-
-    fn get_out_of_focus_char(&self, ch: char, is_middle: bool) -> char {
-        if is_middle {
-            return char::from(Self::PATH_CHAR_DOTS);
-        }
-        match ch {
-            PLATFORM_SEPARATOR_CHARACTER => char::from(Self::PATH_CHAR_SEPARTOR),
-            _ => ch,
-        }
-    }
-
-    fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {        
+    
+    fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {
         let suggestions = self.navigator_cacher.get_suggestions();
         let new_pos: i32 = self.selected_suggestion_pos as i32 + offset;
         let end_visible_pos = (self.start_suggestions_pos + Self::PATH_FINDER_VISIBLE_RESULTS - 1).min(suggestions.len() as u16);
 
-        // println!("suggestions.len() = {}, selected = {}, start = {} end_visible_pos = {}", 
+        // println!("suggestions.len() = {}, selected = {}, start = {} end_visible_pos = {}",
         // suggestions.len(), self.selected_suggestion_pos, self.start_suggestions_pos, end_visible_pos);
 
         (self.selected_suggestion_pos, self.start_suggestions_pos) = match () {
@@ -306,7 +294,7 @@ where
             _ if new_pos < self.start_suggestions_pos as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
             _ if new_pos <= end_visible_pos as i32 => (new_pos as u16, self.start_suggestions_pos),
             _ if new_pos <= suggestions.len() as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
-            _ => (suggestions.len() as u16,  self.start_suggestions_pos),
+            _ => (suggestions.len() as u16, self.start_suggestions_pos),
         };
 
         // println!("RESULTED -> selected = {}, start = {} ", self.selected_suggestion_pos, self.start_suggestions_pos);
@@ -315,6 +303,14 @@ where
             return Some(suggestions[self.selected_suggestion_pos as usize - 1].clone());
         }
         None
+    }    
+
+    fn get_path_items(text: &str) -> Vec<String> {
+        text.trim_start_matches(PLATFORM_SEPARATOR_CHARACTER)
+            .trim_end_matches(PLATFORM_SEPARATOR_CHARACTER)
+            .split(PLATFORM_SEPARATOR_CHARACTER)
+            .map(String::from)
+            .collect()
     }
 }
 
@@ -349,6 +345,9 @@ where
             key!("Backspace") => {
                 self.delete_previous_character();
                 self.update_char_count(-1, false);
+
+                self.selected_suggestion_pos = 0;
+                self.start_suggestions_pos = 1;
                 self.navigator_cacher.update_suggestions(&self.input_path, navigator);
                 self.expand_suggestions_area(control);
                 return EventProcessStatus::Processed;
@@ -374,6 +373,9 @@ where
                 return EventProcessStatus::Processed;
             }
             key!("Enter") => {
+                self.selected_suggestion_pos = 0;
+                self.start_suggestions_pos = 1;
+                self.pack_suggestions_area(control);
                 return EventProcessStatus::Processed;
             }
             key!("Esc") => {
@@ -430,6 +432,12 @@ where
                     (Self::PATH_FINDER_VISIBLE_RESULTS + Self::PATH_FINDER_RESULTS_Y_OFFSET + 1) as u32,
                 ),
             );
+        }
+    }
+
+    fn pack_suggestions_area(&self, control: &mut ControlBase) {
+        if control.is_expanded() {
+            control.pack();
         }
     }
 }
@@ -501,37 +509,85 @@ where
         }
     }
 
-    fn paint_textbox_out_of_focus(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute) {
-        // out of focus, draw trimmed path
-        let string_fits = self.char_count < control.size().width;
-        let mut start = 0;
-        let mut end = self.input_path.len();
-        if end == 0 {
+    fn text_fits_textbox(&self, control: &ControlBase, text: &str) -> (bool, String) {
+        let s = text
+            .trim_start_matches(PLATFORM_SEPARATOR_CHARACTER)
+            .trim_end_matches(PLATFORM_SEPARATOR_CHARACTER)
+            .to_string()
+            .replace(PLATFORM_SEPARATOR_CHARACTER, &format!(" {} ", char::from(Self::PATH_CHAR_SEPARTOR)));
+
+        (s.chars().count() < control.size().width as usize, s)
+    }
+
+    fn paint_fitting_text(&self, surface: &mut Surface, attr: CharAttribute, text: &str) {
+        self.paint_text_at(surface, attr, text, 1);
+    }
+
+    fn paint_trimmed_text(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, text: &str) {
+        let items = Self::get_path_items(text);
+        if items.is_empty() {
             return;
         }
 
-        while self.input_path.glyph(end).is_none() {
-            end -= 1;
+        let separator_size = 3;
+        let mut left_text = String::new();
+        let mut right_text = String::new();
+        let fitting_chars_no = control.size().width as usize - Self::PADDING as usize;
+        let mut str_start = 0;
+        let mut str_end = items.len() - 1;
+        let mut no_printed_chars = 0;
+
+        while str_start < str_end {
+            let left_item = &items[str_start];
+            let left_char_count = left_item.chars().count();
+            if no_printed_chars + left_char_count + separator_size < fitting_chars_no {
+                left_text.push_str(left_item);
+                left_text.push(' ');
+                left_text.push(char::from(Self::PATH_CHAR_SEPARTOR));
+                left_text.push(' ');
+                no_printed_chars = no_printed_chars + left_char_count + separator_size
+            } else {
+                break;
+            }
+
+            let right_item = &items[str_end];
+            let right_char_count = right_item.chars().count();
+            if no_printed_chars + right_char_count + separator_size < fitting_chars_no {
+                right_text.insert_str(0, right_item);
+                right_text.insert(0, ' ');
+                right_text.insert(0, char::from(Self::PATH_CHAR_SEPARTOR));
+                right_text.insert(0, ' ');
+                no_printed_chars = no_printed_chars + right_char_count + separator_size
+            } else {
+                break;
+            }
+
+            str_start += 1;
+            str_end -= 1;
         }
 
-        let mut left = Self::PADDING_LEFT;
-        let mut right = (control.size().width - Self::PADDING as u32).min(self.char_count) as u16;
+        left_text.push(char::from(Self::PATH_CHAR_DOTS));
+        left_text.push_str(&right_text);
+        self.paint_text_at(surface, attr, &left_text, 1);
+    }
 
-        while left <= right {
-            let ch_left = self.input_path.glyph(start).unwrap();
-            let ch_right = self.input_path.glyph(end).unwrap();
+    fn paint_textbox_out_of_focus(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute) {
+        let (string_fits, processed_path) = self.text_fits_textbox(control, &self.input_path);
 
-            let mut ch = Character::with_attributes(' ', attr);
-            ch.code = self.get_out_of_focus_char(ch_left.0, false);
-            surface.write_char(left as i32, 0, ch);
-            ch.code = self.get_out_of_focus_char(ch_right.0, (right - left < 2) && !string_fits);
-            surface.write_char(right as i32, 0, ch);
-
-            left += 1;
-            right -= 1;
-            start = self.input_path.next_pos(start, 1);
-            end = self.input_path.previous_pos(end, 1);
+        if string_fits {
+            self.paint_fitting_text(surface, attr, &processed_path);
+        } else {
+            self.paint_trimmed_text(control, surface, attr, &self.input_path);
         }
+    }
+
+    fn paint_text_at(&self, surface: &mut Surface, attr: CharAttribute, text: &str, pos: usize) {
+        let format = TextFormatBuilder::new()
+            .position(pos as i32, 0)
+            .attribute(attr)
+            .align(TextAlignament::Left)
+            .build();
+        surface.write_text(text, &format);
     }
 
     fn paint_suggestions_area(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
@@ -561,7 +617,7 @@ where
         let mut y = self.expanded_panel_y + 1;
         let suggestions = self.navigator_cacher.get_suggestions();
         let start_index: usize = self.start_suggestions_pos as usize - 1;
-        let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());       
+        let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());
         for path_entry in &suggestions[start_index..end_index] {
             let path = path_entry;
             if y - 1 > Self::PATH_FINDER_VISIBLE_RESULTS as i32 {
@@ -580,7 +636,11 @@ where
                 count_chars += 1;
             }
 
-            let style = if self.selected_suggestion_pos as i32 - self.start_suggestions_pos as i32 == y - 2  { attr_selected } else { attr };
+            let style = if self.selected_suggestion_pos as i32 - self.start_suggestions_pos as i32 == y - 2 {
+                attr_selected
+            } else {
+                attr
+            };
             surface.write_string(Self::PADDING_LEFT as i32, y, &path[..offset], style, false);
             y += 1;
         }
