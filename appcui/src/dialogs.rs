@@ -110,7 +110,7 @@ pub enum SaveFileDialogFlags {
 // nu are campul de file_name
 pub(super) fn inner_save<T>(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags, nav: T) -> Option<PathBuf>
 where
-    T: crate::utils::Navigator<crate::utils::fs::Entry, crate::utils::fs::Root> + 'static,
+    T: crate::utils::Navigator<crate::utils::fs::Entry, crate::utils::fs::Root, PathBuf> + 'static,
 {
     let ext_mask = extension_mask.unwrap_or_default();
     match FileMask::parse(ext_mask) {

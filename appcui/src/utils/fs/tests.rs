@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use chrono::NaiveDateTime;
 use super::NavSimulator;
 use crate::utils::{fs::entry::EntryType, Navigator, NavigatorEntry, NavigatorRoot};
@@ -29,13 +31,13 @@ fn check_simulator() {
     assert!(v.len() == 2);
     assert!(v[0].name() == "C:\\");
     assert!(v[1].name() == "D:\\");
-    let e = nav.entries("C:\\");
+    let e = nav.entries(&PathBuf::from("C:\\"));
     assert!(e.len() == 1);
     assert!(e[0].name() == "Program Files");
     assert!(e[0].size == 0);
     assert!(e[0].entry_type == EntryType::Folder);
     assert!(e[0].created == NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap());    
-    let e = nav.entries("C:\\Program Files\\");
+    let e = nav.entries(&PathBuf::from("C:\\Program Files\\"));
     assert!(e.len() == 3);
     assert!(e[0].name() == "runme.exe");
     assert!(e[0].size == 123);

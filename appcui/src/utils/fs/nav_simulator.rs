@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use super::{Entry, Root};
 pub(crate) struct NavSimulator {
     data: String,   
@@ -9,8 +10,9 @@ impl NavSimulator {
         }
     }
 }
-impl crate::utils::Navigator<Entry,Root> for NavSimulator {
-    fn entries(&self, path: &str) -> Vec<Entry> {
+impl crate::utils::Navigator<Entry,Root, PathBuf> for NavSimulator {
+    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
+        let path = path.as_path().as_os_str().to_str().unwrap();
         let mut v = Vec::new();
         for line in self.data.lines() {
             if let Some(entry) = Entry::from_csv_line(line.trim(), path) {
@@ -28,4 +30,9 @@ impl crate::utils::Navigator<Entry,Root> for NavSimulator {
         }
         v
     }
+    
+    fn join(&self, path: &PathBuf, entry: &Entry) -> Option<PathBuf> {
+        todo!()
+    }
+    
 }

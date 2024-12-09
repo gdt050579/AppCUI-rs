@@ -29,7 +29,7 @@ static LAST_PATH: OnceLock<PathBuf> = OnceLock::new();
 #[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where
-    T: Navigator<Entry, Root> + 'static,
+    T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     list: Handle<ListView<Entry>>,
     path_viewer: Handle<TextField>,
@@ -50,7 +50,7 @@ where
 
 impl<T> FileExplorer<T>
 where
-    T: Navigator<Entry, Root> + 'static,
+    T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     pub(super) fn new(file_name: &str, title: &str, location: Location, extension_mask: Vec<FileMask>, nav: T, flags: InnerFlags) -> Self {
         let mut w = Self {
@@ -111,7 +111,7 @@ where
     }
     fn populate(&mut self) {
         let is_root = self.path.is_absolute() && self.path.parent().is_none();
-        let mut entries = self.nav.entries(self.path.as_os_str().to_str().unwrap_or_default());
+        let mut entries = self.nav.entries(&self.path);
         let filter_idx = if let Some(mask) = self.control(self.mask) {
             mask.index().unwrap_or_default() as usize
         } else {
@@ -156,7 +156,19 @@ where
         }
     }
     fn return_result_from_save(&mut self) {
-        self.exit_with(OpenSaveDialogResult::Cancel);
+        // get the file name
+        let file_name = if let Some(tf) = self.control(self.name) {
+            tf.text()
+        } else {
+            ""
+        };
+        if file_name.is_empty() {
+            return;
+        }
+        let fname = TempString::<256>::new(file_name);
+        let fname_path = PathBuf::from(fname.as_str());
+        
+        //self.exit_with(OpenSaveDialogResult::Path(()));
     }
     fn return_result_from_open(&mut self) {
         self.exit_with(OpenSaveDialogResult::Cancel);
@@ -171,7 +183,7 @@ where
 }
 impl<T> ButtonEvents for FileExplorer<T>
 where
-    T: Navigator<Entry, Root> + 'static,
+    T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
         if handle == self.b_cancel {
@@ -187,7 +199,7 @@ where
 }
 impl<T> ToggleButtonEvents for FileExplorer<T>
 where
-    T: Navigator<Entry, Root> + 'static,
+    T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_selection_changed(&mut self, _handle: Handle<ToggleButton>, _selected: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
@@ -195,27 +207,21 @@ where
 }
 impl<T> WindowEvents for FileExplorer<T>
 where
-    T: Navigator<Entry, Root> + 'static,
+    T: Navigator<Entry, Root, PathBuf> + 'static,
 {
-    fn on_layout_changed(&mut self, _old_layout: Rect, _new_layout: Rect) {}
-
     fn on_activate(&mut self) {
         self.populate();
     }
-
-    fn on_deactivate(&mut self) {}
-
     fn on_accept(&mut self) {
         self.return_result();
     }
-
     fn on_cancel(&mut self) -> ActionRequest {
         ActionRequest::Allow
     }
 }
 impl<T> ComboBoxEvents for FileExplorer<T>
 where
-    T: Navigator<Entry, Root> + 'static,
+    T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_selection_changed(&mut self, handle: Handle<ComboBox>) -> EventProcessStatus {
         if handle == self.mask {
@@ -226,7 +232,7 @@ where
 }
 impl<T> ListViewEvents<Entry> for FileExplorer<T>
 where
-    T: Navigator<Entry, Root> + 'static,
+    T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_item_action(&mut self, handle: Handle<ListView<Entry>>, item_index: usize) -> EventProcessStatus {
         let (data, etype): (Option<TempString<128>>, EntryType) = if let Some(lv) = self.control(handle) {
