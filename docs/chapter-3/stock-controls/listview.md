@@ -138,6 +138,8 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | `set_frozen_columns(...)` | Sets the number of frozen columns. Frozen columns are columns that are not scrolled when the listview is scrolled horizontally. |
 | `set_view_mode(...)`      | Sets the view mode of the ListView control.                                                                                     |
 | `sort(...)`               | Sorts the items in the ListView control based on a column index.                                                                |
+| `clear_search()`          | Clears the content of the search box of the listview.                                                                           |
+
 
 ## Key association
 
