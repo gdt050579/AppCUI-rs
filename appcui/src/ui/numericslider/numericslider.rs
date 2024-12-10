@@ -278,9 +278,8 @@ where
             MouseEvent::Over(point) => return EventProcessStatus::Ignored,
             MouseEvent::Released(mouse_event_data) => return EventProcessStatus::Ignored,
             MouseEvent::DoubleClick(mouse_event_data) => return EventProcessStatus::Ignored,
-            MouseEvent::Drag(mouse_event_data) => return EventProcessStatus::Ignored,
             MouseEvent::Wheel(mouse_wheel_direction) => return EventProcessStatus::Ignored,
-            MouseEvent::Pressed(mouse_event_data) => {
+            MouseEvent::Pressed(mouse_event_data) | MouseEvent::Drag(mouse_event_data) => {
                 if mouse_event_data.button != MouseButton::Left {
                     return EventProcessStatus::Ignored;
                 }
