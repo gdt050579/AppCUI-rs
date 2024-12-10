@@ -165,8 +165,19 @@ where
         };
         if let Some(result) = self.nav.join(&self.path, &entry) {
             if self.flags.contains(InnerFlags::ValidateOverwrite) {
-                if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str()) == false {
-                    return;
+                match self.nav.exists(&self.path) {
+                    Some(true) => {
+                        if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str()) == false {
+                            return;
+                        }
+                    }
+                    Some(false) => {
+                        // do nothing - the file does not exist
+                    }
+                    None => {
+                        crate::dialogs::error("Error", format!("Fail to check if file exists: '{}'", result.display()).as_str());
+                        return;
+                    }
                 }
             }
             self.exit_with(OpenSaveDialogResult::Path(result));
@@ -266,6 +277,10 @@ where
             let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
             if let Some(pv) = self.control_mut(h) {
                 pv.set_text(ts.as_str());
+            }
+            let h = self.list;
+            if let Some(lst) = self.control_mut(h) {
+                lst.clear_search();
             }
             self.populate();
         }
