@@ -5691,7 +5691,7 @@ fn check_clear_method() {
     #[Window(events=ListViewEvents<Person>, internal: true)]
     struct MyWin {}
     impl ListViewEvents<Person> for MyWin {
-        fn on_item_action(&mut self, handle: Handle<ListView<Person>>, index: usize) -> EventProcessStatus {
+        fn on_item_action(&mut self, handle: Handle<ListView<Person>>, _index: usize) -> EventProcessStatus {
             if let Some(lv) = self.control_mut(handle) {
                 lv.clear();
             }
@@ -5740,7 +5740,7 @@ fn check_clear_search_method() {
     #[Window(events=ListViewEvents<Person>, internal: true)]
     struct MyWin {}
     impl ListViewEvents<Person> for MyWin {
-        fn on_item_action(&mut self, handle: Handle<ListView<Person>>, index: usize) -> EventProcessStatus {
+        fn on_item_action(&mut self, handle: Handle<ListView<Person>>, _index: usize) -> EventProcessStatus {
             if let Some(lv) = self.control_mut(handle) {
                 lv.clear_search();
             }
