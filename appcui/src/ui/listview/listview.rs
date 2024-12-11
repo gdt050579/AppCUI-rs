@@ -368,6 +368,27 @@ where
         self.refilter();
     }
 
+    /// Clears the content of the listview.
+    pub fn clear(&mut self) {
+        self.data.clear();
+        self.filter.clear();
+        // clear counter in groups
+        for group in &mut self.groups {
+            group.set_items_count(0);
+        }
+        self.top_view = 0;
+        self.pos = 0;
+        self.selected_items_count = 0;
+        self.update_scrollbars();
+        self.update_position(0, false);
+    }
+
+    /// Clears the content of the search bar
+    pub fn clear_search(&mut self) {
+        self.comp.clear_search();
+        self.filter_items();
+    }
+
     /// Sets the number of frozen columns. Frozen columns are columns that are always visible, even when the list view is scrolled horizontally. The frozen columns are always the first columns in the list view. Using the value 0 will disable frozen columns.
     pub fn set_frozen_columns(&mut self, count: u16) {
         self.header.set_frozen_columns(count);

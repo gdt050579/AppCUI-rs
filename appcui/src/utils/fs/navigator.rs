@@ -1,10 +1,9 @@
-use super::{Entry, Root};
+use super::{Entry, EntryType, Root};
+use std::path::PathBuf;
+use chrono::NaiveDateTime;  
 use chrono::DateTime;
-use chrono::NaiveDateTime;
 use std::fs;
-
 use std::os::windows::fs::MetadataExt;
-use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 
@@ -12,8 +11,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 pub(crate) struct Navigator {   
 }
 
-impl crate::utils::Navigator<Entry, Root> for Navigator {
-    fn entries(&self, path: &str) -> Vec<Entry> {       
+impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
+    fn entries(&self, path: &PathBuf) -> Vec<Entry> {       
         Self::get_folder_listing(path).unwrap_or_default()        
     }
 
@@ -23,12 +22,21 @@ impl crate::utils::Navigator<Entry, Root> for Navigator {
     fn new() -> Self {
         Self {  }
     }
+    
+    fn join(&self, path: &PathBuf, entry: &Entry) -> Option<PathBuf> {
+        todo!()
+    }
+    
+    fn exists(&self, path: &PathBuf) -> Option<bool> {
+        todo!()
+    }
+    
 }
 
 impl Navigator {
-    fn get_folder_listing(path: &str) -> std::io::Result<Vec<Entry>> {
+    fn get_folder_listing(path: &PathBuf) -> std::io::Result<Vec<Entry>> {
         let mut result: Vec<Entry> = vec![];
-        let dir = Path::new(path);
+        let dir = path.as_path();
         // Read the directory entries
         for dir_entry in fs::read_dir(dir)? {
             let entry = dir_entry?;            
@@ -51,7 +59,7 @@ impl Navigator {
             false => metadata.file_size(),
             _ => 0,
         };
-        Ok(Entry::new(path, size, datetime, metadata.is_dir()))
+        Ok(Entry::new(path, size, datetime, if metadata.is_dir() {EntryType::Folder} else {EntryType::File}))
     }
 
     fn system_time_to_naive_datetime(system_time: SystemTime) -> std::io::Result<NaiveDateTime> {

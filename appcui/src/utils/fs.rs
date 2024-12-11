@@ -21,3 +21,4 @@ pub(crate) use entry::Entry;
 pub(self) use windows::get_os_roots;
 #[cfg(target_os="linux")]
 pub(self) use unix::get_os_roots;
+pub(crate) use entry::EntryType;

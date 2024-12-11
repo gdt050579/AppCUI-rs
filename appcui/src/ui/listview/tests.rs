@@ -5684,3 +5684,95 @@ fn check_select_item_method() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+
+#[test]
+fn check_clear_method() {
+    #[Window(events=ListViewEvents<Person>, internal: true)]
+    struct MyWin {}
+    impl ListViewEvents<Person> for MyWin {
+        fn on_item_action(&mut self, handle: Handle<ListView<Person>>, _index: usize) -> EventProcessStatus {
+            if let Some(lv) = self.control_mut(handle) {
+                lv.clear();
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut lv = listview!(
+                "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+            );
+            Person::populate(&mut lv);
+            w.add(lv);
+            w
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x39603D1E8E3FDC2E)  
+        Key.Pressed(Down,6)
+        Key.Pressed(Enter)       
+        Paint('2. Elements are cleared')
+        CheckHash(0xFFF6487CAF22C71F)  
+        Key.Pressed(Down,6)
+        Key.Pressed(Up,2)
+        Key.Pressed(Home)
+        Key.Pressed(End)
+        Key.Pressed(Left,3)
+        Key.Pressed(Down,2)
+        Paint('3. Nothing changes')
+        CheckHash(0xFFF6487CAF22C71F)  
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+
+#[test]
+fn check_clear_search_method() {
+    #[Window(events=ListViewEvents<Person>, internal: true)]
+    struct MyWin {}
+    impl ListViewEvents<Person> for MyWin {
+        fn on_item_action(&mut self, handle: Handle<ListView<Person>>, _index: usize) -> EventProcessStatus {
+            if let Some(lv) = self.control_mut(handle) {
+                lv.clear_search();
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut lv = listview!(
+                "Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+            );
+            Person::populate(&mut lv);
+            w.add(lv);
+            w
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x39603D1E8E3FDC2E)  
+        Key.TypeText('e')     
+        Paint('2. Filter based on `e` character -> cursor on Mike')
+        CheckHash(0x61CC5A5FBEAF5C39)  
+        Key.Pressed(Enter)
+        Paint('3. Search cleared - all items restored -> cursor on Mike')
+        CheckHash(0x6C49F7AAE9F24E9C)  
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

@@ -105,6 +105,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | `add_items(...)`    | Adds a vector of items to the ListView control.                                                                                                                                                                                                        |
 | `add_to_group(...)` | Adds a vector if items to the ListView control and associate all of them to a group                                                                                                                                                                    |
 | `add_batch(...)`    | Adds multiple items to the listview. When an item is added to a listview, it is imediatly filtered based on the current search text. If you want to add multiple items (using various methods) and then filter them, you can use the add_batch method. |
+| `clear()`           | Clears all items from the listview                                                                                                                                                                                                                     |
 
 
 ### Item manipulation
@@ -137,6 +138,8 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | `set_frozen_columns(...)` | Sets the number of frozen columns. Frozen columns are columns that are not scrolled when the listview is scrolled horizontally. |
 | `set_view_mode(...)`      | Sets the view mode of the ListView control.                                                                                     |
 | `sort(...)`               | Sorts the items in the ListView control based on a column index.                                                                |
+| `clear_search()`          | Clears the content of the search box of the listview.                                                                           |
+
 
 ## Key association
 

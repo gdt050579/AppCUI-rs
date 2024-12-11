@@ -109,6 +109,11 @@ impl ListScrollBars {
     }
 
     #[inline(always)]
+    pub fn clear_search(&mut self) {
+        self.search.clear();
+    }
+
+    #[inline(always)]
     pub fn set_match_count(&mut self, count: usize) {
         self.search.set_match_count(count);
     }
