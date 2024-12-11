@@ -17,6 +17,11 @@ pub trait Number: Add<Output = Self> + Sub<Output = Self> + Div<Output = Self> +
     fn write_to_string(&self, writer: &mut String, format: Format);
     fn is_zero(&self) -> bool;
     fn cast_to_u32(&self) -> u32;
+    fn abs(&self) -> Self;
+
+    fn cast_signed_number(value: i128) -> Self;
+    fn cast_unsigned_number(value: u128) -> Self;
+    fn cast_float_number(value: f64) -> Self;
 }
 
 const DECIMAL_FORMAT: FormatNumber = FormatNumber::new(10);
@@ -119,6 +124,20 @@ macro_rules! IMPLEMENT_FOR_SIGNED {
             fn cast_to_u32(&self) -> u32 {
                 return *self as u32;
             }
+
+            fn abs(&self) -> Self {
+                return (*self).abs();
+            }
+
+            fn cast_signed_number(value: i128) -> Self {
+                return value as Self;
+            }
+            fn cast_unsigned_number(value: u128) -> Self {
+                return value as Self;
+            }
+            fn cast_float_number(value: f64) -> Self {
+                return value as Self;
+            }
         }
     };
 }
@@ -138,6 +157,20 @@ macro_rules! IMPLEMENT_FOR_UNSIGNED {
             fn cast_to_u32(&self) -> u32 {
                 return *self as u32;
             }
+
+            fn abs(&self) -> Self {
+                return *self;
+            }
+
+            fn cast_signed_number(value: i128) -> Self {
+                return value as Self;
+            }
+            fn cast_unsigned_number(value: u128) -> Self {
+                return value as Self;
+            }
+            fn cast_float_number(value: f64) -> Self {
+                return value as Self;
+            }
         }
     };
 }
@@ -156,6 +189,20 @@ macro_rules! IMPLEMENT_FOR_FLOAT {
             
             fn cast_to_u32(&self) -> u32 {
                 return *self as u32;
+            }
+
+            fn abs(&self) -> Self {
+                return (*self).abs();
+            }
+            
+            fn cast_signed_number(value: i128) -> Self {
+                return value as Self;
+            }
+            fn cast_unsigned_number(value: u128) -> Self {
+                return value as Self;
+            }
+            fn cast_float_number(value: f64) -> Self {
+                return value as Self;
             }
         }
     };
