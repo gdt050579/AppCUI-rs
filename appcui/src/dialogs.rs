@@ -145,5 +145,5 @@ where
 }
 
 pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
-    inner_save(file_name, location, extension_mask, flags, utils::fs::NavSimulator::with_csv(VFS))
+    inner_save(file_name, location, extension_mask, flags, utils::fs::NavSimulator::with_csv(VFS, true))
 }
