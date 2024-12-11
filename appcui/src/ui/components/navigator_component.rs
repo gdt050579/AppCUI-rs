@@ -6,11 +6,11 @@ use std::marker::PhantomData;
 //TODO: make separate cfgs for different OS
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
 
-struct NavigatorDataCacher<T, E, R>
+struct NavigatorDataCacher<T, E, R, P>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R>,
+    T: crate::utils::Navigator<E, R, P>,
 {
     cached_path: String,
     cached_items: Vec<String>,
@@ -18,13 +18,15 @@ where
     _phantom_t: std::marker::PhantomData<T>,
     _phantom_r: std::marker::PhantomData<R>,
     _phantom_e: std::marker::PhantomData<E>,
+    _phantom_p: std::marker::PhantomData<P>,
 }
 
-impl<T, E, R> NavigatorDataCacher<T, E, R>
+impl<T, E, R, P> NavigatorDataCacher<T, E, R, P>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R>,
+    T: crate::utils::Navigator<E, R, P>,
+    P: From<String>,
 {
     fn new() -> Self {
         Self {
@@ -34,6 +36,7 @@ where
             _phantom_r: PhantomData,
             _phantom_t: PhantomData,
             _phantom_e: PhantomData,
+            _phantom_p: PhantomData,
         }
     }
     fn get_suggestions(&self) -> &Vec<String> {
@@ -46,7 +49,7 @@ where
         // println!("folder = {}", folder);
         if folder != self.cached_path {
             // create cache for this folder
-            let folder_contents = navigator.entries(folder);
+            let folder_contents = navigator.entries(&P::from(folder.to_string()));
             if !folder_contents.is_empty() {
                 self.cached_items.clear();
                 self.cached_path = folder.to_string();
@@ -71,14 +74,14 @@ where
         items.iter().filter(|s| s.starts_with(path)).cloned().collect()
     }
 }
-pub(crate) struct NavigatorComponent<T, E, R>
+pub(crate) struct NavigatorComponent<T, E, R, P>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R>,
+    T: crate::utils::Navigator<E, R, P>,
 {
     is_readonly: bool,
-    navigator_cacher: NavigatorDataCacher<T, E, R>,
+    navigator_cacher: NavigatorDataCacher<T, E, R, P>,
 
     // input area
     cursor: usize,
@@ -102,11 +105,11 @@ where
     _phantom_e: std::marker::PhantomData<E>,
 }
 
-pub(crate) trait NavigatorComponentControlFunctions<T, E, R>
+pub(crate) trait NavigatorComponentControlFunctions<T, E, R, P>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R>,
+    T: crate::utils::Navigator<E, R, P>,
 {
     fn on_expand(&mut self, control: &ControlBase, direction: ExpandedDirection);
     fn on_focus(&mut self, control: &mut ControlBase);
@@ -126,11 +129,12 @@ pub(crate) trait NavigatorComponentPaintFunctions {
     fn paint_trimmed_text(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, text: &str);
 }
 
-impl<T, E, R> NavigatorComponent<T, E, R>
+impl<T, E, R, P> NavigatorComponent<T, E, R, P>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R>,
+    T: crate::utils::Navigator<E, R, P>,
+    P: From<String>,
 {
     const PADDING_LEFT: u16 = 1;
     const PADDING_RIGHT: u16 = 1;
@@ -314,11 +318,12 @@ where
     }
 }
 
-impl<T, E, R> NavigatorComponentControlFunctions<T, E, R> for NavigatorComponent<T, E, R>
+impl<T, E, R, P> NavigatorComponentControlFunctions<T, E, R, P> for NavigatorComponent<T, E, R, P>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R>,
+    T: crate::utils::Navigator<E, R, P>,
+    P: From<String>,
 {
     fn on_expand(&mut self, control: &ControlBase, direction: ExpandedDirection) {
         match direction {
@@ -442,11 +447,12 @@ where
     }
 }
 
-impl<T, E, R> NavigatorComponentPaintFunctions for NavigatorComponent<T, E, R>
+impl<T, E, R, P> NavigatorComponentPaintFunctions for NavigatorComponent<T, E, R, P>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R>,
+    T: crate::utils::Navigator<E, R, P>,
+    P: From<String>,
 {
     fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme) {
         let attr = match () {

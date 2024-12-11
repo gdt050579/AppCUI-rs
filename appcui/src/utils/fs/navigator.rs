@@ -6,8 +6,6 @@ use std::fs;
 use std::os::windows::fs::MetadataExt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-
-
 pub(crate) struct Navigator {   
 }
 
@@ -28,9 +26,11 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     }
     
     fn exists(&self, path: &PathBuf) -> Option<bool> {
-        todo!()
-    }
-    
+        match path.try_exists() {
+            Ok(v) => Some(v),
+            _ => None
+        }
+    }    
 }
 
 impl Navigator {
