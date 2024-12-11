@@ -2,6 +2,7 @@ use super::{Entry, Root};
 use chrono::DateTime;
 use chrono::NaiveDateTime;
 use std::fs;
+
 use std::os::windows::fs::MetadataExt;
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
