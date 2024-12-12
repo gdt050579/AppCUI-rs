@@ -8,8 +8,8 @@ use chrono::NaiveDateTime;
 #[test]
 fn check_simulator() {
     let csv_data = "
-    r,C:\\,10000,100000,   
-    r,D:\\,123,123456,
+    r,C:\\,10000,100000,SYSTEM,fixed   
+    r,D:\\,123,123456,USB Drive,removable
     d,C:\\Program Files,0,2024-01-10 12:00:00,
     f,C:\\Program Files\\runme.exe,123,2024-01-10 12:31:55,
     f,C:\\Program Files\\readme.txt,123456,2023-02-05 09:12:25,
@@ -30,8 +30,8 @@ fn check_simulator() {
     let nav = NavSimulator::with_csv(csv_data, true);
     let v = nav.roots();
     assert!(v.len() == 2);
-    assert!(v[0].name() == "C:\\");
-    assert!(v[1].name() == "D:\\");
+    assert!(v[0].path() == "C:\\");
+    assert!(v[1].path() == "D:\\");
     let e = nav.entries(&PathBuf::from("C:\\"));
     assert!(e.len() == 1);
     assert!(e[0].name() == "Program Files");
@@ -57,8 +57,8 @@ fn check_simulator() {
 #[test]
 fn check_simulator_join() {
     let csv_data = "
-    r,C:\\,10000,100000,   
-    r,D:\\,123,123456,
+    r,C:\\,10000,100000,Old System,cdrom   
+    r,D:\\,123,123456,fast_drive,ramdisk
     d,C:\\Program Files,0,2024-01-10 12:00:00,
     f,C:\\Program Files\\runme.exe,123,2024-01-10 12:31:55,
     f,C:\\Program Files\\readme.txt,123456,2023-02-05 09:12:25,
@@ -77,6 +77,7 @@ fn check_simulator_join() {
         )        
     );
     assert_eq!(p, Some(PathBuf::from("C:\\Program Files")));
+
     let p = nav.join(
         &PathBuf::from("C:\\Test\\xyz"),
         &Entry::new(
@@ -87,6 +88,7 @@ fn check_simulator_join() {
         )        
     );
     assert_eq!(p, Some(PathBuf::from("C:\\Test\\a.exe")));
+
     let p = nav.join(
         &PathBuf::from("C:\\a/b/c/d/e/f"),
         &Entry::new(
@@ -97,6 +99,17 @@ fn check_simulator_join() {
         )        
     );
     assert_eq!(p, Some(PathBuf::from("C:\\a\\b\\c\\a.exe")));
+
+    let p = nav.join(
+        &PathBuf::from("C:\\a/b/c\\d/e/f"),
+        &Entry::new(
+            "X:\\Test/T2/a.exe",
+            0,
+            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(), 
+            EntryType::File
+        )        
+    );
+    assert_eq!(p, Some(PathBuf::from("X:\\Test\\T2\\a.exe")));
 }
 
 

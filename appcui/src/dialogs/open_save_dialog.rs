@@ -159,6 +159,9 @@ where
         // get the file name
         let mut entry = Entry::default();
         if let Some(tf) = self.control(self.name) {
+            if tf.text().trim().is_empty() {
+                return;
+            }
             entry.name.push_str(tf.text());
         } else {
             return;
@@ -184,6 +187,19 @@ where
         } else {
             crate::dialogs::error("Error", format!("Fail to join current path: '{}' with file name: '{}'", self.path.display(), entry.name.as_str()).as_str());
         }
+    }
+    fn populate_after_path_update(&mut self) {
+        self.path.push("");
+        let h = self.path_viewer;
+        let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
+        if let Some(pv) = self.control_mut(h) {
+            pv.set_text(ts.as_str());
+        }
+        let h = self.list;
+        if let Some(lst) = self.control_mut(h) {
+            lst.clear_search();
+        }
+        self.populate();
     }
     fn return_result_from_open(&mut self) {
         self.exit_with(OpenSaveDialogResult::Cancel);
@@ -250,39 +266,35 @@ where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_item_action(&mut self, handle: Handle<ListView<Entry>>, item_index: usize) -> EventProcessStatus {
-        let (data, etype): (Option<TempString<128>>, EntryType) = if let Some(lv) = self.control(handle) {
+        let (data, etype): (Option<TempString<128>>, Option<EntryType>) = if let Some(lv) = self.control(handle) {
             if let Some(e) = lv.item(item_index) {
                 if e.is_container() {
-                    (Some(TempString::new(e.name())), e.entry_type)
+                    (Some(TempString::new(e.name())), Some(e.entry_type))
                 } else {
-                    (None, e.entry_type)
+                    (None, Some(e.entry_type))
                 }
             } else {
-                (None, EntryType::File)
+                (None, None)
             }
         } else {
-            (None, EntryType::File)
+            (None, None)
         };
-        let mut repopulate = false;
-        if etype == EntryType::UpDir {
-            self.path.pop();
-            repopulate = true;
-        } else if let Some(name) = data {
-            self.path.push(name.as_str());
-            repopulate = true;
-        }
-        if repopulate {
-            self.path.push("");
-            let h = self.path_viewer;
-            let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
-            if let Some(pv) = self.control_mut(h) {
-                pv.set_text(ts.as_str());
+
+        match etype {
+            Some(EntryType::UpDir) => {
+                self.path.pop();
+                self.populate_after_path_update();
             }
-            let h = self.list;
-            if let Some(lst) = self.control_mut(h) {
-                lst.clear_search();
+            Some(EntryType::Folder) => {
+                if let Some(name) = data {
+                    self.path.push(name.as_str());
+                    self.populate_after_path_update();
+                }
             }
-            self.populate();
+            Some(EntryType::File) => {
+                self.return_result();
+            }
+            None => {}
         }
         EventProcessStatus::Processed
     }
