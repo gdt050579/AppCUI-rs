@@ -1,4 +1,4 @@
-use super::Root;
+use super::{RootType, Root};
 
 #[allow(clippy::upper_case_acronyms)]
 type BOOL = u32;
@@ -30,9 +30,11 @@ pub(super) fn get_os_roots() -> Vec<Root> {
             };
             if success {
                 v.push(Root {
-                    name: format!("{}", (64u8 + i as u8) as char),
+                    path: format!("{}:\\", (64u8 + i as u8) as char),
                     size: total,
                     free_space: free,
+                    root_type: RootType::Unknown, //GDT: use GetDriveTypeA to find the type !!!
+                    name: String::new(), // GDT: use GetVolumeInformationA to get the name/label of the drive
                 });
             }            
         }
