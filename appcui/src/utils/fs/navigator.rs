@@ -1,17 +1,17 @@
 use super::{Entry, EntryType, Root};
 use std::path::PathBuf;
-use chrono::NaiveDateTime;  
+use chrono::NaiveDateTime;
 use chrono::DateTime;
 use std::fs;
 use std::os::windows::fs::MetadataExt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub(crate) struct Navigator {   
+pub(crate) struct Navigator {
 }
 
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
-    fn entries(&self, path: &PathBuf) -> Vec<Entry> {       
-        Self::get_folder_listing(path).unwrap_or_default()        
+    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
+        Self::get_folder_listing(path).unwrap_or_default()
     }
 
     fn roots(&self) -> Vec<Root> {
@@ -20,17 +20,17 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     fn new() -> Self {
         Self {  }
     }
-    
+
     fn join(&self, path: &PathBuf, entry: &Entry) -> Option<PathBuf> {
         todo!()
     }
-    
+
     fn exists(&self, path: &PathBuf) -> Option<bool> {
         match path.try_exists() {
             Ok(v) => Some(v),
             _ => None
         }
-    }    
+    }
 }
 
 impl Navigator {
@@ -39,14 +39,12 @@ impl Navigator {
         let dir = path.as_path();
         // Read the directory entries
         for dir_entry in fs::read_dir(dir)? {
-            let entry = dir_entry?;            
+            let entry = dir_entry?;
             let metadata = entry.metadata()?;
             if let Some(utf8path) = entry.path().to_str() {
-                // TODO: push only filename/foldername and
-                // add terminating char for folders
                 let entry = Self::get_entry_from_metadata(utf8path, &metadata)?;
-                result.push(entry);                
-            } 
+                result.push(entry);
+            }
         }
         result.sort_by(|a, b| a.name.cmp(&b.name));
         Ok(result)
@@ -69,5 +67,5 @@ impl Navigator {
             }
         }
         Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid timestamp"))
-    }    
+    }
 }

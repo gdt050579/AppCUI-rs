@@ -1,3 +1,6 @@
+use common::{ControlEvent, ControlEventData};
+use pathfinder::events::EventData;
+
 use crate::prelude::textfield::selection::Selection;
 use crate::prelude::*;
 use crate::utils::glyphs::GlyphParser;
@@ -43,10 +46,7 @@ where
         &self.suggestions
     }
     fn update_suggestions(&mut self, path: &str, navigator: &T) {
-        // println!("path = {}", path);
-        // get folder for the input path
         let folder = Self::get_folder(path);
-        // println!("folder = {}", folder);
         if folder != self.cached_path {
             // create cache for this folder
             let folder_contents = navigator.entries(&P::from(folder.to_string()));
@@ -140,7 +140,7 @@ where
     const PADDING_RIGHT: u16 = 1;
     const PADDING: u16 = Self::PADDING_LEFT + Self::PADDING_RIGHT;
     const PATH_CHAR_SEPARTOR: SpecialChar = SpecialChar::TriangleRight;
-    const PATH_CHAR_DOTS: SpecialChar = SpecialChar::ThreePointsHorizontal;    
+    const PATH_CHAR_DOTS: SpecialChar = SpecialChar::ThreePointsHorizontal;
     const PATH_FINDER_VISIBLE_RESULTS: u16 = 5;
     const PATH_FINDER_RESULTS_Y_OFFSET: u16 = 2;
 
@@ -283,14 +283,11 @@ where
             self.delete_selection();
         }
     }
-    
+
     fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {
         let suggestions = self.navigator_cacher.get_suggestions();
         let new_pos: i32 = self.selected_suggestion_pos as i32 + offset;
         let end_visible_pos = (self.start_suggestions_pos + Self::PATH_FINDER_VISIBLE_RESULTS - 1).min(suggestions.len() as u16);
-
-        // println!("suggestions.len() = {}, selected = {}, start = {} end_visible_pos = {}",
-        // suggestions.len(), self.selected_suggestion_pos, self.start_suggestions_pos, end_visible_pos);
 
         (self.selected_suggestion_pos, self.start_suggestions_pos) = match () {
             _ if suggestions.is_empty() => (0, 1),
@@ -300,14 +297,11 @@ where
             _ if new_pos <= suggestions.len() as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
             _ => (suggestions.len() as u16, self.start_suggestions_pos),
         };
-
-        // println!("RESULTED -> selected = {}, start = {} ", self.selected_suggestion_pos, self.start_suggestions_pos);
-
         if self.selected_suggestion_pos > 0 {
             return Some(suggestions[self.selected_suggestion_pos as usize - 1].clone());
         }
         None
-    }    
+    }
 
     fn get_path_items(text: &str) -> Vec<String> {
         text.trim_start_matches(PLATFORM_SEPARATOR_CHARACTER)
@@ -381,6 +375,11 @@ where
                 self.selected_suggestion_pos = 0;
                 self.start_suggestions_pos = 1;
                 self.pack_suggestions_area(control);
+                control.raise_event(ControlEvent {
+                    emitter: control.handle,
+                    receiver: control.event_processor,
+                    data: ControlEventData::PathFinder(EventData { }),
+                });
                 return EventProcessStatus::Processed;
             }
             key!("Esc") => {
@@ -504,9 +503,8 @@ where
                 break;
             }
         }
-        // if it is the last char
+
         if pos == self.cursor {
-            // if the cursor is located on the fist line outside the view --> put it on the last char but on previous line
             if (y == sz.height as i32) && (x == 1) {
                 surface.set_cursor(sz.width as i32 - 1, sz.height as i32 - 1);
             } else {

@@ -10,6 +10,7 @@ use crate::prelude::{
 };
 use crate::system::Handle;
 
+use crate::ui::pathfinder;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents,
     datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
@@ -40,7 +41,8 @@ pub(crate) enum ControlEventData {
     NumericSelector(numericselector::events::EventData),
     DatePicker(datepicker::events::EventData),
     ListBox(listbox::events::EventData),
-    ListView(listview::events::EventData),    
+    ListView(listview::events::EventData),
+    PathFinder(pathfinder::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -55,7 +57,7 @@ impl ControlEvent {
             ControlEventData::Button(_) => ButtonEvents::on_pressed(receiver, self.emitter.cast()),
             ControlEventData::CheckBox(data) => CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked),
             ControlEventData::RadioBox(_) => RadioBoxEvents::on_selected(receiver, self.emitter.cast()),
-            ControlEventData::ToggleButton(data) => togglebutton::events::ToggleButtonEvents::on_selection_changed(receiver, self.emitter.cast(), data.status),        
+            ControlEventData::ToggleButton(data) => togglebutton::events::ToggleButtonEvents::on_selection_changed(receiver, self.emitter.cast(), data.status),
             ControlEventData::ColorPicker(data) => ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color),
             ControlEventData::ThreeStateBox(data) => ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state),
             ControlEventData::Password(data) => {
