@@ -2,7 +2,7 @@ use super::initialization_flags::Flags;
 
 use crate::prelude::*;
 
-use std::{fs::File, io::Write};
+use std::{fs::File, io::Write, mem::swap};
 
 
 // TODO: implement a second Cursor that is used as absolute position on screen and is discarded whenever we
@@ -11,6 +11,8 @@ use std::{fs::File, io::Write};
 struct Cursor {
     pos_x: usize,
     pos_y: usize,
+
+    pressed: bool,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -97,7 +99,7 @@ impl TextArea {
             flags,
             text: text.to_string(),
 
-            cursor: Cursor { pos_x: 0, pos_y: 0},
+            cursor: Cursor { pos_x: 0, pos_y: 0, pressed: false},
             selection: Selection {pos_start: 0, pos_end: 0, direction: SelectionDirection::None},
 
             line_sizes: Vec::new(),
@@ -374,8 +376,61 @@ impl TextArea {
         }
     }
 
-    pub fn remove_text_selection(&mut self) {
+    pub fn remove_text_selection(&mut self, pos_start: usize, pos_end: usize) {
+        // Here we should reverse from absolut_position -> relative line position in order to modify our lines
+        // If the remove is multiline, we should remove lines in between, cut and merge first and last line
 
+        // aaaaaaaa         aaaaaaaa        aaaaa            aaaaabbbb
+        // xxxxxxxx
+        // xxxxxxxx     =>              =>              =>  
+        // xxxxxxxx
+        // bbbbbbbb         bbbbbbbb            bbbb
+
+        // Return if range is invalid 
+        if pos_start >= pos_end {
+            return;
+        }
+
+        let mut position_start_x = 0;
+        let mut position_start_y = 0;
+        let mut position_end_x = 0;
+        let mut position_end_y = 0;
+
+        let mut counter = 0;
+        let mut line_iterator = 0;
+
+        while counter < pos_end && line_iterator < self.line_sizes.len() {
+            
+            if counter <= pos_start && pos_start < counter + self.line_sizes[line_iterator] as usize {
+                position_start_y = line_iterator;
+                position_start_x = pos_start - counter; 
+            }
+
+            if counter <= pos_end && pos_end < counter + self.line_sizes[line_iterator] as usize {
+                position_end_y = line_iterator;
+                position_end_x = pos_end - counter; 
+            }
+
+            counter += self.line_sizes[line_iterator] as usize;
+            line_iterator += 1;
+        }
+
+        // print!("{position_start_x}, {position_start_y}, {position_end_x}, {position_end_y}");
+
+        // this is bad, but this is my level for now in Rust
+        if position_start_y == position_end_y {
+
+            for _it in 0..position_end_x-position_start_x {
+                self.text.remove(pos_start);
+            }
+
+            self.line_sizes[position_start_y] -= (position_end_x - position_start_x) as u32;
+        }
+        else {
+            
+        }
+
+        self.move_cursor_horizontal(pos_start as i32 - pos_end as i32);
     }
 
     pub fn insert_newline(&mut self) {
@@ -833,13 +888,26 @@ impl OnKeyPressed for TextArea {
             key!("Back") => {
                 self.reposition_cursor();
 
-                self.remove_char_back();
+                if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
+                    self.remove_text_selection(self.selection.pos_start, self.selection.pos_end);
+                    self.reset_selection();
+                }
+                else {
+                    self.remove_char_back();
+                }
+
                 return EventProcessStatus::Processed;
             }
             key!("Delete") => {
                 self.reposition_cursor();
 
-                self.remove_char_front();
+                if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
+                    self.remove_text_selection(self.selection.pos_start, self.selection.pos_end);
+                    self.reset_selection();
+                }
+                else {
+                    self.remove_char_front();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Enter") => {
@@ -867,4 +935,89 @@ impl OnKeyPressed for TextArea {
 
 impl OnMouseEvent for TextArea {
     // TODO for next week: mouse event for cursor and selection
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => EventProcessStatus::Ignored,
+            MouseEvent::Over(_) => EventProcessStatus::Ignored,
+            MouseEvent::Pressed(data) => {
+                // We need to change cursor position and reset selection
+
+                self.cursor.pos_x = data.x as usize;
+                self.cursor.pos_y = data.y as usize;
+                self.cursor.pressed = true;
+
+                self.reset_selection();
+                
+                let mut cursor_absolute_position = 0;
+                for i in 0..self.line_offset + self.cursor.pos_y as u32 {
+                    cursor_absolute_position += self.line_sizes[i as usize];
+                }
+                cursor_absolute_position += self.row_offset + self.cursor.pos_x as u32;
+
+                self.selection.pos_start = cursor_absolute_position as usize;
+
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Released(_) => {
+                self.cursor.pressed = false;
+                
+                EventProcessStatus::Processed
+            }
+            MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
+            MouseEvent::Drag(data) => {
+                if self.cursor.pressed == false {
+                    return EventProcessStatus::Ignored;
+                }
+
+                self.cursor.pos_x = data.x as usize;
+                self.cursor.pos_y = data.y as usize;
+
+                let mut cursor_absolute_position = 0;
+                for i in 0..self.line_offset + self.cursor.pos_y as u32 {
+                    cursor_absolute_position += self.line_sizes[i as usize];
+                }
+                cursor_absolute_position += self.row_offset + self.cursor.pos_x as u32;
+
+                if self.selection.direction == SelectionDirection::None {
+                    self.selection.pos_end = cursor_absolute_position as usize;
+
+                    if self.selection.pos_start < self.selection.pos_end {
+                        self.selection.direction = SelectionDirection::Right;
+                    }
+                    else if self.selection.pos_start > self.selection.pos_end {
+
+                        swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
+                        self.selection.direction = SelectionDirection::Left;
+                    }
+                }
+                else if self.selection.direction == SelectionDirection::Right {
+                    self.selection.pos_end = cursor_absolute_position as usize;
+
+                    if self.selection.pos_start == self.selection.pos_end {
+                        self.selection.direction = SelectionDirection::None;
+                    }
+                    else if self.selection.pos_start > self.selection.pos_end {
+
+                        swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
+                        self.selection.direction = SelectionDirection::Left;
+                    }
+                }
+                else if self.selection.direction == SelectionDirection::Left {
+                    self.selection.pos_start = cursor_absolute_position as usize;
+
+                    if self.selection.pos_start == self.selection.pos_end {
+                        self.selection.direction = SelectionDirection::None;
+                    }
+                    else if self.selection.pos_start > self.selection.pos_end {
+
+                        swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
+                        self.selection.direction = SelectionDirection::Right;
+                    }
+                }
+
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
+        }
+    }
 }
