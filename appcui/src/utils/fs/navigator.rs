@@ -1,3 +1,5 @@
+use crate::utils::NavigatorEntry;
+
 use super::{Entry, EntryType, Root};
 use std::path::PathBuf;
 use chrono::NaiveDateTime;
@@ -7,6 +9,7 @@ use std::os::windows::fs::MetadataExt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub(crate) struct Navigator {
+    windows_model: bool,
 }
 
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
@@ -17,12 +20,59 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     fn roots(&self) -> Vec<Root> {
         super::get_os_roots()
     }
+
+    #[cfg(target_os="windows")]
     fn new() -> Self {
-        Self {  }
+        Self { windows_model: true }
+    }
+
+    #[cfg(target_family="unix")]
+    fn new() -> Self {
+        Self { windows_model: false }
     }
 
     fn join(&self, path: &PathBuf, entry: &Entry) -> Option<PathBuf> {
-        todo!()
+        if self.is_root(entry.name()) {
+            Some(PathBuf::from(entry.name().replace('/', "\\").as_str()))
+        } else {
+            let mut components: Vec<&str> = path
+                .components()
+                .map(|c| c.as_os_str().to_str().unwrap())
+                .filter(|c| *c != "\\")
+                .collect();
+
+            println!("{:?}", components);
+            for s in entry.name().split(['/', '\\']) {
+                match s {
+                    ".." => {
+                        if !components.is_empty() {
+                            components.pop();
+                        }
+                    }
+                    "." | "" => {
+                        continue;
+                    }
+                    _ => {
+                        components.push(s);
+                    }
+                }
+            }
+            let mut s = String::with_capacity(256);
+            for c in components {
+                if !s.is_empty() {
+                    if self.windows_model {
+                        s.push('\\');
+                    } else {
+                        s.push('/');
+                    }
+                }
+                println!("Pushing {} to {}", c, s);
+                // edge case for windows roots
+
+                s.push_str(c);
+            }
+            Some(PathBuf::from(s))
+        }
     }
 
     fn exists(&self, path: &PathBuf) -> Option<bool> {
@@ -41,7 +91,7 @@ impl Navigator {
         for dir_entry in fs::read_dir(dir)? {
             let entry = dir_entry?;
             let metadata = entry.metadata()?;
-            if let Some(utf8path) = entry.path().to_str() {
+            if let Some(utf8path) = entry.file_name().to_str() {
                 let entry = Self::get_entry_from_metadata(utf8path, &metadata)?;
                 result.push(entry);
             }
@@ -67,5 +117,14 @@ impl Navigator {
             }
         }
         Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid timestamp"))
+    }
+
+    fn is_root(&self, path: &str) -> bool {
+        let buf = path.as_bytes();
+        if self.windows_model {
+            buf.len() >= 2 && buf[1] == b':' && ((buf[0] >= b'A' && buf[0] <= b'Z') || (buf[0] >= b'a' && buf[0] <= b'z'))
+        } else {
+            buf.len() == 1 && buf[0] == b'/'
+        }
     }
 }

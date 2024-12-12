@@ -5,8 +5,7 @@ use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
 use crate::prelude::{
-    colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, selector, textfield, threestatebox,
-    togglebutton, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents,
+    colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, selector, textfield, threestatebox, togglebutton, GenericSelectorEvents, PathFinderEvents, RuntimeManager, ThreeStateBoxEvents
 };
 use crate::system::Handle;
 
@@ -113,6 +112,7 @@ impl ControlEvent {
                     GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index)
                 }
             },
+            ControlEventData::PathFinder(data) => {EventProcessStatus::Ignored},
         }
     }
 }

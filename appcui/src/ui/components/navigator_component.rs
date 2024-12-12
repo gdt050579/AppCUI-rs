@@ -1,5 +1,6 @@
 use common::{ControlEvent, ControlEventData};
 use pathfinder::events::EventData;
+use std::path::PathBuf;
 
 use crate::prelude::textfield::selection::Selection;
 use crate::prelude::*;
@@ -9,11 +10,11 @@ use std::marker::PhantomData;
 //TODO: make separate cfgs for different OS
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
 
-struct NavigatorDataCacher<T, E, R, P>
+struct NavigatorDataCacher<T, E, R>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, P>,
+    T: crate::utils::Navigator<E, R, PathBuf>,
 {
     cached_path: String,
     cached_items: Vec<String>,
@@ -21,15 +22,13 @@ where
     _phantom_t: std::marker::PhantomData<T>,
     _phantom_r: std::marker::PhantomData<R>,
     _phantom_e: std::marker::PhantomData<E>,
-    _phantom_p: std::marker::PhantomData<P>,
 }
 
-impl<T, E, R, P> NavigatorDataCacher<T, E, R, P>
+impl<T, E, R> NavigatorDataCacher<T, E, R>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, P>,
-    P: From<String>,
+    T: crate::utils::Navigator<E, R, PathBuf>,
 {
     fn new() -> Self {
         Self {
@@ -39,7 +38,6 @@ where
             _phantom_r: PhantomData,
             _phantom_t: PhantomData,
             _phantom_e: PhantomData,
-            _phantom_p: PhantomData,
         }
     }
     fn get_suggestions(&self) -> &Vec<String> {
@@ -49,15 +47,18 @@ where
         let folder = Self::get_folder(path);
         if folder != self.cached_path {
             // create cache for this folder
-            let folder_contents = navigator.entries(&P::from(folder.to_string()));
+            let folder_contents = navigator.entries(&PathBuf::from(folder.to_string()));
             if !folder_contents.is_empty() {
                 self.cached_items.clear();
                 self.cached_path = folder.to_string();
                 for entry in folder_contents {
-                    self.cached_items.push(entry.name().to_string());
+                    let cached_item = navigator.join(&PathBuf::from(folder.to_string()), &entry).unwrap().to_str().unwrap().to_string();
+                    println!("pushed cached item \"{}\"", cached_item);
+                    self.cached_items.push(cached_item);
                 }
             }
         }
+        println!("try matching with \"{}\"", path);
         self.suggestions = Self::get_matching_paths(path, &self.cached_items);
     }
     fn get_folder(path: &str) -> &str {
@@ -74,14 +75,14 @@ where
         items.iter().filter(|s| s.starts_with(path)).cloned().collect()
     }
 }
-pub(crate) struct NavigatorComponent<T, E, R, P>
+pub(crate) struct NavigatorComponent<T, E, R>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, P>,
+    T: crate::utils::Navigator<E, R, PathBuf>,
 {
     is_readonly: bool,
-    navigator_cacher: NavigatorDataCacher<T, E, R, P>,
+    navigator_cacher: NavigatorDataCacher<T, E, R>,
 
     // input area
     cursor: usize,
@@ -105,11 +106,11 @@ where
     _phantom_e: std::marker::PhantomData<E>,
 }
 
-pub(crate) trait NavigatorComponentControlFunctions<T, E, R, P>
+pub(crate) trait NavigatorComponentControlFunctions<T, E, R>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, P>,
+    T: crate::utils::Navigator<E, R, PathBuf>,
 {
     fn on_expand(&mut self, control: &ControlBase, direction: ExpandedDirection);
     fn on_focus(&mut self, control: &mut ControlBase);
@@ -129,12 +130,11 @@ pub(crate) trait NavigatorComponentPaintFunctions {
     fn paint_trimmed_text(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, text: &str);
 }
 
-impl<T, E, R, P> NavigatorComponent<T, E, R, P>
+impl<T, E, R> NavigatorComponent<T, E, R>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, P>,
-    P: From<String>,
+    T: crate::utils::Navigator<E, R, PathBuf>,
 {
     const PADDING_LEFT: u16 = 1;
     const PADDING_RIGHT: u16 = 1;
@@ -312,12 +312,11 @@ where
     }
 }
 
-impl<T, E, R, P> NavigatorComponentControlFunctions<T, E, R, P> for NavigatorComponent<T, E, R, P>
+impl<T, E, R> NavigatorComponentControlFunctions<T, E, R> for NavigatorComponent<T, E, R>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, P>,
-    P: From<String>,
+    T: crate::utils::Navigator<E, R, PathBuf>,
 {
     fn on_expand(&mut self, control: &ControlBase, direction: ExpandedDirection) {
         match direction {
@@ -446,12 +445,11 @@ where
     }
 }
 
-impl<T, E, R, P> NavigatorComponentPaintFunctions for NavigatorComponent<T, E, R, P>
+impl<T, E, R> NavigatorComponentPaintFunctions for NavigatorComponent<T, E, R>
 where
     E: crate::utils::NavigatorEntry,
     R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, P>,
-    P: From<String>,
+    T: crate::utils::Navigator<E, R, PathBuf>,
 {
     fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme) {
         let attr = match () {

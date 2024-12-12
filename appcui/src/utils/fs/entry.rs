@@ -37,7 +37,7 @@ impl Entry {
         if full_path.len() <= path.len() {
             return None;
         }
-        for c in full_path.chars().skip(path.len()) {
+        for c in full_path.chars().skip(path.len()).skip_while(|c| (*c == '/') || (*c == '\\' )) {
             if (c == '/') || (c == '\\') {
                 return None;
             }

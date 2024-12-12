@@ -71,7 +71,7 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
     ValidateOrCancelResult::Cancel
 }
 
-static VFS: &str = include_str!("E:\\Lucru\\Personal\\AppCUI-rs\\scripts\\vfs.csv");
+//static VFS: &str = include_str!("E:\\Lucru\\Personal\\AppCUI-rs\\scripts\\vfs.csv");
 
 pub enum Location<'a> {
     Current,
@@ -145,5 +145,5 @@ where
 }
 
 pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
-    inner_save(file_name, location, extension_mask, flags, utils::fs::NavSimulator::with_csv(VFS, true))
+    inner_save(file_name, location, extension_mask, flags, utils::fs::NavSimulator::with_csv("VFS", true))
 }

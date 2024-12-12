@@ -11,7 +11,7 @@ impl MyWin {
 }
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
-        dialogs::save("abc.exe", ".", "Images = [jpg,png,bmp], Documents = [txt,docx], Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd]");
+        //dialogs::save("abc.exe", ".", "Images = [jpg,png,bmp], Documents = [txt,docx], Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd]");
         EventProcessStatus::Processed
     }
 }

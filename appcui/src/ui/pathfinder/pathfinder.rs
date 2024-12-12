@@ -11,7 +11,7 @@ where
 {
     flags: Flags,
     navigator: T,
-    component: crate::ui::components::NavigatorComponent<T, Entry, Root, PathBuf>,
+    component: crate::ui::components::NavigatorComponent<T, Entry, Root>,
 }
 
 impl<T> PathFinder<T>

@@ -50,7 +50,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
         if self.is_root(entry.name()) {
             Some(PathBuf::from(entry.name().replace('/', "\\").as_str()))
         } else {
-            let mut components: Vec<&str> = path.components().map(|c| c.as_os_str().to_str().unwrap()).collect();
+            let mut components: Vec<&str> = path.components().map(|c| c.as_os_str().to_str().unwrap()).filter(|c| *c != "\\").collect();
             for s in entry.name().split(|c| c == '/' || c == '\\') {
                 match s {
                     ".." => {
@@ -77,7 +77,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
                 }
                 s.push_str(c);
             }
-            Some(PathBuf::from(s))  
+            Some(PathBuf::from(s))
         }
     }
 
