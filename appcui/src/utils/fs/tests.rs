@@ -77,6 +77,7 @@ fn check_simulator_join() {
         )        
     );
     assert_eq!(p, Some(PathBuf::from("C:\\Program Files")));
+
     let p = nav.join(
         &PathBuf::from("C:\\Test\\xyz"),
         &Entry::new(
@@ -87,6 +88,7 @@ fn check_simulator_join() {
         )        
     );
     assert_eq!(p, Some(PathBuf::from("C:\\Test\\a.exe")));
+
     let p = nav.join(
         &PathBuf::from("C:\\a/b/c/d/e/f"),
         &Entry::new(
@@ -97,6 +99,17 @@ fn check_simulator_join() {
         )        
     );
     assert_eq!(p, Some(PathBuf::from("C:\\a\\b\\c\\a.exe")));
+
+    let p = nav.join(
+        &PathBuf::from("C:\\a/b/c\\d/e/f"),
+        &Entry::new(
+            "X:\\Test/T2/a.exe",
+            0,
+            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(), 
+            EntryType::File
+        )        
+    );
+    assert_eq!(p, Some(PathBuf::from("X:\\Test\\T2\\a.exe")));
 }
 
 

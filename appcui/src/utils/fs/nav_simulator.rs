@@ -48,7 +48,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
 
     fn join(&self, path: &PathBuf, entry: &Entry) -> Option<PathBuf> {
         if self.is_root(entry.name()) {
-            Some(PathBuf::from(entry.name()))
+            Some(PathBuf::from(entry.name().replace('/', "\\").as_str()))
         } else {
             let mut components: Vec<&str> = path.components().map(|c| c.as_os_str().to_str().unwrap()).collect();
             for s in entry.name().split(|c| c == '/' || c == '\\') {
@@ -66,11 +66,18 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
                     }
                 }
             }
-            let mut result = PathBuf::new();
-            for component in components {
-                result.push(component);
+            let mut s = String::with_capacity(256);
+            for c in components {
+                if !s.is_empty() {
+                    if self.windows_model {
+                        s.push('\\');
+                    } else {
+                        s.push('/');
+                    }
+                }
+                s.push_str(c);
             }
-            Some(result)
+            Some(PathBuf::from(s))  
         }
     }
 
