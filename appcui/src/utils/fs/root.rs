@@ -1,4 +1,6 @@
 use crate::utils::NavigatorRoot;
+use crate::prelude::*;
+
 #[derive(Debug)]
 pub(crate) enum RootType {
     Fixed,
@@ -22,8 +24,9 @@ impl RootType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, ListViewItem)]
 pub(crate) struct Root {
+    #[Column(name = "&Path", width = 10)]
     pub(crate) path: String,
     pub(crate) name: String,
     pub(crate) size: u64,
