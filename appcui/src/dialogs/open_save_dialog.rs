@@ -240,7 +240,7 @@ where
                 EventProcessStatus::Processed
             }
             _ if handle == self.b_drive => {
-                if let Some(path) = RootSelectDialog::new(self.nav.roots()).show() {
+                if let Some(path) = RootSelectDialog::new(self.nav.roots(), self.flags.contains(InnerFlags::Icons)).show() {
                     self.path = path;
                     self.populate_after_path_update();
                 }

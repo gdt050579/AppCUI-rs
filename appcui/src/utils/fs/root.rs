@@ -19,7 +19,17 @@ impl RootType {
             "ramdisk" | "ram" | "r" | "R" => Some(Self::RamDisk),
             "cdrom" | "cd" | "c" | "C" => Some(Self::CdRom),
             "unknown" | "?" => Some(Self::Unknown),
-            _ => None,
+            _ => None,            
+        }
+    }
+    pub(crate) fn icon(&self) -> char {
+        match self {
+            Self::Fixed => '💻',
+            Self::Removable => '🔌',
+            Self::Network => '🖧',
+            Self::RamDisk => '▦',
+            Self::CdRom => '📀',
+            Self::Unknown => '❓',
         }
     }
 }
