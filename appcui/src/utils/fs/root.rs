@@ -26,10 +26,13 @@ impl RootType {
 
 #[derive(Debug, ListViewItem)]
 pub(crate) struct Root {
-    #[Column(name = "&Path", width = 10)]
+    #[Column(name = "&Path", width = 10, index = 1)]
     pub(crate) path: String,
+    #[Column(name = "&Name", width = 15, index = 4)]
     pub(crate) name: String,
+    #[Column(name = "&Size", width = 10, align = right, render = Size, index = 2)]
     pub(crate) size: u64,
+    #[Column(name = "&Free", width = 10, align = right, render = Size, index = 3)]
     pub(crate) free_space: u64,
     pub(crate) root_type: RootType,
 }

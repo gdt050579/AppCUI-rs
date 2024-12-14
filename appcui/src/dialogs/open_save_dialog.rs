@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::sync::OnceLock;
 
 use dialogs::file_mask::FileMask;
+use dialogs::root_select_dialog::RootSelectDialog;
 use fs::EntryType;
 
 use super::Location;
@@ -38,6 +39,7 @@ where
     name: Handle<TextField>,
     b_ok: Handle<Button>,
     b_cancel: Handle<Button>,
+    b_drive: Handle<Button>,
     mask: Handle<ComboBox>,
     extension_mask: Vec<FileMask>,
     nav: T,
@@ -61,6 +63,7 @@ where
             name: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None,
+            b_drive: Handle::None,
             mask: Handle::None,
             path_viewer: Handle::None,
             extension_mask,
@@ -76,7 +79,7 @@ where
             Location::Last => LAST_PATH.get_or_init(|| std::env::current_dir().unwrap_or_default()).clone(),
             Location::Path(p) => p.to_path_buf(),
         };
-        w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
+        w.b_drive = w.add(button!("&Drive,x:1,y:1,w:7,type:Flat"));
         w.path_viewer = w.add(TextField::new("???", Layout::new("l:9,t:1,r:1"), textfield::Flags::Readonly));
         let mut p = panel!("l:1,t:3,r:1,b:5");
         let mut lv: ListView<Entry> = ListView::new(
@@ -170,7 +173,9 @@ where
             if self.flags.contains(InnerFlags::ValidateOverwrite) {
                 match self.nav.exists(&self.path) {
                     Some(true) => {
-                        if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str()) == false {
+                        if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str())
+                            == false
+                        {
                             return;
                         }
                     }
@@ -185,7 +190,15 @@ where
             }
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
-            crate::dialogs::error("Error", format!("Fail to join current path: '{}' with file name: '{}'", self.path.display(), entry.name.as_str()).as_str());
+            crate::dialogs::error(
+                "Error",
+                format!(
+                    "Fail to join current path: '{}' with file name: '{}'",
+                    self.path.display(),
+                    entry.name.as_str()
+                )
+                .as_str(),
+            );
         }
     }
     fn populate_after_path_update(&mut self) {
@@ -217,15 +230,24 @@ where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
-        if handle == self.b_cancel {
-            self.exit_with(OpenSaveDialogResult::Cancel);
-            return EventProcessStatus::Processed;
+        match () {
+            _ if handle == self.b_ok => {
+                self.return_result();
+                EventProcessStatus::Processed
+            }
+            _ if handle == self.b_cancel => {
+                self.exit_with(OpenSaveDialogResult::Cancel);
+                EventProcessStatus::Processed
+            }
+            _ if handle == self.b_drive => {
+                if let Some(path) = RootSelectDialog::new(self.nav.roots()).show() {
+                    self.path = path;
+                    self.populate_after_path_update();
+                }
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
         }
-        if handle == self.b_ok {
-            self.return_result();
-            return EventProcessStatus::Processed;
-        }
-        EventProcessStatus::Ignored
     }
 }
 impl<T> ToggleButtonEvents for FileExplorer<T>
