@@ -241,7 +241,6 @@ impl Window {
     {
         RuntimeManager::get().get_control_mut(handle)
     }
-    
     pub fn request_focus_for_control<T>(&mut self, handle: Handle<T>)
     where
         T: Control + 'static,
