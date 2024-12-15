@@ -23,6 +23,7 @@ struct Distance {
 }
 
 #[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true, window=true)]
+#[derive(Default)]
 pub struct Window {
     title: Title,
     flags: Flags,

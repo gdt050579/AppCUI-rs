@@ -26,7 +26,6 @@ pub(super) enum InnerFlags {
 }
 
 static LAST_PATH: OnceLock<PathBuf> = OnceLock::new();
-
 #[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where

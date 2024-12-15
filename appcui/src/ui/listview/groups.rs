@@ -13,6 +13,11 @@ impl Group {
         self.index
     }
 }
+impl Default for Group {
+    fn default() -> Self {
+        Group::None
+    }
+}
 
 #[derive(Default)]
 pub(crate) struct GroupInformation {

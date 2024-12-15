@@ -31,7 +31,7 @@ pub enum StatusFlags {
     IncreaseBottomMarginOnFocus = 0x1000,
     SingleWindow = 0x2000,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub(crate) struct Margins {
     pub(crate) left: u8,
     pub(crate) right: u8,
@@ -40,6 +40,7 @@ pub(crate) struct Margins {
 }
 
 #[repr(C)]
+#[derive(Default)]
 pub struct ControlBase {
     pub(crate) layout: ControlLayout,
     pub(crate) margins: Margins,
