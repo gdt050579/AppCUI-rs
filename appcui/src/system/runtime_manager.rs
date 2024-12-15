@@ -158,7 +158,7 @@ impl RuntimeManager {
     #[inline(always)]
     pub(crate) fn theme(&self) -> &Theme {
         &self.theme
-    }   
+    }
     pub(crate) fn is_instantiated() -> bool {
         unsafe { RUNTIME_MANAGER.is_some() }
     }
@@ -346,7 +346,10 @@ impl RuntimeManager {
         // add to modal stack
         if !handle.is_none() {
             self.modal_windows.push(handle);
-            self.request_focus_for_control(handle);
+            // if the existing requested focus is for a child of the modal window - keep-it
+            if !self.is_nth_child(handle, self.request_focus.unwrap_or(Handle::None), true) {
+                self.request_focus_for_control(handle);
+            }
             self.request_update();
         }
         handle.cast()
@@ -743,7 +746,6 @@ impl RuntimeManager {
         }
         self.process_menu_and_cmdbar_mousemove(self.mouse_pos.x, self.mouse_pos.y);
         self.request_update_command_and_menu_bars = false;
-        
     }
 
     fn find_last_leaf(&mut self, handle: Handle<UIElement>) -> Handle<UIElement> {
@@ -765,6 +767,37 @@ impl RuntimeManager {
         }
         result
     }
+
+    fn is_nth_child(&mut self, parent: Handle<UIElement>, child: Handle<UIElement>, focusable: bool) -> bool {
+        if child.is_none() || parent.is_none() {
+            return false;
+        }
+        if child == parent {
+            return true;
+        }
+        let controls = unsafe { &mut *self.controls };
+        if focusable {
+            // check to see if the child can receive focus
+            if let Some(c) = controls.get(child) {
+                if !c.base().can_receive_input() {
+                    return false;
+                }
+            }
+        }
+        let mut handle = child;
+        while let Some(c) = controls.get_mut(handle) {
+            let base = c.base();
+            if focusable && !base.is_active() {
+                break;
+            }
+            if base.parent == parent {
+                return true;
+            }
+            handle = base.parent;
+        }
+        false
+    }
+
     fn update_focus(&mut self, handle: Handle<UIElement>) {
         // if an expanded control exists --> pack it
         if !self.expanded_control.handle.is_none() {
@@ -1375,8 +1408,7 @@ impl MouseMethods for RuntimeManager {
         // update mouse position
         self.mouse_pos.x = event.x;
         self.mouse_pos.y = event.y;
-        
-        
+
         if let Some(menu) = self.get_opened_menu() {
             self.repaint |= menu.on_mouse_wheel(event.direction) == EventProcessStatus::Processed;
             return;
@@ -1457,7 +1489,7 @@ impl MouseMethods for RuntimeManager {
         // update mouse position
         self.mouse_pos.x = event.x;
         self.mouse_pos.y = event.y;
-        
+
         match self.mouse_locked_object {
             MouseLockedObject::None => self.process_mousemove(event),
             MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
@@ -1527,7 +1559,7 @@ impl MouseMethods for RuntimeManager {
         // update mouse position
         self.mouse_pos.x = event.x;
         self.mouse_pos.y = event.y;
-        
+
         // check contextual menus
         if let Some(menu) = self.get_opened_menu() {
             self.repaint |= menu.on_mouse_released(event.x, event.y) == EventProcessStatus::Processed;
@@ -1568,7 +1600,7 @@ impl MouseMethods for RuntimeManager {
         // update mouse position
         self.mouse_pos.x = event.x;
         self.mouse_pos.y = event.y;
-        
+
         // Hide ToolTip
         self.hide_tooltip();
         // check for a control

@@ -42,6 +42,8 @@ impl RootSelectDialog {
         let mut p = panel!("l:1,r:1,t:1,b:3");
         w.list = p.add(lv);
         w.add(p); 
+        let h = w.list;
+        w.request_focus_for_control(h);
         w
     }
     fn return_result(&mut self) {
