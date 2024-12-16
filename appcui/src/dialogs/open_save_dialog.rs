@@ -89,6 +89,11 @@ where
                     listview::Flags::LargeIcons
                 } else {
                     listview::Flags::None
+                }
+                | if !flags.contains(InnerFlags::MultipleOpen) {
+                    listview::Flags::NoSelection
+                } else {
+                    listview::Flags::None
                 },
         );
         w.g_updir = lv.add_group("UpDir");
@@ -109,6 +114,8 @@ where
         w.mask = w.add(mask);
         w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
         w.set_size_bounds(40, 17, u16::MAX, u16::MAX);
+        let h = w.name;
+        w.request_focus_for_control(h);
         w
     }
     fn populate(&mut self) {
