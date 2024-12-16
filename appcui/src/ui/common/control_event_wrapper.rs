@@ -112,7 +112,7 @@ impl ControlEvent {
                     GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index)
                 }
             },
-            ControlEventData::PathFinder(data) => {EventProcessStatus::Ignored},
+            ControlEventData::PathFinder(_) => {EventProcessStatus::Ignored},
         }
     }
 }

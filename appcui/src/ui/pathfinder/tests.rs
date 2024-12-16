@@ -1,47 +1,8 @@
+use pathfinder::pathfinder::PathFinderSimulator;
+
 use crate::{prelude::*, utils::fs::NavSimulator};
 
-#[test]
-fn check() {
-    let script = "
-        //Paint.Enable(false)
-        Paint('Initial')
-        Key.Pressed(Tab)
-        Paint('After Tab')
-        Key.Pressed(P)
-        Paint('after P')
-        Key.Pressed(Backspace)
-        Paint('after backspace')
-    ";
-    let mut a = App::debug(80, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:60,h:15");
-    let p = PathFinder::<crate::utils::fs::Navigator>::new(
-        r#"D:\work\Projects\"#,
-        Layout::new("x:1,y:1,w:30"),
-        pathfinder::Flags::None);
-    w.add(p);
-    w.add(button!("test,x:1,y:3,w:6"));
-    a.add_window(w);
-    a.run();
-}
-
-#[test]
-fn run() -> Result<(), crate::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Test,d:c,w:100,h:15");
-    let p = PathFinder::<crate::utils::fs::Navigator>::new(
-        r#"D:\work\Projects\BDAntiCryptoLockerUnified\RemovalToolUnifiedDropper\RemovalToolUnifiedDropper.sln"#,
-        Layout::new("x:1,y:1,w:60"),
-        pathfinder::Flags::None);
-    w.add(p);
-    w.add(button!("test,x:1,y:4,w:6"));
-    a.add_window(w);
-    a.run();
-    Ok(())
-}
-
-#[test]
-fn check_with_simulator() {
-    let csv_data = "
+const CSV_DATA: &str = "
     r,C:\\,10000,100000,SYSTEM,fixed
     r,D:\\,123,123456,USB Drive,removable
     d,C:\\Program Files,0,2024-01-10 12:00:00,
@@ -61,24 +22,35 @@ fn check_with_simulator() {
     f:D:\\Windows\\picture.png,123456,2020-03-12 12:31:55,
     f:D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
-    let nav = NavSimulator::with_csv(csv_data, true);
+#[test]
+fn check_with_simulator() {
 
-    // let script = "
-    //     //Paint.Enable(false)
-    //     Paint('Initial')
-    //     Key.Pressed(Tab)
-    //     Paint('After Tab')
-    //     Key.Pressed(W)
-    //     Key.Pressed(Backspace)
-    //     Key.Pressed(Down, 6)
-    //     Paint('after')
-    // ";
-    // let mut a = App::debug(80, 20, script).build().unwrap();
-    let mut a = App::new().build().unwrap();
+    let nav = NavSimulator::with_csv(CSV_DATA, true);
+
+    let script = "
+        //Paint.Enable(false)
+        Paint('Initial')
+        Key.Pressed(Tab)
+        Paint('After Focus')
+        Key.Pressed(S)
+        Paint('After pressing inexisting path prefix')
+        Key.Pressed(Backspace)
+        Paint('Print path suggestions')
+        Key.Pressed(Shift+W)
+        Paint('Restrict path suggestions')
+        Key.Pressed(Down, 6)
+        Paint('Got to last selection')
+        Key.Pressed(Enter)
+        Paint('Selected last')
+        Key.Pressed(Tab)
+        Paint('After losing focus')
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    //let mut a = App::new().build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = PathFinder::<crate::utils::fs::NavSimulator>::with_navigator(
+    let p = PathFinderSimulator::new(
         r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:30"),
+        Layout::new("x:1,y:1,w:40"),
         pathfinder::Flags::None,
         nav);
     w.add(p);

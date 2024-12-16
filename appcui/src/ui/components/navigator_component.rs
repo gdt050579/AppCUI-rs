@@ -8,7 +8,10 @@ use crate::utils::glyphs::GlyphParser;
 use std::marker::PhantomData;
 
 //TODO: make separate cfgs for different OS
+#[cfg(target_os="windows")]
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
+#[cfg(target_family="unix")]
+const PLATFORM_SEPARATOR_CHARACTER: char = '/';
 
 struct NavigatorDataCacher<T, E, R>
 where
@@ -164,6 +167,11 @@ where
             _phantom_t: PhantomData,
             _phantom_e: PhantomData,
         }
+    }
+
+    #[inline(always)]
+    pub(crate) fn path(&self) -> &str {
+        &self.input_path
     }
 
     #[inline(always)]
