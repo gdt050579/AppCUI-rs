@@ -1,5 +1,4 @@
-use pathfinder::pathfinder::PathFinderSimulator;
-
+use pathfinder::pathfinder::GenericPathFinder;
 use crate::{prelude::*, utils::fs::NavSimulator};
 
 const CSV_DATA: &str = "
@@ -45,10 +44,10 @@ fn check_with_simulator() {
         Key.Pressed(Tab)
         Paint('After losing focus')
     ";
-    let mut a = App::debug(80, 20, script).build().unwrap();
-    //let mut a = App::new().build().unwrap();
+    //let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut a = App::new().build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = PathFinderSimulator::new(
+    let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
         pathfinder::Flags::None,
