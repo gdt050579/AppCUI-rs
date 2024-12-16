@@ -23,6 +23,7 @@ struct Distance {
 }
 
 #[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true, window=true)]
+#[derive(Default)]
 pub struct Window {
     title: Title,
     flags: Flags,
@@ -241,6 +242,13 @@ impl Window {
     {
         RuntimeManager::get().get_control_mut(handle)
     }
+    pub fn request_focus_for_control<T>(&mut self, handle: Handle<T>)
+    where
+        T: Control + 'static,
+    {
+        RuntimeManager::get().request_focus_for_control(handle.cast());
+    }
+    
     pub fn toolbar(&mut self) -> &mut ToolBar {
         &mut self.toolbar
     }

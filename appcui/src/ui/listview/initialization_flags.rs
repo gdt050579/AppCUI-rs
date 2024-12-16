@@ -14,6 +14,7 @@ pub enum Flags {
     SmallIcons = 0x10,
     LargeIcons = 0x20,
     CustomFilter = 0x40,
+    NoSelection = 0x80,
 }
 
 pub trait ListItem {

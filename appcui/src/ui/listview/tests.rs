@@ -5776,3 +5776,25 @@ fn check_clear_search_method() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_no_selection_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (scroll starts from John,cursor on John)')
+        CheckHash(0xF73F60131F7F0467)
+        Key.Pressed(Insert,2)
+        Paint('2. Nothing select (cursor at ...)')
+        CheckHash(0x97CFE2808BE3E483)
+        Key.Pressed(Shift+Down)
+        Paint('3. Nothing select (cursor at ...)')
+        CheckHash(0x3AF8F1EBE5EB2013)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:40,h:9,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Details,flags: ScrollBars+NoSelection,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+    Person::populate(&mut lv);
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}

@@ -56,20 +56,21 @@ and the following types:
 
 Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
 
-| Method                | Purpose                                                                                                           |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `add(...)`            | Adds a new control as a child control for current window                                                          |
-| `control(...)`        | Returns an immutable reference to a control based on its handle                                                   |
-| `control_mut(...)`    | Returns a mutable reference to a control based on its handle                                                      |
-| `toolbar()`           | Returns a mutable reference to current window toolbar                                                             |
-| `set_title(...)`      | Sets the title of Window.<br>Example: `win.set_title("Title")` - this will set the title of the window to `Title` |
-| `title()`             | Returns the title of the current window                                                                           |
-| `set_tag(...)`        | Sets the tag of Window.<br>Example: `win.set_tag("ABC")` - this will set the tag of the window to `ABC`           |
-| `tag()`               | Returns the tag of the current window                                                                             |
-| `clear_tag()`         | Clears the current tag. Its equivalent to `set_tag("")`                                                           |
-| `set_auto_hotkey()`   | Automatically selects a free hotkey (in a format `Alt`+{number} where `{number}` is between 1 and 9)              |
-| `enter_resize_mode()` | Enters the resize mode programatically                                                                            |
-| `close`               | Closes current window                                                                                             |
+| Method                           | Purpose                                                                                                           |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `add(...)`                       | Adds a new control as a child control for current window                                                          |
+| `control(...)`                   | Returns an immutable reference to a control based on its handle                                                   |
+| `control_mut(...)`               | Returns a mutable reference to a control based on its handle                                                      |
+| `request_focus_for_control(...)` | Requests the focus for a specific control given a specfic handle                                                  |
+| `toolbar()`                      | Returns a mutable reference to current window toolbar                                                             |
+| `set_title(...)`                 | Sets the title of Window.<br>Example: `win.set_title("Title")` - this will set the title of the window to `Title` |
+| `title()`                        | Returns the title of the current window                                                                           |
+| `set_tag(...)`                   | Sets the tag of Window.<br>Example: `win.set_tag("ABC")` - this will set the tag of the window to `ABC`           |
+| `tag()`                          | Returns the tag of the current window                                                                             |
+| `clear_tag()`                    | Clears the current tag. Its equivalent to `set_tag("")`                                                           |
+| `set_auto_hotkey()`              | Automatically selects a free hotkey (in a format `Alt`+{number} where `{number}` is between 1 and 9)              |
+| `enter_resize_mode()`            | Enters the resize mode programatically                                                                            |
+| `close`                          | Closes current window                                                                                             |
 
 ## Key association
 
@@ -135,7 +136,7 @@ These methods are called under the following scenarious:
 | `on_activate(...)`       | Called whenever a window or a modal window receives the focus                                                                                                                                                                                                                                                                                |
 | `on_deactivate(...)`     | Called whenever a window or a modal window loses the focus                                                                                                                                                                                                                                                                                   |
 | `on_accept(...)`         | Called **only for modal windows** when you hit the `Enter` key                                                                                                                                                                                                                                                                               |
-| `on_cancel(...)`         | For a modal window this method is xalled when you press `Escape`. You can use this method to disable closing via `Escape` key and for an exit with a value (via method `exit_with(...)`<br><br>For a regular window (non-modal) this method can be called when you pressed `Esc` key or when you pressed the **close button** from a window. |
+| `on_cancel(...)`         | For a modal window this method is called when you press `Escape`. You can use this method to disable closing via `Escape` key and for an exit with a value (via method `exit_with(...)`<br><br>For a regular window (non-modal) this method can be called when you pressed `Esc` key or when you pressed the **close button** from a window. |
 
 ## Window Tags
 

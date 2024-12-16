@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::sync::OnceLock;
 
 use dialogs::file_mask::FileMask;
+use dialogs::root_select_dialog::RootSelectDialog;
 use fs::EntryType;
 
 use super::Location;
@@ -25,7 +26,6 @@ pub(super) enum InnerFlags {
 }
 
 static LAST_PATH: OnceLock<PathBuf> = OnceLock::new();
-
 #[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where
@@ -38,6 +38,7 @@ where
     name: Handle<TextField>,
     b_ok: Handle<Button>,
     b_cancel: Handle<Button>,
+    b_drive: Handle<Button>,
     mask: Handle<ComboBox>,
     extension_mask: Vec<FileMask>,
     nav: T,
@@ -61,6 +62,7 @@ where
             name: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None,
+            b_drive: Handle::None,
             mask: Handle::None,
             path_viewer: Handle::None,
             extension_mask,
@@ -76,7 +78,7 @@ where
             Location::Last => LAST_PATH.get_or_init(|| std::env::current_dir().unwrap_or_default()).clone(),
             Location::Path(p) => p.to_path_buf(),
         };
-        w.add(button!("Drive,x:1,y:1,w:7,type:Flat"));
+        w.b_drive = w.add(button!("&Drive,x:1,y:1,w:7,type:Flat"));
         w.path_viewer = w.add(TextField::new("???", Layout::new("l:9,t:1,r:1"), textfield::Flags::Readonly));
         let mut p = panel!("l:1,t:3,r:1,b:5");
         let mut lv: ListView<Entry> = ListView::new(
@@ -85,6 +87,11 @@ where
                 | listview::Flags::ScrollBars
                 | if flags.contains(InnerFlags::Icons) {
                     listview::Flags::LargeIcons
+                } else {
+                    listview::Flags::None
+                }
+                | if !flags.contains(InnerFlags::MultipleOpen) {
+                    listview::Flags::NoSelection
                 } else {
                     listview::Flags::None
                 },
@@ -107,6 +114,8 @@ where
         w.mask = w.add(mask);
         w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
         w.set_size_bounds(40, 17, u16::MAX, u16::MAX);
+        let h = w.name;
+        w.request_focus_for_control(h);
         w
     }
     fn populate(&mut self) {
@@ -170,7 +179,9 @@ where
             if self.flags.contains(InnerFlags::ValidateOverwrite) {
                 match self.nav.exists(&self.path) {
                     Some(true) => {
-                        if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str()) == false {
+                        if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str())
+                            == false
+                        {
                             return;
                         }
                     }
@@ -185,7 +196,15 @@ where
             }
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
-            crate::dialogs::error("Error", format!("Fail to join current path: '{}' with file name: '{}'", self.path.display(), entry.name.as_str()).as_str());
+            crate::dialogs::error(
+                "Error",
+                format!(
+                    "Fail to join current path: '{}' with file name: '{}'",
+                    self.path.display(),
+                    entry.name.as_str()
+                )
+                .as_str(),
+            );
         }
     }
     fn populate_after_path_update(&mut self) {
@@ -217,15 +236,24 @@ where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
-        if handle == self.b_cancel {
-            self.exit_with(OpenSaveDialogResult::Cancel);
-            return EventProcessStatus::Processed;
+        match () {
+            _ if handle == self.b_ok => {
+                self.return_result();
+                EventProcessStatus::Processed
+            }
+            _ if handle == self.b_cancel => {
+                self.exit_with(OpenSaveDialogResult::Cancel);
+                EventProcessStatus::Processed
+            }
+            _ if handle == self.b_drive => {
+                if let Some(path) = RootSelectDialog::new(self.nav.roots(), self.flags.contains(InnerFlags::Icons)).show() {
+                    self.path = path;
+                    self.populate_after_path_update();
+                }
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
         }
-        if handle == self.b_ok {
-            self.return_result();
-            return EventProcessStatus::Processed;
-        }
-        EventProcessStatus::Ignored
     }
 }
 impl<T> ToggleButtonEvents for FileExplorer<T>
