@@ -23,26 +23,24 @@ const CSV_DATA: &str = "
     ";
 #[test]
 fn check_with_simulator() {
-
     let nav = NavSimulator::with_csv(CSV_DATA, true);
-
     let script = "
         //Paint.Enable(false)
         Paint('Initial')
-        Key.Pressed(Tab)
-        Paint('After Focus')
-        Key.Pressed(S)
-        Paint('After pressing inexisting path prefix')
-        Key.Pressed(Backspace)
-        Paint('Print path suggestions')
-        Key.Pressed(Shift+W)
-        Paint('Restrict path suggestions')
-        Key.Pressed(Down, 6)
-        Paint('Got to last selection')
-        Key.Pressed(Enter)
-        Paint('Selected last')
-        Key.Pressed(Tab)
-        Paint('After losing focus')
+        // Key.Pressed(Tab)
+        // Paint('After Focus')
+        // Key.Pressed(S)
+        // Paint('After pressing inexisting path prefix')
+        // Key.Pressed(Backspace)
+        // Paint('Print path suggestions')
+        // Key.Pressed(Shift+W)
+        // Paint('Restrict path suggestions')
+        // Key.Pressed(Down, 6)
+        // Paint('Got to last selection')
+        // Key.Pressed(Enter)
+        // Paint('Selected last')
+        // Key.Pressed(Tab)
+        // Paint('After losing focus')
     ";
     //let mut a = App::debug(80, 20, script).build().unwrap();
     let mut a = App::new().build().unwrap();

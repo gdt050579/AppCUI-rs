@@ -36,8 +36,16 @@ where
         self.component.on_expand(control, direction);
     }
 
+    pub(super) fn on_resize(&mut self, control: &ControlBase, old_size: Size, new_size: Size) {
+        self.component.on_resize(control, old_size, new_size);
+    }
+
     pub(super) fn on_focus(&mut self, control: &mut ControlBase) {
         self.component.on_focus(control);
+    }
+
+    pub(super) fn on_lose_focus(&mut self, control: &mut ControlBase) {
+        self.component.on_lose_focus(control);
     }
 
     pub(super) fn path(&self) -> &Path {

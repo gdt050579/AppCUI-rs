@@ -21,9 +21,17 @@ macro_rules! IMPLEMENT_METHODS  {
                 self.inner.on_expand(direction, &self.base);
             }
         }
+        impl<$($g)?> OnResize for $data_type<$($g)?> where $($constraints)* {
+            fn on_resize(&mut self, old_size: Size, new_size: Size) {
+                self.inner.on_resize(&self.base, old_size, new_size);
+            }
+        }
         impl<$($g)?> OnFocus for $data_type<$($g)?> where $($constraints)* {
             fn on_focus(&mut self) {
                 self.inner.on_focus(&mut self.base);
+            }
+            fn on_lose_focus(&mut self) {
+                self.inner.on_lose_focus(&mut self.base);
             }
         }
         impl<$($g)?> $data_type<$($g)?> where $($constraints)* {
@@ -41,7 +49,7 @@ macro_rules! IMPLEMENT_METHODS  {
         }
     };
 }
-#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnExpand+OnFocus, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnExpand+OnFocus+OnResize, internal=true)]
 pub struct PathFinder {
     inner: InnerPathFinder<fs::Navigator>,
 }
@@ -53,7 +61,7 @@ impl PathFinder {
 }
 IMPLEMENT_METHODS!(PathFinder, fs::Navigator,,);
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnExpand+OnFocus, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnExpand+OnFocus+OnResize, internal=true)]
 pub(crate) struct GenericPathFinder<T>
 where T: Navigator<fs::Entry, fs::Root, PathBuf> {
     inner: InnerPathFinder<T>,

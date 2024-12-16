@@ -96,6 +96,7 @@ where
     backup_path: String,
     char_count: u32,
     selection: Selection,
+    out_of_focus_surface: Surface,
 
     // suggestions area
     header_y_ofs: i32,
@@ -115,8 +116,10 @@ where
     R: crate::utils::NavigatorRoot,
     T: crate::utils::Navigator<E, R, PathBuf>,
 {
+    fn on_resize(&mut self, control: &ControlBase, old_size: Size, new_size: Size);
     fn on_expand(&mut self, control: &ControlBase, direction: ExpandedDirection);
     fn on_focus(&mut self, control: &mut ControlBase);
+    fn on_lose_focus(&mut self, control: &mut ControlBase);
     fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus;
     fn expand_suggestions_area(&self, control: &mut ControlBase);
     fn pack_suggestions_area(&self, control: &mut ControlBase);
@@ -124,13 +127,13 @@ where
 
 pub(crate) trait NavigatorComponentPaintFunctions {
     fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme);
-    fn paint_textbox_in_focus(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute);
-    fn paint_textbox_out_of_focus(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute);
+    fn paint_textbox_in_focus(&self, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute);
+    fn paint_textbox_out_of_focus(&self, surface: &mut Surface, theme: &Theme);
     fn paint_suggestions_area(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute);
-    fn paint_text_at(&self, surface: &mut Surface, attr: CharAttribute, text: &str, pos: usize);
-    fn text_fits_textbox(&self, control: &ControlBase, text: &str) -> (bool, String);
-    fn paint_fitting_text(&self, surface: &mut Surface, attr: CharAttribute, text: &str);
-    fn paint_trimmed_text(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, text: &str);
+    fn text_fits_textbox(&self, text: &str) -> (bool, String);
+    fn update_fitting_text(&mut self, theme: &Theme, text: &str);
+    fn update_trimmed_text(&mut self, theme: &Theme);
+    fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize);
 }
 
 impl<T, E, R> NavigatorComponent<T, E, R>
@@ -156,6 +159,7 @@ where
             start: 0,
             end: 0,
             selection: Selection::NONE,
+            out_of_focus_surface: Surface::new(1, 1),
             is_readonly: readonly,
             width: 0,
             header_y_ofs: 0,
@@ -318,6 +322,17 @@ where
             .map(String::from)
             .collect()
     }
+
+    fn update_out_of_focus_surface(&mut self, theme: &Theme) {
+        self.out_of_focus_surface.clear(Character::with_attributes(' ', theme.editor.normal));
+
+        let (string_fits, processed_path) = self.text_fits_textbox(&self.input_path);
+        if string_fits {
+            self.update_fitting_text(theme, &processed_path);
+        } else {
+            self.update_trimmed_text(theme);
+        }
+    }
 }
 
 impl<T, E, R> NavigatorComponentControlFunctions<T, E, R> for NavigatorComponent<T, E, R>
@@ -451,6 +466,17 @@ where
             control.pack();
         }
     }
+
+    fn on_resize(&mut self, control: &ControlBase, _old_size: Size, new_size: Size) {
+        self.width = new_size.width;
+        self.out_of_focus_surface.resize(new_size);
+        self.update_out_of_focus_surface(control.theme());
+        self.move_cursor_at_end();
+    }
+
+    fn on_lose_focus(&mut self, control: &mut ControlBase) {
+        self.update_out_of_focus_surface(control.theme());
+    }
 }
 
 impl<T, E, R> NavigatorComponentPaintFunctions for NavigatorComponent<T, E, R>
@@ -469,19 +495,18 @@ where
         surface.clear(Character::with_attributes(' ', attr));
         // paint
         if control.has_focus() {
-            self.paint_textbox_in_focus(control, surface, attr, theme.editor.pressed_or_selectd);
+            self.paint_textbox_in_focus(surface, attr, theme.editor.pressed_or_selectd);
             if control.is_expanded() {
                 self.paint_suggestions_area(control, surface, attr, theme.editor.pressed_or_selectd);
             }
         } else {
-            self.paint_textbox_out_of_focus(control, surface, attr);
+            self.paint_textbox_out_of_focus(surface, theme);
         }
     }
 
-    fn paint_textbox_in_focus(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
-        let sz = control.size();
-        let w = (sz.width - 1) as i32;
-        let mut count = (sz.width - 2) * sz.height;
+    fn paint_textbox_in_focus(&self, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
+        let w = (self.width - 1) as i32;
+        let mut count = (self.width - 2);
         let mut pos = self.start;
         let mut x = 1;
         let mut y = 0;
@@ -511,30 +536,30 @@ where
         }
 
         if pos == self.cursor {
-            if (y == sz.height as i32) && (x == 1) {
-                surface.set_cursor(sz.width as i32 - 1, sz.height as i32 - 1);
+            if (y == 1 as i32) && (x == 1) {
+                surface.set_cursor(self.width as i32 - 1, 0);
             } else {
                 surface.set_cursor(x, y);
             }
         }
     }
 
-    fn text_fits_textbox(&self, control: &ControlBase, text: &str) -> (bool, String) {
+    fn text_fits_textbox(&self, text: &str) -> (bool, String) {
         let s = text
             .trim_start_matches(PLATFORM_SEPARATOR_CHARACTER)
             .trim_end_matches(PLATFORM_SEPARATOR_CHARACTER)
             .to_string()
             .replace(PLATFORM_SEPARATOR_CHARACTER, &format!(" {} ", char::from(Self::PATH_CHAR_SEPARTOR)));
 
-        (s.chars().count() < control.size().width as usize, s)
+        (s.chars().count() < self.width as usize, s)
     }
 
-    fn paint_fitting_text(&self, surface: &mut Surface, attr: CharAttribute, text: &str) {
-        self.paint_text_at(surface, attr, text, 1);
+    fn update_fitting_text(&mut self, theme: &Theme, text: &str) {
+        self.update_text_at(theme, text, 1);
     }
 
-    fn paint_trimmed_text(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, text: &str) {
-        let items = Self::get_path_items(text);
+    fn update_trimmed_text(&mut self, theme: &Theme) {
+        let items = Self::get_path_items(&self.input_path);
         if items.is_empty() {
             return;
         }
@@ -542,7 +567,7 @@ where
         let separator_size = 3;
         let mut left_text = String::new();
         let mut right_text = String::new();
-        let fitting_chars_no = control.size().width as usize - Self::PADDING as usize;
+        let fitting_chars_no = self.width as usize - Self::PADDING as usize;
         let mut str_start = 0;
         let mut str_end = items.len() - 1;
         let mut no_printed_chars = 0;
@@ -578,26 +603,20 @@ where
 
         left_text.push(char::from(Self::PATH_CHAR_DOTS));
         left_text.push_str(&right_text);
-        self.paint_text_at(surface, attr, &left_text, 1);
+        self.update_text_at(theme, &left_text, 1);
     }
 
-    fn paint_textbox_out_of_focus(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute) {
-        let (string_fits, processed_path) = self.text_fits_textbox(control, &self.input_path);
-
-        if string_fits {
-            self.paint_fitting_text(surface, attr, &processed_path);
-        } else {
-            self.paint_trimmed_text(control, surface, attr, &self.input_path);
-        }
+    fn paint_textbox_out_of_focus(&self, surface: &mut Surface, _theme: &Theme) {
+        surface.draw_surface(0, 0, &self.out_of_focus_surface);
     }
 
-    fn paint_text_at(&self, surface: &mut Surface, attr: CharAttribute, text: &str, pos: usize) {
+    fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize) {
         let format = TextFormatBuilder::new()
             .position(pos as i32, 0)
-            .attribute(attr)
+            .attribute(theme.editor.normal)
             .align(TextAlignament::Left)
             .build();
-        surface.write_text(text, &format);
+        self.out_of_focus_surface.write_text(text, &format);
     }
 
     fn paint_suggestions_area(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
