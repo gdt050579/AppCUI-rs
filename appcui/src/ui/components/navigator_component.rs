@@ -8,9 +8,9 @@ use crate::utils::glyphs::GlyphParser;
 use std::marker::PhantomData;
 
 //TODO: make separate cfgs for different OS
-#[cfg(target_os="windows")]
+#[cfg(target_os = "windows")]
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
-#[cfg(target_family="unix")]
+#[cfg(target_family = "unix")]
 const PLATFORM_SEPARATOR_CHARACTER: char = '/';
 
 struct NavigatorDataCacher<T, E, R>
@@ -55,7 +55,12 @@ where
                 self.cached_items.clear();
                 self.cached_path = folder.to_string();
                 for entry in folder_contents {
-                    let cached_item = navigator.join(&PathBuf::from(folder.to_string()), &entry).unwrap().to_str().unwrap().to_string();
+                    let cached_item = navigator
+                        .join(&PathBuf::from(folder.to_string()), &entry)
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string();
                     println!("pushed cached item \"{}\"", cached_item);
                     self.cached_items.push(cached_item);
                 }
@@ -145,7 +150,7 @@ where
     const PADDING_LEFT: u16 = 1;
     const PADDING_RIGHT: u16 = 1;
     const PADDING: u16 = Self::PADDING_LEFT + Self::PADDING_RIGHT;
-    const PATH_CHAR_SEPARTOR: SpecialChar = SpecialChar::TriangleRight;
+    const PATH_TRIANGLE_SEPARTOR: SpecialChar = SpecialChar::TriangleRight;
     const PATH_CHAR_DOTS: SpecialChar = SpecialChar::ThreePointsHorizontal;
     const PATH_FINDER_VISIBLE_RESULTS: u16 = 5;
     const PATH_FINDER_RESULTS_Y_OFFSET: u16 = 2;
@@ -400,7 +405,7 @@ where
                 control.raise_event(ControlEvent {
                     emitter: control.handle,
                     receiver: control.event_processor,
-                    data: ControlEventData::PathFinder(EventData { }),
+                    data: ControlEventData::PathFinder(EventData {}),
                 });
                 return EventProcessStatus::Processed;
             }
@@ -549,7 +554,7 @@ where
             .trim_start_matches(PLATFORM_SEPARATOR_CHARACTER)
             .trim_end_matches(PLATFORM_SEPARATOR_CHARACTER)
             .to_string()
-            .replace(PLATFORM_SEPARATOR_CHARACTER, &format!(" {} ", char::from(Self::PATH_CHAR_SEPARTOR)));
+            .replace(PLATFORM_SEPARATOR_CHARACTER, &format!(" {} ", char::from(Self::PATH_TRIANGLE_SEPARTOR)));
 
         (s.chars().count() < self.width as usize, s)
     }
@@ -578,7 +583,7 @@ where
             if no_printed_chars + left_char_count + separator_size < fitting_chars_no {
                 left_text.push_str(left_item);
                 left_text.push(' ');
-                left_text.push(char::from(Self::PATH_CHAR_SEPARTOR));
+                left_text.push(char::from(Self::PATH_TRIANGLE_SEPARTOR));
                 left_text.push(' ');
                 no_printed_chars = no_printed_chars + left_char_count + separator_size
             } else {
@@ -590,7 +595,7 @@ where
             if no_printed_chars + right_char_count + separator_size < fitting_chars_no {
                 right_text.insert_str(0, right_item);
                 right_text.insert(0, ' ');
-                right_text.insert(0, char::from(Self::PATH_CHAR_SEPARTOR));
+                right_text.insert(0, char::from(Self::PATH_TRIANGLE_SEPARTOR));
                 right_text.insert(0, ' ');
                 no_printed_chars = no_printed_chars + right_char_count + separator_size
             } else {
@@ -611,12 +616,16 @@ where
     }
 
     fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize) {
-        let format = TextFormatBuilder::new()
-            .position(pos as i32, 0)
-            .attribute(theme.editor.normal)
-            .align(TextAlignament::Left)
-            .build();
-        self.out_of_focus_surface.write_text(text, &format);
+        let mut x = pos as i32;
+        for ch in text.chars() {
+            let attr = if ch == char::from(Self::PATH_TRIANGLE_SEPARTOR) {
+                theme.editor.inactive
+            } else {
+                theme.editor.normal
+            };
+            self.out_of_focus_surface.write_char(x, 0, Character::with_attributes(ch, attr));
+            x += 1;
+        }
     }
 
     fn paint_suggestions_area(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
