@@ -8,9 +8,9 @@ use crate::utils::glyphs::GlyphParser;
 use std::marker::PhantomData;
 
 //TODO: make separate cfgs for different OS
-#[cfg(target_os="windows")]
+#[cfg(target_os = "windows")]
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
-#[cfg(target_family="unix")]
+#[cfg(target_family = "unix")]
 const PLATFORM_SEPARATOR_CHARACTER: char = '/';
 
 struct NavigatorDataCacher<T, E, R>
@@ -55,7 +55,12 @@ where
                 self.cached_items.clear();
                 self.cached_path = folder.to_string();
                 for entry in folder_contents {
-                    let cached_item = navigator.join(&PathBuf::from(folder.to_string()), &entry).unwrap().to_str().unwrap().to_string();
+                    let cached_item = navigator
+                        .join(&PathBuf::from(folder.to_string()), &entry)
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string();
                     println!("pushed cached item \"{}\"", cached_item);
                     self.cached_items.push(cached_item);
                 }
@@ -175,11 +180,13 @@ where
     }
 
     #[inline(always)]
-    fn set_input_path(&mut self, text: &str, overwrite_prev: bool) {
+    pub(crate) fn set_input_path(&mut self, text: &str, overwrite_prev: bool) {
         if overwrite_prev {
-            self.backup_path = self.input_path.clone();
-        }
-        self.input_path = text.to_string();
+            self.backup_path.clear();
+            self.backup_path.push_str(self.input_path.as_str());
+        };
+        self.input_path.clear();
+        self.input_path.push_str(text);
         self.update_char_count(self.input_path.chars().count() as i32, true);
     }
 
@@ -385,7 +392,7 @@ where
                 control.raise_event(ControlEvent {
                     emitter: control.handle,
                     receiver: control.event_processor,
-                    data: ControlEventData::PathFinder(EventData { }),
+                    data: ControlEventData::PathFinder(EventData {}),
                 });
                 return EventProcessStatus::Processed;
             }

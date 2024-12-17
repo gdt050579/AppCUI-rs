@@ -128,3 +128,9 @@ impl Navigator {
         }
     }
 }
+
+impl Clone for Navigator {
+    fn clone(&self) -> Self {
+        Self { windows_model: self.windows_model }
+    }
+}

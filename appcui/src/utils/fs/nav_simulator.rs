@@ -98,3 +98,12 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
         }
     }
 }
+
+impl Clone for NavSimulator {
+    fn clone(&self) -> Self {
+        Self {
+            data: self.data.clone(),
+            windows_model: self.windows_model,
+        }
+    }
+}

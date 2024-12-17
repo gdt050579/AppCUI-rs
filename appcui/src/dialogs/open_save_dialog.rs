@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 use dialogs::file_mask::FileMask;
@@ -7,6 +7,7 @@ use fs::EntryType;
 
 use super::Location;
 use crate::prelude::*;
+use crate::ui::pathfinder::GenericPathFinder;
 use crate::utils::fs::{Entry, Root};
 use crate::utils::Navigator;
 use EnumBitFlags::EnumBitFlags;
@@ -32,7 +33,7 @@ where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     list: Handle<ListView<Entry>>,
-    path_viewer: Handle<TextField>,
+    path_viewer: Handle<GenericPathFinder<T>>,
     details: Handle<ToggleButton>,
     columns: Handle<ToggleButton>,
     name: Handle<TextField>,
@@ -66,7 +67,7 @@ where
             mask: Handle::None,
             path_viewer: Handle::None,
             extension_mask,
-            nav,
+            nav: nav.clone(),
             g_updir: listview::Group::None,
             g_files: listview::Group::None,
             g_folders: listview::Group::None,
@@ -79,7 +80,13 @@ where
             Location::Path(p) => p.to_path_buf(),
         };
         w.b_drive = w.add(button!("&Drive,x:1,y:1,w:7,type:Flat"));
-        w.path_viewer = w.add(TextField::new("???", Layout::new("l:9,t:1,r:1"), textfield::Flags::Readonly));
+        let pf = GenericPathFinder::with_navigator(
+            w.path.as_path().as_os_str().to_str().unwrap_or(""),
+            Layout::new("l:9,t:1,r:1"),
+            pathfinder::Flags::None,
+            nav,
+        );
+        w.path_viewer = w.add(pf);
         let mut p = panel!("l:1,t:3,r:1,b:5");
         let mut lv: ListView<Entry> = ListView::new(
             Layout::new("d:c,w:100%,h:100%"),
@@ -212,7 +219,7 @@ where
         let h = self.path_viewer;
         let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
         if let Some(pv) = self.control_mut(h) {
-            pv.set_text(ts.as_str());
+            pv.set_path(Path::new(ts.as_str()));
         }
         let h = self.list;
         if let Some(lst) = self.control_mut(h) {

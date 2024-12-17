@@ -38,6 +38,9 @@ macro_rules! IMPLEMENT_METHODS  {
             pub fn path(&self) -> &Path {
                 self.inner.path()
             }
+            pub fn set_path(&mut self, path: &Path) {
+                self.inner.set_path(path.to_str().unwrap_or_default());
+            }
         }
     };
 }
