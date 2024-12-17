@@ -117,6 +117,10 @@ where
         }
         else {
             self.ok_step = (self.max - self.min) / T::cast_float_number(self.y as f64);
+            self.nr_val = min(((self.max - self.min).abs() / self.ok_step).cast_to_u32() + 1, self.y as u32);
+            self.sec_dim = (self.bound as f32) / ((self.nr_val - 1) as f32);
+            self.p = (self.sec_dim - self.m as f32) as u32;
+            self.o = (self.sec_dim - (self.m as f32 + ((self.m / 2) as f32))) as u32;
         }
 
         self.values_string.clear();
@@ -125,7 +129,7 @@ where
         // prima oara trebuie sa adun o
         current_value.write_to_string(&mut string_buffer, self.format);
         self.values_string.push_str(&string_buffer);
-        self.values_string.push_str(&Self::get_n_spaces(self.o));
+        self.values_string.push_str(&Self::get_n_spaces((self.o as usize + self.m - string_buffer.len()) as u32));
 
         current_value = current_value + self.ok_step;
 
@@ -134,7 +138,7 @@ where
             self.values_string.push_str(&string_buffer);
 
             if current_value + self.ok_step <= self.max {
-                self.values_string.push_str(&Self::get_n_spaces(self.p));
+                self.values_string.push_str(&Self::get_n_spaces((self.p as usize + self.m - string_buffer.len()) as u32));
             }
 
             current_value = current_value + self.ok_step;
@@ -244,16 +248,20 @@ where
     pub fn get_selected_value(&self) -> T {
         self.value
     }
-    fn update_cursor_pos(&mut self, x: i32) {
-        self.poz_triunghi = (x / self.max_size_per_entry as i32) * self.max_size_per_entry as i32;
-        //self.value = self.min + self.step * (x / self.max_size_per_entry as i32);
-        let mut c = 0;
-        let mut newVal = self.min;
-        while c < (x / self.max_size_per_entry as i32){
-            newVal = newVal + self.ok_step;
-            c += 1;
-        }
-        self.value = Self::to_interval(newVal, self.min, self.max);
+    // fn update_cursor_pos(&mut self, x: i32) {
+    //     self.poz_triunghi = (x / self.max_size_per_entry as i32) * self.max_size_per_entry as i32;
+    //     //self.value = self.min + self.step * (x / self.max_size_per_entry as i32);
+    //     let mut c = 0;
+    //     let mut newVal = self.min;
+    //     while c < (x / self.max_size_per_entry as i32){
+    //         newVal = newVal + self.ok_step;
+    //         c += 1;
+    //     }
+    //     self.value = Self::to_interval(newVal, self.min, self.max);
+    // }
+    fn update_cursor_pos(&mut self, x: i32){
+        self.poz_triunghi = (x / self.sec_dim as i32) * self.sec_dim as i32;
+        self.value = self.min + self.ok_step * Number::cast_signed_number((x / self.sec_dim as i32) as i128);
     }
 }
 impl<T> OnPaint for NumericSlider<T>
@@ -343,6 +351,8 @@ where
         surface.write_char(self.poz_triunghi, 0, current_character_set.selected_value_indicator);
         surface.write_string(0, 2, &self.values_string, theme.text.normal, false);
 
+        surface.write_string(3, 0, &self.value.to_string(), theme.text.normal, false);
+
         //desenez marginea pentru min si max
         surface.write_char(0, 1, current_character_set.start_char);
         surface.write_char(((self.nr_val - 1) * self.sec_dim as u32) as i32, 1, current_character_set.end_char);
@@ -398,8 +408,8 @@ where
             }
         };
         self.compute_math_fields();
-        self.find_ok_step();
-        self.compute_size_per_entru();
+        //self.find_ok_step();
+        //self.compute_size_per_entru();
         //self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.max_size_per_entry as u32) as i32;\
         self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
         self.value = Self::to_interval(self.min + self.ok_step * ((self.value - self.min) / self.ok_step), self.min, self.max);
