@@ -251,6 +251,10 @@ impl Into<Key> for AnsiKey {
 // taken into condideration.
 const _CTRL_KEY_MASK: u8 = 0b0001_1111;
 
+const MOUSE_SHIFT_MASK: u8 = 4;
+const MOUSE_META_MASK: u8 = 8;
+const MOUSE_CTRL_MASK: u8 = 16;
+
 impl TermiosReader {  
     fn parse_mouse_event() -> Result<AnsiKey, TermiosError> {
         let (mut button_code, x, y) = (checked_stdin_read()? - 32, checked_stdin_read()? - 32, checked_stdin_read()? - 32); // all of them are "encoded" by adding 32 to the actual value
@@ -268,10 +272,15 @@ impl TermiosReader {
 
         let event = MouseButtonEvent {button, x: x - 1, y: y - 1};  // coordinates start at 1 in the codes
         
+        let mut modifier = KeyModifier::None;
+        if (button_code & MOUSE_SHIFT_MASK) != 0 { modifier.set(KeyModifier::Shift); }
+        if (button_code & MOUSE_META_MASK) != 0 { modifier.set(KeyModifier::Alt); }
+        if (button_code & MOUSE_CTRL_MASK) != 0 { modifier.set(KeyModifier::Ctrl); }
+        
         Ok(AnsiKey {
             bytes: [27, 91, 77, button_code, 0], 
             code: if is_motion_event {AnsiKeyCode::MouseMove(event)} else {AnsiKeyCode::MouseButton(event)},
-            modifier: KeyModifier::None
+            modifier
         })
     }
     
