@@ -7,11 +7,11 @@ use std::{fs::File, io::Write, os::unix::io::FromRawFd};
 use libc::STDOUT_FILENO;
 
 use super::super::{ SystemEvent, Terminal };
-use crate::{ graphics::*, input::MouseButton, prelude::{Key, KeyModifier}, system::Error, terminals::{termios::api::sizing::listen_for_resizes, KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent} };
+use crate::{ graphics::*, input::MouseButton, prelude::Key, system::Error, terminals::{termios::api::sizing::listen_for_resizes, KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent} };
 
 use self::sizing::{get_terminal_size, set_terminal_size, RESIZE_EVENT};
 #[cfg(target_family = "unix")]
-use super::api::{io::{TermiosReader, AnsiKeyCode, Letter}, Termios, sizing};
+use super::api::{io::{TermiosReader, AnsiKeyCode}, Termios, sizing};
 
 /// Represents a terminal interface that has support for termios API terminals, supported by unix
 /// family and outputs ANSI escape codes and receives input from
@@ -23,7 +23,8 @@ pub struct TermiosTerminal {
     // the terminal as the user had it initially.
     _orig_termios: Termios,
 
-    stdout: File
+    stdout: File,
+    screen_buffer: String
 }
 
 impl TermiosTerminal {
@@ -43,7 +44,8 @@ impl TermiosTerminal {
         let mut t = TermiosTerminal {
             size: Size::new(80, 30),
             _orig_termios,
-            stdout
+            stdout,
+            screen_buffer: String::with_capacity(4096)
         };
 
         if let Err(err) = listen_for_resizes() {
@@ -61,7 +63,7 @@ impl TermiosTerminal {
             Ok(size) => {
                 if size != t.size {
                     if let Err(err) = set_terminal_size(&size) {
-                        return Err(Error::new(crate::system::ErrorKind::InitializationFailure, err.to_string()));;
+                        return Err(Error::new(crate::system::ErrorKind::InitializationFailure, err.to_string()));
                     }
                 }
                 t.size = size;
@@ -86,62 +88,63 @@ impl Terminal for TermiosTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         self.clear();
         
-        let mut s = String::new();
-        let sz = surface.size();
-        for y in 0..sz.height {
-            for x in 0..sz.width {
-                if let Some(c) = surface.get(x as i32, y as i32) {
-                    // Set the foreground using ANSI escape codes
-                    match c.foreground {
-                        Color::Black => s.push_str("\x1b[30m"),
-                        Color::DarkBlue => s.push_str("\x1b[34m"),
-                        Color::DarkGreen => s.push_str("\x1b[32m"),
-                        Color::Teal => s.push_str("\x1b[36m"),
-                        Color::DarkRed => s.push_str("\x1b[31m"),
-                        Color::Magenta => s.push_str("\x1b[35m"),
-                        Color::Olive => s.push_str("\x1b[33m"),
-                        Color::Silver => s.push_str("\x1b[37m"),
-                        Color::Gray => s.push_str("\x1b[90m"),
-                        Color::Blue => s.push_str("\x1b[94m"),
-                        Color::Green => s.push_str("\x1b[92m"),
-                        Color::Aqua => s.push_str("\x1b[96m"),
-                        Color::Red => s.push_str("\x1b[91m"),
-                        Color::Pink => s.push_str("\x1b[95m"),
-                        Color::Yellow => s.push_str("\x1b[93m"),
-                        Color::White => s.push_str("\x1b[97m"),
-                        Color::Transparent => {}
-                    }
-
-                    match c.background {
-                        Color::Black => s.push_str("\x1b[40m"),
-                        Color::DarkBlue => s.push_str("\x1b[44m"),
-                        Color::DarkGreen => s.push_str("\x1b[42m"),
-                        Color::Teal => s.push_str("\x1b[46m"),
-                        Color::DarkRed => s.push_str("\x1b[41m"),
-                        Color::Magenta => s.push_str("\x1b[45m"),
-                        Color::Olive => s.push_str("\x1b[43m"),
-                        Color::Silver => s.push_str("\x1b[47m"),
-                        Color::Gray => s.push_str("\x1b[100m"),
-                        Color::Blue => s.push_str("\x1b[104m"),
-                        Color::Green => s.push_str("\x1b[102m"),
-                        Color::Aqua => s.push_str("\x1b[106m"),
-                        Color::Red => s.push_str("\x1b[101m"),
-                        Color::Pink => s.push_str("\x1b[105m"),
-                        Color::Yellow => s.push_str("\x1b[103m"),
-                        Color::White => s.push_str("\x1b[107m"),
-                        Color::Transparent => {}
-                    }
-                    
-                    s.push(c.code);
-                    s.push_str("\x1b[0m");
-                }
+        let chars = &surface.chars;
+        
+        self.screen_buffer.clear();
+        let mut x = 0;
+        let width = surface.size().width;
+        for c in chars {
+            match c.foreground {
+                Color::Black => self.screen_buffer.push_str("\x1b[30m"),
+                Color::DarkBlue => self.screen_buffer.push_str("\x1b[34m"),
+                Color::DarkGreen => self.screen_buffer.push_str("\x1b[32m"),
+                Color::Teal => self.screen_buffer.push_str("\x1b[36m"),
+                Color::DarkRed => self.screen_buffer.push_str("\x1b[31m"),
+                Color::Magenta => self.screen_buffer.push_str("\x1b[35m"),
+                Color::Olive => self.screen_buffer.push_str("\x1b[33m"),
+                Color::Silver => self.screen_buffer.push_str("\x1b[37m"),
+                Color::Gray => self.screen_buffer.push_str("\x1b[90m"),
+                Color::Blue => self.screen_buffer.push_str("\x1b[94m"),
+                Color::Green => self.screen_buffer.push_str("\x1b[92m"),
+                Color::Aqua => self.screen_buffer.push_str("\x1b[96m"),
+                Color::Red => self.screen_buffer.push_str("\x1b[91m"),
+                Color::Pink => self.screen_buffer.push_str("\x1b[95m"),
+                Color::Yellow => self.screen_buffer.push_str("\x1b[93m"),
+                Color::White => self.screen_buffer.push_str("\x1b[97m"),
+                Color::Transparent => {}
             }
 
-            if y < sz.height - 1 {
-                s.push('\n');
+            match c.background {
+                Color::Black => self.screen_buffer.push_str("\x1b[40m"),
+                Color::DarkBlue => self.screen_buffer.push_str("\x1b[44m"),
+                Color::DarkGreen => self.screen_buffer.push_str("\x1b[42m"),
+                Color::Teal => self.screen_buffer.push_str("\x1b[46m"),
+                Color::DarkRed => self.screen_buffer.push_str("\x1b[41m"),
+                Color::Magenta => self.screen_buffer.push_str("\x1b[45m"),
+                Color::Olive => self.screen_buffer.push_str("\x1b[43m"),
+                Color::Silver => self.screen_buffer.push_str("\x1b[47m"),
+                Color::Gray => self.screen_buffer.push_str("\x1b[100m"),
+                Color::Blue => self.screen_buffer.push_str("\x1b[104m"),
+                Color::Green => self.screen_buffer.push_str("\x1b[102m"),
+                Color::Aqua => self.screen_buffer.push_str("\x1b[106m"),
+                Color::Red => self.screen_buffer.push_str("\x1b[101m"),
+                Color::Pink => self.screen_buffer.push_str("\x1b[105m"),
+                Color::Yellow => self.screen_buffer.push_str("\x1b[103m"),
+                Color::White => self.screen_buffer.push_str("\x1b[107m"),
+                Color::Transparent => {}
+            }
+            
+            self.screen_buffer.push(c.code);
+            self.screen_buffer.push_str("\x1b[0m");
+
+            x += 1;
+            if x >= width {
+                self.screen_buffer.push('\n');
+                x = 0;
             }
         }
-        let _ = self.stdout.write(s.as_bytes());
+        let buf = self.screen_buffer.as_bytes();
+        let _ = self.stdout.write(&buf[..buf.len() - 1]);
     }
 
     fn get_size(&self) -> Size {
@@ -161,12 +164,6 @@ impl Terminal for TermiosTerminal {
         #[cfg(target_family = "unix")]
         match TermiosReader::read_key() {
             Ok(ansi_key) => {
-                // If the key pressed was `Ctrl-Q` we quit the application
-                if ansi_key.modifier() == KeyModifier::Ctrl
-                    && ansi_key.code() == AnsiKeyCode::Letter(Letter::Q) {
-                    return SystemEvent::AppClose;
-                }
-
                 if let AnsiKeyCode::MouseButton(ev) = ansi_key.code() {
                     match ev.button {
                         MouseButton::None => return SystemEvent::MouseButtonUp(MouseButtonUpEvent {x: ev.x.into(), y: ev.y.into(), button: MouseButton::None}),
@@ -204,7 +201,7 @@ impl Terminal for TermiosTerminal {
         todo!()
     }
 
-    fn set_clipboard_text(&mut self, text: &str) {
+    fn set_clipboard_text(&mut self, _text: &str) {
         todo!()
     }
 

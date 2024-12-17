@@ -287,8 +287,9 @@ impl TermiosReader {
                     // If character is 27, this means a function key was pressed and following
                     // is a sequence of characters.
                     match c {
+                        8 => ([c, 0, 0, 0, 0], AnsiKeyCode::_Backspace, KeyModifier::Ctrl),
                         9 => ([c, 0, 0, 0, 0], AnsiKeyCode::_Tab, KeyModifier::None),
-                        1..=8 | 10..=26 => {
+                        1..=7 | 10..=26 => {
                             let key = AnsiKeyCode::Letter(Letter::try_from(c)?);
                             ([c, 0, 0, 0, 0], key, modifier)
                         }
