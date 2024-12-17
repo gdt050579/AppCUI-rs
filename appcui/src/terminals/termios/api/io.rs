@@ -427,7 +427,7 @@ impl TermiosReader {
                 124 => ([c, 0, 0, 0, 0], AnsiKeyCode::BackSlash, KeyModifier::Shift),
                 125 => ([c, 0, 0, 0, 0], AnsiKeyCode::RightBracket, KeyModifier::Shift),
                 126 => ([c, 0, 0, 0, 0], AnsiKeyCode::AngleQuote, KeyModifier::Shift),
-                127 => ([c, 0, 0, 0, 0], AnsiKeyCode::Delete, KeyModifier::Shift),
+                127 => ([c, 0, 0, 0, 0], AnsiKeyCode::_Backspace, KeyModifier::None),
                 194 => {
                     // Currently, all the character that we know with this key code, are pressed
                     // using an `Alt-Key` combination.
