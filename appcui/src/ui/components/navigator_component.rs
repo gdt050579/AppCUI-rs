@@ -61,12 +61,10 @@ where
                         .to_str()
                         .unwrap()
                         .to_string();
-                    println!("pushed cached item \"{}\"", cached_item);
                     self.cached_items.push(cached_item);
                 }
             }
         }
-        println!("try matching with \"{}\"", path);
         self.suggestions = Self::get_matching_paths(path, &self.cached_items);
     }
     fn get_folder(path: &str) -> &str {
@@ -108,6 +106,7 @@ where
     expanded_panel_y: i32,
     selected_suggestion_pos: u16,
     start_suggestions_pos: u16,
+    expanded_above: bool,
 
     // unused
     _phantom_t: std::marker::PhantomData<T>,
@@ -126,19 +125,7 @@ where
     fn on_focus(&mut self, control: &mut ControlBase);
     fn on_lose_focus(&mut self, control: &mut ControlBase);
     fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus;
-    fn expand_suggestions_area(&self, control: &mut ControlBase);
-    fn pack_suggestions_area(&self, control: &mut ControlBase);
-}
-
-pub(crate) trait NavigatorComponentPaintFunctions {
     fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme);
-    fn paint_textbox_in_focus(&self, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute);
-    fn paint_textbox_out_of_focus(&self, surface: &mut Surface, theme: &Theme);
-    fn paint_suggestions_area(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute);
-    fn text_fits_textbox(&self, text: &str) -> (bool, String);
-    fn update_fitting_text(&mut self, theme: &Theme, text: &str);
-    fn update_trimmed_text(&mut self, theme: &Theme);
-    fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize);
 }
 
 impl<T, E, R> NavigatorComponent<T, E, R>
@@ -171,6 +158,7 @@ where
             expanded_panel_y: 1,
             selected_suggestion_pos: 0,
             start_suggestions_pos: 1,
+            expanded_above: false,
             navigator_cacher: NavigatorDataCacher::new(),
             _phantom_r: PhantomData,
             _phantom_t: PhantomData,
@@ -301,25 +289,6 @@ where
         }
     }
 
-    fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {
-        let suggestions = self.navigator_cacher.get_suggestions();
-        let new_pos: i32 = self.selected_suggestion_pos as i32 + offset;
-        let end_visible_pos = (self.start_suggestions_pos + Self::PATH_FINDER_VISIBLE_RESULTS - 1).min(suggestions.len() as u16);
-
-        (self.selected_suggestion_pos, self.start_suggestions_pos) = match () {
-            _ if suggestions.is_empty() => (0, 1),
-            _ if new_pos <= 0 => (0, 1),
-            _ if new_pos < self.start_suggestions_pos as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
-            _ if new_pos <= end_visible_pos as i32 => (new_pos as u16, self.start_suggestions_pos),
-            _ if new_pos <= suggestions.len() as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
-            _ => (suggestions.len() as u16, self.start_suggestions_pos),
-        };
-        if self.selected_suggestion_pos > 0 {
-            return Some(suggestions[self.selected_suggestion_pos as usize - 1].clone());
-        }
-        None
-    }
-
     fn get_path_items(text: &str) -> Vec<String> {
         text.trim_start_matches(PLATFORM_SEPARATOR_CHARACTER)
             .trim_end_matches(PLATFORM_SEPARATOR_CHARACTER)
@@ -338,183 +307,13 @@ where
             self.update_trimmed_text(theme);
         }
     }
-}
-
-impl<T, E, R> NavigatorComponentControlFunctions<T, E, R> for NavigatorComponent<T, E, R>
-where
-    E: crate::utils::NavigatorEntry,
-    R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, PathBuf>,
-{
-    fn on_expand(&mut self, control: &ControlBase, direction: ExpandedDirection) {
-        match direction {
-            ExpandedDirection::OnTop => {
-                self.expanded_panel_y = -1;
-                self.header_y_ofs = (control.expanded_size().height as i32) - 1;
-            }
-            ExpandedDirection::OnBottom => {
-                self.expanded_panel_y = 1;
-                self.header_y_ofs = 0;
-            }
-        }
-    }
-
-    fn on_focus(&mut self, control: &mut ControlBase) {
-        self.width = control.size().width;
-        self.move_cursor_at_end();
-        self.navigator_cacher.suggestions.clear();
-        control.pack();
-    }
-
-    fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus {
-        match key.value() {
-            key!("Backspace") => {
-                self.delete_previous_character();
-                self.update_char_count(-1, false);
-
-                self.selected_suggestion_pos = 0;
-                self.start_suggestions_pos = 1;
-                self.navigator_cacher.update_suggestions(&self.input_path, navigator);
-                self.expand_suggestions_area(control);
-                return EventProcessStatus::Processed;
-            }
-            key!("Delete") => {
-                self.delete_current_character();
-                return EventProcessStatus::Processed;
-            }
-            key!("Left") | key!("Shift+Left") => {
-                self.move_cursor_with(-1, key.modifier.contains(KeyModifier::Shift));
-                return EventProcessStatus::Processed;
-            }
-            key!("Right") | key!("Shift+Right") => {
-                self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
-                return EventProcessStatus::Processed;
-            }
-            key!("Home") | key!("Shift+Home") => {
-                self.move_cursor_to(0, key.modifier.contains(KeyModifier::Shift), false);
-                return EventProcessStatus::Processed;
-            }
-            key!("End") | key!("Shift+End") => {
-                self.move_cursor_to(self.input_path.len(), key.modifier.contains(KeyModifier::Shift), false);
-                return EventProcessStatus::Processed;
-            }
-            key!("Enter") => {
-                self.selected_suggestion_pos = 0;
-                self.start_suggestions_pos = 1;
-                self.pack_suggestions_area(control);
-                control.raise_event(ControlEvent {
-                    emitter: control.handle,
-                    receiver: control.event_processor,
-                    data: ControlEventData::PathFinder(EventData {}),
-                });
-                return EventProcessStatus::Processed;
-            }
-            key!("Esc") => {
-                if control.is_expanded() {
-                    control.pack();
-                    return EventProcessStatus::Processed;
-                }
-            }
-            key!("Up") => {
-                if let Some(selected_path) = self.update_suggestions_selection(-1) {
-                    self.set_input_path(&selected_path, false);
-                } else {
-                    self.restore_path_from_backup();
-                }
-                self.move_cursor_to(self.input_path.len(), false, false);
-                return EventProcessStatus::Processed;
-            }
-            key!("Down") => {
-                if let Some(selected_path) = self.update_suggestions_selection(1) {
-                    self.set_input_path(&selected_path, false);
-                } else {
-                    self.restore_path_from_backup();
-                }
-                self.move_cursor_to(self.input_path.len(), false, false);
-
-                return EventProcessStatus::Processed;
-            }
-            _ => {
-                if character > 0 as char {
-                    self.input_path.push(character);
-                    self.update_char_count(1, false);
-                    self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
-
-                    self.selected_suggestion_pos = 0;
-                    self.start_suggestions_pos = 1;
-                    self.navigator_cacher.update_suggestions(&self.input_path, navigator);
-                    self.expand_suggestions_area(control);
-                    return EventProcessStatus::Processed;
-                }
-            }
-        }
-        EventProcessStatus::Ignored
-    }
-
-    fn expand_suggestions_area(&self, control: &mut ControlBase) {
-        if !control.is_expanded() {
-            control.expand(
-                Size::new(
-                    control.size().width,
-                    (Self::PATH_FINDER_VISIBLE_RESULTS + Self::PATH_FINDER_RESULTS_Y_OFFSET + 1) as u32,
-                ),
-                Size::new(
-                    control.size().width,
-                    (Self::PATH_FINDER_VISIBLE_RESULTS + Self::PATH_FINDER_RESULTS_Y_OFFSET + 1) as u32,
-                ),
-            );
-        }
-    }
-
-    fn pack_suggestions_area(&self, control: &mut ControlBase) {
-        if control.is_expanded() {
-            control.pack();
-        }
-    }
-
-    fn on_resize(&mut self, control: &ControlBase, _old_size: Size, new_size: Size) {
-        self.width = new_size.width;
-        self.out_of_focus_surface.resize(new_size);
-        self.update_out_of_focus_surface(control.theme());
-        self.move_cursor_at_end();
-    }
-
-    fn on_lose_focus(&mut self, control: &mut ControlBase) {
-        self.update_out_of_focus_surface(control.theme());
-    }
-}
-
-impl<T, E, R> NavigatorComponentPaintFunctions for NavigatorComponent<T, E, R>
-where
-    E: crate::utils::NavigatorEntry,
-    R: crate::utils::NavigatorRoot,
-    T: crate::utils::Navigator<E, R, PathBuf>,
-{
-    fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme) {
-        let attr = match () {
-            _ if !control.is_enabled() => theme.editor.inactive,
-            _ if control.has_focus() => theme.editor.focused,
-            _ if control.is_mouse_over() => theme.editor.hovered,
-            _ => theme.editor.normal,
-        };
-        surface.clear(Character::with_attributes(' ', attr));
-        // paint
-        if control.has_focus() {
-            self.paint_textbox_in_focus(surface, attr, theme.editor.pressed_or_selectd);
-            if control.is_expanded() {
-                self.paint_suggestions_area(control, surface, attr, theme.editor.pressed_or_selectd);
-            }
-        } else {
-            self.paint_textbox_out_of_focus(surface, theme);
-        }
-    }
 
     fn paint_textbox_in_focus(&self, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
         let w = (self.width - 1) as i32;
-        let mut count = (self.width - 2);
+        let mut count = self.width - 2;
         let mut pos = self.start;
         let mut x = 1;
-        let mut y = 0;
+        let mut y = self.header_y_ofs;
         let mut ch = Character::with_attributes(' ', attr);
         let mut ch_selected = Character::with_attributes(' ', attr_selected);
         while let Some((code, glyph_size)) = self.input_path.glyph(pos) {
@@ -541,7 +340,7 @@ where
         }
 
         if pos == self.cursor {
-            if (y == 1 as i32) && (x == 1) {
+            if (y == 1) && (x == 1) {
                 surface.set_cursor(self.width as i32 - 1, 0);
             } else {
                 surface.set_cursor(x, y);
@@ -628,7 +427,53 @@ where
         }
     }
 
-    fn paint_suggestions_area(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
+    fn expand_suggestions_area(&self, control: &mut ControlBase) {
+        if !control.is_expanded() {
+            control.expand(
+                Size::new(
+                    control.size().width,
+                    (Self::PATH_FINDER_VISIBLE_RESULTS + Self::PATH_FINDER_RESULTS_Y_OFFSET + 1) as u32,
+                ),
+                Size::new(
+                    control.size().width,
+                    (Self::PATH_FINDER_VISIBLE_RESULTS + Self::PATH_FINDER_RESULTS_Y_OFFSET + 1) as u32,
+                ),
+            );
+        }
+    }
+
+    fn pack_suggestions_area(&mut self, control: &mut ControlBase) {
+        if control.is_expanded() {
+            control.pack();
+            self.header_y_ofs = 0;
+        }
+    }
+
+    fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {
+        let offset = match self.expanded_above {
+            true => 0 - offset,
+            _ => offset
+        };
+
+        let suggestions = self.navigator_cacher.get_suggestions();
+        let new_pos: i32 = self.selected_suggestion_pos as i32 + offset;
+        let end_visible_pos = (self.start_suggestions_pos + Self::PATH_FINDER_VISIBLE_RESULTS - 1).min(suggestions.len() as u16);
+
+        (self.selected_suggestion_pos, self.start_suggestions_pos) = match () {
+            _ if suggestions.is_empty() => (0, 1),
+            _ if new_pos <= 0 => (0, 1),
+            _ if new_pos < self.start_suggestions_pos as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
+            _ if new_pos <= end_visible_pos as i32 => (new_pos as u16, self.start_suggestions_pos),
+            _ if new_pos <= suggestions.len() as i32 => (new_pos as u16, (self.start_suggestions_pos as i32 + offset) as u16),
+            _ => (suggestions.len() as u16, self.start_suggestions_pos),
+        };
+        if self.selected_suggestion_pos > 0 {
+            return Some(suggestions[self.selected_suggestion_pos as usize - 1].clone());
+        }
+        None
+    }
+
+    fn paint_suggestions_area_bottom(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
         let size = control.expanded_size();
         surface.fill_rect(
             Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
@@ -682,5 +527,212 @@ where
             surface.write_string(Self::PADDING_LEFT as i32, y, &path[..offset], style, false);
             y += 1;
         }
+    }
+
+    fn paint_suggestions_area_top(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
+        let size = control.expanded_size();
+        surface.fill_rect(
+            Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+            Character::with_attributes(' ', attr),
+        );
+        surface.draw_rect(
+            Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+            LineType::Single,
+            attr,
+        );
+
+        if self.selected_suggestion_pos > 0 {
+            surface.fill_rect(
+                Rect::with_size(
+                    Self::PADDING_LEFT as i32,
+                    self.header_y_ofs - 2 - self.selected_suggestion_pos as i32 + self.start_suggestions_pos as i32,
+                    size.width as u16 - Self::PADDING,
+                    1,
+                ),
+                Character::with_attributes(' ', attr_selected),
+            );
+        }
+
+        let mut y = self.header_y_ofs - 2;
+        let suggestions = self.navigator_cacher.get_suggestions();
+        let start_index: usize = self.start_suggestions_pos as usize - 1;
+        let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());
+        for path_entry in &suggestions[start_index..end_index] {
+            let path = path_entry;
+            if y - 1 > Self::PATH_FINDER_VISIBLE_RESULTS as i32 {
+                break;
+            }
+            // paint fitting part of the current path
+            let mut offset = 0;
+            let mut count_chars = 0;
+            while count_chars < self.width - Self::PADDING as u32 {
+                let old_offset = offset;
+                offset = path.next_pos(offset, 1);
+                if offset == old_offset {
+                    //end of string
+                    break;
+                }
+                count_chars += 1;
+            }
+
+            let style = if self.selected_suggestion_pos as i32 - self.start_suggestions_pos as i32 == self.header_y_ofs - y - 2 {
+                attr_selected
+            } else {
+                attr
+            };
+            surface.write_string(Self::PADDING_LEFT as i32, y, &path[..offset], style, false);
+            y -= 1;
+        }
+    }
+
+    fn paint_suggestions_area(&self, control: &ControlBase, surface: &mut Surface, attr: CharAttribute, attr_selected: CharAttribute) {
+        match self.expanded_above {
+            true => self.paint_suggestions_area_top(control, surface, attr, attr_selected),
+            _ => self.paint_suggestions_area_bottom(control, surface, attr, attr_selected),
+        }
+    }
+}
+
+impl<T, E, R> NavigatorComponentControlFunctions<T, E, R> for NavigatorComponent<T, E, R>
+where
+    E: crate::utils::NavigatorEntry,
+    R: crate::utils::NavigatorRoot,
+    T: crate::utils::Navigator<E, R, PathBuf>,
+{
+    fn on_resize(&mut self, control: &ControlBase, _old_size: Size, new_size: Size) {
+        self.width = new_size.width;
+        self.out_of_focus_surface.resize(new_size);
+        self.update_out_of_focus_surface(control.theme());
+        self.move_cursor_at_end();
+    }
+
+    fn on_expand(&mut self, control: &ControlBase, direction: ExpandedDirection) {
+        match direction {
+            ExpandedDirection::OnTop => {
+                self.expanded_panel_y = 0;
+                self.header_y_ofs = (control.expanded_size().height as i32) - 1;
+                self.expanded_above = true;
+            }
+            ExpandedDirection::OnBottom => {
+                self.expanded_panel_y = 1;
+                self.header_y_ofs = 0;
+                self.expanded_above = false;
+            }
+        }
+    }
+
+    fn on_focus(&mut self, control: &mut ControlBase) {
+        self.width = control.size().width;
+        self.move_cursor_at_end();
+        self.navigator_cacher.suggestions.clear();
+        control.pack();
+    }
+
+    fn on_lose_focus(&mut self, control: &mut ControlBase) {
+        self.update_out_of_focus_surface(control.theme());
+    }
+
+    fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme) {
+        let attr = match () {
+            _ if !control.is_enabled() => theme.editor.inactive,
+            _ if control.has_focus() => theme.editor.focused,
+            _ if control.is_mouse_over() => theme.editor.hovered,
+            _ => theme.editor.normal,
+        };
+        surface.clear(Character::with_attributes(' ', attr));
+        // paint
+        if control.has_focus() {
+            self.paint_textbox_in_focus(surface, attr, theme.editor.pressed_or_selectd);
+            if control.is_expanded() {
+                self.paint_suggestions_area(control, surface, attr, theme.editor.pressed_or_selectd);
+            }
+        } else {
+            self.paint_textbox_out_of_focus(surface, theme);
+        }
+    }
+
+    fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus {
+        match key.value() {
+            key!("Backspace") => {
+                self.delete_previous_character();
+                self.update_char_count(-1, false);
+
+                self.selected_suggestion_pos = 0;
+                self.start_suggestions_pos = 1;
+                self.navigator_cacher.update_suggestions(&self.input_path, navigator);
+                self.expand_suggestions_area(control);
+                return EventProcessStatus::Processed;
+            }
+            key!("Delete") => {
+                self.delete_current_character();
+                return EventProcessStatus::Processed;
+            }
+            key!("Left") | key!("Shift+Left") => {
+                self.move_cursor_with(-1, key.modifier.contains(KeyModifier::Shift));
+                return EventProcessStatus::Processed;
+            }
+            key!("Right") | key!("Shift+Right") => {
+                self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
+                return EventProcessStatus::Processed;
+            }
+            key!("Home") | key!("Shift+Home") => {
+                self.move_cursor_to(0, key.modifier.contains(KeyModifier::Shift), false);
+                return EventProcessStatus::Processed;
+            }
+            key!("End") | key!("Shift+End") => {
+                self.move_cursor_to(self.input_path.len(), key.modifier.contains(KeyModifier::Shift), false);
+                return EventProcessStatus::Processed;
+            }
+            key!("Enter") => {
+                self.selected_suggestion_pos = 0;
+                self.start_suggestions_pos = 1;
+                self.pack_suggestions_area(control);
+                control.raise_event(ControlEvent {
+                    emitter: control.handle,
+                    receiver: control.event_processor,
+                    data: ControlEventData::PathFinder(EventData {}),
+                });
+                return EventProcessStatus::Processed;
+            }
+            key!("Esc") => {
+                if control.is_expanded() {
+                    control.pack();
+                    return EventProcessStatus::Processed;
+                }
+            }
+            key!("Up") => {
+                if let Some(selected_path) = self.update_suggestions_selection(-1) {
+                    self.set_input_path(&selected_path, false);
+                } else {
+                    self.restore_path_from_backup();
+                }
+                self.move_cursor_to(self.input_path.len(), false, false);
+                return EventProcessStatus::Processed;
+            }
+            key!("Down") => {
+                if let Some(selected_path) = self.update_suggestions_selection(1) {
+                    self.set_input_path(&selected_path, false);
+                } else {
+                    self.restore_path_from_backup();
+                }
+                self.move_cursor_to(self.input_path.len(), false, false);
+
+                return EventProcessStatus::Processed;
+            }
+            _ => {
+                if character > 0 as char {
+                    self.input_path.push(character);
+                    self.update_char_count(1, false);
+                    self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
+
+                    self.selected_suggestion_pos = 0;
+                    self.start_suggestions_pos = 1;
+                    self.navigator_cacher.update_suggestions(&self.input_path, navigator);
+                    self.expand_suggestions_area(control);
+                    return EventProcessStatus::Processed;
+                }
+            }
+        }
+        EventProcessStatus::Ignored
     }
 }
