@@ -82,6 +82,12 @@ impl TermiosTerminal {
         self.size = get_terminal_size()?;
         Ok(())
     }
+
+    fn move_cursor(&mut self, to: &Cursor) -> Result<(), std::io::Error> {
+        self.stdout.write_all(format!("\x1b[{};{}H", to.y + 1, to.x + 1).as_bytes())?;
+
+        Ok(())
+    }
 }
 
 impl Terminal for TermiosTerminal {
@@ -145,6 +151,8 @@ impl Terminal for TermiosTerminal {
         }
         let buf = self.screen_buffer.as_bytes();
         let _ = self.stdout.write(&buf[..buf.len() - 1]);
+
+        let _ = self.move_cursor(&surface.cursor);
     }
 
     fn get_size(&self) -> Size {
