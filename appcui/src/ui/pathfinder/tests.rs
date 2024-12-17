@@ -11,6 +11,15 @@ const CSV_DATA: &str = "
     f,C:\\Program Files\\Windows\\picture.png,123456,2020-03-12 12:31:55,
     f,C:\\Program Files\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     f,C:\\Program Files\\Windows\\script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\1script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\2script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\3script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\4script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\5script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\6script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\7script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\8script.bat,10000,2023-08-11 11:11:11,
+    f,C:\\Program Files\\Windows\\9script.bat,10000,2023-08-11 11:11:11,
     d,C:\\Program Files\\Windows\\System32,0,2020-03-12 12:31:55,
     f,C:\\Program Files\\Windows\\System32\\cmd.exe,123456,2020-03-12 22:15:45,
     f,C:\\Program Files\\Windows\\System32\\notepad.exe,123456,2020-05-14 12:18:55,
@@ -27,21 +36,22 @@ fn check_with_simulator() {
     let script = "
         //Paint.Enable(false)
         Paint('Initial')
-        // Key.Pressed(Tab)
-        // Paint('After Focus')
-        // Key.Pressed(S)
-        // Paint('After pressing inexisting path prefix')
-        // Key.Pressed(Backspace)
-        // Paint('Print path suggestions')
-        // Key.Pressed(Shift+W)
-        // Paint('Restrict path suggestions')
-        // Key.Pressed(Down, 6)
-        // Paint('Got to last selection')
-        // Key.Pressed(Enter)
-        // Paint('Selected last')
-        // Key.Pressed(Tab)
-        // Paint('After losing focus')
+        Key.Pressed(Tab)
+        Paint('After Focus')
+        Key.Pressed(S)
+        Paint('After pressing inexisting path prefix')
+        Key.Pressed(Backspace)
+        Paint('Print path suggestions')
+        Key.Pressed(Shift+W)
+        Paint('Restrict path suggestions')
+        Key.Pressed(Down, 6)
+        Paint('Got to last selection')
+        Key.Pressed(Enter)
+        Paint('Selected last')
+        Key.Pressed(Tab)
+        Paint('After losing focus')
     ";
+
     //let mut a = App::debug(80, 20, script).build().unwrap();
     let mut a = App::new().build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");

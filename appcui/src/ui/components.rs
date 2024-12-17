@@ -14,10 +14,9 @@ pub(crate) use self::combobox_component::ComboBoxComponent;
 pub(crate) use self::combobox_component::ComboBoxComponentDataProvider;
 pub(crate) use self::navigator_component::NavigatorComponent;
 pub(crate) use self::navigator_component::NavigatorComponentControlFunctions;
-pub(crate) use self::navigator_component::NavigatorComponentPaintFunctions;
 
 pub use self::scrollbars::ScrollBars;
 pub use self::listscrollbars::ListScrollBars;
-pub use self::column::Column;  
+pub use self::column::Column;
 pub use self::columns_header::ColumnsHeader;
 pub use self::columns_header::ColumnsHeaderAction;
