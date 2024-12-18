@@ -174,11 +174,13 @@ where
     }
 
     #[inline(always)]
-    fn set_input_path(&mut self, text: &str, overwrite_prev: bool) {
+    pub(crate) fn set_input_path(&mut self, text: &str, overwrite_prev: bool) {
         if overwrite_prev {
-            self.backup_path = self.input_path.clone();
-        }
-        self.input_path = text.to_string();
+            self.backup_path.clear();
+            self.backup_path.push_str(self.input_path.as_str());
+        };
+        self.input_path.clear();
+        self.input_path.push_str(text);
         self.update_char_count(self.input_path.chars().count() as i32, true);
     }
 

@@ -1,4 +1,4 @@
-pub trait Navigator<E, R, P>
+pub trait Navigator<E, R, P>: Clone
 where
     E: NavigatorEntry,
     R: NavigatorRoot,

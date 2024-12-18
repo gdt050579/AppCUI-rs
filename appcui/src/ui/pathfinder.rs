@@ -6,4 +6,5 @@ pub mod events;
 mod tests;
 
 pub use self::pathfinder::PathFinder;
+pub(crate) use self::pathfinder::GenericPathFinder; 
 pub use self::initialization_flags::Flags;
