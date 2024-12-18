@@ -20,7 +20,7 @@ where
         Self {
             flags,
             navigator,
-            component: crate::ui::components::NavigatorComponent::new(file_path, flags.contains(Flags::ReadOnly)),
+            component: crate::ui::components::NavigatorComponent::new(file_path, flags.contains(Flags::ReadOnly), flags.contains(Flags::CaseSensitive)),
         }
     }
 

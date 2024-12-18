@@ -88,6 +88,7 @@ where
     T: crate::utils::Navigator<E, R, PathBuf>,
 {
     is_readonly: bool,
+    is_case_sensitive: bool,
     navigator_cacher: NavigatorDataCacher<T, E, R>,
 
     // input area
@@ -142,7 +143,7 @@ where
     const PATH_FINDER_VISIBLE_RESULTS: u16 = 5;
     const PATH_FINDER_RESULTS_Y_OFFSET: u16 = 2;
 
-    pub(crate) fn new(path: &str, readonly: bool) -> Self {
+    pub(crate) fn new(path: &str, readonly: bool, case_sensitive: bool) -> Self {
         Self {
             input_path: path.to_string(),
             backup_path: path.to_string(),
@@ -153,6 +154,7 @@ where
             selection: Selection::NONE,
             out_of_focus_surface: Surface::new(1, 1),
             is_readonly: readonly,
+            is_case_sensitive: case_sensitive,
             width: 0,
             header_y_ofs: 0,
             expanded_panel_y: 1,
