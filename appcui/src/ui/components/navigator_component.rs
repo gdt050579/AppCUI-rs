@@ -174,7 +174,7 @@ where
     }
 
     #[inline(always)]
-    pub(crate) fn set_input_path(&mut self, text: &str, overwrite_prev: bool) {
+    pub(crate) fn set_input_path(&mut self, text: &str, overwrite_prev: bool, control: &ControlBase) {
         if overwrite_prev {
             self.backup_path.clear();
             self.backup_path.push_str(self.input_path.as_str());
@@ -182,6 +182,9 @@ where
         self.input_path.clear();
         self.input_path.push_str(text);
         self.update_char_count(self.input_path.chars().count() as i32, true);
+        if !control.has_focus() {
+            self.update_out_of_focus_surface(control.theme());
+        }
     }
 
     #[inline(always)]
@@ -706,7 +709,7 @@ where
             }
             key!("Up") => {
                 if let Some(selected_path) = self.update_suggestions_selection(-1) {
-                    self.set_input_path(&selected_path, false);
+                    self.set_input_path(&selected_path, false, control);
                 } else {
                     self.restore_path_from_backup();
                 }
@@ -715,7 +718,7 @@ where
             }
             key!("Down") => {
                 if let Some(selected_path) = self.update_suggestions_selection(1) {
-                    self.set_input_path(&selected_path, false);
+                    self.set_input_path(&selected_path, false, control);
                 } else {
                     self.restore_path_from_backup();
                 }
