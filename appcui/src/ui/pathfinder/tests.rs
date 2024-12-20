@@ -1,5 +1,6 @@
 use pathfinder::pathfinder::GenericPathFinder;
 use crate::{prelude::*, utils::fs::NavSimulator};
+use crate::dialogs::*;
 
 const CSV_DATA: &str = "
     r,C:\\,10000,100000,SYSTEM,fixed
@@ -63,5 +64,14 @@ fn check_with_simulator() {
     w.add(p);
     w.add(button!("test,x:1,y:3,w:6"));
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_with_save() {
+    let nav = NavSimulator::with_csv(CSV_DATA, true);
+    let mut a = App::new().build().unwrap();
+    crate::dialogs::save("title", "file_name", Location::Current, None , SaveFileDialogFlags::Icons);
+
     a.run();
 }

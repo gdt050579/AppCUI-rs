@@ -51,7 +51,7 @@ where
     pub(super) fn path(&self) -> &Path {
         Path::new(self.component.path())
     }
-    pub(super) fn set_path(&mut self, path: &str) {        
-        self.component.set_input_path(path,true);
+    pub(super) fn set_path(&mut self, path: &str, control: &ControlBase) {
+        self.component.set_input_path(path,true, control);
     }
 }
