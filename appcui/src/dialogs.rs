@@ -17,7 +17,7 @@ use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
 use file_mask::FileMask;
 use generic_alert_dialog::GenericAlertDialog;
-use open_save_dialog::{FileExplorer, OpenSaveDialogResult, InnerFlags};
+use open_save_dialog::{FileExplorer, InnerFlags, OpenSaveDialogResult};
 use EnumBitFlags::EnumBitFlags;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -72,7 +72,7 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
     ValidateOrCancelResult::Cancel
 }
 
-//static VFS: &str = include_str!("E:\\Lucru\\Personal\\AppCUI-rs\\scripts\\vfs.csv");
+static VFS: &str = include_str!("E:\\Lucru\\Personal\\AppCUI-rs\\scripts\\vfs.csv");
 
 pub enum Location<'a> {
     Current,
@@ -86,41 +86,21 @@ pub enum SaveFileDialogFlags {
     ValidateOverwrite = 2,
     SaveAs = 4,
 }
-// save:
-//     - file_name: &str
-//     - loction: Current, Last, Specific (path)
-//     - extension_mask: Option<&str> (None inseamna all files)
-//     - flags: u32 -> Icons, ValidateOverwrite, SaveAs (daca e setat, se va deschide cu numele save as, altfel cu save)
-// returneaza: Option<PathBuf>
-// DisableSelection trebuie adaugat si setat la ListView
-// Button de new folder
 
-// open:
-//     - file_name: &str
-//     - location: Current, Last, Specific (path)
-//     - extension_mask: Option<&str> (None inseamna all files)
-//     - flags: u32 -> Icons,
-// returneaza: Option<PathBuf>
-// DisableSelection trebuie adaugat si setat la ListView
-
-// open_multiple:
-//     - location: Current, Last, Specific (path)
-//     - extension_mask: Option<&str> (None inseamna all files)
-//     - flags: u32 -> Icons
-// returneaza: Option<Vec<PathBuf>>
-// nu are campul de file_name
-pub(super) fn inner_save<T>(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags, nav: T) -> Option<PathBuf>
+pub(super) fn inner_save<T>(
+    title: &str,
+    file_name: &str,
+    location: Location,
+    extension_mask: Option<&str>,
+    flags: SaveFileDialogFlags,
+    nav: T,
+) -> Option<PathBuf>
 where
     T: crate::utils::Navigator<crate::utils::fs::Entry, crate::utils::fs::Root, PathBuf> + 'static,
 {
     let ext_mask = extension_mask.unwrap_or_default();
     match FileMask::parse(ext_mask) {
         Ok(mask_list) => {
-            let title = if flags.contains(SaveFileDialogFlags::SaveAs) {
-                "Save As"
-            } else {
-                "Save"
-            };
             let mut inner_flags = InnerFlags::Save;
             if flags.contains(SaveFileDialogFlags::Icons) {
                 inner_flags |= InnerFlags::Icons;
@@ -145,6 +125,13 @@ where
     }
 }
 
-pub fn save(file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
-    inner_save(file_name, location, extension_mask, flags, utils::fs::NavSimulator::with_csv("VFS", true))
+pub fn save(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
+    inner_save(
+        title,
+        file_name,
+        location,
+        extension_mask,
+        flags,
+        utils::fs::NavSimulator::with_csv(VFS, true),
+    )
 }
