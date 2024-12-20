@@ -34,7 +34,7 @@ pub mod datepicker;
 pub mod listbox;
 pub mod listview;
 pub mod togglebutton;
-pub mod chart;
+pub mod chartbar;
 
 // re-export
 pub use common::ControlBase;
@@ -69,4 +69,4 @@ pub use datepicker::DatePicker;
 pub use listbox::ListBox;
 pub use listview::ListView;
 pub use togglebutton::ToggleButton;
-pub use chart::Chart;
+pub use chartbar::ChartBar;
