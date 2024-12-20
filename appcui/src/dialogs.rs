@@ -84,7 +84,11 @@ pub enum Location<'a> {
 pub enum SaveFileDialogFlags {
     Icons = 1,
     ValidateOverwrite = 2,
-    SaveAs = 4,
+}
+#[EnumBitFlags(bits = 8)]
+pub enum OpenFileDialogFlags {
+    Icons = 1,
+    ValidateExisting = 2,
 }
 
 pub(super) fn inner_save<T>(
@@ -125,8 +129,56 @@ where
     }
 }
 
+pub(super) fn inner_open<T>(
+    title: &str,
+    file_name: &str,
+    location: Location,
+    extension_mask: Option<&str>,
+    flags: OpenFileDialogFlags,
+    nav: T,
+) -> Option<PathBuf>
+where
+    T: crate::utils::Navigator<crate::utils::fs::Entry, crate::utils::fs::Root, PathBuf> + 'static,
+{
+    let ext_mask = extension_mask.unwrap_or_default();
+    match FileMask::parse(ext_mask) {
+        Ok(mask_list) => {
+            let mut inner_flags = InnerFlags::None;
+            if flags.contains(OpenFileDialogFlags::Icons) {
+                inner_flags |= InnerFlags::Icons;
+            }
+            if flags.contains(OpenFileDialogFlags::ValidateExisting) {
+                inner_flags |= InnerFlags::ValidateExisting;
+            }
+
+            let w = FileExplorer::new(file_name, title, location, mask_list, nav, inner_flags);
+            let result = w.show();
+            match result {
+                Some(OpenSaveDialogResult::Path(path)) => Some(path),
+                _ => None,
+            }
+        }
+        Err(err_msg) => {
+            panic!(
+                "Error parsing file mask: '{}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{}",
+                ext_mask, err_msg
+            );
+        }
+    }
+}
+
 pub fn save(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
     inner_save(
+        title,
+        file_name,
+        location,
+        extension_mask,
+        flags,
+        utils::fs::NavSimulator::with_csv(VFS, true),
+    )
+}
+pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: OpenFileDialogFlags) -> Option<PathBuf> {
+    inner_open(
         title,
         file_name,
         location,

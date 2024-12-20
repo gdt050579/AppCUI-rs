@@ -24,6 +24,7 @@ pub(super) enum InnerFlags {
     Icons = 2,
     MultipleOpen = 4,
     ValidateOverwrite = 8,
+    ValidateExisting = 16,
 }
 
 static LAST_PATH: OnceLock<PathBuf> = OnceLock::new();
