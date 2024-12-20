@@ -65,7 +65,8 @@ impl From<&str> for StructDefinition {
                     }
                     // find the template type
                     let start_tamplate_type = StructDefinition::skip_spaces(buf, pos + 1);
-                    let end_template_type = StructDefinition::skip_word(buf, start_tamplate_type);
+                    //let end_template_type = StructDefinition::skip_word(buf, start_tamplate_type);
+                    let end_template_type = StructDefinition::skip_while(buf, pos, |value| value != b'>');
                     if end_template_type==start_tamplate_type {
                         panic!("Expecting a valid template type (e.g. <T>");
                     }

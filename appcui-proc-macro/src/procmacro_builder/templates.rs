@@ -8,7 +8,7 @@ use crate::ui::common::*;
 ";
 
 pub(crate) static MODAL_WINDOW_METHODS: &str = "
-impl ModalWindowMethods<$(MODAL_RESULT_TYPE)> for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) ModalWindowMethods<$(MODAL_RESULT_TYPE)> for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn show(self) -> Option<$(MODAL_RESULT_TYPE)> {
         ModalWindow::show(self)
     }

@@ -6,6 +6,8 @@ pub (crate) mod glyphs;
 pub (crate) mod format_number;
 pub (crate) mod format_datetime;
 pub (crate) mod format_ratings;
+pub (crate) mod navigator;
+pub (crate) mod fs;
 #[cfg(test)]
 mod tests;
 
@@ -24,5 +26,8 @@ pub (crate) use self::format_datetime::FormatDateTime;
 pub (crate) use self::format_datetime::FormatTime;
 pub (crate) use self::format_datetime::FormatDate;
 pub (crate) use self::format_ratings::FormatRatings;
+pub (crate) use self::navigator::Navigator;
+pub (crate) use self::navigator::NavigatorEntry;
+pub (crate) use self::navigator::NavigatorRoot;
 
 
