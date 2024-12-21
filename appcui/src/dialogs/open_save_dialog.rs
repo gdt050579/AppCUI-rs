@@ -76,8 +76,8 @@ where
             flags,
         };
         w.path = match location {
-            Location::Current => std::env::current_dir().unwrap_or_default(),
-            Location::Last => LAST_PATH.get_or_init(|| std::env::current_dir().unwrap_or_default()).clone(),
+            Location::Current => nav.current_dir(),
+            Location::Last => LAST_PATH.get_or_init(|| nav.current_dir()).clone(),
             Location::Path(p) => p.to_path_buf(),
         };
         w.b_drive = w.add(button!("&Drive,x:1,y:1,w:7,type:Flat"));
