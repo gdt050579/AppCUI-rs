@@ -72,6 +72,7 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
     ValidateOrCancelResult::Cancel
 }
 
+#[derive(Clone)]
 pub enum Location<'a> {
     Current,
     Last,

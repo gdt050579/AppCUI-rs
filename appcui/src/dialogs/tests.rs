@@ -22,6 +22,77 @@ impl ButtonEvents for CallbackWin {
     }
 }
 
+enum OpenSaveTestWindowFlags {
+    Save(dialogs::SaveFileDialogFlags),
+    Open(dialogs::OpenFileDialogFlags),
+}
+#[Window(events = ButtonEvents, internal: true)]
+struct OpenSaveTestWindow<'a> {
+    title: String,
+    location: dialogs::Location<'a>,
+    file_name: String,
+    flags: OpenSaveTestWindowFlags,
+    info: Handle<Label>,
+}
+
+impl<'a> OpenSaveTestWindow<'a> {
+    fn save(title: &str, file_name: &str, location: dialogs::Location, save_flags: dialogs::SaveFileDialogFlags) -> Self {
+        let mut w = Self {
+            base: window!("Test, d:c"),
+            title: title.to_string(),
+            location,
+            file_name: file_name.to_string(),
+            flags: OpenSaveTestWindowFlags::Save(save_flags),
+            info: Handle::None,
+        };
+        w.add(button!("'Press Me',d:c,w:14"));
+        w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
+        w
+    }
+    fn open(title: &str, file_name: &str, location: dialogs::Location, open_flags: dialogs::OpenFileDialogFlags) -> Self {
+        let mut w = Self {
+            base: window!("Test, d:c"),
+            title: title.to_string(),
+            location,
+            file_name: file_name.to_string(),
+            flags: OpenSaveTestWindowFlags::Open(open_flags),
+            info: Handle::None,
+        };
+        w.add(button!("'Press Me',d:c,w:14"));
+        w
+    }
+}
+
+impl<'a> ButtonEvents for OpenSaveTestWindow<'a> {
+    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
+        let nav = crate::utils::fs::NavSimulator::with_csv("", true, "C:\\Program Files\\");
+        let result = match self.flags {
+            OpenSaveTestWindowFlags::Save(flags) => dialogs::inner_save(
+                self.title.as_str(),
+                self.file_name.as_str(),
+                self.location.clone(),
+                Some("Images = [jpg,png,bmp], Documents = [txt,docx], Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd]"),
+                flags,
+                nav,
+            ),
+            OpenSaveTestWindowFlags::Open(flags) => dialogs::inner_open(
+                self.title.as_str(),
+                self.file_name.as_str(),
+                self.location.clone(),
+                Some("Images = [jpg,png,bmp], Documents = [txt,docx], Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd]"),
+                flags,
+                nav,
+            ),
+        };
+        let txt = format!("{:?}", result);
+        let h = self.info;
+        if let Some(info) = self.control_mut(h) {
+            info.set_caption(&txt);
+        }
+        EventProcessStatus::Processed
+    }
+}
+
 #[test]
 fn check_small_error() {
     let script = "
