@@ -5,12 +5,14 @@ use std::path::PathBuf;
 pub(crate) struct NavSimulator {
     data: String,
     windows_model: bool,
+    current_dir: String,
 }
 impl NavSimulator {
-    pub(crate) fn with_csv(data: &str, windows_model: bool) -> Self {
+    pub(crate) fn with_csv(data: &str, windows_model: bool, current_dir: &str) -> Self {
         Self {
             data: data.to_string(),
             windows_model,
+            current_dir: current_dir.to_string(),
         }
     }
     fn is_root(&self, path: &str) -> bool {
@@ -43,7 +45,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
         v
     }
     fn new() -> Self {
-        Self { data: String::new(), windows_model: true}
+        Self { data: String::new(), windows_model: true, current_dir: String::new() }
     }
 
     fn join(&self, path: &PathBuf, entry: &Entry) -> Option<PathBuf> {
@@ -97,6 +99,9 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
             None
         }
     }
+    fn current_dir(&self) -> PathBuf {
+        PathBuf::from(&self.current_dir)
+    }
 }
 
 impl Clone for NavSimulator {
@@ -104,6 +109,7 @@ impl Clone for NavSimulator {
         Self {
             data: self.data.clone(),
             windows_model: self.windows_model,
+            current_dir: self.current_dir.clone(),
         }
     }
 }

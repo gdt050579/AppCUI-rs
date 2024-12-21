@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 
 use crate::{
     prelude::{window, ModalWindowMethods},
-    utils,
+    utils::{self, Navigator},
 };
 use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
@@ -71,8 +71,6 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
     }
     ValidateOrCancelResult::Cancel
 }
-
-static VFS: &str = include_str!("E:\\Lucru\\Personal\\AppCUI-rs\\scripts\\vfs.csv");
 
 pub enum Location<'a> {
     Current,
@@ -174,7 +172,7 @@ pub fn save(title: &str, file_name: &str, location: Location, extension_mask: Op
         location,
         extension_mask,
         flags,
-        utils::fs::NavSimulator::with_csv(VFS, true),
+        utils::fs::Navigator::new()
     )
 }
 pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: OpenFileDialogFlags) -> Option<PathBuf> {
@@ -184,6 +182,6 @@ pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Op
         location,
         extension_mask,
         flags,
-        utils::fs::NavSimulator::with_csv(VFS, true),
+        utils::fs::Navigator::new()
     )
 }

@@ -8,6 +8,7 @@ where
     fn new() -> Self;
     fn join(&self, path: &P, entry: &E) -> Option<P>;
     fn exists(&self, path: &P) -> Option<bool>;
+    fn current_dir(&self) -> P;
 }
 pub trait NavigatorEntry {
     fn name(&self) -> &str;

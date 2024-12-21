@@ -27,7 +27,7 @@ fn check_simulator() {
     f:D:\\Windows\\picture.png,123456,2020-03-12 12:31:55,
     f:D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
-    let nav = NavSimulator::with_csv(csv_data, true);
+    let nav = NavSimulator::with_csv(csv_data, true, "C:\\");
     let v = nav.roots();
     assert!(v.len() == 2);
     assert!(v[0].path() == "C:\\");
@@ -66,15 +66,15 @@ fn check_simulator_join() {
     f,C:\\Program Files\\Windows\\picture.png,123456,2020-03-12 12:31:55,
     f,C:\\Program Files\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
-    let nav = NavSimulator::with_csv(csv_data, true);
+    let nav = NavSimulator::with_csv(csv_data, true, "C:\\");
     let p = nav.join(
         &PathBuf::from("C:\\"),
         &Entry::new(
             "Program Files",
             0,
-            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(), 
-            EntryType::File
-        )        
+            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(),
+            EntryType::File,
+        ),
     );
     assert_eq!(p, Some(PathBuf::from("C:\\Program Files")));
 
@@ -83,9 +83,9 @@ fn check_simulator_join() {
         &Entry::new(
             "..\\a.exe",
             0,
-            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(), 
-            EntryType::File
-        )        
+            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(),
+            EntryType::File,
+        ),
     );
     assert_eq!(p, Some(PathBuf::from("C:\\Test\\a.exe")));
 
@@ -94,9 +94,9 @@ fn check_simulator_join() {
         &Entry::new(
             "./../.././././///../a.exe",
             0,
-            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(), 
-            EntryType::File
-        )        
+            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(),
+            EntryType::File,
+        ),
     );
     assert_eq!(p, Some(PathBuf::from("C:\\a\\b\\c\\a.exe")));
 
@@ -105,13 +105,12 @@ fn check_simulator_join() {
         &Entry::new(
             "X:\\Test/T2/a.exe",
             0,
-            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(), 
-            EntryType::File
-        )        
+            NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap(),
+            EntryType::File,
+        ),
     );
     assert_eq!(p, Some(PathBuf::from("X:\\Test\\T2\\a.exe")));
 }
-
 
 #[test]
 fn check_simulator_exists() {
@@ -125,7 +124,7 @@ fn check_simulator_exists() {
     f,C:\\Program Files\\Windows\\picture.png,123456,2020-03-12 12:31:55,
     f,C:\\Program Files\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
-    let nav = NavSimulator::with_csv(csv_data, true);
-    assert_eq!(nav.exists(&PathBuf::from("C:\\Program Files\\Windows\\picture.png")),Some(true));
-    assert_eq!(nav.exists(&PathBuf::from("D:\\Program Files\\Windows\\picture.png")),Some(false));
+    let nav = NavSimulator::with_csv(csv_data, true, "C:\\");
+    assert_eq!(nav.exists(&PathBuf::from("C:\\Program Files\\Windows\\picture.png")), Some(true));
+    assert_eq!(nav.exists(&PathBuf::from("D:\\Program Files\\Windows\\picture.png")), Some(false));
 }

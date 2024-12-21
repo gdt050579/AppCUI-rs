@@ -81,6 +81,10 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
             _ => None
         }
     }
+    fn current_dir(&self) -> PathBuf {
+        std::env::current_dir().unwrap_or_default()
+    }
+
 }
 
 impl Navigator {

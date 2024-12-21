@@ -33,7 +33,7 @@ const CSV_DATA: &str = "
     ";
 #[test]
 fn check_with_simulator() {
-    let nav = NavSimulator::with_csv(CSV_DATA, true);
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
         //Paint.Enable(false)
         Paint('Initial')
@@ -69,8 +69,9 @@ fn check_with_simulator() {
 
 #[test]
 fn check_with_save() {
-    let nav = NavSimulator::with_csv(CSV_DATA, true);
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let mut a = App::new().build().unwrap();
+    // GDT: nu are cum sa mai mearga ca am trecut dialogs::save pe Navigator si nu pe simulator
     crate::dialogs::save("title", "file_name", Location::Current, None , SaveFileDialogFlags::Icons);
 
     a.run();
