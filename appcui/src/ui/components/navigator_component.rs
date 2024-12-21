@@ -425,7 +425,7 @@ where
         let mut x = pos as i32;
         for ch in text.chars() {
             let attr = if ch == char::from(Self::PATH_TRIANGLE_SEPARTOR) {
-                theme.editor.inactive
+                theme.editor.hovered
             } else {
                 theme.editor.normal
             };

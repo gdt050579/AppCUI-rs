@@ -172,6 +172,19 @@ where
             });
         }
     }
+    fn populate_after_path_update(&mut self) {
+        self.path.push("");
+        let h = self.path_viewer;
+        let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
+        if let Some(pv) = self.control_mut(h) {
+            pv.set_path(Path::new(ts.as_str()));
+        }
+        let h = self.list;
+        if let Some(lst) = self.control_mut(h) {
+            lst.clear_search();
+        }
+        self.populate();
+    }
     fn return_result_from_save(&mut self) {
         // get the file name
         let mut entry = Entry::default();
@@ -215,21 +228,47 @@ where
             );
         }
     }
-    fn populate_after_path_update(&mut self) {
-        self.path.push("");
-        let h = self.path_viewer;
-        let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
-        if let Some(pv) = self.control_mut(h) {
-            pv.set_path(Path::new(ts.as_str()));
-        }
-        let h = self.list;
-        if let Some(lst) = self.control_mut(h) {
-            lst.clear_search();
-        }
-        self.populate();
-    }
+
     fn return_result_from_open(&mut self) {
-        self.exit_with(OpenSaveDialogResult::Cancel);
+        // get the file name
+        let mut entry = Entry::default();
+        if let Some(tf) = self.control(self.name) {
+            if tf.text().trim().is_empty() {
+                return;
+            }
+            entry.name.push_str(tf.text());
+        } else {
+            return;
+        };
+        if let Some(result) = self.nav.join(&self.path, &entry) {
+            if self.flags.contains(InnerFlags::ValidateExisting) {
+                match self.nav.exists(&self.path) {
+                    Some(true) => {
+                        // do nothing --> all is good
+                    }
+                    Some(false) => {
+                        crate::dialogs::error("Error", format!("File'{}' does not exists !", result.display()).as_str());
+                        return;
+                    }
+                    None => {
+                        crate::dialogs::error("Error", format!("Fail to check if file exists: '{}'", result.display()).as_str());
+                        return;
+                    }
+                }
+            }
+            self.exit_with(OpenSaveDialogResult::Path(result));
+        } else {
+            crate::dialogs::error(
+                "Error",
+                format!(
+                    "Fail to join current path: '{}' with file name: '{}'",
+                    self.path.display(),
+                    entry.name.as_str()
+                )
+                .as_str(),
+            );
+        }
+
     }
     fn return_result(&mut self) {
         if self.flags.contains(InnerFlags::Save) {
