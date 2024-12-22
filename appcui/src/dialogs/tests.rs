@@ -1,6 +1,8 @@
 use crate::dialogs;
 use crate::prelude::*;
 
+use super::SaveFileDialogFlags;
+
 #[Window(events=ButtonEvents, internal: true)]
 struct CallbackWin {
     f: fn(),
@@ -22,6 +24,31 @@ impl ButtonEvents for CallbackWin {
     }
 }
 
+static VFS: &str = "
+    r,C:\\,10000,100000,SYSTEM,fixed   
+    r,D:\\,123,123456,USB Drive,removable
+    d,C:\\Program Files,0,2024-01-10 12:00:00,
+    f,C:\\Program Files\\runme.exe,123,2024-01-10 12:31:55,
+    f,C:\\Program Files\\readme.txt,123456,2023-02-05 09:12:25,
+    d,C:\\Program Files\\Windows,0,2024-01-10 12:31:55,
+    f,C:\\Program Files\\Windows\\picture.png,123456,2020-03-12 12:31:55,
+    f,C:\\Program Files\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
+    f,C:\\Program Files\\Windows\\script.bat,10000,2023-08-11 11:11:11,
+    d,C:\\Program Files\\Windows\\System32,0,2020-03-12 12:31:55,
+    f,C:\\Program Files\\Windows\\System32\\cmd.exe,123456,2020-03-12 22:15:45,
+    f,C:\\Program Files\\Windows\\System32\\notepad.exe,123456,2020-05-14 12:18:55,
+    f,C:\\Program Files\\Windows\\System32\\calc.exe,123456,2022-05-14 12:19:35,
+    d,C:\\Program Files\\Windows\\System32\\drivers,0,2022-05-14 12:19:35,
+    f,C:\\Program Files\\Windows\\System32\\drivers\\file.sys,13579,2022-05-14 12:19:35,
+    f,C:\\Program Files\\Windows\\System32\\drivers\\graphics.sys,12345,2021-08-14 12:19:35,
+    f,C:\\Program Files\\Windows\\System32\\drivers\\network.sys,54321,2020-10-14 12:19:35,
+    f,D:\\runme.exe,123,2024-01-10 12:31:55,
+    f,D:\\readme.txt,123456,2023-02-05 09:12:25,
+    d,D:\\Windows,0,2024-01-10 12:31:55,
+    f,D:\\Windows\\picture.png,123456,2020-03-12 12:31:55,
+    f,D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
+";
+
 enum OpenSaveTestWindowFlags {
     Save(dialogs::SaveFileDialogFlags),
     Open(dialogs::OpenFileDialogFlags),
@@ -36,7 +63,7 @@ struct OpenSaveTestWindow<'a> {
 }
 
 impl<'a> OpenSaveTestWindow<'a> {
-    fn save(title: &str, file_name: &str, location: dialogs::Location, save_flags: dialogs::SaveFileDialogFlags) -> Self {
+    fn save(title: &str, file_name: &str, location: dialogs::Location<'a>, save_flags: dialogs::SaveFileDialogFlags) -> Self {
         let mut w = Self {
             base: window!("Test, d:c"),
             title: title.to_string(),
@@ -49,7 +76,7 @@ impl<'a> OpenSaveTestWindow<'a> {
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
-    fn open(title: &str, file_name: &str, location: dialogs::Location, open_flags: dialogs::OpenFileDialogFlags) -> Self {
+    fn open(title: &str, file_name: &str, location: dialogs::Location<'a>, open_flags: dialogs::OpenFileDialogFlags) -> Self {
         let mut w = Self {
             base: window!("Test, d:c"),
             title: title.to_string(),
@@ -65,7 +92,7 @@ impl<'a> OpenSaveTestWindow<'a> {
 
 impl<'a> ButtonEvents for OpenSaveTestWindow<'a> {
     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
-        let nav = crate::utils::fs::NavSimulator::with_csv("", true, "C:\\Program Files\\");
+        let nav = crate::utils::fs::NavSimulator::with_csv(VFS, true, "C:\\Program Files\\");
         let result = match self.flags {
             OpenSaveTestWindowFlags::Save(flags) => dialogs::inner_save(
                 self.title.as_str(),
@@ -399,5 +426,37 @@ fn check_validate_or_cancel() {
             dialogs::ValidateOrCancelResult::Cancel => dialogs::message("Response", "Cancel exit"),
         }
     }));
+    a.run();
+}
+
+
+#[test]
+fn check_save_dialog_simple() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x21756A7594358988)    
+        Key.Pressed(Alt+T)
+        Paint('3. Open type list');
+        CheckHash(0x45D8222BE460849C)   
+        Key.Pressed(End)
+        Key.Pressed(Enter) 
+        Paint('4. All files selected');
+        CheckHash(0x5F99B748EA7DF5CD)
+        Key.Pressed(Tab,4)   
+        Paint('5. File list has focus');
+        CheckHash(0x17E6B78DD3F14669)
+        Key.Pressed(Down,3)   
+        Paint('6. readme.txt is selected');
+        CheckHash(0xA358C3F59F76F058)
+        Key.Pressed(Enter)   
+        Paint('7. readme.txt is chosen');
+        CheckHash(0xEB21471DE6FDA1EA)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save("Save", "blabla.exe", dialogs::Location::Current, SaveFileDialogFlags::None));
     a.run();
 }

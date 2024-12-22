@@ -110,7 +110,9 @@ where
         w.list = p.add(lv);
         w.add(p);
         w.add(label!("&Name,l:1,b:3,w:4"));
-        w.name = w.add(TextField::new(file_name, Layout::new("l:6,b:3,r:11"), textfield::Flags::None));
+        let mut fname = TextField::new(file_name, Layout::new("l:6,b:3,r:11"), textfield::Flags::None);
+        fname.set_hotkey(key!("Alt+N"));
+        w.name = w.add(fname);
         w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
         w.add(label!("&Type,l:1,b:1,w:4"));
         let mut mask = ComboBox::new(Layout::new("l:6,b:1,r:11"), combobox::Flags::None);
@@ -119,6 +121,7 @@ where
         }
         mask.add("All files");
         mask.set_index(0);
+        mask.set_hotkey(key!("Alt+T"));
         w.mask = w.add(mask);
         w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
         w.set_size_bounds(40, 17, u16::MAX, u16::MAX);
