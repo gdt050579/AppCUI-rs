@@ -1,6 +1,7 @@
 use crate::dialogs;
 use crate::prelude::*;
 
+use super::OpenFileDialogFlags;
 use super::SaveFileDialogFlags;
 
 #[Window(events=ButtonEvents, internal: true)]
@@ -86,6 +87,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
         };
         w.add(button!("'Press Me',d:c,w:14"));
+        w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
 }
@@ -525,5 +527,65 @@ fn check_save_dialog_select_existent_with_validate_overwrite() {
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save("Save", "blabla.exe", dialogs::Location::Current, SaveFileDialogFlags::ValidateOverwrite));
+    a.run();
+}
+
+#[test]
+fn check_open_dialog_hardcoded_relative_path() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show open dialog');
+        CheckHash(0x301AEE3E32DC3466)    
+        Key.Pressed(Enter)
+        Paint('3. Selected path: Some(C:\\abc.exe)');
+        CheckHash(0x66405B20EE6A5135)            
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::open("Open", "../abc.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_open_dialog_hardcoded_absolute_path() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show open dialog');
+        CheckHash(0x9D35411CA46289A9)    
+        Key.Pressed(Enter)
+        Paint('3. Selected path: Some(E:\\abc.exe)');
+        CheckHash(0x1F861B0B7CF0B263)            
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::open("Open", "E:/abc.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_open_dialog_invalid_path_with_validation_flag() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show open dialog');
+        CheckHash(0x9D35411CA46289A9)    
+        Key.Pressed(Enter)
+        Paint('3. Error (File E:\\abc.exe does not exists)');
+        CheckHash(0xEF1EBEE444B0A935) 
+        Key.Pressed(Enter)
+        Paint('4. back to open dialog window');
+        CheckHash(0x9D35411CA46289A9)    
+        Key.Pressed(Escape)
+        Paint('5. No file selected (None)');
+        CheckHash(0xAD065263787B818A)    
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::open("Open", "E:/abc.exe", dialogs::Location::Current, OpenFileDialogFlags::ValidateExisting));
     a.run();
 }

@@ -250,7 +250,7 @@ where
                         // do nothing --> all is good
                     }
                     Some(false) => {
-                        crate::dialogs::error("Error", format!("File'{}' does not exists !", result.display()).as_str());
+                        crate::dialogs::error("Error", format!("File '{}' does not exists !", result.display()).as_str());
                         return;
                     }
                     None => {
