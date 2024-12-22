@@ -811,10 +811,12 @@ impl OnKeyPressed for Window {
             if !control_handle.is_none() {
                 // request focus for that control
                 rm.request_focus_for_control(control_handle);
+                // request the default action for that control
+                rm.request_default_action_for_control(control_handle);
                 // call the default method
-                if let Some(control) = rm.get_controls_mut().get_mut(control_handle) {
-                    OnDefaultAction::on_default_action(control.control_mut());
-                }
+                // if let Some(control) = rm.get_controls_mut().get_mut(control_handle) {
+                //     OnDefaultAction::on_default_action(control.control_mut());
+                // }
                 return EventProcessStatus::Processed;
             }
         }

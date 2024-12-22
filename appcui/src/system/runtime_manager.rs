@@ -70,6 +70,7 @@ pub(crate) struct RuntimeManager {
     loop_status: LoopStatus,
     request_focus: Option<Handle<UIElement>>,
     current_focus: Option<Handle<UIElement>>,
+    request_default_action: Option<Handle<UIElement>>,
     expanded_control: ExpandedControlInfo,
     mouse_over_control: Handle<UIElement>,
     focus_chain: Vec<Handle<UIElement>>,
@@ -107,6 +108,7 @@ impl RuntimeManager {
             key_modifier: KeyModifier::None,
             request_focus: None,
             current_focus: None,
+            request_default_action: None,
             mouse_over_control: Handle::None,
             opened_menu_handle: Handle::None,
             expanded_control: ExpandedControlInfo::default(),
@@ -264,6 +266,9 @@ impl RuntimeManager {
     }
     pub(crate) fn request_focus_for_control(&mut self, handle: Handle<UIElement>) {
         self.request_focus = Some(handle);
+    }
+    pub(crate) fn request_default_action_for_control(&mut self, handle: Handle<UIElement>) {
+        self.request_default_action = Some(handle);
     }
     pub(crate) fn request_expand_for_control(&mut self, handle: Handle<UIElement>, min_size: Size, prefered_size: Size) {
         self.expanded_control.handle = handle;
@@ -468,6 +473,7 @@ impl RuntimeManager {
             if let Some(handle) = self.request_focus {
                 self.update_focus(handle);
                 self.request_focus = None;
+                self.request_default_action = None;
                 self.repaint = true;
                 self.request_update_command_and_menu_bars = true;
             }
@@ -882,6 +888,12 @@ impl RuntimeManager {
         }
         self.current_focus = Some(handle);
         self.request_focus = None;
+        // check default actio
+        if handle == self.request_default_action.unwrap_or(Handle::None) {
+            if let Some(c) = controls.get_mut(handle) {
+                OnDefaultAction::on_default_action(c.control_mut());
+            }
+        }
     }
 
     fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
