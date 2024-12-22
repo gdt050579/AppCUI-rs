@@ -201,7 +201,7 @@ where
         };
         if let Some(result) = self.nav.join(&self.path, &entry) {
             if self.flags.contains(InnerFlags::ValidateOverwrite) {
-                match self.nav.exists(&self.path) {
+                match self.nav.exists(&result) {
                     Some(true) => {
                         if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str())
                             == false
@@ -245,7 +245,7 @@ where
         };
         if let Some(result) = self.nav.join(&self.path, &entry) {
             if self.flags.contains(InnerFlags::ValidateExisting) {
-                match self.nav.exists(&self.path) {
+                match self.nav.exists(&result) {
                     Some(true) => {
                         // do nothing --> all is good
                     }

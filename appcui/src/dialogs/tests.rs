@@ -431,7 +431,7 @@ fn check_validate_or_cancel() {
 
 
 #[test]
-fn check_save_dialog_simple() {
+fn check_save_dialog_select_existent() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')   
@@ -458,5 +458,72 @@ fn check_save_dialog_simple() {
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save("Save", "blabla.exe", dialogs::Location::Current, SaveFileDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_save_dialog_cancelt_existent() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x21756A7594358988)    
+        Key.Pressed(Alt+T)
+        Paint('3. Open type list');
+        CheckHash(0x45D8222BE460849C)   
+        Key.Pressed(End)
+        Key.Pressed(Enter) 
+        Paint('4. All files selected');
+        CheckHash(0x5F99B748EA7DF5CD)
+        Key.Pressed(Tab,4)   
+        Paint('5. File list has focus');
+        CheckHash(0x17E6B78DD3F14669)
+        Key.Pressed(Down,3)   
+        Paint('6. readme.txt is selected');
+        CheckHash(0xA358C3F59F76F058)
+        Key.Pressed(Escape)   
+        Paint('7. readme.txt is chosen');
+        CheckHash(0xAD065263787B818A)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save("Save", "blabla.exe", dialogs::Location::Current, SaveFileDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_save_dialog_select_existent_with_validate_overwrite() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x21756A7594358988)    
+        Key.Pressed(Alt+T)
+        Paint('3. Open type list');
+        CheckHash(0x45D8222BE460849C)   
+        Key.Pressed(End)
+        Key.Pressed(Enter) 
+        Paint('4. All files selected');
+        CheckHash(0x5F99B748EA7DF5CD)
+        Key.Pressed(Tab,4)   
+        Paint('5. File list has focus');
+        CheckHash(0x17E6B78DD3F14669)
+        Key.Pressed(Down,3)   
+        Paint('6. readme.txt is selected');
+        CheckHash(0xA358C3F59F76F058)
+        Key.Pressed(Enter)   
+        Paint('7. Validate overwrite question');
+        CheckHash(0xCA110EB5BB5ADEAA)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)  
+        Key.Pressed(Tab)
+        Paint('8. readme.txt is chosen');
+        CheckHash(0xEB21471DE6FDA1EA)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save("Save", "blabla.exe", dialogs::Location::Current, SaveFileDialogFlags::ValidateOverwrite));
     a.run();
 }
