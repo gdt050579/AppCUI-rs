@@ -28,7 +28,7 @@ pub(super) enum InnerFlags {
 }
 
 static LAST_PATH: OnceLock<PathBuf> = OnceLock::new();
-#[ModalWindow(events = ToggleButtonEvents+ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
+#[ModalWindow(events = ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where
     T: Navigator<Entry, Root, PathBuf> + 'static,
@@ -77,7 +77,13 @@ where
         };
         w.path = match location {
             Location::Current => nav.current_dir(),
-            Location::Last => LAST_PATH.get_or_init(|| nav.current_dir()).clone(),
+            Location::Last => {
+                if let Some(dir) = LAST_PATH.get() {
+                    dir.clone()
+                } else {
+                    nav.current_dir()
+                }
+            }
             Location::Path(p) => p.to_path_buf(),
         };
         w.b_drive = w.add(button!("&Drive,x:1,y:1,w:7,type:Flat"));
@@ -128,6 +134,13 @@ where
         let h = w.name;
         w.request_focus_for_control(h);
         w
+    }
+    fn update_last_path(&self, last_path: &PathBuf) {
+        if let Some(dir) = last_path.parent() {
+            let mut new_path = dir.to_path_buf();
+            new_path.push(""); // make sure we have a trailing slash
+            let _ = LAST_PATH.set(new_path);
+        }
     }
     fn populate(&mut self) {
         let is_root = self.path.is_absolute() && self.path.parent().is_none();
@@ -218,6 +231,7 @@ where
                     }
                 }
             }
+            self.update_last_path(&result); 
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(
@@ -259,6 +273,7 @@ where
                     }
                 }
             }
+            self.update_last_path(&result); 
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(
@@ -304,14 +319,6 @@ where
             }
             _ => EventProcessStatus::Ignored,
         }
-    }
-}
-impl<T> ToggleButtonEvents for FileExplorer<T>
-where
-    T: Navigator<Entry, Root, PathBuf> + 'static,
-{
-    fn on_selection_changed(&mut self, _handle: Handle<ToggleButton>, _selected: bool) -> EventProcessStatus {
-        EventProcessStatus::Ignored
     }
 }
 impl<T> WindowEvents for FileExplorer<T>

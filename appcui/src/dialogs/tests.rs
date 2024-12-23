@@ -589,3 +589,32 @@ fn check_open_dialog_invalid_path_with_validation_flag() {
     a.add_window(OpenSaveTestWindow::open("Open", "E:/abc.exe", dialogs::Location::Current, OpenFileDialogFlags::ValidateExisting));
     a.run();
 }
+
+#[test]
+fn check_open_dialog_last_path() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show open dialog');
+        CheckHash(0x6D0409A7FCA6AE9B)    
+        Key.Pressed(Tab,6)
+        Paint('3. Focus on File list');
+        CheckHash(0x3682F39BCF202163) 
+        Key.Pressed(Down)
+        Key.Pressed(Enter)
+        Key.Pressed(Tab)
+        Paint('4. Back on the file name list - folder is C:\\Program Files\\Windows');
+        CheckHash(0x830F7746A03258A2) 
+        Key.Pressed(Enter)
+        Paint('5. Selected file is Some(C:\\Program Files\\Windows\\myfile.exe)');
+        CheckHash(0x3703567C51F0C71A)                    
+        Key.Pressed(Enter)
+        Paint('6. Open the file dialog again (Directory should be C:\\Program Files\\Windows)');
+        CheckHash(0xC8E329F1E80B6D04)                    
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::open("Open", "myfile.exe", dialogs::Location::Last, OpenFileDialogFlags::None));
+    a.run();
+}
