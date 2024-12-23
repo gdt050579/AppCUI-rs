@@ -13,6 +13,7 @@ mod unix;
 mod tests;
 
 pub(crate) use navigator::Navigator;
+#[cfg(test)]
 pub(crate) use nav_simulator::NavSimulator;
 pub(crate) use root::Root;
 pub(crate) use root::RootType;

@@ -34,6 +34,7 @@ impl<const N: usize> TempBuffer<N> {
         }
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(crate) fn is_on_heap(&self) -> bool {
         matches!(&self.inner, InnerTempBuffer::HeapBuffer(_))
     }
@@ -60,6 +61,7 @@ impl<const N: usize> TempString<N> {
         unsafe { std::str::from_utf8_unchecked(self.buffer.as_slice()) }
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(crate) fn is_on_heap(&self) -> bool {
         self.buffer.is_on_heap()
     }

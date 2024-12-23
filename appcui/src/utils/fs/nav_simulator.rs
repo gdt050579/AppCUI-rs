@@ -8,6 +8,7 @@ pub(crate) struct NavSimulator {
     current_dir: String,
 }
 impl NavSimulator {
+    #[cfg(test)]
     pub(crate) fn with_csv(data: &str, windows_model: bool, current_dir: &str) -> Self {
         Self {
             data: data.to_string(),

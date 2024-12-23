@@ -47,15 +47,15 @@ pub(crate) struct Root {
     pub(crate) root_type: RootType,
 }
 impl Root {
-    pub(super) fn new(path: &str, name: &str, size: u64, free_space: u64, root_type: RootType) -> Self {
-        Self {
-            path: path.to_string(),
-            name: name.to_string(),
-            size,
-            free_space,
-            root_type
-        }
-    }
+    // pub(super) fn new(path: &str, name: &str, size: u64, free_space: u64, root_type: RootType) -> Self {
+    //     Self {
+    //         path: path.to_string(),
+    //         name: name.to_string(),
+    //         size,
+    //         free_space,
+    //         root_type
+    //     }
+    // }
     pub(super) fn from_csv_line(line: &str) -> Option<Self> {
         let mut parts = line.split(',');
         let entry_type = parts.next()?;

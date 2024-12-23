@@ -31,6 +31,7 @@ pub (crate) use self::format_ratings::FormatRatings;
 pub (crate) use self::navigator::Navigator;
 pub (crate) use self::navigator::NavigatorEntry;
 pub (crate) use self::navigator::NavigatorRoot;
+#[cfg(test)]
 pub (crate) use self::temp_buffer::TempBuffer;
 pub (crate) use self::temp_buffer::TempString;
 
