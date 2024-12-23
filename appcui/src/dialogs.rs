@@ -165,24 +165,17 @@ where
         }
     }
 }
+pub(crate) fn clear_last_path() {
+    if let Some(m) = open_save_dialog::LAST_PATH.get() {
+        if let Ok(mut guard) = m.lock() {
+            *guard = None;
+        }
+    }
+}
 
 pub fn save(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
-    inner_save(
-        title,
-        file_name,
-        location,
-        extension_mask,
-        flags,
-        utils::fs::Navigator::new()
-    )
+    inner_save(title, file_name, location, extension_mask, flags, utils::fs::Navigator::new())
 }
 pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: OpenFileDialogFlags) -> Option<PathBuf> {
-    inner_open(
-        title,
-        file_name,
-        location,
-        extension_mask,
-        flags,
-        utils::fs::Navigator::new()
-    )
+    inner_open(title, file_name, location, extension_mask, flags, utils::fs::Navigator::new())
 }

@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
 
 use dialogs::file_mask::FileMask;
 use dialogs::root_select_dialog::RootSelectDialog;
@@ -27,7 +27,8 @@ pub(super) enum InnerFlags {
     ValidateExisting = 16,
 }
 
-static LAST_PATH: OnceLock<PathBuf> = OnceLock::new();
+pub(super) static LAST_PATH: OnceLock<Mutex<Option<PathBuf>>> = OnceLock::new();
+
 #[ModalWindow(events = ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where
@@ -78,8 +79,13 @@ where
         w.path = match location {
             Location::Current => nav.current_dir(),
             Location::Last => {
-                if let Some(dir) = LAST_PATH.get() {
-                    dir.clone()
+                let m = LAST_PATH.get_or_init(|| Mutex::new(None));
+                if let Ok(m) = m.lock() {
+                    if let Some(p) = m.as_ref() {
+                        p.clone()
+                    } else {
+                        nav.current_dir()
+                    }
                 } else {
                     nav.current_dir()
                 }
@@ -139,7 +145,9 @@ where
         if let Some(dir) = last_path.parent() {
             let mut new_path = dir.to_path_buf();
             new_path.push(""); // make sure we have a trailing slash
-            let _ = LAST_PATH.set(new_path);
+            if let Ok(mut guard) = LAST_PATH.get_or_init(|| Mutex::new(None)).lock() {
+                *guard = Some(new_path);
+            }
         }
     }
     fn populate(&mut self) {
