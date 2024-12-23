@@ -26,8 +26,8 @@ impl ButtonEvents for CallbackWin {
 }
 
 static VFS: &str = "
-    r,C:\\,10000,100000,SYSTEM,fixed   
-    r,D:\\,123,123456,USB Drive,removable
+    r,C:\\,1000000,100000,SYSTEM,fixed   
+    r,D:\\,123456,123,USB Drive,removable
     d,C:\\Program Files,0,2024-01-10 12:00:00,
     f,C:\\Program Files\\runme.exe,123,2024-01-10 12:31:55,
     f,C:\\Program Files\\readme.txt,123456,2023-02-05 09:12:25,
@@ -50,6 +50,8 @@ static VFS: &str = "
     f,D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
 ";
 
+static FILE_MASK: &str = "Images = [jpg,png,bmp], Documents = [txt,docx], Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd]";
+
 enum OpenSaveTestWindowFlags {
     Save(dialogs::SaveFileDialogFlags),
     Open(dialogs::OpenFileDialogFlags),
@@ -61,6 +63,7 @@ struct OpenSaveTestWindow<'a> {
     file_name: String,
     flags: OpenSaveTestWindowFlags,
     info: Handle<Label>,
+    mask: Option<&'static str>,
 }
 
 impl<'a> OpenSaveTestWindow<'a> {
@@ -72,6 +75,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             file_name: file_name.to_string(),
             flags: OpenSaveTestWindowFlags::Save(save_flags),
             info: Handle::None,
+            mask: Some(FILE_MASK),
         };
         w.add(button!("'Press Me',d:c,w:14"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
@@ -85,6 +89,21 @@ impl<'a> OpenSaveTestWindow<'a> {
             file_name: file_name.to_string(),
             flags: OpenSaveTestWindowFlags::Open(open_flags),
             info: Handle::None,
+            mask: Some(FILE_MASK),
+        };
+        w.add(button!("'Press Me',d:c,w:14"));
+        w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
+        w
+    }
+    fn open_all(title: &str, file_name: &str, location: dialogs::Location<'a>, open_flags: dialogs::OpenFileDialogFlags) -> Self {
+        let mut w = Self {
+            base: window!("Test, d:c"),
+            title: title.to_string(),
+            location,
+            file_name: file_name.to_string(),
+            flags: OpenSaveTestWindowFlags::Open(open_flags),
+            info: Handle::None,
+            mask: None,
         };
         w.add(button!("'Press Me',d:c,w:14"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
@@ -100,7 +119,7 @@ impl<'a> ButtonEvents for OpenSaveTestWindow<'a> {
                 self.title.as_str(),
                 self.file_name.as_str(),
                 self.location.clone(),
-                Some("Images = [jpg,png,bmp], Documents = [txt,docx], Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd]"),
+                self.mask,
                 flags,
                 nav,
             ),
@@ -108,7 +127,7 @@ impl<'a> ButtonEvents for OpenSaveTestWindow<'a> {
                 self.title.as_str(),
                 self.file_name.as_str(),
                 self.location.clone(),
-                Some("Images = [jpg,png,bmp], Documents = [txt,docx], Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd]"),
+                self.mask,
                 flags,
                 nav,
             ),
@@ -616,5 +635,27 @@ fn check_open_dialog_last_path() {
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open("Open", "myfile.exe", dialogs::Location::Last, OpenFileDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_open_dialog_select_drive() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show open dialog');
+        CheckHash(0x2328A3E49BBF7A06)    
+        Key.Pressed(Alt+D)
+        Paint('3. Drive selection window is chosen');
+        CheckHash(0xB3EBC64EAA555682) 
+        Key.Pressed(Down)
+        Key.Pressed(Enter)
+        Paint('4. Now the folder is D:\');
+        CheckHash(0x9C98C24AA885FA47) 
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::open_all("Open", "myfile.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
     a.run();
 }
