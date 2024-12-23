@@ -29,7 +29,7 @@ pub(super) enum InnerFlags {
 
 pub(super) static LAST_PATH: OnceLock<Mutex<Option<PathBuf>>> = OnceLock::new();
 
-#[ModalWindow(events = ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents, response: OpenSaveDialogResult, internal: true)]
+#[ModalWindow(events = ButtonEvents+WindowEvents+ListViewEvents<Entry>+ComboBoxEvents+PathFinderEvents, response: OpenSaveDialogResult, internal: true)]
 pub(super) struct FileExplorer<T>
 where
     T: Navigator<Entry, Root, PathBuf> + 'static,
@@ -416,3 +416,18 @@ where
         EventProcessStatus::Processed
     }
 }
+
+impl<T> PathFinderEvents for FileExplorer<T>
+where
+    T: Navigator<Entry, Root, PathBuf> + 'static,
+{ 
+    fn on_path_updated(&mut self, handle: Handle<PathFinder>) -> EventProcessStatus {
+        if handle == self.path_viewer {
+            if let Some(pv) = self.control(self.path_viewer) {
+                self.path = pv.path().to_path_buf();
+                self.populate_after_path_update();
+            }
+        }
+        EventProcessStatus::Processed
+    }
+}   

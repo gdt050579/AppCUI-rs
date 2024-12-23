@@ -659,3 +659,28 @@ fn check_open_dialog_select_drive() {
     a.add_window(OpenSaveTestWindow::open_all("Open", "myfile.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
     a.run();
 }
+
+#[test]
+fn check_open_dialog_change_path_manually() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show open dialog');
+        CheckHash(0x2328A3E49BBF7A06)    
+        Key.Pressed(Tab,5)
+        Paint('3. PathFinder is selected (C:\\Program Files)');
+        CheckHash(0xCE4C8945F94D4A52) 
+        // delete the entire content
+        Key.Pressed(Backspace,100)
+        Key.TypeText('C:\\Program Files\\Windows\\System32\\drivers')
+        Key.Pressed(Enter)
+        Key.Pressed(Tab);
+        Paint('4. Showing files from C:\\Program Files\\Windows\\System32\\drivers');
+        CheckHash(0x6F9A79E45ACA183D) 
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::open_all("Open", "myfile.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
+    a.run();
+}
