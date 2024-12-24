@@ -116,6 +116,7 @@ where
                     listview::Flags::None
                 },
         );
+        lv.set_components_toolbar_margins(2, 0);
         w.g_updir = lv.add_group("UpDir");
         w.g_folders = lv.add_group("Folders");
         w.g_files = lv.add_group("Files");

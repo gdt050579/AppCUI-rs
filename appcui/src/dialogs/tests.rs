@@ -469,10 +469,10 @@ fn check_save_dialog_select_existent() {
         CheckHash(0x5F99B748EA7DF5CD)
         Key.Pressed(Tab,4)   
         Paint('5. File list has focus');
-        CheckHash(0x17E6B78DD3F14669)
+        CheckHash(0xFF7E9BC315253CE1)
         Key.Pressed(Down,3)   
         Paint('6. readme.txt is selected');
-        CheckHash(0xA358C3F59F76F058)
+        CheckHash(0x66FB1C04540FF3B8)
         Key.Pressed(Enter)   
         Paint('7. readme.txt is chosen');
         CheckHash(0xEB21471DE6FDA1EA)
@@ -500,10 +500,10 @@ fn check_save_dialog_cancelt_existent() {
         CheckHash(0x5F99B748EA7DF5CD)
         Key.Pressed(Tab,4)   
         Paint('5. File list has focus');
-        CheckHash(0x17E6B78DD3F14669)
+        CheckHash(0xFF7E9BC315253CE1)
         Key.Pressed(Down,3)   
         Paint('6. readme.txt is selected');
-        CheckHash(0xA358C3F59F76F058)
+        CheckHash(0x66FB1C04540FF3B8)
         Key.Pressed(Escape)   
         Paint('7. readme.txt is chosen');
         CheckHash(0xAD065263787B818A)
@@ -531,10 +531,10 @@ fn check_save_dialog_select_existent_with_validate_overwrite() {
         CheckHash(0x5F99B748EA7DF5CD)
         Key.Pressed(Tab,4)   
         Paint('5. File list has focus');
-        CheckHash(0x17E6B78DD3F14669)
+        CheckHash(0xFF7E9BC315253CE1)
         Key.Pressed(Down,3)   
         Paint('6. readme.txt is selected');
-        CheckHash(0xA358C3F59F76F058)
+        CheckHash(0x66FB1C04540FF3B8)
         Key.Pressed(Enter)   
         Paint('7. Validate overwrite question');
         CheckHash(0xCA110EB5BB5ADEAA)
@@ -620,7 +620,7 @@ fn check_open_dialog_last_path() {
         CheckHash(0x6D0409A7FCA6AE9B)    
         Key.Pressed(Tab,6)
         Paint('3. Focus on File list');
-        CheckHash(0x3682F39BCF202163) 
+        CheckHash(0x7E2C45D95E26E3FB) 
         Key.Pressed(Down)
         Key.Pressed(Enter)
         Key.Pressed(Tab)
@@ -678,7 +678,7 @@ fn check_open_dialog_change_path_manually() {
         Key.Pressed(Enter)
         Key.Pressed(Tab);
         Paint('4. Showing files from C:\\Program Files\\Windows\\System32\\drivers');
-        CheckHash(0x6F9A79E45ACA183D) 
+        CheckHash(0xB593E849F4871BAD) 
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open_all("Open", "myfile.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
