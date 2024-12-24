@@ -45,6 +45,7 @@ pub(crate) enum AppCUITrait {
     ListBoxEvents = 36,
     GenericListViewEvents = 37,
     ToggleButtonEvents = 38,
+    PathFinderEvents = 39,
 }
 
 #[repr(u8)]
@@ -100,6 +101,7 @@ impl AppCUITrait {
             AppCUITrait::ListBoxEvents => "ListBoxEvents",
             AppCUITrait::GenericListViewEvents => "ListViewEvents", // important to be without Generic
             AppCUITrait::ToggleButtonEvents => "ToggleButtonEvents",
+            AppCUITrait::PathFinderEvents => "PathFinderEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -146,6 +148,7 @@ impl AppCUITrait {
             AppCUITrait::ListBoxEvents => TraitType::ControlEvent,
             AppCUITrait::GenericListViewEvents => TraitType::ControlEvent,
             AppCUITrait::ToggleButtonEvents => TraitType::ControlEvent,
+            AppCUITrait::PathFinderEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -192,6 +195,7 @@ impl AppCUITrait {
             AppCUITrait::ListBoxEvents => "",
             AppCUITrait::GenericListViewEvents => "",
             AppCUITrait::ToggleButtonEvents => "",
+            AppCUITrait::PathFinderEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -238,6 +242,7 @@ impl AppCUITrait {
             AppCUITrait::ListBoxEvents => "impl$(TEMPLATE_TYPE) ListBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericListViewEvents => "impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::ToggleButtonEvents => "impl$(TEMPLATE_TYPE) ToggleButtonEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::PathFinderEvents => "impl$(TEMPLATE_TYPE) PathFinderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -283,6 +288,7 @@ impl AppCUITrait {
             "ListBoxEvents" | "ListBox" => Some(AppCUITrait::ListBoxEvents),
             "ListViewEvents" | "ListView" => Some(AppCUITrait::GenericListViewEvents),
             "ToggleButtonEvents" | "ToggleButton" => Some(AppCUITrait::ToggleButtonEvents),
+            "PathFinderEvents" | "PathFinder" => Some(AppCUITrait::PathFinderEvents),
             _ => None,
         }
     }
@@ -330,6 +336,7 @@ impl AppCUITrait {
             36 => Some(AppCUITrait::ListBoxEvents),
             37 => Some(AppCUITrait::GenericListViewEvents),
             38 => Some(AppCUITrait::ToggleButtonEvents),
+            39 => Some(AppCUITrait::PathFinderEvents),
             _ => None,
         };
         result?;

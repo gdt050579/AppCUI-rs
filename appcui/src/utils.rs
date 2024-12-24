@@ -8,8 +8,10 @@ pub (crate) mod format_datetime;
 pub (crate) mod format_ratings;
 pub (crate) mod navigator;
 pub (crate) mod fs;
+pub (crate) mod temp_buffer;
 #[cfg(test)]
 mod tests;
+
 
 
 pub (crate) use self::key_value_parser::KeyValueParser;
@@ -29,5 +31,8 @@ pub (crate) use self::format_ratings::FormatRatings;
 pub (crate) use self::navigator::Navigator;
 pub (crate) use self::navigator::NavigatorEntry;
 pub (crate) use self::navigator::NavigatorRoot;
+#[cfg(test)]
+pub (crate) use self::temp_buffer::TempBuffer;
+pub (crate) use self::temp_buffer::TempString;
 
 

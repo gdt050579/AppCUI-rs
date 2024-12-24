@@ -6,10 +6,11 @@ use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
 use crate::prelude::{
     colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, selector, textfield, threestatebox,
-    togglebutton, GenericSelectorEvents, RuntimeManager, ThreeStateBoxEvents,
+    togglebutton, GenericSelectorEvents, PathFinderEvents, RuntimeManager, ThreeStateBoxEvents,
 };
 use crate::system::Handle;
 
+use crate::ui::pathfinder;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents,
     datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
@@ -41,6 +42,7 @@ pub(crate) enum ControlEventData {
     DatePicker(datepicker::events::EventData),
     ListBox(listbox::events::EventData),
     ListView(listview::events::EventData),
+    PathFinder(pathfinder::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -55,7 +57,9 @@ impl ControlEvent {
             ControlEventData::Button(_) => ButtonEvents::on_pressed(receiver, self.emitter.cast()),
             ControlEventData::CheckBox(data) => CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked),
             ControlEventData::RadioBox(_) => RadioBoxEvents::on_selected(receiver, self.emitter.cast()),
-            ControlEventData::ToggleButton(data) => togglebutton::events::ToggleButtonEvents::on_selection_changed(receiver, self.emitter.cast(), data.status),        
+            ControlEventData::ToggleButton(data) => {
+                togglebutton::events::ToggleButtonEvents::on_selection_changed(receiver, self.emitter.cast(), data.status)
+            }
             ControlEventData::ColorPicker(data) => ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color),
             ControlEventData::ThreeStateBox(data) => ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state),
             ControlEventData::Password(data) => {
@@ -75,8 +79,7 @@ impl ControlEvent {
                         } else {
                             EventProcessStatus::Ignored
                         }
-                    }
-                    //textfield::events::TextFieldEventsType::OnTextChanged => todo!(),
+                    } //textfield::events::TextFieldEventsType::OnTextChanged => todo!(),
                 }
             }
             ControlEventData::Custom(data) => CustomEvents::on_event(receiver, self.emitter.cast(), data.class_hash, data.event_id),
@@ -111,6 +114,7 @@ impl ControlEvent {
                     GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index)
                 }
             },
+            ControlEventData::PathFinder(_) => PathFinderEvents::on_path_updated(receiver, self.emitter.cast()),
         }
     }
 }

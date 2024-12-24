@@ -11,6 +11,7 @@ use crate::ui::{
     window::events::WindowEvents,
 };
 use crate::utils::VectorIndex;
+use crate::system::Theme;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 16)]
@@ -30,7 +31,7 @@ pub enum StatusFlags {
     IncreaseBottomMarginOnFocus = 0x1000,
     SingleWindow = 0x2000,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub(crate) struct Margins {
     pub(crate) left: u8,
     pub(crate) right: u8,
@@ -39,6 +40,7 @@ pub(crate) struct Margins {
 }
 
 #[repr(C)]
+#[derive(Default)]
 pub struct ControlBase {
     pub(crate) layout: ControlLayout,
     pub(crate) margins: Margins,
@@ -604,6 +606,11 @@ impl ControlBase {
             return menu.get_mut(menuitem_handle);
         }
         None
+    }
+
+    #[inline(always)]
+    pub fn theme(&self) -> &Theme {
+        RuntimeManager::get().theme()
     }
 }
 // default implementations

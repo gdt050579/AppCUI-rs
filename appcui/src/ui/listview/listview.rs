@@ -109,6 +109,9 @@ where
         if flags.contains(Flags::SearchBar) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
         }
+        if flags.contains(Flags::CheckBoxes | Flags::NoSelection) {
+            panic!("Invalid flags combination. `CheckBoxes` and `NoSelection` flags cannot be used together !");
+        }
 
         let mut lv = Self {
             base: ControlBase::with_status_flags(layout, status_flags),
@@ -137,7 +140,7 @@ where
         // add a default group
         lv.groups.push(GroupInformation::default());
         // add columnes (if described in the type T)
-        for i in 0..T::COLUMNS_COUNT {
+        for i in 0..T::columns_count() {
             lv.header.add(T::column(i));
         }
         lv
@@ -255,13 +258,17 @@ where
     ///                       listview::Group::None));
     /// ```
     #[inline(always)]
-    pub fn add_item(&mut self, item: Item<T>) {
+    pub fn add_item(&mut self, mut item: Item<T>) {
         let gid = item.group_id() as usize;
         if gid >= self.groups.len() {
             panic!("Invalid group id `{}`. Have you reused a group id from a previous instantiation ?", gid);
         }
         let count = self.groups[gid].items_count();
         self.groups[gid].set_items_count(count + 1);
+        // override selection state if the NoSelection flag is set
+        if self.flags.contains(Flags::NoSelection) {
+            item.set_checked(false);
+        }
         self.data.push(item);
         // refilter everything
         self.refilter();
@@ -366,6 +373,27 @@ where
         // restore original refilter state
         self.refilter_enabled = old_refilter;
         self.refilter();
+    }
+
+    /// Clears the content of the listview.
+    pub fn clear(&mut self) {
+        self.data.clear();
+        self.filter.clear();
+        // clear counter in groups
+        for group in &mut self.groups {
+            group.set_items_count(0);
+        }
+        self.top_view = 0;
+        self.pos = 0;
+        self.selected_items_count = 0;
+        self.update_scrollbars();
+        self.update_position(0, false);
+    }
+
+    /// Clears the content of the search bar
+    pub fn clear_search(&mut self) {
+        self.comp.clear_search();
+        self.filter_items();
     }
 
     /// Sets the number of frozen columns. Frozen columns are columns that are always visible, even when the list view is scrolled horizontally. The frozen columns are always the first columns in the list view. Using the value 0 will disable frozen columns.
@@ -1426,6 +1454,9 @@ where
 
     #[inline(always)]
     fn select_item_and_update_count(&mut self, data_index: usize, value: bool) -> bool {
+        if self.flags.contains(Flags::NoSelection) {
+            return false;
+        }
         let item = &mut self.data[data_index];
         let status = item.is_checked();
         item.set_checked(value);
@@ -1442,6 +1473,9 @@ where
     }
     /// Returns true if the selection has been changed, false otherwise
     fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool, emit_event: bool) -> bool {
+        if self.flags.contains(Flags::NoSelection) {
+            return false;
+        }
         if pos >= self.filter.len() {
             return false;
         }
@@ -1512,6 +1546,9 @@ where
         selection_has_changed
     }
     fn check_items(&mut self, start: usize, end: usize, mode: CheckMode, emit_event: bool) {
+        if self.flags.contains(Flags::NoSelection) {
+            return;
+        }
         let len = self.filter.len();
         if len == 0 {
             return;

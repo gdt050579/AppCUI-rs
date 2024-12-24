@@ -82,6 +82,8 @@ impl App {
     pub fn run(self) {
         // must pe self so that after a run a second call will not be possible
         RuntimeManager::get().run();
+        // clear the mutex from open_save_dialog to clear the last path
+        crate::dialogs::clear_last_path();
         // clear the mutex so that other apps can be created after this step
         RuntimeManager::destroy();
         let mut app_created = APP_CREATED_MUTEX.lock().unwrap();

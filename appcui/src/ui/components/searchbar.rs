@@ -58,6 +58,10 @@ impl SearchBar {
         self.match_count = u8::MAX;
         self.update_text_offset();
     }
+    pub fn clear(&mut self) {
+        self.text.clear();
+        self.update_text_offset();
+    }
     fn update_text_offset(&mut self) {
         let match_count_width = if (self.width >= SearchBar::DRAW_COUNT_MIN_WIDTH) && (self.match_count != u8::MAX) {
             6
@@ -121,8 +125,7 @@ impl SearchBar {
         match key.value() {
             key!("Escape") => {
                 if self.edit_mode {
-                    self.text.clear();
-                    self.update_text_offset();
+                    self.clear();
                     self.edit_mode = false;
                     return true;
                 }

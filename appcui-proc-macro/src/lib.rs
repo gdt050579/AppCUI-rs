@@ -98,6 +98,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable); 
 
 
     // custom events
@@ -173,6 +174,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
@@ -223,6 +225,8 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -298,6 +302,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);

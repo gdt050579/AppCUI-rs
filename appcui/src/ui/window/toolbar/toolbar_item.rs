@@ -103,3 +103,8 @@ impl HandleSupport<ToolBarItem> for ToolBarItem {
         self.get_base_mut().set_handle(handle.cast())
     }
 }
+impl Default for ToolBarItem {
+    fn default() -> Self {
+        ToolBarItem::Label(Label::new(""))
+    }
+}
