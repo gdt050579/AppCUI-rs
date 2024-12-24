@@ -100,6 +100,6 @@
 
 - [Dialogs](chapter-5/dialogs.md)
     - [Notifications dialogs](chapter-5/notification_dialogs.md)
-    - [Open/Save dialog]()
+    - [Open/Save dialog](chapter-5/opensave_dialogs.md)
     - [Folder selection dialog]()
     - [Window manager dialog]() 
