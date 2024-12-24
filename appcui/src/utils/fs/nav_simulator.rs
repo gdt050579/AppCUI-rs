@@ -54,7 +54,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
             Some(PathBuf::from(entry.name().replace('/', "\\").as_str()))
         } else {
             let mut components: Vec<&str> = path.components().map(|c| c.as_os_str().to_str().unwrap()).filter(|c| *c != "\\").collect();
-            for s in entry.name().split(|c| c == '/' || c == '\\') {
+            for s in entry.name().split(['/', '\\']) {
                 match s {
                     ".." => {
                         if !components.is_empty() {

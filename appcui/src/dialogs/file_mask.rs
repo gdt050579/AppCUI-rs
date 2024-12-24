@@ -75,17 +75,17 @@ impl FileMask {
             }
             idx -= 1;
         }
-        return None;
+        None
     }
     fn create_error(msg: &str, buffer: &[u8], offset: usize) -> String {
         let mut s = String::from(msg);
-        s.push_str("\n");
+        s.push('\n');
         let start = offset.saturating_sub(10);
         let end = (start + 30).min(buffer.len());
-        for i in start..end {
-            s.push(buffer[i] as char);
+        for val in buffer.iter().take(end).skip(start) {
+            s.push((*val) as char);
         }
-        s.push_str("\n");
+        s.push('\n');
         for i in start..end {
             if i == offset {
                 s.push('^');
@@ -216,7 +216,7 @@ impl FileMask {
                     let hash = if let Some(ext_pos) = FileMask::extension_pos(ext_buf) {
                         FileMask::compute_hash(&ext_buf[ext_pos..])
                     } else {
-                        FileMask::compute_hash(&ext_buf)
+                        FileMask::compute_hash(ext_buf)
                     };
                     mask.extensions_hash.push(hash);
                     // do something with extension

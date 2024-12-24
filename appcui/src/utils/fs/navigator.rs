@@ -1,6 +1,7 @@
 use crate::utils::NavigatorEntry;
 
 use super::{Entry, EntryType, Root};
+use std::path::Path;
 use std::path::PathBuf;
 use chrono::NaiveDateTime;
 use chrono::DateTime;
@@ -88,11 +89,10 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
 }
 
 impl Navigator {
-    fn get_folder_listing(path: &PathBuf) -> std::io::Result<Vec<Entry>> {
+    fn get_folder_listing(path: &Path) -> std::io::Result<Vec<Entry>> {
         let mut result: Vec<Entry> = vec![];
-        let dir = path.as_path();
         // Read the directory entries
-        for dir_entry in fs::read_dir(dir)? {
+        for dir_entry in fs::read_dir(path)? {
             let entry = dir_entry?;
             let metadata = entry.metadata()?;
             if let Some(utf8path) = entry.file_name().to_str() {

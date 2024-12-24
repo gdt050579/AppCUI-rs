@@ -748,18 +748,18 @@ fn check_rating_two_chars() {
 fn check_temp_string() {
     let t: TempString<10> = TempString::new("1234567890");
     assert_eq!(t.as_str(), "1234567890");
-    assert_eq!(t.is_on_heap(), false);
+    assert!(!t.is_on_heap());
     let t: TempString<10> = TempString::new("1234567890A");
     assert_eq!(t.as_str(), "1234567890A");
-    assert_eq!(t.is_on_heap(), true);
+    assert!(t.is_on_heap());
 }
 
 #[test]
 fn check_temp_buffer() {
     let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    assert_eq!(buf.is_on_heap(), false);
+    assert!(!buf.is_on_heap());
     let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-    assert_eq!(buf.is_on_heap(), true);
+    assert!(buf.is_on_heap());
 }

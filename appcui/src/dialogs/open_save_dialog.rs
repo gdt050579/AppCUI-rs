@@ -142,7 +142,7 @@ where
         w.request_focus_for_control(h);
         w
     }
-    fn update_last_path(&self, last_path: &PathBuf) {
+    fn update_last_path(&self, last_path: &Path) {
         if let Some(dir) = last_path.parent() {
             let mut new_path = dir.to_path_buf();
             new_path.push(""); // make sure we have a trailing slash
@@ -225,8 +225,7 @@ where
             if self.flags.contains(InnerFlags::ValidateOverwrite) {
                 match self.nav.exists(&result) {
                     Some(true) => {
-                        if crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str())
-                            == false
+                        if !crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str())
                         {
                             return;
                         }

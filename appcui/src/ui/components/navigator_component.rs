@@ -88,7 +88,7 @@ where
     T: crate::utils::Navigator<E, R, PathBuf>,
 {
     is_readonly: bool,
-    is_case_sensitive: bool,
+    is_case_sensitive: bool, 
     navigator_cacher: NavigatorDataCacher<T, E, R>,
 
     // input area
