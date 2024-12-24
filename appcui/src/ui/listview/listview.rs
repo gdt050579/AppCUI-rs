@@ -140,7 +140,7 @@ where
         // add a default group
         lv.groups.push(GroupInformation::default());
         // add columnes (if described in the type T)
-        for i in 0..T::COLUMNS_COUNT {
+        for i in 0..T::columns_count() {
             lv.header.add(T::column(i));
         }
         lv

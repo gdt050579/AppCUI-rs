@@ -6,7 +6,7 @@ use std::str::FromStr;
 
 static TEMPLATE: &str = r#"
 impl listview::ListItem for $(STRUCT_NAME) {
-    const COLUMNS_COUNT: u16 = $(COLUMNS_COUNT);
+    fn columns_count() -> u16 { $(COLUMNS_COUNT) }
     fn column(index: u16) -> components::Column{ 
         match index {
             $(COLUMNS)

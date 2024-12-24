@@ -70,8 +70,7 @@ impl NavigatorEntry for Entry {
 }
 
 impl listview::ListItem for Entry {
-    const COLUMNS_COUNT: u16 = 3;
-
+    
     fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
         match column_index {
             0 => Some(listview::RenderMethod::Text(&self.name)),
@@ -109,6 +108,8 @@ impl listview::ListItem for Entry {
             _ => std::cmp::Ordering::Equal
         }
     }
+
+    fn columns_count() -> u16 { 3 }
 }
 
 impl Default for Entry {

@@ -282,7 +282,7 @@ To add an item to a listview, the item type has to implement the `listview::List
 
 ```rs
 pub trait ListItem {
-    const COLUMNS_COUNT: u16 = 0;
+    fn columns_count() -> u16 { 0 }
     fn column(index: u16) -> Column { 
         Column::new("", 10, TextAlignament::Left) 
     }
@@ -299,8 +299,8 @@ pub trait ListItem {
 }
 ```
 These methods have the following purpose:
-* `COLUMNS_COUNT` - the number of columns that are displayed in the listview. This is a constant that has to be implemented by the item type. If let undefined, the default value is 0. Adding new columns to the listview will not be affected by this value (all of the new columns will be added after the last column defined by the item type).
-* `column(index)` - returns the column definition for the column with the specified index. This method has to be implemented by the item type. The column definition contains the name of the column, the width of the column, and the alignment of the column. This method is called once, when the listview is created, for indexes from 0 to `COLUMNS_COUNT-1`.
+* `columns_count()` - the number of columns that are displayed in the listview. If let unspecfied, the default value is 0. Adding new columns to the listview will not be affected by this value (all of the new columns will be added after the last column defined by the item type).
+* `column(index)` - returns the column definition for the column with the specified index. This method has to be implemented by the item type. The column definition contains the name of the column, the width of the column, and the alignment of the column. This method is called once, when the listview is created, for indexes from 0 to `columns_count()-1`.
 * `paint(column_index, width, surface, theme, attr)` - paints the item in the surface. This method has to be implemented by the item type. This method is only called if the `render_method(...)` returns the value `RenderMethod::Custom`.
 * `render_method(column_index)` - returns the render method for the column with the specified index. This method has to be implemented by the item type. 
 * `compare(other, column_index)` - compares the item with another item based on the column index. This method has to be implemented by the item type. This method is used to sort the items in the listview.
@@ -391,7 +391,7 @@ However, you can also add them programatically by using the `add_column` method 
 
 ```rs
 impl ListItem for Student {
-    const COLUMNS_COUNT: u16 = 3;
+    fn columns_count() -> u16 { 3 }
     fn column(index: u16) -> Column { 
         match index {
             0 => Column::new("&Name", 20, TextAlignament::Left),
@@ -403,12 +403,12 @@ impl ListItem for Student {
     fn render_method(&self, column_index: u16) -> Option<RenderMethod> {...}
 }
 ```
-Notice that in this case, we have to specify the number of columns that are displayed in the listview by using the `COLUMNS_COUNT` constant.
+Notice that in this case, we have to specify the number of columns that are displayed in the listview by using the `columns_count()` method.
 
 If you want all of the columns to be sortable, you will have to override the `compare` method from the `ListItem` trait. This method has to return an `Ordering` value that indicates the order of the two items. 
 ```rs
 impl ListItem for Student {
-    const COLUMNS_COUNT: u16 = 3;
+    fn columns_count() -> u16 { 3 }
     fn column(index: u16) -> Column {...}
     fn render_method(&self, column_index: u16) -> Option<RenderMethod> {...}
     fn compare(&self, other: &Self, column_index: u16) -> Ordering {
