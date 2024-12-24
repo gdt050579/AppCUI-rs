@@ -605,7 +605,7 @@ fn check_open_dialog_invalid_path_with_validation_flag() {
         CheckHash(0xAD065263787B818A)    
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::open("Open", "E:/abc.exe", dialogs::Location::Current, OpenFileDialogFlags::ValidateExisting));
+    a.add_window(OpenSaveTestWindow::open("Open", "E:/abc.exe", dialogs::Location::Current, OpenFileDialogFlags::CheckIfFileExists));
     a.run();
 }
 

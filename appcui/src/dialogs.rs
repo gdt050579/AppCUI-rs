@@ -87,7 +87,7 @@ pub enum SaveFileDialogFlags {
 #[EnumBitFlags(bits = 8)]
 pub enum OpenFileDialogFlags {
     Icons = 1,
-    ValidateExisting = 2,
+    CheckIfFileExists = 2,
 }
 
 pub(super) fn inner_save<T>(
@@ -146,8 +146,8 @@ where
             if flags.contains(OpenFileDialogFlags::Icons) {
                 inner_flags |= InnerFlags::Icons;
             }
-            if flags.contains(OpenFileDialogFlags::ValidateExisting) {
-                inner_flags |= InnerFlags::ValidateExisting;
+            if flags.contains(OpenFileDialogFlags::CheckIfFileExists) {
+                inner_flags |= InnerFlags::CheckIfFileExists;
             }
 
             let w = FileExplorer::new(file_name, title, location, mask_list, nav, inner_flags);

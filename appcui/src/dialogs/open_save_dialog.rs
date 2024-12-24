@@ -14,7 +14,7 @@ use EnumBitFlags::EnumBitFlags;
 
 pub(super) enum OpenSaveDialogResult {
     Path(PathBuf),
-    MultiplePaths(Vec<PathBuf>),
+    //MultiplePaths(Vec<PathBuf>),
     Cancel,
 }
 
@@ -24,7 +24,7 @@ pub(super) enum InnerFlags {
     Icons = 2,
     MultipleOpen = 4,
     ValidateOverwrite = 8,
-    ValidateExisting = 16,
+    CheckIfFileExists = 16,
 }
 
 pub(super) static LAST_PATH: OnceLock<Mutex<Option<PathBuf>>> = OnceLock::new();
@@ -266,7 +266,7 @@ where
             return;
         };
         if let Some(result) = self.nav.join(&self.path, &entry) {
-            if self.flags.contains(InnerFlags::ValidateExisting) {
+            if self.flags.contains(InnerFlags::CheckIfFileExists) {
                 match self.nav.exists(&result) {
                     Some(true) => {
                         // do nothing --> all is good
