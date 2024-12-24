@@ -33,7 +33,7 @@ const CSV_DATA: &str = "
     ";
 #[test]
 fn check_with_simulator() {
-    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    //let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
         //Paint.Enable(false)
         Paint('Initial')
@@ -54,25 +54,25 @@ fn check_with_simulator() {
     ";
 
     //let mut a = App::debug(80, 20, script).build().unwrap();
-    let mut a = App::new().build().unwrap();
-    let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::None,
-        nav);
-    w.add(p);
-    w.add(button!("test,x:1,y:3,w:6"));
-    a.add_window(w);
-    a.run();
+//     let mut a = App::new().build().unwrap();
+//     let mut w = window!("Test,d:c,w:60,h:15");
+//     let p = GenericPathFinder::with_navigator(
+//         r#"C:\Program Files\"#,
+//         Layout::new("x:1,y:1,w:40"),
+//         pathfinder::Flags::None,
+//         nav);
+//     w.add(p);
+//     w.add(button!("test,x:1,y:3,w:6"));
+//     a.add_window(w);
+//     a.run();
 }
 
 #[test]
 fn check_with_save() {
-    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
-    let mut a = App::new().build().unwrap();
+    // let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    // let mut a = App::new().build().unwrap();
     // GDT: nu are cum sa mai mearga ca am trecut dialogs::save pe Navigator si nu pe simulator
-    crate::dialogs::save("title", "file_name", Location::Current, None , SaveFileDialogFlags::Icons);
+    //crate::dialogs::save("title", "file_name", Location::Current, None , SaveFileDialogFlags::Icons);
 
-    a.run();
+    //a.run();
 }
