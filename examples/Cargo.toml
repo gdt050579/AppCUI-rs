@@ -148,3 +148,6 @@ path = "listbox/main.rs"
 name = "listview"
 path = "listview/main.rs"
 
+[[example]]
+name = "csv_viewer"
+path = "csv_viewer/main.rs"
