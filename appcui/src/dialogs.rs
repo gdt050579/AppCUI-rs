@@ -173,9 +173,53 @@ pub(crate) fn clear_last_path() {
     }
 }
 
+/// Opens a file dialog for saving a file and returns the path of the file selected by the user or None if the user canceled the operation.
+/// # Arguments
+/// * `title` - The title of the dialog.
+/// * `file_name` - The default file name.
+/// * `location` - The initial location of the dialog (one of Current, Last or Path). If Last is used, the dialog will open in the last location used by the user.
+/// * `extension_mask` - A string that specifies the file extensions that can be selected by the user. The format is `name1 = [ext1, ext2, ... extn], name2 = [...], ...`. If None is provided, all files will be displayed.
+/// * `flags` - Flags that specify the behavior of the dialog.
+/// 
+/// # Example
+/// ```rust,no_run
+/// use appcui::dialogs;
+/// 
+/// if let Some(path) = dialogs::save("Save file", 
+///                                   "file.txt", 
+///                                   dialogs::Location::Current, 
+///                                   Some("Text files = [txt]"), 
+///                                   dialogs::SaveFileDialogFlags::Icons) 
+/// {
+///    println!("File saved at: {:?}", path);
+/// }
+/// ```
 pub fn save(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: SaveFileDialogFlags) -> Option<PathBuf> {
     inner_save(title, file_name, location, extension_mask, flags, utils::fs::Navigator::new())
 }
+
+
+/// Opens a file dialog for opening a file and returns the path of the file selected by the user or None if the user canceled the operation.
+/// # Arguments
+/// * `title` - The title of the dialog.
+/// * `file_name` - The default file name.
+/// * `location` - The initial location of the dialog (one of Current, Last or Path). If Last is used, the dialog will open in the last location used by the user.
+/// * `extension_mask` - A string that specifies the file extensions that can be selected by the user. The format is `name1 = [ext1, ext2, ... extn], name2 = [...], ...`. If None is provided, all files will be displayed.
+/// * `flags` - Flags that specify the behavior of the dialog.
+/// 
+/// # Example
+/// ```rust,no_run
+/// use appcui::dialogs;
+/// 
+/// if let Some(path) = dialogs::open("Open file", 
+///                                   "file.txt", 
+///                                   dialogs::Location::Current, 
+///                                   Some("Text files = [txt]"), 
+///                                   dialogs::OpenFileDialogFlags::Icons) 
+/// {
+///   println!("File opened: {:?}", path);
+/// }
+/// ```
 pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: OpenFileDialogFlags) -> Option<PathBuf> {
     inner_open(title, file_name, location, extension_mask, flags, utils::fs::Navigator::new())
 }
