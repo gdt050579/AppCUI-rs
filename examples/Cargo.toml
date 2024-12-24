@@ -151,3 +151,7 @@ path = "listview/main.rs"
 [[example]]
 name = "csv_viewer"
 path = "csv_viewer/main.rs"
+
+[[example]]
+name = "calculator"
+path = "calculator/main.rs"
