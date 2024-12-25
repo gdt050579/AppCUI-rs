@@ -1641,6 +1641,28 @@ impl MouseMethods for RuntimeManager {
         }
     }
 }
+impl ThemeMethods for RuntimeManager {
+    fn update_theme(&mut self) {
+        // notify desktop and its children
+        self.update_theme_for_control(self.desktop_handle);
+        // notify modal windows (if any)
+        let count = self.modal_windows.len();
+        for idx in 0..count {
+            self.update_theme_for_control(self.modal_windows[idx]);
+        }
+    }
+
+    fn update_theme_for_control(&mut self, handle: Handle<UIElement>) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(element) = controls.get_mut(handle) {
+            OnThemeChanged::on_theme_changed(element.control_mut(), &self.theme);
+            let base = element.base();
+            for child_handle in base.children.iter() {
+                self.update_theme_for_control(*child_handle);
+            }
+        }
+    }
+}
 
 impl Drop for RuntimeManager {
     fn drop(&mut self) {
