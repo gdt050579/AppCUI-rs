@@ -1,5 +1,7 @@
 mod structures;
 mod macros;
+#[cfg(test)]
+mod tests;
 // stock themes
 mod default;
 

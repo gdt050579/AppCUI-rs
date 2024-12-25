@@ -5,6 +5,8 @@ use super::Error;
 use super::ErrorKind;
 use super::Handle;
 use super::RuntimeManager;
+use super::Theme;
+use super::ThemeMethods;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 use crate::ui::common::traits::*;
@@ -97,6 +99,13 @@ impl App {
         T: Control + WindowControl + NotModalWindow + 'static,
     {
         RuntimeManager::get().add_window(window)
+    }
+
+    pub fn set_theme(theme: Theme) {
+        if !App::is_created() {
+            panic!("App::set_theme can only be called after the App has been created !");
+        }
+        RuntimeManager::get().set_theme(theme);
     }
 }
 

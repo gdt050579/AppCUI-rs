@@ -56,4 +56,3 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 | Method        | Purpose                                                                                                                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `theme()`     | Returns a reference to the theme object that is being used by the application. This is the same reference an objectr receives when OnPaint method is being called. |
-| `set_theme()` | Sets a new theme for the current application (and implicitelly for the current object).                                                                            |

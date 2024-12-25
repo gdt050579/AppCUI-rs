@@ -613,12 +613,6 @@ impl ControlBase {
     pub fn theme(&self) -> &Theme {
         RuntimeManager::get().theme()
     }
-    
-    /// Sets the theme for the current application. The theme will be applied to all controls that are part of the application.
-    #[inline(always)]
-    pub fn set_theme(&mut self, theme: Theme) {
-        RuntimeManager::get().set_theme(theme);
-    }
 }
 // default implementations
 impl OnPaint for ControlBase {}
