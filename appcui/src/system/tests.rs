@@ -2,6 +2,7 @@ use AppCUIProcMacro::*;
 
 use super::App;
 use super::Theme;
+use super::Themes;
 use super::ToolTip;
 use crate::graphics::CharFlags;
 use crate::graphics::Character;
@@ -21,7 +22,7 @@ use crate::ui::common::traits::*;
 
 fn draw_tool_tip(size: Size, rect: Rect, txt: &str) -> SurfaceTester {
     let mut tooltip = ToolTip::new();
-    let theme = Theme::new();
+    let theme = Theme::new(Themes::Default);
     let mut s = SurfaceTester::new(size.width, size.height);
 
     tooltip.show(txt, &rect, s.size(), &theme);
@@ -124,7 +125,7 @@ fn check_command_bar_1() {
     let mut s = SurfaceTester::new(60, 5);
     let c = prepare_command_bar(s.size());
     s.clear(Character::new('X', Color::Black, Color::DarkBlue, CharFlags::None));
-    c.paint(&mut s, &Theme::new());
+    c.paint(&mut s, &Theme::new(Themes::Default));
     //s.print();
     assert_eq!(s.compute_hash(), 0xD466864BD254E538);
 }
@@ -135,7 +136,7 @@ fn check_command_bar_2() {
     let mut c = prepare_command_bar(s.size());
     s.clear(Character::new('.', Color::Black, Color::DarkBlue, CharFlags::None));
     c.set_key_modifier(KeyModifier::Alt);
-    c.paint(&mut s, &Theme::new());
+    c.paint(&mut s, &Theme::new(Themes::Default));
     //s.print();
     assert_eq!(s.compute_hash(), 0x940B30F3F39A2B3A);
 }
@@ -150,7 +151,7 @@ fn check_command_bar_hover() {
             y: 4,
             button: MouseButton::None,
         });
-        c.paint(&mut s, &Theme::new());
+        c.paint(&mut s, &Theme::new(Themes::Default));
         //s.print();
         assert_eq!(s.compute_hash(), 0x6FFD6A9E00B06190);
     }
@@ -159,7 +160,7 @@ fn check_command_bar_hover() {
         y: 4,
         button: MouseButton::None,
     });
-    c.paint(&mut s, &Theme::new());
+    c.paint(&mut s, &Theme::new(Themes::Default));
     //s.print();
     assert_eq!(s.compute_hash(), 0x8FE003D26FC257B8);
     c.on_mouse_move(&MouseMoveEvent {
@@ -167,7 +168,7 @@ fn check_command_bar_hover() {
         y: 4,
         button: MouseButton::None,
     });
-    c.paint(&mut s, &Theme::new());
+    c.paint(&mut s, &Theme::new(Themes::Default));
     //s.print();
     assert_eq!(s.compute_hash(), 0x24738CE8FFD30F80);
     c.on_mouse_move(&MouseMoveEvent {
@@ -175,7 +176,7 @@ fn check_command_bar_hover() {
         y: 3,
         button: MouseButton::None,
     });
-    c.paint(&mut s, &Theme::new());
+    c.paint(&mut s, &Theme::new(Themes::Default));
     //s.print();
     assert_eq!(s.compute_hash(), 0x8FE003D26FC257B8);
 }
@@ -191,7 +192,7 @@ fn check_command_bar_click() {
         y: 4,
         button: MouseButton::None,
     });
-    c.paint(&mut s, &Theme::new());
+    c.paint(&mut s, &Theme::new(Themes::Default));
     //s.print();
     assert_eq!(s.compute_hash(), 0xF768DE602AA7C28A);
     c.on_mouse_down(&MouseButtonDownEvent {
@@ -199,11 +200,11 @@ fn check_command_bar_click() {
         y: 4,
         button: MouseButton::Left,
     });
-    c.paint(&mut s, &Theme::new());
+    c.paint(&mut s, &Theme::new(Themes::Default));
     //s.print();
     assert_eq!(s.compute_hash(), 0x66FEDFABE303DEF6);
     let result = c.on_mouse_up().unwrap().command_id;
-    c.paint(&mut s, &Theme::new());
+    c.paint(&mut s, &Theme::new(Themes::Default));
     //s.print();
     assert_eq!(s.compute_hash(), 0xF768DE602AA7C28A);
     assert_eq!(result, 12345);

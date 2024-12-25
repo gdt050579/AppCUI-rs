@@ -93,7 +93,7 @@ impl RuntimeManager {
         let term_sz = term.get_size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
-            theme: Theme::new(),
+            theme: builder.theme,
             terminal: term,
             surface,
             desktop_handle: Handle::new(0),
@@ -156,10 +156,6 @@ impl RuntimeManager {
         }
 
         Ok(())
-    }
-    #[inline(always)]
-    pub(crate) fn theme(&self) -> &Theme {
-        &self.theme
     }
     pub(crate) fn is_instantiated() -> bool {
         unsafe { RUNTIME_MANAGER.is_some() }
@@ -1642,6 +1638,16 @@ impl MouseMethods for RuntimeManager {
     }
 }
 impl ThemeMethods for RuntimeManager {
+    #[inline(always)]
+    fn theme(&self) -> &Theme {
+        &self.theme
+    }
+    #[inline(always)]
+    fn set_theme(&mut self, theme: Theme) {
+        self.theme = theme;
+        self.update_theme();
+    }
+
     fn update_theme(&mut self) {
         // notify desktop and its children
         self.update_theme_for_control(self.desktop_handle);

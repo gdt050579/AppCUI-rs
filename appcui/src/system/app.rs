@@ -5,6 +5,8 @@ use super::Error;
 use super::ErrorKind;
 use super::Handle;
 use super::RuntimeManager;
+use super::ThemeMethods;
+use super::Theme;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 use crate::ui::common::traits::*;
@@ -97,6 +99,18 @@ impl App {
         T: Control + WindowControl + NotModalWindow + 'static,
     {
         RuntimeManager::get().add_window(window)
+    }
+
+    /// Sets the theme for the current application. The theme will be applied to all controls that are part of the application.
+    /// Example:
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let app = App::new().build().unwrap();
+    /// app.set_theme(Theme::new(Themes::Dark));
+    /// ```
+    pub fn set_theme(&mut self, theme: Theme) {
+        RuntimeManager::get().set_theme(theme);
     }
 }
 

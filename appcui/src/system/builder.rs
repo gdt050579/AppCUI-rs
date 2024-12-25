@@ -13,6 +13,7 @@ pub struct Builder {
     pub(crate) has_menu_bar: bool,
     pub(crate) has_command_bar: bool,
     pub(crate) single_window: bool,
+    pub(crate) theme: Theme,
 }
 impl Builder {
     pub(crate) fn new() -> Self {
@@ -25,6 +26,7 @@ impl Builder {
             has_menu_bar: false,
             has_command_bar: false,
             single_window: false,
+            theme: Theme::new(Themes::Default),
         }
     }
     #[inline(always)]
@@ -62,6 +64,11 @@ impl Builder {
         T: Control + DesktopControl + 'static,
     {
         self.desktop_manager = Some(ControlManager::new(desktop));
+        self
+    }
+    #[inline(always)]
+    pub fn theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
         self
     }
 }

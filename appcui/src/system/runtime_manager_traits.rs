@@ -5,6 +5,7 @@ use crate::ui::menu::Menu;
 use crate::input::*;
 use crate::terminals::*;
 use super::Handle;
+use super::Theme;
 
 pub(crate) trait LayoutMethods {
     fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout);
@@ -40,4 +41,6 @@ pub(crate) trait MouseMethods {
 pub(crate) trait ThemeMethods {
     fn update_theme(&mut self);
     fn update_theme_for_control(&mut self, handle: Handle<UIElement>);
+    fn theme(&self) -> &Theme;
+    fn set_theme(&mut self, theme: Theme);
 }

@@ -1,5 +1,10 @@
 use crate::{graphics::*, ui::common::ControlCharAttributesState};
 
+
+pub enum Themes {
+    Default
+}
+
 #[derive(Default)]
 pub struct DesktopTheme {
     pub character: Character,
@@ -126,9 +131,11 @@ pub struct Theme {
     pub toggle_button: ToggleButtonTheme,
 }
 impl Theme {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(theme: Themes) -> Self {
         let mut t = Theme::default();
-        t.set_regular_theme();
+        match theme {
+            Themes::Default => t.set_regular_theme(),
+        }        
         t
     }
     fn set_regular_theme(&mut self) {
