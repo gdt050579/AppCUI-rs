@@ -155,7 +155,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
 
 
     // control events
@@ -209,7 +209,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
@@ -361,6 +361,11 @@ pub fn key(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn char(input: TokenStream) -> TokenStream {
     crate::chars::create(input)
+}
+
+#[proc_macro]
+pub fn charattr(input: TokenStream) -> TokenStream {
+    crate::chars::create_attr(input)
 }
 
 #[proc_macro]
