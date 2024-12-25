@@ -103,3 +103,6 @@
     - [Open/Save dialog](chapter-5/opensave_dialogs.md)
     - [Folder selection dialog]()
     - [Window manager dialog]() 
+
+- [Themes](chapter-6/themes.md)
+    
