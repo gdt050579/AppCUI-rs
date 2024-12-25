@@ -5,8 +5,6 @@ use super::Error;
 use super::ErrorKind;
 use super::Handle;
 use super::RuntimeManager;
-use super::ThemeMethods;
-use super::Theme;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 use crate::ui::common::traits::*;
