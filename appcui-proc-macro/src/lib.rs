@@ -77,6 +77,8 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::Default);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::Default);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::Default);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
+
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
@@ -153,6 +155,9 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::DefaultNonOverwritable);
+
+
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
@@ -204,6 +209,8 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::DefaultNonOverwritable);
+
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
@@ -281,6 +288,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
+
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
