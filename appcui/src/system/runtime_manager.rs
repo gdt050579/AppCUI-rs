@@ -1646,6 +1646,8 @@ impl ThemeMethods for RuntimeManager {
     fn set_theme(&mut self, theme: Theme) {
         self.theme = theme;
         self.update_theme();
+        self.repaint = true;
+        self.recompute_layout = true;
     }
 
     fn update_theme(&mut self) {

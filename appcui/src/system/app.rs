@@ -100,18 +100,6 @@ impl App {
     {
         RuntimeManager::get().add_window(window)
     }
-
-    /// Sets the theme for the current application. The theme will be applied to all controls that are part of the application.
-    /// Example:
-    /// ```rust,no_run
-    /// use appcui::prelude::*;
-    /// 
-    /// let app = App::new().build().unwrap();
-    /// app.set_theme(Theme::new(Themes::Dark));
-    /// ```
-    pub fn set_theme(&mut self, theme: Theme) {
-        RuntimeManager::get().set_theme(theme);
-    }
 }
 
 impl Drop for App {
