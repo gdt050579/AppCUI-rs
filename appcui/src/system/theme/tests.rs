@@ -46,7 +46,6 @@ fn check_theme_update() {
                 let mut theme = Theme::new(Themes::Default);
                 // make the window dark greem
                 theme.window.normal = CharAttribute::new(Color::White, Color::DarkGreen, CharFlags::None);
-                //App::current().set_theme(theme);
                 App::set_theme(theme);
             }
         }

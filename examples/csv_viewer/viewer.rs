@@ -16,7 +16,7 @@ impl Viewer {
         let mut lv = listview!("CSVEntry,d:c,w:100%,h:100%,flags: SearchBar+ScrollBars,lsm:2");
         for h in &csv.headers {
             let column_width = (h.len() as u8).min(20);
-            lv.add_column(Column::new(&h, column_width + 2, TextAlignament::Left));
+            lv.add_column(Column::new(h, column_width + 2, TextAlignament::Left));
         }
         lv.add_items(csv.entries);
         w.add(lv);

@@ -1,9 +1,13 @@
-use std::{fs::File, io::{BufRead, BufReader}, path::Path};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+    path::Path,
+};
 
 use appcui::prelude::*;
 
 pub struct CSVEntry {
-    pub data: Vec<String>
+    pub data: Vec<String>,
 }
 
 impl ListItem for CSVEntry {
@@ -49,29 +53,25 @@ impl CSVFile {
         let mut entries = Vec::new();
         let mut columns_count = 0;
 
-        for line in reader.lines() {
-            if let Ok(line) = line {
-                if line.trim().is_empty() {
-                    continue;
+        for line in reader.lines().map_while(Result::ok) {
+            if line.trim().is_empty() {
+                continue;
+            }
+            if columns_count == 0 {
+                headers = Self::split_line(&line);
+                if headers.is_empty() {
+                    return None;
                 }
-                if columns_count == 0 {
-                    headers = Self::split_line(&line);
-                    if headers.is_empty() {
-                        return None;
-                    }
-                    columns_count = headers.len();
-                } else {
-                    let result = Self::split_line(&line);
-                    if result.len() != columns_count {
-                        return None;
-                    }
-                    entries.push(CSVEntry{ data: result } );
+                columns_count = headers.len();
+            } else {
+                let result = Self::split_line(&line);
+                if result.len() != columns_count {
+                    return None;
                 }
+                entries.push(CSVEntry { data: result });
             }
         }
 
         Some(Self { headers, entries })
     }
 }
-
-
