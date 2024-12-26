@@ -105,4 +105,4 @@
     - [Window manager dialog]() 
 
 - [Themes](chapter-6/themes.md)
-    
+    - [Predefined Themes](chapter-6/predefined_themes.md)    
