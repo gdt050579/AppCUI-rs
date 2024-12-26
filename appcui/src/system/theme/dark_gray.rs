@@ -95,8 +95,8 @@ pub(crate) fn new() -> Theme {
             symbol: controlattr!("black,silver", "black,silver", "black,white", "gray", "black,silver"),
         },
         toggle_button: ToggleButtonTheme {
-            selected: controlattr!("black", "black,w", "black,w", "gray", "w,black"),
-            unselected: controlattr!("silver", "silver,w", "silver,w", "gray", "w,black"),
+            selected: controlattr!("black", "black,silver", "black,w", "gray", "w,black"),
+            unselected: controlattr!("silver", "silver,black", "black,w", "gray", "w,black"),
         },
     }
 }
