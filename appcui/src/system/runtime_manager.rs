@@ -70,6 +70,7 @@ pub(crate) struct RuntimeManager {
     loop_status: LoopStatus,
     request_focus: Option<Handle<UIElement>>,
     current_focus: Option<Handle<UIElement>>,
+    request_default_action: Option<Handle<UIElement>>,
     expanded_control: ExpandedControlInfo,
     mouse_over_control: Handle<UIElement>,
     focus_chain: Vec<Handle<UIElement>>,
@@ -92,7 +93,7 @@ impl RuntimeManager {
         let term_sz = term.get_size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
-            theme: Theme::new(),
+            theme: builder.theme,
             terminal: term,
             surface,
             desktop_handle: Handle::new(0),
@@ -107,6 +108,7 @@ impl RuntimeManager {
             key_modifier: KeyModifier::None,
             request_focus: None,
             current_focus: None,
+            request_default_action: None,
             mouse_over_control: Handle::None,
             opened_menu_handle: Handle::None,
             expanded_control: ExpandedControlInfo::default(),
@@ -261,6 +263,9 @@ impl RuntimeManager {
     pub(crate) fn request_focus_for_control(&mut self, handle: Handle<UIElement>) {
         self.request_focus = Some(handle);
     }
+    pub(crate) fn request_default_action_for_control(&mut self, handle: Handle<UIElement>) {
+        self.request_default_action = Some(handle);
+    }
     pub(crate) fn request_expand_for_control(&mut self, handle: Handle<UIElement>, min_size: Size, prefered_size: Size) {
         self.expanded_control.handle = handle;
         self.expanded_control.min_size = min_size;
@@ -342,7 +347,10 @@ impl RuntimeManager {
         // add to modal stack
         if !handle.is_none() {
             self.modal_windows.push(handle);
-            self.request_focus_for_control(handle);
+            // if the existing requested focus is for a child of the modal window - keep-it
+            if !self.is_nth_child(handle, self.request_focus.unwrap_or(Handle::None), true) {
+                self.request_focus_for_control(handle);
+            }
             self.request_update();
         }
         handle.cast()
@@ -461,6 +469,7 @@ impl RuntimeManager {
             if let Some(handle) = self.request_focus {
                 self.update_focus(handle);
                 self.request_focus = None;
+                self.request_default_action = None;
                 self.repaint = true;
                 self.request_update_command_and_menu_bars = true;
             }
@@ -739,7 +748,6 @@ impl RuntimeManager {
         }
         self.process_menu_and_cmdbar_mousemove(self.mouse_pos.x, self.mouse_pos.y);
         self.request_update_command_and_menu_bars = false;
-        
     }
 
     fn find_last_leaf(&mut self, handle: Handle<UIElement>) -> Handle<UIElement> {
@@ -761,6 +769,37 @@ impl RuntimeManager {
         }
         result
     }
+
+    fn is_nth_child(&mut self, parent: Handle<UIElement>, child: Handle<UIElement>, focusable: bool) -> bool {
+        if child.is_none() || parent.is_none() {
+            return false;
+        }
+        if child == parent {
+            return true;
+        }
+        let controls = unsafe { &mut *self.controls };
+        if focusable {
+            // check to see if the child can receive focus
+            if let Some(c) = controls.get(child) {
+                if !c.base().can_receive_input() {
+                    return false;
+                }
+            }
+        }
+        let mut handle = child;
+        while let Some(c) = controls.get_mut(handle) {
+            let base = c.base();
+            if focusable && !base.is_active() {
+                break;
+            }
+            if base.parent == parent {
+                return true;
+            }
+            handle = base.parent;
+        }
+        false
+    }
+
     fn update_focus(&mut self, handle: Handle<UIElement>) {
         // if an expanded control exists --> pack it
         if !self.expanded_control.handle.is_none() {
@@ -845,6 +884,12 @@ impl RuntimeManager {
         }
         self.current_focus = Some(handle);
         self.request_focus = None;
+        // check default actio
+        if handle == self.request_default_action.unwrap_or(Handle::None) {
+            if let Some(c) = controls.get_mut(handle) {
+                OnDefaultAction::on_default_action(c.control_mut());
+            }
+        }
     }
 
     fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
@@ -1371,8 +1416,7 @@ impl MouseMethods for RuntimeManager {
         // update mouse position
         self.mouse_pos.x = event.x;
         self.mouse_pos.y = event.y;
-        
-        
+
         if let Some(menu) = self.get_opened_menu() {
             self.repaint |= menu.on_mouse_wheel(event.direction) == EventProcessStatus::Processed;
             return;
@@ -1453,7 +1497,7 @@ impl MouseMethods for RuntimeManager {
         // update mouse position
         self.mouse_pos.x = event.x;
         self.mouse_pos.y = event.y;
-        
+
         match self.mouse_locked_object {
             MouseLockedObject::None => self.process_mousemove(event),
             MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
@@ -1523,7 +1567,7 @@ impl MouseMethods for RuntimeManager {
         // update mouse position
         self.mouse_pos.x = event.x;
         self.mouse_pos.y = event.y;
-        
+
         // check contextual menus
         if let Some(menu) = self.get_opened_menu() {
             self.repaint |= menu.on_mouse_released(event.x, event.y) == EventProcessStatus::Processed;
@@ -1564,7 +1608,7 @@ impl MouseMethods for RuntimeManager {
         // update mouse position
         self.mouse_pos.x = event.x;
         self.mouse_pos.y = event.y;
-        
+
         // Hide ToolTip
         self.hide_tooltip();
         // check for a control
@@ -1589,6 +1633,40 @@ impl MouseMethods for RuntimeManager {
                     self.repaint = true;
                     self.request_update_command_and_menu_bars = true;
                 }
+            }
+        }
+    }
+}
+impl ThemeMethods for RuntimeManager {
+    #[inline(always)]
+    fn theme(&self) -> &Theme {
+        &self.theme
+    }
+    #[inline(always)]
+    fn set_theme(&mut self, theme: Theme) {
+        self.theme = theme;
+        self.update_theme();
+        self.repaint = true;
+        self.recompute_layout = true;
+    }
+
+    fn update_theme(&mut self) {
+        // notify desktop and its children
+        self.update_theme_for_control(self.desktop_handle);
+        // notify modal windows (if any)
+        let count = self.modal_windows.len();
+        for idx in 0..count {
+            self.update_theme_for_control(self.modal_windows[idx]);
+        }
+    }
+
+    fn update_theme_for_control(&mut self, handle: Handle<UIElement>) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(element) = controls.get_mut(handle) {
+            OnThemeChanged::on_theme_changed(element.control_mut(), &self.theme);
+            let base = element.base();
+            for child_handle in base.children.iter() {
+                self.update_theme_for_control(*child_handle);
             }
         }
     }

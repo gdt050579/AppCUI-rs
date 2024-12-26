@@ -1,5 +1,6 @@
 use crate::system::{Handle, HandleSupport};
 
+#[derive(Default)]
 pub(crate) struct HandleManager<T> {
     objects: Vec<Option<T>>,
     free: Vec<u32>,

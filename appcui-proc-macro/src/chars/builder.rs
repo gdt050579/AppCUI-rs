@@ -7,12 +7,12 @@ use std::str::FromStr;
 
 static mut CHAR_ATTR: FlagsSignature = FlagsSignature::new(&["Bold", "Italic", "Underline"]);
 
-static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
+static CHAR_POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("value", ParamType::String),
     PositionalParameter::new("fore", ParamType::Color),
     PositionalParameter::new("back", ParamType::Color),
 ];
-static NAMED_PARAMETERS: &[NamedParameter] = &[
+static CHAR_NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("value", "value", ParamType::String),
     NamedParameter::new("char", "value", ParamType::String),
     NamedParameter::new("ch", "value", ParamType::String),
@@ -28,6 +28,23 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("code", "code", ParamType::String),
     NamedParameter::new("unicode", "code", ParamType::String),
 ];
+
+static CHARATTR_POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
+    PositionalParameter::new("fore", ParamType::Color),
+    PositionalParameter::new("back", ParamType::Color),
+];
+static CHARATTR_NAMED_PARAMETERS: &[NamedParameter] = &[
+    NamedParameter::new("fore", "fore", ParamType::Color),
+    NamedParameter::new("foreground", "fore", ParamType::Color),
+    NamedParameter::new("forecolor", "fore", ParamType::Color),
+    NamedParameter::new("color", "fore", ParamType::Color),
+    NamedParameter::new("back", "back", ParamType::Color),
+    NamedParameter::new("background", "back", ParamType::Color),
+    NamedParameter::new("backcolor", "back", ParamType::Color),
+    NamedParameter::new("attr", "attr", ParamType::Flags),
+    NamedParameter::new("attributes", "attr", ParamType::Flags),
+];
+
 
 fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {
     if !dict.contains(param_name) {
@@ -61,9 +78,48 @@ fn unicode_number_to_value(text: &str) -> u32 {
     }
     value
 }
+fn add_color(output: &mut String, key: &str, dict: &mut NamedParamsMap) {
+    let col = get_color(key, dict);
+    output.push_str("Color::");
+    output.push_str(col.get_name());
+}
+fn add_attr(output: &mut String, dict: &mut NamedParamsMap, param_list: &str) {
+    if let Some(value) = dict.get_mut("attr") {
+        if let Some(list) = value.get_list() {
+            if list.is_empty() {
+                output.push_str("CharFlags::None)");
+            } else {
+                let mut add_or_operator = false;
+                for name in list {
+                    if let Some(flag) = unsafe { CHAR_ATTR.get(name.get_string()) } {
+                        if add_or_operator {
+                            output.push_str(" | ")
+                        }
+                        output.push_str("CharFlags::");
+                        output.push_str(flag);
+                        add_or_operator = true;
+                    } else {
+                        Error::new(
+                            param_list,
+                            format!("Unknwon character attribute: {} !", name.get_string()).as_str(),
+                            name.get_start_pos(),
+                            name.get_end_pos(),
+                        )
+                        .panic();
+                    }
+                }
+                output.push(')')
+            }
+        } else {
+            panic!("Parameter 'attr' should contain some flags !");
+        }
+    } else {
+        output.push_str("CharFlags::None)");
+    }    
+}
 pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
-    dict.validate_positional_parameters(param_list, POSILITIONAL_PARAMETERS).unwrap();
-    dict.validate_named_parameters(param_list, NAMED_PARAMETERS).unwrap();
+    dict.validate_positional_parameters(param_list, CHAR_POSILITIONAL_PARAMETERS).unwrap();
+    dict.validate_named_parameters(param_list, CHAR_NAMED_PARAMETERS).unwrap();
     let mut res = String::with_capacity(64);
     res.push_str("Character::new(");
     if let Some(value) = dict.get("code") {
@@ -94,52 +150,39 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
         }
     }
     res.push_str(", ");
-    let fore = get_color("fore", dict);
-    let back = get_color("back", dict);
-    res.push_str("Color::");
-    res.push_str(fore.get_name());
+    add_color(&mut res, "fore", dict);
     res.push_str(", ");
-    res.push_str("Color::");
-    res.push_str(back.get_name());
+    add_color(&mut res, "back", dict);
     res.push_str(", ");
+    add_attr(&mut res, dict, param_list);
 
-    if let Some(value) = dict.get_mut("attr") {
-        if let Some(list) = value.get_list() {
-            if list.is_empty() {
-                res.push_str("CharFlags::None)");
-            } else {
-                let mut add_or_operator = false;
-                for name in list {
-                    if let Some(flag) = unsafe { CHAR_ATTR.get(name.get_string()) } {
-                        if add_or_operator {
-                            res.push_str(" | ")
-                        }
-                        res.push_str("CharFlags::");
-                        res.push_str(flag);
-                        add_or_operator = true;
-                    } else {
-                        Error::new(
-                            param_list,
-                            format!("Unknwon character attribute: {} !", name.get_string()).as_str(),
-                            name.get_start_pos(),
-                            name.get_end_pos(),
-                        )
-                        .panic();
-                    }
-                }
-                res.push(')')
-            }
-        } else {
-            panic!("Parameter 'attr' should contain some flags !");
-        }
-    } else {
-        res.push_str("CharFlags::None)");
-    }
     res
 }
+
+pub(crate) fn create_attr_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
+    dict.validate_positional_parameters(param_list, CHARATTR_POSILITIONAL_PARAMETERS).unwrap();
+    dict.validate_named_parameters(param_list, CHARATTR_NAMED_PARAMETERS).unwrap();
+    let mut res = String::with_capacity(64);
+    res.push_str("CharAttribute::new(");
+    add_color(&mut res, "fore", dict);
+    res.push_str(", ");
+    add_color(&mut res, "back", dict);
+    res.push_str(", ");
+    add_attr(&mut res, dict, param_list);
+
+    res
+}
+
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let s = input.validate_one_string_parameter("char");
     let mut d = parameter_parser::parse(&s).unwrap();
     let res = create_from_dict(&s, &mut d);
     TokenStream::from_str(&res).expect("Fail to convert 'char!' macro content to token stream")
+}
+
+pub(crate) fn create_attr(input: TokenStream) -> TokenStream {
+    let s = input.validate_one_string_parameter("charattr");
+    let mut d = parameter_parser::parse(&s).unwrap();
+    let res = create_attr_from_dict(&s, &mut d);
+    TokenStream::from_str(&res).expect("Fail to convert 'charattr!' macro content to token stream")
 }

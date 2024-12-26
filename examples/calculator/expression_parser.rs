@@ -65,7 +65,7 @@ impl<'a> ExpressionParser<'a> {
                 } else {
                     return Err(());
                 }
-            } else if c.is_digit(10) || c == '.' {
+            } else if c.is_ascii_digit() || c == '.' {
                 return self.parse_number();
             }
         }
@@ -75,14 +75,14 @@ impl<'a> ExpressionParser<'a> {
     fn parse_number(&mut self) -> Result<f64, ()> {
         let mut num_string = String::new();
         while let Some(&c) = self.chars.peek() {
-            if c.is_digit(10) || c == '.' {
+            if c.is_ascii_digit() || c == '.' {
                 num_string.push(c);
                 self.chars.next();
             } else {
                 break;
             }
         }
-        num_string.parse::<f64>().or_else(|_err| Err(()))
+        num_string.parse::<f64>().map_err(|_err| ())
     }
 
     fn skip_whitespace(&mut self) {

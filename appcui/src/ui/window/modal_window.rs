@@ -26,7 +26,7 @@ impl<T> ModalWindow<T> {
         // a Modal Window does not have an implicit close button
         // as exiting has to be done from either exit(...) or exit_with(...) method.
         Self {
-            base: Window::new(title, layout, flags | Flags::NoCloseButton),
+            base: Window::with_type_and_status_flags(title, layout, flags | Flags::NoCloseButton, window::Type::Normal, StatusFlags::ModalWindow),
             result: None,
         }
     }
@@ -59,6 +59,7 @@ impl<T> ModalWindow<T> {
     }
 }
 impl<T: 'static> Control for ModalWindow<T> {}
+impl<T> OnThemeChanged for ModalWindow<T> {}
 impl<T> GenericMenuEvents for ModalWindow<T> {}
 impl<T> DesktopEvents for ModalWindow<T> {}
 impl<T> ToolBarEvents for ModalWindow<T> {}
@@ -85,6 +86,7 @@ impl<T> WindowControl for ModalWindow<T> {}
 impl<T> OnExpand for ModalWindow<T> {}
 impl<T> ThreeStateBoxEvents for ModalWindow<T> {}
 impl<T> OnSiblingSelected for ModalWindow<T> {}
+impl<T> PathFinderEvents for ModalWindow<T> {}
 
 // events routed to base window
 impl<T> OnFocus for ModalWindow<T> {

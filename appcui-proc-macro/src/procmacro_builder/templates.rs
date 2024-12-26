@@ -87,6 +87,12 @@ impl$(TEMPLATE_TYPE) OnExpand for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 }
 ";
 
+pub(crate) static ON_THEME_CHANGED_TRAIT: &str = "
+impl$(TEMPLATE_TYPE) OnThemeChanged for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_theme_changed(&mut self, theme: &Theme)  { self.base.on_theme_changed(theme); }
+}
+";
+
 pub(crate) static ON_WINDOW_REGISTERED_TRAIT: &str = "
 impl$(TEMPLATE_TYPE) OnWindowRegistered for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_registered(&mut self)  { self.base.on_registered(); }
