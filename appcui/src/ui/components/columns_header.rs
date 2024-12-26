@@ -127,7 +127,7 @@ impl ColumnsHeader {
                                 } else {
                                     SpecialChar::ArrowDown
                                 },
-                                theme.header.hotkey.hovered,
+                                theme.header.symbol.hovered,
                             ),
                         );
                     }
