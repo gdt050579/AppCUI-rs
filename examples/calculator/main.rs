@@ -99,9 +99,9 @@ impl MyWin {
 }
 
 impl TextFieldEvents for MyWin {
-    fn on_validate(&mut self, _handle: Handle<TextField>, _text: &str) -> EventProcessStatus {
+    fn on_validate(&mut self, _handle: Handle<TextField>, text: &str) -> EventProcessStatus {
         let d = self.display;
-        let result = evaluate_expression(&_text);
+        let result = evaluate_expression(text);
         if let Some(display) = self.control_mut(d) {
             display.set_text(&result);
         }

@@ -155,3 +155,7 @@ path = "csv_viewer/main.rs"
 [[example]]
 name = "calculator"
 path = "calculator/main.rs"
+
+[[example]]
+name = "theme_switcher"
+path = "theme_switcher/main.rs"

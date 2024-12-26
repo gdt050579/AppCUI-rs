@@ -79,6 +79,10 @@ pub trait OnExpand {
     fn on_pack(&mut self) {}
 }
 
+pub trait OnThemeChanged {
+    fn on_theme_changed(&mut self, _theme: &Theme) {}
+}
+
 pub trait OnWindowRegistered {
     fn on_registered(&mut self) {}
 }
@@ -103,6 +107,7 @@ pub trait Control:
     + OnExpand
     + OnWindowRegistered
     + OnSiblingSelected
+    + OnThemeChanged
     /* events from each control */
     + ButtonEvents
     + CheckBoxEvents

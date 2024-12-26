@@ -93,7 +93,7 @@ impl RuntimeManager {
         let term_sz = term.get_size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
-            theme: Theme::new(),
+            theme: builder.theme,
             terminal: term,
             surface,
             desktop_handle: Handle::new(0),
@@ -156,10 +156,6 @@ impl RuntimeManager {
         }
 
         Ok(())
-    }
-    #[inline(always)]
-    pub(crate) fn theme(&self) -> &Theme {
-        &self.theme
     }
     pub(crate) fn is_instantiated() -> bool {
         unsafe { RUNTIME_MANAGER.is_some() }
@@ -1637,6 +1633,40 @@ impl MouseMethods for RuntimeManager {
                     self.repaint = true;
                     self.request_update_command_and_menu_bars = true;
                 }
+            }
+        }
+    }
+}
+impl ThemeMethods for RuntimeManager {
+    #[inline(always)]
+    fn theme(&self) -> &Theme {
+        &self.theme
+    }
+    #[inline(always)]
+    fn set_theme(&mut self, theme: Theme) {
+        self.theme = theme;
+        self.update_theme();
+        self.repaint = true;
+        self.recompute_layout = true;
+    }
+
+    fn update_theme(&mut self) {
+        // notify desktop and its children
+        self.update_theme_for_control(self.desktop_handle);
+        // notify modal windows (if any)
+        let count = self.modal_windows.len();
+        for idx in 0..count {
+            self.update_theme_for_control(self.modal_windows[idx]);
+        }
+    }
+
+    fn update_theme_for_control(&mut self, handle: Handle<UIElement>) {
+        let controls = unsafe { &mut *self.controls };
+        if let Some(element) = controls.get_mut(handle) {
+            OnThemeChanged::on_theme_changed(element.control_mut(), &self.theme);
+            let base = element.base();
+            for child_handle in base.children.iter() {
+                self.update_theme_for_control(*child_handle);
             }
         }
     }

@@ -127,7 +127,7 @@ impl ColumnsHeader {
                                 } else {
                                     SpecialChar::ArrowDown
                                 },
-                                theme.header.hotkey.hovered,
+                                theme.header.symbol.hovered,
                             ),
                         );
                     }
@@ -147,7 +147,7 @@ impl ColumnsHeader {
                             } else {
                                 SpecialChar::ArrowDown
                             },
-                            theme.header.hotkey.pressed_or_selectd,
+                            theme.header.symbol.pressed_or_selectd,
                         ),
                     );
                 } else {

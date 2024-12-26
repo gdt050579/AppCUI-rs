@@ -214,7 +214,7 @@ where
             _ => theme.editor.normal,
         };
         let w = self.size().width as i32;
-        let (l, r) = if has_buttons { (4, w - 6) } else { (0, w - 1) };
+        let (l, r) = if has_buttons { (4, w - 5) } else { (0, w - 1) };
         surface.fill_horizontal_line(l, 0, r, Character::with_attributes(' ', attr));
         if l + 2 <= r {
             if self.edit_mode {
@@ -239,7 +239,7 @@ where
                 }
             } else {
                 let format = TextFormatBuilder::new()
-                    .position((l + r) / 2, 0)
+                    .position((l + r + 1) / 2, 0)
                     .attribute(attr)
                     .align(TextAlignament::Center)
                     .chars_count(self.txtlen as u16)

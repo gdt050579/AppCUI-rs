@@ -12,6 +12,7 @@ use crate::ui::{
 };
 use crate::utils::VectorIndex;
 use crate::system::Theme;
+use crate::system::ThemeMethods;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 16)]

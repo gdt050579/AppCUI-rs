@@ -16,6 +16,8 @@ mod builder;
 mod event_recorder;
 
 pub use self::theme::Theme;
+pub use self::theme::Themes;
+pub(crate) use self::runtime_manager_traits::ThemeMethods;
 pub use self::handle::Handle;
 pub (crate) use self::handle::HandleSupport;
 pub use self::reference::Reference;
