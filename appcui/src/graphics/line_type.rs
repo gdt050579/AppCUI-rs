@@ -11,7 +11,7 @@ pub(super) struct LineTypeChars {
     pub(super) vertical: char,
 }
 
-static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
+static LINE_TYPE_CHARS: [LineTypeChars; 8] = [
     /* Single Lines */
     LineTypeChars {
         corner_top_left: '\u{250C}',
@@ -23,6 +23,19 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
         corner_bottom_left: '\u{2514}',
         vertical_on_left: '\u{2502}',
         horizontal: '\u{2500}',
+        vertical: '\u{2502}',
+    },
+    /*Single roof lines*/
+    LineTypeChars {
+        corner_top_left: '\u{250C}',
+        horizontal_on_top: '\u{203E}',
+        corner_top_right: '\u{2510}',
+        vertical_on_right: '\u{2502}',
+        corner_bottom_right: '\u{2518}',
+        horizontal_on_bottom: '\u{2500}',
+        corner_bottom_left: '\u{2514}',
+        vertical_on_left: '\u{2502}',
+        horizontal: '\u{203E}',
         vertical: '\u{2502}',
     },
     /* Double Lines */
@@ -109,6 +122,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
 #[derive(Copy, Clone, PartialEq)]
 pub enum LineType {
     Single = 0,
+    RoofLine,
     Double,
     SingleThick,
     Border,

@@ -1,5 +1,4 @@
 
-use std::os::windows::io::IntoRawHandle;
 
 use chartbar::Value;
 use flat_string::FlatString;
@@ -265,11 +264,6 @@ impl OnPaint for ChartBar {
             sz.height as i32 - 2,
             Character::with_attributes(SpecialChar::BoxBottomLeftCornerSingleLine, lineattr),
         );
-        surface.write_char(
-            left_space as i32,
-            sz.height as i32 / 2,
-            Character::with_attributes(SpecialChar::BoxCrossSingleLine, lineattr),
-        );
 
         let interval = self.yaxes_interval();
         let mut min = interval.0;
@@ -282,13 +276,14 @@ impl OnPaint for ChartBar {
         let start = self.left_offset / bar_width;
         let h = (sz.height - 1) as i32;
         
-        let mut i = 3;
-        while i <= max
+        let mut i = 2;
+        min+=1;
+        while i <= max + h
         {
-            if h - 1 - self.top_view <= h - 1
+            if h - i - self.top_view <= h - 2
             {
                 self.write_string_on_y_axes(surface, theme, h - i - self.top_view, &format!("{}",min));
-                surface.draw_horizontal_line(left_space + 1, h -i - self.top_view, sz.width as i32, LineType::Single, lineattr);
+                surface.draw_horizontal_line(left_space + 1, h - i - self.top_view, sz.width as i32, LineType::RoofLine , lineattr);
             }
             min+=step;
             i+=step;
@@ -312,6 +307,73 @@ impl OnPaint for ChartBar {
 
     }
 }
+
+impl OnMouseEvent for ChartBar {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.comp.process_mouse_event(event) {
+            self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
+        }
+        match event {
+            MouseEvent::Enter => {
+                self.hide_tooltip();
+            }
+            MouseEvent::Leave => {
+                self.hide_tooltip();
+            }
+            MouseEvent::Over(point) => {
+                if is_over(point, 0, 1, 6, 1) && self.oy_label().bytes().count() >= 4 {}
+
+                let sz = self.size();
+    
+                if self.chart_type == Type::VerticalBar {
+                   
+                    let bar_width = self.bar_width as u32 + self.distance as u32;
+
+                    let start = self.left_offset / bar_width;
+                    let h = (sz.height - 1) as i32;
+                    let left_space = self.left_space() as i32;
+
+                    for (index, c) in self.data[start as usize..].iter().enumerate() {
+                        
+                        let x = index as u32 * bar_width + left_space as u32 + 1;
+                        if x > sz.width as u32 {
+                            break;
+                        }
+                        let val = c.relative_size(self.max_bar_height, self.min_val, self.max_val) as i32 + 1;
+                        //let rect1 = Rect::with_size(x as i32, h - 1, self.bar_width as u16, val as u16);
+                        if  h - val - self.top_view as i32 - 1 <= h - val + val.max(1) - 2 {
+                            if is_over( point, x as i32, h - val - self.top_view as i32 - 2 , x as i32 + self.bar_width.max(1) as i32 - 1, h - val + val.max(1) - 2)
+                            {
+                                self.show_tooltip_on_point(
+                                    format!("{},{},{}", c.value(), val, self.max_val).as_str(),
+                                    point.x,
+                                    point.y,
+                                );
+                                return EventProcessStatus::Processed;
+                                } else {
+                                self.hide_tooltip();
+                            }
+                        }
+                    }
+                    return EventProcessStatus::Processed;
+                }
+                return EventProcessStatus::Ignored;
+            }
+            MouseEvent::Pressed(mouse_event_data) => {
+                if mouse_event_data.button == MouseButton::Right {
+                    // De implementat un meniu de schimbat culori la fiecare bara cand o apesi
+                }
+            }
+            MouseEvent::Released(_mouse_event_data) => {}
+            MouseEvent::DoubleClick(_mouse_event_data) => {}
+            MouseEvent::Drag(_mouse_event_data) => {}
+            MouseEvent::Wheel(_mouse_wheel_direction) => {}
+        }
+        EventProcessStatus::Ignored
+    }
+}
+
 impl OnKeyPressed for ChartBar {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         match key.value() {
@@ -405,72 +467,6 @@ pub fn is_over(poz: &Point, top: i32, left: i32, bottom: i32, right: i32) -> boo
         return true;
     }
     return false;
-}
-
-impl OnMouseEvent for ChartBar {
-    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        if self.comp.process_mouse_event(event) {
-            self.update_scroll_pos_from_scrollbars();
-            return EventProcessStatus::Processed;
-        }
-        match event {
-            MouseEvent::Enter => {
-                self.hide_tooltip();
-            }
-            MouseEvent::Leave => {
-                self.hide_tooltip();
-            }
-            MouseEvent::Over(point) => {
-                if is_over(point, 0, 1, 6, 1) && self.oy_label().bytes().count() >= 4 {}
-
-                let sz = self.size();
-    
-                if self.chart_type == Type::VerticalBar {
-                   
-                    let bar_width = self.bar_width as u32 + self.distance as u32;
-
-                    let start = self.left_offset / bar_width;
-                    let h = (sz.height - 1) as i32;
-
-                    for (index, c) in self.data[start as usize..].iter().enumerate() 
-                    {
-                        let x = index as u32 * bar_width + self.left_space();
-                        if x > sz.width as u32 
-                        {
-                            break;
-                        }
-                        let val = c.relative_size(self.max_bar_height, self.min_val, self.max_val) as i32 + 1;
-                        
-
-                        if is_over( point, x as i32, h - val - self.top_view as i32 - 1 , x as i32 + self.bar_width.max(1) as i32 - 1, h - val + val.max(1) - 2)
-                        {
-                            self.show_tooltip_on_point(
-                                format!("{},{},{}", c.value(), val, self.max_val).as_str(),
-                                point.x,
-                                point.y,
-                            );
-                            return EventProcessStatus::Processed;
-                        } else {
-                            self.hide_tooltip();
-                        }
-                    }                    
-
-                    return EventProcessStatus::Processed;
-                }
-                return EventProcessStatus::Ignored;
-            }
-            MouseEvent::Pressed(mouse_event_data) => {
-                if mouse_event_data.button == MouseButton::Right {
-                    // De implementat un meniu de schimbat culori la fiecare bara cand o apesi
-                }
-            }
-            MouseEvent::Released(_mouse_event_data) => {}
-            MouseEvent::DoubleClick(_mouse_event_data) => {}
-            MouseEvent::Drag(_mouse_event_data) => {}
-            MouseEvent::Wheel(_mouse_wheel_direction) => {}
-        }
-        EventProcessStatus::Ignored
-    }
 }
 
 impl OnResize for ChartBar {
