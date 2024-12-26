@@ -92,7 +92,7 @@ pub(crate) fn new() -> Theme {
         header: HeaderTheme {
             text: controlattr!("silver,magenta", "w,magenta", "dr,silver", "gray", "w,pink"),
             hotkey: controlattr!("y,magenta", "y,magenta", "r,silver", "gray", "y,pink"),
-            symbol: controlattr!("silver,magenta", "w,magenta", "dr,silver", "gray", "w,pink"),
+            symbol: controlattr!("silver,magenta", "w,magenta", "dr,silver", "gray", "y,pink"),
         },
         toggle_button: ToggleButtonTheme {
             selected: controlattr!("aqua", "dr,w", "dr,y", "gray", "w,black"),
