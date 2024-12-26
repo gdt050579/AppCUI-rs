@@ -130,7 +130,7 @@ pub struct Theme {
     pub toggle_button: ToggleButtonTheme,
 }
 impl Theme {
-    pub(crate) fn new(theme: Themes) -> Self {
+    pub fn new(theme: Themes) -> Self {
         match theme {
             Themes::Default => super::default::new(),
         }
