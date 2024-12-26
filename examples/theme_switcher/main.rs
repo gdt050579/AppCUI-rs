@@ -55,7 +55,7 @@ impl MyWindow {
         p_selectors.add(combobox!("x:1,y:1,w:23,items=[Delphin,Zebra,Lion],index:1"));
         p_selectors.add(colorpicker!("x:27,y:1,w:20,color:Red"));
         p_selectors.add(datepicker!("x:1,y:3,w:23,date:2024-12-31"));
-        p_selectors.add(numericselector!("class:i32,value:5,min:0,max:10,step:1,x:27,y:3,w:12"));
+        p_selectors.add(numericselector!("class:i32,value:50,min:0,max:99,step:1,x:27,y:3,w:20"));
         splitter.add(vsplitter::Panel::Left, p_selectors);
 
         let mut tab = tab!("l:1,t:1,r:1,h:5,tabs:[&First,&Second,&Third]");
