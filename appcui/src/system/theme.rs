@@ -4,6 +4,7 @@ mod macros;
 mod tests;
 // stock themes
 mod default;
+mod dark_gray;
 
 
 pub use structures::Theme;

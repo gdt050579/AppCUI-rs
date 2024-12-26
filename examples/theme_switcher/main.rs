@@ -11,7 +11,7 @@ struct FileInformation {
     created: NaiveDate,
 }
 
-#[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme)]
+#[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme)]
 struct MyWindow {
     h_file: Handle<Menu>,
     h_theme: Handle<Menu>,
@@ -19,7 +19,7 @@ struct MyWindow {
 impl MyWindow {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("'Theme Switcher',r:1,b:1,w:100,h:20"),
+            base: window!("'Theme Switcher',r:1,b:1,w:100,h:20, Flags: Sizeable"),
             h_file: Handle::None,
             h_theme: Handle::None,
         };
@@ -36,6 +36,7 @@ impl MyWindow {
         w.h_theme = w.register_menu(menu!(
             "&Theme,class: MyWindow, items=[
             {&Default,cmd:DefaultTheme,selected: true},
+            {'Dark Gray',cmd:DarkGrayTheme, selected: false},
         ]"
         ));
 
@@ -121,6 +122,7 @@ impl MenuEvents for MyWindow {
     fn on_select(&mut self, _: Handle<Menu>, _: Handle<menu::SingleChoice>, cmd: mywindow::Commands) {
         let stock_theme = match cmd {
             mywindow::Commands::DefaultTheme => Some(Themes::Default),
+            mywindow::Commands::DarkGrayTheme => Some(Themes::DarkGray),
             _ => None,
         };
         if let Some(theme) = stock_theme {
@@ -136,7 +138,8 @@ impl MenuEvents for MyWindow {
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().size(Size::new(120, 24)).menu_bar().build()?;
+    App::set_theme(Theme::new(Themes::DarkGray));
     a.add_window(MyWindow::new());
     a.run();
-    Ok(())
+    Ok(())  
 }

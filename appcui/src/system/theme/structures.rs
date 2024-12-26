@@ -2,6 +2,7 @@ use crate::{graphics::*, ui::common::ControlCharAttributesState};
 
 pub enum Themes {
     Default,
+    DarkGray,
 }
 
 #[derive(Default)]
@@ -133,6 +134,7 @@ impl Theme {
     pub fn new(theme: Themes) -> Self {
         match theme {
             Themes::Default => super::default::new(),
+            Themes::DarkGray => super::dark_gray::new(),            
         }
     }
 }
