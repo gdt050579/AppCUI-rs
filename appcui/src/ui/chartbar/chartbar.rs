@@ -1,4 +1,6 @@
 
+use std::os::windows::io::IntoRawHandle;
+
 use chartbar::Value;
 use flat_string::FlatString;
 
@@ -101,28 +103,29 @@ impl ChartBar {
     }
 
     #[inline(always)]
-    fn left_space(&self) -> u32
-    {   
-        // let a = self.y_axes.as_ref();
-        // let b = a.map(|f| { f.left_space });
-        // let c = b.unwrap_or(1);
-        // c
-        // if let Some(y) = self.y_axes
-        // {
-        //     y.left_space
-        // }
-        // else {
-        //     1
-        // }
-        self.y_axes.as_ref().map(|y| y.left_space).unwrap_or(0)
-        
-    }
-
     fn oy_label(&self) -> &str
     {
-        self.y_axes.as_ref().map(|f| { f.label.as_str() }).unwrap_or("xc")
+        self.y_axes.as_ref().map(|f| { f.label.as_str() }).unwrap_or("")
     }
 
+    #[inline(always)]
+    fn yaxes_interval(&self) -> (i32,i32)
+    {
+        self.y_axes.as_ref().map(|f| { (f.min,f.max) }).unwrap_or((0,i32::MAX))
+    }
+
+    #[inline(always)]
+    fn step(&self) -> i32
+    {
+        self.y_axes.as_ref().map(|f| { f.step }).unwrap_or(2)
+    }
+
+    #[inline(always)]
+    fn left_space(&self) -> u32
+    {   
+        self.y_axes.as_ref().map(|y| y.left_space).unwrap_or(0)
+    }
+    
     fn update_min_max_on_wiew_width(&mut self)
     {   
         let bar_width = (self.bar_width + self.distance) as u32;
@@ -268,13 +271,28 @@ impl OnPaint for ChartBar {
             Character::with_attributes(SpecialChar::BoxCrossSingleLine, lineattr),
         );
 
-        surface.draw_horizontal_line(left_space + 1, sz.height as i32 / 2, sz.width as i32, LineType::Single, lineattr);
+        let interval = self.yaxes_interval();
+        let mut min = interval.0;
+        let max = interval.1;
+        let step = self.step();
 
-        
+
         let bar_width = self.bar_width as u32 + self.distance as u32;
 
         let start = self.left_offset / bar_width;
         let h = (sz.height - 1) as i32;
+        
+        let mut i = 3;
+        while i <= max
+        {
+            if h - 1 - self.top_view <= h - 1
+            {
+                self.write_string_on_y_axes(surface, theme, h - i - self.top_view, &format!("{}",min));
+                surface.draw_horizontal_line(left_space + 1, h -i - self.top_view, sz.width as i32, LineType::Single, lineattr);
+            }
+            min+=step;
+            i+=step;
+        }
 
         for (index, c) in self.data[start as usize..].iter().enumerate() {
             let x = index as u32 * bar_width + left_space as u32 + 1;
@@ -285,14 +303,13 @@ impl OnPaint for ChartBar {
             //let rect1 = Rect::with_size(x as i32, h - 1, self.bar_width as u16, val as u16);
             if  h - val - self.top_view as i32 - 1 <= h - val + val.max(1) - 2 {
                 
-                self.write_string_on_y_axes(surface, theme, h - val - self.top_view as i32 - 1 , &String::from(c.label()));
                 let rect = Rect::new(x as i32, h - val - self.top_view as i32 - 1 , x as i32 + self.bar_width.max(1) as i32 - 1, h - val + val.max(1) - 2);
                 surface.fill_rect(rect, Character::with_attributes(' ', c.attr()));
             }
         }
 
         self.write_string_on_y_axes(surface, theme, 0, &String::from(self.oy_label()));
-       
+
     }
 }
 impl OnKeyPressed for ChartBar {
@@ -423,11 +440,12 @@ impl OnMouseEvent for ChartBar {
                             break;
                         }
                         let val = c.relative_size(self.max_bar_height, self.min_val, self.max_val) as i32 + 1;
-          
+                        
+
                         if is_over( point, x as i32, h - val - self.top_view as i32 - 1 , x as i32 + self.bar_width.max(1) as i32 - 1, h - val + val.max(1) - 2)
                         {
                             self.show_tooltip_on_point(
-                                format!("{},{},{}", c.value(), self.min_val, self.max_val).as_str(),
+                                format!("{},{},{}", c.value(), val, self.max_val).as_str(),
                                 point.x,
                                 point.y,
                             );
