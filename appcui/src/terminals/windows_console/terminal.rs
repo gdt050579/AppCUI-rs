@@ -1,3 +1,5 @@
+use std::sync::mpsc;
+
 use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
@@ -330,6 +332,8 @@ pub struct WindowsTerminal {
     last_mouse_pos: Point,
     visible_region: SMALL_RECT,
     _original_mode_flags: u32,
+    receiver: mpsc::Receiver<INPUT_RECORD>,
+    sender: mpsc::Sender<INPUT_RECORD>,    
 }
 
 impl WindowsTerminal {
@@ -503,6 +507,29 @@ impl WindowsTerminal {
         let w = (info.window.right as u32) + 1 - (info.window.left as u32);
         let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
 
+        // create the comunication channel
+        let (sender, receiver) = mpsc::channel::<INPUT_RECORD>();
+        // create the thread that will read the input
+        let event_sender = sender.clone();
+        std::thread::spawn(move || {
+            let mut ir = INPUT_RECORD {
+                event_type: 0,
+                event: WindowsTerminalEvent { extra: 0 },
+            };
+            loop {
+                ir.event_type = 0;
+                let mut nr_read = 0u32;
+        
+                unsafe {
+                    if (winapi::ReadConsoleInputW(stdin, &mut ir, 1, &mut nr_read) == TRUE) && (nr_read == 1) {
+                        if event_sender.send(ir).is_err() {
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+
         let mut term = WindowsTerminal {
             stdin_handle: stdin,
             stdout_handle: stdout,
@@ -512,6 +539,8 @@ impl WindowsTerminal {
             last_mouse_pos: Point::new(i32::MAX, i32::MAX),
             visible_region: info.window,
             _original_mode_flags: original_mode_flags,
+            sender,
+            receiver,
         };
         term.chars.resize(
             (term.size.width as usize) * (term.size.height as usize) * 2,
@@ -678,18 +707,22 @@ impl Terminal for WindowsTerminal {
     }
 
     fn get_system_event(&mut self) -> SystemEvent {
-        let mut ir = INPUT_RECORD {
-            event_type: 0,
-            event: WindowsTerminalEvent { extra: 0 },
-        };
-        let mut nr_read = 0u32;
+        // let mut ir = INPUT_RECORD {
+        //     event_type: 0,
+        //     event: WindowsTerminalEvent { extra: 0 },
+        // };
+        // let mut nr_read = 0u32;
 
-        unsafe {
-            if (winapi::ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE) || (nr_read != 1) {
-                return SystemEvent::None;
-            }
-            //println!("Event: {}",ir.event_type);
-        }
+        // unsafe {
+        //     if (winapi::ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE) || (nr_read != 1) {
+        //         return SystemEvent::None;
+        //     }
+        //     //println!("Event: {}",ir.event_type);
+        // }
+        let ir = match self.receiver.recv() {
+            Ok(ir) => ir,
+            Err(_) => return SystemEvent::None,
+        };
 
         // Key processings
         if ir.event_type == KEY_EVENT {

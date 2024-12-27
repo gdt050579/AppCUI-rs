@@ -29,6 +29,9 @@ use self::ncurses::NcursesTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_console::WindowsTerminal;
 
+pub(crate) trait SystemEventReader {
+    fn get_system_event(&mut self) -> SystemEvent;
+}
 pub(crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
     fn get_size(&self) -> Size;
