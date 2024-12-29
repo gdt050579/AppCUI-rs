@@ -4,6 +4,7 @@ use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
+use crate::system::Timer;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
@@ -47,6 +48,7 @@ pub struct ControlBase {
     pub(crate) margins: Margins,
     pub(crate) handle: Handle<UIElement>,
     pub(crate) parent: Handle<UIElement>,
+    pub(crate) timer: Handle<Timer>,
     pub(crate) event_processor: Handle<UIElement>,
     pub(crate) children: Vec<Handle<UIElement>>,
     pub(crate) focused_child_index: VectorIndex,
@@ -74,6 +76,7 @@ impl ControlBase {
         Self {
             parent: Handle::None,
             handle: Handle::None,
+            timer: Handle::None,
             event_processor: Handle::None,
             children: Vec::new(),
             focused_child_index: VectorIndex::Invalid,
@@ -325,6 +328,19 @@ impl ControlBase {
             self.focused_child_index.set(children_count - 1, children_count, false);
         }
         handle.cast()
+    }
+
+    pub fn timer(&mut self) -> Option<&mut Timer> {
+        let tm = RuntimeManager::get().get_timer_manager();
+        if self.timer.is_none() {
+            let timer_handle = tm.allocate_for(self.handle.cast());
+            if timer_handle.is_none() {
+                // no empty slots available to allocate a new timer
+                return None;
+            }
+            self.timer = timer_handle;            
+        }
+        tm.get_mut(self.timer)
     }
 
     /// Returns `true` if the current control is visible or `false` otherwise

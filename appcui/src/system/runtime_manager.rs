@@ -2,6 +2,7 @@ use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
 
 use super::runtime_manager_traits::*;
+use super::timer::TimerManager;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
@@ -55,6 +56,7 @@ pub(crate) struct RuntimeManager {
     surface: Surface,
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
+    timers_manager: TimerManager,
     desktop_handle: Handle<UIElement>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
@@ -119,6 +121,7 @@ impl RuntimeManager {
             commandbar_event: None,
             menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
+            timers_manager: TimerManager::new(4),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
@@ -382,6 +385,11 @@ impl RuntimeManager {
     #[inline(always)]
     pub(crate) fn get_controls(&self) -> &ControlHandleManager {
         unsafe { &*self.controls }
+    }
+    
+    #[inline(always)]
+    pub(crate) fn get_timer_manager(&mut self) -> &mut TimerManager {
+        &mut self.timers_manager
     }
     #[inline(always)]
     pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {

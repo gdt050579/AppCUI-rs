@@ -40,16 +40,20 @@ pub (crate) struct MouseWheelEvent
     pub (crate) direction: MouseWheelDirection
 }
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct KeyPressedEvent {
-    pub key: Key,
-    pub character: char,
+pub (crate) struct KeyPressedEvent {
+    pub (crate) key: Key,
+    pub (crate) character: char,
 }
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct KeyModifierChangedEvent {
-    pub new_state: KeyModifier,
-    pub old_state: KeyModifier,
+pub (crate) struct KeyModifierChangedEvent {
+    pub (crate) new_state: KeyModifier,
+    pub (crate) old_state: KeyModifier,
 }
 
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub (crate) struct TimerEvent {
+    id: u8,    
+}
 
 #[derive(Copy,Clone,PartialEq,Debug)]
 pub (crate) enum SystemEvent

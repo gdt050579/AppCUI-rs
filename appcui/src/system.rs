@@ -9,6 +9,7 @@ mod handle;
 mod control_handle_manager;
 mod menu_handle_manager;
 mod reference;
+mod timer;
 #[cfg(test)]
 mod tests;
 mod builder;
@@ -34,3 +35,4 @@ pub (crate) use self::runtime_manager_traits::LayoutMethods;
 pub (crate) use self::runtime_manager_traits::PaintMethods;
 pub (crate) use self::tooltip::ToolTip;
 pub use self::builder::Builder;
+pub use self::timer::Timer;
