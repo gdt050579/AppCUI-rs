@@ -68,6 +68,7 @@ pub(crate) struct RuntimeManager {
     desktop_os_start_called: bool,
     recompute_parent_indexes: bool,
     request_update_command_and_menu_bars: bool,
+    request_update_timer_threads: bool,
     single_window: bool,
     loop_status: LoopStatus,
     request_focus: Option<Handle<UIElement>>,
@@ -105,6 +106,7 @@ impl RuntimeManager {
             desktop_os_start_called: false,
             request_update_command_and_menu_bars: true,
             recompute_parent_indexes: true,
+            request_update_timer_threads: false,
             single_window: builder.single_window,
             mouse_pos: Point::new(-1, -1),
             key_modifier: KeyModifier::None,
@@ -386,11 +388,17 @@ impl RuntimeManager {
     pub(crate) fn get_controls(&self) -> &ControlHandleManager {
         unsafe { &*self.controls }
     }
-    
+
     #[inline(always)]
     pub(crate) fn get_timer_manager(&mut self) -> &mut TimerManager {
         &mut self.timers_manager
     }
+    #[inline(always)]
+    pub(crate) fn request_timer_threads_update(&mut self) {
+        self.request_update_timer_threads = true;
+    }
+    
+
     #[inline(always)]
     pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {
         unsafe { &mut *self.menus }
@@ -492,6 +500,12 @@ impl RuntimeManager {
             }
             self.recompute_layout = false;
             self.repaint = false;
+
+            // timer threads update
+            if self.request_update_timer_threads {
+                self.timers_manager.update_threads();
+                self.request_update_timer_threads = false;
+            }
             // auto save changes
             #[cfg(feature = "EVENT_RECORDER")]
             self.event_recorder.auto_update(&self.surface);

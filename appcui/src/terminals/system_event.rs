@@ -51,8 +51,9 @@ pub (crate) struct KeyModifierChangedEvent {
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub (crate) struct TimerEvent {
-    id: u8,    
+pub (crate) struct TimerTickUpdateEvent {
+    id: u8, 
+    tick: u64,   
 }
 
 #[derive(Copy,Clone,PartialEq,Debug)]
@@ -67,6 +68,7 @@ pub (crate) enum SystemEvent
     MouseButtonUp(MouseButtonUpEvent),
     MouseDoubleClick(MouseDoubleClickEvent),
     MouseMove(MouseMoveEvent),
-    MouseWheel(MouseWheelEvent)
+    MouseWheel(MouseWheelEvent),
+    //TimerTickUpdate(TimerTickUpdateEvent),
 }
 

@@ -45,4 +45,9 @@ impl TimerManager {
             None
         }
     }
+    pub(crate) fn update_control_handle(&mut self, handle: Handle<Timer>, control_handle: Handle<()>) {
+        if let Some(timer) = self.get_mut(handle) {
+            timer.update_control_handle(control_handle);
+        }
+    }
 }
