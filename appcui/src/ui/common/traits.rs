@@ -97,6 +97,11 @@ pub trait CustomEvents {
     }
 }
 
+pub trait TimerEvents {
+    fn on_start(&mut self) -> EventProcessStatus { EventProcessStatus:: Ignored }
+    fn on_update(&mut self, tick: u64) -> EventProcessStatus;
+}
+
 pub trait Control:
     OnPaint
     + OnKeyPressed

@@ -328,8 +328,11 @@ impl ControlBase {
             // since we have already pushed one handle, we know that children count > 0
             self.focused_child_index.set(children_count - 1, children_count, false);
         }
-        if !handle.is_none() && !timer_handle.is_none() {
-            rm.get_timer_manager().update_control_handle(timer_handle, handle.cast());
+        if !timer_handle.is_none() {
+            if !handle.is_none() {
+                rm.get_timer_manager().update_control_handle(timer_handle, handle.cast());
+            }
+            rm.request_timer_threads_update();
         }
         handle.cast()
     }

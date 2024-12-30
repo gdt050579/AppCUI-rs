@@ -8,7 +8,7 @@ pub(crate) struct ThreadLogic {
     tick: u64,
     interval: u32,
     handle: Handle<()>,
-    running: bool,
+    paused: bool,
 }
 
 impl ThreadLogic {
@@ -17,7 +17,7 @@ impl ThreadLogic {
             tick: 0,
             interval: command.iterval().unwrap_or(1000).max(1),
             handle,
-            running: true,
+            paused: true,
         }
     }
     pub(crate) fn run(&mut self, sync: Arc<(Mutex<Command>, Condvar)>) {
@@ -44,16 +44,37 @@ impl ThreadLogic {
     /// true means thread should finish, false keep alive
     fn update_status(&mut self, command: Command) -> bool {
         match command {
-            Command::None => todo!(),
-            Command::Start(_) => todo!(),
-            Command::Stop => todo!(),
-            Command::Resume => todo!(),
-            Command::SetInterval(_) => todo!(),
-            Command::Pause => todo!(),
+            Command::None => false,
+            Command::Start(interval) => {
+                self.interval = interval;
+                self.tick = 0;
+                self.paused = false;
+                false
+            }
+            Command::Stop => {
+                self.paused = true;
+                true
+            }
+            Command::Resume => {
+                self.paused = false;
+                false
+            }
+            Command::SetInterval(interval) => {
+                self.interval = interval;
+                false
+            }
+            Command::Pause => {
+                self.paused = true;
+                false
+            }
         }
     }
     #[inline(always)]
     fn wait_time(&self) -> Duration {
-        Duration::from_micros(self.interval as u64)
+        if self.paused {
+            Duration::MAX
+        } else {
+            Duration::from_micros(self.interval as u64)
+        }
     }
 }

@@ -50,4 +50,17 @@ impl TimerManager {
             timer.update_control_handle(control_handle);
         }
     }
+    pub(crate) fn update_threads(&mut self) {
+        for slot in self.slots.iter_mut() {
+            if let Some(timer) = slot {
+                if timer.is_ready() {
+                    // we need to start a new timer
+                    timer.start_thread();
+                } else if timer.is_closed() {
+                    // timer is about to close (empty the slot)
+                    *slot = None;
+                }
+            }
+        }
+    }
 }

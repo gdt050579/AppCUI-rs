@@ -48,12 +48,24 @@ impl Timer {
             self.state = TimerState::Ready;
         }
     }
+    #[inline(always)]
+    pub(super) fn is_ready(&self) -> bool {
+        self.state == TimerState::Ready
+    }
+    #[inline(always)]
+    pub(super) fn is_closed(&self) -> bool {
+        self.state == TimerState::Terminate
+    }
     pub(super) fn start_thread(&mut self) {
         let mut thread_logic = ThreadLogic::new(self.control_handle, self.requested_command);
         let synk = self.synk.clone();
         thread::spawn(move || {
             thread_logic.run(synk);
         });
+        self.state = match self.requested_command {
+            Command::Start(_) | Command::Resume => TimerState::Running,
+            _ => TimerState::Paused
+        };
     }
     fn send_command(&mut self, command: Command) {
         match self.state {
@@ -87,7 +99,17 @@ impl Timer {
     pub fn start(&mut self, interval: u64) {
         self.send_command(Command::Start((interval as u32).max(1)));
     }
-    pub fn stop(&mut self) {}
+    pub fn stop(&mut self) {
+        match self.state {
+            TimerState::Running |
+            TimerState::Paused => {
+                self.send_command(Command::Stop);
+            }
+            _ => {}
+        }
+        self.state = TimerState::Terminate;
+        RuntimeManager::get().request_timer_threads_update();
+    }
     pub fn is_paused(&self) -> bool {
         false
     }
