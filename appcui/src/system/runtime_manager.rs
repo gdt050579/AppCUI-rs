@@ -515,7 +515,6 @@ impl RuntimeManager {
             self.event_recorder.auto_update(&self.surface);
 
             //self.debug_print(self.desktop_handle, 0);
-
             if let Ok(sys_event) = self.event_receiver.recv() {
                 match sys_event {
                     SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,

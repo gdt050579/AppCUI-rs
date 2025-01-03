@@ -231,8 +231,9 @@ impl WindowsTerminal {
             //last_mouse_pos: Point::new(i32::MAX, i32::MAX),
             visible_region: info.window,
             _original_mode_flags: original_mode_flags,
-            shared_visible_region: Arc::new(Mutex::new(SMALL_RECT::default())),
+            shared_visible_region: Arc::new(Mutex::new(info.window)),
         };
+        //println!("Start region: {:?}",term.visible_region);
         term.chars.resize(
             (term.size.width as usize) * (term.size.height as usize) * 2,
             CHAR_INFO { code: 32, attr: 0 },
@@ -265,9 +266,11 @@ impl Terminal for WindowsTerminal {
         self.size = new_size;
         if let Ok(data) = self.shared_visible_region.lock() {
             self.visible_region = *data;
+            //println!("OnResize: -> region: {:?}",self.visible_region);
         }
     }
     fn update_screen(&mut self, surface: &Surface) {
+        // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);
         // safety check --> surface size should be the same as self.width/height size
         if surface.size != self.size {
             panic!("Invalid size !!!");
