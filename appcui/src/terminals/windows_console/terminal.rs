@@ -233,7 +233,7 @@ impl WindowsTerminal {
             _original_mode_flags: original_mode_flags,
             shared_visible_region: Arc::new(Mutex::new(info.window)),
         };
-        //println!("Start region: {:?}",term.visible_region);
+        // println!("Start region: {:?}",term.visible_region);
         term.chars.resize(
             (term.size.width as usize) * (term.size.height as usize) * 2,
             CHAR_INFO { code: 32, attr: 0 },

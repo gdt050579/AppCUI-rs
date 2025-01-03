@@ -520,7 +520,10 @@ impl RuntimeManager {
                     SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,
                     SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
                     SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
-                    SystemEvent::Resize(new_size) => self.process_terminal_resize_event(new_size),
+                    SystemEvent::Resize(new_size) => {
+                        self.terminal.on_resize(new_size);
+                        self.process_terminal_resize_event(new_size);
+                    }
                     SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
                     SystemEvent::MouseButtonUp(event) => self.process_mousebuttonup_event(event),
                     SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
@@ -936,8 +939,6 @@ impl RuntimeManager {
         if (new_size.width == 0) || (new_size.height == 0) {
             return;
         }
-        // notify the terminal on the new size
-        self.terminal.on_resize(new_size);
         if new_size == self.surface.size {
             return;
         }
