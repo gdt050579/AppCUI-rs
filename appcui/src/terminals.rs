@@ -1,10 +1,10 @@
 mod debug;
+#[cfg(target_family = "unix")]
+mod ncurses;
 mod system_event;
 mod system_event_thread;
 #[cfg(target_family = "unix")]
 mod termios;
-#[cfg(target_family = "unix")]
-mod ncurses;
 #[cfg(target_os = "windows")]
 mod windows_console;
 
@@ -28,9 +28,9 @@ pub(super) use self::system_event_thread::SystemEventReader;
 use self::debug::DebugTerminal;
 
 #[cfg(target_family = "unix")]
-use self::termios::TermiosTerminal;
-#[cfg(target_family = "unix")]
 use self::ncurses::NcursesTerminal;
+#[cfg(target_family = "unix")]
+use self::termios::TermiosTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_console::WindowsTerminal;
 
@@ -41,6 +41,8 @@ pub(crate) trait Terminal {
     fn get_clipboard_text(&self) -> Option<String>;
     fn set_clipboard_text(&mut self, text: &str);
     fn has_clipboard_text(&self) -> bool;
+    fn query_system_event(&mut self) -> Option<SystemEvent> { None }
+    fn is_single_threaded(&self) -> bool;
 }
 
 #[repr(u8)]
@@ -88,7 +90,7 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
         }
         #[cfg(target_family = "unix")]
         TerminalType::Termios => TermiosTerminal::new(builder),
-        
+
         #[cfg(target_family = "unix")]
         TerminalType::NcursesTerminal => NcursesTerminal::new(builder),
     }

@@ -259,6 +259,9 @@ impl WindowsTerminal {
 }
 
 impl Terminal for WindowsTerminal {
+    fn is_single_threaded(&self) -> bool {
+        false
+    }
     fn on_resize(&mut self, new_size: Size) {
         let w = new_size.width as usize;
         let h = new_size.height as usize;

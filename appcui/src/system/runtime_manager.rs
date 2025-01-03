@@ -453,6 +453,7 @@ impl RuntimeManager {
         self.recompute_parent_indexes = true;
         self.commandbar_event = None;
         self.menu_event = None;
+        let single_threaded = self.terminal.is_single_threaded();
         // if first time an execution start
         if !self.desktop_os_start_called {
             self.process_terminal_resize_event(self.terminal.get_size());
@@ -514,24 +515,16 @@ impl RuntimeManager {
             #[cfg(feature = "EVENT_RECORDER")]
             self.event_recorder.auto_update(&self.surface);
 
-            //self.debug_print(self.desktop_handle, 0);
-            if let Ok(sys_event) = self.event_receiver.recv() {
-                match sys_event {
-                    SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,
-                    SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
-                    SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
-                    SystemEvent::Resize(new_size) => {
-                        self.terminal.on_resize(new_size);
-                        self.process_terminal_resize_event(new_size);
-                    }
-                    SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
-                    SystemEvent::MouseButtonUp(event) => self.process_mousebuttonup_event(event),
-                    SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
-                    SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
-                    SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
+            if single_threaded {
+                if let Some(sys_event) = self.terminal.query_system_event() {
+                    self.process_system_event(sys_event);
                 }
-                #[cfg(feature = "EVENT_RECORDER")]
-                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
+            } else {
+                if let Ok(sys_event) = self.event_receiver.recv() {
+                    self.process_system_event(sys_event);
+                    #[cfg(feature = "EVENT_RECORDER")]
+                    self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
+                }
             }
         }
         // loop has ended
@@ -549,6 +542,23 @@ impl RuntimeManager {
             }
             self.loop_status = LoopStatus::Normal;
             self.request_update();
+        }
+    }
+    #[inline(always)]
+    fn process_system_event(&mut self, sys_event: SystemEvent) {
+        match sys_event {
+            SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,
+            SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
+            SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
+            SystemEvent::Resize(new_size) => {
+                self.terminal.on_resize(new_size);
+                self.process_terminal_resize_event(new_size);
+            }
+            SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
+            SystemEvent::MouseButtonUp(event) => self.process_mousebuttonup_event(event),
+            SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
+            SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
+            SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
         }
     }
     fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
