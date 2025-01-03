@@ -6,6 +6,7 @@ use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::input::MouseWheelDirection;
+use crate::terminals::SystemEventReader;
 
 use super::super::system_event::KeyModifierChangedEvent;
 use super::super::KeyPressedEvent;
@@ -23,8 +24,8 @@ use crate::graphics::*;
 
 
 pub(crate) struct Input {
-    stdin_handle: HANDLE,
-    stdout_handle: HANDLE,
+    stdin: HANDLE,
+    stdout: HANDLE,
     shift_state: KeyModifier,
     last_mouse_pos: Point,
     visible_region: SMALL_RECT,
@@ -291,10 +292,21 @@ const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
 ];
 
-
-
 impl Input {
-    fn read(&mut self) -> SystemEvent {
+    pub(super) fn new(stdin: HANDLE, stdout: HANDLE, visible_region: SMALL_RECT, shared_visible_region: Arc<Mutex<SMALL_RECT>>) -> Self {
+        Self {
+            stdin,
+            stdout,
+            shift_state: KeyModifier::None,
+            last_mouse_pos: Point::new(i32::MAX, i32::MAX),
+            visible_region,
+            shared_visible_region,
+        }
+    }
+}
+
+impl SystemEventReader for Input {
+    fn read(&mut self) -> Option<SystemEvent> {
         let mut ir = INPUT_RECORD {
             event_type: 0,
             event: WindowsTerminalEvent { extra: 0 },
@@ -302,8 +314,8 @@ impl Input {
         let mut nr_read = 0u32;
 
         unsafe {
-            if (winapi::ReadConsoleInputW(self.stdin_handle, &mut ir, 1, &mut nr_read) == FALSE) || (nr_read != 1) {
-                return SystemEvent::None;
+            if (winapi::ReadConsoleInputW(self.stdin, &mut ir, 1, &mut nr_read) == FALSE) || (nr_read != 1) {
+                return None;
             }
             //println!("Event: {}",ir.event_type);
         }
@@ -342,26 +354,26 @@ impl Input {
                 if (key_code != KeyCode::None) || (character != '\0') {
                     if ir.event.key_event.key_down == FALSE {
                         // key is up (no need to send)
-                        return SystemEvent::None;
+                        return None;
                     }
                 } else {
                     // check for change in modifier
                     if self.shift_state == key_modifier {
                         // nothing changed --> return
-                        return SystemEvent::None;
+                        return None;
                     }
                     let old_state = self.shift_state;
                     self.shift_state = key_modifier;
-                    return SystemEvent::KeyModifierChanged(KeyModifierChangedEvent {
+                    return Some(SystemEvent::KeyModifierChanged(KeyModifierChangedEvent {
                         new_state: key_modifier,
                         old_state,
-                    });
+                    }));
                 }
             }
-            return SystemEvent::KeyPressed(KeyPressedEvent {
+            return Some(SystemEvent::KeyPressed(KeyPressedEvent {
                 key: Key::new(key_code, key_modifier),
                 character,
-            });
+            }));
         }
 
         // mouse processing
@@ -372,7 +384,7 @@ impl Input {
                 // for Windows 11
                 if ir.event.mouse_event.event_flags == 0x01 {
                     if (x == self.last_mouse_pos.x) && (y == self.last_mouse_pos.y) {
-                        return SystemEvent::None;
+                        return None;
                     }
 
                     self.last_mouse_pos.x = x;
@@ -394,50 +406,50 @@ impl Input {
                 match ir.event.mouse_event.event_flags {
                     0 => {
                         if ir.event.mouse_event.button_state != 0 {
-                            return SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button });
+                            return Some(SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button }));
                         } else {
-                            return SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button });
+                            return Some(SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button }));
                         }
                     }
                     DOUBLE_CLICK => {
-                        return SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button });
+                        return Some(SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button }));
                     }
                     MOUSE_MOVED => {
-                        return SystemEvent::MouseMove(MouseMoveEvent { x, y, button });
+                        return Some(SystemEvent::MouseMove(MouseMoveEvent { x, y, button }));
                     }
                     MOUSE_HWHEELED => {
                         //println!("HWHEEL {}", ir.event.mouse_event.button_state);
                         if ir.event.mouse_event.button_state >= 0x80000000 {
-                            return SystemEvent::MouseWheel(MouseWheelEvent {
+                            return Some(SystemEvent::MouseWheel(MouseWheelEvent {
                                 x,
                                 y,
                                 direction: MouseWheelDirection::Left,
-                            });
+                            }));
                         } else {
-                            return SystemEvent::MouseWheel(MouseWheelEvent {
+                            return Some(SystemEvent::MouseWheel(MouseWheelEvent {
                                 x,
                                 y,
                                 direction: MouseWheelDirection::Right,
-                            });
+                            }));
                         }
                     }
                     MOUSE_WHEELED => {
                         if ir.event.mouse_event.button_state >= 0x80000000 {
-                            return SystemEvent::MouseWheel(MouseWheelEvent {
+                            return Some(SystemEvent::MouseWheel(MouseWheelEvent {
                                 x,
                                 y,
                                 direction: MouseWheelDirection::Down,
-                            });
+                            }));
                         } else {
-                            return SystemEvent::MouseWheel(MouseWheelEvent {
+                            return Some(SystemEvent::MouseWheel(MouseWheelEvent {
                                 x,
                                 y,
                                 direction: MouseWheelDirection::Up,
-                            });
+                            }));
                         }
                     }
                     _ => {
-                        return SystemEvent::None;
+                        return None;
                     }
                 }
             }
@@ -445,21 +457,21 @@ impl Input {
 
         // resize
         if ir.event_type == WINDOW_BUFFER_SIZE_EVENT {
-            if let Ok(info) = utils::get_console_screen_buffer_info(self.stdout_handle) {
+            if let Ok(info) = utils::get_console_screen_buffer_info(self.stdout) {
                 let w = (info.window.right as u32) + 1 - (info.window.left as u32);
                 let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
                 self.visible_region = info.window;
                 if let Ok(mut shared_data) = self.shared_visible_region.lock() {
                     *shared_data = info.window;
                 }
-                return SystemEvent::Resize(Size::new(w, h));
+                return Some(SystemEvent::Resize(Size::new(w, h)));
                 // self.chars.resize((w as usize) * (h as usize) * 2, CHAR_INFO { code: 32, attr: 0 });
                 // self.size = Size::new(w, h);
             }
             // return SystemEvent::Resize(self.size);
         }
 
-        SystemEvent::None
+        None
     }
 
 }

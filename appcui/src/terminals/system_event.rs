@@ -1,65 +1,58 @@
-use crate::input::{MouseButton, MouseWheelDirection, Key, KeyModifier};
+use crate::input::{Key, KeyModifier, MouseButton, MouseWheelDirection};
 
-#[derive(Copy,Clone,PartialEq,Debug)]
-pub (crate) struct MouseButtonDownEvent
-{
-    pub (crate) x: i32,
-    pub (crate) y: i32,
-    pub (crate) button: MouseButton
-}
-
-#[derive(Copy,Clone,PartialEq,Debug)]
-pub (crate) struct MouseButtonUpEvent
-{
-    pub (crate) x: i32,
-    pub (crate) y: i32,
-    pub (crate) button: MouseButton
-}
-
-#[derive(Copy,Clone,PartialEq,Debug)]
-pub (crate) struct MouseDoubleClickEvent
-{
-    pub (crate) x: i32,
-    pub (crate) y: i32,
-    pub (crate) button: MouseButton
-}
-
-#[derive(Copy,Clone,PartialEq,Debug)]
-pub (crate) struct MouseMoveEvent
-{
-    pub (crate) x: i32,
-    pub (crate) y: i32,
-    pub (crate) button: MouseButton
-}
-
-#[derive(Copy,Clone,PartialEq,Debug)]
-pub (crate) struct MouseWheelEvent
-{
-    pub (crate) x: i32,
-    pub (crate) y: i32,
-    pub (crate) direction: MouseWheelDirection
-}
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub (crate) struct KeyPressedEvent {
-    pub (crate) key: Key,
-    pub (crate) character: char,
-}
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub (crate) struct KeyModifierChangedEvent {
-    pub (crate) new_state: KeyModifier,
-    pub (crate) old_state: KeyModifier,
+pub(crate) struct MouseButtonDownEvent {
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) button: MouseButton,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub (crate) struct TimerTickUpdateEvent {
-    id: u8, 
-    tick: u64,   
+pub(crate) struct MouseButtonUpEvent {
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) button: MouseButton,
 }
 
-#[derive(Copy,Clone,PartialEq,Debug)]
-pub (crate) enum SystemEvent
-{
-    None,
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) struct MouseDoubleClickEvent {
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) button: MouseButton,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) struct MouseMoveEvent {
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) button: MouseButton,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) struct MouseWheelEvent {
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) direction: MouseWheelDirection,
+}
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) struct KeyPressedEvent {
+    pub(crate) key: Key,
+    pub(crate) character: char,
+}
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) struct KeyModifierChangedEvent {
+    pub(crate) new_state: KeyModifier,
+    pub(crate) old_state: KeyModifier,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) struct TimerTickUpdateEvent {
+    id: u8,
+    tick: u64,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) enum SystemEvent {
     AppClose,
     KeyPressed(KeyPressedEvent),
     KeyModifierChanged(KeyModifierChangedEvent),
@@ -72,3 +65,9 @@ pub (crate) enum SystemEvent
     //TimerTickUpdate(TimerTickUpdateEvent),
 }
 
+impl SystemEvent {
+    #[inline(always)]
+    pub(super) fn should_close(&self) -> bool {
+        matches!(self, SystemEvent::AppClose)
+    }
+}

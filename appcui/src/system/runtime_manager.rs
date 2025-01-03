@@ -1,3 +1,5 @@
+use std::sync::mpsc::Receiver;
+
 use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
 
@@ -84,6 +86,7 @@ pub(crate) struct RuntimeManager {
     opened_menu_handle: Handle<Menu>,
     modal_windows: Vec<Handle<UIElement>>,
     to_remove_list: Vec<Handle<UIElement>>,
+    event_receiver: Receiver<SystemEvent>,
     #[cfg(feature = "EVENT_RECORDER")]
     event_recorder: super::event_recorder::EventRecorder,
 }
@@ -92,12 +95,14 @@ static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
 impl RuntimeManager {
     pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
-        let term = terminals::new(&builder)?;
+        let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
+        let term = terminals::new(&builder, sender.clone())?;
         let term_sz = term.get_size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
             theme: builder.theme,
             terminal: term,
+            event_receiver: receiver,
             surface,
             desktop_handle: Handle::new(0),
             tooltip: ToolTip::new(),
@@ -397,7 +402,6 @@ impl RuntimeManager {
     pub(crate) fn request_timer_threads_update(&mut self) {
         self.request_update_timer_threads = true;
     }
-    
 
     #[inline(always)]
     pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {
@@ -512,21 +516,21 @@ impl RuntimeManager {
 
             //self.debug_print(self.desktop_handle, 0);
 
-            let sys_event = self.terminal.get_system_event();
-            match sys_event {
-                SystemEvent::None => {}
-                SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,
-                SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
-                SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
-                SystemEvent::Resize(new_size) => self.process_terminal_resize_event(new_size),
-                SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
-                SystemEvent::MouseButtonUp(event) => self.process_mousebuttonup_event(event),
-                SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
-                SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
-                SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
+            if let Ok(sys_event) = self.event_receiver.recv() {
+                match sys_event {
+                    SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,
+                    SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
+                    SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
+                    SystemEvent::Resize(new_size) => self.process_terminal_resize_event(new_size),
+                    SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
+                    SystemEvent::MouseButtonUp(event) => self.process_mousebuttonup_event(event),
+                    SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
+                    SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
+                    SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
+                }
+                #[cfg(feature = "EVENT_RECORDER")]
+                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
             }
-            #[cfg(feature = "EVENT_RECORDER")]
-            self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
         }
         // loop has ended
         if self.loop_status == LoopStatus::ExitCurrentLoop {
@@ -933,6 +937,8 @@ impl RuntimeManager {
         if (new_size.width == 0) || (new_size.height == 0) {
             return;
         }
+        // notify the terminal on the new size
+        self.terminal.on_resize(new_size);
         if new_size == self.surface.size {
             return;
         }

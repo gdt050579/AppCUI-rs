@@ -344,122 +344,122 @@ impl Terminal for DebugTerminal {
     fn get_size(&self) -> Size {
         self.size
     }
+    
+    // fn get_system_event(&mut self) -> SystemEvent {
+    //     // if there is any event in the que --> return that event
+    //     if let Some(event) = self.sys_events.pop_front() {
+    //         match event {
+    //             SystemEvent::Resize(new_size) => {
+    //                 self.size.width = new_size.width;
+    //                 self.size.height = new_size.height;
+    //             }
+    //             SystemEvent::MouseButtonDown(evnt) => {
+    //                 self.mouse_pos.x = evnt.x;
+    //                 self.mouse_pos.y = evnt.y;
+    //             }
+    //             SystemEvent::MouseButtonUp(evnt) => {
+    //                 self.mouse_pos.x = evnt.x;
+    //                 self.mouse_pos.y = evnt.y;
+    //             }
+    //             SystemEvent::MouseDoubleClick(evnt) => {
+    //                 self.mouse_pos.x = evnt.x;
+    //                 self.mouse_pos.y = evnt.y;
+    //             }
+    //             SystemEvent::MouseMove(evnt) => {
+    //                 self.mouse_pos.x = evnt.x;
+    //                 self.mouse_pos.y = evnt.y;
+    //             }
+    //             SystemEvent::MouseWheel(evnt) => {
+    //                 self.mouse_pos.x = evnt.x;
+    //                 self.mouse_pos.y = evnt.y;
+    //             }
+    //             SystemEvent::KeyModifierChanged(evnt) => {
+    //                 self.keymodifier_state = evnt.new_state;
+    //             }
+    //             _ => {}
+    //         }
+    //         return event;
+    //     }
+    //     // if no events are in the event queue --> check if a command is present
+    //     if let Some(cmd) = self.commands.pop_front() {
+    //         cmd.generate_event(self.mouse_pos, self.keymodifier_state, &mut self.sys_events);
+    //         // check for paint command
+    //         if !self.ignore_paint_command {
+    //             if let Some(title) = cmd.get_paint_command_title() {
+    //                 self.paint_title = title;
+    //                 RuntimeManager::get().request_repaint();
+    //                 self.paint = true;
+    //                 return SystemEvent::None;
+    //             }
+    //         }
+    //         match cmd {
+    //             Command::MouseHold(_)
+    //             | Command::MouseRelease(_)
+    //             | Command::MouseClick(_)
+    //             | Command::MouseDoubleClick(_)
+    //             | Command::MouseMove(_)
+    //             | Command::MouseDrag(_)
+    //             | Command::MouseWheel(_)
+    //             | Command::Paint(_)
+    //             | Command::Resize(_)
+    //             | Command::KeyPresed(_)
+    //             | Command::KeyModifier(_)
+    //             | Command::KeyTypeText(_) => {
+    //                 return SystemEvent::None;
+    //             }
+    //             Command::PaintEnable(obj) => {
+    //                 self.ignore_paint_command = !obj.is_paint_enabled();
+    //                 return SystemEvent::None;
+    //             }
+    //             Command::ErrorDisable(obj) => {
+    //                 self.errors_disabled = obj.is_error_disabled();
+    //                 return SystemEvent::None;
+    //             }
+    //             Command::CheckHash(obj) => {
+    //                 self.paint = false; // I don't want to paint anything --> just store the hash
+    //                 self.hash_to_test = Some(obj.get_hash()); // next time I paint --> I will check it
+    //                 RuntimeManager::get().request_repaint();
+    //                 return SystemEvent::None;
+    //             }
+    //             Command::CheckCursor(obj) => {
+    //                 self.paint = false; // I don't want to paint anything --> just store the hash
+    //                 self.cursor_point_to_check = Some(obj.get_point()); // next time I paint --> I will check it
+    //                 RuntimeManager::get().request_repaint();
+    //                 return SystemEvent::None;
+    //             }
 
-    fn get_system_event(&mut self) -> SystemEvent {
-        // if there is any event in the que --> return that event
-        if let Some(event) = self.sys_events.pop_front() {
-            match event {
-                SystemEvent::Resize(new_size) => {
-                    self.size.width = new_size.width;
-                    self.size.height = new_size.height;
-                }
-                SystemEvent::MouseButtonDown(evnt) => {
-                    self.mouse_pos.x = evnt.x;
-                    self.mouse_pos.y = evnt.y;
-                }
-                SystemEvent::MouseButtonUp(evnt) => {
-                    self.mouse_pos.x = evnt.x;
-                    self.mouse_pos.y = evnt.y;
-                }
-                SystemEvent::MouseDoubleClick(evnt) => {
-                    self.mouse_pos.x = evnt.x;
-                    self.mouse_pos.y = evnt.y;
-                }
-                SystemEvent::MouseMove(evnt) => {
-                    self.mouse_pos.x = evnt.x;
-                    self.mouse_pos.y = evnt.y;
-                }
-                SystemEvent::MouseWheel(evnt) => {
-                    self.mouse_pos.x = evnt.x;
-                    self.mouse_pos.y = evnt.y;
-                }
-                SystemEvent::KeyModifierChanged(evnt) => {
-                    self.keymodifier_state = evnt.new_state;
-                }
-                _ => {}
-            }
-            return event;
-        }
-        // if no events are in the event queue --> check if a command is present
-        if let Some(cmd) = self.commands.pop_front() {
-            cmd.generate_event(self.mouse_pos, self.keymodifier_state, &mut self.sys_events);
-            // check for paint command
-            if !self.ignore_paint_command {
-                if let Some(title) = cmd.get_paint_command_title() {
-                    self.paint_title = title;
-                    RuntimeManager::get().request_repaint();
-                    self.paint = true;
-                    return SystemEvent::None;
-                }
-            }
-            match cmd {
-                Command::MouseHold(_)
-                | Command::MouseRelease(_)
-                | Command::MouseClick(_)
-                | Command::MouseDoubleClick(_)
-                | Command::MouseMove(_)
-                | Command::MouseDrag(_)
-                | Command::MouseWheel(_)
-                | Command::Paint(_)
-                | Command::Resize(_)
-                | Command::KeyPresed(_)
-                | Command::KeyModifier(_)
-                | Command::KeyTypeText(_) => {
-                    return SystemEvent::None;
-                }
-                Command::PaintEnable(obj) => {
-                    self.ignore_paint_command = !obj.is_paint_enabled();
-                    return SystemEvent::None;
-                }
-                Command::ErrorDisable(obj) => {
-                    self.errors_disabled = obj.is_error_disabled();
-                    return SystemEvent::None;
-                }
-                Command::CheckHash(obj) => {
-                    self.paint = false; // I don't want to paint anything --> just store the hash
-                    self.hash_to_test = Some(obj.get_hash()); // next time I paint --> I will check it
-                    RuntimeManager::get().request_repaint();
-                    return SystemEvent::None;
-                }
-                Command::CheckCursor(obj) => {
-                    self.paint = false; // I don't want to paint anything --> just store the hash
-                    self.cursor_point_to_check = Some(obj.get_point()); // next time I paint --> I will check it
-                    RuntimeManager::get().request_repaint();
-                    return SystemEvent::None;
-                }
+    //             Command::ClipboardSetText(obj) => {
+    //                 self.set_clipboard_text(obj.get_text());
+    //                 return SystemEvent::None;
+    //             }
+    //             Command::ClipboardClear(_) => {
+    //                 self.set_clipboard_text("");
+    //                 return SystemEvent::None;
+    //             }
+    //             Command::CheckClipboardText(obj) => {
+    //                 if obj.get_text() != self.clipboard_text {
+    //                     if self.errors_disabled {
+    //                         println!(
+    //                             "\x1b[91;40m[Error] Invalid clipboard text: (expecting: '{}' but found '{}')\x1b[0m",
+    //                             obj.get_text(),
+    //                             self.clipboard_text
+    //                         );
+    //                     } else {
+    //                         panic!(
+    //                             "Invalid clipboard text: (expecting: '{}' but found '{}')",
+    //                             obj.get_text(),
+    //                             self.clipboard_text
+    //                         );
+    //                     }
+    //                 }
+    //                 return SystemEvent::None;
+    //             }
+    //         }
+    //     }
 
-                Command::ClipboardSetText(obj) => {
-                    self.set_clipboard_text(obj.get_text());
-                    return SystemEvent::None;
-                }
-                Command::ClipboardClear(_) => {
-                    self.set_clipboard_text("");
-                    return SystemEvent::None;
-                }
-                Command::CheckClipboardText(obj) => {
-                    if obj.get_text() != self.clipboard_text {
-                        if self.errors_disabled {
-                            println!(
-                                "\x1b[91;40m[Error] Invalid clipboard text: (expecting: '{}' but found '{}')\x1b[0m",
-                                obj.get_text(),
-                                self.clipboard_text
-                            );
-                        } else {
-                            panic!(
-                                "Invalid clipboard text: (expecting: '{}' but found '{}')",
-                                obj.get_text(),
-                                self.clipboard_text
-                            );
-                        }
-                    }
-                    return SystemEvent::None;
-                }
-            }
-        }
-
-        // if nothing else works, close the app (script has finished)
-        SystemEvent::AppClose
-    }
+    //     // if nothing else works, close the app (script has finished)
+    //     SystemEvent::AppClose
+    // }
 
     fn get_clipboard_text(&self) -> Option<String> {
         if self.clipboard_text.is_empty() {
@@ -476,5 +476,9 @@ impl Terminal for DebugTerminal {
 
     fn has_clipboard_text(&self) -> bool {
         !self.clipboard_text.is_empty()
+    }
+    
+    fn on_resize(&mut self, new_size: Size) {
+        todo!()
     }
 }
