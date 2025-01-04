@@ -109,7 +109,7 @@ impl ThreadLogic {
         if self.paused {
             Duration::MAX
         } else {
-            Duration::from_micros(self.interval as u64)
+            Duration::from_millis(self.interval as u64)
         }
     }
 }
