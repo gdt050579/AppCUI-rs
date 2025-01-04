@@ -16,6 +16,15 @@ pub enum Fit
     None
 }
 
+#[repr(u8)]
+#[derive(Clone,Copy,PartialEq,Eq)]
+pub enum YAxes
+{
+    MinMax(i32,i32),
+    Auto,
+    Visible,
+}
+
 #[EnumBitFlags(bits = 8)]
 pub enum Flags {
     ScrollBars = 0x0001,

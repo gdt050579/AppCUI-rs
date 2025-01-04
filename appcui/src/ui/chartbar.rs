@@ -6,5 +6,5 @@ pub mod events;
 mod tests;
 
 pub use self::chartbar::ChartBar;
-pub use self::initialization_flags::{ Type, Flags };
+pub use self::initialization_flags::{ Type, YAxes, Flags };
 pub use self::value::Value;
