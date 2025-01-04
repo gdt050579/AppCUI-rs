@@ -1,4 +1,4 @@
-use std::sync::mpsc::Receiver;
+use std::sync::mpsc::{Receiver, Sender};
 
 use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
@@ -87,6 +87,7 @@ pub(crate) struct RuntimeManager {
     modal_windows: Vec<Handle<UIElement>>,
     to_remove_list: Vec<Handle<UIElement>>,
     event_receiver: Receiver<SystemEvent>,
+    event_sender: Sender<SystemEvent>,
     #[cfg(feature = "EVENT_RECORDER")]
     event_recorder: super::event_recorder::EventRecorder,
 }
@@ -103,6 +104,7 @@ impl RuntimeManager {
             theme: builder.theme,
             terminal: term,
             event_receiver: receiver,
+            event_sender: sender,
             surface,
             desktop_handle: Handle::new(0),
             tooltip: ToolTip::new(),
@@ -395,12 +397,8 @@ impl RuntimeManager {
     }
 
     #[inline(always)]
-    pub(crate) fn get_timer_manager(&mut self) -> &mut TimerManager {
-        &mut self.timers_manager
-    }
-    #[inline(always)]
-    pub(crate) fn request_timer_threads_update(&mut self) {
-        self.request_update_timer_threads = true;
+    pub(crate) fn get_system_event_sender(&self) -> std::sync::mpsc::Sender<SystemEvent> {
+        self.event_sender.clone()
     }
 
     #[inline(always)]
@@ -559,6 +557,9 @@ impl RuntimeManager {
             SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
             SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
             SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
+            SystemEvent::TimerTickUpdate(event) => self.process_timer_tick_update_event(event.id, event.tick.value()),
+            SystemEvent::TimerStart(event) => self.process_timer_start_event(event.id, event.tick.value()),
+            SystemEvent::TimerPaused(event) => self.process_timer_paused_event(event.id, event.tick.value()),
         }
     }
     fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
@@ -1705,6 +1706,73 @@ impl ThemeMethods for RuntimeManager {
             let base = element.base();
             for child_handle in base.children.iter() {
                 self.update_theme_for_control(*child_handle);
+            }
+        }
+    }
+}
+impl TimerMethods for RuntimeManager {
+    #[inline(always)]
+    fn get_timer_manager(&mut self) -> &mut TimerManager {
+        &mut self.timers_manager
+    }
+    #[inline(always)]
+    fn request_timer_threads_update(&mut self) {
+        self.request_update_timer_threads = true;
+    }
+    #[inline(always)]
+    fn timer_id_to_control(&mut self, id: u8) -> Option<&mut ControlManager> {
+        let h = self.timers_manager.control_handle(id);
+        if h.is_none() {
+            None
+        } else {
+            let controls = unsafe { &mut *self.controls };
+            controls.get_mut(h.cast())
+        }
+    }
+
+    fn process_timer_tick_update_event(&mut self, id: u8, tick: u64) {
+        if let Some(cm) = self.timer_id_to_control(id) {
+            if TimerEvents::on_update(cm.control_mut(), tick) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+    }
+
+    fn process_timer_paused_event(&mut self, id: u8, tick: u64) {
+        let already_paused = if let Some(timer) = self.timers_manager.index_mut(id) {
+            let p = timer.is_paused();
+            timer.set_pause_state();
+            p
+        } else {
+            false
+        };
+        if !already_paused {
+            if let Some(cm) = self.timer_id_to_control(id) {
+                if TimerEvents::on_pause(cm.control_mut(), tick) == EventProcessStatus::Processed {
+                    self.repaint = true;
+                }
+            }
+        }
+    }
+
+    fn process_timer_start_event(&mut self, id: u8, tick: u64) {
+        let already_running = if let Some(timer) = self.timers_manager.index_mut(id) {
+            let p = timer.is_paused();
+            timer.set_running_state();
+            p
+        } else {
+            false
+        };
+        if !already_running {
+            if let Some(cm) = self.timer_id_to_control(id) {
+                let result = if tick == 0 {
+                    TimerEvents::on_start(cm.control_mut())
+                } else {
+                    TimerEvents::on_resume(cm.control_mut(), tick)
+                };
+                if result == EventProcessStatus::Processed {
+                    self.repaint = true;
+                }
             }
         }
     }

@@ -45,10 +45,40 @@ pub(crate) struct KeyModifierChangedEvent {
     pub(crate) old_state: KeyModifier,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(crate) struct TimerTick {
+    low: u32,
+    hi: u32,
+}
+impl From<u64> for TimerTick {
+    #[inline(always)]
+    fn from(value: u64) -> Self {
+        Self {
+            low: (value & 0xFFFF_FFFF) as u32,
+            hi: (value >> 32) as u32,
+        }
+    }
+}
+impl TimerTick {
+    pub(crate) fn value(&self) -> u64 {
+        (self.low as u64) | ((self.hi as u64) << 32)
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(crate) struct TimerTickUpdateEvent {
-    id: u8,
-    tick: u64,
+    pub(crate) id: u8,
+    pub(crate) tick: TimerTick,
+}
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) struct TimerStartEvent {
+    pub(crate) id: u8,
+    pub(crate) tick: TimerTick,
+}
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub(crate) struct TimerPausedEvent {
+    pub(crate) id: u8,
+    pub(crate) tick: TimerTick,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -62,7 +92,9 @@ pub(crate) enum SystemEvent {
     MouseDoubleClick(MouseDoubleClickEvent),
     MouseMove(MouseMoveEvent),
     MouseWheel(MouseWheelEvent),
-    //TimerTickUpdate(TimerTickUpdateEvent),
+    TimerTickUpdate(TimerTickUpdateEvent),
+    TimerStart(TimerStartEvent),
+    TimerPaused(TimerPausedEvent),
 }
 
 impl SystemEvent {

@@ -1,7 +1,10 @@
 use crate::system::RuntimeManager;
+use crate::system::runtime_manager_traits::TimerMethods;
+use crate::terminals::SystemEvent;
 
 use super::Command;
 use super::{super::Handle, thread_logic::ThreadLogic};
+use std::sync::mpsc::Sender;
 use std::{
     sync::{Arc, Condvar, Mutex},
     thread,
@@ -42,6 +45,10 @@ impl Timer {
     pub(super) fn handle(&self) -> Handle<Timer> {
         self.handle
     }
+    #[inline(always)]
+    pub(super) fn control_handle(&self) -> Handle<()> {
+        self.control_handle
+    }
     pub(super) fn update_control_handle(&mut self, control_handle: Handle<()>) {
         if (self.state == TimerState::RequiresControlHandle) && (!control_handle.is_none()) {
             self.control_handle = control_handle;
@@ -56,15 +63,15 @@ impl Timer {
     pub(super) fn is_closed(&self) -> bool {
         self.state == TimerState::Terminate
     }
-    pub(super) fn start_thread(&mut self) {
-        let mut thread_logic = ThreadLogic::new(self.control_handle, self.requested_command);
+    pub(super) fn start_thread(&mut self, sender: Sender<SystemEvent>) {
+        let mut thread_logic = ThreadLogic::new(self.handle.index() as u8, self.requested_command);
         let synk = self.synk.clone();
         thread::spawn(move || {
-            thread_logic.run(synk);
+            thread_logic.run(synk, sender);
         });
         self.state = match self.requested_command {
             Command::Start(_) | Command::Resume => TimerState::Running,
-            _ => TimerState::Paused
+            _ => TimerState::Paused,
         };
     }
     fn send_command(&mut self, command: Command) {
@@ -101,8 +108,7 @@ impl Timer {
     }
     pub fn stop(&mut self) {
         match self.state {
-            TimerState::Running |
-            TimerState::Paused => {
+            TimerState::Running | TimerState::Paused => {
                 self.send_command(Command::Stop);
             }
             _ => {}
@@ -111,6 +117,19 @@ impl Timer {
         RuntimeManager::get().request_timer_threads_update();
     }
     pub fn is_paused(&self) -> bool {
-        false
+        self.state == TimerState::Paused
+    }
+    pub fn is_running(&self) -> bool {
+        self.state == TimerState::Running
+    }
+    pub(in super::super) fn set_pause_state(&mut self) {
+        if self.state == TimerState::Running {
+            self.state = TimerState::Paused
+        }
+    }
+    pub(in super::super) fn set_running_state(&mut self) {
+        if self.state == TimerState::Paused {
+            self.state = TimerState::Running
+        }
     }
 }

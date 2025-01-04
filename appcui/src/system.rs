@@ -33,6 +33,7 @@ pub use self::error::ErrorKind;
 pub (crate) use self::runtime_manager::RuntimeManager;
 pub (crate) use self::runtime_manager_traits::LayoutMethods;
 pub (crate) use self::runtime_manager_traits::PaintMethods;
+pub (crate) use self::runtime_manager_traits::TimerMethods;
 pub (crate) use self::tooltip::ToolTip;
 pub use self::builder::Builder;
 pub use self::timer::Timer;

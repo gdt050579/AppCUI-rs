@@ -1,5 +1,7 @@
-use super::super::Handle;
+use crate::terminals::*;
+
 use super::Command;
+use std::sync::mpsc::Sender;
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::Duration;
 
@@ -7,23 +9,23 @@ use std::time::Duration;
 pub(crate) struct ThreadLogic {
     tick: u64,
     interval: u32,
-    handle: Handle<()>,
+    id: u8,
     paused: bool,
 }
 
 impl ThreadLogic {
-    pub(super) fn new(handle: Handle<()>, command: Command) -> Self {
+    pub(super) fn new(id: u8, command: Command) -> Self {
         Self {
             tick: 0,
             interval: command.iterval().unwrap_or(1000).max(1),
-            handle,
+            id,
             paused: true,
         }
     }
-    pub(crate) fn run(&mut self, sync: Arc<(Mutex<Command>, Condvar)>) {
+    pub(crate) fn run(&mut self, sync: Arc<(Mutex<Command>, Condvar)>, sender: Sender<SystemEvent>) {
         let (mutex, cvar) = &*sync;
         let mut guard = mutex.lock().unwrap();
-        if self.update_status(*guard) {
+        if self.update_status(*guard, &sender) {
             return; // exit the thread
         }
         let mut time_to_wait = self.wait_time();
@@ -31,10 +33,19 @@ impl ThreadLogic {
             let (new_guard, timeout_status) = cvar.wait_timeout(guard, time_to_wait).unwrap();
             guard = new_guard;
             if timeout_status.timed_out() {
-                // send timer event
+                if sender
+                    .send(SystemEvent::TimerTickUpdate(TimerTickUpdateEvent {
+                        id: self.id,
+                        tick: self.tick.into(),
+                    }))
+                    .is_err()
+                {
+                    self.update_status(Command::Stop, &sender);
+                    return;
+                }
                 self.tick += 1;
             } else {
-                if self.update_status(*guard) {
+                if self.update_status(*guard, &sender) {
                     return;
                 }
                 time_to_wait = self.wait_time();
@@ -42,13 +53,21 @@ impl ThreadLogic {
         }
     }
     /// true means thread should finish, false keep alive
-    fn update_status(&mut self, command: Command) -> bool {
+    #[inline(always)]
+    fn update_status(&mut self, command: Command, sender: &Sender<SystemEvent>) -> bool {
         match command {
             Command::None => false,
             Command::Start(interval) => {
                 self.interval = interval;
                 self.tick = 0;
                 self.paused = false;
+                if sender
+                    .send(SystemEvent::TimerStart(TimerStartEvent { id: self.id, tick: 0.into() }))
+                    .is_err()
+                {
+                    self.paused = true;
+                    return true;
+                }
                 false
             }
             Command::Stop => {
@@ -56,8 +75,19 @@ impl ThreadLogic {
                 true
             }
             Command::Resume => {
-                self.paused = false;
-                false
+                if sender
+                    .send(SystemEvent::TimerStart(TimerStartEvent {
+                        id: self.id,
+                        tick: self.tick.into(),
+                    }))
+                    .is_err()
+                {
+                    self.paused = true;
+                    true
+                } else {
+                    self.paused = false;
+                    false
+                }
             }
             Command::SetInterval(interval) => {
                 self.interval = interval;
@@ -65,7 +95,12 @@ impl ThreadLogic {
             }
             Command::Pause => {
                 self.paused = true;
-                false
+                sender
+                    .send(SystemEvent::TimerPaused(TimerPausedEvent {
+                        id: self.id,
+                        tick: self.tick.into(),
+                    }))
+                    .is_err()
             }
         }
     }

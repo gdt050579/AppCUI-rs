@@ -1,5 +1,5 @@
 use self::control_event_wrapper::CustomEventData;
-
+use crate::system::TimerMethods;
 use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;

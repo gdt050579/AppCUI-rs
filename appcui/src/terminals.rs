@@ -22,6 +22,9 @@ pub(crate) use self::system_event::MouseDoubleClickEvent;
 pub(crate) use self::system_event::MouseMoveEvent;
 pub(crate) use self::system_event::MouseWheelEvent;
 pub(crate) use self::system_event::SystemEvent;
+pub(crate) use self::system_event::TimerTickUpdateEvent;
+pub(crate) use self::system_event::TimerStartEvent;
+pub(crate) use self::system_event::TimerPausedEvent;
 
 pub(super) use self::system_event_thread::SystemEventReader;
 
