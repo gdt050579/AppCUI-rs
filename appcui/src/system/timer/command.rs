@@ -1,4 +1,4 @@
-#[derive(Copy,Clone,Eq,PartialEq)]
+#[derive(Copy,Clone,Eq,PartialEq,Debug)]
 #[repr(u8)]
 pub(crate) enum Command {
     None,

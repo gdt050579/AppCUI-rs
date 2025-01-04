@@ -14,10 +14,10 @@ pub(crate) struct ThreadLogic {
 }
 
 impl ThreadLogic {
-    pub(super) fn new(id: u8, command: Command) -> Self {
+    pub(super) fn new(id: u8, interval: u32) -> Self {
         Self {
             tick: 0,
-            interval: command.iterval().unwrap_or(1000).max(1),
+            interval,
             id,
             paused: true,
         }

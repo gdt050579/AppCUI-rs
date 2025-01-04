@@ -50,6 +50,7 @@ impl TimerManager {
         }
     }
     pub(crate) fn update_threads(&mut self) {
+
         let rm = RuntimeManager::get();
         for slot in self.slots.iter_mut() {
             if let Some(timer) = slot {

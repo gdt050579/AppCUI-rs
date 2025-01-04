@@ -10,7 +10,7 @@ use std::{
     thread,
 };
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u8)]
 enum TimerState {
     RequiresControlHandle,
@@ -20,6 +20,7 @@ enum TimerState {
     Terminate,
 }
 
+#[derive(Debug)]
 pub struct Timer {
     synk: Arc<(Mutex<Command>, Condvar)>,
     control_handle: Handle<()>,
@@ -64,8 +65,11 @@ impl Timer {
         self.state == TimerState::Terminate
     }
     pub(super) fn start_thread(&mut self, sender: Sender<SystemEvent>) {
-        let mut thread_logic = ThreadLogic::new(self.handle.index() as u8, self.requested_command);
-        let synk = self.synk.clone();
+        let mut thread_logic = ThreadLogic::new(self.handle.index() as u8, self.requested_command.iterval().unwrap_or(1000).max(1) );
+        if let Ok(mut guard) = self.synk.0.lock() {
+            *guard = self.requested_command;
+        }
+        let synk = self.synk.clone();        
         thread::spawn(move || {
             thread_logic.run(synk, sender);
         });
