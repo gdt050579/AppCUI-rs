@@ -5,6 +5,7 @@ use crate::terminals::SystemEvent;
 use super::Command;
 use super::{super::Handle, thread_logic::ThreadLogic};
 use std::sync::mpsc::Sender;
+use std::time::Duration;
 use std::{
     sync::{Arc, Condvar, Mutex},
     thread,
@@ -104,11 +105,11 @@ impl Timer {
     pub fn resume(&mut self) {
         self.send_command(Command::Resume);
     }
-    pub fn set_interval(&mut self, new_interval: u32) {
-        self.send_command(Command::SetInterval(new_interval.max(1)));
+    pub fn set_interval(&mut self, duration: Duration) {
+        self.send_command(Command::SetInterval(Timer::duration_to_miliseconds(duration)));
     }
-    pub fn start(&mut self, interval: u64) {
-        self.send_command(Command::Start((interval as u32).max(1)));
+    pub fn start(&mut self, duration: Duration) {
+        self.send_command(Command::Start(Timer::duration_to_miliseconds(duration)));
     }
     pub fn stop(&mut self) {
         match self.state {
@@ -135,5 +136,9 @@ impl Timer {
         if self.state == TimerState::Paused {
             self.state = TimerState::Running
         }
+    }
+    #[inline(always)]
+    fn duration_to_miliseconds(dur: Duration) -> u32 {
+        dur.as_millis().clamp(1, 0xFFFFFFFE) as u32
     }
 }
