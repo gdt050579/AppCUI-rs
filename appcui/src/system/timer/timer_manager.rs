@@ -31,15 +31,7 @@ impl TimerManager {
     }
     pub(crate) fn get_mut(&mut self, handle: Handle<Timer>) -> Option<&mut Timer> {
         if handle.index() < self.slots.len() {
-            if let Some(timer) = &mut self.slots[handle.index()] {
-                if timer.handle() == handle {
-                    Some(timer)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
+            self.slots[handle.index()].as_mut().filter(|timer| timer.handle() == handle)
         } else {
             None
         }

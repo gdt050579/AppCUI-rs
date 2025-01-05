@@ -517,12 +517,10 @@ impl RuntimeManager {
                 if let Some(sys_event) = self.terminal.query_system_event() {
                     self.process_system_event(sys_event);
                 }
-            } else {
-                if let Ok(sys_event) = self.event_receiver.recv() {
-                    self.process_system_event(sys_event);
-                    #[cfg(feature = "EVENT_RECORDER")]
-                    self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
-                }
+            } else if let Ok(sys_event) = self.event_receiver.recv() {
+                self.process_system_event(sys_event);
+                #[cfg(feature = "EVENT_RECORDER")]
+                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
             }
         }
         // loop has ended

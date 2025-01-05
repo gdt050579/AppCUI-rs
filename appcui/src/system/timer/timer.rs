@@ -109,7 +109,7 @@ impl Timer {
         self.send_command(Command::Resume);
     }
     /// Set the interval of the timer. If the timer is running, the interval will be changed imediatelly. If the timer is paused, the interval will be changed when the timer is resumed.
-    /// The interval (**duration** parameter) will be clamped between 1 and 0xFFFFFFFE miliseconds.
+    /// The interval (**duration** parameter) will be clamped between 1 and 0xFFFFFFFE miliseconds. 
     pub fn set_interval(&mut self, duration: Duration) {
         self.send_command(Command::SetInterval(Timer::duration_to_miliseconds(duration)));
     }

@@ -12,9 +12,8 @@ pub(crate) trait SystemEventReader {
             while !should_close {
                 if let Some(ev) = self.read() {
                     should_close = ev.should_close();
-                    match sender.send(ev) {
-                        Err(_) => should_close = true,
-                        _ => {}
+                    if sender.send(ev).is_err() {
+                        should_close = true
                     }
                 }
             }
