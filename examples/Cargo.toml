@@ -159,3 +159,7 @@ path = "calculator/main.rs"
 [[example]]
 name = "theme_switcher"
 path = "theme_switcher/main.rs"
+
+[[example]]
+name = "timer"
+path = "timer/main.rs"
