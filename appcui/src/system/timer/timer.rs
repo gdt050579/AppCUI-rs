@@ -100,18 +100,27 @@ impl Timer {
             }
         }
     }
+    /// Pause the timer
     pub fn pause(&mut self) {
         self.send_command(Command::Pause);
     }
+    /// Resume the timer. The internal tick counter will not be modified.
     pub fn resume(&mut self) {
         self.send_command(Command::Resume);
     }
+    /// Set the interval of the timer. If the timer is running, the interval will be changed imediatelly. If the timer is paused, the interval will be changed when the timer is resumed.
+    /// The interval (**duration** parameter) will be clamped between 1 and 0xFFFFFFFE miliseconds.
     pub fn set_interval(&mut self, duration: Duration) {
         self.send_command(Command::SetInterval(Timer::duration_to_miliseconds(duration)));
     }
+    /// Start the timer with the specified duration
+    /// If the timer already has an associated thread it will be used. Otherwise, a new thread will be started.
+    /// The internal tick counter will be reset to 0.   
+    /// The interval (**duration** parameter) will be clamped between 1 and 0xFFFFFFFE miliseconds.
     pub fn start(&mut self, duration: Duration) {
         self.send_command(Command::Start(Timer::duration_to_miliseconds(duration)));
     }
+    /// Stop the timer. closes the associated thread and releases the internal timer slot so that other control can use it.
     pub fn stop(&mut self) {
         match self.state {
             TimerState::Running | TimerState::Paused => {
@@ -122,9 +131,11 @@ impl Timer {
         self.state = TimerState::Terminate;
         RuntimeManager::get().request_timer_threads_update();
     }
+    /// Returns true if the timer is paused or false otherwise (running or stopped)
     pub fn is_paused(&self) -> bool {
         self.state == TimerState::Paused
     }
+    /// Returns true if the timer is running or false otherwise (paused or stopped)
     pub fn is_running(&self) -> bool {
         self.state == TimerState::Running
     }
