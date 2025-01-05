@@ -33,6 +33,7 @@ impl ThreadLogic {
             let (new_guard, timeout_status) = cvar.wait_timeout(guard, time_to_wait).unwrap();
             guard = new_guard;
             if timeout_status.timed_out() {
+                self.tick += 1;
                 if sender
                     .send(SystemEvent::TimerTickUpdate(TimerTickUpdateEvent {
                         id: self.id,
@@ -43,7 +44,6 @@ impl ThreadLogic {
                     self.update_status(Command::Stop, &sender);
                     return;
                 }
-                self.tick += 1;
             } else {
                 if self.update_status(*guard, &sender) {
                     return;

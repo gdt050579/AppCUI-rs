@@ -101,13 +101,13 @@ pub trait TimerEvents {
     fn on_start(&mut self) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    fn on_resume(&mut self, _tick: u64) -> EventProcessStatus {
+    fn on_resume(&mut self, _ticks: u64) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    fn on_pause(&mut self, _tick: u64) -> EventProcessStatus {
+    fn on_pause(&mut self, _ticks: u64) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }    
-    fn on_update(&mut self, _tick: u64) -> EventProcessStatus {
+    fn on_update(&mut self, _ticks: u64) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }

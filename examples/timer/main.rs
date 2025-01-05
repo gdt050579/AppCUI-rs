@@ -1,54 +1,103 @@
 mod digits;
-use std::time::Duration;
 use appcui::prelude::*;
-
-
+use std::time::Duration;
 
 #[Window(events = ButtonEvents+ TimerEvents)]
+#[derive(Default)]
 struct MyWin {
-    h: Handle<ListBox>,
+    c: Handle<Canvas>,
+    b_start: Handle<Button>,
+    b_pause: Handle<Button>,
+    b_resume: Handle<Button>,
 }
 impl MyWin {
     fn new() -> Self {
-        let mut w = Self { base: window!("Test, d:c"), h: Handle::None };
-        w.h = w.add(listbox!("x:0,y:0,w:100%,h:50%,flags:Autoscroll"));
-        w.add(button!("Test,d:b,w:10"));
+        let mut w = Self {
+            base: window!("Timer, d:c,w:36,h:13"),
+            ..Default::default()
+        };
+        w.c = w.add(canvas!("x:1,y:1,w:32,h:7,size:32x7,back:{' ',white,black}"));
+        w.b_start = w.add(button!("&Start,x:1,y:9,w:10"));
+        w.b_pause = w.add(button!("&Pause,x:12,y:9,w:10,enable: false"));
+        w.b_resume = w.add(button!("&Resume,x:23,y:9,w:10,enable: false"));
         w
     }
-    fn log(&mut self, text: &str) {
-        let h = self.h;
-        if let Some(lb) = self.control_mut(h){
-            lb.add(text);
+    fn update_timer(&mut self, seconds: u64, paused: bool) {
+        let theme = self.theme();
+        let attr = if paused { theme.text.error } else { theme.text.normal };
+        let back = Character::with_attributes(' ', theme.editor.normal);
+        let attr_two_points = theme.text.inactive;
+        let c = self.c;
+        if let Some(c) = self.control_mut(c) {
+            let s = c.get_drawing_surface();
+            s.clear(back);
+            let sec = seconds % 60;
+            let min = seconds / 60;
+            let s_second_digit = (sec % 10) as u8;
+            let s_first_digit = (sec / 10) as u8;
+            let m_second_digit = (min % 10) as u8;
+            let m_first_digit = ((min / 10).min(9)) as u8;
+            s.write_string(3, 0, digits::digit_to_text(m_first_digit), attr, true);
+            s.write_string(8, 0, digits::digit_to_text(m_second_digit), attr, true);
+            s.write_string(18, 0, digits::digit_to_text(s_first_digit), attr, true);
+            s.write_string(23, 0, digits::digit_to_text(s_second_digit), attr, true);
+            if ((seconds & 1) == 0) {
+                s.draw_rect(Rect::with_size(14, 1, 3, 2), LineType::Single, attr_two_points);
+                s.draw_rect(Rect::with_size(14, 4, 3, 2), LineType::Single, attr_two_points);
+            }
         }
     }
 }
 impl ButtonEvents for MyWin {
-    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
-        self.log("Attemp to start the timer ...");
-        if let Some(t) = self.timer() {
-            t.start(Duration::from_secs(1));
-        } else {
-            self.log("Fail to start the timer ...");
+    fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
+        if handle == self.b_start {
+            if let Some(t) = self.timer() {
+                t.start(Duration::from_secs(1));
+            }
+        }
+        if handle == self.b_pause {
+            if let Some(t) = self.timer() {
+                t.pause();
+            }
+        }
+        if handle == self.b_resume {
+            if let Some(t) = self.timer() {
+                t.resume();
+            }
         }
         EventProcessStatus::Processed
     }
 }
 impl TimerEvents for MyWin {
     fn on_start(&mut self) -> EventProcessStatus {
-        self.log("Timer started!");
+        self.update_timer(0, false);
+        let h = self.b_pause;
+        if let Some(pause) = self.control_mut(h) {
+            pause.set_enabled(true);
+        }
         EventProcessStatus::Processed
     }
 
-    fn on_resume(&mut self, _tick: u64) -> EventProcessStatus {
+    fn on_resume(&mut self, ticks: u64) -> EventProcessStatus {
+        self.update_timer(ticks, false);
+        let h = self.b_pause;
+        if let Some(pause) = self.control_mut(h) {
+            pause.set_enabled(false);
+        }
         EventProcessStatus::Ignored
     }
 
-    fn on_pause(&mut self, _tick: u64) -> EventProcessStatus {
+    fn on_pause(&mut self, ticks: u64) -> EventProcessStatus {
+        self.update_timer(ticks, true);
+        let h = self.b_resume;
+        if let Some(resume) = self.control_mut(h) {
+            resume.set_enabled(false);
+        }
         EventProcessStatus::Ignored
     }
 
-    fn on_update(&mut self, tick: u64) -> EventProcessStatus {
-        self.log(format!("Tick: {}",tick).as_str());
+    fn on_update(&mut self, ticks: u64) -> EventProcessStatus {
+        self.update_timer(ticks, false);
         EventProcessStatus::Processed
     }
 }
