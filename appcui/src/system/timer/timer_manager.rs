@@ -83,4 +83,12 @@ impl TimerManager {
             None
         }
     }
+    pub(crate) fn terminate_thread(&mut self, index: usize) {
+        if index < self.slots.len() {
+            if let Some(timer) = &mut self.slots[index] {
+                timer.stop();
+            }
+            self.slots[index] = None;
+        } 
+    }
 }

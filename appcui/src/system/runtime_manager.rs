@@ -570,6 +570,7 @@ impl RuntimeManager {
         let mut parent: Handle<UIElement> = Handle::None;
         let mut has_focus = false;
         let mut is_window_control = false;
+        let mut timer_handle: Handle<Timer> = Handle::None;
         // remove the link from its parent if requested
         if unlink_from_parent {
             if let Some(control) = controls.get(handle.cast()) {
@@ -610,8 +611,13 @@ impl RuntimeManager {
             for child in &base.children {
                 self.remove_control(*child, false);
             }
+            timer_handle = control.base().timer_handle;
         }
         controls.remove(handle);
+        if timer_handle.is_none() {
+            self.timers_manager.terminate_thread(timer_handle.index());
+        }
+        
         if has_focus {
             (parent, is_window_control)
         } else {
@@ -1735,6 +1741,9 @@ impl TimerMethods for RuntimeManager {
             if TimerEvents::on_update(cm.control_mut(), tick) == EventProcessStatus::Processed {
                 self.repaint = true;
             }
+        } else {
+            // invalid control (should terminate the timer)
+            self.timers_manager.terminate_thread(id as usize);
         }
     }
 
@@ -1749,6 +1758,9 @@ impl TimerMethods for RuntimeManager {
             if TimerEvents::on_pause(cm.control_mut(), tick) == EventProcessStatus::Processed {
                 self.repaint = true;
             }
+        } else {
+            // invalid control (should terminate the timer)
+            self.timers_manager.terminate_thread(id as usize);
         }
     }
 
@@ -1768,6 +1780,9 @@ impl TimerMethods for RuntimeManager {
             if result == EventProcessStatus::Processed {
                 self.repaint = true;
             }
+        } else {
+            // invalid control (should terminate the timer)
+            self.timers_manager.terminate_thread(id as usize);
         }
     }
 }
