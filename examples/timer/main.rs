@@ -41,10 +41,20 @@ impl MyWin {
             s.write_string(8, 0, digits::digit_to_text(m_second_digit), attr, true);
             s.write_string(18, 0, digits::digit_to_text(s_first_digit), attr, true);
             s.write_string(23, 0, digits::digit_to_text(s_second_digit), attr, true);
-            if ((seconds & 1) == 0) {
+            if (seconds & 1) == 0 {
                 s.draw_rect(Rect::with_size(14, 1, 3, 2), LineType::Single, attr_two_points);
                 s.draw_rect(Rect::with_size(14, 4, 3, 2), LineType::Single, attr_two_points);
             }
+        }
+    }
+    fn set_buttons_state(&mut self, pause_state: bool, resume_state: bool) {
+        let h = self.b_pause;
+        if let Some(pause) = self.control_mut(h) {
+            pause.set_enabled(pause_state);
+        }
+        let h = self.b_resume;
+        if let Some(resume) = self.control_mut(h) {
+            resume.set_enabled(resume_state);
         }
     }
 }
@@ -71,29 +81,20 @@ impl ButtonEvents for MyWin {
 impl TimerEvents for MyWin {
     fn on_start(&mut self) -> EventProcessStatus {
         self.update_timer(0, false);
-        let h = self.b_pause;
-        if let Some(pause) = self.control_mut(h) {
-            pause.set_enabled(true);
-        }
+        self.set_buttons_state(true,false);
         EventProcessStatus::Processed
     }
 
     fn on_resume(&mut self, ticks: u64) -> EventProcessStatus {
         self.update_timer(ticks, false);
-        let h = self.b_pause;
-        if let Some(pause) = self.control_mut(h) {
-            pause.set_enabled(false);
-        }
-        EventProcessStatus::Ignored
+        self.set_buttons_state(true,false);
+        EventProcessStatus::Processed
     }
 
     fn on_pause(&mut self, ticks: u64) -> EventProcessStatus {
         self.update_timer(ticks, true);
-        let h = self.b_resume;
-        if let Some(resume) = self.control_mut(h) {
-            resume.set_enabled(false);
-        }
-        EventProcessStatus::Ignored
+        self.set_buttons_state(false,true);
+        EventProcessStatus::Processed
     }
 
     fn on_update(&mut self, ticks: u64) -> EventProcessStatus {
