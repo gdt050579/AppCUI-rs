@@ -130,7 +130,7 @@ impl RuntimeManager {
             commandbar_event: None,
             menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
-            timers_manager: TimerManager::new(4),
+            timers_manager: TimerManager::new(builder.max_timer_count),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
