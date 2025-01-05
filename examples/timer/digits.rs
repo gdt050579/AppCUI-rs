@@ -7,11 +7,11 @@ static DIGIT_0: &str = "
 ";
 
 static DIGIT_1: &str = "
+    ┐
     │
     │
     │
-    │
-    │
+    ┘
 ";
 
 static DIGIT_2: &str = "
@@ -31,11 +31,11 @@ static DIGIT_3: &str = "
 ";
 
 static DIGIT_4: &str = "
-│   │
+┌   ┐
 │   │
 └───┤
     │
-    │
+    ┘
 ";
 
 static DIGIT_5: &str = "
@@ -59,7 +59,7 @@ static DIGIT_7: &str = "
     │
     │
     │
-    │
+    ┘
 ";
 
 static DIGIT_8: &str = "
@@ -75,7 +75,7 @@ static DIGIT_9: &str = "
 │   │
 └───┤
     │
-    │
+└───┘
 ";
 
 pub(crate) fn digit_to_text(digit: u8) -> &'static str {

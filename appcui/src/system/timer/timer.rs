@@ -71,13 +71,14 @@ impl Timer {
             *guard = self.requested_command;
         }
         let synk = self.synk.clone();        
-        thread::spawn(move || {
-            thread_logic.run(synk, sender);
-        });
         self.state = match self.requested_command {
             Command::Start(_) | Command::Resume => TimerState::Running,
             _ => TimerState::Paused,
         };
+        // last --> start the thread
+        thread::spawn(move || {
+            thread_logic.run(synk, sender);
+        });
     }
     fn send_command(&mut self, command: Command) {
         match self.state {

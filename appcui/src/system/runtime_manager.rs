@@ -1739,40 +1739,34 @@ impl TimerMethods for RuntimeManager {
     }
 
     fn process_timer_paused_event(&mut self, id: u8, tick: u64) {
-        let already_paused = if let Some(timer) = self.timers_manager.index_mut(id) {
-            let p = timer.is_paused();
+        if let Some(timer) = self.timers_manager.index_mut(id) {
             timer.set_pause_state();
-            p
         } else {
-            false
+            // if timer is invalid -> ignore the event
+            return;
         };
-        if !already_paused {
-            if let Some(cm) = self.timer_id_to_control(id) {
-                if TimerEvents::on_pause(cm.control_mut(), tick) == EventProcessStatus::Processed {
-                    self.repaint = true;
-                }
+        if let Some(cm) = self.timer_id_to_control(id) {
+            if TimerEvents::on_pause(cm.control_mut(), tick) == EventProcessStatus::Processed {
+                self.repaint = true;
             }
         }
     }
 
     fn process_timer_start_event(&mut self, id: u8, tick: u64) {
-        let already_running = if let Some(timer) = self.timers_manager.index_mut(id) {
-            let p = timer.is_paused();
+        if let Some(timer) = self.timers_manager.index_mut(id) {
             timer.set_running_state();
-            p
         } else {
-            false
+            // if timer is invalid -> ignore the event
+            return;
         };
-        if !already_running {
-            if let Some(cm) = self.timer_id_to_control(id) {
-                let result = if tick == 0 {
-                    TimerEvents::on_start(cm.control_mut())
-                } else {
-                    TimerEvents::on_resume(cm.control_mut(), tick)
-                };
-                if result == EventProcessStatus::Processed {
-                    self.repaint = true;
-                }
+        if let Some(cm) = self.timer_id_to_control(id) {
+            let result = if tick == 0 {
+                TimerEvents::on_start(cm.control_mut())
+            } else {
+                TimerEvents::on_resume(cm.control_mut(), tick)
+            };
+            if result == EventProcessStatus::Processed {
+                self.repaint = true;
             }
         }
     }

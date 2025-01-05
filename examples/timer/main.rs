@@ -16,7 +16,7 @@ impl MyWin {
             base: window!("Timer, d:c,w:36,h:13"),
             ..Default::default()
         };
-        w.c = w.add(canvas!("x:1,y:1,w:32,h:7,size:32x7,back:{' ',white,black}"));
+        w.c = w.add(canvas!("x:1,y:1,w:32,h:7,size:32x7,back:{' ',white,black},enable:false"));
         w.b_start = w.add(button!("&Start,x:1,y:9,w:10"));
         w.b_pause = w.add(button!("&Pause,x:12,y:9,w:10,enable: false"));
         w.b_resume = w.add(button!("&Resume,x:23,y:9,w:10,enable: false"));
