@@ -36,6 +36,7 @@ impl<T> TreeDataManager<T> where T: ListItem + 'static {
             }
         }
     }
+
     fn inner_add(&mut self, mut item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
         // find the position and set my own handle
         if let Some(index) = self.free.pop() {
@@ -67,5 +68,52 @@ impl<T> TreeDataManager<T> where T: ListItem + 'static {
             self.data.push(Some(item));
         }
         h
+    }
+    fn inner_delete_children(&mut self, parent: Handle<Item<T>>) {
+        if let Some(idx) = self.handle_to_index(parent) {
+            let parent = self.data[idx].as_mut().unwrap();
+            parent.child = Handle::None;
+            let mut h = parent.child;
+            while !h.is_none() {
+                if let Some(idx) = self.handle_to_index(h) {
+                    let next_sibling = self.data[idx].as_mut().unwrap().next_sibling;
+                    self.inner_delete_children(h);                    
+                    self.free.push(idx as u32);
+                    self.data[idx] = None;
+                    h = next_sibling;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+    fn inner_delete(&mut self, handle: Handle<Item<T>>) {
+        if let Some(idx) = self.handle_to_index(handle) {
+            self.inner_delete_children(handle);
+            let item = self.data[idx].as_mut().unwrap();
+            let parent_handle = item.parent;
+            let next_handle = item.next_sibling;
+            let prev_handle = item.prev_sibling;            
+            self.free.push(idx as u32);
+            self.data[idx] = None;
+            // next -> prev
+            if let Some(idx) = self.handle_to_index(next_handle) {
+                let next = self.data[idx].as_mut().unwrap();
+                next.prev_sibling = prev_handle;
+            }
+            // prev -> next
+            if let Some(idx) = self.handle_to_index(prev_handle) {
+                let prev = self.data[idx].as_mut().unwrap();
+                prev.next_sibling = next_handle;
+            }
+            // parent -> child (if needed)
+            if prev_handle.is_none() {
+                // meaning I was the first child
+                if let Some(idx) = self.handle_to_index(parent_handle) {
+                    let parent = self.data[idx].as_mut().unwrap();
+                    parent.child = next_handle;
+                }
+            }
+        }
     }
 }
