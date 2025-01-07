@@ -1,8 +1,8 @@
 use super::super::Column;
 use crate::graphics::{Surface, TextAlignament, CharAttribute};
 use crate::system::Theme;
+use super::RenderMethod;
 use std::cmp::Ordering;
-use crate::ui::listview::RenderMethod;
 
 pub trait ListItem {
     fn columns_count() -> u16 {
