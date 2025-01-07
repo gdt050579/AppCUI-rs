@@ -32,4 +32,6 @@ pub use self::initialization_flags::Flags;
 pub use self::item::Item;
 pub use self::treeview::TreeView;
 
+use self::tree_data_manager::TreeDataManager;
+
 
