@@ -8,19 +8,24 @@ where
 {
     data: Vec<Option<Item<T>>>,
     free: Vec<u32>,
+    first_root_child: Handle<Item<T>>,
 }
 
-impl<T> TreeDataManager<T> where T: ListItem + 'static {
+impl<T> TreeDataManager<T>
+where
+    T: ListItem + 'static,
+{
     pub(super) fn with_capacity(capacity: u32) -> Self {
         Self {
             data: Vec::with_capacity(capacity as usize),
             free: Vec::with_capacity(16),
+            first_root_child: Handle::None,
         }
     }
     fn handle_to_index(&self, handle: Handle<Item<T>>) -> Option<usize> {
         if handle.is_none() {
             return None;
-        }   
+        }
         let idx = handle.index();
         if idx >= self.data.len() {
             None
@@ -43,7 +48,7 @@ impl<T> TreeDataManager<T> where T: ListItem + 'static {
             item.handle = Handle::new(index);
         } else {
             item.handle = Handle::new(self.data.len() as u32);
-        }        
+        }
         // add to parent
         let prev_child = if let Some(idx) = self.handle_to_index(parent) {
             // I kwno that the parent is not None
@@ -52,7 +57,9 @@ impl<T> TreeDataManager<T> where T: ListItem + 'static {
             parent.child = item.handle;
             h
         } else {
-            Handle::None
+            let h = self.first_root_child;
+            self.first_root_child = item.handle;
+            h
         };
         if let Some(idx) = self.handle_to_index(prev_child) {
             let prev_child = self.data[idx].as_mut().unwrap();
@@ -62,14 +69,20 @@ impl<T> TreeDataManager<T> where T: ListItem + 'static {
         // move to vector
         let idx = item.handle.index() as usize;
         let h = item.handle;
-        if idx<self.data.len() {
+        if idx < self.data.len() {
             self.data[idx] = Some(item);
         } else {
             self.data.push(Some(item));
         }
         h
     }
-    fn inner_delete_children(&mut self, parent: Handle<Item<T>>) {
+    pub(super) fn add(&mut self, value: T) -> Handle<Item<T>> {
+        self.inner_add(Item::from(value), Handle::None)
+    }
+    pub(super) fn add_to_parent(&mut self, mut item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
+        self.inner_add(item, parent)
+    }
+    pub(super) fn delete_children(&mut self, parent: Handle<Item<T>>) {
         if let Some(idx) = self.handle_to_index(parent) {
             let parent = self.data[idx].as_mut().unwrap();
             parent.child = Handle::None;
@@ -77,7 +90,7 @@ impl<T> TreeDataManager<T> where T: ListItem + 'static {
             while !h.is_none() {
                 if let Some(idx) = self.handle_to_index(h) {
                     let next_sibling = self.data[idx].as_mut().unwrap().next_sibling;
-                    self.inner_delete_children(h);                    
+                    self.delete_children(h);
                     self.free.push(idx as u32);
                     self.data[idx] = None;
                     h = next_sibling;
@@ -87,13 +100,13 @@ impl<T> TreeDataManager<T> where T: ListItem + 'static {
             }
         }
     }
-    fn inner_delete(&mut self, handle: Handle<Item<T>>) {
+    pub(super) fn delete(&mut self, handle: Handle<Item<T>>) {
         if let Some(idx) = self.handle_to_index(handle) {
-            self.inner_delete_children(handle);
+            self.delete_children(handle);
             let item = self.data[idx].as_mut().unwrap();
             let parent_handle = item.parent;
             let next_handle = item.next_sibling;
-            let prev_handle = item.prev_sibling;            
+            let prev_handle = item.prev_sibling;
             self.free.push(idx as u32);
             self.data[idx] = None;
             // next -> prev
@@ -115,5 +128,17 @@ impl<T> TreeDataManager<T> where T: ListItem + 'static {
                 }
             }
         }
+    }
+    pub(super) fn next(&self, handle: Handle<Item<T>>) -> Handle<Item<T>> {
+        if let Some(idx) = self.handle_to_index(handle) {
+            let item = self.data[idx].as_ref().unwrap();
+            item.next_sibling
+        } else {
+            Handle::None
+        }
+    }
+    #[inline(always)]
+    pub(super) fn first(&self) -> Handle<Item<T>> {
+        self.first_root_child
     }
 }
