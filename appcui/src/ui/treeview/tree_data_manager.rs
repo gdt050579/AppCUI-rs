@@ -79,7 +79,7 @@ where
     pub(super) fn add(&mut self, value: T) -> Handle<Item<T>> {
         self.inner_add(Item::from(value), Handle::None)
     }
-    pub(super) fn add_to_parent(&mut self, mut item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
+    pub(super) fn add_to_parent(&mut self, item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
         self.inner_add(item, parent)
     }
     pub(super) fn delete_children(&mut self, parent: Handle<Item<T>>) {
@@ -125,6 +125,9 @@ where
                 if let Some(idx) = self.handle_to_index(parent_handle) {
                     let parent = self.data[idx].as_mut().unwrap();
                     parent.child = next_handle;
+                } else {
+                    // I am in root
+                    self.first_root_child = next_handle;
                 }
             }
         }
@@ -140,5 +143,13 @@ where
     #[inline(always)]
     pub(super) fn first(&self) -> Handle<Item<T>> {
         self.first_root_child
+    }
+    #[inline(always)]
+    pub(super) fn get(&self, handle: Handle<Item<T>>) -> Option<&Item<T>> {
+        if let Some(idx) = self.handle_to_index(handle) {
+            self.data[idx].as_ref()
+        } else {
+            None
+        }
     }
 }
