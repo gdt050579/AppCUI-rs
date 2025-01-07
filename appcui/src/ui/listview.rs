@@ -32,8 +32,9 @@ pub use self::formats::volume_format::VolumeFormat;
 pub use self::formats::weight_format::WeightFormat;
 pub use self::groups::Group;
 pub use self::initialization_flags::Flags;
-pub use self::initialization_flags::ListItem;
 pub use self::item::Item;
 pub use self::listview::ListView;
 pub use self::render_method::RenderMethod;
 pub use self::view_mode::ViewMode;
+
+pub use crate::ui::components::listitem::ListItem;

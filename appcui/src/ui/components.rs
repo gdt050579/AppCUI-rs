@@ -6,6 +6,7 @@ mod scrollbars;
 pub mod column;
 mod columns_header;
 mod navigator_component;
+pub (in crate::ui) mod listitem;
 
 // pub(crate) use self::scrollbars::VScrollBar;
 // pub(crate) use self::horizontal_scrollbar::HScrollBar;
