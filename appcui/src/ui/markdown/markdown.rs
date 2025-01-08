@@ -20,7 +20,7 @@ pub struct Markdown {
 impl Markdown {
     // Creates a new markdown component with a specified content, layout, and flags.
     pub fn new(content: String, layout: Layout, flags: Flags) -> Self {
-        let (width, height) = (100, 50); //Markdown::compute_dimensions(&content);
+        let (width, height) = (100, 150); //Markdown::compute_dimensions(&content);
 
         Self {
             base: ControlBase::with_status_flags(
@@ -82,6 +82,7 @@ impl OnPaint for Markdown {
                             InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
                             InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
                             InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
+                            InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
                         };
 
                         let content_str = element.to_string();
@@ -108,6 +109,7 @@ impl OnPaint for Markdown {
                                 InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
                                 InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
                                 InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
+                                InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
                             };
 
                             let content_str = element.to_string();
@@ -152,6 +154,7 @@ impl OnPaint for Markdown {
                                 InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
                                 InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
                                 InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
+                                InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
                             };
 
                             let content_str = element.to_string();
@@ -185,6 +188,18 @@ impl OnPaint for Markdown {
                     xlsurface.write_string(0, y_pos, &line, CharAttribute::new(Color::Gray, Color::White, CharFlags::None), false);
                     y_pos += 1;
                 },
+                MarkdownElement::CodeBlock(code) => {
+                    let code_lines = code.lines();
+                    let code_color = Color::Gray;
+                    let background_color = Color::White;
+                    let flags = CharFlags::None;
+                
+                    for line in code_lines {
+                       
+                        xlsurface.write_string(0, y_pos, line, CharAttribute::new(code_color, background_color, flags), false);
+                        y_pos += 1; 
+                    }
+                }
             }
             y_pos += 1;
         }
@@ -209,6 +224,7 @@ fn process_nested_list(depth: u8, nested_items: &Box<MarkdownElement>, x_pos: &m
                                 InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
                                 InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
                                 InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
+                                InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
                             };
 
                             let content_str = element.to_string();
@@ -250,6 +266,7 @@ fn process_nested_list(depth: u8, nested_items: &Box<MarkdownElement>, x_pos: &m
                                 InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
                                 InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
                                 InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
+                                InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
                             };
 
                             let content_str = element.to_string();

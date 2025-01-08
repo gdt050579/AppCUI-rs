@@ -7,7 +7,8 @@ pub enum MarkdownElement {
     Paragraph(Vec<InlineElement>),
     UnorderedList(Vec<ListItem>),
     OrderedList(Vec<ListItem>),
-    HorizontalRule
+    HorizontalRule,
+    CodeBlock(String), 
 }
 
 /// Enum representing list items in Markdown. List items can be simple or nested.
@@ -24,6 +25,7 @@ pub enum InlineElement {
     Bold(String),
     Italic(String),
     Link(String, String),
+    Code(String),
 }
 
 // Temporary implementation to identify easier elements
@@ -34,6 +36,7 @@ impl fmt::Display for InlineElement {
             InlineElement::Bold(content) => write!(f, "**{}**", content),
             InlineElement::Italic(content) => write!(f, "_{}_", content),
             InlineElement::Link(text, url) => write!(f, "[{}]({})", text, url),
+            InlineElement::Code(content) => write!(f, "`{}`", content),
         }
     }
 }
@@ -42,18 +45,31 @@ pub struct MarkdownParser;
 
 impl MarkdownParser {
     /// Parses a string input into a vector of MarkdownElements.
-    /// It identifies headers, lists, and paragraphs in the input.
+    /// It identifies headers, lists, paragraphs, and code blocks in the input.
     pub fn parse(input: &str) -> Vec<MarkdownElement> {
         let mut elements = Vec::new();
         let mut lines = input.lines();
 
+        let mut in_code_block = false;
+        let mut code_block_content = String::new();
+
         while let Some(line) = lines.next() {
             let trimmed = line.trim();
 
-            if trimmed == "---" {
+            // Check for the start or end of a code block
+            if trimmed == "```" {
+                if in_code_block {
+                    // Close code block
+                    elements.push(MarkdownElement::CodeBlock(code_block_content.clone()));
+                    code_block_content.clear();
+                }
+                in_code_block = !in_code_block;
+            } else if in_code_block {
+                code_block_content.push_str(line);
+                code_block_content.push('\n');
+            } else if trimmed == "---" {
                 elements.push(MarkdownElement::HorizontalRule);
-            }
-            else if trimmed.starts_with('#') {
+            } else if trimmed.starts_with('#') {
                 elements.push(Self::parse_header(trimmed));
             } else if trimmed.starts_with('-') {
                 elements.push(Self::parse_list(&mut lines, trimmed, false));
@@ -101,6 +117,13 @@ impl MarkdownParser {
                     i = end + 1;
                     continue;
                 }
+            } else if input[i..].starts_with('`') {
+                let delimiter = '`';
+                if let Some(end) = input[i + 1..].find(delimiter).map(|p| p + i + 1) {
+                    elements.push(InlineElement::Code(input[i + 1..end].to_string()));
+                    i = end + 1;
+                    continue;
+                }
             } else if input[i..].starts_with('[') {
                 if let Some(close_bracket) = input[i + 1..].find(']').map(|p| p + i + 1) {
                     if input[close_bracket + 1..].starts_with('(') {
@@ -114,7 +137,9 @@ impl MarkdownParser {
                     }
                 }
             } else {
-                let next_special = input[i..].find(|c: char| c == '*' || c == '_' || c == '[').unwrap_or(input.len() - i);
+                let next_special = input[i..]
+                    .find(|c: char| c == '*' || c == '_' || c == '[' || c == '`')
+                    .unwrap_or(input.len() - i);
                 elements.push(InlineElement::Text(input[i..i + next_special].to_string()));
                 i += next_special;
             }

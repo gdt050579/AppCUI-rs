@@ -18,7 +18,7 @@ Markdown is a lightweight markup language for creating formatted text using a pl
 
 ### Why use Markdown?
 
-- **Easy to learn**: Simple syntax __bold__ A **ceva**.
+- **Easy to learn**: Simple syntax `__bold__` A **ceva**.
 - __Readable__: Looks great as plain text.
 - **Flexible**: Converts to HTML and other formats.
 
@@ -35,3 +35,15 @@ Here are some Markdown features:
   - Sub-item 1.2
     - Subitem 1.2.1
 - Item 2
+
+#### Code Blocks
+
+Here is an example of inline code: `let x = 10;`
+
+And here is a code block:
+
+```
+fn main() {
+    println!("Hello, world!");
+}
+```

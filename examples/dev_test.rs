@@ -6,9 +6,9 @@ fn main() -> Result<(), appcui::system::Error> {
     let content = fs::read_to_string(file_path).unwrap_or_else(|_| String::new());
     
     let mut a = App::new().build()?;
-    let mut w = window!("Test,d:c,w:130,h:30");
+    let mut w = window!("Test,d:c,w:130,h:40");
     let mut m = Markdown::new(content,
-        Layout::new("x: 1, y: 1, w: 130, h: 80"),
+        Layout::new("x: 1, y: 1, w: 130, h: 100"),
         markdown::Flags::None,
     );
     w.add(m);
