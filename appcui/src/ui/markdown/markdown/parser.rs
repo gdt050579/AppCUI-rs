@@ -6,6 +6,7 @@ pub enum MarkdownElement {
     Header(String, usize),
     Paragraph(Vec<InlineElement>),
     UnorderedList(Vec<ListItem>),
+    OrderedList(Vec<ListItem>),
 }
 
 /// Enum representing list items in Markdown. List items can be simple or nested.
@@ -40,7 +41,7 @@ pub struct MarkdownParser;
 
 impl MarkdownParser {
     /// Parses a string input into a vector of MarkdownElements.
-    /// It identifies headers, unordered lists, and paragraphs in the input.
+    /// It identifies headers, lists, and paragraphs in the input.
     pub fn parse(input: &str) -> Vec<MarkdownElement> {
         let mut elements = Vec::new();
         let mut lines = input.lines();
@@ -51,7 +52,10 @@ impl MarkdownParser {
             if trimmed.starts_with('#') {
                 elements.push(Self::parse_header(trimmed));
             } else if trimmed.starts_with('-') {
-                elements.push(Self::parse_unordered_list(&mut lines, trimmed));
+                elements.push(Self::parse_list(&mut lines, trimmed, false));
+            } else if trimmed.starts_with(|c: char| c.is_digit(10)) && trimmed[1..].starts_with('.')
+            {
+                elements.push(Self::parse_list(&mut lines, trimmed, true));
             } else if !trimmed.is_empty() {
                 elements.push(Self::parse_paragraph(trimmed));
             }
@@ -59,7 +63,7 @@ impl MarkdownParser {
 
         elements
     }
-    
+
     /// Parses a header line (e.g., "# Header") into a `MarkdownElement::Header`
     fn parse_header(line: &str) -> MarkdownElement {
         let level = line.chars().take_while(|&c| c == '#').count();
@@ -114,11 +118,12 @@ impl MarkdownParser {
         elements
     }
 
-    /// Parses an unordered list in Markdown into a `MarkdownElement::UnorderedList`.
-    ///
-    /// This function handles both simple and nested unordered lists by analyzing
-    /// the indentation level of each line and organizing list items hierarchically.
-    fn parse_unordered_list<'a>(lines: &mut impl Iterator<Item = &'a str>, first_line: &str) -> MarkdownElement {
+    /// Parses a list in Markdown into either an `UnorderedList` or `OrderedList`.
+    fn parse_list<'a>(
+        lines: &mut impl Iterator<Item = &'a str>,
+        first_line: &str,
+        ordered: bool,
+    ) -> MarkdownElement {
         let mut list_items = Vec::new();
         let mut current_level = 0;
 
@@ -129,14 +134,31 @@ impl MarkdownParser {
         let mut sublist_stack: Vec<(usize, Vec<ListItem>)> = Vec::new();
 
         current_level = indentation_level(first_line);
-        list_items.push(ListItem::Simple(Self::parse_inline(first_line.trim().trim_start_matches('-').trim())));
+        let content = if ordered {
+            let no_digit_line = first_line.trim_start_matches(|c: char| c.is_digit(10));
+            no_digit_line.trim_start_matches('.').trim()
+        } else {
+            first_line.trim_start_matches('-').trim()
+        };
+        list_items.push(ListItem::Simple(Self::parse_inline(content)));
 
         while let Some(next_line) = lines.next() {
+            let trimmed = next_line.trim();
             let next_level = indentation_level(next_line);
 
-            if next_line.trim().starts_with('-') {
-                let inline_elements = Self::parse_inline(next_line.trim().trim_start_matches('-').trim());
-                let item = ListItem::Simple(inline_elements);
+            let is_ordered =
+                trimmed.starts_with(|c: char| c.is_digit(10)) && trimmed[1..].starts_with('.');
+            let is_unordered = trimmed.starts_with('-');
+
+            if (ordered && is_ordered) || (!ordered && is_unordered) {
+                let content = if ordered {
+                    let no_digit_line = trimmed.trim_start_matches(|c: char| c.is_digit(10));
+                    no_digit_line.trim_start_matches('.').trim()
+                } else {
+                    trimmed.trim_start_matches('-').trim()
+                };
+
+                let item = ListItem::Simple(Self::parse_inline(content));
 
                 if next_level > current_level {
                     // new sublist
@@ -150,11 +172,14 @@ impl MarkdownParser {
                             sublist_stack.push((prev_level, prev_items));
                             break;
                         }
-                        prev_items.push(ListItem::Nested(Box::new(MarkdownElement::UnorderedList(list_items))));
+                        prev_items.push(ListItem::Nested(Box::new(if ordered {
+                            MarkdownElement::OrderedList(list_items)
+                        } else {
+                            MarkdownElement::UnorderedList(list_items)
+                        })));
                         list_items = prev_items;
                         current_level = prev_level;
                     }
-
                     list_items.push(item);
                 } else {
                     // Same level, add the item
@@ -166,10 +191,18 @@ impl MarkdownParser {
         }
 
         while let Some((_, mut prev_items)) = sublist_stack.pop() {
-            prev_items.push(ListItem::Nested(Box::new(MarkdownElement::UnorderedList(list_items))));
+            prev_items.push(ListItem::Nested(Box::new(if ordered {
+                MarkdownElement::OrderedList(list_items)
+            } else {
+                MarkdownElement::UnorderedList(list_items)
+            })));
             list_items = prev_items;
         }
 
-        MarkdownElement::UnorderedList(list_items)
+        if ordered {
+            MarkdownElement::OrderedList(list_items)
+        } else {
+            MarkdownElement::UnorderedList(list_items)
+        }
     }
 }

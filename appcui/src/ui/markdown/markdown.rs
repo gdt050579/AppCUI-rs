@@ -133,6 +133,51 @@ impl OnPaint for Markdown {
                         y_pos += 1;
                     }
                 }
+                MarkdownElement::OrderedList(items) => {
+                    let mut index = 1;
+                    for item in items.iter() {
+                        let mut x_pos: i32 = 0;
+
+                        let elements = match item {
+                            parser::ListItem::Simple(elements) => elements,
+                            parser::ListItem::Nested(items) => {
+                                process_nested_list(1, &items, &mut x_pos, &mut y_pos, xlsurface);
+                                continue;
+                            }
+                        };
+
+                        for (i, element) in elements.iter().enumerate() {
+                            let (color, char_flags) = match element {
+                                InlineElement::Text(_) => (Color::Green, CharFlags::None),
+                                InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
+                                InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
+                                InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
+                            };
+
+                            let content_str = element.to_string();
+
+                            let formatted_content = if i == 0 {
+                                let prefix = index;
+                                index += 1;
+                                format!("{}. {}", prefix, content_str).to_string()
+                            } else {
+                                content_str
+                            };
+
+                            xlsurface.write_string(
+                                x_pos,
+                                y_pos,
+                                &formatted_content,
+                                CharAttribute::new(color, Color::White, char_flags),
+                                false,
+                            );
+
+                            x_pos += formatted_content.chars().count() as i32;
+                        }
+
+                        y_pos += 1;
+                    }
+                },
             }
             y_pos += 1;
         }
@@ -171,6 +216,48 @@ fn process_nested_list(depth: u8, nested_items: &Box<MarkdownElement>, x_pos: &m
                                 false,
                             );
 
+                            *x_pos += formatted_content.chars().count() as i32;
+                        }
+                    }
+                    parser::ListItem::Nested(ref nested) => {
+                        process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface);
+                    }
+                }
+                *y_pos += 1;
+            }
+        },
+        MarkdownElement::OrderedList(ref items) => {
+            let indent = depth as i32 * 4;
+            let mut index = 1;
+
+            for item in items.iter() {
+                match item {
+                    parser::ListItem::Simple(ref elements) => {
+                        // Process simple list items
+                        for (i, element) in elements.iter().enumerate() {
+                            if i == 0 {
+                                *x_pos = indent;
+                            }
+                            let (color, char_flags) = match element {
+                                InlineElement::Text(_) => (Color::Green, CharFlags::None),
+                                InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
+                                InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
+                                InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
+                            };
+
+                            let content_str = element.to_string();
+
+                            let prefix = index;
+                            let formatted_content = if i == 0 { format!("{}. {}",prefix , content_str) } else { content_str };
+
+                            xlsurface.write_string(
+                                *x_pos,
+                                *y_pos,
+                                &formatted_content,
+                                CharAttribute::new(color, Color::White, char_flags),
+                                false,
+                            );
+                            index += 1;
                             *x_pos += formatted_content.chars().count() as i32;
                         }
                     }
