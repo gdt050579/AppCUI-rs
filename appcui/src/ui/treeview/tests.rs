@@ -77,3 +77,21 @@ fn check_tree_manager_chldren() {
     assert_eq!(tm.first(),h1);
     assert_eq!(tm.free_list().len(),31);
 }
+
+#[test]
+fn check_tree_manager_delete_middle_child() {
+    let mut tm = TreeDataManager::<TestData>::with_capacity(10);
+    assert!(tm.first().is_none());
+    let h1 = tm.add(TestData::new("1"));
+    let h2 = tm.add(TestData::new("2"));
+    let h3 = tm.add(TestData::new("3"));
+    assert_eq!(tm.first(),h3);
+    assert_eq!(tm.next(h3),h2);
+    assert_eq!(tm.next(h2),h1);
+    assert!(tm.next(h1).is_none());
+    tm.delete(h2);
+    assert_eq!(tm.first(),h3);
+    assert_eq!(tm.next(h3),h1);
+    assert!(tm.next(h1).is_none());
+    assert_eq!(tm.free_list().len(),1);
+}
