@@ -2,6 +2,7 @@
 
 Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.
 
+---
 
 ## Table of Contents
 
@@ -34,6 +35,3 @@ Here are some Markdown features:
   - Sub-item 1.2
     - Subitem 1.2.1
 - Item 2
-
-
-

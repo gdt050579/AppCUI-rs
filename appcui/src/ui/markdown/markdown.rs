@@ -178,6 +178,13 @@ impl OnPaint for Markdown {
                         y_pos += 1;
                     }
                 },
+                MarkdownElement::HorizontalRule => {
+                    let width = 80;
+                    let line = "-".repeat(width as usize);
+
+                    xlsurface.write_string(0, y_pos, &line, CharAttribute::new(Color::Gray, Color::White, CharFlags::None), false);
+                    y_pos += 1;
+                },
             }
             y_pos += 1;
         }

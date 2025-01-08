@@ -7,6 +7,7 @@ pub enum MarkdownElement {
     Paragraph(Vec<InlineElement>),
     UnorderedList(Vec<ListItem>),
     OrderedList(Vec<ListItem>),
+    HorizontalRule
 }
 
 /// Enum representing list items in Markdown. List items can be simple or nested.
@@ -49,7 +50,10 @@ impl MarkdownParser {
         while let Some(line) = lines.next() {
             let trimmed = line.trim();
 
-            if trimmed.starts_with('#') {
+            if trimmed == "---" {
+                elements.push(MarkdownElement::HorizontalRule);
+            }
+            else if trimmed.starts_with('#') {
                 elements.push(Self::parse_header(trimmed));
             } else if trimmed.starts_with('-') {
                 elements.push(Self::parse_list(&mut lines, trimmed, false));
