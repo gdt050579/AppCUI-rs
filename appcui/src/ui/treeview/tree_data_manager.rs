@@ -54,17 +54,21 @@ where
             // I kwno that the parent is not None
             let parent = self.data[idx].as_mut().unwrap();
             let h = parent.child;
-            parent.child = item.handle;
+            item.depth = parent.depth + 1;
+            parent.child = item.handle;  
+            item.parent = parent.handle;          
             h
         } else {
             let h = self.first_root_child;
             self.first_root_child = item.handle;
+            item.parent = Handle::None;
             h
         };
         if let Some(idx) = self.handle_to_index(prev_child) {
             let prev_child = self.data[idx].as_mut().unwrap();
             prev_child.prev_sibling = item.handle;
             item.next_sibling = prev_child.handle;
+            item.depth = 0;
         }
         // move to vector
         let idx = item.handle.index() as usize;
@@ -79,14 +83,14 @@ where
     pub(super) fn add(&mut self, value: T) -> Handle<Item<T>> {
         self.inner_add(Item::from(value), Handle::None)
     }
-    pub(super) fn add_to_parent(&mut self, item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
-        self.inner_add(item, parent)
+    pub(super) fn add_to_parent(&mut self, value: T, parent: Handle<Item<T>>) -> Handle<Item<T>> {
+        self.inner_add(Item::from(value), parent)
     }
     pub(super) fn delete_children(&mut self, parent: Handle<Item<T>>) {
         if let Some(idx) = self.handle_to_index(parent) {
             let parent = self.data[idx].as_mut().unwrap();
-            parent.child = Handle::None;
             let mut h = parent.child;
+            parent.child = Handle::None;
             while !h.is_none() {
                 if let Some(idx) = self.handle_to_index(h) {
                     let next_sibling = self.data[idx].as_mut().unwrap().next_sibling;
@@ -151,5 +155,9 @@ where
         } else {
             None
         }
+    }
+    #[cfg(test)]
+    pub(super) fn free_list(&self) -> &Vec<u32> {
+        &self.free
     }
 }

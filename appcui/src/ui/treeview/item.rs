@@ -10,7 +10,7 @@ where
     checked: bool,
     attr: Option<CharAttribute>,
     icon: [char;2],
-    depth: u16,
+    pub(super) depth: u16,
     pub(super) handle: Handle<Item<T>>,
     pub(super) parent: Handle<Item<T>>,
     pub(super) child: Handle<Item<T>>,

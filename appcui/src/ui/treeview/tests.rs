@@ -5,7 +5,7 @@ struct TestData {
     text: String,
 }
 impl TestData {
-    pub fn new(text: &'static str) -> Self {
+    pub fn new(text: &str) -> Self {
         Self { text: text.to_string() }   
     }
     pub fn value(&self) -> &str {
@@ -43,4 +43,37 @@ fn check_tree_manager_test_root() {
     assert_eq!(tm.first(),h1);
     tm.delete(h1);
     assert!(tm.first().is_none());
+}
+
+#[test]
+fn check_tree_manager_chldren() {
+    let mut tm = TreeDataManager::<TestData>::with_capacity(10);
+    assert!(tm.first().is_none());
+    let h1 = tm.add(TestData::new("1"));
+    assert_eq!(tm.first(),h1);
+    let h2 = tm.add(TestData::new("2"));
+    for i in 0..10 {
+        tm.add_to_parent(TestData::new(&format!("1.{i}")),h1);
+    }
+    for i in 0..20 {
+        tm.add_to_parent(TestData::new(&format!("2.{i}")),h2);
+    }
+    assert_eq!(tm.first(),h2);
+    assert_eq!(tm.free_list().len(),0);
+    let mut h = tm.get(h2).unwrap().child;
+    for i in 19..=0 {
+        assert_eq!(tm.get(h).unwrap().value().value(),&format!("2.{i}"));
+        h = tm.next(h);
+    }
+    let mut h = tm.get(h1).unwrap().child;
+    for i in 9..=0 {
+        assert_eq!(tm.get(h).unwrap().value().value(),&format!("1.{i}"));
+        h = tm.next(h);
+    }
+    tm.delete_children(h1);
+    assert_eq!(tm.free_list().len(),10);
+    assert!(tm.get(h1).unwrap().child.is_none());
+    tm.delete(h2);
+    assert_eq!(tm.first(),h1);
+    assert_eq!(tm.free_list().len(),31);
 }
