@@ -1,5 +1,8 @@
+use crate::system::Handle;
+
 use super::ListItem;
 use super::TreeDataManager;
+use super::Item;
 
 struct TestData {
     text: String,
@@ -32,9 +35,9 @@ impl ListItem for TestData {
 fn check_tree_manager_test_root() {
     let mut tm = TreeDataManager::<TestData>::with_capacity(10);
     assert!(tm.first().is_none());
-    let h1 = tm.add(TestData::new("Item 1"));
+    let h1 = tm.add(Item::from(TestData::new("Item 1")),Handle::None);
     assert_eq!(tm.first(),h1);
-    let h2 = tm.add(TestData::new("Item 2"));
+    let h2 = tm.add(Item::from(TestData::new("Item 2")),Handle::None);
     assert_eq!(tm.first(),h2);
     assert_eq!(tm.next(h2),h1);
     assert_eq!(tm.get(h1).unwrap().value().value(),"Item 1");
@@ -49,14 +52,14 @@ fn check_tree_manager_test_root() {
 fn check_tree_manager_chldren() {
     let mut tm = TreeDataManager::<TestData>::with_capacity(10);
     assert!(tm.first().is_none());
-    let h1 = tm.add(TestData::new("1"));
+    let h1 = tm.add(Item::from(TestData::new("1")),Handle::None);
     assert_eq!(tm.first(),h1);
-    let h2 = tm.add(TestData::new("2"));
+    let h2 = tm.add(Item::from(TestData::new("2")),Handle::None);
     for i in 0..10 {
-        tm.add_to_parent(TestData::new(&format!("1.{i}")),h1);
+        tm.add(Item::from(TestData::new(&format!("1.{i}"))),h1);
     }
     for i in 0..20 {
-        tm.add_to_parent(TestData::new(&format!("2.{i}")),h2);
+        tm.add(Item::from(TestData::new(&format!("2.{i}"))),h2);
     }
     assert_eq!(tm.first(),h2);
     assert_eq!(tm.free_list().len(),0);
@@ -82,9 +85,9 @@ fn check_tree_manager_chldren() {
 fn check_tree_manager_delete_middle_child() {
     let mut tm = TreeDataManager::<TestData>::with_capacity(10);
     assert!(tm.first().is_none());
-    let h1 = tm.add(TestData::new("1"));
-    let h2 = tm.add(TestData::new("2"));
-    let h3 = tm.add(TestData::new("3"));
+    let h1 = tm.add(Item::from(TestData::new("1")),Handle::None);
+    let h2 = tm.add(Item::from(TestData::new("2")),Handle::None);
+    let h3 = tm.add(Item::from(TestData::new("3")),Handle::None);
     assert_eq!(tm.first(),h3);
     assert_eq!(tm.next(h3),h2);
     assert_eq!(tm.next(h2),h1);

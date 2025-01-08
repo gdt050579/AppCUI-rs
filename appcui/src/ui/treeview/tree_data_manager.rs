@@ -80,11 +80,8 @@ where
         }
         h
     }
-    pub(super) fn add(&mut self, value: T) -> Handle<Item<T>> {
-        self.inner_add(Item::from(value), Handle::None)
-    }
-    pub(super) fn add_to_parent(&mut self, value: T, parent: Handle<Item<T>>) -> Handle<Item<T>> {
-        self.inner_add(Item::from(value), parent)
+    pub(super) fn add(&mut self, item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
+        self.inner_add(item, parent)
     }
     pub(super) fn delete_children(&mut self, parent: Handle<Item<T>>) {
         if let Some(idx) = self.handle_to_index(parent) {
@@ -156,6 +153,10 @@ where
             None
         }
     }
+    #[inline(always)]
+    pub(super) fn len(&self) -> usize {
+        self.data.len()
+    }   
     #[cfg(test)]
     pub(super) fn free_list(&self) -> &Vec<u32> {
         &self.free

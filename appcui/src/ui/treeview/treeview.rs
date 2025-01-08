@@ -23,11 +23,114 @@ where
     pos: usize,
     icon_width: u8,
     hover_status: HoverStatus,
+    refilter_enabled: bool,
 }
 impl<T> TreeView<T>
 where
     T: ListItem + 'static,
 {
+    pub fn new(layout: Layout, flags: Flags) -> Self {
+        Self::with_capacity(16, layout, flags)
+    }
+    pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags) -> Self {
+        let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
+        if flags.contains(Flags::ScrollBars) {
+            status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
+            status_flags |= StatusFlags::IncreaseRightMarginOnFocus;
+        }
+        if flags.contains(Flags::SearchBar) {
+            status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
+        }
+        if flags.contains(Flags::CheckBoxes | Flags::NoSelection) {
+            panic!("Invalid flags combination. `CheckBoxes` and `NoSelection` flags cannot be used together !");
+        }
+
+        let mut lv = Self {
+            base: ControlBase::with_status_flags(layout, status_flags),
+            flags,
+            top_view: 0,
+            pos: 0,
+            manager: TreeDataManager::with_capacity(capacity as u32),
+            filter: Vec::with_capacity(capacity),
+            header: ColumnsHeader::with_capacity(4),
+            comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
+            icon_width: if flags.contains(Flags::LargeIcons) {
+                3 // includes the extra space
+            } else if flags.contains(Flags::SmallIcons) {
+                2 // includes the extra space
+            } else {
+                0 // No extra space
+            },
+            refilter_enabled: true,
+            //start_mouse_select: 0,
+            //mouse_check_mode: CheckMode::False,
+            hover_status: HoverStatus::None,
+            //selected_items_count: 0,
+        };
+        // add columnes (if described in the type T)
+        for i in 0..T::columns_count() {
+            lv.header.add(T::column(i));
+        }
+        lv
+    }
+    #[inline(always)]
+    pub fn add(&mut self, item: T) -> Handle<Item<T>> {
+        self.add_item_to_parent(Item::from(item), Handle::None)
+    }
+    #[inline(always)]
+    pub fn add_to_parent(&mut self, item: T, parent: Handle<Item<T>>) -> Handle<Item<T>> {
+        self.add_item_to_parent(Item::from(item), parent)
+    }
+    #[inline(always)]
+    pub fn add_item(&mut self, item: Item<T>) -> Handle<Item<T>> {
+        self.add_item_to_parent(item, Handle::None)
+    }
+    #[inline(always)]
+    pub fn add_item_to_parent(&mut self, mut item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
+        // override selection state if the NoSelection flag is set
+        if self.flags.contains(Flags::NoSelection) {
+            item.set_checked(false);
+        }
+        let h = self.manager.add(item, parent);
+        // refilter everything
+        self.refilter();
+        h
+    }
+    pub fn add_batch<F>(&mut self, f: F)
+    where
+        F: FnOnce(&mut Self),
+    {
+        let old_refilter = self.refilter_enabled;
+        self.refilter_enabled = false;
+        f(self);
+        // restore original refilter state
+        self.refilter_enabled = old_refilter;
+        self.refilter();
+    }
+    fn refilter(&mut self) {
+        if !self.refilter_enabled {
+            return;
+        }
+        // refilter elements
+        self.filter.clear();
+        // reserve space for the entire list + groups
+        self.filter.reserve(self.manager.len());
+        // add items
+        let handle = self.manager.first();
+        while !handle.is_none() {
+            if let Some(item) = self.manager.get(handle) {
+                // if !self.is_item_filtered_out(item) {
+                //     self.filter.push(handle);
+                // }
+            }
+        }
+
+        // if let Some(column_index) = self.header.sort_column() {
+        //     self.sort(column_index, self.header.should_sort_ascendent());
+        // } else {
+        //     self.sort(u16::MAX, true);
+        // }
+    }
     #[inline(always)]
     fn visible_space(&self) -> Size {
         let mut sz = self.size();
@@ -63,7 +166,7 @@ where
             _ => {}
         }
     }
-    
+
     fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         let width = self.header.width() as i32;
         let frozen_columns = self.header.frozen_columns();
