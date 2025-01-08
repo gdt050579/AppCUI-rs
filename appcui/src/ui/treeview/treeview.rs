@@ -1,4 +1,5 @@
 use super::{Flags, Item, TreeDataManager};
+use components::listitem::render_method::RenderData;
 use AppCUIProcMacro::*;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -48,6 +49,115 @@ where
     fn item_width(&self) -> u32 {
         self.size().width
     }
+    #[inline(always)]
+    fn paint_icon(&self, x: i32, item: &Item<T>, attr: Option<CharAttribute>, surface: &mut Surface, theme: &Theme) {
+        let attr = attr.unwrap_or(theme.list_current_item.icon);
+        match self.icon_width {
+            3 => {
+                surface.write_char(x, 0, Character::with_attributes(item.icon_first_character(), attr));
+                surface.write_char(x + 1, 0, Character::with_attributes(item.icon_second_character(), attr));
+            }
+            2 => {
+                surface.write_char(x, 0, Character::with_attributes(item.icon_first_character(), attr));
+            }
+            _ => {}
+        }
+    }
+    
+    fn paint_item(&self, item: &Item<T>, y: i32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
+        let width = self.header.width() as i32;
+        let frozen_columns = self.header.frozen_columns();
+        let columns = self.header.columns();
+        if columns.is_empty() {
+            return;
+        }
+        let min_left = if frozen_columns == 0 {
+            columns[0].x
+        } else {
+            let c = &columns[frozen_columns as usize - 1];
+            c.x + c.width as i32 + 1
+        };
+        // first column
+        let c = &columns[0];
+        let l = c.x + (item.depth as i32) * 2;
+        let r = c.x + c.width as i32;
+        let mut extra = 0;
+        let mut rd = RenderData {
+            theme,
+            alignment: TextAlignament::Left,
+            width: 0,
+            attr: None,
+        };
+        if (r >= 0) && (l < width) && (c.width != 0)
+        /*&& (r >= min_left)*/
+        {
+            if frozen_columns == 0 {
+                surface.set_relative_clip(l.max(min_left), y, r.max(min_left), y);
+                surface.set_origin(l, y);
+            } else {
+                surface.set_relative_clip(l, y, r, y);
+                surface.set_origin(l, y);
+            }
+            if self.flags.contains(Flags::CheckBoxes) {
+                if item.is_checked() {
+                    surface.write_char(
+                        0,
+                        0,
+                        Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
+                    );
+                } else {
+                    surface.write_char(0, 0, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+                }
+                extra = 2;
+            }
+            // icon
+            if self.icon_width > 0 {
+                self.paint_icon(extra, item, attr, surface, theme);
+                extra += self.icon_width as i32;
+            }
+            if extra > 0 {
+                if frozen_columns == 0 {
+                    surface.set_relative_clip((l + extra).max(min_left), y, r.max(min_left), y);
+                    surface.set_origin(l + extra, y);
+                } else {
+                    surface.set_relative_clip(l + extra, y, r, y);
+                    surface.set_origin(l + extra, y);
+                }
+            }
+            if let Some(render_method) = ListItem::render_method(item.value(), 0) {
+                rd.width = c.width as u16;
+                rd.alignment = c.alignment;
+                rd.attr = if attr.is_none() { item.render_attr() } else { attr };
+                if !render_method.paint(surface, &rd) {
+                    // custom paint required
+                    ListItem::paint(item.value(), 0, c.width.saturating_sub(extra as u8) as u16, surface, theme, rd.attr)
+                }
+            }
+        }
+        rd.attr = if attr.is_none() { item.render_attr() } else { attr };
+        for (index, c) in columns.iter().enumerate().skip(1) {
+            let r = c.x + c.width as i32;
+            if (r < 0) /*|| (r < min_left)*/ || (c.x >= width) || (c.width == 0) {
+                continue;
+            }
+            if index < frozen_columns as usize {
+                surface.set_relative_clip(c.x, y, r, y);
+            } else {
+                surface.set_relative_clip(c.x.max(min_left), y, r.max(min_left), y);
+            }
+            surface.set_origin(c.x, y);
+            if let Some(render_method) = ListItem::render_method(item.value(), index as u16) {
+                rd.width = c.width as u16;
+                rd.alignment = c.alignment;
+
+                if !render_method.paint(surface, &rd) {
+                    // custom paint required
+                    ListItem::paint(item.value(), index as u32, c.width as u16, surface, theme, rd.attr)
+                }
+            }
+        }
+    }
+
     fn paint_items(&self, surface: &mut Surface, theme: &Theme) {
         let has_focus = self.base.has_focus();
         let is_enabled = self.is_enabled();
