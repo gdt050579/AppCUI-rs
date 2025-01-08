@@ -1,7 +1,10 @@
+use std::sync::mpsc::{Receiver, Sender};
+
 use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
 
 use super::runtime_manager_traits::*;
+use super::timer::TimerManager;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
@@ -55,6 +58,7 @@ pub(crate) struct RuntimeManager {
     surface: Surface,
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
+    timers_manager: TimerManager,
     desktop_handle: Handle<UIElement>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
@@ -66,6 +70,7 @@ pub(crate) struct RuntimeManager {
     desktop_os_start_called: bool,
     recompute_parent_indexes: bool,
     request_update_command_and_menu_bars: bool,
+    request_update_timer_threads: bool,
     single_window: bool,
     loop_status: LoopStatus,
     request_focus: Option<Handle<UIElement>>,
@@ -81,6 +86,8 @@ pub(crate) struct RuntimeManager {
     opened_menu_handle: Handle<Menu>,
     modal_windows: Vec<Handle<UIElement>>,
     to_remove_list: Vec<Handle<UIElement>>,
+    event_receiver: Receiver<SystemEvent>,
+    event_sender: Sender<SystemEvent>,
     #[cfg(feature = "EVENT_RECORDER")]
     event_recorder: super::event_recorder::EventRecorder,
 }
@@ -89,12 +96,15 @@ static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
 impl RuntimeManager {
     pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
-        let term = terminals::new(&builder)?;
+        let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
+        let term = terminals::new(&builder, sender.clone())?;
         let term_sz = term.get_size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
             theme: builder.theme,
             terminal: term,
+            event_receiver: receiver,
+            event_sender: sender,
             surface,
             desktop_handle: Handle::new(0),
             tooltip: ToolTip::new(),
@@ -103,6 +113,7 @@ impl RuntimeManager {
             desktop_os_start_called: false,
             request_update_command_and_menu_bars: true,
             recompute_parent_indexes: true,
+            request_update_timer_threads: false,
             single_window: builder.single_window,
             mouse_pos: Point::new(-1, -1),
             key_modifier: KeyModifier::None,
@@ -119,6 +130,7 @@ impl RuntimeManager {
             commandbar_event: None,
             menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
+            timers_manager: TimerManager::new(builder.max_timer_count),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
@@ -383,6 +395,12 @@ impl RuntimeManager {
     pub(crate) fn get_controls(&self) -> &ControlHandleManager {
         unsafe { &*self.controls }
     }
+
+    #[inline(always)]
+    pub(crate) fn get_system_event_sender(&self) -> std::sync::mpsc::Sender<SystemEvent> {
+        self.event_sender.clone()
+    }
+
     #[inline(always)]
     pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {
         unsafe { &mut *self.menus }
@@ -433,6 +451,7 @@ impl RuntimeManager {
         self.recompute_parent_indexes = true;
         self.commandbar_event = None;
         self.menu_event = None;
+        let single_threaded = self.terminal.is_single_threaded();
         // if first time an execution start
         if !self.desktop_os_start_called {
             self.process_terminal_resize_event(self.terminal.get_size());
@@ -484,27 +503,25 @@ impl RuntimeManager {
             }
             self.recompute_layout = false;
             self.repaint = false;
+
+            // timer threads update
+            if self.request_update_timer_threads {
+                self.timers_manager.update_threads();
+                self.request_update_timer_threads = false;
+            }
             // auto save changes
             #[cfg(feature = "EVENT_RECORDER")]
             self.event_recorder.auto_update(&self.surface);
 
-            //self.debug_print(self.desktop_handle, 0);
-
-            let sys_event = self.terminal.get_system_event();
-            match sys_event {
-                SystemEvent::None => {}
-                SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,
-                SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
-                SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
-                SystemEvent::Resize(new_size) => self.process_terminal_resize_event(new_size),
-                SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
-                SystemEvent::MouseButtonUp(event) => self.process_mousebuttonup_event(event),
-                SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
-                SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
-                SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
+            if single_threaded {
+                if let Some(sys_event) = self.terminal.query_system_event() {
+                    self.process_system_event(sys_event);
+                }
+            } else if let Ok(sys_event) = self.event_receiver.recv() {
+                self.process_system_event(sys_event);
+                #[cfg(feature = "EVENT_RECORDER")]
+                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
             }
-            #[cfg(feature = "EVENT_RECORDER")]
-            self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
         }
         // loop has ended
         if self.loop_status == LoopStatus::ExitCurrentLoop {
@@ -523,6 +540,26 @@ impl RuntimeManager {
             self.request_update();
         }
     }
+    #[inline(always)]
+    fn process_system_event(&mut self, sys_event: SystemEvent) {
+        match sys_event {
+            SystemEvent::AppClose => self.loop_status = LoopStatus::StopApp,
+            SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
+            SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
+            SystemEvent::Resize(new_size) => {
+                self.terminal.on_resize(new_size);
+                self.process_terminal_resize_event(new_size);
+            }
+            SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
+            SystemEvent::MouseButtonUp(event) => self.process_mousebuttonup_event(event),
+            SystemEvent::MouseDoubleClick(event) => self.process_mouse_dblclick_event(event),
+            SystemEvent::MouseMove(event) => self.process_mousemove_event(event),
+            SystemEvent::MouseWheel(event) => self.process_mousewheel_event(event),
+            SystemEvent::TimerTickUpdate(event) => self.process_timer_tick_update_event(event.id, event.tick.value()),
+            SystemEvent::TimerStart(event) => self.process_timer_start_event(event.id, event.tick.value()),
+            SystemEvent::TimerPaused(event) => self.process_timer_paused_event(event.id, event.tick.value()),
+        }
+    }
     fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
         if handle.is_none() {
             return (Handle::None, false);
@@ -531,6 +568,7 @@ impl RuntimeManager {
         let mut parent: Handle<UIElement> = Handle::None;
         let mut has_focus = false;
         let mut is_window_control = false;
+        let mut timer_handle: Handle<Timer> = Handle::None;
         // remove the link from its parent if requested
         if unlink_from_parent {
             if let Some(control) = controls.get(handle.cast()) {
@@ -571,8 +609,13 @@ impl RuntimeManager {
             for child in &base.children {
                 self.remove_control(*child, false);
             }
+            timer_handle = control.base().timer_handle;
         }
         controls.remove(handle);
+        if timer_handle.is_none() {
+            self.timers_manager.terminate_thread(timer_handle.index());
+        }
+        
         if has_focus {
             (parent, is_window_control)
         } else {
@@ -1668,6 +1711,76 @@ impl ThemeMethods for RuntimeManager {
             for child_handle in base.children.iter() {
                 self.update_theme_for_control(*child_handle);
             }
+        }
+    }
+}
+impl TimerMethods for RuntimeManager {
+    #[inline(always)]
+    fn get_timer_manager(&mut self) -> &mut TimerManager {
+        &mut self.timers_manager
+    }
+    #[inline(always)]
+    fn request_timer_threads_update(&mut self) {
+        self.request_update_timer_threads = true;
+    }
+    #[inline(always)]
+    fn timer_id_to_control(&mut self, id: u8) -> Option<&mut ControlManager> {
+        let h = self.timers_manager.control_handle(id);
+        if h.is_none() {
+            None
+        } else {
+            let controls = unsafe { &mut *self.controls };
+            controls.get_mut(h.cast())
+        }
+    }
+
+    fn process_timer_tick_update_event(&mut self, id: u8, tick: u64) {
+        if let Some(cm) = self.timer_id_to_control(id) {
+            if TimerEvents::on_update(cm.control_mut(), tick) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        } else {
+            // invalid control (should terminate the timer)
+            self.timers_manager.terminate_thread(id as usize);
+        }
+    }
+
+    fn process_timer_paused_event(&mut self, id: u8, tick: u64) {
+        if let Some(timer) = self.timers_manager.index_mut(id) {
+            timer.set_pause_state();
+        } else {
+            // if timer is invalid -> ignore the event
+            return;
+        };
+        if let Some(cm) = self.timer_id_to_control(id) {
+            if TimerEvents::on_pause(cm.control_mut(), tick) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        } else {
+            // invalid control (should terminate the timer)
+            self.timers_manager.terminate_thread(id as usize);
+        }
+    }
+
+    fn process_timer_start_event(&mut self, id: u8, tick: u64) {
+        if let Some(timer) = self.timers_manager.index_mut(id) {
+            timer.set_running_state();
+        } else {
+            // if timer is invalid -> ignore the event
+            return;
+        };
+        if let Some(cm) = self.timer_id_to_control(id) {
+            let result = if tick == 0 {
+                TimerEvents::on_start(cm.control_mut())
+            } else {
+                TimerEvents::on_resume(cm.control_mut(), tick)
+            };
+            if result == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        } else {
+            // invalid control (should terminate the timer)
+            self.timers_manager.terminate_thread(id as usize);
         }
     }
 }

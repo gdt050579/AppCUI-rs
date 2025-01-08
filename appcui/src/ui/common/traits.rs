@@ -17,13 +17,13 @@ use crate::{
         menu::events::GenericMenuEvents,
         numericselector::events::GenericNumericSelectorEvents,
         password::events::PasswordEvents,
+        pathfinder::events::PathFinderEvents,
         radiobox::events::RadioBoxEvents,
         selector::events::GenericSelectorEvents,
         textfield::events::TextFieldEvents,
         threestatebox::events::ThreeStateBoxEvents,
         togglebutton::events::ToggleButtonEvents,
         window::events::{ToolBarEvents, WindowEvents},
-        pathfinder::events::PathFinderEvents,
     },
 };
 
@@ -97,6 +97,21 @@ pub trait CustomEvents {
     }
 }
 
+pub trait TimerEvents {
+    fn on_start(&mut self) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_resume(&mut self, _ticks: u64) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_pause(&mut self, _ticks: u64) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }    
+    fn on_update(&mut self, _ticks: u64) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+
 pub trait Control:
     OnPaint
     + OnKeyPressed
@@ -132,6 +147,7 @@ pub trait Control:
     + ListBoxEvents
     + GenericListViewEvents
     + PathFinderEvents
+    + TimerEvents
 {
 }
 

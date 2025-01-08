@@ -106,6 +106,10 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
+
+
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -184,6 +188,9 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
+
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -237,6 +244,9 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
@@ -316,6 +326,9 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
