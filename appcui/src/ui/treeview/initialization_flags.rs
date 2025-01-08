@@ -9,4 +9,5 @@ pub enum Flags {
     LargeIcons = 0x10,
     CustomFilter = 0x20,
     NoSelection = 0x40,
+    HideHeader = 0x80,
 }
