@@ -90,7 +90,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
         horizontal: '-',
         vertical: '|',
     },
-    /* Border */
+    /* SingleRound */
     LineTypeChars {
         corner_top_left: '\u{256D}',
         horizontal_on_top: '\u{2500}',

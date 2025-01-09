@@ -3,7 +3,7 @@ use crate::input::*;
 use crate::system::*;
 use AppCUIProcMacro::*;
 
-use super::ProcessEventResult;
+use super::scrollbars_components::ProcessEventResult;
 
 pub struct SearchBar {
     x: i32,
@@ -56,6 +56,10 @@ impl SearchBar {
     }
     pub fn clear_match_count(&mut self) {
         self.match_count = u8::MAX;
+        self.update_text_offset();
+    }
+    pub fn clear(&mut self) {
+        self.text.clear();
         self.update_text_offset();
     }
     fn update_text_offset(&mut self) {
@@ -121,8 +125,7 @@ impl SearchBar {
         match key.value() {
             key!("Escape") => {
                 if self.edit_mode {
-                    self.text.clear();
-                    self.update_text_offset();
+                    self.clear();
                     self.edit_mode = false;
                     return true;
                 }

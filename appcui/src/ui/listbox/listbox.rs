@@ -99,7 +99,7 @@ impl ListBox {
         }
         // recompute the scroll bars
         let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
-        self.comp.resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base);
+        self.comp.resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base, self.size());
         // if auto scroll is enabled, we should scroll to the last item
         if self.flags.contains(Flags::AutoScroll) {
             self.update_position(self.items.len() - 1, false);
@@ -113,7 +113,7 @@ impl ListBox {
         self.top_view = 0;
         self.pos = usize::MAX;
         self.max_chars = 0;
-        self.comp.resize(0, 0, &self.base);
+        self.comp.resize(0, 0, &self.base, self.size());
     }
 
     /// Returns the item from the listbox at the specified index
@@ -348,9 +348,12 @@ impl OnPaint for ListBox {
                 _ if has_focus => theme.text.highlighted,
                 _ => theme.text.inactive,
             };
-            let mut format = TextFormat::new(w / 2, h / 2, empty_attr, TextAlignament::Center, true);
-            format.width = Some(w as u16);
-            format.text_wrap = TextWrap::Word;
+            let format = TextFormatBuilder::new()
+                .position(w / 2, h / 2)
+                .attribute(empty_attr)
+                .align(TextAlignament::Center)
+                .wrap_type(WrapType::WordWrap(w as u16))
+                .build();
             surface.write_text(&self.empty_message, &format);
             return;
         }
@@ -570,7 +573,7 @@ impl OnMouseEvent for ListBox {
 impl OnResize for ListBox {
     fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
         let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
-        self.comp.resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base);
+        self.comp.resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base, self.size());
         self.update_position(self.pos, false);
     }
 }

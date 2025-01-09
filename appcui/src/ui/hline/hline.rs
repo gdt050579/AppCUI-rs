@@ -18,11 +18,11 @@ impl HLine {
         obj
     }
 
-    pub fn title(&self) -> &str{
+    pub fn title(&self) -> &str {
         &self.title
     }
 
-    pub fn set_title(&mut self, new_title: &str){
+    pub fn set_title(&mut self, new_title: &str) {
         self.title.clear();
         self.title.push_str(new_title);
     }
@@ -43,10 +43,13 @@ impl OnPaint for HLine {
             },
             attr,
         );
-        if self.flags.contains(Flags::HasTitle) && w >= 5{
-            let attr2 = if self.is_enabled() { theme.text.normal } else { theme.text.inactive };
-            let mut format = TextFormat::new(w as i32 / 2, 0, attr2, TextAlignament::Center, false);
-            format.width = Some(w as u16 - 4);
+        if self.flags.contains(Flags::HasTitle) && w >= 5 {
+            let format = TextFormatBuilder::new()
+                .position(w as i32 / 2, 0)
+                .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
+                .align(TextAlignament::Center)
+                .wrap_type(WrapType::SingleLineWrap(w as u16 - 4))
+                .build();
             surface.write_text(&self.title, &format);
         }
     }

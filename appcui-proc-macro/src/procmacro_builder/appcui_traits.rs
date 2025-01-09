@@ -22,27 +22,32 @@ pub(crate) enum AppCUITrait {
     OnFocus = 14,
     OnExpand = 15,
     OnSiblingSelected = 16,
+    OnThemeChanged = 17,
     // control events
-    ButtonEvents = 17,
-    CheckBoxEvents = 18,
-    WindowEvents = 19,
-    CommandBarEvents = 20,
-    MenuEvents = 21,
-    DesktopEvents = 22,
-    ToolBarEvents = 23,
-    ColorPickerEvents = 24,
-    ThreeStateBoxEvents = 25,
-    RadioBoxEvents = 26,
-    PasswordEvents = 27,
-    KeySelectorEvents = 28,
-    TextFieldEvents = 29,
-    CustomEvents = 30,
-    GenericSelectorEvents = 31,
-    ComboBoxEvents = 32,
-    GenericDropDownListEvents = 33,
-    GenericNumericSelectorEvents = 34,
-    DatePickerEvents = 35,
-    ListBoxEvents = 36,
+    ButtonEvents = 18,
+    CheckBoxEvents = 19,
+    WindowEvents = 20,
+    CommandBarEvents = 21,
+    MenuEvents = 22,
+    DesktopEvents = 23,
+    ToolBarEvents = 24,
+    ColorPickerEvents = 25,
+    ThreeStateBoxEvents = 26,
+    RadioBoxEvents = 27,
+    PasswordEvents = 28,
+    KeySelectorEvents = 29,
+    TextFieldEvents = 30,
+    CustomEvents = 31,
+    GenericSelectorEvents = 32,
+    ComboBoxEvents = 33,
+    GenericDropDownListEvents = 34,
+    GenericNumericSelectorEvents = 35,
+    DatePickerEvents = 36,
+    ListBoxEvents = 37,
+    GenericListViewEvents = 38,
+    ToggleButtonEvents = 39,
+    PathFinderEvents = 40,
+    TimerEvents = 41,
 }
 
 #[repr(u8)]
@@ -75,6 +80,7 @@ impl AppCUITrait {
             AppCUITrait::OnFocus => "OnFocus",
             AppCUITrait::OnExpand => "OnExpand",
             AppCUITrait::OnSiblingSelected => "OnSiblingSelected",
+            AppCUITrait::OnThemeChanged => "OnThemeChanged",
             // control events
             AppCUITrait::ButtonEvents => "ButtonEvents",
             AppCUITrait::CheckBoxEvents => "CheckBoxEvents",
@@ -93,9 +99,13 @@ impl AppCUITrait {
             AppCUITrait::GenericSelectorEvents => "SelectorEvents", // important to be without Generic
             AppCUITrait::ComboBoxEvents => "ComboBoxEvents",
             AppCUITrait::GenericDropDownListEvents => "DropDownListEvents", // important to be without Generic
-            AppCUITrait::GenericNumericSelectorEvents => "NumericSelectorEvents", // important to be without Generic            
-            AppCUITrait::DatePickerEvents => "DatePickerEvents",      
-            AppCUITrait::ListBoxEvents => "ListBoxEvents",    
+            AppCUITrait::GenericNumericSelectorEvents => "NumericSelectorEvents", // important to be without Generic
+            AppCUITrait::DatePickerEvents => "DatePickerEvents",
+            AppCUITrait::ListBoxEvents => "ListBoxEvents",
+            AppCUITrait::GenericListViewEvents => "ListViewEvents", // important to be without Generic
+            AppCUITrait::ToggleButtonEvents => "ToggleButtonEvents",
+            AppCUITrait::PathFinderEvents => "PathFinderEvents",
+            AppCUITrait::TimerEvents => "TimerEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -119,6 +129,7 @@ impl AppCUITrait {
             AppCUITrait::OnFocus => TraitType::RawEvent,
             AppCUITrait::OnExpand => TraitType::RawEvent,
             AppCUITrait::OnSiblingSelected => TraitType::RawEvent,
+            AppCUITrait::OnThemeChanged => TraitType::RawEvent,
             // control events
             AppCUITrait::ButtonEvents => TraitType::ControlEvent,
             AppCUITrait::CheckBoxEvents => TraitType::ControlEvent,
@@ -140,6 +151,10 @@ impl AppCUITrait {
             AppCUITrait::GenericNumericSelectorEvents => TraitType::ControlEvent,
             AppCUITrait::DatePickerEvents => TraitType::ControlEvent,
             AppCUITrait::ListBoxEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericListViewEvents => TraitType::ControlEvent,
+            AppCUITrait::ToggleButtonEvents => TraitType::ControlEvent,
+            AppCUITrait::PathFinderEvents => TraitType::ControlEvent,
+            AppCUITrait::TimerEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -163,6 +178,7 @@ impl AppCUITrait {
             AppCUITrait::OnFocus => templates::ON_FOCUS_TRAIT,
             AppCUITrait::OnExpand => templates::ON_EXPAND_TRAIT,
             AppCUITrait::OnSiblingSelected => templates::ON_SIBLING_SELECTED,
+            AppCUITrait::OnThemeChanged => templates::ON_THEME_CHANGED_TRAIT,
             // control events
             AppCUITrait::ButtonEvents => "",
             AppCUITrait::CheckBoxEvents => "",
@@ -184,6 +200,10 @@ impl AppCUITrait {
             AppCUITrait::GenericNumericSelectorEvents => "",
             AppCUITrait::DatePickerEvents => "",
             AppCUITrait::ListBoxEvents => "",
+            AppCUITrait::GenericListViewEvents => "",
+            AppCUITrait::ToggleButtonEvents => "",
+            AppCUITrait::PathFinderEvents => "",
+            AppCUITrait::TimerEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -207,6 +227,7 @@ impl AppCUITrait {
             AppCUITrait::OnFocus => "impl$(TEMPLATE_TYPE) OnFocus for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::OnExpand => "impl$(TEMPLATE_TYPE) OnExpand for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::OnSiblingSelected => "impl$(TEMPLATE_TYPE) OnSiblingSelected for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::OnThemeChanged => "impl$(TEMPLATE_TYPE) OnThemeChanged for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             // control events
             AppCUITrait::ButtonEvents => "impl$(TEMPLATE_TYPE) ButtonEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::CheckBoxEvents => "impl$(TEMPLATE_TYPE) CheckBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
@@ -228,10 +249,20 @@ impl AppCUITrait {
             AppCUITrait::GenericNumericSelectorEvents => "impl$(TEMPLATE_TYPE) GenericNumericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::DatePickerEvents => "impl$(TEMPLATE_TYPE) DatePickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::ListBoxEvents => "impl$(TEMPLATE_TYPE) ListBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericListViewEvents => "impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::ToggleButtonEvents => "impl$(TEMPLATE_TYPE) ToggleButtonEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::PathFinderEvents => "impl$(TEMPLATE_TYPE) PathFinderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::TimerEvents => "impl$(TEMPLATE_TYPE) TimerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
-        matches!(self, AppCUITrait::GenericSelectorEvents | AppCUITrait::GenericDropDownListEvents | AppCUITrait::GenericNumericSelectorEvents)
+        matches!(
+            self,
+            AppCUITrait::GenericSelectorEvents
+                | AppCUITrait::GenericDropDownListEvents
+                | AppCUITrait::GenericNumericSelectorEvents
+                | AppCUITrait::GenericListViewEvents
+        )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
         match name {
@@ -244,6 +275,7 @@ impl AppCUITrait {
             "OnFocus" => Some(AppCUITrait::OnFocus),
             "OnExpand" => Some(AppCUITrait::OnExpand),
             "OnSiblingSelected" => Some(AppCUITrait::OnSiblingSelected),
+            "OnThemeChanged" => Some(AppCUITrait::OnThemeChanged),
             // control events
             "ButtonEvents" | "Button" => Some(AppCUITrait::ButtonEvents),
             "CheckBoxEvents" | "CheckBox" => Some(AppCUITrait::CheckBoxEvents),
@@ -265,6 +297,10 @@ impl AppCUITrait {
             "NumericSelectorEvents" | "NumericSelector" => Some(AppCUITrait::GenericNumericSelectorEvents),
             "DatePickerEvents" | "DatePicker" => Some(AppCUITrait::DatePickerEvents),
             "ListBoxEvents" | "ListBox" => Some(AppCUITrait::ListBoxEvents),
+            "ListViewEvents" | "ListView" => Some(AppCUITrait::GenericListViewEvents),
+            "ToggleButtonEvents" | "ToggleButton" => Some(AppCUITrait::ToggleButtonEvents),
+            "PathFinderEvents" | "PathFinder" => Some(AppCUITrait::PathFinderEvents),
+            "TimerEvents" | "Timer" => Some(AppCUITrait::TimerEvents),
             _ => None,
         }
     }
@@ -289,27 +325,32 @@ impl AppCUITrait {
             14 => Some(AppCUITrait::OnFocus),
             15 => Some(AppCUITrait::OnExpand),
             16 => Some(AppCUITrait::OnSiblingSelected),
+            17 => Some(AppCUITrait::OnThemeChanged),
             // control events
-            17 => Some(AppCUITrait::ButtonEvents),
-            18 => Some(AppCUITrait::CheckBoxEvents),
-            19 => Some(AppCUITrait::WindowEvents),
-            20 => Some(AppCUITrait::CommandBarEvents),
-            21 => Some(AppCUITrait::MenuEvents),
-            22 => Some(AppCUITrait::DesktopEvents),
-            23 => Some(AppCUITrait::ToolBarEvents),
-            24 => Some(AppCUITrait::ColorPickerEvents),
-            25 => Some(AppCUITrait::ThreeStateBoxEvents),
-            26 => Some(AppCUITrait::RadioBoxEvents),
-            27 => Some(AppCUITrait::PasswordEvents),
-            28 => Some(AppCUITrait::KeySelectorEvents),
-            29 => Some(AppCUITrait::TextFieldEvents),
-            30 => Some(AppCUITrait::CustomEvents),
-            31 => Some(AppCUITrait::GenericSelectorEvents),
-            32 => Some(AppCUITrait::ComboBoxEvents),
-            33 => Some(AppCUITrait::GenericDropDownListEvents),
-            34 => Some(AppCUITrait::GenericNumericSelectorEvents), 
-            35 => Some(AppCUITrait::DatePickerEvents), 
-            36 => Some(AppCUITrait::ListBoxEvents),
+            18 => Some(AppCUITrait::ButtonEvents),
+            19 => Some(AppCUITrait::CheckBoxEvents),
+            20 => Some(AppCUITrait::WindowEvents),
+            21 => Some(AppCUITrait::CommandBarEvents),
+            22 => Some(AppCUITrait::MenuEvents),
+            23 => Some(AppCUITrait::DesktopEvents),
+            24 => Some(AppCUITrait::ToolBarEvents),
+            25 => Some(AppCUITrait::ColorPickerEvents),
+            26 => Some(AppCUITrait::ThreeStateBoxEvents),
+            27 => Some(AppCUITrait::RadioBoxEvents),
+            28 => Some(AppCUITrait::PasswordEvents),
+            29 => Some(AppCUITrait::KeySelectorEvents),
+            30 => Some(AppCUITrait::TextFieldEvents),
+            31 => Some(AppCUITrait::CustomEvents),
+            32 => Some(AppCUITrait::GenericSelectorEvents),
+            33 => Some(AppCUITrait::ComboBoxEvents),
+            34 => Some(AppCUITrait::GenericDropDownListEvents),
+            35 => Some(AppCUITrait::GenericNumericSelectorEvents),
+            36 => Some(AppCUITrait::DatePickerEvents),
+            37 => Some(AppCUITrait::ListBoxEvents),
+            38 => Some(AppCUITrait::GenericListViewEvents),
+            39 => Some(AppCUITrait::ToggleButtonEvents),
+            40 => Some(AppCUITrait::PathFinderEvents),
+            41 => Some(AppCUITrait::TimerEvents),
             _ => None,
         };
         result?;

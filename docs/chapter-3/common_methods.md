@@ -50,3 +50,9 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 | `show_menu(...)`     | Show a popup menu that was registered by the current control                                                    |
 | `menuitem(...)`      | Returns an immutable reference to a menu item based on two handles: one for the menu, and one for the menu item |
 | `menuitem_mut(...)`  | Returns an mutable reference to a menu item based on two handles: one for the menu, and one for the menu item   |
+
+## Theme related methods
+
+| Method        | Purpose                                                                                                                                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `theme()`     | Returns a reference to the theme object that is being used by the application. This is the same reference an objectr receives when OnPaint method is being called. |

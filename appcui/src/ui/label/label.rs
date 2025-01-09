@@ -15,39 +15,30 @@ impl Label {
         self.caption.set_text(text, ExtractHotKeyMethod::AltPlusKey);
     }
     #[inline(always)]
-    pub fn caption(&self)->&str {
+    pub fn caption(&self) -> &str {
         self.caption.text()
     }
 }
 impl OnPaint for Label {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let sz = self.size();
-        let mut format = TextFormat::new(
-            0,
-            0,
-            CharAttribute::default(),
-            TextAlignament::Left,
-            sz.height > 1,
-        );
-        format.chars_count = Some(self.caption.chars_count() as u16);
-        format.char_attr = if self.is_enabled() {
-            theme.text.normal
-        } else {
-            theme.text.inactive
-        };
-        format.hotkey_pos = self.caption.hotkey_pos();
+        let mut format = TextFormatBuilder::new()
+            .position(0, 0)
+            .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
+            .align(TextAlignament::Left)
+            .chars_count(self.caption.chars_count() as u16)
+            .build();
+
         if self.caption.has_hotkey() {
-            format.hotkey_attr = Some(if self.is_enabled() {
-                theme.text.hot_key
-            } else {
-                theme.text.inactive
-            });
+            format.set_hotkey(
+                if self.is_enabled() { theme.text.hot_key } else { theme.text.inactive },
+                self.caption.hotkey_pos().unwrap() as u32,
+            );
         }
-        if format.multi_line {
-            format.text_wrap = TextWrap::Word;
-            format.width = Some(sz.width as u16);
+        if sz.height > 1 {
+            format.set_wrap_type(WrapType::WordWrap(sz.width as u16));
         }
-        format.chars_count = Some(self.caption.chars_count() as u16);
+
         surface.write_text(self.caption.text(), &format);
     }
 }

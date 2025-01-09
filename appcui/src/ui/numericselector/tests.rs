@@ -5,7 +5,7 @@ fn check_creation() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xDE731548A8E93318)
+        CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:68,h:9");
@@ -90,7 +90,7 @@ fn check_create_procmacro() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xDE731548A8E93318)
+        CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:68,h:9");
@@ -115,7 +115,7 @@ fn check_create_procmacro_defaults() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xDE731548A8E93318)
+        CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:68,h:9");
@@ -140,30 +140,30 @@ fn check_min_max_by_mouse() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xD4AD9150F1EA4E67)
+        CheckHash(0x21E8E7F45798DD63)
         Mouse.Click(4,3,left)
         Paint('value: 4 (hover on minus)')   
-        CheckHash(0x6391031B571469C)
+        CheckHash(0xE4A9807564EFFBF8)
         Mouse.Click(4,3,left)
         Paint('value: 3, minus button disabled')   
-        CheckHash(0x5627CC54036AA831)
+        CheckHash(0xAB2ADD34B5706401)
         Mouse.Click(4,3,left)
         Paint('value: 3, nothing changes')   
-        CheckHash(0x5627CC54036AA831)
+        CheckHash(0xAB2ADD34B5706401)
         Mouse.Click(20,3,left)
         Paint('value: 4 (hover on plus)')   
-        CheckHash(0x68B6023C171AB5E4)
+        CheckHash(0x17E44C83F40145FC)
         Mouse.Click(20,3,left)
         Mouse.Click(20,3,left)
         Mouse.Click(20,3,left)
         Paint('value: 7, hover on plus')   
-        CheckHash(0x23F47536083C71F3)
+        CheckHash(0x7C58ADC98EA500A3)
         Mouse.Click(20,3,left)
         Paint('value: 8, right button disabled')   
-        CheckHash(0xC049BAA97BC1B892)
+        CheckHash(0x3F03BA5FA9F80BAA)
         Mouse.Click(20,3,left)
         Paint('value: 8, nothing changes')   
-        CheckHash(0xC049BAA97BC1B892)
+        CheckHash(0x3F03BA5FA9F80BAA)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
@@ -177,30 +177,30 @@ fn check_min_max_by_keyboard() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xD4AD9150F1EA4E67)
+        CheckHash(0x21E8E7F45798DD63)
         Key.Pressed(Left)
         Paint('value: 4')   
-        CheckHash(0x154343482A32A0E)
+        CheckHash(0x8C7E9FBD384B89EE)
         Key.Pressed(Down)
         Paint('value: 3 (minus button disabled)')   
-        CheckHash(0x5627CC54036AA831)
+        CheckHash(0xAB2ADD34B5706401)
         Key.Pressed(Left)
         Paint('value: 3, nothing changes')   
-        CheckHash(0x5627CC54036AA831)
+        CheckHash(0xAB2ADD34B5706401)
         Key.Pressed(Right)
         Paint('value: 4')   
-        CheckHash(0x154343482A32A0E)
+        CheckHash(0x8C7E9FBD384B89EE)
         Key.Pressed(Up)
         Key.Pressed(Right)
         Key.Pressed(Up)
         Paint('value: 7')   
-        CheckHash(0xB51CDD4CCB7E5475)
+        CheckHash(0x1EF0AF28867D456D)
         Key.Pressed(Right)
         Paint('value: 8, right button disabled')   
-        CheckHash(0xC049BAA97BC1B892)
+        CheckHash(0x3F03BA5FA9F80BAA)
         Key.Pressed(Up)
         Paint('value: 8, nothing changes')   
-        CheckHash(0xC049BAA97BC1B892)
+        CheckHash(0x3F03BA5FA9F80BAA)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
@@ -214,13 +214,13 @@ fn check_min_max_by_home_end() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xD4AD9150F1EA4E67)
+        CheckHash(0x21E8E7F45798DD63)
         Key.Pressed(Home)
         Paint('value: 3 (minus button disabled)')   
-        CheckHash(0x5627CC54036AA831)
+        CheckHash(0xAB2ADD34B5706401)
         Key.Pressed(End)
         Paint('value: 8, right button disabled')   
-        CheckHash(0xC049BAA97BC1B892)
+        CheckHash(0x3F03BA5FA9F80BAA)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
@@ -234,27 +234,27 @@ fn check_readonly() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0x63F43E387E2F60B7)
+        CheckHash(0xBE164F0A76471873)
         Key.Pressed(Home)
         Paint('nothng changes')   
-        CheckHash(0x63F43E387E2F60B7)
+        CheckHash(0xBE164F0A76471873)
         Key.Pressed(Right)
         Key.Pressed(Up)
         Paint('nothng changes')   
-        CheckHash(0x63F43E387E2F60B7)
+        CheckHash(0xBE164F0A76471873)
         Key.Pressed(End)
         Paint('nothng changes')   
-        CheckHash(0x63F43E387E2F60B7)
+        CheckHash(0xBE164F0A76471873)
         Key.Pressed(Left)
         Key.Pressed(Down)
         Paint('nothng changes')   
-        CheckHash(0x63F43E387E2F60B7)
+        CheckHash(0xBE164F0A76471873)
         Mouse.Click(4,3,left)
         Paint('nothng changes')   
-        CheckHash(0x63F43E387E2F60B7)
+        CheckHash(0xBE164F0A76471873)
         Mouse.Click(20,3,left)
         Paint('nothng changes')   
-        CheckHash(0x63F43E387E2F60B7)
+        CheckHash(0xBE164F0A76471873)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
@@ -268,7 +268,7 @@ fn check_edit_mode() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xD4AD9150F1EA4E67)
+        CheckHash(0x21E8E7F45798DD63)
         Key.Pressed(Enter)
         Paint('Enter edit mode')   
         CheckHash(0xE9BCB46477286639)
@@ -283,7 +283,7 @@ fn check_edit_mode() {
         CheckCursor(6,3)
         Key.Pressed(Enter)
         Paint('exit edit mode -> 56')   
-        CheckHash(0x2F449AF0A464F231)
+        CheckHash(0x534C873C7A674B61)
         CheckCursor(hidden)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
@@ -298,14 +298,14 @@ fn check_exit_edit_mode() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xD4AD9150F1EA4E67)
+        CheckHash(0x21E8E7F45798DD63)
         Key.Pressed(Enter)
         Paint('Enter edit mode')   
         CheckHash(0xE9BCB46477286639)
         CheckCursor(5,3)
         Key.Pressed(Escape)
         Paint('exit edit mode')   
-        CheckHash(0xD4AD9150F1EA4E67)
+        CheckHash(0x21E8E7F45798DD63)
         CheckCursor(hidden)
         Key.Pressed(Escape)
         Paint('window closed')
@@ -341,10 +341,10 @@ fn check_events() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xD4AD9150F1EA4E67)
+        CheckHash(0x21E8E7F45798DD63)
         Mouse.Click(4,3,left)
         Paint('New-value: 4')   
-        CheckHash(0xF5654B7B9496886A)
+        CheckHash(0x50AB32FB27060802)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     a.add_window(MyWin::new());

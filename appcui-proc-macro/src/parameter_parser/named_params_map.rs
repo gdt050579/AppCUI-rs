@@ -9,12 +9,12 @@ pub(crate) struct NamedParamsMap<'a> {
 }
 
 impl<'a> NamedParamsMap<'a> {
-    pub(crate) fn empty()->Self {
+    pub(crate) fn empty() -> Self {
         NamedParamsMap {
             named: HashMap::new(),
             values: Vec::new(),
             all_params: HashMap::new(),
-            positional_count: 0
+            positional_count: 0,
         }
     }
     pub(crate) fn validate_positional_parameters(&mut self, param_list: &str, params: &[PositionalParameter]) -> Result<(), Error> {
@@ -28,7 +28,7 @@ impl<'a> NamedParamsMap<'a> {
         }
         // lets validate that they are in the right order
         //for index in 0..self.positional_count {
-        for (index,item) in params.iter().enumerate().take(self.positional_count) {
+        for (index, item) in params.iter().enumerate().take(self.positional_count) {
             let h = crate::utils::compute_hash(item.get_key());
             if self.all_params.contains_key(&h) {
                 return Err(Error::new(
@@ -98,13 +98,39 @@ impl<'a> NamedParamsMap<'a> {
         }
         Ok(())
     }
-    pub(crate) fn check_unkwnon_params(&self, param_list: &str) -> Result<(), Error> {
+    pub(crate) fn check_unkwnon_params(
+        &self,
+        param_list: &str,
+        positional_parameters: &[PositionalParameter],
+        named_parameters: &[NamedParameter],
+        control_parameters: Option<&[NamedParameter]>,
+    ) -> Result<(), Error> {
         // all values must be validated
         for value in &self.values {
             if !value.validated {
+                // make a list with all available parameters
+                let mut s = String::with_capacity(256);
+                let mut m: HashMap<String, bool> = HashMap::with_capacity(32);
+                for param in positional_parameters {
+                    m.insert(param.get_key().to_string(), true);
+                }
+                for param in named_parameters {
+                    m.insert(param.get_key().to_string(), true);
+                }
+                if let Some(cp) = control_parameters {
+                    for param in cp {
+                        m.insert(param.get_key().to_string(), true);
+                    }
+                }
+                for k in m.keys() {
+                    if !s.is_empty() {
+                        s.push_str(", ");
+                    }
+                    s.push_str(k.as_str());
+                }
                 return Err(Error::new(
                     param_list,
-                    format!("Unknwon parameter: '{}' !", value.param_name).as_str(),
+                    format!("Unknwon parameter: '{}' !\nHere is a list of all available parameters: {}", value.param_name, &s).as_str(),
                     value.start,
                     value.end,
                 ));
@@ -145,7 +171,7 @@ impl<'a> NamedParamsMap<'a> {
     pub(crate) fn get_dimension(&mut self, name: &str) -> Option<Dimension> {
         self.get_mut(name)?.get_dimension()
     }
-    pub(crate) fn get_parameters_count(&self)->usize {
+    pub(crate) fn get_parameters_count(&self) -> usize {
         self.all_params.len()
     }
 }

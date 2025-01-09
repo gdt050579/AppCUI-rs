@@ -29,7 +29,7 @@ Mouse related commands are a set of commands that simulate various mouse events
 | `Mouse.DoubleClick(x,y,button)`    | simulates a double-click (for a specific button)                                                                                                                                                                                             |
 | `Mouse.Move(x,y)`                  | simulates the movement of a mouse to coordonates (x,y). No mouse button are being pressed.                                                                                                                                                   |
 | `Mouse.Drag(x1,y1,x2,y2)`          | simulates the movement of a mouse from (x1,y1) to (x2,y2) while the `left` button is being pressed                                                                                                                                           |
-| `Mouse.Wheel(x,y,direction,times)` | simulates the wheel mouse being rotated into a direction (one of `up`, `bottom`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0.                                                                        |
+| `Mouse.Wheel(x,y,direction,times)` | simulates the wheel mouse being rotated into a direction (one of `up`, `down`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0.                                                                        |
      
 ## Keyboard related commands
 

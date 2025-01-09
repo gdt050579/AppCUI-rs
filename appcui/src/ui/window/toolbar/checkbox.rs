@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, SpecialChar, Surface, TextAlignament, TextFormat},
+    graphics::{Character, SpecialChar, Surface, TextAlignament, TextFormatBuilder, WrapType},
     system::{Handle, Theme},
     utils::Caption,
     utils::ExtractHotKeyMethod
@@ -50,11 +50,14 @@ impl CheckBox {
         let text_attr = st.get_button_attr(theme);
         let x = self.base.get_left();
         let y = self.base.get_y();
-        let mut format = TextFormat::single_line(x + 2, y, text_attr, TextAlignament::Left);
-        format.width = Some(self.caption.chars_count() as u16);
-        format.hotkey_pos = self.caption.hotkey_pos();
+        let mut format = TextFormatBuilder::new()
+            .position(x + 2, y)
+            .attribute(text_attr)
+            .align(TextAlignament::Left)
+            .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
+            .build();
         if self.caption.has_hotkey() {
-            format.hotkey_attr = Some(st.get_hotkey_attr(theme));
+            format.set_hotkey(st.get_hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
         }
         surface.write_string(x, y, "  ", text_attr, false);
         surface.write_text(self.caption.text(), &format);
