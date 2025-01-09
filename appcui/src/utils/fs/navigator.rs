@@ -6,7 +6,6 @@ use std::path::PathBuf;
 use chrono::NaiveDateTime;
 use chrono::DateTime;
 use std::fs;
-use std::os::windows::fs::MetadataExt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub(crate) struct Navigator {
@@ -108,7 +107,7 @@ impl Navigator {
         let creation = metadata.created()?;
         let datetime = Self::system_time_to_naive_datetime(creation)?;
         let size = match metadata.is_dir() {
-            false => metadata.file_size(),
+            false => metadata.len(),
             _ => 0,
         };
         Ok(Entry::new(path, size, datetime, if metadata.is_dir() {EntryType::Folder} else {EntryType::File}))
