@@ -262,9 +262,13 @@ where
             surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_DRAWING) as i32, space_char);
             if size.width > MIN_WIDTH_VARIANT_NAME {
                 let mut paint_next = true;
-                let mut format = TextFormat::single_line(1, self.header_y_ofs, col_text, TextAlignament::Left);
+                let mut format = TextFormatBuilder::new()
+                    .position(1, self.header_y_ofs)
+                    .attribute(col_text)
+                    .align(TextAlignament::Left)
+                    .build();
                 if self.symbol_size > 0 {
-                    format.width = Some(self.symbol_size as u16);
+                    format.set_wrap_type(WrapType::SingleLineWrap(self.symbol_size as u16));
                     if let Some(value) = data.symbol(self.current_index) {
                         surface.write_text(value, &format);
                     }
@@ -273,12 +277,12 @@ where
                     // recompute the new width
                     let w = (size.width - MIN_WIDTH_VARIANT_NAME) as i32 - self.symbol_size as i32 - 1;
                     if w > 0 {
-                        format.width = Some(w as u16);
+                        format.set_wrap_type(WrapType::SingleLineWrap(w as u16));
                     } else {
                         paint_next = false;
                     }
                 } else {
-                    format.width = Some((size.width - MIN_WIDTH_VARIANT_NAME) as u16);
+                    format.set_wrap_type(WrapType::SingleLineWrap((size.width - MIN_WIDTH_VARIANT_NAME) as u16));
                 }
                 if paint_next {
                     if let Some(value) = data.name(self.current_index) {
@@ -314,22 +318,30 @@ where
 
             if (self.count > 0) && (size.height > 3) {
                 let visible_items = size.height - 3;
-                let mut format = TextFormat::single_line(2, self.expanded_panel_y + 1, col_text, TextAlignament::Left);
-                let mut format_symbol = TextFormat::single_line(2, self.expanded_panel_y + 1, theme.menu.symbol.normal, TextAlignament::Left);
                 let mut display_value = true;
-                format_symbol.width = Some(self.symbol_size as u16);
+                let mut format = TextFormatBuilder::new()
+                    .position(2, self.expanded_panel_y + 1)
+                    .attribute(col_text)
+                    .align(TextAlignament::Left)
+                    .build();
+                let mut format_symbol = TextFormatBuilder::new()
+                    .position(2, self.expanded_panel_y + 1)
+                    .attribute(theme.menu.symbol.normal)
+                    .align(TextAlignament::Left)
+                    .wrap_type(WrapType::SingleLineWrap(self.symbol_size as u16))
+                    .build();
                 if self.symbol_size > 0 {
                     format.x += self.symbol_size as i32;
                     format.x += 1;
                     let space_left = (size.width as i32) - (5 + self.symbol_size as i32);
                     if space_left > 0 {
-                        format.width = Some(space_left as u16);
+                        format.set_wrap_type(WrapType::SingleLineWrap(space_left as u16));
                     } else {
-                        format.width = Some(0);
+                        format.set_wrap_type(WrapType::SingleLineWrap(0));
                         display_value = false;
                     }
                 } else {
-                    format.width = Some((size.width - 4) as u16);
+                    format.set_wrap_type(WrapType::SingleLineWrap((size.width - 4) as u16));
                 }
 
                 for i in self.start_index..self.start_index + visible_items {
@@ -346,15 +358,15 @@ where
                                 if let Some(desc) = data.description(i) {
                                     if !desc.is_empty() {
                                         let sz = value.chars().count();
-                                        let old_width = format.width;
+                                        let old_width = format.width();
                                         let old_x = format.x;
                                         format.x += 1 + sz as i32;
                                         if format.x < (size.width as i32) - 2 {
-                                            format.width = Some((size.width as i32 - (2 + format.x)) as u16);
+                                            format.set_wrap_type(WrapType::SingleLineWrap((size.width as i32 - (2 + format.x)) as u16));
                                             format.char_attr = theme.menu.text.inactive;
                                             surface.write_text(desc, &format);
                                         }
-                                        format.width = old_width;
+                                        format.set_wrap_type(WrapType::SingleLineWrap(old_width));
                                         format.x = old_x;
                                     }
                                 }

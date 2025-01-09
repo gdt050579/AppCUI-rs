@@ -32,6 +32,9 @@ pub mod hline;
 pub mod vline;
 pub mod datepicker;
 pub mod listbox;
+pub mod listview;
+pub mod togglebutton;
+pub mod pathfinder;
 pub mod textarea;
 
 // re-export
@@ -65,4 +68,7 @@ pub use hline::HLine;
 pub use vline::VLine;
 pub use datepicker::DatePicker;
 pub use listbox::ListBox;
+pub use listview::ListView;
+pub use togglebutton::ToggleButton;
+pub use pathfinder::PathFinder;
 pub use textarea::TextArea;

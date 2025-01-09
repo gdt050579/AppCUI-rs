@@ -52,7 +52,7 @@ pub trait ModalWindowMethods<T> {
     fn close(&mut self);
 }
 
-#[derive(Copy, Clone)]
-pub(crate) enum EventData {
+// #[derive(Copy, Clone)]
+// pub(crate) enum EventData {
 
-}
+// }

@@ -156,7 +156,6 @@ impl Tab {
                 }
                 Some(idx)
             }
-
         }
     }
     #[inline(always)]
@@ -191,15 +190,11 @@ impl Tab {
         }
     }
     fn paint_horizontal_tab(&self, surface: &mut Surface, theme: &Theme, y: i32) {
-        let mut format = TextFormat {
-            x: 1,
-            y,
-            width: Some(self.tab_width as u16 - 2),
-            align: TextAlignament::Center,
-            text_wrap: TextWrap::None,
-            multi_line: false,
-            ..Default::default()
-        };
+        let mut format = TextFormatBuilder::new()
+            .position(1, y)
+            .wrap_type(WrapType::SingleLineWrap(self.tab_width as u16 - 2))
+            .align(TextAlignament::Center)
+            .build();
 
         let sz = self.size();
         if !self.flags.contains(Flags::TransparentBackground) {
@@ -219,10 +214,9 @@ impl Tab {
         let s2 = (self.tab_width as i32) - s1;
         for (index, page) in self.pages.iter().enumerate() {
             let (text_attr, hotkey_attr) = self.get_tabattr(theme, index);
-            format.chars_count = Some(page.chars_count() as u16);
-            format.hotkey_pos = page.hotkey_pos();
-            format.char_attr = text_attr;
-            format.hotkey_attr = Some(hotkey_attr);
+            format.set_attribute(text_attr);
+            format.set_chars_count(page.chars_count() as u16);
+            format.set_hotkey_from_caption(hotkey_attr, page);
 
             // fill the tab
             surface.fill_horizontal_line_with_size(format.x, y, self.tab_width as u32, Character::with_attributes(' ', text_attr));
@@ -246,23 +240,17 @@ impl Tab {
                 Character::with_attributes(' ', self.get_tabsbarattr(theme)),
             );
         }
-
-        let mut format = TextFormat {
-            x: 1,
-            y: 1,
-            width: Some(self.tab_width as u16 - 2),
-            align: TextAlignament::Left,
-            text_wrap: TextWrap::None,
-            multi_line: false,
-            ..Default::default()
-        };
+        let mut format = TextFormatBuilder::new()
+            .position(1, 1)
+            .wrap_type(WrapType::SingleLineWrap(self.tab_width as u16 - 2))
+            .align(TextAlignament::Left)
+            .build();
 
         for (index, page) in self.pages.iter().enumerate() {
             let (text_attr, hotkey_attr) = self.get_tabattr(theme, index);
-            format.chars_count = Some(page.chars_count() as u16);
-            format.hotkey_pos = page.hotkey_pos();
-            format.char_attr = text_attr;
-            format.hotkey_attr = Some(hotkey_attr);
+            format.set_attribute(text_attr);
+            format.set_chars_count(page.chars_count() as u16);
+            format.set_hotkey_from_caption(hotkey_attr, page);
 
             // fill the tab
             surface.fill_horizontal_line_with_size(0, format.y, self.tab_width as u32, Character::with_attributes(' ', text_attr));

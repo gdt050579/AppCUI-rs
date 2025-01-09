@@ -1,6 +1,8 @@
 use crate::graphics::{CharAttribute, Character, SpecialChar, Surface};
 
+#[derive(Copy, Clone, PartialEq, Eq, Default)]
 enum TitleDrawMode {
+    #[default]
     None,
     Full,
     SplitInMiddle,
@@ -8,6 +10,7 @@ enum TitleDrawMode {
     FirstLetter,
 }
 
+#[derive(Default)]
 pub(crate) struct Title {
     text: String,
     count: u16,

@@ -1,5 +1,5 @@
-use super::HScrollBar;
-use super::VScrollBar;
+use super::scrollbars_components::HScrollBar;
+use super::scrollbars_components::VScrollBar;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::Theme;
@@ -20,7 +20,7 @@ impl ScrollBars {
     }
     pub fn update(&mut self, horizontal_indexes: u64, vertical_indexes: u64, size: Size) {
         self.horizontal.update(size.width as u64, horizontal_indexes);
-        self.vertical.update_count(size.height as u64, vertical_indexes);
+        self.vertical.update(size.height as u64, vertical_indexes);
     }
     pub fn paint(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
         self.horizontal.paint(surface, theme, control);
@@ -40,7 +40,7 @@ impl ScrollBars {
         let h = (control_size.height as i32) - top_margin; // 1 space from bottom
         let x = left_margin;
         let y = top_margin;
-        self.horizontal.recompute_layout(x, w, control_size);
+        self.horizontal.recompute_position(x, w, control_size);
         self.vertical.recompute_position(y, h, control_size);
         self.update(horizontal_indexes, vertical_indexes, control_size);
     }
@@ -48,15 +48,15 @@ impl ScrollBars {
         self.should_paint
     }
     pub fn set_indexes(&mut self, horizontal: u64, vertical: u64) {
-        self.horizontal.set_index(horizontal);
-        self.vertical.set_index(vertical);
+        self.horizontal.set_value(horizontal);
+        self.vertical.set_value(vertical);
     }
     #[inline(always)]
     pub fn horizontal_index(&self) -> u64 {
-        self.horizontal.index()
+        self.horizontal.value()
     }
     #[inline(always)]
     pub fn vertical_index(&self) -> u64 {
-        self.vertical.index()
+        self.vertical.value()
     }
 }

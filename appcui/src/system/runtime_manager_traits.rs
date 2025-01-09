@@ -4,7 +4,9 @@ use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::menu::Menu;
 use crate::input::*;
 use crate::terminals::*;
+use super::timer::TimerManager;
 use super::Handle;
+use super::Theme;
 
 pub(crate) trait LayoutMethods {
     fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout);
@@ -35,4 +37,20 @@ pub(crate) trait MouseMethods {
     fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent);
     fn process_mousebuttonup_event(&mut self, event: MouseButtonUpEvent);
     fn process_mouse_dblclick_event(&mut self, _event: MouseDoubleClickEvent);
+}
+
+pub(crate) trait ThemeMethods {
+    fn update_theme(&mut self);
+    fn update_theme_for_control(&mut self, handle: Handle<UIElement>);
+    fn theme(&self) -> &Theme;
+    fn set_theme(&mut self, theme: Theme);
+}
+
+pub(crate) trait TimerMethods {
+    fn request_timer_threads_update(&mut self);
+    fn get_timer_manager(&mut self) -> &mut TimerManager;
+    fn process_timer_tick_update_event(&mut self, id: u8, tick: u64);
+    fn process_timer_paused_event(&mut self, id: u8, tick: u64);
+    fn process_timer_start_event(&mut self, id: u8, tick: u64);
+    fn timer_id_to_control(&mut self, id: u8) -> Option<&mut ControlManager>;
 }

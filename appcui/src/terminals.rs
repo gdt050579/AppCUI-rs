@@ -1,11 +1,14 @@
 mod debug;
-mod system_event;
-#[cfg(target_family = "unix")]
-mod termios;
 #[cfg(target_family = "unix")]
 mod ncurses;
+mod system_event;
+mod system_event_thread;
+#[cfg(target_family = "unix")]
+mod termios;
 #[cfg(target_os = "windows")]
 mod windows_console;
+
+use std::sync::mpsc::Sender;
 
 use super::graphics::Size;
 use super::graphics::Surface;
@@ -19,23 +22,30 @@ pub(crate) use self::system_event::MouseDoubleClickEvent;
 pub(crate) use self::system_event::MouseMoveEvent;
 pub(crate) use self::system_event::MouseWheelEvent;
 pub(crate) use self::system_event::SystemEvent;
+pub(crate) use self::system_event::TimerTickUpdateEvent;
+pub(crate) use self::system_event::TimerStartEvent;
+pub(crate) use self::system_event::TimerPausedEvent;
+
+pub(super) use self::system_event_thread::SystemEventReader;
 
 use self::debug::DebugTerminal;
 
 #[cfg(target_family = "unix")]
-use self::termios::TermiosTerminal;
-#[cfg(target_family = "unix")]
 use self::ncurses::NcursesTerminal;
+#[cfg(target_family = "unix")]
+use self::termios::TermiosTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_console::WindowsTerminal;
 
 pub(crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
+    fn on_resize(&mut self, new_size: Size);
     fn get_size(&self) -> Size;
-    fn get_system_event(&mut self) -> SystemEvent;
     fn get_clipboard_text(&self) -> Option<String>;
     fn set_clipboard_text(&mut self, text: &str);
     fn has_clipboard_text(&self) -> bool;
+    fn query_system_event(&mut self) -> Option<SystemEvent> { None }
+    fn is_single_threaded(&self) -> bool;
 }
 
 #[repr(u8)]
@@ -49,7 +59,7 @@ pub enum TerminalType {
     NcursesTerminal,
 }
 
-pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     // check if terminal size if valid (if present)
     if let Some(sz) = builder.size.as_ref() {
         if (sz.width == 0) || (sz.height == 0) {
@@ -71,26 +81,26 @@ pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>,
     // this depends on the OS
     if builder.terminal.is_none() {
         // based on OS we should choose a terminal
-        return build_default_terminal(builder);
+        return build_default_terminal(builder, sender);
     }
     // finaly, based on the type, return a terminal
     let terminal = *builder.terminal.as_ref().unwrap();
     match terminal {
         #[cfg(target_os = "windows")]
         TerminalType::WindowsConsole => {
-            let term = WindowsTerminal::new(builder)?;
+            let term = WindowsTerminal::new(builder, sender)?;
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
         TerminalType::Termios => TermiosTerminal::new(builder),
-        
+
         #[cfg(target_family = "unix")]
         TerminalType::NcursesTerminal => NcursesTerminal::new(builder),
     }
 }
 #[cfg(target_os = "windows")]
-fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-    let term = WindowsTerminal::new(builder)?;
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+    let term = WindowsTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "linux")]

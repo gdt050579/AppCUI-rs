@@ -1,9 +1,12 @@
 use self::control_event_wrapper::CustomEventData;
-
+use crate::system::TimerMethods;
 use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
+use crate::system::Theme;
+use crate::system::ThemeMethods;
+use crate::system::Timer;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
@@ -30,7 +33,7 @@ pub enum StatusFlags {
     IncreaseBottomMarginOnFocus = 0x1000,
     SingleWindow = 0x2000,
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub(crate) struct Margins {
     pub(crate) left: u8,
     pub(crate) right: u8,
@@ -39,11 +42,13 @@ pub(crate) struct Margins {
 }
 
 #[repr(C)]
+#[derive(Default)]
 pub struct ControlBase {
     pub(crate) layout: ControlLayout,
     pub(crate) margins: Margins,
     pub(crate) handle: Handle<UIElement>,
     pub(crate) parent: Handle<UIElement>,
+    pub(crate) timer_handle: Handle<Timer>,
     pub(crate) event_processor: Handle<UIElement>,
     pub(crate) children: Vec<Handle<UIElement>>,
     pub(crate) focused_child_index: VectorIndex,
@@ -71,6 +76,7 @@ impl ControlBase {
         Self {
             parent: Handle::None,
             handle: Handle::None,
+            timer_handle: Handle::None,
             event_processor: Handle::None,
             children: Vec::new(),
             focused_child_index: VectorIndex::Invalid,
@@ -305,6 +311,7 @@ impl ControlBase {
         // if I am already registered, I will set the parent of my child
         let base = c.base_mut();
         let focusable = base.can_receive_input();
+        let timer_handle = base.timer_handle;
 
         base.parent = self.handle;
         // I will use the same event_processor as my parent
@@ -321,7 +328,26 @@ impl ControlBase {
             // since we have already pushed one handle, we know that children count > 0
             self.focused_child_index.set(children_count - 1, children_count, false);
         }
+        if !timer_handle.is_none() {
+            if !handle.is_none() {
+                rm.get_timer_manager().update_control_handle(timer_handle, handle.cast());
+            }
+            rm.request_timer_threads_update();
+        }
         handle.cast()
+    }
+
+    pub fn timer(&mut self) -> Option<&mut Timer> {
+        let tm = RuntimeManager::get().get_timer_manager();
+        if self.timer_handle.is_none() {
+            let timer_handle = tm.allocate_for(self.handle.cast());
+            if timer_handle.is_none() {
+                // no empty slots available to allocate a new timer
+                return None;
+            }
+            self.timer_handle = timer_handle;
+        }
+        tm.get_mut(self.timer_handle)
     }
 
     /// Returns `true` if the current control is visible or `false` otherwise
@@ -604,6 +630,11 @@ impl ControlBase {
             return menu.get_mut(menuitem_handle);
         }
         None
+    }
+
+    #[inline(always)]
+    pub fn theme(&self) -> &Theme {
+        RuntimeManager::get().theme()
     }
 }
 // default implementations

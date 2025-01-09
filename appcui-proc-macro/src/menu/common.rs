@@ -120,10 +120,8 @@ fn add_command_id(s: &mut String, dict: &mut NamedParamsMap, class: Option<&str>
             // validate if the class can be build
             let c = if dict.contains("class") {
                 dict.get("class").unwrap().get_string()
-            } else if let Some(name) = class {
-                name
             } else {
-                ""
+                class.unwrap_or_default()
             };
             if c.is_empty() {
                 panic!("Unknwon class nane (or empty) for command. Either specify it in the `class` attribute (e.g. class=MyWin) or specify the command with its full qualifier (e.g. command='mywin::Command::<name>').");

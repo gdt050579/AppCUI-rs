@@ -1,4 +1,7 @@
-use crate::graphics::{Character, Point, Rect, SpecialChar, Surface, TextFormat, TextWrap, Size};
+use crate::{
+    graphics::{Character, Point, Rect, Size, SpecialChar, Surface, TextAlignament, WrapType},
+    prelude::TextFormatBuilder,
+};
 
 use super::Theme;
 
@@ -7,7 +10,6 @@ pub(crate) struct ToolTip {
     text_pos: Point,
     arrow_pos: Point,
     arrow_char: SpecialChar,
-    format: TextFormat,
     canvas: Surface,
 }
 impl ToolTip {
@@ -17,7 +19,6 @@ impl ToolTip {
             text_pos: Point::default(),
             arrow_pos: Point::default(),
             arrow_char: SpecialChar::ArrowDown,
-            format: TextFormat::default(),
             canvas: Surface::new(16, 16),
         }
     }
@@ -25,13 +26,7 @@ impl ToolTip {
     pub(crate) fn is_visible(&self) -> bool {
         self.visible
     }
-    pub(crate) fn show(
-        &mut self,
-        text: &str,
-        object_rect: &Rect,
-        screen_size: Size,
-        theme: &Theme,
-    ) -> bool {
+    pub(crate) fn show(&mut self, text: &str, object_rect: &Rect, screen_size: Size, theme: &Theme) -> bool {
         self.visible = false;
 
         let mut nr_lines = 0u32;
@@ -68,19 +63,19 @@ impl ToolTip {
             let top = object_rect.top();
             //let best_x = x;
             x = x.min((screen_size.width as i32) - (best_width as i32)).max(0);
-            self.arrow_pos = Point::new(cx.clamp(0, (screen_size.width as i32)-1), top-1);
+            self.arrow_pos = Point::new(cx.clamp(0, (screen_size.width as i32) - 1), top - 1);
             self.arrow_char = SpecialChar::ArrowDown;
             self.text_pos = Point::new(x, top - ((nr_lines + 1) as i32));
-            self.format.multi_line = nr_lines > 1;
-            self.format.width = Some((best_width - 2) as u16);
-            self.format.x = 1;
-            self.format.y = 0;
-            self.format.chars_count = Some(chars_count as u16);
-            self.format.char_attr = theme.tooltip.text;
-            self.format.text_wrap = TextWrap::Word;
+            let format = TextFormatBuilder::new()
+                .position(1, 0)
+                .attribute(theme.tooltip.text)
+                .align(TextAlignament::Left)
+                .chars_count(chars_count as u16)
+                .wrap_type(WrapType::WordWrap((best_width - 2) as u16))
+                .build();
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
-            self.canvas.write_text(text, &self.format);
+            self.canvas.write_text(text, &format);
             self.visible = true;
             return true;
         }
@@ -91,19 +86,19 @@ impl ToolTip {
             let bottom = object_rect.bottom();
             //let best_x = x;
             x = x.min((screen_size.width as i32) - (best_width as i32)).max(0);
-            self.arrow_pos = Point::new(cx.clamp(0, (screen_size.width as i32)-1), bottom+1);
+            self.arrow_pos = Point::new(cx.clamp(0, (screen_size.width as i32) - 1), bottom + 1);
             self.arrow_char = SpecialChar::ArrowUp;
-            self.text_pos = Point::new(x, bottom+2);
-            self.format.multi_line = nr_lines > 1;
-            self.format.width = Some((best_width - 2) as u16);
-            self.format.x = 1;
-            self.format.y = 0;
-            self.format.chars_count = Some(chars_count as u16);
-            self.format.char_attr = theme.tooltip.text;
-            self.format.text_wrap = TextWrap::Word;
+            self.text_pos = Point::new(x, bottom + 2);
+            let format = TextFormatBuilder::new()
+                .position(1, 0)
+                .attribute(theme.tooltip.text)
+                .align(TextAlignament::Left)
+                .chars_count(chars_count as u16)
+                .wrap_type(WrapType::WordWrap((best_width - 2) as u16))
+                .build();
             self.canvas.resize(Size::new(best_width, nr_lines));
             self.canvas.clear(Character::with_attributes(' ', theme.tooltip.text));
-            self.canvas.write_text(text, &self.format);
+            self.canvas.write_text(text, &format);
             self.visible = true;
         }
         false

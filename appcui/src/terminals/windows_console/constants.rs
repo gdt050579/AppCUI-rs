@@ -14,6 +14,7 @@ pub(super) const RIGHT_ALT_PRESSED: u32 = 0x0001;
 pub(super) const DOUBLE_CLICK: u32 = 0x0002;
 pub(super) const MOUSE_MOVED: u32 = 0x0001;
 pub(super) const MOUSE_WHEELED: u32 = 0x0004;
+pub(super) const MOUSE_HWHEELED: u32 = 0x0008;
 pub(super) const LEFT_ALT_PRESSED: u32 = 0x0002;
 pub(super) const RIGHT_CTRL_PRESSED: u32 = 0x0004;
 pub(super) const LEFT_CTRL_PRESSED: u32 = 0x0008;

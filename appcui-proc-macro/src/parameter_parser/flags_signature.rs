@@ -21,4 +21,19 @@ impl FlagsSignature {
         let hash = utils::compute_hash(name);
         map.get(&hash).copied()
     }
+    pub(crate) fn list(&self) -> String {
+        let mut l = String::with_capacity(64);
+        let mut v: Vec<&'static str> = Vec::with_capacity(self.flags.len());
+        for f in self.flags {
+            v.push(*f);
+        }
+        v.sort();
+        for item in v {
+            if !l.is_empty() {
+                l.push_str(", ");
+            }
+            l.push_str(item);
+        }
+        l
+    }
 }

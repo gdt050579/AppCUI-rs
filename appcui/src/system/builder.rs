@@ -13,6 +13,8 @@ pub struct Builder {
     pub(crate) has_menu_bar: bool,
     pub(crate) has_command_bar: bool,
     pub(crate) single_window: bool,
+    pub(crate) theme: Theme,
+    pub(crate) max_timer_count: u8,
 }
 impl Builder {
     pub(crate) fn new() -> Self {
@@ -25,6 +27,8 @@ impl Builder {
             has_menu_bar: false,
             has_command_bar: false,
             single_window: false,
+            max_timer_count: 4,
+            theme: Theme::new(Themes::Default),
         }
     }
     #[inline(always)]
@@ -62,6 +66,16 @@ impl Builder {
         T: Control + DesktopControl + 'static,
     {
         self.desktop_manager = Some(ControlManager::new(desktop));
+        self
+    }
+    #[inline(always)]
+    pub fn theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
+        self
+    }
+    #[inline(always)]
+    pub fn timers_count(mut self, count: u8) -> Self {
+        self.max_timer_count = count.max(1); // at least one timer
         self
     }
 }

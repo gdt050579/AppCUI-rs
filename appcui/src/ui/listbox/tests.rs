@@ -729,17 +729,17 @@ fn check_sort() {
         CheckHash(0xC02891D8E535215)
         Key.Pressed(Tab)
         Paint('Listbox has scrollbar and is focused')
-        CheckHash(0xD3C19BA7590D076A)
+        CheckHash(0xE86843629485A14D)
         Key.Pressed(Down,3)
         Paint('Yellow is selected')
-        CheckHash(0xA851E23683C81495)
+        CheckHash(0x19199C80DA1101F2)
         Key.Pressed(Tab)
         Key.Pressed(Enter)
         Paint('List is sorted')
         CheckHash(0x1C8CADCF8F9DBA81)
         Key.Pressed(Tab)
         Paint('Listbox is sorted, Yellow is selected')
-        CheckHash(0x118D927047A34629)
+        CheckHash(0x14EC25C01F6E20A6)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
@@ -781,17 +781,17 @@ fn check_sort_by() {
         CheckHash(0xC02891D8E535215)
         Key.Pressed(Tab)
         Paint('Listbox has scrollbar and is focused')
-        CheckHash(0xD3C19BA7590D076A)
+        CheckHash(0xE86843629485A14D)
         Key.Pressed(Down,3)
         Paint('Yellow is selected')
-        CheckHash(0xA851E23683C81495)
+        CheckHash(0x19199C80DA1101F2)
         Key.Pressed(Tab)
         Key.Pressed(Enter)
         Paint('List is sorted (based on length: Red,Blue,Greem,Black,White,Yellow,Orange,Purple)')
         CheckHash(0xEC290E75D5C9A6C9)
         Key.Pressed(Tab)
         Paint('Listbox is sorted, Yellow is selected')
-        CheckHash(0x771AD5CC44C8F901)
+        CheckHash(0x7793BA7F95CF1B06)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());

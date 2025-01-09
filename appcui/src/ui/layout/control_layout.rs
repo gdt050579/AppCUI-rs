@@ -11,6 +11,7 @@ impl Layout<'_> {
     }
 }
 
+#[derive(Default)]
 pub(crate) struct ControlLayout {
     mode: LayoutMode,
     x: i32,

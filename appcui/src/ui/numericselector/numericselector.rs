@@ -11,7 +11,7 @@ use std::str::FromStr;
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct NumericSelector<T>
 where
-    T: Number + 'static,
+    T: Number + 'static, 
 {
     value: T,
     min: T,
@@ -214,29 +214,37 @@ where
             _ => theme.editor.normal,
         };
         let w = self.size().width as i32;
-        let (l, r) = if has_buttons { (4, w - 6) } else { (0, w - 1) };
+        let (l, r) = if has_buttons { (4, w - 5) } else { (0, w - 1) };
         surface.fill_horizontal_line(l, 0, r, Character::with_attributes(' ', attr));
         if l + 2 <= r {
             if self.edit_mode {
                 let chars_count = self.txt.len() as i32; // all are ascii
                 let vis_chars = r - (l + 1);
-                let mut format = TextFormat::new(l + 1, 0, attr, TextAlignament::Left, false);
+                let mut format = TextFormatBuilder::new()
+                    .position(l + 1, 0)
+                    .attribute(attr)
+                    .align(TextAlignament::Left)
+                    .build();
                 if chars_count <= vis_chars {
-                    format.chars_count = Some(chars_count as u16);
-                    format.width = Some(vis_chars as u16);
+                    format.set_chars_count(chars_count as u16);
+                    format.set_wrap_type(WrapType::SingleLineWrap(vis_chars as u16));
                     surface.write_text(&self.txt, &format);
                     surface.set_cursor(l + chars_count + 1, 0);
                 } else {
                     let start = chars_count - vis_chars;
-                    format.chars_count = Some(vis_chars as u16);
-                    format.width = Some(vis_chars as u16);
+                    format.set_chars_count(vis_chars as u16);
+                    format.set_wrap_type(WrapType::SingleLineWrap(vis_chars as u16));
                     surface.write_text(&self.txt[start as usize..], &format);
                     surface.set_cursor(r, 0);
                 }
             } else {
-                let mut format = TextFormat::new((l + r) / 2, 0, attr, TextAlignament::Center, false);
-                format.chars_count = Some(self.txtlen as u16);
-                format.width = Some((r - (l + 1)) as u16);
+                let format = TextFormatBuilder::new()
+                    .position((l + r + 1) / 2, 0)
+                    .attribute(attr)
+                    .align(TextAlignament::Center)
+                    .chars_count(self.txtlen as u16)
+                    .wrap_type(WrapType::SingleLineWrap((r - (l + 1)) as u16))
+                    .build();
                 surface.write_text(&self.txt, &format);
             }
         }

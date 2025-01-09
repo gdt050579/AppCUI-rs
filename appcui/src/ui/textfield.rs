@@ -1,7 +1,7 @@
 mod textfield;
 mod initialization_flags;
 mod char_class;
-mod selection;
+pub mod selection;
 pub mod events;
 #[cfg(test)]
 mod tests;

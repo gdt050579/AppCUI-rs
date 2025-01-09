@@ -1118,7 +1118,7 @@ fn check_resize() {
         CheckHash(0x47C7A4F7921EBA48)
         Key.Pressed(F1)
         Paint('Scale 33% - full image')
-        CheckHash(0x6D5016A101BD20B8)
+        CheckHash(0x3352D0A5F5CF681E)
         Key.Pressed(F2,2)
         Paint('Scale 33% - Gray scale')
         CheckHash(0xDA77D4E54A3D71CA)

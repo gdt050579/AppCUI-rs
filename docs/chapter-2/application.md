@@ -28,6 +28,8 @@ Using `App::new` or `App::with_terminal` creates a builder object that can furth
 * `.single_window()` if you want a single window application
 * `.menu_bar()` to enable the application top menu bar
 * `.command_bar()` to enable the application command bar
+* `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in section [Themes](chapter-6/themes.md)
+* `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
 
 After setting up the configuration for an application, just call the `build()` method to create an application. This methods returns a result of type `Result<App,Error>` from where the appcui application can be obtained via several methods such as:
 * `unwrap()` or `expect(...)` methods
