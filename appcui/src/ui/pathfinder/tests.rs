@@ -33,7 +33,7 @@ const CSV_DATA: &str = "
     ";
 #[test]
 fn check_with_simulator() {
-    //let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
         //Paint.Enable(false)
         Paint('Initial')
@@ -54,17 +54,17 @@ fn check_with_simulator() {
     ";
 
     //let mut a = App::debug(80, 20, script).build().unwrap();
-//     let mut a = App::new().build().unwrap();
-//     let mut w = window!("Test,d:c,w:60,h:15");
-//     let p = GenericPathFinder::with_navigator(
-//         r#"C:\Program Files\"#,
-//         Layout::new("x:1,y:1,w:40"),
-//         pathfinder::Flags::None,
-//         nav);
-//     w.add(p);
-//     w.add(button!("test,x:1,y:3,w:6"));
-//     a.add_window(w);
-//     a.run();
+    let mut a = App::new().build().unwrap();
+    let mut w = window!("Test,d:c,w:60,h:15");
+    let p = GenericPathFinder::with_navigator(
+        r#"C:\Program Files\"#,
+        Layout::new("x:1,y:1,w:40"),
+        pathfinder::Flags::CaseSensitive,
+        nav);
+    w.add(p);
+    w.add(button!("test,x:1,y:3,w:6"));
+    a.add_window(w);
+    a.run();
 }
 
 #[test]

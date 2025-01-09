@@ -7,7 +7,6 @@ use crate::prelude::*;
 use crate::utils::glyphs::GlyphParser;
 use std::marker::PhantomData;
 
-//TODO: make separate cfgs for different OS
 #[cfg(target_os = "windows")]
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
 #[cfg(target_family = "unix")]
@@ -46,7 +45,7 @@ where
     fn get_suggestions(&self) -> &Vec<String> {
         &self.suggestions
     }
-    fn update_suggestions(&mut self, path: &str, navigator: &T) {
+    fn update_suggestions(&mut self, path: &str, navigator: &T, case_sensitive: bool) {
         let folder = Self::get_folder(path);
         if folder != self.cached_path {
             // create cache for this folder
@@ -61,11 +60,18 @@ where
                         .to_str()
                         .unwrap()
                         .to_string();
-                    self.cached_items.push(cached_item);
+                    match case_sensitive {
+                        true => self.cached_items.push(cached_item.to_lowercase()),
+                        _ => self.cached_items.push(cached_item),
+                    }
                 }
             }
         }
-        self.suggestions = Self::get_matching_paths(path, &self.cached_items);
+        self.suggestions = if case_sensitive {
+            Self::get_matching_paths(&path.to_lowercase(), &self.cached_items)
+        } else {
+            Self::get_matching_paths(path, &self.cached_items)
+        };
     }
     fn get_folder(path: &str) -> &str {
         let mut end = path.len();
@@ -88,7 +94,7 @@ where
     T: crate::utils::Navigator<E, R, PathBuf>,
 {
     is_readonly: bool,
-    is_case_sensitive: bool, 
+    is_case_sensitive: bool,
     navigator_cacher: NavigatorDataCacher<T, E, R>,
 
     // input area
@@ -459,7 +465,7 @@ where
     fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {
         let offset = match self.expanded_above {
             true => 0 - offset,
-            _ => offset
+            _ => offset,
         };
 
         let suggestions = self.navigator_cacher.get_suggestions();
@@ -666,7 +672,7 @@ where
 
                 self.selected_suggestion_pos = 0;
                 self.start_suggestions_pos = 1;
-                self.navigator_cacher.update_suggestions(&self.input_path, navigator);
+                self.navigator_cacher.update_suggestions(&self.input_path, navigator, self.is_case_sensitive);
                 self.expand_suggestions_area(control);
                 return EventProcessStatus::Processed;
             }
@@ -734,7 +740,7 @@ where
 
                     self.selected_suggestion_pos = 0;
                     self.start_suggestions_pos = 1;
-                    self.navigator_cacher.update_suggestions(&self.input_path, navigator);
+                    self.navigator_cacher.update_suggestions(&self.input_path, navigator, self.is_case_sensitive);
                     self.expand_suggestions_area(control);
                     return EventProcessStatus::Processed;
                 }
