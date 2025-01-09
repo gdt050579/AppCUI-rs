@@ -52,6 +52,105 @@ impl Markdown {
 
         (width, height)
     }
+
+    fn get_element_style(element: &InlineElement) -> (Color, CharFlags) {
+        match element {
+            InlineElement::Text(_) => (Color::Green, CharFlags::None),
+            InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
+            InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
+            InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
+            InlineElement::Code(_) => (Color::Magenta, CharFlags::None)
+        }
+    }
+
+    fn get_header_style(level: usize) -> (Color, CharFlags) {
+        match level {
+            1 => (Color::Red, CharFlags::None),
+            2 => (Color::Yellow, CharFlags::None),
+            3 => (Color::Pink, CharFlags::None),
+            _ => (Color::Magenta, CharFlags::None),
+        }
+    }
+    
+    fn process_list_element(
+        elements: &[InlineElement],
+        indent: i32,
+        x_pos: &mut i32,
+        y_pos: &mut i32,
+        xlsurface: &mut Surface,
+        prefix: Option<String>,
+    ) {
+        for (i, element) in elements.iter().enumerate() {
+            if i == 0 {
+                *x_pos = indent;
+            }
+    
+            let (color, char_flags) = Self::get_element_style(element);
+    
+            let content_str = element.to_string();
+            let formatted_content = if i == 0 {
+                if let Some(ref prefix) = prefix {
+                    format!("{} {}", prefix, content_str)
+                } else {
+                    format!("○ {}", content_str)
+                }
+            } else {
+                content_str
+            };
+    
+            xlsurface.write_string(
+                *x_pos,
+                *y_pos,
+                &formatted_content,
+                CharAttribute::new(color, Color::White, char_flags),
+                false,
+            );
+    
+            *x_pos += formatted_content.chars().count() as i32;
+        }
+    }
+    
+    fn process_nested_list(
+        depth: u8,
+        nested_items: &Box<MarkdownElement>,
+        x_pos: &mut i32,
+        y_pos: &mut i32,
+        xlsurface: &mut Surface,
+    ) {
+        let indent = depth as i32 * 4;
+    
+        match **nested_items {
+            MarkdownElement::UnorderedList(ref items) => {
+                for item in items.iter() {
+                    match item {
+                        parser::ListItem::Simple(ref elements) => {
+                            Self::process_list_element(elements, indent, x_pos, y_pos, xlsurface, None);
+                        }
+                        parser::ListItem::Nested(ref nested) => {
+                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface);
+                        }
+                    }
+                    *y_pos += 1;
+                }
+            }
+            MarkdownElement::OrderedList(ref items) => {
+                let mut index = 1;
+                for item in items.iter() {
+                    match item {
+                        parser::ListItem::Simple(ref elements) => {
+                            Self::process_list_element(elements, indent, x_pos, y_pos, xlsurface, Some(format!("{}. ", index)));
+                            index += 1;
+                        }
+                        parser::ListItem::Nested(ref nested) => {
+                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface);
+                        }
+                    }
+                    *y_pos += 1;
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 impl OnPaint for Markdown {
@@ -64,27 +163,15 @@ impl OnPaint for Markdown {
         for element in elements {
             match element {
                 MarkdownElement::Header(content, level) => {
-                    let color = match level {
-                        1 => Color::Red,
-                        2 => Color::Yellow,
-                        3 => Color::Pink,
-                        _ => Color::Magenta,
-                    };
-                    xlsurface.write_string(0, y_pos, &content, CharAttribute::new(color, Color::White, CharFlags::Bold), false);
+                    let (color, flags) = Self::get_header_style(level);
+                    xlsurface.write_string(0, y_pos, &content, CharAttribute::new(color, Color::White, flags), false);
                 }
 
                 MarkdownElement::Paragraph(content) => {
                     let mut x_pos: i32 = 0;
 
                     for element in content.iter() {
-                        let (color, char_flags) = match element {
-                            InlineElement::Text(_) => (Color::Black, CharFlags::None),
-                            InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
-                            InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
-                            InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
-                            InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
-                        };
-
+                        let (color, char_flags) = Self::get_element_style(element);
                         let content_str = element.to_string();
 
                         xlsurface.write_string(x_pos, y_pos, &content_str, CharAttribute::new(color, Color::White, char_flags), false);
@@ -98,20 +185,13 @@ impl OnPaint for Markdown {
                         let elements = match item {
                             parser::ListItem::Simple(elements) => elements,
                             parser::ListItem::Nested(items) => {
-                                process_nested_list(1, &items, &mut x_pos, &mut y_pos, xlsurface);
+                                Self::process_nested_list(1, &items, &mut x_pos, &mut y_pos, xlsurface);
                                 continue;
                             }
                         };
 
                         for (i, element) in elements.iter().enumerate() {
-                            let (color, char_flags) = match element {
-                                InlineElement::Text(_) => (Color::Green, CharFlags::None),
-                                InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
-                                InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
-                                InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
-                                InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
-                            };
-
+                            let (color, char_flags) = Self::get_element_style(element);
                             let content_str = element.to_string();
 
                             let formatted_content = if i == 0 {
@@ -143,20 +223,13 @@ impl OnPaint for Markdown {
                         let elements = match item {
                             parser::ListItem::Simple(elements) => elements,
                             parser::ListItem::Nested(items) => {
-                                process_nested_list(1, &items, &mut x_pos, &mut y_pos, xlsurface);
+                                Self::process_nested_list(1, &items, &mut x_pos, &mut y_pos, xlsurface);
                                 continue;
                             }
                         };
 
                         for (i, element) in elements.iter().enumerate() {
-                            let (color, char_flags) = match element {
-                                InlineElement::Text(_) => (Color::Green, CharFlags::None),
-                                InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
-                                InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
-                                InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
-                                InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
-                            };
-
+                            let (color, char_flags) = Self::get_element_style(element);
                             let content_str = element.to_string();
 
                             let formatted_content = if i == 0 {
@@ -206,93 +279,3 @@ impl OnPaint for Markdown {
     }
 }
 
-fn process_nested_list(depth: u8, nested_items: &Box<MarkdownElement>, x_pos: &mut i32, y_pos: &mut i32, xlsurface: &mut Surface) {
-    match **nested_items {
-        MarkdownElement::UnorderedList(ref items) => {
-            let indent = depth as i32 * 4;
-
-            for item in items.iter() {
-                match item {
-                    parser::ListItem::Simple(ref elements) => {
-                        // Process simple list items
-                        for (i, element) in elements.iter().enumerate() {
-                            if i == 0 {
-                                *x_pos = indent;
-                            }
-                            let (color, char_flags) = match element {
-                                InlineElement::Text(_) => (Color::Green, CharFlags::None),
-                                InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
-                                InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
-                                InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
-                                InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
-                            };
-
-                            let content_str = element.to_string();
-
-                            let formatted_content = if i == 0 { format!("○ {}", content_str) } else { content_str };
-
-                            xlsurface.write_string(
-                                *x_pos,
-                                *y_pos,
-                                &formatted_content,
-                                CharAttribute::new(color, Color::White, char_flags),
-                                false,
-                            );
-
-                            *x_pos += formatted_content.chars().count() as i32;
-                        }
-                    }
-                    parser::ListItem::Nested(ref nested) => {
-                        process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface);
-                    }
-                }
-                *y_pos += 1;
-            }
-        },
-        MarkdownElement::OrderedList(ref items) => {
-            let indent = depth as i32 * 4;
-            let mut index = 1;
-
-            for item in items.iter() {
-                match item {
-                    parser::ListItem::Simple(ref elements) => {
-                        // Process simple list items
-                        for (i, element) in elements.iter().enumerate() {
-                            if i == 0 {
-                                *x_pos = indent;
-                            }
-                            let (color, char_flags) = match element {
-                                InlineElement::Text(_) => (Color::Green, CharFlags::None),
-                                InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
-                                InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
-                                InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
-                                InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
-                            };
-
-                            let content_str = element.to_string();
-
-                            let prefix = index;
-                            let formatted_content = if i == 0 { format!("{}. {}",prefix , content_str) } else { content_str };
-
-                            xlsurface.write_string(
-                                *x_pos,
-                                *y_pos,
-                                &formatted_content,
-                                CharAttribute::new(color, Color::White, char_flags),
-                                false,
-                            );
-                            index += 1;
-                            *x_pos += formatted_content.chars().count() as i32;
-                        }
-                    }
-                    parser::ListItem::Nested(ref nested) => {
-                        process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface);
-                    }
-                }
-                *y_pos += 1;
-            }
-        }
-        _ => {
-        }
-    }
-}
