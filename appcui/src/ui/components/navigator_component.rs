@@ -665,6 +665,9 @@ where
     }
 
     fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus {
+        if self.is_readonly {
+            return EventProcessStatus::Ignored;
+        }
         match key.value() {
             key!("Backspace") => {
                 self.delete_previous_character();

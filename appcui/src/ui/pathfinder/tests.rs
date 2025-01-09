@@ -1,6 +1,5 @@
 use pathfinder::pathfinder::GenericPathFinder;
 use crate::{prelude::*, utils::fs::NavSimulator};
-use crate::dialogs::*;
 
 const CSV_DATA: &str = "
     r,C:\\,10000,100000,SYSTEM,fixed
@@ -32,7 +31,7 @@ const CSV_DATA: &str = "
     f:D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
 #[test]
-fn check_with_simulator() {
+fn test_while_developing() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
         //Paint.Enable(false)
@@ -59,20 +58,10 @@ fn check_with_simulator() {
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive,
+        pathfinder::Flags::ReadOnly,
         nav);
     w.add(p);
     w.add(button!("test,x:1,y:3,w:6"));
     a.add_window(w);
     a.run();
-}
-
-#[test]
-fn check_with_save() {
-    // let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
-    // let mut a = App::new().build().unwrap();
-    // GDT: nu are cum sa mai mearga ca am trecut dialogs::save pe Navigator si nu pe simulator
-    //crate::dialogs::save("title", "file_name", Location::Current, None , SaveFileDialogFlags::Icons);
-
-    //a.run();
 }
