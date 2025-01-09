@@ -515,7 +515,6 @@ impl OnPaint for TextArea {
         let mut x = 0;
         let mut y = 0;
 
-
         let max_line_size = self.size().width as usize;
         let mut initial_offset = 0;
         
@@ -910,6 +909,8 @@ impl OnKeyPressed for TextArea {
                 }
                 return EventProcessStatus::Processed;
             }
+            // TODO: Add Ctrl+Delete and Ctrl+Back as commands
+
             key!("Enter") => {
                 self.reposition_cursor();
 
