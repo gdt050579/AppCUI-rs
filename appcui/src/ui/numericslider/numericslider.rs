@@ -136,17 +136,22 @@ where
 
         for i in 1..self.nr_val - 1 {
             current_value.write_to_string(&mut string_buffer, self.format);
+            let space_debt: u32 = (self.m - string_buffer.len()) as u32;
+            string_buffer = Self::get_n_spaces(space_debt / 2 + space_debt % 2) + &string_buffer + &Self::get_n_spaces(space_debt / 2);
+            
             self.values_string.push_str(&string_buffer);
 
             if i != self.nr_val - 2{
-                self.values_string.push_str(&Self::get_n_spaces((self.p as usize + self.m - string_buffer.len()) as u32));
+                self.values_string.push_str(&Self::get_n_spaces(self.p));
             }
 
             current_value = current_value + self.ok_step;
         }
-        current_value.write_to_string(&mut string_buffer, self.format);
+        self.values_string.push_str(&Self::get_n_spaces(self.o));
         
-        self.values_string.push_str(&Self::get_n_spaces((self.o as usize + self.m - string_buffer.len()) as u32));
+        current_value.write_to_string(&mut string_buffer, self.format);
+        let space_debt: u32 = (self.m - string_buffer.len()) as u32 + (self.m % 2 == 0) as u32;
+        string_buffer = Self::get_n_spaces(space_debt) + &string_buffer;
         self.values_string.push_str(&string_buffer);
 
 
