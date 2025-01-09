@@ -13,9 +13,7 @@ where
     pub(super) depth: u16,
     pub(super) handle: Handle<Item<T>>,
     pub(super) parent: Handle<Item<T>>,
-    pub(super) child: Handle<Item<T>>,
-    pub(super) next_sibling: Handle<Item<T>>,
-    pub(super) prev_sibling: Handle<Item<T>>,
+    pub(super) children: Vec<Handle<Item<T>>>,
 }
 
 impl<T> Item<T> where T: ListItem {
@@ -28,9 +26,7 @@ impl<T> Item<T> where T: ListItem {
             icon: icon_chars,
             handle: Handle::None,
             parent: Handle::None,
-            child: Handle::None,
-            next_sibling: Handle::None,
-            prev_sibling: Handle::None,
+            children: Vec::new(),
         }
     }
     #[inline(always)]
@@ -72,9 +68,7 @@ impl<T> From<T> for Item<T> where T: ListItem {
             icon: [0u8 as char, 0u8 as char],
             handle: Handle::None,
             parent: Handle::None,
-            child: Handle::None,
-            next_sibling: Handle::None,
-            prev_sibling: Handle::None,
+            children: Vec::new(),
         }
     }
 }

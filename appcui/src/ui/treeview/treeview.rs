@@ -116,14 +116,14 @@ where
         // reserve space for the entire list + groups
         self.filter.reserve(self.manager.len());
         // add items
-        let handle = self.manager.first();
-        while !handle.is_none() {
-            if let Some(item) = self.manager.get(handle) {
-                // if !self.is_item_filtered_out(item) {
-                //     self.filter.push(handle);
-                // }
-            }
-        }
+        // let handle = self.manager.first();
+        // while !handle.is_none() {
+        //     if let Some(item) = self.manager.get(handle) {
+        //         // if !self.is_item_filtered_out(item) {
+        //         //     self.filter.push(handle);
+        //         // }
+        //     }
+        // }
 
         // if let Some(column_index) = self.header.sort_column() {
         //     self.sort(column_index, self.header.should_sort_ascendent());
