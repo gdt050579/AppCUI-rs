@@ -119,9 +119,34 @@ where
         }
     }
     #[inline(always)]
+    pub(super) fn get_mut(&mut self, handle: Handle<Item<T>>) -> Option<&mut Item<T>> {
+        if let Some(idx) = self.handle_to_index(handle) {
+            self.data[idx].as_mut()
+        } else {
+            None
+        }
+    }
+    #[inline(always)]
     pub(super) fn len(&self) -> usize {
         self.data.len()
     }
+
+    fn pupulate_children(&self, handle: Handle<Item<T>>, output: &mut Vec<Handle<Item<T>>>) {
+        if let Some(idx) = self.handle_to_index(handle) {
+            let item = self.data[idx].as_ref().unwrap();
+            for h in item.children.iter() {
+                output.push(*h);
+                self.pupulate_children(*h, output);
+            }
+        }
+    }
+    pub(super) fn populate(&self, output: &mut Vec<Handle<Item<T>>>) {
+        for h in self.roots.iter() {
+            output.push(*h);
+            self.pupulate_children(*h, output);
+        }
+    }
+
     #[cfg(test)]
     pub(super) fn free_list(&self) -> &Vec<u32> {
         &self.free

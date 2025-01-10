@@ -107,6 +107,7 @@ where
         self.refilter_enabled = old_refilter;
         self.refilter();
     }
+
     fn refilter(&mut self) {
         if !self.refilter_enabled {
             return;
@@ -115,7 +116,9 @@ where
         self.filter.clear();
         // reserve space for the entire list + groups
         self.filter.reserve(self.manager.len());
-        // add items
+        // populate filter with items
+        self.manager.populate(&mut self.filter);
+        //self.manager.
         // let handle = self.manager.first();
         // while !handle.is_none() {
         //     if let Some(item) = self.manager.get(handle) {
