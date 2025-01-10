@@ -1,12 +1,17 @@
 // reference: https://man7.org/linux/man-pages/man2/TIOCGWINSZ.2const.html
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Condvar, Mutex, OnceLock};
 
 use libc::{ioctl, sighandler_t, signal, SIGWINCH, SIG_ERR, STDOUT_FILENO, TIOCGWINSZ, TIOCSWINSZ};
 
 use crate::prelude::Size;
 
-pub static RESIZE_EVENT: AtomicBool = AtomicBool::new(false);  // event for resize event
+pub struct ResizeNotification {
+    pub mutex: Mutex<Size>,
+    pub cond_var: Condvar
+}
+
+pub static RESIZE_ARC: OnceLock<Arc<ResizeNotification>> = OnceLock::new();
 
 #[repr(C)]
 struct Winsize {
@@ -22,11 +27,23 @@ impl Winsize {
     }
 }
 
+pub fn get_resize_notification() -> &'static Arc<ResizeNotification> {
+    RESIZE_ARC.get_or_init(|| Arc::new(ResizeNotification {mutex: Mutex::new(Size::default()), cond_var: Condvar::new()}))
+}
+
 extern "C" fn handle_resize(_: libc::c_int) {
-    RESIZE_EVENT.store(true, Ordering::SeqCst);
+    let resize_not = get_resize_notification();
+    let mut guard = resize_not.mutex.lock().unwrap();
+    *guard = Size::default();
+    if let Ok(size) = get_terminal_size() {
+        *guard = size;
+        resize_not.cond_var.notify_one();
+    }
 }
 
 pub(crate) fn listen_for_resizes () -> Result<(), std::io::Error> {
+    let _ = get_resize_notification();
+    
     unsafe {
         if SIG_ERR == signal(SIGWINCH, handle_resize as sighandler_t) {
             return Err(std::io::Error::last_os_error());

@@ -1,17 +1,16 @@
 //! Module representing an `TermiosTerminal` abstraction over the ANSI protocol using the termios
 //! API to set it into raw mode. Targeted for UNIX systems, including `linux` and `mac`
 
-use std::{fs::File, io::Write, os::unix::io::FromRawFd};
+use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
 
 
 use libc::STDOUT_FILENO;
 
-use super::super::{ SystemEvent, Terminal };
-use crate::{ graphics::*, input::MouseButton, prelude::Key, system::Error, terminals::{termios::api::sizing::listen_for_resizes, KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent} };
+use super::{super::{ SystemEvent, Terminal }, api::sizing::{get_resize_notification, get_terminal_size, set_terminal_size}, get_size_thread::GetSizeThread, input::Input};
+use crate::{ graphics::*, system::Error, terminals::{termios::api::sizing::listen_for_resizes, SystemEventReader} };
 
-use self::sizing::{get_terminal_size, set_terminal_size, RESIZE_EVENT};
 #[cfg(target_family = "unix")]
-use super::api::{io::{TermiosReader, AnsiKeyCode}, Termios, sizing};
+use super::api::Termios;
 
 /// Represents a terminal interface that has support for termios API terminals, supported by unix
 /// family and outputs ANSI escape codes and receives input from
@@ -28,7 +27,7 @@ pub struct TermiosTerminal {
 }
 
 impl TermiosTerminal {
-    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+    pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
         let Ok(_orig_termios) = Termios::enable_raw_mode() else {
             return Err(Error::new(
                 crate::prelude::ErrorKind::InitializationFailure,
@@ -71,6 +70,9 @@ impl TermiosTerminal {
         }
 
         let _ = t.stdout.write("\x1b[?1003h".as_bytes()); // capture mouse events
+
+        Input::new().start(sender.clone());
+        GetSizeThread::new(get_resize_notification().clone()).start(sender);
         Ok(Box::new(t))
     }
 
@@ -78,13 +80,10 @@ impl TermiosTerminal {
         let _ = self.stdout.write("\x1b[2J".as_bytes());
     }
 
-    fn update_size(&mut self) -> Result<(), std::io::Error> {
-        self.size = get_terminal_size()?;
-        Ok(())
-    }
-
     fn move_cursor(&mut self, to: &Cursor) -> Result<(), std::io::Error> {
-        self.stdout.write_all(format!("\x1b[{};{}H", to.y + 1, to.x + 1).as_bytes())?;
+        if !to.is_visible() { return Ok(()) };
+        
+        self.stdout.write_all(format!("\x1b[{};{}H", to.y.saturating_add(1), to.x.saturating_add(1)).as_bytes())?;
 
         Ok(())
     }
@@ -159,51 +158,8 @@ impl Terminal for TermiosTerminal {
         self.size
     }
 
-    fn get_system_event(&mut self) -> SystemEvent {
-        if RESIZE_EVENT.load(std::sync::atomic::Ordering::SeqCst) {
-            RESIZE_EVENT.store(false, std::sync::atomic::Ordering::SeqCst);
-            if let Err(_) = self.update_size() {
-                return SystemEvent::None;
-            };
-
-            return SystemEvent::Resize(self.size);
-        }
-        
-        #[cfg(target_family = "unix")]
-        match TermiosReader::read_key() {
-            Ok(ansi_key) => {
-                if let AnsiKeyCode::MouseButton(ev) = ansi_key.code() {
-                    match ev.button {
-                        MouseButton::None => return SystemEvent::MouseButtonUp(MouseButtonUpEvent {x: ev.x.into(), y: ev.y.into(), button: MouseButton::None}),
-                        other => return SystemEvent::MouseButtonDown(MouseButtonDownEvent {button: other, x: ev.x.into(), y: ev.y.into()})
-                    }
-                }
-                if let AnsiKeyCode::MouseMove(ev) = ansi_key.code() {
-                    return SystemEvent::MouseMove(MouseMoveEvent { x: ev.x.into(), y: ev.y.into(), button: ev.button });
-                }
-
-                // We take the initial 4 bytes an we try to convert them into an `u32`
-                let Some(bytes) = ansi_key.bytes().get(0..4) else {
-                    return SystemEvent::None;
-                };
-                let value = u32::from_le_bytes(bytes.try_into().unwrap_or([0; 4]));
-
-                let character = char::from_u32(value).unwrap_or('\0');
-
-                // We convert our ANSI key to the system's `Key` known key type
-                let key: Key = ansi_key.into();
-                SystemEvent::KeyPressed(KeyPressedEvent {
-                    key,
-                    character,
-                })
-            }
-            Err(_) => SystemEvent::None,
-        }
-
-        // Currently the way we handle raw terminal input is not available on windows through
-        // termios
-        #[cfg(target_family = "windows")]
-        SystemEvent::None
+    fn query_system_event(&mut self) -> Option<SystemEvent> {
+        None
     }
     fn get_clipboard_text(&self) -> Option<String> {
         todo!()
@@ -215,6 +171,14 @@ impl Terminal for TermiosTerminal {
 
     fn has_clipboard_text(&self) -> bool {
         todo!()
+    }
+    
+    fn on_resize(&mut self, new_size: Size) {
+        self.size = new_size;
+    }
+    
+    fn is_single_threaded(&self) -> bool {
+        false
     }
 }
 

@@ -83,8 +83,8 @@ impl Termios {
             !(local_flags::ECHO | local_flags::ICANON | local_flags::ISIG | local_flags::IEXTEN);
 
         // Set control conditions like characters and time to wait for
-        raw_termios.c_cc[ctrl_char_idx::VMIN] = 0;
-        raw_termios.c_cc[ctrl_char_idx::VTIME] = 1;
+        raw_termios.c_cc[ctrl_char_idx::VMIN] = 1;
+        raw_termios.c_cc[ctrl_char_idx::VTIME] = 0;
 
         let result = unsafe { tcsetattr(io::STDIN_FILENO, term_cmd::TC_SET_ATTR_FLUSH, &raw_termios) };
 

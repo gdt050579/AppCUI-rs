@@ -1,4 +1,6 @@
 mod terminal;
+mod input;
+mod get_size_thread;
 
 mod api;
 

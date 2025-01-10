@@ -81,7 +81,7 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
     // this depends on the OS
     if builder.terminal.is_none() {
         // based on OS we should choose a terminal
-        return build_default_terminal(builder);
+        return build_default_terminal(builder, sender);
     }
     // finaly, based on the type, return a terminal
     let terminal = *builder.terminal.as_ref().unwrap();
@@ -92,7 +92,7 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
-        TerminalType::Termios => TermiosTerminal::new(builder),
+        TerminalType::Termios => TermiosTerminal::new(builder, sender),
         
         #[cfg(target_os = "linux")]
         TerminalType::NcursesTerminal => NcursesTerminal::new(builder),
@@ -104,16 +104,16 @@ fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<Syste
     Ok(Box::new(term))
 }
 #[cfg(target_os = "linux")]
-fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     // TermiosTerminal::new(builder)
     NcursesTerminal::new(builder)
 }
 #[cfg(target_os = "macos")]
-fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-    TermiosTerminal::new(builder)
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+    TermiosTerminal::new(builder, sender)
 }
 #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
-fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     // anything else
-    TermiosTerminal::new(builder)
+    TermiosTerminal::new(builder, sender)
 }
