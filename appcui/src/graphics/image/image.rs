@@ -121,7 +121,7 @@ impl Image {
     #[inline]
     pub fn render_size(&self, rendering_method: RenderMethod, scale_method: Scale) -> Size {
         let rap = scale_method as u32;
-        match rendering_method {
+        match rendering_method { 
             RenderMethod::SmallBlocks => Size::new((self.width + rap - 1) / rap, (self.height + 2 * rap - 1) / (2 * rap)),
             RenderMethod::LargeBlocks64Colors => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
             RenderMethod::GrayScale => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),

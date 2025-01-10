@@ -95,10 +95,10 @@ fn check_tree_manager_delete_middle_child() {
     assert_eq!(tm.roots()[1], h2);
     assert_eq!(tm.roots()[2], h3);
 
-    tm.delete(h2);
+    tm.delete(h2); 
     assert_eq!(tm.roots().len(), 2);
     assert_eq!(tm.roots()[0], h1);
     assert_eq!(tm.roots()[1], h3);
-    
+
     assert_eq!(tm.free_list().len(), 1);
 }
