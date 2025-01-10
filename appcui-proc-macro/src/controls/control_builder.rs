@@ -3,8 +3,8 @@ use crate::parameter_parser::size::Size;
 use crate::parameter_parser::*;
 use crate::token_stream_to_string::TokenStreamToString;
 use proc_macro::*;
-use std::str::FromStr;
 use std::fmt::Write;
+use std::str::FromStr;
 
 use self::coordonate::Coordonate;
 use self::dimension::Dimension;
@@ -73,7 +73,15 @@ impl<'a> ControlBuilder<'a> {
             if add_common_parameters {
                 builder.parser.validate_named_parameters(ref_str, CONTROL_NAMED_PARAMATERS).unwrap();
             }
-            builder.parser.check_unkwnon_params(ref_str).unwrap();
+            builder
+                .parser
+                .check_unkwnon_params(
+                    ref_str,
+                    positional_parameters,
+                    named_parameters,
+                    if add_common_parameters { Some(CONTROL_NAMED_PARAMATERS) } else { None },
+                )
+                .unwrap();
             builder.ref_str = ref_str;
         }
         builder.content.push_str("{\n\tlet mut control = ");
@@ -122,14 +130,20 @@ impl<'a> ControlBuilder<'a> {
         if let Some(value) = self.parser.get(template_param) {
             let name = value.get_string();
             if name.is_empty() {
-                panic!("Parameter `{}` can not be an empty string. It should be a generic/template type to be used !", template_param);
+                panic!(
+                    "Parameter `{}` can not be an empty string. It should be a generic/template type to be used !",
+                    template_param
+                );
             }
             self.content.push_str(name);
             self.content.push_str(">::");
-            self.content.push_str(method);            
+            self.content.push_str(method);
             self.content.push('(');
         } else {
-            panic!("Parameter `{}` is mandatory and must express the generic/template type to be used !", template_param);
+            panic!(
+                "Parameter `{}` is mandatory and must express the generic/template type to be used !",
+                template_param
+            );
         }
     }
     pub(super) fn finish_control_initialization(&mut self) {
@@ -141,7 +155,7 @@ impl<'a> ControlBuilder<'a> {
             unsafe {
                 let x = std::mem::transmute::<&str, &str>(str_value.get_string());
                 self.content.push_str(x);
-            }        
+            }
         } else {
             panic!(
                 "Parameter '{}' is mandatory ! (you need to provided it as part of macro initialization)",
@@ -169,7 +183,7 @@ impl<'a> ControlBuilder<'a> {
     pub(super) fn add_key_parameter(&mut self, param_name: &str, default: Option<&str>) {
         self.add_comma();
         let value = self.parser.get(param_name);
-        if let Some(str_value) = value {            
+        if let Some(str_value) = value {
             let r = crate::key::builder::create_string(str_value.get_string());
             self.content.push_str(&r);
         } else if let Some(default_value) = default {
@@ -309,7 +323,12 @@ impl<'a> ControlBuilder<'a> {
             } else {
                 Error::new(
                     self.ref_str,
-                    format!("Unknwon enum variant: {} !", variant).as_str(),
+                    format!(
+                        "Unknwon enum variant: {} !\nAvailable variants are: {}",
+                        variant,
+                        available_variants.list().as_str()
+                    )
+                    .as_str(),
                     value.get_start_pos(),
                     value.get_end_pos(),
                 )
@@ -347,7 +366,12 @@ impl<'a> ControlBuilder<'a> {
                         } else {
                             Error::new(
                                 self.ref_str,
-                                format!("Unknwon flag: {} !", name.get_string()).as_str(),
+                                format!(
+                                    "Unknwon flag: {} !\nAvailable flags are: {}",
+                                    name.get_string(),
+                                    available_flags.list().as_str()
+                                )
+                                .as_str(),
                                 name.get_start_pos(),
                                 name.get_end_pos(),
                             )

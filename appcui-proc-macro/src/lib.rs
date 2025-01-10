@@ -77,6 +77,8 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::Default);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::Default);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::Default);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
+
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
@@ -98,10 +100,15 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable); 
 
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
+
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
@@ -152,6 +159,9 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
+
+
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
@@ -173,9 +183,13 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
+
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
@@ -202,6 +216,8 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
+
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
@@ -223,9 +239,14 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
@@ -277,6 +298,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::OnKeyPressed, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnMouseEvent, TraitImplementation::BaseFallbackNonOverwritable);
     config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
+
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
@@ -298,9 +321,14 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
@@ -346,6 +374,11 @@ pub fn key(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn char(input: TokenStream) -> TokenStream {
     crate::chars::create(input)
+}
+
+#[proc_macro]
+pub fn charattr(input: TokenStream) -> TokenStream {
+    crate::chars::create_attr(input)
 }
 
 #[proc_macro]

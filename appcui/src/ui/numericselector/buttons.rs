@@ -67,7 +67,7 @@ impl Buttons {
         let sub_attr = self.sub.color(theme, is_enable);
         let add_attr = self.add.color(theme, is_enable);
         surface.write_string(0, 0, " - ", sub_attr, false);
-        surface.write_string(self.width as i32 - 4, 0, " + ", add_attr, false);
+        surface.write_string(self.width as i32 - 3, 0, " + ", add_attr, false);
     }
     #[inline(always)]
     pub(super) fn update_width(&mut self, width: u16) {

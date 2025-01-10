@@ -35,6 +35,7 @@ pub mod listbox;
 pub mod listview;
 pub mod togglebutton;
 pub mod markdown;
+pub mod pathfinder;
 
 // re-export
 pub use common::ControlBase;
@@ -70,3 +71,4 @@ pub use listbox::ListBox;
 pub use listview::ListView;
 pub use togglebutton::ToggleButton;
 pub use markdown::Markdown;
+pub use pathfinder::PathFinder;

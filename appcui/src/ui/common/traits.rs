@@ -17,6 +17,7 @@ use crate::{
         menu::events::GenericMenuEvents,
         numericselector::events::GenericNumericSelectorEvents,
         password::events::PasswordEvents,
+        pathfinder::events::PathFinderEvents,
         radiobox::events::RadioBoxEvents,
         selector::events::GenericSelectorEvents,
         textfield::events::TextFieldEvents,
@@ -78,6 +79,10 @@ pub trait OnExpand {
     fn on_pack(&mut self) {}
 }
 
+pub trait OnThemeChanged {
+    fn on_theme_changed(&mut self, _theme: &Theme) {}
+}
+
 pub trait OnWindowRegistered {
     fn on_registered(&mut self) {}
 }
@@ -92,6 +97,21 @@ pub trait CustomEvents {
     }
 }
 
+pub trait TimerEvents {
+    fn on_start(&mut self) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_resume(&mut self, _ticks: u64) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_pause(&mut self, _ticks: u64) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }    
+    fn on_update(&mut self, _ticks: u64) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+
 pub trait Control:
     OnPaint
     + OnKeyPressed
@@ -102,6 +122,7 @@ pub trait Control:
     + OnExpand
     + OnWindowRegistered
     + OnSiblingSelected
+    + OnThemeChanged
     /* events from each control */
     + ButtonEvents
     + CheckBoxEvents
@@ -125,6 +146,8 @@ pub trait Control:
     + DatePickerEvents
     + ListBoxEvents
     + GenericListViewEvents
+    + PathFinderEvents
+    + TimerEvents
 {
 }
 

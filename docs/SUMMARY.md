@@ -100,6 +100,14 @@
 
 - [Dialogs](chapter-5/dialogs.md)
     - [Notifications dialogs](chapter-5/notification_dialogs.md)
-    - [Open/Save dialog]()
+    - [Open/Save dialog](chapter-5/opensave_dialogs.md)
     - [Folder selection dialog]()
     - [Window manager dialog]() 
+
+- [Themes](chapter-6/themes.md)
+    - [Predefined Themes](chapter-6/predefined_themes.md)    
+    - [Events](chapter-6/events.md)
+
+- [Multi-Threading](chapter-7/multi-threading.md)
+    - [Timers](chapter-7/timers.md)  
+    - [Background tasks]()<!--(chapter-7/background_tasks.md)-->

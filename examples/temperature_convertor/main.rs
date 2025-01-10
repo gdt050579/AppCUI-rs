@@ -9,14 +9,14 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'Convert',d:c,w:40,h:8"),
+            base: window!("'Convert',d:c,w:40,h:7"),
             celsius: Handle::None,
             fahrenheit: Handle::None,
         };
         win.add(label!("'Celsius:',x:1,y:1,w:12,h:1"));
-        win.celsius = win.add(numericselector!("f64,0.0,x:14,y:1,w:25,min:-100.0,max:100.0,step:1.0"));
+        win.celsius = win.add(numericselector!("f64,0.0,x:14,y:1,w:23,min:-100.0,max:100.0,step:1.0"));
         win.add(label!("'Fahrenheit:',x:1,y:3,w:12,h:1"));
-        win.fahrenheit = win.add(numericselector!("f64,32.0,x:14,y:3,w:25,min:-213.0,max:213.0,step:0.1"));
+        win.fahrenheit = win.add(numericselector!("f64,32.0,x:14,y:3,w:23,min:-213.0,max:213.0,step:0.1"));
         win
     }
     fn convert_celsius_to_feherenheit(&mut self) {

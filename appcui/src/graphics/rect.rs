@@ -13,7 +13,7 @@ pub enum Alignament {
     Left,
     Center,
 }
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Rect {
     left: i32,
     top: i32,

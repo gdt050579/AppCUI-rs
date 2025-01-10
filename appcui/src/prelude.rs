@@ -32,6 +32,8 @@ pub use super::ui::datepicker;
 pub use super::ui::datepicker::events::DatePickerEvents;
 pub use super::ui::listbox;
 pub use super::ui::listbox::events::ListBoxEvents;
+pub use super::ui::pathfinder;
+pub use super::ui::pathfinder::events::PathFinderEvents;
 pub use super::ui::listview;
 pub use super::ui::listview::events::GenericListViewEvents;
 pub use super::ui::listview::ListItem;

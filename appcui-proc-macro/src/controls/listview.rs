@@ -10,6 +10,7 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "SmallIcons",
     "LargeIcons",
     "CustomFilter",
+    "NoSelection",
 ]);
 
 static VIEW_MODES: FlagsSignature = FlagsSignature::new(&[

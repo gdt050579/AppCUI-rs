@@ -886,3 +886,13 @@ fn check_char_macro() {
     assert_eq!(char!("|_"), Character::with_char(SpecialChar::BoxBottomLeftCornerSingleLine));
     assert_eq!(char!("_|"), Character::with_char(SpecialChar::BoxBottomRightCornerSingleLine));
 }
+
+#[test]
+fn check_charattr_macro() {
+    assert_eq!(charattr!("Red,Green"), CharAttribute::new(Color::Red, Color::Green, CharFlags::None));
+    assert_eq!(charattr!("white,pinK"), CharAttribute::new(Color::White, Color::Pink, CharFlags::None));
+    assert_eq!(charattr!("g,r"), CharAttribute::new(Color::Green, Color::Red, CharFlags::None));
+    assert_eq!(charattr!("g"), CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None));
+    assert_eq!(charattr!("g,attr: Bold+Italic"), CharAttribute::new(Color::Green, Color::Transparent, CharFlags::Bold | CharFlags::Italic));
+    assert_eq!(charattr!("?,r,attr: Bold+Italic"), CharAttribute::new(Color::Transparent, Color::Red, CharFlags::Bold | CharFlags::Italic));
+}

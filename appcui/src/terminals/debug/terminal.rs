@@ -7,10 +7,9 @@ use super::command::Command;
 use crate::graphics::Color;
 use crate::graphics::Point;
 use crate::graphics::Size;
-use crate::system::Error;
-use crate::system::PaintMethods;
-use crate::system::RuntimeManager;
 use crate::input::KeyModifier;
+use crate::system::Error;
+use crate::system::{PaintMethods, RuntimeManager};
 
 pub(crate) struct DebugTerminal {
     size: Size,
@@ -153,6 +152,10 @@ impl DebugTerminal {
     }
 }
 impl Terminal for DebugTerminal {
+    fn is_single_threaded(&self) -> bool {
+        true
+    }
+
     fn update_screen(&mut self, surface: &Surface) {
         let surface_hash = DebugTerminal::compute_surface_hash(surface);
         if let Some(hash_to_test) = self.hash_to_test {
@@ -345,7 +348,7 @@ impl Terminal for DebugTerminal {
         self.size
     }
 
-    fn get_system_event(&mut self) -> SystemEvent {
+    fn query_system_event(&mut self) -> Option<SystemEvent> {
         // if there is any event in the que --> return that event
         if let Some(event) = self.sys_events.pop_front() {
             match event {
@@ -378,7 +381,7 @@ impl Terminal for DebugTerminal {
                 }
                 _ => {}
             }
-            return event;
+            return Some(event);
         }
         // if no events are in the event queue --> check if a command is present
         if let Some(cmd) = self.commands.pop_front() {
@@ -389,7 +392,7 @@ impl Terminal for DebugTerminal {
                     self.paint_title = title;
                     RuntimeManager::get().request_repaint();
                     self.paint = true;
-                    return SystemEvent::None;
+                    return None;
                 }
             }
             match cmd {
@@ -405,36 +408,36 @@ impl Terminal for DebugTerminal {
                 | Command::KeyPresed(_)
                 | Command::KeyModifier(_)
                 | Command::KeyTypeText(_) => {
-                    return SystemEvent::None;
+                    return None;
                 }
                 Command::PaintEnable(obj) => {
                     self.ignore_paint_command = !obj.is_paint_enabled();
-                    return SystemEvent::None;
+                    return None;
                 }
                 Command::ErrorDisable(obj) => {
                     self.errors_disabled = obj.is_error_disabled();
-                    return SystemEvent::None;
+                    return None;
                 }
                 Command::CheckHash(obj) => {
                     self.paint = false; // I don't want to paint anything --> just store the hash
                     self.hash_to_test = Some(obj.get_hash()); // next time I paint --> I will check it
                     RuntimeManager::get().request_repaint();
-                    return SystemEvent::None;
+                    return None;
                 }
                 Command::CheckCursor(obj) => {
                     self.paint = false; // I don't want to paint anything --> just store the hash
                     self.cursor_point_to_check = Some(obj.get_point()); // next time I paint --> I will check it
                     RuntimeManager::get().request_repaint();
-                    return SystemEvent::None;
+                    return None;
                 }
 
                 Command::ClipboardSetText(obj) => {
                     self.set_clipboard_text(obj.get_text());
-                    return SystemEvent::None;
+                    return None;
                 }
                 Command::ClipboardClear(_) => {
                     self.set_clipboard_text("");
-                    return SystemEvent::None;
+                    return None;
                 }
                 Command::CheckClipboardText(obj) => {
                     if obj.get_text() != self.clipboard_text {
@@ -452,13 +455,13 @@ impl Terminal for DebugTerminal {
                             );
                         }
                     }
-                    return SystemEvent::None;
+                    return None;
                 }
             }
         }
 
         // if nothing else works, close the app (script has finished)
-        SystemEvent::AppClose
+        Some(SystemEvent::AppClose)
     }
 
     fn get_clipboard_text(&self) -> Option<String> {
@@ -476,5 +479,9 @@ impl Terminal for DebugTerminal {
 
     fn has_clipboard_text(&self) -> bool {
         !self.clipboard_text.is_empty()
+    }
+
+    fn on_resize(&mut self, new_size: Size) {
+        self.size = new_size;
     }
 }
