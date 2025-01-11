@@ -185,7 +185,8 @@ where
         };
         // first column
         let c = &columns[0];
-        let l = c.x + (item.depth as i32) * 2;
+        let d = if item.depth == 0 { 0 } else { (item.depth as i32) * 6 - 2 };
+        let l = c.x + d;
         let r = c.x + c.width as i32;
         let mut extra = 0;
         let mut rd = RenderData {
@@ -197,6 +198,17 @@ where
         if (r >= 0) && (l < width) && (c.width != 0)
         /*&& (r >= min_left)*/
         {
+            if d > 0 {
+                surface.set_relative_clip(c.x - 2, y, r.max(min_left), y);
+                surface.set_origin(c.x - 2, y);
+                for i in 1..item.depth {
+                    surface.write_char(
+                        (i as i32) * 6,
+                        0,
+                        Character::with_attributes(SpecialChar::BoxVerticalSingleLine, attr.unwrap_or(theme.text.normal)),
+                    );
+                }
+            }
             if frozen_columns == 0 {
                 surface.set_relative_clip(l.max(min_left), y, r.max(min_left), y);
                 surface.set_origin(l, y);
@@ -204,10 +216,16 @@ where
                 surface.set_relative_clip(l, y, r, y);
                 surface.set_origin(l, y);
             }
+            if d > 0 {
+                surface.write_string(extra, 0, "├─", attr.unwrap_or(theme.text.normal), false);
+                extra += 2;
+            }
+            surface.write_string(extra, 0, "[ ]", attr.unwrap_or(theme.text.normal), false);
+            extra += 4;
             if self.flags.contains(Flags::CheckBoxes) {
                 if item.is_checked() {
                     surface.write_char(
-                        0,
+                        extra,
                         0,
                         Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
                     );

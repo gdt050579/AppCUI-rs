@@ -1,6 +1,12 @@
 use super::ListItem;
 use crate::graphics::CharAttribute;
 use crate::system::Handle;
+use EnumBitFlags::EnumBitFlags;
+
+#[EnumBitFlags(bits = 8)]
+pub(super) enum ItemFlags {
+    LastSibling = 0x01, 
+}
 
 pub struct Item<T>
 where
@@ -10,6 +16,7 @@ where
     checked: bool,
     attr: Option<CharAttribute>,
     icon: [char;2],
+    flags: ItemFlags,
     pub(super) depth: u16,
     pub(super) handle: Handle<Item<T>>,
     pub(super) parent: Handle<Item<T>>,
@@ -23,6 +30,7 @@ impl<T> Item<T> where T: ListItem {
             checked,
             attr,
             depth: 0,
+            flags: ItemFlags::None,
             icon: icon_chars,
             handle: Handle::None,
             parent: Handle::None,
@@ -65,6 +73,7 @@ impl<T> From<T> for Item<T> where T: ListItem {
             checked: false,
             attr: None,
             depth: 0,
+            flags: ItemFlags::None,
             icon: [0u8 as char, 0u8 as char],
             handle: Handle::None,
             parent: Handle::None,
