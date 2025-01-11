@@ -167,24 +167,25 @@ where
     }
 
     pub fn sort(&mut self, column_index: u16, ascendent: bool) {
-        // self.header.set_sort_column(column_index, ascendent, true);
-        // if self.filter.is_empty() {
-        //     // no need to sort
-        //     return;
-        // }
-        // let current_item = if self.pos < self.filter.len() {
-        //     Some(self.filter[self.pos])
-        // } else {
-        //     None
-        // };
-        // // sort elements by column index
-        // let data = &self.data;
-        // self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
-        // // find the new position after sorting
-        // if let Some(current_item) = current_item {
-        //     // on the same item --> no need to emit an event
-        //     self.goto_element(current_item, false);
-        // }
+        self.header.set_sort_column(column_index, ascendent, true);
+        if self.filter.is_empty() {
+            // no need to sort
+            return;
+        }
+        let current_handle = if self.pos < self.filter.len() {
+            self.filter[self.pos]
+        } else {
+            Handle::None
+        };
+        // sort elements by column index
+        self.manager.sort(column_index, ascendent);
+        // repopulate 
+        self.refilter();
+        // find the new position after sorting
+        if !current_handle.is_none() {
+            // on the same item --> no need to emit an event
+            self.goto_handle(current_handle, false);
+        }
     }
 
     #[inline(always)]

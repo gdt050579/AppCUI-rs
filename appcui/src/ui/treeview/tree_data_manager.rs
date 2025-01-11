@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use super::Item;
 use super::ListItem;
 use crate::system::Handle;
@@ -145,6 +147,49 @@ where
             output.push(*h);
             self.pupulate_children(*h, output);
         }
+    }
+
+    #[inline(always)]
+    fn compare(&self, h1: Handle<Item<T>>, h2: Handle<Item<T>>, column_index: u16, ascendent: bool) -> Ordering {
+        let i1 = self.get(h1);
+        let i2 = self.get(h2);
+        match (i1, i2) {
+            (Some(item1), Some(item2)) => {
+                let result = item1.value().compare(item2.value(), column_index);
+                if !ascendent {
+                    result.reverse()
+                } else {
+                    result
+                }
+            }
+            (Some(_), None) => Ordering::Greater,
+            (None, Some(_)) => Ordering::Less,
+            (None, None) => Ordering::Equal,
+        }        
+    }
+
+    fn sort_by(data: &mut Vec<Handle<Item<T>>>, manager: &mut TreeDataManager<T>, column_index: u16, ascendent: bool)
+    {
+        data.sort_by(|h1,h2| manager.compare(*h1, *h2, column_index, ascendent));
+        for h in data.iter() {
+            if let Some(item) = manager.get_mut(*h) {
+                if !item.children.is_empty() {
+                    let p = unsafe {
+                        let px = &mut item.children as *mut Vec<Handle<Item<T>>>;
+                        &mut *px
+                    };
+                    TreeDataManager::sort_by(p, manager, column_index, ascendent);
+                }
+            }
+        }
+    }
+
+    pub(super) fn sort(&mut self, column_index: u16, ascendent: bool) {
+        let p = unsafe {
+            let px = &mut self.roots as *mut Vec<Handle<Item<T>>>;
+            &mut *px
+        };
+        TreeDataManager::sort_by(p, self, column_index, ascendent);
     }
 
     #[cfg(test)]
