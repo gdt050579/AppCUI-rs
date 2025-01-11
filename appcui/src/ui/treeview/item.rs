@@ -1,11 +1,14 @@
 use super::ListItem;
 use crate::graphics::CharAttribute;
+use crate::prelude::ColumnsHeader;
 use crate::system::Handle;
+use crate::utils::glyphs::GlyphParser;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 8)]
 pub(super) enum ItemFlags {
-    LastSibling = 0x01, 
+    LastSibling = 0x01,
+    
 }
 
 pub struct Item<T>
@@ -15,7 +18,7 @@ where
     data: T,
     checked: bool,
     attr: Option<CharAttribute>,
-    icon: [char;2],
+    icon: [char; 2],
     flags: ItemFlags,
     pub(super) depth: u16,
     pub(super) handle: Handle<Item<T>>,
@@ -23,8 +26,11 @@ where
     pub(super) children: Vec<Handle<Item<T>>>,
 }
 
-impl<T> Item<T> where T: ListItem {
-    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, icon_chars: [char;2]) -> Self {
+impl<T> Item<T>
+where
+    T: ListItem,
+{
+    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, icon_chars: [char; 2]) -> Self {
         Self {
             data,
             checked,
@@ -65,8 +71,35 @@ impl<T> Item<T> where T: ListItem {
     pub(super) fn render_attr(&self) -> Option<CharAttribute> {
         self.attr
     }
+
+    #[inline(always)]
+    pub(super) fn matches(&self, search_text: &str, header: Option<&ColumnsHeader>) -> bool {
+        if search_text.is_empty() {
+            true
+        } else {
+            if let Some(header) = header {
+                let mut output: [u8; 256] = [0; 256];
+                let columns_count = header.columns().len();
+                for column_index in 0..columns_count {
+                    if let Some(rm) = self.data.render_method(column_index as u16) {
+                        if let Some(item_text) = rm.string_representation(&mut output) {
+                            if item_text.index_ignoring_case(search_text).is_some() {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                false
+            } else {
+                self.data.matches(search_text)
+            }
+        }
+    }
 }
-impl<T> From<T> for Item<T> where T: ListItem {
+impl<T> From<T> for Item<T>
+where
+    T: ListItem,
+{
     fn from(value: T) -> Self {
         Self {
             data: value,

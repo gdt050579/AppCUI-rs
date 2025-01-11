@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 
 use super::Item;
 use super::ListItem;
+use crate::prelude::ColumnsHeader;
 use crate::system::Handle;
 
 pub(super) struct TreeDataManager<T>
@@ -165,12 +166,11 @@ where
             (Some(_), None) => Ordering::Greater,
             (None, Some(_)) => Ordering::Less,
             (None, None) => Ordering::Equal,
-        }        
+        }
     }
 
-    fn sort_by(data: &mut Vec<Handle<Item<T>>>, manager: &mut TreeDataManager<T>, column_index: u16, ascendent: bool)
-    {
-        data.sort_by(|h1,h2| manager.compare(*h1, *h2, column_index, ascendent));
+    fn sort_by(data: &mut Vec<Handle<Item<T>>>, manager: &mut TreeDataManager<T>, column_index: u16, ascendent: bool) {
+        data.sort_by(|h1, h2| manager.compare(*h1, *h2, column_index, ascendent));
         for h in data.iter() {
             if let Some(item) = manager.get_mut(*h) {
                 if !item.children.is_empty() {
@@ -190,6 +190,19 @@ where
             &mut *px
         };
         TreeDataManager::sort_by(p, self, column_index, ascendent);
+    }
+
+    fn filter(&mut self, handle: Handle<Item<T>>, search_text: &str, header: Option<&ColumnsHeader>) {
+        if let Some(item) = self.get_mut(handle) {
+            let result = item.matches(search_text, header);
+            let p = unsafe {
+                let px = &mut item.children as *const Vec<Handle<Item<T>>>;
+                & *px
+            };
+            for h in p.iter() {
+                self.filter(*h, search_text, header);
+            }
+        }
     }
 
     #[cfg(test)]
