@@ -2,6 +2,13 @@ use super::{Flags, Item, TreeDataManager};
 use components::listitem::render_method::RenderData;
 use AppCUIProcMacro::*;
 
+#[derive(Clone, Copy)]
+enum CheckMode {
+    True,
+    False,
+    Reverse,
+}
+
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum HoverStatus {
     None,
@@ -134,6 +141,52 @@ where
         //     self.sort(u16::MAX, true);
         // }
     }
+    fn goto_handle(&mut self, handle: Handle<Item<T>>, emit_event: bool) -> bool {
+        if let Some(index) = self.filter.iter().position(|h| *h == handle) {
+            self.update_position(index, emit_event);
+            true 
+        } else {
+            false
+        }
+    }
+    fn filter_items(&mut self) {
+        if self.manager.len() == 0 {
+            return;
+        }
+        let current_handle = if self.pos < self.filter.len() {
+            self.filter[self.pos]
+        } else {
+            Handle::None
+        };
+        self.refilter();
+        if current_handle.is_none() {
+            self.update_position(0, true);
+        } else {
+            self.goto_handle(current_handle, true);
+        }
+    }
+
+    pub fn sort(&mut self, column_index: u16, ascendent: bool) {
+        // self.header.set_sort_column(column_index, ascendent, true);
+        // if self.filter.is_empty() {
+        //     // no need to sort
+        //     return;
+        // }
+        // let current_item = if self.pos < self.filter.len() {
+        //     Some(self.filter[self.pos])
+        // } else {
+        //     None
+        // };
+        // // sort elements by column index
+        // let data = &self.data;
+        // self.filter.sort_by(|a, b| ListView::compare_items(*a, *b, column_index, data, ascendent));
+        // // find the new position after sorting
+        // if let Some(current_item) = current_item {
+        //     // on the same item --> no need to emit an event
+        //     self.goto_element(current_item, false);
+        // }
+    }
+
     #[inline(always)]
     fn visible_space(&self) -> Size {
         let mut sz = self.size();
@@ -345,6 +398,359 @@ where
         surface.reset_clip();
         surface.reset_origin();
     }
+    fn autoresize_column(&mut self, column_index: u16) {
+        let mut new_width = 0u32;
+        let mut found = false;
+        for handle in self.filter.iter() {
+            if let Some(item) = self.manager.get(*handle) {
+                if let Some(rm) = item.value().render_method(column_index) {
+                    new_width = new_width.max(listview::RenderMethod::min_width(&rm));
+                    found = true;
+                }
+            }
+        }
+        if found {
+            if column_index == 0 {
+                if self.flags.contains(Flags::CheckBoxes) {
+                    new_width += 2
+                };
+                new_width += self.icon_width as u32;
+            }
+            self.header.set_column_width(column_index, new_width.min(u8::MAX as u32) as u8);
+        }
+    }
+    fn update_scrollbars(&mut self) {
+        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
+        self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
+    }
+    fn execute_column_header_action(&mut self, action: ColumnsHeaderAction) -> bool {
+        match action {
+            ColumnsHeaderAction::Sort((index, ascendent)) => {
+                self.sort(index, ascendent);
+                self.update_scrollbars();
+                true
+            }
+            ColumnsHeaderAction::AutoResize(index) => {
+                self.autoresize_column(index);
+                self.update_scrollbars();
+                true
+            }
+            ColumnsHeaderAction::ResizeColumn => {
+                self.update_scrollbars();
+                true
+            }
+            ColumnsHeaderAction::UpdateScroll => {
+                self.update_scrollbars();
+                true
+            }
+            ColumnsHeaderAction::Processed => true,
+            ColumnsHeaderAction::None => false,
+            ColumnsHeaderAction::Repaint => false,
+        }
+    }   
+    fn update_position(&mut self, new_pos: usize, emit_event: bool) {
+        let len = self.filter.len();
+        if len == 0 {
+            return;
+        }
+        let new_pos = new_pos.min(len - 1);
+        let h = self.visible_items();
+        if h == 0 {
+            return;
+        }
+
+        // check the top view
+        if self.top_view + h >= len {
+            self.top_view = len.saturating_sub(h);
+        }
+        if new_pos < self.top_view {
+            self.top_view = new_pos;
+        } else {
+            let diff = new_pos - self.top_view;
+            if (diff >= h) && (h > 0) {
+                self.top_view = new_pos - h + 1;
+            }
+        }
+        // update scrollbars
+        self.update_scrollbars();
+        let should_emit = (self.pos != new_pos) && emit_event;
+        self.pos = new_pos;
+        if should_emit {
+            // self.raise_event(ControlEvent {
+            //     emitter: self.handle,
+            //     receiver: self.event_processor,
+            //     data: ControlEventData::ListView(EventData {
+            //         event_type: listview::events::ListViewEventTypes::CurrentItemChanged,
+            //         type_id: std::any::TypeId::of::<T>(),
+            //     }),
+            // });
+        }
+    }    
+    fn move_scroll_to(&mut self, new_poz: usize) {
+        if new_poz == self.top_view {
+            return;
+        }
+        let visible_items = self.visible_items();
+        let max_value = self.filter.len().saturating_sub(visible_items);
+        self.top_view = new_poz.min(max_value);
+        self.update_scrollbars();
+    }   
+    fn emit_selection_update_event(&self) {
+        // self.raise_event(ControlEvent {
+        //     emitter: self.handle,
+        //     receiver: self.event_processor,
+        //     data: ControlEventData::ListView(EventData {
+        //         event_type: listview::events::ListViewEventTypes::SelectionChanged,
+        //         type_id: std::any::TypeId::of::<T>(),
+        //     }),
+        // });
+    }
+    fn emit_item_action_event(&self, index: usize) {
+        // if index < self.manager.len() {
+        //     self.raise_event(ControlEvent {
+        //         emitter: self.handle,
+        //         receiver: self.event_processor,
+        //         data: ControlEventData::ListView(EventData {
+        //             event_type: listview::events::ListViewEventTypes::ItemAction(index),
+        //             type_id: std::any::TypeId::of::<T>(),
+        //         }),
+        //     });
+        // }
+    }
+    #[inline(always)]
+    fn toggle_current_item_selection(&self) -> CheckMode {
+        if self.pos < self.filter.len() {
+            if let Some(item) = self.manager.get(self.filter[self.pos]) {
+                if item.is_checked() {
+                    CheckMode::False
+                } else {
+                    CheckMode::True
+                }
+            } else {
+                CheckMode::False
+            }
+        } else {
+            CheckMode::False
+        }
+    }
+    fn select_until_position(&mut self, new_pos: usize) {
+        let start = self.pos;
+        let mode = self.toggle_current_item_selection();
+        self.update_position(new_pos, true);
+        self.check_items(start, self.pos, mode, true);
+    }
+    fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool, emit_event: bool) -> bool {
+        if self.flags.contains(Flags::NoSelection) {
+            return false;
+        }
+        if pos >= self.filter.len() {
+            return false;
+        }
+        let mut selection_has_changed = false;
+        // match self.filter[pos] {
+        //     Element::Item(index) => {
+        //         let item = &mut self.data[index as usize];
+        //         let status = item.is_checked();
+        //         match mode {
+        //             CheckMode::True => item.set_checked(true),
+        //             CheckMode::False => item.set_checked(false),
+        //             CheckMode::Reverse => item.set_checked(!status),
+        //         }
+        //         selection_has_changed = item.is_checked() != status;
+        //         if selection_has_changed {
+        //             if item.is_checked() {
+        //                 self.selected_items_count += 1;
+        //             } else {
+        //                 self.selected_items_count -= 1;
+        //             }
+        //         }
+        //         if update_group_check_count {
+        //             self.update_check_count_for_groups();
+        //         }
+        //     }
+        //     Element::Group(gid) => {
+        //         let group = &mut self.groups[gid as usize];
+        //         let checked = group.items_checked_count();
+        //         let count = group.items_count();
+        //         let new_status = checked < count;
+        //         if group.is_collapsed() {
+        //             // iterate through all items that and check if they are filtered or not and check them
+        //             let len = self.data.len();
+        //             for idx in 0..len {
+        //                 let item = &self.data[idx];
+        //                 if item.group_id() != gid {
+        //                     continue;
+        //                 }
+        //                 if self.is_item_filtered_out(item) {
+        //                     continue;
+        //                 }
+        //                 selection_has_changed |= self.select_item_and_update_count(idx, new_status);
+        //             }
+        //         } else {
+        //             let len = self.filter.len();
+        //             for idx in pos + 1..len {
+        //                 match self.filter[idx] {
+        //                     Element::Item(index) => {
+        //                         let item = &self.data[index as usize];
+        //                         if item.group_id() != gid {
+        //                             break;
+        //                         }
+        //                         selection_has_changed |= self.select_item_and_update_count(index as usize, new_status);
+        //                     }
+        //                     _ => {
+        //                         break;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //         let group = &mut self.groups[gid as usize];
+        //         group.set_items_checked_count(if checked < count { count } else { 0 });
+        //     }
+        // }
+        if (emit_event) && (selection_has_changed) {
+            self.emit_selection_update_event();
+        }
+        selection_has_changed
+    }
+    fn check_items(&mut self, start: usize, end: usize, mode: CheckMode, emit_event: bool) {
+        if self.flags.contains(Flags::NoSelection) {
+            return;
+        }
+        let len = self.filter.len();
+        if len == 0 {
+            return;
+        }
+        let p_start = start.min(end).min(len - 1);
+        let p_end = end.max(start).min(len - 1);
+        let mut selection_has_changed = false;
+        for pos in p_start..=p_end {
+            selection_has_changed |= self.check_item(pos, mode, false, false);
+        }
+        if (emit_event) && (selection_has_changed) {
+            self.emit_selection_update_event();
+        }
+    }
+    #[inline(always)]
+    fn is_entire_list_selected(&self) -> bool {
+        for handle in &self.filter {
+            if let Some(item) = self.manager.get(*handle) {
+                if !item.is_checked() {
+                    return false;
+                }
+            }
+        }
+        true
+    }      
+    fn process_key_pressed(&mut self, key: Key) -> bool {
+        // process key for items
+        match key.value() {
+            // movements
+            key!("Up") => {
+                self.update_position(self.pos.saturating_sub(1), true);
+                true
+            }
+            key!("Down") => {
+                self.update_position(self.pos.saturating_add(1), true);
+                true
+            }
+            key!("Ctrl+Alt+Up") => {
+                self.move_scroll_to(self.top_view.saturating_sub(1));
+                true
+            }
+            key!("Ctrl+Alt+Down") => {
+                self.move_scroll_to(self.top_view.saturating_add(1));
+                true
+            }
+            key!("Home") => {
+                self.update_position(0, true);
+                true
+            }
+            key!("End") => {
+                self.update_position(self.filter.len(), true);
+                true
+            }
+            key!("PageUp") => {
+                self.update_position(self.pos.saturating_sub(self.visible_items()), true);
+                true
+            }
+            key!("PageDown") => {
+                self.update_position(self.pos.saturating_add(self.visible_items()), true);
+                true
+            }
+            key!("Left") => {
+                self.update_position(self.pos.saturating_sub(self.size().height as usize), true);
+                true
+            }
+            key!("Right") => {
+                self.update_position(self.pos.saturating_add(self.size().height as usize), true);
+                true
+            }
+
+            // Selection
+            key!("Space") => {
+                if self.flags.contains(Flags::CheckBoxes) {
+                    self.check_item(self.pos, CheckMode::Reverse, true, true);
+                    true
+                } else {
+                    false
+                }
+            }
+            key!("Insert") | key!("Shift+Down") => {
+                self.check_item(self.pos, CheckMode::Reverse, true, true);
+                self.update_position(self.pos.saturating_add(1), true);
+                true
+            }
+            key!("Shift+Up") => {
+                self.check_item(self.pos, CheckMode::Reverse, true, true);
+                self.update_position(self.pos.saturating_sub(1), true);
+                true
+            }
+            key!("Shift+Home") => {
+                self.select_until_position(0);
+                true
+            }
+            key!("Shift+End") => {
+                self.select_until_position(self.filter.len());
+                true
+            }
+            key!("Shift+PageUp") => {
+                self.select_until_position(self.pos.saturating_sub(self.visible_items()));
+                true
+            }
+            key!("Shift+PageDown") => {
+                self.select_until_position(self.pos.saturating_add(self.visible_items()));
+                true
+            }
+            key!("Shift+Left") => {
+                self.select_until_position(self.pos.saturating_sub(self.size().height as usize));
+                true
+            }
+            key!("Shift+Right") => {
+                self.select_until_position(self.pos.saturating_add(self.size().height as usize));
+                true
+            }
+
+            key!("Ctrl+A") => {
+                if self.is_entire_list_selected() {
+                    self.check_items(0, self.filter.len(), CheckMode::False, true);
+                } else {
+                    self.check_items(0, self.filter.len(), CheckMode::True, true);
+                }
+                true
+            }
+
+            // Action
+            key!("Enter") => {
+                // match self.filter.get(self.pos) {
+                //     Some(Element::Item(index)) => self.emit_item_action_event(*index as usize),
+                //     Some(Element::Group(gid)) => self.toggle_group_collapse_status(*gid, true),
+                //     _ => {}
+                // }
+                true
+            }
+            _ => false,
+        }
+    } 
 }
 impl<T> OnPaint for TreeView<T>
 where
@@ -361,7 +767,27 @@ where
         self.comp.paint(surface, theme, &self.base);
     }
 }
-impl<T> OnKeyPressed for TreeView<T> where T: ListItem + 'static {}
+impl<T> OnKeyPressed for TreeView<T> where T: ListItem + 'static {
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        let action = self.header.process_key_pressed(key);
+        if self.execute_column_header_action(action) {
+            return EventProcessStatus::Processed;
+        }
+        if self.comp.process_key_pressed(key, character) {
+            self.filter_items();
+            return EventProcessStatus::Processed;
+        }
+        if self.process_key_pressed(key) {
+            self.comp.exit_edit_mode();
+            return EventProcessStatus::Processed;
+        }
+        if (action.should_repaint()) || (self.comp.should_repaint()) {
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
+    }
+}
 impl<T> OnMouseEvent for TreeView<T> where T: ListItem + 'static {}
 impl<T> OnResize for TreeView<T>
 where
