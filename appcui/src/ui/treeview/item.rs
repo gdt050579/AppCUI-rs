@@ -8,7 +8,7 @@ use EnumBitFlags::EnumBitFlags;
 #[EnumBitFlags(bits = 8)]
 pub(super) enum ItemFlags {
     LastSibling = 0x01,
-    
+    //
 }
 
 pub struct Item<T>
@@ -20,6 +20,7 @@ where
     attr: Option<CharAttribute>,
     icon: [char; 2],
     flags: ItemFlags,
+    pub(super) line_mask: u32,
     pub(super) depth: u16,
     pub(super) handle: Handle<Item<T>>,
     pub(super) parent: Handle<Item<T>>,
@@ -36,6 +37,7 @@ where
             checked,
             attr,
             depth: 0,
+            line_mask: 0,
             flags: ItemFlags::None,
             icon: icon_chars,
             handle: Handle::None,
@@ -95,6 +97,23 @@ where
             }
         }
     }
+
+    #[inline(always)]
+    pub(super) fn set_line_mask(&mut self, previous_value: u32, depth: u16, last_sibling: bool) -> u32 {
+        self.depth = depth;
+        if (depth == 0) || (depth > 32) {
+            self.line_mask = 0;
+        } else {
+            let bit = 1u32 << (depth - 1);
+            let value = previous_value &  (bit-1);
+            if !last_sibling {
+                self.line_mask = value | bit;
+            } else {
+                self.line_mask = value;
+            }
+        }
+        self.line_mask
+    }
 }
 impl<T> From<T> for Item<T>
 where
@@ -106,6 +125,7 @@ where
             checked: false,
             attr: None,
             depth: 0,
+            line_mask: 0,
             flags: ItemFlags::None,
             icon: [0u8 as char, 0u8 as char],
             handle: Handle::None,
