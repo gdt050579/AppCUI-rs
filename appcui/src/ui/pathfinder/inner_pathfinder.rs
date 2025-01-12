@@ -47,6 +47,12 @@ where
     pub(super) fn on_lose_focus(&mut self, control: &mut ControlBase) {
         self.component.on_lose_focus(control);
     }
+    pub(super) fn on_theme_changed(&mut self, theme: &Theme)  {
+        self.component.on_theme_changed(theme);
+    }
+    pub(super) fn on_mouse_event(&mut self, control: &ControlBase, event: &MouseEvent) -> EventProcessStatus {
+        self.component.on_mouse_event(control, event)
+    }
 
     pub(super) fn path(&self) -> &Path {
         Path::new(self.component.path())

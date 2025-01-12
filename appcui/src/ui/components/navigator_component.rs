@@ -106,6 +106,7 @@ where
     backup_path: String,
     char_count: u32,
     selection: Selection,
+    drag_started: bool,
     out_of_focus_surface: Surface,
 
     // suggestions area
@@ -132,7 +133,9 @@ where
     fn on_focus(&mut self, control: &mut ControlBase);
     fn on_lose_focus(&mut self, control: &mut ControlBase);
     fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus;
+    fn on_mouse_event(&mut self, control: &ControlBase, event: &MouseEvent) -> EventProcessStatus;
     fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme);
+    fn on_theme_changed(&self, theme: &Theme);
 }
 
 impl<T, E, R> NavigatorComponent<T, E, R>
@@ -158,6 +161,7 @@ where
             start: 0,
             end: 0,
             selection: Selection::NONE,
+            drag_started: false,
             out_of_focus_surface: Surface::new(1, 1),
             is_readonly: readonly,
             is_case_sensitive: case_sensitive,
@@ -604,6 +608,58 @@ where
             _ => self.paint_suggestions_area_bottom(control, surface, attr, attr_selected),
         }
     }
+
+    fn mouse_pos_to_glyph_offset(&self, x: i32, y: i32, within_control: bool) -> Option<usize> {
+        let w = self.width as i32;
+        let h = 1;
+        if within_control && ((x < 1) || (x >= w - 1) || (y < 0) || (y >= h)) {
+            return None;
+        }
+        let glyphs_count = self.start as i32 + x - 1 - self.cursor as i32 ;
+        println!("[mouse_pos_to_glyph_offset] x = {}, y = {}, glyphs_count = {}", x, y, glyphs_count);
+        match glyphs_count.cmp(&0) {
+            std::cmp::Ordering::Less => Some(self.input_path.previous_pos(self.cursor, (-glyphs_count) as usize)),
+            std::cmp::Ordering::Equal => Some(self.cursor),
+            std::cmp::Ordering::Greater => Some(self.input_path.next_pos(self.cursor, glyphs_count as usize)),
+        }
+    }
+
+    fn select_all(&mut self) {
+        self.selection = Selection::NONE;
+        self.move_cursor_to(0, false, true);
+        self.move_cursor_to(self.input_path.len(), true, true);
+    }
+
+    fn copy_text(&mut self) {
+        if !self.selection.is_empty() {
+            RuntimeManager::get()
+                .terminal_mut()
+                .set_clipboard_text(&self.input_path[self.selection.start..self.selection.end]);
+        }
+    }
+    fn paste_text(&mut self) {
+        if self.is_readonly {
+            return;
+        }
+        if !self.selection.is_empty() {
+            self.delete_selection();
+        }
+        if let Some(txt) = RuntimeManager::get().terminal().get_clipboard_text() {
+            self.input_path.insert_str(self.cursor, &txt);
+            self.move_cursor_to(self.cursor + txt.len(), false, true);
+        }
+    }
+    fn cut_text(&mut self) {
+        if self.is_readonly {
+            return;
+        }
+        if !self.selection.is_empty() {
+            RuntimeManager::get()
+                .terminal_mut()
+                .set_clipboard_text(&self.input_path[self.selection.start..self.selection.end]);
+            self.delete_selection();
+        }
+    }
 }
 
 impl<T, E, R> NavigatorComponentControlFunctions<T, E, R> for NavigatorComponent<T, E, R>
@@ -662,6 +718,11 @@ where
         } else {
             self.paint_textbox_out_of_focus(surface, theme);
         }
+    }
+
+    fn on_theme_changed(&self, _theme: &Theme) {
+        // TODO: remove theme from passing it as param and
+        // use this function to keep internal colors or whole theme needed
     }
 
     fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus {
@@ -735,6 +796,22 @@ where
 
                 return EventProcessStatus::Processed;
             }
+            key!("Ctrl+C") | key!("Ctrl+Insert") => {
+                self.copy_text();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+X") | key!("Shift+Del") => {
+                self.cut_text();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+V") | key!("Shift+Insert") => {
+                self.paste_text();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+A") => {
+                self.select_all();
+                return EventProcessStatus::Processed;
+            }
             _ => {
                 if character > 0 as char {
                     self.input_path.push(character);
@@ -750,5 +827,39 @@ where
             }
         }
         EventProcessStatus::Ignored
+    }
+
+    fn on_mouse_event(&mut self, control: &ControlBase, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.drag_started = false;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(_) => EventProcessStatus::Ignored,
+            MouseEvent::Pressed(data) => {
+                if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, true) {
+                    self.move_cursor_to(new_pos, false, false);
+                    self.drag_started = true;
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Released(_) => {
+                self.drag_started = false;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::DoubleClick(data) => {
+                self.select_all();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Drag(data) => {
+                if self.drag_started {
+                    if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, false) {
+                        self.move_cursor_to(new_pos, true, true);
+                    }
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
+        }
     }
 }

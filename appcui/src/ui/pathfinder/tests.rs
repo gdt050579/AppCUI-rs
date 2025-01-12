@@ -35,7 +35,7 @@ fn test_while_developing() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
         //Paint.Enable(false)
-        Paint('Initial')
+        Paint('Initial')    
         Key.Pressed(Tab)
         Paint('After Focus')
         Key.Pressed(S)
@@ -58,7 +58,7 @@ fn test_while_developing() {
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::ReadOnly,
+        pathfinder::Flags::None ,
         nav);
     w.add(p);
     w.add(button!("test,x:1,y:3,w:6"));
