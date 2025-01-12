@@ -20,6 +20,7 @@ libc = "0.2"
 default = []
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
 EVENT_RECORDER = []
+GLOBAL_RUNTIME = []
 
 [lints]
 workspace = true

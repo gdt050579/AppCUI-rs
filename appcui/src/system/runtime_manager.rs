@@ -93,8 +93,10 @@ pub(crate) struct RuntimeManager {
     event_recorder: super::event_recorder::EventRecorder,
 }
 
-//static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
+#[cfg(feature = "GLOBAL_RUNTIME")]
+static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
+#[cfg(not(feature = "GLOBAL_RUNTIME"))]
 thread_local! {
     static RUNTIME_MANAGER: RefCell<Option<RuntimeManager>> = RefCell::new(None);
 }
@@ -168,23 +170,32 @@ impl RuntimeManager {
         manager.current_focus = Some(manager.desktop_handle);
         controls.get_mut(manager.desktop_handle).unwrap().base_mut().handle = manager.desktop_handle;
         // all good --> add single window if case
-        // unsafe {
-        //     RUNTIME_MANAGER = Some(manager);
-        // }
+
+        #[cfg(feature = "GLOBAL_RUNTIME")]
+        unsafe {
+            RUNTIME_MANAGER = Some(manager);
+        }
+
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.set(Some(manager));
 
         Ok(())
     }
     pub(crate) fn is_instantiated() -> bool {
+        #[cfg(feature = "GLOBAL_RUNTIME")]
+        unsafe { RUNTIME_MANAGER.is_some() }
+
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.with(|manager| manager.borrow().is_some())
-        //unsafe { RUNTIME_MANAGER.is_some() }
     }
     pub(crate) fn get() -> &'static mut RuntimeManager {
-        //unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
+        #[cfg(feature = "GLOBAL_RUNTIME")]
+        unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
+        
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]        
         RUNTIME_MANAGER.with(|manager| {
             let mut binding = manager.borrow_mut();
             let mut_ref = binding.as_mut().expect("RuntimeManager is not initialized");
-            // SAFETY: This is safe because we are in a single-threaded context
             unsafe { &mut *(mut_ref as *mut RuntimeManager) }
         })
     }
@@ -1026,9 +1037,12 @@ impl RuntimeManager {
         #[cfg(feature = "EVENT_RECORDER")]
         RuntimeManager::get().event_recorder.save();
 
-        // unsafe {
-        //     RUNTIME_MANAGER = None;
-        // }
+        #[cfg(feature = "GLOBAL_RUNTIME")]
+        unsafe {
+            RUNTIME_MANAGER = None;
+        }
+
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.set(None);
     }
 }
