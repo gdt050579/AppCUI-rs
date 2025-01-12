@@ -61,16 +61,16 @@ where
                         .unwrap()
                         .to_string();
                     match case_sensitive {
-                        true => self.cached_items.push(cached_item.to_lowercase()),
+                        false => self.cached_items.push(cached_item.to_lowercase()),
                         _ => self.cached_items.push(cached_item),
                     }
                 }
             }
         }
         self.suggestions = if case_sensitive {
-            Self::get_matching_paths(&path.to_lowercase(), &self.cached_items)
-        } else {
             Self::get_matching_paths(path, &self.cached_items)
+        } else {
+            Self::get_matching_paths(&path.to_lowercase(), &self.cached_items)
         };
     }
     fn get_folder(path: &str) -> &str {
@@ -372,7 +372,7 @@ where
             .to_string()
             .replace(PLATFORM_SEPARATOR_CHARACTER, &format!(" {} ", char::from(Self::PATH_TRIANGLE_SEPARTOR)));
 
-        (s.chars().count() < self.width as usize, s)
+        (s.chars().count() <= self.width as usize - Self::PADDING as usize , s)
     }
 
     fn update_fitting_text(&mut self, theme: &Theme, text: &str) {
