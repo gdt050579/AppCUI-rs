@@ -1,9 +1,19 @@
 use std::cmp::Ordering;
+use std::usize;
 
 use super::Item;
 use super::ListItem;
 use crate::prelude::ColumnsHeader;
 use crate::system::Handle;
+
+macro_rules! new_mutable_ref {
+    ($current_ref:expr) => {
+        unsafe {
+            let px = $current_ref as *mut Vec<Handle<Item<T>>>;
+            &mut *px
+        }
+    };
+}
 
 pub(super) struct TreeDataManager<T>
 where
@@ -80,18 +90,15 @@ where
     pub(super) fn delete_children(&mut self, parent: Handle<Item<T>>) {
         if let Some(idx) = self.handle_to_index(parent) {
             let parent_ref = self.data[idx].as_mut().unwrap();
-            let parent = unsafe {
-                let p = parent_ref as *mut Item<T>;
-                &mut *p
-            };
-            for handle in parent.children.iter() {
+            let parent_children = new_mutable_ref!(&mut parent_ref.children);
+            for handle in parent_children.iter() {
                 self.delete_children(*handle);
                 if let Some(idx) = self.handle_to_index(*handle) {
                     self.free.push(idx as u32);
                     self.data[idx] = None;
                 }
             }
-            parent.children.clear();
+            self.data[idx].as_mut().unwrap().children.clear();
         }
     }
     pub(super) fn delete(&mut self, handle: Handle<Item<T>>) {
@@ -134,19 +141,53 @@ where
         self.data.len()
     }
 
-    fn pupulate_children(&self, handle: Handle<Item<T>>, output: &mut Vec<Handle<Item<T>>>) {
-        if let Some(idx) = self.handle_to_index(handle) {
-            let item = self.data[idx].as_ref().unwrap();
-            for h in item.children.iter() {
-                output.push(*h);
-                self.pupulate_children(*h, output);
+    fn pupulate_children(&mut self, handle_list: &Vec<Handle<Item<T>>>, output: &mut Vec<Handle<Item<T>>>, last_mask: u32, depth: u16) -> u32 {
+        if handle_list.is_empty() {
+            return last_mask;
+        }
+        let mut last_mask = last_mask;
+        // find the last position that will be added
+        let mut last_index = None;
+        for (index, h) in handle_list.iter().rev().enumerate() {
+            if let Some(item) = self.get_mut(*h) {
+                // check to see if the item is visible
+                last_index = Some(index);
+                break;
             }
         }
+        if let Some(idx) = last_index {
+            if idx > 0 {
+                // process all until the last one
+                for h in (&handle_list[..idx]).iter() {
+                    if let Some(item) = self.get_mut(*h) {
+                        last_mask = item.set_line_mask(last_mask, depth, false);
+                        output.push(*h);
+                        let list = new_mutable_ref!(&mut item.children);
+                        last_mask = self.pupulate_children(list, output, last_mask, depth + 1);
+                    }
+                }
+            }
+            // process the last one (we know it should be added)
+            let h = handle_list[idx];
+            if let Some(item) = self.get_mut(h) {
+                last_mask = item.set_line_mask(last_mask, depth, true);
+                output.push(h);
+                let list = new_mutable_ref!(&mut item.children);
+                last_mask = self.pupulate_children(list, output, last_mask, depth + 1);
+            }
+}
+        0
     }
-    pub(super) fn populate(&self, output: &mut Vec<Handle<Item<T>>>) {
-        for h in self.roots.iter() {
-            output.push(*h);
-            self.pupulate_children(*h, output);
+    pub(super) fn populate(&mut self, output: &mut Vec<Handle<Item<T>>>) {
+        let l = new_mutable_ref!(&mut self.roots);
+        let mut last_mask = 0;
+        for h in l.iter() {
+            if let Some(item) = self.get_mut(*h) {
+                last_mask = item.set_line_mask(last_mask, 0, false);
+                output.push(*h);
+                let list = new_mutable_ref!(&mut item.children);
+                self.pupulate_children(list, output, last_mask, 1);
+            }
         }
     }
 
@@ -174,10 +215,7 @@ where
         for h in data.iter() {
             if let Some(item) = manager.get_mut(*h) {
                 if !item.children.is_empty() {
-                    let p = unsafe {
-                        let px = &mut item.children as *mut Vec<Handle<Item<T>>>;
-                        &mut *px
-                    };
+                    let p = new_mutable_ref!(&mut item.children);
                     TreeDataManager::sort_by(p, manager, column_index, ascendent);
                 }
             }
@@ -185,20 +223,14 @@ where
     }
 
     pub(super) fn sort(&mut self, column_index: u16, ascendent: bool) {
-        let p = unsafe {
-            let px = &mut self.roots as *mut Vec<Handle<Item<T>>>;
-            &mut *px
-        };
+        let p = new_mutable_ref!(&mut self.roots);
         TreeDataManager::sort_by(p, self, column_index, ascendent);
     }
 
     fn filter(&mut self, handle: Handle<Item<T>>, search_text: &str, header: Option<&ColumnsHeader>) {
         if let Some(item) = self.get_mut(handle) {
             let result = item.matches(search_text, header);
-            let p = unsafe {
-                let px = &mut item.children as *const Vec<Handle<Item<T>>>;
-                & *px
-            };
+            let p = new_mutable_ref!(&mut item.children);
             for h in p.iter() {
                 self.filter(*h, search_text, header);
             }
