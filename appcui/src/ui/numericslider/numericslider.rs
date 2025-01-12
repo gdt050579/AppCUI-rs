@@ -160,40 +160,80 @@ where
     }
 
     fn get_charset_based_on_theme(&self, theme: &Theme) -> CharSet {
-        let mut set: CharSet = CharSet {
+        let mut downSingleLineSet: CharSet = CharSet {
             start_char: Character::new(
-                SpecialChar::BoxTopLeftCornerSingleLine,
+                SpecialChar::BoxTopLeftCornerSingleLine, // BoxBottomLeftCornerSingleLine
                 theme.border.normal.foreground,
                 theme.border.normal.background,
                 theme.lines.normal.flags,
             ),
             separator: Character::new(
-                SpecialChar::BoxHorizontalSingleLine,
+                SpecialChar::BoxHorizontalSingleLine, // ramane acelasi pe up
                 theme.border.normal.foreground,
                 theme.border.normal.background,
                 theme.lines.normal.flags,
             ),
             value_indicator: Character::new(
-                SpecialChar::SingleLineDownT,
+                SpecialChar::SingleLineDownT, //up e BoxMidleBottom
                 theme.border.normal.foreground,
                 theme.border.normal.background,
                 theme.lines.normal.flags,
             ),
             end_char: Character::new(
-                SpecialChar::BoxTopRightCornerSingleLine,
+                SpecialChar::BoxTopRightCornerSingleLine, // BoxBottomRightCornerSingleLine
                 theme.border.normal.foreground,
                 theme.border.normal.background,
                 theme.lines.normal.flags,
             ),
             selected_value_indicator: Character::new(
-                SpecialChar::TriangleDown,
+                SpecialChar::TriangleDown, // TriangleUp
                 theme.lines.pressed_or_selectd.foreground,
                 theme.lines.normal.background,
                 theme.lines.normal.flags,
             ),
         };
-        if self.flags.contains(Flags::SingleLine | Flags::HorizontalSlider) {
-            return set;
+
+        let mut upSingleLineSet: CharSet = CharSet {
+            start_char: Character::new(
+                SpecialChar::BoxBottomLeftCornerSingleLine, 
+                theme.border.normal.foreground,
+                theme.border.normal.background,
+                theme.lines.normal.flags,
+            ),
+            separator: Character::new(
+                SpecialChar::BoxHorizontalSingleLine, 
+                theme.border.normal.foreground,
+                theme.border.normal.background,
+                theme.lines.normal.flags,
+            ),
+            value_indicator: Character::new(
+                SpecialChar::BoxMidleBottom, 
+                theme.border.normal.foreground,
+                theme.border.normal.background,
+                theme.lines.normal.flags,
+            ),
+            end_char: Character::new(
+                SpecialChar::BoxBottomRightCornerSingleLine,
+                theme.border.normal.foreground,
+                theme.border.normal.background,
+                theme.lines.normal.flags,
+            ),
+            selected_value_indicator: Character::new(
+                SpecialChar::TriangleUp, 
+                theme.lines.pressed_or_selectd.foreground,
+                theme.lines.normal.background,
+                theme.lines.normal.flags,
+            ),
+        };
+
+
+        if self.flags.contains(Flags::SingleLine) {
+            if !self.flags.contains(Flags::ValuesUp) {
+                return downSingleLineSet;
+            }
+            else {
+                return upSingleLineSet;
+            }
         }
         panic!("Invalid flags received for character set!");
     }
@@ -217,22 +257,31 @@ where
 
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let current_character_set: CharSet = self.get_charset_based_on_theme(theme);
-        surface.write_char(self.poz_triunghi, 0, current_character_set.selected_value_indicator);
-        surface.write_string(0, 2, &self.values_string, theme.text.normal, false);
 
-        surface.write_string(3, 0, &self.value.to_string(), theme.text.normal, false);
+        let y_separators = 1; // mereu in centru
+        let mut y_values = 2;
+        let mut y_selector = 0;
+        if self.flags.contains(Flags::ValuesUp){
+            y_values = 0;
+            y_selector = 2;
+        }
+
+        surface.write_char(self.poz_triunghi, y_selector, current_character_set.selected_value_indicator);
+        surface.write_string(0, y_values, &self.values_string, theme.text.normal, false);
+
+        //surface.write_string(3, 0, &self.value.to_string(), theme.text.normal, false); de debug
 
         //desenez marginea pentru min si max
-        surface.write_char(0, 1, current_character_set.start_char);
-        surface.write_char(((self.nr_val - 1) * self.sec_dim as u32) as i32, 1, current_character_set.end_char);
+        surface.write_char(0, y_separators, current_character_set.start_char);
+        surface.write_char(((self.nr_val - 1) * self.sec_dim as u32) as i32, y_separators, current_character_set.end_char);
 
         let mut index: i32 = 1;
         while index < ((self.nr_val - 1) as i32 * self.sec_dim as i32) {
             if index % self.sec_dim as i32 == 0 {
-                surface.write_char(index, 1, current_character_set.value_indicator);
+                surface.write_char(index, y_separators, current_character_set.value_indicator);
             }
             else {
-                surface.write_char(index, 1, current_character_set.separator);
+                surface.write_char(index, y_separators, current_character_set.separator);
             }
             index += 1;
         }
@@ -269,13 +318,7 @@ where
     T: Number + 'static,
 {
     fn on_resize(&mut self, old_size: Size, new_size: Size) {
-        self.bound = {
-            if self.flags.contains(Flags::HorizontalSlider) {
-                new_size.width as i32
-            } else {
-                new_size.height as i32
-            }
-        };
+        self.bound = new_size.width as i32;
         self.compute_math_fields();
 
         self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;

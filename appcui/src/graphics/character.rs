@@ -11,7 +11,7 @@ static UNICODE_CODES: [char; 49] = [
     '\u{25CF}', '\u{25CB}', '\u{221A}', '\u{2261}', '\u{205E}', '\u{2026}', // symbols
     '\u{251C}', '\u{252C}', '\u{2524}', '\u{2534}', // middle single line box
     '\u{2594}', '\u{2587}', '\u{2595}', '\u{2581}', // middle single line box
-    '\u{252C}', // single line T
+    '\u{252C}',// down T
 ];
 
 #[repr(u8)]
