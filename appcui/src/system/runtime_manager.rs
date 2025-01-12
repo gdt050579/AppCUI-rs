@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::sync::mpsc::{Receiver, Sender};
 
 use self::layout::ControlLayout;
@@ -92,7 +93,11 @@ pub(crate) struct RuntimeManager {
     event_recorder: super::event_recorder::EventRecorder,
 }
 
-static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
+//static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
+
+thread_local! {
+    static RUNTIME_MANAGER: RefCell<Option<RuntimeManager>> = RefCell::new(None);
+}
 
 impl RuntimeManager {
     pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
@@ -163,17 +168,25 @@ impl RuntimeManager {
         manager.current_focus = Some(manager.desktop_handle);
         controls.get_mut(manager.desktop_handle).unwrap().base_mut().handle = manager.desktop_handle;
         // all good --> add single window if case
-        unsafe {
-            RUNTIME_MANAGER = Some(manager);
-        }
+        // unsafe {
+        //     RUNTIME_MANAGER = Some(manager);
+        // }
+        RUNTIME_MANAGER.set(Some(manager));
 
         Ok(())
     }
     pub(crate) fn is_instantiated() -> bool {
-        unsafe { RUNTIME_MANAGER.is_some() }
+        RUNTIME_MANAGER.with(|manager| manager.borrow().is_some())
+        //unsafe { RUNTIME_MANAGER.is_some() }
     }
     pub(crate) fn get() -> &'static mut RuntimeManager {
-        unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
+        //unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
+        RUNTIME_MANAGER.with(|manager| {
+            let mut binding = manager.borrow_mut();
+            let mut_ref = binding.as_mut().expect("RuntimeManager is not initialized");
+            // SAFETY: This is safe because we are in a single-threaded context
+            unsafe { &mut *(mut_ref as *mut RuntimeManager) }
+        })
     }
     pub(crate) fn get_terminal_size(&self) -> Size {
         self.terminal.get_size()
@@ -615,7 +628,7 @@ impl RuntimeManager {
         if timer_handle.is_none() {
             self.timers_manager.terminate_thread(timer_handle.index());
         }
-        
+
         if has_focus {
             (parent, is_window_control)
         } else {
@@ -1013,9 +1026,10 @@ impl RuntimeManager {
         #[cfg(feature = "EVENT_RECORDER")]
         RuntimeManager::get().event_recorder.save();
 
-        unsafe {
-            RUNTIME_MANAGER = None;
-        }
+        // unsafe {
+        //     RUNTIME_MANAGER = None;
+        // }
+        RUNTIME_MANAGER.set(None);
     }
 }
 
