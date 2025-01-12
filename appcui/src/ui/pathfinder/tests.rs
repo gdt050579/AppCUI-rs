@@ -30,6 +30,7 @@ const CSV_DATA: &str = "
     f:D:\\Windows\\picture.png,123456,2020-03-12 12:31:55,
     f:D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
+
 #[test]
 fn test_while_developing() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
@@ -87,7 +88,7 @@ fn check_display_out_of_focus() {
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::None ,
+        pathfinder::Flags::CaseSensitive,
         nav);
     w.add(p);
     w.add(button!("test,x:1,y:3,w:6"));
@@ -132,7 +133,7 @@ fn check_suggestion_box_navigation() {
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::None ,
+        pathfinder::Flags::CaseSensitive,
         nav);
     w.add(p);
     a.add_window(w);
@@ -176,7 +177,7 @@ fn check_suggestion_box_top_navigation() {
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:5,w:40"),
-        pathfinder::Flags::None ,
+        pathfinder::Flags::CaseSensitive,
         nav);
     w.add(p);
     a.add_window(w);
@@ -197,7 +198,7 @@ fn check_case_sensitive() {
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive ,
+        pathfinder::Flags::CaseSensitive,
         nav);
     w.add(p);
     a.add_window(w);
@@ -219,6 +220,31 @@ fn check_case_insensitive() {
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
         pathfinder::Flags::None ,
+        nav);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_readonly_flag() {
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    let script = "
+        Paint('Initial')
+        CheckHash(0xF4B84D62A7A75EB9)
+        Key.TypeText('w')
+        Paint('After trying to write text')
+        CheckHash(0xF4B84D62A7A75EB9)
+        Key.Pressed(Backspace)
+        Paint('After trying to delete text with backspace')
+        CheckHash(0xF4B84D62A7A75EB9)
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:60,h:15");
+    let p = GenericPathFinder::with_navigator(
+        r#"C:\Program Files\"#,
+        Layout::new("x:1,y:1,w:40"),
+        pathfinder::Flags::ReadOnly ,
         nav);
     w.add(p);
     a.add_window(w);
