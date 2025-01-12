@@ -126,3 +126,9 @@ impl LayoutMode {
         }
     }
 }
+
+impl Default for LayoutMode {
+    fn default() -> LayoutMode {
+        LayoutMode::Absolute(AbsoluteLayout::new(0, 0, 0, 0))
+    }
+}

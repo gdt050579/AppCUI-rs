@@ -70,7 +70,7 @@ impl Command {
         format.x = 2;
         surface.write_text(self.caption.text(), format);
         if self.shortcut.code != KeyCode::None {
-            super::utils::paint_shortcut(self.shortcut, surface, format, width, self.enabled, current_item, color);
+            super::utils::paint_shortcut(self.shortcut, surface, format.y, width, self.enabled, current_item, color);
         }
     }
 }

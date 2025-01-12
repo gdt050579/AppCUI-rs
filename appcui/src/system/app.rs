@@ -5,6 +5,8 @@ use super::Error;
 use super::ErrorKind;
 use super::Handle;
 use super::RuntimeManager;
+use super::Theme;
+use super::ThemeMethods;
 use crate::graphics::Size;
 use crate::terminals::TerminalType;
 use crate::ui::common::traits::*;
@@ -82,6 +84,8 @@ impl App {
     pub fn run(self) {
         // must pe self so that after a run a second call will not be possible
         RuntimeManager::get().run();
+        // clear the mutex from open_save_dialog to clear the last path
+        crate::dialogs::clear_last_path();
         // clear the mutex so that other apps can be created after this step
         RuntimeManager::destroy();
         let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
@@ -95,6 +99,13 @@ impl App {
         T: Control + WindowControl + NotModalWindow + 'static,
     {
         RuntimeManager::get().add_window(window)
+    }
+
+    pub fn set_theme(theme: Theme) {
+        if !App::is_created() {
+            panic!("App::set_theme can only be called after the App has been created !");
+        }
+        RuntimeManager::get().set_theme(theme);
     }
 }
 

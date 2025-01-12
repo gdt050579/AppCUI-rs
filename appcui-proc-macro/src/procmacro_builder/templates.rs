@@ -8,7 +8,7 @@ use crate::ui::common::*;
 ";
 
 pub(crate) static MODAL_WINDOW_METHODS: &str = "
-impl ModalWindowMethods<$(MODAL_RESULT_TYPE)> for $(STRUCT_NAME) {
+impl$(TEMPLATE_TYPE) ModalWindowMethods<$(MODAL_RESULT_TYPE)> for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn show(self) -> Option<$(MODAL_RESULT_TYPE)> {
         ModalWindow::show(self)
     }
@@ -84,6 +84,12 @@ pub(crate) static ON_EXPAND_TRAIT: &str = "
 impl$(TEMPLATE_TYPE) OnExpand for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_expand(&mut self, direction: ExpandedDirection) { self.base.on_expand(direction); }
     fn on_pack(&mut self) { self.base.on_pack(); }
+}
+";
+
+pub(crate) static ON_THEME_CHANGED_TRAIT: &str = "
+impl$(TEMPLATE_TYPE) OnThemeChanged for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_theme_changed(&mut self, theme: &Theme)  { self.base.on_theme_changed(theme); }
 }
 ";
 
@@ -296,5 +302,89 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
         return NumericSelectorEvents::<$(TYPE)>::on_value_changed(self, h, value);
     }
     return EventProcessStatus::Ignored;
+}
+";
+
+
+pub(crate) static LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return ListViewEvents::<$(TYPE)>::on_current_item_changed(self, h);
+}
+";
+
+pub(crate) static LISTVIEW_ON_GROUP_EXPANDED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return ListViewEvents::<$(TYPE)>::on_group_expanded(self, h, group);
+}
+";
+
+pub(crate) static LISTVIEW_ON_GROUP_COLLAPSED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return ListViewEvents::<$(TYPE)>::on_group_collapsed(self, h, group);
+}
+";
+
+pub(crate) static LISTVIEW_ON_SELECTION_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return ListViewEvents::<$(TYPE)>::on_selection_changed(self, h);
+}
+";
+
+pub(crate) static LISTVIEW_ON_ITEM_ACTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return ListViewEvents::<$(TYPE)>::on_item_action(self, h, index);
+}
+";
+
+pub(crate) static LISTVIEW_TRAIT_DEF: &str = "
+trait ListViewEvents<T: listview::ListItem+'static> {
+    fn on_current_item_changed(&mut self, handle: Handle<ListView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_group_collapsed(&mut self, handle: Handle<ListView<T>>, group: listview::Group) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_group_expanded(&mut self, handle: Handle<ListView<T>>, group: listview::Group) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_selection_changed(&mut self, handle: Handle<ListView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_item_action(&mut self, handle: Handle<ListView<T>>, item_index: usize) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+
+    fn on_current_item_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_CURRENT_ITEM_CHANGED)
+        return EventProcessStatus::Ignored;
+    }
+
+    fn on_group_collapsed(&mut self, handle: Handle<()>, type_id: std::any::TypeId, group: listview::Group) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_COLLAPSED)
+        return EventProcessStatus::Ignored;
+    }
+
+    fn on_group_expanded(&mut self, handle: Handle<()>, type_id: std::any::TypeId, group: listview::Group) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_EXPANDED)
+        return EventProcessStatus::Ignored;
+    }
+    
+    fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_SELECTION_CHANGED)
+        return EventProcessStatus::Ignored;
+    }
+
+    fn on_item_action(&mut self, handle: Handle<()>, type_id: std::any::TypeId, index: usize) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_ITEM_ACTION)
+        return EventProcessStatus::Ignored;
+    }    
+
 }
 ";

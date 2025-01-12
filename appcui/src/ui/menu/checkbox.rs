@@ -1,13 +1,11 @@
 use super::{menu_item::MenuItem, MenuItemWrapper};
 use crate::{
-    graphics::{Character, SpecialChar, Surface, TextFormat},
+    graphics::{Character, SpecialChar, Surface},
     input::{Key, KeyCode},
-    system::Handle,
-    system::MenuTheme,
-    ui::common::traits::CommandID,
-    ui::menu::Menu,
-    utils::Caption,
-    utils::ExtractHotKeyMethod
+    prelude::TextFormat,
+    system::{Handle, MenuTheme},
+    ui::{common::traits::CommandID, menu::Menu},
+    utils::{Caption, ExtractHotKeyMethod},
 };
 pub struct CheckBox {
     pub(super) enabled: bool,
@@ -64,10 +62,13 @@ impl CheckBox {
         self.shortcut
     }
     #[inline(always)]
-    pub fn set_shortcut<T>(&mut self, shortcut: T) where Key: From<T>, {
+    pub fn set_shortcut<T>(&mut self, shortcut: T)
+    where
+        Key: From<T>,
+    {
         self.shortcut = Key::from(shortcut)
     }
-    
+
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
         if current_item && self.enabled {
@@ -81,7 +82,7 @@ impl CheckBox {
             surface.write_char(2, format.y, Character::with_attributes(SpecialChar::CheckMark, attr));
         }
         if self.shortcut.code != KeyCode::None {
-            super::utils::paint_shortcut(self.shortcut, surface, format, width, self.enabled, current_item, color);
+            super::utils::paint_shortcut(self.shortcut, surface, format.y, width, self.enabled, current_item, color);
         }
     }
 }

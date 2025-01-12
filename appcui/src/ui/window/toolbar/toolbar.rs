@@ -20,6 +20,7 @@ pub struct ToolbarElementHandle {
     handle: Handle<UIElement>,
 }
 
+#[derive(Default)]
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
     current_handle: Handle<UIElement>,

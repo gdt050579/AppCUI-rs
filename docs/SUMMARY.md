@@ -18,8 +18,14 @@
         - [Ansi]()
         - [Web]()
     - [Screen area and sizes](chapter-2/screen.md)
-    - [Surface]() <!-- (chapter-2/surface.md) -->
-        - [Images](chapter-2/images.md)
+    - [Surface](chapter-2/surface.md)
+        - [Clipping and origin point](chapter-2/surface/clipping.md)
+        - [Cursor](chapter-2/surface/cursor.md)
+        - [Drawing characters](chapter-2/surface/drawing_chars.md)
+        - [Lines](chapter-2/surface/lines.md)
+        - [Rectangles](chapter-2/surface/rectangles.md)
+        - [Text](chapter-2/surface/text.md)
+        - [Images](chapter-2/surface/images.md)
     - [Input](chapter-2/input.md)
         - [Mouse](chapter-2/mouse.md)
         - [Keyboard](chapter-2/keyboard.md)
@@ -52,7 +58,7 @@
         - [DropDownList](chapter-3/stock-controls/dropdownlist.md)
         - [Label](chapter-3/stock-controls/label.md)
         - [ListBox](chapter-3/stock-controls/listbox.md)
-        - [ListView]()
+        - [ListView](chapter-3/stock-controls/listview.md)
         - [HLine](chapter-3/stock-controls/hline.md)
         - [HSplitter](chapter-3/stock-controls/hsplitter.md)
         - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
@@ -68,6 +74,7 @@
         - [TextField](chapter-3/stock-controls/textfield.md)
         - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
+        - [ToggleButton](chapter-3/stock-controls/togglebutton.md)
         - [TreeView]()
         - [VLine](chapter-3/stock-controls/vline.md)
         - [VSplitter](chapter-3/stock-controls/vsplitter.md)
@@ -93,6 +100,14 @@
 
 - [Dialogs](chapter-5/dialogs.md)
     - [Notifications dialogs](chapter-5/notification_dialogs.md)
-    - [Open/Save dialog]()
+    - [Open/Save dialog](chapter-5/opensave_dialogs.md)
     - [Folder selection dialog]()
     - [Window manager dialog]() 
+
+- [Themes](chapter-6/themes.md)
+    - [Predefined Themes](chapter-6/predefined_themes.md)    
+    - [Events](chapter-6/events.md)
+
+- [Multi-Threading](chapter-7/multi-threading.md)
+    - [Timers](chapter-7/timers.md)  
+    - [Background tasks]()<!--(chapter-7/background_tasks.md)-->

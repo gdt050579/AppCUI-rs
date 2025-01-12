@@ -15,10 +15,10 @@ fn check_struct_definition() {
     assert_eq!(sd2.template_type,"<T>");
 
 
-    let sd3 = StructDefinition::from("pub   struct    MyControl  <TYPE_TEMPLATE: Copy+Clone> { ");
+    let sd3 = StructDefinition::from("pub   struct    MyControl  <A,B> where  A:Copy+Clone, B:Debug { ");
     assert_eq!(sd3.name,"MyControl");
-    assert_eq!(sd3.template_def,"<TYPE_TEMPLATE: Copy+Clone> ");
-    assert_eq!(sd3.template_type,"<TYPE_TEMPLATE>");
+    assert_eq!(sd3.template_def,"<A,B> where  A:Copy+Clone, B:Debug ");
+    assert_eq!(sd3.template_type,"<A,B>");
 
     let sd4 = StructDefinition::from("pub   struct MyControl  <TT> where TT: Copy+Clone> { ");
     assert_eq!(sd4.name,"MyControl");

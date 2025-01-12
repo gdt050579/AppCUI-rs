@@ -105,6 +105,10 @@ The list of all special characters that are supported by AppCUI (as described in
 | `SpecialCharacter::BlockLeftHalf`                         | 0x258C       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x258C;</td></tr></table> |
 | `SpecialCharacter::BlockRightHalf`                        | 0x2590       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2590;</td></tr></table> |
 | `SpecialCharacter::BlockCentered`                         | 0x25A0       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25A0;</td></tr></table> |
+| `SpecialCharacter::LineOnTop`                             | 0x2594       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2594;</td></tr></table> |
+| `SpecialCharacter::LineOnBottom`                          | 0x2581       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2581;</td></tr></table> |
+| `SpecialCharacter::LineOnLeft`                            | 0x258F       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x258F;</td></tr></table> |
+| `SpecialCharacter::LineOnRight`                           | 0x2595       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2595;</td></tr></table> |
 
 ## Other
 
@@ -180,6 +184,8 @@ The following values can be used as color parameters for `foreground` and `backg
 | `Yellow` or `y`      | Yellow     | `Color::Yellow`    | <div style="width: 24px; height: 24px; background-color: rgb(255, 255, 0);border: 2px solid white;"></div>   |
 | `White` or `w`       | White      | `Color::White`     | <div style="width: 24px; height: 24px; background-color: rgb(255, 255, 255);border: 2px solid white;"></div> |
 
+For `Transparent` color you can use the following values: `transparent`, `invisible` or `?`.
+
 You can also specify special characters by either using their specific name from the enum `SpecialChars` or by using certaing adnotations as presented in the following table:
 
 | Value                                    | Variant <br>(appcui::graphics::**SpecialCharacter** enum) | Visual Representation                                                                                                  |
@@ -196,6 +202,36 @@ You can also specify special characters by either using their specific name from
 | &#x7c;>                                  | `SpecialCharacter::TriangleRight`                         | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x25BA;</td></tr></table> |
 | `...`                                    | `SpecialCharacter::ThreePointsHorizontal`                 | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x2026;</td></tr></table> |
 | ^&#x7c;^                                 | `SpecialCharacter::SingleLineDownT`                       | <table style="width: 48px; height: 24px;" border="2"><tr><td align="center" valign="middle">&#x252C;</td></tr></table> |
+
+# Character attributes
+
+Sometimes, you might want to use a character with a specific color and attributes. For example, you might want to use a bolded character with a red color on a yellow background. This is in particular useful when building a theme where you just select the attributes and colors and then apply them to the characters.
+AppCUI provides a specific structure called `CharAttribute` that allows you to define colors and attributes for a character. 
+To create a `CharAttribute` you can use the following methods:
+
+```rust
+impl CharAttribute {
+    pub fn new(fore: Color, back: Color, flags: CharFlags) -> CharAttribute {...}
+    pub fn with_color(fore: Color, back: Color) -> CharAttribute {...}
+    pub fn with_fore_color(fore: Color) -> CharAttribute {...}
+    pub fn with_back_color(back: Color) -> CharAttribute {...}
+}
+```
+or
+the macro `charattr!`  that works similar to `char!` but it returns a `CharAttribute` object. The macro supports tha following positional and named parameters:
+
+| Position    | Parameter        | Type                                                                             |
+| ----------- | ---------------- | -------------------------------------------------------------------------------- |
+| #1 (second) | foreground color | `Color` for foreground (special constants are accepted in this case - see below) |
+| #2 (third)  | background color | `Color` for background (special constants are accepted in this case - see below) |
+
+and the named parameters:
+
+| Name                                             | Type      | Optional | Description                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fore` or `foreground` or `forecolor` or `color` | Color     | Yes      | The foreground color of the character. If not specified it is defaulted to `Transparent`.                                                                                                                                                                                                                                                                                                                                                               |
+| `back` or `background` or `backcolor`            | Color     | Yes      | The background color of the character. If not specified it is defaulted to `Transparent`.                                                                                                                                                                                                                                                                                                                                                               |
+| `attr` or `attributes`                           | Flags     | Yes      | One of the following combination: `Bold`, `Italic`, `Underline`                                                                                                                                                                                                                                                                                                                                                                                         |
 
 
 # Examples
@@ -243,4 +279,21 @@ char!("<-,red")
 or
 ```rs
 char!("<-,r")
+```
+
+
+**Example 4**: An arrow towards left a DarkGreen color, Bolded and Underlined while keeping the current background. We will use a CharAttribute for this example:
+```rust
+let attr = CharAttribute::new(Color::DarkGreen,Color::Transparent,CharFlags::Bold | CharFlags::Underline);  
+let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr);
+```
+or
+```rs
+let attr = charattr!("DarkGreen,Transparent,attr:Bold+Underline");
+let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr));
+```
+or
+```rs
+let attr = charattr!("dg,?,attr:Bold+Underline");
+let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr);
 ```
