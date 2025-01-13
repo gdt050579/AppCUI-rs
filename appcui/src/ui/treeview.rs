@@ -33,5 +33,6 @@ pub use self::item::Item;
 pub use self::treeview::TreeView;
 
 use self::tree_data_manager::TreeDataManager;
+use self::item::ItemVisibility;
 
 

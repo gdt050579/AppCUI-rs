@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::usize;
 
 use super::Item;
+use super::ItemVisibility;
 use super::ListItem;
 use crate::prelude::ColumnsHeader;
 use crate::system::Handle;
@@ -150,9 +151,10 @@ where
         let mut last_index = None;
         for (index, h) in handle_list.iter().rev().enumerate() {
             if let Some(item) = self.get_mut(*h) {
-                // check to see if the item is visible
-                last_index = Some(index);
-                break;
+                if item.is_visible() {
+                    last_index = Some(index);
+                    break;
+                }
             }
         }
         if let Some(idx) = last_index {
@@ -160,10 +162,12 @@ where
                 // process all until the last one
                 for h in (&handle_list[..idx]).iter() {
                     if let Some(item) = self.get_mut(*h) {
-                        last_mask = item.set_line_mask(last_mask, depth, false);
-                        output.push(*h);
-                        let list = new_mutable_ref!(&mut item.children);
-                        last_mask = self.pupulate_children(list, output, last_mask, depth + 1);
+                        if item.is_visible() {
+                            last_mask = item.set_line_mask(last_mask, depth, false);
+                            output.push(*h);
+                            let list = new_mutable_ref!(&mut item.children);
+                            last_mask = self.pupulate_children(list, output, last_mask, depth + 1);
+                        }
                     }
                 }
             }
@@ -175,7 +179,7 @@ where
                 let list = new_mutable_ref!(&mut item.children);
                 last_mask = self.pupulate_children(list, output, last_mask, depth + 1);
             }
-}
+        }
         0
     }
     pub(super) fn populate(&mut self, output: &mut Vec<Handle<Item<T>>>) {
@@ -227,13 +231,31 @@ where
         TreeDataManager::sort_by(p, self, column_index, ascendent);
     }
 
-    fn filter(&mut self, handle: Handle<Item<T>>, search_text: &str, header: Option<&ColumnsHeader>) {
-        if let Some(item) = self.get_mut(handle) {
-            let result = item.matches(search_text, header);
+    fn filter(&mut self, handle: Handle<Item<T>>, search_text: &str, header: Option<&ColumnsHeader>) -> bool {
+        let visibility = if let Some(item) = self.get_mut(handle) {
+            let match_search_criteria = item.matches(search_text, header);
             let p = new_mutable_ref!(&mut item.children);
+            let mut has_visible_children = false;
             for h in p.iter() {
-                self.filter(*h, search_text, header);
+                has_visible_children |= self.filter(*h, search_text, header);
             }
+            match (match_search_criteria, has_visible_children) {
+                (true, _) => Some(ItemVisibility::Visible),
+                (false, true) => Some(ItemVisibility::VisibleBecauseOfChildren),
+                (false, false) => Some(ItemVisibility::Hidden),
+            }
+        } else {
+            None
+        };
+        if let Some(vis) = visibility {
+            if let Some(item) = self.get_mut(handle) {
+                item.visibility = vis;
+                matches!(vis, ItemVisibility::Visible | ItemVisibility::VisibleBecauseOfChildren)
+            } else {
+                false
+            }
+        } else {
+            false
         }
     }
     pub(super) fn refilter(&mut self, search_text: &str, header: Option<&ColumnsHeader>) {

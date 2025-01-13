@@ -3,12 +3,12 @@ use crate::graphics::CharAttribute;
 use crate::prelude::ColumnsHeader;
 use crate::system::Handle;
 use crate::utils::glyphs::GlyphParser;
-use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits = 8)]
-pub(super) enum ItemFlags {
-    LastSibling = 0x01,
-    //
+#[derive(Debug, Clone, Copy)]
+pub(super) enum ItemVisibility {
+    Visible,
+    Hidden,
+    VisibleBecauseOfChildren,
 }
 
 pub struct Item<T>
@@ -19,7 +19,7 @@ where
     checked: bool,
     attr: Option<CharAttribute>,
     icon: [char; 2],
-    flags: ItemFlags,
+    pub(super) visibility: ItemVisibility,
     pub(super) line_mask: u32,
     pub(super) depth: u16,
     pub(super) handle: Handle<Item<T>>,
@@ -38,7 +38,7 @@ where
             attr,
             depth: 0,
             line_mask: 0,
-            flags: ItemFlags::None,
+            visibility: ItemVisibility::Visible,
             icon: icon_chars,
             handle: Handle::None,
             parent: Handle::None,
@@ -72,6 +72,10 @@ where
     #[inline(always)]
     pub(super) fn render_attr(&self) -> Option<CharAttribute> {
         self.attr
+    }
+    #[inline(always)]
+    pub(super) fn is_visible(&self) -> bool {
+        matches!(self.visibility, ItemVisibility::Visible | ItemVisibility::VisibleBecauseOfChildren)
     }
 
     #[inline(always)]
@@ -126,7 +130,7 @@ where
             attr: None,
             depth: 0,
             line_mask: 0,
-            flags: ItemFlags::None,
+            visibility: ItemVisibility::Visible,
             icon: [0u8 as char, 0u8 as char],
             handle: Handle::None,
             parent: Handle::None,
