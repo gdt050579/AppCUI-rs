@@ -236,6 +236,12 @@ where
             }
         }
     }
+    pub(super) fn refilter(&mut self, search_text: &str, header: Option<&ColumnsHeader>) {
+        let list = new_mutable_ref!(&mut self.roots);
+        for h in list.iter() {
+            self.filter(*h, search_text, header);
+        }
+    }
 
     #[cfg(test)]
     pub(super) fn free_list(&self) -> &Vec<u32> {

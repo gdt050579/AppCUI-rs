@@ -2,6 +2,12 @@ use super::{Flags, Item, TreeDataManager};
 use components::listitem::render_method::RenderData;
 use AppCUIProcMacro::*;
 
+enum UpdateVisibleItemsOperation {
+    Sort,
+    Refilter,
+    SortAndRefilter,
+}
+
 #[derive(Clone, Copy)]
 enum CheckMode {
     True,
@@ -23,14 +29,14 @@ where
 {
     flags: Flags,
     manager: TreeDataManager<T>,
-    filter: Vec<Handle<Item<T>>>,
+    item_list: Vec<Handle<Item<T>>>,
     header: ColumnsHeader,
     comp: ListScrollBars,
     top_view: usize,
     pos: usize,
     icon_width: u8,
     hover_status: HoverStatus,
-    refilter_enabled: bool,
+    update_item_list_enabled: bool,
 }
 impl<T> TreeView<T>
 where
@@ -58,7 +64,7 @@ where
             top_view: 0,
             pos: 0,
             manager: TreeDataManager::with_capacity(capacity as u32),
-            filter: Vec::with_capacity(capacity),
+            item_list: Vec::with_capacity(capacity),
             header: ColumnsHeader::with_capacity(4),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
             icon_width: if flags.contains(Flags::LargeIcons) {
@@ -68,7 +74,7 @@ where
             } else {
                 0 // No extra space
             },
-            refilter_enabled: true,
+            update_item_list_enabled: true,
             //start_mouse_select: 0,
             //mouse_check_mode: CheckMode::False,
             hover_status: HoverStatus::None,
@@ -100,92 +106,68 @@ where
         }
         let h = self.manager.add(item, parent);
         // refilter everything
-        self.refilter();
+        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
         h
     }
     pub fn add_batch<F>(&mut self, f: F)
     where
         F: FnOnce(&mut Self),
     {
-        let old_refilter = self.refilter_enabled;
-        self.refilter_enabled = false;
+        let old_state = self.update_item_list_enabled;
+        self.update_item_list_enabled = false;
         f(self);
         // restore original refilter state
-        self.refilter_enabled = old_refilter;
-        self.refilter();
+        self.update_item_list_enabled = old_state;
+        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
     }
 
-    fn refilter(&mut self) {
-        if !self.refilter_enabled {
-            return;
-        }
-        // refilter elements
-        self.filter.clear();
-        // reserve space for the entire list + groups
-        self.filter.reserve(self.manager.len());
-        // populate filter with items
-        self.manager.populate(&mut self.filter);
-        //self.manager.
-        // let handle = self.manager.first();
-        // while !handle.is_none() {
-        //     if let Some(item) = self.manager.get(handle) {
-        //         // if !self.is_item_filtered_out(item) {
-        //         //     self.filter.push(handle);
-        //         // }
-        //     }
-        // }
-
-        // if let Some(column_index) = self.header.sort_column() {
-        //     self.sort(column_index, self.header.should_sort_ascendent());
-        // } else {
-        //     self.sort(u16::MAX, true);
-        // }
-    }
-    fn goto_handle(&mut self, handle: Handle<Item<T>>, emit_event: bool) -> bool {
-        if let Some(index) = self.filter.iter().position(|h| *h == handle) {
-            self.update_position(index, emit_event);
-            true 
-        } else {
-            false
-        }
-    }
-    fn filter_items(&mut self) {
-        if self.manager.len() == 0 {
-            return;
-        }
-        let current_handle = if self.pos < self.filter.len() {
-            self.filter[self.pos]
+    fn update_item_list(&mut self, op: UpdateVisibleItemsOperation) {
+        let current_handle = if self.pos < self.item_list.len() {
+            self.item_list[self.pos]
         } else {
             Handle::None
         };
-        self.refilter();
-        if current_handle.is_none() {
-            self.update_position(0, true);
+        // sorting
+        if matches!(op, UpdateVisibleItemsOperation::SortAndRefilter | UpdateVisibleItemsOperation::Sort) {
+            if let Some(column_index) = self.header.sort_column() {
+                self.manager.sort(column_index, self.header.should_sort_ascendent());
+            } 
+        }
+        // refilter
+        if matches!(op, UpdateVisibleItemsOperation::SortAndRefilter | UpdateVisibleItemsOperation::Refilter) {
+            self.manager.refilter(
+                self.comp.search_text(),
+                if self.flags.contains(Flags::CustomFilter) {
+                    Some(&self.header)
+                } else {
+                    None
+                },
+            );
+        }
+        // clear all elements
+        self.item_list.clear();
+        // reserve space for the entire list + groups
+        self.item_list.reserve(self.manager.len());
+        // populate filter with items
+        self.manager.populate(&mut self.item_list);
+        // restore previous position
+        if !current_handle.is_none() {
+            self.goto_handle(current_handle, false);
+        }
+    }
+
+    fn goto_handle(&mut self, handle: Handle<Item<T>>, emit_event: bool) -> bool {
+        if let Some(index) = self.item_list.iter().position(|h| *h == handle) {
+            self.update_position(index, emit_event);
+            true
         } else {
-            self.goto_handle(current_handle, true);
+            false
         }
     }
 
     pub fn sort(&mut self, column_index: u16, ascendent: bool) {
         self.header.set_sort_column(column_index, ascendent, true);
-        if self.filter.is_empty() {
-            // no need to sort
-            return;
-        }
-        let current_handle = if self.pos < self.filter.len() {
-            self.filter[self.pos]
-        } else {
-            Handle::None
-        };
-        // sort elements by column index
-        self.manager.sort(column_index, ascendent);
-        // repopulate 
-        self.refilter();
-        // find the new position after sorting
-        if !current_handle.is_none() {
-            // on the same item --> no need to emit an event
-            self.goto_handle(current_handle, false);
-        }
+        self.update_item_list(UpdateVisibleItemsOperation::Sort);
     }
 
     #[inline(always)]
@@ -352,7 +334,7 @@ where
         let item_size = self.item_width();
         let max_y = self.size().height as i32;
         let mut idx = self.top_view;
-        let max_idx = self.filter.len();
+        let max_idx = self.item_list.len();
         let visible_items = self.visible_items();
         let mut item_count = 0;
         let (hover_checkmark_x, hover_pos) = match self.hover_status {
@@ -361,7 +343,7 @@ where
         };
         // very simply code
         while (item_count < visible_items) && (idx < max_idx) {
-            if let Some(item) = self.manager.get(self.filter[idx]) {
+            if let Some(item) = self.manager.get(self.item_list[idx]) {
                 self.paint_item(item, y, surface, theme, attr);
                 if (item.is_checked()) && (has_focus) && (!self.flags.contains(Flags::CheckBoxes)) {
                     surface.reset_clip();
@@ -402,7 +384,7 @@ where
     fn autoresize_column(&mut self, column_index: u16) {
         let mut new_width = 0u32;
         let mut found = false;
-        for handle in self.filter.iter() {
+        for handle in self.item_list.iter() {
             if let Some(item) = self.manager.get(*handle) {
                 if let Some(rm) = item.value().render_method(column_index) {
                     new_width = new_width.max(listview::RenderMethod::min_width(&rm));
@@ -421,7 +403,8 @@ where
         }
     }
     fn update_scrollbars(&mut self) {
-        self.comp.resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
+        self.comp
+            .resize(self.header.width() as u64, self.item_list.len() as u64, &self.base, self.visible_space());
         self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
     }
     fn execute_column_header_action(&mut self, action: ColumnsHeaderAction) -> bool {
@@ -448,9 +431,9 @@ where
             ColumnsHeaderAction::None => false,
             ColumnsHeaderAction::Repaint => false,
         }
-    }   
+    }
     fn update_position(&mut self, new_pos: usize, emit_event: bool) {
-        let len = self.filter.len();
+        let len = self.item_list.len();
         if len == 0 {
             return;
         }
@@ -486,16 +469,16 @@ where
             //     }),
             // });
         }
-    }    
+    }
     fn move_scroll_to(&mut self, new_poz: usize) {
         if new_poz == self.top_view {
             return;
         }
         let visible_items = self.visible_items();
-        let max_value = self.filter.len().saturating_sub(visible_items);
+        let max_value = self.item_list.len().saturating_sub(visible_items);
         self.top_view = new_poz.min(max_value);
         self.update_scrollbars();
-    }   
+    }
     fn emit_selection_update_event(&self) {
         // self.raise_event(ControlEvent {
         //     emitter: self.handle,
@@ -520,8 +503,8 @@ where
     }
     #[inline(always)]
     fn toggle_current_item_selection(&self) -> CheckMode {
-        if self.pos < self.filter.len() {
-            if let Some(item) = self.manager.get(self.filter[self.pos]) {
+        if self.pos < self.item_list.len() {
+            if let Some(item) = self.manager.get(self.item_list[self.pos]) {
                 if item.is_checked() {
                     CheckMode::False
                 } else {
@@ -544,7 +527,7 @@ where
         if self.flags.contains(Flags::NoSelection) {
             return false;
         }
-        if pos >= self.filter.len() {
+        if pos >= self.item_list.len() {
             return false;
         }
         let mut selection_has_changed = false;
@@ -588,7 +571,7 @@ where
         //                 selection_has_changed |= self.select_item_and_update_count(idx, new_status);
         //             }
         //         } else {
-        //             let len = self.filter.len();
+        //             let len = self.item_list.len();
         //             for idx in pos + 1..len {
         //                 match self.filter[idx] {
         //                     Element::Item(index) => {
@@ -617,7 +600,7 @@ where
         if self.flags.contains(Flags::NoSelection) {
             return;
         }
-        let len = self.filter.len();
+        let len = self.item_list.len();
         if len == 0 {
             return;
         }
@@ -633,7 +616,7 @@ where
     }
     #[inline(always)]
     fn is_entire_list_selected(&self) -> bool {
-        for handle in &self.filter {
+        for handle in &self.item_list {
             if let Some(item) = self.manager.get(*handle) {
                 if !item.is_checked() {
                     return false;
@@ -641,7 +624,7 @@ where
             }
         }
         true
-    }      
+    }
     fn process_key_pressed(&mut self, key: Key) -> bool {
         // process key for items
         match key.value() {
@@ -667,7 +650,7 @@ where
                 true
             }
             key!("End") => {
-                self.update_position(self.filter.len(), true);
+                self.update_position(self.item_list.len(), true);
                 true
             }
             key!("PageUp") => {
@@ -711,7 +694,7 @@ where
                 true
             }
             key!("Shift+End") => {
-                self.select_until_position(self.filter.len());
+                self.select_until_position(self.item_list.len());
                 true
             }
             key!("Shift+PageUp") => {
@@ -733,16 +716,16 @@ where
 
             key!("Ctrl+A") => {
                 if self.is_entire_list_selected() {
-                    self.check_items(0, self.filter.len(), CheckMode::False, true);
+                    self.check_items(0, self.item_list.len(), CheckMode::False, true);
                 } else {
-                    self.check_items(0, self.filter.len(), CheckMode::True, true);
+                    self.check_items(0, self.item_list.len(), CheckMode::True, true);
                 }
                 true
             }
 
             // Action
             key!("Enter") => {
-                // match self.filter.get(self.pos) {
+                // match self.item_list.get(self.pos) {
                 //     Some(Element::Item(index)) => self.emit_item_action_event(*index as usize),
                 //     Some(Element::Group(gid)) => self.toggle_group_collapse_status(*gid, true),
                 //     _ => {}
@@ -751,7 +734,7 @@ where
             }
             _ => false,
         }
-    } 
+    }
 }
 impl<T> OnPaint for TreeView<T>
 where
@@ -768,14 +751,17 @@ where
         self.comp.paint(surface, theme, &self.base);
     }
 }
-impl<T> OnKeyPressed for TreeView<T> where T: ListItem + 'static {
+impl<T> OnKeyPressed for TreeView<T>
+where
+    T: ListItem + 'static,
+{
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         let action = self.header.process_key_pressed(key);
         if self.execute_column_header_action(action) {
             return EventProcessStatus::Processed;
         }
         if self.comp.process_key_pressed(key, character) {
-            self.filter_items();
+            self.update_item_list(UpdateVisibleItemsOperation::Refilter);
             return EventProcessStatus::Processed;
         }
         if self.process_key_pressed(key) {
@@ -797,6 +783,6 @@ where
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.header.resize(new_size);
         self.comp
-            .resize(self.header.width() as u64, self.filter.len() as u64, &self.base, self.visible_space());
+            .resize(self.header.width() as u64, self.item_list.len() as u64, &self.base, self.visible_space());
     }
 }
