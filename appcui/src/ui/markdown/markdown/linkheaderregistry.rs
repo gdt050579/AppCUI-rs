@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
 #[derive(Hash, Eq, PartialEq, Debug)]
-pub struct LinkHeaderID(pub String);
+struct LinkHeaderID(pub String);
 
-pub struct HeaderPosition(pub i32);
+struct HeaderPosition(pub i32);
 
-pub struct LinkArea {
+struct LinkArea {
     pub x_pos: i32,
     pub y_pos: i32,
     pub len: i32,
 }
 
 pub struct LinkHeaderRegistry {
-    pub link_header_positions: HashMap<LinkHeaderID, (LinkArea, HeaderPosition)>,
+    link_header_positions: HashMap<LinkHeaderID, (LinkArea, HeaderPosition)>,
 }
 
 impl LinkHeaderRegistry {
@@ -23,7 +23,7 @@ impl LinkHeaderRegistry {
     }
 
     pub fn register_header_position(&mut self, header: &str, position: i32) {
-        let id = LinkHeaderID(Self::generate_link_id(header));
+        let id = LinkHeaderID(Self::get_id_from_header(header));
         
         if let Some((_, header_position)) = self.link_header_positions.get_mut(&id) {
             *header_position = HeaderPosition(position);
@@ -39,7 +39,7 @@ impl LinkHeaderRegistry {
     }
 
     pub fn register_link_position(&mut self, link: &str, x_pos: i32, y_pos: i32, len: i32) {
-        let id = LinkHeaderID(Self::generate_link_id(link));
+        let id = LinkHeaderID(link.to_string());
         
         if let Some((link_area, _)) = self.link_header_positions.get_mut(&id) {
             *link_area = LinkArea { x_pos, y_pos, len };
@@ -50,19 +50,18 @@ impl LinkHeaderRegistry {
         }
     }
 
-    pub fn get_entry(&self, id: &str) -> Option<&(LinkArea, HeaderPosition)> {
-        let id = LinkHeaderID(Self::generate_link_id(id));
-        self.link_header_positions.get(&id)
+    pub fn get_link_area_coordinates(&self, id: &str) -> Option<(i32, i32, i32)> {
+        let key = LinkHeaderID(id.to_string());
+        self.link_header_positions
+            .get(&key)
+            .map(|(link_area, _)| (link_area.x_pos, link_area.y_pos, link_area.len))
     }
-
-    pub fn get_link_area(&self, header: &str) -> Option<&LinkArea> {
-        let id = LinkHeaderID(Self::generate_link_id(header));
-        self.link_header_positions.get(&id).map(|(link_area, _)| link_area)
-    }
-
-    pub fn get_header_position(&self, header: &str) -> Option<&HeaderPosition> {
-        let id = LinkHeaderID(Self::generate_link_id(header));
-        self.link_header_positions.get(&id).map(|(_, header_position)| header_position)
+    
+    pub fn get_header_position(&self, id: &str) -> Option<i32> {
+        let key = LinkHeaderID(id.to_string());
+        self.link_header_positions
+            .get(&key)
+            .map(|(_, header_position)| header_position.0)
     }
 
     pub fn check_for_link_at_position(&self, x: i32, y: i32) -> Option<String> {
@@ -75,10 +74,10 @@ impl LinkHeaderRegistry {
     }
 
     fn is_within_link_area(&self, area: &LinkArea, x: i32, y: i32) -> bool {
-        x >= area.x_pos && x <= area.x_pos + area.len && y >= area.y_pos && y <= area.y_pos + 20
+        x >= area.x_pos && x <= area.x_pos + area.len && y >= area.y_pos && y <= area.y_pos
     }
 
-    fn generate_link_id(header: &str) -> String {
+    pub fn get_id_from_header(header: &str) -> String {
         header
             .chars()
             .filter(|c| c.is_alphanumeric() || *c == ' ')

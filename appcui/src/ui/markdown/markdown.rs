@@ -9,6 +9,9 @@ use self::components::ScrollBars;
 use crate::prelude::*;
 use crate::ui::markdown::initialization_flags::Flags;
 
+use std::sync::Mutex;
+static DEBUG_STRING: Mutex<String> = Mutex::new(String::new());
+
 #[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct Markdown {
     surface: Surface,
@@ -20,11 +23,35 @@ pub struct Markdown {
     drag_point: Option<Point>,
     scrollbars: ScrollBars,
     link_header_registry: RefCell<LinkHeaderRegistry>,
+    elements: Vec<MarkdownElement>,
 }
 
 impl Markdown {
+    // FOR DEBUG -- REMOVE
+    pub fn reset_debug_message() {
+        let mut debug_string = DEBUG_STRING.lock().unwrap();
+        *debug_string = String::new();
+    }
+
+    pub fn append_debug_message(message: &str) {
+        let mut debug_string = DEBUG_STRING.lock().unwrap();
+        debug_string.push_str(message);
+    }
+
+    pub fn set_debug_message(message: &str) {
+        let mut debug_string = DEBUG_STRING.lock().unwrap();
+        *debug_string = message.to_string();
+    }
+
+    pub fn get_debug_message() -> String {
+        let debug_string = DEBUG_STRING.lock().unwrap();
+        debug_string.clone()
+    }
+    //
+
     // Creates a new markdown component with a specified content, layout, and flags.
     pub fn new(content: String, layout: Layout, flags: Flags) -> Self {
+        Self::reset_debug_message();
         let (width, height) = (100, 150); //Markdown::compute_dimensions(&content);
 
         Self {
@@ -38,7 +65,7 @@ impl Markdown {
                     },
             ),
             surface: Surface::new(width as u32, height as u32),
-            content,
+            content: content.clone(),
             x: 0,
             y: 0,
             flags,
@@ -46,6 +73,7 @@ impl Markdown {
             drag_point: None,
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
             link_header_registry: RefCell::new(LinkHeaderRegistry::new()),
+            elements: MarkdownParser::parse(&content),
         }
     }
 
@@ -101,7 +129,8 @@ impl Markdown {
     fn register_if_link(link_header_registry: &mut LinkHeaderRegistry, element: &InlineElement, x: i32, y: i32) -> bool {
         if let InlineElement::Link(_, link) = element {
             let link_width = link.chars().count() as i32;
-            link_header_registry.register_link_position(&link.replace('#', ""), x, y, link_width);
+            let link_str = &link.replace('#', "");
+            link_header_registry.register_link_position(link_str, x, y, link_width);
             return true;
         }
         false
@@ -219,16 +248,13 @@ impl OnPaint for Markdown {
             surface.clear(back);
         }
 
-        // Parse the content using the md parser.
-        let elements = MarkdownParser::parse(&self.content);
-
         // Inititialize vertical offset.
         let mut y_pos = self.y;
 
-        for element in elements {
+        for element in &self.elements {
             match element {
                 MarkdownElement::Header(content, level) => {
-                    let (color, flags) = Self::get_header_style(level);
+                    let (color, flags) = Self::get_header_style(*level);
                     self.link_header_registry.borrow_mut().register_header_position(&content, y_pos);
                     surface.write_string(self.x, y_pos, &content, CharAttribute::new(color, Color::White, flags), false);
                 }
@@ -394,24 +420,19 @@ impl OnMouseEvent for Markdown {
         }
         match event {
             MouseEvent::Pressed(data) => {
-                self.drag_point = Some(Point::new(data.x, data.y));
-                EventProcessStatus::Processed
-            }
-            MouseEvent::Pressed(data) => {
                 let mut y_header: Option<i32> = None;
 
                 if let Some(link_header_id) = self.link_header_registry.borrow().check_for_link_at_position(data.x, data.y) {
                     if let Some(header_position) = self.link_header_registry.borrow().get_header_position(&link_header_id) {
-                        y_header = Some(header_position.0);
+                        y_header = Some(header_position);
                     }
                 }
                 
                 if let Some(header_position) = y_header {
-                    self.move_scroll_to(0, header_position);
+                    self.move_scroll_to(0, self.y - header_position);
                 } else {
                     self.drag_point = Some(Point::new(data.x, data.y));
                 }
-                
                 EventProcessStatus::Processed
             }            
             MouseEvent::Released(data) => {

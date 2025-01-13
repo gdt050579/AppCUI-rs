@@ -3,6 +3,8 @@
 Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.
 
 ---
+## Back link
+Some testing for links back 
 
 ## Table of Contents
 
@@ -47,3 +49,4 @@ fn main() {
     println!("Hello, world!");
 }
 ```
+[Get me back](#back-link)
