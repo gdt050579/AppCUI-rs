@@ -35,7 +35,7 @@ pub mod listbox;
 pub mod listview;
 pub mod togglebutton;
 pub mod pathfinder;
-pub mod numericslider;
+pub mod hnumericslider;
 
 // re-export
 pub use common::ControlBase;

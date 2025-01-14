@@ -1,8 +1,8 @@
-mod numericslider;
+mod hnumericslider;
 mod initialization_flags;
 
 #[cfg(test)]
 mod tests;
 
-pub use self::numericslider::NumericSlider;
+pub use self::hnumericslider::HNumericSlider;
 pub use self::initialization_flags::Flags;

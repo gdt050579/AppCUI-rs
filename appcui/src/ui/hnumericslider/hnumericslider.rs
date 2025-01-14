@@ -16,7 +16,7 @@ struct CharSet {
 }
 
 #[CustomControl(overwrite: [OnPaint, OnMouseEvent, OnResize, OnKeyPressed], internal=true)]
-pub struct NumericSlider<T>
+pub struct HNumericSlider<T>
 where
     T: Number + 'static,
 {
@@ -32,16 +32,16 @@ where
     last_pressed_coods: Point,
     poz_triunghi: i32,
     // pentru mate
-    m: usize,     //max size la valori
-    nr_val: u32,  //cate valori am in interval
-    sec_dim: f32, // dimensiunea unei sectiuni
-    y: f32,       // dimensiunea secventei m + spatiu + m + spatiu +...+ m in size
-    o: u32,       // padding-ul necesar pentru prima sectiune
-    p: u32,       // padding-ul necesar pentru restul sectiunilor
+    m: usize,        //max size la valori
+    nr_val: u32,     //cate valori am in interval
+    sec_dim: f32,    // dimensiunea unei sectiuni
+    y: f32,          // dimensiunea secventei m + spatiu + m + spatiu +...+ m in size
+    o: u32,          // padding-ul necesar pentru prima sectiune
+    p: u32,          // padding-ul necesar pentru restul sectiunilor
     computed_max: T, // pentru cazul in care nu pot ajunge la max cu step-ul curent
     values_string: String,
 }
-impl<T> NumericSlider<T>
+impl<T> HNumericSlider<T>
 where
     T: Number + 'static,
 {
@@ -137,9 +137,12 @@ where
         for i in 1..self.nr_val - 1 {
             current_value.write_to_string(&mut string_buffer, self.format);
             let space_debt: u32 = (self.m - string_buffer.len()) as u32;
-            string_buffer = Self::get_n_spaces(space_debt / 2 + space_debt % 2) + &string_buffer + &Self::get_n_spaces(space_debt / 2);
-
-            self.values_string.push_str(&string_buffer);
+            self.values_string.push_str(&format!(
+                "{}{}{}",
+                Self::get_n_spaces(space_debt / 2 + space_debt % 2),
+                string_buffer,
+                Self::get_n_spaces(space_debt / 2)
+            ));
 
             if i != self.nr_val - 2 {
                 self.values_string.push_str(&Self::get_n_spaces(self.p));
@@ -151,9 +154,9 @@ where
 
         current_value.write_to_string(&mut string_buffer, self.format);
         let space_debt: u32 = (self.m - string_buffer.len()) as u32 + (self.m % 2 == 0) as u32;
-        string_buffer = Self::get_n_spaces(space_debt) + &string_buffer;
-        self.values_string.push_str(&string_buffer);
-        
+        self.values_string
+            .push_str(&format!("{}{}", Self::get_n_spaces(space_debt), string_buffer));
+
         self.computed_max = current_value;
     }
 
@@ -213,7 +216,7 @@ where
         self.value = self.min + self.ok_step * Number::cast_signed_number((x / self.sec_dim as i32) as i128);
     }
 }
-impl<T> OnPaint for NumericSlider<T>
+impl<T> OnPaint for HNumericSlider<T>
 where
     T: Number + 'static,
 {
@@ -258,7 +261,7 @@ where
     }
 }
 
-impl<T> OnMouseEvent for NumericSlider<T>
+impl<T> OnMouseEvent for HNumericSlider<T>
 where
     T: Number + 'static,
 {
@@ -283,7 +286,7 @@ where
     }
 }
 
-impl<T> OnKeyPressed for NumericSlider<T>
+impl<T> OnKeyPressed for HNumericSlider<T>
 where
     T: Number + 'static,
 {
@@ -297,24 +300,24 @@ where
             KeyCode::Right => {
                 self.value = Self::to_interval(self.value + self.ok_step, self.min, self.computed_max);
                 self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
-                return EventProcessStatus::Processed
-            },
+                return EventProcessStatus::Processed;
+            }
             KeyCode::Home => {
                 self.value = self.min;
                 self.poz_triunghi = 0;
-                return EventProcessStatus::Processed
+                return EventProcessStatus::Processed;
             }
             KeyCode::End => {
                 self.value = self.computed_max;
                 self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
-                return EventProcessStatus::Processed
+                return EventProcessStatus::Processed;
             }
             _ => return EventProcessStatus::Ignored,
         };
     }
 }
 
-impl<T> OnResize for NumericSlider<T>
+impl<T> OnResize for HNumericSlider<T>
 where
     T: Number + 'static,
 {
@@ -323,6 +326,10 @@ where
         self.compute_math_fields();
 
         self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
-        self.value = Self::to_interval(self.min + self.ok_step * ((self.value - self.min) / self.ok_step), self.min, self.computed_max);
+        self.value = Self::to_interval(
+            self.min + self.ok_step * ((self.value - self.min) / self.ok_step),
+            self.min,
+            self.computed_max,
+        );
     }
 }
