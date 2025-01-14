@@ -152,7 +152,7 @@ where
         for (index, h) in handle_list.iter().rev().enumerate() {
             if let Some(item) = self.get_mut(*h) {
                 if item.is_visible() {
-                    last_index = Some(index);
+                    last_index = Some(handle_list.len() - 1 - index);
                     break;
                 }
             }
