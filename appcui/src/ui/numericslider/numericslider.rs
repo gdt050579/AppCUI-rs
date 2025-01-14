@@ -15,7 +15,7 @@ struct CharSet {
     selected_value_indicator: Character,
 }
 
-#[CustomControl(overwrite: [OnPaint, OnMouseEvent, OnResize], internal=true)]
+#[CustomControl(overwrite: [OnPaint, OnMouseEvent, OnResize, OnKeyPressed], internal=true)]
 pub struct NumericSlider<T>
 where
     T: Number + 'static,
@@ -32,13 +32,14 @@ where
     last_pressed_coods: Point,
     poz_triunghi: i32,
     // pentru mate
-    m: usize, //max size la valori
-    nr_val: u32, //cate valori am in interval
-    sec_dim : f32, // dimensiunea unei sectiuni
-    y: f32, // dimensiunea secventei m + spatiu + m + spatiu +...+ m in size
-    o: u32, // padding-ul necesar pentru prima sectiune
-    p: u32, // padding-ul necesar pentru restul sectiunilor
-    values_string: String
+    m: usize,     //max size la valori
+    nr_val: u32,  //cate valori am in interval
+    sec_dim: f32, // dimensiunea unei sectiuni
+    y: f32,       // dimensiunea secventei m + spatiu + m + spatiu +...+ m in size
+    o: u32,       // padding-ul necesar pentru prima sectiune
+    p: u32,       // padding-ul necesar pentru restul sectiunilor
+    computed_max: T, // pentru cazul in care nu pot ajunge la max cu step-ul curent
+    values_string: String,
 }
 impl<T> NumericSlider<T>
 where
@@ -89,7 +90,8 @@ where
             y: 0.0,
             o: 0,
             p: 0,
-            values_string: String::new()
+            values_string: String::new(),
+            computed_max: max,
         };
         control.set_size_bounds(2, 3, u16::MAX, 3);
         control
@@ -104,8 +106,7 @@ where
             self.m = string_buffer.len();
         };
 
-        self.y = (self.bound + 1) as f32
-          / (self.m + 1) as f32;
+        self.y = (self.bound + 1) as f32 / (self.m + 1) as f32;
 
         self.nr_val = ((self.max - self.min) / self.step).cast_to_u32() + 1;
         self.sec_dim = (self.bound as f32) / ((self.nr_val - 1) as f32);
@@ -114,8 +115,7 @@ where
 
         if self.p >= 1 && self.o >= 1 {
             self.ok_step = self.step; //am suficient spatiu
-        }
-        else {
+        } else {
             self.ok_step = (self.max - self.min) / T::cast_float_number(self.y as f64);
             self.nr_val = min(((self.max - self.min) / self.ok_step).cast_to_u32() + 1, self.y as u32);
             self.sec_dim = (self.bound as f32) / ((self.nr_val - 1) as f32);
@@ -129,113 +129,76 @@ where
         // prima oara trebuie sa adun o
         current_value.write_to_string(&mut string_buffer, self.format);
         self.values_string.push_str(&string_buffer);
-        self.values_string.push_str(&Self::get_n_spaces((self.o as usize + self.m - string_buffer.len()) as u32));
+        self.values_string
+            .push_str(&Self::get_n_spaces((self.o as usize + self.m - string_buffer.len()) as u32));
 
         current_value = current_value + self.ok_step;
-
 
         for i in 1..self.nr_val - 1 {
             current_value.write_to_string(&mut string_buffer, self.format);
             let space_debt: u32 = (self.m - string_buffer.len()) as u32;
             string_buffer = Self::get_n_spaces(space_debt / 2 + space_debt % 2) + &string_buffer + &Self::get_n_spaces(space_debt / 2);
-            
+
             self.values_string.push_str(&string_buffer);
 
-            if i != self.nr_val - 2{
+            if i != self.nr_val - 2 {
                 self.values_string.push_str(&Self::get_n_spaces(self.p));
             }
 
             current_value = current_value + self.ok_step;
         }
         self.values_string.push_str(&Self::get_n_spaces(self.o));
-        
+
         current_value.write_to_string(&mut string_buffer, self.format);
         let space_debt: u32 = (self.m - string_buffer.len()) as u32 + (self.m % 2 == 0) as u32;
         string_buffer = Self::get_n_spaces(space_debt) + &string_buffer;
         self.values_string.push_str(&string_buffer);
-
-
-        //println!("max = {}, min = {}, step = {}, size = {}, m = {}, y = {}, nr_val = {}, sec_dim = {}, p = {}, o = {}, ok_step = {}", self.max, self.min, self.step, self.bound, self.m, self.y, self.nr_val, self.sec_dim, self.p, self.o, self.ok_step);
-        //panic!("test");
+        
+        self.computed_max = current_value;
     }
 
     fn get_charset_based_on_theme(&self, theme: &Theme) -> CharSet {
-        let mut downSingleLineSet: CharSet = CharSet {
-            start_char: Character::new(
-                SpecialChar::BoxTopLeftCornerSingleLine, // BoxBottomLeftCornerSingleLine
-                theme.border.normal.foreground,
-                theme.border.normal.background,
-                theme.lines.normal.flags,
+        let (attr_line, attr_triangle) = match () {
+            _ if !self.is_enabled() => (theme.text.inactive, theme.text.inactive),
+            _ if self.has_focus() => (theme.text.focused, theme.text.focused),
+            _ if self.is_mouse_over() => (theme.text.hovered, theme.text.hovered),
+            _ => (theme.text.normal, theme.text.normal),
+        };
+        let down = !self.flags.contains(Flags::ValuesUp);
+        CharSet {
+            start_char: Character::with_attributes(
+                if down {
+                    SpecialChar::BoxTopLeftCornerSingleLine
+                } else {
+                    SpecialChar::BoxBottomLeftCornerSingleLine
+                },
+                attr_line,
             ),
-            separator: Character::new(
+            separator: Character::with_attributes(
                 SpecialChar::BoxHorizontalSingleLine, // ramane acelasi pe up
-                theme.border.normal.foreground,
-                theme.border.normal.background,
-                theme.lines.normal.flags,
+                attr_line,
             ),
-            value_indicator: Character::new(
-                SpecialChar::SingleLineDownT, //up e BoxMidleBottom
-                theme.border.normal.foreground,
-                theme.border.normal.background,
-                theme.lines.normal.flags,
+            value_indicator: Character::with_attributes(
+                if down {
+                    SpecialChar::SingleLineDownT
+                } else {
+                    SpecialChar::BoxMidleBottom
+                }, //up e BoxMidleBottom
+                attr_line,
             ),
-            end_char: Character::new(
-                SpecialChar::BoxTopRightCornerSingleLine, // BoxBottomRightCornerSingleLine
-                theme.border.normal.foreground,
-                theme.border.normal.background,
-                theme.lines.normal.flags,
+            end_char: Character::with_attributes(
+                if down {
+                    SpecialChar::BoxTopRightCornerSingleLine
+                } else {
+                    SpecialChar::BoxBottomRightCornerSingleLine
+                }, // BoxBottomRightCornerSingleLine
+                attr_line,
             ),
-            selected_value_indicator: Character::new(
-                SpecialChar::TriangleDown, // TriangleUp
-                theme.lines.pressed_or_selectd.foreground,
-                theme.lines.normal.background,
-                theme.lines.normal.flags,
+            selected_value_indicator: Character::with_attributes(
+                if down { SpecialChar::TriangleDown } else { SpecialChar::TriangleUp }, // TriangleUp
+                attr_triangle,
             ),
-        };
-
-        let mut upSingleLineSet: CharSet = CharSet {
-            start_char: Character::new(
-                SpecialChar::BoxBottomLeftCornerSingleLine, 
-                theme.border.normal.foreground,
-                theme.border.normal.background,
-                theme.lines.normal.flags,
-            ),
-            separator: Character::new(
-                SpecialChar::BoxHorizontalSingleLine, 
-                theme.border.normal.foreground,
-                theme.border.normal.background,
-                theme.lines.normal.flags,
-            ),
-            value_indicator: Character::new(
-                SpecialChar::BoxMidleBottom, 
-                theme.border.normal.foreground,
-                theme.border.normal.background,
-                theme.lines.normal.flags,
-            ),
-            end_char: Character::new(
-                SpecialChar::BoxBottomRightCornerSingleLine,
-                theme.border.normal.foreground,
-                theme.border.normal.background,
-                theme.lines.normal.flags,
-            ),
-            selected_value_indicator: Character::new(
-                SpecialChar::TriangleUp, 
-                theme.lines.pressed_or_selectd.foreground,
-                theme.lines.normal.background,
-                theme.lines.normal.flags,
-            ),
-        };
-
-
-        if self.flags.contains(Flags::SingleLine) {
-            if !self.flags.contains(Flags::ValuesUp) {
-                return downSingleLineSet;
-            }
-            else {
-                return upSingleLineSet;
-            }
         }
-        panic!("Invalid flags received for character set!");
     }
 
     pub fn set_selected_value(&mut self, value: T) {
@@ -245,7 +208,7 @@ where
         self.value
     }
 
-    fn update_cursor_pos(&mut self, x: i32){
+    fn update_cursor_pos(&mut self, x: i32) {
         self.poz_triunghi = (x / self.sec_dim as i32) * self.sec_dim as i32;
         self.value = self.min + self.ok_step * Number::cast_signed_number((x / self.sec_dim as i32) as i128);
     }
@@ -254,33 +217,40 @@ impl<T> OnPaint for NumericSlider<T>
 where
     T: Number + 'static,
 {
-
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let current_character_set: CharSet = self.get_charset_based_on_theme(theme);
+
+        let attr_text = match () {
+            _ if !self.is_enabled() => theme.text.inactive,
+            _ if self.has_focus() => theme.text.focused,
+            _ if self.is_mouse_over() => theme.text.hovered,
+            _ => theme.text.normal,
+        };
 
         let y_separators = 1; // mereu in centru
         let mut y_values = 2;
         let mut y_selector = 0;
-        if self.flags.contains(Flags::ValuesUp){
+        if self.flags.contains(Flags::ValuesUp) {
             y_values = 0;
             y_selector = 2;
         }
 
         surface.write_char(self.poz_triunghi, y_selector, current_character_set.selected_value_indicator);
-        surface.write_string(0, y_values, &self.values_string, theme.text.normal, false);
-
-        //surface.write_string(3, 0, &self.value.to_string(), theme.text.normal, false); de debug
+        surface.write_string(0, y_values, &self.values_string, attr_text, false);
 
         //desenez marginea pentru min si max
         surface.write_char(0, y_separators, current_character_set.start_char);
-        surface.write_char(((self.nr_val - 1) * self.sec_dim as u32) as i32, y_separators, current_character_set.end_char);
+        surface.write_char(
+            ((self.nr_val - 1) * self.sec_dim as u32) as i32,
+            y_separators,
+            current_character_set.end_char,
+        );
 
         let mut index: i32 = 1;
         while index < ((self.nr_val - 1) as i32 * self.sec_dim as i32) {
             if index % self.sec_dim as i32 == 0 {
                 surface.write_char(index, y_separators, current_character_set.value_indicator);
-            }
-            else {
+            } else {
                 surface.write_char(index, y_separators, current_character_set.separator);
             }
             index += 1;
@@ -294,8 +264,8 @@ where
 {
     fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
         match _event {
-            MouseEvent::Enter => return EventProcessStatus::Ignored,
-            MouseEvent::Leave => return EventProcessStatus::Ignored,
+            MouseEvent::Enter => return EventProcessStatus::Processed,
+            MouseEvent::Leave => return EventProcessStatus::Processed,
             MouseEvent::Over(point) => return EventProcessStatus::Ignored,
             MouseEvent::Released(mouse_event_data) => return EventProcessStatus::Ignored,
             MouseEvent::DoubleClick(mouse_event_data) => return EventProcessStatus::Ignored,
@@ -313,6 +283,37 @@ where
     }
 }
 
+impl<T> OnKeyPressed for NumericSlider<T>
+where
+    T: Number + 'static,
+{
+    fn on_key_pressed(&mut self, _key: Key, _character: char) -> EventProcessStatus {
+        match _key.code {
+            KeyCode::Left => {
+                self.value = Self::to_interval(self.value - self.ok_step, self.min, self.computed_max);
+                self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
+                return EventProcessStatus::Processed;
+            }
+            KeyCode::Right => {
+                self.value = Self::to_interval(self.value + self.ok_step, self.min, self.computed_max);
+                self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
+                return EventProcessStatus::Processed
+            },
+            KeyCode::Home => {
+                self.value = self.min;
+                self.poz_triunghi = 0;
+                return EventProcessStatus::Processed
+            }
+            KeyCode::End => {
+                self.value = self.computed_max;
+                self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
+                return EventProcessStatus::Processed
+            }
+            _ => return EventProcessStatus::Ignored,
+        };
+    }
+}
+
 impl<T> OnResize for NumericSlider<T>
 where
     T: Number + 'static,
@@ -322,6 +323,6 @@ where
         self.compute_math_fields();
 
         self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
-        self.value = Self::to_interval(self.min + self.ok_step * ((self.value - self.min) / self.ok_step), self.min, self.max);
+        self.value = Self::to_interval(self.min + self.ok_step * ((self.value - self.min) / self.ok_step), self.min, self.computed_max);
     }
 }
