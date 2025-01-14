@@ -138,9 +138,9 @@ where
             self.manager.refilter(
                 self.comp.search_text(),
                 if self.flags.contains(Flags::CustomFilter) {
-                    Some(&self.header)
-                } else {
                     None
+                } else {
+                    Some(&self.header)
                 },
             );
         }

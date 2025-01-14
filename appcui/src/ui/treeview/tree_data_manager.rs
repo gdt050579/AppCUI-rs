@@ -187,10 +187,12 @@ where
         let mut last_mask = 0;
         for h in l.iter() {
             if let Some(item) = self.get_mut(*h) {
-                last_mask = item.set_line_mask(last_mask, 0, false);
-                output.push(*h);
-                let list = new_mutable_ref!(&mut item.children);
-                self.pupulate_children(list, output, last_mask, 1);
+                if item.is_visible() {
+                    last_mask = item.set_line_mask(last_mask, 0, false);
+                    output.push(*h);
+                    let list = new_mutable_ref!(&mut item.children);
+                    self.pupulate_children(list, output, last_mask, 1);
+                }
             }
         }
     }
@@ -259,6 +261,7 @@ where
         }
     }
     pub(super) fn refilter(&mut self, search_text: &str, header: Option<&ColumnsHeader>) {
+        //println!("Refiltering for [{search_text}]");
         let list = new_mutable_ref!(&mut self.roots);
         for h in list.iter() {
             self.filter(*h, search_text, header);
