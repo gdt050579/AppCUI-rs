@@ -142,9 +142,9 @@ where
         self.data.len()
     }
 
-    fn pupulate_children(&mut self, handle_list: &Vec<Handle<Item<T>>>, output: &mut Vec<Handle<Item<T>>>, last_mask: u32, depth: u16) -> u32 {
+    fn pupulate_children(&mut self, handle_list: &Vec<Handle<Item<T>>>, output: &mut Vec<Handle<Item<T>>>, last_mask: u32, depth: u16) {
         if handle_list.is_empty() {
-            return last_mask;
+            return;
         }
         let mut last_mask = last_mask;
         // find the last position that will be added
@@ -166,7 +166,7 @@ where
                             last_mask = item.set_line_mask(last_mask, depth, false);
                             output.push(*h);
                             let list = new_mutable_ref!(&mut item.children);
-                            last_mask = self.pupulate_children(list, output, last_mask, depth + 1);
+                            self.pupulate_children(list, output, last_mask, depth + 1);
                         }
                     }
                 }
@@ -177,10 +177,9 @@ where
                 last_mask = item.set_line_mask(last_mask, depth, true);
                 output.push(h);
                 let list = new_mutable_ref!(&mut item.children);
-                last_mask = self.pupulate_children(list, output, last_mask, depth + 1);
+                self.pupulate_children(list, output, last_mask, depth + 1);
             }
         }
-        0
     }
     pub(super) fn populate(&mut self, output: &mut Vec<Handle<Item<T>>>) {
         let l = new_mutable_ref!(&mut self.roots);

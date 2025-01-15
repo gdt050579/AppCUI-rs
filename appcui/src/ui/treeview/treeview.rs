@@ -246,12 +246,15 @@ where
             if d > 0 {
                 surface.set_relative_clip(c.x - 2, y, r.max(min_left), y);
                 surface.set_origin(c.x - 2, y);
+                let line_mask = item.line_mask;
                 for i in 1..item.depth {
-                    surface.write_char(
-                        (i as i32) * 6,
-                        0,
-                        Character::with_attributes(SpecialChar::BoxVerticalSingleLine, attr.unwrap_or(theme.text.normal)),
-                    );
+                    if line_mask & (1 << (i - 1)) != 0 {
+                        surface.write_char(
+                            (i as i32) * 6,
+                            0,
+                            Character::with_attributes(SpecialChar::BoxVerticalSingleLine, attr.unwrap_or(theme.text.normal)),
+                        );
+                    }
                 }
             }
             if frozen_columns == 0 {
@@ -262,10 +265,18 @@ where
                 surface.set_origin(l, y);
             }
             if d > 0 {
-                surface.write_string(extra, 0, "├─", attr.unwrap_or(theme.text.normal), false);
+                if item.depth < 32 {
+                    let mask = 1 << (item.depth - 1);
+                    if item.line_mask & mask != 0 {
+                        surface.write_string(extra, 0, "├─", attr.unwrap_or(theme.text.normal), false);
+                    } else {
+                        surface.write_string(extra, 0, "└─", attr.unwrap_or(theme.text.normal), false);
+                    }
+                }
                 extra += 2;
             }
             surface.write_string(extra, 0, "[ ]", attr.unwrap_or(theme.text.normal), false);
+            //surface.write_string(extra, 0, format!("{:04b}",item.line_mask).as_str(), charattr!("white,darkred"), false);
             extra += 4;
             if self.flags.contains(Flags::CheckBoxes) {
                 if item.is_checked() {
