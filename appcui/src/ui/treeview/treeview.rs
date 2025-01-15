@@ -812,6 +812,10 @@ where
             self.update_item_list(UpdateVisibleItemsOperation::Refilter);
             return EventProcessStatus::Processed;
         }
+        if self.comp.is_in_edit_mode() && key.code == KeyCode::Enter {
+            self.goto_next_match(self.pos + 1, true);
+            return EventProcessStatus::Processed;
+        }
         if self.process_key_pressed(key) {
             self.comp.exit_edit_mode();
             return EventProcessStatus::Processed;
