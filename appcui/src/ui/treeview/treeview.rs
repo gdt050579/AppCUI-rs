@@ -152,7 +152,19 @@ where
         self.manager.populate(&mut self.item_list);
         // restore previous position
         if !current_handle.is_none() {
-            self.goto_handle(current_handle, false);
+            // check to see if the current handle has match
+            let matched = if let Some(item) = self.manager.get(current_handle) {
+                item.has_matched()
+            } else {
+                false
+            };
+            if matched {
+                self.goto_handle(current_handle, false);
+            } else {
+                // the current handle is not matched anymore
+                // go to the first visible
+                self.goto_next_match(0, true);
+            }
         }
     }
 
@@ -162,6 +174,22 @@ where
             true
         } else {
             false
+        }
+    }
+    fn goto_next_match(&mut self, start: usize, emit_event: bool) {
+        let len = self.item_list.len();
+        if len == 0 {
+            return;
+        }
+        for index in 0..len {
+            let new_pos = (index + start) % len;
+            let handle = self.item_list[new_pos];
+            if let Some(item) = self.manager.get(handle) {
+                if item.has_matched() {
+                    self.update_position(new_pos, emit_event);
+                    return;
+                }
+            }
         }
     }
 
