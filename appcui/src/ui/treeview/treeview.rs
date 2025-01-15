@@ -131,7 +131,7 @@ where
         if matches!(op, UpdateVisibleItemsOperation::SortAndRefilter | UpdateVisibleItemsOperation::Sort) {
             if let Some(column_index) = self.header.sort_column() {
                 self.manager.sort(column_index, self.header.should_sort_ascendent());
-            } 
+            }
         }
         // refilter
         if matches!(op, UpdateVisibleItemsOperation::SortAndRefilter | UpdateVisibleItemsOperation::Refilter) {
@@ -229,7 +229,16 @@ where
             theme,
             alignment: TextAlignament::Left,
             width: 0,
-            attr: None,
+            attr: if item.is_visible_because_of_children() {
+                Some(theme.text.inactive)
+            } else {
+                None
+            },
+        };
+        let attr = if item.is_visible_because_of_children() {
+            Some(theme.text.inactive)
+        } else {
+            attr
         };
         if (r >= 0) && (l < width) && (c.width != 0)
         /*&& (r >= min_left)*/

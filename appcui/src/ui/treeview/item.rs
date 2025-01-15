@@ -79,6 +79,11 @@ where
     }
 
     #[inline(always)]
+    pub(super) fn is_visible_because_of_children(&self) -> bool {
+        matches!(self.visibility, ItemVisibility::VisibleBecauseOfChildren)
+    }
+
+    #[inline(always)]
     pub(super) fn matches(&self, search_text: &str, header: Option<&ColumnsHeader>) -> bool {
         if search_text.is_empty() {
             true
