@@ -63,7 +63,7 @@ where
         str
     }
 
-    pub fn new(min: T, max: T, step: T, value: T, format: Format, layout: Layout, flags: Flags) -> Self {
+    pub fn new(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags, format: Format) -> Self {
         if step.is_zero() {
             panic!("Step can't be 0 for NumericSlider");
         }
@@ -167,7 +167,7 @@ where
             _ if self.is_mouse_over() => (theme.text.hovered, theme.text.hovered),
             _ => (theme.text.normal, theme.text.normal),
         };
-        let down = !self.flags.contains(Flags::ValuesUp);
+        let down = !self.flags.contains(Flags::OnTop);
         CharSet {
             start_char: Character::with_attributes(
                 if down {
@@ -233,7 +233,7 @@ where
         let y_separators = 1; // mereu in centru
         let mut y_values = 2;
         let mut y_selector = 0;
-        if self.flags.contains(Flags::ValuesUp) {
+        if self.flags.contains(Flags::OnTop) {
             y_values = 0;
             y_selector = 2;
         }

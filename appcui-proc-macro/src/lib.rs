@@ -538,3 +538,8 @@ pub fn listview(input: TokenStream) -> TokenStream {
 pub fn togglebutton(input: TokenStream) -> TokenStream {
     crate::controls::togglebutton::create(input)
 }
+
+#[proc_macro]
+pub fn hnumericslider(input: TokenStream) -> TokenStream {
+    crate::controls::hnumericslider::create(input)
+}
