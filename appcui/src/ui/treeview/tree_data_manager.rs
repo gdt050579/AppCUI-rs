@@ -258,7 +258,16 @@ where
         if let Some(vis) = visibility {
             if let Some(item) = self.get_mut(handle) {
                 item.visibility = vis;
-                matches!(vis, ItemVisibility::Visible | ItemVisibility::VisibleBecauseOfChildren)
+                if matches!(vis, ItemVisibility::Visible | ItemVisibility::VisibleBecauseOfChildren) {
+                    // expand its parent
+                    let parent = item.parent;
+                    if let Some(parent) = self.get_mut(parent) {
+                        parent.fold_status = FoldStatus::Expanded;
+                    }
+                    true
+                } else {
+                    false
+                }
             } else {
                 false
             }
