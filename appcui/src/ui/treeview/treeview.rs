@@ -1,8 +1,9 @@
-use super::{Flags, Item, TreeDataManager};
+use super::{Flags, FoldStatus, Item, TreeDataManager};
 use components::listitem::render_method::RenderData;
 use AppCUIProcMacro::*;
 
 enum UpdateVisibleItemsOperation {
+    Refresh,
     Sort,
     Refilter,
     SortAndRefilter,
@@ -303,7 +304,12 @@ where
                 }
                 extra += 2;
             }
-            surface.write_string(extra, 0, "[ ]", attr.unwrap_or(theme.text.normal), false);
+            let s = match item.fold_status {
+                FoldStatus::Collapsed => "[+]",
+                FoldStatus::Expanded => "[-]",
+                FoldStatus::NonExpandable => "[ ]",
+            };
+            surface.write_string(extra, 0, s, attr.unwrap_or(theme.text.normal), false);
             //surface.write_string(extra, 0, format!("{:04b}",item.line_mask).as_str(), charattr!("white,darkred"), false);
             extra += 4;
             if self.flags.contains(Flags::CheckBoxes) {
@@ -673,6 +679,17 @@ where
         }
         true
     }
+    fn reverse_fold(&mut self) -> bool {
+        if self.pos < self.item_list.len() {
+            if let Some(item) = self.manager.get_mut(self.item_list[self.pos]) {
+                if item.reverse_fold() {
+                    self.update_item_list(UpdateVisibleItemsOperation::Refresh);
+                    return true;
+                }
+            }
+        }
+        false
+    }
     fn process_key_pressed(&mut self, key: Key) -> bool {
         // process key for items
         match key.value() {
@@ -720,12 +737,8 @@ where
 
             // Selection
             key!("Space") => {
-                if self.flags.contains(Flags::CheckBoxes) {
-                    self.check_item(self.pos, CheckMode::Reverse, true, true);
-                    true
-                } else {
-                    false
-                }
+                self.reverse_fold();
+                true
             }
             key!("Insert") | key!("Shift+Down") => {
                 self.check_item(self.pos, CheckMode::Reverse, true, true);

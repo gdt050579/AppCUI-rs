@@ -11,6 +11,13 @@ pub(super) enum ItemVisibility {
     VisibleBecauseOfChildren,
 }
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub(super) enum FoldStatus {
+    Collapsed,
+    Expanded,
+    NonExpandable,
+}
+
 pub struct Item<T>
 where
     T: ListItem,
@@ -19,6 +26,7 @@ where
     checked: bool,
     attr: Option<CharAttribute>,
     icon: [char; 2],
+    pub(super) fold_status: FoldStatus,
     pub(super) visibility: ItemVisibility,
     pub(super) line_mask: u32,
     pub(super) depth: u16,
@@ -38,6 +46,7 @@ where
             attr,
             depth: 0,
             line_mask: 0,
+            fold_status: FoldStatus::Expanded,
             visibility: ItemVisibility::Visible,
             icon: icon_chars,
             handle: Handle::None,
@@ -89,6 +98,21 @@ where
     }
 
     #[inline(always)]
+    pub(super) fn reverse_fold(&mut self) -> bool {
+        match self.fold_status {
+            FoldStatus::Collapsed => {
+                self.fold_status = FoldStatus::Expanded;
+                true
+            }
+            FoldStatus::Expanded => {
+                self.fold_status = FoldStatus::Collapsed;
+                true
+            }
+            FoldStatus::NonExpandable => false,
+        }
+    }
+
+    #[inline(always)]
     pub(super) fn matches(&self, search_text: &str, header: Option<&ColumnsHeader>) -> bool {
         if search_text.is_empty() {
             true
@@ -119,7 +143,7 @@ where
             self.line_mask = 0;
         } else {
             let bit = 1u32 << (depth - 1);
-            let value = previous_value &  (bit-1);
+            let value = previous_value & (bit - 1);
             if !last_sibling {
                 self.line_mask = value | bit;
             } else {
@@ -140,6 +164,7 @@ where
             attr: None,
             depth: 0,
             line_mask: 0,
+            fold_status: FoldStatus::Expanded,
             visibility: ItemVisibility::Visible,
             icon: [0u8 as char, 0u8 as char],
             handle: Handle::None,

@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::usize;
 
+use super::FoldStatus;
 use super::Item;
 use super::ItemVisibility;
 use super::ListItem;
@@ -165,8 +166,10 @@ where
                         if item.is_visible() {
                             last_mask = item.set_line_mask(last_mask, depth, false);
                             output.push(*h);
-                            let list = new_mutable_ref!(&mut item.children);
-                            self.pupulate_children(list, output, last_mask, depth + 1);
+                            if item.fold_status == FoldStatus::Expanded {
+                                let list = new_mutable_ref!(&mut item.children);
+                                self.pupulate_children(list, output, last_mask, depth + 1);
+                            }
                         }
                     }
                 }
@@ -176,8 +179,10 @@ where
             if let Some(item) = self.get_mut(h) {
                 last_mask = item.set_line_mask(last_mask, depth, true);
                 output.push(h);
-                let list = new_mutable_ref!(&mut item.children);
-                self.pupulate_children(list, output, last_mask, depth + 1);
+                if item.fold_status == FoldStatus::Expanded {
+                    let list = new_mutable_ref!(&mut item.children);
+                    self.pupulate_children(list, output, last_mask, depth + 1);
+                }
             }
         }
     }
@@ -189,8 +194,10 @@ where
                 if item.is_visible() {
                     last_mask = item.set_line_mask(last_mask, 0, false);
                     output.push(*h);
-                    let list = new_mutable_ref!(&mut item.children);
-                    self.pupulate_children(list, output, last_mask, 1);
+                    if item.fold_status == FoldStatus::Expanded {
+                        let list = new_mutable_ref!(&mut item.children);
+                        self.pupulate_children(list, output, last_mask, 1);
+                    }
                 }
             }
         }
