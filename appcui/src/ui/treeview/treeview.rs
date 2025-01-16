@@ -310,6 +310,8 @@ where
                 //FoldStatus::NonExpandable => ("[ ]", theme.text.inactive),
                 //FoldStatus::NonExpandable => ("───", theme.text.inactive),
                 FoldStatus::NonExpandable => ("──>", theme.text.inactive),
+                //FoldStatus::NonExpandable => ("   ", theme.text.inactive),
+                //FoldStatus::NonExpandable => ("──◉", theme.text.inactive),
             };
             surface.write_string(extra, 0, s, attr.unwrap_or(fold_attr), false);
             //surface.write_string(extra, 0, format!("{:04b}",item.line_mask).as_str(), charattr!("white,darkred"), false);
@@ -324,7 +326,7 @@ where
                 } else {
                     surface.write_char(0, 0, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
                 }
-                extra = 2;
+                extra += 2;
             }
             // icon
             if self.icon_width > 0 {

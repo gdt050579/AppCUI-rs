@@ -54,6 +54,11 @@ where
             children: Vec::new(),
         }
     }
+    pub(super) fn non_expandable(data: T) -> Self {
+        let mut i = Self::from(data);
+        i.fold_status = FoldStatus::NonExpandable;
+        i
+    }
     #[inline(always)]
     pub fn value(&self) -> &T {
         &self.data
