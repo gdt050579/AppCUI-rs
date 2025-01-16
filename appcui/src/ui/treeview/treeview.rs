@@ -89,11 +89,11 @@ where
     }
     #[inline(always)]
     pub fn add(&mut self, item: T) -> Handle<Item<T>> {
-        self.add_item_to_parent(Item::from(item), Handle::None)
+        self.add_item_to_parent(Item::non_expandable(item), Handle::None)
     }
     #[inline(always)]
     pub fn add_to_parent(&mut self, item: T, parent: Handle<Item<T>>) -> Handle<Item<T>> {
-        self.add_item_to_parent(Item::from(item), parent)
+        self.add_item_to_parent(Item::non_expandable(item), parent)
     }
     #[inline(always)]
     pub fn add_item(&mut self, item: Item<T>) -> Handle<Item<T>> {
@@ -281,7 +281,7 @@ where
                         surface.write_char(
                             (i as i32) * 6,
                             0,
-                            Character::with_attributes(SpecialChar::BoxVerticalSingleLine, attr.unwrap_or(theme.text.normal)),
+                            Character::with_attributes(SpecialChar::BoxVerticalSingleLine, attr.unwrap_or(theme.text.inactive)),
                         );
                     }
                 }
@@ -297,19 +297,21 @@ where
                 if item.depth < 32 {
                     let mask = 1 << (item.depth - 1);
                     if item.line_mask & mask != 0 {
-                        surface.write_string(extra, 0, "├─", attr.unwrap_or(theme.text.normal), false);
+                        surface.write_string(extra, 0, "├─", attr.unwrap_or(theme.text.inactive), false);
                     } else {
-                        surface.write_string(extra, 0, "└─", attr.unwrap_or(theme.text.normal), false);
+                        surface.write_string(extra, 0, "└─", attr.unwrap_or(theme.text.inactive), false);
                     }
                 }
                 extra += 2;
             }
-            let s = match item.fold_status {
-                FoldStatus::Collapsed => "[+]",
-                FoldStatus::Expanded => "[-]",
-                FoldStatus::NonExpandable => "[ ]",
+            let (s,fold_attr) = match item.fold_status {
+                FoldStatus::Collapsed => ("[+]", theme.text.normal),
+                FoldStatus::Expanded => ("[-]", theme.text.normal),
+                //FoldStatus::NonExpandable => ("[ ]", theme.text.inactive),
+                //FoldStatus::NonExpandable => ("───", theme.text.inactive),
+                FoldStatus::NonExpandable => ("──>", theme.text.inactive),
             };
-            surface.write_string(extra, 0, s, attr.unwrap_or(theme.text.normal), false);
+            surface.write_string(extra, 0, s, attr.unwrap_or(fold_attr), false);
             //surface.write_string(extra, 0, format!("{:04b}",item.line_mask).as_str(), charattr!("white,darkred"), false);
             extra += 4;
             if self.flags.contains(Flags::CheckBoxes) {

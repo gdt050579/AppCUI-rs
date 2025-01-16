@@ -71,6 +71,9 @@ where
             let parent = self.data[idx].as_mut().unwrap();
             item.depth = parent.depth + 1;
             parent.children.push(item.handle);
+            if parent.fold_status == FoldStatus::NonExpandable {
+                parent.fold_status = FoldStatus::Expanded;
+            }
         } else {
             item.parent = Handle::None;
             item.depth = 0;
