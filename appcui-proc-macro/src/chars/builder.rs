@@ -5,7 +5,7 @@ use crate::{
 use proc_macro::*;
 use std::str::FromStr;
 
-static mut CHAR_ATTR: FlagsSignature = FlagsSignature::new(&["Bold", "Italic", "Underline"]);
+static CHAR_ATTR:&[&'static str] = &["Bold", "Italic", "Underline"];
 
 static CHAR_POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("value", ParamType::String),
@@ -83,6 +83,14 @@ fn add_color(output: &mut String, key: &str, dict: &mut NamedParamsMap) {
     output.push_str("Color::");
     output.push_str(col.get_name());
 }
+fn get_attr(text: &str)->Option<&'static str> {
+    for value in CHAR_ATTR {
+        if crate::utils::equal_ignore_case(text, value) {
+            return Some(value);
+        }
+    }
+    return None;
+}
 fn add_attr(output: &mut String, dict: &mut NamedParamsMap, param_list: &str) {
     if let Some(value) = dict.get_mut("attr") {
         if let Some(list) = value.get_list() {
@@ -91,7 +99,7 @@ fn add_attr(output: &mut String, dict: &mut NamedParamsMap, param_list: &str) {
             } else {
                 let mut add_or_operator = false;
                 for name in list {
-                    if let Some(flag) = unsafe { CHAR_ATTR.get(name.get_string()) } {
+                    if let Some(flag) = get_attr(name.get_string()) {
                         if add_or_operator {
                             output.push_str(" | ")
                         }
