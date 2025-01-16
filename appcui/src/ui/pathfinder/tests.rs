@@ -39,7 +39,7 @@ fn test_while_developing() {
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::None ,
+        pathfinder::Flags::CaseSensitive ,
         nav);
     w.add(p);
     w.add(button!("test,x:1,y:3,w:6"));
@@ -245,6 +245,85 @@ fn check_readonly_flag() {
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
         pathfinder::Flags::ReadOnly ,
+        nav);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_select_all() {
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    let script = "
+        Paint('Initial')
+        CheckHash(0xF4B84D62A7A75EB9)
+        Key.Pressed(Ctrl+A)
+        Paint('After Ctrl+A')
+        CheckHash(0x78BD3BFA11A509BE)
+        Key.Pressed(Left)
+        Paint('Pressed left arrow to deselect all')
+        CheckHash(0xF4B84D62A7A75EB9)
+        Mouse.DoubleClick(30,5,left)
+        Paint('Double clicked for selecting all')
+        CheckHash(0x78BD3BFA11A509BE)
+        Mouse.Click(30,5,left)
+        Paint('Clicked for deselecting all')
+        CheckHash(0xF4B84D62A7A75EB9)
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:60,h:15");
+    let p = GenericPathFinder::with_navigator(
+        r#"C:\Program Files\"#,
+        Layout::new("x:1,y:1,w:40"),
+        pathfinder::Flags::CaseSensitive,
+        nav);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_click_move_cursor() {
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    let script = "
+        Paint('Initial')
+        CheckHash(0xF4B84D62A7A75EB9)
+        CheckCursor(30,5)
+        Mouse.Click(20,5,left)
+        Paint('Clicked inside text')
+        CheckHash(0xF4B84D62A7A75EB9)
+        CheckCursor(20,5)
+        Mouse.Click(13,5,left)
+        Paint('Clicked at start of text')
+        CheckHash(0xF4B84D62A7A75EB9)
+        CheckCursor(13,5)
+        Mouse.Click(30,5,left)
+        Paint('Clicked at end of text')
+        CheckHash(0xF4B84D62A7A75EB9)
+        CheckCursor(30,5)
+        Mouse.Click(11,5,left)
+        Paint('Clicked outside of text to the left')
+        CheckHash(0xF4B84D62A7A75EB9)
+        CheckCursor(30,5)
+        Mouse.Click(35,5,left)
+        Paint('Clicked outside of text to the right')
+        CheckHash(0xF4B84D62A7A75EB9)
+        CheckCursor(30,5)
+        Mouse.Click(15,4,left)
+        Paint('Clicked outside of text to the top')
+        CheckHash(0xF4B84D62A7A75EB9)
+        CheckCursor(30,5)
+        Mouse.Click(15,6,left)
+        Paint('Clicked outside of text to the bottom')
+        CheckHash(0xF4B84D62A7A75EB9)
+        CheckCursor(30,5)
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:60,h:15");
+    let p = GenericPathFinder::with_navigator(
+        r#"C:\Program Files\"#,
+        Layout::new("x:1,y:1,w:40"),
+        pathfinder::Flags::CaseSensitive,
         nav);
     w.add(p);
     a.add_window(w);
