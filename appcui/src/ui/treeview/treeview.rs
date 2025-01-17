@@ -36,8 +36,11 @@ where
     top_view: usize,
     pos: usize,
     icon_width: u8,
+    fold_sign_with: u8,
     hover_status: HoverStatus,
     update_item_list_enabled: bool,
+    start_mouse_select: usize,
+    mouse_check_mode: SelectMode,
 }
 impl<T> TreeView<T>
 where
@@ -71,9 +74,10 @@ where
             } else {
                 0 // No extra space
             },
+            fold_sign_with: 3,
             update_item_list_enabled: true,
-            //start_mouse_select: 0,
-            //mouse_check_mode: CheckMode::False,
+            start_mouse_select: 0,
+            mouse_check_mode: SelectMode::False,
             hover_status: HoverStatus::None,
             //selected_items_count: 0,
         };
@@ -246,7 +250,11 @@ where
         };
         // first column
         let c = &columns[0];
-        let d = if item.depth == 0 { 0 } else { (item.depth as i32) * 6 - 2 };
+        let d = if item.depth == 0 {
+            0
+        } else {
+            (item.depth as i32) * (3 + self.fold_sign_with as i32) - 2
+        };
         let l = c.x + d;
         let r = c.x + c.width as i32;
         let mut extra = 0;
@@ -300,7 +308,7 @@ where
                 }
                 extra += 2;
             }
-            let (s,fold_attr) = match item.fold_status {
+            let (s, fold_attr) = match item.fold_status {
                 FoldStatus::Collapsed => ("[+]", theme.text.normal),
                 FoldStatus::Expanded => ("[-]", theme.text.normal),
                 //FoldStatus::NonExpandable => ("[ ]", theme.text.inactive),
@@ -311,7 +319,7 @@ where
             };
             surface.write_string(extra, 0, s, attr.unwrap_or(fold_attr), false);
             //surface.write_string(extra, 0, format!("{:04b}",item.line_mask).as_str(), charattr!("white,darkred"), false);
-            extra += 4;
+            extra += (self.fold_sign_with as i32) + 1;
             // icon
             if self.icon_width > 0 {
                 self.paint_icon(extra, item, attr, surface, theme);
@@ -446,6 +454,11 @@ where
             .resize(self.header.width() as u64, self.item_list.len() as u64, &self.base, self.visible_space());
         self.comp.set_indexes(self.header.scroll_pos() as u64, self.top_view as u64);
     }
+    fn update_scroll_pos_from_scrollbars(&mut self) {
+        self.header.scroll_to(self.comp.horizontal_index() as u32);
+        self.top_view = (self.comp.vertical_index() as usize).min(self.item_list.len());
+    }
+
     fn execute_column_header_action(&mut self, action: ColumnsHeaderAction) -> bool {
         match action {
             ColumnsHeaderAction::Sort((index, ascendent)) => {
@@ -562,7 +575,7 @@ where
         self.update_position(new_pos, true);
         for i in start..=self.pos {
             self.select_item(i, mode, true);
-        }        
+        }
     }
     fn select_item(&mut self, pos: usize, mode: SelectMode, emit_event: bool) -> bool {
         if self.flags.contains(Flags::NoSelection) {
@@ -607,6 +620,44 @@ where
             }
         }
         false
+    }
+    fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
+        let sz = self.size();
+        if (y >= 1) && (x >= 0) && (x < sz.width as i32) && (y < sz.height as i32) {
+            let new_pos = self.top_view + (y - 1) as usize;
+            if new_pos < self.item_list.len() {
+                Some(new_pos)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+    fn hover_status_for_mouse_pos(&self, pos: usize, x: i32) -> HoverStatus {
+        if (pos >= self.item_list.len()) || (self.header.columns().is_empty()) {
+            return HoverStatus::None;
+        }
+        let left_pos = self.header.columns()[0].x;
+        match self.item_list[pos] {
+            Element::Item(_) => {
+                if self.flags.contains(Flags::CheckBoxes) {
+                    let mut left = left_pos;
+                    left += if self.flags.contains(Flags::ShowGroups) {
+                        X_OFFSET_FOR_GROUP_ITEMS
+                    } else {
+                        0
+                    };
+                    if x == left {
+                        HoverStatus::OverItemCheckMark(left, pos)
+                    } else {
+                        HoverStatus::None
+                    }
+                } else {
+                    HoverStatus::None
+                }
+            }
+        }
     }
     fn process_key_pressed(&mut self, key: Key) -> bool {
         // process key for items
@@ -701,6 +752,97 @@ where
             _ => false,
         }
     }
+    fn process_mouse_event(&mut self, event: &MouseEvent) -> bool {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                if self.hover_status != HoverStatus::None {
+                    self.hover_status = HoverStatus::None;
+                    true
+                } else {
+                    false
+                }
+            }
+            MouseEvent::Over(point) => {
+                let new_hover_status = if let Some(pos) = self.mouse_pos_to_index(point.x, point.y) {
+                    self.hover_status_for_mouse_pos(pos, point.x)
+                } else {
+                    HoverStatus::None
+                };
+                if new_hover_status != self.hover_status {
+                    self.hover_status = new_hover_status;
+                    true
+                } else {
+                    false
+                }
+            }
+            MouseEvent::Pressed(ev) => {
+                if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
+                    if pos != self.pos {
+                        self.update_position(pos, true);
+                    }
+                    let left_pos = self.header.columns()[0].x;
+                    match self.item_list[self.pos] {
+                        Element::Item(_) => {
+                            if self.flags.contains(Flags::CheckBoxes) {
+                                let l = if self.flags.contains(Flags::ShowGroups) {
+                                    X_OFFSET_FOR_GROUP_ITEMS
+                                } else {
+                                    0
+                                };
+                                if ev.x == l + left_pos {
+                                    self.check_item(self.pos, SelectMode::Reverse, true, true);
+                                }
+                            }
+                        }
+                    }
+                    self.start_mouse_select = self.pos;
+                    self.mouse_check_mode = self.toggle_current_item_selection();
+                } else {
+                    self.start_mouse_select = usize::MAX;
+                }
+                true
+            }
+            MouseEvent::Released(_) => true,
+            MouseEvent::DoubleClick(ev) => {
+                if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
+                    if pos != self.pos {
+                        self.update_position(pos, true);
+                    }
+                    match self.item_list[self.pos] {
+                        Element::Item(index) => {
+                            self.emit_item_action_event(index as usize);
+                        }
+                    }
+                }
+                true
+            }
+            MouseEvent::Drag(ev) => {
+                if self.start_mouse_select != usize::MAX {
+                    if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
+                        if pos != self.pos {
+                            self.update_position(pos, true);
+                            self.check_items(self.start_mouse_select, pos, self.mouse_check_mode, true);
+                        }
+                    }
+                }
+                true
+            }
+            MouseEvent::Wheel(dir) => {
+                match dir {
+                    MouseWheelDirection::Up => self.move_scroll_to(self.top_view.saturating_sub(1)),
+                    MouseWheelDirection::Down => self.move_scroll_to(self.top_view.saturating_add(1)),
+                    MouseWheelDirection::Left => {
+                        OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Left, KeyModifier::None), 0 as char);
+                    }
+                    MouseWheelDirection::Right => {
+                        OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Right, KeyModifier::None), 0 as char);
+                    }
+                    _ => {}
+                }
+                true
+            }
+        }
+    }
 }
 impl<T> OnPaint for TreeView<T>
 where
@@ -745,7 +887,30 @@ where
         }
     }
 }
-impl<T> OnMouseEvent for TreeView<T> where T: ListItem + 'static {}
+impl<T> OnMouseEvent for TreeView<T>
+where
+    T: ListItem + 'static,
+{
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.comp.process_mouse_event(event) {
+            self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
+        }
+        let action = self.header.process_mouse_event(event);
+        if self.execute_column_header_action(action) {
+            return EventProcessStatus::Processed;
+        }
+        // process mouse event for items
+        if self.process_mouse_event(event) {
+            return EventProcessStatus::Processed;
+        }
+        if (action.should_repaint()) || (self.comp.should_repaint()) {
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
+    }
+}
 impl<T> OnResize for TreeView<T>
 where
     T: ListItem + 'static,
