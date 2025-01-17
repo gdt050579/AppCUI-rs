@@ -10,7 +10,7 @@ enum UpdateVisibleItemsOperation {
 }
 
 #[derive(Clone, Copy)]
-enum CheckMode {
+enum SelectMode {
     True,
     False,
     Reverse,
@@ -55,10 +55,6 @@ where
         if flags.contains(Flags::SearchBar) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
         }
-        if flags.contains(Flags::CheckBoxes | Flags::NoSelection) {
-            panic!("Invalid flags combination. `CheckBoxes` and `NoSelection` flags cannot be used together !");
-        }
-
         let mut lv = Self {
             base: ControlBase::with_status_flags(layout, status_flags),
             flags,
@@ -103,7 +99,7 @@ where
     pub fn add_item_to_parent(&mut self, mut item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
         // override selection state if the NoSelection flag is set
         if self.flags.contains(Flags::NoSelection) {
-            item.set_checked(false);
+            item.set_selected(false);
         }
         let h = self.manager.add(item, parent);
         // refilter everything
@@ -316,18 +312,6 @@ where
             surface.write_string(extra, 0, s, attr.unwrap_or(fold_attr), false);
             //surface.write_string(extra, 0, format!("{:04b}",item.line_mask).as_str(), charattr!("white,darkred"), false);
             extra += 4;
-            if self.flags.contains(Flags::CheckBoxes) {
-                if item.is_checked() {
-                    surface.write_char(
-                        extra,
-                        0,
-                        Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
-                    );
-                } else {
-                    surface.write_char(0, 0, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
-                }
-                extra += 2;
-            }
             // icon
             if self.icon_width > 0 {
                 self.paint_icon(extra, item, attr, surface, theme);
@@ -403,7 +387,7 @@ where
         while (item_count < visible_items) && (idx < max_idx) {
             if let Some(item) = self.manager.get(self.item_list[idx]) {
                 self.paint_item(item, y, surface, theme, attr);
-                if (item.is_checked()) && (has_focus) && (!self.flags.contains(Flags::CheckBoxes)) {
+                if (item.is_selected()) && (has_focus) {
                     surface.reset_clip();
                     surface.reset_origin();
                     surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.selected));
@@ -414,8 +398,7 @@ where
                         surface.reset_origin();
                         if has_focus {
                             let current_item_attr = match () {
-                                _ if self.flags.contains(Flags::CheckBoxes) => theme.list_current_item.focus,
-                                _ if item.is_checked() => theme.list_current_item.over_selection,
+                                _ if item.is_selected() => theme.list_current_item.over_selection,
                                 _ => theme.list_current_item.focus,
                             };
                             surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, current_item_attr));
@@ -452,9 +435,7 @@ where
         }
         if found {
             if column_index == 0 {
-                if self.flags.contains(Flags::CheckBoxes) {
-                    new_width += 2
-                };
+                todo!("add depth with");
                 new_width += self.icon_width as u32;
             }
             self.header.set_column_width(column_index, new_width.min(u8::MAX as u32) as u8);
@@ -560,123 +541,56 @@ where
         // }
     }
     #[inline(always)]
-    fn toggle_current_item_selection(&self) -> CheckMode {
+    fn toggle_current_item_selection(&self) -> SelectMode {
         if self.pos < self.item_list.len() {
             if let Some(item) = self.manager.get(self.item_list[self.pos]) {
-                if item.is_checked() {
-                    CheckMode::False
+                if item.is_selected() {
+                    SelectMode::False
                 } else {
-                    CheckMode::True
+                    SelectMode::True
                 }
             } else {
-                CheckMode::False
+                SelectMode::False
             }
         } else {
-            CheckMode::False
+            SelectMode::False
         }
     }
     fn select_until_position(&mut self, new_pos: usize) {
         let start = self.pos;
         let mode = self.toggle_current_item_selection();
         self.update_position(new_pos, true);
-        self.check_items(start, self.pos, mode, true);
+        for i in start..=self.pos {
+            self.select_item(i, mode, true);
+        }        
     }
-    fn check_item(&mut self, pos: usize, mode: CheckMode, update_group_check_count: bool, emit_event: bool) -> bool {
+    fn select_item(&mut self, pos: usize, mode: SelectMode, emit_event: bool) -> bool {
         if self.flags.contains(Flags::NoSelection) {
             return false;
         }
         if pos >= self.item_list.len() {
             return false;
         }
-        let mut selection_has_changed = false;
-        // match self.filter[pos] {
-        //     Element::Item(index) => {
-        //         let item = &mut self.data[index as usize];
-        //         let status = item.is_checked();
-        //         match mode {
-        //             CheckMode::True => item.set_checked(true),
-        //             CheckMode::False => item.set_checked(false),
-        //             CheckMode::Reverse => item.set_checked(!status),
-        //         }
-        //         selection_has_changed = item.is_checked() != status;
-        //         if selection_has_changed {
-        //             if item.is_checked() {
-        //                 self.selected_items_count += 1;
-        //             } else {
-        //                 self.selected_items_count -= 1;
-        //             }
-        //         }
-        //         if update_group_check_count {
-        //             self.update_check_count_for_groups();
-        //         }
-        //     }
-        //     Element::Group(gid) => {
-        //         let group = &mut self.groups[gid as usize];
-        //         let checked = group.items_checked_count();
-        //         let count = group.items_count();
-        //         let new_status = checked < count;
-        //         if group.is_collapsed() {
-        //             // iterate through all items that and check if they are filtered or not and check them
-        //             let len = self.data.len();
-        //             for idx in 0..len {
-        //                 let item = &self.data[idx];
-        //                 if item.group_id() != gid {
-        //                     continue;
-        //                 }
-        //                 if self.is_item_filtered_out(item) {
-        //                     continue;
-        //                 }
-        //                 selection_has_changed |= self.select_item_and_update_count(idx, new_status);
-        //             }
-        //         } else {
-        //             let len = self.item_list.len();
-        //             for idx in pos + 1..len {
-        //                 match self.filter[idx] {
-        //                     Element::Item(index) => {
-        //                         let item = &self.data[index as usize];
-        //                         if item.group_id() != gid {
-        //                             break;
-        //                         }
-        //                         selection_has_changed |= self.select_item_and_update_count(index as usize, new_status);
-        //                     }
-        //                     _ => {
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         let group = &mut self.groups[gid as usize];
-        //         group.set_items_checked_count(if checked < count { count } else { 0 });
-        //     }
-        // }
-        if (emit_event) && (selection_has_changed) {
-            self.emit_selection_update_event();
+        let h = self.item_list[self.pos];
+        if let Some(item) = self.manager.get_mut(h) {
+            let current_select_status = item.is_selected();
+            match mode {
+                SelectMode::True => item.set_selected(true),
+                SelectMode::False => item.set_selected(false),
+                SelectMode::Reverse => item.set_selected(!current_select_status),
+            }
+            if (item.is_selected() != current_select_status) && emit_event {
+                self.emit_selection_update_event();
+                return true;
+            }
         }
-        selection_has_changed
-    }
-    fn check_items(&mut self, start: usize, end: usize, mode: CheckMode, emit_event: bool) {
-        if self.flags.contains(Flags::NoSelection) {
-            return;
-        }
-        let len = self.item_list.len();
-        if len == 0 {
-            return;
-        }
-        let p_start = start.min(end).min(len - 1);
-        let p_end = end.max(start).min(len - 1);
-        let mut selection_has_changed = false;
-        for pos in p_start..=p_end {
-            selection_has_changed |= self.check_item(pos, mode, false, false);
-        }
-        if (emit_event) && (selection_has_changed) {
-            self.emit_selection_update_event();
-        }
+        false
     }
     #[inline(always)]
     fn is_entire_list_selected(&self) -> bool {
         for handle in &self.item_list {
             if let Some(item) = self.manager.get(*handle) {
-                if !item.is_checked() {
+                if !item.is_selected() {
                     return false;
                 }
             }
@@ -740,17 +654,13 @@ where
             }
 
             // Selection
-            key!("Space") => {
-                self.reverse_fold();
-                true
-            }
             key!("Insert") | key!("Shift+Down") => {
-                self.check_item(self.pos, CheckMode::Reverse, true, true);
+                self.select_item(self.pos, SelectMode::Reverse, true);
                 self.update_position(self.pos.saturating_add(1), true);
                 true
             }
             key!("Shift+Up") => {
-                self.check_item(self.pos, CheckMode::Reverse, true, true);
+                self.select_item(self.pos, SelectMode::Reverse, true);
                 self.update_position(self.pos.saturating_sub(1), true);
                 true
             }
@@ -779,22 +689,13 @@ where
                 true
             }
 
-            key!("Ctrl+A") => {
-                if self.is_entire_list_selected() {
-                    self.check_items(0, self.item_list.len(), CheckMode::False, true);
-                } else {
-                    self.check_items(0, self.item_list.len(), CheckMode::True, true);
+            // Action & folding
+            key!("Space") | key!("Enter") => {
+                if self.comp.is_in_edit_mode() {
+                    // will be process separately
+                    return false;
                 }
-                true
-            }
-
-            // Action
-            key!("Enter") => {
-                // match self.item_list.get(self.pos) {
-                //     Some(Element::Item(index)) => self.emit_item_action_event(*index as usize),
-                //     Some(Element::Group(gid)) => self.toggle_group_collapse_status(*gid, true),
-                //     _ => {}
-                // }
+                self.reverse_fold();
                 true
             }
             _ => false,

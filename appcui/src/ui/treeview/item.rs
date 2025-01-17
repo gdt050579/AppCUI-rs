@@ -23,7 +23,7 @@ where
     T: ListItem,
 {
     data: T,
-    checked: bool,
+    selected: bool,
     attr: Option<CharAttribute>,
     icon: [char; 2],
     pub(super) fold_status: FoldStatus,
@@ -39,10 +39,10 @@ impl<T> Item<T>
 where
     T: ListItem,
 {
-    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, icon_chars: [char; 2]) -> Self {
+    pub fn new(data: T, selected: bool, attr: Option<CharAttribute>, icon_chars: [char; 2]) -> Self {
         Self {
             data,
-            checked,
+            selected,
             attr,
             depth: 0,
             line_mask: 0,
@@ -68,12 +68,12 @@ where
         &mut self.data
     }
     #[inline(always)]
-    pub fn is_checked(&self) -> bool {
-        self.checked
+    pub fn is_selected(&self) -> bool {
+        self.selected
     }
     #[inline(always)]
-    pub(super) fn set_checked(&mut self, value: bool) {
-        self.checked = value;
+    pub(super) fn set_selected(&mut self, value: bool) {
+        self.selected = value;
     }
     #[inline(always)]
     pub(super) fn icon_first_character(&self) -> char {
@@ -165,7 +165,7 @@ where
     fn from(value: T) -> Self {
         Self {
             data: value,
-            checked: false,
+            selected: false,
             attr: None,
             depth: 0,
             line_mask: 0,

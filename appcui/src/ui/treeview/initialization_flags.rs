@@ -4,10 +4,9 @@ use EnumBitFlags::EnumBitFlags;
 pub enum Flags {
     ScrollBars = 0x01,
     SearchBar = 0x02,
-    CheckBoxes = 0x04,
-    SmallIcons = 0x08,
-    LargeIcons = 0x10,
-    CustomFilter = 0x20,
-    NoSelection = 0x40,
-    HideHeader = 0x80,
+    SmallIcons = 0x04,
+    LargeIcons = 0x08,
+    CustomFilter = 0x10,
+    NoSelection = 0x20,
+    HideHeader = 0x40,
 }
