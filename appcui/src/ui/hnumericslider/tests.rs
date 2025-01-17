@@ -58,16 +58,61 @@ fn check_click() {
 #[test]
 fn check_smaller_window_resize() {
     let script = "
-        Paint.Enable(true)
+        Paint.Enable(false)
         Paint('Show slider in small window')   
-        CheckHash(0x249D67EEA5FA0F64)   
+        CheckHash(0x6A7B970316D50959)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test, d:c, w:100%, h:100%");
-    w.add(hnumericslider!("i32, 40, 10, 100, 5, x:1, y:1, w:10"));
+    w.add(hnumericslider!("i32, 40, 100, 200, 5, x:1, y:1, w:11"));
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_smaller_window_resize1() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Show slider in small window')   
+        CheckHash(0x2B794ECF151FE6C6)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test, d:c, w:100%, h:100%");
+    w.add(hnumericslider!("i32, 40, 100, 200, 5, x:1, y:1, w:10"));
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_smaller_window_resize2() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Show slider in small window')   
+        CheckHash(0xBA913E16763FD176)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test, d:c, w:100%, h:100%");
+    w.add(hnumericslider!("i32, 40, 10, 100, 5, x:1, y:1, w:11"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_smaller_window_resize3() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Show slider in small window')   
+        CheckHash(0x8210CD919BA0B6C9)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test, d:c, w:100%, h:100%");
+    w.add(hnumericslider!("i32, 150, 100, 200, 25, x:1, y:1, w:11"));
+    a.add_window(w);
+    a.run();
+}
+
+
 
 #[test]
 fn check_buttons() {

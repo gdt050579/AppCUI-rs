@@ -116,11 +116,22 @@ where
         if self.p >= 1 && self.o >= 1 {
             self.ok_step = self.step; //am suficient spatiu
         } else {
-            self.ok_step = (self.max - self.min) / T::cast_float_number(self.y as f64);
-            self.nr_val = min(((self.max - self.min) / self.ok_step).cast_to_u32() + 1, self.y as u32);
+            // self.ok_step = (self.max - self.min) / T::cast_float_number(self.y as f64);
+            // self.nr_val = min(((self.max - self.min) / self.ok_step).cast_to_u32() + 1, self.y as u32);
+            // self.sec_dim = (self.bound as f32) / ((self.nr_val - 1) as f32);
+            // self.p = (self.sec_dim - self.m as f32) as u32;
+            // self.o = (self.sec_dim - (self.m as f32 + ((self.m / 2) as f32))) as u32;
+            let w = self.bound;
+            let k = self.m;
+            self.nr_val = ((w+1)/(k as i32+1)).max(2) as u32;
+            self.ok_step = (self.max - self.min) / T::cast_float_number((self.nr_val - 1) as f64);
+            let p2 = (w-(self.nr_val*(k as u32)) as i32) / ((self.nr_val-1) as i32);
             self.sec_dim = (self.bound as f32) / ((self.nr_val - 1) as f32);
-            self.p = (self.sec_dim - self.m as f32) as u32;
-            self.o = (self.sec_dim - (self.m as f32 + ((self.m / 2) as f32))) as u32;
+            self.p = p2 as u32;
+            self.o = p2 as u32;
+            //100- 200 width 10 step 5
+            //100 - 200 width 11 step 5     
+            //step 25
         }
 
         self.values_string.clear();
@@ -150,7 +161,9 @@ where
 
             current_value = current_value + self.ok_step;
         }
-        self.values_string.push_str(&Self::get_n_spaces(self.o));
+        if self.nr_val - 1 != 1 {
+            self.values_string.push_str(&Self::get_n_spaces(self.o));
+        }
 
         current_value.write_to_string(&mut string_buffer, self.format);
         let space_debt: u32 = (self.m - string_buffer.len()) as u32 + (self.m % 2 == 0) as u32;
@@ -212,7 +225,7 @@ where
     }
 
     fn update_cursor_pos(&mut self, x: i32) {
-        self.poz_triunghi = (x / self.sec_dim as i32) * self.sec_dim as i32;
+        self.poz_triunghi = ((x / self.sec_dim as i32) * self.sec_dim as i32).min(self.bound - 1);
         self.value = self.min + self.ok_step * Number::cast_signed_number((x / self.sec_dim as i32) as i128);
     }
 }
@@ -244,13 +257,13 @@ where
         //desenez marginea pentru min si max
         surface.write_char(0, y_separators, current_character_set.start_char);
         surface.write_char(
-            ((self.nr_val - 1) * self.sec_dim as u32) as i32,
+            (((self.nr_val - 1) * self.sec_dim as u32) as i32).min(self.bound-1),
             y_separators,
             current_character_set.end_char,
         );
 
         let mut index: i32 = 1;
-        while index < ((self.nr_val - 1) as i32 * self.sec_dim as i32) {
+        while index < (((self.nr_val - 1) as i32 * self.sec_dim as i32)).min(self.bound - 1) {
             if index % self.sec_dim as i32 == 0 {
                 surface.write_char(index, y_separators, current_character_set.value_indicator);
             } else {
@@ -279,7 +292,7 @@ where
                 }
                 self.last_pressed_coods.x = mouse_event_data.x;
                 self.last_pressed_coods.y = mouse_event_data.y;
-                self.update_cursor_pos(mouse_event_data.x);
+                self.update_cursor_pos(mouse_event_data.x.clamp(0, self.bound - 1));
                 return EventProcessStatus::Processed;
             }
         };
