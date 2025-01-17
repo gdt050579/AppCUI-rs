@@ -30,7 +30,7 @@ fn check_aspect_up() {
 
 
 #[test]
-fn click_test() {
+fn check_click() {
     let script = "
         Paint.Enable(false)
         Paint('Test if clicks work as intended')
@@ -56,21 +56,21 @@ fn click_test() {
 }
 
 #[test]
-fn resize_test() {
+fn check_smaller_window_resize() {
     let script = "
-        Paint.Enable(false)
+        Paint.Enable(true)
         Paint('Show slider in small window')   
         CheckHash(0x249D67EEA5FA0F64)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test, d:c, w:35, h:9");
-    w.add(hnumericslider!("i32, 40, 10, 100, 5, x:1, y:1, w:100%"));
+    let mut w = window!("Test, d:c, w:100%, h:100%");
+    w.add(hnumericslider!("i32, 40, 10, 100, 5, x:1, y:1, w:10"));
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn buttons_test() {
+fn check_buttons() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
