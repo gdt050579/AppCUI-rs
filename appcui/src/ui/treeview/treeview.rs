@@ -19,8 +19,7 @@ enum SelectMode {
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum HoverStatus {
     None,
-    OverCheckMark(i32, usize),
-    OverFoldButton(i32, usize),
+    OverFoldButton(i32, u8),
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
@@ -250,11 +249,7 @@ where
         };
         // first column
         let c = &columns[0];
-        let d = if item.depth == 0 {
-            0
-        } else {
-            (item.depth as i32) * (3 + self.fold_sign_with as i32) - 2
-        };
+        let d = item.x_offset(self.fold_sign_with);
         let l = c.x + d;
         let r = c.x + c.width as i32;
         let mut extra = 0;
@@ -388,7 +383,7 @@ where
         let visible_items = self.visible_items();
         let mut item_count = 0;
         let (hover_checkmark_x, hover_pos) = match self.hover_status {
-            HoverStatus::OverCheckMark(x, pos) => (x, pos),
+            HoverStatus::OverFoldButton(x, pos) => (x, pos as usize),
             _ => (0, usize::MAX),
         };
         // very simply code
@@ -639,25 +634,13 @@ where
             return HoverStatus::None;
         }
         let left_pos = self.header.columns()[0].x;
-        match self.item_list[pos] {
-            Element::Item(_) => {
-                if self.flags.contains(Flags::CheckBoxes) {
-                    let mut left = left_pos;
-                    left += if self.flags.contains(Flags::ShowGroups) {
-                        X_OFFSET_FOR_GROUP_ITEMS
-                    } else {
-                        0
-                    };
-                    if x == left {
-                        HoverStatus::OverItemCheckMark(left, pos)
-                    } else {
-                        HoverStatus::None
-                    }
-                } else {
-                    HoverStatus::None
-                }
+        if let Some(item) = self.manager.get(self.item_list[pos]) {
+            let p_x = left_pos + item.x_offset(self.fold_sign_with);
+            if (item.fold_status != FoldStatus::NonExpandable) && (x>=p_x) && (x < p_x + self.fold_sign_with as i32) {  
+                return HoverStatus::OverFoldButton(p_x, self.fold_sign_with);
             }
         }
+        return HoverStatus::None;
     }
     fn process_key_pressed(&mut self, key: Key) -> bool {
         // process key for items
@@ -780,20 +763,8 @@ where
                     if pos != self.pos {
                         self.update_position(pos, true);
                     }
-                    let left_pos = self.header.columns()[0].x;
-                    match self.item_list[self.pos] {
-                        Element::Item(_) => {
-                            if self.flags.contains(Flags::CheckBoxes) {
-                                let l = if self.flags.contains(Flags::ShowGroups) {
-                                    X_OFFSET_FOR_GROUP_ITEMS
-                                } else {
-                                    0
-                                };
-                                if ev.x == l + left_pos {
-                                    self.check_item(self.pos, SelectMode::Reverse, true, true);
-                                }
-                            }
-                        }
+                    if let HoverStatus::OverFoldButton(_, _) = self.hover_status_for_mouse_pos(self.pos, ev.x) {
+                        self.reverse_fold();
                     }
                     self.start_mouse_select = self.pos;
                     self.mouse_check_mode = self.toggle_current_item_selection();
@@ -808,11 +779,7 @@ where
                     if pos != self.pos {
                         self.update_position(pos, true);
                     }
-                    match self.item_list[self.pos] {
-                        Element::Item(index) => {
-                            self.emit_item_action_event(index as usize);
-                        }
-                    }
+                    self.emit_item_action_event(self.pos);
                 }
                 true
             }
@@ -821,7 +788,7 @@ where
                     if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
                         if pos != self.pos {
                             self.update_position(pos, true);
-                            self.check_items(self.start_mouse_select, pos, self.mouse_check_mode, true);
+                            //self.check_items(self.start_mouse_select, pos, self.mouse_check_mode, true);
                         }
                     }
                 }

@@ -102,6 +102,14 @@ where
         matches!(self.visibility, ItemVisibility::Visible)
     }
 
+    pub(super) fn x_offset(&self, fold_sign_width: u8) -> i32 {
+        if self.depth == 0 {
+            0
+        } else {
+            (self.depth as i32) * (3 + fold_sign_width as i32) - 2
+        }
+    }
+
     #[inline(always)]
     pub(super) fn reverse_fold(&mut self) -> bool {
         match self.fold_status {
