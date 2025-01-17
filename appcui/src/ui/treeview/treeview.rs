@@ -19,7 +19,7 @@ enum SelectMode {
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum HoverStatus {
     None,
-    OverFoldButton(i32, u8),
+    OverFoldButton(i32, usize),
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
@@ -249,7 +249,7 @@ where
         };
         // first column
         let c = &columns[0];
-        let d = item.x_offset(self.fold_sign_with);
+        let d = item.x_offset(self.fold_sign_with, false);
         let l = c.x + d;
         let r = c.x + c.width as i32;
         let mut extra = 0;
@@ -383,7 +383,7 @@ where
         let visible_items = self.visible_items();
         let mut item_count = 0;
         let (hover_checkmark_x, hover_pos) = match self.hover_status {
-            HoverStatus::OverFoldButton(x, pos) => (x, pos as usize),
+            HoverStatus::OverFoldButton(x, pos) => (x, pos),
             _ => (0, usize::MAX),
         };
         // very simply code
@@ -410,7 +410,12 @@ where
                     if idx == hover_pos {
                         surface.reset_clip();
                         surface.reset_origin();
-                        surface.write_char(hover_checkmark_x, y, Character::with_attributes(0, theme.button.text.hovered));
+                        surface.fill_horizontal_line_with_size(
+                            hover_checkmark_x,
+                            y,
+                            self.fold_sign_with as u32,
+                            Character::with_attributes(0, theme.button.text.hovered),
+                        );
                     }
                 }
             }
@@ -635,9 +640,9 @@ where
         }
         let left_pos = self.header.columns()[0].x;
         if let Some(item) = self.manager.get(self.item_list[pos]) {
-            let p_x = left_pos + item.x_offset(self.fold_sign_with);
-            if (item.fold_status != FoldStatus::NonExpandable) && (x>=p_x) && (x < p_x + self.fold_sign_with as i32) {  
-                return HoverStatus::OverFoldButton(p_x, self.fold_sign_with);
+            let p_x = left_pos + item.x_offset(self.fold_sign_with, true);
+            if (item.fold_status != FoldStatus::NonExpandable) && (x >= p_x) && (x < p_x + self.fold_sign_with as i32) {
+                return HoverStatus::OverFoldButton(p_x, pos);
             }
         }
         return HoverStatus::None;

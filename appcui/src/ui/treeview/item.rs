@@ -102,11 +102,11 @@ where
         matches!(self.visibility, ItemVisibility::Visible)
     }
 
-    pub(super) fn x_offset(&self, fold_sign_width: u8) -> i32 {
+    pub(super) fn x_offset(&self, fold_sign_width: u8, from_fold_button: bool) -> i32 {
         if self.depth == 0 {
             0
         } else {
-            (self.depth as i32) * (3 + fold_sign_width as i32) - 2
+            (self.depth as i32) * (3 + fold_sign_width as i32) - if from_fold_button { 0 } else { 2 }
         }
     }
 
