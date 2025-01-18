@@ -24,6 +24,7 @@ use crate::{
         threestatebox::events::ThreeStateBoxEvents,
         togglebutton::events::ToggleButtonEvents,
         window::events::{ToolBarEvents, WindowEvents},
+        treeview::events::GenericTreeViewEvents,
     },
 };
 
@@ -148,6 +149,7 @@ pub trait Control:
     + GenericListViewEvents
     + PathFinderEvents
     + TimerEvents
+    + GenericTreeViewEvents
 {
 }
 

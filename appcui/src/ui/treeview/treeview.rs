@@ -1,3 +1,4 @@
+use super::events::EventData;
 use super::{Flags, FoldStatus, Item, TreeDataManager};
 use components::listitem::render_method::RenderData;
 use AppCUIProcMacro::*;
@@ -511,15 +512,15 @@ where
         self.update_scrollbars();
         let should_emit = (self.pos != new_pos) && emit_event;
         self.pos = new_pos;
-        if should_emit {
-            // self.raise_event(ControlEvent {
-            //     emitter: self.handle,
-            //     receiver: self.event_processor,
-            //     data: ControlEventData::ListView(EventData {
-            //         event_type: listview::events::ListViewEventTypes::CurrentItemChanged,
-            //         type_id: std::any::TypeId::of::<T>(),
-            //     }),
-            // });
+        if (should_emit) && (self.pos < len) {
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::TreeView(EventData {
+                    event_type: treeview::events::TreeViewEventTypes::CurrentItemChanged(self.item_list[self.pos].cast()),
+                    type_id: std::any::TypeId::of::<T>(),
+                }),
+            });
         }
     }
     fn move_scroll_to(&mut self, new_poz: usize) {
@@ -542,16 +543,16 @@ where
         // });
     }
     fn emit_item_action_event(&self, index: usize) {
-        // if index < self.manager.len() {
-        //     self.raise_event(ControlEvent {
-        //         emitter: self.handle,
-        //         receiver: self.event_processor,
-        //         data: ControlEventData::ListView(EventData {
-        //             event_type: listview::events::ListViewEventTypes::ItemAction(index),
-        //             type_id: std::any::TypeId::of::<T>(),
-        //         }),
-        //     });
-        // }
+        if index < self.manager.len() {
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::TreeView(EventData {
+                    event_type: treeview::events::TreeViewEventTypes::ItemAction(self.item_list[index].cast()),
+                    type_id: std::any::TypeId::of::<T>(),
+                }),
+            });
+        }
     }
     #[inline(always)]
     fn toggle_current_item_selection(&self) -> SelectMode {
@@ -599,22 +600,36 @@ where
         }
         false
     }
-    #[inline(always)]
-    fn is_entire_list_selected(&self) -> bool {
-        for handle in &self.item_list {
-            if let Some(item) = self.manager.get(*handle) {
-                if !item.is_selected() {
-                    return false;
-                }
-            }
-        }
-        true
-    }
+    // #[inline(always)]
+    // fn is_entire_list_selected(&self) -> bool {
+    //     for handle in &self.item_list {
+    //         if let Some(item) = self.manager.get(*handle) {
+    //             if !item.is_selected() {
+    //                 return false;
+    //             }
+    //         }
+    //     }
+    //     true
+    // }
     fn reverse_fold(&mut self) -> bool {
         if self.pos < self.item_list.len() {
             if let Some(item) = self.manager.get_mut(self.item_list[self.pos]) {
                 if item.reverse_fold() {
+                    let is_expanded = item.fold_status == FoldStatus::Expanded;
                     self.update_item_list(UpdateVisibleItemsOperation::Refresh);
+                    // emit the fold / unfold event
+                    self.raise_event(ControlEvent {
+                        emitter: self.handle,
+                        receiver: self.event_processor,
+                        data: ControlEventData::TreeView(EventData {
+                            event_type: if is_expanded {
+                                treeview::events::TreeViewEventTypes::IteamExpanded(self.item_list[self.pos].cast())
+                            } else {
+                                treeview::events::TreeViewEventTypes::ItemCollapsed(self.item_list[self.pos].cast())
+                            },
+                            type_id: std::any::TypeId::of::<T>(),
+                        }),
+                    });
                     return true;
                 }
             }
