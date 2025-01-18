@@ -307,14 +307,9 @@ where
             let (s, fold_attr) = match item.fold_status {
                 FoldStatus::Collapsed => ("[+]", theme.text.normal),
                 FoldStatus::Expanded => ("[-]", theme.text.normal),
-                //FoldStatus::NonExpandable => ("[ ]", theme.text.inactive),
-                //FoldStatus::NonExpandable => ("───", theme.text.inactive),
-                FoldStatus::NonExpandable => ("──>", theme.text.inactive),
-                //FoldStatus::NonExpandable => ("   ", theme.text.inactive),
-                //FoldStatus::NonExpandable => ("──◉", theme.text.inactive),
+                FoldStatus::NonExpandable => ("──▷", theme.text.inactive),
             };
             surface.write_string(extra, 0, s, attr.unwrap_or(fold_attr), false);
-            //surface.write_string(extra, 0, format!("{:04b}",item.line_mask).as_str(), charattr!("white,darkred"), false);
             extra += (self.fold_sign_with as i32) + 1;
             // icon
             if self.icon_width > 0 {
