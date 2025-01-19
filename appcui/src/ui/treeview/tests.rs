@@ -354,3 +354,69 @@ fn check_column_sort() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_key_movement_up_down_without_header() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0xDF48D35D7AEBD3B6) 
+        Key.Pressed(Down,3) 
+        Paint('2. Focus on Advance Calculus')
+        CheckHash(0x3725D55464171ADD) 
+        Key.Pressed(Down,2)
+        Paint('3. Focus on Logic')
+        CheckHash(0x7684D00A6F3535A6) 
+        Key.Pressed(Down)
+        Paint('4. Focus on English')
+        CheckHash(0x79BF7AF04C1EEDC9) 
+        Key.Pressed(Down,3)
+        Paint('5. Focus on Semantic')
+        CheckHash(0x238E1F8AA368BB82) 
+        Key.Pressed(Down,300)
+        Paint('6. Last element: Focus on Bob')
+        CheckHash(0xE3FEA7288EC382B6) 
+        Key.Pressed(Up,2)
+        Paint('7. Focus on Neural Network')
+        CheckHash(0x3BCC08D73E174E8E) 
+        Key.Pressed(Up,4)
+        Paint('8. Focus on v1, last view element is Bob')
+        CheckHash(0x75A257EB67E95A0E) 
+        Key.Pressed(Up,400)
+        Paint('9.Back to initial state')
+        CheckHash(0xDF48D35D7AEBD3B6) 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
+    Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_key_mouse_does_not_work_on_columns_on_hide_header_flag() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0xDF48D35D7AEBD3B6) 
+        Key.Pressed(Down,3) 
+        Paint('2. Focus on Advance Calculus')
+        CheckHash(0x3725D55464171ADD) 
+        Mouse.Move(5,1)
+        Paint('3. Nothing changes')
+        CheckHash(0x3725D55464171ADD) 
+        Mouse.Click(5,1,left)
+        Paint('4. John is selected (NO sort by name happens)')
+        CheckHash(0xDF48D35D7AEBD3B6) 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
+    Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}

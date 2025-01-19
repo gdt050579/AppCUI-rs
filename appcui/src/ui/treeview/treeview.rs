@@ -633,8 +633,9 @@ where
     }
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
         let sz = self.size();
-        if (y >= 1) && (x >= 0) && (x < sz.width as i32) && (y < sz.height as i32) {
-            let new_pos = self.top_view + (y - 1) as usize;
+        let start_y = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
+        if (y >= start_y) && (x >= 0) && (x < sz.width as i32) && (y < sz.height as i32) {
+            let new_pos = self.top_view + (y - start_y) as usize;
             if new_pos < self.item_list.len() {
                 Some(new_pos)
             } else {
@@ -832,10 +833,12 @@ where
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         // paint columns
-        self.header.paint(surface, theme, &self.base);
+        if !self.flags.contains(Flags::HideHeader) {
+            self.header.paint(surface, theme, &self.base);
+        }
         // paint items
         self.paint_items(surface, theme);
-        // paint separation lines (columns)
+        // paint separation lines (columns) - show wheather or not HideHeader is set or not
         self.header.paint_columns(surface, theme, &self.base);
         // paint scroll bars and searh bars
         self.comp.paint(surface, theme, &self.base);
@@ -878,10 +881,15 @@ where
             self.update_scroll_pos_from_scrollbars();
             return EventProcessStatus::Processed;
         }
-        let action = self.header.process_mouse_event(event);
-        if self.execute_column_header_action(action) {
-            return EventProcessStatus::Processed;
-        }
+        let action = if !self.flags.contains(Flags::HideHeader) {
+            let action = self.header.process_mouse_event(event);
+            if self.execute_column_header_action(action) {
+                return EventProcessStatus::Processed;
+            }
+            action
+        } else {
+            ColumnsHeaderAction::None
+        };
         // process mouse event for items
         if self.process_mouse_event(event) {
             return EventProcessStatus::Processed;
