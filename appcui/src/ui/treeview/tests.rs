@@ -172,3 +172,117 @@ fn check_init() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_key_movement_left_right() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x461AC404AD7793D0) 
+        Key.Pressed(Right,3) 
+        Paint('2. Scroll to right (+3 position)')
+        CheckHash(0x54D5076D51FBEB36) 
+        Key.Pressed(Right,10)
+        Paint('3. Scroll to right (+10 position)')
+        CheckHash(0x90A1F3104F8A79EB) 
+        Key.Pressed(Right,100)
+        Paint('4. Scroll to max right')
+        CheckHash(0x7A388F4BD11BAFA2) 
+        Key.Pressed(Left,10)
+        Paint('5. Scroll to left (-10 positions)')
+        CheckHash(0x96B04C8EA9FDCB3B) 
+        Key.Pressed(Left,100)
+        Paint('6. Scroll to initial state')
+        CheckHash(0x461AC404AD7793D0) 
+    ";
+    let mut a = App::debug(40, 12, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars|treeview::Flags::SearchBar);
+    Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_key_movement_up_down() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0xB43934B962A84918) 
+        Key.Pressed(Down,3) 
+        Paint('2. Focus on Advance Calculus')
+        CheckHash(0x84D046006246A1DB) 
+        Key.Pressed(Down,2)
+        Paint('3. Focus on Logic')
+        CheckHash(0xAB83685BE65F2050) 
+        Key.Pressed(Down)
+        Paint('4. Focus on English')
+        CheckHash(0x4C56B11AB66903F7) 
+        Key.Pressed(Down,3)
+        Paint('5. Focus on Semantic')
+        CheckHash(0x85CDF875454B8881) 
+        Key.Pressed(Down,300)
+        Paint('6. Last element: Focus on Bob')
+        CheckHash(0xC27C2E646E71DB79) 
+        Key.Pressed(Up,2)
+        Paint('7. Focus on Neural Network')
+        CheckHash(0xE0578657B45848C1) 
+        Key.Pressed(Up,4)
+        Paint('8. Focus on v2, last view element is Bob')
+        CheckHash(0x4ABAE32EA5027079) 
+        Key.Pressed(Up,400)
+        Paint('9.Back to initial state')
+        CheckHash(0xB43934B962A84918) 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars|treeview::Flags::SearchBar);
+    Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_key_movement_pageup_pagedown() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0xB43934B962A84918) 
+        Key.Pressed(PageDown)
+        Paint('2. Focus on Grammar')
+        CheckHash(0x4677CEAFEDD4405D) 
+        Key.Pressed(PageDown)
+        Paint('3. Focus on v2')
+        CheckHash(0x6A918816F85C4198) 
+        Key.Pressed(PageDown)
+        Paint('4. Focus on Bob')
+        CheckHash(0xC27C2E646E71DB79) 
+        Key.Pressed(PageDown)
+        Paint('5. Focus remains on Bob')
+        CheckHash(0xC27C2E646E71DB79) 
+        Key.Pressed(PageUp)
+        Paint('6. Focus on Haiku')
+        CheckHash(0xBB62323FB39A99A7) 
+        Key.Pressed(PageUp)
+        Paint('7. Focus on Logic')
+        CheckHash(0xB46529F8F791A898) 
+        Key.Pressed(PageUp)
+        Paint('8. Back to initial state')
+        CheckHash(0xB43934B962A84918) 
+        Key.Pressed(End)
+        Paint('9. Focus on BOB (last state)')
+        CheckHash(0xC27C2E646E71DB79) 
+        Key.Pressed(Home)
+        Paint('10. Back to initial state')
+        CheckHash(0xB43934B962A84918) 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars|treeview::Flags::SearchBar);
+    Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
