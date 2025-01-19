@@ -32,7 +32,6 @@ impl ListItem for TestData {
     }
 }
 
-
 #[derive(ListViewItem)]
 struct Course {
     #[Column(name = "&Name", width = 30)]
@@ -50,14 +49,14 @@ impl Course {
             credits,
         }
     }
-    fn populate_with_courses(tv:&mut TreeView<Course>) {
+    fn populate_with_courses(tv: &mut TreeView<Course>) {
         tv.add(Course::new("John", 20, 10));
         let h2 = tv.add(Course::new("Alice", 21, 11));
         let h2_2 = tv.add_to_parent(Course::new("Math", 1, 9), h2);
         tv.add_to_parent(Course::new("Advance Calculus", 2, 8), h2_2);
-        tv.add_to_parent(Course::new("Geometry", 1, 6), h2_2); 
+        tv.add_to_parent(Course::new("Geometry", 1, 6), h2_2);
         tv.add_to_parent(Course::new("Logic", 3, 9), h2_2);
-    
+
         let h3 = tv.add_to_parent(Course::new("English", 2, 7), h2);
         let h3_1 = tv.add_to_parent(Course::new("Grammar", 1, 8), h3);
         tv.add_to_parent(Course::new("Syntax", 1, 9), h3_1);
@@ -69,12 +68,12 @@ impl Course {
         tv.add_to_parent(Course::new("v2", 3, 5), h4_3);
 
         tv.add_to_parent(Course::new("Sonnet", 2, 9), h3_3);
-    
+
         let h2_3 = tv.add_to_parent(Course::new("AI", 1, 10), h2);
         tv.add_to_parent(Course::new("Neural Networks", 2, 8), h2_3);
         tv.add_to_parent(Course::new("Deep Learning", 3, 9), h2_3);
-    
-        tv.add(Course::new("Bob", 22, 12));        
+
+        tv.add(Course::new("Bob", 22, 12));
     }
 }
 
@@ -142,7 +141,7 @@ fn check_tree_manager_delete_middle_child() {
     assert_eq!(tm.roots()[1], h2);
     assert_eq!(tm.roots()[2], h3);
 
-    tm.delete(h2); 
+    tm.delete(h2);
     assert_eq!(tm.roots().len(), 2);
     assert_eq!(tm.roots()[0], h1);
     assert_eq!(tm.roots()[1], h3);
@@ -166,7 +165,7 @@ fn check_init() {
     ";
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars|treeview::Flags::SearchBar);
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -197,7 +196,7 @@ fn check_key_movement_left_right() {
     ";
     let mut a = App::debug(40, 12, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars|treeview::Flags::SearchBar);
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -237,7 +236,7 @@ fn check_key_movement_up_down() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars|treeview::Flags::SearchBar);
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -280,7 +279,76 @@ fn check_key_movement_pageup_pagedown() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars|treeview::Flags::SearchBar);
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_key_movement_scroll_up_down() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0xB43934B962A84918) 
+        Key.Pressed(Ctrl+Alt+Down)
+        Paint('2. Scroll starts with Alice')
+        CheckHash(0x369BEDE4869DDF36) 
+        Key.Pressed(Ctrl+Alt+Down,5)
+        Paint('3. Scroll starts with English')
+        CheckHash(0x34D177D1FF0AD4CA) 
+        Key.Pressed(Down)
+        Paint('4. Scroll starts with Alice, focus on Alice')
+        CheckHash(0xAA3869BE66A2218E) 
+        Key.Pressed(Ctrl+Alt+Down,7)
+        Paint('5. Scroll starts with Syntax')
+        CheckHash(0x8D4E28A201B257DF) 
+        Key.Pressed(Ctrl+Alt+Down,100)
+        Paint('6. Scroll starts with v1, last visible item is Bob')
+        CheckHash(0x8989B7D7CEA6D066) 
+        Key.Pressed(Ctrl+Alt+Up,10)
+        Paint('7. Scroll starts with Advance Calculus')
+        CheckHash(0x3CBDDECEEEA2BEF6) 
+        Key.Pressed(Ctrl+Alt+Up)
+        Paint('8. Scroll starts with Math')
+        CheckHash(0x6110677A6E4D7487) 
+        Key.Pressed(Ctrl+Alt+Up,10)
+        Paint('9. Scroll starts with John, Selected item is Alice')
+        CheckHash(0xA3A7B2F7F66BA9AC) 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_column_sort() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Down,3)
+        Paint('1. Initial state (focus on Advance Calculus)')
+        CheckHash(0xEB97DB5992DF3F85) 
+        Key.Pressed(Ctrl+N)
+        Paint('2. Sort by name (ascendent)')
+        CheckHash(0x35EDBA55B7A7C9CB) 
+        Key.Pressed(Ctrl+N)
+        Paint('3. Sort by name (descendent)')
+        CheckHash(0xE3C543AB79E3E38C) 
+        Key.Pressed(Ctrl+R)
+        Paint('4. Sort by relevance (ascendent)')
+        CheckHash(0xE86218F3A4195C13) 
+        Key.Pressed(Ctrl+R)
+        Paint('5. Sort by relevance (descendent)')
+        CheckHash(0xDEBE625515EF7278) 
+    ";
+    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
