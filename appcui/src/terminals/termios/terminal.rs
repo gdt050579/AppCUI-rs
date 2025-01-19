@@ -6,7 +6,7 @@ use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
 
 use libc::STDOUT_FILENO;
 
-use super::{super::{ SystemEvent, Terminal }, api::sizing::{get_resize_notification, get_terminal_size, set_terminal_size}, get_size_thread::GetSizeThread, input::Input};
+use super::{super::{ SystemEvent, Terminal }, api::sizing::{get_resize_notification, get_terminal_size, set_terminal_size}, size_reader::SizeReader, input::Input};
 use crate::{ graphics::*, system::Error, terminals::{termios::api::sizing::listen_for_resizes, SystemEventReader} };
 
 #[cfg(target_family = "unix")]
@@ -72,7 +72,7 @@ impl TermiosTerminal {
         let _ = t.stdout.write("\x1b[?1003h".as_bytes()); // capture mouse events
 
         Input::new().start(sender.clone());
-        GetSizeThread::new(get_resize_notification().clone()).start(sender);
+        SizeReader::new(get_resize_notification().clone()).start(sender);
         Ok(Box::new(t))
     }
 
@@ -149,7 +149,7 @@ impl Terminal for TermiosTerminal {
             }
         }
         let buf = self.screen_buffer.as_bytes();
-        let _ = self.stdout.write(&buf[..buf.len() - 1]);
+        let _ = self.stdout.write_all(&buf[..buf.len() - 1]);
 
         let _ = self.move_cursor(&surface.cursor);
     }

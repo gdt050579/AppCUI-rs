@@ -20,7 +20,7 @@ impl Input {
 }
 
 impl SystemEventReader for Input {
-    fn read(&mut self) -> Option<crate::terminals::SystemEvent> {        
+    fn read(&mut self) -> Option<crate::terminals::SystemEvent> {
         #[cfg(target_family = "unix")]
         match TermiosReader::read_key() {
             Ok(ansi_key) => {
@@ -51,9 +51,7 @@ impl SystemEventReader for Input {
                 }
 
                 // We take the initial 4 bytes an we try to convert them into an `u32`
-                let Some(bytes) = ansi_key.bytes().get(0..4) else {
-                    return None;
-                };
+                let bytes = ansi_key.bytes().get(0..4)?;
                 let value = u32::from_le_bytes(bytes.try_into().unwrap_or([0; 4]));
 
                 let mut character = char::from_u32(value).unwrap_or('\0');

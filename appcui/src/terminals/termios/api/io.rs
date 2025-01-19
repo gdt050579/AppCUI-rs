@@ -129,7 +129,7 @@ pub enum Letter {
 }
 
 #[derive(Debug)]
-pub struct UnknownLetter(u8);
+pub struct UnknownLetter;
 
 impl TryFrom<u8> for Letter {
     type Error = UnknownLetter;
@@ -161,14 +161,14 @@ impl TryFrom<u8> for Letter {
             24 => Ok(Self::X),
             25 => Ok(Self::Y),
             26 => Ok(Self::Z),
-            _ => Err(UnknownLetter(value)),
+            _ => Err(UnknownLetter),
         }
     }
 }
 
-impl Into<Key> for AnsiKey {
-    fn into(self) -> Key {
-        let code = match self.code {
+impl From<AnsiKey> for Key {
+    fn from(value: AnsiKey) -> Self {
+        let code = match value.code {
             AnsiKeyCode::Letter(letter) => {
                 match letter {
                     Letter::A => KeyCode::A,
@@ -241,7 +241,7 @@ impl Into<Key> for AnsiKey {
 
         Key {
             code,
-            modifier: self.modifier,
+            modifier: value.modifier,
         }
     }
 }
@@ -298,7 +298,8 @@ impl TermiosReader {
                     match c {
                         8 => ([c, 0, 0, 0, 0], AnsiKeyCode::_Backspace, KeyModifier::Ctrl),
                         9 => ([c, 0, 0, 0, 0], AnsiKeyCode::_Tab, KeyModifier::None),
-                        1..=7 | 10..=26 => {
+                        10..=13 => ([c, 0, 0, 0, 0], AnsiKeyCode::_Enter, KeyModifier::None),
+                        1..=7 | 14..=26 => {
                             let key = AnsiKeyCode::Letter(Letter::try_from(c)?);
                             ([c, 0, 0, 0, 0], key, modifier)
                         }
@@ -323,7 +324,7 @@ impl TermiosReader {
                                         81 => AnsiKeyCode::F2,
                                         82 => AnsiKeyCode::F3,
                                         83 => AnsiKeyCode::F4,
-                                        _ => return Err(TermiosError::UnknownKey(byte_3)),
+                                        _ => return Err(TermiosError::UnknownKey),
                                     };
                                     let code = [c, byte_2, byte_3, 0, 0];
                                     (code, key, modifier)
@@ -345,7 +346,7 @@ impl TermiosReader {
                                                 (55, 126) => AnsiKeyCode::F6,
                                                 (56, 126) => AnsiKeyCode::F7,
                                                 (57, 126) => AnsiKeyCode::F8,
-                                                _ => return Err(TermiosError::UnknownKey(byte_4)),
+                                                _ => return Err(TermiosError::UnknownKey),
                                             };
                                             ([c, byte_2, byte_3, byte_4, byte_5], key, modifier)
                                         }
@@ -360,7 +361,7 @@ impl TermiosReader {
                                                 (48, 126) => AnsiKeyCode::F9,
                                                 (49, 126) => AnsiKeyCode::F10,
                                                 (52, 126) => AnsiKeyCode::F12,
-                                                _ => return Err(TermiosError::UnknownKey(byte_4)),
+                                                _ => return Err(TermiosError::UnknownKey),
                                             };
                                             ([c, byte_2, byte_3, byte_4, byte_5], key, modifier)
                                         }
@@ -369,7 +370,7 @@ impl TermiosReader {
                                         67 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Right, modifier),
                                         68 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Left, modifier),
                                         77 => return Self::parse_mouse_event(),
-                                        _ => return Err(TermiosError::UnknownKey(byte_3)),
+                                        _ => return Err(TermiosError::UnknownKey),
                                     }
                                 }
                                 0 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::_Escape, modifier),
@@ -798,11 +799,11 @@ impl TermiosReader {
                 modifier,
             });
         }
-        Err(TermiosError::ReadStdInFailed(
-            std::io::Error::last_os_error(),
-        ))
+        Err(TermiosError::ReadStdInFailed)
     }
 }
+
+
 
 /// Calls the system `read` and checks that no error occurs
 ///
@@ -812,8 +813,7 @@ impl TermiosReader {
 pub fn checked_stdin_read() -> Result<u8, TermiosError> {
     let mut byte = 0;
     if unsafe { read(STDIN_FILENO, &mut byte, 1) } == -1 {
-        let err = std::io::Error::last_os_error();
-        return Err(TermiosError::ReadStdInFailed(err));
+        return Err(TermiosError::ReadStdInFailed);
     }
     // println!("{}", byte);
     Ok(byte)
