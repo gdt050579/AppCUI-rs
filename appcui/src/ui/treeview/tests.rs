@@ -75,6 +75,11 @@ impl Course {
 
         tv.add(Course::new("Bob", 22, 12));
     }
+    fn populate_with_courses_batch(tv: &mut TreeView<Course>) {
+        tv.add_batch(|tv| {
+            Course::populate_with_courses(tv);
+        });
+    }
 }
 
 #[test]
@@ -350,6 +355,35 @@ fn check_column_sort() {
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_column_sort_by_mouse() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Down,3)
+        Paint('1. Initial state (focus on Advance Calculus)')
+        CheckHash(0xEB97DB5992DF3F85) 
+        Mouse.Click(10,1,left)
+        Paint('2. Sort by name (ascendent)')
+        CheckHash(0x58B4BE1D9E03E25F) 
+        Mouse.Click(10,1,left)
+        Paint('3. Sort by name (descendent)')
+        CheckHash(0xC4F3642B25FBC9F8) 
+        Mouse.Click(40,1,left)
+        Paint('4. Sort by relevance (ascendent)')
+        CheckHash(0x3E3BBCEC77D1EA72) 
+        Mouse.Click(40,1,left)
+        Paint('5. Sort by relevance (descendent)')
+        CheckHash(0xCB769FD963C7F0DD) 
+    ";
+    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
     a.run();
