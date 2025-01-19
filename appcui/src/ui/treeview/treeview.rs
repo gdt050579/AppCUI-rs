@@ -472,6 +472,7 @@ where
                 true
             }
             ColumnsHeaderAction::UpdateScroll => {
+                self.hover_status = HoverStatus::None;
                 self.update_scrollbars();
                 true
             }
@@ -525,6 +526,7 @@ where
         let visible_items = self.visible_items();
         let max_value = self.item_list.len().saturating_sub(visible_items);
         self.top_view = new_poz.min(max_value);
+        self.hover_status = HoverStatus::None;
         self.update_scrollbars();
     }
     fn emit_selection_update_event(&self) {
@@ -694,14 +696,6 @@ where
                 self.update_position(self.pos.saturating_add(self.visible_items()), true);
                 true
             }
-            key!("Left") => {
-                self.update_position(self.pos.saturating_sub(self.size().height as usize), true);
-                true
-            }
-            key!("Right") => {
-                self.update_position(self.pos.saturating_add(self.size().height as usize), true);
-                true
-            }
 
             // Selection
             key!("Insert") | key!("Shift+Down") => {
@@ -730,14 +724,14 @@ where
                 self.select_until_position(self.pos.saturating_add(self.visible_items()));
                 true
             }
-            key!("Shift+Left") => {
-                self.select_until_position(self.pos.saturating_sub(self.size().height as usize));
-                true
-            }
-            key!("Shift+Right") => {
-                self.select_until_position(self.pos.saturating_add(self.size().height as usize));
-                true
-            }
+            // key!("Shift+Left") => {
+            //     self.select_until_position(self.pos.saturating_sub(self.size().height as usize));
+            //     true
+            // }
+            // key!("Shift+Right") => {
+            //     self.select_until_position(self.pos.saturating_add(self.size().height as usize));
+            //     true
+            // }
 
             // Action & folding
             key!("Space") | key!("Enter") => {

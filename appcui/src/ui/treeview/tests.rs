@@ -454,3 +454,39 @@ fn check_key_mouse_does_not_work_on_columns_on_hide_header_flag() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_hover_over_fold_button() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Down,3)
+        Paint('1. Initial state (focus on Advance Calculus)')
+        CheckHash(0x7265C73AC95890D9) 
+        Mouse.Move(2,3)
+        Paint('2. Hover over Alice [-] button')
+        CheckHash(0x21DB0D48AF84A8FF) 
+        Mouse.Move(14,9)
+        Paint('3. Hover over Grammer [-] button')
+        CheckHash(0xDB9B92DC20777933) 
+        Key.Pressed(Right,10)
+        Paint('4. Change scroll X (nothing should be hovered)')
+        CheckHash(0x351C7A95B324BD1C) 
+        Key.Pressed(Ctrl+Alt+Down,4)
+        Paint('5. Change scroll Y (nothing should be hovered)')
+        CheckHash(0x7120D733E0AACA30) 
+        Mouse.Move(16,10)
+        Paint('6. Hover over Grammer [-] Haiku')
+        CheckHash(0x5891B0DD550D20CA) 
+        Mouse.Move(4,4)
+        Paint('7. Hover over Grammer [-] English')
+        CheckHash(0x75A6E85CF8407EAE) 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
