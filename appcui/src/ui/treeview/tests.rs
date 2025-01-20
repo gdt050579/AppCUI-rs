@@ -533,6 +533,38 @@ fn check_fold_button_with_mouse() {
 }
 
 #[test]
+fn check_fold_using_space() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Down,2)
+        Paint('1. Initial state (focus on Math)')
+        CheckHash(0x2D9B66CBE781DDFE) 
+        Key.Pressed(Space)
+        Paint('2. Math is collapsed [+]')
+        CheckHash(0x4C84D0C161FAA53E) 
+        Key.Pressed(Space)
+        Paint('3. Math is expanded [+]')
+        CheckHash(0x2D9B66CBE781DDFE) 
+        Key.Pressed(Down,5)
+        Key.Pressed(Space)
+        Paint('4. Grammar is now collapsed [+]')
+        CheckHash(0x250802DA587A60A1) 
+        Key.Pressed(Up)
+        Key.Pressed(Space)
+        Paint('5. Englosh is now collapsed [+]')
+        CheckHash(0x408F23B73C4E37C6) 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
 fn check_inactive() {
     let script = "
         Paint.Enable(false)

@@ -724,17 +724,13 @@ where
                 self.select_until_position(self.pos.saturating_add(self.visible_items()));
                 true
             }
-            // key!("Shift+Left") => {
-            //     self.select_until_position(self.pos.saturating_sub(self.size().height as usize));
-            //     true
-            // }
-            // key!("Shift+Right") => {
-            //     self.select_until_position(self.pos.saturating_add(self.size().height as usize));
-            //     true
-            // }
 
             // Action & folding
-            key!("Space") | key!("Enter") => {
+            key!("Space") => {
+                self.reverse_fold();
+                true   
+            }
+            key!("Enter") => {
                 if self.comp.is_in_edit_mode() {
                     // will be process separately
                     return false;
