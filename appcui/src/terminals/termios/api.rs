@@ -1,5 +1,6 @@
 //! Interface to the <termios.h> API
 pub(crate) mod io;
+pub(crate) mod sizing;
 
 // Define C system binding calls
 extern "C" {
@@ -55,8 +56,7 @@ impl Termios {
 
         // If an error results, we return it back
         if result == -1 {
-            let err = std::io::Error::last_os_error();
-            return Err(TermiosError::TcGetAttr(err));
+            return Err(TermiosError::TcGetAttr);
         }
 
         // We create a new termios structure. The reason for that is we want to keep the previous
@@ -82,15 +82,14 @@ impl Termios {
             !(local_flags::ECHO | local_flags::ICANON | local_flags::ISIG | local_flags::IEXTEN);
 
         // Set control conditions like characters and time to wait for
-        raw_termios.c_cc[ctrl_char_idx::VMIN] = 0;
-        raw_termios.c_cc[ctrl_char_idx::VTIME] = 1;
+        raw_termios.c_cc[ctrl_char_idx::VMIN] = 1;
+        raw_termios.c_cc[ctrl_char_idx::VTIME] = 0;
 
         let result = unsafe { tcsetattr(io::STDIN_FILENO, term_cmd::TC_SET_ATTR_FLUSH, &raw_termios) };
 
         // If an error results, we return it back
         if result == -1 {
-            let err = std::io::Error::last_os_error();
-            return Err(TermiosError::TcSetAttr(err));
+            return Err(TermiosError::TcSetAttr);
         }
 
         Ok(orig_termios)
@@ -113,11 +112,11 @@ impl Drop for Termios {
 
 #[derive(Debug)]
 pub enum TermiosError {
-    TcGetAttr(std::io::Error),
-    TcSetAttr(std::io::Error),
-    ReadStdInFailed(std::io::Error),
+    TcGetAttr,
+    TcSetAttr,
+    ReadStdInFailed,
     UnknownLetter(io::UnknownLetter),
-    UnknownKey(u8),
+    UnknownKey,
 }
 
 impl From<io::UnknownLetter> for TermiosError {
