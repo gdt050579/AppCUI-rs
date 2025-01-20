@@ -12,6 +12,7 @@
     - [Terminals](chapter-2/terminals.md)
         - [Windows Console]()
         - [NCurses](chapter-2/terminals/ncurses.md)
+        - [Termios](chapter-2/terminals/termios.md)
         - [OpenGL]()
         - [SDL]()
         - [CrossTerm]()

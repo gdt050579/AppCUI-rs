@@ -1,10 +1,10 @@
 mod debug;
-#[cfg(target_family = "unix")]
-mod ncurses;
 mod system_event;
-mod system_event_thread;
 #[cfg(target_family = "unix")]
 mod termios;
+#[cfg(target_os = "linux")]
+mod ncurses;
+mod system_event_thread;
 #[cfg(target_os = "windows")]
 mod windows_console;
 
@@ -31,9 +31,9 @@ pub(super) use self::system_event_thread::SystemEventReader;
 use self::debug::DebugTerminal;
 
 #[cfg(target_family = "unix")]
-use self::ncurses::NcursesTerminal;
-#[cfg(target_family = "unix")]
 use self::termios::TermiosTerminal;
+#[cfg(target_os = "linux")]
+use self::ncurses::NcursesTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_console::WindowsTerminal;
 
@@ -55,7 +55,7 @@ pub enum TerminalType {
     WindowsConsole,
     #[cfg(target_family = "unix")]
     Termios,
-    #[cfg(target_family = "unix")]
+    #[cfg(target_os = "linux")]
     NcursesTerminal,
 }
 
@@ -92,9 +92,9 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
-        TerminalType::Termios => TermiosTerminal::new(builder),
-
-        #[cfg(target_family = "unix")]
+        TerminalType::Termios => TermiosTerminal::new(builder, sender),
+        
+        #[cfg(target_os = "linux")]
         TerminalType::NcursesTerminal => NcursesTerminal::new(builder),
     }
 }
@@ -104,16 +104,16 @@ fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<Syste
     Ok(Box::new(term))
 }
 #[cfg(target_os = "linux")]
-fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     // TermiosTerminal::new(builder)
     NcursesTerminal::new(builder)
 }
 #[cfg(target_os = "macos")]
-fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
-    TermiosTerminal::new(builder)
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+    TermiosTerminal::new(builder, sender)
 }
 #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
-fn build_default_terminal(builder: &crate::system::Builder) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     // anything else
-    TermiosTerminal::new(builder)
+    TermiosTerminal::new(builder, sender)
 }
