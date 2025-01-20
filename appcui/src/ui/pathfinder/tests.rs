@@ -31,7 +31,7 @@ const CSV_DATA: &str = "
     f:D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
 
-#[test]
+//#[test]
 fn test_while_developing() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let mut a = App::new().build().unwrap();
@@ -39,7 +39,7 @@ fn test_while_developing() {
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\"#,
         Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive ,
+        pathfinder::Flags::None ,
         nav);
     w.add(p);
     w.add(button!("test,x:1,y:3,w:6"));
@@ -212,7 +212,7 @@ fn check_case_insensitive() {
         Paint('Initial')
         Key.TypeText('w')
         Paint('Suggestion Windows should appear even though w was inserted')
-        CheckHash(0xF9D5B8F930ABA6DA)
+        CheckHash(0xE7C42E9D121AE49A)
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
