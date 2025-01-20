@@ -581,3 +581,31 @@ fn check_inactive() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_filter() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF4F13809AFE2629) 
+        Key.TypeText('ai')
+        Paint('2. filter based on <ai> text - cursor on Haiku')
+        CheckHash(0x6D6BDBD3081248C1) 
+        Key.Pressed(Enter)
+        Paint('3. Move to next item with <ai> -> AI')
+        CheckHash(0xE19B5FD646D31CCA) 
+        Key.Pressed(Enter)
+        Paint('4. Back on Haiku')
+        CheckHash(0x6D6BDBD3081248C1) 
+        Mouse.Click(10,13,left)
+        Paint('5. Click outside the list (nothing happens)')
+        CheckHash(0x6D6BDBD3081248C1) 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
