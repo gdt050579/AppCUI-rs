@@ -490,3 +490,44 @@ fn check_hover_over_fold_button() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_fold_button_with_mouse() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Down,3)
+        Paint('1. Initial state (focus on Advance Calculus)')
+        CheckHash(0x7265C73AC95890D9) 
+        Mouse.Move(2,3)
+        Paint('2. Hover over Alice [-] button')
+        CheckHash(0x21DB0D48AF84A8FF) 
+        Mouse.Click(2,3,left)
+        Paint('3. Alice is collapsed [+]')
+        CheckHash(0x30313469FD320C65) 
+        Mouse.Click(2,3,left)
+        Paint('4. Alice is expanded [-]')
+        CheckHash(0x9B48A3C26FEC3EDA) 
+        Mouse.Click(14,9,left)
+        Paint('5. Grammar is collapse [+]')
+        CheckHash(0x508A56E0D23C18F6) 
+        Mouse.Click(2,3,left)
+        Paint('6. Alice is collapsed [+]')
+        CheckHash(0x30313469FD320C65) 
+        Mouse.Click(2,3,left)
+        Paint('7. Alice is expanded [-] (and grammer is collapsed)')
+        CheckHash(0x48543562D4D9E092) 
+        Key.Pressed(Right,15)
+        Paint('8. Scroll right characters to the right')
+        CheckHash(0x5EFDABDA00591910) 
+        Mouse.Click(4,8,left)
+        Paint('9. English is collapsed [+]')
+        CheckHash(0x2BF6024818A131A7) 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
