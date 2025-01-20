@@ -79,9 +79,12 @@ where
     fn get_matching_paths(path: &str, items: &[String], case_sensitive: bool) -> Vec<String> {
         if case_sensitive {
             items.iter().filter(|s| s.starts_with(path)).cloned().collect()
-        }
-        else {
-            items.iter().filter(|s| crate::utils::string_comparison::starts_with_ignore_case(path, s)).cloned().collect()
+        } else {
+            items
+                .iter()
+                .filter(|s| crate::utils::string_comparison::starts_with_ignore_case(path, s))
+                .cloned()
+                .collect()
         }
     }
 }
@@ -191,7 +194,7 @@ where
         self.input_path.push_str(text);
         self.update_char_count(self.input_path.chars().count() as i32, true);
         if !control.has_focus() {
-            self.update_out_of_focus_surface(control.theme());
+            self.update_out_of_focus_surface(control.theme(), control.is_enabled(), control.is_mouse_over());
         }
     }
 
@@ -274,9 +277,6 @@ where
     }
 
     fn delete_current_character(&mut self) {
-        if self.is_readonly {
-            return;
-        }
         if self.selection.is_empty() {
             let next_pos = self.input_path.next_pos(self.cursor, 1);
             if self.cursor < next_pos {
@@ -289,9 +289,6 @@ where
     }
 
     fn delete_previous_character(&mut self) {
-        if self.is_readonly {
-            return;
-        }
         if self.selection.is_empty() {
             let prev_pos = self.input_path.previous_pos(self.cursor, 1);
             if prev_pos < self.cursor {
@@ -312,14 +309,14 @@ where
             .collect()
     }
 
-    fn update_out_of_focus_surface(&mut self, theme: &Theme) {
+    fn update_out_of_focus_surface(&mut self, theme: &Theme, is_enabled: bool, is_mouse_hover: bool) {
         self.out_of_focus_surface.clear(Character::with_attributes(' ', theme.editor.normal));
 
         let (string_fits, processed_path) = self.text_fits_textbox(&self.input_path);
         if string_fits {
-            self.update_fitting_text(theme, &processed_path);
+            self.update_fitting_text(theme, &processed_path, is_enabled, is_mouse_hover);
         } else {
-            self.update_trimmed_text(theme);
+            self.update_trimmed_text(theme, is_enabled, is_mouse_hover);
         }
     }
 
@@ -370,14 +367,14 @@ where
             .to_string()
             .replace(PLATFORM_SEPARATOR_CHARACTER, &format!(" {} ", char::from(Self::PATH_TRIANGLE_SEPARTOR)));
 
-        (s.chars().count() <= self.width as usize - Self::PADDING as usize , s)
+        (s.chars().count() <= self.width as usize - Self::PADDING as usize, s)
     }
 
-    fn update_fitting_text(&mut self, theme: &Theme, text: &str) {
-        self.update_text_at(theme, text, 1);
+    fn update_fitting_text(&mut self, theme: &Theme, text: &str, is_enabled: bool, is_mouse_hover: bool) {
+        self.update_text_at(theme, text, 1, is_enabled, is_mouse_hover);
     }
 
-    fn update_trimmed_text(&mut self, theme: &Theme) {
+    fn update_trimmed_text(&mut self, theme: &Theme, is_enabled: bool, is_mouse_hover: bool) {
         let items = Self::get_path_items(&self.input_path);
         if items.is_empty() {
             return;
@@ -422,20 +419,21 @@ where
 
         left_text.push(char::from(Self::PATH_CHAR_DOTS));
         left_text.push_str(&right_text);
-        self.update_text_at(theme, &left_text, 1);
+        self.update_text_at(theme, &left_text, 1, is_enabled, is_mouse_hover);
     }
 
     fn paint_textbox_out_of_focus(&self, surface: &mut Surface, _theme: &Theme) {
         surface.draw_surface(0, 0, &self.out_of_focus_surface);
     }
 
-    fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize) {
+    fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize, is_enabled: bool, is_mouse_hover: bool) {
         let mut x = pos as i32;
         for ch in text.chars() {
-            let attr = if ch == char::from(Self::PATH_TRIANGLE_SEPARTOR) {
-                theme.editor.hovered
-            } else {
-                theme.editor.normal
+            let attr = match () {
+                _ if !is_enabled => theme.editor.inactive,
+                _ if is_mouse_hover => theme.editor.hovered,
+                _ if ch == char::from(Self::PATH_TRIANGLE_SEPARTOR) => theme.editor.hovered,
+                _ => theme.editor.normal,
             };
             self.out_of_focus_surface.write_char(x, 0, Character::with_attributes(ch, attr));
             x += 1;
@@ -613,7 +611,7 @@ where
         if within_control && ((x < 1) || (x >= w - 1) || (y < 0) || (y >= h)) {
             return None;
         }
-        let glyphs_count = self.start as i32 + x - 1 - self.cursor as i32 ;
+        let glyphs_count = self.start as i32 + x - 1 - self.cursor as i32;
         println!("[mouse_pos_to_glyph_offset] x = {}, y = {}, glyphs_count = {}", x, y, glyphs_count);
         match glyphs_count.cmp(&0) {
             std::cmp::Ordering::Less => Some(self.input_path.previous_pos(self.cursor, (-glyphs_count) as usize)),
@@ -669,7 +667,7 @@ where
     fn on_resize(&mut self, control: &ControlBase, _old_size: Size, new_size: Size) {
         self.width = new_size.width;
         self.out_of_focus_surface.resize(new_size);
-        self.update_out_of_focus_surface(control.theme());
+        self.update_out_of_focus_surface(control.theme(), control.is_enabled(), control.is_mouse_over());
         self.move_cursor_at_end();
     }
 
@@ -696,7 +694,7 @@ where
     }
 
     fn on_lose_focus(&mut self, control: &mut ControlBase) {
-        self.update_out_of_focus_surface(control.theme());
+        self.update_out_of_focus_surface(control.theme(), control.is_enabled(), control.is_mouse_over());
     }
 
     fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme) {
@@ -734,7 +732,8 @@ where
 
                 self.selected_suggestion_pos = 0;
                 self.start_suggestions_pos = 1;
-                self.navigator_cacher.update_suggestions(&self.input_path, navigator, self.is_case_sensitive);
+                self.navigator_cacher
+                    .update_suggestions(&self.input_path, navigator, self.is_case_sensitive);
                 self.expand_suggestions_area(control);
                 return EventProcessStatus::Processed;
             }
@@ -818,7 +817,8 @@ where
 
                     self.selected_suggestion_pos = 0;
                     self.start_suggestions_pos = 1;
-                    self.navigator_cacher.update_suggestions(&self.input_path, navigator, self.is_case_sensitive);
+                    self.navigator_cacher
+                        .update_suggestions(&self.input_path, navigator, self.is_case_sensitive);
                     self.expand_suggestions_area(control);
                     return EventProcessStatus::Processed;
                 }
@@ -829,8 +829,14 @@ where
 
     fn on_mouse_event(&mut self, control: &ControlBase, event: &MouseEvent) -> EventProcessStatus {
         match event {
-            MouseEvent::Enter | MouseEvent::Leave => {
+            MouseEvent::Enter => {
                 self.drag_started = false;
+                self.update_out_of_focus_surface(control.theme(), control.is_enabled(), true);
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Leave => {
+                self.drag_started = false;
+                self.update_out_of_focus_surface(control.theme(), control.is_enabled(), false);
                 EventProcessStatus::Processed
             }
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
@@ -845,7 +851,7 @@ where
                 self.drag_started = false;
                 EventProcessStatus::Processed
             }
-            MouseEvent::DoubleClick(data) => {
+            MouseEvent::DoubleClick(_) => {
                 self.select_all();
                 EventProcessStatus::Processed
             }

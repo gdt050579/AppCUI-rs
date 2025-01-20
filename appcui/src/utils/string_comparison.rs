@@ -10,21 +10,6 @@ static LOWER_CASE_TABLE: [u8; 256] = [
     250, 251, 252, 253, 254, 255,
 ];
 
-pub(crate) fn equal_ignore_case(text1: &str, text2: &str) -> bool {
-    if text1.len() != text2.len() {
-        return false;
-    }
-    let b1 = text1.as_bytes();
-    let b2 = text2.as_bytes();
-    let len = b1.len();
-    for i in 0..len {
-        if LOWER_CASE_TABLE[b1[i] as usize] != LOWER_CASE_TABLE[b2[i] as usize] {
-            return false;
-        }
-    }
-    true
-}
-
 pub(crate) fn starts_with_ignore_case(text1: &str, text2: &str) -> bool {
     let b1 = text1.as_bytes();
     let b2 = text2.as_bytes();

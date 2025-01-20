@@ -1,5 +1,5 @@
-use pathfinder::pathfinder::GenericPathFinder;
 use crate::{prelude::*, utils::fs::NavSimulator};
+use pathfinder::pathfinder::GenericPathFinder;
 
 const CSV_DATA: &str = "
     r,C:\\,10000,100000,SYSTEM,fixed
@@ -36,11 +36,8 @@ fn test_while_developing() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let mut a = App::new().build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::None ,
-        nav);
+    let mut p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::None, nav);
+    //p.set_enabled(false);
     w.add(p);
     w.add(button!("test,x:1,y:3,w:6"));
     a.add_window(w);
@@ -85,11 +82,7 @@ fn check_display_out_of_focus() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive,
-        nav);
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::CaseSensitive, nav);
     w.add(p);
     w.add(button!("test,x:1,y:3,w:6"));
     a.add_window(w);
@@ -130,11 +123,7 @@ fn check_suggestion_box_navigation() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive,
-        nav);
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::CaseSensitive, nav);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -174,11 +163,7 @@ fn check_suggestion_box_top_navigation() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:10");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:5,w:40"),
-        pathfinder::Flags::CaseSensitive,
-        nav);
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:5,w:40"), pathfinder::Flags::CaseSensitive, nav);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -195,11 +180,7 @@ fn check_case_sensitive() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive,
-        nav);
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::CaseSensitive, nav);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -216,11 +197,7 @@ fn check_case_insensitive() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::None ,
-        nav);
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::None, nav);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -241,11 +218,7 @@ fn check_readonly_flag() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::ReadOnly ,
-        nav);
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::ReadOnly, nav);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -272,11 +245,7 @@ fn check_select_all() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive,
-        nav);
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::CaseSensitive, nav);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -320,12 +289,84 @@ fn check_mouse_click_move_cursor() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files\"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive,
-        nav);
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::CaseSensitive, nav);
     w.add(p);
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_mouse_hover() {
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    let script = "
+        Paint('Initial')
+        CheckHash(0xEC9D919B63523643)
+        Mouse.Move(20,5)
+        Paint('Mouse hover when out of focus')
+        CheckHash(0xB2898339EE3B49F3)
+        Key.Pressed(Tab)
+        Paint('Mouse hover when in focus')
+        CheckHash(0xEC4AB50225FA43DF)
+        Mouse.Move(20,7)
+        Paint('Mouse not over when in focus')
+        CheckHash(0xEC4AB50225FA43DF)
+        Mouse.Move(20,5)
+        Key.Pressed(Tab)
+        Paint('Mouse hover when out of focus')
+        CheckHash(0xB2898339EE3B49F3)
+        Mouse.Move(20,7)
+        Paint('Mouse not over when out of focus')
+        CheckHash(0xEC9D919B63523643)
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:60,h:15");
+    let p = GenericPathFinder::with_navigator(
+        r#"C:\Program Files\Windows\System32"#,
+        Layout::new("x:1,y:1,w:40"),
+        pathfinder::Flags::CaseSensitive,
+        nav,
+    );
+    w.add(p);
+    w.add(button!("test,x:1,y:3,w:6"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_select_and_clipboard() {
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    let script = "
+        Paint('Initial')
+        CheckHash(0x73883FF79A85162E)
+        Mouse.Drag(15,5,29,5)
+        Paint('After Mouse select Program Files')
+        CheckHash(0x996E1BBDDE69F18A)
+        Key.Pressed(Ctrl+X)
+        Paint('After Ctrl+X (Cut)')
+        CheckHash(0x84BD994B0080D697)
+        Key.Pressed(End)
+        Key.Pressed(Ctrl+V)
+        Paint('After Paste Program Files at end')
+        CheckHash(0x4D712C6B5A0B8DCE)
+        Mouse.Drag(15,5,23,5)
+        Paint('After Mouse select Windows')
+        CheckHash(0xAD80728B963D302)
+        Key.Pressed(Ctrl+C)
+        Key.Pressed(End)
+        Key.Pressed(Ctrl+V)
+        Paint('After Paste Windows at end')
+        CheckHash(0x8702BC116CD2B48B)
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:60,h:15");
+    let p = GenericPathFinder::with_navigator(
+        r#"C:\Program Files\Windows\System32"#,
+        Layout::new("x:1,y:1,w:40"),
+        pathfinder::Flags::CaseSensitive,
+        nav,
+    );
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
