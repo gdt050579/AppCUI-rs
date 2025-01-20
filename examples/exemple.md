@@ -50,3 +50,8 @@ fn main() {
 }
 ```
 [Get me back](#back-link)
+
+| Column 1 | Column 2|
+| - | - |
+| Cell 1, __Row 1__ | Cell 2, Row 1 |
+| Cell 1, Row 2 | Cell 1, Row 2 |

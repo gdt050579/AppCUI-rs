@@ -374,6 +374,75 @@ impl OnPaint for Markdown {
                         y_pos += 1;
                     }
                 }
+                MarkdownElement::Table(table) => {
+                    let mut column_widths = Vec::new();
+
+                    for (i, header) in table.headers.iter().enumerate() {
+                        let header_len = header.iter().map(|e| e.to_string().chars().count()).sum::<usize>();
+                        if column_widths.len() <= i {
+                            column_widths.push(header_len);
+                        } else {
+                            column_widths[i] = column_widths[i].max(header_len);
+                        }
+                    }
+
+                    for row in &table.rows {
+                        for (i, cell) in row.iter().enumerate() {
+                            let cell_len = cell.iter().map(|e| e.to_string().chars().count()).sum::<usize>();
+                            if column_widths.len() <= i {
+                                column_widths.push(cell_len);
+                            } else {
+                                column_widths[i] = column_widths[i].max(cell_len);
+                            }
+                        }
+                    }
+
+                    let mut x_pos = self.x;
+                    for (i, header) in table.headers.iter().enumerate() {
+                        let header_str = header.iter().map(|e| e.to_string()).collect::<String>();
+                        let padded_header = format!("{:width$}|", header_str, width = column_widths[i] + 3);
+                        surface.write_string(
+                            x_pos,
+                            y_pos,
+                            &padded_header,
+                            CharAttribute::new(Color::Magenta, Color::White, CharFlags::Bold),
+                            false,
+                        );
+                        x_pos += column_widths[i] as i32 + 4;
+                    }
+                    y_pos += 1;
+
+                    let separator = column_widths
+                        .iter()
+                        .map(|&width| "─".repeat(width + 3))
+                        .collect::<Vec<_>>()
+                        .join("|") + "|";
+                    surface.write_string(
+                        self.x,
+                        y_pos,
+                        &separator,
+                        CharAttribute::new(Color::Gray, Color::White, CharFlags::None),
+                        false,
+                    );
+                    y_pos += 1;
+
+                    for row in &table.rows {
+                        x_pos = self.x;
+                        for (i, cell) in row.iter().enumerate() {
+                            let cell_str = cell.iter().map(|e| e.to_string()).collect::<String>();
+                            let padded_cell = format!("{:width$}|", cell_str, width = column_widths[i] + 3);
+                            surface.write_string(
+                                x_pos,
+                                y_pos,
+                                &padded_cell,
+                                CharAttribute::new(Color::Black, Color::White, CharFlags::None),
+                                false,
+                            );
+                            x_pos += column_widths[i] as i32 + 4;
+                        }
+                        y_pos += 1;
+                    }
+                }
             }
             y_pos += 1;
         }
@@ -427,14 +496,14 @@ impl OnMouseEvent for Markdown {
                         y_header = Some(header_position);
                     }
                 }
-                
+
                 if let Some(header_position) = y_header {
                     self.move_scroll_to(0, self.y - header_position);
                 } else {
                     self.drag_point = Some(Point::new(data.x, data.y));
                 }
                 EventProcessStatus::Processed
-            }            
+            }
             MouseEvent::Released(data) => {
                 if let Some(p) = self.drag_point {
                     self.move_scroll_to(self.x + data.x - p.x, self.y + data.y - p.y);

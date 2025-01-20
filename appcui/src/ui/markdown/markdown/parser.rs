@@ -8,7 +8,15 @@ pub enum MarkdownElement {
     UnorderedList(Vec<ListItem>),
     OrderedList(Vec<ListItem>),
     HorizontalRule,
-    CodeBlock(String), 
+    CodeBlock(String),
+    Table(Table)
+}
+
+// Enum representing Markdown  table with rows and cells.
+#[derive(Debug)]
+pub struct Table {
+    pub headers: Vec<Vec<InlineElement>>,
+    pub rows: Vec<Vec<Vec<InlineElement>>> // rows[row][cell][element]
 }
 
 /// Enum representing list items in Markdown. List items can be simple or nested.
@@ -67,6 +75,8 @@ impl MarkdownParser {
             } else if in_code_block {
                 code_block_content.push_str(line);
                 code_block_content.push('\n');
+            } else if Self::is_table_header(trimmed) {
+                elements.push(Self::parse_table(&mut lines, trimmed));
             } else if trimmed == "---" {
                 elements.push(MarkdownElement::HorizontalRule);
             } else if trimmed.starts_with('#') {
@@ -82,6 +92,44 @@ impl MarkdownParser {
         }
 
         elements
+    }
+
+    /// Check for table header
+    fn is_table_header(line: &str) -> bool {
+        line.starts_with('|') && line.ends_with('|')
+    }
+
+    fn parse_inline_cells(line: &str) -> Vec<Vec<InlineElement>> {
+        line.trim()
+            .trim_matches('|')
+            .split('|')
+            .map(|cell| {
+                let content = cell.trim();
+                Self::parse_inline(content)
+            })
+            .collect()
+    }
+
+    // Parse a table from lines.
+    fn parse_table<'a>(
+        lines: &mut impl Iterator<Item = &'a str>,
+        header_line: &str,
+    ) -> MarkdownElement {
+        let headers = Self::parse_inline_cells(header_line);
+        lines.next();
+    
+        let mut rows = Vec::new();
+
+        while let Some(line) = lines.next() {
+            let trimmed = line.trim();
+            if trimmed.starts_with('|') && trimmed.ends_with('|') {
+                rows.push(Self::parse_inline_cells(trimmed));
+            } else {
+                break; 
+            }
+        }
+        
+        MarkdownElement::Table(Table { headers, rows })
     }
 
     /// Parses a header line (e.g., "# Header") into a `MarkdownElement::Header`
