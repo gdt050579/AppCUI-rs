@@ -531,3 +531,21 @@ fn check_fold_button_with_mouse() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_inactive() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Down,3)
+        Paint('1. Initial state (no focus because it is inactive)')
+        CheckHash(0x674C02FC96FC3BC9) 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
+    tv.set_enabled(false);
+    Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
