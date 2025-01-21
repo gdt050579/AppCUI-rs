@@ -104,8 +104,9 @@ pub fn acs_map() -> *const chtype {
 //     fn set_escdelay(ms: c_int) -> i32;
 // }
 
+#[cfg_attr(target_os = "linux", link(name = "ncursesw"))]
+#[cfg_attr(target_os = "macos", link(name = "ncurses"))]  // on macos `ncurses` already includes wide chars support
 #[cfg(target_family = "unix")]
-#[link(name = "ncursesw")]
 extern "C"{
     pub fn initscr() -> WINDOW;
     pub fn endwin() -> c_int;
