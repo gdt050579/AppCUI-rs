@@ -8,6 +8,8 @@ fn check_chartbar_creation() {
         Paint('nine labels across al corners and center')   
         CheckHash(0xF7D704CAB062ED5C)   
     ";
+
+    
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
 
