@@ -13,7 +13,7 @@ fn check_chartbar_creation() {
 
     let mut c = ChartBar::new(
         "aaaaa",
-        Type::Line,
+        Type::VerticalBar,
         0,
         Flags::AutoScroll | Flags::ScrollBars,
         1,

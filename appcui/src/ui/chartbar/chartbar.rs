@@ -100,7 +100,7 @@ impl ChartBar {
 
     #[inline(always)]
     fn oy_label(&self) -> &str {
-        self.y_axes.as_ref().map(|f| f.label.as_str()).unwrap_or("")
+        self.y_axes.as_ref().map(|f| f.label.as_str()).unwrap_or("?")
     }
 
     #[inline(always)]
