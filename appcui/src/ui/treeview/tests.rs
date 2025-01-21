@@ -609,3 +609,41 @@ fn check_filter() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_column_resize() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x754C65468149AA5) 
+        Key.Pressed(Ctrl+Right)
+        Paint('2. First resize column selected')
+        CheckHash(0x15A3000A16F00EAF) 
+        Key.Pressed(Left,10)
+        Paint('3. Minimize first column by 10 characters')
+        CheckHash(0x9DE0D61EB6DDDB47) 
+        Key.Pressed(Ctrl+Right)
+        Paint('4. Seconds resize column selected')
+        CheckHash(0xB4DC3AF051686A8F) 
+        Key.Pressed(Right,10)
+        Paint('5. Increase seconds column by 10 characters')
+        CheckHash(0x32AB02708F5CE014) 
+        Mouse.DoubleClick(21,1,left)
+        Paint('6. Autoresze column 1')
+        CheckHash(0x8C7B09FCFA339E6E) 
+        Key.Pressed(Escape)
+        Key.Pressed(Right,100)
+        Paint('7. Scroll to last column')
+        CheckHash(0x4FC46C5F91982D49) 
+        Mouse.DoubleClick(58,1,left)
+        Paint('8. Autoresze column 3')
+        CheckHash(0x9BF79D529343665A) 
+    ";
+    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}

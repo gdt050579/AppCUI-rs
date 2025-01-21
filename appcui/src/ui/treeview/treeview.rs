@@ -432,16 +432,17 @@ where
         for handle in self.item_list.iter() {
             if let Some(item) = self.manager.get(*handle) {
                 if let Some(rm) = item.value().render_method(column_index) {
-                    new_width = new_width.max(listview::RenderMethod::min_width(&rm));
+                    let x_offset = item.x_offset(self.fold_sign_with, true) + 1 + self.icon_width as i32 + self.fold_sign_with as i32;
+                    if column_index == 0 {
+                        new_width = new_width.max(listview::RenderMethod::min_width(&rm) + x_offset as u32);
+                    } else {
+                        new_width = new_width.max(listview::RenderMethod::min_width(&rm));
+                    }
                     found = true;
                 }
             }
         }
         if found {
-            if column_index == 0 {
-                todo!("add depth with");
-                new_width += self.icon_width as u32;
-            }
             self.header.set_column_width(column_index, new_width.min(u8::MAX as u32) as u8);
         }
     }
@@ -728,7 +729,7 @@ where
             // Action & folding
             key!("Space") => {
                 self.reverse_fold();
-                true   
+                true
             }
             key!("Enter") => {
                 if self.comp.is_in_edit_mode() {
