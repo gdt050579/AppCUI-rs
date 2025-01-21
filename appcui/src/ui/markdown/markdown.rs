@@ -202,12 +202,12 @@ impl Markdown {
                         parser::ListItem::Simple(ref elements) => {
                             let mut x = *x_pos;
                             Self::process_list_element(elements, indent, &mut x, y_pos, xlsurface, None, link_header_registry);
+                            *y_pos += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
                             Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry);
                         }
                     }
-                    *y_pos += 1;
                 }
             }
             MarkdownElement::OrderedList(ref items) => {
@@ -215,22 +215,23 @@ impl Markdown {
                 for item in items.iter() {
                     match item {
                         parser::ListItem::Simple(ref elements) => {
+                            let mut x = *x_pos;
                             Self::process_list_element(
                                 elements,
                                 indent,
-                                x_pos,
+                                &mut x,
                                 y_pos,
                                 xlsurface,
                                 Some(format!("{}.", index)),
                                 link_header_registry,
                             );
                             index += 1;
+                            *y_pos += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
                             Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry);
                         }
                     }
-                    *y_pos += 1;
                 }
             }
             _ => {}

@@ -9,8 +9,10 @@ Some testing for links back
 ## Table of Contents
 
 1. [Introduction](#introduction)
-   1. it 1
-   2. it 2
+ 1. it 1
+ 2. it 2
+ 3. it 244444544545454545
+  1. it 3
 2. [Features](#features)
 3. [Conclusion](#conclusion)
 
@@ -36,6 +38,8 @@ Here are some Markdown features:
   - Sub-item 1.1
   - Sub-item 1.2
     - Subitem 1.2.1
+    - Subitem 1.2.2
+  - Item 1.3
 - Item 2
 
 #### Code Blocks
@@ -52,6 +56,6 @@ fn main() {
 [Get me back](#back-link)
 
 | Column 1 | Column 2|
-| - | - |
+| - | --- |
 | Cell 1, __Row 1__ | Cell 2, Row 1 |
 | Cell 1, Row 2 | Cell 1, Row 2 |

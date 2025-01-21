@@ -49,13 +49,6 @@ impl LinkHeaderRegistry {
             self.link_header_positions.insert(id, (area, header_position));
         }
     }
-
-    pub fn get_link_area_coordinates(&self, id: &str) -> Option<(i32, i32, i32)> {
-        let key = LinkHeaderID(id.to_string());
-        self.link_header_positions
-            .get(&key)
-            .map(|(link_area, _)| (link_area.x_pos, link_area.y_pos, link_area.len))
-    }
     
     pub fn get_header_position(&self, id: &str) -> Option<i32> {
         let key = LinkHeaderID(id.to_string());
@@ -74,7 +67,7 @@ impl LinkHeaderRegistry {
     }
 
     fn is_within_link_area(&self, area: &LinkArea, x: i32, y: i32) -> bool {
-        x >= area.x_pos && x <= area.x_pos + area.len && y >= area.y_pos && y <= area.y_pos
+        x >= area.x_pos && x <= area.x_pos + area.len && y == area.y_pos
     }
 
     pub fn get_id_from_header(header: &str) -> String {
