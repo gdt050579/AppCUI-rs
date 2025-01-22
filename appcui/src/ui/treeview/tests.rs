@@ -647,3 +647,34 @@ fn check_column_resize() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_mouse_wheel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC0FE26FDDDC694DF) 
+        Mouse.Wheel(20,5,down,1)
+        Paint('2. Scroll starst with Alice')
+        CheckHash(0xB3B90D215AD057EF) 
+        Mouse.Wheel(20,5,right,10)
+        Paint('3. Scroll on right')
+        CheckHash(0xAE208272BB8A18D8) 
+        Mouse.Wheel(20,5,down,4)
+        Paint('4. Scroll starts with Logic')
+        CheckHash(0x734C6A359873E7A9) 
+        Mouse.Wheel(20,5,left,2)
+        Paint('5. Scroll to left 5 positions')
+        CheckHash(0x79B339256DF9AC29) 
+        Mouse.Wheel(20,5,up,2)
+        Paint('6. Scroll is not on Advance Calculus')
+        CheckHash(0x5D9406DE9A1F664E) 
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
