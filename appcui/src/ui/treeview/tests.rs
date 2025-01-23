@@ -80,6 +80,20 @@ impl Course {
             Course::populate_with_courses(tv);
         });
     }
+    fn populate_with_icons(tv: &mut TreeView<Course>) {
+        let h_math = tv.add_item(Item::new(Course::new("Math", 20, 10),false,None,['M','M']));
+        let h_geom = tv.add_item_to_parent(Item::new(Course::new("Geometry", 2, 5),false,None,['G','G']), h_math);
+        tv.add_item_to_parent(Item::new(Course::new("1-0-1", 4, 3),false,None,['1','1']), h_geom);
+        tv.add_item_to_parent(Item::new(Course::new("2-0-2", 8, 2),false,None,['2','2']), h_geom);
+        let h_calculus = tv.add_item_to_parent(Item::new(Course::new("Calculus", 4, 3),false,None,['C','C']), h_math);
+        tv.add_item_to_parent(Item::new(Course::new("Simple", 4, 3),false,None,['S','S']), h_calculus);
+        let h_adv = tv.add_item_to_parent(Item::new(Course::new("Advanced", 8, 2),false,None,['A','A']), h_calculus);
+        tv.add_item_to_parent(Item::new(Course::new("1-0-1", 4, 3),false,None,['1','1']), h_adv);
+        tv.add_item_to_parent(Item::new(Course::new("2-0-2", 8, 2),false,None,['2','2']), h_adv);
+        let h_logic = tv.add_item_to_parent(Item::new(Course::new("Logic", 4, 3),false,None,['L','L']), h_math);
+        tv.add_item_to_parent(Item::new(Course::new("Boolean", 8, 8),false,None,['B','B']), h_logic);
+        tv.add_item_to_parent(Item::new(Course::new("Prop", 8, 8),false,None,['P','P']), h_logic);
+    }
 }
 
 #[test]
@@ -674,6 +688,46 @@ fn check_mouse_wheel() {
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_small_icons() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Drag(31,1,40,1)
+        Paint('1. Initial state')
+        CheckHash(0x463764FFB7A47293) 
+        Mouse.Click(19,8,left)
+        Paint('2. Advanced is folded [+]')
+        CheckHash(0x4CDB8F4C685DFC7C) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SmallIcons);
+    Course::populate_with_icons(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_larger_icons() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Drag(31,1,40,1)
+        Paint('1. Initial state')
+        CheckHash(0xED408410B85B1EE1) 
+        Mouse.Click(21,8,left)
+        Paint('2. Advanced is folded [+]')
+        CheckHash(0x25A50B0D5E4C7061) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::LargeIcons);
+    Course::populate_with_icons(&mut tv);
     w.add(tv);
     a.add_window(w);
     a.run();

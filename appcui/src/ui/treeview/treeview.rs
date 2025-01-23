@@ -250,7 +250,7 @@ where
         };
         // first column
         let c = &columns[0];
-        let d = item.x_offset(self.fold_sign_with, false);
+        let d = item.x_offset(self.fold_sign_with, self.icon_width, false);
         let l = c.x + d;
         let r = c.x + c.width as i32;
         let mut extra = 0;
@@ -276,10 +276,11 @@ where
                 surface.set_relative_clip(c.x - 2, y, r.max(min_left), y);
                 surface.set_origin(c.x - 2, y);
                 let line_mask = item.line_mask;
+                let space = (self.icon_width + 6) as i32;
                 for i in 1..item.depth {
                     if line_mask & (1 << (i - 1)) != 0 {
                         surface.write_char(
-                            (i as i32) * 6,
+                            (i as i32) * space,
                             0,
                             Character::with_attributes(SpecialChar::BoxVerticalSingleLine, attr.unwrap_or(theme.text.inactive)),
                         );
@@ -432,7 +433,8 @@ where
         for handle in self.item_list.iter() {
             if let Some(item) = self.manager.get(*handle) {
                 if let Some(rm) = item.value().render_method(column_index) {
-                    let x_offset = item.x_offset(self.fold_sign_with, true) + 1 + self.icon_width as i32 + self.fold_sign_with as i32;
+                    let x_offset =
+                        item.x_offset(self.fold_sign_with, self.icon_width, true) + 1 + self.icon_width as i32 + self.fold_sign_with as i32;
                     if column_index == 0 {
                         new_width = new_width.max(listview::RenderMethod::min_width(&rm) + x_offset as u32);
                     } else {
@@ -654,7 +656,7 @@ where
         }
         let left_pos = self.header.columns()[0].x;
         if let Some(item) = self.manager.get(self.item_list[pos]) {
-            let p_x = left_pos + item.x_offset(self.fold_sign_with, true);
+            let p_x = left_pos + item.x_offset(self.fold_sign_with, self.icon_width, true);
             if (item.fold_status != FoldStatus::NonExpandable) && (x >= p_x) && (x < p_x + self.fold_sign_with as i32) {
                 return HoverStatus::OverFoldButton(p_x, pos);
             }
