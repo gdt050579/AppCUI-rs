@@ -20,7 +20,7 @@ impl KeyTypeTextCommand {
             ));
         }
         Ok(Self {
-            text: String::from(parser.get_param(0).unwrap()),
+            text: parser.get_string(0).unwrap(),
         })
     }
     pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {

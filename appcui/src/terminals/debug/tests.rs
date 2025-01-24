@@ -29,6 +29,15 @@ fn check_command_parser_string() {
 }
 
 #[test]
+fn check_command_parser_string_with_unescape() {
+    let cp = CommandParser::new("test('123\\n123','123\\t123')").unwrap();
+    assert_eq!(cp.get_command(), "test");
+    assert_eq!(cp.get_params_count(), 2);
+    assert_eq!(cp.get_string(0), Some(String::from("123\n123")));
+    assert_eq!(cp.get_string(1), Some(String::from("123\t123")));
+}
+
+#[test]
 fn test_command_only() {
     let command = "help";
     let parser = CommandParser::new(command).unwrap();
