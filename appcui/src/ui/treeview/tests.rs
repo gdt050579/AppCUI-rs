@@ -1,3 +1,5 @@
+use flat_string::FlatString;
+
 use crate::prelude::*;
 use crate::system::Handle;
 
@@ -81,18 +83,18 @@ impl Course {
         });
     }
     fn populate_with_icons(tv: &mut TreeView<Course>) {
-        let h_math = tv.add_item(Item::new(Course::new("Math", 20, 10),false,None,['M','M']));
-        let h_geom = tv.add_item_to_parent(Item::new(Course::new("Geometry", 2, 5),false,None,['G','G']), h_math);
-        tv.add_item_to_parent(Item::new(Course::new("1-0-1", 4, 3),false,None,['1','1']), h_geom);
-        tv.add_item_to_parent(Item::new(Course::new("2-0-2", 8, 2),false,None,['2','2']), h_geom);
-        let h_calculus = tv.add_item_to_parent(Item::new(Course::new("Calculus", 4, 3),false,None,['C','C']), h_math);
-        tv.add_item_to_parent(Item::new(Course::new("Simple", 4, 3),false,None,['S','S']), h_calculus);
-        let h_adv = tv.add_item_to_parent(Item::new(Course::new("Advanced", 8, 2),false,None,['A','A']), h_calculus);
-        tv.add_item_to_parent(Item::new(Course::new("1-0-1", 4, 3),false,None,['1','1']), h_adv);
-        tv.add_item_to_parent(Item::new(Course::new("2-0-2", 8, 2),false,None,['2','2']), h_adv);
-        let h_logic = tv.add_item_to_parent(Item::new(Course::new("Logic", 4, 3),false,None,['L','L']), h_math);
-        tv.add_item_to_parent(Item::new(Course::new("Boolean", 8, 8),false,None,['B','B']), h_logic);
-        tv.add_item_to_parent(Item::new(Course::new("Prop", 8, 8),false,None,['P','P']), h_logic);
+        let h_math = tv.add_item(Item::new(Course::new("Math", 20, 10), false, None, ['M', 'M']));
+        let h_geom = tv.add_item_to_parent(Item::new(Course::new("Geometry", 2, 5), false, None, ['G', 'G']), h_math);
+        tv.add_item_to_parent(Item::new(Course::new("1-0-1", 4, 3), false, None, ['1', '1']), h_geom);
+        tv.add_item_to_parent(Item::new(Course::new("2-0-2", 8, 2), false, None, ['2', '2']), h_geom);
+        let h_calculus = tv.add_item_to_parent(Item::new(Course::new("Calculus", 4, 3), false, None, ['C', 'C']), h_math);
+        tv.add_item_to_parent(Item::new(Course::new("Simple", 4, 3), false, None, ['S', 'S']), h_calculus);
+        let h_adv = tv.add_item_to_parent(Item::new(Course::new("Advanced", 8, 2), false, None, ['A', 'A']), h_calculus);
+        tv.add_item_to_parent(Item::new(Course::new("1-0-1", 4, 3), false, None, ['1', '1']), h_adv);
+        tv.add_item_to_parent(Item::new(Course::new("2-0-2", 8, 2), false, None, ['2', '2']), h_adv);
+        let h_logic = tv.add_item_to_parent(Item::new(Course::new("Logic", 4, 3), false, None, ['L', 'L']), h_math);
+        tv.add_item_to_parent(Item::new(Course::new("Boolean", 8, 8), false, None, ['B', 'B']), h_logic);
+        tv.add_item_to_parent(Item::new(Course::new("Prop", 8, 8), false, None, ['P', 'P']), h_logic);
     }
 }
 
@@ -403,7 +405,6 @@ fn check_column_sort_by_mouse() {
     a.run();
 }
 
-
 #[test]
 fn check_key_movement_up_down_without_header() {
     let script = "
@@ -468,7 +469,6 @@ fn check_key_mouse_does_not_work_on_columns_on_hide_header_flag() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_hover_over_fold_button() {
@@ -576,7 +576,6 @@ fn check_fold_using_space() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_inactive() {
@@ -730,5 +729,54 @@ fn check_larger_icons() {
     Course::populate_with_icons(&mut tv);
     w.add(tv);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_change_item_event() {
+    #[Window(events = TreeViewEvents<Course>, internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            Course::populate_with_icons(&mut tv);
+            w.add(tv);
+            w
+        }
+    }
+    impl TreeViewEvents<Course> for MyWin {
+        fn on_current_item_changed(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
+            if let Some(tv) = self.control(handle) {
+                if let Some(item) = tv.item(item_handle) {
+                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    self.set_title(&s);
+                }
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Mouse.Drag(31,1,40,1)
+        Paint('1. Initial state')
+        CheckHash(0x9797BA2144E8815E) 
+        Key.Pressed(Down)
+        Paint('2. Focus on Geometry, windows title: Geometry ')
+        CheckHash(0xD5A2BDB1F85A1FE2) 
+        Key.Pressed(End)
+        Paint('3. Focus on Prop, windows title: Prop ')
+        CheckHash(0x988BC5D85727D801) 
+        Mouse.Click(30,8,left)
+        Paint('4. Focus on Advanced, windows title: Advanced ')
+        CheckHash(0xEFD5EED5912A30EA) 
+        Mouse.Click(30,8,left)
+        Paint('5. Nothing changes')
+        CheckHash(0xEFD5EED5912A30EA) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }

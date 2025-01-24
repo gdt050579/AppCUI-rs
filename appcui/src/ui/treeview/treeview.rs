@@ -177,6 +177,17 @@ where
             false
         }
     }
+
+    #[inline(always)]
+    pub fn item(&self, item_handle: Handle<Item<T>>) -> Option<&T> {
+        self.manager.get(item_handle).map(|f| f.value())
+    }
+
+    #[inline(always)]
+    pub fn item_mut(&mut self, item_handle: Handle<Item<T>>) -> Option<&mut T> {
+        self.manager.get_mut(item_handle).map(|f| f.value_mut())
+    }
+
     fn goto_next_match(&mut self, start: usize, emit_event: bool) {
         let len = self.item_list.len();
         if len == 0 {

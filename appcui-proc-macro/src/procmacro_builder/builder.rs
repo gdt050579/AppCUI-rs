@@ -149,7 +149,7 @@ fn generate_numeric_selector_events(a: &mut Arguments) -> String {
 
 fn generate_listview_events(a: &mut Arguments) -> String {
     if !a.template_events.contains_key(&AppCUITrait::GenericListViewEvents) {
-        panic!("Missing generic type for ListView event (Have you used evets=ListVewEvents<Type> ?)");
+        panic!("Missing generic type for ListView event (Have you used events=ListVewEvents<Type> ?)");
     }
     let mut on_current_item_changed_code = String::new();
     let mut on_group_collapsed_code = String::new();
@@ -172,6 +172,33 @@ fn generate_listview_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_GROUP_EXPANDED)", &on_group_expanded_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_ITEM_ACTION)", &on_item_action_code)
+}
+
+fn generate_treeview_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericTreeViewEvents) {
+        panic!("Missing generic type for TreeView event (Have you used events=TreeVewEvents<Type> ?)");
+    }
+    let mut on_current_item_changed_code = String::new();
+    let mut on_item_collapsed_code = String::new();
+    let mut on_item_expanded_code = String::new();
+    let mut on_selection_changed_code = String::new();
+    let mut on_item_action_code = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericTreeViewEvents].iter() {
+        on_current_item_changed_code.push_str(templates::TREEVIEW_ON_CURRENT_ITEM_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_item_collapsed_code.push_str(templates::TREEVIEW_ON_ITEM_COLLAPSED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_item_expanded_code.push_str(templates::TREEVIEW_ON_ITEM_EXPANDED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_selection_changed_code.push_str(templates::TREEVIEW_ON_SELECTION_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_item_action_code.push_str(templates::TREEVIEW_ON_ITEM_ACTION_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    templates::TREEVIEW_TRAIT_DEF
+        .replace(
+            "$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_CURRENT_ITEM_CHANGED)",
+            &on_current_item_changed_code,
+        )
+        .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_COLLAPSED)", &on_item_collapsed_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_EXPANDED)", &on_item_expanded_code)
+        //.replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_ACTION)", &on_item_action_code)
 }
 
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
@@ -223,6 +250,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericDropDownListEvents => code.push_str(generate_dropdownlist_events(&mut a).as_str()),
                         AppCUITrait::GenericNumericSelectorEvents => code.push_str(generate_numeric_selector_events(&mut a).as_str()),
                         AppCUITrait::GenericListViewEvents => code.push_str(generate_listview_events(&mut a).as_str()),
+                        AppCUITrait::GenericTreeViewEvents => code.push_str(generate_treeview_events(&mut a).as_str()),
                         _ => {}
                     }
                 }
