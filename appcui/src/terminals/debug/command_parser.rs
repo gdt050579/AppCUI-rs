@@ -91,8 +91,15 @@ impl<'a> CommandParser<'a> {
     pub(super) fn get_params_count(&self) -> usize {
         self.count
     }
+    pub(super) fn get_string(&self, index: usize)->Option<String> {
+        if index >= self.count {    
+            return None;
+        }
+        let s = String::from(self.params[index]).replace("\\n", "\n").replace("\\t", "\t").replace("\\\\", "\\");
+        Some(s)
+    }
     pub(super) fn get_param(&self, index: usize) -> Option<&'a str> {
-        if index >= self.count {
+        if index >= self.count {    
             return None;
         }
         Some(self.params[index])
