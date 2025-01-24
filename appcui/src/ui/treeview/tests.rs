@@ -30,7 +30,7 @@ impl ListItem for TestData {
         1
     }
     fn column(_: u16) -> crate::prelude::Column {
-        crate::prelude::Column::new("", 10, crate::prelude::TextAlignament::Left)
+        crate::prelude::Column::new("", 50, crate::prelude::TextAlignament::Left)
     }
 }
 
@@ -943,6 +943,73 @@ fn check_on_item_colapse_expanded() {
         Mouse.Click(7,6,left)      
         Paint('5. Expands Calculus')
         CheckHash(0xFFF9FB0BF9B3C7F5)   
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_on_item_dynamic_colapse_expanded() {
+    #[Window(events = TreeViewEvents<TestData>, internal: true)]
+    struct MyWin {
+        count: u32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+                count: 0,
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            tv.add_item(treeview::Item::expandable(TestData::new("Root"), false));
+            w.add(tv);
+            w
+        }
+    }
+    impl TreeViewEvents<TestData> for MyWin {
+        fn on_item_collapsed(&mut self, handle: Handle<TreeView<TestData>>, item_handle: Handle<treeview::Item<TestData>>) -> EventProcessStatus {
+            if let Some(tv) = self.control(handle) {
+                if let Some(item) = tv.item(item_handle) {
+                    let s: FlatString<32> = FlatString::from_str(item.text.as_str());
+                    self.set_title(format!("CLP: {}", &s).as_str());
+                }
+            }
+            EventProcessStatus::Processed
+        }
+
+        fn on_item_expanded(&mut self, handle: Handle<TreeView<TestData>>, item_handle: Handle<treeview::Item<TestData>>) -> EventProcessStatus {
+            let mut c = self.count;
+            self.count += 3;
+            if let Some(tv) = self.control_mut(handle) {
+                for _ in 0..3 {
+                    c += 1;
+                    let item = treeview::Item::expandable(TestData::new(format!("Item {}", c).as_str()),true);
+                    tv.add_item_to_parent(item, item_handle);
+                }
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x1C291EE6B3316985)   
+        Key.Pressed(Space,2)
+        Paint('2. Root has [1,2,3]')
+        CheckHash(0x10A51F78769763FC)   
+        Key.Pressed(Down,2)
+        Key.Pressed(Space)
+        Paint('3. Item 2 has [4,5,6]')
+        CheckHash(0x1B6DC137029E688F)   
+        Key.Pressed(Down,1)
+        Key.Pressed(Space)
+        Paint('4. Item 4 has [7,8,9]')
+        CheckHash(0x2154027A7D714AF0)   
+        Key.Pressed(Down,2)
+        Key.Pressed(Space)
+        Paint('5. Item 8 has [10,11,12]')
+        CheckHash(0xFFDA4F699A6E1275)   
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     a.add_window(MyWin::new());
