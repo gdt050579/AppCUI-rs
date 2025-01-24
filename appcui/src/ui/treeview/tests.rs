@@ -836,3 +836,56 @@ fn check_change_item_event_change() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_on_item_action_event() {
+    #[Window(events = TreeViewEvents<Course>, internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            Course::populate_with_icons(&mut tv);
+            w.add(tv);
+            w
+        }
+    }
+    impl TreeViewEvents<Course> for MyWin {
+        fn on_item_action(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
+            if let Some(tv) = self.control(handle) {
+                if let Some(item) = tv.item(item_handle) {
+                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    self.set_title(&s);
+                }
+            }
+            EventProcessStatus::Processed
+        }        
+    }
+    let script = "
+        Paint.Enable(false)
+        Mouse.Drag(31,1,40,1)
+        Paint('1. Initial state')
+        CheckHash(0x9797BA2144E8815E) 
+        Key.Pressed(Down)
+        Key.Pressed(Enter)
+        Paint('2. Focus on Geometry, windows title: Geometry ')
+        CheckHash(0xD5A2BDB1F85A1FE2) 
+        Key.Pressed(End)
+        Paint('3. Focus on Prop, windows title: Geometry ')
+        CheckHash(0xF62E72ECDCF31E36) 
+        Key.Pressed(Enter)
+        Paint('4. Focus on Prop, windows title: Prop ')
+        CheckHash(0x988BC5D85727D801) 
+        Mouse.DoubleClick(30,8,left)
+        Paint('5. Focus on Advanced, windows title: Advanced ')
+        CheckHash(0xEFD5EED5912A30EA) 
+        Mouse.Click(30,6,left)
+        Paint('6. Focus on Calculus, windows title: Advanced')
+        CheckHash(0xBA98FC217CA536FE) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

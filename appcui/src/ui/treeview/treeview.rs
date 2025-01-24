@@ -554,7 +554,7 @@ where
         // });
     }
     fn emit_item_action_event(&self, index: usize) {
-        if index < self.manager.len() {
+        if index < self.item_list.len() {
             self.raise_event(ControlEvent {
                 emitter: self.handle,
                 receiver: self.event_processor,
@@ -749,7 +749,7 @@ where
                     // will be process separately
                     return false;
                 }
-                self.reverse_fold();
+                self.emit_item_action_event(self.pos);
                 true
             }
             _ => false,
