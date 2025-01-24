@@ -969,11 +969,8 @@ fn check_on_item_dynamic_colapse_expanded() {
     }
     impl TreeViewEvents<TestData> for MyWin {
         fn on_item_collapsed(&mut self, handle: Handle<TreeView<TestData>>, item_handle: Handle<treeview::Item<TestData>>) -> EventProcessStatus {
-            if let Some(tv) = self.control(handle) {
-                if let Some(item) = tv.item(item_handle) {
-                    let s: FlatString<32> = FlatString::from_str(item.text.as_str());
-                    self.set_title(format!("CLP: {}", &s).as_str());
-                }
+            if let Some(tv) = self.control_mut(handle) {
+                tv.delete_item_children(item_handle);
             }
             EventProcessStatus::Processed
         }
@@ -997,19 +994,25 @@ fn check_on_item_dynamic_colapse_expanded() {
         CheckHash(0x1C291EE6B3316985)   
         Key.Pressed(Space,2)
         Paint('2. Root has [1,2,3]')
-        CheckHash(0x10A51F78769763FC)   
+        CheckHash(0xB8572D4F123DE46E)   
         Key.Pressed(Down,2)
         Key.Pressed(Space)
         Paint('3. Item 2 has [4,5,6]')
-        CheckHash(0x1B6DC137029E688F)   
+        CheckHash(0x1132F01163CD9041)   
         Key.Pressed(Down,1)
         Key.Pressed(Space)
         Paint('4. Item 4 has [7,8,9]')
-        CheckHash(0x2154027A7D714AF0)   
+        CheckHash(0x6E11F38A6C816AFE)   
         Key.Pressed(Down,2)
         Key.Pressed(Space)
         Paint('5. Item 8 has [10,11,12]')
-        CheckHash(0xFFDA4F699A6E1275)   
+        CheckHash(0xE2CB37B127653FAF)   
+        Mouse.Click(8,4,left)
+        Paint('6. Item 2 collapsed')
+        CheckHash(0xEA5B053EC01EC531)   
+        Mouse.Click(8,4,left)
+        Paint('7. Item 2 expanded [13,14,15]')
+        CheckHash(0x174C3A2DE2587A19)   
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     a.add_window(MyWin::new());

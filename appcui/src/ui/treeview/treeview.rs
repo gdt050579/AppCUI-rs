@@ -188,6 +188,16 @@ where
         self.manager.get_mut(item_handle).map(|f| f.value_mut())
     }
 
+    pub fn delete_item(&mut self, item_handle: Handle<Item<T>>) {
+        self.manager.delete(item_handle);
+        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+    }
+
+    pub fn delete_item_children(&mut self, item_handle: Handle<Item<T>>) {
+        self.manager.delete_children(item_handle);
+        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+    }
+
     fn goto_next_match(&mut self, start: usize, emit_event: bool) {
         let len = self.item_list.len();
         if len == 0 {

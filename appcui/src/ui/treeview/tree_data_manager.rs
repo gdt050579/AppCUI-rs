@@ -95,8 +95,8 @@ where
     pub(super) fn delete_children(&mut self, parent: Handle<Item<T>>) {
         if let Some(idx) = self.handle_to_index(parent) {
             let parent_ref = self.data[idx].as_mut().unwrap();
-            let parent_children = new_mutable_ref!(&mut parent_ref.children);
-            for handle in parent_children.iter() {
+            let children = new_mutable_ref!(&mut parent_ref.children);
+            for handle in children.iter() {
                 self.delete_children(*handle);
                 if let Some(idx) = self.handle_to_index(*handle) {
                     self.free.push(idx as u32);
