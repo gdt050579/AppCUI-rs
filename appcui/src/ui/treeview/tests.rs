@@ -791,7 +791,7 @@ fn check_change_item_event_change() {
         fn new() -> Self {
             let mut w = MyWin {
                 base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
-                counter: 0
+                counter: 0,
             };
             let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
             Course::populate_with_icons(&mut tv);
@@ -861,7 +861,7 @@ fn check_on_item_action_event() {
                 }
             }
             EventProcessStatus::Processed
-        }        
+        }
     }
     let script = "
         Paint.Enable(false)
@@ -884,6 +884,65 @@ fn check_on_item_action_event() {
         Mouse.Click(30,6,left)
         Paint('6. Focus on Calculus, windows title: Advanced')
         CheckHash(0xBA98FC217CA536FE) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_on_item_colapse_expanded() {
+    #[Window(events = TreeViewEvents<Course>, internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            Course::populate_with_icons(&mut tv);
+            w.add(tv);
+            w
+        }
+    }
+    impl TreeViewEvents<Course> for MyWin {
+        fn on_item_collapsed(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
+            if let Some(tv) = self.control(handle) {
+                if let Some(item) = tv.item(item_handle) {
+                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    self.set_title(format!("CLP: {}", &s).as_str());
+                }
+            }
+            EventProcessStatus::Processed
+        }
+
+        fn on_item_expanded(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
+            if let Some(tv) = self.control(handle) {
+                if let Some(item) = tv.item(item_handle) {
+                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    self.set_title(format!("EXP: {}", &s).as_str());
+                }
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Mouse.Drag(31,1,40,1)
+        Paint('1. Initial state')
+        CheckHash(0x9797BA2144E8815E) 
+        Key.Pressed(Space)
+        Paint('2. Math collapsed')
+        CheckHash(0xED587153AFDDF179)         
+        Key.Pressed(Space)
+        Paint('3. Math Expanded')
+        CheckHash(0xAE04F8FC3C9970B0)   
+        Mouse.Click(7,6,left)      
+        Paint('4. Collapse Calculus')
+        CheckHash(0xB22991CB13229E05)   
+        Mouse.Click(7,6,left)      
+        Paint('5. Expands Calculus')
+        CheckHash(0xFFF9FB0BF9B3C7F5)   
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     a.add_window(MyWin::new());
