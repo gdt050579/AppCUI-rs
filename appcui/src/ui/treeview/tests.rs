@@ -780,3 +780,59 @@ fn check_change_item_event() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_change_item_event_change() {
+    #[Window(events = TreeViewEvents<Course>, internal: true)]
+    struct MyWin {
+        counter: u32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+                counter: 0
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            Course::populate_with_icons(&mut tv);
+            w.add(tv);
+            w
+        }
+    }
+    impl TreeViewEvents<Course> for MyWin {
+        fn on_current_item_changed(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
+            self.counter += 1;
+            let c = self.counter;
+            if let Some(tv) = self.control_mut(handle) {
+                if let Some(item) = tv.item_mut(item_handle) {
+                    item.name.push_str(format!("{},", c).as_str());
+                }
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Mouse.Drag(31,1,40,1)
+        Paint('1. Initial state')
+        CheckHash(0x9797BA2144E8815E) 
+        Key.Pressed(Down)
+        Paint('2. Focus on Geometry, new name: Geometry1,') ')
+        CheckHash(0x65491C2002F10483) 
+        Key.Pressed(End)
+        Paint('3. Focus on Prop, new name: Prop2,')
+        CheckHash(0xA6D85A0961EC73A1) 
+        Mouse.Click(30,8,left)
+        Paint('4. Focus on Advanced, new name: Advanced3,')
+        CheckHash(0x7E4D5CAFD1D987CE) 
+        Mouse.Click(30,8,left)
+        Paint('5. Nothing changes')
+        CheckHash(0x7E4D5CAFD1D987CE) 
+        Key.Pressed(Up,5)
+        Paint('6. Focus on Geometry, new name: Geometry1,8, and [Simple4,] [Calculus5,] [2-0-26,] [1-0-17,]')
+        CheckHash(0xFB14BB51038A327A) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
