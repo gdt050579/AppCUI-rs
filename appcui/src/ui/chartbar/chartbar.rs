@@ -105,7 +105,7 @@ impl ChartBar {
 
     #[inline(always)]
     fn yaxes_interval(&self) -> (i32, i32) {
-        self.y_axes.as_ref().map(|f| (f.min, f.max)).unwrap_or((0, i32::MAX))
+        self.y_axes.as_ref().map(|f| (f.min, f.max)).unwrap_or((0, 50))
     }
 
     #[inline(always)]
@@ -179,6 +179,7 @@ impl ChartBar {
     pub fn set_axes_left_space(&mut self, val: u32) {
         if self.y_axes.is_some() {
             self.y_axes.as_mut().unwrap().left_space = val;
+            self.left_offset = 0;
         }
     }
 
@@ -205,12 +206,9 @@ impl ChartBar {
         let w = self.size().width.saturating_sub(self.left_space()) / bar_width;
 
         self.data.push(value);
-        if len == 1 {}
-        if self.flags.contains(Flags::AutoScroll) && len >= w {
+
+        if self.flags.contains(Flags::AutoScroll) && len >= w - self.left_space() {
             self.left_offset += bar_width;
-        }
-        else {
-            self.left_offset = 0;
         }
         self.update_min_max();
 
@@ -234,6 +232,7 @@ impl ChartBar {
             step,
             left_space,
         });
+        self.left_offset = 0;
     }
     pub fn change_chart_type(&mut self, t: chartbar::Type) {
         self.chart_type = t;
@@ -284,16 +283,18 @@ impl OnPaint for ChartBar {
         let h = (sz.height - 1) as i32;
 
 
-        let d = (self.max_on_size - self.min_on_size) as u32;
+        let d = (self.max_on_size.saturating_sub(self.min_on_size)) as u32;
         let mut i = 0;
         
-        while i <= max + h - 2 {
-            if h - 2 - i - self.top_view < h - 2 {
-                let v = (i as u32 * d / self.max_bar_height.max(1)) as i32 + self.min_on_size;
-                self.write_string_on_y_axes(surface, theme, h - i - self.top_view, &format!("{}", v));
-                surface.draw_horizontal_line(left_space + 1, h - i - self.top_view, sz.width as i32, LineType::RoofLine, lineattr);
+        if self.y_axes.is_some() {
+            while i <= max + h - 2  {
+                if h - 2 - i - self.top_view < h - 2 {
+                    let v = (i as u32 * d / self.max_bar_height.max(1)) as i32 + self.min_on_size;
+                    self.write_string_on_y_axes(surface, theme, h - i - self.top_view, &format!("{}", v));
+                    surface.draw_horizontal_line(left_space + 1, h - i - self.top_view, sz.width as i32, LineType::RoofLine, lineattr);
+                }
+                i += step;
             }
-            i += step;
         }
         if self.chart_type == Type::VerticalBar {
             for (index, c) in self.data[start as usize..].iter().enumerate() {

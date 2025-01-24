@@ -4,12 +4,16 @@ use chartbar::{Fit,Value,Type,Flags,YAxes};
 #[test]
 fn check_chartbar_creation() {
     let script = "
-        //Paint.Enable(false)
-        Paint('nine labels across al corners and center')   
-        CheckHash(0xF7D704CAB062ED5C)   
+        Paint.Enable(false)
+        // Error.Disable(true)
+        Paint('nine labels across al corners and center')  
+        CheckHash(0xA34BECD1E225B1A5)
+        Key.Pressed(Home)  
+        Paint('Toate barele sunt afisate') 
+        CheckHash(0xD594A37ED97C454B)
     ";
 
-    
+
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
 
