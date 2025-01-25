@@ -119,21 +119,6 @@ where
             (self.depth as i32) * (3 + fold_sign_width as i32 + icon_width as i32) - if from_fold_button { 0 } else { 2 }
         }
     }
-
-    #[inline(always)]
-    pub(super) fn reverse_fold(&mut self) -> bool {
-        match self.fold_status {
-            FoldStatus::Collapsed => {
-                self.fold_status = FoldStatus::Expanded;
-                true
-            }
-            FoldStatus::Expanded => {
-                self.fold_status = FoldStatus::Collapsed;
-                true
-            }
-            FoldStatus::NonExpandable => false,
-        }
-    }
     #[inline(always)]
     pub(super) fn expand_fold(&mut self) -> bool {
         match self.fold_status {

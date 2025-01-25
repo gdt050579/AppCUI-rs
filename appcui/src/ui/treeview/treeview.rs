@@ -18,6 +18,12 @@ enum SelectMode {
     Reverse,
 }
 
+#[derive(Copy, Clone)]
+enum FoldMethod {
+    Expand,
+    Collapse,
+}
+
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum HoverStatus {
     None,
@@ -234,30 +240,34 @@ where
         self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
     }
 
-    fn inner_fold_item(&mut self, item_handle: Handle<Item<T>>, mode: SelectMode, emit_event: bool) -> bool {
-        if let Some(item) = self.manager.get_mut(item_handle) {
-            let changed = match mode {
-                SelectMode::True => item.expand_fold(),
-                SelectMode::False => item.collapse_fold(),
-                SelectMode::Reverse => item.reverse_fold(),
-            };
-            if changed {
-                let is_expanded = item.fold_status == FoldStatus::Expanded;
-                self.update_item_list(UpdateVisibleItemsOperation::Refresh);
-                if emit_event {
-                    self.emit_expand_collapse_action_event(self.pos, is_expanded);
-                }
+    fn inner_fold_item(&mut self, item_handle: Handle<Item<T>>, method: FoldMethod, emit_event: bool, recursive: bool) -> bool {
+        let changed = if recursive {
+            match method {
+                FoldMethod::Expand => self.manager.set_fold_status(item_handle, FoldStatus::Expanded),
+                FoldMethod::Collapse => self.manager.set_fold_status(item_handle, FoldStatus::Collapsed),
             }
-            changed
+        } else {
+            match method {
+                FoldMethod::Expand => self.manager.get_mut(item_handle).map(|f| f.expand_fold()).unwrap_or(false),
+                FoldMethod::Collapse => self.manager.get_mut(item_handle).map(|f| f.collapse_fold()).unwrap_or(false),
+            }
+        };
+
+        if changed {
+            self.update_item_list(UpdateVisibleItemsOperation::Refresh);
+            if emit_event {
+                self.emit_expand_collapse_action_event(self.pos, matches!(method, FoldMethod::Expand));
+            }
+            true
         } else {
             false
         }
     }
     pub fn collapse_item(&mut self, item_handle: Handle<Item<T>>) {
-        self.inner_fold_item(item_handle, SelectMode::False, false);
+        self.inner_fold_item(item_handle, FoldMethod::Collapse, false, false);
     }
     pub fn expand_item(&mut self, item_handle: Handle<Item<T>>) {
-        self.inner_fold_item(item_handle, SelectMode::True, false);
+        self.inner_fold_item(item_handle, FoldMethod::Expand, false, false);
     }
 
     fn goto_next_match(&mut self, start: usize, emit_event: bool) {
@@ -699,10 +709,15 @@ where
         false
     }
 
-    fn reverse_fold(&mut self) -> bool {
+    fn reverse_fold(&mut self, recursive: bool) -> bool {
         if self.pos < self.item_list.len() {
             let h = self.item_list[self.pos];
-            self.inner_fold_item(h, SelectMode::Reverse, true)
+            let fold_status = self.manager.get(h).map(|f| f.fold_status).unwrap_or(FoldStatus::NonExpandable);
+            match fold_status {
+                FoldStatus::Collapsed => self.inner_fold_item(h, FoldMethod::Expand, true, recursive),
+                FoldStatus::Expanded => self.inner_fold_item(h, FoldMethod::Collapse, true, recursive),
+                FoldStatus::NonExpandable => false,
+            }
         } else {
             false
         }
@@ -801,7 +816,11 @@ where
 
             // Action & folding
             key!("Space") => {
-                self.reverse_fold();
+                self.reverse_fold(false);
+                true
+            }
+            key!("Ctrl+Space") => {
+                self.reverse_fold(true);
                 true
             }
             key!("Enter") => {
@@ -844,7 +863,7 @@ where
                         self.update_position(pos, true);
                     }
                     if let HoverStatus::OverFoldButton(_, _) = self.hover_status_for_mouse_pos(self.pos, ev.x) {
-                        self.reverse_fold();
+                        self.reverse_fold(ev.modifier.contains(KeyModifier::Ctrl));
                     }
                     self.start_mouse_select = self.pos;
                     self.mouse_check_mode = self.toggle_current_item_selection();

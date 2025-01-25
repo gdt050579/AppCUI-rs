@@ -292,6 +292,24 @@ where
         }
     }
 
+    pub(super) fn set_fold_status(&mut self, parent: Handle<Item<T>>, fold_status: FoldStatus)-> bool {
+        if let Some(item) = self.get_mut(parent) {
+            if item.fold_status != FoldStatus::NonExpandable {
+                let mut change = item.fold_status != fold_status;
+                item.fold_status = fold_status;
+                let p = new_mutable_ref!(&mut item.children);
+                for h in p.iter() {
+                    change |= self.set_fold_status(*h, fold_status);
+                }
+                change
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
     #[cfg(test)]
     pub(super) fn free_list(&self) -> &Vec<u32> {
         &self.free
