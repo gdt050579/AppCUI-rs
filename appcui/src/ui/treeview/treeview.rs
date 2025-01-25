@@ -8,6 +8,7 @@ enum UpdateVisibleItemsOperation {
     Sort,
     Refilter,
     SortAndRefilter,
+    SortAndRefilterWithoutPositionUpdate,
 }
 
 #[derive(Clone, Copy)]
@@ -129,13 +130,23 @@ where
             Handle::None
         };
         // sorting
-        if matches!(op, UpdateVisibleItemsOperation::SortAndRefilter | UpdateVisibleItemsOperation::Sort) {
+        if matches!(
+            op,
+            UpdateVisibleItemsOperation::SortAndRefilter
+                | UpdateVisibleItemsOperation::Sort
+                | UpdateVisibleItemsOperation::SortAndRefilterWithoutPositionUpdate
+        ) {
             if let Some(column_index) = self.header.sort_column() {
                 self.manager.sort(column_index, self.header.should_sort_ascendent());
             }
         }
         // refilter
-        if matches!(op, UpdateVisibleItemsOperation::SortAndRefilter | UpdateVisibleItemsOperation::Refilter) {
+        if matches!(
+            op,
+            UpdateVisibleItemsOperation::SortAndRefilter
+                | UpdateVisibleItemsOperation::Refilter
+                | UpdateVisibleItemsOperation::SortAndRefilterWithoutPositionUpdate
+        ) {
             self.manager.refilter(
                 self.comp.search_text(),
                 if self.flags.contains(Flags::CustomFilter) {
@@ -152,7 +163,8 @@ where
         // populate filter with items
         self.manager.populate(&mut self.item_list);
         // restore previous position
-        if !current_handle.is_none() {
+        let update_position = !matches!(op, UpdateVisibleItemsOperation::SortAndRefilterWithoutPositionUpdate);
+        if (!current_handle.is_none()) && update_position {
             // check to see if the current handle has match
             let matched = if let Some(item) = self.manager.get(current_handle) {
                 item.has_matched()
@@ -188,9 +200,26 @@ where
         self.manager.get_mut(item_handle).map(|f| f.value_mut())
     }
 
+    #[inline(always)]
+    pub fn current_item(&self) -> Option<Handle<treeview::Item<T>>> {
+        if self.pos < self.item_list.len() {
+            Some(self.item_list[self.pos])
+        } else {
+            None
+        }
+    }
+
     pub fn delete_item(&mut self, item_handle: Handle<Item<T>>) {
+        let pos = self.pos;
         self.manager.delete(item_handle);
-        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilterWithoutPositionUpdate);
+        let len = self.item_list.len();
+        self.pos = len;
+        if pos < len {
+            self.update_position(pos, true);
+        } else {
+            self.update_position(len.saturating_sub(1), true);
+        }
     }
 
     pub fn delete_item_children(&mut self, item_handle: Handle<Item<T>>) {

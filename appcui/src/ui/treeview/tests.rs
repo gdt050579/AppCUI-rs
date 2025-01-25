@@ -981,7 +981,7 @@ fn check_on_item_dynamic_colapse_expanded() {
             if let Some(tv) = self.control_mut(handle) {
                 for _ in 0..3 {
                     c += 1;
-                    let item = treeview::Item::expandable(TestData::new(format!("Item {}", c).as_str()),true);
+                    let item = treeview::Item::expandable(TestData::new(format!("Item {}", c).as_str()), true);
                     tv.add_item_to_parent(item, item_handle);
                 }
             }
@@ -1015,6 +1015,77 @@ fn check_on_item_dynamic_colapse_expanded() {
         CheckHash(0x174C3A2DE2587A19)   
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_delete_item() {
+    #[Window(events = TreeViewEvents<Course>+CommandBarEvents, commands: Delete, internal: true)]
+    struct MyWin {
+        tv: Handle<TreeView<Course>>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,x:0,y:0,w:100%,h:19,flags: Sizeable"),
+                tv: Handle::None,
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            Course::populate_with_icons(&mut tv);
+            w.tv = w.add(tv);
+            w
+        }
+    }
+    impl TreeViewEvents<Course> for MyWin {
+        fn on_current_item_changed(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
+            if let Some(tv) = self.control(handle) {
+                if let Some(item) = tv.item(item_handle) {
+                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    self.set_title(format!("Current: {}", &s).as_str());
+                }
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("Delete"), "Delete", mywin::Commands::Delete);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            if command_id == mywin::Commands::Delete {
+                let h = self.tv;
+                if let Some(tv) = self.control_mut(h) {
+                    if let Some(current) = tv.current_item() {
+                        tv.delete_item(current);
+                    }
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x4C82513A69DE59BB)  
+        Key.Pressed(Down,4)
+        Paint('2. Now on Calculus (title is Calculus)')
+        CheckHash(0x66D6BBEC6238BD47)  
+        Key.Pressed(Delete)
+        Paint('3. Calculus deleted, now on Logic (title is Logic)')
+        CheckHash(0xD15CDF09517B60C2)  
+        Key.Pressed(Delete)
+        Paint('4. Logic deleted, now on 2-0-2 (title is 2-0-2)')
+        CheckHash(0x5287C4F19F3FFD3C)  
+        Key.Pressed(Up,2)
+        Key.Pressed(Delete)
+        Paint('5. Geometry deleted, now on Math (title is Math)')
+        CheckHash(0xEA032D83E92961D4)  
+        Key.Pressed(Delete)
+        Paint('6. Math deleted, no more items (title remains Math)')
+        CheckHash(0xBB7F61AA35475FAC)  
+    ";
+    let mut a = App::debug(60, 20, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
