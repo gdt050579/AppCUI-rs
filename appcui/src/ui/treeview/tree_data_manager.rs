@@ -127,6 +127,7 @@ where
         self.roots.clear();
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(super) fn roots(&self) -> &[Handle<Item<T>>] {
         &self.roots
     }

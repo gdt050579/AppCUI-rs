@@ -54,7 +54,7 @@ where
             children: Vec::new(),
         }
     }
-    pub(super) fn expandable(data: T, collapsed: bool) -> Self {
+    pub fn expandable(data: T, collapsed: bool) -> Self {
         let mut i = Self::from(data);
         if collapsed {
             i.fold_status = FoldStatus::Collapsed;
@@ -64,7 +64,7 @@ where
         i
     }
 
-    pub(super) fn non_expandable(data: T) -> Self {
+    pub fn non_expandable(data: T) -> Self {
         let mut i = Self::from(data);
         i.fold_status = FoldStatus::NonExpandable;
         i
