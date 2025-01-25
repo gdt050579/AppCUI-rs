@@ -234,6 +234,32 @@ where
         self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
     }
 
+    fn inner_fold_item(&mut self, item_handle: Handle<Item<T>>, mode: SelectMode, emit_event: bool) -> bool {
+        if let Some(item) = self.manager.get_mut(item_handle) {
+            let changed = match mode {
+                SelectMode::True => item.expand_fold(),
+                SelectMode::False => item.collapse_fold(),
+                SelectMode::Reverse => item.reverse_fold(),
+            };
+            if changed {
+                let is_expanded = item.fold_status == FoldStatus::Expanded;
+                self.update_item_list(UpdateVisibleItemsOperation::Refresh);
+                if emit_event {
+                    self.emit_expand_collapse_action_event(self.pos, is_expanded);
+                }
+            }
+            changed
+        } else {
+            false
+        }
+    }
+    pub fn collapse_item(&mut self, item_handle: Handle<Item<T>>) {
+        self.inner_fold_item(item_handle, SelectMode::False, false);
+    }
+    pub fn expand_item(&mut self, item_handle: Handle<Item<T>>) {
+        self.inner_fold_item(item_handle, SelectMode::True, false);
+    }
+
     fn goto_next_match(&mut self, start: usize, emit_event: bool) {
         let len = self.item_list.len();
         if len == 0 {
@@ -611,6 +637,21 @@ where
             });
         }
     }
+    fn emit_expand_collapse_action_event(&self, index: usize, is_expanded: bool) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::TreeView(EventData {
+                event_type: if is_expanded {
+                    treeview::events::TreeViewEventTypes::IteamExpanded(self.item_list[index].cast())
+                } else {
+                    treeview::events::TreeViewEventTypes::ItemCollapsed(self.item_list[index].cast())
+                },
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }
+
     #[inline(always)]
     fn toggle_current_item_selection(&self) -> SelectMode {
         if self.pos < self.item_list.len() {
@@ -657,41 +698,14 @@ where
         }
         false
     }
-    // #[inline(always)]
-    // fn is_entire_list_selected(&self) -> bool {
-    //     for handle in &self.item_list {
-    //         if let Some(item) = self.manager.get(*handle) {
-    //             if !item.is_selected() {
-    //                 return false;
-    //             }
-    //         }
-    //     }
-    //     true
-    // }
+
     fn reverse_fold(&mut self) -> bool {
         if self.pos < self.item_list.len() {
-            if let Some(item) = self.manager.get_mut(self.item_list[self.pos]) {
-                if item.reverse_fold() {
-                    let is_expanded = item.fold_status == FoldStatus::Expanded;
-                    self.update_item_list(UpdateVisibleItemsOperation::Refresh);
-                    // emit the fold / unfold event
-                    self.raise_event(ControlEvent {
-                        emitter: self.handle,
-                        receiver: self.event_processor,
-                        data: ControlEventData::TreeView(EventData {
-                            event_type: if is_expanded {
-                                treeview::events::TreeViewEventTypes::IteamExpanded(self.item_list[self.pos].cast())
-                            } else {
-                                treeview::events::TreeViewEventTypes::ItemCollapsed(self.item_list[self.pos].cast())
-                            },
-                            type_id: std::any::TypeId::of::<T>(),
-                        }),
-                    });
-                    return true;
-                }
-            }
+            let h = self.item_list[self.pos];
+            self.inner_fold_item(h, SelectMode::Reverse, true)
+        } else {
+            false
         }
-        false
     }
     fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
         let sz = self.size();

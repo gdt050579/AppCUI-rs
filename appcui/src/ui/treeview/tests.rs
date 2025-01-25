@@ -1089,6 +1089,7 @@ fn check_delete_item() {
     a.add_window(MyWin::new());
     a.run();
 }
+
 #[test]
 fn check_clear() {
     #[Window(events = CommandBarEvents, commands: Clear+Add, internal: true)]
@@ -1166,6 +1167,71 @@ fn check_clear() {
         Mouse.Drag(59,2,59,6)
         Paint('11. Scroll to the end') 
         CheckHash(0x520D93E7092CDBE9)
+    ";
+    let mut a = App::debug(60, 10, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+
+#[test]
+fn check_collapse_expand_via_methods() {
+    #[Window(events = CommandBarEvents, commands: Collapse+Expand, internal: true)]
+    struct MyWin {
+        tv: Handle<TreeView<Course>>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,x:0,y:0,w:100%,h:9,flags: Sizeable"),
+                tv: Handle::None,
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            Course::populate_with_courses(&mut tv);
+            w.tv = w.add(tv);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Expand", mywin::Commands::Expand);
+            commandbar.set(key!("F2"), "Collapse", mywin::Commands::Collapse);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            let h = self.tv;
+            match command_id {
+                mywin::Commands::Expand => {
+                    if let Some(tv) = self.control_mut(h) {
+                        if let Some(ci) = tv.current_item() {
+                            tv.expand_item(ci);
+                        }
+                    }
+                }
+                mywin::Commands::Collapse => {
+                    if let Some(tv) = self.control_mut(h) {
+                        if let Some(ci) = tv.current_item() {
+                            tv.collapse_item(ci);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3C07A73059F403C8)  
+        Key.Pressed(Down)
+        Key.Pressed(F2)
+        Paint('2. Alice is collapsed')
+        CheckHash(0x886AA1E9B0BB0A4C)  
+        Key.Pressed(F2)
+        Paint('3. Nothing changes')
+        CheckHash(0x886AA1E9B0BB0A4C)  
+        Key.Pressed(F1)
+        Paint('4. Alice is expanded')
+        CheckHash(0xD8BC7870BC98F71C)  
     ";
     let mut a = App::debug(60, 10, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());

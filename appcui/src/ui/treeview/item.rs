@@ -134,6 +134,26 @@ where
             FoldStatus::NonExpandable => false,
         }
     }
+    #[inline(always)]
+    pub(super) fn expand_fold(&mut self) -> bool {
+        match self.fold_status {
+            FoldStatus::Collapsed => {
+                self.fold_status = FoldStatus::Expanded;
+                true
+            }
+            FoldStatus::Expanded | FoldStatus::NonExpandable => false,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn collapse_fold(&mut self) -> bool {
+        match self.fold_status {
+            FoldStatus::Expanded => {
+                self.fold_status = FoldStatus::Collapsed;
+                true
+            }
+            FoldStatus::Collapsed | FoldStatus::NonExpandable => false,
+        }
+    }
 
     #[inline(always)]
     pub(super) fn matches(&self, search_text: &str, header: Option<&ColumnsHeader>) -> bool {
