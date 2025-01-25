@@ -1237,3 +1237,40 @@ fn check_collapse_expand_via_methods() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+
+#[test]
+fn check_expand_collapese_recursively() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xA413FE97269933E0) 
+        Key.Pressed(Ctrl+Space)
+        Paint('2. Math collapsed recusivelly')
+        CheckHash(0xAB4CC479A2C48A4F) 
+        Key.Pressed(Space)
+        Paint('3. Math expanded (Geometry, Calculus and Logic are collapsed)')
+        CheckHash(0x262090A713F7BCFD) 
+        Key.Pressed(Down,2)
+        Paint('4. Focus on calculus')
+        CheckHash(0xF892BEA47C253AD) 
+        Key.Pressed(Ctrl+Space)
+        Paint('5. Expand recursively Calculus')
+        CheckHash(0x4DF25F1D06E1F137) 
+        Key.Modifier(Ctrl)
+        Mouse.Click(2,2,left)
+        Key.Modifier(None)
+        Paint('6. Math recusivelly collapse via mouse')
+        CheckHash(0xFC357E031BEC5A60) 
+        Key.Pressed(Space)
+        Paint('7. Math expanded (Geometry, Calculus and Logic are collapsed)')
+        CheckHash(0x98F8001FACD5814A) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    Course::populate_with_icons(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
