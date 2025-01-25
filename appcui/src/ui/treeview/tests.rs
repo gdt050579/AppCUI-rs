@@ -1089,3 +1089,85 @@ fn check_delete_item() {
     a.add_window(MyWin::new());
     a.run();
 }
+#[test]
+fn check_clear() {
+    #[Window(events = CommandBarEvents, commands: Clear+Add, internal: true)]
+    struct MyWin {
+        tv: Handle<TreeView<Course>>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,x:0,y:0,w:100%,h:9,flags: Sizeable"),
+                tv: Handle::None,
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            Course::populate_with_icons(&mut tv);
+            w.tv = w.add(tv);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Clear", mywin::Commands::Clear);
+            commandbar.set(key!("F2"), "Add", mywin::Commands::Add);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            let h = self.tv;
+            match command_id {
+                mywin::Commands::Clear => {
+                    if let Some(tv) = self.control_mut(h) {
+                        tv.clear();
+                    }
+                }
+                mywin::Commands::Add => {
+                    if let Some(tv) = self.control_mut(h) {
+                        Course::populate_with_courses_batch(tv);
+                    }
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF39ABDF241CD6DA1)  
+        Key.Pressed(End)
+        Paint('2. Now at end (focus on Prop)') 
+        CheckHash(0xCFC9DC4133EA1DDB)
+        Mouse.Click(10,1,left)
+        Mouse.Click(10,1,left)
+        Paint('3. Sort by name (descendent)') 
+        CheckHash(0xE9CD4715B31F1AE5)
+        Key.Pressed(F2)
+        Paint('4. Add Math root one more time (scroll should change)') 
+        CheckHash(0xDC67902C4A15F6E9)
+        Mouse.Drag(59,2,59,4)
+        Paint('5. Drag srollbar down') 
+        CheckHash(0x7F6FFC68D93D3C69)
+        Mouse.Click(2,3,left)
+        Paint('6. Alice folded') 
+        CheckHash(0xD2A1B4C7A63107E8)
+        Key.Pressed(Home)
+        Key.Pressed(Space)
+        Paint('7. Math folded') 
+        CheckHash(0x6E4E2276E101E5CE)
+        Key.Pressed(End)
+        Key.Pressed(Space)
+        Paint('8. Alice expanded') 
+        CheckHash(0x908E90024D7E599B)
+        Key.Pressed(F1)
+        Paint('9. All items cleared (scrollbars should be disabled)') 
+        CheckHash(0xC91809CA90AC8ADF)
+        Key.Pressed(F2)
+        Paint('10. Repopulate (scroll bars should be enabled)') 
+        CheckHash(0xB3B4C273E84B43EA)
+        Mouse.Drag(59,2,59,6)
+        Paint('11. Scroll to the end') 
+        CheckHash(0x520D93E7092CDBE9)
+    ";
+    let mut a = App::debug(60, 10, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

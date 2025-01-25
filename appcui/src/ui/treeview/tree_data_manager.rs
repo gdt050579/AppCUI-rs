@@ -121,6 +121,11 @@ where
             self.data[idx] = None;
         }
     }
+    pub(super) fn clear(&mut self) {
+        self.data.clear();
+        self.free.clear();
+        self.roots.clear();
+    }
     #[inline(always)]
     pub(super) fn roots(&self) -> &[Handle<Item<T>>] {
         &self.roots

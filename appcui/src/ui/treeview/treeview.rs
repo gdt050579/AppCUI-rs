@@ -222,6 +222,13 @@ where
         }
     }
 
+    pub fn clear(&mut self) {
+        self.manager.clear();
+        self.pos = 0;
+        self.update_item_list(UpdateVisibleItemsOperation::Refresh);
+        self.update_scrollbars();
+    }
+
     pub fn delete_item_children(&mut self, item_handle: Handle<Item<T>>) {
         self.manager.delete_children(item_handle);
         self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
@@ -922,6 +929,7 @@ where
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if self.comp.process_mouse_event(event) {
             self.update_scroll_pos_from_scrollbars();
+            self.hover_status = HoverStatus::None;
             return EventProcessStatus::Processed;
         }
         let action = if !self.flags.contains(Flags::HideHeader) {
