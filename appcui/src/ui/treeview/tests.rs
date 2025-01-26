@@ -1473,3 +1473,31 @@ fn check_collapse_expand_all() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_empty_list() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x19F65FEDF374B26D) 
+        Key.Pressed(Ctrl+Space,10)
+        Key.Pressed(Enter,3)
+        Key.Pressed(Space,2)
+        Key.Pressed(Up,6)
+        Key.Pressed(Down,10)
+        Key.Pressed(Home,3)
+        Key.Pressed(End,4)
+        Key.Pressed(PageUp,2)
+        Key.Pressed(PageDown,10)
+        Paint('2. Nothing changes')
+        CheckHash(0x19F65FEDF374B26D) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv: TreeView<Course> = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    tv.expand_all();
+    tv.collapse_all();
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
