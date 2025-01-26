@@ -120,11 +120,11 @@ impl ControlEvent {
                 treeview::events::TreeViewEventTypes::CurrentItemChanged(item_handle) => {
                     GenericTreeViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id, item_handle)
                 }
-                treeview::events::TreeViewEventTypes::ItemCollapsed(item_handle) => {
-                    GenericTreeViewEvents::on_item_collapsed(receiver, self.emitter.cast(), data.type_id, item_handle)
+                treeview::events::TreeViewEventTypes::ItemCollapsed(item_handle, recursive) => {
+                    GenericTreeViewEvents::on_item_collapsed(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
                 },
-                treeview::events::TreeViewEventTypes::IteamExpanded(item_handle) => {
-                    GenericTreeViewEvents::on_item_expanded(receiver, self.emitter.cast(), data.type_id, item_handle)
+                treeview::events::TreeViewEventTypes::ItemExpanded(item_handle, recursive) => {
+                    GenericTreeViewEvents::on_item_expanded(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
                 },
                 treeview::events::TreeViewEventTypes::ItemAction(item_handle) => {
                     GenericTreeViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, item_handle)

@@ -5,10 +5,10 @@ pub trait GenericTreeViewEvents {
     fn on_current_item_changed(&mut self, _handle: Handle<()>, _type_id: TypeId, _current_item: Handle<()>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    fn on_item_collapsed(&mut self, _handle: Handle<()>, _type_id: TypeId, _item: Handle<()>) -> EventProcessStatus {
+    fn on_item_collapsed(&mut self, _handle: Handle<()>, _type_id: TypeId, _item: Handle<()>, _recursive: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    fn on_item_expanded(&mut self, _handle: Handle<()>, _type_id: TypeId, _item: Handle<()>) -> EventProcessStatus {
+    fn on_item_expanded(&mut self, _handle: Handle<()>, _type_id: TypeId, _item: Handle<()>, _recursive: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
     fn on_selection_changed(&mut self, _handle: Handle<()>, _type_id: TypeId) -> EventProcessStatus {
@@ -23,8 +23,8 @@ pub trait GenericTreeViewEvents {
 #[derive(Copy,Clone)]
 pub(crate) enum TreeViewEventTypes {
     CurrentItemChanged(Handle<()>),
-    ItemCollapsed(Handle<()>),
-    IteamExpanded(Handle<()>),
+    ItemCollapsed(Handle<()>, bool),
+    ItemExpanded(Handle<()>, bool),
     ItemAction(Handle<()>)
 }
 

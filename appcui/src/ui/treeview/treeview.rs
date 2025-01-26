@@ -256,7 +256,7 @@ where
         if changed {
             self.update_item_list(UpdateVisibleItemsOperation::Refresh);
             if emit_event {
-                self.emit_expand_collapse_action_event(self.pos, matches!(method, FoldMethod::Expand));
+                self.emit_expand_collapse_action_event(self.pos, matches!(method, FoldMethod::Expand), recursive);
             }
             true
         } else {
@@ -647,15 +647,15 @@ where
             });
         }
     }
-    fn emit_expand_collapse_action_event(&self, index: usize, is_expanded: bool) {
+    fn emit_expand_collapse_action_event(&self, index: usize, is_expanded: bool, recursive: bool) {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
             data: ControlEventData::TreeView(EventData {
                 event_type: if is_expanded {
-                    treeview::events::TreeViewEventTypes::IteamExpanded(self.item_list[index].cast())
+                    treeview::events::TreeViewEventTypes::ItemExpanded(self.item_list[index].cast(), recursive)
                 } else {
-                    treeview::events::TreeViewEventTypes::ItemCollapsed(self.item_list[index].cast())
+                    treeview::events::TreeViewEventTypes::ItemCollapsed(self.item_list[index].cast(), recursive)
                 },
                 type_id: std::any::TypeId::of::<T>(),
             }),
