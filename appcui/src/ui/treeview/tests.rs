@@ -1501,3 +1501,69 @@ fn check_empty_list() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_one_frozen_column() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x61B848596D19D4D) 
+        Key.Pressed(Right,5)
+        Paint('2. Scroll moves to the right')
+        CheckHash(0x229C61771736CD27) 
+        Key.Pressed(Right,100)
+        Paint('3. Scroll moved all to the right')
+        CheckHash(0x401079D106484A0B) 
+        Key.Pressed(Ctrl+Right)
+        Paint('4. Column Name is selected')
+        CheckHash(0x8638011FD716034D) 
+        Key.Pressed(Left,15)
+        Paint('5. Column Name is resized')
+        CheckHash(0xF8D1DA1E409DF562) 
+        Key.Pressed(Escape)
+        Mouse.Drag(32,1,20,1)
+        Paint('6. Column Relevance is resized')
+        CheckHash(0x6BFECFDC37AE5CCD) 
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    Course::populate_with_courses_batch(&mut tv);
+    tv.set_frozen_columns(1);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_two_frozen_column() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5F49F5B181B9F399) 
+        Key.Pressed(Right,2)
+        Paint('2. Scroll moves to the right')
+        CheckHash(0x88831AE7C3E22B9F) 
+        Key.Pressed(Right,100)
+        Paint('3. Scroll moved all to the right')
+        CheckHash(0x2F9298FA1F7FF6F7) 
+        Key.Pressed(Ctrl+Right)
+        Paint('4. Column Name is selected')
+        CheckHash(0xCC4B4A373D184A39) 
+        Key.Pressed(Left,15)
+        Paint('5. Column Name is resized')
+        CheckHash(0x489EAD8458087834) 
+        Key.Pressed(Escape)
+        Mouse.Drag(32,1,20,1)
+        Paint('6. Column Relevance is resized')
+        CheckHash(0xF6E6088E113B29B5) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    Course::populate_with_courses_batch(&mut tv);
+    tv.set_frozen_columns(2);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
