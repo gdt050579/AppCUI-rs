@@ -310,6 +310,24 @@ where
         }
     }
 
+    pub(super) fn collapse_all(&mut self)->bool {
+        let mut change = false;
+        let list = new_mutable_ref!(&mut self.roots);
+        for h in list.iter() {
+            change |= self.set_fold_status(*h, FoldStatus::Collapsed);
+        }
+        change
+    }
+
+    pub(super) fn expand_all(&mut self)->bool {
+        let mut change = false;
+        let list = new_mutable_ref!(&mut self.roots);
+        for h in list.iter() {
+            change |= self.set_fold_status(*h, FoldStatus::Expanded);
+        }
+        change
+    }
+
     #[cfg(test)]
     pub(super) fn free_list(&self) -> &Vec<u32> {
         &self.free

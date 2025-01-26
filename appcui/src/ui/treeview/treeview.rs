@@ -263,12 +263,39 @@ where
             false
         }
     }
-    pub fn collapse_item(&mut self, item_handle: Handle<Item<T>>) {
-        self.inner_fold_item(item_handle, FoldMethod::Collapse, false, false);
+    pub fn collapse_item(&mut self, item_handle: Handle<Item<T>>, recursive: bool) {
+        self.inner_fold_item(item_handle, FoldMethod::Collapse, false, recursive);
     }
-    pub fn expand_item(&mut self, item_handle: Handle<Item<T>>) {
-        self.inner_fold_item(item_handle, FoldMethod::Expand, false, false);
+    pub fn expand_item(&mut self, item_handle: Handle<Item<T>>, recursive: bool) {
+        self.inner_fold_item(item_handle, FoldMethod::Expand, false, recursive);
     }
+    pub fn collapse_all(&mut self) {
+        let current_handle = if self.pos < self.item_list.len() {
+            self.item_list[self.pos]
+        } else {
+            Handle::None
+        };
+        self.manager.collapse_all();
+        self.update_item_list(UpdateVisibleItemsOperation::Refresh);
+        if !self.goto_handle(current_handle, false) {
+            self.update_position(0, false);
+        }
+        self.update_scrollbars();
+    }
+
+    pub fn expand_all(&mut self) {
+        let current_handle = if self.pos < self.item_list.len() {
+            self.item_list[self.pos]
+        } else {
+            Handle::None
+        };
+        self.manager.expand_all();
+        self.update_item_list(UpdateVisibleItemsOperation::Refresh);
+        if !self.goto_handle(current_handle, false) {
+            self.update_position(0, false);
+        }
+        self.update_scrollbars();
+    }    
 
     fn goto_next_match(&mut self, start: usize, emit_event: bool) {
         let len = self.item_list.len();

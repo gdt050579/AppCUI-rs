@@ -1218,14 +1218,14 @@ fn check_collapse_expand_via_methods() {
                 mywin::Commands::Expand => {
                     if let Some(tv) = self.control_mut(h) {
                         if let Some(ci) = tv.current_item() {
-                            tv.expand_item(ci);
+                            tv.expand_item(ci, false);
                         }
                     }
                 }
                 mywin::Commands::Collapse => {
                     if let Some(tv) = self.control_mut(h) {
                         if let Some(ci) = tv.current_item() {
-                            tv.collapse_item(ci);
+                            tv.collapse_item(ci, false);
                         }
                     }
                 }
@@ -1384,3 +1384,92 @@ fn check_on_item_dynamic_colapse_expanded_recursively() {
     a.run();
 }
 
+#[test]
+fn check_collapse_expand_all() {
+    #[Window(events = CommandBarEvents, commands: Collapse+Expand, internal: true)]
+    struct MyWin {
+        tv: Handle<TreeView<Course>>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,x:0,y:0,w:100%,h:14,flags: Sizeable"),
+                tv: Handle::None,
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            Course::populate_with_courses(&mut tv);
+            Course::populate_with_icons(&mut tv);
+            w.tv = w.add(tv);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Expand All", mywin::Commands::Expand);
+            commandbar.set(key!("F2"), "Collapse All", mywin::Commands::Collapse);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            let h = self.tv;
+            match command_id {
+                mywin::Commands::Expand => {
+                    if let Some(tv) = self.control_mut(h) {
+                        tv.expand_all();
+                    }
+                }
+                mywin::Commands::Collapse => {
+                    if let Some(tv) = self.control_mut(h) {
+                        tv.collapse_all();
+                    }
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xE3CD5451472DA03)   
+        Key.Pressed(Down,5)
+        Paint('2. Focus on Logic')
+        CheckHash(0x37B34412BC8022A0)   
+        Key.Pressed(Enter)
+        Paint('3. Focus remains on Logic (nothing changes)')
+        CheckHash(0x37B34412BC8022A0)   
+        Key.Pressed(F2)
+        Paint('4. All are collapsed (focus on John - frst item)')
+        CheckHash(0xC7DBD23B6C6012A9) 
+        Key.Pressed(End)  
+        Paint('5. Focus on Math')
+        CheckHash(0x8EE5E33FB7640F3E) 
+        Key.Pressed(F1)
+        Paint('6. All expanded - focus remains on Math')
+        CheckHash(0x8ED2AE204A4A6BC8) 
+        Key.Pressed(Up,9)
+        Paint('7. Focus on Poetry')
+        CheckHash(0x8627294D8EE52D97) 
+        Key.Pressed(Space)
+        Paint('8. Poetry is collapsed')
+        CheckHash(0xC759DEC33E4A2ACE) 
+        Key.Pressed(F1)
+        Paint('9. All expanded - focus remains on Poetry')
+        CheckHash(0x8627294D8EE52D97) 
+        Key.Pressed(Down,8)
+        Paint('10. Focus on Bob')
+        CheckHash(0xA9D4D4CD3578E9D0) 
+        Key.Pressed(F2)
+        Paint('11. All Collapsed, focus remains on Bob')
+        CheckHash(0xB8884896FE4B8E7A) 
+        Key.Pressed(Space)
+        Paint('12. Nothing changes, focus remains on Bob')
+        CheckHash(0xB8884896FE4B8E7A) 
+        Key.Pressed(Ctrl+Space)
+        Paint('13. Nothing changes, focus remains on Bob')
+        CheckHash(0xB8884896FE4B8E7A) 
+        Key.Pressed(F1)
+        Paint('14. All expanded, focus remains on Bob')
+        CheckHash(0xC0124799876E1227) 
+    ";
+    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
