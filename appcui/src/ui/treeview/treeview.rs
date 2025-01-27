@@ -498,7 +498,6 @@ where
         };
         let start_y_poz = if !self.flags.contains(Flags::HideHeader) { 1 } else { 0 };
         let mut y = start_y_poz;
-        let mut x = 0;
         let item_size = self.item_width();
         let max_y = self.size().height as i32;
         let mut idx = self.top_view;
@@ -510,13 +509,14 @@ where
             _ => (0, usize::MAX),
         };
         // very simply code
-        while (item_count < visible_items) && (idx < max_idx) {
+        while (item_count < visible_items) && (idx < max_idx) && (y < max_y) {
             if let Some(item) = self.manager.get(self.item_list[idx]) {
                 self.paint_item(item, y, surface, theme, attr);
                 if (item.is_selected()) && (has_focus) {
                     surface.reset_clip();
                     surface.reset_origin();
-                    surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.selected));
+                    //let x = item.x_offset(self.fold_sign_with, self.icon_width, true) + self.header.columns()[0].x;
+                    surface.fill_horizontal_line_with_size(0, y, item_size, Character::with_attributes(0, theme.list_current_item.selected));
                 }
                 if is_enabled {
                     if idx == self.pos {
@@ -527,7 +527,7 @@ where
                                 _ if item.is_selected() => theme.list_current_item.over_selection,
                                 _ => theme.list_current_item.focus,
                             };
-                            surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, current_item_attr));
+                            surface.fill_horizontal_line_with_size(0, y, item_size, Character::with_attributes(0, current_item_attr));
                         }
                     }
                     if idx == hover_pos {
@@ -545,10 +545,6 @@ where
             y += 1;
             idx += 1;
             item_count += 1;
-            if y >= max_y {
-                y = start_y_poz;
-                x += item_size as i32 + 1;
-            }
         }
         surface.reset_clip();
         surface.reset_origin();
@@ -712,10 +708,12 @@ where
         }
     }
     fn select_until_position(&mut self, new_pos: usize) {
-        let start = self.pos;
+        let initial = self.pos;
         let mode = self.toggle_current_item_selection();
         self.update_position(new_pos, true);
-        for i in start..=self.pos {
+        let start = initial.min(self.pos);
+        let end = initial.max(self.pos);
+        for i in start..=end {
             self.select_item(i, mode, true);
         }
     }
@@ -726,7 +724,7 @@ where
         if pos >= self.item_list.len() {
             return false;
         }
-        let h = self.item_list[self.pos];
+        let h = self.item_list[pos];
         if let Some(item) = self.manager.get_mut(h) {
             let current_select_status = item.is_selected();
             match mode {
