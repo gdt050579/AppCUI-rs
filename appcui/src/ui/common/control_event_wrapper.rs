@@ -129,6 +129,9 @@ impl ControlEvent {
                 treeview::events::TreeViewEventTypes::ItemAction(item_handle) => {
                     GenericTreeViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, item_handle)
                 }
+                treeview::events::TreeViewEventTypes::SelectionChanged => {
+                    GenericTreeViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
+                }
             },
         }
     }

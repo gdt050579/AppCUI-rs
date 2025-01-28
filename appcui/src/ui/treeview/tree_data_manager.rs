@@ -25,6 +25,7 @@ where
     free: Vec<u32>,
     roots: Vec<Handle<Item<T>>>,
     selected_count: usize,
+    count: usize,
 }
 
 impl<T> TreeDataManager<T>
@@ -37,6 +38,7 @@ where
             free: Vec::with_capacity(16),
             roots: Vec::with_capacity(16),
             selected_count: 0,
+            count: 0,
         }
     }
     fn handle_to_index(&self, handle: Handle<Item<T>>) -> Option<usize> {
@@ -93,6 +95,7 @@ where
         } else {
             self.data.push(Some(item));
         }
+        self.count += 1;
         h
     }
     pub(super) fn add(&mut self, item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
@@ -110,6 +113,7 @@ where
                     }
                     self.free.push(idx as u32);
                     self.data[idx] = None;
+                    self.count = self.count.saturating_sub(1);
                 }
             }
             self.data[idx].as_mut().unwrap().children.clear();
@@ -131,6 +135,7 @@ where
             }
             self.free.push(idx as u32);
             self.data[idx] = None;
+            self.count = self.count.saturating_sub(1);
         }
     }
     pub(super) fn clear(&mut self) {
@@ -353,6 +358,11 @@ where
     #[inline(always)]
     pub(super) fn selected_count(&self) -> usize {
         self.selected_count
+    }
+
+    #[inline(always)]
+    pub(super) fn count(&self) -> usize {
+        self.count
     }
 
     #[cfg(test)]

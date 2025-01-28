@@ -301,7 +301,13 @@ where
         }
         self.update_scrollbars();
     }
-    /// Returns the number of selected (checked) items
+
+
+    /// Returns the number of items in the tree view
+    pub fn items_count(&self) -> usize {
+        self.manager.count()
+    }
+    /// Returns the number of selected items
     pub fn selected_items_count(&self) -> usize {
         self.manager.selected_count()
     }
@@ -658,14 +664,14 @@ where
         self.update_scrollbars();
     }
     fn emit_selection_update_event(&self) {
-        // self.raise_event(ControlEvent {
-        //     emitter: self.handle,
-        //     receiver: self.event_processor,
-        //     data: ControlEventData::ListView(EventData {
-        //         event_type: listview::events::ListViewEventTypes::SelectionChanged,
-        //         type_id: std::any::TypeId::of::<T>(),
-        //     }),
-        // });
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::TreeView(EventData {
+                event_type: treeview::events::TreeViewEventTypes::SelectionChanged,
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
     }
     fn emit_item_action_event(&self, index: usize) {
         if index < self.item_list.len() {

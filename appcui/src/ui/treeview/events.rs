@@ -25,7 +25,8 @@ pub(crate) enum TreeViewEventTypes {
     CurrentItemChanged(Handle<()>),
     ItemCollapsed(Handle<()>, bool),
     ItemExpanded(Handle<()>, bool),
-    ItemAction(Handle<()>)
+    ItemAction(Handle<()>),
+    SelectionChanged,
 }
 
 #[derive(Copy, Clone)]
