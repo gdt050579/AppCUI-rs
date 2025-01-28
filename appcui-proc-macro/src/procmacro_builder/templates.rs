@@ -445,6 +445,9 @@ trait TreeViewEvents<T: treeview::ListItem+'static> {
     fn on_item_action(&mut self, handle: Handle<TreeView<T>>, item_handle: Handle<treeview::Item<T>>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    fn on_selection_changed(&mut self, handle: Handle<TreeView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
 }
 impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
@@ -461,6 +464,7 @@ impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
         EventProcessStatus::Ignored
     }
     fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_SELECTION_CHANGED)
         EventProcessStatus::Ignored
     }
     fn on_item_action(&mut self, handle: Handle<()>, type_id: std::any::TypeId, item_handle: Handle<()>) -> EventProcessStatus {

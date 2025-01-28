@@ -197,7 +197,7 @@ fn generate_treeview_events(a: &mut Arguments) -> String {
         )
         .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_COLLAPSED)", &on_item_collapsed_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_EXPANDED)", &on_item_expanded_code)
-        //.replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_ACTION)", &on_item_action_code)
 }
 

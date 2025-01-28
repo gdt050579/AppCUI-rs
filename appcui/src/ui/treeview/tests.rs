@@ -1,3 +1,4 @@
+use chrono::format;
 use flat_string::FlatString;
 
 use crate::prelude::*;
@@ -1640,10 +1641,110 @@ fn check_no_select_flags() {
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars| treeview::Flags::NoSelection);
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
     Course::populate_with_courses_batch(&mut tv);
     tv.set_frozen_columns(2);
     w.add(tv);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_select_and_count_method() {
+    #[Window(events = TreeViewEvents<Course>+CommandBarEvents, commands: Delete+Add, internal: true)]
+    struct MyWin {
+        tv: Handle<TreeView<Course>>,
+        idx: u32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,x:0,y:0,w:100%,h:19,flags: Sizeable"),
+                tv: Handle::None,
+                idx: 0,
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            Course::populate_with_icons(&mut tv);
+            w.tv = w.add(tv);
+            w
+        }
+        fn update_title(&mut self) {
+            if let Some(tv) = self.control(self.tv) {
+                let s = tv.selected_items_count();
+                let c = tv.items_count();
+                self.set_title(format!("{s}/{c}").as_str());
+            }
+        }
+    }
+    impl TreeViewEvents<Course> for MyWin {
+        fn on_selection_changed(&mut self, _: Handle<TreeView<Course>>) -> EventProcessStatus {
+            self.update_title();
+            EventProcessStatus::Processed
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("Delete"), "Delete", mywin::Commands::Delete);
+            commandbar.set(key!("F2"), "Add", mywin::Commands::Add);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            if command_id == mywin::Commands::Delete {
+                let h = self.tv;
+                if let Some(tv) = self.control_mut(h) {
+                    if let Some(current) = tv.current_item() {
+                        tv.delete_item(current);
+                    }
+                }
+            }
+            if command_id == mywin::Commands::Add {
+                let h = self.tv;
+                self.idx += 1;
+                let idx = self.idx;
+                if let Some(tv) = self.control_mut(h) {
+                    if let Some(current) = tv.current_item() {
+                        tv.add_to_parent(Course::new(format!("Item {}", idx).as_str(), (idx * 7) % 3 + 1, (idx * 11) % 5 + 1), current);
+                    }
+                }
+            }
+            self.update_title();
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xAEAA3DABC248E1B2)   
+        Key.Pressed(Down,2)
+        Key.Pressed(Insert,2)
+        Paint('2. 2 items selected (title is 2/12)')
+        CheckHash(0x9D99E2DCDCF9D60E)   
+        Key.Pressed(Down,1)
+        Key.Pressed(F2,2)
+        Paint('3. Add two items (title is 2/14)')
+        CheckHash(0x19FE6D873CA8EAFF)   
+        Key.Pressed(Up,4)
+        Paint('4. Focus on Geometry')
+        CheckHash(0xD9C106F4F677DB8B) 
+        Key.Pressed(Delete)  
+        Paint('5. Geometry & children deleted (title is 0/11)')
+        CheckHash(0x941141B75AD8B648) 
+        Key.Pressed(Shift+End)  
+        Paint('6. All items except math are deleted (title is 10/11)')
+        CheckHash(0x18963B824BA085C2) 
+        Key.Pressed(Home)
+        Key.Pressed(Down)
+        Key.Pressed(Delete)
+        Paint('7. Calculus deleted (title is 3/4)')
+        CheckHash(0xE3F39B3A8E9747A1) 
+        Key.Pressed(F2,5)
+        Paint('8. 5 more items added (title is 3/9)')
+        CheckHash(0xA07B0363852EA940)
+        Key.Pressed(Home)
+        Key.Pressed(Delete) 
+        Paint('9. All items deleted (title is 0/0)')
+        CheckHash(0xB00A3EEB83CDB655)
+    ";
+    let mut a = App::debug(60, 20, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
