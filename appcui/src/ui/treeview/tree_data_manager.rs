@@ -24,6 +24,7 @@ where
     data: Vec<Option<Item<T>>>,
     free: Vec<u32>,
     roots: Vec<Handle<Item<T>>>,
+    selected_count: usize,
 }
 
 impl<T> TreeDataManager<T>
@@ -35,6 +36,7 @@ where
             data: Vec::with_capacity(capacity as usize),
             free: Vec::with_capacity(16),
             roots: Vec::with_capacity(16),
+            selected_count: 0,
         }
     }
     fn handle_to_index(&self, handle: Handle<Item<T>>) -> Option<usize> {
@@ -79,6 +81,10 @@ where
             item.depth = 0;
             self.roots.push(item.handle);
         };
+        // update selection
+        if item.is_selected() {
+            self.selected_count += 1;
+        }
         // move to vector
         let idx = item.handle.index() as usize;
         let h = item.handle;
@@ -99,6 +105,9 @@ where
             for handle in children.iter() {
                 self.delete_children(*handle);
                 if let Some(idx) = self.handle_to_index(*handle) {
+                    if self.data[idx].as_ref().unwrap().is_selected() {
+                        self.selected_count = self.selected_count.saturating_sub(1);
+                    }
                     self.free.push(idx as u32);
                     self.data[idx] = None;
                 }
@@ -117,6 +126,9 @@ where
             } else {
                 self.roots.retain(|h| *h != handle);
             }
+            if self.data[idx].as_ref().unwrap().is_selected() {
+                self.selected_count = self.selected_count.saturating_sub(1);
+            }
             self.free.push(idx as u32);
             self.data[idx] = None;
         }
@@ -125,6 +137,7 @@ where
         self.data.clear();
         self.free.clear();
         self.roots.clear();
+        self.selected_count = 0;
     }
     #[inline(always)]
     #[cfg(test)]
@@ -326,6 +339,20 @@ where
             change |= self.set_fold_status(*h, FoldStatus::Expanded);
         }
         change
+    }
+
+    #[inline(always)]
+    pub(super) fn update_selected_count(&mut self, increase: bool)  {
+        if increase {
+            self.selected_count += 1;
+        } else {
+            self.selected_count = self.selected_count.saturating_sub(1);
+        }
+    }
+
+    #[inline(always)]
+    pub(super) fn selected_count(&self) -> usize {
+        self.selected_count
     }
 
     #[cfg(test)]

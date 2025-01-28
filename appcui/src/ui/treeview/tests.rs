@@ -1606,3 +1606,44 @@ fn check_select_simple() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_no_select_flags() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5F49F5B181B9F399) 
+        Key.Pressed(Down,2)
+        Key.Pressed(Insert,3)
+        Key.Pressed(Down,3)
+        Key.Pressed(Insert,2)
+        Paint('2. Scroll moves to the right')
+        CheckHash(0xD35D2CBD94995F11) 
+        Key.Pressed(Down,2)
+        Key.Pressed(Shift+Down,1)
+        Paint('3. Extra selection')
+        CheckHash(0x7A3E4CFDFA0B4C39) 
+        Key.Pressed(Shift+Home)
+        Paint('4. Select up to first item')
+        CheckHash(0x5F49F5B181B9F399) 
+        Key.Pressed(Shift+End)
+        Paint('5. All are unselected')
+        CheckHash(0x3232D386D828F71F) 
+        Key.Pressed(Shift+PageUp,9)
+        Paint('6. All are selected (except alice and math)')
+        CheckHash(0x5F49F5B181B9F399) 
+        Key.Pressed(Shift+PageDown)
+        Key.Pressed(Shift+Up)
+        Key.Pressed(Shift+Down)
+        Paint('7. Deselect some items (focus on neural networks)')
+        CheckHash(0xD09A4C4043F4FDAC) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars| treeview::Flags::NoSelection);
+    Course::populate_with_courses_batch(&mut tv);
+    tv.set_frozen_columns(2);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}

@@ -86,7 +86,6 @@ where
             start_mouse_select: 0,
             mouse_check_mode: SelectMode::False,
             hover_status: HoverStatus::None,
-            //selected_items_count: 0,
         };
         // add columnes (if described in the type T)
         for i in 0..T::columns_count() {
@@ -301,7 +300,11 @@ where
             self.update_position(0, false);
         }
         self.update_scrollbars();
-    }    
+    }
+    /// Returns the number of selected (checked) items
+    pub fn selected_items_count(&self) -> usize {
+        self.manager.selected_count()
+    }
 
     fn goto_next_match(&mut self, start: usize, emit_event: bool) {
         let len = self.item_list.len();
@@ -713,8 +716,12 @@ where
         self.update_position(new_pos, true);
         let start = initial.min(self.pos);
         let end = initial.max(self.pos);
+        let mut changed = false;
         for i in start..=end {
-            self.select_item(i, mode, true);
+            changed |= self.select_item(i, mode, true);
+        }
+        if changed {
+            self.emit_selection_update_event();
         }
     }
     fn select_item(&mut self, pos: usize, mode: SelectMode, emit_event: bool) -> bool {
@@ -732,8 +739,11 @@ where
                 SelectMode::False => item.set_selected(false),
                 SelectMode::Reverse => item.set_selected(!current_select_status),
             }
-            if (item.is_selected() != current_select_status) && emit_event {
-                self.emit_selection_update_event();
+            if item.is_selected() != current_select_status {
+                self.manager.update_selected_count(!current_select_status);
+                if emit_event {
+                    self.emit_selection_update_event();
+                }
                 return true;
             }
         }
