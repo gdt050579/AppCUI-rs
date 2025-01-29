@@ -76,7 +76,7 @@
         - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
         - [ToggleButton](chapter-3/stock-controls/togglebutton.md)
-        - [TreeView]()
+        - [TreeView](chapter-3/stock-controls/treeview.md)
         - [VLine](chapter-3/stock-controls/vline.md)
         - [VSplitter](chapter-3/stock-controls/vsplitter.md)
     - [Custom controls](chapter-3/custom_controls.md)
