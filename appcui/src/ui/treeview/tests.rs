@@ -32,6 +32,11 @@ impl ListItem for TestData {
     fn column(_: u16) -> crate::prelude::Column {
         crate::prelude::Column::new("", 50, crate::prelude::TextAlignament::Left)
     }
+        
+    fn matches(&self, text: &str) -> bool {
+        self.text.contains(text)
+    }
+    
 }
 
 #[derive(ListViewItem)]
@@ -1768,5 +1773,35 @@ fn check_select_and_count_method() {
     ";
     let mut a = App::debug(60, 20, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_custom_filter() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0xEADD865DD9FCA8DB) 
+        Key.TypeText('A')
+        Paint('2. Filter by capital A')
+        CheckHash(0xFB0494D034757861) 
+    ";
+    let mut a = App::debug(60, 14, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = treeview!("TestData,d:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    let h = tv.add(TestData::new("Alice"));
+    tv.add_to_parent(TestData::new("Andra"), h);
+    tv.add_to_parent(TestData::new("Boby"), h);
+    tv.add_to_parent(TestData::new("Charlie"), h);
+    let h = tv.add(TestData::new("Bob"));
+    tv.add_to_parent(TestData::new("Andra"), h);
+    let h2 = tv.add_to_parent(TestData::new("John"), h);
+    tv.add_to_parent(TestData::new("Andrei"), h2);
+    tv.add_to_parent(TestData::new("Dragos"), h2);
+    tv.add_to_parent(TestData::new("Alex"), h2);
+    tv.add_to_parent(TestData::new("Zig"), h);
+    tv.add(TestData::new("Charlie"));
+    w.add(tv);
+    a.add_window(w);
     a.run();
 }
