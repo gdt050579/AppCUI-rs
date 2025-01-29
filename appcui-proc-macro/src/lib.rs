@@ -542,3 +542,8 @@ pub fn listview(input: TokenStream) -> TokenStream {
 pub fn togglebutton(input: TokenStream) -> TokenStream {
     crate::controls::togglebutton::create(input)
 }
+
+#[proc_macro]
+pub fn treeview(input: TokenStream) -> TokenStream {
+    crate::controls::treeview::create(input)
+}

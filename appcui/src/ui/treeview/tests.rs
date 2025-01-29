@@ -1,4 +1,3 @@
-use chrono::format;
 use flat_string::FlatString;
 
 use crate::prelude::*;
@@ -188,6 +187,29 @@ fn check_init() {
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    Course::populate_with_courses(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_init_with_macro() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0x754C65468149AA5)  
+        Key.Pressed(Ctrl+Right)
+        Key.Pressed(Right,6)    
+        Paint('2. Name column increase by 6 characters')
+        CheckHash(0x4D937071C0592AFF)  
+        Key.Pressed(Down,10)
+        Paint('3. Cursors on: Literature')
+        CheckHash(0xEBF7B023783A3585)  
+    ";
+    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = treeview!("type:Course, d:c,flags: ScrollBars+SearchBar");
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
