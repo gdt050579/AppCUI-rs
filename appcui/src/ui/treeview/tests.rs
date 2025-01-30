@@ -39,7 +39,7 @@ impl ListItem for TestData {
     
 }
 
-#[derive(ListViewItem)]
+#[derive(ListItem)]
 struct Course {
     #[Column(name = "&Name", width = 30)]
     name: String,

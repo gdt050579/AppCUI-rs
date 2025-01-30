@@ -3215,7 +3215,7 @@ fn check_numeric_formater_renderer() {
 
 #[test]
 fn check_numeric_formater_renderer_with_macro() {
-    #[derive(ListViewItem)]
+    #[derive(ListItem)]
     struct Employee {
         #[Column(name = "&Name", align = "Left", size = 10)]
         name: &'static str,
@@ -3388,7 +3388,7 @@ fn check_bool_formater_renderer() {
 #[test]
 fn check_bool_formater_renderer_with_macro() {
     // columns=[{&Name,10,Left},{V1,10,Right},{V2,12,Center},{V3,10,Right},{V4,10,Right}]
-    #[derive(ListViewItem)]
+    #[derive(ListItem)]
     struct Employee {
         #[Column(name: "&Name", w: 10, a: l, r:Ascii)]
         name: &'static str,
@@ -5443,7 +5443,7 @@ fn check_item_custom_paint_first_column_columns_3() {
 
 #[test]
 fn check_proc_macro_listviewitem() {
-    #[derive(ListViewItem)]
+    #[derive(ListItem)]
     struct DownloadItem {
         #[Column(name: "&Name", width: 12, align: Left)]
         name: &'static str,
@@ -5504,7 +5504,7 @@ fn check_proc_macro_listviewitem() {
 
 #[test]
 fn check_proc_macro_listviewitem_order_from_1() {
-    #[derive(ListViewItem)]
+    #[derive(ListItem)]
     struct DownloadItem {
         #[Column(name: "&Name", width: 12, align: Left, index: 2)]
         name: &'static str,
@@ -5564,7 +5564,7 @@ fn check_proc_macro_listviewitem_order_from_1() {
 
 #[test]
 fn check_proc_macro_listviewitem_order_from_0() {
-    #[derive(ListViewItem)]
+    #[derive(ListItem)]
     struct DownloadItem {
         #[Column(name: "&Name", width: 12, align: Left, index: 1)]
         name: &'static str,

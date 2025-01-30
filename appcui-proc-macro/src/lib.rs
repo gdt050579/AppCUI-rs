@@ -341,9 +341,9 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 
-#[proc_macro_derive(ListViewItem, attributes(Column))]
-pub fn derive_describe(input: TokenStream) -> TokenStream {
-    crate::derives::listview_item::derive(input)
+#[proc_macro_derive(ListItem, attributes(Column))]
+pub fn listitem_derive(input: TokenStream) -> TokenStream {
+    crate::derives::listitem::derive(input)
 }
 
 /// Use to quickly identify a key or a combination via a string
