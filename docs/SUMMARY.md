@@ -83,6 +83,8 @@
         - [Overwriteable traits](chapter-3/custon-controls/overwriteable_traits.md)
         - [Emitting events](chapter-3/custon-controls/emitting_events.md)
         - [ScrollBars]()
+    - [Object Traits](chapter-3/object_traits.rs)
+        - [ListItem](chapter-3/object-traits/listitem.md)
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops](chapter-4/custom_desktop.md)
