@@ -812,7 +812,7 @@ fn check_create() {
     w.add(ImageViewer::new(
         img,
         Layout::new("d:c"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::NoScale,
         imageviewer::Flags::None,
     ));
@@ -852,14 +852,14 @@ fn check_smallbloacks_scaling() {
     w.add(ImageViewer::new(
         Image::with_str(s).unwrap(),
         Layout::new("x:0,y:0,w:8,h:4"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::NoScale,
         imageviewer::Flags::None,
     ));
     w.add(ImageViewer::new(
         Image::with_str(s).unwrap(),
         Layout::new("x:10,y:0,w:16,h:8"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::Scale50,
         imageviewer::Flags::None,
     ));
@@ -1046,7 +1046,7 @@ fn check_resize() {
             let i = ImageViewer::new(
                 ferris_image(),
                 Layout::new("d:c"),
-                image::RenderMethod::SmallBlocks,
+                image::RendererType::SmallBlocks,
                 image::Scale::NoScale,
                 imageviewer::Flags::ScrollBars,
             );
@@ -1066,11 +1066,11 @@ fn check_resize() {
                 Scale::Scale5 => "Scale:5%",
             };
             commandbar.set(key!("F1"), sc_name, mywin::Commands::Scale);
-            let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RenderMethod::SmallBlocks) {
-                RenderMethod::SmallBlocks => "Method:SmallBlocks",
-                RenderMethod::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
-                RenderMethod::GrayScale => "Method:GrayScale",
-                RenderMethod::AsciiArt => "Method:AsciiArt",
+            let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RendererType::SmallBlocks) {
+                RendererType::SmallBlocks => "Method:SmallBlocks",
+                RendererType::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
+                RendererType::GrayScale => "Method:GrayScale",
+                RendererType::AsciiArt => "Method:AsciiArt",
             };
             commandbar.set(key!("F2"), rd_name, mywin::Commands::RenderMethod);
         }
@@ -1094,10 +1094,10 @@ fn check_resize() {
                     mywin::Commands::RenderMethod => {
                         let m = img.render_method();
                         match m {
-                            RenderMethod::SmallBlocks => img.set_render_method(image::RenderMethod::LargeBlocks64Colors),
-                            RenderMethod::LargeBlocks64Colors => img.set_render_method(image::RenderMethod::GrayScale),
-                            RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::AsciiArt),
-                            RenderMethod::AsciiArt => img.set_render_method(image::RenderMethod::SmallBlocks),
+                            RendererType::SmallBlocks => img.set_render_method(image::RendererType::LargeBlocks64Colors),
+                            RendererType::LargeBlocks64Colors => img.set_render_method(image::RendererType::GrayScale),
+                            RendererType::GrayScale => img.set_render_method(image::RendererType::AsciiArt),
+                            RendererType::AsciiArt => img.set_render_method(image::RendererType::SmallBlocks),
                         }
                     },
                 }

@@ -5454,7 +5454,7 @@ fn check_proc_macro_listviewitem() {
         #[Column(name: "&Stars", width: 10, align: Center, render: Rating, format:Stars)]
         stars: u8,
         #[Column(name: "Download", width:15)]
-        download: listview::Status,
+        download: listitem::Status,
         #[Column(name: "Created", w: 20, align: Center, render: DateTime, format: Short)]
         created: chrono::NaiveDateTime,
         #[Column(name: "Enabled", align: Center)]
@@ -5492,7 +5492,7 @@ fn check_proc_macro_listviewitem() {
         age: 40,
         server: "Bucharest",
         stars: 5,
-        download: listview::Status::Completed,
+        download: listitem::Status::Completed,
         created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
         enabled: true,
     });
@@ -5515,7 +5515,7 @@ fn check_proc_macro_listviewitem_order_from_1() {
         #[Column(name: "&Stars", width: 10, align: Center, render: Rating, format:Stars, idx: 3)]
         stars: u8,
         #[Column(name: "Download", width:15, idx: 7)]
-        download: listview::Status,
+        download: listitem::Status,
         #[Column(name: "Created", w: 20, align: Center, render: DateTime, format: Short, index: 6)]
         created: chrono::NaiveDateTime,
         #[Column(name: "Enabled", align: Center, index: 5)]
@@ -5575,7 +5575,7 @@ fn check_proc_macro_listviewitem_order_from_0() {
         #[Column(name: "&Stars", width: 10, align: Center, render: Rating, format:Stars, idx: 2)]
         stars: u8,
         #[Column(name: "Download", width:15, idx: 6)]
-        download: listview::Status,
+        download: listitem::Status,
         #[Column(name: "Created", w: 20, align: Center, render: DateTime, format: Short, index: 5)]
         created: chrono::NaiveDateTime,
         #[Column(name: "Enabled", align: Center, index: 4)]

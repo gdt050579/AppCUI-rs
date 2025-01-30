@@ -33,7 +33,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         cb.add("Image::new(1,1).unwrap()");
     }
     cb.add_layout();
-    cb.add_enum_parameter("render", "image::RenderMethod", &RENDER_METHOD, Some("SmallBlocks"));
+    cb.add_enum_parameter("render", "image::RendererType", &RENDER_METHOD, Some("SmallBlocks"));
     if cb.has_parameter("scale") {
         let rap = cb.get_percentage("scale").unwrap() as i32;
         cb.add(", image::Scale::");

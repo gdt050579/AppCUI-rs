@@ -2,7 +2,7 @@ use super::{super::{Character, Color, Image, SpecialChar, Surface}, Pixel};
 
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub enum RenderMethod {
+pub enum RendererType {
     SmallBlocks,
     LargeBlocks64Colors,
     GrayScale,

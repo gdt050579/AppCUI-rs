@@ -1,6 +1,6 @@
 use super::super::{Color, Size};
 use super::pixel::Pixel;
-use super::RenderMethod;
+use super::RendererType;
 use super::Scale;
 
 #[derive(Clone)]
@@ -119,13 +119,13 @@ impl Image {
         Size::new(self.width, self.height)
     }
     #[inline]
-    pub fn render_size(&self, rendering_method: RenderMethod, scale_method: Scale) -> Size {
+    pub fn render_size(&self, rendering_method: RendererType, scale_method: Scale) -> Size {
         let rap = scale_method as u32;
         match rendering_method { 
-            RenderMethod::SmallBlocks => Size::new((self.width + rap - 1) / rap, (self.height + 2 * rap - 1) / (2 * rap)),
-            RenderMethod::LargeBlocks64Colors => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
-            RenderMethod::GrayScale => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
-            RenderMethod::AsciiArt => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
+            RendererType::SmallBlocks => Size::new((self.width + rap - 1) / rap, (self.height + 2 * rap - 1) / (2 * rap)),
+            RendererType::LargeBlocks64Colors => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
+            RendererType::GrayScale => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
+            RendererType::AsciiArt => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
         }
     }
 

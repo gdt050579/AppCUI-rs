@@ -793,7 +793,7 @@ impl Surface {
         // }
     }
 
-    /// Draws an image at the specified position. The image will be drawn using the specified rendering method and scale method.
+    /// Draws an image at the specified position. The image will be drawn using the specified renderer type and scale method.
     /// The rendering method can be `SmallBlocks`, `LargeBlocks64Colors`, `GrayScale` or `AsciiArt`.
     ///
     /// Example:
@@ -810,16 +810,16 @@ impl Surface {
     ///         |....r....|"#;
     /// let image = Image::with_str(heart).unwrap();
     /// surface.draw_image(10, 10, &image,
-    ///                            image::RenderMethod::LargeBlocks64Colors,
+    ///                            image::RendererType::LargeBlocks64Colors,
     ///                            image::Scale::NoScale);
     /// ```
-    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: image::RenderMethod, scale_method: image::Scale) {
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: image::RendererType, scale_method: image::Scale) {
         let rap = scale_method as u32;
         match rendering_method {
-            image::RenderMethod::SmallBlocks => Renderer::render_with_small_blocks(self, image, x, y, rap),
-            image::RenderMethod::LargeBlocks64Colors => Renderer::render_with_large_blocks_64(self, image, x, y, rap),
-            image::RenderMethod::GrayScale => Renderer::render_with_gray_scale(self, image, x, y, rap),
-            image::RenderMethod::AsciiArt => Renderer::render_ascii_art(self, image, x, y, rap),
+            image::RendererType::SmallBlocks => Renderer::render_with_small_blocks(self, image, x, y, rap),
+            image::RendererType::LargeBlocks64Colors => Renderer::render_with_large_blocks_64(self, image, x, y, rap),
+            image::RendererType::GrayScale => Renderer::render_with_gray_scale(self, image, x, y, rap),
+            image::RendererType::AsciiArt => Renderer::render_ascii_art(self, image, x, y, rap),
         }
     }
     pub(crate) fn resize(&mut self, size: Size) {
