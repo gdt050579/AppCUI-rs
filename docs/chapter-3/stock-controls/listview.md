@@ -93,7 +93,7 @@ pub trait ListViewEvents<T: ListItem + 'static> {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a list view also has the following aditional methods:
 
 ### Adding items and groups
 

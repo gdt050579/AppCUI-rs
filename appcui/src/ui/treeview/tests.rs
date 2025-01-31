@@ -1100,7 +1100,7 @@ fn check_delete_item() {
             if command_id == mywin::Commands::Delete {
                 let h = self.tv;
                 if let Some(tv) = self.control_mut(h) {
-                    if let Some(current) = tv.current_item() {
+                    if let Some(current) = tv.current_item_handle() {
                         tv.delete_item(current);
                     }
                 }
@@ -1245,14 +1245,14 @@ fn check_collapse_expand_via_methods() {
             match command_id {
                 mywin::Commands::Expand => {
                     if let Some(tv) = self.control_mut(h) {
-                        if let Some(ci) = tv.current_item() {
+                        if let Some(ci) = tv.current_item_handle() {
                             tv.expand_item(ci, false);
                         }
                     }
                 }
                 mywin::Commands::Collapse => {
                     if let Some(tv) = self.control_mut(h) {
-                        if let Some(ci) = tv.current_item() {
+                        if let Some(ci) = tv.current_item_handle() {
                             tv.collapse_item(ci, false);
                         }
                     }
@@ -1719,7 +1719,7 @@ fn check_select_and_count_method() {
             if command_id == mywin::Commands::Delete {
                 let h = self.tv;
                 if let Some(tv) = self.control_mut(h) {
-                    if let Some(current) = tv.current_item() {
+                    if let Some(current) = tv.current_item_handle() {
                         tv.delete_item(current);
                     }
                 }
@@ -1729,7 +1729,7 @@ fn check_select_and_count_method() {
                 self.idx += 1;
                 let idx = self.idx;
                 if let Some(tv) = self.control_mut(h) {
-                    if let Some(current) = tv.current_item() {
+                    if let Some(current) = tv.current_item_handle() {
                         tv.add_to_parent(Course::new(format!("Item {}", idx).as_str(), (idx * 7) % 3 + 1, (idx * 11) % 5 + 1), current);
                     }
                 }

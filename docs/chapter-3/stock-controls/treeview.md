@@ -107,3 +107,59 @@ pub trait TreeViewEvents<T: ListItem + 'static> {
     }
 }
 ```
+
+## Methods
+
+Besides the [Common methods for all Controls](../common_methods.md) a tree view also has the following aditional methods:
+
+### Adding items
+
+| Method                    | Purpose                                                                                                                                                                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `add_column(...)`         | Adds a new column to the TreeView control. This method is in particular usefull when you need to create a custom treeview.                                                                                                                             |
+| `add(...)`                | Adds a new item to the root of the TreeView control.                                                                                                                                                                                                   |
+| `add_to_parent(...)`      | Adds a new item as a child for another item that exists in TreeView control.                                                                                                                                                                           |
+| `add_item(...)`           | Adds a new item to the root of the TreeView control. This methods allows you to specify the color, icon and selection state for that item.                                                                                                             |
+| `add_item_to_parent(...)` | Adds a new item as a child for another item that exists in TreeView control. This methods allows you to specify the color, icon and selection state for that item.                                                                                     |
+| `add_batch(...)`          | Adds multiple items to the treeview. When an item is added to a treeview, it is imediatly filtered based on the current search text. If you want to add multiple items (using various methods) and then filter them, you can use the add_batch method. |
+| `items_count()`           | Returns the number of items in the treeview.                                                                                                                                                                                                           |
+
+
+### Deleting items
+
+| Method                      | Purpose                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| `delete_item(...)`          | Deletes an item from the treeview. If the item has children, they will be deleted as well. |
+| `delete_item_children(...)` | Deletes all children of an item from the treeview.                                         |
+| `clear()`                   | Clears all items from the treeview                                                         |
+
+
+### Item access
+
+| Method                  | Purpose                                                                                                                |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `current_item_handle()` | Returns a handle to the current item or None if the treeview is empty                                                  |
+| `current_item()`        | Returns a immutable reference to the current item or None if the treeview is empty                                     |
+| `current_item_mut()`    | Returns a mutable reference to the current item or None if the treeview is empty                                       |
+| `item(...)`             | Returns an immutable reference to an item based on its handle or None if the handle is invalid (e.g. item was deleted) |
+| `item_mut(...)`         | Returns a mutable reference to an item based on its handle or None if the handle is invalid (e.g. item was deleted)    |
+
+
+### Selection & Folding
+
+| Method                   | Purpose                                               |
+| ------------------------ | ----------------------------------------------------- |
+| `select_item(...)`       | Selects or deselects an item based on its handle.     |
+| `selected_items_count()` | Returns the number of selected items in the treeview. |
+
+| `is_item_selected(...)`  | Returns true if the item is selected or false otherwise. If the index is invalid, false will be returned.              |
+
+
+### Miscellaneous
+
+| Method                    | Purpose                                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `set_frozen_columns(...)` | Sets the number of frozen columns. Frozen columns are columns that are not scrolled when the treeview is scrolled horizontally. |
+| `sort(...)`               | Sorts the items in the TreeView control based on a column index.                                                                |
+| `clear_search()`          | Clears the content of the search box of the treeview.                                                                           |
+

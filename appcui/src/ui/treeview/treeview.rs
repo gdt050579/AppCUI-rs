@@ -212,13 +212,32 @@ where
     }
 
     #[inline(always)]
-    pub fn current_item(&self) -> Option<Handle<treeview::Item<T>>> {
+    pub fn current_item_handle(&self) -> Option<Handle<Item<T>>> {
         if self.pos < self.item_list.len() {
             Some(self.item_list[self.pos])
         } else {
             None
         }
     }
+
+    #[inline(always)]
+    pub fn current_item(&self) -> Option<&T> {
+        if self.pos < self.item_list.len() {
+            self.manager.get(self.item_list[self.pos]).map(|f| f.value())
+        } else {
+            None
+        }
+    }
+
+    #[inline(always)]
+    pub fn current_item_mut(&mut self) -> Option<&mut T> {
+        if self.pos < self.item_list.len() {
+            let h = self.item_list[self.pos];
+            self.manager.get_mut(h).map(|f| f.value_mut ())
+        } else {
+            None
+        }
+    }    
 
     pub fn delete_item(&mut self, item_handle: Handle<Item<T>>) {
         let pos = self.pos;
@@ -310,6 +329,17 @@ where
     /// Returns the number of selected items
     pub fn selected_items_count(&self) -> usize {
         self.manager.selected_count()
+    }
+
+    /// Change the selection state of the item at the specified index
+    pub fn select_item(&mut self, item_handle: Handle<Item<T>>, selected: bool) {
+        if let Some(item) = self.manager.get_mut(item_handle) {
+            let current_value = item.is_selected();
+            item.set_selected(selected);
+            if current_value != selected {
+                self.manager.update_selected_count(selected);
+            }
+        }
     }
 
     fn goto_next_match(&mut self, start: usize, emit_event: bool) {
@@ -724,13 +754,13 @@ where
         let end = initial.max(self.pos);
         let mut changed = false;
         for i in start..=end {
-            changed |= self.select_item(i, mode, true);
+            changed |= self.select_item_at_pos(i, mode, true);
         }
         if changed {
             self.emit_selection_update_event();
         }
     }
-    fn select_item(&mut self, pos: usize, mode: SelectMode, emit_event: bool) -> bool {
+    fn select_item_at_pos(&mut self, pos: usize, mode: SelectMode, emit_event: bool) -> bool {
         if self.flags.contains(Flags::NoSelection) {
             return false;
         }
@@ -835,12 +865,12 @@ where
 
             // Selection
             key!("Insert") | key!("Shift+Down") => {
-                self.select_item(self.pos, SelectMode::Reverse, true);
+                self.select_item_at_pos(self.pos, SelectMode::Reverse, true);
                 self.update_position(self.pos.saturating_add(1), true);
                 true
             }
             key!("Shift+Up") => {
-                self.select_item(self.pos, SelectMode::Reverse, true);
+                self.select_item_at_pos(self.pos, SelectMode::Reverse, true);
                 self.update_position(self.pos.saturating_sub(1), true);
                 true
             }
