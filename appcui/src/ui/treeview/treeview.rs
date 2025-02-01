@@ -221,23 +221,47 @@ where
     }
 
     #[inline(always)]
-    pub fn current_item(&self) -> Option<&T> {
+    pub fn current_item(&self) -> Option<&Item<T>> {
         if self.pos < self.item_list.len() {
-            self.manager.get(self.item_list[self.pos]).map(|f| f.value())
+            self.manager.get(self.item_list[self.pos])
         } else {
             None
         }
     }
 
     #[inline(always)]
-    pub fn current_item_mut(&mut self) -> Option<&mut T> {
+    pub fn current_item_mut(&mut self) -> Option<&mut Item<T>> {
         if self.pos < self.item_list.len() {
             let h = self.item_list[self.pos];
-            self.manager.get_mut(h).map(|f| f.value_mut ())
+            self.manager.get_mut(h)
         } else {
             None
         }
-    }    
+    }
+
+    #[inline(always)]
+    pub fn root_items(&self) -> &[Handle<Item<T>>] {
+        self.manager.roots()
+    }
+    #[inline(always)]
+    pub fn root_item(&self, index: usize) -> Option<&Item<T>> {
+        let len = self.manager.roots().len();
+        if index < len {
+            self.manager.get(self.manager.roots()[index])
+        } else {
+            None
+        }
+    }
+
+    #[inline(always)]
+    pub fn root_item_mut(&mut self, index: usize) -> Option<&mut Item<T>> {
+        let len = self.manager.roots().len();
+        if index < len {
+            self.manager.get_mut(self.manager.roots()[index])
+        } else {
+            None
+        }
+    }
 
     pub fn delete_item(&mut self, item_handle: Handle<Item<T>>) {
         let pos = self.pos;
@@ -321,7 +345,6 @@ where
         self.update_scrollbars();
     }
 
-
     /// Returns the number of items in the tree view
     pub fn items_count(&self) -> usize {
         self.manager.count()
@@ -362,6 +385,12 @@ where
     pub fn sort(&mut self, column_index: u16, ascendent: bool) {
         self.header.set_sort_column(column_index, ascendent, true);
         self.update_item_list(UpdateVisibleItemsOperation::Sort);
+    }
+
+    /// Clears the content of the search bar
+    pub fn clear_search(&mut self) {
+        self.comp.clear_search();
+        self.update_item_list(UpdateVisibleItemsOperation::Refresh);
     }
 
     #[inline(always)]

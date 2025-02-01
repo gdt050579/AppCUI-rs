@@ -143,16 +143,21 @@ Besides the [Common methods for all Controls](../common_methods.md) a tree view 
 | `current_item_mut()`    | Returns a mutable reference to the current item or None if the treeview is empty                                       |
 | `item(...)`             | Returns an immutable reference to an item based on its handle or None if the handle is invalid (e.g. item was deleted) |
 | `item_mut(...)`         | Returns a mutable reference to an item based on its handle or None if the handle is invalid (e.g. item was deleted)    |
+| `root_items()`          | Returns a list of handles to the root items in the treeview.                                                           |
+| `root_item_mut(...)`    | Returns a mutable reference to the root item based on its index or None if the index is invalid                        |
+| `root_item(...)`        | Returns an immutable reference to the root item based on its index or None if the index is invalid                     |
 
 
 ### Selection & Folding
 
-| Method                   | Purpose                                               |
-| ------------------------ | ----------------------------------------------------- |
-| `select_item(...)`       | Selects or deselects an item based on its handle.     |
-| `selected_items_count()` | Returns the number of selected items in the treeview. |
-
-| `is_item_selected(...)`  | Returns true if the item is selected or false otherwise. If the index is invalid, false will be returned.              |
+| Method                   | Purpose                                                                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `select_item(...)`       | Selects or deselects an item based on its handle.                                                                                              |
+| `selected_items_count()` | Returns the number of selected items in the treeview.                                                                                          |
+| `collapse_item(...)`     | Collapses an item based on its handle. This methods takes a `recursive` parameter that if **true** will also collapse all of the item children |
+| `expand_item(...)`       | Expands an item based on its handle. This methods takes a `recursive` parameter that if **true** will also expand all of the item children     |
+| `collapse_all()`         | Collapses all items in the treeview.                                                                                                           |
+| `expand_all()`           | Expands all items in the treeview.                                                                                                             |
 
 
 ### Miscellaneous

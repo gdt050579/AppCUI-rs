@@ -82,6 +82,14 @@ where
         self.selected
     }
     #[inline(always)]
+    pub fn parent(&self) -> Option<Handle<Item<T>>> {
+        if self.parent.is_none() { Some(self.parent) } else { None }
+    }
+    #[inline(always)]
+    pub fn children(&self) -> &[Handle<Item<T>>] {
+        &self.children
+    }
+    #[inline(always)]
     pub(super) fn set_selected(&mut self, value: bool) {
         self.selected = value;
     }

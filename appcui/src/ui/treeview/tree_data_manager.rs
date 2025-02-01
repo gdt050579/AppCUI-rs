@@ -145,7 +145,6 @@ where
         self.selected_count = 0;
     }
     #[inline(always)]
-    #[cfg(test)]
     pub(super) fn roots(&self) -> &[Handle<Item<T>>] {
         &self.roots
     }
