@@ -1805,3 +1805,176 @@ fn check_custom_filter() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_select_via_api() {
+    #[Window(events = CommandBarEvents, commands: Select+UnSelect, internal: true)]
+    struct MyWin {
+        tv: Handle<TreeView<Course>>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,x:0,y:0,w:100%,h:9,flags: Sizeable"),
+                tv: Handle::None,
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            Course::populate_with_icons(&mut tv);
+            w.tv = w.add(tv);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Select", mywin::Commands::Select);
+            commandbar.set(key!("F2"), "UnSelect", mywin::Commands::UnSelect);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            let h = self.tv;
+            match command_id {
+                mywin::Commands::Select => {
+                    if let Some(tv) = self.control_mut(h) {
+                        let h = tv.current_item_handle().unwrap();
+                        tv.select_item(h, true);
+                    }
+                }
+                mywin::Commands::UnSelect => {
+                    if let Some(tv) = self.control_mut(h) {
+                        let h = tv.current_item_handle().unwrap();
+                        tv.select_item(h, false);
+                    }
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5739A3BC6CC006A6)  
+        Key.Pressed(F1)
+        Key.Pressed(Down,2)
+        Paint('2. Math selected, cursor on 1-0-1')
+        CheckHash(0x89A533FD367B6271)  
+        Key.Pressed(F1)
+        Key.Pressed(Down,2)
+        Paint('3. 1-0-1 selected, cursor on Calculus')
+        CheckHash(0xDA4BD0416BB5B712)  
+        Key.Pressed(Home)
+        Key.Pressed(F2)
+        Key.Pressed(Down)
+        Paint('4. Math un-selected, cursor on Geometry')
+        CheckHash(0xD0BBAFFE2855880E)  
+    ";
+    let mut a = App::debug(60, 10, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_current_item_via_api() {
+    #[Window(events = CommandBarEvents, commands: Read+Change, internal: true)]
+    struct MyWin {
+        tv: Handle<TreeView<Course>>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,x:0,y:0,w:100%,h:9,flags: Sizeable"),
+                tv: Handle::None,
+            };
+            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            assert!(tv.current_item().is_none());
+            assert!(tv.current_item_mut().is_none());
+            assert!(tv.current_item_handle().is_none());
+            Course::populate_with_icons(&mut tv);
+            w.tv = w.add(tv);
+            w
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Read", mywin::Commands::Read);
+            commandbar.set(key!("F2"), "Change", mywin::Commands::Change);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            let h = self.tv;
+            match command_id {
+                mywin::Commands::Read => {
+                    let name = self.control(h).map(|tv| tv.current_item().unwrap()).map(|ci| ci.value().name.as_str()).unwrap_or("").to_string();
+                    self.set_title(&name);
+                }
+                mywin::Commands::Change => {
+                    if let Some(tv) = self.control_mut(h) {
+                        if let Some(ci) = tv.current_item_mut() {
+                            ci.value_mut().name.push_str("+++");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x738FE94E03821DA9)  
+        Key.Pressed(F1)
+        Key.Pressed(Down,2)
+        Paint('2. Math read, cursor on 1-0-1')
+        CheckHash(0x37A0968C6A0B4AEC)  
+        Key.Pressed(F1)
+        Key.Pressed(Down,2)
+        Paint('3. 1-0-1 read, cursor on Calculus')
+        CheckHash(0xBC4B861ED2D010BC)  
+        Key.Pressed(Home)
+        Key.Pressed(F2)
+        Key.Pressed(Down)
+        Paint('4. Math changed, cursor on Geometry')
+        CheckHash(0x8F097B0F69B5F894)  
+    ";
+    let mut a = App::debug(60, 10, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_root_access_via_api() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0xD10327941CB68014) 
+    ";
+    let mut a = App::debug(60, 14, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = treeview!("TestData,d:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    assert!(tv.current_item().is_none());
+    let h = tv.add(TestData::new("Alice"));
+    tv.add_to_parent(TestData::new("Andra"), h);
+    tv.add_to_parent(TestData::new("Boby"), h);
+    tv.add_to_parent(TestData::new("Charlie"), h);
+    let h = tv.add(TestData::new("Bob"));
+    tv.add_to_parent(TestData::new("Andra"), h);
+    let h2 = tv.add_to_parent(TestData::new("John"), h);
+    tv.add_to_parent(TestData::new("Andrei"), h2);
+    tv.add_to_parent(TestData::new("Dragos"), h2);
+    tv.add_to_parent(TestData::new("Alex"), h2);
+    tv.add_to_parent(TestData::new("Zig"), h);
+    tv.add(TestData::new("Charlie"));
+    let r = tv.root_items();
+    assert_eq!(r.len(), 3);
+    assert_eq!(tv.item(r[0]).unwrap().value().text, "Alice");
+    assert_eq!(tv.item(r[1]).unwrap().value().text, "Bob");
+    assert_eq!(tv.item(r[2]).unwrap().value().text, "Charlie");
+    assert_eq!(tv.root_item(0).unwrap().value().text, "Alice");
+    assert_eq!(tv.root_item(1).unwrap().value().text, "Bob");
+    assert_eq!(tv.root_item(2).unwrap().value().text, "Charlie");
+    assert!(tv.root_item(3).is_none());
+    tv.root_item_mut(0).unwrap().value_mut().text.push_str("+++");
+    assert_eq!(tv.root_item(0).unwrap().value().text, "Alice+++");
+    assert!(tv.root_item_mut(3).is_none());
+
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
