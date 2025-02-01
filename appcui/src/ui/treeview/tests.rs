@@ -1978,3 +1978,36 @@ fn check_root_access_via_api() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_mouse_select() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state ')
+        CheckHash(0xEADD865DD9FCA8DB) 
+        Mouse.Drag(12,3,12,9)
+        Paint('2. Andra to Andrei are selected ')
+        CheckHash(0x7A781EBC066F183B) 
+        Mouse.Drag(12,4,12,6)
+        Paint('3. Boby to Bob are unselected')
+        CheckHash(0xF2D9830739E10B0F) 
+    ";
+    let mut a = App::debug(60, 14, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv = treeview!("TestData,d:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    let h = tv.add(TestData::new("Alice"));
+    tv.add_to_parent(TestData::new("Andra"), h);
+    tv.add_to_parent(TestData::new("Boby"), h);
+    tv.add_to_parent(TestData::new("Charlie"), h);
+    let h = tv.add(TestData::new("Bob"));
+    tv.add_to_parent(TestData::new("Andra"), h);
+    let h2 = tv.add_to_parent(TestData::new("John"), h);
+    tv.add_to_parent(TestData::new("Andrei"), h2);
+    tv.add_to_parent(TestData::new("Dragos"), h2);
+    tv.add_to_parent(TestData::new("Alex"), h2);
+    tv.add_to_parent(TestData::new("Zig"), h);
+    tv.add(TestData::new("Charlie"));
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}

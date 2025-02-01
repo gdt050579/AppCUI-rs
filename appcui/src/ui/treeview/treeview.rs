@@ -814,6 +814,25 @@ where
         }
         false
     }
+    fn select_items(&mut self, start: usize, end: usize, mode: SelectMode, emit_event: bool) {
+        if self.flags.contains(Flags::NoSelection) {
+            return;
+        }
+        let len = self.item_list.len();
+        if len == 0 {
+            return;
+        }
+        let p_start = start.min(end).min(len - 1);
+        let p_end = end.max(start).min(len - 1);
+        let mut selection_has_changed = false;
+        for pos in p_start..=p_end {
+            selection_has_changed |= self.select_item_at_pos(pos, mode, false);
+        }
+        if (emit_event) && (selection_has_changed) {
+            self.emit_selection_update_event();
+        }
+    }
+
 
     fn reverse_fold(&mut self, recursive: bool) -> bool {
         if self.pos < self.item_list.len() {
@@ -992,8 +1011,8 @@ where
                 if self.start_mouse_select != usize::MAX {
                     if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
                         if pos != self.pos {
-                            self.update_position(pos, true);
-                            //self.check_items(self.start_mouse_select, pos, self.mouse_check_mode, true);
+                            self.update_position(pos, true);                    
+                            self.select_items(self.start_mouse_select, pos, self.mouse_check_mode, true);
                         }
                     }
                 }
