@@ -168,3 +168,44 @@ Besides the [Common methods for all Controls](../common_methods.md) a tree view 
 | `sort(...)`               | Sorts the items in the TreeView control based on a column index.                                                                |
 | `clear_search()`          | Clears the content of the search box of the treeview.                                                                           |
 
+## Key association
+
+The following keys are processed by a `TreeView` control if it has focus:
+
+| Key                                                        | Purpose                                                                                                                                                                                                                                         |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Up`, `Down`                                               | Changes the current item from the TreeView.                                                                                                                                                                                                     |
+| `Left`, `Right`                                            | Scrolls the view to the left or to the right                                                                                                                                                                                                    |
+| `PageUp`, `PageDown`                                       | Navigates through the list of items page by page.                                                                                                                                                                                               |
+| `Home`                                                     | Moves the current item to the first element in the tree view                                                                                                                                                                                    |
+| `End`                                                      | Moves the current item to the last element in the tree view                                                                                                                                                                                     |
+| `Shift`+{`Up`, `Down`,`PageUp`, `PageDown`, `Home`, `End`} | Selects multiple items in the tree view.                                                                                                                                                                                                        |
+| `Insert`                                                   | Toggle the selection state of the current item. Once the selection is toggled, the cursor will me moved to the next item in the tree view.                                                                                                      |
+| `Space`                                                    | Folds or un-foldes an item in the tree view                                                                                                                                                                                                     |
+| `Ctrl`+`Alt`+{`Up`, `Down`}                                | Moves the scroll up or down                                                                                                                                                                                                                     |
+| `Enter`                                                    | Triggers the `TreeViewEvents::on_item_action` event for the current item                                                                                                                                                                        |
+| `Ctrl`+{`A`..`Z`, `0`..`9`}                                | If a column has a hot key associated (by using the `&` character in the column name), this will sort all items bsed on that column. If that column is already selected, this will reverse the order of the sort items (ascendent or descendent) |
+| `Ctrl`+{`Left`, `Right`}                                   | Enter in the column resize mode.                                                                                                                                                                                                                |
+
+Aditionally, typing any character will trigger the search bar (if the flag `SearchBar` is present) and will filter the items based on the search text. While the search bar is active, the following keys are processed:
+* `Backspace` - removes the last character from the search text
+* `Escape` - clears the search text and closes the search bar
+* `Enter` - moves to the next match
+* Movement keys (such as `Up`, `Down`, `Left`, `Right`, `PageUp`, `PageDown`, `Home`, `End`) - will disable the search bar, but will keep the search text
+
+While in the column resize mode, the following keys are processed:
+* `Left`, `Right` - increases or decreases the width of the current column
+* `Ctrl`+`Left`, `Ctrl`+`Right` - moves the focus to the previous or next column
+* `Escape` or movement keys - exits the column resize mode
+
+## Populating a tree view
+
+To add items to a tree view, you can use the `add` and `add_to_parent` methods. The `add` method adds an item to the root of the tree view, while the `add_to_parent` method adds an item as a child to another item. Both of them return a handle to the newly added item.
+
+The following example shows how to add items to a tree view:
+
+```rs
+```
+
+Whenever an element is being added to a TreeView, the TreeView will try to filter and sort the item based on its content. These operations are expensive so if you need to add multiple items to a TreeView, you can use the `add_batch` method. This method will add all items to the TreeView and will filter and sort the items only once, after all items were added.
+

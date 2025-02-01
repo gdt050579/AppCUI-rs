@@ -148,7 +148,7 @@ The following keys are processed by a `ListView` control if it has focus:
 
 | Key                                                                          | Purpose                                                                                                                                                                                                                                         |
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Up`, `Down`                                                                 | Changes the current item from the ListBox.                                                                                                                                                                                                      |
+| `Up`, `Down`                                                                 | Changes the current item from the ListView.                                                                                                                                                                                                      |
 | `Left`, `Right`                                                              | Scrolls the view to the left or to the right (when the view is `Details` or changes the current item if the view is `Columns`)                                                                                                                  |
 | `PageUp`, `PageDown`                                                         | Navigates through the list of items page by page.                                                                                                                                                                                               |
 | `Home`                                                                       | Moves the current item to the first element in the list                                                                                                                                                                                         |
@@ -193,7 +193,7 @@ that contains the following characteristics:
 * `selected` - a checkbox that can be used to select or deselecte all items from the group. 
 * `count` - the right most number that indicates the number of items from the group that are visible (if the search bar is being used, this number will indicate the number of items in the group that have been filtered out)
 
-## Populating a litsview
+## Populating a list view
 
 Whenever an element is being added to a listview, the listview will try to assigned to a group and if the search bar contains a filter expression, will try to filter the item based on that expression. After this steps, the listview will also try to sort the items based on the current sorting column.
 Aditionally, there might be cases where you want to add an item with a specific icon, selection status or color.
