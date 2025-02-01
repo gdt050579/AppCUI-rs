@@ -101,6 +101,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable); 
+    config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events
@@ -184,6 +185,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
@@ -240,6 +242,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
 
 
     // custom events
@@ -322,6 +325,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events
@@ -337,9 +341,9 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 
-#[proc_macro_derive(ListViewItem, attributes(Column))]
-pub fn derive_describe(input: TokenStream) -> TokenStream {
-    crate::derives::listview_item::derive(input)
+#[proc_macro_derive(ListItem, attributes(Column))]
+pub fn listitem_derive(input: TokenStream) -> TokenStream {
+    crate::derives::listitem::derive(input)
 }
 
 /// Use to quickly identify a key or a combination via a string
@@ -537,4 +541,9 @@ pub fn listview(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn togglebutton(input: TokenStream) -> TokenStream {
     crate::controls::togglebutton::create(input)
+}
+
+#[proc_macro]
+pub fn treeview(input: TokenStream) -> TokenStream {
+    crate::controls::treeview::create(input)
 }

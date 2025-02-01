@@ -17,7 +17,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut iv_1 = ImageViewer::new(
         create_image(172, 122, ferris::FERRIS_PIXELS),
         Layout::new("d:c"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::Scale33,
         imageviewer::Flags::ScrollBars,
     );
@@ -25,7 +25,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let iv_2 = ImageViewer::new(
         create_image(172, 122, ferris::FERRIS_PIXELS),
         Layout::new("d:c"),
-        image::RenderMethod::AsciiArt,
+        image::RendererType::AsciiArt,
         image::Scale::Scale25,
         imageviewer::Flags::ScrollBars,
     );

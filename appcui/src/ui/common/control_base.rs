@@ -114,8 +114,8 @@ impl ControlBase {
         let width = self.layout.get_width() as u32;
         let height = self.layout.get_height() as u32;
         Size {
-            width: if horizontal_margins > width { 0 } else { width - horizontal_margins },
-            height: if vertical_margins > height { 0 } else { height - vertical_margins },
+            width: width.saturating_sub(horizontal_margins),
+            height: height.saturating_sub(vertical_margins),
         }
     }
 

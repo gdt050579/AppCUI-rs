@@ -5,7 +5,7 @@ use proc_macro::*;
 use std::str::FromStr;
 
 static TEMPLATE: &str = r#"
-impl listview::ListItem for $(STRUCT_NAME) {
+impl components::listitem::ListItem for $(STRUCT_NAME) {
     fn columns_count() -> u16 { $(COLUMNS_COUNT) }
     fn column(index: u16) -> components::Column{ 
         match index {
@@ -13,7 +13,7 @@ impl listview::ListItem for $(STRUCT_NAME) {
             _ => components::Column::new("", 10, TextAlignament::Left)
         }
     }
-    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+    fn render_method(&self, column_index: u16) -> Option<components::listitem::RenderMethod> {
         match column_index {
             $(RENDER_METHODS)
             _ => None
@@ -169,7 +169,7 @@ impl RenderMethod {
             "u8" | "u16" | "u32" | "u64" => Some(Self::UInt64("Normal")),
             "f32" | "f64" => Some(Self::Float("Normal")),
             "bool" => Some(Self::Bool("CheckmarkMinus")),
-            "Status" | "listview::Status" => Some(Self::Status("Graphical")),
+            "Status" | "components::listitem::Status" | "listitem::Status" => Some(Self::Status("Graphical")),
             "chrono::NaiveDateTime" | "NaiveDateTime" => Some(Self::DateTime("Normal")),
             "chrono::NaiveDate" | "NaiveDate" => Some(Self::Date("Full")),
             "chrono::NaiveTime" | "NaiveTime" => Some(Self::Time("Normal")),
@@ -241,91 +241,91 @@ impl RenderMethod {
         match self {           
             Self::Text | Self::Ascii => {
                 match vartype {
-                    "&str" => format!("{} => Some(listview::RenderMethod::{}(self.{})),\n", index,self.name(),varname),
-                    "String" => format!("{} => Some(listview::RenderMethod::{}(self.{}.as_str())),\n", index,self.name(),varname),
+                    "&str" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{})),\n", index,self.name(),varname),
+                    "String" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{}.as_str())),\n", index,self.name(),varname),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Int64(fmt) => {
                 match vartype {
-                    "u8" | "u16" | "u32" | "i8" | "i16" | "i32" | "i64"  => format!("{} => Some(listview::RenderMethod::{}(self.{} as i64, listview::NumericFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "u8" | "u16" | "u32" | "i8" | "i16" | "i32" | "i64"  => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} as i64, components::listitem::NumericFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::UInt64(fmt) => {
                 match vartype {
-                    "u8" | "u16" | "u32" | "u64"  => format!("{} => Some(listview::RenderMethod::{}(self.{} as u64, listview::NumericFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "u8" | "u16" | "u32" | "u64"  => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} as u64, components::listitem::NumericFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Float(fmt) => {
                 match vartype {
-                    "f32" | "f64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::FloatFormat::{})),\n", index,self.name(),varname, *fmt),
-                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::FloatFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "f32" | "f64" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} as f64, components::listitem::FloatFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} as f64, components::listitem::FloatFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Bool(fmt) => {
                 match vartype {
-                    "bool" => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::BoolFormat::{})),\n", index,self.name(),varname, *fmt),
-                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}(self.{} != 0, listview::BoolFormat::{})),\n", index,self.name(),varname, *fmt), 
-                    "usize" | "u128" | "i128" | "isize" => format!("{} => Some(listview::RenderMethod::{}(self.{} != 0, listview::BoolFormat::{})),\n", index,self.name(),varname, *fmt),   
+                    "bool" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{}, components::listitem::BoolFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} != 0, components::listitem::BoolFormat::{})),\n", index,self.name(),varname, *fmt), 
+                    "usize" | "u128" | "i128" | "isize" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} != 0, components::listitem::BoolFormat::{})),\n", index,self.name(),varname, *fmt),   
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Area(fmt)|Self::Size(fmt)|Self::Distance(fmt)|Self::Volume(fmt)|Self::Weight(fmt)|Self::Speed(fmt) => {
                 match vartype {
-                    "u8" | "u16" | "u32" | "u64"  => format!("{} => Some(listview::RenderMethod::{}(self.{} as u64, listview::{}Format::{})),\n", index,self.name(),varname,self.name(), *fmt),
+                    "u8" | "u16" | "u32" | "u64"  => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} as u64, components::listitem::{}Format::{})),\n", index,self.name(),varname,self.name(), *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Percentage(fmt) => {
                 match vartype {
-                    "f32" | "f64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::PercentageFormat::{})),\n", index,self.name(),varname, *fmt),
-                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}((self.{} as f64)/100.0, listview::PercentageFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "f32" | "f64" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} as f64, components::listitem::PercentageFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(components::listitem::RenderMethod::{}((self.{} as f64)/100.0, components::listitem::PercentageFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Temperature(fmt)|Self::Currency(fmt) => {
                 match vartype {
-                    "f32" | "f64" | "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(listview::RenderMethod::{}(self.{} as f64, listview::{}Format::{})),\n", index,self.name(),varname,self.name(), *fmt),
+                    "f32" | "f64" | "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} as f64, components::listitem::{}Format::{})),\n", index,self.name(),varname,self.name(), *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Rating(fmt, number) => {
                 match vartype {
-                    "u8" | "u16" | "u32"   => format!("{} => Some(listview::RenderMethod::{}(self.{} as u32, listview::RatingFormat::{}({}))),\n", index,self.name(),varname, *fmt, number),
+                    "u8" | "u16" | "u32"   => format!("{} => Some(components::listitem::RenderMethod::{}(self.{} as u32, components::listitem::RatingFormat::{}({}))),\n", index,self.name(),varname, *fmt, number),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Status(fmt) => {
                 match vartype {
-                    "Status" | "listview::Status" => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::StatusFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "Status" | "components::listitem::Status" | "listitem::Status"  => format!("{} => Some(components::listitem::RenderMethod::{}(self.{}, components::listitem::StatusFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::DateTime(fmt) => {
                 match vartype {
-                    "chrono::NaiveDateTime" | "NaiveDateTime"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::DateTimeFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "chrono::NaiveDateTime" | "NaiveDateTime"  => format!("{} => Some(components::listitem::RenderMethod::{}(self.{}, components::listitem::DateTimeFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Date(fmt) => {
                 match vartype {
-                    "chrono::NaiveDate" | "NaiveDate"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::DateFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "chrono::NaiveDate" | "NaiveDate"  => format!("{} => Some(components::listitem::RenderMethod::{}(self.{}, components::listitem::DateFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Time(fmt) => {
                 match vartype {
-                    "chrono::NaiveTime" | "NaiveTime"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::TimeFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "chrono::NaiveTime" | "NaiveTime"  => format!("{} => Some(components::listitem::RenderMethod::{}(self.{}, components::listitem::TimeFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
             Self::Duration(fmt) => {
                 match vartype {
-                    "chrono::Duration" | "Duration"  => format!("{} => Some(listview::RenderMethod::{}(self.{}, listview::DurationFormat::{})),\n", index,self.name(),varname, *fmt),
-                    "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" => format!("{} => Some(listview::RenderMethod::{}(chrono::Duration::seconds(self.{} as i64) , listview::DurationFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "chrono::Duration" | "Duration"  => format!("{} => Some(components::listitem::RenderMethod::{}(self.{}, components::listitem::DurationFormat::{})),\n", index,self.name(),varname, *fmt),
+                    "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" => format!("{} => Some(components::listitem::RenderMethod::{}(chrono::Duration::seconds(self.{} as i64) , components::listitem::DurationFormat::{})),\n", index,self.name(),varname, *fmt),
                     _ => panic!("Unsupported rendering method '{}' for type '{}', for field '{}'. Implement ListItem manually to provide explicit implementation for this type !", self.name(),vartype, varname),
                 }
             }
@@ -486,7 +486,7 @@ impl Column {
             "&str" => {
                 format!("{} => self.{}.cmp(other.{}),\n", index, self.varname, self.varname)
             }
-            "Status" | "listview::Status" => {
+            "Status" | "components::listitem::Status" | "listitem::Status"  => {
                 format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             "chrono::NaiveDateTime" | "NaiveDateTime" => {

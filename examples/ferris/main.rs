@@ -788,7 +788,7 @@ fn main() -> Result<(), appcui::system::Error> {
     w.add(ImageViewer::new(
         ferris,
         Layout::new("d:c"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::NoScale,
         imageviewer::Flags::ScrollBars,
     ));

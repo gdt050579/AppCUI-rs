@@ -1,11 +1,10 @@
 pub mod events;
-mod groups;
 mod initialization_flags;
+mod treeview;
+mod tree_data_manager;
 mod item;
-mod listview;
 #[cfg(test)]
 mod tests;
-mod view_mode;
 
 pub use crate::ui::components::listitem::formats::AreaFormat;
 pub use crate::ui::components::listitem::formats::BoolFormat;
@@ -29,10 +28,12 @@ pub use crate::ui::components::listitem::formats::WeightFormat;
 pub use crate::ui::components::listitem::ListItem;
 pub use crate::ui::components::listitem::RenderMethod;
 
-pub use self::groups::Group;
-pub(super) use self::groups::GroupInformation;
 pub use self::initialization_flags::Flags;
 pub use self::item::Item;
-pub use self::listview::ListView;
-pub use self::view_mode::ViewMode;
+pub use self::treeview::TreeView;
+
+use self::tree_data_manager::TreeDataManager;
+use self::item::ItemVisibility;
+use self::item::FoldStatus;
+
 
