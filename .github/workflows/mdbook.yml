@@ -34,7 +34,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./book  # Ensure this path matches the output directory of mdbook build
+          path: ./html  # Ensure this path matches the output directory of mdbook build
 
   deploy:
     environment:
