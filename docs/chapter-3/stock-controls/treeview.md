@@ -205,7 +205,61 @@ To add items to a tree view, you can use the `add` and `add_to_parent` methods. 
 The following example shows how to add items to a tree view:
 
 ```rs
+let mut treeview = TreeView::new(Layout::new("d:c"),treeview::Flags::ScrollBars);
+// add two items to the root of the tree view
+let handle_item_1 = treeview.add(...);
+let handle_item_2 = treeview.add(...);
+// add a child item to the first item
+let handle_item_3 = treeview.add_to_parent(...,handle_item_1);
+// add a child to the child of the first item
+let handle_item_4 = treeview.add_to_parent(...,handle_item_3);
 ```
 
 Whenever an element is being added to a TreeView, the TreeView will try to filter and sort the item based on its content. These operations are expensive so if you need to add multiple items to a TreeView, you can use the `add_batch` method. This method will add all items to the TreeView and will filter and sort the items only once, after all items were added.
 
+To add an item to a tree view, the item type has to implement the [ListItem](../object-traits/listitem.md) trait. Based on the implementation of this trait, the TreeView will:
+* display an item based on a specification
+* filter the item based on the search text or a specific filtering algorithm
+* sort the items based on a column index
+* get a list of columns and their specifications (name, width, alignment)
+
+
+# Example
+
+The following example shows how to create a tree view with a custom item type that implements the `ListItem` trait:
+
+```rs
+use appcui::prelude::*;
+
+#[derive(ListItem)]
+struct MyItem {
+    #[Column(name="Text", width=100)]
+    text: String,
+}
+impl MyItem {
+    pub fn new(text: &str) -> Self {
+        Self {
+            text: text.to_string(),
+        }
+    }
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut a = App::new().build()?;
+    let mut w = window!("Tree,d:c");
+    let mut tv = treeview!("MyItem,d:c,flags: ScrollBars+SearchBar+HideHeader");
+    let h1 = tv.add(MyItem::new("Root Item 1"));    
+    let h2 = tv.add(MyItem::new("Root Item 2"));
+    let h1_1 = tv.add_to_parent(MyItem::new("First Child of Root Item 1"), h1);
+    let h1_2 = tv.add_to_parent(MyItem::new("Second Child of Root Item 1"), h1);
+    let h1_3 = tv.add_to_parent(MyItem::new("Third Child of Root Item 1"), h1);
+    let h1_1_1 = tv.add_to_parent(MyItem::new("First Child of First Child of Root Item 1"), h1_1);
+    let h2_1 = tv.add_to_parent(MyItem::new("First Child of Root Item 1"), h2);
+    let h2_2 = tv.add_to_parent(MyItem::new("Second Child of Root Item 1"), h2);
+
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+    Ok(())
+}
+```
