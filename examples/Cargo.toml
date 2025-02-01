@@ -163,3 +163,7 @@ path = "theme_switcher/main.rs"
 [[example]]
 name = "timer"
 path = "timer/main.rs"
+
+[[example]]
+name = "treeview"
+path = "treeview/main.rs"
