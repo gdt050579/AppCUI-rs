@@ -111,7 +111,7 @@ impl<'a> OpenSaveTestWindow<'a> {
     }
 }
 
-impl<'a> ButtonEvents for OpenSaveTestWindow<'a> {
+impl ButtonEvents for OpenSaveTestWindow<'_> {
     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         let nav = crate::utils::fs::NavSimulator::with_csv(VFS, true, "C:\\Program Files\\");
         let result = match self.flags {

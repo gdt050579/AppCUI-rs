@@ -127,14 +127,14 @@ fn generate_selector_events(a: &mut Arguments) -> String {
     for trait_name in a.template_events[&AppCUITrait::GenericSelectorEvents].iter() {
         s.push_str(templates::SELECT_ON_SELECTION_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());
     }
-    return templates::SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_SELECTOR)", s.as_str());
+    templates::SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_SELECTOR)", s.as_str())
 }
 fn generate_dropdownlist_events(a: &mut Arguments) -> String {
     let mut s = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericDropDownListEvents].iter() {
         s.push_str(templates::SELECT_ON_DROPDOWNLIST_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());
     }
-    return templates::DROPDOWNLIST_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_DROPDOWNLIST)", s.as_str());
+    templates::DROPDOWNLIST_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_DROPDOWNLIST)", s.as_str())
 }
 fn generate_numeric_selector_events(a: &mut Arguments) -> String {
     if !a.template_events.contains_key(&AppCUITrait::GenericNumericSelectorEvents) {
@@ -144,7 +144,7 @@ fn generate_numeric_selector_events(a: &mut Arguments) -> String {
     for trait_name in a.template_events[&AppCUITrait::GenericNumericSelectorEvents].iter() {
         s.push_str(templates::NUMERIC_SELECT_ON_VALUE_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());
     }
-    return templates::NUMERIC_SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_NUMERIC_SELECTOR)", s.as_str());
+    templates::NUMERIC_SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_NUMERIC_SELECTOR)", s.as_str())
 }
 
 fn generate_listview_events(a: &mut Arguments) -> String {

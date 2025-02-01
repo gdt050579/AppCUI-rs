@@ -1343,10 +1343,8 @@ fn check_on_item_dynamic_colapse_expanded_recursively() {
         ) -> EventProcessStatus {
             if recursive {
                 self.set_title("Collapsed recursively");
-            } else {
-                if let Some(tv) = self.control_mut(handle) {
-                    tv.delete_item_children(item_handle);
-                }
+            } else if let Some(tv) = self.control_mut(handle) {
+                tv.delete_item_children(item_handle);
             }
             EventProcessStatus::Processed
         }
@@ -1361,13 +1359,11 @@ fn check_on_item_dynamic_colapse_expanded_recursively() {
             self.count += 3;
             if recursive {
                 self.set_title("Expanded recursively");
-            } else {
-                if let Some(tv) = self.control_mut(handle) {
-                    for _ in 0..3 {
-                        c += 1;
-                        let item = treeview::Item::expandable(TestData::new(format!("Item {}", c).as_str()), true);
-                        tv.add_item_to_parent(item, item_handle);
-                    }
+            } else if let Some(tv) = self.control_mut(handle) {
+                for _ in 0..3 {
+                    c += 1;
+                    let item = treeview::Item::expandable(TestData::new(format!("Item {}", c).as_str()), true);
+                    tv.add_item_to_parent(item, item_handle);
                 }
             }
             EventProcessStatus::Processed
@@ -1990,7 +1986,7 @@ fn check_mouse_select() {
         CheckHash(0x7A781EBC066F183B) 
         Mouse.Drag(12,4,12,6)
         Paint('3. Boby to Bob are unselected')
-        CheckHash(0xF2D9830739E10B0F) 
+        CheckHash(0xF2D9830739E10B0F)  
     ";
     let mut a = App::debug(60, 14, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");

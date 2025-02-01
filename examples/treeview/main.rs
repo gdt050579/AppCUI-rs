@@ -1,5 +1,3 @@
-use std::fs::File;
-
 use appcui::prelude::*;
 
 #[derive(ListItem)]

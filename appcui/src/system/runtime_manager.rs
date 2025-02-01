@@ -98,7 +98,7 @@ static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
 
 #[cfg(not(feature = "GLOBAL_RUNTIME"))]
 thread_local! {
-    static RUNTIME_MANAGER: RefCell<Option<RuntimeManager>> = RefCell::new(None);
+    static RUNTIME_MANAGER: RefCell<Option<RuntimeManager>> = const { RefCell::new(None) };
 }
 
 impl RuntimeManager {
@@ -665,7 +665,7 @@ impl RuntimeManager {
             return None;
         }
         let menus = unsafe { &mut *self.menus };
-        return menus.get_mut(self.opened_menu_handle);
+        menus.get_mut(self.opened_menu_handle)
     }
     #[inline(always)]
     fn get_root_control_handle(&self) -> Handle<UIElement> {

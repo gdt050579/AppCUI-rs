@@ -152,23 +152,21 @@ where
     pub(super) fn matches(&self, search_text: &str, header: Option<&ColumnsHeader>) -> bool {
         if search_text.is_empty() {
             true
-        } else {
-            if let Some(header) = header {
-                let mut output: [u8; 256] = [0; 256];
-                let columns_count = header.columns().len();
-                for column_index in 0..columns_count {
-                    if let Some(rm) = self.data.render_method(column_index as u16) {
-                        if let Some(item_text) = rm.string_representation(&mut output) {
-                            if item_text.index_ignoring_case(search_text).is_some() {
-                                return true;
-                            }
+        } else if let Some(header) = header {
+            let mut output: [u8; 256] = [0; 256];
+            let columns_count = header.columns().len();
+            for column_index in 0..columns_count {
+                if let Some(rm) = self.data.render_method(column_index as u16) {
+                    if let Some(item_text) = rm.string_representation(&mut output) {
+                        if item_text.index_ignoring_case(search_text).is_some() {
+                            return true;
                         }
                     }
                 }
-                false
-            } else {
-                self.data.matches(search_text)
             }
+            false
+        } else {
+            self.data.matches(search_text)
         }
     }
 

@@ -1,6 +1,4 @@
 use std::cmp::Ordering;
-use std::usize;
-
 use super::FoldStatus;
 use super::Item;
 use super::ItemVisibility;
@@ -48,16 +46,14 @@ where
         let idx = handle.index();
         if idx >= self.data.len() {
             None
-        } else {
-            if let Some(item) = &self.data[idx as usize] {
-                if item.handle == handle {
-                    Some(idx as usize)
-                } else {
-                    None
-                }
+        } else if let Some(item) = &self.data[idx] {
+            if item.handle == handle {
+                Some(idx)
             } else {
                 None
             }
+        } else {
+            None
         }
     }
 
@@ -88,7 +84,7 @@ where
             self.selected_count += 1;
         }
         // move to vector
-        let idx = item.handle.index() as usize;
+        let idx = item.handle.index();
         let h = item.handle;
         if idx < self.data.len() {
             self.data[idx] = Some(item);
@@ -169,7 +165,7 @@ where
         self.data.len()
     }
 
-    fn pupulate_children(&mut self, handle_list: &Vec<Handle<Item<T>>>, output: &mut Vec<Handle<Item<T>>>, last_mask: u32, depth: u16) {
+    fn pupulate_children(&mut self, handle_list: &[Handle<Item<T>>], output: &mut Vec<Handle<Item<T>>>, last_mask: u32, depth: u16) {
         if handle_list.is_empty() {
             return;
         }
@@ -187,7 +183,7 @@ where
         if let Some(idx) = last_index {
             if idx > 0 {
                 // process all until the last one
-                for h in (&handle_list[..idx]).iter() {
+                for h in handle_list[..idx].iter() {
                     if let Some(item) = self.get_mut(*h) {
                         if item.is_visible() {
                             last_mask = item.set_line_mask(last_mask, depth, false);

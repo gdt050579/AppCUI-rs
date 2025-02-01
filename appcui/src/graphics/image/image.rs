@@ -122,10 +122,10 @@ impl Image {
     pub fn render_size(&self, rendering_method: RendererType, scale_method: Scale) -> Size {
         let rap = scale_method as u32;
         match rendering_method { 
-            RendererType::SmallBlocks => Size::new((self.width + rap - 1) / rap, (self.height + 2 * rap - 1) / (2 * rap)),
-            RendererType::LargeBlocks64Colors => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
-            RendererType::GrayScale => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
-            RendererType::AsciiArt => Size::new((self.width * 2 + rap - 1) / rap, (self.height + rap - 1) / rap),
+            RendererType::SmallBlocks => Size::new(self.width.div_ceil(rap), self.height.div_ceil(2 * rap)),
+            RendererType::LargeBlocks64Colors => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
+            RendererType::GrayScale => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
+            RendererType::AsciiArt => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
         }
     }
 

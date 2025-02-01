@@ -186,7 +186,7 @@ where
                 if name
                     .chars()
                     .next()
-                    .map(|c| c.to_ascii_lowercase() == to_find.to_ascii_lowercase())
+                    .map(|c| c.eq_ignore_ascii_case(&to_find))
                     .unwrap_or(false)
                 {
                     return poz;

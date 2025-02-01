@@ -872,7 +872,7 @@ where
                 return HoverStatus::OverFoldButton(p_x, pos);
             }
         }
-        return HoverStatus::None;
+        HoverStatus::None
     }
     fn process_key_pressed(&mut self, key: Key) -> bool {
         // process key for items

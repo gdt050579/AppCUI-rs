@@ -25,7 +25,7 @@ impl ParserError {
         }
     }
     pub(super) fn get_error(&self) -> &str {
-        return self.error.as_str();
+        self.error.as_str()
     }
     pub(super) fn as_string(&self) -> String {
         let mut err = String::with_capacity(256);

@@ -74,7 +74,7 @@ pub(crate) struct KeyValueParser<'a> {
     item: KeyValuePair<'a>,
 }
 
-impl<'a> KeyValueParser<'a> {
+impl KeyValueParser<'_> {
     pub fn new(text_representation: &str) -> KeyValueParser {
         KeyValueParser {
             text: text_representation,
