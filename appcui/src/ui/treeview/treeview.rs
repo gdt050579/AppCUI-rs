@@ -53,9 +53,39 @@ impl<T> TreeView<T>
 where
     T: ListItem + 'static,
 {
+    /// Creates a new TreeView control with the specified layout and flags
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListItem)]
+    /// struct FileInfo {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Folder", width=10)]
+    ///    folder: bool
+    /// }
+    /// let mut tree = TreeView::<FileInfo>::new(Layout::new("d:c"), treeview::Flags::None);
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(16, layout, flags)
     }
+    
+    
+    /// Creates a new TreeView control with the specified layout and flags.  The capacity parameter specifies the initial number of items that can be stored in the tree view.
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListItem)]
+    /// struct FileInfo {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Folder", width=10)]
+    ///    folder: bool
+    /// }
+    /// let mut tree = TreeView::<FileInfo>::with_capacity(16, Layout::new("d:c"), treeview::Flags::None);
+    /// ```
     pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags) -> Self {
         let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
