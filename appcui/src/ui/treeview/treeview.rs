@@ -202,13 +202,13 @@ where
     }
 
     #[inline(always)]
-    pub fn item(&self, item_handle: Handle<Item<T>>) -> Option<&T> {
-        self.manager.get(item_handle).map(|f| f.value())
+    pub fn item(&self, item_handle: Handle<Item<T>>) -> Option<&Item<T>> {
+        self.manager.get(item_handle)
     }
 
     #[inline(always)]
-    pub fn item_mut(&mut self, item_handle: Handle<Item<T>>) -> Option<&mut T> {
-        self.manager.get_mut(item_handle).map(|f| f.value_mut())
+    pub fn item_mut(&mut self, item_handle: Handle<Item<T>>) -> Option<&mut Item<T>> {
+        self.manager.get_mut(item_handle)
     }
 
     #[inline(always)]

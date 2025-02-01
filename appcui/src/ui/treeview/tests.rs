@@ -779,7 +779,7 @@ fn check_change_item_event() {
         fn on_current_item_changed(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
-                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
                     self.set_title(&s);
                 }
             }
@@ -833,7 +833,7 @@ fn check_change_item_event_change() {
             let c = self.counter;
             if let Some(tv) = self.control_mut(handle) {
                 if let Some(item) = tv.item_mut(item_handle) {
-                    item.name.push_str(format!("{},", c).as_str());
+                    item.value_mut().name.push_str(format!("{},", c).as_str());
                 }
             }
             EventProcessStatus::Processed
@@ -884,7 +884,7 @@ fn check_on_item_action_event() {
         fn on_item_action(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
-                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
                     self.set_title(&s);
                 }
             }
@@ -942,7 +942,7 @@ fn check_on_item_colapse_expanded() {
         ) -> EventProcessStatus {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
-                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
                     self.set_title(format!("CLP: {}", &s).as_str());
                 }
             }
@@ -952,7 +952,7 @@ fn check_on_item_colapse_expanded() {
         fn on_item_expanded(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>, _: bool) -> EventProcessStatus {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
-                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
                     self.set_title(format!("EXP: {}", &s).as_str());
                 }
             }
@@ -1084,7 +1084,7 @@ fn check_delete_item() {
         fn on_current_item_changed(&mut self, handle: Handle<TreeView<Course>>, item_handle: Handle<treeview::Item<Course>>) -> EventProcessStatus {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
-                    let s: FlatString<32> = FlatString::from_str(item.name.as_str());
+                    let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
                     self.set_title(format!("Current: {}", &s).as_str());
                 }
             }
