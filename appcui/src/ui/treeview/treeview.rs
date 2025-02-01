@@ -123,18 +123,102 @@ where
         }
         lv
     }
+    
+    
+    /// Adds a new object to the tree view. The object must implement ListItem trait. The object will be added as a root item.
+    /// This method returns a handle to the newly added item.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListItem)]
+    /// struct FileInfo {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Folder", width=10)]
+    ///    folder: bool
+    /// }
+    /// let mut tree = TreeView::<FileInfo>::new(Layout::new("d:c"), treeview::Flags::None);
+    /// tree.add(FileInfo { name: "Folder", folder: true });
+    /// ```
     #[inline(always)]
     pub fn add(&mut self, item: T) -> Handle<Item<T>> {
         self.add_item_to_parent(Item::non_expandable(item), Handle::None)
     }
+    
+    
+    /// Adds a new object to the tree view. The object must implement ListItem trait. The object will be added as a child of the specified parent item.
+    /// This method returns a handle to the newly added item.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListItem)]
+    /// struct FileInfo {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Folder", width=10)]
+    ///    folder: bool
+    /// }
+    /// let mut tree = TreeView::<FileInfo>::new(Layout::new("d:c"), treeview::Flags::None);
+    /// let parent = tree.add(FileInfo { name: "Folder", folder: true });
+    /// tree.add_to_parent(FileInfo { name: "File", folder: false }, parent);
+    /// ```
     #[inline(always)]
     pub fn add_to_parent(&mut self, item: T, parent: Handle<Item<T>>) -> Handle<Item<T>> {
         self.add_item_to_parent(Item::non_expandable(item), parent)
     }
+    
+    /// Adds a new item to the tree view. The item will be added as a root item and will allow someone to control the selection state, icon and attributes.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListItem)]
+    /// struct FileInfo {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Folder", width=10)]
+    ///    folder: bool
+    /// }
+    /// let mut tree = TreeView::<FileInfo>::new(Layout::new("d:c"), treeview::Flags::None);
+    /// let h = tree.add_item(treeview::Item::new(
+    ///         FileInfo { name: "Folder", folder: true }, 
+    ///         false, 
+    ///         Some(charattr!("white")), 
+    ///         ['F', 'D']));
+    /// ```
     #[inline(always)]
     pub fn add_item(&mut self, item: Item<T>) -> Handle<Item<T>> {
         self.add_item_to_parent(item, Handle::None)
     }
+    
+    /// Adds a new item to the tree view. The item will be added as a child of the specified parent item and will allow someone to control the selection state, icon and attributes.
+    /// This method returns a handle to the newly added item.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(ListItem)]
+    /// struct FileInfo {
+    ///    #[Column(name="Name", width=20)]
+    ///    name: &'static str,
+    ///    #[Column(name="Folder", width=10)]
+    ///    folder: bool
+    /// }
+    /// 
+    /// let mut tree = TreeView::<FileInfo>::new(Layout::new("d:c"), treeview::Flags::None);
+    /// let parent = tree.add(FileInfo { name: "Folder", folder: true });
+    /// tree.add_item_to_parent(treeview::Item::new(
+    ///        FileInfo { name: "File", folder: false },
+    ///        false,
+    ///        Some(charattr!("white")),
+    ///        ['F', 'D']), parent);
+    /// ```
     #[inline(always)]
     pub fn add_item_to_parent(&mut self, mut item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
         // override selection state if the NoSelection flag is set
@@ -146,6 +230,8 @@ where
         self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
         h
     }
+    
+    /// Adds multiple items to a tree view and then sorts and refilters the list. This method is useful when you want to add multiple items at once.
     pub fn add_batch<F>(&mut self, f: F)
     where
         F: FnOnce(&mut Self),
@@ -231,16 +317,19 @@ where
         }
     }
 
+    /// Returns a immutable reference of the item with a specified handle or None if the handle is invalid (e.g. the handle does not exist in the tree view)
     #[inline(always)]
     pub fn item(&self, item_handle: Handle<Item<T>>) -> Option<&Item<T>> {
         self.manager.get(item_handle)
     }
 
+    /// Returns a mutable reference of the item with a specified handle or None if the handle is invalid (e.g. the handle does not exist in the tree view)
     #[inline(always)]
     pub fn item_mut(&mut self, item_handle: Handle<Item<T>>) -> Option<&mut Item<T>> {
         self.manager.get_mut(item_handle)
     }
 
+    /// Returns the handle of the current item (the item where the cursor is located) or None if there are no items in the tree view
     #[inline(always)]
     pub fn current_item_handle(&self) -> Option<Handle<Item<T>>> {
         if self.pos < self.item_list.len() {
@@ -250,6 +339,7 @@ where
         }
     }
 
+    /// Returns a immutable reference to the current item (the item where the cursor is located) or None if there are no items in the tree view
     #[inline(always)]
     pub fn current_item(&self) -> Option<&Item<T>> {
         if self.pos < self.item_list.len() {
@@ -259,6 +349,7 @@ where
         }
     }
 
+    /// Returns a mutable reference to the current item (the item where the cursor is located) or None if there are no items in the tree view
     #[inline(always)]
     pub fn current_item_mut(&mut self) -> Option<&mut Item<T>> {
         if self.pos < self.item_list.len() {
@@ -269,10 +360,13 @@ where
         }
     }
 
+    /// Returns a slice with the handles of all root level items
     #[inline(always)]
     pub fn root_items(&self) -> &[Handle<Item<T>>] {
         self.manager.roots()
     }
+
+    /// Returns a mutable reference to the root item at the specified index or None if the index is invalid
     #[inline(always)]
     pub fn root_item(&self, index: usize) -> Option<&Item<T>> {
         let len = self.manager.roots().len();
@@ -283,6 +377,7 @@ where
         }
     }
 
+    /// Returns a mutable reference to the root item at the specified index or None if the index is invalid
     #[inline(always)]
     pub fn root_item_mut(&mut self, index: usize) -> Option<&mut Item<T>> {
         let len = self.manager.roots().len();
@@ -293,6 +388,7 @@ where
         }
     }
 
+    /// Deletes the item with the specified handle. If the item has children, they will be deleted as well.
     pub fn delete_item(&mut self, item_handle: Handle<Item<T>>) {
         let pos = self.pos;
         self.manager.delete(item_handle);
@@ -306,6 +402,7 @@ where
         }
     }
 
+    /// Deletes all items in the tree view
     pub fn clear(&mut self) {
         self.manager.clear();
         self.pos = 0;
@@ -313,6 +410,7 @@ where
         self.update_scrollbars();
     }
 
+    /// 
     pub fn delete_item_children(&mut self, item_handle: Handle<Item<T>>) {
         self.manager.delete_children(item_handle);
         self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
@@ -341,12 +439,18 @@ where
             false
         }
     }
+    
+    /// Collapses the item with the specified handle. If the recursive flag is set to true, all children of the item will be collapsed as well.
     pub fn collapse_item(&mut self, item_handle: Handle<Item<T>>, recursive: bool) {
         self.inner_fold_item(item_handle, FoldMethod::Collapse, false, recursive);
     }
+    
+    /// Expands the item with the specified handle. If the recursive flag is set to true, all children of the item will be expanded as well.
     pub fn expand_item(&mut self, item_handle: Handle<Item<T>>, recursive: bool) {
         self.inner_fold_item(item_handle, FoldMethod::Expand, false, recursive);
     }
+    
+    /// Collapses all items in the tree view
     pub fn collapse_all(&mut self) {
         let current_handle = if self.pos < self.item_list.len() {
             self.item_list[self.pos]
@@ -361,6 +465,7 @@ where
         self.update_scrollbars();
     }
 
+    /// Expands all items in the tree view
     pub fn expand_all(&mut self) {
         let current_handle = if self.pos < self.item_list.len() {
             self.item_list[self.pos]
@@ -412,6 +517,7 @@ where
         }
     }
 
+    /// Sort the items in the tree view based on the specified column index. The ascendent flag specifies the sorting order (true for ascending, false for descending)
     pub fn sort(&mut self, column_index: u16, ascendent: bool) {
         self.header.set_sort_column(column_index, ascendent, true);
         self.update_item_list(UpdateVisibleItemsOperation::Sort);
