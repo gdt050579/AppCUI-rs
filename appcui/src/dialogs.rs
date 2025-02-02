@@ -1,6 +1,7 @@
 mod dialog_buttons;
 mod dialog_result;
 mod file_mask;
+mod folder_select_dialog;
 mod generic_alert_dialog;
 mod open_save_dialog;
 mod root_select_dialog;
@@ -16,8 +17,9 @@ use crate::{
 use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
 use file_mask::FileMask;
+use folder_select_dialog::{FolderExplorer, FolderSelectionDialogResult};
 use generic_alert_dialog::GenericAlertDialog;
-use open_save_dialog::{FileExplorer, InnerFlags, OpenSaveDialogResult};
+use open_save_dialog::{FileExplorer, OpenSaveDialogResult};
 use EnumBitFlags::EnumBitFlags;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -104,12 +106,12 @@ where
     let ext_mask = extension_mask.unwrap_or_default();
     match FileMask::parse(ext_mask) {
         Ok(mask_list) => {
-            let mut inner_flags = InnerFlags::Save;
+            let mut inner_flags = open_save_dialog::InnerFlags::Save;
             if flags.contains(SaveFileDialogFlags::Icons) {
-                inner_flags |= InnerFlags::Icons;
+                inner_flags |= open_save_dialog::InnerFlags::Icons;
             }
             if flags.contains(SaveFileDialogFlags::ValidateOverwrite) {
-                inner_flags |= InnerFlags::ValidateOverwrite;
+                inner_flags |= open_save_dialog::InnerFlags::ValidateOverwrite;
             }
 
             let w = FileExplorer::new(file_name, title, location, mask_list, nav, inner_flags);
@@ -142,12 +144,12 @@ where
     let ext_mask = extension_mask.unwrap_or_default();
     match FileMask::parse(ext_mask) {
         Ok(mask_list) => {
-            let mut inner_flags = InnerFlags::None;
+            let mut inner_flags = open_save_dialog::InnerFlags::None;
             if flags.contains(OpenFileDialogFlags::Icons) {
-                inner_flags |= InnerFlags::Icons;
+                inner_flags |= open_save_dialog::InnerFlags::Icons;
             }
             if flags.contains(OpenFileDialogFlags::CheckIfFileExists) {
-                inner_flags |= InnerFlags::CheckIfFileExists;
+                inner_flags |= open_save_dialog::InnerFlags::CheckIfFileExists;
             }
 
             let w = FileExplorer::new(file_name, title, location, mask_list, nav, inner_flags);
@@ -165,6 +167,24 @@ where
         }
     }
 }
+
+pub(super) fn inner_select_folder<T>(title: &str, location: Location, flags: OpenFileDialogFlags, nav: T) -> Option<PathBuf>
+where
+    T: crate::utils::Navigator<crate::utils::fs::Entry, crate::utils::fs::Root, PathBuf> + 'static,
+{
+    let mut inner_flags = folder_select_dialog::InnerFlags::None;
+    if flags.contains(OpenFileDialogFlags::Icons) {
+        inner_flags |= folder_select_dialog::InnerFlags::Icons;
+    }
+
+    let w = FolderExplorer::new(title, location, nav, inner_flags);
+    let result = w.show();
+    match result {
+        Some(FolderSelectionDialogResult::Path(path)) => Some(path),
+        _ => None,
+    }
+}
+
 pub(crate) fn clear_last_path() {
     if let Some(m) = open_save_dialog::LAST_PATH.get() {
         if let Ok(mut guard) = m.lock() {
@@ -180,16 +200,16 @@ pub(crate) fn clear_last_path() {
 /// * `location` - The initial location of the dialog (one of Current, Last or Path). If Last is used, the dialog will open in the last location used by the user.
 /// * `extension_mask` - A string that specifies the file extensions that can be selected by the user. The format is `name1 = [ext1, ext2, ... extn], name2 = [...], ...`. If None is provided, all files will be displayed.
 /// * `flags` - Flags that specify the behavior of the dialog.
-/// 
+///
 /// # Example
 /// ```rust,no_run
 /// use appcui::dialogs;
-/// 
-/// if let Some(path) = dialogs::save("Save file", 
-///                                   "file.txt", 
-///                                   dialogs::Location::Current, 
-///                                   Some("Text files = [txt]"), 
-///                                   dialogs::SaveFileDialogFlags::Icons) 
+///
+/// if let Some(path) = dialogs::save("Save file",
+///                                   "file.txt",
+///                                   dialogs::Location::Current,
+///                                   Some("Text files = [txt]"),
+///                                   dialogs::SaveFileDialogFlags::Icons)
 /// {
 ///    println!("File saved at: {:?}", path);
 /// }
@@ -198,7 +218,6 @@ pub fn save(title: &str, file_name: &str, location: Location, extension_mask: Op
     inner_save(title, file_name, location, extension_mask, flags, utils::fs::Navigator::new())
 }
 
-
 /// Opens a file dialog for opening a file and returns the path of the file selected by the user or None if the user canceled the operation.
 /// # Arguments
 /// * `title` - The title of the dialog.
@@ -206,20 +225,24 @@ pub fn save(title: &str, file_name: &str, location: Location, extension_mask: Op
 /// * `location` - The initial location of the dialog (one of Current, Last or Path). If Last is used, the dialog will open in the last location used by the user.
 /// * `extension_mask` - A string that specifies the file extensions that can be selected by the user. The format is `name1 = [ext1, ext2, ... extn], name2 = [...], ...`. If None is provided, all files will be displayed.
 /// * `flags` - Flags that specify the behavior of the dialog.
-/// 
+///
 /// # Example
 /// ```rust,no_run
 /// use appcui::dialogs;
-/// 
-/// if let Some(path) = dialogs::open("Open file", 
-///                                   "file.txt", 
-///                                   dialogs::Location::Current, 
-///                                   Some("Text files = [txt]"), 
-///                                   dialogs::OpenFileDialogFlags::Icons) 
+///
+/// if let Some(path) = dialogs::open("Open file",
+///                                   "file.txt",
+///                                   dialogs::Location::Current,
+///                                   Some("Text files = [txt]"),
+///                                   dialogs::OpenFileDialogFlags::Icons)
 /// {
 ///   println!("File opened: {:?}", path);
 /// }
 /// ```
 pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Option<&str>, flags: OpenFileDialogFlags) -> Option<PathBuf> {
     inner_open(title, file_name, location, extension_mask, flags, utils::fs::Navigator::new())
+}
+
+pub fn select_folder(title:&str, location: Location) -> Option<PathBuf> {
+    inner_select_folder(title, location, OpenFileDialogFlags::None, utils::fs::Navigator::new())
 }
