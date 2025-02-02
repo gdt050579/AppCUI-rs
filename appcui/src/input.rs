@@ -5,6 +5,9 @@ mod mouse_event;
 mod mouse_button;
 mod mouse_wheel_direction;
 
+#[cfg(test)]
+mod tests;
+
 
 pub use self::key::Key;
 pub use self::key_code::KeyCode;

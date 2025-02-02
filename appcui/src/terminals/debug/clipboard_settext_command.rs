@@ -11,7 +11,7 @@ impl ClipboardSetTextCommand {
         }
 
         Ok(Self {
-            text: String::from(parser.get_param(0).unwrap()),
+            text: parser.get_string(0).unwrap(),
         })
     }
     pub(super) fn get_text(&self) -> &str {

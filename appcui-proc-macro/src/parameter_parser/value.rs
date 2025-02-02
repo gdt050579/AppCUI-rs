@@ -181,7 +181,7 @@ impl<'a> Value<'a> {
         if self.get_bool().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting a bool value (true or false) for parameter '{}' but found '{}'",
@@ -190,7 +190,7 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_layout(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if let Some(value) = self.get_i32() {
@@ -223,7 +223,7 @@ impl<'a> Value<'a> {
             }
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting an integer value or a percentage for parameter '{}' but found '{}'",
@@ -232,7 +232,7 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_flags(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.is_list() {
@@ -292,7 +292,7 @@ impl<'a> Value<'a> {
         if self.get_alignament().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting an alignament constant (left,topleft,top,topright,right,bottomright,bottom,bottomleft,center) for parameter '{}' but found '{}'",
@@ -301,13 +301,13 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_color(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_color().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting an color name (Black,DarkBlue,DarkGreen,Teal,DarkRed,Magenta,Olive,Silver,Gray,Blue,Green,Aqua,Red,Pink,Yellow,White,Transparent) for parameter '{}' but found '{}'",
@@ -316,13 +316,13 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_size(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_size().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting a size (width x height) for parameter '{}' but found '{}'",
@@ -331,13 +331,13 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_dict(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_dict().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting a dictionary with values `{{..}}` for parameter '{}' but found '{}'",
@@ -346,13 +346,13 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_list(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_list().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting a list with values `[]..]` for parameter '{}' but found '{}'",
@@ -361,13 +361,13 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_i32(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_i32().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting a numerical value (integer) for parameter '{}' but found '{}'",
@@ -376,13 +376,13 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_percentage(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_percentage().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting a percentage value (a number followed by the percentage % sign) for parameter '{}' but found '{}'",
@@ -391,13 +391,13 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }
     fn validate_dimension(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_dimension().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting a value that express a dimension (a positive number followed by the percentage % sign or an absolute value: ex: 50% or 100) for parameter '{}' but found '{}'",
@@ -406,13 +406,13 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }   
     fn validate_coordonate(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_coordonate().is_some() {
             return Ok(());
         }
-        return Err(Error::new(
+        Err(Error::new(
             param_list,
             format!(
                 "Expecting a value that express a coordonate (a number followed by the percentage % sign or an absolute value: ex: 50% or -25% or 100 or -2) for parameter '{}' but found '{}'",
@@ -421,7 +421,7 @@ impl<'a> Value<'a> {
             .as_str(),
             self.start,
             self.end,
-        ));
+        ))
     }  
     pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if !self.param_name.is_empty() { self.param_name } else { key_name };

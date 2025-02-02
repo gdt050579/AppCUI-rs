@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::sync::mpsc::{Receiver, Sender};
 
 use self::layout::ControlLayout;
@@ -92,7 +93,13 @@ pub(crate) struct RuntimeManager {
     event_recorder: super::event_recorder::EventRecorder,
 }
 
+#[cfg(feature = "GLOBAL_RUNTIME")]
 static mut RUNTIME_MANAGER: Option<RuntimeManager> = None;
+
+#[cfg(not(feature = "GLOBAL_RUNTIME"))]
+thread_local! {
+    static RUNTIME_MANAGER: RefCell<Option<RuntimeManager>> = const { RefCell::new(None) };
+}
 
 impl RuntimeManager {
     pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
@@ -163,17 +170,34 @@ impl RuntimeManager {
         manager.current_focus = Some(manager.desktop_handle);
         controls.get_mut(manager.desktop_handle).unwrap().base_mut().handle = manager.desktop_handle;
         // all good --> add single window if case
+
+        #[cfg(feature = "GLOBAL_RUNTIME")]
         unsafe {
             RUNTIME_MANAGER = Some(manager);
         }
 
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
+        RUNTIME_MANAGER.set(Some(manager));
+
         Ok(())
     }
     pub(crate) fn is_instantiated() -> bool {
+        #[cfg(feature = "GLOBAL_RUNTIME")]
         unsafe { RUNTIME_MANAGER.is_some() }
+
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
+        RUNTIME_MANAGER.with(|manager| manager.borrow().is_some())
     }
     pub(crate) fn get() -> &'static mut RuntimeManager {
+        #[cfg(feature = "GLOBAL_RUNTIME")]
         unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
+        
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]        
+        RUNTIME_MANAGER.with(|manager| {
+            let mut binding = manager.borrow_mut();
+            let mut_ref = binding.as_mut().expect("RuntimeManager is not initialized");
+            unsafe { &mut *(mut_ref as *mut RuntimeManager) }
+        })
     }
     pub(crate) fn get_terminal_size(&self) -> Size {
         self.terminal.get_size()
@@ -615,7 +639,7 @@ impl RuntimeManager {
         if timer_handle.is_none() {
             self.timers_manager.terminate_thread(timer_handle.index());
         }
-        
+
         if has_focus {
             (parent, is_window_control)
         } else {
@@ -641,7 +665,7 @@ impl RuntimeManager {
             return None;
         }
         let menus = unsafe { &mut *self.menus };
-        return menus.get_mut(self.opened_menu_handle);
+        menus.get_mut(self.opened_menu_handle)
     }
     #[inline(always)]
     fn get_root_control_handle(&self) -> Handle<UIElement> {
@@ -1013,9 +1037,13 @@ impl RuntimeManager {
         #[cfg(feature = "EVENT_RECORDER")]
         RuntimeManager::get().event_recorder.save();
 
+        #[cfg(feature = "GLOBAL_RUNTIME")]
         unsafe {
             RUNTIME_MANAGER = None;
         }
+
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
+        RUNTIME_MANAGER.set(None);
     }
 }
 

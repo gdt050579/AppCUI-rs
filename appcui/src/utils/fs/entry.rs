@@ -76,15 +76,15 @@ impl listview::ListItem for Entry {
             0 => Some(listview::RenderMethod::Text(&self.name)),
             1 => {
                 match self.entry_type {
-                    EntryType::UpDir => return Some(listview::RenderMethod::Ascii("UpDir")),
-                    EntryType::Folder => return Some(listview::RenderMethod::Ascii("Folder")),
-                    EntryType::File => return Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::AutoWithDecimals)),
+                    EntryType::UpDir => Some(listview::RenderMethod::Ascii("UpDir")),
+                    EntryType::Folder => Some(listview::RenderMethod::Ascii("Folder")),
+                    EntryType::File => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::AutoWithDecimals)),
                 }
             }
             2 => {
                 match self.entry_type {
-                    EntryType::UpDir => return Some(listview::RenderMethod::Ascii("-")),
-                    _ => return Some(listview::RenderMethod::DateTime(self.created, listview::DateTimeFormat::Short)),
+                    EntryType::UpDir => Some(listview::RenderMethod::Ascii("-")),
+                    _ => Some(listview::RenderMethod::DateTime(self.created, listview::DateTimeFormat::Short)),
                 }
             }
             _ => None,

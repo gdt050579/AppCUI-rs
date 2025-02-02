@@ -1,4 +1,4 @@
-#[derive(Copy,Clone,Debug,PartialEq)]
+#[derive(Copy,Clone,Debug,PartialEq, Eq)]
 #[repr(u8)]
 pub enum MouseButton {
     None = 0,
@@ -6,13 +6,13 @@ pub enum MouseButton {
     Right,
     Center
 }
-impl MouseButton {
-    pub fn name(&self)->&str {
-        match self {
-            MouseButton::None => "",
-            MouseButton::Left => "left",
-            MouseButton::Right => "right",
-            MouseButton::Center => "center",
-        }
-    }
-}
+// impl MouseButton {
+//     pub fn name(&self)->&str {
+//         match self {
+//             MouseButton::None => "",
+//             MouseButton::Left => "left",
+//             MouseButton::Right => "right",
+//             MouseButton::Center => "center",
+//         }
+//     }
+// }
