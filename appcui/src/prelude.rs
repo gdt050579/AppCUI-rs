@@ -57,6 +57,7 @@ pub use super::ui::menu::events::GenericMenuEvents;
 pub use super::ui::menu::Menu;
 pub use super::ui::menu::MenuBar;
 pub use super::ui::hnumericslider::HNumericSlider;
+pub use super::ui::hnumericslider::events::GenericHNumericSliderEvents;
 pub use super::graphics::*;
 pub use super::system::*;
 pub use super::input::*;

@@ -2,6 +2,7 @@ use std::cmp::min;
 use std::string;
 use std::thread::current;
 
+use super::events::EventData;
 use super::initialization_flags::Flags;
 use crate::prelude::*;
 use crate::ui::common::number::Format;
@@ -118,9 +119,9 @@ where
         } else {
             let w = self.bound;
             let k = self.m;
-            self.nr_val = ((w+1)/(k as i32+1)).max(2) as u32;
+            self.nr_val = ((w + 1) / (k as i32 + 1)).max(2) as u32;
             self.ok_step = (self.max - self.min) / T::cast_float_number((self.nr_val - 1) as f64);
-            let p2 = (w-(self.nr_val*(k as u32)) as i32) / ((self.nr_val-1) as i32);
+            let p2 = (w - (self.nr_val * (k as u32)) as i32) / ((self.nr_val - 1) as i32);
             self.sec_dim = (self.bound as f32) / ((self.nr_val - 1) as f32);
             self.p = p2 as u32;
             self.o = p2 as u32;
@@ -220,6 +221,16 @@ where
         self.poz_triunghi = ((x / self.sec_dim as i32) * self.sec_dim as i32).min(self.bound - 1);
         self.value = self.min + self.ok_step * Number::cast_signed_number((x / self.sec_dim as i32) as i128);
     }
+
+    fn emit_changed_event(&self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::HNumericSlider(EventData {
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }
 }
 impl<T> OnPaint for HNumericSlider<T>
 where
@@ -249,13 +260,13 @@ where
         //desenez marginea pentru min si max
         surface.write_char(0, y_separators, current_character_set.start_char);
         surface.write_char(
-            (((self.nr_val - 1) * self.sec_dim as u32) as i32).min(self.bound-1),
+            (((self.nr_val - 1) * self.sec_dim as u32) as i32).min(self.bound - 1),
             y_separators,
             current_character_set.end_char,
         );
 
         let mut index: i32 = 1;
-        while index < (((self.nr_val - 1) as i32 * self.sec_dim as i32)).min(self.bound - 1) {
+        while index < ((self.nr_val - 1) as i32 * self.sec_dim as i32).min(self.bound - 1) {
             if index % self.sec_dim as i32 == 0 {
                 surface.write_char(index, y_separators, current_character_set.value_indicator);
             } else {
@@ -300,21 +311,25 @@ where
             KeyCode::Left => {
                 self.value = Self::to_interval(self.value - self.ok_step, self.min, self.computed_max);
                 self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
+                self.emit_changed_event();
                 return EventProcessStatus::Processed;
             }
             KeyCode::Right => {
                 self.value = Self::to_interval(self.value + self.ok_step, self.min, self.computed_max);
                 self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
+                self.emit_changed_event();
                 return EventProcessStatus::Processed;
             }
             KeyCode::Home => {
                 self.value = self.min;
                 self.poz_triunghi = 0;
+                self.emit_changed_event();
                 return EventProcessStatus::Processed;
             }
             KeyCode::End => {
                 self.value = self.computed_max;
                 self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
+                self.emit_changed_event();
                 return EventProcessStatus::Processed;
             }
             _ => return EventProcessStatus::Ignored,
@@ -322,6 +337,7 @@ where
     }
 }
 
+// implement update_value care emite si event
 impl<T> OnResize for HNumericSlider<T>
 where
     T: Number + 'static,
@@ -331,10 +347,14 @@ where
         self.compute_math_fields();
 
         self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
+        let temp = self.value;
         self.value = Self::to_interval(
             self.min + self.ok_step * ((self.value - self.min) / self.ok_step),
             self.min,
             self.computed_max,
         );
+        if temp != self.value {
+            self.emit_changed_event();
+        }
     }
 }

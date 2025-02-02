@@ -473,3 +473,27 @@ impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     }
 }
 ";
+
+pub(crate) static HNUMERICSLIDER_ON_VALUE_CHANGED_TEMPLATE: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HNumericSlider<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    // let old_value: $(TYPE) = old_value as $(TYPE);
+    // let new_value: $(TYPE) = new_value as $(TYPE);
+    return HNumericSliderEvents::<$(TYPE)>::on_value_changed(self, h, /*old_value, new_value*/);
+}
+";
+
+pub(crate) static HNUMERICSLIDER_DEF: &str = "
+trait HNumericSliderEvents<T: appcui::ui::common::Number+'static> {
+    fn on_value_changed(&mut self, handle: Handle<HNumericSlider<T>>, /*old_value: T, new_value: T*/) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+impl$(TEMPLATE_TYPE) GenericHNumericSliderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+
+    fn on_value_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId, /*old_value: u128, new_value: u128*/) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HNUMERICSLIDER_VALUE_CHANGED)
+        EventProcessStatus::Ignored
+    }
+}
+";

@@ -49,6 +49,7 @@ pub(crate) enum AppCUITrait {
     PathFinderEvents = 40,
     TimerEvents = 41,
     GenericTreeViewEvents = 42,
+    GenericHNumericSliderEvents = 43,
 }
 
 #[repr(u8)]
@@ -107,7 +108,9 @@ impl AppCUITrait {
             AppCUITrait::ToggleButtonEvents => "ToggleButtonEvents",
             AppCUITrait::PathFinderEvents => "PathFinderEvents",
             AppCUITrait::TimerEvents => "TimerEvents",
-            AppCUITrait::GenericTreeViewEvents => "TreeViewEvents", // important to be without Generic
+            AppCUITrait::GenericTreeViewEvents => "TreeViewEvents",
+            AppCUITrait::GenericHNumericSliderEvents => "HNumericSliderEvents", // important to be without Generic
+            
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -158,6 +161,7 @@ impl AppCUITrait {
             AppCUITrait::PathFinderEvents => TraitType::ControlEvent,
             AppCUITrait::TimerEvents => TraitType::ControlEvent,
             AppCUITrait::GenericTreeViewEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericHNumericSliderEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -208,6 +212,7 @@ impl AppCUITrait {
             AppCUITrait::PathFinderEvents => "",
             AppCUITrait::TimerEvents => "",
             AppCUITrait::GenericTreeViewEvents => "",
+            AppCUITrait::GenericHNumericSliderEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -258,6 +263,7 @@ impl AppCUITrait {
             AppCUITrait::PathFinderEvents => "impl$(TEMPLATE_TYPE) PathFinderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::TimerEvents => "impl$(TEMPLATE_TYPE) TimerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericTreeViewEvents => "impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericHNumericSliderEvents => "impl$(TEMPLATE_TYPE) GenericHNumericSliderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -268,6 +274,7 @@ impl AppCUITrait {
                 | AppCUITrait::GenericNumericSelectorEvents
                 | AppCUITrait::GenericListViewEvents
                 | AppCUITrait::GenericTreeViewEvents
+                | AppCUITrait::GenericHNumericSliderEvents
         )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -308,6 +315,7 @@ impl AppCUITrait {
             "PathFinderEvents" | "PathFinder" => Some(AppCUITrait::PathFinderEvents),
             "TimerEvents" | "Timer" => Some(AppCUITrait::TimerEvents),
             "TreeViewEvents" | "TreeView" => Some(AppCUITrait::GenericTreeViewEvents),
+            "HNumericSliderEvents" | "HNumericSlider" => Some(AppCUITrait::GenericHNumericSliderEvents),
             _ => None,
         }
     }
@@ -359,6 +367,7 @@ impl AppCUITrait {
             40 => Some(AppCUITrait::PathFinderEvents),
             41 => Some(AppCUITrait::TimerEvents),
             42 => Some(AppCUITrait::GenericTreeViewEvents),
+            43 => Some(AppCUITrait::GenericHNumericSliderEvents),
             _ => None,
         };
         result?;

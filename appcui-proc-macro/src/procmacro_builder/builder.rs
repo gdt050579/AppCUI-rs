@@ -201,6 +201,22 @@ fn generate_treeview_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_ACTION)", &on_item_action_code)
 }
 
+fn generate_hnumericslider_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericHNumericSliderEvents) {
+        panic!("Missing generic type for HNumericSlider event (Have you used events=HNumericSlider<Type> ?)");
+    }
+    let mut on_value_changed = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericHNumericSliderEvents].iter() {
+        on_value_changed.push_str(templates::HNUMERICSLIDER_ON_VALUE_CHANGED_TEMPLATE.replace("$(TYPE)", trait_name).as_str());  
+    }
+    templates::HNUMERICSLIDER_DEF
+        .replace(
+            "$(TYPE_ID_TRANSLATION_FOR_HNUMERICSLIDER_VALUE_CHANGED)",
+            &on_value_changed,
+        )
+}
+
+
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args, config);
@@ -251,6 +267,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericNumericSelectorEvents => code.push_str(generate_numeric_selector_events(&mut a).as_str()),
                         AppCUITrait::GenericListViewEvents => code.push_str(generate_listview_events(&mut a).as_str()),
                         AppCUITrait::GenericTreeViewEvents => code.push_str(generate_treeview_events(&mut a).as_str()),
+                        AppCUITrait::GenericHNumericSliderEvents => code.push_str(generate_hnumericslider_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

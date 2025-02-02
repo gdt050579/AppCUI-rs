@@ -102,6 +102,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable); 
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericHNumericSliderEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events
@@ -186,6 +187,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHNumericSliderEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
@@ -243,6 +245,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHNumericSliderEvents, TraitImplementation::Default);
 
 
     // custom events
@@ -326,6 +329,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericHNumericSliderEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events

@@ -89,6 +89,7 @@ impl<T> ThreeStateBoxEvents for ModalWindow<T> {}
 impl<T> OnSiblingSelected for ModalWindow<T> {}
 impl<T> PathFinderEvents for ModalWindow<T> {}
 impl<T> TimerEvents for ModalWindow<T> {}
+impl<T> GenericHNumericSliderEvents for ModalWindow<T> {}
 
 // events routed to base window
 impl<T> OnFocus for ModalWindow<T> {

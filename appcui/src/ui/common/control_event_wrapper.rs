@@ -14,9 +14,9 @@ use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents,
     datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
     listview::events::GenericListViewEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents,
-    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
+    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents, hnumericslider::events::GenericHNumericSliderEvents
 };
-use crate::ui::{pathfinder, treeview};
+use crate::ui::{hnumericslider, pathfinder, treeview};
 
 #[derive(Copy, Clone)]
 pub(crate) struct CustomEventData {
@@ -44,6 +44,7 @@ pub(crate) enum ControlEventData {
     ListView(listview::events::EventData),
     PathFinder(pathfinder::events::EventData),
     TreeView(treeview::events::EventData),
+    HNumericSlider(hnumericslider::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -133,6 +134,10 @@ impl ControlEvent {
                     GenericTreeViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
                 }
             },
+            ControlEventData::HNumericSlider(data) => {
+                GenericHNumericSliderEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id)
+            },
+            
         }
     }
 }
