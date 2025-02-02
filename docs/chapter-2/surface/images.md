@@ -140,7 +140,7 @@ impl Surface {
     pub fn draw_image(&mut self, x: i32, 
                                 y: i32, 
                                 image: &Image, 
-                                rendering_method: image::RenderMethod, 
+                                rendering_method: image::RendererType, 
                                 scale_method: image::Scale
                     ) { ... }
 }

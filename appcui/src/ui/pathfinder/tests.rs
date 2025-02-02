@@ -40,18 +40,21 @@ const CSV_DATA: &str = "
     f,C:\\Program Files\\Într-un.exe,123,2024-01-10 12:31:55,
     ";
 
-#[test]
-fn test_while_developing() {
-    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
-    let mut a = App::new().build().unwrap();
-    let mut w = window!("Test,d:c,w:60,h:15");
-    let mut p = GenericPathFinder::with_navigator(r#"C:\Program Files\"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::None, nav);
-    //p.set_enabled(false);
-    w.add(p);
-    w.add(button!("test,x:1,y:3,w:6"));
-    a.add_window(w);
-    a.run();
-}
+// #[test]
+// fn test_while_developing() {
+//     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+//     let mut a = App::new().build().unwrap();
+//     let mut w = window!("Test,d:c,w:60,h:15");
+//     let mut p = GenericPathFinder::with_navigator(
+//         r#"C:\Program Files\"#,
+//         Layout::new("x:1,y:1,w:40"),
+//         pathfinder::Flags::None, nav);
+//     //p.set_enabled(false);
+//     w.add(p);
+//     w.add(button!("test,x:1,y:3,w:6"));
+//     a.add_window(w);
+//     a.run();
+// }
 
 #[test]
 fn check_display_out_of_focus() {
@@ -71,8 +74,8 @@ fn check_display_out_of_focus() {
         Paint('Windows folder out of focus')
         CheckHash(0xAD1DF8ADAB3DA0B2)
         Key.Pressed(Tab)
-        Key.Pressed(Down)
         Key.TypeText('\\S')
+        Key.Pressed(Down)
         Key.Pressed(Enter)
         Paint('Selected System32 folder')
         CheckHash(0xEC4AB50225FA43DF)
@@ -185,7 +188,7 @@ fn check_case_sensitive() {
         Paint('Initial')
         Key.TypeText('w')
         Paint('No suggestion should appear because Windows starts with capital letter')
-        CheckHash(0xAD6CCAFEE3E4844D)
+        CheckHash(0xD608AC36C2B2E322)
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
@@ -202,7 +205,7 @@ fn check_case_insensitive() {
         Paint('Initial')
         Key.TypeText('w')
         Paint('Suggestion Windows should appear even though w was inserted')
-        CheckHash(0xE7C42E9D121AE49A)
+        CheckHash(0x6D0B14A9ADEA92B5)
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");

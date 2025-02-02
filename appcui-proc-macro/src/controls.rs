@@ -30,3 +30,4 @@ pub (crate) mod listbox;
 pub (crate) mod listview;
 pub (crate) mod togglebutton;
 pub (crate) mod pathfinder;
+pub (crate) mod treeview;
