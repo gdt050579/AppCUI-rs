@@ -68,6 +68,18 @@ pub struct PathFinder {
 }
 
 impl PathFinder {
+    ///
+    /// Creates a new PathFinder control with the specified layout and flags and sets the starting path.
+    ///
+    /// The flags can be a combination of the following values:
+    /// * `Flags::ReadOnly` - if set, only the file path passed as a parameter will be displayed and any other changes can not be made.
+    /// * `Flags::CaseSensitive` - if set, the path matching is case sensitive when navigating
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// let mut control = PathFinder::new("C:\\Program Files", Layout::new("x:1 , y:1 , width:40"), pathfinder::Flags::CaseSensitive);
+    /// ```
     pub fn new(file_path: &str, layout: Layout, flags: Flags) -> Self {
         Self::with_navigator(file_path, layout, flags, fs::Navigator::new())
     }

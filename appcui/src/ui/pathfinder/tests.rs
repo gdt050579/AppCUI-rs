@@ -31,7 +31,16 @@ const CSV_DATA: &str = "
     f:D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
 
-//#[test]
+    const CSV_DATA_UNICODE: &str = "
+    r,C:\\,10000,100000,SYSTEM,fixed
+    r,D:\\,123,123456,USB Drive,removable
+    d,C:\\Program Files,0,2024-01-10 12:00:00,
+    f,C:\\Program Files\\cașchetă.exe,123,2024-01-10 12:31:55,
+    f,C:\\Program Files\\Țambal.exe,123,2024-01-10 12:31:55,
+    f,C:\\Program Files\\Într-un.exe,123,2024-01-10 12:31:55,
+    ";
+
+#[test]
 fn test_while_developing() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let mut a = App::new().build().unwrap();
@@ -62,8 +71,8 @@ fn check_display_out_of_focus() {
         Paint('Windows folder out of focus')
         CheckHash(0xAD1DF8ADAB3DA0B2)
         Key.Pressed(Tab)
-        Key.TypeText('\\S')
         Key.Pressed(Down)
+        Key.TypeText('\\S')
         Key.Pressed(Enter)
         Paint('Selected System32 folder')
         CheckHash(0xEC4AB50225FA43DF)
@@ -361,6 +370,44 @@ fn check_mouse_select_and_clipboard() {
     let mut w = window!("Test,d:c,w:60,h:15");
     let p = GenericPathFinder::with_navigator(
         r#"C:\Program Files\Windows\System32"#,
+        Layout::new("x:1,y:1,w:40"),
+        pathfinder::Flags::CaseSensitive,
+        nav,
+    );
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_pathfinder_macro() {
+    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
+    let script = "
+        Paint('Initial')
+        CheckHash(0x30CF64266AE3901)
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:60,h:15");
+    w.add(pathfinder!(" x: 1, y:1,  path: 'C:\\Program Files', w:40"));
+    w.add(button!("test,x:1,y:3,w:6"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_pathfinder_unicode() {
+    let nav = NavSimulator::with_csv(CSV_DATA_UNICODE, true, "C:\\");
+    let script = "
+        Paint('Initial')
+        CheckHash(0x64293773A3AA0A2D)
+        Key.TypeText('\\')
+        Paint('List Unicode containing files')
+        CheckHash(0xD4D18B655E2A98C7)
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:60,h:15");
+    let p = GenericPathFinder::with_navigator(
+        r#"C:\Program Files"#,
         Layout::new("x:1,y:1,w:40"),
         pathfinder::Flags::CaseSensitive,
         nav,
