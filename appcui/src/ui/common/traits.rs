@@ -16,6 +16,7 @@ use crate::{
         listview::events::GenericListViewEvents,
         menu::events::GenericMenuEvents,
         numericselector::events::GenericNumericSelectorEvents,
+        hnumericslider::events::GenericHNumericSliderEvents,
         password::events::PasswordEvents,
         pathfinder::events::PathFinderEvents,
         radiobox::events::RadioBoxEvents,
@@ -148,6 +149,7 @@ pub trait Control:
     + GenericListViewEvents
     + PathFinderEvents
     + TimerEvents
+    + GenericHNumericSliderEvents
 {
 }
 

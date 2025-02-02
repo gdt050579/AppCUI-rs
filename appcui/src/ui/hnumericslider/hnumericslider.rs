@@ -116,11 +116,6 @@ where
         if self.p >= 1 && self.o >= 1 {
             self.ok_step = self.step; //am suficient spatiu
         } else {
-            // self.ok_step = (self.max - self.min) / T::cast_float_number(self.y as f64);
-            // self.nr_val = min(((self.max - self.min) / self.ok_step).cast_to_u32() + 1, self.y as u32);
-            // self.sec_dim = (self.bound as f32) / ((self.nr_val - 1) as f32);
-            // self.p = (self.sec_dim - self.m as f32) as u32;
-            // self.o = (self.sec_dim - (self.m as f32 + ((self.m / 2) as f32))) as u32;
             let w = self.bound;
             let k = self.m;
             self.nr_val = ((w+1)/(k as i32+1)).max(2) as u32;
@@ -129,9 +124,6 @@ where
             self.sec_dim = (self.bound as f32) / ((self.nr_val - 1) as f32);
             self.p = p2 as u32;
             self.o = p2 as u32;
-            //100- 200 width 10 step 5
-            //100 - 200 width 11 step 5     
-            //step 25
         }
 
         self.values_string.clear();
