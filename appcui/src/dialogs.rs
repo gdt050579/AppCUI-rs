@@ -191,6 +191,11 @@ pub(crate) fn clear_last_path() {
             *guard = None;
         }
     }
+    if let Some(m) = folder_select_dialog::FOLDER_LAST_PATH.get() {
+        if let Ok(mut guard) = m.lock() {
+            *guard = None;
+        }
+    }
 }
 
 /// Opens a file dialog for saving a file and returns the path of the file selected by the user or None if the user canceled the operation.

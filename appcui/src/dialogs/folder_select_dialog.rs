@@ -30,7 +30,7 @@ struct FolderName {
     value: String,
 }
 
-pub(super) static LAST_PATH: OnceLock<Mutex<Option<PathBuf>>> = OnceLock::new();
+pub(super) static FOLDER_LAST_PATH: OnceLock<Mutex<Option<PathBuf>>> = OnceLock::new();
 
 #[ModalWindow(events = ButtonEvents+WindowEvents+PathFinderEvents, response: FolderSelectionDialogResult, internal: true)]
 pub(super) struct FolderExplorer<T>
@@ -66,7 +66,7 @@ where
         w.path = match location {
             Location::Current => nav.current_dir(),
             Location::Last => {
-                let m = LAST_PATH.get_or_init(|| Mutex::new(None));
+                let m = FOLDER_LAST_PATH.get_or_init(|| Mutex::new(None));
                 if let Ok(m) = m.lock() {
                     if let Some(p) = m.as_ref() {
                         p.clone()
@@ -105,7 +105,7 @@ where
         if let Some(dir) = last_path.parent() {
             let mut new_path = dir.to_path_buf();
             new_path.push(""); // make sure we have a trailing slash
-            if let Ok(mut guard) = LAST_PATH.get_or_init(|| Mutex::new(None)).lock() {
+            if let Ok(mut guard) = FOLDER_LAST_PATH.get_or_init(|| Mutex::new(None)).lock() {
                 *guard = Some(new_path);
             }
         }
