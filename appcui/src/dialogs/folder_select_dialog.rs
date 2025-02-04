@@ -99,8 +99,39 @@ where
         w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
         w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
         w.set_size_bounds(40, 17, u16::MAX, u16::MAX);
+        w.populate_from_path();
         w
     }
+
+    fn populate_from_path(&mut self) {
+        let h = self.tv;
+        let roots = self.nav.roots();
+        let current_path = self.path.clone();
+        let mut p_iter = current_path.iter();
+        if let Some(tv) = self.control_mut(h) {
+            tv.clear();
+            // roots
+            let path_root = p_iter.next();
+            let mut next_handle = Handle::None;
+            for root in roots {
+                let found = path_root.is_some() && path_root.unwrap().eq_ignore_ascii_case(root.path.as_str());
+                let handle = tv.add_item(treeview::Item::expandable(
+                    FolderName {
+                        value: root.path.to_string(),
+                    },
+                    !found,
+                ));
+                if found {
+                    next_handle = handle;
+                }
+            }
+            // folders
+            while !next_handle.is_none() {
+                self.nav.entries()
+            }
+        }
+    }
+
     fn update_last_path(&self, last_path: &Path) {
         if let Some(dir) = last_path.parent() {
             let mut new_path = dir.to_path_buf();
@@ -170,9 +201,7 @@ where
         // self.populate();
     }
 
-    fn return_result(&mut self) {
-        
-    }
+    fn return_result(&mut self) {}
 }
 impl<T> ButtonEvents for FolderExplorer<T>
 where
