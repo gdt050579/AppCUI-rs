@@ -103,18 +103,39 @@ where
         w
     }
 
-    fn populate_from_path(&mut self) {
+    fn populate_node(
+        &mut self,
+        path: &PathBuf,
+        parent_node: Handle<treeview::Item<FolderName>>,
+        child: &str,
+    ) -> Option<Handle<treeview::Item<FolderName>>> {
+        let h = self.tv;
+        let entries = self.nav.entries(path);
+        let mut result = None;
+        if let Some(tv) = self.control_mut(h) {
+            tv.add_batch(|tv| {
+                for e in entries {
+                    if !e.is_container() {
+                        continue;
+                    }
+                    if e.name.eq_ignore_ascii_case(child) {
+                        result = Some(tv.add_item_to_parent(treeview::Item::expandable(FolderName { value: e.name }, false), parent_node));
+                    } else {
+                        tv.add_item_to_parent(treeview::Item::expandable(FolderName { value: e.name }, true), parent_node);
+                    }
+                }
+            });
+        }
+        result
+    }
+    fn populate_root(&mut self, search: &str) -> Option<Handle<treeview::Item<FolderName>>> {
         let h = self.tv;
         let roots = self.nav.roots();
-        let current_path = self.path.clone();
-        let mut p_iter = current_path.iter();
         if let Some(tv) = self.control_mut(h) {
-            tv.clear();
-            // roots
-            let path_root = p_iter.next();
-            let mut next_handle = Handle::None;
+            let mut result = None;
             for root in roots {
-                let found = path_root.is_some() && path_root.unwrap().eq_ignore_ascii_case(root.path.as_str());
+                println!("search: {}, root: {}", search, root.path);
+                let found = search.eq_ignore_ascii_case(&root.path);
                 let handle = tv.add_item(treeview::Item::expandable(
                     FolderName {
                         value: root.path.to_string(),
@@ -122,12 +143,36 @@ where
                     !found,
                 ));
                 if found {
-                    next_handle = handle;
+                    result = Some(handle);
                 }
             }
-            // folders
-            while !next_handle.is_none() {
-                self.nav.entries()
+            result
+        } else {
+            None
+        }
+    }
+    fn populate_from_path(&mut self) {
+        let mut cp = PathBuf::new();
+        let current_path = self.path.clone();
+        let mut first = true;
+        let mut parent_handle = Handle::None;
+        for component in current_path.components() {
+            let c = component.as_os_str().to_str().unwrap_or_default();
+            if first {
+                first = false;                
+                if let Some(handle) = self.populate_root(c) {
+                    parent_handle = handle;
+                    cp.push(component);
+                } else {
+                    break;
+                }
+            } else {
+                if let Some(handle) = self.populate_node(&cp, parent_handle, c) {
+                    parent_handle = handle;
+                    cp.push(component);
+                } else {
+                    break;
+                }
             }
         }
     }
