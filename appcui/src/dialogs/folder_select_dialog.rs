@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
 use dialogs::root_select_dialog::RootSelectDialog;
@@ -113,6 +113,8 @@ where
         let entries = self.nav.entries(path);
         let mut result = None;
         if let Some(tv) = self.control_mut(h) {
+            println!("Populate nod with path: {:?},  search: {}", path, child);
+            //println!("Searching for: {} -> entries: {:?}", child, entries);
             tv.add_batch(|tv| {
                 for e in entries {
                     if !e.is_container() {
@@ -134,8 +136,7 @@ where
         if let Some(tv) = self.control_mut(h) {
             let mut result = None;
             for root in roots {
-                println!("search: {}, root: {}", search, root.path);
-                let found = search.eq_ignore_ascii_case(&root.path);
+                let found = (search.len()>0) && search[0..1].eq_ignore_ascii_case(&root.path[0..1]);
                 let handle = tv.add_item(treeview::Item::expandable(
                     FolderName {
                         value: root.path.to_string(),
@@ -154,9 +155,15 @@ where
     fn populate_from_path(&mut self) {
         let mut cp = PathBuf::new();
         let current_path = self.path.clone();
+        println!("----------------");
+        println!("Current path: {:?}", current_path);
         let mut first = true;
         let mut parent_handle = Handle::None;
         for component in current_path.components() {
+            if cfg!(target_os = "windows") && component == Component::RootDir {
+                continue; // Skip RootDir only on Windows
+            }
+            println!("Component: {:?}", component);
             let c = component.as_os_str().to_str().unwrap_or_default();
             if first {
                 first = false;                

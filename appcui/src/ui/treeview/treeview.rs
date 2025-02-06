@@ -250,6 +250,12 @@ where
         self.update_scrollbars();
     }
 
+    /// Moves the cursor to a specified item. That item has to be visible in the tree view. If the item is not visible, the method will return false.
+    pub fn move_cursor_to(&mut self, handle: Handle<Item<T>>) -> bool
+    {
+        self.goto_handle(handle, false)
+    }
+
     fn update_item_list(&mut self, op: UpdateVisibleItemsOperation) {
         let current_handle = if self.pos < self.item_list.len() {
             self.item_list[self.pos]
