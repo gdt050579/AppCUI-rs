@@ -113,7 +113,7 @@ where
         let entries = self.nav.entries(path);
         let mut result = None;
         if let Some(tv) = self.control_mut(h) {
-            println!("Populate nod with path: {:?},  search: {}", path, child);
+            //println!("Populate nod with path: {:?},  search: {}", path, child);
             //println!("Searching for: {} -> entries: {:?}", child, entries);
             tv.add_batch(|tv| {
                 for e in entries {
@@ -136,7 +136,7 @@ where
         if let Some(tv) = self.control_mut(h) {
             let mut result = None;
             for root in roots {
-                let found = (search.len()>0) && search[0..1].eq_ignore_ascii_case(&root.path[0..1]);
+                let found = (search.len() > 0) && search[0..1].eq_ignore_ascii_case(&root.path[0..1]);
                 let handle = tv.add_item(treeview::Item::expandable(
                     FolderName {
                         value: root.path.to_string(),
@@ -155,19 +155,17 @@ where
     fn populate_from_path(&mut self) {
         let mut cp = PathBuf::new();
         let current_path = self.path.clone();
-        println!("----------------");
-        println!("Current path: {:?}", current_path);
         let mut first = true;
         let mut parent_handle = Handle::None;
         for component in current_path.components() {
             if cfg!(target_os = "windows") && component == Component::RootDir {
-                continue; // Skip RootDir only on Windows
+                continue; // Skip RootDir only  on Windows
             }
-            println!("Component: {:?}", component);
             let c = component.as_os_str().to_str().unwrap_or_default();
             if first {
-                first = false;                
+                first = false;
                 if let Some(handle) = self.populate_root(c) {
+                    //println!("Populate root: {} -> H: {:?}", c, handle);
                     parent_handle = handle;
                     cp.push(component);
                 } else {
@@ -175,11 +173,19 @@ where
                 }
             } else {
                 if let Some(handle) = self.populate_node(&cp, parent_handle, c) {
+                    //println!("Populate node: {} -> H: {:?}", c, handle);
                     parent_handle = handle;
                     cp.push(component);
                 } else {
                     break;
                 }
+            }
+        }
+        if !parent_handle.is_none() {
+            //println!("Handle = {:?}", parent_handle);
+            let h = self.tv;
+            if let Some(tv) = self.control_mut(h) {
+                tv.move_cursor_to(parent_handle);
             }
         }
     }
