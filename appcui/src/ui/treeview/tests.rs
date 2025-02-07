@@ -2007,3 +2007,22 @@ fn check_mouse_select() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_move_cursor_to() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Cursor should be at last item')
+        CheckHash(0x85BCA6685DCC2EDA) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut tv: TreeView<Course> = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    Course::populate_with_courses_batch(&mut tv);
+    let len = tv.root_items().len();
+    let h = tv.root_items()[len - 1];
+    tv.move_cursor_to(h);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
