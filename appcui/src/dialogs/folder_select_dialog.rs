@@ -41,7 +41,6 @@ where
     tv: Handle<TreeView<FolderName>>,
     b_ok: Handle<Button>,
     b_cancel: Handle<Button>,
-    b_drive: Handle<Button>,
     nav: T,
     path: PathBuf,
     flags: InnerFlags,
@@ -57,7 +56,6 @@ where
             tv: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None,
-            b_drive: Handle::None,
             path_viewer: Handle::None,
             nav: nav.clone(),
             path: PathBuf::new(),
@@ -79,15 +77,16 @@ where
             }
             Location::Path(p) => p.to_path_buf(),
         };
-        w.b_drive = w.add(button!("&Drive,x:1,y:1,w:7,type:Flat"));
-        let pf = GenericPathFinder::with_navigator(
+        w.add(label!("&Path,x:1,y:1,w:4"));
+        let mut pf = GenericPathFinder::with_navigator(
             w.path.as_path().as_os_str().to_str().unwrap_or(""),
-            Layout::new("l:9,t:1,r:1"),
+            Layout::new("l:6,t:1,r:1"),
             pathfinder::Flags::None,
             nav,
         );
+        pf.set_hotkey(key!("Alt+P"));
         w.path_viewer = w.add(pf);
-        let mut p = panel!("l:1,t:3,r:1,b:5");
+        let mut p = panel!("l:1,t:2,r:1,b:3");
         let mut tv = TreeView::with_capacity(
             256,
             Layout::new("d:c,w:100%,h:100%"),
@@ -96,10 +95,12 @@ where
         tv.set_components_toolbar_margins(2, 0);
         w.tv = p.add(tv);
         w.add(p);
-        w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
-        w.b_cancel = w.add(button!("&Cancel,r:1,b:0,w:9"));
+        w.b_ok = w.add(button!("&OK,r:1,b:0,w:9"));
+        w.b_cancel = w.add(button!("&Cancel,r:10,b:0,w:9"));
         w.set_size_bounds(40, 17, u16::MAX, u16::MAX);
         w.populate_from_path();
+        let h = w.tv;
+        w.request_focus_for_control(h);
         w
     }
 
@@ -273,13 +274,6 @@ where
             }
             _ if handle == self.b_cancel => {
                 self.exit_with(FolderSelectionDialogResult::Cancel);
-                EventProcessStatus::Processed
-            }
-            _ if handle == self.b_drive => {
-                if let Some(path) = RootSelectDialog::new(self.nav.roots(), self.flags.contains(InnerFlags::Icons)).show() {
-                    self.path = path;
-                    self.populate_after_path_update();
-                }
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
