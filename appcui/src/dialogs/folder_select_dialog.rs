@@ -1,8 +1,6 @@
 use std::path::{Component, Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
-use dialogs::root_select_dialog::RootSelectDialog;
-
 use super::Location;
 use crate::prelude::*;
 use crate::ui::pathfinder::GenericPathFinder;
@@ -32,7 +30,7 @@ struct FolderName {
 
 pub(super) static FOLDER_LAST_PATH: OnceLock<Mutex<Option<PathBuf>>> = OnceLock::new();
 
-#[ModalWindow(events = ButtonEvents+WindowEvents+PathFinderEvents, response: FolderSelectionDialogResult, internal: true)]
+#[ModalWindow(events = ButtonEvents+WindowEvents+PathFinderEvents+TreeViewEvents<FolderName>, response: FolderSelectionDialogResult, internal: true)]
 pub(super) struct FolderExplorer<T>
 where
     T: Navigator<Entry, Root, PathBuf> + 'static,
@@ -95,10 +93,9 @@ where
         tv.set_components_toolbar_margins(2, 0);
         w.tv = p.add(tv);
         w.add(p);
-        w.b_ok = w.add(button!("&OK,r:1,b:0,w:9"));
-        w.b_cancel = w.add(button!("&Cancel,r:10,b:0,w:9"));
+        w.b_ok = w.add(button!("&OK,r:1,b:0,w:13"));
+        w.b_cancel = w.add(button!("&Cancel,r:15,b:0,w:13"));
         w.set_size_bounds(40, 17, u16::MAX, u16::MAX);
-        w.populate_from_path();
         let h = w.tv;
         w.request_focus_for_control(h);
         w
@@ -158,6 +155,11 @@ where
         let current_path = self.path.clone();
         let mut first = true;
         let mut parent_handle = Handle::None;
+        let h = self.tv;
+        self.control_mut(h).map(|tv| tv.clear());
+        // if let Some(tv) = self.control_mut(h) {
+        //     tv.clear();
+        // }
         for component in current_path.components() {
             if cfg!(target_os = "windows") && component == Component::RootDir {
                 continue; // Skip RootDir only  on Windows
@@ -191,75 +193,6 @@ where
         }
     }
 
-    fn update_last_path(&self, last_path: &Path) {
-        if let Some(dir) = last_path.parent() {
-            let mut new_path = dir.to_path_buf();
-            new_path.push(""); // make sure we have a trailing slash
-            if let Ok(mut guard) = FOLDER_LAST_PATH.get_or_init(|| Mutex::new(None)).lock() {
-                *guard = Some(new_path);
-            }
-        }
-    }
-    fn populate(&mut self) {
-        // let is_root = self.path.is_absolute() && self.path.parent().is_none();
-        // let mut entries = self.nav.entries(&self.path);
-        // let filter_idx = if let Some(mask) = self.control(self.mask) {
-        //     mask.index().unwrap_or_default() as usize
-        // } else {
-        //     0
-        // };
-        // if filter_idx < self.extension_mask.len() {
-        //     // we need to filter the files
-        //     let filter = &self.extension_mask[filter_idx];
-        //     entries.retain(|e| (e.entry_type != EntryType::File) || filter.matches(&e.name));
-        // }
-
-        // let h = self.list;
-        // let g_folders = self.g_folders;
-        // let g_files = self.g_files;
-        // let g_updir = self.g_updir;
-        // let theme = self.theme();
-        // let c_files = theme.text.normal;
-        // let c_folders = theme.text.focused;
-        // if let Some(lv) = self.control_mut(h) {
-        //     lv.add_batch(|lv| {
-        //         lv.clear();
-        //         if !is_root {
-        //             lv.add_item(listview::Item::new(
-        //                 Entry::new("..", 0, chrono::NaiveDateTime::default(), crate::utils::fs::EntryType::UpDir),
-        //                 false,
-        //                 Some(c_folders),
-        //                 ['🔙', ' '],
-        //                 g_updir,
-        //             ));
-        //         }
-        //         for e in entries {
-        //             let is_folder = e.is_container();
-        //             lv.add_item(listview::Item::new(
-        //                 e,
-        //                 false,
-        //                 if is_folder { Some(c_folders) } else { Some(c_files) },
-        //                 [if is_folder { '📁' } else { '📄' }, ' '],
-        //                 if is_folder { g_folders } else { g_files },
-        //             ));
-        //         }
-        //     });
-        // }
-    }
-    fn populate_after_path_update(&mut self) {
-        // self.path.push("");
-        // let h = self.path_viewer;
-        // let ts = TempString::<128>::new(self.path.to_str().unwrap_or_default());
-        // if let Some(pv) = self.control_mut(h) {
-        //     pv.set_path(Path::new(ts.as_str()));
-        // }
-        // let h = self.list;
-        // if let Some(lst) = self.control_mut(h) {
-        //     lst.clear_search();
-        // }
-        // self.populate();
-    }
-
     fn return_result(&mut self) {}
 }
 impl<T> ButtonEvents for FolderExplorer<T>
@@ -285,7 +218,7 @@ where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_activate(&mut self) {
-        self.populate();
+        self.populate_from_path();
     }
     fn on_accept(&mut self) {
         self.return_result();
@@ -303,9 +236,79 @@ where
         if handle == self.path_viewer {
             if let Some(pv) = self.control(self.path_viewer) {
                 self.path = pv.path().to_path_buf();
-                self.populate_after_path_update();
+                self.populate_from_path();
             }
         }
+        EventProcessStatus::Processed
+    }
+}
+
+impl<T> TreeViewEvents<FolderName> for FolderExplorer<T>
+where
+    T: Navigator<Entry, Root, PathBuf> + 'static,
+{
+    fn on_current_item_changed(
+        &mut self,
+        handle: Handle<TreeView<FolderName>>,
+        item_handle: Handle<treeview::Item<FolderName>>,
+    ) -> EventProcessStatus {
+        let p = if let Some(tv) = self.control(handle) {
+            let mut a: [Handle<treeview::Item<FolderName>>; 256] = [Handle::None; 256];
+            let mut pos = 255;
+            let mut h = item_handle;
+            while let Some(item) = tv.item(h) {
+                a[pos] = h;
+                h = item.parent().unwrap_or(Handle::None);
+                pos -= 1;
+                if (pos == 0) || (h.is_none()) {
+                    break;
+                }
+            }
+            if pos > 0 {
+                let mut path = PathBuf::new();
+                for i in (pos + 1)..256 {
+                    if let Some(item) = tv.item(a[i]) {
+                        path.push(item.value().value.as_str());
+                    }
+                }
+                Some(path)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        if let Some(path) = p {
+            let h = self.path_viewer;
+            if let Some(pv) = self.control_mut(h) {
+                pv.set_path(&path);
+            }
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
+    }
+
+    fn on_item_collapsed(
+        &mut self,
+        handle: Handle<TreeView<FolderName>>,
+        item_handle: Handle<treeview::Item<FolderName>>,
+        recursive: bool,
+    ) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+
+    fn on_item_expanded(
+        &mut self,
+        handle: Handle<TreeView<FolderName>>,
+        item_handle: Handle<treeview::Item<FolderName>>,
+        recursive: bool,
+    ) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+
+    fn on_item_action(&mut self, handle: Handle<TreeView<FolderName>>, item_handle: Handle<treeview::Item<FolderName>>) -> EventProcessStatus {
+        self.return_result();
         EventProcessStatus::Processed
     }
 }

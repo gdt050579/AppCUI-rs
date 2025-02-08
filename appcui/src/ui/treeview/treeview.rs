@@ -1254,8 +1254,6 @@ where
 {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.header.resize(new_size);
-        // self.comp
-        //     .resize(self.header.width() as u64, self.item_list.len() as u64, &self.base, self.visible_space());
         self.update_scrollbars();
     }
 }
