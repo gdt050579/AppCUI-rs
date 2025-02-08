@@ -74,7 +74,7 @@ macro_rules! IMPLEMENT_METHODS  {
             /// ```rust, no_run
             /// use appcui::prelude::*;
             /// let mut control = PathFinder::new("C:\\Program Files", Layout::new("x:1 , y:1 , width:40"), pathfinder::Flags::CaseSensitive);
-            /// let path = control.set_path(Path::new("C:\\Windows"));
+            /// let path = control.set_path(std::path::Path::new("C:\\Windows"));
             /// ```
             pub fn set_path(&mut self, path: &Path) {
                 self.inner.set_path(path.to_str().unwrap_or_default(), &self.base);
