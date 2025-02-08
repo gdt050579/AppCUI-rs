@@ -41,7 +41,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
                 .filter(|c| *c != "\\")
                 .collect();
 
-            println!("{:?}", components);
+            // println!("{:?}", components);
             for s in entry.name().split(['/', '\\']) {
                 match s {
                     ".." => {
@@ -66,7 +66,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
                         s.push('/');
                     }
                 }
-                println!("Pushing {} to {}", c, s);
+                // println!("Pushing {} to {}", c, s);
                 // edge case for windows roots
 
                 s.push_str(c);

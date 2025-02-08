@@ -7,7 +7,6 @@ pub(super) struct InnerPathFinder<T>
 where
     T: crate::utils::Navigator<Entry, Root, PathBuf>,
 {
-    flags: Flags,
     navigator: T,
     component: crate::ui::components::NavigatorComponent<T, Entry, Root>,
 }
@@ -18,7 +17,6 @@ where
 {
     pub(super) fn new(file_path: &str, navigator: T, flags: Flags) -> Self {
         Self {
-            flags,
             navigator,
             component: crate::ui::components::NavigatorComponent::new(file_path, flags.contains(Flags::ReadOnly), flags.contains(Flags::CaseSensitive)),
         }

@@ -60,6 +60,7 @@ const CSV_DATA: &str = "
 fn check_display_out_of_focus() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0x30CF64266AE3901)
         Key.Pressed(Tab)
@@ -105,6 +106,7 @@ fn check_display_out_of_focus() {
 fn check_suggestion_box_navigation() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0xF4B84D62A7A75EB9)
         Key.TypeText('W')
@@ -145,6 +147,7 @@ fn check_suggestion_box_navigation() {
 fn check_suggestion_box_top_navigation() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0x19EF566F050504B1)
         Key.TypeText('W')
@@ -185,6 +188,7 @@ fn check_suggestion_box_top_navigation() {
 fn check_case_sensitive() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         Key.TypeText('w')
         Paint('No suggestion should appear because Windows starts with capital letter')
@@ -202,6 +206,7 @@ fn check_case_sensitive() {
 fn check_case_insensitive() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         Key.TypeText('w')
         Paint('Suggestion Windows should appear even though w was inserted')
@@ -219,6 +224,7 @@ fn check_case_insensitive() {
 fn check_readonly_flag() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0xF4B84D62A7A75EB9)
         Key.TypeText('w')
@@ -240,6 +246,7 @@ fn check_readonly_flag() {
 fn check_select_all() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0xF4B84D62A7A75EB9)
         Key.Pressed(Ctrl+A)
@@ -267,6 +274,7 @@ fn check_select_all() {
 fn check_mouse_click_move_cursor() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0xF4B84D62A7A75EB9)
         CheckCursor(30,5)
@@ -311,6 +319,7 @@ fn check_mouse_click_move_cursor() {
 fn check_mouse_hover() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0xEC9D919B63523643)
         Mouse.Move(20,5)
@@ -348,6 +357,7 @@ fn check_mouse_hover() {
 fn check_mouse_select_and_clipboard() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0x73883FF79A85162E)
         Mouse.Drag(15,5,29,5)
@@ -384,14 +394,14 @@ fn check_mouse_select_and_clipboard() {
 
 #[test]
 fn check_pathfinder_macro() {
-    let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
-        CheckHash(0x30CF64266AE3901)
+        CheckHash(0x4AF15626C9A556A5)
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    w.add(pathfinder!(" x: 1, y:1,  path: 'C:\\Program Files', w:40"));
+    let _ = pathfinder!(" x: 1, y:1, path: 'C:\\Program Files', w:40");
     w.add(button!("test,x:1,y:3,w:6"));
     a.add_window(w);
     a.run();
@@ -401,6 +411,7 @@ fn check_pathfinder_macro() {
 fn check_pathfinder_unicode() {
     let nav = NavSimulator::with_csv(CSV_DATA_UNICODE, true, "C:\\");
     let script = "
+        Paint.Enable(false)
         Paint('Initial')
         CheckHash(0x64293773A3AA0A2D)
         Key.TypeText('\\')

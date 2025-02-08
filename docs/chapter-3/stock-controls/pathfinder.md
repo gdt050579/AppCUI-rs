@@ -17,7 +17,7 @@ A pathfinder supports all common parameters (as they are described in [Instantia
 
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                                              |
 | ------------------- | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `file_path` | String | **Yes** (first postional parameter) | The file path used as a starting point when navigating through the file system. |
+| `path` | String | **Yes** (first postional parameter) | The file path used as a starting point when navigating through the file system. |
 | `flags`             | List   | **No**                              | PathFinder initialization flags that control if the path finder is case-sensitive, readonly, etc                  |
 
 A pathfinder supports the following initialization flags:

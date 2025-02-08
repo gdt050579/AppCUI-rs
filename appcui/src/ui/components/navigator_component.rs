@@ -42,11 +42,11 @@ where
             _phantom_e: PhantomData,
         }
     }
-    fn get_suggestions(&self) -> &Vec<String> {
+    fn suggestions(&self) -> &Vec<String> {
         &self.suggestions
     }
     fn update_suggestions(&mut self, path: &str, navigator: &T, case_sensitive: bool) {
-        let folder = Self::get_folder(path);
+        let folder = Self::folder(path);
         if folder != self.cached_path {
             // create cache for this folder
             let folder_contents = navigator.entries(&PathBuf::from(folder.to_string()));
@@ -64,9 +64,9 @@ where
                 }
             }
         }
-        self.suggestions = Self::get_matching_paths(path, &self.cached_items, case_sensitive);
+        self.suggestions = Self::matching_paths(path, &self.cached_items, case_sensitive);
     }
-    fn get_folder(path: &str) -> &str {
+    fn folder(path: &str) -> &str {
         let mut end = path.len();
         while let Some((ch, sz)) = path.previous_glyph(end) {
             end -= sz as usize;
@@ -76,7 +76,7 @@ where
         }
         &path[..end]
     }
-    fn get_matching_paths(path: &str, items: &[String], case_sensitive: bool) -> Vec<String> {
+    fn matching_paths(path: &str, items: &[String], case_sensitive: bool) -> Vec<String> {
         if case_sensitive {
             items.iter().filter(|s| s.starts_with(path)).cloned().collect()
         } else {
@@ -301,7 +301,7 @@ where
         }
     }
 
-    fn get_path_items(text: &str) -> Vec<String> {
+    fn path_items(text: &str) -> Vec<String> {
         text.trim_start_matches(PLATFORM_SEPARATOR_CHARACTER)
             .trim_end_matches(PLATFORM_SEPARATOR_CHARACTER)
             .split(PLATFORM_SEPARATOR_CHARACTER)
@@ -375,7 +375,7 @@ where
     }
 
     fn update_trimmed_text(&mut self, theme: &Theme, is_enabled: bool, is_mouse_hover: bool) {
-        let items = Self::get_path_items(&self.input_path);
+        let items = Self::path_items(&self.input_path);
         if items.is_empty() {
             return;
         }
@@ -468,7 +468,7 @@ where
             _ => offset,
         };
 
-        let suggestions = self.navigator_cacher.get_suggestions();
+        let suggestions = self.navigator_cacher.suggestions();
         let new_pos: i32 = self.selected_suggestion_pos as i32 + offset;
         let end_visible_pos = (self.start_suggestions_pos + Self::PATH_FINDER_VISIBLE_RESULTS - 1).min(suggestions.len() as u16);
 
@@ -511,7 +511,7 @@ where
         }
 
         let mut y = self.expanded_panel_y + 1;
-        let suggestions = self.navigator_cacher.get_suggestions();
+        let suggestions = self.navigator_cacher.suggestions();
         let start_index: usize = self.start_suggestions_pos as usize - 1;
         let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());
         for path_entry in &suggestions[start_index..end_index] {
@@ -567,7 +567,7 @@ where
         }
 
         let mut y = self.header_y_ofs - 2;
-        let suggestions = self.navigator_cacher.get_suggestions();
+        let suggestions = self.navigator_cacher.suggestions();
         let start_index: usize = self.start_suggestions_pos as usize - 1;
         let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());
         for path_entry in &suggestions[start_index..end_index] {
@@ -612,7 +612,6 @@ where
             return None;
         }
         let glyphs_count = self.start as i32 + x - 1 - self.cursor as i32;
-        println!("[mouse_pos_to_glyph_offset] x = {}, y = {}, glyphs_count = {}", x, y, glyphs_count);
         match glyphs_count.cmp(&0) {
             std::cmp::Ordering::Less => Some(self.input_path.previous_pos(self.cursor, (-glyphs_count) as usize)),
             std::cmp::Ordering::Equal => Some(self.cursor),
