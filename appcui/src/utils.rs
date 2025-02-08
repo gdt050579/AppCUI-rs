@@ -9,6 +9,7 @@ pub (crate) mod format_ratings;
 pub (crate) mod navigator;
 pub (crate) mod fs;
 pub (crate) mod temp_buffer;
+pub (crate) mod string_comparison;
 #[cfg(test)]
 mod tests;
 
