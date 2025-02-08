@@ -7,7 +7,6 @@ pub(super) struct InnerPathFinder<T>
 where
     T: crate::utils::Navigator<Entry, Root, PathBuf>,
 {
-    flags: Flags,
     navigator: T,
     component: crate::ui::components::NavigatorComponent<T, Entry, Root>,
 }
@@ -18,7 +17,6 @@ where
 {
     pub(super) fn new(file_path: &str, navigator: T, flags: Flags) -> Self {
         Self {
-            flags,
             navigator,
             component: crate::ui::components::NavigatorComponent::new(file_path, flags.contains(Flags::ReadOnly), flags.contains(Flags::CaseSensitive)),
         }
@@ -46,6 +44,12 @@ where
 
     pub(super) fn on_lose_focus(&mut self, control: &mut ControlBase) {
         self.component.on_lose_focus(control);
+    }
+    pub(super) fn on_theme_changed(&mut self, theme: &Theme)  {
+        self.component.on_theme_changed(theme);
+    }
+    pub(super) fn on_mouse_event(&mut self, control: &ControlBase, event: &MouseEvent) -> EventProcessStatus {
+        self.component.on_mouse_event(control, event)
     }
 
     pub(super) fn path(&self) -> &Path {
