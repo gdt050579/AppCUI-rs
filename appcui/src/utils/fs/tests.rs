@@ -8,7 +8,7 @@ use chrono::NaiveDateTime;
 #[test]
 fn check_simulator() {
     let csv_data = "
-    r,C:\\,10000,100000,SYSTEM,fixed   
+    r,C:\\,10000,100000,SYSTEM,fixed
     r,D:\\,123,123456,USB Drive,removable
     d,C:\\Program Files,0,2024-01-10 12:00:00,
     f,C:\\Program Files\\runme.exe,123,2024-01-10 12:31:55,
@@ -32,13 +32,13 @@ fn check_simulator() {
     assert!(v.len() == 2);
     assert!(v[0].path() == "C:\\");
     assert!(v[1].path() == "D:\\");
-    let e = nav.entries(&PathBuf::from("C:\\"));
+    let e = nav.entries(&PathBuf::from("C:\\")).unwrap();
     assert!(e.len() == 1);
     assert!(e[0].name() == "Program Files");
     assert!(e[0].size == 0);
     assert!(e[0].entry_type == EntryType::Folder);
     assert!(e[0].created == NaiveDateTime::parse_from_str("2024-01-10 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap());
-    let e = nav.entries(&PathBuf::from("C:\\Program Files\\"));
+    let e = nav.entries(&PathBuf::from("C:\\Program Files\\")).unwrap();
     assert!(e.len() == 3);
     assert!(e[0].name() == "runme.exe");
     assert!(e[0].size == 123);
@@ -57,7 +57,7 @@ fn check_simulator() {
 #[test]
 fn check_simulator_join() {
     let csv_data = "
-    r,C:\\,10000,100000,Old System,cdrom   
+    r,C:\\,10000,100000,Old System,cdrom
     r,D:\\,123,123456,fast_drive,ramdisk
     d,C:\\Program Files,0,2024-01-10 12:00:00,
     f,C:\\Program Files\\runme.exe,123,2024-01-10 12:31:55,
@@ -115,7 +115,7 @@ fn check_simulator_join() {
 #[test]
 fn check_simulator_exists() {
     let csv_data = "
-    r,C:\\,10000,100000,   
+    r,C:\\,10000,100000,
     r,D:\\,123,123456,
     d,C:\\Program Files,0,2024-01-10 12:00:00,
     f,C:\\Program Files\\runme.exe,123,2024-01-10 12:31:55,

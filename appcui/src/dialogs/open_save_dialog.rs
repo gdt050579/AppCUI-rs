@@ -153,7 +153,8 @@ where
     }
     fn populate(&mut self) {
         let is_root = self.path.is_absolute() && self.path.parent().is_none();
-        let mut entries = self.nav.entries(&self.path);
+        // FOR GDT: schimba tu cum doresti unwrapul
+        let mut entries = self.nav.entries(&self.path).unwrap();
         let filter_idx = if let Some(mask) = self.control(self.mask) {
             mask.index().unwrap_or_default() as usize
         } else {
@@ -239,7 +240,7 @@ where
                     }
                 }
             }
-            self.update_last_path(&result); 
+            self.update_last_path(&result);
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(
@@ -281,7 +282,7 @@ where
                     }
                 }
             }
-            self.update_last_path(&result); 
+            self.update_last_path(&result);
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(
@@ -420,7 +421,7 @@ where
 impl<T> PathFinderEvents for FileExplorer<T>
 where
     T: Navigator<Entry, Root, PathBuf> + 'static,
-{ 
+{
     fn on_path_updated(&mut self, handle: Handle<PathFinder>) -> EventProcessStatus {
         if handle == self.path_viewer {
             if let Some(pv) = self.control(self.path_viewer) {
@@ -430,4 +431,4 @@ where
         }
         EventProcessStatus::Processed
     }
-}   
+}

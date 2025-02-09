@@ -49,17 +49,18 @@ where
         let folder = Self::folder(path);
         if folder != self.cached_path {
             // create cache for this folder
-            let folder_contents = navigator.entries(&PathBuf::from(folder.to_string()));
             self.cached_items.clear();
             self.cached_path = folder.to_string();
-            for entry in folder_contents {
-                let cached_item = navigator
-                    .join(&PathBuf::from(folder.to_string()), &entry)
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string();
-                self.cached_items.push(cached_item);
+            if let Some(folder_contents) = navigator.entries(&PathBuf::from(folder.to_string())) {
+                for entry in folder_contents {
+                    let cached_item = navigator
+                        .join(&PathBuf::from(folder.to_string()), &entry)
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string();
+                    self.cached_items.push(cached_item);
+                }
             }
         }
         self.suggestions = Self::matching_paths(path, &self.cached_items, case_sensitive);

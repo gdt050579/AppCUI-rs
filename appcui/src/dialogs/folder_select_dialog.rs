@@ -109,7 +109,8 @@ where
         child: &str,
     ) -> Option<Handle<treeview::Item<FolderName>>> {
         let h = self.tv;
-        let entries = self.nav.entries(path);
+        // FOR GDT: schimba tu cum doresti unwrapul
+        let entries = self.nav.entries(path).unwrap();
         let mut result = None;
         log!("INFO", "Populate Node: Path={:?}, search='{}'",path, child);
 

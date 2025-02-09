@@ -44,3 +44,19 @@ pub(super) fn get_os_roots() -> Vec<Root> {
         eprintln!("Failed to open /etc/mtab");
     }
 }
+
+pub(super) fn get_os_absolute_path(path: &PathBuf) -> Option<PathBuf> {
+    if path.is_absolute() {
+        return Some(path.to_path_buf());
+    }
+    path::absolute(path).ok()
+}
+
+pub(super) fn get_os_separator() -> char {
+    '/'
+}
+
+pub(super) fn is_fs_root(path: &str) -> bool {
+    let buf = path.as_bytes();
+    buf.len() == 1 && buf[0] == b'/'
+}

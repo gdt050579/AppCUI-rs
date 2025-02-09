@@ -26,7 +26,7 @@ impl NavSimulator {
     }
 }
 impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
-    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
+    fn entries(&self, path: &PathBuf) -> Option<Vec<Entry>> {
         let path = path.as_path().as_os_str().to_str().unwrap();
         let mut v = Vec::new();
         for line in self.data.lines() {
@@ -34,7 +34,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for NavSimulator {
                 v.push(entry);
             }
         }
-        v
+        Some(v)
     }
     fn roots(&self) -> Vec<Root> {
         let mut v = Vec::new();

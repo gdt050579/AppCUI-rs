@@ -1,4 +1,6 @@
 use super::{Entry, EntryType, Root};
+use crate::log;
+use crate::utils::log::write_log_to_file;
 use crate::utils::NavigatorEntry;
 use chrono::DateTime;
 use chrono::NaiveDateTime;
@@ -8,43 +10,32 @@ use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub(crate) struct Navigator {
-    windows_model: bool,
 }
 
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
-    #[cfg(target_os = "windows")]
-    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
-        if path.as_os_str().is_empty() {
-            return vec![];
+    fn entries(&self, path: &PathBuf) -> Option<Vec<Entry>> {
+        if let Some(absoulte_path) = super::get_os_absolute_path(path) {
+            log!("Debug", "Navigator::entries() Conversion to absoulte path {:?} -> {:?}", path, absoulte_path);
+            if !absoulte_path.exists() {
+                return None;
+            }
+            if let Ok(results) = Self::get_folder_listing(absoulte_path.as_path()) {
+                return Some(results);
+            }
         }
-        if let Some(normalized_root) = Self::normalize_windows_root(path) {
-            Self::get_folder_listing(normalized_root.as_path()).unwrap_or_default()
-        } else {
-            Self::get_folder_listing(path).unwrap_or_default()
-        }
-    }
-
-    #[cfg(target_family = "unix")]
-    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
-        Self::get_folder_listing(path).unwrap_or_default()
+        None
     }
 
     fn roots(&self) -> Vec<Root> {
         super::get_os_roots()
     }
 
-    #[cfg(target_os = "windows")]
     fn new() -> Self {
-        Self { windows_model: true }
-    }
-
-    #[cfg(target_family = "unix")]
-    fn new() -> Self {
-        Self { windows_model: false }
+        Self { }
     }
 
     fn join(&self, path: &PathBuf, entry: &Entry) -> Option<PathBuf> {
-        if self.is_root(entry.name()) {
+        if super::is_fs_root(entry.name()) {
             Some(PathBuf::from(entry.name().replace('/', "\\").as_str()))
         } else {
             let mut components: Vec<&str> = path
@@ -72,15 +63,8 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
             let mut s = String::with_capacity(256);
             for c in components {
                 if !s.is_empty() {
-                    if self.windows_model {
-                        s.push('\\');
-                    } else {
-                        s.push('/');
-                    }
+                    s.push(super::get_os_separator());
                 }
-                // println!("Pushing {} to {}", c, s);
-                // edge case for windows roots
-
                 s.push_str(c);
             }
             Some(PathBuf::from(s))
@@ -137,31 +121,10 @@ impl Navigator {
         }
         Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid timestamp"))
     }
-
-    fn is_root(&self, path: &str) -> bool {
-        let buf = path.as_bytes();
-        if self.windows_model {
-            buf.len() >= 2 && buf[1] == b':' && ((buf[0] >= b'A' && buf[0] <= b'Z') || (buf[0] >= b'a' && buf[0] <= b'z'))
-        } else {
-            buf.len() == 1 && buf[0] == b'/'
-        }
-    }
-
-    fn normalize_windows_root(path: &Path) -> Option<PathBuf> {
-        let buf = path.as_os_str().as_encoded_bytes();
-        if buf.len() == 2 && buf[1] == b':' && ((buf[0] >= b'A' && buf[0] <= b'Z') || (buf[0] >= b'a' && buf[0] <= b'z')) {
-            let mut tmp = path.to_path_buf();
-            tmp.push("\\");
-            return Some(tmp);
-        }
-        None
-    }
 }
 
 impl Clone for Navigator {
     fn clone(&self) -> Self {
-        Self {
-            windows_model: self.windows_model,
-        }
+        Self { }
     }
 }

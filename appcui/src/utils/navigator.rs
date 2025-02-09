@@ -3,7 +3,7 @@ where
     E: NavigatorEntry,
     R: NavigatorRoot,
 {
-    fn entries(&self, path: &P) -> Vec<E>;
+    fn entries(&self, path: &P) -> Option<Vec<E>>;
     fn roots(&self) -> Vec<R>;
     fn new() -> Self;
     fn join(&self, path: &P, entry: &E) -> Option<P>;

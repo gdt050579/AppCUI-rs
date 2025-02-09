@@ -1,3 +1,5 @@
+use std::path;
+use std::path::PathBuf;
 use super::{RootType, Root};
 
 #[allow(clippy::upper_case_acronyms)]
@@ -43,8 +45,26 @@ pub(super) fn get_os_roots() -> Vec<Root> {
     v
 }
 
-#[test]
-fn test_os_roots() {
-    let roots = get_os_roots();
-    println!("{:?}", roots);
+pub(super) fn get_os_absolute_path(path: &PathBuf) -> Option<PathBuf> {
+    let buf = path.as_os_str().as_encoded_bytes();
+    if buf.len() == 2 && buf[1] == b':' && ((buf[0] >= b'A' && buf[0] <= b'Z') || (buf[0] >= b'a' && buf[0] <= b'z')) {
+        // special root form like "D:"
+        let mut tmp = path.to_path_buf();
+        tmp.push("\\");
+        return Some(tmp);
+    }
+
+    if path.is_absolute() {
+        return Some(path.to_path_buf());
+    }
+    path::absolute(path).ok()
+}
+
+pub(super) fn get_os_separator() -> char {
+    '\\'
+}
+
+pub(super) fn is_fs_root(path: &str) -> bool {
+    let buf = path.as_bytes();
+    buf.len() >= 2 && buf[1] == b':' && ((buf[0] >= b'A' && buf[0] <= b'Z') || (buf[0] >= b'a' && buf[0] <= b'z'))
 }
