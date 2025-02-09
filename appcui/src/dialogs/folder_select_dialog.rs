@@ -1,4 +1,4 @@
-use std::path::{Component, Path, PathBuf};
+use std::path::{Component, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
 use super::Location;
@@ -91,6 +91,7 @@ where
             treeview::Flags::HideHeader | treeview::Flags::ScrollBars | treeview::Flags::SearchBar,
         );
         tv.set_components_toolbar_margins(2, 0);
+        tv.sort(0, true);
         w.tv = p.add(tv);
         w.add(p);
         w.b_ok = w.add(button!("&OK,r:1,b:0,w:13"));
@@ -111,7 +112,7 @@ where
         let entries = self.nav.entries(path);
         let mut result = None;
         if let Some(tv) = self.control_mut(h) {
-            //println!("Populate nod with path: {:?},  search: {}", path, child);
+            //println!("\nPopulate nod with path: {:?},  search: {}", path, child);
             //println!("Searching for: {} -> entries: {:?}", child, entries);
             tv.add_batch(|tv| {
                 for e in entries {
@@ -157,9 +158,6 @@ where
         let mut parent_handle = Handle::None;
         let h = self.tv;
         self.control_mut(h).map(|tv| tv.clear());
-        // if let Some(tv) = self.control_mut(h) {
-        //     tv.clear();
-        // }
         for component in current_path.components() {
             if cfg!(target_os = "windows") && component == Component::RootDir {
                 continue; // Skip RootDir only  on Windows
@@ -283,31 +281,24 @@ where
             if let Some(pv) = self.control_mut(h) {
                 pv.set_path(&path);
             }
+            self.path = path;
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
         }
     }
 
-    fn on_item_collapsed(
-        &mut self,
-        handle: Handle<TreeView<FolderName>>,
-        item_handle: Handle<treeview::Item<FolderName>>,
-        recursive: bool,
-    ) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_item_expanded(&mut self, tv: Handle<TreeView<FolderName>>, item_handle: Handle<treeview::Item<FolderName>>, _: bool) -> EventProcessStatus {
+        if let Some(tv) = self.control_mut(tv) {
+            tv.clear_search();
+            tv.delete_item_children(item_handle);
+        }
+        let p = self.path.clone();
+        self.populate_node(&p, item_handle, "");
+        EventProcessStatus::Processed
     }
 
-    fn on_item_expanded(
-        &mut self,
-        handle: Handle<TreeView<FolderName>>,
-        item_handle: Handle<treeview::Item<FolderName>>,
-        recursive: bool,
-    ) -> EventProcessStatus {
-        EventProcessStatus::Ignored
-    }
-
-    fn on_item_action(&mut self, handle: Handle<TreeView<FolderName>>, item_handle: Handle<treeview::Item<FolderName>>) -> EventProcessStatus {
+    fn on_item_action(&mut self, _: Handle<TreeView<FolderName>>, _: Handle<treeview::Item<FolderName>>) -> EventProcessStatus {
         self.return_result();
         EventProcessStatus::Processed
     }
