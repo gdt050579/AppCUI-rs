@@ -6,7 +6,7 @@ static LOG_FILE: Mutex<RefCell<Option<std::fs::File>>> = Mutex::new(RefCell::new
 pub(crate) fn init_log_file(name: &str, append: bool) {
     use std::fs::OpenOptions;
 
-    if let Ok(file) = OpenOptions::new().create(true).append(append).open(name) {        
+    if let Ok(file) = OpenOptions::new().create(true).write(true).append(append).open(name) {        
         LOG_FILE.lock().unwrap().replace(Some(file));
         write_log_to_file("INFO", "Application started");
     }
@@ -32,7 +32,6 @@ macro_rules! log {
         #[cfg(debug_assertions)]
         {
             let msg = format!($fmt, $($arg)*);
-            println!("[{}] {}", $tag, msg);
             write_log_to_file($tag, &msg);
         }
     };

@@ -111,6 +111,8 @@ where
         let h = self.tv;
         let entries = self.nav.entries(path);
         let mut result = None;
+        log!("INFO", "Populate Node: Path={:?}, search='{}'",path, child);
+
         if let Some(tv) = self.control_mut(h) {
             //println!("\nPopulate nod with path: {:?},  search: {}", path, child);
             //println!("Searching for: {} -> entries: {:?}", child, entries);
@@ -130,6 +132,7 @@ where
         result
     }
     fn populate_root(&mut self, search: &str) -> Option<Handle<treeview::Item<FolderName>>> {
+        log!("INFO", "Populate root with search: '{}'", search);
         let h = self.tv;
         let roots = self.nav.roots();
         if let Some(tv) = self.control_mut(h) {
@@ -158,6 +161,8 @@ where
         let mut parent_handle = Handle::None;
         let h = self.tv;
         self.control_mut(h).map(|tv| tv.clear());
+        log!("INFO", "Populate from path: {:?}", current_path);
+
         for component in current_path.components() {
             if cfg!(target_os = "windows") && component == Component::RootDir {
                 continue; // Skip RootDir only  on Windows

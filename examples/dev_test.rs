@@ -26,7 +26,7 @@ impl ButtonEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().log_file("debug.log",true).build()?;
+    let mut a = App::new().log_file("debug.log",false).build()?;
     a.add_window(MyWin::new());
     a.run();
     Ok(())
