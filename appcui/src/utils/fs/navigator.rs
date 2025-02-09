@@ -1,11 +1,10 @@
-use crate::utils::NavigatorEntry;
-
 use super::{Entry, EntryType, Root};
+use crate::utils::NavigatorEntry;
+use chrono::DateTime;
+use chrono::NaiveDateTime;
+use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use chrono::NaiveDateTime;
-use chrono::DateTime;
-use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub(crate) struct Navigator {
@@ -13,6 +12,19 @@ pub(crate) struct Navigator {
 }
 
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
+    #[cfg(target_os = "windows")]
+    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
+        if path.as_os_str().is_empty() {
+            return vec![];
+        }
+        if let Some(normalized_root) = Self::normalize_windows_root(path) {
+            Self::get_folder_listing(normalized_root.as_path()).unwrap_or_default()
+        } else {
+            Self::get_folder_listing(path).unwrap_or_default()
+        }
+    }
+
+    #[cfg(target_family = "unix")]
     fn entries(&self, path: &PathBuf) -> Vec<Entry> {
         Self::get_folder_listing(path).unwrap_or_default()
     }
@@ -21,12 +33,12 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
         super::get_os_roots()
     }
 
-    #[cfg(target_os="windows")]
+    #[cfg(target_os = "windows")]
     fn new() -> Self {
         Self { windows_model: true }
     }
 
-    #[cfg(target_family="unix")]
+    #[cfg(target_family = "unix")]
     fn new() -> Self {
         Self { windows_model: false }
     }
@@ -78,13 +90,12 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     fn exists(&self, path: &PathBuf) -> Option<bool> {
         match path.try_exists() {
             Ok(v) => Some(v),
-            _ => None
+            _ => None,
         }
     }
     fn current_dir(&self) -> PathBuf {
         std::env::current_dir().unwrap_or_default()
     }
-
 }
 
 impl Navigator {
@@ -110,7 +121,12 @@ impl Navigator {
             false => metadata.len(),
             _ => 0,
         };
-        Ok(Entry::new(path, size, datetime, if metadata.is_dir() {EntryType::Folder} else {EntryType::File}))
+        Ok(Entry::new(
+            path,
+            size,
+            datetime,
+            if metadata.is_dir() { EntryType::Folder } else { EntryType::File },
+        ))
     }
 
     fn system_time_to_naive_datetime(system_time: SystemTime) -> std::io::Result<NaiveDateTime> {
@@ -130,10 +146,21 @@ impl Navigator {
             buf.len() == 1 && buf[0] == b'/'
         }
     }
+
+    fn normalize_windows_root(path: &Path) -> Option<PathBuf> {
+        if path.as_os_str().as_encoded_bytes().len() < 3 {
+            let mut tmp = path.to_path_buf();
+            tmp.push("\\");
+            return Some(tmp);
+        }
+        None
+    }
 }
 
 impl Clone for Navigator {
     fn clone(&self) -> Self {
-        Self { windows_model: self.windows_model }
+        Self {
+            windows_model: self.windows_model,
+        }
     }
 }
