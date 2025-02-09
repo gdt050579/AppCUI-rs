@@ -148,7 +148,8 @@ impl Navigator {
     }
 
     fn normalize_windows_root(path: &Path) -> Option<PathBuf> {
-        if path.as_os_str().as_encoded_bytes().len() < 3 {
+        let buf = path.as_os_str().as_encoded_bytes();
+        if buf.len() == 2 && buf[1] == b':' && ((buf[0] >= b'A' && buf[0] <= b'Z') || (buf[0] >= b'a' && buf[0] <= b'z')) {
             let mut tmp = path.to_path_buf();
             tmp.push("\\");
             return Some(tmp);

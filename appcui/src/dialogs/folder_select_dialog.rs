@@ -121,6 +121,7 @@ where
                     if !e.is_container() {
                         continue;
                     }
+                    log!("INFO", " - Add: {}", e.name);
                     if e.name.eq_ignore_ascii_case(child) {
                         result = Some(tv.add_item_to_parent(treeview::Item::expandable(FolderName { value: e.name }, false), parent_node));
                     } else {
