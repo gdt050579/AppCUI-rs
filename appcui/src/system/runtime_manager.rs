@@ -103,6 +103,11 @@ thread_local! {
 
 impl RuntimeManager {
     pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
+        #[cfg(debug_assertions)]
+        if let Some(fname) = builder.log_file.as_ref() {
+            crate::utils::log::init_log_file(fname, builder.log_append);
+        }
+
         let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
         let term = terminals::new(&builder, sender.clone())?;
         let term_sz = term.get_size();

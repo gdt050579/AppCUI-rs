@@ -9,6 +9,7 @@
     - [Application](chapter-2/application.md)
         - [Debug scenarios](chapter-2/debug_scenarious.md)
         - [Recording events](chapter-2/event_recording.md)
+        - [Logging](chapter-2/logging.md)
     - [Terminals](chapter-2/terminals.md)
         - [Windows Console]()
         - [NCurses](chapter-2/terminals/ncurses.md)
