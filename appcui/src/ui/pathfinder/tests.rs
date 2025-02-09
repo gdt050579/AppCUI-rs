@@ -31,7 +31,7 @@ const CSV_DATA: &str = "
     f:D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
     ";
 
-    const CSV_DATA_UNICODE: &str = "
+const CSV_DATA_UNICODE: &str = "
     r,C:\\,10000,100000,SYSTEM,fixed
     r,D:\\,123,123456,USB Drive,removable
     d,C:\\Program Files,0,2024-01-10 12:00:00,
@@ -43,12 +43,12 @@ const CSV_DATA: &str = "
 // #[test]
 // fn test_while_developing() {
 //     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
-//     let mut a = App::new().build().unwrap();
+//     let mut a = App::new().log_file("debug.log", false).build().unwrap();
 //     let mut w = window!("Test,d:c,w:60,h:15");
 //     let mut p = GenericPathFinder::with_navigator(
 //         r#"C:\Program Files\"#,
 //         Layout::new("x:1,y:1,w:40"),
-//         pathfinder::Flags::None, nav);
+//         pathfinder::Flags::None, fs::Navigator::new());
 //     //p.set_enabled(false);
 //     w.add(p);
 //     w.add(button!("test,x:1,y:3,w:6"));
@@ -420,14 +420,8 @@ fn check_pathfinder_unicode() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:60,h:15");
-    let p = GenericPathFinder::with_navigator(
-        r#"C:\Program Files"#,
-        Layout::new("x:1,y:1,w:40"),
-        pathfinder::Flags::CaseSensitive,
-        nav,
-    );
+    let p = GenericPathFinder::with_navigator(r#"C:\Program Files"#, Layout::new("x:1,y:1,w:40"), pathfinder::Flags::CaseSensitive, nav);
     w.add(p);
     a.add_window(w);
     a.run();
 }
-
