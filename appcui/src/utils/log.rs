@@ -28,7 +28,13 @@ pub fn write_log_to_file(tag: &str, message: &str) {
 
 #[macro_export]
 macro_rules! log {
-    ($tag:expr, $fmt:expr, $($arg:tt)*) => {
+    ($tag:literal, $fmt:literal) => {
+        #[cfg(debug_assertions)]
+        {
+            write_log_to_file($tag,$fmt);
+        }
+    };
+    ($tag:literal, $fmt:literal, $($arg:tt)*) => {
         #[cfg(debug_assertions)]
         {
             let msg = format!($fmt, $($arg)*);
