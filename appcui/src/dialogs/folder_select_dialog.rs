@@ -195,7 +195,9 @@ where
         }
     }
 
-    fn return_result(&mut self) {}
+    fn return_result(&mut self) {
+        self.exit_with(FolderSelectionDialogResult::Path(self.path.clone()));
+    }
 }
 impl<T> ButtonEvents for FolderExplorer<T>
 where
