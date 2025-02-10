@@ -114,8 +114,6 @@ where
         log!("INFO", "Populate Node: Path={:?}, search='{}'",path, child);
 
         if let Some(tv) = self.control_mut(h) {
-            //println!("\nPopulate nod with path: {:?},  search: {}", path, child);
-            //println!("Searching for: {} -> entries: {:?}", child, entries);
             tv.add_batch(|tv| {
                 for e in entries {
                     if !e.is_container() {
@@ -172,15 +170,16 @@ where
             if first {
                 first = false;
                 if let Some(handle) = self.populate_root(c) {
-                    //println!("Populate root: {} -> H: {:?}", c, handle);
                     parent_handle = handle;
                     cp.push(component);
+                    if cfg!(target_os = "windows") {
+                        cp.push("\\");
+                    }
                 } else {
                     break;
                 }
             } else {
                 if let Some(handle) = self.populate_node(&cp, parent_handle, c) {
-                    //println!("Populate node: {} -> H: {:?}", c, handle);
                     parent_handle = handle;
                     cp.push(component);
                 } else {
@@ -189,7 +188,6 @@ where
             }
         }
         if !parent_handle.is_none() {
-            //println!("Handle = {:?}", parent_handle);
             let h = self.tv;
             if let Some(tv) = self.control_mut(h) {
                 tv.move_cursor_to(parent_handle);
@@ -300,6 +298,7 @@ where
             tv.delete_item_children(item_handle);
         }
         let p = self.path.clone();
+        log!("INFO", "Item expanded: {:?}, Handle:{:?}", p, item_handle);
         self.populate_node(&p, item_handle, "");
         EventProcessStatus::Processed
     }

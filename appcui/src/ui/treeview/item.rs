@@ -132,6 +132,7 @@ where
         match self.fold_status {
             FoldStatus::Collapsed => {
                 self.fold_status = FoldStatus::Expanded;
+                //log!("INFO", "expand_fold({:?}) - parent={:?}", self.handle, self.parent);
                 true
             }
             FoldStatus::Expanded | FoldStatus::NonExpandable => false,

@@ -3,6 +3,9 @@ use super::{Flags, FoldStatus, Item, TreeDataManager};
 use components::listitem::render_method::RenderData;
 use AppCUIProcMacro::*;
 
+use crate::prelude::*;
+
+#[derive(Copy,Clone,Debug)]
 enum UpdateVisibleItemsOperation {
     Refresh,
     Sort,
@@ -223,8 +226,12 @@ where
             item.set_selected(false);
         }
         let h = self.manager.add(item, parent);
-        // refilter everything
-        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        // refilter everything if needed
+        if self.comp.search_text().is_empty() {
+            self.update_item_list(UpdateVisibleItemsOperation::Sort);
+        } else {
+            self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        }
         h
     }
 
@@ -238,7 +245,12 @@ where
         f(self);
         // restore original refilter state
         self.update_item_list_enabled = old_state;
-        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        if self.comp.search_text().is_empty() {
+            self.update_item_list(UpdateVisibleItemsOperation::Sort);
+        } else {
+            self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        }
+
     }
 
     /// Sets the number of frozen columns. Frozen columns are columns that are always visible, even when the list view is scrolled horizontally. The frozen columns are always the first columns in the list view. Using the value 0 will disable frozen columns.
@@ -415,7 +427,7 @@ where
     ///
     pub fn delete_item_children(&mut self, item_handle: Handle<Item<T>>) {
         self.manager.delete_children(item_handle);
-        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        self.update_item_list(UpdateVisibleItemsOperation::Refresh);
     }
 
     fn inner_fold_item(&mut self, item_handle: Handle<Item<T>>, method: FoldMethod, emit_event: bool, recursive: bool) -> bool {

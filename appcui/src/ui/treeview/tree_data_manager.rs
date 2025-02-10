@@ -5,6 +5,7 @@ use super::ItemVisibility;
 use super::ListItem;
 use crate::prelude::ColumnsHeader;
 use crate::system::Handle;
+use crate::prelude::*;
 
 macro_rules! new_mutable_ref {
     ($current_ref:expr) => {
@@ -57,7 +58,7 @@ where
         }
     }
 
-    fn inner_add(&mut self, mut item: Item<T>, parent: Handle<Item<T>>) -> Handle<Item<T>> {
+    fn inner_add(&mut self, mut item: Item<T>, parent_handle: Handle<Item<T>>) -> Handle<Item<T>> {
         // find the position and set my own handle
         if let Some(index) = self.free.pop() {
             item.handle = Handle::new(index);
@@ -65,14 +66,15 @@ where
             item.handle = Handle::new(self.data.len() as u32);
         }
         // add to parent
-        if let Some(idx) = self.handle_to_index(parent) {
-            item.parent = parent;
+        if let Some(idx) = self.handle_to_index(parent_handle) {
+            item.parent = parent_handle;
             // I kwno that the parent is not None
             let parent = self.data[idx].as_mut().unwrap();
             item.depth = parent.depth + 1;
             parent.children.push(item.handle);
             if parent.fold_status == FoldStatus::NonExpandable {
                 parent.fold_status = FoldStatus::Expanded;
+                log!("INFO","Setting parent to expanded for {:?}", parent_handle);
             }
         } else {
             item.parent = Handle::None;
