@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::dialogs;
 use crate::prelude::*;
 
@@ -115,27 +117,49 @@ impl ButtonEvents for OpenSaveTestWindow<'_> {
     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         let nav = crate::utils::fs::NavSimulator::with_csv(VFS, true, "C:\\Program Files\\");
         let result = match self.flags {
-            OpenSaveTestWindowFlags::Save(flags) => dialogs::inner_save(
-                self.title.as_str(),
-                self.file_name.as_str(),
-                self.location.clone(),
-                self.mask,
-                flags,
-                nav,
-            ),
-            OpenSaveTestWindowFlags::Open(flags) => dialogs::inner_open(
-                self.title.as_str(),
-                self.file_name.as_str(),
-                self.location.clone(),
-                self.mask,
-                flags,
-                nav,
-            ),
+            OpenSaveTestWindowFlags::Save(flags) => {
+                dialogs::inner_save(self.title.as_str(), self.file_name.as_str(), self.location.clone(), self.mask, flags, nav)
+            }
+            OpenSaveTestWindowFlags::Open(flags) => {
+                dialogs::inner_open(self.title.as_str(), self.file_name.as_str(), self.location.clone(), self.mask, flags, nav)
+            }
         };
         let txt = format!("{:?}", result);
         let h = self.info;
         if let Some(info) = self.control_mut(h) {
             info.set_caption(&txt);
+        }
+        EventProcessStatus::Processed
+    }
+}
+
+#[Window(events = ButtonEvents, internal: true)]
+struct FolderSelectDialog {
+    loc: String,
+}
+impl FolderSelectDialog {
+    fn new(loc: &str) -> Self {
+        let mut w = Self {
+            base: window!("Test,d:c"),
+            loc: loc.to_string(),
+        };
+        w.add(button!("Press,d:c,w:14"));
+        w
+    }
+}
+impl ButtonEvents for FolderSelectDialog {
+    fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+        let nav = crate::utils::fs::NavSimulator::with_csv(VFS, true, "C:\\Program Files\\");
+        let p = PathBuf::from(self.loc.as_str());
+        let loc = match self.loc.as_str() {
+            "" => dialogs::Location::Last,
+            "." => dialogs::Location::Current,
+            _ => dialogs::Location::Path(&p),
+        };
+        if let Some(result) = dialogs::inner_select_folder("Folder", loc, dialogs::OpenFileDialogFlags::None, nav) {
+            self.set_title(&format!("{:?}", result));
+        } else {
+            self.set_title("Folder selection canceled !");
         }
         EventProcessStatus::Processed
     }
@@ -450,7 +474,6 @@ fn check_validate_or_cancel() {
     a.run();
 }
 
-
 #[test]
 fn check_save_dialog_select_existent() {
     let script = "
@@ -478,7 +501,12 @@ fn check_save_dialog_select_existent() {
         CheckHash(0xEB21471DE6FDA1EA)
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::save("Save", "blabla.exe", dialogs::Location::Current, SaveFileDialogFlags::None));
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "blabla.exe",
+        dialogs::Location::Current,
+        SaveFileDialogFlags::None,
+    ));
     a.run();
 }
 
@@ -509,7 +537,12 @@ fn check_save_dialog_cancelt_existent() {
         CheckHash(0xAD065263787B818A)
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::save("Save", "blabla.exe", dialogs::Location::Current, SaveFileDialogFlags::None));
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "blabla.exe",
+        dialogs::Location::Current,
+        SaveFileDialogFlags::None,
+    ));
     a.run();
 }
 
@@ -545,7 +578,12 @@ fn check_save_dialog_select_existent_with_validate_overwrite() {
         CheckHash(0xEB21471DE6FDA1EA)
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::save("Save", "blabla.exe", dialogs::Location::Current, SaveFileDialogFlags::ValidateOverwrite));
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "blabla.exe",
+        dialogs::Location::Current,
+        SaveFileDialogFlags::ValidateOverwrite,
+    ));
     a.run();
 }
 
@@ -563,7 +601,12 @@ fn check_open_dialog_hardcoded_relative_path() {
         CheckHash(0x66405B20EE6A5135)            
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::open("Open", "../abc.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
+    a.add_window(OpenSaveTestWindow::open(
+        "Open",
+        "../abc.exe",
+        dialogs::Location::Current,
+        OpenFileDialogFlags::None,
+    ));
     a.run();
 }
 
@@ -581,7 +624,12 @@ fn check_open_dialog_hardcoded_absolute_path() {
         CheckHash(0x1F861B0B7CF0B263)            
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::open("Open", "E:/abc.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
+    a.add_window(OpenSaveTestWindow::open(
+        "Open",
+        "E:/abc.exe",
+        dialogs::Location::Current,
+        OpenFileDialogFlags::None,
+    ));
     a.run();
 }
 
@@ -605,7 +653,12 @@ fn check_open_dialog_invalid_path_with_validation_flag() {
         CheckHash(0xAD065263787B818A)    
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::open("Open", "E:/abc.exe", dialogs::Location::Current, OpenFileDialogFlags::CheckIfFileExists));
+    a.add_window(OpenSaveTestWindow::open(
+        "Open",
+        "E:/abc.exe",
+        dialogs::Location::Current,
+        OpenFileDialogFlags::CheckIfFileExists,
+    ));
     a.run();
 }
 
@@ -634,7 +687,12 @@ fn check_open_dialog_last_path() {
         CheckHash(0xC8E329F1E80B6D04)                    
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::open("Open", "myfile.exe", dialogs::Location::Last, OpenFileDialogFlags::None));
+    a.add_window(OpenSaveTestWindow::open(
+        "Open",
+        "myfile.exe",
+        dialogs::Location::Last,
+        OpenFileDialogFlags::None,
+    ));
     a.run();
 }
 
@@ -656,7 +714,12 @@ fn check_open_dialog_select_drive() {
         CheckHash(0x9C98C24AA885FA47) 
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::open_all("Open", "myfile.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
+    a.add_window(OpenSaveTestWindow::open_all(
+        "Open",
+        "myfile.exe",
+        dialogs::Location::Current,
+        OpenFileDialogFlags::None,
+    ));
     a.run();
 }
 
@@ -681,6 +744,36 @@ fn check_open_dialog_change_path_manually() {
         CheckHash(0xB593E849F4871BAD) 
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(OpenSaveTestWindow::open_all("Open", "myfile.exe", dialogs::Location::Current, OpenFileDialogFlags::None));
+    a.add_window(OpenSaveTestWindow::open_all(
+        "Open",
+        "myfile.exe",
+        dialogs::Location::Current,
+        OpenFileDialogFlags::None,
+    ));
+    a.run();
+}
+
+#[test]
+fn check_create_folder_select_dialog() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xD04C3E714AC5A212)
+        Key.Pressed(Space)
+        Paint('3. Program Files expanded')   
+        CheckHash(0xB4761C157E0BC65C)
+        Key.Pressed(Down)
+        Paint('4. Windows selected')   
+        CheckHash(0x5DD2E869CAAA2C2F)
+        Key.Pressed(Enter)
+        Paint('5. `C:\\Program Files\\Windows` returned')   
+        CheckHash(0x57FDC0A388354481)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\"));
     a.run();
 }

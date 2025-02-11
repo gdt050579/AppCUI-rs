@@ -106,12 +106,13 @@ where
         &mut self,
         path: &PathBuf,
         parent_node: Handle<treeview::Item<FolderName>>,
-        child: &str,
+        search: &str,
+        expand_search: bool,
     ) -> Option<Handle<treeview::Item<FolderName>>> {
         let h = self.tv;
         let entries = self.nav.entries(path);
         let mut result = None;
-        log!("INFO", "Populate Node: Path={:?}, search='{}'",path, child);
+        log!("INFO", "Populate Node: Path={:?}, search='{}'", path, search);
 
         if let Some(tv) = self.control_mut(h) {
             tv.add_batch(|tv| {
@@ -120,8 +121,8 @@ where
                         continue;
                     }
                     log!("INFO", " - Add: {}", e.name);
-                    if e.name.eq_ignore_ascii_case(child) {
-                        result = Some(tv.add_item_to_parent(treeview::Item::expandable(FolderName { value: e.name }, false), parent_node));
+                    if e.name.eq_ignore_ascii_case(search) {
+                        result = Some(tv.add_item_to_parent(treeview::Item::expandable(FolderName { value: e.name }, !expand_search), parent_node));
                     } else {
                         tv.add_item_to_parent(treeview::Item::expandable(FolderName { value: e.name }, true), parent_node);
                     }
@@ -162,7 +163,8 @@ where
         self.control_mut(h).map(|tv| tv.clear());
         log!("INFO", "Populate from path: {:?}", current_path);
 
-        for component in current_path.components() {
+        let total_components = current_path.components().count();
+        for (index, component) in current_path.components().enumerate() {
             if cfg!(target_os = "windows") && component == Component::RootDir {
                 continue; // Skip RootDir only  on Windows
             }
@@ -179,7 +181,7 @@ where
                     break;
                 }
             } else {
-                if let Some(handle) = self.populate_node(&cp, parent_handle, c) {
+                if let Some(handle) = self.populate_node(&cp, parent_handle, c, index + 1 < total_components) {
                     parent_handle = handle;
                     cp.push(component);
                 } else {
@@ -301,7 +303,7 @@ where
         }
         let p = self.path.clone();
         log!("INFO", "Item expanded: {:?}, Handle:{:?}", p, item_handle);
-        self.populate_node(&p, item_handle, "");
+        self.populate_node(&p, item_handle, "", false);
         EventProcessStatus::Processed
     }
 
