@@ -88,7 +88,7 @@ where
         let mut tv = TreeView::with_capacity(
             256,
             Layout::new("d:c,w:100%,h:100%"),
-            treeview::Flags::HideHeader | treeview::Flags::ScrollBars | treeview::Flags::SearchBar,
+            treeview::Flags::HideHeader | treeview::Flags::ScrollBars | treeview::Flags::SearchBar | treeview::Flags::NoSelection,
         );
         tv.set_components_toolbar_margins(2, 0);
         tv.sort(0, true);
@@ -112,7 +112,7 @@ where
         let h = self.tv;
         let entries = self.nav.entries(path);
         let mut result = None;
-        log!("INFO", "Populate Node: Path={:?}, search='{}'", path, search);
+        log!("INFO", "Populate Node: Path={:?}, search='{}', entries='{:?}'", path, search, entries);
 
         if let Some(tv) = self.control_mut(h) {
             tv.add_batch(|tv| {

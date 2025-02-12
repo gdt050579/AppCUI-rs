@@ -757,7 +757,6 @@ fn check_open_dialog_change_path_manually() {
 fn check_create_folder_select_dialog() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. Initial State')   
         CheckHash(0xDC27AD6BE7A637F4)
         Key.Pressed(Enter)
@@ -774,6 +773,47 @@ fn check_create_folder_select_dialog() {
         CheckHash(0x57FDC0A388354481)
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\"));
+    a.run();
+}
+
+#[test]
+fn check_expand_collapse_select_dialog() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xD04C3E714AC5A212)
+        Key.Pressed(Space)
+        Paint('3. Program Files expanded')   
+        CheckHash(0xB4761C157E0BC65C)
+        Key.Pressed(Down)
+        Paint('4. Windows selected')   
+        CheckHash(0x5DD2E869CAAA2C2F)
+        Key.Pressed(Space)
+        Paint('5. `Windows` expanded')   
+        CheckHash(0xE04DF44556D7054B)
+        Key.Pressed(Down)
+        Key.Pressed(Space)
+        Paint('6. `System32` expanded (no children)')   
+        CheckHash(0xEC7FE1642903A5BE)
+        Key.Pressed(Down,2)
+        Key.Pressed(Space)
+        Paint('7. `D:` expanded')   
+        CheckHash(0x965AB5F9A62E278C)
+        Key.Pressed(Down)
+        Key.Pressed(Space)
+        Paint('8. `Windows` from D expanded (no children)')   
+        CheckHash(0xCC5E647E8E8B8379)
+        Key.Pressed(Home)
+        Key.Pressed(Space)
+        Paint('9. `C` is collapsed')   
+        CheckHash(0x1EF4952E6256D245)
+    ";
+    let mut a = App::debug(80, 30, script).log_file("debug.log", true).build().unwrap();
     a.add_window(FolderSelectDialog::new("C:\\Program Files\\"));
     a.run();
 }

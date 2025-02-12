@@ -27,7 +27,7 @@ pub fn write_log_to_file(tag: &str, message: &str) {
 }
 
 #[macro_export]
-macro_rules! log {
+macro_rules! log {  
     ($tag:literal, $fmt:literal) => {
         #[cfg(debug_assertions)]
         {

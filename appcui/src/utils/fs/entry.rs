@@ -51,8 +51,13 @@ impl Entry {
         };
         let size = size.parse().ok()?;
         let created = NaiveDateTime::parse_from_str(created, "%Y-%m-%d %H:%M:%S").ok()?;
+        let len = path.len() + match full_path.as_bytes()[path.len()] {
+            b'\\' | b'/' => 1,
+            _ => 0,
+        };
+        
         Some(Self {
-            name: full_path[path.len()..].to_string(),
+            name: full_path[len..].to_string(),
             size,
             created,
             entry_type: if folder { EntryType::Folder } else { EntryType::File },
