@@ -8,7 +8,7 @@ pub enum Flags {
     // TextHighlight            = 0x0008,
     
     // TODO: must
-    ScrollBar                = 0x0010,
-    SearchBar                = 0x0020,
+    ScrollBars                = 0x0010,
+    // SearchBar                = 0x0020,
     HighlightCursor          = 0x0040,
 }
