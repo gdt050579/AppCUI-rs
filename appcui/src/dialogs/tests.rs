@@ -5,6 +5,7 @@ use crate::prelude::*;
 
 use super::OpenFileDialogFlags;
 use super::SaveFileDialogFlags;
+use super::SelectFolderDialogFlags;
 
 #[Window(events=ButtonEvents, internal: true)]
 struct CallbackWin {
@@ -136,12 +137,14 @@ impl ButtonEvents for OpenSaveTestWindow<'_> {
 #[Window(events = ButtonEvents, internal: true)]
 struct FolderSelectDialog {
     loc: String,
+    flags: SelectFolderDialogFlags,
 }
 impl FolderSelectDialog {
-    fn new(loc: &str) -> Self {
+    fn new(loc: &str, flags: SelectFolderDialogFlags) -> Self {
         let mut w = Self {
             base: window!("Test,d:c"),
             loc: loc.to_string(),
+            flags,
         };
         w.add(button!("Press,d:c,w:14"));
         w
@@ -156,7 +159,7 @@ impl ButtonEvents for FolderSelectDialog {
             "." => dialogs::Location::Current,
             _ => dialogs::Location::Path(&p),
         };
-        if let Some(result) = dialogs::inner_select_folder("Folder", loc, dialogs::OpenFileDialogFlags::None, nav) {
+        if let Some(result) = dialogs::inner_select_folder("Folder", loc, self.flags, nav) {
             self.set_title(&format!("{:?}", result));
         } else {
             self.set_title("Folder selection canceled !");
@@ -773,7 +776,7 @@ fn check_create_folder_select_dialog() {
         CheckHash(0x57FDC0A388354481)
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(FolderSelectDialog::new("C:\\Program Files\\"));
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
     a.run();
 }
 
@@ -781,7 +784,6 @@ fn check_create_folder_select_dialog() {
 fn check_expand_collapse_select_dialog() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. Initial State')   
         CheckHash(0xDC27AD6BE7A637F4)
         Key.Pressed(Enter)
@@ -813,7 +815,23 @@ fn check_expand_collapse_select_dialog() {
         Paint('9. `C` is collapsed')   
         CheckHash(0x1EF4952E6256D245)
     ";
-    let mut a = App::debug(80, 30, script).log_file("debug.log", true).build().unwrap();
-    a.add_window(FolderSelectDialog::new("C:\\Program Files\\"));
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_with_icons() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Key.Pressed(Home)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0x541A8C33A6975193)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\Windows\\System32\\drivers", SelectFolderDialogFlags::Icons));
     a.run();
 }

@@ -2,24 +2,15 @@ use std::path::{Component, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
 use super::Location;
+use super::SelectFolderDialogFlags;
 use crate::prelude::*;
 use crate::ui::pathfinder::GenericPathFinder;
 use crate::utils::fs::{Entry, Root};
 use crate::utils::Navigator;
-use EnumBitFlags::EnumBitFlags;
 
 pub(super) enum FolderSelectionDialogResult {
     Path(PathBuf),
     Cancel,
-}
-
-#[EnumBitFlags(bits = 8)]
-pub(super) enum InnerFlags {
-    Save = 1,
-    Icons = 2,
-    MultipleOpen = 4,
-    ValidateOverwrite = 8,
-    CheckIfFileExists = 16,
 }
 
 #[derive(ListItem)]
@@ -41,14 +32,14 @@ where
     b_cancel: Handle<Button>,
     nav: T,
     path: PathBuf,
-    flags: InnerFlags,
+    flags: SelectFolderDialogFlags,
 }
 
 impl<T> FolderExplorer<T>
 where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
-    pub(super) fn new(title: &str, location: Location, nav: T, flags: InnerFlags) -> Self {
+    pub(super) fn new(title: &str, location: Location, nav: T, flags: SelectFolderDialogFlags) -> Self {
         let mut w = Self {
             base: ModalWindow::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
             tv: Handle::None,
@@ -88,7 +79,15 @@ where
         let mut tv = TreeView::with_capacity(
             256,
             Layout::new("d:c,w:100%,h:100%"),
-            treeview::Flags::HideHeader | treeview::Flags::ScrollBars | treeview::Flags::SearchBar | treeview::Flags::NoSelection,
+            treeview::Flags::HideHeader
+                | treeview::Flags::ScrollBars
+                | treeview::Flags::SearchBar
+                | treeview::Flags::NoSelection
+                | if flags.contains(SelectFolderDialogFlags::Icons) {
+                    treeview::Flags::LargeIcons
+                } else {
+                    treeview::Flags::None
+                },
         );
         tv.set_components_toolbar_margins(2, 0);
         tv.sort(0, true);
@@ -112,6 +111,7 @@ where
         let h = self.tv;
         let entries = self.nav.entries(path);
         let mut result = None;
+        let flags = self.flags;
         log!("INFO", "Populate Node: Path={:?}, search='{}', entries='{:?}'", path, search, entries);
 
         if let Some(tv) = self.control_mut(h) {
@@ -120,11 +120,14 @@ where
                     if !e.is_container() {
                         continue;
                     }
-                    log!("INFO", " - Add: {}", e.name);
-                    if e.name.eq_ignore_ascii_case(search) {
-                        result = Some(tv.add_item_to_parent(treeview::Item::expandable(FolderName { value: e.name }, !expand_search), parent_node));
-                    } else {
-                        tv.add_item_to_parent(treeview::Item::expandable(FolderName { value: e.name }, true), parent_node);
+                    let searched_file = e.name.eq_ignore_ascii_case(search);
+                    let mut item = treeview::Item::expandable(FolderName { value: e.name }, if searched_file { !expand_search } else { true });
+                    if flags.contains(SelectFolderDialogFlags::Icons) {
+                        item.set_icon(['📁', ' ']);
+                    }
+                    let item_handle = tv.add_item_to_parent(item, parent_node);
+                    if searched_file {
+                        result = Some(item_handle);
                     }
                 }
             });
@@ -135,16 +138,22 @@ where
         log!("INFO", "Populate root with search: '{}'", search);
         let h = self.tv;
         let roots = self.nav.roots();
+        let set_icon = self.flags.contains(SelectFolderDialogFlags::Icons);
         if let Some(tv) = self.control_mut(h) {
             let mut result = None;
             for root in roots {
                 let found = (search.len() > 0) && search[0..1].eq_ignore_ascii_case(&root.path[0..1]);
-                let handle = tv.add_item(treeview::Item::expandable(
+                let mut item = treeview::Item::expandable(
                     FolderName {
                         value: root.path.to_string(),
                     },
                     !found,
-                ));
+                );
+                if set_icon {
+                    let icon = root.root_type.icon();
+                    item.set_icon([icon, ' ']);
+                }
+                let handle = tv.add_item(item);
                 if found {
                     result = Some(handle);
                 }

@@ -130,6 +130,10 @@ where
     }
 }
 
+#[EnumBitFlags(bits = 8)]
+pub enum SelectFolderDialogFlags {
+    Icons = 1,
+}
 pub(super) fn inner_open<T>(
     title: &str,
     file_name: &str,
@@ -168,16 +172,11 @@ where
     }
 }
 
-pub(super) fn inner_select_folder<T>(title: &str, location: Location, flags: OpenFileDialogFlags, nav: T) -> Option<PathBuf>
+pub(super) fn inner_select_folder<T>(title: &str, location: Location, flags: SelectFolderDialogFlags, nav: T) -> Option<PathBuf>
 where
     T: crate::utils::Navigator<crate::utils::fs::Entry, crate::utils::fs::Root, PathBuf> + 'static,
 {
-    let mut inner_flags = folder_select_dialog::InnerFlags::None;
-    if flags.contains(OpenFileDialogFlags::Icons) {
-        inner_flags |= folder_select_dialog::InnerFlags::Icons;
-    }
-
-    let w = FolderExplorer::new(title, location, nav, inner_flags);
+    let w = FolderExplorer::new(title, location, nav, flags);
     let result = w.show();
     match result {
         Some(FolderSelectionDialogResult::Path(path)) => Some(path),
@@ -248,6 +247,22 @@ pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Op
     inner_open(title, file_name, location, extension_mask, flags, utils::fs::Navigator::new())
 }
 
-pub fn select_folder(title:&str, location: Location) -> Option<PathBuf> {
-    inner_select_folder(title, location, OpenFileDialogFlags::None, utils::fs::Navigator::new())
+/// Opens a dialog for selecting a folder and returns the path of the folder selected by the user or None if the user canceled the operation.
+/// # Arguments
+/// * `title` - The title of the dialog.
+/// * `location` - The initial location of the dialog (one of Current, Last or Path). If Last is used, the dialog will open in the last location used by the user.
+/// * `flags` - Flags that specify the behavior of the dialog (ex: display icons).
+/// 
+/// # Example
+/// ```rust,no_run
+/// use appcui::dialogs;
+/// 
+/// if let Some(path) = dialogs::select_folder("Select folder", 
+///                                            dialogs::Location::Current, 
+///                                            dialogs::SelectFolderDialogFlags::Icons) 
+/// {
+///    println!("Folder selected: {:?}", path);
+/// }
+pub fn select_folder(title:&str, location: Location, flags: SelectFolderDialogFlags) -> Option<PathBuf> {
+    inner_select_folder(title, location, flags, utils::fs::Navigator::new())
 }

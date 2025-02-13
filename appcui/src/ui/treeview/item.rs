@@ -86,6 +86,10 @@ where
         if !self.parent.is_none() { Some(self.parent) } else { None }
     }
     #[inline(always)]
+    pub fn set_icon(&mut self, icon: [char; 2]) {
+        self.icon = icon;
+    }
+    #[inline(always)]
     pub fn children(&self) -> &[Handle<Item<T>>] {
         &self.children
     }
