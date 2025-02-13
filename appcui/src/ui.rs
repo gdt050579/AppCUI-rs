@@ -72,3 +72,5 @@ pub use listbox::ListBox;
 pub use listview::ListView;
 pub use togglebutton::ToggleButton;
 pub use pathfinder::PathFinder;
+pub use treeview::TreeView;
+pub use textarea::TextArea;
