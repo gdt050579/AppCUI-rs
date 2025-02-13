@@ -38,6 +38,8 @@ pub use super::ui::pathfinder::events::PathFinderEvents;
 pub use super::ui::listview;
 pub use super::ui::listview::events::GenericListViewEvents;
 pub use super::ui::listview::ListItem;
+pub use super::ui::treeview;
+pub use super::ui::treeview::events::GenericTreeViewEvents;
 pub use super::ui::canvas;
 pub use super::ui::imageviewer;
 pub use super::ui::password;
@@ -60,3 +62,6 @@ pub use super::system::*;
 pub use super::input::*;
 pub use super::dialogs;
 pub use AppCUIProcMacro::*;
+pub use super::log;
+#[cfg(debug_assertions)]
+pub use super::utils::log::write_log_to_file;

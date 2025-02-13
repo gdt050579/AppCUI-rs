@@ -5,7 +5,7 @@ use crate::{
 use proc_macro::*;
 use std::str::FromStr;
 
-static mut CHAR_ATTR: FlagsSignature = FlagsSignature::new(&["Bold", "Italic", "Underline"]);
+static CHAR_ATTR: &[&str] = &["Bold", "Italic", "Underline"];
 
 static CHAR_POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("value", ParamType::String),
@@ -45,7 +45,6 @@ static CHARATTR_NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("attributes", "attr", ParamType::Flags),
 ];
 
-
 fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {
     if !dict.contains(param_name) {
         return Color::Transparent;
@@ -74,7 +73,7 @@ fn unicode_number_to_value(text: &str) -> u32 {
             value = value * 16 + ((ch as u32 - 'A' as u32) + 10);
             continue;
         }
-        panic!("Invalid hexadecimal number: {} for character code !",text);
+        panic!("Invalid hexadecimal number: {} for character code !", text);
     }
     value
 }
@@ -82,6 +81,14 @@ fn add_color(output: &mut String, key: &str, dict: &mut NamedParamsMap) {
     let col = get_color(key, dict);
     output.push_str("Color::");
     output.push_str(col.get_name());
+}
+fn get_attr(text: &str) -> Option<&'static str> {
+    for value in CHAR_ATTR {
+        if crate::utils::equal_ignore_case(text, value) {
+            return Some(*value);
+        }
+    }
+    None
 }
 fn add_attr(output: &mut String, dict: &mut NamedParamsMap, param_list: &str) {
     if let Some(value) = dict.get_mut("attr") {
@@ -91,7 +98,7 @@ fn add_attr(output: &mut String, dict: &mut NamedParamsMap, param_list: &str) {
             } else {
                 let mut add_or_operator = false;
                 for name in list {
-                    if let Some(flag) = unsafe { CHAR_ATTR.get(name.get_string()) } {
+                    if let Some(flag) = get_attr(name.get_string()) {
                         if add_or_operator {
                             output.push_str(" | ")
                         }
@@ -115,7 +122,7 @@ fn add_attr(output: &mut String, dict: &mut NamedParamsMap, param_list: &str) {
         }
     } else {
         output.push_str("CharFlags::None)");
-    }    
+    }
 }
 pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> String {
     dict.validate_positional_parameters(param_list, CHAR_POSILITIONAL_PARAMETERS).unwrap();
@@ -124,7 +131,7 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
     res.push_str("Character::new(");
     if let Some(value) = dict.get("code") {
         let code_value = unicode_number_to_value(value.get_string());
-        res.push_str(format!{"'\\u{{{:x}}}'",code_value}.as_str());
+        res.push_str(format! {"'\\u{{{:x}}}'",code_value}.as_str());
     } else {
         let val = dict
             .get("value")
@@ -144,9 +151,9 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
                     res.push_str("SpecialChar::");
                     res.push_str(special_char.get_name());
                 } else {
-                    panic!("Unknown representation '{}' for a special character !",char_value);
+                    panic!("Unknown representation '{}' for a special character !", char_value);
                 }
-            },
+            }
         }
     }
     res.push_str(", ");

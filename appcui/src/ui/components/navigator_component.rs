@@ -7,7 +7,6 @@ use crate::prelude::*;
 use crate::utils::glyphs::GlyphParser;
 use std::marker::PhantomData;
 
-//TODO: make separate cfgs for different OS
 #[cfg(target_os = "windows")]
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
 #[cfg(target_family = "unix")]
@@ -43,31 +42,29 @@ where
             _phantom_e: PhantomData,
         }
     }
-    fn get_suggestions(&self) -> &Vec<String> {
+    fn suggestions(&self) -> &Vec<String> {
         &self.suggestions
     }
-    fn update_suggestions(&mut self, path: &str, navigator: &T) {
-        let folder = Self::get_folder(path);
+    fn update_suggestions(&mut self, path: &str, navigator: &T, case_sensitive: bool) {
+        let folder = Self::folder(path);
         if folder != self.cached_path {
             // create cache for this folder
             let folder_contents = navigator.entries(&PathBuf::from(folder.to_string()));
-            if !folder_contents.is_empty() {
-                self.cached_items.clear();
-                self.cached_path = folder.to_string();
-                for entry in folder_contents {
-                    let cached_item = navigator
-                        .join(&PathBuf::from(folder.to_string()), &entry)
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .to_string();
-                    self.cached_items.push(cached_item);
-                }
+            self.cached_items.clear();
+            self.cached_path = folder.to_string();
+            for entry in folder_contents {
+                let cached_item = navigator
+                    .join(&PathBuf::from(folder.to_string()), &entry)
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string();
+                self.cached_items.push(cached_item);
             }
         }
-        self.suggestions = Self::get_matching_paths(path, &self.cached_items);
+        self.suggestions = Self::matching_paths(path, &self.cached_items, case_sensitive);
     }
-    fn get_folder(path: &str) -> &str {
+    fn folder(path: &str) -> &str {
         let mut end = path.len();
         while let Some((ch, sz)) = path.previous_glyph(end) {
             end -= sz as usize;
@@ -77,8 +74,16 @@ where
         }
         &path[..end]
     }
-    fn get_matching_paths(path: &str, items: &[String]) -> Vec<String> {
-        items.iter().filter(|s| s.starts_with(path)).cloned().collect()
+    fn matching_paths(path: &str, items: &[String], case_sensitive: bool) -> Vec<String> {
+        if case_sensitive {
+            items.iter().filter(|s| s.starts_with(path)).cloned().collect()
+        } else {
+            items
+                .iter()
+                .filter(|s| crate::utils::string_comparison::starts_with_ignore_case(path, s))
+                .cloned()
+                .collect()
+        }
     }
 }
 pub(crate) struct NavigatorComponent<T, E, R>
@@ -88,7 +93,7 @@ where
     T: crate::utils::Navigator<E, R, PathBuf>,
 {
     is_readonly: bool,
-    is_case_sensitive: bool, 
+    is_case_sensitive: bool,
     navigator_cacher: NavigatorDataCacher<T, E, R>,
 
     // input area
@@ -98,8 +103,8 @@ where
     width: u32,
     input_path: String,
     backup_path: String,
-    char_count: u32,
     selection: Selection,
+    drag_started: bool,
     out_of_focus_surface: Surface,
 
     // suggestions area
@@ -126,7 +131,9 @@ where
     fn on_focus(&mut self, control: &mut ControlBase);
     fn on_lose_focus(&mut self, control: &mut ControlBase);
     fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus;
+    fn on_mouse_event(&mut self, control: &ControlBase, event: &MouseEvent) -> EventProcessStatus;
     fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme);
+    fn on_theme_changed(&self, theme: &Theme);
 }
 
 impl<T, E, R> NavigatorComponent<T, E, R>
@@ -147,11 +154,11 @@ where
         Self {
             input_path: path.to_string(),
             backup_path: path.to_string(),
-            char_count: path.chars().count() as u32,
             cursor: 0,
             start: 0,
             end: 0,
             selection: Selection::NONE,
+            drag_started: false,
             out_of_focus_surface: Surface::new(1, 1),
             is_readonly: readonly,
             is_case_sensitive: case_sensitive,
@@ -181,29 +188,23 @@ where
         };
         self.input_path.clear();
         self.input_path.push_str(text);
-        self.update_char_count(self.input_path.chars().count() as i32, true);
         if !control.has_focus() {
-            self.update_out_of_focus_surface(control.theme());
+            self.update_out_of_focus_surface(control.theme(), control.is_enabled(), control.is_mouse_over());
         }
     }
 
     #[inline(always)]
     fn restore_path_from_backup(&mut self) {
         self.input_path = self.backup_path.clone();
-        self.update_char_count(self.input_path.chars().count() as i32, true);
     }
 
-    #[inline(always)]
-    fn update_char_count(&mut self, update_size: i32, set_absolute: bool) {
-        if set_absolute {
-            self.char_count = update_size as u32;
-            return;
+    fn add_char(&mut self, character: char) {
+        if !self.selection.is_empty() {
+            self.delete_selection();
         }
-        if self.char_count as i32 + update_size > 0 {
-            self.char_count = (self.char_count as i32 + update_size) as u32;
-        } else {
-            self.char_count = 0;
-        }
+        self.input_path.insert(self.cursor, character);
+        //self.update_char_count(1, false);
+        self.move_cursor_with(1, false);
     }
 
     fn update_text_area_view(&mut self, force_end_update: bool) {
@@ -266,9 +267,6 @@ where
     }
 
     fn delete_current_character(&mut self) {
-        if self.is_readonly {
-            return;
-        }
         if self.selection.is_empty() {
             let next_pos = self.input_path.next_pos(self.cursor, 1);
             if self.cursor < next_pos {
@@ -281,9 +279,6 @@ where
     }
 
     fn delete_previous_character(&mut self) {
-        if self.is_readonly {
-            return;
-        }
         if self.selection.is_empty() {
             let prev_pos = self.input_path.previous_pos(self.cursor, 1);
             if prev_pos < self.cursor {
@@ -296,7 +291,7 @@ where
         }
     }
 
-    fn get_path_items(text: &str) -> Vec<String> {
+    fn path_items(text: &str) -> Vec<String> {
         text.trim_start_matches(PLATFORM_SEPARATOR_CHARACTER)
             .trim_end_matches(PLATFORM_SEPARATOR_CHARACTER)
             .split(PLATFORM_SEPARATOR_CHARACTER)
@@ -304,14 +299,14 @@ where
             .collect()
     }
 
-    fn update_out_of_focus_surface(&mut self, theme: &Theme) {
+    fn update_out_of_focus_surface(&mut self, theme: &Theme, is_enabled: bool, is_mouse_hover: bool) {
         self.out_of_focus_surface.clear(Character::with_attributes(' ', theme.editor.normal));
 
         let (string_fits, processed_path) = self.text_fits_textbox(&self.input_path);
         if string_fits {
-            self.update_fitting_text(theme, &processed_path);
+            self.update_fitting_text(theme, &processed_path, is_enabled, is_mouse_hover);
         } else {
-            self.update_trimmed_text(theme);
+            self.update_trimmed_text(theme, is_enabled, is_mouse_hover);
         }
     }
 
@@ -362,15 +357,15 @@ where
             .to_string()
             .replace(PLATFORM_SEPARATOR_CHARACTER, &format!(" {} ", char::from(Self::PATH_TRIANGLE_SEPARTOR)));
 
-        (s.chars().count() < self.width as usize, s)
+        (s.chars().count() <= self.width as usize - Self::PADDING as usize, s)
     }
 
-    fn update_fitting_text(&mut self, theme: &Theme, text: &str) {
-        self.update_text_at(theme, text, 1);
+    fn update_fitting_text(&mut self, theme: &Theme, text: &str, is_enabled: bool, is_mouse_hover: bool) {
+        self.update_text_at(theme, text, 1, is_enabled, is_mouse_hover);
     }
 
-    fn update_trimmed_text(&mut self, theme: &Theme) {
-        let items = Self::get_path_items(&self.input_path);
+    fn update_trimmed_text(&mut self, theme: &Theme, is_enabled: bool, is_mouse_hover: bool) {
+        let items = Self::path_items(&self.input_path);
         if items.is_empty() {
             return;
         }
@@ -414,20 +409,21 @@ where
 
         left_text.push(char::from(Self::PATH_CHAR_DOTS));
         left_text.push_str(&right_text);
-        self.update_text_at(theme, &left_text, 1);
+        self.update_text_at(theme, &left_text, 1, is_enabled, is_mouse_hover);
     }
 
     fn paint_textbox_out_of_focus(&self, surface: &mut Surface, _theme: &Theme) {
         surface.draw_surface(0, 0, &self.out_of_focus_surface);
     }
 
-    fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize) {
+    fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize, is_enabled: bool, is_mouse_hover: bool) {
         let mut x = pos as i32;
         for ch in text.chars() {
-            let attr = if ch == char::from(Self::PATH_TRIANGLE_SEPARTOR) {
-                theme.editor.hovered
-            } else {
-                theme.editor.normal
+            let attr = match () {
+                _ if !is_enabled => theme.editor.inactive,
+                _ if is_mouse_hover => theme.editor.hovered,
+                _ if ch == char::from(Self::PATH_TRIANGLE_SEPARTOR) => theme.editor.hovered,
+                _ => theme.editor.normal,
             };
             self.out_of_focus_surface.write_char(x, 0, Character::with_attributes(ch, attr));
             x += 1;
@@ -459,10 +455,10 @@ where
     fn update_suggestions_selection(&mut self, offset: i32) -> Option<String> {
         let offset = match self.expanded_above {
             true => 0 - offset,
-            _ => offset
+            _ => offset,
         };
 
-        let suggestions = self.navigator_cacher.get_suggestions();
+        let suggestions = self.navigator_cacher.suggestions();
         let new_pos: i32 = self.selected_suggestion_pos as i32 + offset;
         let end_visible_pos = (self.start_suggestions_pos + Self::PATH_FINDER_VISIBLE_RESULTS - 1).min(suggestions.len() as u16);
 
@@ -505,7 +501,7 @@ where
         }
 
         let mut y = self.expanded_panel_y + 1;
-        let suggestions = self.navigator_cacher.get_suggestions();
+        let suggestions = self.navigator_cacher.suggestions();
         let start_index: usize = self.start_suggestions_pos as usize - 1;
         let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());
         for path_entry in &suggestions[start_index..end_index] {
@@ -561,7 +557,7 @@ where
         }
 
         let mut y = self.header_y_ofs - 2;
-        let suggestions = self.navigator_cacher.get_suggestions();
+        let suggestions = self.navigator_cacher.suggestions();
         let start_index: usize = self.start_suggestions_pos as usize - 1;
         let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());
         for path_entry in &suggestions[start_index..end_index] {
@@ -598,6 +594,57 @@ where
             _ => self.paint_suggestions_area_bottom(control, surface, attr, attr_selected),
         }
     }
+
+    fn mouse_pos_to_glyph_offset(&self, x: i32, y: i32, within_control: bool) -> Option<usize> {
+        let w = self.width as i32;
+        let h = 1;
+        if within_control && ((x < 1) || (x >= w - 1) || (y < 0) || (y >= h)) {
+            return None;
+        }
+        let glyphs_count = self.start as i32 + x - 1 - self.cursor as i32;
+        match glyphs_count.cmp(&0) {
+            std::cmp::Ordering::Less => Some(self.input_path.previous_pos(self.cursor, (-glyphs_count) as usize)),
+            std::cmp::Ordering::Equal => Some(self.cursor),
+            std::cmp::Ordering::Greater => Some(self.input_path.next_pos(self.cursor, glyphs_count as usize)),
+        }
+    }
+
+    fn select_all(&mut self) {
+        self.selection = Selection::NONE;
+        self.move_cursor_to(0, false, true);
+        self.move_cursor_to(self.input_path.len(), true, true);
+    }
+
+    fn copy_text(&mut self) {
+        if !self.selection.is_empty() {
+            RuntimeManager::get()
+                .terminal_mut()
+                .set_clipboard_text(&self.input_path[self.selection.start..self.selection.end]);
+        }
+    }
+    fn paste_text(&mut self) {
+        if self.is_readonly {
+            return;
+        }
+        if !self.selection.is_empty() {
+            self.delete_selection();
+        }
+        if let Some(txt) = RuntimeManager::get().terminal().get_clipboard_text() {
+            self.input_path.insert_str(self.cursor, &txt);
+            self.move_cursor_to(self.cursor + txt.len(), false, true);
+        }
+    }
+    fn cut_text(&mut self) {
+        if self.is_readonly {
+            return;
+        }
+        if !self.selection.is_empty() {
+            RuntimeManager::get()
+                .terminal_mut()
+                .set_clipboard_text(&self.input_path[self.selection.start..self.selection.end]);
+            self.delete_selection();
+        }
+    }
 }
 
 impl<T, E, R> NavigatorComponentControlFunctions<T, E, R> for NavigatorComponent<T, E, R>
@@ -609,7 +656,7 @@ where
     fn on_resize(&mut self, control: &ControlBase, _old_size: Size, new_size: Size) {
         self.width = new_size.width;
         self.out_of_focus_surface.resize(new_size);
-        self.update_out_of_focus_surface(control.theme());
+        self.update_out_of_focus_surface(control.theme(), control.is_enabled(), control.is_mouse_over());
         self.move_cursor_at_end();
     }
 
@@ -636,7 +683,7 @@ where
     }
 
     fn on_lose_focus(&mut self, control: &mut ControlBase) {
-        self.update_out_of_focus_surface(control.theme());
+        self.update_out_of_focus_surface(control.theme(), control.is_enabled(), control.is_mouse_over());
     }
 
     fn on_paint(&self, control: &ControlBase, surface: &mut Surface, theme: &Theme) {
@@ -658,15 +705,22 @@ where
         }
     }
 
+    fn on_theme_changed(&self, _theme: &Theme) {
+        // TODO: remove theme from passing it as param and
+        // use this function to keep internal colors or whole theme needed
+    }
+
     fn on_key_pressed(&mut self, control: &mut ControlBase, key: Key, character: char, navigator: &T) -> EventProcessStatus {
+        if self.is_readonly {
+            return EventProcessStatus::Ignored;
+        }
         match key.value() {
             key!("Backspace") => {
                 self.delete_previous_character();
-                self.update_char_count(-1, false);
-
                 self.selected_suggestion_pos = 0;
                 self.start_suggestions_pos = 1;
-                self.navigator_cacher.update_suggestions(&self.input_path, navigator);
+                self.navigator_cacher
+                    .update_suggestions(&self.input_path, navigator, self.is_case_sensitive);
                 self.expand_suggestions_area(control);
                 return EventProcessStatus::Processed;
             }
@@ -694,6 +748,8 @@ where
                 self.selected_suggestion_pos = 0;
                 self.start_suggestions_pos = 1;
                 self.pack_suggestions_area(control);
+                self.backup_path.clear();
+                self.backup_path.push_str(self.input_path.as_str());
                 control.raise_event(ControlEvent {
                     emitter: control.handle,
                     receiver: control.event_processor,
@@ -726,20 +782,74 @@ where
 
                 return EventProcessStatus::Processed;
             }
+            key!("Ctrl+C") | key!("Ctrl+Insert") => {
+                self.copy_text();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+X") | key!("Shift+Del") => {
+                self.cut_text();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+V") | key!("Shift+Insert") => {
+                self.paste_text();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+A") => {
+                self.select_all();
+                return EventProcessStatus::Processed;
+            }
             _ => {
                 if character > 0 as char {
-                    self.input_path.push(character);
-                    self.update_char_count(1, false);
-                    self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
-
+                    self.add_char(character);
                     self.selected_suggestion_pos = 0;
                     self.start_suggestions_pos = 1;
-                    self.navigator_cacher.update_suggestions(&self.input_path, navigator);
+                    self.navigator_cacher
+                        .update_suggestions(&self.input_path, navigator, self.is_case_sensitive);
                     self.expand_suggestions_area(control);
                     return EventProcessStatus::Processed;
                 }
             }
         }
         EventProcessStatus::Ignored
+    }
+
+    fn on_mouse_event(&mut self, control: &ControlBase, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter => {
+                self.drag_started = false;
+                self.update_out_of_focus_surface(control.theme(), control.is_enabled(), true);
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Leave => {
+                self.drag_started = false;
+                self.update_out_of_focus_surface(control.theme(), control.is_enabled(), false);
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(_) => EventProcessStatus::Ignored,
+            MouseEvent::Pressed(data) => {
+                if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, true) {
+                    self.move_cursor_to(new_pos, false, false);
+                    self.drag_started = true;
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Released(_) => {
+                self.drag_started = false;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::DoubleClick(_) => {
+                self.select_all();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Drag(data) => {
+                if self.drag_started {
+                    if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, false) {
+                        self.move_cursor_to(new_pos, true, true);
+                    }
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(_) => EventProcessStatus::Ignored,
+        }
     }
 }

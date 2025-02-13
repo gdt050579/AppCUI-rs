@@ -24,7 +24,7 @@ impl ControlHandleManager {
     }
     #[inline(always)]
     pub(crate) fn desktop_mut(&mut self) -> &mut ControlManager {
-        return self.manager.element_mut(0).unwrap();
+        self.manager.element_mut(0).unwrap()
     }
     #[inline(always)]
     pub(crate) fn remove(&mut self, handle: Handle<UIElement>) -> bool {

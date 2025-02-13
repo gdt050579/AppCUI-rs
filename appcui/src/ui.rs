@@ -35,6 +35,7 @@ pub mod listbox;
 pub mod listview;
 pub mod togglebutton;
 pub mod pathfinder;
+pub mod treeview;
 pub mod textarea;
 
 // re-export
@@ -71,4 +72,3 @@ pub use listbox::ListBox;
 pub use listview::ListView;
 pub use togglebutton::ToggleButton;
 pub use pathfinder::PathFinder;
-pub use textarea::TextArea;

@@ -14,7 +14,7 @@ impl MyWin {
         let i = ImageViewer::new(
             image,
             Layout::new("d:c"),
-            image::RenderMethod::SmallBlocks,
+            image::RendererType::SmallBlocks,
             image::Scale::NoScale,
             imageviewer::Flags::ScrollBars,
         );
@@ -34,11 +34,11 @@ impl CommandBarEvents for MyWin {
             Scale::Scale5 => "Scale:5%",
         };
         commandbar.set(key!("F1"), sc_name, mywin::Commands::Scale);
-        let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RenderMethod::SmallBlocks) {
-            RenderMethod::SmallBlocks => "Method:SmallBlocks",
-            RenderMethod::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
-            RenderMethod::GrayScale => "Method:GrayScale",
-            RenderMethod::AsciiArt => "Method:AsciiArt",
+        let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RendererType::SmallBlocks) {
+            RendererType::SmallBlocks => "Method:SmallBlocks",
+            RendererType::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
+            RendererType::GrayScale => "Method:GrayScale",
+            RendererType::AsciiArt => "Method:AsciiArt",
         };
         commandbar.set(key!("F2"), rd_name, mywin::Commands::RenderMethod);
     }
@@ -62,10 +62,10 @@ impl CommandBarEvents for MyWin {
                 mywin::Commands::RenderMethod => {
                     let m = img.render_method();
                     match m {
-                        RenderMethod::SmallBlocks => img.set_render_method(image::RenderMethod::LargeBlocks64Colors),
-                        RenderMethod::LargeBlocks64Colors => img.set_render_method(image::RenderMethod::GrayScale),
-                        RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::AsciiArt),
-                        RenderMethod::AsciiArt => img.set_render_method(image::RenderMethod::SmallBlocks),
+                        RendererType::SmallBlocks => img.set_render_method(image::RendererType::LargeBlocks64Colors),
+                        RendererType::LargeBlocks64Colors => img.set_render_method(image::RendererType::GrayScale),
+                        RendererType::GrayScale => img.set_render_method(image::RendererType::AsciiArt),
+                        RendererType::AsciiArt => img.set_render_method(image::RendererType::SmallBlocks),
                     }
                 },
             }

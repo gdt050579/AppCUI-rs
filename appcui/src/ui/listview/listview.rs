@@ -1,10 +1,10 @@
 use std::cmp::Ordering;
 
 use super::events::*;
-use super::render_method::RenderData;
 use super::{Flags, Group, GroupInformation, Item, ListItem, ViewMode};
 use crate::utils;
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
+use components::listitem::render_method::RenderData;
 use AppCUIProcMacro::*;
 
 #[derive(Clone, Copy)]
@@ -68,7 +68,7 @@ where
     /// ```rust
     /// use appcui::prelude::*;
     ///
-    /// #[derive(ListViewItem)]
+    /// #[derive(ListItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
     ///    name: &'static str,
@@ -87,7 +87,7 @@ where
     /// ```rust
     /// use appcui::prelude::*;
     ///
-    /// #[derive(ListViewItem)]
+    /// #[derive(ListItem)]
     /// struct Student {
     ///   #[Column(name="Name", width=20)]
     ///   name: &'static str,
@@ -152,7 +152,7 @@ where
     /// ```rust
     /// use appcui::prelude::*;
     ///
-    /// #[derive(ListViewItem)]
+    /// #[derive(ListItem)]
     /// struct Student {
     ///     #[Column(name="Name", width=20)]
     ///     name: &'static str,
@@ -177,7 +177,7 @@ where
     }
 
     /// Adds a new column to the listview. The column will be added after the last existing column.
-    /// This method is useful when you manually implement ListItem trait for a type and you want to add columns to the list view. Normally, implementing the ListItem trait (via `#[derive(ListViewItem)]`) for a type will automatically add columns to the list view.
+    /// This method is useful when you manually implement ListItem trait for a type and you want to add columns to the list view. Normally, implementing the ListItem trait (via `#[derive(ListItem)]`) for a type will automatically add columns to the list view.
     ///
     /// # Example
     /// ```rust
@@ -212,7 +212,7 @@ where
     /// ```rust
     /// use appcui::prelude::*;
     ///
-    /// #[derive(ListViewItem)]
+    /// #[derive(ListItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
     ///    name: &'static str,
@@ -235,7 +235,7 @@ where
     /// ```rust
     /// use appcui::prelude::*;
     ///
-    /// #[derive(ListViewItem)]
+    /// #[derive(ListItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
     ///    name: &'static str,
@@ -280,7 +280,7 @@ where
     /// ```rust
     /// use appcui::prelude::*;
     ///
-    /// #[derive(ListViewItem)]
+    /// #[derive(ListItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
     ///    name: &'static str,
@@ -307,7 +307,7 @@ where
     /// ```rust
     /// use appcui::prelude::*;
     ///
-    /// #[derive(ListViewItem)]
+    /// #[derive(ListItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
     ///    name: &'static str,
@@ -348,7 +348,7 @@ where
     /// ```rust
     /// use appcui::prelude::*;
     ///
-    /// #[derive(ListViewItem)]
+    /// #[derive(ListItem)]
     /// struct Student {
     ///    #[Column(name="Name", width=20)]
     ///    name: &'static str,
