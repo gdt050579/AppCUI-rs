@@ -152,7 +152,7 @@ impl FolderSelectDialog {
 }
 impl ButtonEvents for FolderSelectDialog {
     fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
-        let nav = crate::utils::fs::NavSimulator::with_csv(VFS, true, "C:\\Program Files\\");
+        let nav = crate::utils::fs::NavSimulator::with_csv(VFS, true, "C:\\");
         let p = PathBuf::from(self.loc.as_str());
         let loc = match self.loc.as_str() {
             "" => dialogs::Location::Last,
@@ -833,5 +833,107 @@ fn check_folder_select_dialog_with_icons() {
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
     a.add_window(FolderSelectDialog::new("C:\\Program Files\\Windows\\System32\\drivers", SelectFolderDialogFlags::Icons));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_cancel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xD04C3E714AC5A212)
+        Key.Pressed(Space)
+        Paint('3. Program Files expanded')   
+        CheckHash(0xB4761C157E0BC65C)
+        Key.Pressed(Down)
+        Paint('4. Windows selected')   
+        CheckHash(0x5DD2E869CAAA2C2F)
+        Key.Pressed(Escape)
+        Paint('5. Nothing selected')   
+        CheckHash(0x4BA44613FC503131)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_cancel_via_button() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xD04C3E714AC5A212)
+        Key.Pressed(Space)
+        Paint('3. Program Files expanded')   
+        CheckHash(0xB4761C157E0BC65C)
+        Key.Pressed(Down)
+        Paint('4. Windows selected')   
+        CheckHash(0x5DD2E869CAAA2C2F)
+        Key.Pressed(Tab,2)
+        Key.Pressed(Enter)
+        Paint('5. Nothing selected')   
+        CheckHash(0x4BA44613FC503131)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_ok_via_button() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xD04C3E714AC5A212)
+        Key.Pressed(Space)
+        Paint('3. Program Files expanded')   
+        CheckHash(0xB4761C157E0BC65C)
+        Key.Pressed(Down)
+        Paint('4. Windows selected')   
+        CheckHash(0x5DD2E869CAAA2C2F)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('5. C:\\Program Files\\Windows selected')   
+        CheckHash(0x57FDC0A388354481)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_navigator() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0x9F2DE0204475624D)
+        Key.Pressed(Alt+P)
+        Key.TypeText('Program Files\\Windows\\')
+        Key.Pressed(Enter)
+        Paint('3. C:\\Program Files\\Windows selected from Navigator')   
+        CheckHash(0x2D7EA2EA5CC21257)
+        Key.Pressed(Tab)
+        Key.Pressed(Down)
+        Paint('4. D:\\ selected')   
+        CheckHash(0xBCF70255B3E29322)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('5. D:\\ selected')   
+        CheckHash(0xE2640A216D7BFEDC)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("", SelectFolderDialogFlags::None));
     a.run();
 }
