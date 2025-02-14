@@ -1,5 +1,6 @@
 use super::{Entry, EntryType, Root};
 use crate::utils::NavigatorEntry;
+use crate::prelude::*;
 use chrono::DateTime;
 use chrono::NaiveDateTime;
 use std::fs;
@@ -14,6 +15,7 @@ pub(crate) struct Navigator {
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     #[cfg(target_os = "windows")]
     fn entries(&self, path: &PathBuf) -> Vec<Entry> {
+        log!("FS","entries({})", path.display()); 
         if path.as_os_str().is_empty() {
             return vec![];
         }
@@ -100,6 +102,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
 
 impl Navigator {
     fn get_folder_listing(path: &Path) -> std::io::Result<Vec<Entry>> {
+        log!("FS","get_folder_listing({})", path.display());    
         let mut result: Vec<Entry> = vec![];
         // Read the directory entries
         for dir_entry in fs::read_dir(path)? {

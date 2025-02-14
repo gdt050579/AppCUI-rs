@@ -937,3 +937,25 @@ fn check_folder_select_dialog_navigator() {
     a.add_window(FolderSelectDialog::new("", SelectFolderDialogFlags::None));
     a.run();
 }
+
+#[test]
+fn check_folder_select_dialog_mouse_usage() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Mouse.Wheel(40,15,up,2)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xDE086D26B8B708B7)
+        Mouse.Click(9,9,left)
+        Paint('3. C:\\ expanded')   
+        CheckHash(0xDD33C7F7498AD706)
+        Mouse.Click(15,10,left)
+        Paint('4. C:\\Program Files\\ expanded')   
+        CheckHash(0x6F576C7EE1F145D7)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("D:\\Windows", SelectFolderDialogFlags::None));
+    a.run();
+}

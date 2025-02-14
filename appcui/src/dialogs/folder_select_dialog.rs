@@ -209,6 +209,34 @@ where
     fn return_result(&mut self) {
         self.exit_with(FolderSelectionDialogResult::Path(self.path.clone()));
     }
+    fn item_to_path(&self, item_handle: Handle<treeview::Item<FolderName>>) -> Option<PathBuf> {
+        if let Some(tv) = self.control(self.tv) {
+            let mut a: [Handle<treeview::Item<FolderName>>; 256] = [Handle::None; 256];
+            let mut pos = 255;
+            let mut h = item_handle;
+            while let Some(item) = tv.item(h) {
+                a[pos] = h;
+                h = item.parent().unwrap_or(Handle::None);
+                pos -= 1;
+                if (pos == 0) || (h.is_none()) {
+                    break;
+                }
+            }
+            if pos > 0 {
+                let mut path = PathBuf::new();
+                for i in (pos + 1)..256 {
+                    if let Some(item) = tv.item(a[i]) {
+                        path.push(item.value().value.as_str());
+                    }
+                }
+                Some(path)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
 }
 impl<T> ButtonEvents for FolderExplorer<T>
 where
@@ -262,38 +290,8 @@ impl<T> TreeViewEvents<FolderName> for FolderExplorer<T>
 where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
-    fn on_current_item_changed(
-        &mut self,
-        handle: Handle<TreeView<FolderName>>,
-        item_handle: Handle<treeview::Item<FolderName>>,
-    ) -> EventProcessStatus {
-        let p = if let Some(tv) = self.control(handle) {
-            let mut a: [Handle<treeview::Item<FolderName>>; 256] = [Handle::None; 256];
-            let mut pos = 255;
-            let mut h = item_handle;
-            while let Some(item) = tv.item(h) {
-                a[pos] = h;
-                h = item.parent().unwrap_or(Handle::None);
-                pos -= 1;
-                if (pos == 0) || (h.is_none()) {
-                    break;
-                }
-            }
-            if pos > 0 {
-                let mut path = PathBuf::new();
-                for i in (pos + 1)..256 {
-                    if let Some(item) = tv.item(a[i]) {
-                        path.push(item.value().value.as_str());
-                    }
-                }
-                Some(path)
-            } else {
-                None
-            }
-        } else {
-            None
-        };
-        if let Some(path) = p {
+    fn on_current_item_changed(&mut self, _: Handle<TreeView<FolderName>>, item_handle: Handle<treeview::Item<FolderName>>) -> EventProcessStatus {
+        if let Some(path) = self.item_to_path(item_handle) {
             let h = self.path_viewer;
             if let Some(pv) = self.control_mut(h) {
                 pv.set_path(&path);
@@ -310,9 +308,12 @@ where
             tv.clear_search();
             tv.delete_item_children(item_handle);
         }
-        let p = self.path.clone();
-        log!("INFO", "Item expanded: {:?}, Handle:{:?}", p, item_handle);
-        self.populate_node(&p, item_handle, "", false);
+        if let Some(p) = self.item_to_path(item_handle) {
+            log!("INFO", "Item expanded: {:?}, Handle:{:?}", p, item_handle);
+            self.populate_node(&p, item_handle, "", false);
+        } else {
+            log!("ERROR", "Failed to get path for item {:?}", item_handle);
+        }
         EventProcessStatus::Processed
     }
 
