@@ -2,10 +2,9 @@ use crate::prelude::*;
 use crate::utils::format_datetime::FormatDuration;
 use crate::utils::{FormatDate, FormatDateTime, FormatRatings, FormatTime};
 use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
-use listview::formats::percentage_format::PercentageFormat;
-use listview::{
+use super::formats::{
     AreaFormat, BoolFormat, CurrencyFormat, DateFormat, DateTimeFormat, DistanceFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat,
-    SizeFormat, SpeedFormat, Status, StatusFormat, TemperatureFormat, TimeFormat, VolumeFormat, WeightFormat,
+    SizeFormat, SpeedFormat, Status, StatusFormat, TemperatureFormat, TimeFormat, VolumeFormat, WeightFormat, PercentageFormat
 };
 
 const MAX_RATING_STARS: u8 = 10;
@@ -130,7 +129,7 @@ impl<'a> RenderMethod<'a> {
     }
 
     #[inline(always)]
-    pub(super) fn paint(&self, surface: &mut Surface, rd: &RenderData) -> bool {
+    pub(in crate::ui) fn paint(&self, surface: &mut Surface, rd: &RenderData) -> bool {
         match self {
             RenderMethod::Text(txt) => {
                 RenderMethod::paint_text(txt, surface, rd);
@@ -181,7 +180,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Custom => false,
         }
     }
-    pub(super) fn string_representation(&self, output: &'a mut [u8]) -> Option<&'a str> {
+    pub(in crate::ui) fn string_representation(&self, output: &'a mut [u8]) -> Option<&'a str> {
         match self {
             RenderMethod::Text(txt) => Some(txt),
             RenderMethod::Ascii(txt) => Some(txt),
@@ -230,7 +229,7 @@ impl<'a> RenderMethod<'a> {
             RenderMethod::Custom => None,
         }
     }
-    pub(super) fn min_width(&self) -> u32 {
+    pub(in crate::ui) fn min_width(&self) -> u32 {
         match self {
             RenderMethod::Text(txt) => txt.chars().count() as u32,
             RenderMethod::Ascii(txt) => txt.len() as u32,

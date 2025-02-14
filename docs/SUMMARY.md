@@ -67,6 +67,7 @@
         - [NumericSelector](chapter-3/stock-controls/numericselector.md)
         - [Panel](chapter-3/stock-controls/panel.md)
         - [Password](chapter-3/stock-controls/password.md)
+        - [PathFinder](chapter-3/stock-controls/pathfinder.md)
         - [PropertyView]()
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
         - [Selector](chapter-3/stock-controls/selector.md)
@@ -76,13 +77,15 @@
         - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
         - [ToggleButton](chapter-3/stock-controls/togglebutton.md)
-        - [TreeView]()
+        - [TreeView](chapter-3/stock-controls/treeview.md)
         - [VLine](chapter-3/stock-controls/vline.md)
         - [VSplitter](chapter-3/stock-controls/vsplitter.md)
     - [Custom controls](chapter-3/custom_controls.md)
         - [Overwriteable traits](chapter-3/custon-controls/overwriteable_traits.md)
         - [Emitting events](chapter-3/custon-controls/emitting_events.md)
         - [ScrollBars]()
+    - [Object Traits](chapter-3/object_traits.rs)
+        - [ListItem](chapter-3/object-traits/listitem.md)
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops](chapter-4/custom_desktop.md)
@@ -103,12 +106,12 @@
     - [Notifications dialogs](chapter-5/notification_dialogs.md)
     - [Open/Save dialog](chapter-5/opensave_dialogs.md)
     - [Folder selection dialog]()
-    - [Window manager dialog]() 
+    - [Window manager dialog]()
 
 - [Themes](chapter-6/themes.md)
-    - [Predefined Themes](chapter-6/predefined_themes.md)    
+    - [Predefined Themes](chapter-6/predefined_themes.md)
     - [Events](chapter-6/events.md)
 
 - [Multi-Threading](chapter-7/multi-threading.md)
-    - [Timers](chapter-7/timers.md)  
+    - [Timers](chapter-7/timers.md)
     - [Background tasks]()<!--(chapter-7/background_tasks.md)-->

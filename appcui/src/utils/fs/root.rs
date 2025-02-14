@@ -34,7 +34,7 @@ impl RootType {
     }
 }
 
-#[derive(Debug, ListViewItem)]
+#[derive(Debug, ListItem)]
 pub(crate) struct Root {
     #[Column(name = "&Path", width = 10, index = 1)]
     pub(crate) path: String,

@@ -10,13 +10,13 @@ use crate::prelude::{
 };
 use crate::system::Handle;
 
-use crate::ui::pathfinder;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents,
     datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
     listview::events::GenericListViewEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents,
-    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents,
+    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
 };
+use crate::ui::{pathfinder, treeview};
 
 #[derive(Copy, Clone)]
 pub(crate) struct CustomEventData {
@@ -43,6 +43,7 @@ pub(crate) enum ControlEventData {
     ListBox(listbox::events::EventData),
     ListView(listview::events::EventData),
     PathFinder(pathfinder::events::EventData),
+    TreeView(treeview::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -115,6 +116,23 @@ impl ControlEvent {
                 }
             },
             ControlEventData::PathFinder(_) => PathFinderEvents::on_path_updated(receiver, self.emitter.cast()),
+            ControlEventData::TreeView(data) => match data.event_type {
+                treeview::events::TreeViewEventTypes::CurrentItemChanged(item_handle) => {
+                    GenericTreeViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id, item_handle)
+                }
+                treeview::events::TreeViewEventTypes::ItemCollapsed(item_handle, recursive) => {
+                    GenericTreeViewEvents::on_item_collapsed(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
+                },
+                treeview::events::TreeViewEventTypes::ItemExpanded(item_handle, recursive) => {
+                    GenericTreeViewEvents::on_item_expanded(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
+                },
+                treeview::events::TreeViewEventTypes::ItemAction(item_handle) => {
+                    GenericTreeViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, item_handle)
+                }
+                treeview::events::TreeViewEventTypes::SelectionChanged => {
+                    GenericTreeViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
+                }
+            },
         }
     }
 }

@@ -2,7 +2,7 @@ use libc::{statvfs, statvfs64};
 use std::{ffi::CStr, fs::File, io::BufRead, io::BufReader};
 
 pub(super) fn get_os_roots() -> Vec<Root> {
-    println!("{:<30} {:<15} {:<15} {:<15}", "Mount Point", "Total Size", "Free Space", "Used Space");
+    // println!("{:<30} {:<15} {:<15} {:<15}", "Mount Point", "Total Size", "Free Space", "Used Space");
 
     // Open the /etc/mtab file to read mounted file systems
     if let Ok(file) = File::open("/etc/mtab") {
@@ -29,18 +29,18 @@ pub(super) fn get_os_roots() -> Vec<Root> {
                         let free_space = stats.f_bfree * stats.f_frsize as u64;
                         let used_space = total_size - free_space;
 
-                        println!(
-                            "{:<30} {:<15} {:<15} {:<15}",
-                            mount_point,
-                            format!("{} MB", total_size / 1_048_576),
-                            format!("{} MB", free_space / 1_048_576),
-                            format!("{} MB", used_space / 1_048_576)
-                        );
+                        // println!(
+                        //     "{:<30} {:<15} {:<15} {:<15}",
+                        //     mount_point,
+                        //     format!("{} MB", total_size / 1_048_576),
+                        //     format!("{} MB", free_space / 1_048_576),
+                        //     format!("{} MB", used_space / 1_048_576)
+                        // );
                     }
                 }
             }
         }
     } else {
         eprintln!("Failed to open /etc/mtab");
-    }    
+    }
 }
