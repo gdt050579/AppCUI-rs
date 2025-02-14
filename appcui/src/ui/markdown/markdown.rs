@@ -377,6 +377,7 @@ impl OnPaint for Markdown {
                 }
                 MarkdownElement::Table(table) => {
                     let mut column_widths = Vec::new();
+                    let lines_count = table.rows.iter().count() + 2; // add the header and the separation line
 
                     for (i, header) in table.headers.iter().enumerate() {
                         let header_len = header.iter().map(|e| e.to_string().chars().count()).sum::<usize>();
@@ -398,10 +399,18 @@ impl OnPaint for Markdown {
                         }
                     }
 
+                    let table_width: usize = column_widths.iter().sum();
+                    let suplimentar_padding: usize = column_widths.iter().count() * 3;
+
                     let mut x_pos = self.x;
+                    let rect = Rect::new(x_pos, y_pos, x_pos + (table_width + suplimentar_padding) as i32, y_pos + 1 + lines_count as i32);
+                    surface.draw_rect(rect, LineType::Ascii, CharAttribute::new(Color::Black, Color::White, CharFlags::None));
+
+                    x_pos += 1;
+                    y_pos += 1;
                     for (i, header) in table.headers.iter().enumerate() {
                         let header_str = header.iter().map(|e| e.to_string()).collect::<String>();
-                        let padded_header = format!("{:width$}|", header_str, width = column_widths[i] + 3);
+                        let padded_header = format!("{:width$}", header_str, width = column_widths[i] + 2);
                         surface.write_string(
                             x_pos,
                             y_pos,
@@ -409,29 +418,21 @@ impl OnPaint for Markdown {
                             CharAttribute::new(Color::Magenta, Color::White, CharFlags::Bold),
                             false,
                         );
-                        x_pos += column_widths[i] as i32 + 4;
+                        x_pos += column_widths[i] as i32 + 3;
+                        
+                        let c = Character::new('|', Color::Black, Color::White, CharFlags::None);
+                        surface.fill_vertical_line(x_pos - 1, y_pos, y_pos - 1 + lines_count as i32, c);
                     }
                     y_pos += 1;
-
-                    let separator = column_widths
-                        .iter()
-                        .map(|&width| "─".repeat(width + 3))
-                        .collect::<Vec<_>>()
-                        .join("|") + "|";
-                    surface.write_string(
-                        self.x,
-                        y_pos,
-                        &separator,
-                        CharAttribute::new(Color::Gray, Color::White, CharFlags::None),
-                        false,
-                    );
+                    let c = Character::new('-', Color::Black, Color::White, CharFlags::None);
+                        surface.fill_horizontal_line(self.x + 1, y_pos, self.x + (table_width + suplimentar_padding) as i32 - 1, c);
                     y_pos += 1;
 
                     for row in &table.rows {
-                        x_pos = self.x;
+                        x_pos = self.x + 1;
                         for (i, cell) in row.iter().enumerate() {
                             let cell_str = cell.iter().map(|e| e.to_string()).collect::<String>();
-                            let padded_cell = format!("{:width$}|", cell_str, width = column_widths[i] + 3);
+                            let padded_cell = format!("{:width$}", cell_str, width = column_widths[i] + 2);
                             surface.write_string(
                                 x_pos,
                                 y_pos,
@@ -439,7 +440,7 @@ impl OnPaint for Markdown {
                                 CharAttribute::new(Color::Black, Color::White, CharFlags::None),
                                 false,
                             );
-                            x_pos += column_widths[i] as i32 + 4;
+                            x_pos += column_widths[i] as i32 + 3;
                         }
                         y_pos += 1;
                     }

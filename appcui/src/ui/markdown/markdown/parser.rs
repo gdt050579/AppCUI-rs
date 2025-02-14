@@ -37,6 +37,7 @@ pub enum InlineElement {
 }
 
 // Temporary implementation to identify easier elements
+/*
 impl fmt::Display for InlineElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -45,6 +46,19 @@ impl fmt::Display for InlineElement {
             InlineElement::Italic(content) => write!(f, "_{}_", content),
             InlineElement::Link(text, url) => write!(f, "[{}]({})", text, url),
             InlineElement::Code(content) => write!(f, "`{}`", content),
+        }
+    }
+}
+*/
+
+impl fmt::Display for InlineElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            InlineElement::Link(text, url) => write!(f, "[{}]({})", text, url),
+            InlineElement::Text(content) |
+            InlineElement::Bold(content) |
+            InlineElement::Italic(content) |
+            InlineElement::Code(content) => write!(f, "{}", content),
         }
     }
 }
