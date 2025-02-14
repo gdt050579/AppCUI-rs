@@ -15,5 +15,6 @@ pub trait NavigatorEntry {
     fn is_container(&self) -> bool;
 }
 pub trait NavigatorRoot {
+    #[cfg(test)]
     fn path(&self) -> &str;
 }

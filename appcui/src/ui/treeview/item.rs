@@ -83,7 +83,11 @@ where
     }
     #[inline(always)]
     pub fn parent(&self) -> Option<Handle<Item<T>>> {
-        if self.parent.is_none() { Some(self.parent) } else { None }
+        if !self.parent.is_none() { Some(self.parent) } else { None }
+    }
+    #[inline(always)]
+    pub fn set_icon(&mut self, icon: [char; 2]) {
+        self.icon = icon;
     }
     #[inline(always)]
     pub fn children(&self) -> &[Handle<Item<T>>] {
@@ -132,6 +136,7 @@ where
         match self.fold_status {
             FoldStatus::Collapsed => {
                 self.fold_status = FoldStatus::Expanded;
+                //log!("INFO", "expand_fold({:?}) - parent={:?}", self.handle, self.parent);
                 true
             }
             FoldStatus::Expanded | FoldStatus::NonExpandable => false,

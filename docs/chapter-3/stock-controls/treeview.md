@@ -167,6 +167,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a tree view 
 | `set_frozen_columns(...)` | Sets the number of frozen columns. Frozen columns are columns that are not scrolled when the treeview is scrolled horizontally. |
 | `sort(...)`               | Sorts the items in the TreeView control based on a column index.                                                                |
 | `clear_search()`          | Clears the content of the search box of the treeview.                                                                           |
+| `move_cursor_to(...)`     | Moves the cursor to a specific item in the treeview.                                                                            |
 
 ## Key association
 

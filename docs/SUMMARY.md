@@ -9,6 +9,7 @@
     - [Application](chapter-2/application.md)
         - [Debug scenarios](chapter-2/debug_scenarious.md)
         - [Recording events](chapter-2/event_recording.md)
+        - [Logging](chapter-2/logging.md)
     - [Terminals](chapter-2/terminals.md)
         - [Windows Console]()
         - [NCurses](chapter-2/terminals/ncurses.md)
@@ -105,7 +106,7 @@
 - [Dialogs](chapter-5/dialogs.md)
     - [Notifications dialogs](chapter-5/notification_dialogs.md)
     - [Open/Save dialog](chapter-5/opensave_dialogs.md)
-    - [Folder selection dialog]()
+    - [Folder selection dialog](chapter-5/folder_selection_dialogs.md)
     - [Window manager dialog]()
 
 - [Themes](chapter-6/themes.md)

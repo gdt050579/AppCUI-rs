@@ -50,18 +50,16 @@ where
         if folder != self.cached_path {
             // create cache for this folder
             let folder_contents = navigator.entries(&PathBuf::from(folder.to_string()));
-            if !folder_contents.is_empty() {
-                self.cached_items.clear();
-                self.cached_path = folder.to_string();
-                for entry in folder_contents {
-                    let cached_item = navigator
-                        .join(&PathBuf::from(folder.to_string()), &entry)
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .to_string();
-                    self.cached_items.push(cached_item);
-                }
+            self.cached_items.clear();
+            self.cached_path = folder.to_string();
+            for entry in folder_contents {
+                let cached_item = navigator
+                    .join(&PathBuf::from(folder.to_string()), &entry)
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string();
+                self.cached_items.push(cached_item);
             }
         }
         self.suggestions = Self::matching_paths(path, &self.cached_items, case_sensitive);
@@ -105,7 +103,6 @@ where
     width: u32,
     input_path: String,
     backup_path: String,
-    char_count: u32,
     selection: Selection,
     drag_started: bool,
     out_of_focus_surface: Surface,
@@ -157,7 +154,6 @@ where
         Self {
             input_path: path.to_string(),
             backup_path: path.to_string(),
-            char_count: path.chars().count() as u32,
             cursor: 0,
             start: 0,
             end: 0,
@@ -192,7 +188,6 @@ where
         };
         self.input_path.clear();
         self.input_path.push_str(text);
-        self.update_char_count(self.input_path.chars().count() as i32, true);
         if !control.has_focus() {
             self.update_out_of_focus_surface(control.theme(), control.is_enabled(), control.is_mouse_over());
         }
@@ -201,20 +196,15 @@ where
     #[inline(always)]
     fn restore_path_from_backup(&mut self) {
         self.input_path = self.backup_path.clone();
-        self.update_char_count(self.input_path.chars().count() as i32, true);
     }
 
-    #[inline(always)]
-    fn update_char_count(&mut self, update_size: i32, set_absolute: bool) {
-        if set_absolute {
-            self.char_count = update_size as u32;
-            return;
+    fn add_char(&mut self, character: char) {
+        if !self.selection.is_empty() {
+            self.delete_selection();
         }
-        if self.char_count as i32 + update_size > 0 {
-            self.char_count = (self.char_count as i32 + update_size) as u32;
-        } else {
-            self.char_count = 0;
-        }
+        self.input_path.insert(self.cursor, character);
+        //self.update_char_count(1, false);
+        self.move_cursor_with(1, false);
     }
 
     fn update_text_area_view(&mut self, force_end_update: bool) {
@@ -727,8 +717,6 @@ where
         match key.value() {
             key!("Backspace") => {
                 self.delete_previous_character();
-                self.update_char_count(-1, false);
-
                 self.selected_suggestion_pos = 0;
                 self.start_suggestions_pos = 1;
                 self.navigator_cacher
@@ -760,6 +748,8 @@ where
                 self.selected_suggestion_pos = 0;
                 self.start_suggestions_pos = 1;
                 self.pack_suggestions_area(control);
+                self.backup_path.clear();
+                self.backup_path.push_str(self.input_path.as_str());
                 control.raise_event(ControlEvent {
                     emitter: control.handle,
                     receiver: control.event_processor,
@@ -810,10 +800,7 @@ where
             }
             _ => {
                 if character > 0 as char {
-                    self.input_path.push(character);
-                    self.update_char_count(1, false);
-                    self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
-
+                    self.add_char(character);
                     self.selected_suggestion_pos = 0;
                     self.start_suggestions_pos = 1;
                     self.navigator_cacher

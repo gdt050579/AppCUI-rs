@@ -3,6 +3,9 @@ use super::{Flags, FoldStatus, Item, TreeDataManager};
 use components::listitem::render_method::RenderData;
 use AppCUIProcMacro::*;
 
+use crate::prelude::*;
+
+#[derive(Copy,Clone,Debug)]
 enum UpdateVisibleItemsOperation {
     Refresh,
     Sort,
@@ -57,7 +60,7 @@ where
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListItem)]
     /// struct FileInfo {
     ///    #[Column(name="Name", width=20)]
@@ -70,13 +73,12 @@ where
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(16, layout, flags)
     }
-    
-    
+
     /// Creates a new TreeView control with the specified layout and flags.  The capacity parameter specifies the initial number of items that can be stored in the tree view.
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListItem)]
     /// struct FileInfo {
     ///    #[Column(name="Name", width=20)]
@@ -123,15 +125,14 @@ where
         }
         lv
     }
-    
-    
+
     /// Adds a new object to the tree view. The object must implement ListItem trait. The object will be added as a root item.
     /// This method returns a handle to the newly added item.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListItem)]
     /// struct FileInfo {
     ///    #[Column(name="Name", width=20)]
@@ -146,15 +147,14 @@ where
     pub fn add(&mut self, item: T) -> Handle<Item<T>> {
         self.add_item_to_parent(Item::non_expandable(item), Handle::None)
     }
-    
-    
+
     /// Adds a new object to the tree view. The object must implement ListItem trait. The object will be added as a child of the specified parent item.
     /// This method returns a handle to the newly added item.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListItem)]
     /// struct FileInfo {
     ///    #[Column(name="Name", width=20)]
@@ -170,13 +170,13 @@ where
     pub fn add_to_parent(&mut self, item: T, parent: Handle<Item<T>>) -> Handle<Item<T>> {
         self.add_item_to_parent(Item::non_expandable(item), parent)
     }
-    
+
     /// Adds a new item to the tree view. The item will be added as a root item and will allow someone to control the selection state, icon and attributes.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListItem)]
     /// struct FileInfo {
     ///    #[Column(name="Name", width=20)]
@@ -186,23 +186,23 @@ where
     /// }
     /// let mut tree = TreeView::<FileInfo>::new(Layout::new("d:c"), treeview::Flags::None);
     /// let h = tree.add_item(treeview::Item::new(
-    ///         FileInfo { name: "Folder", folder: true }, 
-    ///         false, 
-    ///         Some(charattr!("white")), 
+    ///         FileInfo { name: "Folder", folder: true },
+    ///         false,
+    ///         Some(charattr!("white")),
     ///         ['F', 'D']));
     /// ```
     #[inline(always)]
     pub fn add_item(&mut self, item: Item<T>) -> Handle<Item<T>> {
         self.add_item_to_parent(item, Handle::None)
     }
-    
+
     /// Adds a new item to the tree view. The item will be added as a child of the specified parent item and will allow someone to control the selection state, icon and attributes.
     /// This method returns a handle to the newly added item.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// #[derive(ListItem)]
     /// struct FileInfo {
     ///    #[Column(name="Name", width=20)]
@@ -210,7 +210,7 @@ where
     ///    #[Column(name="Folder", width=10)]
     ///    folder: bool
     /// }
-    /// 
+    ///
     /// let mut tree = TreeView::<FileInfo>::new(Layout::new("d:c"), treeview::Flags::None);
     /// let parent = tree.add(FileInfo { name: "Folder", folder: true });
     /// tree.add_item_to_parent(treeview::Item::new(
@@ -226,11 +226,15 @@ where
             item.set_selected(false);
         }
         let h = self.manager.add(item, parent);
-        // refilter everything
-        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        // refilter everything if needed
+        if self.comp.search_text().is_empty() {
+            self.update_item_list(UpdateVisibleItemsOperation::Sort);
+        } else {
+            self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        }
         h
     }
-    
+
     /// Adds multiple items to a tree view and then sorts and refilters the list. This method is useful when you want to add multiple items at once.
     pub fn add_batch<F>(&mut self, f: F)
     where
@@ -241,13 +245,23 @@ where
         f(self);
         // restore original refilter state
         self.update_item_list_enabled = old_state;
-        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        if self.comp.search_text().is_empty() {
+            self.update_item_list(UpdateVisibleItemsOperation::Sort);
+        } else {
+            self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        }
+
     }
 
     /// Sets the number of frozen columns. Frozen columns are columns that are always visible, even when the list view is scrolled horizontally. The frozen columns are always the first columns in the list view. Using the value 0 will disable frozen columns.
     pub fn set_frozen_columns(&mut self, count: u16) {
         self.header.set_frozen_columns(count);
         self.update_scrollbars();
+    }
+
+    /// Moves the cursor to a specified item. That item has to be visible in the tree view. If the item is not visible, the method will return false.
+    pub fn move_cursor_to(&mut self, handle: Handle<Item<T>>) -> bool {
+        self.goto_handle(handle, false)
     }
 
     fn update_item_list(&mut self, op: UpdateVisibleItemsOperation) {
@@ -410,10 +424,10 @@ where
         self.update_scrollbars();
     }
 
-    /// 
+    /// Recursively deletes all children of the item with the specified handle (but keeps the item itself)
     pub fn delete_item_children(&mut self, item_handle: Handle<Item<T>>) {
         self.manager.delete_children(item_handle);
-        self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
+        self.update_item_list(UpdateVisibleItemsOperation::Refresh);
     }
 
     fn inner_fold_item(&mut self, item_handle: Handle<Item<T>>, method: FoldMethod, emit_event: bool, recursive: bool) -> bool {
@@ -439,17 +453,17 @@ where
             false
         }
     }
-    
+
     /// Collapses the item with the specified handle. If the recursive flag is set to true, all children of the item will be collapsed as well.
     pub fn collapse_item(&mut self, item_handle: Handle<Item<T>>, recursive: bool) {
         self.inner_fold_item(item_handle, FoldMethod::Collapse, false, recursive);
     }
-    
+
     /// Expands the item with the specified handle. If the recursive flag is set to true, all children of the item will be expanded as well.
     pub fn expand_item(&mut self, item_handle: Handle<Item<T>>, recursive: bool) {
         self.inner_fold_item(item_handle, FoldMethod::Expand, false, recursive);
     }
-    
+
     /// Collapses all items in the tree view
     pub fn collapse_all(&mut self) {
         let current_handle = if self.pos < self.item_list.len() {
@@ -818,19 +832,20 @@ where
         let new_pos = new_pos.min(len - 1);
         let h = self.visible_items();
         if h == 0 {
-            return;
-        }
-
-        // check the top view
-        if self.top_view + h >= len {
-            self.top_view = len.saturating_sub(h);
-        }
-        if new_pos < self.top_view {
             self.top_view = new_pos;
+            //return;
         } else {
-            let diff = new_pos - self.top_view;
-            if (diff >= h) && (h > 0) {
-                self.top_view = new_pos - h + 1;
+            // check the top view
+            if self.top_view + h >= len {
+                self.top_view = len.saturating_sub(h);
+            }
+            if new_pos < self.top_view {
+                self.top_view = new_pos;
+            } else {
+                let diff = new_pos - self.top_view;
+                if (diff >= h) && (h > 0) {
+                    self.top_view = new_pos - h + 1;
+                }
             }
         }
         // update scrollbars
@@ -968,7 +983,6 @@ where
             self.emit_selection_update_event();
         }
     }
-
 
     fn reverse_fold(&mut self, recursive: bool) -> bool {
         if self.pos < self.item_list.len() {
@@ -1147,7 +1161,7 @@ where
                 if self.start_mouse_select != usize::MAX {
                     if let Some(pos) = self.mouse_pos_to_index(ev.x, ev.y) {
                         if pos != self.pos {
-                            self.update_position(pos, true);                    
+                            self.update_position(pos, true);
                             self.select_items(self.start_mouse_select, pos, self.mouse_check_mode, true);
                         }
                     }
@@ -1252,7 +1266,6 @@ where
 {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.header.resize(new_size);
-        self.comp
-            .resize(self.header.width() as u64, self.item_list.len() as u64, &self.base, self.visible_space());
+        self.update_scrollbars();
     }
 }
