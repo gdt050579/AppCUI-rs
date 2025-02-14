@@ -246,7 +246,7 @@ where
         }
     }
 
-    fn sort_by(data: &mut Vec<Handle<Item<T>>>, manager: &mut TreeDataManager<T>, column_index: u16, ascendent: bool) {
+    fn sort_by(data: &mut [Handle<Item<T>>], manager: &mut TreeDataManager<T>, column_index: u16, ascendent: bool) {
         data.sort_by(|h1, h2| manager.compare(*h1, *h2, column_index, ascendent));
         for h in data.iter() {
             if let Some(item) = manager.get_mut(*h) {

@@ -142,7 +142,7 @@ where
         if let Some(tv) = self.control_mut(h) {
             let mut result = None;
             for root in roots {
-                let found = (search.len() > 0) && search[0..1].eq_ignore_ascii_case(&root.path[0..1]);
+                let found = (!search.is_empty()) && search[0..1].eq_ignore_ascii_case(&root.path[0..1]);
                 let mut item = treeview::Item::expandable(
                     FolderName {
                         value: root.path.to_string(),
@@ -169,7 +169,9 @@ where
         let mut first = true;
         let mut parent_handle = Handle::None;
         let h = self.tv;
-        self.control_mut(h).map(|tv| tv.clear());
+        if let Some(tv) = self.control_mut(h) {
+            tv.clear()
+        }
         log!("INFO", "Populate from path: {:?}", current_path);
 
         let total_components = current_path.components().count();
@@ -189,13 +191,11 @@ where
                 } else {
                     break;
                 }
+            } else if let Some(handle) = self.populate_node(&cp, parent_handle, c, index + 1 < total_components) {
+                parent_handle = handle;
+                cp.push(component);
             } else {
-                if let Some(handle) = self.populate_node(&cp, parent_handle, c, index + 1 < total_components) {
-                    parent_handle = handle;
-                    cp.push(component);
-                } else {
-                    break;
-                }
+                break;
             }
         }
         if !parent_handle.is_none() {
@@ -224,8 +224,8 @@ where
             }
             if pos > 0 {
                 let mut path = PathBuf::new();
-                for i in (pos + 1)..256 {
-                    if let Some(item) = tv.item(a[i]) {
+                for item_handle in a.iter().skip(pos + 1) {
+                    if let Some(item) = tv.item(*item_handle) {
                         path.push(item.value().value.as_str());
                     }
                 }
