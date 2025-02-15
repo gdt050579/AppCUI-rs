@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use crate::dialogs;
 use crate::prelude::*;
 
+use super::FileMask;
 use super::OpenFileDialogFlags;
 use super::SaveFileDialogFlags;
 use super::SelectFolderDialogFlags;
@@ -958,4 +959,73 @@ fn check_folder_select_dialog_mouse_usage() {
     let mut a = App::debug(80, 30, script).build().unwrap();
     a.add_window(FolderSelectDialog::new("D:\\Windows", SelectFolderDialogFlags::None));
     a.run();
+}
+
+#[test]
+fn check_file_mask_errors() {
+    let fm = FileMask::parse("abc");
+    assert!(fm.is_err());
+    assert!(fm.err().unwrap().starts_with("Unexpecting end of file mask definition. Expecting a assignment operator ('=' or ':')"));
+
+    let fm = FileMask::parse("###");
+    assert!(fm.is_err());
+    assert!(fm.err().unwrap().starts_with("Expected word character (A-Z, a-z, 0-9, _, -, .) but got invalid character"));
+
+    let fm = FileMask::parse("test:123");
+    assert!(fm.is_err());
+    assert!(fm.err().unwrap().starts_with("Expected open square bracket ('[') but got word character (A-Z, a-z, 0-9, _, -, .)"));
+
+    let fm = FileMask::parse("test:[1,,3]");
+    assert!(fm.is_err());
+    assert!(fm.err().unwrap().starts_with("Expected comma (',') separator or close square bracket (']') but got word character (A-Z, a-z, 0-9, _, -, .)"));
+
+    let fm = FileMask::parse("test:[1,");
+    assert!(fm.is_err());    
+    assert!(fm.err().unwrap().starts_with("Unexpecting end of file mask definition. Expecting either a comma (',') separator or a close square bracket (']')"));
+
+    // println!("{}",fm.err().unwrap());
+}
+
+#[test]
+fn check_file_mask_empty() {
+    let fm = FileMask::parse("");
+    assert!(fm.is_ok());
+    assert!(fm.ok().unwrap().is_empty());
+    let fm = FileMask::parse("   ").unwrap();
+    assert!(fm.is_empty());    
+
+    let fm = FileMask::parse("key = []").unwrap();
+    assert!(fm.len() == 1);
+    assert!(fm[0].extensions_hash.is_empty());
+    assert!(fm[0].name() == "key");
+    assert!(fm[0].matches("test.txt"));
+    assert!(fm[0].matches("C:\\windows\\test.txt"));
+    assert!(fm[0].matches("/etc/test.txt"));
+    assert!(fm[0].matches("test"));
+    assert!(fm[0].matches("C:\\windows\\test"));
+    assert!(fm[0].matches("/etc/test"));
+}
+
+#[test]
+fn check_file_mask_array() {
+    let fm = FileMask::parse("  first key = [value1,  value2 , value3  ], key2 = [1,2,3,4,5]").unwrap();
+    assert_eq!(fm.len(),2);
+    assert_eq!(fm[0].name(),"first key");
+    assert_eq!(fm[0].extensions_hash.len(),3);
+    assert_eq!(fm[1].name(),"key2");
+    assert_eq!(fm[1].extensions_hash.len(),5);
+}
+
+#[test]
+fn check_file_mask_ignore_case() {
+    let fm = FileMask::parse("images = [png,JPG]").unwrap();
+    assert!(fm.len() == 1);
+    assert!(fm[0].extensions_hash.len() == 2);
+    assert!(fm[0].name() == "images");
+    assert!(fm[0].matches("test.png"));
+    assert!(fm[0].matches("test.pNG"));
+    assert!(fm[0].matches("test.jpg"));
+    assert!(fm[0].matches("test.JPG"));
+    assert!(!fm[0].matches("test.png123"));
+    assert!(!fm[0].matches("test.JpG123")); 
 }
