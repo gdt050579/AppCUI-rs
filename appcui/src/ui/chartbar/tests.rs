@@ -1,41 +1,388 @@
 use crate::prelude::*;
-use chartbar::{Fit,Value,Type,Flags,YAxes};
+use chartbar::{Flags, Value};
 
 #[test]
-fn check_chartbar_creation() {
+fn check_chartbar_creation_with_vertical_bars() {
     let script = "
+        // Error.Disable(false)
         Paint.Enable(false)
-        // Error.Disable(true)
-        Paint('nine labels across al corners and center')  
-        CheckHash(0xA34BECD1E225B1A5)
-        Key.Pressed(Home)  
-        Paint('Toate barele sunt afisate') 
-        CheckHash(0xD594A37ED97C454B)
+        Paint('Some values represented by a chart with vertical bars !')  
+        CheckHash(0xF4D90E6B2B781A5C)
     ";
 
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(Flags::VerticalBar | Flags::AdaptivYAXesOnView, Layout::new("d:c,w:100%,h:100%"));
+
+    let v = [100, 15, 20, 30, 25, 37, 50, 50, 70, 78, 90, 100];
+
+    for i in v {
+        c.add_value(Value::with_label_and_color(i, format!("{i}").as_str(), Color::Red));
+    }
+    c.set_axes_left_space(7);
+    c.set_yaxes("VBar", 0, 70, 2, 7);
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_chartbar_creation_with_line() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Some values represented by a single line')  
+        CheckHash(0x162742DDAF04DCAF)
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(Flags::Line | Flags::AdaptivYAXesOnData, Layout::new("d:c,w:100%,h:100%"));
+
+    let v = [100, 15, 20, 30, 25, 37, 50, 50, 70, 78, 90, 100];
+
+    for i in v {
+        c.add_value(Value::with_label_and_color(i, format!("{i}").as_str(), Color::Red));
+    }
+    c.set_axes_left_space(7);
+    c.set_yaxes("Line", 0, 70, 2, 7);
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_autoscroll_non_moved() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Some values added with autoscroll')  
+        CheckHash(0xDE2DED5D271BD55D)
+    ";
 
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
 
     let mut c = ChartBar::new(
-        "aaaaa",
-        Type::VerticalBar,
-        0,
-        Flags::AutoScroll | Flags::ScrollBars,
-        1,
-        YAxes::MinMax(0, 100),
-        Fit::None,
+        Flags::VerticalBar | Flags::AdaptivYAXesOnData | Flags::AutoScroll,
         Layout::new("d:c,w:100%,h:100%"),
     );
-    
-    let v = [ 100, 15, 20, 30, 25, 37, 50, 50, 70, 78, 90, 100 ];
 
-    for i in v 
-    {
-        c.add_value(Value::with_label_color(i, format!("{i}").as_str(), charattr!("back:red")));
-    }
+    let v = [
+        100, 15, 20, 30, 25, 37, 50, 50, 70, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78,
+    ]
+    .to_vec();
+
     c.set_axes_left_space(7);
-    c.set_yaxes("lalddsD", 0, 70, 2, 7);
+    c.set_yaxes("auto", 0, 70, 2, 7);
+    c.add_data(&v);
+
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_keys() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(27,5,left)
+        Paint('Initial chart')
+        CheckHash(0x3FBDBDC4C59F2BC6)
+        Key.Pressed(End)
+        Paint('End pressed')
+        CheckHash(0xCA6B9BBCED90C346)
+        Key.Pressed(Home)
+        Paint('Back at the begining by pressing home')
+        CheckHash(0x3FBDBDC4C59F2BC6)
+        Key.Pressed(Right)
+        Paint('Moved to the right')
+        CheckHash(0x4F6413FAD90B2596)
+        Key.Pressed(Left)
+        Paint('Moved to the left')
+        CheckHash(0x3FBDBDC4C59F2BC6)
+        Key.Pressed(Down)
+        Key.Pressed(Down)
+        Paint('Scrolled down')
+        CheckHash(0x710FE451F4C08AFD)
+        Key.Pressed(Up)
+        Key.Pressed(Up)
+        Paint('Scrolled up')
+        CheckHash(0x3FBDBDC4C59F2BC6)
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:25,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(
+        Flags::Line | Flags::AdaptivYAXesOnData | Flags::ScrollBars,
+        Layout::new("d:c,w:100%,h:100%"),
+    );
+
+    let v = [
+        25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+        25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+    ]
+    .to_vec();
+
+    c.set_axes_left_space(7);
+    c.set_yaxes("auto", 0, 70, 2, 7);
+    c.add_data(&v);
+
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bar_info() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')  
+        CheckHash(0x82BA998CA50883CA)
+        Mouse.Move(19,6)
+        Paint('Info for a bar added only with a value')
+        CheckHash(0x729EBD0C538B9A5B)
+        Mouse.Move(24,6)
+        Paint('Info for a bar added only with a value and a label')
+        CheckHash(0xB8FFA927702280A7)
+        Mouse.Move(29,6)
+        Paint('Info for a bar added only with value,label and a color')
+        CheckHash(0x3C34753789384F96)
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(Flags::VerticalBar | Flags::AdaptivYAXesOnData, Layout::new("d:c,w:100%,h:100%"));
+
+    c.set_bar_width(1);
+    c.set_distance_between_bars(4);
+
+    c.add_value(Value::new(10));
+    c.add_value(Value::with_label(15, "label"));
+    c.add_value(Value::with_label_and_color(20, "red bar", Color::Red));
+
+    c.set_axes_left_space(7);
+    c.set_yaxes("auto", 0, 70, 2, 7);
+
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bar_customization() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Move(19,6)
+        Paint('Changed from white to blue')  
+        CheckHash(0x673AA326A6532496)
+        
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(Flags::VerticalBar | Flags::AdaptivYAXesOnView, Layout::new("d:c,w:100%,h:100%"));
+
+    c.set_bar_width(6);
+
+    c.add_value(Value::new(10));
+
+    if let Some(val) = c.index_mut(0) {
+        val.set_color(Color::Blue);
+        val.set_label("I am blue");
+        val.set_value(20);
+    }
+
+    c.set_axes_left_space(7);
+    c.set_yaxes("auto", 0, 70, 2, 7);
+
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_too_long_oy_label() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Long OY label')  
+        CheckHash(0x364DA63C4A9A80BD)
+        
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(Flags::VerticalBar | Flags::AdaptivYAXesOnView, Layout::new("d:c,w:100%,h:100%"));
+
+    c.set_bar_width(6);
+
+    c.add_value(Value::new(10));
+
+    if let Some(val) = c.index_mut(0) {
+        val.set_color(Color::Blue);
+        val.set_label("I am blue");
+        val.set_value(20);
+    }
+
+    c.set_axes_left_space(7);
+    c.set_yaxes("loooooong", 0, 70, 2, 7);
+
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_adaptive_on_data() {
+    let script = "
+        Paint.Enable(false)
+        Paint('This should be small because of the value 1000 from the end of the vec')  
+        CheckHash(0xC0F07D7379E52029)
+        
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(Flags::VerticalBar | Flags::AdaptivYAXesOnData, Layout::new("d:c,w:100%,h:100%"));
+
+    let v = [
+        100, 15, 20, 30, 25, 37, 50, 50, 70, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78,
+        78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 1000,
+    ]
+    .to_vec();
+
+    c.set_axes_left_space(7);
+    c.set_yaxes("auto", 0, 70, 2, 7);
+    c.add_data(&v);
+
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_adaptive_on_view() {
+    let script = "
+        Paint.Enable(false)
+        Paint('This should be normal because the value 1000 from the end of the vec is out of view')  
+        CheckHash(0x26BACCE161F6187D)
+        
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(Flags::VerticalBar | Flags::AdaptivYAXesOnView, Layout::new("d:c,w:100%,h:100%"));
+
+    let v = [
+        100, 15, 20, 30, 25, 37, 50, 50, 70, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78,
+        78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 1000,
+    ]
+    .to_vec();
+
+    c.set_axes_left_space(7);
+    c.set_yaxes("auto", 0, 70, 2, 7);
+    c.add_data(&v);
+
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_manual_oy_size() {
+    let script = "
+        Paint.Enable(false)
+        Mouse.Move(20,3)
+        Paint('This should be normal despite the value 1000 because the chart does not care')  
+        CheckHash(0xF7BF1DE1821BF62D)
+        
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+
+    let mut c = ChartBar::new(Flags::VerticalBar | Flags::ManualYAxesSize, Layout::new("d:c,w:100%,h:100%"));
+
+    let v = [
+        0, 1000, 20, 40, 25, 37, 50, 50, 70, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60,
+        78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100,
+        45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90, 100, 45, 60, 78, 90,
+        100, 45, 60, 78, 90, 100, 45, 60, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78,
+        78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 1000,
+    ]
+    .to_vec();
+
+    c.set_axes_left_space(7);
+    c.set_yaxes("auto", 0, 70, 2, 7);
+    c.add_data(&v);
+
     w.add(c);
     a.add_window(w);
     a.run();

@@ -3,9 +3,7 @@ use flat_string::FlatString;
 
 use crate::graphics::Rect;
 use crate::prelude::*;
-use crate::ui::chartbar::initialization_flags::{Flags, Type, Fit, YAxes};
-
-//use crate::ui::chart::{events::EventData, Type};
+use crate::ui::chartbar::initialization_flags::{Fit, Flags, Type, YAxes};
 
 struct YAxesData {
     label: FlatString<14>,
@@ -15,20 +13,6 @@ struct YAxesData {
     left_space: u32,
 }
 
-// impl YAxes
-// {
-//     fn set_label(&mut self, label: FlatString<14>) { self.label = label; }
-//     fn set_interval(&mut self, min: i32, max: i32) { self.min = min; self.max = max; }
-//     fn set_step(&mut self, step: i32) { self.step = step ; }
-//     fn set_left_space(&mut self, left_space: u32) { self.left_space = left_space; }
-
-//     fn label(&self) -> FlatString<14> { self.label }
-//     fn interval(&self) -> (i32,i32) { (self.min,self.max) }
-//     fn step(&self) -> i32 { self.step }
-//     fn left_space(&self) -> u32 { self.left_space }
-
-// }
-
 #[CustomControl(overwrite =[OnPaint,OnKeyPressed,OnMouseEvent,OnResize], internal = true)]
 pub struct ChartBar {
     ox_label: String,
@@ -37,6 +21,7 @@ pub struct ChartBar {
     max_on_size: i32,
 
     y_axes: Option<YAxesData>,
+    y_axes_type: YAxes,
 
     max_bar_height: u32,
 
@@ -51,51 +36,87 @@ pub struct ChartBar {
     data: Vec<Value>,
 
     top_view: i32,
-
-    y_axes_type: YAxes,
-
     left_offset: u32,
 }
 
 impl ChartBar {
+    pub fn default_chart() -> Self {
+        Self {
+            base: ControlBase::default(),
+            ox_label: String::from(""),
+
+            bar_width: 1,
+
+            chart_type: Type::VerticalBar,
+            distance: 0,
+            comp: ScrollBars::new(false),
+            flags: Flags::None,
+            fit: Fit::None,
+            data: Vec::new(),
+            top_view: 0,
+            left_offset: 0,
+
+            min_on_size: 0,
+            max_on_size: 100,
+
+            max_bar_height: 50,
+
+            y_axes: Some(YAxesData {
+                label: FlatString::from_str("11"),
+                min: 0,
+                max: 100,
+                step: 5,
+                left_space: 5,
+            }),
+            y_axes_type: YAxes::Auto,
+        }
+    }
+
     /// Creates a excel like chart that allows the user to show data  
     /// #Examples
     /// '''rust,no_run
     /// use appcui::prelude::*
     /// let mut chart = ChartBar::new(Vec::from([1,2,3,4,5,8,9]),chart::Type::VerticalBar,false,Layout::new("d:c,w:100%,h:100%"));
     ///
-    pub fn new(ox_label: &str, chart_type: chartbar::Type, distance: u8, flags: Flags, bar_width: u8, y_axes_type: YAxes, heightfit: Fit, layout: Layout) -> Self {
+    pub fn new(f: Flags, layout: Layout) -> Self {
         let mut status_flags = StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput;
-        if flags.contains(Flags::ScrollBars) {
+
+        if f.contains(Flags::ScrollBars) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
             status_flags |= StatusFlags::IncreaseRightMarginOnFocus;
         }
-        let mut c = Self {
-            base: ControlBase::with_status_flags(layout, status_flags),
-            ox_label: String::from(ox_label),
 
-            bar_width: bar_width.clamp(1, 40),
-
-            chart_type: chart_type,
-            distance: distance.clamp(0, 10),
-            comp: ScrollBars::new(flags.contains(Flags::ScrollBars)),
-            flags: flags,
-            fit: heightfit,
-            data: Vec::new(),
-            top_view: 0,
-
-            left_offset: 0,
-
-            min_on_size: i32::MAX,
-            max_on_size: i32::MIN,
-
-            max_bar_height: 50,
-
-            y_axes: None,
-            y_axes_type,
+        let mut c_type = Type::VerticalBar;
+        if f.contains(Flags::Line) {
+            c_type = Type::Line
         };
-        c.max_bar_height = if c.fit == Fit::FitToHeight { c.base.size().height } else { 50 };
-        c
+        if f.contains(Flags::VerticalBar) {
+            c_type = Type::VerticalBar
+        };
+
+        let fits = if f.contains(Flags::FitToHeight) { Fit::FitToHeight } else { Fit::None };
+
+        let y_axes = if f.contains(Flags::ManualYAxesSize) {
+            YAxes::MinMax(0, 100)
+        } else if f.contains(Flags::AdaptivYAXesOnData) {
+            YAxes::Auto
+        } else {
+            YAxes::Visible
+        };
+
+        Self {
+            base: ControlBase::with_status_flags(layout, status_flags),
+            y_axes_type: y_axes,
+            chart_type: c_type,
+            fit: fits,
+            flags: f,
+            comp: ScrollBars::new(f.contains(Flags::ScrollBars)),
+            ..Self::default_chart()
+        }
+    }
+
+    pub fn set_fit_to_window_height(&mut self, b: bool) {
+        self.fit = if b == true { Fit::FitToHeight } else { Fit::None };
     }
 
     #[inline(always)]
@@ -115,7 +136,27 @@ impl ChartBar {
 
     #[inline(always)]
     fn left_space(&self) -> u32 {
-        self.y_axes.as_ref().map(|y| y.left_space).unwrap_or(0)
+        self.y_axes.as_ref().map(|y| y.left_space).unwrap_or(4)
+    }
+
+    pub fn get_bars_count(&self) -> usize {
+        self.data.len()
+    }
+
+    pub fn index(&self, idx: usize) -> Option<&Value> {
+        if idx < self.data.len() {
+            Some(&self.data[idx])
+        } else {
+            None
+        }
+    }
+
+    pub fn index_mut(&mut self, idx: usize) -> Option<&mut Value> {
+        if idx < self.data.len() {
+            Some(&mut self.data[idx])
+        } else {
+            None
+        }
     }
 
     fn update_min_max(&mut self) {
@@ -152,8 +193,7 @@ impl ChartBar {
         }
     }
 
-    pub fn write_string_on_y_axes(&self, surface: &mut Surface, theme: &Theme, y: i32, label: &String) {
-        let attr = theme.editor.normal;
+    fn write_string_on_y_axes(&self, surface: &mut Surface, y: i32, label: &str, attr: CharAttribute) {
         let left_space = self.left_space();
         let mut index_copy = -5;
         for (index, c) in label.as_bytes().iter().enumerate() {
@@ -161,12 +201,12 @@ impl ChartBar {
                 index_copy = index as i32;
                 break;
             }
-            surface.write_char(0 + index as i32, y, Character::with_attributes(*c as char, attr));
+            surface.write_char(index as i32, y, Character::with_attributes(*c as char, attr));
         }
 
         if index_copy >= 0 {
             while index_copy < left_space.saturating_sub(1) as i32 {
-                surface.write_char(0 + index_copy, y, Character::with_attributes('.', attr));
+                surface.write_char(index_copy, y, Character::with_attributes('.', attr));
                 index_copy += 1;
             }
         }
@@ -179,13 +219,12 @@ impl ChartBar {
     pub fn set_axes_left_space(&mut self, val: u32) {
         if self.y_axes.is_some() {
             self.y_axes.as_mut().unwrap().left_space = val;
-            self.left_offset = 0;
         }
     }
 
-    pub fn update_scroll_pos_from_scrollbars(&mut self) {
+    fn update_scroll_pos_from_scrollbars(&mut self) {
         self.left_offset = self.comp.horizontal_index() as u32;
-        self.top_view = self.comp.vertical_index() as i32 * -1;
+        self.top_view = -(self.comp.vertical_index() as i32);
     }
 
     fn update_scrollbars_size(&mut self) {
@@ -196,25 +235,32 @@ impl ChartBar {
         self.comp.resize(total_width, total_height, &self.base);
     }
 
-    pub fn update_scrollbars(&mut self) {
-        self.comp.set_indexes(self.left_offset as u64, (self.top_view * -1) as u64);
+    fn update_scrollbars(&mut self) {
+        self.comp.set_indexes(self.left_offset as u64, -self.top_view as u64);
     }
 
     pub fn add_value(&mut self, value: Value) {
-        let len = self.data.len() as u32;
         let bar_width = (self.bar_width + self.distance) as u32;
-        let w = self.size().width.saturating_sub(self.left_space()) / bar_width;
+        let len = self.data.len() as u32 * bar_width;
+        let w = self.size().width.saturating_sub(self.left_space());
 
         self.data.push(value);
 
-        if self.flags.contains(Flags::AutoScroll) && len >= w - self.left_space() {
+        if self.flags.contains(Flags::AutoScroll) && len - self.left_offset * bar_width > w {
             self.left_offset += bar_width;
         }
+        self.top_view = 0;
         self.update_min_max();
 
         self.update_scrollbars();
         self.update_scrollbars_size();
         self.on_resize(self.size(), self.size());
+    }
+
+    pub fn add_data(&mut self, data: &Vec<i32>) {
+        for &i in data {
+            self.add_value(Value::new(i));
+        }
     }
 
     pub fn clear_values(&mut self) {
@@ -232,15 +278,32 @@ impl ChartBar {
             step,
             left_space,
         });
-        self.left_offset = 0;
     }
-    pub fn change_chart_type(&mut self, t: chartbar::Type) {
+    pub fn set_chart_type(&mut self, t: chartbar::Type) {
         self.chart_type = t;
+    }
+    pub fn set_manul_size_for_yaxes(&mut self, min: i32, max: i32) {
+        self.y_axes_type = YAxes::MinMax(min, max);
+    }
+    pub fn set_adaptive_size_for_yaxes(&mut self) {
+        self.y_axes_type = YAxes::Auto;
+    }
+    pub fn set_adaptive_size_on_view_for_yaxes(&mut self) {
+        self.y_axes_type = YAxes::Visible;
+    }
+    pub fn set_distance_between_bars(&mut self, distance: u8) {
+        self.distance = distance;
+    }
+    pub fn set_bar_width(&mut self, width: u8) {
+        self.bar_width = width;
     }
 }
 
 impl OnPaint for ChartBar {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        let mut output: [u8; 16] = [0; 16];
+        const FMT_NUMBER: FormatNumber = FormatNumber::new(10);
+
         //pregatim terenul pentru scrollbars
         if self.has_focus() && (self.flags.contains(Flags::ScrollBars)) {
             self.comp.paint(surface, theme, self);
@@ -250,27 +313,33 @@ impl OnPaint for ChartBar {
                 surface.reduce_clip_by(0, 0, 0, 1);
             }
         }
+        let (back_attr, line_attr, bar_color) = match () {
+            _ if !self.is_enabled() => (theme.editor.normal, theme.lines.inactive, Some(theme.editor.inactive.foreground)),
+            _ if self.has_focus() => (theme.editor.focused, theme.lines.focused, None),
+            _ if self.is_mouse_over() => (theme.editor.hovered, theme.lines.hovered, Some(theme.editor.hovered.foreground)),
+            _ => (theme.editor.normal, theme.lines.normal, Some(theme.editor.normal.foreground)),
+        };
+        let default_color = theme.editor.focused.foreground;
         //curatam pagina de caracterele anterioare
-        surface.clear(Character::with_attributes(' ', theme.editor.normal));
+        surface.clear(Character::with_attributes(' ', back_attr));
         //separam axele ox si oy de restul chartului
         let left_space = self.left_space() as i32;
         let sz = self.size();
-        let lineattr = if self.is_enabled() { theme.lines.normal } else { theme.lines.inactive };
-        surface.draw_vertical_line(left_space, 0, sz.height as i32 - 2, LineType::Single, lineattr);
+        surface.draw_vertical_line(left_space, 0, sz.height as i32 - 2, LineType::Single, line_attr);
 
-        surface.draw_horizontal_line(left_space, sz.height as i32 - 2, sz.width as i32, LineType::Single, lineattr);
+        surface.draw_horizontal_line(left_space, sz.height as i32 - 2, sz.width as i32, LineType::Single, line_attr);
         surface.write_string(
-            sz.width as i32 - self.ox_label.bytes().count() as i32,
+            sz.width as i32 - self.ox_label.len() as i32,
             sz.height as i32 - 1,
             self.ox_label.as_str(),
-            theme.editor.normal,
+            back_attr,
             false,
         );
 
         surface.write_char(
             left_space,
             sz.height as i32 - 2,
-            Character::with_attributes(SpecialChar::BoxBottomLeftCornerSingleLine, lineattr),
+            Character::with_attributes(SpecialChar::BoxBottomLeftCornerSingleLine, line_attr),
         );
 
         let interval = self.yaxes_interval();
@@ -279,63 +348,75 @@ impl OnPaint for ChartBar {
 
         let bar_width = self.bar_width as u32 + self.distance as u32;
 
-        let start = self.left_offset / bar_width;
+        let start = self.left_offset.saturating_div(bar_width);
         let h = (sz.height - 1) as i32;
-
 
         let d = (self.max_on_size.saturating_sub(self.min_on_size)) as u32;
         let mut i = 0;
-        
+
         if self.y_axes.is_some() {
-            while i <= max + h - 2  {
+            while i <= max + h - 2 {
                 if h - 2 - i - self.top_view < h - 2 {
-                    let v = (i as u32 * d / self.max_bar_height.max(1)) as i32 + self.min_on_size;
-                    self.write_string_on_y_axes(surface, theme, h - i - self.top_view, &format!("{}", v));
-                    surface.draw_horizontal_line(left_space + 1, h - i - self.top_view, sz.width as i32, LineType::RoofLine, lineattr);
+                    let v = (((i as u32).saturating_mul(d) / self.max_bar_height.max(1)) as i32).saturating_add(self.min_on_size);
+                    if let Some(txt) = FMT_NUMBER.write_number(v, &mut output) {
+                        self.write_string_on_y_axes(surface, h - i - self.top_view, txt, back_attr);
+                    }
+                    surface.draw_horizontal_line(left_space + 1, h - i - self.top_view, sz.width as i32, LineType::RoofLine, line_attr);
                 }
                 i += step;
             }
         }
+
         if self.chart_type == Type::VerticalBar {
             for (index, c) in self.data[start as usize..].iter().enumerate() {
                 let x = index as u32 * bar_width + left_space as u32 + 1;
-                if x > sz.width as u32 {
+                if x > sz.width {
                     break;
                 }
                 let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
 
-                if h - val - self.top_view as i32 - 1 <= h - val + val.max(1) - 2 {
+                if h - val - self.top_view - 1 <= h - val + val.max(1) - 2 {
                     let rect = Rect::new(
                         x as i32,
-                        h - val - self.top_view as i32 - 1,
+                        h - val - self.top_view - 1,
                         x as i32 + self.bar_width.max(1) as i32 - 1,
                         h - val + val.max(1) - 2,
                     );
-                    surface.fill_rect(rect, Character::with_attributes(' ', c.attr()));
+                    surface.fill_rect(rect, Character::with_attributes(' ', c.attr(bar_color, default_color)));
                 }
             }
         } else if self.chart_type == Type::Line {
-                let mut prev_val = 1;
-                for (index, c) in self.data[start as usize..].iter().enumerate() {
-                    let x = index as u32 * bar_width + left_space as u32 + 1;
-                    if x > sz.width as u32 {
-                        break;
-                    }
-                    let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
-
-                    if h - val - self.top_view as i32 - 1 <= h - val + val.max(1) - 2 {
-                        surface.write_char(x as i32,h - val - self.top_view as i32 - 1, Character::with_attributes(' ', c.attr()) );   
-                    }
-                    if h - prev_val - self.top_view as i32 - 1 < h - val - self.top_view as i32 - 1 {
-                            surface.draw_vertical_line(x as i32, h - prev_val - self.top_view as i32 - 1 , (h - val - self.top_view as i32 - 1).min(h - 1), LineType::Single, c.attr());
-                        } else {
-                            surface.draw_vertical_line(x as i32, h - val - self.top_view as i32 - 1 , (h - prev_val - self.top_view as i32 - 1).min(h - 1), LineType::Single, c.attr());
-                        }
-                    prev_val = val;
+            let mut prev_val = 1;
+            for (index, c) in self.data[start as usize..].iter().enumerate() {
+                let x = index as u32 * bar_width + left_space as u32 + 1;
+                if x > sz.width {
+                    break;
                 }
+                let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
+                let bar_attr = c.attr(bar_color, default_color);
+                if h - val - self.top_view - 1 <= h - val + val.max(1) - 2 {
+                    surface.write_char(x as i32, h - val - self.top_view - 1, Character::with_attributes(' ', bar_attr));
+                }
+                if h - prev_val - self.top_view - 1 < h - val - self.top_view - 1 {
+                    surface.fill_vertical_line(
+                        x as i32,
+                        h - prev_val - self.top_view - 1,
+                        (h - val - self.top_view - 1).min(h - 1),
+                        Character::with_attributes(' ', bar_attr),
+                    );
+                } else {
+                    surface.fill_vertical_line(
+                        x as i32,
+                        h - val - self.top_view - 1,
+                        (h - prev_val - self.top_view - 1).min(h - 1),
+                        Character::with_attributes(' ', bar_attr),
+                    );
+                }
+                prev_val = val;
             }
+        }
 
-        self.write_string_on_y_axes(surface, theme, 0, &String::from(self.oy_label()));
+        self.write_string_on_y_axes(surface, 0, self.oy_label(), back_attr);
     }
 }
 
@@ -348,13 +429,13 @@ impl OnMouseEvent for ChartBar {
         match event {
             MouseEvent::Enter => {
                 self.hide_tooltip();
+                return EventProcessStatus::Processed;
             }
             MouseEvent::Leave => {
                 self.hide_tooltip();
+                return EventProcessStatus::Processed;
             }
             MouseEvent::Over(point) => {
-                if is_over(point, 0, 1, 6, 1) && self.oy_label().bytes().count() >= 4 {}
-
                 let sz = self.size();
                 let bar_width = self.bar_width as u32 + self.distance as u32;
 
@@ -363,24 +444,22 @@ impl OnMouseEvent for ChartBar {
                 let left_space = self.left_space() as i32;
 
                 if self.chart_type == Type::VerticalBar {
-                    
-
                     for (index, c) in self.data[start as usize..].iter().enumerate() {
                         let x = index as u32 * bar_width + left_space as u32 + 1;
-                        if x > sz.width as u32 {
+                        if x > sz.width {
                             break;
                         }
                         let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
                         //let rect1 = Rect::with_size(x as i32, h - 1, self.bar_width as u16, val as u16);
-                        if h - val - self.top_view as i32 - 1 <= h - val + val.max(1) - 2 {
+                        if h - val - self.top_view - 1 <= h - val + val.max(1) - 2 {
                             if is_over(
                                 point,
                                 x as i32,
-                                h - val - self.top_view as i32 - 2,
+                                h - val - self.top_view - 1,
                                 x as i32 + self.bar_width.max(1) as i32 - 1,
                                 h - val + val.max(1) - 2,
                             ) {
-                                self.show_tooltip_on_point(format!("{},{},{}", c.value(), val, self.max_on_size).as_str(), point.x, point.y);
+                                self.show_tooltip_on_point(format!("{},{}", c.value(), c.label()).as_str(), point.x, point.y);
                                 return EventProcessStatus::Processed;
                             } else {
                                 self.hide_tooltip();
@@ -388,7 +467,7 @@ impl OnMouseEvent for ChartBar {
                         }
                     }
                     return EventProcessStatus::Processed;
-                } 
+                }
                 return EventProcessStatus::Ignored;
             }
             MouseEvent::Pressed(mouse_event_data) => {
@@ -409,7 +488,7 @@ impl OnKeyPressed for ChartBar {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         match key.value() {
             key!("Left") => {
-                if Flags::contains(&self.flags, Flags::ScrollBars) {   
+                if Flags::contains(&self.flags, Flags::ScrollBars) {
                     let bar_width = (self.bar_width + self.distance) as u32;
                     self.left_offset = self.left_offset.saturating_sub(bar_width);
 
@@ -421,12 +500,14 @@ impl OnKeyPressed for ChartBar {
             }
             key!("Right") => {
                 if Flags::contains(&self.flags, Flags::ScrollBars) {
-                    let len = self.data.len() as u32;
                     let bar_width = (self.bar_width + self.distance) as u32;
-                    let w = (self.size().width.saturating_sub(self.left_space()) / bar_width) as u32;
+                    let len = self.data.len() as u32 * bar_width;
+                    let w = self.size().width.saturating_sub(self.left_space());
+
                     let new_poz = self.left_offset.saturating_add(bar_width);
-                    let final_pos = len.saturating_sub(w) * bar_width;
-                    if new_poz <= final_pos {
+                    let final_pos = len.saturating_sub(w);
+
+                    if new_poz <= final_pos + 1 {
                         self.left_offset = new_poz;
                     }
 
@@ -445,14 +526,13 @@ impl OnKeyPressed for ChartBar {
                     self.update_scrollbars_size();
                     return EventProcessStatus::Processed;
                 }
-                
             }
             key!("End") => {
                 if Flags::contains(&self.flags, Flags::ScrollBars) {
-                    let len = self.data.len() as u32;
                     let bar_width = (self.bar_width + self.distance) as u32;
-                    let w = self.base.size().width.saturating_sub(self.left_space()) / bar_width;
-                    self.left_offset = len.saturating_sub(w) * bar_width;
+                    let len = self.data.len() as u32 * bar_width;
+                    let w = self.base.size().width.saturating_sub(self.left_space());
+                    self.left_offset = len.saturating_sub(w) + bar_width;
 
                     self.update_min_max();
                     self.update_scrollbars();
@@ -464,7 +544,7 @@ impl OnKeyPressed for ChartBar {
                 if Flags::contains(&self.flags, Flags::ScrollBars) {
                     let new_pos = self.top_view - 1;
 
-                    if new_pos * -1 <= self.max_bar_height as i32 {
+                    if -new_pos <= self.max_bar_height as i32 {
                         self.top_view = new_pos;
                     }
 
@@ -476,7 +556,6 @@ impl OnKeyPressed for ChartBar {
 
             key!("Up") => {
                 if Flags::contains(&self.flags, Flags::ScrollBars) {
-
                     let new_pos = self.top_view + 1;
 
                     if new_pos <= 0 {
@@ -502,7 +581,7 @@ pub fn is_over(poz: &Point, top: i32, left: i32, bottom: i32, right: i32) -> boo
     if poz.x >= top && poz.x <= bottom && poz.y >= left && poz.y <= right {
         return true;
     }
-    return false;
+    false
 }
 
 impl OnResize for ChartBar {

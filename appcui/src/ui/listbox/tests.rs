@@ -97,7 +97,7 @@ fn check_create_with_macro_4() {
 #[test]
 fn check_movement_keys() {
     let script = "
-        Paint.Enable(false)
+        Paint.Enable(true))
         Mouse.Click(10,3,left)
         Paint('Initial state')
         CheckHash(0x6063E984F2B99F35)
