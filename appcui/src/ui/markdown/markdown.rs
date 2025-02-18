@@ -4,7 +4,7 @@ mod parser;
 use linkheaderregistry::LinkHeaderRegistry;
 use parser::{InlineElement, MarkdownElement, MarkdownParser};
 use std::cell::RefCell;
-
+use crate::system::Theme;
 use self::components::ScrollBars;
 use crate::prelude::*;
 use crate::ui::markdown::initialization_flags::Flags;
@@ -116,13 +116,13 @@ impl Markdown {
         (width, height)
     }
 
-    fn get_element_style(element: &InlineElement) -> (Color, CharFlags) {
+    fn get_element_style(element: &InlineElement, theme: &Theme) -> CharAttribute {
         match element {
-            InlineElement::Text(_) => (Color::Green, CharFlags::None),
-            InlineElement::Bold(_) => (Color::Red, CharFlags::Bold),
-            InlineElement::Italic(_) => (Color::Blue, CharFlags::Italic),
-            InlineElement::Link(_, _) => (Color::Pink, CharFlags::Underline),
-            InlineElement::Code(_) => (Color::Magenta, CharFlags::None),
+            InlineElement::Text(_) => theme.markdown.text,
+            InlineElement::Bold(_) => theme.markdown.bold,
+            InlineElement::Italic(_) => theme.markdown.italic,
+            InlineElement::Link(_, _) => theme.markdown.link,
+            InlineElement::Code(_) => theme.markdown.code,
         }
     }
 
@@ -153,13 +153,14 @@ impl Markdown {
         xlsurface: &mut Surface,
         prefix: Option<String>,
         link_header_registry: &mut LinkHeaderRegistry,
+        theme: &Theme
     ) {
         for (i, element) in elements.iter().enumerate() {
             if i == 0 {
                 *x_pos = indent;
             }
 
-            let (color, char_flags) = Self::get_element_style(element);
+            let style = Self::get_element_style(element, theme);
             Self::register_if_link(link_header_registry, element, *x_pos, *y_pos);
 
             let content_str = element.to_string();
@@ -177,7 +178,7 @@ impl Markdown {
                 *x_pos,
                 *y_pos,
                 &formatted_content,
-                CharAttribute::new(color, Color::White, char_flags),
+                style,
                 false,
             );
 
@@ -192,6 +193,7 @@ impl Markdown {
         y_pos: &mut i32,
         xlsurface: &mut Surface,
         link_header_registry: &mut LinkHeaderRegistry,
+        theme: &Theme
     ) {
         let indent = *x_pos + (depth as i32) * 4;
 
@@ -201,11 +203,11 @@ impl Markdown {
                     match item {
                         parser::ListItem::Simple(ref elements) => {
                             let mut x = *x_pos;
-                            Self::process_list_element(elements, indent, &mut x, y_pos, xlsurface, None, link_header_registry);
+                            Self::process_list_element(elements, indent, &mut x, y_pos, xlsurface, None, link_header_registry, theme);
                             *y_pos += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
-                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry);
+                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry, theme);
                         }
                     }
                 }
@@ -224,12 +226,13 @@ impl Markdown {
                                 xlsurface,
                                 Some(format!("{}.", index)),
                                 link_header_registry,
+                                theme
                             );
                             index += 1;
                             *y_pos += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
-                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry);
+                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry, theme);
                         }
                     }
                 }
@@ -255,20 +258,25 @@ impl OnPaint for Markdown {
         for element in &self.elements {
             match element {
                 MarkdownElement::Header(content, level) => {
-                    let (color, flags) = Self::get_header_style(*level);
+                    let header_style = match level {
+                        1 => _theme.markdown.h1,
+                        2 => _theme.markdown.h2,
+                        _ => _theme.markdown.h3,
+                    };
+            
                     self.link_header_registry.borrow_mut().register_header_position(&content, y_pos);
-                    surface.write_string(self.x, y_pos, &content, CharAttribute::new(color, Color::White, flags), false);
+                    surface.write_string(self.x, y_pos, &content, header_style, false);
                 }
 
                 MarkdownElement::Paragraph(content) => {
                     let mut x_pos: i32 = self.x;
 
                     for element in content.iter() {
-                        let (color, char_flags) = Self::get_element_style(element);
+                        let style = Self::get_element_style(element, _theme);
                         Self::register_if_link(&mut *self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
                         let content_str = element.to_string();
 
-                        surface.write_string(x_pos, y_pos, &content_str, CharAttribute::new(color, Color::White, char_flags), false);
+                        surface.write_string(x_pos, y_pos, &content_str, style, false);
                         x_pos += content_str.chars().count() as i32;
                     }
                 }
@@ -279,13 +287,13 @@ impl OnPaint for Markdown {
                         let elements = match item {
                             parser::ListItem::Simple(elements) => elements,
                             parser::ListItem::Nested(items) => {
-                                Self::process_nested_list(1, &items, &mut x_pos, &mut y_pos, surface, &mut *self.link_header_registry.borrow_mut());
+                                Self::process_nested_list(1, &items, &mut x_pos, &mut y_pos, surface, &mut *self.link_header_registry.borrow_mut(), _theme);
                                 continue;
                             }
                         };
 
                         for (i, element) in elements.iter().enumerate() {
-                            let (color, char_flags) = Self::get_element_style(element);
+                            let style = Self::get_element_style(element, _theme);
                             Self::register_if_link(&mut *self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
                             let content_str = element.to_string();
 
@@ -300,7 +308,7 @@ impl OnPaint for Markdown {
                                 x_pos,
                                 y_pos,
                                 &formatted_content,
-                                CharAttribute::new(color, Color::White, char_flags),
+                                style,
                                 false,
                             );
 
@@ -318,13 +326,13 @@ impl OnPaint for Markdown {
                         let elements = match item {
                             parser::ListItem::Simple(elements) => elements,
                             parser::ListItem::Nested(items) => {
-                                Self::process_nested_list(1, &items, &mut x_pos, &mut y_pos, surface, &mut *self.link_header_registry.borrow_mut());
+                                Self::process_nested_list(1, &items, &mut x_pos, &mut y_pos, surface, &mut *self.link_header_registry.borrow_mut(), _theme);
                                 continue;
                             }
                         };
 
                         for (i, element) in elements.iter().enumerate() {
-                            let (color, char_flags) = Self::get_element_style(element);
+                            let style = Self::get_element_style(element, _theme);
                             Self::register_if_link(&mut *self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
                             let content_str = element.to_string();
 
@@ -340,7 +348,7 @@ impl OnPaint for Markdown {
                                 x_pos,
                                 y_pos,
                                 &formatted_content,
-                                CharAttribute::new(color, Color::White, char_flags),
+                                style,
                                 false,
                             );
 
@@ -365,13 +373,10 @@ impl OnPaint for Markdown {
                 }
                 MarkdownElement::CodeBlock(code) => {
                     let code_lines = code.lines();
-                    let code_color = Color::Gray;
-                    let background_color = Color::White;
-                    let flags = CharFlags::None;
                     let x_pos = self.x + 4;
 
                     for line in code_lines {
-                        surface.write_string(x_pos, y_pos, line, CharAttribute::new(code_color, background_color, flags), false);
+                        surface.write_string(x_pos, y_pos, line, _theme.markdown.code_block, false);
                         y_pos += 1;
                     }
                 }

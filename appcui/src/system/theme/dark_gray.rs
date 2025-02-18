@@ -98,5 +98,18 @@ pub(crate) fn new() -> Theme {
             selected: controlattr!("black", "black,silver", "black,w", "gray", "w,black"),
             unselected: controlattr!("silver", "silver,black", "black,w", "gray", "w,black"),
         },
+        markdown: MarkdownTheme {
+            text: charattr!("silver"),
+            bold: charattr!("w, flags: Bold"),
+            italic: charattr!("gray, flags: Italic"),
+            link: charattr!("blue,black, flags: Underline"),
+            code: charattr!("green,gray"),
+            code_block: charattr!("green,gray"),
+            h1: charattr!("red,black"),
+            h2: charattr!("blue,black"),
+            h3: charattr!("blue,black"),
+            ordered_list: charattr!("silver"),
+            unordered_list: charattr!("silver"),
+        },               
     }
 }
