@@ -10,21 +10,23 @@ pub struct ProgressBar {
 }
 impl ProgressBar {
     pub fn new(items_count: u64, layout: Layout) -> Self {
-        Self {
+        let mut me = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
             items_count,
             items_processed: 0,
             proc_buf: [b' ', b' ', b' ', b' '],
             text: String::new(),
             percentage: 0,
-        }
+        };
+        me.set_size_bounds(4, 1, u16::MAX, 1);
+        me
     }
-    fn update_text(&mut self, text: &str) {
+    pub fn update_text(&mut self, text: &str) {
         self.text.clear();
         self.text.push_str(text);
     }
-    fn update_items_count(&mut self, new_count: u64) {
-        self.items_count = new_count.min(self.items_processed);
+    pub fn update_processed_items(&mut self, processed_items: u64) {
+        self.items_processed = processed_items.min(self.items_count);
         if self.items_count == 0 {
             self.proc_buf = [b'-', b'-', b'-', b'%'];
             self.percentage = 0;
@@ -69,7 +71,7 @@ impl OnPaint for ProgressBar {
             Character::new(' ', theme.progressbar.text, theme.progressbar.progress, CharFlags::None),
         );
         surface.fill_horizontal_line(
-            m + 1,
+            m,
             0,
             w,
             Character::new(' ', theme.progressbar.text, theme.progressbar.background, CharFlags::None),
