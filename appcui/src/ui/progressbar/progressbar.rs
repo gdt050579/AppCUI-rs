@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use super::initialization_flags::Flags;
 
 #[CustomControl(overwrite=OnPaint, internal=true)]
 pub struct ProgressBar {
@@ -7,9 +8,10 @@ pub struct ProgressBar {
     proc_buf: [u8; 4],
     text: String,
     percentage: u8,
+    flags: Flags,
 }
 impl ProgressBar {
-    pub fn new(items_count: u64, layout: Layout) -> Self {
+    pub fn new(items_count: u64, layout: Layout, flags: Flags) -> Self {
         let mut me = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
             items_count,
@@ -17,10 +19,21 @@ impl ProgressBar {
             proc_buf: [b' ', b' ', b' ', b' '],
             text: String::new(),
             percentage: 0,
+            flags,
         };
         me.set_size_bounds(4, 1, u16::MAX, 1);
         me
     }
+
+    /// Updates the text displayed on the progress bar
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"));
+    /// p.update_text("Running ...");
+    /// ```
     pub fn update_text(&mut self, text: &str) {
         self.text.clear();
         self.text.push_str(text);
@@ -59,6 +72,24 @@ impl ProgressBar {
             }
         }
     }
+    /// Returns the number of items processed
+    #[inline(always)]
+    pub fn processed_items(&self) -> u64 {
+        self.items_processed
+    }
+
+    /// Returns the items that were processed so far
+    #[inline(always)]
+    pub fn items_count(&self) -> u64 {
+        self.items_count
+    }
+    /// Sets the totsal number of items that need to be processed
+    /// If the number of items processed is greater than the number of items to be processed, the number of items processed will be set to the number of items to be processed
+    #[inline(always)]
+    pub fn set_items_count(&mut self, items_count: u64) {
+        self.items_count = items_count;
+        self.update_processed_items(self.items_processed);
+    }
 }
 impl OnPaint for ProgressBar {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -78,6 +109,8 @@ impl OnPaint for ProgressBar {
         );
         let attr = CharAttribute::with_fore_color(theme.progressbar.text);
         surface.write_string(1, 0, &self.text, attr, false);
-        surface.write_ascii(w - 5, 0, &self.proc_buf, attr, false);
+        if !self.flags.contains(Flags::HidePercentage) {
+            surface.write_ascii(w - 5, 0, &self.proc_buf, attr, false);
+        }
     }
 }
