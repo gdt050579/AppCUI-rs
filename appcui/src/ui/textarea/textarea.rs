@@ -586,23 +586,53 @@ impl TextArea {
             counter += self.line_sizes[line_iterator] as usize;
             line_iterator += 1;
         }
-
-        // print!("{position_start_x}, {position_start_y}, {position_end_x}, {position_end_y}");
-
-        // this is bad, but this is my level for now in Rust
+        
+        // If the deletion is requested on a single line
         if position_start_y == position_end_y {
-
-            for _it in 0..position_end_x-position_start_x {
-                self.text.remove(pos_start);
-            }
-
             self.line_sizes[position_start_y] -= (position_end_x - position_start_x) as u32;
         }
+        // The deletion request is multiline
         else {
-            
+            // Cut the first line to 0..position_start_x
+            self.line_sizes[position_start_y] = position_start_x as u32;
+
+            // Cut the last line to [position_end_x..]
+            self.line_sizes[position_end_y] = self.line_sizes[position_end_y] - position_end_x as u32;
+
+            // Remove the lines in between
+            self.line_sizes.drain(position_start_y + 1..position_end_y);
+
+            // Merge the two lines together
+            self.line_sizes[position_start_y] = self.line_sizes[position_start_y] + self.line_sizes[position_start_y + 1];
+            self.line_sizes.remove(position_start_y + 1);
+        }
+        // Remove the selected text
+        self.text.drain(pos_start..pos_end);
+        
+        // Reposition the cursor to the start of the selection
+        
+        log!("Info", "Starting position: ({}, {})", position_start_x, position_start_y);
+        log!("Info", "Cursor position: ({}, {})", self.cursor.pos_x, self.cursor.pos_y);
+        log!("Info", "line_offset: {}, row_offset: {}", self.line_offset, self.row_offset);
+        // Check if cursor can be position in current view for horizontal
+        if self.row_offset <= position_start_x as u32 && (position_start_x as u32) < self.row_offset + self.size().width {
+            self.cursor.pos_x = position_start_x - self.row_offset as usize;
+        }
+        // It does not, updating the view
+        else {
+            self.cursor.pos_x = 0;
+            self.row_offset = position_start_x as u32;
         }
 
-        self.move_cursor_horizontal(pos_start as i32 - pos_end as i32);
+        // Check if cursor can be position in current view for vertical
+        if self.line_offset <= position_start_y as u32 && (position_start_y as u32) < self.line_offset + self.size().height {
+            self.cursor.pos_y = position_start_y - self.line_offset as usize; 
+        }
+        // It does not, updating the view
+        else {
+            self.cursor.pos_y = 0;
+            self.line_offset = position_start_y as u32;
+        }
     }
 
     pub fn insert_newline(&mut self) {
@@ -633,7 +663,6 @@ impl TextArea {
 
     pub fn insert_text(&mut self, text: &str) {
         if text.contains('\n') {
-
             // First we parse the text in lines
             let mut line_sizes : Vec<i32> = Vec::new();
             self.parse_text_in_lines(text, &mut line_sizes);
@@ -682,7 +711,6 @@ impl TextArea {
         }
     
         self.update_max_line_size();
-
     }
 }
 
