@@ -51,8 +51,9 @@ pub struct TextArea {
 
     file: File,
 
-    scrollbars: ScrollBars
-
+    scrollbars: ScrollBars,
+    scrollbar_x: u32,
+    scrollbar_y: u32
 }
 
 impl TextArea {
@@ -161,7 +162,9 @@ impl TextArea {
 
             file: File::create("debug.txt").unwrap(),
 
-            scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars))
+            scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
+            scrollbar_x: 0,
+            scrollbar_y: 0,
         };
 
         if !control.text.ends_with('\n') {
@@ -189,9 +192,86 @@ impl TextArea {
         control
     }
 
+    
     #[inline(always)]
     fn update_scrollbar_pos(&mut self) {
-        self.scrollbars.set_indexes((self.row_offset as usize) as u64, (self.cursor.pos_y + self.line_offset as usize) as u64);
+        self.scrollbars.set_indexes((self.row_offset as usize) as u64, (self.line_offset as usize) as u64);
+    }
+
+    fn update_view_from_scrollbars(&mut self, vertical: i32, horizontal: i32) {
+        // In this function we need to change the horizontal and vertical view, 
+        // without changing the position of the cursor, if possible. If the cursor is out of view,
+        // it will be set on the first viewed character of the line if moving to right or the 
+        // last if moving to left. Same applies for moving vertically
+
+        if horizontal != 0 {
+            let current_cursor_position = self.row_offset + self.cursor.pos_x as u32;
+
+            // Moving to right
+            if horizontal > 0 {
+
+                // Updating the view
+                self.row_offset += horizontal as u32;
+
+                // Checking if the characer marked by cursor is out of screen right now
+                if current_cursor_position < self.row_offset {
+                    self.cursor.pos_x = 0;
+                }
+                // the characer marked by cursor is still on screen, needs repositioning
+                else {
+                    self.cursor.pos_x = self.cursor.pos_x as usize - horizontal as usize;
+                }
+            }
+            // Moving to left
+            else {
+                let tmp_moves_needed = (-horizontal) as u32;
+                // Updating the view
+                self.row_offset -= tmp_moves_needed;
+
+                // Checking if the characer marked by cursor is out of screen right now
+                if current_cursor_position >= self.row_offset + self.size().width {
+                    self.cursor.pos_x = self.size().width as usize - 1;
+                }
+                // the characer marked by cursor is still on screen, needs repositioning
+                else {
+                    self.cursor.pos_x = self.cursor.pos_x as usize + tmp_moves_needed as usize;
+                }
+            }
+        }
+        if vertical != 0 {
+            let current_cursor_position = self.line_offset + self.cursor.pos_y as u32;
+
+            // Moving down
+            if vertical > 0 {
+
+                // Updating the view
+                self.line_offset += vertical as u32;
+
+                // Checking if the characer marked by cursor is out of screen right now
+                if current_cursor_position < self.line_offset {
+                    self.cursor.pos_y = 0;
+                }
+                // the characer marked by cursor is still on screen, needs repositioning
+                else {
+                    self.cursor.pos_y = self.cursor.pos_y as usize - vertical as usize;
+                }
+            }
+            // Moving up
+            else {
+                let tmp_moves_needed = (-vertical) as u32;
+                // Updating the view
+                self.line_offset -= tmp_moves_needed;
+
+                // Checking if the characer marked by cursor is out of screen right now
+                if current_cursor_position >= self.line_offset + self.size().height {
+                    self.cursor.pos_y = self.size().height as usize - 1;
+                }
+                // the characer marked by cursor is still on screen, needs repositioning
+                else {
+                    self.cursor.pos_y = self.cursor.pos_y as usize + tmp_moves_needed as usize;
+                }
+            }
+        }
     }
 
     pub fn move_cursor_vertical(&mut self, no_of_rows: i32) {
@@ -353,7 +433,7 @@ impl TextArea {
                 // We need to update position, we will check where the direction on movement
                 // Checking if the movement is to the left
                 if self.row_offset > new_position as u32 {
-                    let tmp_row_offset = new_position as i32 - self.size().width as i32;
+                    let tmp_row_offset = new_position as i32;
                     if tmp_row_offset < 0 {
                         self.row_offset = new_position as u32;
                     }
@@ -453,10 +533,19 @@ impl TextArea {
     }
 
     fn update_scroll_pos_from_scrollbars(&mut self) {
-        let current_pos = self.line_offset as i32 + self.cursor.pos_y as i32;
-        let new_pos = self.scrollbars.vertical_index() as i32;
+        // Calculating the direction of movement as a difference between the current coordinates
+        // and the new scrollbar values
+        let new_pos_vertical = self.scrollbars.vertical_index() as i32 - self.scrollbar_y as i32;
+        let new_pos_horizontal = self.scrollbars.horizontal_index() as i32 - self.scrollbar_x as i32;
 
-        self.move_cursor_vertical(new_pos - current_pos);
+        log!("Info", "Scrollbar update direction V={}, H={}", new_pos_vertical, new_pos_horizontal);
+
+        // Updating the view based on the direction
+        self.update_view_from_scrollbars(new_pos_vertical, new_pos_horizontal);
+
+        // Setting the new scrollbar values as the current coordinates
+        self.scrollbar_x = self.scrollbars.horizontal_index() as u32;
+        self.scrollbar_y = self.scrollbars.vertical_index() as u32;
     }
 
     pub fn remove_text_selection(&mut self, pos_start: usize, pos_end: usize) {
