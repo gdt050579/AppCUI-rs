@@ -122,7 +122,9 @@ pub struct MarkdownTheme {
     pub h3: CharAttribute,
     pub code_block: CharAttribute,
     pub ordered_list: CharAttribute,
-    pub unordered_list: CharAttribute
+    pub unordered_list: CharAttribute,
+    pub table: CharAttribute,
+    pub table_header: CharAttribute,
 }
 
 #[derive(Default)]

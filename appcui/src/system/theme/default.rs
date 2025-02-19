@@ -102,14 +102,16 @@ pub(crate) fn new() -> Theme {
             text: charattr!("silver"),               
             bold: charattr!("y, flags: Bold"),           
             italic: charattr!("aqua, flags: Italic"),              
-            link: charattr!("blue,black, flags: Underiline"),          
-            code: charattr!("green,gray"),       
-            h1: charattr!("red,black"),        
-            h2: charattr!("blue,black"),    
-            h3: charattr!("aqua,black"),             
-            code_block: charattr!("green,gray"),     
+            link: charattr!("pink, flags: Underiline"),          
+            code: charattr!("green, gray"),       
+            h1: charattr!("red"), //why this is still white?       
+            h2: charattr!("blue"),    
+            h3: charattr!("aqua"),             
+            code_block: charattr!("green, gray"),     
             ordered_list: charattr!("silver"),       
-            unordered_list: charattr!("silver"),  
+            unordered_list: charattr!("silver"),
+            table: charattr!("silver"),
+            table_header: charattr!("silver, flags: Bold"),
         },
         
     }

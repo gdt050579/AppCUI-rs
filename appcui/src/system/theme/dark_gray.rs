@@ -102,14 +102,16 @@ pub(crate) fn new() -> Theme {
             text: charattr!("silver"),
             bold: charattr!("w, flags: Bold"),
             italic: charattr!("gray, flags: Italic"),
-            link: charattr!("blue,black, flags: Underline"),
+            link: charattr!("blue,gray, flags: Underline"),
             code: charattr!("green,gray"),
             code_block: charattr!("green,gray"),
-            h1: charattr!("red,black"),
-            h2: charattr!("blue,black"),
-            h3: charattr!("blue,black"),
+            h1: charattr!("red,gray"),
+            h2: charattr!("blue,gray"),
+            h3: charattr!("blue,gray"),
             ordered_list: charattr!("silver"),
             unordered_list: charattr!("silver"),
+            table: charattr!("silver"),
+            table_header: charattr!("silver, flags: Bold")
         },               
     }
 }

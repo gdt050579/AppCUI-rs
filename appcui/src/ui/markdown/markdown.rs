@@ -366,7 +366,7 @@ impl OnPaint for Markdown {
                         self.x,
                         y_pos,
                         &line,
-                        CharAttribute::new(Color::Gray, Color::White, CharFlags::None),
+                        _theme.markdown.text,
                         false,
                     );
                     y_pos += 1;
@@ -409,7 +409,7 @@ impl OnPaint for Markdown {
 
                     let mut x_pos = self.x;
                     let rect = Rect::new(x_pos, y_pos, x_pos + (table_width + suplimentar_padding) as i32, y_pos + 1 + lines_count as i32);
-                    surface.draw_rect(rect, LineType::Ascii, CharAttribute::new(Color::Black, Color::White, CharFlags::None));
+                    surface.draw_rect(rect, LineType::Ascii, _theme.markdown.table);
 
                     x_pos += 1;
                     y_pos += 1;
@@ -420,16 +420,16 @@ impl OnPaint for Markdown {
                             x_pos,
                             y_pos,
                             &padded_header,
-                            CharAttribute::new(Color::Magenta, Color::White, CharFlags::Bold),
+                            _theme.markdown.table_header,
                             false,
                         );
                         x_pos += column_widths[i] as i32 + 3;
                         
-                        let c = Character::new('|', Color::Black, Color::White, CharFlags::None);
+                        let c = Character::new('|', _theme.markdown.table.foreground, _theme.markdown.table.background, _theme.markdown.table.flags);
                         surface.fill_vertical_line(x_pos - 1, y_pos, y_pos - 1 + lines_count as i32, c);
                     }
                     y_pos += 1;
-                    let c = Character::new('-', Color::Black, Color::White, CharFlags::None);
+                    let c = Character::new('-', _theme.markdown.table.foreground, _theme.markdown.table.background, _theme.markdown.table.flags);
                         surface.fill_horizontal_line(self.x + 1, y_pos, self.x + (table_width + suplimentar_padding) as i32 - 1, c);
                     y_pos += 1;
 
@@ -442,9 +442,9 @@ impl OnPaint for Markdown {
                                 x_pos,
                                 y_pos,
                                 &padded_cell,
-                                CharAttribute::new(Color::Black, Color::White, CharFlags::None),
+                                _theme.markdown.table,
                                 false,
-                            );
+                            ); // shall modify if I want bold in table
                             x_pos += column_widths[i] as i32 + 3;
                         }
                         y_pos += 1;
