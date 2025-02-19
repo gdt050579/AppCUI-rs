@@ -15,6 +15,8 @@ pub struct Builder {
     pub(crate) single_window: bool,
     pub(crate) theme: Theme,
     pub(crate) max_timer_count: u8,
+    pub(crate) log_file: Option<String>,
+    pub(crate) log_append: bool,
 }
 impl Builder {
     pub(crate) fn new() -> Self {
@@ -29,6 +31,8 @@ impl Builder {
             single_window: false,
             max_timer_count: 4,
             theme: Theme::new(Themes::Default),
+            log_file: None,
+            log_append: false,
         }
     }
     #[inline(always)]
@@ -76,6 +80,12 @@ impl Builder {
     #[inline(always)]
     pub fn timers_count(mut self, count: u8) -> Self {
         self.max_timer_count = count.max(1); // at least one timer
+        self
+    }
+    #[inline(always)]
+    pub fn log_file(mut self, name: &str, append: bool) -> Self {
+        self.log_file = Some(String::from(name));
+        self.log_append = append;
         self
     }
 }

@@ -31,7 +31,7 @@ extern crate proc_macro;
 /// * CommandBarEvents
 /// * MenuEvents
 ///
-/// If none of the **overwrite** or **events** parameters is present, a default implementation 
+/// If none of the **overwrite** or **events** parameters is present, a default implementation
 /// will be provided.
 ///
 /// # Example
@@ -83,7 +83,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable); 
+    config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
@@ -100,7 +100,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
-    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable); 
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHNumericSliderEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -109,7 +109,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
     // timer events
-    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default);
 
 
     // desktop
@@ -193,7 +193,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
     // timer events
-    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default);
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
@@ -252,7 +252,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
     // timer events
-    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default);
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
@@ -266,7 +266,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Where the **overwrite** parameter is a list of traits that can be overwritten that include:
 /// * OnPaint
 /// * OnResize
-/// 
+///
 ///and the **events** parameter is a list of events that could be received by the new control:
 /// * CommandBarEvents
 /// * MenuEvents
@@ -336,7 +336,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
     // timer events
-    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default); 
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default);
 
     // desktop
     config.set(AppCUITrait::DesktopEvents, TraitImplementation::Default);
@@ -545,6 +545,11 @@ pub fn listview(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn togglebutton(input: TokenStream) -> TokenStream {
     crate::controls::togglebutton::create(input)
+}
+
+#[proc_macro]
+pub fn pathfinder(input: TokenStream) -> TokenStream {
+    crate::controls::pathfinder::create(input)
 }
 
 #[proc_macro]

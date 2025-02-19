@@ -2,7 +2,7 @@ mod control_builder;
 
 pub (crate) mod layout;
 pub (crate) mod button;
-pub (crate) mod label; 
+pub (crate) mod label;
 pub (crate) mod panel;
 pub (crate) mod checkbox;
 pub (crate) mod radiobox;
@@ -28,6 +28,7 @@ pub (crate) mod hsplitter;
 pub (crate) mod datepicker;
 pub (crate) mod listbox;
 pub (crate) mod listview;
-pub (crate) mod togglebutton;
 pub (crate) mod hnumericslider;
+pub (crate) mod togglebutton;
+pub (crate) mod pathfinder;
 pub (crate) mod treeview;
