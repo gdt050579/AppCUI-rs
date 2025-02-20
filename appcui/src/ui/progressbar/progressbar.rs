@@ -50,11 +50,11 @@ impl ProgressBar {
 
     /// Updates the progress bar with the number of items processed so far. The progress bar will
     /// automatically calculate the percentage and ETA and will update the display.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"));
     /// p.update_progress(85);
     /// ```
@@ -73,6 +73,7 @@ impl ProgressBar {
                 if self.items_processed > 0xFF_FFFF_FFFF_FFFF {
                     self.proc_buf = [b' ', b'9', b'9', b'%'];
                     self.percentage = 99;
+                    self.update_eta();
                 } else {
                     self.percentage = ((self.items_processed * 100) / self.items_count) as u8;
                     self.proc_buf[3] = b'%';
@@ -90,10 +91,46 @@ impl ProgressBar {
                         self.proc_buf[1] = 32;
                         self.proc_buf[0] = 32;
                     }
+                    self.update_eta();
                 }
             }
         }
     }
+
+    fn update_eta(&mut self) {
+        if self.items_processed == 0 {
+            self.eta = [b'-', b'-', b':', b'-', b'-', b':', b'-', b'-'];
+            return;
+        }
+        let elapsed = (self.start.elapsed() + self.extra_duration).as_secs();
+        let total_time = (elapsed as u128 * self.items_count as u128 / self.items_processed as u128) as u64;
+        let eta = total_time - elapsed;
+        if eta >= 604800 {
+            self.eta = [b' ', b'>', b'1', b' ', b'w', b'e', b'e', b'k'];
+        } else {
+            let days = eta / 86400;
+            if days > 0 {
+                if days == 1 {
+                    self.eta = [b' ', b' ', b'>', b'1', b' ', b'd', b'a', b'y'];
+                } else {
+                    self.eta = [b' ', b'>', 48 + days as u8, b' ', b'd', b'a', b'y', b's'];
+                }
+            } else {
+                let hours = eta / 3600;
+                let minutes = (eta % 3600) / 60;
+                let seconds = eta % 60;
+                self.eta[0] = (hours / 10) as u8 + 48;
+                self.eta[1] = (hours % 10) as u8 + 48;
+                self.eta[2] = b':';
+                self.eta[3] = (minutes / 10) as u8 + 48;
+                self.eta[4] = (minutes % 10) as u8 + 48;
+                self.eta[5] = b':';
+                self.eta[6] = (seconds / 10) as u8 + 48;
+                self.eta[7] = (seconds % 10) as u8 + 48;
+            }
+        }
+    }
+
     /// Returns the number of items processed
     #[inline(always)]
     pub fn processed_items(&self) -> u64 {
@@ -159,6 +196,12 @@ impl OnPaint for ProgressBar {
         surface.write_string(1, 0, &self.text, attr, false);
         if !self.flags.contains(Flags::HidePercentage) {
             surface.write_ascii(w - 5, 0, &self.proc_buf, attr, false);
+        }
+        if self.size().height > 1 {
+            surface.write_ascii(w - 8, 1, &self.eta, theme.text.focused, false);
+            if w > 12 {
+                surface.write_string(0, 1, "ETA:", theme.text.normal, false);
+            }
         }
     }
 }
