@@ -552,3 +552,8 @@ pub fn pathfinder(input: TokenStream) -> TokenStream {
 pub fn treeview(input: TokenStream) -> TokenStream {
     crate::controls::treeview::create(input)
 }
+
+#[proc_macro]
+pub fn markdown(input: TokenStream) -> TokenStream {
+    crate::controls::markdown::create(input)
+}

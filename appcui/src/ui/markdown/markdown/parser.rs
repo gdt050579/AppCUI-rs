@@ -97,7 +97,7 @@ impl MarkdownParser {
                 elements.push(Self::parse_header(trimmed));
             } else if trimmed.starts_with('-') {
                 elements.push(Self::parse_list(&mut lines, trimmed, false));
-            } else if trimmed.starts_with(|c: char| c.is_digit(10)) && trimmed[1..].starts_with('.')
+            } else if trimmed.starts_with(|c: char| c.is_ascii_digit()) && trimmed[1..].starts_with('.')
             {
                 elements.push(Self::parse_list(&mut lines, trimmed, true));
             } else if !trimmed.is_empty() {
@@ -134,7 +134,7 @@ impl MarkdownParser {
     
         let mut rows = Vec::new();
 
-        while let Some(line) = lines.next() {
+        for line in lines.by_ref() {
             let trimmed = line.trim();
             if trimmed.starts_with('|') && trimmed.ends_with('|') {
                 rows.push(Self::parse_inline_cells(trimmed));
@@ -200,7 +200,7 @@ impl MarkdownParser {
                 }
             } else {
                 let next_special = input[i..]
-                    .find(|c: char| c == '*' || c == '_' || c == '[' || c == '`')
+                    .find(|c| ['*', '_', '[', '`'].contains(&c))
                     .unwrap_or(input.len() - i);
                 elements.push(InlineElement::Text(input[i..i + next_special].to_string()));
                 i += next_special;
@@ -216,7 +216,6 @@ impl MarkdownParser {
         ordered: bool,
     ) -> MarkdownElement {
         let mut list_items = Vec::new();
-        let mut current_level = 0;
 
         fn indentation_level(line: &str) -> usize {
             line.chars().take_while(|c| c.is_whitespace()).count()
@@ -224,26 +223,26 @@ impl MarkdownParser {
 
         let mut sublist_stack: Vec<(usize, Vec<ListItem>)> = Vec::new();
 
-        current_level = indentation_level(first_line);
+        let mut current_level = indentation_level(first_line);
         let content = if ordered {
-            let no_digit_line = first_line.trim_start_matches(|c: char| c.is_digit(10));
+            let no_digit_line = first_line.trim_start_matches(|c: char| c.is_ascii_digit());
             no_digit_line.trim_start_matches('.').trim()
         } else {
             first_line.trim_start_matches('-').trim()
         };
         list_items.push(ListItem::Simple(Self::parse_inline(content)));
 
-        while let Some(next_line) = lines.next() {
+        for next_line in lines.by_ref() {
             let trimmed = next_line.trim();
             let next_level = indentation_level(next_line);
 
             let is_ordered =
-                trimmed.starts_with(|c: char| c.is_digit(10)) && trimmed[1..].starts_with('.');
+                trimmed.starts_with(|c: char| c.is_ascii_digit()) && trimmed[1..].starts_with('.');
             let is_unordered = trimmed.starts_with('-');
 
             if (ordered && is_ordered) || (!ordered && is_unordered) {
                 let content = if ordered {
-                    let no_digit_line = trimmed.trim_start_matches(|c: char| c.is_digit(10));
+                    let no_digit_line = trimmed.trim_start_matches(|c: char| c.is_ascii_digit());
                     no_digit_line.trim_start_matches('.').trim()
                 } else {
                     trimmed.trim_start_matches('-').trim()
@@ -251,31 +250,35 @@ impl MarkdownParser {
 
                 let item = ListItem::Simple(Self::parse_inline(content));
 
-                if next_level > current_level {
-                    // new sublist
-                    sublist_stack.push((current_level, list_items));
-                    list_items = vec![item];
-                    current_level = next_level;
-                } else if next_level < current_level {
-                    // end the current sublist and go back to previous level
-                    while let Some((prev_level, mut prev_items)) = sublist_stack.pop() {
-                        if prev_level < next_level {
-                            sublist_stack.push((prev_level, prev_items));
-                            break;
-                        }
-                        prev_items.push(ListItem::Nested(Box::new(if ordered {
-                            MarkdownElement::OrderedList(list_items)
-                        } else {
-                            MarkdownElement::UnorderedList(list_items)
-                        })));
-                        list_items = prev_items;
-                        current_level = prev_level;
+                match () {
+                    _ if next_level > current_level => {
+                        // new sublist
+                        sublist_stack.push((current_level, list_items));
+                        list_items = vec![item];
+                        current_level = next_level;
                     }
-                    list_items.push(item);
-                } else {
-                    // Same level, add the item
-                    list_items.push(item);
-                }
+                    _ if next_level < current_level => {
+                        // end the current sublist and go back to previous level
+                        while let Some((prev_level, mut prev_items)) = sublist_stack.pop() {
+                            if prev_level < next_level {
+                                sublist_stack.push((prev_level, prev_items));
+                                break;
+                            }
+                            prev_items.push(ListItem::Nested(Box::new(if ordered {
+                                MarkdownElement::OrderedList(list_items)
+                            } else {
+                                MarkdownElement::UnorderedList(list_items)
+                            })));
+                            list_items = prev_items;
+                            current_level = prev_level;
+                        }
+                        list_items.push(item);
+                    }
+                    _ => {
+                        // Same level, add the item
+                        list_items.push(item);
+                    }
+                }                
             } else {
                 break;
             }
@@ -297,3 +300,4 @@ impl MarkdownParser {
         }
     }
 }
+

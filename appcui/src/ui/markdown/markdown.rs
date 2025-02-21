@@ -1,5 +1,5 @@
-mod linkheaderregistry;
-mod parser;
+pub mod linkheaderregistry;
+pub mod parser;
 
 use linkheaderregistry::LinkHeaderRegistry;
 use parser::{InlineElement, MarkdownElement, MarkdownParser};
@@ -50,7 +50,7 @@ impl Markdown {
     //
 
     // Creates a new markdown component with a specified content, layout, and flags.
-    pub fn new(content: String, layout: Layout, flags: Flags) -> Self {
+    pub fn new(content: &str, layout: Layout, flags: Flags) -> Self {
         Self::reset_debug_message();
         let (width, height) = (100, 150); //Markdown::compute_dimensions(&content);
 
@@ -65,7 +65,7 @@ impl Markdown {
                     },
             ),
             surface: Surface::new(width as u32, height as u32),
-            content: content.clone(),
+            content: content.to_string().clone(),
             x: 0,
             y: 0,
             flags,
@@ -73,7 +73,7 @@ impl Markdown {
             drag_point: None,
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
             link_header_registry: RefCell::new(LinkHeaderRegistry::new()),
-            elements: MarkdownParser::parse(&content),
+            elements: MarkdownParser::parse(content),
         }
     }
 
@@ -95,25 +95,10 @@ impl Markdown {
         self.scrollbars.set_indexes((-self.x) as u64, (-self.y) as u64);
     }
 
-    fn update_scrollbars(&mut self, surface: &mut Surface) {
-        let surface_size = surface.size();
-        self.scrollbars.update(surface_size.width as u64, surface_size.height as u64, self.size());
-    }
-
     fn update_scroll_pos_from_scrollbars(&mut self) {
         let h = -(self.scrollbars.horizontal_index() as i32);
         let v = -(self.scrollbars.vertical_index() as i32);
         self.move_scroll_to(h, v);
-    }
-
-    fn compute_dimensions(content: &str) -> (usize, usize) {
-        let lines: Vec<&str> = content.split('\n').collect();
-
-        let width = lines.iter().map(|line| line.chars().count()).max().unwrap_or(0);
-
-        let height = lines.len();
-
-        (width, height)
     }
 
     fn get_element_style(element: &InlineElement, theme: &Theme) -> CharAttribute {
@@ -134,15 +119,6 @@ impl Markdown {
             return true;
         }
         false
-    }
-
-    fn get_header_style(level: usize) -> (Color, CharFlags) {
-        match level {
-            1 => (Color::Red, CharFlags::None),
-            2 => (Color::Yellow, CharFlags::None),
-            3 => (Color::Pink, CharFlags::None),
-            _ => (Color::Magenta, CharFlags::None),
-        }
     }
 
     fn process_list_element(
@@ -188,7 +164,7 @@ impl Markdown {
 
     fn process_nested_list(
         depth: u8,
-        nested_items: &Box<MarkdownElement>,
+        nested_items: &MarkdownElement,
         x_pos: &mut i32,
         y_pos: &mut i32,
         xlsurface: &mut Surface,
@@ -197,7 +173,7 @@ impl Markdown {
     ) {
         let indent = *x_pos + (depth as i32) * 4;
 
-        match **nested_items {
+        match *nested_items {
             MarkdownElement::UnorderedList(ref items) => {
                 for item in items.iter() {
                     match item {
@@ -264,8 +240,8 @@ impl OnPaint for Markdown {
                         _ => _theme.markdown.h3,
                     };
             
-                    self.link_header_registry.borrow_mut().register_header_position(&content, y_pos);
-                    surface.write_string(self.x, y_pos, &content, header_style, false);
+                    self.link_header_registry.borrow_mut().register_header_position(content, y_pos);
+                    surface.write_string(self.x, y_pos, content, header_style, false);
                 }
 
                 MarkdownElement::Paragraph(content) => {
@@ -273,7 +249,7 @@ impl OnPaint for Markdown {
 
                     for element in content.iter() {
                         let style = Self::get_element_style(element, _theme);
-                        Self::register_if_link(&mut *self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
+                        Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
                         let content_str = element.to_string();
 
                         surface.write_string(x_pos, y_pos, &content_str, style, false);
@@ -287,14 +263,14 @@ impl OnPaint for Markdown {
                         let elements = match item {
                             parser::ListItem::Simple(elements) => elements,
                             parser::ListItem::Nested(items) => {
-                                Self::process_nested_list(1, &items, &mut x_pos, &mut y_pos, surface, &mut *self.link_header_registry.borrow_mut(), _theme);
+                                Self::process_nested_list(1, items, &mut x_pos, &mut y_pos, surface, &mut self.link_header_registry.borrow_mut(), _theme);
                                 continue;
                             }
                         };
 
                         for (i, element) in elements.iter().enumerate() {
                             let style = Self::get_element_style(element, _theme);
-                            Self::register_if_link(&mut *self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
+                            Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
                             let content_str = element.to_string();
 
                             let formatted_content = if i == 0 {
@@ -326,14 +302,14 @@ impl OnPaint for Markdown {
                         let elements = match item {
                             parser::ListItem::Simple(elements) => elements,
                             parser::ListItem::Nested(items) => {
-                                Self::process_nested_list(1, &items, &mut x_pos, &mut y_pos, surface, &mut *self.link_header_registry.borrow_mut(), _theme);
+                                Self::process_nested_list(1, items, &mut x_pos, &mut y_pos, surface, &mut self.link_header_registry.borrow_mut(), _theme);
                                 continue;
                             }
                         };
 
                         for (i, element) in elements.iter().enumerate() {
                             let style = Self::get_element_style(element, _theme);
-                            Self::register_if_link(&mut *self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
+                            Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
                             let content_str = element.to_string();
 
                             let formatted_content = if i == 0 {
@@ -382,7 +358,7 @@ impl OnPaint for Markdown {
                 }
                 MarkdownElement::Table(table) => {
                     let mut column_widths = Vec::new();
-                    let lines_count = table.rows.iter().count() + 2; // add the header and the separation line
+                    let lines_count = table.rows.len() + 2; // add the header and the separation line
 
                     for (i, header) in table.headers.iter().enumerate() {
                         let header_len = header.iter().map(|e| e.to_string().chars().count()).sum::<usize>();
@@ -405,7 +381,7 @@ impl OnPaint for Markdown {
                     }
 
                     let table_width: usize = column_widths.iter().sum();
-                    let suplimentar_padding: usize = column_widths.iter().count() * 3;
+                    let suplimentar_padding: usize = column_widths.len() * 3;
 
                     let mut x_pos = self.x;
                     let rect = Rect::new(x_pos, y_pos, x_pos + (table_width + suplimentar_padding) as i32, y_pos + 1 + lines_count as i32);

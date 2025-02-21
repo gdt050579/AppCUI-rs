@@ -3,8 +3,10 @@ use std::collections::HashMap;
 #[derive(Hash, Eq, PartialEq, Debug)]
 struct LinkHeaderID(pub String);
 
+#[derive(PartialEq, Debug)]
 struct HeaderPosition(pub i32);
 
+#[derive(PartialEq, Debug)]
 struct LinkArea {
     pub x_pos: i32,
     pub y_pos: i32,
