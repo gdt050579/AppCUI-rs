@@ -30,6 +30,7 @@ impl ProgressBar {
             extra_duration: Duration::default(),
             paused: false,
         };
+        me.update_progress(0);
         me.set_size_bounds(4, 1, u16::MAX, 2);
         me
     }
@@ -131,15 +132,15 @@ impl ProgressBar {
         }
     }
 
-    /// Returns the number of items processed
+    /// Returns the number of items processed so far
     #[inline(always)]
-    pub fn processed_items(&self) -> u64 {
+    pub fn processed(&self) -> u64 {
         self.items_processed
     }
 
-    /// Returns the items that were processed so far
+    /// Returns the total items that need to be processed
     #[inline(always)]
-    pub fn items_count(&self) -> u64 {
+    pub fn count(&self) -> u64 {
         self.items_count
     }
 
