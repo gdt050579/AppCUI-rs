@@ -38,10 +38,10 @@ impl ProgressBar {
     /// Updates the text displayed on the progress bar
     ///
     /// # Example
-    /// ```rust
+    /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"));
+    /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"),progressbar::Flags::None);
     /// p.update_text("Running ...");
     /// ```
     pub fn update_text(&mut self, text: &str) {
@@ -54,10 +54,10 @@ impl ProgressBar {
     /// If the progress bar is paused, calling this method will resume the progress bar.
     ///
     /// # Example
-    /// ```rust
+    /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"));
+    /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"),progressbar::Flags::None);
     /// p.update_progress(85);
     /// ```
     pub fn update_progress(&mut self, processed_items: u64) {
