@@ -98,5 +98,10 @@ pub(crate) fn new() -> Theme {
             selected: controlattr!("aqua", "dr,w", "dr,y", "gray", "w,black"),
             unselected: controlattr!("silver", "black,w", "black,y", "gray", "w,black"),
         },
+        progressbar: ProgressBarTheme {
+            background: Color::Black,
+            progress: Color::Teal,
+            text: Color::White,
+        },
     }
 }

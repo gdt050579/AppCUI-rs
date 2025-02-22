@@ -64,7 +64,7 @@
         - [Panel](chapter-3/stock-controls/panel.md)
         - [Password](chapter-3/stock-controls/password.md)
         - [PathFinder](chapter-3/stock-controls/pathfinder.md)
-        - [ProgressBar]()
+        - [ProgressBar](chapter-3/stock-controls/progressbar.md)
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
         - [Selector](chapter-3/stock-controls/selector.md)
         - [Slider]()
