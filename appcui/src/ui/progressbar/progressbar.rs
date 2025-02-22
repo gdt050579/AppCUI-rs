@@ -60,6 +60,9 @@ impl ProgressBar {
     /// p.update_progress(85);
     /// ```
     pub fn update_progress(&mut self, processed_items: u64) {
+        if self.paused {
+            self.resume();
+        }
         self.items_processed = processed_items.min(self.items_count);
         if self.items_count == 0 {
             self.proc_buf = [b'-', b'-', b'-', b'%'];
@@ -167,6 +170,12 @@ impl ProgressBar {
         }
     }
 
+    /// Returns true if the ProgressBar is paused or false otherwise
+    #[inline(always)]
+    pub fn is_paused(&self) -> bool {
+        self.paused
+    }
+
     /// Resets the progress bar internal state (items processed, timer, etc). This is usefull if you
     /// want to restart the progress bar from the beginning or if you want to reuse the same progress
     /// bar for multiple operations.
@@ -201,7 +210,11 @@ impl OnPaint for ProgressBar {
             surface.write_ascii(w - 5, 0, &self.proc_buf, attr, false);
         }
         if self.size().height > 1 {
-            surface.write_ascii(w - 8, 1, &self.eta, theme.text.focused, false);
+            if self.paused {
+                surface.write_ascii(w - 6, 1, "Paused".as_bytes(), theme.text.error, false);
+            } else {
+                surface.write_ascii(w - 8, 1, &self.eta, theme.text.focused, false);
+            }
             if w > 12 {
                 surface.write_string(0, 1, "ETA:", theme.text.normal, false);
             }

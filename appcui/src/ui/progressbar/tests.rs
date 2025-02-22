@@ -235,3 +235,37 @@ fn check_hide_percentage() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_paused() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Just running... (20% is not printed), and paused')   
+        CheckHash(0x6316D1E95B82EFCB)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:9");
+    let c = progressbar!("value: 2, x:1,y:1,w:36,h:2, total: 10, text: 'Running...', paused: true");
+    assert!(c.is_paused());
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_resume() {
+    let script = "
+        Paint.Enable(false)
+        Paint('50%, Running... text and 10 sec ETA')   
+        CheckHash(0x560946B21ADA059E)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:9");
+    let mut c = progressbar!("value: 2, x:1,y:1,w:36,h:2, total: 10, text: 'Running...', paused: true");
+    c.update_progress(5); // should call resume
+    c.update_eta_with_elapsed_time(10);
+    assert!(!c.is_paused());
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
