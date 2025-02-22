@@ -256,7 +256,7 @@ fn check_paused() {
 fn check_resume() {
     let script = "
         Paint.Enable(false)
-        Paint('50%, Running... text and 10 sec ETA')   
+        Paint('50%, Running... text and 10 sec ETA')    
         CheckHash(0x560946B21ADA059E)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
