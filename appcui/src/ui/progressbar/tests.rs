@@ -208,12 +208,28 @@ fn check_show_eta_four_day() {
 fn check_macro() {
     let script = "
         Paint.Enable(false)
-        Paint('20% + >4 days')   
+        Paint('Initial state')   
         CheckHash(0xF35890A91AA2DA45)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:9");
     let mut c = progressbar!("value: 2, x:1,y:1,w:36,h:2, total: 10, text: 'Running...'");
+    c.update_eta_with_elapsed_time(1);
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_hide_percentage() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Just running... (20% is not printed), eta is 4 seconds')   
+        CheckHash(0xA5C51B4854FAD972)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:9");
+    let mut c = progressbar!("value: 2, x:1,y:1,w:36,h:2, total: 10, text: 'Running...', flags: HidePercentage");
     c.update_eta_with_elapsed_time(1);
     w.add(c);
     a.add_window(w);

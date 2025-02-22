@@ -2,7 +2,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&["ShowDescription"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["HidePercentage"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
