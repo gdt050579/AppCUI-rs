@@ -51,6 +51,7 @@ impl ProgressBar {
 
     /// Updates the progress bar with the number of items processed so far. The progress bar will
     /// automatically calculate the percentage and ETA and will update the display.
+    /// If the progress bar is paused, calling this method will resume the progress bar.
     ///
     /// # Example
     /// ```rust
