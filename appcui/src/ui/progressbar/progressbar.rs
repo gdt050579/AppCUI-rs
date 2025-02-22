@@ -71,29 +71,27 @@ impl ProgressBar {
                 self.eta = [b'0', b'0', b':', b'0', b'0', b':', b'0', b'0'];
                 self.percentage = 100;
             } else {
-                if self.items_processed > 0xFF_FFFF_FFFF_FFFF {
-                    self.proc_buf = [b' ', b'9', b'9', b'%'];
-                    self.percentage = 99;
-                    self.update_eta();
+                if self.items_processed > 0xFFFF_FFFF_FFFF_FF00 {
+                    self.percentage = ((self.items_processed as u128 * 100u128) / self.items_count as u128) as u8;
                 } else {
                     self.percentage = ((self.items_processed * 100) / self.items_count) as u8;
-                    self.proc_buf[3] = b'%';
-                    self.proc_buf[2] = (self.percentage % 10) + 48;
-                    let proc = self.percentage / 10;
+                }
+                self.proc_buf[3] = b'%';
+                self.proc_buf[2] = (self.percentage % 10) + 48;
+                let proc = self.percentage / 10;
+                if proc > 0 {
+                    self.proc_buf[1] = (proc % 10) + 48;
+                    let proc = proc / 10;
                     if proc > 0 {
-                        self.proc_buf[1] = (proc % 10) + 48;
-                        let proc = proc / 10;
-                        if proc > 0 {
-                            self.proc_buf[1] = proc + 48;
-                        } else {
-                            self.proc_buf[0] = 32;
-                        }
+                        self.proc_buf[1] = proc + 48;
                     } else {
-                        self.proc_buf[1] = 32;
                         self.proc_buf[0] = 32;
                     }
-                    self.update_eta();
+                } else {
+                    self.proc_buf[1] = 32;
+                    self.proc_buf[0] = 32;
                 }
+                self.update_eta();
             }
         }
     }
