@@ -83,7 +83,7 @@ impl ProgressBar {
                     self.proc_buf[1] = (proc % 10) + 48;
                     let proc = proc / 10;
                     if proc > 0 {
-                        self.proc_buf[1] = proc + 48;
+                        self.proc_buf[0] = proc + 48;
                     } else {
                         self.proc_buf[0] = 32;
                     }
@@ -96,12 +96,8 @@ impl ProgressBar {
         }
     }
 
-    fn update_eta(&mut self) {
-        if self.items_processed == 0 {
-            self.eta = [b'-', b'-', b':', b'-', b'-', b':', b'-', b'-'];
-            return;
-        }
-        let elapsed = (self.start.elapsed() + self.extra_duration).as_secs();
+    #[inline(always)]
+    pub(super) fn update_eta_with_elapsed_time(&mut self, elapsed: u64) {
         let total_time = (elapsed as u128 * self.items_count as u128 / self.items_processed as u128) as u64;
         let eta = total_time - elapsed;
         if eta >= 604800 {
@@ -128,6 +124,14 @@ impl ProgressBar {
                 self.eta[7] = (seconds % 10) as u8 + 48;
             }
         }
+    }
+    fn update_eta(&mut self) {
+        if self.items_processed == 0 {
+            self.eta = [b'-', b'-', b':', b'-', b'-', b':', b'-', b'-'];
+            return;
+        }
+        let elapsed = (self.start.elapsed() + self.extra_duration).as_secs();
+        self.update_eta_with_elapsed_time(elapsed);
     }
 
     /// Returns the number of items processed so far

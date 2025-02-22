@@ -117,3 +117,89 @@ fn check_large_number_of_items() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_show_eta_for_no_items() {
+    let script = "
+        Paint.Enable(false)
+        Paint('0% + eta')   
+        CheckHash(0x47E85613777BE97)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut p = ProgressBar::new(u64::MAX,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    p.update_progress(0);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_show_eta() {
+    let script = "
+        Paint.Enable(false)
+        Paint('20% + 00:02:40')   
+        CheckHash(0xE6AB2456FCAA33CE)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut p = ProgressBar::new(10,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    p.update_progress(2);
+    p.update_eta_with_elapsed_time(40);
+    // 40 seconds for 2 items -> remaining is 160 seconds for the rest of the 8 items
+    // should print 2 min and 40 sec
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_show_eta_more_than_one_week() {
+    let script = "
+        Paint.Enable(false)
+        Paint('10% + >1 week')   
+        CheckHash(0xE238233C43771F70)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut p = ProgressBar::new(10,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    p.update_progress(1);
+    p.update_eta_with_elapsed_time(300000);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_show_eta_one_day() {
+    let script = "
+        Paint.Enable(false)
+        Paint('50% + >1 day')   
+        CheckHash(0xC976C1D0A758949)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut p = ProgressBar::new(10,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    p.update_progress(5);
+    p.update_eta_with_elapsed_time(87400);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_show_eta_four_day() {
+    let script = "
+        Paint.Enable(false)
+        Paint('20% + >4 days')   
+        CheckHash(0x699487060EFC4429)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut p = ProgressBar::new(10,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    p.update_progress(2);
+    p.update_eta_with_elapsed_time(87400);
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
