@@ -11,7 +11,7 @@
         - [Recording events](chapter-2/event_recording.md)
         - [Logging](chapter-2/logging.md)
     - [Terminals](chapter-2/terminals.md)
-        - [Windows Console]()
+        - [Windows Console](chapter-2/terminals/windows_console.md)
         - [NCurses](chapter-2/terminals/ncurses.md)
         - [Termios](chapter-2/terminals/termios.md)
     - [Screen area and sizes](chapter-2/screen.md)
