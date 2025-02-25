@@ -99,19 +99,19 @@ pub(crate) fn new() -> Theme {
             unselected: controlattr!("silver", "silver,black", "black,w", "gray", "w,black"),
         },
         markdown: MarkdownTheme {
-            text: charattr!("silver"),
-            bold: charattr!("w, flags: Bold"),
-            italic: charattr!("gray, flags: Italic"),
-            link: charattr!("blue,gray, flags: Underline"),
-            code: charattr!("green,gray"),
-            code_block: charattr!("green,gray"),
-            h1: charattr!("red,gray"),
-            h2: charattr!("blue,gray"),
-            h3: charattr!("blue,gray"),
-            ordered_list: charattr!("silver"),
-            unordered_list: charattr!("silver"),
-            table: charattr!("silver"),
-            table_header: charattr!("silver, flags: Bold")
+            text: charattr!("black"),
+            bold: charattr!("black, flags: Bold"),
+            italic: charattr!("black, flags: Italic"),
+            link: charattr!("white, gray, flags: Underline"),
+            code: charattr!("red, black"),
+            code_block: charattr!("red, black"),
+            h1: charattr!("darkred, gray"),
+            h2: charattr!("darkred, gray"),
+            h3: charattr!("darkred, gray"),
+            ordered_list: charattr!("black"),
+            unordered_list: charattr!("black"),
+            table: charattr!("black"),
+            table_header: charattr!("black, flags: Bold")
         },               
     }
 }

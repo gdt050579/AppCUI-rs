@@ -1,14 +1,15 @@
 pub mod linkheaderregistry;
 pub mod parser;
 
-use linkheaderregistry::LinkHeaderRegistry;
-use parser::{InlineElement, MarkdownElement, MarkdownParser};
-use std::cell::RefCell;
-use crate::system::Theme;
 use self::components::ScrollBars;
 use crate::prelude::*;
+use crate::system::Theme;
 use crate::ui::markdown::initialization_flags::Flags;
+use linkheaderregistry::LinkHeaderRegistry;
+use parser::{InlineElement, MarkdownElement, MarkdownParser, Table};
+use std::cell::RefCell;
 
+use std::io::Lines;
 use std::sync::Mutex;
 static DEBUG_STRING: Mutex<String> = Mutex::new(String::new());
 
@@ -129,7 +130,7 @@ impl Markdown {
         xlsurface: &mut Surface,
         prefix: Option<String>,
         link_header_registry: &mut LinkHeaderRegistry,
-        theme: &Theme
+        theme: &Theme,
     ) {
         for (i, element) in elements.iter().enumerate() {
             if i == 0 {
@@ -150,13 +151,7 @@ impl Markdown {
                 content_str
             };
 
-            xlsurface.write_string(
-                *x_pos,
-                *y_pos,
-                &formatted_content,
-                style,
-                false,
-            );
+            xlsurface.write_string(*x_pos, *y_pos, &formatted_content, style, false);
 
             *x_pos += formatted_content.chars().count() as i32;
         }
@@ -169,7 +164,7 @@ impl Markdown {
         y_pos: &mut i32,
         xlsurface: &mut Surface,
         link_header_registry: &mut LinkHeaderRegistry,
-        theme: &Theme
+        theme: &Theme,
     ) {
         let indent = *x_pos + (depth as i32) * 4;
 
@@ -202,7 +197,7 @@ impl Markdown {
                                 xlsurface,
                                 Some(format!("{}.", index)),
                                 link_header_registry,
-                                theme
+                                theme,
                             );
                             index += 1;
                             *y_pos += 1;
@@ -216,99 +211,232 @@ impl Markdown {
             _ => {}
         }
     }
-}
 
-impl OnPaint for Markdown {
-    fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
-        if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
-            self.scrollbars.paint(surface, _theme, self);
-            surface.reduce_clip_by(0, 0, 1, 1);
+    fn paint_codeblock(&self, code: &str, mut y_pos: i32, surface: &mut Surface, theme: &Theme) -> i32 {
+        let code_lines: Vec<&str> = code.lines().collect();
+        let max_width = code_lines.iter().map(|line| line.len()).max().unwrap_or(0);
+        let x_pos = self.x + 4;
+
+        for line in code_lines {
+            let formatted_line = format!(" {:width$} ", line, width = max_width);
+            surface.write_string(x_pos - 1, y_pos, &formatted_line, theme.markdown.code_block, false);
+            y_pos += 1;
         }
-        if let Some(back) = self.background {
-            surface.clear(back);
-        }
+        y_pos
+    }
 
-        // Inititialize vertical offset.
-        let mut y_pos = self.y;
+    fn paint_header(&self, content: &str, y_pos: i32, level: &usize, surface: &mut Surface, theme: &Theme) {
+        let header_style = match level {
+            1 => theme.markdown.h1,
+            2 => theme.markdown.h2,
+            _ => theme.markdown.h3,
+        };
 
-        for element in &self.elements {
-            match element {
-                MarkdownElement::Header(content, level) => {
-                    let header_style = match level {
-                        1 => _theme.markdown.h1,
-                        2 => _theme.markdown.h2,
-                        _ => _theme.markdown.h3,
-                    };
-            
-                    self.link_header_registry.borrow_mut().register_header_position(content, y_pos);
-                    surface.write_string(self.x, y_pos, content, header_style, false);
+        self.link_header_registry.borrow_mut().register_header_position(content, y_pos);
+        surface.write_string(self.x, y_pos, content, header_style, false);
+    }
+
+    fn paint_table(&self, table: &Table, y_pos: &mut i32, surface: &mut Surface, theme: &Theme) {
+        fn compute_column_widths(table: &Table) -> Vec<usize> {
+            let mut column_widths = Vec::new();
+
+            for (i, header) in table.headers.iter().enumerate() {
+                let header_len = header.iter().map(|e| e.to_string().chars().count()).sum::<usize>();
+                if column_widths.len() <= i {
+                    column_widths.push(header_len);
+                } else {
+                    column_widths[i] = column_widths[i].max(header_len);
                 }
+            }
 
-                MarkdownElement::Paragraph(content) => {
-                    let mut x_pos: i32 = self.x;
-
-                    for element in content.iter() {
-                        let style = Self::get_element_style(element, _theme);
-                        Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
-                        let content_str = element.to_string();
-
-                        surface.write_string(x_pos, y_pos, &content_str, style, false);
-                        x_pos += content_str.chars().count() as i32;
+            for row in &table.rows {
+                for (i, cell) in row.iter().enumerate() {
+                    let cell_len = cell.iter().map(|e| e.to_string().chars().count()).sum::<usize>();
+                    if column_widths.len() <= i {
+                        column_widths.push(cell_len);
+                    } else {
+                        column_widths[i] = column_widths[i].max(cell_len);
                     }
                 }
-                MarkdownElement::UnorderedList(items) => {
+            }
+
+            column_widths
+        }
+
+        let lines_count = table.rows.len() + 2; // the header and the separator
+        let column_widths = compute_column_widths(table);
+
+        let table_width: usize = column_widths.iter().sum();
+        let suplimentar_padding: usize = column_widths.len() * 3;
+
+        // draw contour
+        let mut x_pos = self.x;
+        let rect = Rect::new(
+            x_pos,
+            *y_pos,
+            x_pos + (table_width + suplimentar_padding) as i32,
+            *y_pos + 1 + lines_count as i32,
+        );
+        surface.draw_rect(rect, LineType::Single, theme.markdown.table);
+
+        // draw horizontal line
+        x_pos += 1;
+        *y_pos += 2;
+        surface.draw_horizontal_line(
+            self.x + 1,
+            *y_pos,
+            self.x + (table_width + suplimentar_padding) as i32 - 1,
+            LineType::Single,
+            theme.markdown.table,
+        );
+        *y_pos -= 1;
+
+        // write headers
+        for (i, header) in table.headers.iter().enumerate() {
+            let header_str = header.iter().map(|e| e.to_string()).collect::<String>();
+            let padded_header = format!("{:width$}", header_str, width = column_widths[i] + 2);
+            surface.write_string(x_pos, *y_pos, &padded_header, theme.markdown.table_header, false);
+            x_pos += column_widths[i] as i32 + 3;
+
+            // draw vertical line
+            surface.draw_vertical_line(x_pos - 1, *y_pos, *y_pos - 1 + lines_count as i32, LineType::Single, theme.markdown.table);
+        }
+        *y_pos += 2;
+
+        for (row_index, row) in table.rows.iter().enumerate() {
+            x_pos = self.x + 1;
+            for (i, cell) in row.iter().enumerate() {
+                let cell_str = cell.iter().map(|e| e.to_string()).collect::<String>();
+                let padded_cell = format!("{:width$}", cell_str, width = column_widths[i] + 2);
+                surface.write_string(x_pos, *y_pos, &padded_cell, theme.markdown.table, false); // shall modify if I want bold in table
+                x_pos += column_widths[i] as i32 + 3;
+                if row_index == 0 && i < (row.len() - 1) {
+                    // cross separators
+                    surface.write_char(
+                        x_pos - 1,
+                        *y_pos - 1,
+                        Character::with_attributes(SpecialChar::BoxCrossSingleLine, theme.markdown.table),
+                    );
+
+                    // horizontal separators
+                    surface.write_char(
+                        rect.left(),
+                        *y_pos - 1,
+                        Character::with_attributes(SpecialChar::BoxMidleLeft, theme.markdown.table),
+                    );
+                    surface.write_char(
+                        rect.right(),
+                        *y_pos - 1,
+                        Character::with_attributes(SpecialChar::BoxMidleRight, theme.markdown.table),
+                    );
+
+                    // vertical separators
+                    surface.write_char(
+                        x_pos - 1,
+                        rect.top(),
+                        Character::with_attributes(SpecialChar::BoxMidleTop, theme.markdown.table),
+                    );
+                    surface.write_char(
+                        x_pos - 1,
+                        rect.bottom(),
+                        Character::with_attributes(SpecialChar::BoxMidleBottom, theme.markdown.table),
+                    );
+                }
+            }
+            *y_pos += 1;
+        }
+    }
+
+    fn paint_paragraph(&self, content: &Vec<InlineElement>, y_pos: i32, surface: &mut Surface, theme: &Theme) {
+        let mut x_pos: i32 = self.x;
+
+        for element in content.iter() {
+            let style = Self::get_element_style(element, theme);
+            Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
+            let content_str = element.to_string();
+
+            surface.write_string(x_pos, y_pos, &content_str, style, false);
+            x_pos += content_str.chars().count() as i32;
+        }
+    }
+
+    fn paint_unordered_list(
+        &self,
+        items: &[parser::ListItem],
+        mut y_pos: i32,
+        surface: &mut Surface,
+        theme: &Theme,
+    ) -> i32 {
+        for item in items.iter() {
+            let mut x_pos: i32 = self.x + 4;
+
+            let elements = match item {
+                parser::ListItem::Simple(elements) => elements,
+                parser::ListItem::Nested(items) => {
+                    Self::process_nested_list(
+                        1,
+                        items,
+                        &mut x_pos,
+                        &mut y_pos,
+                        surface,
+                        &mut self.link_header_registry.borrow_mut(),
+                        theme,
+                    );
+                    continue;
+                }
+            };
+
+            for (i, element) in elements.iter().enumerate() {
+                let style = Self::get_element_style(element, theme);
+                Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
+                let content_str = element.to_string();
+
+                let formatted_content = if i == 0 {
+                    let prefix = "•";
+                    format!("{} {}", prefix, content_str).to_string()
+                } else {
+                    content_str
+                };
+
+                surface.write_string(x_pos, y_pos, &formatted_content, style, false);
+
+                x_pos += formatted_content.chars().count() as i32;
+            }
+
+            y_pos += 1;
+        }
+        y_pos
+    }
+
+    fn paint_ordered_list(
+        &self,
+        items: &[parser::ListItem],
+        mut y_pos: i32,
+        surface: &mut Surface,
+        theme: &Theme,
+    ) -> i32 {
+        let mut index = 1;
                     for item in items.iter() {
                         let mut x_pos: i32 = self.x + 4;
 
                         let elements = match item {
                             parser::ListItem::Simple(elements) => elements,
                             parser::ListItem::Nested(items) => {
-                                Self::process_nested_list(1, items, &mut x_pos, &mut y_pos, surface, &mut self.link_header_registry.borrow_mut(), _theme);
+                                Self::process_nested_list(
+                                    1,
+                                    items,
+                                    &mut x_pos,
+                                    &mut y_pos,
+                                    surface,
+                                    &mut self.link_header_registry.borrow_mut(),
+                                    theme,
+                                );
                                 continue;
                             }
                         };
 
                         for (i, element) in elements.iter().enumerate() {
-                            let style = Self::get_element_style(element, _theme);
-                            Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
-                            let content_str = element.to_string();
-
-                            let formatted_content = if i == 0 {
-                                let prefix = "•";
-                                format!("{} {}", prefix, content_str).to_string()
-                            } else {
-                                content_str
-                            };
-
-                            surface.write_string(
-                                x_pos,
-                                y_pos,
-                                &formatted_content,
-                                style,
-                                false,
-                            );
-
-                            x_pos += formatted_content.chars().count() as i32;
-                        }
-
-                        y_pos += 1;
-                    }
-                }
-                MarkdownElement::OrderedList(items) => {
-                    let mut index = 1;
-                    for item in items.iter() {
-                        let mut x_pos: i32 = self.x + 4;
-
-                        let elements = match item {
-                            parser::ListItem::Simple(elements) => elements,
-                            parser::ListItem::Nested(items) => {
-                                Self::process_nested_list(1, items, &mut x_pos, &mut y_pos, surface, &mut self.link_header_registry.borrow_mut(), _theme);
-                                continue;
-                            }
-                        };
-
-                        for (i, element) in elements.iter().enumerate() {
-                            let style = Self::get_element_style(element, _theme);
+                            let style = Self::get_element_style(element, theme);
                             Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
                             let content_str = element.to_string();
 
@@ -320,112 +448,42 @@ impl OnPaint for Markdown {
                                 content_str
                             };
 
-                            surface.write_string(
-                                x_pos,
-                                y_pos,
-                                &formatted_content,
-                                style,
-                                false,
-                            );
+                            surface.write_string(x_pos, y_pos, &formatted_content, style, false);
 
                             x_pos += formatted_content.chars().count() as i32;
                         }
 
                         y_pos += 1;
                     }
+                    y_pos
                 }
+}
+
+impl OnPaint for Markdown {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
+            self.scrollbars.paint(surface, theme, self);
+            surface.reduce_clip_by(0, 0, 1, 1);
+        }
+        if let Some(back) = self.background {
+            surface.clear(back);
+        }
+
+        // Inititialize vertical offset.
+        let mut y_pos = self.y;
+
+        for element in &self.elements {
+            match element {
+                MarkdownElement::Header(content, level) => self.paint_header(&content, y_pos, level, surface, theme),
+                MarkdownElement::Paragraph(content) => self.paint_paragraph(content, y_pos, surface, theme),
+                MarkdownElement::UnorderedList(items) => { y_pos = self.paint_unordered_list(items, y_pos, surface, theme) },
+                MarkdownElement::OrderedList(items) => { y_pos = self.paint_ordered_list(items, y_pos, surface, theme) },
                 MarkdownElement::HorizontalRule => {
-                    let width = 80;
-                    let line = "-".repeat(width as usize);
-
-                    surface.write_string(
-                        self.x,
-                        y_pos,
-                        &line,
-                        _theme.markdown.text,
-                        false,
-                    );
+                    surface.draw_horizontal_line(self.x, y_pos, 80, LineType::Single, theme.markdown.text);
                     y_pos += 1;
                 }
-                MarkdownElement::CodeBlock(code) => {
-                    let code_lines = code.lines();
-                    let x_pos = self.x + 4;
-
-                    for line in code_lines {
-                        surface.write_string(x_pos, y_pos, line, _theme.markdown.code_block, false);
-                        y_pos += 1;
-                    }
-                }
-                MarkdownElement::Table(table) => {
-                    let mut column_widths = Vec::new();
-                    let lines_count = table.rows.len() + 2; // add the header and the separation line
-
-                    for (i, header) in table.headers.iter().enumerate() {
-                        let header_len = header.iter().map(|e| e.to_string().chars().count()).sum::<usize>();
-                        if column_widths.len() <= i {
-                            column_widths.push(header_len);
-                        } else {
-                            column_widths[i] = column_widths[i].max(header_len);
-                        }
-                    }
-
-                    for row in &table.rows {
-                        for (i, cell) in row.iter().enumerate() {
-                            let cell_len = cell.iter().map(|e| e.to_string().chars().count()).sum::<usize>();
-                            if column_widths.len() <= i {
-                                column_widths.push(cell_len);
-                            } else {
-                                column_widths[i] = column_widths[i].max(cell_len);
-                            }
-                        }
-                    }
-
-                    let table_width: usize = column_widths.iter().sum();
-                    let suplimentar_padding: usize = column_widths.len() * 3;
-
-                    let mut x_pos = self.x;
-                    let rect = Rect::new(x_pos, y_pos, x_pos + (table_width + suplimentar_padding) as i32, y_pos + 1 + lines_count as i32);
-                    surface.draw_rect(rect, LineType::Ascii, _theme.markdown.table);
-
-                    x_pos += 1;
-                    y_pos += 1;
-                    for (i, header) in table.headers.iter().enumerate() {
-                        let header_str = header.iter().map(|e| e.to_string()).collect::<String>();
-                        let padded_header = format!("{:width$}", header_str, width = column_widths[i] + 2);
-                        surface.write_string(
-                            x_pos,
-                            y_pos,
-                            &padded_header,
-                            _theme.markdown.table_header,
-                            false,
-                        );
-                        x_pos += column_widths[i] as i32 + 3;
-                        
-                        let c = Character::new('|', _theme.markdown.table.foreground, _theme.markdown.table.background, _theme.markdown.table.flags);
-                        surface.fill_vertical_line(x_pos - 1, y_pos, y_pos - 1 + lines_count as i32, c);
-                    }
-                    y_pos += 1;
-                    let c = Character::new('-', _theme.markdown.table.foreground, _theme.markdown.table.background, _theme.markdown.table.flags);
-                        surface.fill_horizontal_line(self.x + 1, y_pos, self.x + (table_width + suplimentar_padding) as i32 - 1, c);
-                    y_pos += 1;
-
-                    for row in &table.rows {
-                        x_pos = self.x + 1;
-                        for (i, cell) in row.iter().enumerate() {
-                            let cell_str = cell.iter().map(|e| e.to_string()).collect::<String>();
-                            let padded_cell = format!("{:width$}", cell_str, width = column_widths[i] + 2);
-                            surface.write_string(
-                                x_pos,
-                                y_pos,
-                                &padded_cell,
-                                _theme.markdown.table,
-                                false,
-                            ); // shall modify if I want bold in table
-                            x_pos += column_widths[i] as i32 + 3;
-                        }
-                        y_pos += 1;
-                    }
-                }
+                MarkdownElement::CodeBlock(code) => y_pos = self.paint_codeblock(&code, y_pos, surface, theme),
+                MarkdownElement::Table(table) => self.paint_table(table, &mut y_pos, surface, theme),
             }
             y_pos += 1;
         }

@@ -3,17 +3,15 @@ use std::fs;
 
 fn main() -> Result<(), appcui::system::Error> {
     let file_path = "examples\\exemple.md";
-    let content = fs::read_to_string(file_path).unwrap_or_else(|_| String::new());
+    //let content = fs::read_to_string(file_path).unwrap_or_else(|_| String::new());
 
     let mut a = App::new().build()?;
-    /*
+
     let app_theme = Some(Themes::DarkGray);
     if let Some(theme) = app_theme {
         App::set_theme(Theme::new(theme));
     };
-*/
     let mut w = window!("Test,d:c,w:50,h:15,flags:sizeable");
-    // empty md control as I cannot initiali
     let mut m = markdown!("
     '
     # My Markdown Example\n\n\
@@ -64,7 +62,7 @@ fn main() -> Result<(), appcui::system::Error> {
     ',d:c,flags:ScrollBars");
 
     
-   // m = Markdown::new(&content,Layout::new("d: c"),markdown::Flags::ScrollBars,);
+    //m = Markdown::new(&content,Layout::new("d: c"),markdown::Flags::ScrollBars,);
     
     w.add(m);
     a.add_window(w);
