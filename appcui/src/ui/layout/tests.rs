@@ -232,4 +232,14 @@ fn dimension_from_basic_type() {
     assert_eq!(Dimension::from(10u16), Dimension::Absolute(10));
     assert_eq!(Dimension::from(10u32), Dimension::Absolute(10));
     assert_eq!(Dimension::from(10u64), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10i8), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10i16), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10i32), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(10i64), Dimension::Absolute(10));
+    assert_eq!(Dimension::from(-10i8), Dimension::Absolute(0));
+    assert_eq!(Dimension::from(-10i16), Dimension::Absolute(0));
+    assert_eq!(Dimension::from(-10i32), Dimension::Absolute(0));
+    assert_eq!(Dimension::from(-10i64), Dimension::Absolute(0));
+    assert_eq!(Dimension::from(5.25f32), Dimension::Percentage(5.25));
+    assert_eq!(Dimension::from(5.25f64), Dimension::Percentage(5.25));
 }
