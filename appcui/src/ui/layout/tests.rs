@@ -1,4 +1,5 @@
 use crate::ui::layout::absolute_layout::AbsoluteLayout;
+use crate::ui::layout::Coordonate;
 
 use super::Alignament;
 use super::ControlLayout;
@@ -242,4 +243,18 @@ fn dimension_from_basic_type() {
     assert_eq!(Dimension::from(-10i64), Dimension::Absolute(0));
     assert_eq!(Dimension::from(5.25f32), Dimension::Percentage(5.25));
     assert_eq!(Dimension::from(5.25f64), Dimension::Percentage(5.25));
+}
+
+
+#[test]
+fn coordonate_from_basic_type() {
+    assert_eq!(Coordonate::from(10u8), Coordonate::Absolute(10));
+    assert_eq!(Coordonate::from(-10i8), Coordonate::Absolute(-10));
+    assert_eq!(Coordonate::from(10u16), Coordonate::Absolute(10));
+    assert_eq!(Coordonate::from(-10i16), Coordonate::Absolute(-10));
+    assert_eq!(Coordonate::from(-10i32), Coordonate::Absolute(-10));
+    assert_eq!(Coordonate::from(-10i64), Coordonate::Absolute(-10));
+    assert_eq!(Coordonate::from(1.25f32), Coordonate::Percentage(1.25));
+    assert_eq!(Coordonate::from(-1.25f64), Coordonate::Percentage(-1.25));
+
 }
