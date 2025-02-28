@@ -228,6 +228,36 @@ fn layout_mode_anchor_lbr() {
 }
 
 #[test]
+fn layout_mode_anchor_lr() {
+    validate_pos!("l:5,r:7,y:0,h:10,a:t",50,30,5,0,38,10);
+    validate_pos!("l:5,r:7,y:10,h:10,a:c",50,30,5,5,38,10);
+    validate_pos!("l:5,r:7,y:20,h:10,a:b",50,30,5,10,38,10);
+    // no alignament - default is center
+    validate_pos!("l:5,r:7,y:0,h:10",50,30,5,-5,38,10);
+    
+    validate_pos!("l:10%,a:t,y:50%,r:20%,h:4",50,30,5,15,35,4);
+    validate_pos!("l:10%,a:c,y:50%,r:20%,h:4",50,30,5,13,35,4);
+    validate_pos!("l:10%,a:b,y:50%,r:20%,h:4",50,30,5,11,35,4);
+
+    validate_pos!("l:10%,a:t,y:50%,r:20%,h:50%",50,30,5,15,35,15);
+    validate_pos!("l:10%,a:c,y:50%,r:20%,h:50%",50,30,5,8,35,15);
+    validate_pos!("l:10%,a:b,y:50%,r:20%,h:50%",50,30,5,0,35,15);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_lr_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Left-Right layout mode
+    validate_pos!("l:5,r:7,y:0,h:10,a:t,x:10",50,30,5,0,38,10);
+}
+#[test]
+#[should_panic]
+fn layout_mode_anchor_lr_invalid_alignament() {
+    // this code should panic because only (top,bottom and center) alignaments can not be used in a Left-Right layout mode
+    validate_pos!("l:5,r:7,y:0,h:10,a:left",50,30,5,0,38,10);
+}
+
+#[test]
 fn dimension_from_basic_type() {
     assert_eq!(Dimension::from(10u8), Dimension::Absolute(10));
     assert_eq!(Dimension::from(10u16), Dimension::Absolute(10));
