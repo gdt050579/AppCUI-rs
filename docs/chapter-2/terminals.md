@@ -16,7 +16,7 @@ AppCUI supports various terminals (but each one comes with advantages and drawba
 | Display       | Windows Console     | NCurses             | Termios             |
 | ------------- | ------------------- | ------------------- | ------------------- |
 | Colors        | 16 (fore),16 (back) | 16 (fore),16 (back) | 16 (fore),16 (back) |
-| Bold          | Yes                 | Yes                 | -                   |
+| Bold          | -                   | Yes                 | -                   |
 | Underline     | Yes                 | Yes                 | -                   |
 | Character Set | Ascii,WTF-16        | Ascii,UTF-8         | -                   |
 | Cursor        | Yes                 | Yes                 | -                   |
@@ -78,4 +78,3 @@ By default, when using initializing a terminal, the folowing will be used:
 | Windows | Windows Console  |
 | Linux   | NCurses          |
 | Mac/OSX | Termios          |
-| Web     | N/A              |

@@ -44,9 +44,10 @@ impl CharType {
         }
     }
 }
+#[derive(Debug)]
 pub(super) struct FileMask {
     name: String,
-    extensions_hash: Vec<u32>,
+    pub(super) extensions_hash: Vec<u32>,
 }
 impl FileMask {
     fn compute_hash(buf: &[u8]) -> u32 {
@@ -63,6 +64,9 @@ impl FileMask {
         hash
     }
     fn extension_pos(buf: &[u8]) -> Option<usize> {
+        if buf.is_empty() {
+            return None;
+        }
         // search where the extension starts
         let mut idx = buf.len() - 1;
         while idx > 0 {
@@ -225,7 +229,7 @@ impl FileMask {
                     if ct == CharType::CloseSquareBracket {
                         break;
                     }
-                    start += 1;
+                    start = FileMask::skip_spaces(bytes, start + 1);
                 }
             }
             start = FileMask::skip_spaces(bytes, start + 1);

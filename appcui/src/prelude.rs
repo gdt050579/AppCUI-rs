@@ -44,6 +44,7 @@ pub use super::ui::imageviewer;
 pub use super::ui::password;
 pub use super::ui::vsplitter;
 pub use super::ui::hsplitter;
+pub use super::ui::progressbar;
 pub use super::ui::password::events::PasswordEvents;
 pub use super::ui::common::traits::*;
 pub use super::ui::components::*;
@@ -61,3 +62,6 @@ pub use super::system::*;
 pub use super::input::*;
 pub use super::dialogs;
 pub use AppCUIProcMacro::*;
+pub use super::log;
+#[cfg(debug_assertions)]
+pub use super::utils::log::write_log_to_file;

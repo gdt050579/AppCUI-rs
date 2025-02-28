@@ -114,5 +114,10 @@ pub(crate) fn new() -> Theme {
             table_header: charattr!("silver, flags: Bold"),
         },
         
+        progressbar: ProgressBarTheme {
+            background: Color::Black,
+            progress: Color::Teal,
+            text: Color::White,
+        },
     }
 }

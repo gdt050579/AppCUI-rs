@@ -128,6 +128,13 @@ pub struct MarkdownTheme {
 }
 
 #[derive(Default)]
+pub struct ProgressBarTheme {
+    pub background: Color,
+    pub progress: Color,
+    pub text: Color,
+}
+
+#[derive(Default)]
 pub struct Theme {
     pub accordion: AccordionTheme,
     pub desktop: DesktopTheme,
@@ -148,6 +155,7 @@ pub struct Theme {
     pub header: HeaderTheme,
     pub toggle_button: ToggleButtonTheme,
     pub markdown: MarkdownTheme,
+    pub progressbar: ProgressBarTheme,
 }
 impl Theme {
     pub fn new(theme: Themes) -> Self {

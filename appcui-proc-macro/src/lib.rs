@@ -557,3 +557,8 @@ pub fn treeview(input: TokenStream) -> TokenStream {
 pub fn markdown(input: TokenStream) -> TokenStream {
     crate::controls::markdown::create(input)
 }
+
+#[proc_macro]
+pub fn progressbar(input: TokenStream) -> TokenStream {
+    crate::controls::progressbar::create(input)
+}

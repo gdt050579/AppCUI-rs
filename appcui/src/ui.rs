@@ -37,6 +37,7 @@ pub mod togglebutton;
 pub mod markdown;
 pub mod pathfinder;
 pub mod treeview;
+pub mod progressbar;
 
 // re-export
 pub use common::ControlBase;
@@ -74,3 +75,4 @@ pub use togglebutton::ToggleButton;
 pub use markdown::Markdown;
 pub use pathfinder::PathFinder;
 pub use treeview::TreeView;
+pub use progressbar::ProgressBar;

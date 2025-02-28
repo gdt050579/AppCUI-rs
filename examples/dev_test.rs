@@ -1,5 +1,6 @@
 use appcui::prelude::*;
 
+
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
 
