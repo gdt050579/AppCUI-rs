@@ -36,8 +36,11 @@ pub struct TextArea {
     cursor: Cursor,
     selection: Selection,
 
-    // Line sizes
+    // Line sizes in bytes
     line_sizes: Vec<u32>,
+    // Line sizes in characters
+    line_character_counts: Vec<u32>,
+    // Max line size, right now in bytes, needs to be changed to character counts
     max_line_size: u32,
 
     // LineNumberBar size
@@ -58,19 +61,234 @@ pub struct TextArea {
 
 impl TextArea {
 
+    pub fn move_cursor_vertical(&mut self, no_of_rows: i32) {
+        let new_position = self.cursor.pos_y as i32 + no_of_rows;
+        
+        if new_position < 0 {
+            let update_offset = new_position + self.line_offset as i32; 
+
+            self.cursor.pos_y = 0;
+
+            if update_offset > 0 {
+                self.line_offset = update_offset as u32;
+            }
+            else {
+                self.line_offset = 0;
+            }
+        }
+        else if new_position >= self.size().height as i32 {
+            self.cursor.pos_y = self.size().height as usize - 1;
+            
+            let mut update_offset = new_position - self.size().height as i32 + 1 + self.line_offset as i32;
+            
+            if update_offset > self.line_character_counts.len() as i32 - self.size().height as i32 {
+                update_offset = self.line_character_counts.len() as i32 - self.size().height as i32;
+            }
+
+            self.line_offset = update_offset as u32;
+        }
+        else {
+            self.cursor.pos_y = new_position as usize;
+            if self.line_offset + self.cursor.pos_y as u32 >= self.line_character_counts.len() as u32 - 1 {
+                self.cursor.pos_y = self.line_character_counts.len() - self.line_offset as usize - 1;
+            }
+        }
+        self.update_scrollbar_pos();
+    }
+
+    pub fn move_cursor_horizontal(&mut self, no_collumns: i32) {
+        let mut new_position = self.cursor.pos_x as i32 + self.row_offset as i32 + no_collumns;
+
+        // The number of column left moves is bigger than the position in the line, needing to go upwards
+        if new_position < self.line_number_bar_size as i32 {
+            // Current row, the offset of the first line printed + the row cursor position
+            let mut current_row = self.line_offset + self.cursor.pos_y as u32;
+            
+            // Going up while we are still on a valid row
+            while current_row > 0 && new_position < self.line_number_bar_size as i32 {
+                
+                // Going a row above
+                current_row -= 1;
+
+                // Adding the row size of the current row 
+                new_position = new_position + self.line_character_counts[current_row as usize] as i32;
+            }
+
+            // Too much left move, setting to pos (0, 0) 
+            if new_position < self.line_number_bar_size as i32 {
+                // Updating the cursor 
+                self.cursor.pos_x = self.line_number_bar_size as i32 as usize;
+                self.cursor.pos_y = 0;
+                
+                // Updating the view as well
+                self.line_offset = 0;
+                self.row_offset = 0;
+            }
+            // We can change the position to pos (current_row, new_position)
+            else {
+                // We need to check if the line we landed on was already on the screen
+                // If yes, we do not need to update the line_offset
+                if current_row < self.line_offset {
+                    self.line_offset = current_row;
+                }
+                // Updating the cursor position on vertical
+                self.cursor.pos_y = current_row as usize - self.line_offset as usize;
+
+                // We need to check if the row we landed on was already on the screen
+                // The position is not on the screen, setting the cursor row_offset to the new position
+                if !(new_position as u32 >= self.row_offset && new_position < self.size().width as i32 + self.row_offset as i32) {
+                    if new_position < self.size().width as i32 {
+                        self.row_offset = new_position as u32;
+                    }
+                    else {
+                        self.row_offset = new_position as u32 - self.size().width as u32 + 1;
+                    }
+                }
+                // Updating the cursor position on horizontal
+                self.cursor.pos_x = new_position as usize - self.row_offset as usize;
+            }
+        }
+        // The number of column right moves will end up on a row below
+        else if new_position as u32 >= self.line_character_counts[self.line_offset as usize + self.cursor.pos_y as usize] {
+            // Current row, the offset of the first line printed + the row cursor position
+            let mut current_row = self.line_offset + self.cursor.pos_y as u32;
+
+            // The number of position will needed, without the ones available in the current line which we know is not enough
+            new_position = (new_position as u32 - self.line_character_counts[current_row as usize]) as i32;
+            
+            // Going to the next row
+            current_row += 1;
+            // Going up while we are still on a valid row
+            while current_row < self.line_character_counts.len() as u32 {
+                
+                // Checking if the new position will land on the current row 
+                if new_position <= self.line_character_counts[current_row as usize] as i32 {
+                    break;
+                }
+                // Otherwise, counting the positions before going a row below
+                else {
+                    new_position -= self.line_character_counts[current_row as usize] as i32;
+                }
+
+                // Going a row below
+                current_row += 1;
+            }
+            
+            // Too much right move, setting to pos (last_line, last_char_in_line) 
+            if current_row == self.line_character_counts.len() as u32 {
+                current_row = self.line_character_counts.len() as u32 - 1;
+                new_position = self.line_character_counts[current_row as usize] as i32 - 1;
+            }
+
+            // Updating the line offset, which will be 0 if the text fits enterely on the screen, otherwise last_line - line_capacity 
+            let tmp_line_offset = current_row as i32 - self.size().height as i32 + 1;
+            if tmp_line_offset < 0 {
+                self.line_offset = 0;
+            }
+            else {
+                self.line_offset = tmp_line_offset as u32;
+            }
+            // Updating the cursor position vertically
+            self.cursor.pos_y = current_row as usize - self.line_offset as usize;
+
+            // Checking if th line fits enterely on the screen
+            if (new_position as u32) < self.size().width as u32 {
+                self.cursor.pos_x = new_position as usize;
+                self.row_offset = 0;
+            }
+            // The line does not fit on the screen, we need to determine the offset for the line view
+            else {
+                let tmp_row_offset = new_position as i32 - self.size().width as i32;
+                if tmp_row_offset < 0 {
+                    self.row_offset = 0;
+                }
+                else {
+                    self.row_offset = tmp_row_offset as u32;
+                }
+                self.cursor.pos_x = new_position as usize - self.row_offset as usize;
+            }
+        }
+        // The line stays the same, updating only the row_offset
+        else {
+            
+            // Checking if we need to update the row_offset
+            // If the character is already on screen, no need to update
+
+            // We consider a character a screen if row_offset <= new_position < row_offset + screen_width
+            if !(self.row_offset <= new_position as u32 && (new_position as u32) < self.row_offset as u32 + self.size().width as u32) {
+                
+                // We need to update position, we will check where the direction on movement
+                // Checking if the movement is to the left
+                if self.row_offset > new_position as u32 {
+                    let tmp_row_offset = new_position as i32;
+                    if tmp_row_offset < 0 {
+                        self.row_offset = new_position as u32;
+                    }
+                    else {
+                        self.row_offset = tmp_row_offset as u32;
+                    }
+                }
+                // The movement is to the right, we need to increase the offset
+                else {
+                    let tmp_row_offset = new_position as i32 - self.size().width as i32 + 1;
+                    if tmp_row_offset < 0 {
+                        self.row_offset = new_position as u32;
+                    }
+                    else {
+                        self.row_offset = tmp_row_offset as u32;
+                    }
+                }
+            }
+            
+            self.cursor.pos_x = new_position as usize - self.row_offset as usize;
+        }
+
+        // if self.flags.contains(Flags::ShowLineNumber) {
+        //     self.cursor.pos_x += self.line_number_bar_size as usize;
+        // }
+
+        self.update_scrollbar_pos();
+
+        let _ = self.file.write_all(format!("Cursor {:?}\n", self.cursor).as_bytes());
+    }
+
+    fn get_cursor_position_in_line(line_text: &str, row_offset: usize, cursor_index: usize, linebar_size: usize) -> usize {
+        let cursor_offset = row_offset + cursor_index - linebar_size;
+
+        let char_index = line_text.char_indices().nth(cursor_offset).map(|(i, _)| i);
+        if let Some(bytes_index) = char_index {
+            return bytes_index;
+        }
+        else {
+            return usize::MAX;
+        }
+    }
     fn get_absolute_position(&mut self) -> u32 {
+        let cursor_absolute_position;
+        let _byte_index_in_line;
+
+        (cursor_absolute_position, _byte_index_in_line) = self.get_absolute_position_verbose();
+
+        cursor_absolute_position
+    }
+    fn get_absolute_position_verbose(&mut self) -> (u32, u32) {
         let mut cursor_absolute_position = 0;
+
+        // Here I count the byte sizes of that lines above
         for i in 0..self.line_offset + self.cursor.pos_y as u32 {
             cursor_absolute_position += self.line_sizes[i as usize];
         }
-        cursor_absolute_position += self.row_offset + self.cursor.pos_x as u32;
 
-        // We need to remove the LineNumberBar size from Cursor Position
-        if self.flags.contains(Flags::ShowLineNumber) {
-            cursor_absolute_position -= self.line_number_bar_size;
+        // Here I need the absolute position of that character, therefore I need to slice 
+        // the text and extract the absolute position
+        let line_text = &self.text[cursor_absolute_position as usize .. (cursor_absolute_position + self.line_sizes[self.line_offset as usize + self.cursor.pos_y as usize]) as usize];
+        
+        let byte_index_in_line = Self::get_cursor_position_in_line(line_text, self.row_offset as usize, self.cursor.pos_x as usize, self.line_number_bar_size as usize);
+        if byte_index_in_line != usize::MAX {
+            cursor_absolute_position += byte_index_in_line as u32;
         }
 
-        cursor_absolute_position
+        (cursor_absolute_position, byte_index_in_line as u32)
     }
 
     fn reset_selection(&mut self) {
@@ -87,21 +305,21 @@ impl TextArea {
         }
     }
 
-    fn parse_text_in_lines(&mut self, text: &str, line_sizes: &mut Vec<i32>) {
-        let mut current_offset = 0;
-        for ch in text.as_bytes() {
-            current_offset = current_offset + 1;
-            if *ch == b'\n' {
-                line_sizes.push(current_offset);
-                current_offset = 0;
-            }
-        }
-        if current_offset != 0 {
-            line_sizes.push(current_offset);
+    #[inline(always)]
+    fn parse_text_in_lines(&mut self, text: &str, line_sizes: &mut Vec<u32>, line_character_counts: &mut Vec<u32>) {
+        for line in text.lines() {
+            line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
+            line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
         }
 
-        for line in line_sizes {
-            _ = self.file.write_all((format!("Line size: {line}")).as_bytes());
+        if text.ends_with("\n") {
+            line_sizes.push(0);
+            line_character_counts.push(0);
+        } else {
+            let line_count = line_character_counts.iter().count();
+            
+            line_sizes[line_count - 1] -= 1;
+            line_character_counts[line_count - 1] -= 1;
         }
     }
 
@@ -146,12 +364,13 @@ impl TextArea {
                     },
             ),
             flags,
-            text: text.to_string().replace('\t', "  "),
+            text: text.to_string().replace('\t', " "),
 
             cursor: Cursor { pos_x: 0, pos_y: 0, pressed: false},
             selection: Selection {pos_start: 0, pos_end: 0, direction: SelectionDirection::None},
 
             line_sizes: Vec::new(),
+            line_character_counts: Vec::new(),
             max_line_size: 0,
 
             row_offset: 0,
@@ -167,37 +386,36 @@ impl TextArea {
             scrollbar_y: 0,
         };
 
-        if !control.text.ends_with('\n') {
-            control.text += "\n";
-        }
-
         if !flags.contains(Flags::ShowLineNumber) {
             control.line_number_bar_size = 0;
         }
 
-        let mut current_offset = 0;
-        for ch in control.text.as_bytes() {
-            current_offset = current_offset + 1;
-            if *ch == b'\n' {
-                control.line_sizes.push(current_offset);
-                current_offset = 0;
-            }
+        if !control.text.ends_with('\n') {
+            control.text += "\n";
         }
-        if current_offset != 0 {
-            control.line_sizes.push(current_offset);
+
+        for line in text.lines() {
+            control.line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
+            control.line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
         }
+
         control.update_max_line_size();
         control.update_line_number_tab_size();
         
         control
     }
 
-    
+    #[inline(always)]
+    fn update_scrollbar_data(&mut self) {
+        // Setting the new scrollbar values as the current coordinates
+        self.scrollbar_x = self.scrollbars.horizontal_index() as u32;
+        self.scrollbar_y = self.scrollbars.vertical_index() as u32;
+    }
     #[inline(always)]
     fn update_scrollbar_pos(&mut self) {
         self.scrollbars.set_indexes((self.row_offset as usize) as u64, (self.line_offset as usize) as u64);
+        self.update_scrollbar_data();
     }
-
     fn update_view_from_scrollbars(&mut self, vertical: i32, horizontal: i32) {
         // In this function we need to change the horizontal and vertical view, 
         // without changing the position of the cursor, if possible. If the cursor is out of view,
@@ -274,262 +492,61 @@ impl TextArea {
         }
     }
 
-    pub fn move_cursor_vertical(&mut self, no_of_rows: i32) {
-        let new_position = self.cursor.pos_y as i32 + no_of_rows;
-        
-        if new_position < 0 {
-            let update_offset = new_position + self.line_offset as i32; 
-
-            self.cursor.pos_y = 0;
-
-            if update_offset > 0 {
-                self.line_offset = update_offset as u32;
-            }
-            else {
-                self.line_offset = 0;
-            }
-        }
-        else if new_position >= self.size().height as i32 {
-            self.cursor.pos_y = self.size().height as usize - 1;
-            
-            let mut update_offset = new_position - self.size().height as i32 + 1 + self.line_offset as i32;
-            
-            if update_offset > self.line_sizes.len() as i32 - self.size().height as i32 {
-                update_offset = self.line_sizes.len() as i32 - self.size().height as i32;
-            }
-
-            self.line_offset = update_offset as u32;
-        }
-        else {
-            self.cursor.pos_y = new_position as usize;
-            if self.line_offset + self.cursor.pos_y as u32 >= self.line_sizes.len() as u32 - 1 {
-                self.cursor.pos_y = self.line_sizes.len() - self.line_offset as usize - 1;
-            }
-        }
-        self.update_scrollbar_pos();
-    }
-
-    pub fn move_cursor_horizontal(&mut self, no_collumns: i32) {
-        let mut new_position = self.cursor.pos_x as i32 + self.row_offset as i32 + no_collumns;
-
-        // The number of column left moves is bigger than the position in the line, needing to go upwards
-        if new_position < self.line_number_bar_size as i32 {
-            // Current row, the offset of the first line printed + the row cursor position
-            let mut current_row = self.line_offset + self.cursor.pos_y as u32;
-            
-            // Going up while we are still on a valid row
-            while current_row > 0 && new_position < self.line_number_bar_size as i32 {
-                
-                // Going a row above
-                current_row -= 1;
-
-                // Adding the row size of the current row 
-                new_position = new_position + self.line_sizes[current_row as usize] as i32;
-            }
-
-            // Too much left move, setting to pos (0, 0) 
-            if new_position < self.line_number_bar_size as i32 {
-                // Updating the cursor 
-                self.cursor.pos_x = self.line_number_bar_size as i32 as usize;
-                self.cursor.pos_y = 0;
-                
-                // Updating the view as well
-                self.line_offset = 0;
-                self.row_offset = 0;
-            }
-            // We can change the position to pos (current_row, new_position)
-            else {
-                // We need to check if the line we landed on was already on the screen
-                // If yes, we do not need to update the line_offset
-                if current_row < self.line_offset {
-                    self.line_offset = current_row;
-                }
-                // Updating the cursor position on vertical
-                self.cursor.pos_y = current_row as usize - self.line_offset as usize;
-
-                // We need to check if the row we landed on was already on the screen
-                // The position is not on the screen, setting the cursor row_offset to the new position
-                if !(new_position as u32 >= self.row_offset && new_position < self.size().width as i32 + self.row_offset as i32) {
-                    if new_position < self.size().width as i32 {
-                        self.row_offset = new_position as u32;
-                    }
-                    else {
-                        self.row_offset = new_position as u32 - self.size().width as u32 + 1;
-                    }
-                }
-                // Updating the cursor position on horizontal
-                self.cursor.pos_x = new_position as usize - self.row_offset as usize;
-            }
-        }
-        // The number of column right moves will end up on a row below
-        else if new_position as u32 >= self.line_sizes[self.line_offset as usize + self.cursor.pos_y as usize] {
-            // Current row, the offset of the first line printed + the row cursor position
-            let mut current_row = self.line_offset + self.cursor.pos_y as u32;
-
-            // The number of position will needed, without the ones available in the current line which we know is not enough
-            new_position = (new_position as u32 - self.line_sizes[current_row as usize]) as i32;
-            
-            // Going to the next row
-            current_row += 1;
-            // Going up while we are still on a valid row
-            while current_row < self.line_sizes.len() as u32 {
-                
-                // Checking if the new position will land on the current row 
-                if new_position <= self.line_sizes[current_row as usize] as i32 {
-                    break;
-                }
-                // Otherwise, counting the positions before going a row below
-                else {
-                    new_position -= self.line_sizes[current_row as usize] as i32;
-                }
-
-                // Going a row below
-                current_row += 1;
-            }
-            
-            // Too much right move, setting to pos (last_line, last_char_in_line) 
-            if current_row == self.line_sizes.len() as u32 {
-                current_row = self.line_sizes.len() as u32 - 1;
-                new_position = self.line_sizes[current_row as usize] as i32 - 1;
-            }
-
-            // Updating the line offset, which will be 0 if the text fits enterely on the screen, otherwise last_line - line_capacity 
-            let tmp_line_offset = current_row as i32 - self.size().height as i32 + 1;
-            if tmp_line_offset < 0 {
-                self.line_offset = 0;
-            }
-            else {
-                self.line_offset = tmp_line_offset as u32;
-            }
-            // Updating the cursor position vertically
-            self.cursor.pos_y = current_row as usize - self.line_offset as usize;
-
-            // Checking if th line fits enterely on the screen
-            if (new_position as u32) < self.size().width as u32 {
-                self.cursor.pos_x = new_position as usize;
-                self.row_offset = 0;
-            }
-            // The line does not fit on the screen, we need to determine the offset for the line view
-            else {
-                let tmp_row_offset = new_position as i32 - self.size().width as i32;
-                if tmp_row_offset < 0 {
-                    self.row_offset = 0;
-                }
-                else {
-                    self.row_offset = tmp_row_offset as u32;
-                }
-                self.cursor.pos_x = new_position as usize - self.row_offset as usize;
-            }
-        }
-        // The line stays the same, updating only the row_offset
-        else {
-            
-            // Checking if we need to update the row_offset
-            // If the character is already on screen, no need to update
-
-            // We consider a character a screen if row_offset <= new_position < row_offset + screen_width
-            if !(self.row_offset <= new_position as u32 && (new_position as u32) < self.row_offset as u32 + self.size().width as u32) {
-                
-                // We need to update position, we will check where the direction on movement
-                // Checking if the movement is to the left
-                if self.row_offset > new_position as u32 {
-                    let tmp_row_offset = new_position as i32;
-                    if tmp_row_offset < 0 {
-                        self.row_offset = new_position as u32;
-                    }
-                    else {
-                        self.row_offset = tmp_row_offset as u32;
-                    }
-                }
-                // The movement is to the right, we need to increase the offset
-                else {
-                    let tmp_row_offset = new_position as i32 - self.size().width as i32 + 1;
-                    if tmp_row_offset < 0 {
-                        self.row_offset = new_position as u32;
-                    }
-                    else {
-                        self.row_offset = tmp_row_offset as u32;
-                    }
-                }
-            }
-            
-            self.cursor.pos_x = new_position as usize - self.row_offset as usize;
-        }
-
-        // if self.flags.contains(Flags::ShowLineNumber) {
-        //     self.cursor.pos_x += self.line_number_bar_size as usize;
-        // }
-
-        self.update_scrollbar_pos();
-
-        let _ = self.file.write_all(format!("Cursor {:?}\n", self.cursor).as_bytes());
-    }
-
-    pub fn insert_char(&mut self, character: char) {
-        // First we need to calculate the absolute position in the text for the cursor
-        // TODO: this seems slow to do considering text editing is the main purpose, we need to cache this information
-        let cursor_absolute_position = self.get_absolute_position();
-        
-        // Inserting char, updating line size
-        self.text.insert(cursor_absolute_position as usize, character);
-        self.line_sizes[self.line_offset as usize + self.cursor.pos_y] += 1;
-        
-        // Move cursor to the newly added character
-        self.move_cursor_horizontal(1);
-
-        self.update_max_line_size();
-    }
-
     pub fn remove_char_back(&mut self) {
         // First we need to calculate the absolute position in the text for the cursor
-        let mut cursor_absolute_position = self.get_absolute_position();
+        let cursor_absolute_position_initial = self.get_absolute_position() as usize;
         
         // If we press Backspace but we do not have any character to the left, we do nothing
-        if cursor_absolute_position != 0 {
+        if cursor_absolute_position_initial != 0 {
             // The position we need to remove
-            cursor_absolute_position -= 1;
+            self.move_cursor_horizontal(-1);
+            let cursor_absolute_position_new = self.get_absolute_position() as usize;
+            
+            log!("Info", "Removing data from index {} to {}", cursor_absolute_position_new, cursor_absolute_position_initial);
+
+            let char_size = cursor_absolute_position_initial - cursor_absolute_position_new;
+
+            log!("Info", "Removed text: {}", &self.text[cursor_absolute_position_new..cursor_absolute_position_initial]);
 
             // If its a newline, we need to merge 2 rows
-            if self.text.as_bytes()[cursor_absolute_position as usize] == b'\n' {
-                self.text.remove(cursor_absolute_position as usize);
-                self.line_sizes[self.line_offset as usize + self.cursor.pos_y] -= 1;
-                self.line_sizes[self.line_offset as usize + self.cursor.pos_y - 1] += self.line_sizes[self.line_offset as usize + self.cursor.pos_y];
+            if self.text.as_bytes()[cursor_absolute_position_new as usize] == b'\n' {   
+                log!("Info", "Removing newline");
 
-                let tmp = self.line_sizes[self.line_offset as usize + self.cursor.pos_y];
-                self.line_sizes.remove(self.line_offset as usize + self.cursor.pos_y);
-                self.move_cursor_horizontal(-1 - tmp as i32);
+                self.line_sizes[self.line_offset as usize + self.cursor.pos_y] -= char_size as u32;
+                self.line_sizes[self.line_offset as usize + self.cursor.pos_y] += self.line_sizes[self.line_offset as usize + self.cursor.pos_y + 1];
+                self.line_sizes.remove(self.line_offset as usize + self.cursor.pos_y + 1);
 
-                self.update_line_number_tab_size();
+                self.line_character_counts[self.line_offset as usize + self.cursor.pos_y] -= 1;
+                self.line_character_counts[self.line_offset as usize + self.cursor.pos_y] += self.line_character_counts[self.line_offset as usize + self.cursor.pos_y + 1];
+                self.line_character_counts.remove(self.line_offset as usize + self.cursor.pos_y + 1);
+                
             }
             else {
-                self.text.remove(cursor_absolute_position as usize);
-                self.line_sizes[self.line_offset as usize + self.cursor.pos_y] -= 1;
-                self.move_cursor_horizontal(-1);
+                self.line_sizes[self.line_offset as usize + self.cursor.pos_y] -= char_size as u32;
+                self.line_character_counts[self.line_offset as usize + self.cursor.pos_y] -= 1;
             }
 
+            self.text.drain(cursor_absolute_position_new..cursor_absolute_position_initial);
+            
+            log!("Info", "Text after deletion: {}", self.text);
+            
+            self.update_line_number_tab_size();
             self.update_max_line_size();
         }
     }
 
     pub fn remove_char_front(&mut self) {
-        let cursor_absolute_position = self.get_absolute_position();
-        
-        if cursor_absolute_position < self.text.len() as u32 - 1 {
-            if self.text.as_bytes()[cursor_absolute_position as usize] == b'\n' {
-                self.text.remove(cursor_absolute_position as usize);
-                self.line_sizes[self.line_offset as usize + self.cursor.pos_y] -= 1;
-                self.line_sizes[self.line_offset as usize + self.cursor.pos_y] += self.line_sizes[self.line_offset as usize + self.cursor.pos_y + 1];
-                self.line_sizes.remove(self.line_offset as usize + self.cursor.pos_y + 1);
 
-                self.update_line_number_tab_size();
-            }
-            else {
-                self.text.remove(cursor_absolute_position as usize);
-                self.line_sizes[self.line_offset as usize + self.cursor.pos_y] -= 1;
-            }
+        let current_line_number = self.line_offset as usize + self.cursor.pos_y;
+        if current_line_number == self.line_sizes.len() - 1 {
+            let position_in_line = self.row_offset as usize + self.cursor.pos_x;
 
-            self.update_max_line_size();
+            if self.line_character_counts[current_line_number] == 0 || position_in_line == self.line_character_counts[current_line_number] as usize - 1 {
+                return;
+            }
         }
+        self.move_cursor_horizontal(1);
+        self.remove_char_back();
     }
 
     fn update_scroll_pos_from_scrollbars(&mut self) {
@@ -538,14 +555,12 @@ impl TextArea {
         let new_pos_vertical = self.scrollbars.vertical_index() as i32 - self.scrollbar_y as i32;
         let new_pos_horizontal = self.scrollbars.horizontal_index() as i32 - self.scrollbar_x as i32;
 
+        log!("Info", "Scrollbar data y: {}, x: {}", self.scrollbars.vertical_index(), self.scrollbars.horizontal_index());
         log!("Info", "Scrollbar update direction V={}, H={}", new_pos_vertical, new_pos_horizontal);
 
         // Updating the view based on the direction
         self.update_view_from_scrollbars(new_pos_vertical, new_pos_horizontal);
-
-        // Setting the new scrollbar values as the current coordinates
-        self.scrollbar_x = self.scrollbars.horizontal_index() as u32;
-        self.scrollbar_y = self.scrollbars.vertical_index() as u32;
+        self.update_scrollbar_data();
     }
 
     pub fn remove_text_selection(&mut self, pos_start: usize, pos_end: usize) {
@@ -635,82 +650,63 @@ impl TextArea {
         }
     }
 
-    pub fn insert_newline(&mut self) {
-        // First we need to calculate the absolute position in the text for the cursor
-        let cursor_absolute_position = self.get_absolute_position();
-
-        let mut position_in_line = self.row_offset + self.cursor.pos_x as u32;
-        if self.flags.contains(Flags::ShowLineNumber) {
-            position_in_line -= self.line_number_bar_size;
-        }
+    #[inline(always)]
+    fn update_lines_after_insert(destination_line_sizes: &mut Vec<u32>, line_index: usize, insert_index: u32, new_text_line_sizes: &Vec<u32>) {
+        // Splitting the line into 2, [0, position] + (position , line_size]
+        destination_line_sizes.insert(line_index + 1, destination_line_sizes[line_index] - insert_index);
+        destination_line_sizes[line_index] = insert_index;
         
-        let line_index = self.line_offset as usize + self.cursor.pos_y;
+        // Adding the first line of the inserted text to the original position
+        destination_line_sizes[line_index] += new_text_line_sizes[0] as u32;
+
+        // Adding the last line of the inserted text to the newly added line
+        destination_line_sizes[line_index + 1] += new_text_line_sizes[new_text_line_sizes.len() - 1] as u32;
         
-        // Inserting the character for newline in the text, updating the line_size
-        self.text.insert(cursor_absolute_position as usize, '\n');
-        self.line_sizes[line_index] += 1;
-
-        // Splitting the line into 2, [0, position + 1] + (position + 1, line_size]
-        // The + 1 is in fact the '\n' added
-        self.line_sizes.insert(line_index + 1, self.line_sizes[line_index] - position_in_line - 1);
-        self.line_sizes[line_index] = position_in_line + 1;
-
-        self.move_cursor_horizontal(1);
-
-        self.update_max_line_size();
-        self.update_line_number_tab_size();
+        // Inserting the new text in between the spliced line
+        destination_line_sizes.splice(line_index..line_index, new_text_line_sizes[1 .. new_text_line_sizes.len() - 1].iter().cloned());
     }
-
     pub fn insert_text(&mut self, text: &str) {
         if text.contains('\n') {
-            // First we parse the text in lines
-            let mut line_sizes : Vec<i32> = Vec::new();
-            self.parse_text_in_lines(text, &mut line_sizes);
-
             // We need to calculate the absolute position in the text for the cursor and the position in line
-            let mut cursor_absolute_position = 0;
-            for i in 0..self.line_offset + self.cursor.pos_y as u32 {
-                cursor_absolute_position += self.line_sizes[i as usize];
-            }
-            let position_in_line = self.row_offset + self.cursor.pos_x as u32;
-            cursor_absolute_position += position_in_line;
+            let cursor_absolute_position;
+            let byte_index_in_line;
+            (cursor_absolute_position, byte_index_in_line) = self.get_absolute_position_verbose();
 
             let line_index = self.line_offset as usize + self.cursor.pos_y;
+            let character_index = self.row_offset as usize + self.cursor.pos_x;
 
+            log!("Info", "Insert text after: {}", &self.text[0 .. cursor_absolute_position as usize]);
             // Adding the text given as parameter
             self.text.insert_str(cursor_absolute_position as usize, text);
 
-            // Splitting the line into 2, [0, position] + (position , line_size]
-            self.line_sizes.insert(line_index + 1, self.line_sizes[line_index] - position_in_line);
-            self.line_sizes[line_index] = position_in_line;
-            
-            self.line_sizes[line_index] += line_sizes[0] as u32;
-            self.line_sizes[line_index + 1] += line_sizes[line_sizes.len() - 1] as u32;
-            
-            for i in 1..line_sizes.len() - 1 {
-                self.line_sizes.insert(line_index + i, line_sizes[i] as u32);
+            // First we parse the text in lines
+            let mut line_sizes : Vec<u32> = Vec::new();
+            let mut line_character_counts : Vec<u32> = Vec::new();
+            self.parse_text_in_lines(text, &mut line_sizes, &mut line_character_counts);
+
+            for it in 0..line_sizes.len() {
+                log!("Info", "Line size {}: {}", it, line_sizes[it]);
+                log!("Info", "Line char count {}: {}", it, line_character_counts[it]);
             }
 
-            self.update_line_number_tab_size();
+            TextArea::update_lines_after_insert(&mut self.line_sizes, line_index, byte_index_in_line, &line_sizes);
+            TextArea::update_lines_after_insert(&mut self.line_character_counts, line_index, character_index as u32, &line_character_counts);
         }
         else {
-            // We need to calculate the absolute position in the text for the cursor and the position in line
-            let mut cursor_absolute_position = 0;
-            for i in 0..self.line_offset + self.cursor.pos_y as u32 {
-                cursor_absolute_position += self.line_sizes[i as usize];
-            }
-            let position_in_line = self.row_offset + self.cursor.pos_x as u32;
-            cursor_absolute_position += position_in_line;
-
+            let cursor_absolute_position = self.get_absolute_position();
             let line_index = self.line_offset as usize + self.cursor.pos_y;
 
             // Adding the text given as parameter
             self.text.insert_str(cursor_absolute_position as usize, text);
 
             self.line_sizes[line_index] += text.len() as u32;
+            self.line_character_counts[line_index] += text.chars().count() as u32;
+
+            log!("Info", "Moving cursor by {} horizontal", text.chars().count());
         }
-    
+
         self.update_max_line_size();
+        self.update_line_number_tab_size();
     }
 }
 
@@ -748,6 +744,11 @@ impl OnPaint for TextArea {
             let current_offset = &self.line_sizes[it];
 
             if it >= self.line_offset as usize + self.size().height as usize {
+                break;
+            }
+
+            if initial_offset + *current_offset > self.text.len() as u32 {
+                log!("Error", "Attempted to access string data from initial {} + current {} while size: {}", initial_offset, *current_offset, self.text.len());
                 break;
             }
             
@@ -1122,7 +1123,7 @@ impl OnKeyPressed for TextArea {
 
                     if let Some(clipboard_data) = RuntimeManager::get().terminal().get_clipboard_text() {
                         self.insert_text(&clipboard_data);
-                        self.move_cursor_horizontal(clipboard_data.len() as i32);
+                        self.move_cursor_horizontal(clipboard_data.chars().count() as i32);
                     }
                     return EventProcessStatus::Processed;
                 }
@@ -1172,7 +1173,9 @@ impl OnKeyPressed for TextArea {
                 if !self.flags.contains(Flags::ReadOnly) {
                     self.reposition_cursor();
 
-                    self.insert_newline();
+                    self.insert_text("\n");
+                    self.move_cursor_horizontal(1);
+                    
                     return EventProcessStatus::Processed;
                 }
             }
@@ -1186,7 +1189,9 @@ impl OnKeyPressed for TextArea {
 
                 self.reset_selection();
 
-                self.insert_char(character);
+                self.insert_text(&character.to_string());
+                self.move_cursor_horizontal(1);
+
                 return EventProcessStatus::Processed;
             }
         }

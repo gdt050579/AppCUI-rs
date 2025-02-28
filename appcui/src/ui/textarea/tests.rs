@@ -510,9 +510,10 @@ fn check_paste_1() {
 fn check_paste_2() {
     let script = "
         
-        Paint.Enable(false)
+        // Paint.Enable(false)
 
         Key.Pressed(Right, 4)
+        Paint('Before Paste')
 
         Clipboard.SetText(' Test\\nPaste ')
         Key.Pressed(Ctrl+V)
@@ -612,11 +613,11 @@ fn check_scrolling_2() {
     a.run();
 }
 
-// #[test]
+#[test]
 fn check_scrolling_3() {
     let script = "
         
-        // Paint.Enable(false)
+        Paint.Enable(false)
 
         Key.Pressed(Right, 65)
         Paint('After Right Moves')
@@ -627,8 +628,8 @@ fn check_scrolling_3() {
         Key.Pressed(Left, 1)
         Paint('After Left Move')
 
-        CheckHash(0x895AF80E2463D0D0)
-        CheckCursor(48, 2)
+        CheckHash(0xEF6647DDAEC7465A)
+        CheckCursor(51, 2)
     ";
 
     let text_print = "Unit Test Scrolling, where I try to scroll as much as possible outside the displayed area\nof the text, to see test if the whole display moves";    
@@ -640,6 +641,8 @@ fn check_scrolling_3() {
     w.add(textarea);
     a.add_window(w);
     a.run();
+
+    
 }
 
 #[test]
@@ -696,7 +699,7 @@ fn check_scrolling_enter_1() {
 fn check_scrolling_backspace_1() {
     let script = "
         
-        Paint.Enable(false)
+        // Paint.Enable(false)
 
         Key.Pressed(Right, 10)
 
@@ -1042,11 +1045,11 @@ fn check_write_1() {
     a.run();
 }
 
-// #[test]
+#[test]
 fn check_write_2() {
     let script = "
         
-        // Paint.Enable(false)
+        Paint.Enable(false)
 
         Key.Pressed(Right, 4)
 
@@ -1055,11 +1058,11 @@ fn check_write_2() {
         Key.TypeText('Write')
 
         Paint('Text Write')
-        CheckHash(0x122326FBF473D824)
-        CheckCursor(7, 2)
+        CheckHash(0xC40F747070F53B2A)
+        CheckCursor(6, 2)
     ";
 
-    let text_print = "Unit";    
+    let text_print = "Unit 2";    
     let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
     
     let mut a = App::debug(60, 11, script).build().unwrap();
@@ -1087,12 +1090,11 @@ fn check_mouse_drag_1() {
 
         Mouse.Release(6,1,left)
 
-
         Key.Pressed(Ctrl+C)
         CheckClipboardText('Tes')
 
-        CheckHash(0xA02D97F65F1989C9)
-        CheckCursor(3, 2)
+        CheckHash(0xD5F8DC8568E16C25)
+        CheckCursor(6, 1)
     ";
 
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
@@ -1253,6 +1255,123 @@ fn check_selection_down_left_3() {
     
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn test_scrollbar_1() {
+    let script = "
+        
+        // Paint.Enable(false)
+   
+        Paint('Initial View')
+
+        Mouse.Click(59, 9, left)
+
+        Paint('View After 1 Click Down')
+
+        CheckHash(0x7B432D113EA7EFF4)
+        CheckCursor(1, 1)
+
+        Mouse.Click(59, 1, left)
+
+        Paint('View After 1 Click Up')
+
+        CheckHash(0xA83691DB58C957EC)
+        CheckCursor(1, 2)
+    ";
+
+    let text_print = "Laus Cargo et Rust\n tipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris.\nNisi ut aliquip ex ea commodo consequat. Duis aute irure dolor.\nIn reprehenderit in voluptate velit esse cillum dolore eu fugiat.\nNulla pariatur. Excepteur sint occaecat cupidatat non proident.\nSunt in culpa qui officia deserunt mollit anim id est laborum.\nPraesent malesuada eros ut felis efficitur, vitae tincidunt velit.\nCurabitur nec nisl a odio euismod fringilla non nec risus.\nMorbi sit amet nulla ac nisi faucibus tempus sit amet a justo.";
+    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::ScrollBars);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag Scrollbar", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn test_scrollbar_2() {
+    let script = "
+        
+        // Paint.Enable(false)
+   
+        Paint('Initial View')
+
+        Mouse.Click(57, 10, left)
+        Mouse.Click(57, 10, left)
+        Mouse.Click(57, 10, left)
+
+        Paint('View After 3 Clicks Right')
+
+        CheckHash(0x41F9155618775A5B)
+        CheckCursor(1, 1)
+
+        Mouse.Click(1, 10, left)
+        Mouse.Click(1, 10, left)
+
+        Paint('View After 2 Clicks Left')
+
+        CheckHash(0x97613F6F9E73A50)
+        CheckCursor(3, 1)
+    ";
+
+    let text_print = "Laus Cargo et Rust\n tipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris.\nNisi ut aliquip ex ea commodo consequat. Duis aute irure dolor.\nIn reprehenderit in voluptate velit esse cillum dolore eu fugiat.\nNulla pariatur. Excepteur sint occaecat cupidatat non proident.\nSunt in culpa qui officia deserunt mollit anim id est laborum.\nPraesent malesuada eros ut felis efficitur, vitae tincidunt velit.\nCurabitur nec nisl a odio euismod fringilla non nec risus.\nMorbi sit amet nulla ac nisi faucibus tempus sit amet a justo.";
+    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::ScrollBars);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag Scrollbar", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn test_scrollbar_3() {
+    let script = "
+        
+        // Paint.Enable(false)
+   
+        Paint('Initial View')
+
+        Key.Pressed(Down)
+        Key.Pressed(Right, 70)
+
+        Paint('View After Some Right Moves')
+
+        Mouse.Click(57, 10, left)
+        Mouse.Click(57, 10, left)
+        Mouse.Click(57, 10, left)
+        Mouse.Click(57, 10, left)
+
+        Paint('View After 4 Click Rights')
+
+        CheckHash(0xDB65790755BAFE5)
+        CheckCursor(54, 2)
+
+        Mouse.Click(1, 10, left)
+        Mouse.Click(1, 10, left)
+
+        Paint('View After 2 Clicks Left')
+
+        CheckHash(0xE1C77CA3A506A0EA)
+        CheckCursor(56, 2)
+    ";
+
+    let text_print = "Laus Cargo et Rust\n tipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris.\nNisi ut aliquip ex ea commodo consequat. Duis aute irure dolor.\nIn reprehenderit in voluptate velit esse cillum dolore eu fugiat.\nNulla pariatur. Excepteur sint occaecat cupidatat non proident.\nSunt in culpa qui officia deserunt mollit anim id est laborum.\nPraesent malesuada eros ut felis efficitur, vitae tincidunt velit.\nCurabitur nec nisl a odio euismod fringilla non nec risus.\nMorbi sit amet nulla ac nisi faucibus tempus sit amet a justo.";
+    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::ScrollBars);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag Scrollbar", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
     
     w.add(textarea);
     a.add_window(w);
