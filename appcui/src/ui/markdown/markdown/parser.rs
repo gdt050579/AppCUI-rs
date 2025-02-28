@@ -54,15 +54,15 @@ impl MarkdownParser {
     /// Parses a string input into a vector of MarkdownElements.
     /// It identifies headers, lists, paragraphs, and code blocks in the input.
     pub fn parse(input: &str) -> Vec<MarkdownElement> {
+        let uniform_input = input.replace("    ", "\t");
         let mut elements = Vec::new();
-        let mut lines = input.lines();
+        let mut lines = uniform_input.lines();
 
         let mut in_code_block = false;
         let mut code_block_content = String::new();
 
         while let Some(line) = lines.next() {
-            let trimmed = line.trim();
-
+            let trimmed = line.trim_matches(' ');
             // Check for the start or end of a code block
             if trimmed == "```" {
                 if in_code_block {
@@ -73,7 +73,7 @@ impl MarkdownParser {
                 in_code_block = !in_code_block;
             } else if in_code_block {
                 code_block_content.push_str(line);
-                code_block_content.push('\n');
+                code_block_content.push_str("\r\n");
             } else if Self::is_table_header(trimmed) {
                 elements.push(Self::parse_table(&mut lines, trimmed));
             } else if trimmed == "---" {
@@ -203,8 +203,8 @@ impl MarkdownParser {
         let mut list_items = Vec::new();
 
         fn indentation_level(line: &str) -> usize {
-            line.chars().take_while(|c| c.is_whitespace()).count()
-        }
+            line.chars().take_while(|&c| c == '\t').count()
+        }        
 
         let mut sublist_stack: Vec<(usize, Vec<ListItem>)> = Vec::new();
 

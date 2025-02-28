@@ -172,83 +172,268 @@ fn test_get_id_from_header() {
 
 // Markdown tests
 #[test]
-fn check_mouse_on_scrollbars() {
+fn check_scrollbars_on_arrows_and_click() {
     let script = "
-        Paint.Enable(false)
-        Paint('Initial state')
-        CheckHash(0x3C87B202E97374F2)
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0xD0BE94DEA66EE381)
         Key.Pressed(Right,5)
-        Paint('bottom scrollbar moved with keys')
-        CheckHash(0x3C87B202E97374F2)
+        Paint('2. bottom scrollbar moved with keys')
+        CheckHash(0x6C410318B795F49F)
         Key.Pressed(Down,3)
-        Paint('vertical scrollbar moved with keys')
-        CheckHash(0x3C87B202E97374F2)
+        Paint('3. vertical scrollbar moved with keys')
+        CheckHash(0x2022FBDCEF6E8DF7)
+        Key.Pressed(Left,3)
         Key.Pressed(Right,20)
-        Key.Pressed(Down,20)
-        Paint('Scrollbars on bottom-right')
-        CheckHash(0x3C87B202E97374F2)
+        Key.Pressed(Up,1)
+        Paint('4. Scrollbars on bottom-right')
+        CheckHash(0x32ABDD6A0506AB2)
         Mouse.Move(49,7)
         Mouse.Click(49,7,left)
         Mouse.Move(31,13)
         Mouse.Click(31,13,left)
         Mouse.Move(44,16)
-        Paint('scroll bars moved with mouse')
-        CheckHash(0x3C87B202E97374F2) 
+        Paint('5. scroll bars moved with mouse')
+        CheckHash(0x1C63D7BA7B0A18EF) 
 ";
-    let content: &str = "# My Markdown Example\n\n\
-    Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\n\n\
-    ---\n\
-    ## Back link\n\
-    Some testing for links back \n\n\
-    ## Table of Contents\n\n\
-    1. [Introduction](#introduction) \n\
-    \t1. ana\n\
-    \t2. are\n\
-    \t3. mere\n\
-    2. [Features](#features)\n\
-    \t1. gigi\n\
-    \t\t1. vine\n\
-    \t\t2. cere\n\
-    3. [Conclusion](#conclusion)\n\n\
-    ## Introduction\n\n\
-    Markdown is a lightweight markup language for creating formatted text using a plain-text editor.\n\n\
-    ### Why use Markdown?\n\n\
-    - **Easy to learn**: Simple syntax `__bold__` A **ceva**.\n\
-    - __Readable__: Looks great as plain text.\n\
-    - **Flexible**: Converts to HTML and other formats.\n\n\
-    ## Features\n\n\
-    Here are some Markdown features:\n\n\
-    ### Lists\n\n\
-    #### Unordered\n\n\
-    - Item 1\n\
-    \t- Sub-item 1.1\n\
-    \t- Sub-item 1.2\n\
-    \t\t- Subitem 1.2.1\n\
-    \t\t- Subitem 1.2.2\n\
-    \t- Item 1.3\n\
-    - Item 2\n\n\
-    #### Code Blocks\n\n\
-    Here is an example of inline code: `let x = 10;`\n\n\
-    And here is a code block:\n\n\
-    ```\n\
-    fn main() {
-        println!(\"Hello, world!\");
-    }
-    ```\n\
-    [Get me back](#back-link)\n\n\
-    | Column 1 | Column 2|\n\
-    | - | --- |\n\
-    | Cell 1, __Row 1__ | Cell 2, Row 1 |\n\
-    | Cell 1, Row 2 | Cell 1, Row 2 |\n
-    ";
-    
+    let mut m = markdown!("'
+    # My Markdown Example\r\n\r\n\
+    Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\r\n\r\n\
+    ---\r\n\
+    ## Back link\r\n\
+    Some testing for links back \r\n\r\n\
+    ## Table of Contents\r\n\r\n\
+    1. [Introduction](#introduction)\r\n\
+    \t1. ana\r\n\
+    \t2. are\r\n\
+    \t3. mere\r\n\
+    2. [Features](#features)\r\n\
+    \t1. gigi\r\n\
+    \t\t1. vine\r\n\
+    \t\t2. cere\r\n\
+    3. [Conclusion](#conclusion)\r\n\r\n\
+    ## Introduction\r\n\r\n\
+    Markdown is a lightweight markup language for creating formatted text using a plain-text editor.\r\n\r\n\
+    ### Why use Markdown?\r\n\r\n\
+    - **Easy to learn**: Simple syntax `__bold__` A **ceva**.\r\n\
+    - __Readable__: Looks great as plain text.\r\n\
+    - **Flexible**: Converts to HTML and other formats.\r\n\r\n\
+    ## Features\r\n\r\n\
+    Here are some Markdown features:\r\n\r\n\
+    ### Lists\r\n\r\n\
+    #### Unordered\r\n\r\n\
+    - Item 1\r\n\
+    \t- Sub-item 1.1\r\n\
+    \t- Sub-item 1.2\r\n\
+    \t\t- Subitem 1.2.1\r\n\
+    \t\t- Subitem 1.2.2\r\n\
+    \t- Item 1.3\r\n\
+    - Item 2\r\n\r\n\
+    #### Code Blocks\r\n\r\n\
+    Here is an example of inline code: `let x = 10;`\r\n\r\n\
+    And here is a code block:\r\n\r\n\
+    ```\r\n\
+    fn main() {\r\n\
+    \tprintln!(\"Hello, world!\");\r\n\
+    }\r\n\
+    ```\r\n\
+    [Get me back](#back-link)\r\n\r\n\
+    | Column 1 | Column 2 |\r\n\
+    | - | --- |\r\n\
+    | Cell 1, __Row 1__ | Cell 2, Row 1 |\r\n\
+    | Cell 1, Row 2 | Cell 1, Row 2 |\r\n\r\n\
+    ', d:c, flags:ScrollBars"
+    );
+
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
-    let m = Markdown::new(&content,Layout::new("d: c"),markdown::Flags::ScrollBars,);
     w.add(m);
-    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
     a.add_window(w);
     a.run();
 }
 
+// complete here
+#[test]
+fn check_scrollbars_on_drag_and_weel() {
+    let script = "
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0x9FDE78EBFCEB11B1)
+        Mouse.Wheel(5,5,down,5)
+        Paint('2. Scroll weel down')
+        CheckHash(0xDEEE9DEB22896715)
+        Mouse.Wheel(5,5,up,5)
+        Paint('3. scroll weel up')
+        CheckHash(0x9FDE78EBFCEB11B1)
+        Mouse.Drag(5,5,5,3)
+        Paint('4. drag mouse up (scroll down)')
+        CheckHash(0xCEF639CC66412132)
+        Mouse.Drag(5,5,5,12)
+        Paint('5. drag mouse down (scroll up)')
+        CheckHash(0x9FDE78EBFCEB11B1)
+";
+    let mut m = markdown!("'
+    # My Markdown Example\r\n\r\n\
+    Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\r\n\r\n\
+    ---\r\n\
+    ## Back link\r\n\
+    Some testing for links back \r\n\r\n\
+    ## Table of Contents\r\n\r\n\
+    1. [Introduction](#introduction)\r\n\
+    \t1. ana\r\n\
+    \t2. are\r\n\
+    \t3. mere\r\n\
+    2. [Features](#features)\r\n\
+    \t1. gigi\r\n\
+    \t\t1. vine\r\n\
+    \t\t2. cere\r\n\
+    3. [Conclusion](#conclusion)\r\n\r\n\
+    ## Introduction\r\n\r\n\
+    Markdown is a lightweight markup language for creating formatted text using a plain-text editor.\r\n\r\n\
+    ### Why use Markdown?\r\n\r\n\
+    - **Easy to learn**: Simple syntax `__bold__` A **ceva**.\r\n\
+    - __Readable__: Looks great as plain text.\r\n\
+    - **Flexible**: Converts to HTML and other formats.\r\n\r\n\
+    ## Features\r\n\r\n\
+    Here are some Markdown features:\r\n\r\n\
+    ### Lists\r\n\r\n\
+    #### Unordered\r\n\r\n\
+    - Item 1\r\n\
+    \t- Sub-item 1.1\r\n\
+    \t- Sub-item 1.2\r\n\
+    \t\t- Subitem 1.2.1\r\n\
+    \t\t- Subitem 1.2.2\r\n\
+    \t- Item 1.3\r\n\
+    - Item 2\r\n\r\n\
+    #### Code Blocks\r\n\r\n\
+    Here is an example of inline code: `let x = 10;`\r\n\r\n\
+    And here is a code block:\r\n\r\n\
+    ```\r\n\
+    fn main() {\r\n\
+    \tprintln!(\"Hello, world!\");\r\n\
+    }\r\n\
+    ```\r\n\
+    [Get me back](#back-link)\r\n\r\n\
+    | Column 1 | Column 2 |\r\n\
+    | - | --- |\r\n\
+    | Cell 1, __Row 1__ | Cell 2, Row 1 |\r\n\
+    | Cell 1, Row 2 | Cell 1, Row 2 |\r\n\r\n\
+    ', d:c, flags:ScrollBars"
+    );
 
+    let mut a = App::debug(40, 8, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    w.add(m);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_move_to_section_on_link_click() {
+    let script = "
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0xE2BF3C6FAAA8C1B8)
+        Mouse.Move(3,2)
+        Mouse.Click(3,2,left)
+        Paint('2. scroll bars moved with mouse')
+        CheckHash(0x23D8260826FFEF99) 
+";
+    let mut m = markdown!("'
+    [Go to end](#end-link)\r\n\r\n\
+    Some testing for links back \r\n\r\n\
+    ## Table of Contents\r\n\r\n\
+    1. [Introduction](#introduction)\r\n\
+    \t1. ana\r\n\
+    \t2. are\r\n\
+    \t3. mere\r\n\
+    2. [Features](#features)\r\n\
+    \t1. gigi\r\n\
+    \t\t1. vine\r\n\
+    \t\t2. cere\r\n\
+    3. [Conclusion](#conclusion)\r\n\r\n\
+    ## Introduction\r\n\r\n\
+    Markdown is a lightweight markup language for creating formatted text using a plain-text editor.\r\n\r\n\
+    ### Why use Markdown?\r\n\r\n\
+    - **Easy to learn**: Simple syntax `__bold__` A **ceva**.\r\n\
+    - __Readable__: Looks great as plain text.\r\n\
+    - **Flexible**: Converts to HTML and other formats.\r\n\r\n\
+    ## Features\r\n\r\n\
+    Here are some Markdown features:\r\n\r\n\
+    ### Lists\r\n\r\n\
+    #### Unordered\r\n\r\n\
+    - Item 1\r\n\
+    \t- Sub-item 1.1\r\n\
+    \t- Sub-item 1.2\r\n\
+    \t\t- Subitem 1.2.1\r\n\
+    \t\t- Subitem 1.2.2\r\n\
+    \t- Item 1.3\r\n\
+    - Item 2\r\n\r\n\
+    #### Code Blocks\r\n\r\n\
+    Here is an example of inline code: `let x = 10;`\r\n\r\n\
+    And here is a code block:\r\n\r\n\
+    ```\r\n\
+    fn main() {\r\n\
+    \tprintln!(\"Hello, world!\");\r\n\
+    }\r\n\
+    ```\r\n\
+    ## End Link\r\n\
+    ', d:c, flags:ScrollBars"
+    );
+
+    let mut a = App::debug(40, 8, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    w.add(m);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_inactive() {
+    let script = "
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0xF5953A121DF629B6)
+        Mouse.Move(3,2)
+        Mouse.Click(3,2,left)
+        Paint('2. scroll bars moved with mouse')
+        CheckHash(0xF5953A121DF629B6) 
+";
+    let mut m = markdown!("'
+    [Go to end](#end-link)\r\n\r\n\
+    Some testing for links back \r\n\r\n\
+    ## Table of Contents\r\n\r\n\
+    1. [Introduction](#introduction)\r\n\
+    \t1. ana\r\n\
+    \t2. are\r\n\
+    \t3. mere\r\n\
+    2. [Conclusion](#conclusion)\r\n\r\n\
+    ## Introduction\r\n\r\n\
+    Markdown is a lightweight markup language.\r\n\r\n\
+    ### Why use Markdown?\r\n\r\n\
+    - **Easy to learn**: Simple syntax `__bold__` A **ceva**.\r\n\
+    - __Readable__: Looks great as plain text.\r\n\
+    - **Flexible**: Converts to HTML and other formats.\r\n\r\n\
+    #### Code Blocks\r\n\r\n\
+    Here is an example of inline code: `let x = 10;`\r\n\r\n\
+    And here is a code block:\r\n\r\n\
+    ```\r\n\
+    fn main() {\r\n\
+    \tprintln!(\"Hello, world!\");\r\n\
+    }\r\n\
+    ```\r\n\
+    ## End Link\r\n\
+    ', d:c, flags:ScrollBars"
+    );
+
+    let mut a = App::debug(70, 30, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:70,h:30,flags:Sizeable");
+    m.set_enabled(false);
+    w.add(m);
+    a.add_window(w);
+    a.run();
+}

@@ -7,6 +7,9 @@ struct LinkHeaderID(pub String);
 struct HeaderPosition(pub i32);
 
 #[derive(PartialEq, Debug)]
+struct IsHovered(pub bool);
+
+#[derive(PartialEq, Debug)]
 struct LinkArea {
     pub x_pos: i32,
     pub y_pos: i32,
@@ -14,7 +17,7 @@ struct LinkArea {
 }
 
 pub struct LinkHeaderRegistry {
-    link_header_positions: HashMap<LinkHeaderID, (LinkArea, HeaderPosition)>,
+    link_header_positions: HashMap<LinkHeaderID, (LinkArea, HeaderPosition, IsHovered)>,
 }
 
 impl LinkHeaderRegistry {
@@ -27,7 +30,7 @@ impl LinkHeaderRegistry {
     pub fn register_header_position(&mut self, header: &str, position: i32) {
         let id = LinkHeaderID(Self::get_id_from_header(header));
         
-        if let Some((_, header_position)) = self.link_header_positions.get_mut(&id) {
+        if let Some((_, header_position, IsHovered(false))) = self.link_header_positions.get_mut(&id) {
             *header_position = HeaderPosition(position);
         } else {
             let area = LinkArea {
@@ -36,19 +39,19 @@ impl LinkHeaderRegistry {
                 len: 0,
             };
             let header_position = HeaderPosition(position);
-            self.link_header_positions.insert(id, (area, header_position));
+            self.link_header_positions.insert(id, (area, header_position, IsHovered(false)));
         }
     }
 
     pub fn register_link_position(&mut self, link: &str, x_pos: i32, y_pos: i32, len: i32) {
         let id = LinkHeaderID(link.to_string());
         
-        if let Some((link_area, _)) = self.link_header_positions.get_mut(&id) {
+        if let Some((link_area, _, _)) = self.link_header_positions.get_mut(&id) {
             *link_area = LinkArea { x_pos, y_pos, len };
         } else {
             let area = LinkArea { x_pos, y_pos, len };
             let header_position = HeaderPosition(0); 
-            self.link_header_positions.insert(id, (area, header_position));
+            self.link_header_positions.insert(id, (area, header_position, IsHovered(false)));
         }
     }
     
@@ -56,11 +59,11 @@ impl LinkHeaderRegistry {
         let key = LinkHeaderID(id.to_string());
         self.link_header_positions
             .get(&key)
-            .map(|(_, header_position)| header_position.0)
+            .map(|(_, header_position, _)| header_position.0)
     }
 
     pub fn check_for_link_at_position(&self, x: i32, y: i32) -> Option<String> {
-        for (id, (area, _)) in &self.link_header_positions {
+        for (id, (area, _, _)) in &self.link_header_positions {
             if self.is_within_link_area(area, x, y) {
                 return Some(id.0.clone());
             }
@@ -78,5 +81,28 @@ impl LinkHeaderRegistry {
             .filter(|c| c.is_alphanumeric() || *c == ' ')
             .map(|c| if c == ' ' { '-' } else { c.to_ascii_lowercase() })
             .collect()
+    }
+
+    pub fn set_link_hovered(&mut self, id: &str) {
+        let key = LinkHeaderID(id.to_string());
+    
+        if let Some((_, _, is_hovered)) = self.link_header_positions.get_mut(&key) {
+            *is_hovered = IsHovered(true);
+        }
+    }
+
+    pub fn is_hovered(&self, id: &str) -> bool {
+        let key = LinkHeaderID(id.to_string());
+        if let Some((_, _, is_hovered)) = self.link_header_positions.get(&key) {
+            is_hovered.0
+        } else {
+            false
+        }
+    }
+
+    pub fn clear_hovered(&mut self) {
+        for (_, (_, _, is_hovered)) in self.link_header_positions.iter_mut() {
+            *is_hovered = IsHovered(false);
+        }
     }
 }

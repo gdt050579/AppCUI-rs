@@ -1,69 +1,64 @@
 use appcui::prelude::*;
-use std::fs;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let file_path = "examples\\exemple.md";
-    //let content = fs::read_to_string(file_path).unwrap_or_else(|_| String::new());
-
     let mut a = App::new().build()?;
 
-    let app_theme = Some(Themes::DarkGray);
-    if let Some(theme) = app_theme {
-        App::set_theme(Theme::new(theme));
-    };
-    let mut w = window!("Test,d:c,w:50,h:15,flags:sizeable");
-    let mut m = markdown!("
-    '
-    # My Markdown Example\n\n\
-    Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\n\n\
-    ---\n\
-    ## Back link\n\
-    Some testing for links back \n\n\
-    ## Table of Contents\n\n\
-    1. [Introduction](#introduction) \n\
-    \t1. ana\n\
-    \t2. are\n\
-    \t3. mere\n\
-    2. [Features](#features)\n\
-    \t1. gigi\n\
-    \t\t1. vine\n\
-    \t\t2. cere\n\
-    3. [Conclusion](#conclusion)\n\n\
-    ## Introduction\n\n\
-    Markdown is a lightweight markup language for creating formatted text using a plain-text editor.\n\n\
-    ### Why use Markdown?\n\n\
-    - **Easy to learn**: Simple syntax `__bold__` A **ceva**.\n\
-    - __Readable__: Looks great as plain text.\n\
-    - **Flexible**: Converts to HTML and other formats.\n\n\
-    ## Features\n\n\
-    Here are some Markdown features:\n\n\
-    ### Lists\n\n\
-    #### Unordered\n\n\
-    - Item 1\n\
-    \t- Sub-item 1.1\n\
-    \t- Sub-item 1.2\n\
-    \t\t- Subitem 1.2.1\n\
-    \t\t- Subitem 1.2.2\n\
-    \t- Item 1.3\n\
-    - Item 2\n\n\
-    #### Code Blocks\n\n\
-    Here is an example of inline code: `let x = 10;`\n\n\
-    And here is a code block:\n\n\
-    ```\n\
-    fn main() {
-        println!(\"Hello, world!\");
-    }
-    ```\n\
-    [Get me back](#back-link)\n\n\
-    | Column 1 | Column 2|\n\
-    | - | --- |\n\
-    | Cell 1, __Row 1__ | Cell 2, Row 1 |\n\
-    | Cell 1, Row 2 | Cell 1, Row 2 |\n
-    ',d:c,flags:ScrollBars");
-
-    
-    //m = Markdown::new(&content,Layout::new("d: c"),markdown::Flags::ScrollBars,);
-    
+    let mut w = window!("Markdown,d:c,w:50,h:15,flags:sizeable");
+    let m = markdown!(
+        "'''
+        \r\n\
+        # Rust Programming Language\r\n\
+        \r\n\
+        Rust is a modern systems programming language that emphasizes memory safety, concurrency, and performance.\r\n\
+        \r\n\
+        ## Table of Contents\r\n\
+        - [Introduction](#introduction)\r\n\
+            - [What Makes Rust Unique?](#what-makes-rust-unique)\r\n\
+        - [Features](#features)\r\n\
+            - [Ownership and Borrowing](#ownership-and-borrowing)\r\n\
+            - [Concurrency](#concurrency)\r\n\
+        \r\n\
+        ## Introduction\r\n\
+        \r\n\
+        Rust is a statically typed language designed to eliminate common programming errors at compile time while delivering high performance.\r\n\
+        \r\n\
+        ### What Makes Rust Unique?\r\n\
+        \r\n\
+        - **Memory Safety**: Rust's ownership model prevents null pointer dereferences and data races.\r\n\
+        - **Concurrency**: Built-in support for safe, concurrent programming.\r\n\
+        - **Performance**: Delivers speed comparable to C/C++.\r\n\
+        - **Modern Syntax**: Offers clear, expressive code that is easy to maintain.\r\n\
+        \r\n\
+        ## Features\r\n\
+        \r\n\
+        Rust provides several advanced features that set it apart:\r\n\
+        \r\n\
+        ### Ownership and Borrowing\r\n\
+        \r\n\
+        Rust enforces strict rules for how memory is accessed and managed, ensuring that bugs like use-after-free and data races are caught at compile time.\r\n\
+        \r\n\
+        ### Concurrency\r\n\
+        \r\n\
+        Rust's design promotes safe concurrency, enabling multithreaded programming without the typical pitfalls of shared mutable state.\r\n\
+        \r\n\
+        Inline code example: `let x = 10;`\r\n\
+        \r\n\
+        Block code example:\r\n\
+        \r\n\
+        ```\r\n\
+        fn main() {\r\n\
+            println!(\"Hello, world!\");\r\n\
+        }\r\n\
+        ```\r\n\
+        \r\n\
+        | Feature           | Description                                                          |\r\n\
+        | ----------------- | -------------------------------------------------------------------- |\r\n\
+        | Memory Safety     | Prevents null pointers and data races through ownership rules.       |\r\n\
+        | Concurrency       | Enables safe multithreading with minimal runtime overhead.           |\r\n\
+        | Performance       | Optimized for high-performance, low-level systems programming.       |\r\n\
+        | Expressive Syntax | Modern syntax that enhances code clarity and maintainability.         |\r\n\
+        ''',d: c,flags: ScrollBars,lsm:10,tsm:1"
+    );
     w.add(m);
     a.add_window(w);
     a.run();

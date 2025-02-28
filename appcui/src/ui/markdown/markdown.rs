@@ -9,10 +9,6 @@ use linkheaderregistry::LinkHeaderRegistry;
 use parser::{InlineElement, MarkdownElement, MarkdownParser, Table};
 use std::cell::RefCell;
 
-use std::io::Lines;
-use std::sync::Mutex;
-static DEBUG_STRING: Mutex<String> = Mutex::new(String::new());
-
 #[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct Markdown {
     surface: Surface,
@@ -28,31 +24,8 @@ pub struct Markdown {
 }
 
 impl Markdown {
-    // FOR DEBUG -- REMOVE
-    pub fn reset_debug_message() {
-        let mut debug_string = DEBUG_STRING.lock().unwrap();
-        *debug_string = String::new();
-    }
-
-    pub fn append_debug_message(message: &str) {
-        let mut debug_string = DEBUG_STRING.lock().unwrap();
-        debug_string.push_str(message);
-    }
-
-    pub fn set_debug_message(message: &str) {
-        let mut debug_string = DEBUG_STRING.lock().unwrap();
-        *debug_string = message.to_string();
-    }
-
-    pub fn get_debug_message() -> String {
-        let debug_string = DEBUG_STRING.lock().unwrap();
-        debug_string.clone()
-    }
-    //
-
     // Creates a new markdown component with a specified content, layout, and flags.
     pub fn new(content: &str, layout: Layout, flags: Flags) -> Self {
-        Self::reset_debug_message();
         let (width, height) = (100, 150); //Markdown::compute_dimensions(&content);
 
         Self {
@@ -102,24 +75,29 @@ impl Markdown {
         self.move_scroll_to(h, v);
     }
 
-    fn get_element_style(element: &InlineElement, theme: &Theme) -> CharAttribute {
+    fn get_element_style(element: &InlineElement, theme: &Theme, hovered: bool) -> CharAttribute {
         match element {
             InlineElement::Text(_) => theme.markdown.text,
             InlineElement::Bold(_) => theme.markdown.bold,
             InlineElement::Italic(_) => theme.markdown.italic,
-            InlineElement::Link(_, _) => theme.markdown.link,
+            InlineElement::Link(_, _) => if !hovered { theme.markdown.link } else { theme.text.highlighted },
             InlineElement::Code(_) => theme.markdown.code,
         }
     }
 
-    fn register_if_link(link_header_registry: &mut LinkHeaderRegistry, element: &InlineElement, x: i32, y: i32) -> bool {
+    fn register_if_link(
+        link_header_registry: &mut LinkHeaderRegistry,
+        element: &InlineElement,
+        x: i32,
+        y: i32,
+    ) -> Option<String> {
         if let InlineElement::Link(_, link) = element {
             let link_width = link.chars().count() as i32;
-            let link_str = &link.replace('#', "");
-            link_header_registry.register_link_position(link_str, x, y, link_width);
-            return true;
+            let link_str = link.replace('#', "");
+            link_header_registry.register_link_position(&link_str, x, y, link_width);
+            return Some(link_str);
         }
-        false
+        None
     }
 
     fn process_list_element(
@@ -131,14 +109,21 @@ impl Markdown {
         prefix: Option<String>,
         link_header_registry: &mut LinkHeaderRegistry,
         theme: &Theme,
+        inactive: bool
     ) {
         for (i, element) in elements.iter().enumerate() {
             if i == 0 {
                 *x_pos = indent;
             }
 
-            let style = Self::get_element_style(element, theme);
-            Self::register_if_link(link_header_registry, element, *x_pos, *y_pos);
+            let link_identifier = Self::register_if_link(link_header_registry, element, *x_pos, *y_pos);
+            let is_hovered = if let Some(ref id) = link_identifier {
+                link_header_registry.is_hovered(id)
+            } else {
+                false
+            };
+            let style = Self::get_element_style(element, theme, is_hovered);
+            let attr = if !inactive { style } else { theme.text.inactive };
 
             let content_str = element.to_string();
             let formatted_content = if i == 0 {
@@ -151,7 +136,7 @@ impl Markdown {
                 content_str
             };
 
-            xlsurface.write_string(*x_pos, *y_pos, &formatted_content, style, false);
+            xlsurface.write_string(*x_pos, *y_pos, &Self::replace_tabs(&formatted_content), attr, false);
 
             *x_pos += formatted_content.chars().count() as i32;
         }
@@ -165,6 +150,7 @@ impl Markdown {
         xlsurface: &mut Surface,
         link_header_registry: &mut LinkHeaderRegistry,
         theme: &Theme,
+        inactive: bool
     ) {
         let indent = *x_pos + (depth as i32) * 4;
 
@@ -174,11 +160,11 @@ impl Markdown {
                     match item {
                         parser::ListItem::Simple(ref elements) => {
                             let mut x = *x_pos;
-                            Self::process_list_element(elements, indent, &mut x, y_pos, xlsurface, None, link_header_registry, theme);
+                            Self::process_list_element(elements, indent, &mut x, y_pos, xlsurface, None, link_header_registry, theme, inactive);
                             *y_pos += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
-                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry, theme);
+                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry, theme, inactive);
                         }
                     }
                 }
@@ -198,12 +184,13 @@ impl Markdown {
                                 Some(format!("{}.", index)),
                                 link_header_registry,
                                 theme,
+                                inactive
                             );
                             index += 1;
                             *y_pos += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
-                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry, theme);
+                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry, theme, inactive);
                         }
                     }
                 }
@@ -212,31 +199,47 @@ impl Markdown {
         }
     }
 
-    fn paint_codeblock(&self, code: &str, mut y_pos: i32, surface: &mut Surface, theme: &Theme) -> i32 {
-        let code_lines: Vec<&str> = code.lines().collect();
-        let max_width = code_lines.iter().map(|line| line.len()).max().unwrap_or(0);
-        let x_pos = self.x + 4;
+    fn replace_tabs(string_to_print: &str) -> String {
+        string_to_print.replace("\t", "    ")
+    }
 
+    fn paint_codeblock(&self, code: &str, y_pos: &mut i32, surface: &mut Surface, theme: &Theme, left_padding: Option<i32>) {
+        let left_padding = left_padding.unwrap_or(4);
+        let content = Self::replace_tabs(code);
+        let code_lines: Vec<&str> = content.lines().collect();
+        let max_width = code_lines.iter().map(|line| line.len()).max().unwrap_or(0);
+
+        let attr = if self.is_enabled() { theme.markdown.code_block } else { theme.text.inactive };
+        
         for line in code_lines {
             let formatted_line = format!(" {:width$} ", line, width = max_width);
-            surface.write_string(x_pos - 1, y_pos, &formatted_line, theme.markdown.code_block, false);
-            y_pos += 1;
+            surface.write_string(self.x + left_padding - 1, *y_pos, &Self::replace_tabs(&formatted_line), attr, false);
+            *y_pos += 1;
         }
-        y_pos
     }
 
     fn paint_header(&self, content: &str, y_pos: i32, level: &usize, surface: &mut Surface, theme: &Theme) {
+        let content = Self::replace_tabs(content);
         let header_style = match level {
             1 => theme.markdown.h1,
             2 => theme.markdown.h2,
             _ => theme.markdown.h3,
         };
 
-        self.link_header_registry.borrow_mut().register_header_position(content, y_pos);
-        surface.write_string(self.x, y_pos, content, header_style, false);
+        let attr = if self.is_enabled() { header_style } else { theme.text.inactive };
+
+        self.link_header_registry.borrow_mut().register_header_position(&content, y_pos);
+        surface.write_string(self.x, y_pos, &Self::replace_tabs(&content), attr, false);
     }
 
     fn paint_table(&self, table: &Table, y_pos: &mut i32, surface: &mut Surface, theme: &Theme) {
+
+        let (attr, attr_header) = if self.is_enabled() {
+            (theme.markdown.table, theme.markdown.table_header)
+        } else {
+            (theme.text.inactive, theme.text.inactive)
+        };
+
         fn compute_column_widths(table: &Table) -> Vec<usize> {
             let mut column_widths = Vec::new();
 
@@ -277,7 +280,7 @@ impl Markdown {
             x_pos + (table_width + suplimentar_padding) as i32,
             *y_pos + 1 + lines_count as i32,
         );
-        surface.draw_rect(rect, LineType::Single, theme.markdown.table);
+        surface.draw_rect(rect, LineType::Single, attr);
 
         // draw horizontal line
         x_pos += 1;
@@ -287,7 +290,7 @@ impl Markdown {
             *y_pos,
             self.x + (table_width + suplimentar_padding) as i32 - 1,
             LineType::Single,
-            theme.markdown.table,
+            attr,
         );
         *y_pos -= 1;
 
@@ -295,11 +298,12 @@ impl Markdown {
         for (i, header) in table.headers.iter().enumerate() {
             let header_str = header.iter().map(|e| e.to_string()).collect::<String>();
             let padded_header = format!("{:width$}", header_str, width = column_widths[i] + 2);
-            surface.write_string(x_pos, *y_pos, &padded_header, theme.markdown.table_header, false);
+            let content = Self::replace_tabs(&padded_header);
+            surface.write_string(x_pos, *y_pos, &content, attr_header, false);
             x_pos += column_widths[i] as i32 + 3;
 
             // draw vertical line
-            surface.draw_vertical_line(x_pos - 1, *y_pos, *y_pos - 1 + lines_count as i32, LineType::Single, theme.markdown.table);
+            surface.draw_vertical_line(x_pos - 1, *y_pos, *y_pos - 1 + lines_count as i32, LineType::Single, attr);
         }
         *y_pos += 2;
 
@@ -308,38 +312,39 @@ impl Markdown {
             for (i, cell) in row.iter().enumerate() {
                 let cell_str = cell.iter().map(|e| e.to_string()).collect::<String>();
                 let padded_cell = format!("{:width$}", cell_str, width = column_widths[i] + 2);
-                surface.write_string(x_pos, *y_pos, &padded_cell, theme.markdown.table, false); // shall modify if I want bold in table
+                let content = Self::replace_tabs(&padded_cell);
+                surface.write_string(x_pos, *y_pos, &content, attr, false); // shall modify if I want bold in table
                 x_pos += column_widths[i] as i32 + 3;
                 if row_index == 0 && i < (row.len() - 1) {
                     // cross separators
                     surface.write_char(
                         x_pos - 1,
                         *y_pos - 1,
-                        Character::with_attributes(SpecialChar::BoxCrossSingleLine, theme.markdown.table),
+                        Character::with_attributes(SpecialChar::BoxCrossSingleLine, attr),
                     );
 
                     // horizontal separators
                     surface.write_char(
                         rect.left(),
                         *y_pos - 1,
-                        Character::with_attributes(SpecialChar::BoxMidleLeft, theme.markdown.table),
+                        Character::with_attributes(SpecialChar::BoxMidleLeft, attr),
                     );
                     surface.write_char(
                         rect.right(),
                         *y_pos - 1,
-                        Character::with_attributes(SpecialChar::BoxMidleRight, theme.markdown.table),
+                        Character::with_attributes(SpecialChar::BoxMidleRight, attr),
                     );
 
                     // vertical separators
                     surface.write_char(
                         x_pos - 1,
                         rect.top(),
-                        Character::with_attributes(SpecialChar::BoxMidleTop, theme.markdown.table),
+                        Character::with_attributes(SpecialChar::BoxMidleTop, attr),
                     );
                     surface.write_char(
                         x_pos - 1,
                         rect.bottom(),
-                        Character::with_attributes(SpecialChar::BoxMidleBottom, theme.markdown.table),
+                        Character::with_attributes(SpecialChar::BoxMidleBottom, attr),
                     );
                 }
             }
@@ -349,17 +354,28 @@ impl Markdown {
 
     fn paint_paragraph(&self, content: &Vec<InlineElement>, y_pos: i32, surface: &mut Surface, theme: &Theme) {
         let mut x_pos: i32 = self.x;
-
+        
         for element in content.iter() {
-            let style = Self::get_element_style(element, theme);
-            Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
+            let link_identifier = {
+                let mut registry = self.link_header_registry.borrow_mut();
+                Self::register_if_link(&mut registry, element, x_pos, y_pos)
+            };
+            
+            let is_hovered = if let Some(ref id) = link_identifier {
+                self.link_header_registry.borrow().is_hovered(id)
+            } else {
+                false
+            };
+            
+            let style = Self::get_element_style(element, theme, is_hovered);
+            let attr = if self.is_enabled() { style } else { theme.text.inactive };
             let content_str = element.to_string();
-
-            surface.write_string(x_pos, y_pos, &content_str, style, false);
+            
+            surface.write_string(x_pos, y_pos, &Self::replace_tabs(&content_str), attr, false);
             x_pos += content_str.chars().count() as i32;
         }
     }
-
+    
     fn paint_unordered_list(
         &self,
         items: &[parser::ListItem],
@@ -381,14 +397,24 @@ impl Markdown {
                         surface,
                         &mut self.link_header_registry.borrow_mut(),
                         theme,
+                        !self.is_enabled()
                     );
                     continue;
                 }
             };
 
             for (i, element) in elements.iter().enumerate() {
-                let style = Self::get_element_style(element, theme);
-                Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
+                let link_identifier = {
+                    let mut registry = self.link_header_registry.borrow_mut();
+                    Self::register_if_link(&mut registry, element, x_pos, y_pos)
+                };
+                let is_hovered = if let Some(ref id) = link_identifier {
+                    self.link_header_registry.borrow().is_hovered(id)
+                } else {
+                    false
+                };
+                let style = Self::get_element_style(element, theme, is_hovered);
+                let attr = if self.is_enabled() { style } else { theme.text.inactive };
                 let content_str = element.to_string();
 
                 let formatted_content = if i == 0 {
@@ -398,7 +424,7 @@ impl Markdown {
                     content_str
                 };
 
-                surface.write_string(x_pos, y_pos, &formatted_content, style, false);
+                surface.write_string(x_pos, y_pos, &Self::replace_tabs(&formatted_content), attr, false);
 
                 x_pos += formatted_content.chars().count() as i32;
             }
@@ -406,6 +432,14 @@ impl Markdown {
             y_pos += 1;
         }
         y_pos
+    }
+
+    fn send_link(&self, link: &str) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::Button(EventData {}),
+        });
     }
 
     fn paint_ordered_list(
@@ -430,14 +464,24 @@ impl Markdown {
                                     surface,
                                     &mut self.link_header_registry.borrow_mut(),
                                     theme,
+                                    !self.is_enabled()
                                 );
                                 continue;
                             }
                         };
 
                         for (i, element) in elements.iter().enumerate() {
-                            let style = Self::get_element_style(element, theme);
-                            Self::register_if_link(&mut self.link_header_registry.borrow_mut(), element, x_pos, y_pos);
+                            let link_identifier = {
+                                let mut registry = self.link_header_registry.borrow_mut();
+                                Self::register_if_link(&mut registry, element, x_pos, y_pos)
+                            };
+                            let is_hovered = if let Some(ref id) = link_identifier {
+                                self.link_header_registry.borrow().is_hovered(id)
+                            } else {
+                                false
+                            };
+                            let style = Self::get_element_style(element, theme, is_hovered);
+                            let attr = if self.is_enabled() { style } else { theme.text.inactive };
                             let content_str = element.to_string();
 
                             let formatted_content = if i == 0 {
@@ -448,7 +492,7 @@ impl Markdown {
                                 content_str
                             };
 
-                            surface.write_string(x_pos, y_pos, &formatted_content, style, false);
+                            surface.write_string(x_pos, y_pos, &Self::replace_tabs(&formatted_content), attr, false);
 
                             x_pos += formatted_content.chars().count() as i32;
                         }
@@ -482,7 +526,7 @@ impl OnPaint for Markdown {
                     surface.draw_horizontal_line(self.x, y_pos, 80, LineType::Single, theme.markdown.text);
                     y_pos += 1;
                 }
-                MarkdownElement::CodeBlock(code) => y_pos = self.paint_codeblock(&code, y_pos, surface, theme),
+                MarkdownElement::CodeBlock(code) => self.paint_codeblock(code, &mut y_pos, surface, theme, None),
                 MarkdownElement::Table(table) => self.paint_table(table, &mut y_pos, surface, theme),
             }
             y_pos += 1;
@@ -565,6 +609,16 @@ impl OnMouseEvent for Markdown {
                     MouseWheelDirection::Down => self.move_scroll_to(self.x, self.y - 1),
                     _ => {}
                 };
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(data) => {
+                let mut tmp = None;
+                if let Some(link_header_id) = self.link_header_registry.borrow().check_for_link_at_position(data.x, data.y) {
+                    tmp = Some(link_header_id);
+                }
+                if let Some(link_header_id) = tmp {
+                    self.link_header_registry.borrow_mut().set_link_hovered(&link_header_id);
+                }
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,

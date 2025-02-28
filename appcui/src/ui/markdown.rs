@@ -1,4 +1,5 @@
 mod markdown;
+pub mod events;
 mod initialization_flags;
 #[cfg(test)]
 mod tests;
