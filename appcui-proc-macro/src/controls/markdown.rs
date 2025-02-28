@@ -6,8 +6,7 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars"]);
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("content", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("content", "content", ParamType::String),
-    NamedParameter::new("cont", "content", ParamType::String),
-    NamedParameter::new("c", "content", ParamType::String),
+    NamedParameter::new("text", "content", ParamType::String),
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("left-scroll-margin", "lsm", ParamType::Integer),
     NamedParameter::new("lsm", "lsm", ParamType::Integer),
