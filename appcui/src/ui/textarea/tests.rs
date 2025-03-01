@@ -480,7 +480,7 @@ fn check_selection_multi_line() {
 fn check_paste_1() {
     let script = "
         
-        Paint.Enable(false)
+        // Paint.Enable(false)
 
         Key.Pressed(Right, 3)
         Key.Pressed(Shift+Right, 6)
@@ -617,7 +617,7 @@ fn check_scrolling_2() {
 fn check_scrolling_3() {
     let script = "
         
-        Paint.Enable(false)
+        // Paint.Enable(false)
 
         Key.Pressed(Right, 65)
         Paint('After Right Moves')
@@ -628,8 +628,8 @@ fn check_scrolling_3() {
         Key.Pressed(Left, 1)
         Paint('After Left Move')
 
-        CheckHash(0xEF6647DDAEC7465A)
-        CheckCursor(51, 2)
+        CheckHash(0x487B386668755E06)
+        CheckCursor(43, 2)
     ";
 
     let text_print = "Unit Test Scrolling, where I try to scroll as much as possible outside the displayed area\nof the text, to see test if the whole display moves";    
@@ -925,17 +925,16 @@ fn check_move_up_down_4() {
 fn check_move_up_down_5() {
     let script = "
         
-        Paint.Enable(false)
+        //Paint.Enable(false)
 
-        Key.Pressed(Down, 2)
-        Key.Pressed(PageDown, 3)
+        Key.Pressed(PageDown, 2)
 
         Paint('Cursor on Down')
-        CheckHash(0xF931EEE2A34103F8)
+        CheckHash(0x2AFAEA882ADB0DD0)
         CheckCursor(1, 9)
     ";
 
-    let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
+    let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
     
     let mut a = App::debug(60, 11, script).build().unwrap();
@@ -950,10 +949,9 @@ fn check_move_up_down_5() {
 fn check_move_up_down_6() {
     let script = "
         
-        Paint.Enable(false)
+        // Paint.Enable(false)
 
-        Key.Pressed(Down, 2)
-        Key.Pressed(PageDown, 3)
+        Key.Pressed(PageDown, 2)
 
         Paint('Cursor on Down')
         CheckHash(0xF931EEE2A34103F8)
@@ -967,7 +965,7 @@ fn check_move_up_down_6() {
         CheckCursor(1, 1)
     ";
 
-    let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
+    let text_print = "Unit\n...\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
     
     let mut a = App::debug(60, 11, script).build().unwrap();
@@ -982,7 +980,7 @@ fn check_move_up_down_6() {
 fn check_move_up_down_7() {
     let script = "
         
-        Paint.Enable(false)
+        // Paint.Enable(false)
 
         Key.Pressed(Down, 2)
         Key.Pressed(PageDown, 3)
@@ -1372,6 +1370,70 @@ fn test_scrollbar_3() {
     
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Unit Test Mouse Drag Scrollbar", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_drag_delete() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Mouse.Drag(6,2,5,1)
+
+        Paint('Mouse Drag')
+
+        Key.Pressed(Backspace)
+
+        Paint('After Backspace')
+
+        CheckHash(0xF670818DB593C749)
+        CheckCursor(5, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+// #[test]
+fn check_mouse_drag_4() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Mouse.Hold(6, 2, left)
+        Mouse.Move(19, 5)
+
+        Paint('Mouse Drag 1')
+
+        Mouse.Move(1, 4)
+        Mouse.Release(1, 4, left)
+
+        Paint('Mouse Drag')
+
+        Key.Pressed(Backspace)
+
+        Paint('After Backspace')
+
+        CheckHash(0xF670818DB593C749)
+        CheckCursor(5, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
     
     w.add(textarea);
     a.add_window(w);

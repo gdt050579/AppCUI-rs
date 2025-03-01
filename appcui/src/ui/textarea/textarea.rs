@@ -1,6 +1,7 @@
 use super::initialization_flags::Flags;
 
 use crate::prelude::*;
+use std::{fmt, i32, u32};
 
 use std::{fs::File, io::Write, mem::swap};
 
@@ -20,6 +21,15 @@ enum SelectionDirection {
     None,
     Right,
     Left
+}
+impl fmt::Display for SelectionDirection {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SelectionDirection::Left => write!(f, "Left"),
+            SelectionDirection::Right => write!(f, "Right"),
+            SelectionDirection::None => write!(f, "None")
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -56,12 +66,27 @@ pub struct TextArea {
 
     scrollbars: ScrollBars,
     scrollbar_x: u32,
-    scrollbar_y: u32
+    scrollbar_y: u32,
+
+    cursor_position_x_backup: u32,
+
+    mouse_x: u32,
+    mouse_y: u32,
 }
 
 impl TextArea {
 
     pub fn move_cursor_vertical(&mut self, no_of_rows: i32) {
+
+        // We are already on the first line, moving left to the max
+        if self.line_offset as i32 + self.cursor.pos_y as i32 + no_of_rows < 0 {
+            return self.move_cursor_horizontal(i32::MIN);
+        }
+        // We are already on the last line, moving right to the max
+        else if  self.line_offset as i32 + self.cursor.pos_y as i32 + no_of_rows >= self.line_character_counts.len() as i32 {
+            return self.move_cursor_horizontal(i32::MAX);
+        }
+
         let new_position = self.cursor.pos_y as i32 + no_of_rows;
         
         if new_position < 0 {
@@ -93,11 +118,46 @@ impl TextArea {
                 self.cursor.pos_y = self.line_character_counts.len() - self.line_offset as usize - 1;
             }
         }
+        
+        // Checking if the cursor points to a valid character in line
+        let current_cursor_position_x = self.row_offset as usize + self.cursor.pos_x as usize;
+        let current_cursor_position_y = self.line_offset as usize + self.cursor.pos_y as usize;
+
+        let position_diff_x = self.line_character_counts[current_cursor_position_y] as i32 - current_cursor_position_x as i32 - 1; // -1 for the newline
+        
+        log!("TextArea", "Position diff: {}", position_diff_x);
+        log!("TextArea", "Cursor position x: {}, y: {}", self.cursor.pos_x, self.cursor.pos_y);
+        log!("TextArea", "Line length: {}", self.line_character_counts[current_cursor_position_y]);
+
+        // Cursor is at invalid position, repositioning and remembering to restore position
+        if position_diff_x < 0 {
+            let tmp_cursor_position_x_backup = self.cursor_position_x_backup;
+            self.reposition_cursor();
+            log!("TextArea", "Cursor new position x: {}, y: {}", self.cursor.pos_x, self.cursor.pos_y);
+            self.cursor_position_x_backup = tmp_cursor_position_x_backup;
+            self.cursor_position_x_backup += -position_diff_x as u32;
+        }
+        else if self.cursor_position_x_backup > 0 {
+            if (position_diff_x as u32) >= self.cursor_position_x_backup {
+                self.move_cursor_horizontal(self.cursor_position_x_backup as i32);
+            }
+            else {
+                let tmp_cursor_position_x_backup = self.cursor_position_x_backup;
+                self.move_cursor_horizontal(position_diff_x);
+                self.cursor_position_x_backup = tmp_cursor_position_x_backup;
+                self.cursor_position_x_backup -= position_diff_x as u32;
+            }
+        }
+        log!("TextArea", "Cursor new position x: {}, y: {}", self.cursor.pos_x, self.cursor.pos_y);
+        log!("TextArea", "Datorie: {}", self.cursor_position_x_backup);
+
         self.update_scrollbar_pos();
     }
 
     pub fn move_cursor_horizontal(&mut self, no_collumns: i32) {
-        let mut new_position = self.cursor.pos_x as i32 + self.row_offset as i32 + no_collumns;
+        self.cursor_position_x_backup = 0;
+
+        let mut new_position = (self.cursor.pos_x as i32 + self.row_offset as i32).saturating_add(no_collumns);
 
         // The number of column left moves is bigger than the position in the line, needing to go upwards
         if new_position < self.line_number_bar_size as i32 {
@@ -242,11 +302,7 @@ impl TextArea {
             
             self.cursor.pos_x = new_position as usize - self.row_offset as usize;
         }
-
-        // if self.flags.contains(Flags::ShowLineNumber) {
-        //     self.cursor.pos_x += self.line_number_bar_size as usize;
-        // }
-
+        
         self.update_scrollbar_pos();
 
         let _ = self.file.write_all(format!("Cursor {:?}\n", self.cursor).as_bytes());
@@ -299,8 +355,9 @@ impl TextArea {
 
     fn reposition_cursor(&mut self) {
         // If the cursor is outside the line its supposed to be
-        if self.cursor.pos_x + self.line_offset as usize >= self.line_sizes[self.cursor.pos_y + self.line_offset as usize] as usize {
-            let diff = (self.cursor.pos_x + self.line_offset as usize) - self.line_sizes[self.cursor.pos_y + self.line_offset as usize] as usize + 1;
+        if self.cursor.pos_x + self.row_offset as usize >= self.line_character_counts[self.cursor.pos_y + self.line_offset as usize] as usize {
+            let diff = (self.cursor.pos_x + self.row_offset as usize) - self.line_character_counts[self.cursor.pos_y + self.line_offset as usize] as usize + 1;
+            log!("TextArea", "Repositioning diff: {}", 0 - diff as i32);
             self.move_cursor_horizontal(0 - diff as i32);
         }
     }
@@ -308,6 +365,7 @@ impl TextArea {
     #[inline(always)]
     fn parse_text_in_lines(&mut self, text: &str, line_sizes: &mut Vec<u32>, line_character_counts: &mut Vec<u32>) {
         for line in text.lines() {
+            log!("Info", "Print line: {}", line);
             line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
             line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
         }
@@ -384,6 +442,11 @@ impl TextArea {
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             scrollbar_x: 0,
             scrollbar_y: 0,
+
+            cursor_position_x_backup: 0,
+
+            mouse_x: 0,
+            mouse_y: 0
         };
 
         if !flags.contains(Flags::ShowLineNumber) {
@@ -601,7 +664,7 @@ impl TextArea {
             counter += self.line_sizes[line_iterator] as usize;
             line_iterator += 1;
         }
-        
+
         // If the deletion is requested on a single line
         if position_start_y == position_end_y {
             self.line_sizes[position_start_y] -= (position_end_x - position_start_x) as u32;
@@ -663,7 +726,7 @@ impl TextArea {
         destination_line_sizes[line_index + 1] += new_text_line_sizes[new_text_line_sizes.len() - 1] as u32;
         
         // Inserting the new text in between the spliced line
-        destination_line_sizes.splice(line_index..line_index, new_text_line_sizes[1 .. new_text_line_sizes.len() - 1].iter().cloned());
+        destination_line_sizes.splice(line_index + 1..line_index + 1, new_text_line_sizes[1 .. new_text_line_sizes.len() - 1].iter().cloned());
     }
     pub fn insert_text(&mut self, text: &str) {
         if text.contains('\n') {
@@ -708,6 +771,88 @@ impl TextArea {
         self.update_max_line_size();
         self.update_line_number_tab_size();
     }
+
+    #[inline(always)]
+    fn update_selection(&mut self, absolute_position_inital: usize, absolute_position_new: usize, direction: SelectionDirection) {
+        if direction == SelectionDirection::None {
+            return;
+        }
+        
+        // Checking how the selection was initially started so we understand how to process it
+                
+        // the selection is already to the left, so we expand the selection
+        if self.selection.direction == SelectionDirection::Left {
+            self.selection.pos_start = absolute_position_new;
+
+            // by moving our selection to the right, the selection is now sized at 0, 
+            // so we change it to None, in order to be able to switch directions
+            if self.selection.pos_start == self.selection.pos_end {
+                self.selection.direction = SelectionDirection::None;
+            }
+            else if self.selection.pos_start > self.selection.pos_end {
+                swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
+                self.selection.direction = SelectionDirection::Right;
+            }
+        }
+        // the selection is to the right, so we must reduce our selection
+        else if self.selection.direction == SelectionDirection::Right {
+            self.selection.pos_end = absolute_position_new;
+
+            // by moving our selection to the right, the selection is now sized at 0, 
+            // so we change it to None, in order to be able to switch directions
+            if self.selection.pos_start == self.selection.pos_end {
+                self.selection.direction = SelectionDirection::None;
+            }
+            else if self.selection.pos_start > self.selection.pos_end {
+                swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
+                self.selection.direction = SelectionDirection::Left;
+            }
+        }
+        // there was no previous selection, so we create it now
+        else {
+            self.selection.direction = direction;
+
+            if self.selection.direction == SelectionDirection::Left {
+                self.selection.pos_end = absolute_position_inital;
+                self.selection.pos_start = absolute_position_new;
+            }
+            else {
+                self.selection.pos_start = absolute_position_inital;
+                self.selection.pos_end = absolute_position_new;
+            }
+        }
+
+        // print!("Selection start: {}, end: {}, direction: {}\n", self.selection.pos_start, self.selection.pos_end, self.selection.direction);              
+    }
+
+    #[inline(always)]
+    fn save_mouse_data(&mut self, mouse_data: &MouseEventData) {
+        // Updating the view based on the direction
+        self.mouse_x = std::cmp::min(std::cmp::max(mouse_data.x, 0) as u32, self.size().width - 1);
+        self.mouse_y = std::cmp::min(std::cmp::max(mouse_data.y, 0) as u32, self.size().height - 1);
+    }
+    fn update_cursor_pos_from_mouse(&mut self, mouse_data: &MouseEventData) {
+        // Calculating the direction of movement as a difference between the current coordinates
+        let new_pos_vertical = mouse_data.y as i32 - self.mouse_y as i32;
+        let mut new_pos_horizontal = mouse_data.x as i32 - self.mouse_x as i32;
+
+        self.move_cursor_vertical(new_pos_vertical);
+        let current_cursor_position_x = self.row_offset + self.cursor.pos_x as u32;
+        let current_cursor_position_y = self.line_offset + self.cursor.pos_y as u32;
+        if new_pos_horizontal < 0 {
+            if -new_pos_horizontal > current_cursor_position_x as i32 {
+                new_pos_horizontal = -(current_cursor_position_x as i32);
+            }
+        }
+        else {
+            if new_pos_horizontal as u32 + current_cursor_position_x >= self.line_character_counts[current_cursor_position_y as usize] {
+                new_pos_horizontal = (self.line_character_counts[current_cursor_position_y as usize] - current_cursor_position_x) as i32 - 1;
+            }
+        }
+        self.move_cursor_horizontal(new_pos_horizontal);
+
+        self.save_mouse_data(mouse_data);
+    }
 }
 
 impl OnPaint for TextArea {
@@ -730,6 +875,8 @@ impl OnPaint for TextArea {
 
         let mut x = 0;
         let mut y = 0;
+
+        log!("TextArea - OnPaint", "line_offset: {}, row_offset: {}", self.line_offset, self.row_offset);
         
         // We reserve the necessary space for showing the line number, which will be dynamically calculated
         // using the number of lines the text has + 1 as a divider for the text
@@ -879,243 +1026,57 @@ impl OnKeyPressed for TextArea {
 
                 return EventProcessStatus::Processed;
             }
-
+            
             key!("Shift+Right") => {
                 // Making sure our cursor is in Focus
                 self.reposition_cursor();
-                
                 let absolute_position_inital = self.get_absolute_position() as usize;
-
-                // The text is already at the end, so no action is performed
-                if absolute_position_inital == self.text.len() - 1 {
-                    return EventProcessStatus::Processed;
-                }
-                
-                // Checking how the selction was initially started so we understand how to process it
-                
-                // the selection is already to the right, so we expand the selection
-                if self.selection.direction == SelectionDirection::Right {
-                    let absolute_position_final = absolute_position_inital + 1;
-                    
-                    self.selection.pos_end = absolute_position_final;
-                }
-                // the selection is to the left, so we must reduce our selection
-                else if self.selection.direction == SelectionDirection::Left {
-                    let absolute_position_final = absolute_position_inital + 1;
-
-                    self.selection.pos_start = absolute_position_final;
-
-                    // by moving our selection to the right, the selection is now sized at 0, 
-                    // so we change it to None, in order to be able to switch directions
-                    if self.selection.pos_start == self.selection.pos_end {
-                        self.selection.direction = SelectionDirection::None;
-                    }
-                }
-                // there was no previous selection, so we create it now
-                else {
-                    let absolute_position_final = absolute_position_inital + 1;
-                    
-                    self.selection.pos_start = absolute_position_inital;
-                    self.selection.pos_end = absolute_position_final;
-                    self.selection.direction = SelectionDirection::Right;
-                }                
-                
-                let _ = self.file.write_all(format!("Selection {:?}\n", self.selection).as_bytes());
-
                 self.move_cursor_horizontal(1);
+                let absolute_position_new = self.get_absolute_position() as usize;
+                
+                self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
+                
+                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
                 return EventProcessStatus::Processed;
             }
             key!("Shift+Left") => {
                 // Making sure our cursor is in Focus
                 self.reposition_cursor();
-                
                 let absolute_position_inital = self.get_absolute_position() as usize;
-
-                // The text is already at the start, so no action is performed
-                if absolute_position_inital == 0 {
-                    return EventProcessStatus::Processed;
-                }
-
-                // Checking how the selection was initially started so we understand how to process it
-                
-                // the selection is already to the left, so we expand the selection
-                if self.selection.direction == SelectionDirection::Left {
-                    let absolute_position_final = absolute_position_inital - 1;
-                    
-                    self.selection.pos_start = absolute_position_final;
-                }
-                // the selection is to the right, so we must reduce our selection
-                else if self.selection.direction == SelectionDirection::Right {
-                    let absolute_position_final = absolute_position_inital - 1;
-
-                    self.selection.pos_end = absolute_position_final;
-
-                    // by moving our selection to the right, the selection is now sized at 0, 
-                    // so we change it to None, in order to be able to switch directions
-                    if self.selection.pos_start == self.selection.pos_end {
-                        self.selection.direction = SelectionDirection::None;
-                    }
-                }
-                // there was no previous selection, so we create it now
-                else {
-                    let absolute_position_final = absolute_position_inital - 1;
-                    
-                    self.selection.pos_end = absolute_position_inital;
-                    self.selection.pos_start = absolute_position_final;
-                    self.selection.direction = SelectionDirection::Left;
-                }
-
-                let _ = self.file.write_all(format!("Selection {:?}\n", self.selection).as_bytes());
-
                 self.move_cursor_horizontal(-1);
+                let absolute_position_new = self.get_absolute_position() as usize;
+
+                self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Left);
+
+                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
                 return EventProcessStatus::Processed;
             }
             key!("Shift+Up") => {
-                // We can consider Shift+Up as just a Shift+Left that moves from position (x, y) to (x, y-1)
-                // Which in theory should mean moving Left with 
-                // cursor.position_x (for current line) + min(line_sizes[cursor.position_y - 1] - cursor.position_x, 0)
-                // which equates to exactly line_sizes[cursor.position_y - 1] if the position in the line is smaller than the line above
-                // or cursor.position_x otherwise 
-
                 // Making sure our cursor is in Focus 
                 self.move_cursor_vertical(0);
-
                 let absolute_position_inital = self.get_absolute_position() as usize;
+                self.move_cursor_vertical(-1);
+                let absolute_position_new = self.get_absolute_position() as usize;
 
-                let positions_to_move;
+                self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
 
-                // If we are at line 0, we just need to move to the beginning of it
-                if self.cursor.pos_y + self.line_offset as usize == 0 {
-                    if self.cursor.pos_x + self.row_offset as usize == 0 {
-                        // Cannot select, therefor exiting without changes 
-                        return EventProcessStatus::Processed;
-                    }
-                    else {
-                        // The number of positions becomes the row_offset + the cursor position
-                        positions_to_move = self.cursor.pos_x + self.row_offset as usize;
-                    }
-                }
-                else if self.row_offset as usize + self.cursor.pos_x < self.line_sizes[self.line_offset as usize + self.cursor.pos_y - 1] as usize {
-                    positions_to_move = self.line_sizes[self.line_offset as usize + self.cursor.pos_y - 1] as usize;
-                }
-                else {
-                    positions_to_move = self.row_offset as usize + self.cursor.pos_x;  
-                }
-
-                // Checking how the selection was initially started so we understand how to process it
-                
-                // the selection is already to the left, so we expand the selection
-                if self.selection.direction == SelectionDirection::Left {
-                    let absolute_position_final = absolute_position_inital - positions_to_move;
-                    
-                    self.selection.pos_start = absolute_position_final;
-                }
-                // the selection is to the right, so we must reduce our selection
-                else if self.selection.direction == SelectionDirection::Right {
-                    let absolute_position_final = absolute_position_inital - positions_to_move;
-
-                    self.selection.pos_end = absolute_position_final;
-
-                    // by moving our selection to the right, the selection is now sized at 0, 
-                    // so we change it to None, in order to be able to switch directions
-                    if self.selection.pos_start == self.selection.pos_end {
-                        self.selection.direction = SelectionDirection::None;
-                    }
-                }
-                // there was no previous selection, so we create it now
-                else {
-                    let absolute_position_final = absolute_position_inital - positions_to_move;
-                    
-                    self.selection.pos_end = absolute_position_inital;
-                    self.selection.pos_start = absolute_position_final;
-                    self.selection.direction = SelectionDirection::Left;
-                }
-
-                let _ = self.file.write_all(format!("Selection {:?}\n", self.selection).as_bytes());
-
-                self.move_cursor_horizontal(0 - positions_to_move as i32);
+                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
                 return EventProcessStatus::Processed;
             }
             key!("Shift+Down") => {
                 // Making sure our cursor is in Focus 
                 self.move_cursor_vertical(0);
-
                 let absolute_position_inital = self.get_absolute_position() as usize;
+                self.move_cursor_vertical(1);
+                let absolute_position_new = self.get_absolute_position() as usize;
 
-                let positions_to_move;
-                
-                let current_line_position = self.cursor.pos_y as usize + self.line_offset as usize;
-                let current_row_position = self.cursor.pos_x + self.row_offset as usize;
+                self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
+     
 
-                // If we are at the last line, we just need to move to the end of it
-                if current_line_position == self.line_sizes.len() - 1 {
-                    if current_row_position as usize == self.line_sizes[current_line_position] as usize - 1 {
-                        // Cannot select, therefor exiting without changes 
-                        return EventProcessStatus::Processed;
-                    }
-                    else {
-                        // The number of positions becomes the row_offset + the cursor position
-                        positions_to_move = self.line_sizes[current_line_position] as usize - current_row_position  - 1; // -1 for the newline 
-                    }
-                }
-                else {
-                    if current_row_position < self.line_sizes[current_line_position + 1] as usize {
-                        positions_to_move = self.line_sizes[current_line_position] as usize;
-                    }
-                    else {
-                        positions_to_move = self.line_sizes[current_line_position] as usize - current_row_position + self.line_sizes[current_line_position + 1] as usize; 
-                    }
-                }
-
-                // Checking how the selection was initially started so we understand how to process it
-                
-                // the selection is already to the right, so we expand the selection
-                if self.selection.direction == SelectionDirection::Right {
-                    let absolute_position_final = absolute_position_inital + positions_to_move;
-                    
-                    self.selection.pos_end = absolute_position_final;
-                }
-                // the selection is to the left, so we must reduce our selection
-                else if self.selection.direction == SelectionDirection::Left {
-                    let absolute_position_final = absolute_position_inital + positions_to_move;
-
-                    self.selection.pos_start = absolute_position_final;
-
-                    // by moving our selection to the right, the selection is now sized at 0, 
-                    // so we change it to None, in order to be able to switch directions
-                    if self.selection.pos_start == self.selection.pos_end {
-                        self.selection.direction = SelectionDirection::None;
-                    }
-                    // selection changed direction, we need to update our selection parameters
-                    if self.selection.pos_start > self.selection.pos_end {
-                        swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
-                        self.selection.direction = SelectionDirection::Right;
-                    }
-                }
-                // there was no previous selection, so we create it now
-                else {
-                    let absolute_position_final = absolute_position_inital + positions_to_move;
-                    
-                    self.selection.pos_start = absolute_position_inital;
-                    self.selection.pos_end = absolute_position_final;
-                    self.selection.direction = SelectionDirection::Right;
-                }               
-
-                let _ = self.file.write_all(format!("Selection {:?}\n", self.selection).as_bytes());
-
-                self.move_cursor_horizontal(positions_to_move as i32);
+                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
                 return EventProcessStatus::Processed;
             }
-
-            // Test only for now
-            key!("Ctrl+Left") | key!("Ctrl+Shift+Left") => {
-                self.move_cursor_horizontal(-20);
-                return EventProcessStatus::Processed;
-            }
-            key!("Ctrl+Right") | key!("Ctrl+Shift+Right") => {
-                self.move_cursor_horizontal(20);
-                return EventProcessStatus::Processed;
-            }
+            // TODO: Add Ctrl+Left, Ctrl+Right, Ctrl+Shift+Left, Ctrl+Shift+Right
 
             key!("Ctrl+V") | key!("Ctrl+Shift+V") => {
                 if !self.flags.contains(Flags::ReadOnly) {
@@ -1172,7 +1133,6 @@ impl OnKeyPressed for TextArea {
             key!("Enter") => {
                 if !self.flags.contains(Flags::ReadOnly) {
                     self.reposition_cursor();
-
                     self.insert_text("\n");
                     self.move_cursor_horizontal(1);
                     
@@ -1212,20 +1172,12 @@ impl OnMouseEvent for TextArea {
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(data) => {
                 // We need to change cursor position and reset selection
-
-                self.cursor.pos_x = data.x as usize;
-                self.cursor.pos_y = data.y as usize;
+                self.update_cursor_pos_from_mouse(data);
                 self.cursor.pressed = true;
 
                 self.reset_selection();
                 
-                let mut cursor_absolute_position = 0;
-                for i in 0..self.line_offset + self.cursor.pos_y as u32 {
-                    cursor_absolute_position += self.line_sizes[i as usize];
-                }
-                cursor_absolute_position += self.row_offset + self.cursor.pos_x as u32;
-
-                self.selection.pos_start = cursor_absolute_position as usize;
+                self.selection.pos_start = self.get_absolute_position() as usize;
                 
                 self.update_scrollbar_pos();
 
@@ -1242,50 +1194,28 @@ impl OnMouseEvent for TextArea {
                     return EventProcessStatus::Ignored;
                 }
 
-                self.cursor.pos_x = data.x as usize;
-                self.cursor.pos_y = data.y as usize;
+                log!("TextArea - Mouse Drag", "Previous Mouse position x: {}, y: {}", self.mouse_x, self.mouse_y);
+                log!("TextArea - Mouse Drag", "New Mouse position x: {}, y: {}", data.x, data.y);
 
-                let mut cursor_absolute_position = 0;
-                for i in 0..self.line_offset + self.cursor.pos_y as u32 {
-                    cursor_absolute_position += self.line_sizes[i as usize];
-                }
-                cursor_absolute_position += self.row_offset + self.cursor.pos_x as u32;
+                let cursor_absolute_position = self.get_absolute_position();
+
+                self.update_cursor_pos_from_mouse(data);
+
+                let absolute_position_new = self.get_absolute_position() as usize;
 
                 if self.selection.direction == SelectionDirection::None {
-                    self.selection.pos_end = cursor_absolute_position as usize;
-
-                    if self.selection.pos_start < self.selection.pos_end {
-                        self.selection.direction = SelectionDirection::Right;
+                    if (cursor_absolute_position as usize) < absolute_position_new {
+                        self.update_selection(cursor_absolute_position as usize, absolute_position_new, SelectionDirection::Right);
                     }
-                    else if self.selection.pos_start > self.selection.pos_end {
-
-                        swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
-                        self.selection.direction = SelectionDirection::Left;
+                    else if (cursor_absolute_position as usize) > absolute_position_new {
+                        self.update_selection(cursor_absolute_position as usize, absolute_position_new, SelectionDirection::Left);
                     }
                 }
                 else if self.selection.direction == SelectionDirection::Right {
-                    self.selection.pos_end = cursor_absolute_position as usize;
-
-                    if self.selection.pos_start == self.selection.pos_end {
-                        self.selection.direction = SelectionDirection::None;
-                    }
-                    else if self.selection.pos_start > self.selection.pos_end {
-
-                        swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
-                        self.selection.direction = SelectionDirection::Left;
-                    }
+                    self.update_selection(cursor_absolute_position as usize, absolute_position_new, SelectionDirection::Right);
                 }
-                else if self.selection.direction == SelectionDirection::Left {
-                    self.selection.pos_start = cursor_absolute_position as usize;
-
-                    if self.selection.pos_start == self.selection.pos_end {
-                        self.selection.direction = SelectionDirection::None;
-                    }
-                    else if self.selection.pos_start > self.selection.pos_end {
-
-                        swap(&mut self.selection.pos_start, &mut self.selection.pos_end);
-                        self.selection.direction = SelectionDirection::Right;
-                    }
+                else {
+                    self.update_selection(cursor_absolute_position as usize, absolute_position_new, SelectionDirection::Left);
                 }
 
                 EventProcessStatus::Processed
