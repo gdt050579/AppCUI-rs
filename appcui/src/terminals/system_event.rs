@@ -95,6 +95,9 @@ pub(crate) enum SystemEvent {
     TimerTickUpdate(TimerTickUpdateEvent),
     TimerStart(TimerStartEvent),
     TimerPaused(TimerPausedEvent),
+    BackgroundTaskStart(u64),
+    BackgroundTaskEnd(u64),
+    BackgroundTaskUpdate(u64),
 }
 
 impl SystemEvent {

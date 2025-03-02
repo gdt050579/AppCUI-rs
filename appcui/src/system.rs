@@ -10,6 +10,7 @@ mod control_handle_manager;
 mod menu_handle_manager;
 mod reference;
 mod timer;
+mod background_task;
 #[cfg(test)]
 mod tests;
 mod builder;
