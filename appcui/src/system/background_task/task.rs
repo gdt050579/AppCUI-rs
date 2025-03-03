@@ -2,6 +2,7 @@ use crate::system::Handle;
 
 pub(crate) trait Task<T: Sized> {
     fn read_data(&self) -> Option<T>;
+    fn update_control_handle(&mut self, control_handle: Handle<()>);
 }
 pub(crate) struct InnerTask<T: Sized> {
     pub(crate) control: Handle<()>,
@@ -18,12 +19,13 @@ impl<T: Sized> InnerTask<T> {
             sender,
         }
     }
-    pub(crate) fn update_control_handle(&mut self, control_handle: Handle<()>) {
-        self.control = control_handle;
-    }
+
 }
 impl<T: Sized> Task<T> for InnerTask<T> {
     fn read_data(&self) -> Option<T> {
         self.receiver.try_recv().ok()
+    }
+    fn update_control_handle(&mut self, control_handle: Handle<()>) {
+        self.control = control_handle;
     }
 }
