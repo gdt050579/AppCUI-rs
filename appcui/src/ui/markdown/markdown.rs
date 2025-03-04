@@ -1,33 +1,33 @@
-pub mod linkheaderregistry;
+pub mod linkregistry;
 pub mod parser;
 
 use self::components::ScrollBars;
 use crate::prelude::*;
 use crate::system::Theme;
 use crate::ui::markdown::initialization_flags::Flags;
-use linkheaderregistry::LinkHeaderRegistry;
+use linkregistry::LinkRegistry;
 use parser::{InlineElement, MarkdownElement, MarkdownParser, Table};
 use std::cell::RefCell;
+
+use super::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct Markdown {
     surface: Surface,
-    content: String,
     x: i32,
     y: i32,
     background: Option<Character>,
     flags: Flags,
     drag_point: Option<Point>,
     scrollbars: ScrollBars,
-    link_header_registry: RefCell<LinkHeaderRegistry>,
+    link_registry: RefCell<LinkRegistry>,
     elements: Vec<MarkdownElement>,
 }
 
 impl Markdown {
     // Creates a new markdown component with a specified content, layout, and flags.
     pub fn new(content: &str, layout: Layout, flags: Flags) -> Self {
-        let (width, height) = (100, 150); //Markdown::compute_dimensions(&content);
-
+        let (width, height) = Self::compute_dimension(content);
         Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -39,16 +39,37 @@ impl Markdown {
                     },
             ),
             surface: Surface::new(width as u32, height as u32),
-            content: content.to_string().clone(),
             x: 0,
             y: 0,
             flags,
             background: None,
             drag_point: None,
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
-            link_header_registry: RefCell::new(LinkHeaderRegistry::new()),
-            elements: MarkdownParser::parse(content),
+            link_registry: RefCell::new(LinkRegistry::new()),
+            elements: MarkdownParser::parse(content) ,
         }
+    }
+
+    pub fn set_content(&mut self, content: &str) {
+        self.x = 0;
+        self.y = 0;
+        self.elements = MarkdownParser::parse(content);
+        self.link_registry.replace(LinkRegistry::new());
+  
+        let (width, height) = Self::compute_dimension(content);
+        self.surface.resize(Size::new(width as u32, height as u32));
+        
+        let paint_sz = self.surface.size();
+        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
+        self.move_scroll_to(self.x, self.y);
+    }
+
+    fn compute_dimension(content: &str) -> (usize, usize) {
+        let lines: Vec<&str> = content.lines().collect();
+        let height = lines.len();
+        let width = lines.iter().map(|line| line.len()).max().unwrap_or(0); 
+    
+        (width, height)
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
@@ -86,15 +107,21 @@ impl Markdown {
     }
 
     fn register_if_link(
-        link_header_registry: &mut LinkHeaderRegistry,
+        link_registry: &mut LinkRegistry,
         element: &InlineElement,
         x: i32,
         y: i32,
     ) -> Option<String> {
         if let InlineElement::Link(_, link) = element {
+            let link_str = if link.starts_with("#") {
+                link.trim_start_matches("#").to_string()
+            } else {
+                link.to_string()
+            };
+    
             let link_width = link.chars().count() as i32;
-            let link_str = link.replace('#', "");
-            link_header_registry.register_link_position(&link_str, x, y, link_width);
+            link_registry.register_link_position(&link_str, x, y, link_width, !link.starts_with("#"));
+    
             return Some(link_str);
         }
         None
@@ -107,7 +134,7 @@ impl Markdown {
         y_pos: &mut i32,
         xlsurface: &mut Surface,
         prefix: Option<String>,
-        link_header_registry: &mut LinkHeaderRegistry,
+        link_registry: &mut LinkRegistry,
         theme: &Theme,
         inactive: bool
     ) {
@@ -116,9 +143,9 @@ impl Markdown {
                 *x_pos = indent;
             }
 
-            let link_identifier = Self::register_if_link(link_header_registry, element, *x_pos, *y_pos);
+            let link_identifier = Self::register_if_link(link_registry, element, *x_pos, *y_pos);
             let is_hovered = if let Some(ref id) = link_identifier {
-                link_header_registry.is_hovered(id)
+                link_registry.is_hovered(id)
             } else {
                 false
             };
@@ -148,7 +175,7 @@ impl Markdown {
         x_pos: &mut i32,
         y_pos: &mut i32,
         xlsurface: &mut Surface,
-        link_header_registry: &mut LinkHeaderRegistry,
+        link_registry: &mut LinkRegistry,
         theme: &Theme,
         inactive: bool
     ) {
@@ -160,11 +187,11 @@ impl Markdown {
                     match item {
                         parser::ListItem::Simple(ref elements) => {
                             let mut x = *x_pos;
-                            Self::process_list_element(elements, indent, &mut x, y_pos, xlsurface, None, link_header_registry, theme, inactive);
+                            Self::process_list_element(elements, indent, &mut x, y_pos, xlsurface, None, link_registry, theme, inactive);
                             *y_pos += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
-                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry, theme, inactive);
+                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_registry, theme, inactive);
                         }
                     }
                 }
@@ -182,7 +209,7 @@ impl Markdown {
                                 y_pos,
                                 xlsurface,
                                 Some(format!("{}.", index)),
-                                link_header_registry,
+                                link_registry,
                                 theme,
                                 inactive
                             );
@@ -190,7 +217,7 @@ impl Markdown {
                             *y_pos += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
-                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_header_registry, theme, inactive);
+                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_registry, theme, inactive);
                         }
                     }
                 }
@@ -228,7 +255,7 @@ impl Markdown {
 
         let attr = if self.is_enabled() { header_style } else { theme.text.inactive };
 
-        self.link_header_registry.borrow_mut().register_header_position(&content, y_pos);
+        self.link_registry.borrow_mut().register_header_position(&content, y_pos);
         surface.write_string(self.x, y_pos, &Self::replace_tabs(&content), attr, false);
     }
 
@@ -352,17 +379,17 @@ impl Markdown {
         }
     }
 
-    fn paint_paragraph(&self, content: &Vec<InlineElement>, y_pos: i32, surface: &mut Surface, theme: &Theme) {
+    fn paint_paragraph(&self, content: &[InlineElement], y_pos: i32, surface: &mut Surface, theme: &Theme) {
         let mut x_pos: i32 = self.x;
         
         for element in content.iter() {
             let link_identifier = {
-                let mut registry = self.link_header_registry.borrow_mut();
+                let mut registry = self.link_registry.borrow_mut();
                 Self::register_if_link(&mut registry, element, x_pos, y_pos)
             };
             
             let is_hovered = if let Some(ref id) = link_identifier {
-                self.link_header_registry.borrow().is_hovered(id)
+                self.link_registry.borrow().is_hovered(id)
             } else {
                 false
             };
@@ -395,7 +422,7 @@ impl Markdown {
                         &mut x_pos,
                         &mut y_pos,
                         surface,
-                        &mut self.link_header_registry.borrow_mut(),
+                        &mut self.link_registry.borrow_mut(),
                         theme,
                         !self.is_enabled()
                     );
@@ -405,11 +432,11 @@ impl Markdown {
 
             for (i, element) in elements.iter().enumerate() {
                 let link_identifier = {
-                    let mut registry = self.link_header_registry.borrow_mut();
+                    let mut registry = self.link_registry.borrow_mut();
                     Self::register_if_link(&mut registry, element, x_pos, y_pos)
                 };
                 let is_hovered = if let Some(ref id) = link_identifier {
-                    self.link_header_registry.borrow().is_hovered(id)
+                    self.link_registry.borrow().is_hovered(id)
                 } else {
                     false
                 };
@@ -438,7 +465,15 @@ impl Markdown {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::Button(EventData {}),
+            data: ControlEventData::Markdown(EventData { event_type: markdown::events::Data::LinkClickEvent(link.to_string()) })
+        });
+    }
+
+    fn send_back_navigation_command(&self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::Markdown(EventData { event_type: markdown::events::Data::BackEvent }),
         });
     }
 
@@ -462,7 +497,7 @@ impl Markdown {
                                     &mut x_pos,
                                     &mut y_pos,
                                     surface,
-                                    &mut self.link_header_registry.borrow_mut(),
+                                    &mut self.link_registry.borrow_mut(),
                                     theme,
                                     !self.is_enabled()
                                 );
@@ -472,11 +507,11 @@ impl Markdown {
 
                         for (i, element) in elements.iter().enumerate() {
                             let link_identifier = {
-                                let mut registry = self.link_header_registry.borrow_mut();
+                                let mut registry = self.link_registry.borrow_mut();
                                 Self::register_if_link(&mut registry, element, x_pos, y_pos)
                             };
                             let is_hovered = if let Some(ref id) = link_identifier {
-                                self.link_header_registry.borrow().is_hovered(id)
+                                self.link_registry.borrow().is_hovered(id)
                             } else {
                                 false
                             };
@@ -518,7 +553,7 @@ impl OnPaint for Markdown {
 
         for element in &self.elements {
             match element {
-                MarkdownElement::Header(content, level) => self.paint_header(&content, y_pos, level, surface, theme),
+                MarkdownElement::Header(content, level) => self.paint_header(content, y_pos, level, surface, theme),
                 MarkdownElement::Paragraph(content) => self.paint_paragraph(content, y_pos, surface, theme),
                 MarkdownElement::UnorderedList(items) => { y_pos = self.paint_unordered_list(items, y_pos, surface, theme) },
                 MarkdownElement::OrderedList(items) => { y_pos = self.paint_ordered_list(items, y_pos, surface, theme) },
@@ -561,10 +596,15 @@ impl OnKeyPressed for Markdown {
                 self.move_scroll_to(self.x, self.y - 1);
                 EventProcessStatus::Processed
             }
+            key!("Backspace") => {
+                self.send_back_navigation_command();
+                EventProcessStatus::Processed
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
 }
+
 
 impl OnMouseEvent for Markdown {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
@@ -573,27 +613,48 @@ impl OnMouseEvent for Markdown {
             return EventProcessStatus::Processed;
         }
         match event {
+            MouseEvent::Over(data) => {
+                let mut tmp = None;
+                if let Some(link_header_id) = self.link_registry.borrow().check_for_link_at_position(data.x, data.y) {
+                    tmp = Some(link_header_id);
+                }
+
+                if let Some(link_header_id) = tmp {
+                    self.link_registry.borrow_mut().set_link_hovered(&link_header_id);
+                } else {
+                    self.link_registry.borrow_mut().clear_hovered();
+                }
+                EventProcessStatus::Processed
+            }
             MouseEvent::Pressed(data) => {
+                self.drag_point = Some(Point::new(data.x, data.y));
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Released(data) => {
                 let mut y_header: Option<i32> = None;
 
-                if let Some(link_header_id) = self.link_header_registry.borrow().check_for_link_at_position(data.x, data.y) {
-                    if let Some(header_position) = self.link_header_registry.borrow().get_header_position(&link_header_id) {
-                        y_header = Some(header_position);
+    
+                if let Some(link_id) = self.link_registry.borrow().check_for_link_at_position(data.x, data.y) {
+                    if let Some(is_external) = self.link_registry.borrow().is_link_external(&link_id) {
+                        if is_external {
+                            self.send_link(&link_id);
+                            return EventProcessStatus::Processed;
+                        } else if let Some(header_position) = self.link_registry.borrow().get_header_position(&link_id) {
+                            y_header = Some(header_position);
+                        }
                     }
                 }
 
                 if let Some(header_position) = y_header {
                     self.move_scroll_to(0, self.y - header_position);
-                } else {
-                    self.drag_point = Some(Point::new(data.x, data.y));
+                    return EventProcessStatus::Processed;
                 }
-                EventProcessStatus::Processed
-            }
-            MouseEvent::Released(data) => {
+
                 if let Some(p) = self.drag_point {
                     self.move_scroll_to(self.x + data.x - p.x, self.y + data.y - p.y);
+                    self.drag_point = None;
+                    return EventProcessStatus::Processed;
                 }
-                self.drag_point = None;
                 EventProcessStatus::Processed
             }
             MouseEvent::Drag(data) => {
@@ -609,16 +670,6 @@ impl OnMouseEvent for Markdown {
                     MouseWheelDirection::Down => self.move_scroll_to(self.x, self.y - 1),
                     _ => {}
                 };
-                EventProcessStatus::Processed
-            }
-            MouseEvent::Over(data) => {
-                let mut tmp = None;
-                if let Some(link_header_id) = self.link_header_registry.borrow().check_for_link_at_position(data.x, data.y) {
-                    tmp = Some(link_header_id);
-                }
-                if let Some(link_header_id) = tmp {
-                    self.link_header_registry.borrow_mut().set_link_hovered(&link_header_id);
-                }
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,

@@ -78,11 +78,21 @@ Some examples that uses these paramateres:
     ```
 
 ## Events
-A markdown control emits no events yet.
+To intercept events from a markdown control, the following trait has to be implemented to the Window that processes the event loop:
+```rs
+pub trait MarkdownEvents {
+    fn on_external_link(&mut self, markdown: Handle<Markdown>, link: &str) -> 
+    EventProcessStatus {...}
+}
+```
 
 ## Methods
 
-There are no new methods besides the [Common methods for all Controls](../common_methods.md).
+Besides the [Common methods for all Controls](../common_methods.md) a canvas also has the following aditional methods:
+
+| Method                     | Purpose                                                            |
+| -------------------------- | ------------------------------------------------------------------ |
+| `set_content(...)` |  Replaces the canvas content with new data. It resets the drawing coordinates (x, y) and re-parses the content.|
 
 ## Key association
 

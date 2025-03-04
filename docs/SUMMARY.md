@@ -60,6 +60,7 @@
         - [HSplitter](chapter-3/stock-controls/hsplitter.md)
         - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
         - [KeySelector](chapter-3/stock-controls/keyselector.md)
+        - [Markdown](chapter-3/stock-controls/markdown.md)
         - [NumericSelector](chapter-3/stock-controls/numericselector.md)
         - [Panel](chapter-3/stock-controls/panel.md)
         - [Password](chapter-3/stock-controls/password.md)

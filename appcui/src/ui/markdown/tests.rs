@@ -1,4 +1,4 @@
-use super::markdown::linkheaderregistry::LinkHeaderRegistry;
+use super::markdown::linkregistry::LinkRegistry;
 use super::markdown::parser::{InlineElement, ListItem, MarkdownElement, MarkdownParser};
 use crate::prelude::*;
 
@@ -151,23 +151,23 @@ fn test_parse_inline_elements() {
 // LinkHeaderRegistry Tests
 #[test]
 fn test_register_and_get_header_position() {
-    let mut registry = LinkHeaderRegistry::new();
+    let mut registry = LinkRegistry::new();
     registry.register_header_position("Test Header", 42);
     assert_eq!(registry.get_header_position("test-header"), Some(42));
 }
 
 #[test]
 fn test_register_link_position_and_check() {
-    let mut registry = LinkHeaderRegistry::new();
-    registry.register_link_position("example-link", 10, 20, 5);
+    let mut registry = LinkRegistry::new();
+    registry.register_link_position("example-link", 10, 20, 5, false);
     assert_eq!(registry.check_for_link_at_position(12, 20), Some("example-link".to_string()));
     assert_eq!(registry.check_for_link_at_position(16, 20), None);
 }
 
 #[test]
 fn test_get_id_from_header() {
-    assert_eq!(LinkHeaderRegistry::get_id_from_header("Example Header"), "example-header");
-    assert_eq!(LinkHeaderRegistry::get_id_from_header("Another_Test"), "anothertest");
+    assert_eq!(LinkRegistry::get_id_from_header("Example Header"), "example-header");
+    assert_eq!(LinkRegistry::get_id_from_header("Another_Test"), "anothertest");
 }
 
 // Markdown tests
@@ -197,7 +197,7 @@ fn check_scrollbars_on_arrows_and_click() {
         Paint('5. scroll bars moved with mouse')
         CheckHash(0x1C63D7BA7B0A18EF) 
 ";
-    let mut m = markdown!("'
+    let m = markdown!("'
     # My Markdown Example\r\n\r\n\
     Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\r\n\r\n\
     ---\r\n\
@@ -274,7 +274,7 @@ fn check_scrollbars_on_drag_and_weel() {
         Paint('5. drag mouse down (scroll up)')
         CheckHash(0x9FDE78EBFCEB11B1)
 ";
-    let mut m = markdown!("'
+    let m = markdown!("'
     # My Markdown Example\r\n\r\n\
     Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\r\n\r\n\
     ---\r\n\
@@ -342,7 +342,7 @@ fn check_move_to_section_on_link_click() {
         Paint('2. scroll bars moved with mouse')
         CheckHash(0x23D8260826FFEF99) 
 ";
-    let mut m = markdown!("'
+    let m = markdown!("'
     [Go to end](#end-link)\r\n\r\n\
     Some testing for links back \r\n\r\n\
     ## Table of Contents\r\n\r\n\

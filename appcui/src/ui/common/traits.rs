@@ -3,28 +3,7 @@ use crate::{
     input::{Key, MouseEvent},
     system::{Handle, Theme},
     ui::{
-        button::events::ButtonEvents,
-        checkbox::events::CheckBoxEvents,
-        colorpicker::events::ColorPickerEvents,
-        combobox::events::ComboBoxEvents,
-        command_bar::events::GenericCommandBarEvents,
-        datepicker::events::DatePickerEvents,
-        desktop::events::DesktopEvents,
-        dropdownlist::events::GenericDropDownListEvents,
-        keyselector::events::KeySelectorEvents,
-        listbox::events::ListBoxEvents,
-        listview::events::GenericListViewEvents,
-        menu::events::GenericMenuEvents,
-        numericselector::events::GenericNumericSelectorEvents,
-        password::events::PasswordEvents,
-        pathfinder::events::PathFinderEvents,
-        radiobox::events::RadioBoxEvents,
-        selector::events::GenericSelectorEvents,
-        textfield::events::TextFieldEvents,
-        threestatebox::events::ThreeStateBoxEvents,
-        togglebutton::events::ToggleButtonEvents,
-        window::events::{ToolBarEvents, WindowEvents},
-        treeview::events::GenericTreeViewEvents,
+        button::events::ButtonEvents, checkbox::events::CheckBoxEvents, colorpicker::events::ColorPickerEvents, combobox::events::ComboBoxEvents, command_bar::events::GenericCommandBarEvents, datepicker::events::DatePickerEvents, desktop::events::DesktopEvents, dropdownlist::events::GenericDropDownListEvents, keyselector::events::KeySelectorEvents, listbox::events::ListBoxEvents, listview::events::GenericListViewEvents, markdown::events::MarkdownEvents, menu::events::GenericMenuEvents, numericselector::events::GenericNumericSelectorEvents, password::events::PasswordEvents, pathfinder::events::PathFinderEvents, radiobox::events::RadioBoxEvents, selector::events::GenericSelectorEvents, textfield::events::TextFieldEvents, threestatebox::events::ThreeStateBoxEvents, togglebutton::events::ToggleButtonEvents, treeview::events::GenericTreeViewEvents, window::events::{ToolBarEvents, WindowEvents}
     },
 };
 
@@ -150,6 +129,7 @@ pub trait Control:
     + PathFinderEvents
     + TimerEvents
     + GenericTreeViewEvents
+    + MarkdownEvents
 {
 }
 
