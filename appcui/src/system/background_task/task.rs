@@ -19,7 +19,9 @@ impl<T: Sized> InnerTask<T> {
             sender,
         }
     }
-
+    fn run(&self, task: Fn()) {
+        task();
+    }
 }
 impl<T: Sized> Task<T> for InnerTask<T> {
     fn read_data(&self) -> Option<T> {
