@@ -1,9 +1,7 @@
-# Ownership
+# Ownership & Borrowing
 
-Rust's ownership model provides memory safety without a garbage collector. It ensures that resources are managed efficiently and safely.
+**Level 2**
 
-Explore related topics:
-- [Concurrency](concurrency.md)
-- [Features](features.md)
+This file explains Rust's ownership model, a core concept that guarantees memory safety and eliminates many common programming errors. Understand how ownership, borrowing, and lifetimes work in Rust.
 
-Return to the [Introduction](introduction.md)
+- [Back to Introduction](introduction.md)

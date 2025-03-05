@@ -1,8 +1,9 @@
-# Introduction
+# Welcome to Rust
 
-Welcome to our Markdown documentation! This file introduces the content and provides links to more detailed sections.
+**Level 1**
 
-Learn more about our project:
-- [Features](features.md)
-- [Ownership](ownership.md)
-- [Concurrency](concurrency.md)
+Welcome to the world of Rust! This file serves as your entry point into Rust’s concepts and community. Here you'll get an overview of what Rust offers, and you can navigate to more detailed topics.
+
+## Learn More
+- [Language Features](features.md)
+- [Ownership & Safety](ownership.md)
