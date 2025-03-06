@@ -1,31 +1,40 @@
+use std::any::Any;
 use crate::system::Handle;
 
-pub(crate) trait Task<T: Sized> {
-    fn read_data(&self) -> Option<T>;
+pub(crate) trait Task {
+    fn read_data(&mut self) -> Option<&dyn Any>;
     fn update_control_handle(&mut self, control_handle: Handle<()>);
 }
 pub(crate) struct InnerTask<T: Sized> {
     pub(crate) control: Handle<()>,
     pub(crate) receiver: std::sync::mpsc::Receiver<T>,
     pub(crate) sender: std::sync::mpsc::Sender<T>,
+    data: Option<T>,
 }
 
-impl<T: Sized> InnerTask<T> {
+impl<T: Sized+'static> InnerTask<T> {
     pub(crate) fn new() -> InnerTask<T> {
         let (sender, receiver) = std::sync::mpsc::channel();
         InnerTask {
             control: Handle::None,
             receiver,
             sender,
+            data: None
         }
     }
     // fn run(&self, task: Fn()) {
     //     task();
     // }
 }
-impl<T: Sized> Task<T> for InnerTask<T> {
-    fn read_data(&self) -> Option<T> {
-        self.receiver.try_recv().ok()
+impl<T: Sized+'static> Task for InnerTask<T> {
+    fn read_data(&mut self) -> Option<&dyn Any> {
+        if let Ok(data) = self.receiver.try_recv() {
+            self.data = Some(data);
+            Some(&self.data)
+        } else {
+            None
+        }
+        //self.receiver.try_recv().ok()
     }
     fn update_control_handle(&mut self, control_handle: Handle<()>) {
         self.control = control_handle;
