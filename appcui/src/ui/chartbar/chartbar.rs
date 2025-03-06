@@ -34,6 +34,7 @@ pub struct ChartBar {
     comp: ScrollBars,
 
     data: Vec<Value>,
+    max_capacity: u32,
 
     top_view: i32,
     left_offset: u32,
@@ -69,6 +70,7 @@ impl ChartBar {
                 left_space: 5,
             }),
             y_axes_type: YAxes::Auto,
+            max_capacity: 50,
         }
     }
 
@@ -116,7 +118,7 @@ impl ChartBar {
     }
 
     pub fn set_fit_to_window_height(&mut self, b: bool) {
-        self.fit = if b == true { Fit::FitToHeight } else { Fit::None };
+        self.fit = if b { Fit::FitToHeight } else { Fit::None };
     }
 
     #[inline(always)]
@@ -243,18 +245,21 @@ impl ChartBar {
         let bar_width = (self.bar_width + self.distance) as u32;
         let len = self.data.len() as u32 * bar_width;
         let w = self.size().width.saturating_sub(self.left_space());
+        if len < self.max_capacity {
+            self.data.push(value);
 
-        self.data.push(value);
+            if self.flags.contains(Flags::AutoScroll) && len - self.left_offset * bar_width > w {
+                self.left_offset += bar_width;
+            }
+            self.top_view = 0;
+            self.update_min_max();
 
-        if self.flags.contains(Flags::AutoScroll) && len - self.left_offset * bar_width > w {
-            self.left_offset += bar_width;
+            self.update_scrollbars();
+            self.update_scrollbars_size();
+            self.on_resize(self.size(), self.size());
+        } else {
+            todo!();
         }
-        self.top_view = 0;
-        self.update_min_max();
-
-        self.update_scrollbars();
-        self.update_scrollbars_size();
-        self.on_resize(self.size(), self.size());
     }
 
     pub fn add_data(&mut self, data: &Vec<i32>) {
@@ -452,7 +457,7 @@ impl OnMouseEvent for ChartBar {
                         let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
                         //let rect1 = Rect::with_size(x as i32, h - 1, self.bar_width as u16, val as u16);
                         if h - val - self.top_view - 1 <= h - val + val.max(1) - 2 {
-                            if is_over(
+                            if is_over_rectangle(
                                 point,
                                 x as i32,
                                 h - val - self.top_view - 1,
@@ -467,6 +472,47 @@ impl OnMouseEvent for ChartBar {
                         }
                     }
                     return EventProcessStatus::Processed;
+                } else if self.chart_type == Type::Line {
+                    let mut prev_val = 1;
+                    for (index, c) in self.data[start as usize..].iter().enumerate() {
+                        let x = index as u32 * bar_width + left_space as u32 + 1;
+                        if x > sz.width {
+                            break;
+                        }
+                        let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
+
+                        if h - prev_val - self.top_view - 1 < h - val - self.top_view - 1 {
+                            if is_over_rectangle(
+                                point,
+                                x as i32,
+                                h - prev_val - self.top_view - 1,
+                                x as i32,
+                                (h - val - self.top_view - 1).min(h - 1),
+                            ) {
+                                self.show_tooltip_on_point(format!("{},{}", c.value(), c.label()).as_str(), point.x, point.y);
+                                return EventProcessStatus::Processed;
+                            } else {
+                                self.hide_tooltip();
+                            }
+                        } else {
+                            if is_over_rectangle(
+                                point,
+                                x as i32,
+                                h - val - self.top_view - 1,
+                                x as i32,
+                                (h - prev_val - self.top_view - 1).min(h - 1),
+                            ) {
+                                self.show_tooltip_on_point(format!("{},{}", c.value(), c.label()).as_str(), point.x, point.y);
+                                return EventProcessStatus::Processed;
+                            } else {
+                                self.hide_tooltip();
+                            }
+                        }
+
+                        prev_val = val;
+                    }
+
+                    return EventProcessStatus::Processed;
                 }
                 return EventProcessStatus::Ignored;
             }
@@ -477,7 +523,9 @@ impl OnMouseEvent for ChartBar {
             }
             MouseEvent::Released(_mouse_event_data) => {}
             MouseEvent::DoubleClick(_mouse_event_data) => {}
-            MouseEvent::Drag(_mouse_event_data) => {}
+            MouseEvent::Drag(_mouse_event_data) => {
+                //let x_movement = mouse_event_data
+            }
             MouseEvent::Wheel(_mouse_wheel_direction) => {}
         }
         EventProcessStatus::Ignored
@@ -577,7 +625,7 @@ impl OnKeyPressed for ChartBar {
     }
 }
 
-pub fn is_over(poz: &Point, top: i32, left: i32, bottom: i32, right: i32) -> bool {
+fn is_over_rectangle(poz: &Point, top: i32, left: i32, bottom: i32, right: i32) -> bool {
     if poz.x >= top && poz.x <= bottom && poz.y >= left && poz.y <= right {
         return true;
     }
