@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-pub struct MarkdownLoader;
+pub(crate) struct MarkdownLoader;
 
 impl MarkdownLoader {
     pub fn load(path: &str) -> Option<String> {

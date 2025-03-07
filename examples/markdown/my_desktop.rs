@@ -14,7 +14,7 @@ const LOGO: [&str; 8] = [
 
 
 
-#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
+#[Desktop(events    = [MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
           commands  = [Open,Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, Back])]
 pub struct MyDesktop {
@@ -94,12 +94,17 @@ impl MenuEvents for MyDesktop {
     fn on_command(&mut self, _:Handle<Menu>, _:Handle<menu::Command>, command:mydesktop::Commands) {
         match command {
             mydesktop::Commands::Open => {
-                if let Some(_file_path) = dialogs::open("Open",
+                if let Some(file_path) = dialogs::open(
+                    "Open",
                     "",
                     dialogs::Location::Last,
                     Some("Markdown files = [md]"),
-                    dialogs::OpenFileDialogFlags::Icons
-                ) { self.add_window(Viewer::new()); }
+                    dialogs::OpenFileDialogFlags::Icons,
+                ) {
+                    if let Some(parent_dir) = std::path::Path::new(&file_path).parent() {
+                        self.add_window(Viewer::new(parent_dir.to_string_lossy().to_string())); 
+                    }
+                }
             }
             mydesktop::Commands::Exit => self.close(),
             _ => {}
@@ -111,20 +116,5 @@ impl MenuEvents for MyDesktop {
     {
         menubar.add(self.menu_file);
         menubar.add(self.menu_arrange);
-    }
-}
-
-impl CommandBarEvents for MyDesktop {
-    fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("Back"), "Back", mydesktop::Commands::Back);
-    }
-
-    fn on_event(&mut self, command_id: mydesktop::Commands) {
-        match command_id {
-            mydesktop::Commands::Back => {
-                // to be completed
-            }
-            _ => {}
-        }
     }
 }

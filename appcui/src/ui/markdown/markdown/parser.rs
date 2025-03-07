@@ -48,7 +48,7 @@ impl fmt::Display for InlineElement {
     }
 }
 
-pub struct MarkdownParser;
+pub(crate) struct MarkdownParser;
 
 impl MarkdownParser {
     /// Parses a string input into a vector of MarkdownElements.

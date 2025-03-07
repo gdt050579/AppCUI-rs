@@ -14,10 +14,10 @@ impl my_win {
             \r\n\
             ## Table of Contents\r\n\
             - [Introduction](#introduction)\r\n\
-                - [What Makes Rust Unique?](#what-makes-rust-unique)\r\n\
+            \t- [What Makes Rust Unique?](#what-makes-rust-unique)\r\n\
             - [Features](#features)\r\n\
-                - [Ownership and Borrowing](#ownership-and-borrowing)\r\n\
-                - [Concurrency](#concurrency)\r\n\
+            \t- [Ownership and Borrowing](#ownership-and-borrowing)\r\n\
+            \t- [Concurrency](#concurrency)\r\n\
             \r\n\
             ## Introduction\r\n\
             \r\n\
@@ -48,7 +48,7 @@ impl my_win {
             \r\n\
             ```\r\n\
             fn main() {\r\n\
-                println!(\"Hello, world!\");\r\n\
+            \tprintln!(\"Hello, world!\");\r\n\
             }\r\n\
             ```\r\n\
             [Link EXTERN](https://google.com)\r\n\

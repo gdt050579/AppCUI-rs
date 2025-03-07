@@ -4,22 +4,23 @@ mod md_loader;
 use markdown_navigator::MarkdownNavigator;
 use md_loader::MarkdownLoader;
 
-#[Window(events = MarkdownEvents)]
+#[Window(events = MarkdownEvents+ToolBarEvents)]
 pub struct Viewer {
     base_path: String,
     navigator: MarkdownNavigator,
+    h_md: Handle<Markdown>,
 }
 
 impl Viewer {
-    pub fn new() -> Self {
-        let base_path = "D:/rust/AppCUI-rs/examples/markdown/md_files".to_string();
-        let initial_path = format!("{}/{}", base_path, "introduction.md");
+    pub fn new(base_path: String) -> Self {
+        let initial_path = format!(r"{}\{}", base_path, "introduction.md");
 
         let window = Window::new(&initial_path, Layout::new("d:c, w:50, h: 15"), Flags::Sizeable);
         let mut w: Viewer = Self {
             base: window,
             base_path,
             navigator: MarkdownNavigator::new(),
+            h_md: Handle::None
         };
         
         let content = MarkdownLoader::load(&initial_path);
@@ -27,13 +28,37 @@ impl Viewer {
         if let Some(text) = content {
             w.navigator.open("introduction.md".to_string());
             let m: Markdown = Markdown::new(&text, Layout::new("d: c"), markdown::Flags::ScrollBars);
-            w.add(m);
+            w.h_md = w.add(m);
         }
+        let group = w.toolbar().create_group(toolbar::GroupPosition::TopLeft);
+        w.toolbar().add(group, window::toolbar::Button::new("<--"));
         w
     }
 
     fn full_path(&self, filename: &str) -> String {
-        format!("{}/{}", self.base_path, filename)
+        format!(r"{}\{}", self.base_path, filename)
+    }
+
+    fn go_back(&mut self) {
+        let handle = self.h_md;
+        if let Some(current_path) = self.navigator.go_back() {
+            let full_path = self.full_path(&current_path);
+            if let Some(file_content) = MarkdownLoader::load(&full_path) {
+                if let Some(md) = self.control_mut(handle) {
+                    md.set_content(&file_content);
+                }
+            } else if let Some(md) = self.control_mut(handle) {
+                md.set_content(&format!("Could not load file at {}", current_path));
+            }
+        }
+    }
+}
+
+
+impl ToolBarEvents for Viewer {
+    fn on_button_clicked(&mut self, _: Handle<toolbar::Button>) -> EventProcessStatus {
+        self.go_back();
+        EventProcessStatus::Processed
     }
 }
 
@@ -47,27 +72,14 @@ impl MarkdownEvents for Viewer {
             if let Some(md) = self.control_mut(_handle) {
                 md.set_content(&file_content);
             }
-        } else {
-            if let Some(md) = self.control_mut(_handle) {
-                md.set_content(&format!("Could not load file at {}", full_path));
-            }
+        } else if let Some(md) = self.control_mut(_handle) {
+            md.set_content(&format!("Could not load file at {}", full_path));
         }
         EventProcessStatus::Processed
     }
 
     fn on_backspace_navigation(&mut self, _handle: Handle<Markdown>) -> EventProcessStatus {
-        if let Some(current_path) = self.navigator.go_back() {
-            let full_path = self.full_path(&current_path);
-            if let Some(file_content) = MarkdownLoader::load(&full_path) {
-                if let Some(md) = self.control_mut(_handle) {
-                    md.set_content(&file_content);
-                }
-            } else {
-                if let Some(md) = self.control_mut(_handle) {
-                    md.set_content(&format!("Could not load file at {}", current_path));
-                }
-            }
-        }
+        self.go_back();
         EventProcessStatus::Processed
     }
 }

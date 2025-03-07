@@ -1,6 +1,5 @@
-pub mod linkregistry;
-pub mod parser;
-
+pub(crate) mod linkregistry;
+pub(crate) mod parser;
 use self::components::ScrollBars;
 use crate::prelude::*;
 use crate::system::Theme;
@@ -25,7 +24,18 @@ pub struct Markdown {
 }
 
 impl Markdown {
-    // Creates a new markdown component with a specified content, layout, and flags.
+    /// Creates a new markdown component with a specified content, layout, and flags.
+    /// This method initializes a markdown rendering control with the provided parameters.
+    ///
+    /// # Parameters
+    /// - `content`: The markdown-formatted string to be displayed.
+    /// - `layout`: The layout configuration for positioning and sizing.
+    /// - `flags`: Initialization flags that define specific behaviors (e.g., enabling scrollbars).
+    /// 
+    /// # Example
+    /// ```rust,no_run
+    /// let m = Markdown::new(&content, Layout::new("d: c"), markdown::Flags::ScrollBars);
+    /// ```
     pub fn new(content: &str, layout: Layout, flags: Flags) -> Self {
         let (width, height) = Self::compute_dimension(content);
         Self {
@@ -50,6 +60,12 @@ impl Markdown {
         }
     }
 
+    /// Sets new content in the markdown component.
+    /// This method resets the scroll position, reparses the content, 
+    /// and adjusts the surface and scrollbars accordingly.
+    ///
+    /// # Parameters
+    /// - `content`: The new markdown content to be set.
     pub fn set_content(&mut self, content: &str) {
         self.x = 0;
         self.y = 0;
@@ -112,14 +128,14 @@ impl Markdown {
         x: i32,
         y: i32,
     ) -> Option<String> {
-        if let InlineElement::Link(_, link) = element {
+        if let InlineElement::Link(display_str, link) = element {
             let link_str = if link.starts_with("#") {
                 link.trim_start_matches("#").to_string()
             } else {
                 link.to_string()
             };
     
-            let link_width = link.chars().count() as i32;
+            let link_width = display_str.chars().count() as i32;
             link_registry.register_link_position(&link_str, x, y, link_width, !link.starts_with("#"));
     
             return Some(link_str);
@@ -340,7 +356,7 @@ impl Markdown {
                 let cell_str = cell.iter().map(|e| e.to_string()).collect::<String>();
                 let padded_cell = format!("{:width$}", cell_str, width = column_widths[i] + 2);
                 let content = Self::replace_tabs(&padded_cell);
-                surface.write_string(x_pos, *y_pos, &content, attr, false); // shall modify if I want bold in table
+                surface.write_string(x_pos, *y_pos, &content, attr, false);
                 x_pos += column_widths[i] as i32 + 3;
                 if row_index == 0 && i < (row.len() - 1) {
                     // cross separators
@@ -558,7 +574,7 @@ impl OnPaint for Markdown {
                 MarkdownElement::UnorderedList(items) => { y_pos = self.paint_unordered_list(items, y_pos, surface, theme) },
                 MarkdownElement::OrderedList(items) => { y_pos = self.paint_ordered_list(items, y_pos, surface, theme) },
                 MarkdownElement::HorizontalRule => {
-                    surface.draw_horizontal_line(self.x, y_pos, 80, LineType::Single, theme.markdown.text);
+                    surface.draw_horizontal_line(self.x, y_pos, surface.size().width as i32, LineType::Single, theme.markdown.text);
                     y_pos += 1;
                 }
                 MarkdownElement::CodeBlock(code) => self.paint_codeblock(code, &mut y_pos, surface, theme, None),

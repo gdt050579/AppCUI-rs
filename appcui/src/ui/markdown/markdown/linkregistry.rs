@@ -19,7 +19,7 @@ pub enum LinkDestination {
     ExternalLink(String),
 }
 
-pub struct LinkRegistry {
+pub(crate) struct LinkRegistry {
     links_map: HashMap<LinkID, (LinkArea, LinkDestination, IsHovered)>,
     current_hovered: Option<LinkID>,
 }
