@@ -1,5 +1,7 @@
-use std::any::Any;
+use std::{any::Any, thread};
 use crate::system::Handle;
+use super::BackgroundTaskNotifier;
+
 
 pub(crate) trait Task {
     fn read_data(&mut self) -> Option<&dyn Any>;
@@ -22,9 +24,14 @@ impl<T: Sized+'static> InnerTask<T> {
             data: None
         }
     }
-    // fn run(&self, task: Fn()) {
-    //     task();
-    // }
+    fn run(&self, task: fn(notifier: &BackgroundTaskNotifier<T>)) {
+        let notifier = BackgroundTaskNotifier::new(0, std::sync::mpsc::Sender::clone(&self.sender));
+        thread::spawn(move || {
+            notifier.notify_start();
+            task(&notifier);
+            notifier.notify_end();
+        });
+    }
 }
 impl<T: Sized+'static> Task for InnerTask<T> {
     fn read_data(&mut self) -> Option<&dyn Any> {
