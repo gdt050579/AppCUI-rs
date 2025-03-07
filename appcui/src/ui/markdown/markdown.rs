@@ -34,7 +34,8 @@ impl Markdown {
     /// 
     /// # Example
     /// ```rust,no_run
-    /// let m = Markdown::new(&content, Layout::new("d: c"), markdown::Flags::ScrollBars);
+    /// use appcui::prelude::*;
+    /// let m = Markdown::new("< a markdown text >", Layout::new("d: c"), markdown::Flags::ScrollBars);
     /// ```
     pub fn new(content: &str, layout: Layout, flags: Flags) -> Self {
         let (width, height) = Self::compute_dimension(content);
