@@ -245,7 +245,8 @@ impl ChartBar {
         let bar_width = (self.bar_width + self.distance) as u32;
         let len = self.data.len() as u32 * bar_width;
         let w = self.size().width.saturating_sub(self.left_space());
-        if len < self.max_capacity {
+        //if len < self.max_capacity
+        {
             self.data.push(value);
 
             if self.flags.contains(Flags::AutoScroll) && len - self.left_offset * bar_width > w {
@@ -257,8 +258,6 @@ impl ChartBar {
             self.update_scrollbars();
             self.update_scrollbars_size();
             self.on_resize(self.size(), self.size());
-        } else {
-            todo!();
         }
     }
 
@@ -379,11 +378,12 @@ impl OnPaint for ChartBar {
                     break;
                 }
                 let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
+                let val_pos = h - val - self.top_view - 1;
 
-                if h - val - self.top_view - 1 <= h - val + val.max(1) - 2 {
+                if val_pos <= h - val + val.max(1) - 2 {
                     let rect = Rect::new(
                         x as i32,
-                        h - val - self.top_view - 1,
+                        val_pos,
                         x as i32 + self.bar_width.max(1) as i32 - 1,
                         h - val + val.max(1) - 2,
                     );
@@ -391,7 +391,7 @@ impl OnPaint for ChartBar {
                 }
             }
         } else if self.chart_type == Type::Line {
-            let mut prev_val = 1;
+            let mut prev_val: Option<(i32, i32)> = None;
             for (index, c) in self.data[start as usize..].iter().enumerate() {
                 let x = index as u32 * bar_width + left_space as u32 + 1;
                 if x > sz.width {
@@ -399,25 +399,30 @@ impl OnPaint for ChartBar {
                 }
                 let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
                 let bar_attr = c.attr(bar_color, default_color);
-                if h - val - self.top_view - 1 <= h - val + val.max(1) - 2 {
-                    surface.write_char(x as i32, h - val - self.top_view - 1, Character::with_attributes(' ', bar_attr));
+                let val_pos = h - val - self.top_view - 1;
+
+                if val_pos <= h - val + val.max(1) - 2 {
+                    surface.write_char(x as i32, val_pos, Character::with_attributes(' ', bar_attr));
                 }
-                if h - prev_val - self.top_view - 1 < h - val - self.top_view - 1 {
-                    surface.fill_vertical_line(
-                        x as i32,
-                        h - prev_val - self.top_view - 1,
-                        (h - val - self.top_view - 1).min(h - 1),
-                        Character::with_attributes(' ', bar_attr),
-                    );
+
+                if let Some((prev_top, prev_bottom)) = prev_val {
+
+                    let (current_top, current_bottom) = if prev_top < val_pos {
+                        (val_pos, prev_top + 1)
+                    } else if prev_top >= val_pos && prev_bottom <= val_pos {
+                        (val_pos, val_pos)
+                    } else {
+                        (prev_bottom - 1, val_pos)
+                    };
+
+                    surface.fill_vertical_line(x as i32, current_bottom, current_top, Character::with_attributes(' ', bar_attr));
+
+                    prev_val = Some((current_top, current_bottom));
                 } else {
-                    surface.fill_vertical_line(
-                        x as i32,
-                        h - val - self.top_view - 1,
-                        (h - prev_val - self.top_view - 1).min(h - 1),
-                        Character::with_attributes(' ', bar_attr),
-                    );
+                    let first_point = val_pos;
+                    surface.fill_vertical_line(x as i32, first_point, first_point, Character::with_attributes(' ', bar_attr));
+                    prev_val = Some((first_point, first_point));
                 }
-                prev_val = val;
             }
         }
 
@@ -473,7 +478,7 @@ impl OnMouseEvent for ChartBar {
                     }
                     return EventProcessStatus::Processed;
                 } else if self.chart_type == Type::Line {
-                    let mut prev_val = 1;
+                    let mut prev_val: Option<(i32, i32)> = None;
                     for (index, c) in self.data[start as usize..].iter().enumerate() {
                         let x = index as u32 * bar_width + left_space as u32 + 1;
                         if x > sz.width {
@@ -481,35 +486,34 @@ impl OnMouseEvent for ChartBar {
                         }
                         let val = c.relative_size(self.max_bar_height, self.min_on_size, self.max_on_size).max(1) as i32;
 
-                        if h - prev_val - self.top_view - 1 < h - val - self.top_view - 1 {
-                            if is_over_rectangle(
-                                point,
-                                x as i32,
-                                h - prev_val - self.top_view - 1,
-                                x as i32,
-                                (h - val - self.top_view - 1).min(h - 1),
-                            ) {
-                                self.show_tooltip_on_point(format!("{},{}", c.value(), c.label()).as_str(), point.x, point.y);
-                                return EventProcessStatus::Processed;
-                            } else {
-                                self.hide_tooltip();
-                            }
-                        } else {
-                            if is_over_rectangle(
-                                point,
-                                x as i32,
-                                h - val - self.top_view - 1,
-                                x as i32,
-                                (h - prev_val - self.top_view - 1).min(h - 1),
-                            ) {
-                                self.show_tooltip_on_point(format!("{},{}", c.value(), c.label()).as_str(), point.x, point.y);
-                                return EventProcessStatus::Processed;
-                            } else {
-                                self.hide_tooltip();
-                            }
-                        }
+                        if let Some((prev_top, prev_bottom)) = prev_val {
+                            let val_pos = h - val - self.top_view - 1;
 
-                        prev_val = val;
+                            let (current_top, current_bottom) = if prev_top < val_pos {
+                                (val_pos, prev_top + 1)
+                            } else if prev_top >= val_pos && prev_bottom <= val_pos {
+                                (val_pos, val_pos)
+                            } else {
+                                (prev_bottom - 1, val_pos)
+                            };
+
+                            if is_over_rectangle(point, x as i32, current_bottom, x as i32, current_top) {
+                                self.show_tooltip_on_point(format!("{},{}", c.value(), c.label()).as_str(), point.x, point.y);
+                                return EventProcessStatus::Processed;
+                            } else {
+                                self.hide_tooltip();
+                            }
+                            prev_val = Some((current_top, current_bottom));
+                        } else {
+                            let first_point = h - val - self.top_view - 1;
+                            if is_over_rectangle(point, x as i32, first_point, x as i32, first_point) {
+                                self.show_tooltip_on_point(format!("{},{}", c.value(), c.label()).as_str(), point.x, point.y);
+                                return EventProcessStatus::Processed;
+                            } else {
+                                self.hide_tooltip();
+                            }
+                            prev_val = Some((first_point, first_point));
+                        }
                     }
 
                     return EventProcessStatus::Processed;
