@@ -5,11 +5,8 @@ struct my_win {}
 impl my_win {
     fn new () -> Self {
         let mut w = Self { base: window!("Markdown,d:c,w:50,h:15,flags:sizeable") };
-        let m2 = Markdown::new("", Layout::new("d: c"), markdown::Flags::ScrollBars);
         let m = markdown!(
-            "'''
-            \r\n\
-            Rust is a modern systems programming language that emphasizes memory safety, concurrency, and performance.\r\n\
+            "'''Rust is a modern systems programming language that emphasizes memory safety, concurrency, and performance.\r\n\
             \r\n\
             # Rust Programming Language\r\n\
             \r\n\

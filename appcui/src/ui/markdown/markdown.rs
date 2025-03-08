@@ -12,7 +12,8 @@ use super::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct Markdown {
-    surface: Surface,
+    w: u32,
+    h: u32,
     x: i32,
     y: i32,
     background: Option<Character>,
@@ -49,7 +50,8 @@ impl Markdown {
                         StatusFlags::None
                     },
             ),
-            surface: Surface::new(width as u32, height as u32),
+            w: width,
+            h: height,
             x: 0,
             y: 0,
             flags,
@@ -73,34 +75,32 @@ impl Markdown {
         self.elements = MarkdownParser::parse(content);
         self.link_registry.replace(LinkRegistry::new());
   
-        let (width, height) = Self::compute_dimension(content);
-        self.surface.resize(Size::new(width as u32, height as u32));
+        (self.w, self.h) = Self::compute_dimension(content);
+
         
-        let paint_sz = self.surface.size();
-        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
+        self.scrollbars.resize(self.w as u64, self.h as u64, &self.base);
         self.move_scroll_to(self.x, self.y);
     }
 
-    fn compute_dimension(content: &str) -> (usize, usize) {
+    fn compute_dimension(content: &str) -> (u32, u32) {
         let lines: Vec<&str> = content.lines().collect();
-        let height = lines.len();
-        let width = lines.iter().map(|line| line.len()).max().unwrap_or(0); 
+        let height = lines.len() as u32;
+        let width = lines.iter().map(|line| line.len()).max().unwrap_or(0) as u32; 
     
         (width, height)
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();
-        let surface_size = self.surface.size();
-        self.x = if surface_size.width <= sz.width {
+        self.x = if self.w <= sz.width {
             0
         } else {
-            x.max((sz.width as i32) - (surface_size.width as i32))
+            x.max((sz.width as i32) - (self.w as i32))
         };
-        self.y = if surface_size.height <= sz.height {
+        self.y = if self.h <= sz.height {
             0
         } else {
-            y.max((sz.height as i32) - (surface_size.height as i32))
+            y.max((sz.height as i32) - (self.h as i32))
         };
         self.x = self.x.min(0);
         self.y = self.y.min(0);
@@ -588,8 +588,7 @@ impl OnPaint for Markdown {
 
 impl OnResize for Markdown {
     fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
-        let paint_sz = self.surface.size();
-        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
+        self.scrollbars.resize(self.w as u64, self.h as u64, &self.base);
         self.move_scroll_to(self.x, self.y);
     }
 }

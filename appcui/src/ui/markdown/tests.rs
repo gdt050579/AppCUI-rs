@@ -174,8 +174,7 @@ fn test_get_id_from_header() {
 #[test]
 fn check_scrollbars_on_arrows_and_click() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0xD0BE94DEA66EE381)
         Key.Pressed(Right,5)
@@ -195,7 +194,7 @@ fn check_scrollbars_on_arrows_and_click() {
         Mouse.Click(31,13,left)
         Mouse.Move(44,16)
         Paint('5. scroll bars moved with mouse')
-        CheckHash(0x1C63D7BA7B0A18EF) 
+        CheckHash(0xCD06DB42F28CBE04) 
 ";
     let m = markdown!("'
     # My Markdown Example\r\n\r\n\
@@ -257,8 +256,7 @@ fn check_scrollbars_on_arrows_and_click() {
 #[test]
 fn check_scrollbars_on_drag_and_weel() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0x9FDE78EBFCEB11B1)
         Mouse.Wheel(5,5,down,5)
@@ -333,14 +331,13 @@ fn check_scrollbars_on_drag_and_weel() {
 #[test]
 fn check_move_to_section_on_link_click() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0xE2BF3C6FAAA8C1B8)
         Mouse.Move(3,2)
         Mouse.Click(3,2,left)
         Paint('2. scroll bars moved with mouse')
-        CheckHash(0x23D8260826FFEF99) 
+        CheckHash(0x19DD90B0FD257FA9) 
 ";
     let m = markdown!("'
     [Go to end](#end-link)\r\n\r\n\
@@ -394,8 +391,7 @@ fn check_move_to_section_on_link_click() {
 #[test]
 fn check_inactive() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0xF5953A121DF629B6)
         Mouse.Move(3,2)
@@ -433,6 +429,49 @@ fn check_inactive() {
     let mut a = App::debug(70, 30, script).build().unwrap();
     let mut w = window!("Title,d:c,w:70,h:30,flags:Sizeable");
     m.set_enabled(false);
+    w.add(m);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_set_content() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF1F34BA26A32DF9C)
+";
+    let mut m = markdown!("'
+    [Go to end](#end-link)\r\n\r\n\
+    Some testing for links back \r\n\r\n\
+    ## Table of Contents\r\n\r\n\
+    1. [Introduction](#introduction)\r\n\
+    \t1. ana\r\n\
+    \t2. are\r\n\
+    \t3. mere\r\n\
+    2. [Conclusion](#conclusion)\r\n\r\n\
+    ## Introduction\r\n\r\n\
+    Markdown is a lightweight markup language.\r\n\r\n\
+    ### Why use Markdown?\r\n\r\n\
+    - **Easy to learn**: Simple syntax `__bold__` A **ceva**.\r\n\
+    - __Readable__: Looks great as plain text.\r\n\
+    - **Flexible**: Converts to HTML and other formats.\r\n\r\n\
+    #### Code Blocks\r\n\r\n\
+    Here is an example of inline code: `let x = 10;`\r\n\r\n\
+    And here is a code block:\r\n\r\n\
+    ```\r\n\
+    fn main() {\r\n\
+    \tprintln!(\"Hello, world!\");\r\n\
+    }\r\n\
+    ```\r\n\
+    ## End Link\r\n\
+    ', d:c, flags:ScrollBars"
+    );
+
+    let mut a = App::debug(70, 30, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:70,h:30,flags:Sizeable");
+    m.set_enabled(false);
+    m.set_content("# Empty markdown");
     w.add(m);
     a.add_window(w);
     a.run();
