@@ -98,6 +98,22 @@ pub(crate) fn new() -> Theme {
             selected: controlattr!("aqua", "dr,w", "dr,y", "gray", "w,black"),
             unselected: controlattr!("silver", "black,w", "black,y", "gray", "w,black"),
         },
+        markdown: MarkdownTheme {
+            text: charattr!("silver"),               
+            bold: charattr!("red, flags: Bold"),        
+            italic: charattr!("magenta, flags: Italic"),              
+            link: charattr!("aqua, flags: Underiline"),          
+            code: charattr!("silver, black"),       
+            h1: charattr!("white"),      
+            h2: charattr!("y"),    
+            h3: charattr!("g"),             
+            code_block: charattr!("silver, black"),     
+            ordered_list: charattr!("silver"),       
+            unordered_list: charattr!("silver"),
+            table: charattr!("silver"),
+            table_header: charattr!("silver, flags: Bold"),
+        },
+        
         progressbar: ProgressBarTheme {
             background: Color::Black,
             progress: Color::Teal,

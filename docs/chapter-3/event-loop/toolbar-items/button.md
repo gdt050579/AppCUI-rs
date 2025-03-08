@@ -46,7 +46,7 @@ To intercept button clicks, implement `ToolBarEvents` for the current window, as
 #[Window(events=ToolBarEvents)]
 struct MyWin { /* data members */ }
 
-impl ToolBarEvens for MyWin {
+impl ToolBarEvents for MyWin {
     fn on_button_clicked(&mut self, handle: Handle<toolbar::Button>) -> EventProcessStatus {
         // process click events from a toolbar button
     }
