@@ -388,3 +388,88 @@ impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
 }
 ";
+
+
+pub(crate) static TREEVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<TreeView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    let i: Handle<treeview::Item<$(TYPE)>> = unsafe { item_handle.unsafe_cast() };
+    return TreeViewEvents::<$(TYPE)>::on_current_item_changed(self, h, i);
+}
+";
+
+pub(crate) static TREEVIEW_ON_ITEM_EXPANDED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<TreeView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    let i: Handle<treeview::Item<$(TYPE)>> = unsafe { item_handle.unsafe_cast() };
+    return TreeViewEvents::<$(TYPE)>::on_item_expanded(self, h, i, recursive);
+}
+";
+
+pub(crate) static TREEVIEW_ON_ITEM_COLLAPSED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<TreeView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    let i: Handle<treeview::Item<$(TYPE)>> = unsafe { item_handle.unsafe_cast() };
+    return TreeViewEvents::<$(TYPE)>::on_item_collapsed(self, h, i, recursive);
+}
+";
+
+pub(crate) static TREEVIEW_ON_SELECTION_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<TreeView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return TreeViewEvents::<$(TYPE)>::on_selection_changed(self, h);
+}
+";
+
+pub(crate) static TREEVIEW_ON_ITEM_ACTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<TreeView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    let i: Handle<treeview::Item<$(TYPE)>> = unsafe { item_handle.unsafe_cast() };
+    return TreeViewEvents::<$(TYPE)>::on_item_action(self, h, i);
+}
+";
+
+
+pub(crate) static TREEVIEW_TRAIT_DEF: &str = "
+trait TreeViewEvents<T: treeview::ListItem+'static> {
+
+    fn on_current_item_changed(&mut self, handle: Handle<TreeView<T>>, item_handle: Handle<treeview::Item<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_item_collapsed(&mut self, handle: Handle<TreeView<T>>, item_handle: Handle<treeview::Item<T>>, recursive: bool) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_item_expanded(&mut self, handle: Handle<TreeView<T>>, item_handle: Handle<treeview::Item<T>>, recursive: bool) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_item_action(&mut self, handle: Handle<TreeView<T>>, item_handle: Handle<treeview::Item<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_selection_changed(&mut self, handle: Handle<TreeView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+
+    fn on_current_item_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId, item_handle: Handle<()>) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_CURRENT_ITEM_CHANGED)
+        EventProcessStatus::Ignored
+    }
+    fn on_item_collapsed(&mut self, handle: Handle<()>, type_id: std::any::TypeId, item_handle: Handle<()>, recursive: bool) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_COLLAPSED)
+        EventProcessStatus::Ignored
+    }
+    fn on_item_expanded(&mut self, handle: Handle<()>, type_id: std::any::TypeId, item_handle: Handle<()>, recursive: bool) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_EXPANDED)
+        EventProcessStatus::Ignored
+    }
+    fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_SELECTION_CHANGED)
+        EventProcessStatus::Ignored
+    }
+    fn on_item_action(&mut self, handle: Handle<()>, type_id: std::any::TypeId, item_handle: Handle<()>) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_ACTION)
+        EventProcessStatus::Ignored
+    }
+}
+";

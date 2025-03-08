@@ -81,6 +81,7 @@ impl<T> GenericSelectorEvents for ModalWindow<T> {}
 impl<T> GenericDropDownListEvents for ModalWindow<T> {}
 impl<T> GenericNumericSelectorEvents for ModalWindow<T> {}
 impl<T> GenericListViewEvents for ModalWindow<T> {}
+impl<T> GenericTreeViewEvents for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
 impl<T> WindowControl for ModalWindow<T> {}
 impl<T> OnExpand for ModalWindow<T> {}
@@ -88,6 +89,7 @@ impl<T> ThreeStateBoxEvents for ModalWindow<T> {}
 impl<T> OnSiblingSelected for ModalWindow<T> {}
 impl<T> PathFinderEvents for ModalWindow<T> {}
 impl<T> TimerEvents for ModalWindow<T> {}
+impl<T> MarkdownEvents for ModalWindow<T> {}
 
 // events routed to base window
 impl<T> OnFocus for ModalWindow<T> {

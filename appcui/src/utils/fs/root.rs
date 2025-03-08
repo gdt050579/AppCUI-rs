@@ -34,7 +34,7 @@ impl RootType {
     }
 }
 
-#[derive(Debug, ListViewItem)]
+#[derive(Debug, ListItem)]
 pub(crate) struct Root {
     #[Column(name = "&Path", width = 10, index = 1)]
     pub(crate) path: String,
@@ -82,6 +82,7 @@ impl Root {
     }
 }
 impl NavigatorRoot for Root {
+    #[cfg(test)]
     fn path(&self) -> &str {
         &self.path
     }

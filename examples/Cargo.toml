@@ -69,6 +69,10 @@ name = "password"
 path = "password/main.rs"
 
 [[example]]
+name = "markdown"
+path = "markdown/main.rs"
+
+[[example]]
 name = "notification_dialogs"
 path = "notification_dialogs/main.rs"
 
@@ -163,3 +167,7 @@ path = "theme_switcher/main.rs"
 [[example]]
 name = "timer"
 path = "timer/main.rs"
+
+[[example]]
+name = "treeview"
+path = "treeview/main.rs"

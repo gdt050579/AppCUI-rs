@@ -6,7 +6,7 @@ use self::components::ScrollBars;
 pub struct ImageViewer {
     surface: Surface,
     image: Image,
-    render_method: image::RenderMethod,
+    render_method: image::RendererType,
     scale: image::Scale,
     x: i32,
     y: i32,
@@ -16,7 +16,7 @@ pub struct ImageViewer {
     scrollbars: ScrollBars,
 }
 impl ImageViewer {
-    pub fn new(image: Image, layout: Layout, render_method: image::RenderMethod, scale: image::Scale, flags: Flags) -> Self {
+    pub fn new(image: Image, layout: Layout, render_method: image::RendererType, scale: image::Scale, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -58,10 +58,10 @@ impl ImageViewer {
         self.update_surface();
     }
     #[inline(always)]
-    pub fn render_method(&self) -> image::RenderMethod {
+    pub fn render_method(&self) -> image::RendererType {
         self.render_method
     }
-    pub fn set_render_method(&mut self, render_method: image::RenderMethod) {
+    pub fn set_render_method(&mut self, render_method: image::RendererType) {
         self.render_method = render_method;
         self.update_surface();
     }

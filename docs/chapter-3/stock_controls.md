@@ -1,6 +1,6 @@
 # Stock controls
 
-AppCUI comes with a set of out-of-the-box controls that can be used: 
+AppCUI comes with a set of out-of-the-box controls that can be used:
 
 | Control                                              | Class                        | Macro              | Image                                                         |
 | ---------------------------------------------------- | ---------------------------- | ------------------ | ------------------------------------------------------------- |
@@ -19,15 +19,19 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [Label](stock-controls/label.md)                     | ui::Label                    | `label!`           | <img src="stock-controls/img/label.png" width=300/>           |
 | [ListBox](stock-controls/listbox.md)                 | ui::ListBox                  | `listbox!`         | <img src="stock-controls/img/listbox.png" width=300/>         |
 | [ListView](stock-controls/listview.md)               | ui::ListView&lt;T&gt;        | `listview!`        | <img src="stock-controls/img/listview.png" width=300/>        |
+| [Markdown](stock-controls/markdown.md)               | ui::Markdown                 | `markdown!`        | <img src="stock-controls/img/markdown.png" width=300/>        |
 | [NumericSelector](stock-controls/numericselector.md) | ui::NumericSelector&lt;T&gt; | `numericselector!` | <img src="stock-controls/img/numericselector.png" width=300/> |
 | [Panel](stock-controls/panel.md)                     | ui::Panel                    | `panel!`           | <img src="stock-controls/img/panel.png" width=300/>           |
 | [Password](stock-controls/password.md)               | ui::Password                 | `password!`        | <img src="stock-controls/img/password.png" width=300/>        |
+| [PathFinder](stock-controls/pathfinder.md)           | ui::PathFinder               | `pathfinder!`      | <img src="stock-controls/img/pathfinder.png" width=300/>      |
+| [ProgressBar](stock-controls/progressbar.md)         | ui::ProgressBar              | `progressbar!`     | <img src="stock-controls/img/progressbar.png" width=300/>     |
 | [RadioBox](stock-controls/radiobox.md)               | ui::RadioBox                 | `radiobox!`        | <img src="stock-controls/img/radiobox.png" width=300/>        |
 | [Selector](stock-controls/selector.md)               | ui::Selector&lt;T&gt;        | `selector!`        | <img src="stock-controls/img/selector.png" width=300/>        |
 | [Tab](stock-controls/tab.md)                         | ui::Tab                      | `tab!`             | <img src="stock-controls/img/tab.png" width=300/>             |
 | [TextField](stock-controls/textField.md)             | ui::TextField                | `textfield!`       | <img src="stock-controls/img/textfield.png" width=300/>       |
 | [ThreeStateBox](stock-controls/threestatebox.md)     | ui::ThreeStateBox            | `threestatebox!`   | <img src="stock-controls/img/threestatebox.png" width=300/>   |
 | [ToggleButton](stock-controls/togglebutton.md)       | ui::ToggleButton             | `togglebutton!`    | <img src="stock-controls/img/togglebutton.png" width=300/>    |
+| [TreeView](stock-controls/treeview.md)               | ui::TreeView&lt;T&gt;        | `treeview!`        | <img src="stock-controls/img/treeview.png" width=300/>        |
 | [VLine](stock-controls/vline.md)                     | ui::VLine                    | `vline!`           | <img src="stock-controls/img/vline.png" width=300/>           |
 | [VSplitter](stock-controls/vsplitter.md)             | ui::VSplitter                | `vsplitter!`       | <img src="stock-controls/img/vsplitter.png" width=300/>       |
 

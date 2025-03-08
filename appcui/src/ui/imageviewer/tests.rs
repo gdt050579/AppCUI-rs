@@ -812,7 +812,7 @@ fn check_create() {
     w.add(ImageViewer::new(
         img,
         Layout::new("d:c"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::NoScale,
         imageviewer::Flags::None,
     ));
@@ -852,14 +852,14 @@ fn check_smallbloacks_scaling() {
     w.add(ImageViewer::new(
         Image::with_str(s).unwrap(),
         Layout::new("x:0,y:0,w:8,h:4"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::NoScale,
         imageviewer::Flags::None,
     ));
     w.add(ImageViewer::new(
         Image::with_str(s).unwrap(),
         Layout::new("x:10,y:0,w:16,h:8"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::Scale50,
         imageviewer::Flags::None,
     ));
@@ -1046,7 +1046,7 @@ fn check_resize() {
             let i = ImageViewer::new(
                 ferris_image(),
                 Layout::new("d:c"),
-                image::RenderMethod::SmallBlocks,
+                image::RendererType::SmallBlocks,
                 image::Scale::NoScale,
                 imageviewer::Flags::ScrollBars,
             );
@@ -1066,11 +1066,11 @@ fn check_resize() {
                 Scale::Scale5 => "Scale:5%",
             };
             commandbar.set(key!("F1"), sc_name, mywin::Commands::Scale);
-            let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RenderMethod::SmallBlocks) {
-                RenderMethod::SmallBlocks => "Method:SmallBlocks",
-                RenderMethod::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
-                RenderMethod::GrayScale => "Method:GrayScale",
-                RenderMethod::AsciiArt => "Method:AsciiArt",
+            let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RendererType::SmallBlocks) {
+                RendererType::SmallBlocks => "Method:SmallBlocks",
+                RendererType::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
+                RendererType::GrayScale => "Method:GrayScale",
+                RendererType::AsciiArt => "Method:AsciiArt",
             };
             commandbar.set(key!("F2"), rd_name, mywin::Commands::RenderMethod);
         }
@@ -1094,10 +1094,10 @@ fn check_resize() {
                     mywin::Commands::RenderMethod => {
                         let m = img.render_method();
                         match m {
-                            RenderMethod::SmallBlocks => img.set_render_method(image::RenderMethod::LargeBlocks64Colors),
-                            RenderMethod::LargeBlocks64Colors => img.set_render_method(image::RenderMethod::GrayScale),
-                            RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::AsciiArt),
-                            RenderMethod::AsciiArt => img.set_render_method(image::RenderMethod::SmallBlocks),
+                            RendererType::SmallBlocks => img.set_render_method(image::RendererType::LargeBlocks64Colors),
+                            RendererType::LargeBlocks64Colors => img.set_render_method(image::RendererType::GrayScale),
+                            RendererType::GrayScale => img.set_render_method(image::RendererType::AsciiArt),
+                            RendererType::AsciiArt => img.set_render_method(image::RendererType::SmallBlocks),
                         }
                     },
                 }
@@ -1140,4 +1140,57 @@ fn check_resize() {
     a.add_window(MyWin::new());
     a.run();
 
+}
+
+#[test]
+fn check_clear_background() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x336411586F530FA4)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, back: {X,Red}");
+    i.clear_background();
+    w.add(i);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_events() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0xFBEE66EEC5614266)
+        Mouse.Drag(56,8,5,1)
+        Paint('Image dragged')
+        CheckHash(0xC119738A865D078)
+        Mouse.Wheel(56,8,right,10)
+        Paint('Image Scrolled to Right')
+        CheckHash(0x4885632755FDD7F4)
+        Mouse.Wheel(56,8,down,10)
+        Paint('Image Scrolled to Bottom')
+        CheckHash(0xE762606E224B44A)
+        Mouse.Drag(59,4,59,7)
+        Paint('Full scroll to bottom-right corner')
+        CheckHash(0x96606E6E116E4015)
+        Mouse.Move(58,0)
+        Paint('Mouse over [X] button')
+        CheckHash(0xDF59C35326154442)
+        Mouse.Wheel(56,8,up,2)
+        Mouse.Wheel(56,8,left,2)
+        Paint('Scroll 2 position towards top-left corner')
+        CheckHash(0xDB2058C74BA2BD4B)
+        Mouse.DoubleClick(30,10,left)
+        Paint('Double clicked on image - nothing happens')
+        CheckHash(0xDB2058C74BA2BD4B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    let i = ImageViewer::new(ferris_image(), Layout::new("d:c"), RendererType::SmallBlocks, Scale::NoScale, imageviewer::Flags::ScrollBars);
+    w.add(i);
+    a.add_window(w);
+    a.run();
 }

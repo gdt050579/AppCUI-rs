@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 use chrono::NaiveDate;
 
-#[derive(ListViewItem)]
+#[derive(ListItem)]
 struct FileInformation {
     #[Column(name: "&Name", width: 25)]
     name: &'static str,

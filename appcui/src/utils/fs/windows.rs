@@ -36,7 +36,7 @@ pub(super) fn get_os_roots() -> Vec<Root> {
                     root_type: RootType::Unknown, //GDT: use GetDriveTypeA to find the type !!!
                     name: String::new(), // GDT: use GetVolumeInformationA to get the name/label of the drive
                 });
-            }            
+            }
         }
         a *= 2;
     }

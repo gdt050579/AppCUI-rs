@@ -8,7 +8,7 @@ To create a image viewer use `ImageViewer::new` method (with 5 parameters: an im
 ```rs
 let i = ImageViewer::new(Image::with_str(...).unwrap(), 
                          Layout::new("x:10,y:5,w:15"),
-                         image::RenderMethod::SmallBlocks, 
+                         image::RendererType::SmallBlocks, 
                          image::Scale::NoScale, 
                          imageviewer::Flags::None);
 ```
@@ -24,7 +24,7 @@ A image viewer supports all common parameters (as they are described in [Instant
 | ---------------------------------- | ------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `image`                            | String       | **No**               | A string representation of an image as described in [Images (Building from a string)](../../chapter-2/images.md#building-from-a-string) chapter                                                 |
 | `scale`                            | Percentage   | **No**               | The scaling percentage. Acceptable values are: `100%`, `50%`, `33%`, `25%`, `20%`, `10%` and `5%`                                                                                               |
-| `render` or `rendermethod` or `rm` | Enum values  | **No**               | The rendering method as described in [Images (Rendering)](../../chapter-2/images.md#rendering-images) chapter                                                                                   |
+| `render` or `RendererType` or `rm` | Enum values  | **No**               | The rendering method as described in [Images (Rendering)](../../chapter-2/images.md#rendering-images) chapter                                                                                   |
 | `flags`                            | String       | **No**               | image viewer initialization flags                                                                                                                                                               |
 | `back` or `backgroud`              | char! format | **No**               | A character as describes in [Macro Builds](../../chapter-2/screen.md#macro-builds) - the same as with the  `char!` macro format                                                                 |
 | `lsm` or `left-scroll-margin`      | Numeric      | **No**               | The left margin of the bottom scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up. |
@@ -106,7 +106,7 @@ fn main() -> Result<(), appcui::system::Error> {
     w.add(ImageViewer::new(
         heart,
         Layout::new("d:c"),
-        image::RenderMethod::SmallBlocks,
+        image::RendererType::SmallBlocks,
         image::Scale::NoScale,
         imageviewer::Flags::None,
     ));

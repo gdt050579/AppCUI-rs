@@ -64,3 +64,22 @@ fn check_create_procmacro() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_apis() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0xC5491A50D5507086)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    
+    w.add(hline!("x:1,y:1,w:10"));
+    let mut l = hline!("TT,x:1,y:3,w:30,flags:DoubleLine+HasTitle");
+    assert_eq!(l.title(),"TT");
+    l.set_title("TestLine");
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
