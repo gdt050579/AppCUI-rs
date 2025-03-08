@@ -97,7 +97,8 @@ pub(crate) enum SystemEvent {
     TimerPaused(TimerPausedEvent),
     BackgroundTaskStart(u32),
     BackgroundTaskEnd(u32),
-    BackgroundTaskUpdate(u32),
+    BackgroundTaskNotify(u32),
+    BackgroundTaskQuery(u32),
 }
 
 impl SystemEvent {

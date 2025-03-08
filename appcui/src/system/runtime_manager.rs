@@ -589,7 +589,8 @@ impl RuntimeManager {
             SystemEvent::TimerPaused(event) => self.process_timer_paused_event(event.id, event.tick.value()),
             SystemEvent::BackgroundTaskStart(_) => todo!(),
             SystemEvent::BackgroundTaskEnd(_) => todo!(),
-            SystemEvent::BackgroundTaskUpdate(_) => todo!(),
+            SystemEvent::BackgroundTaskNotify(_) => todo!(),
+            SystemEvent::BackgroundTaskQuery(_) => todo!(),            
         }
     }
     fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
