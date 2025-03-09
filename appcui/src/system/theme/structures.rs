@@ -109,6 +109,24 @@ pub struct ToggleButtonTheme {
     pub unselected: ControlCharAttributesState,
 }
 
+
+#[derive(Default)]
+pub struct MarkdownTheme {
+    pub text: CharAttribute,
+    pub bold: CharAttribute,
+    pub italic: CharAttribute,
+    pub link: CharAttribute,
+    pub code: CharAttribute,
+    pub h1: CharAttribute,
+    pub h2: CharAttribute,
+    pub h3: CharAttribute,
+    pub code_block: CharAttribute,
+    pub ordered_list: CharAttribute,
+    pub unordered_list: CharAttribute,
+    pub table: CharAttribute,
+    pub table_header: CharAttribute,
+}
+
 #[derive(Default)]
 pub struct ProgressBarTheme {
     pub background: Color,
@@ -136,6 +154,7 @@ pub struct Theme {
     pub list_current_item: ListCurentItemTheme,
     pub header: HeaderTheme,
     pub toggle_button: ToggleButtonTheme,
+    pub markdown: MarkdownTheme,
     pub progressbar: ProgressBarTheme,
 }
 impl Theme {

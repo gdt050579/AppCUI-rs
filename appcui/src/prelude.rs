@@ -39,6 +39,8 @@ pub use super::ui::listview::events::GenericListViewEvents;
 pub use super::ui::listview::ListItem;
 pub use super::ui::treeview;
 pub use super::ui::treeview::events::GenericTreeViewEvents;
+pub use super::ui::markdown;
+pub use super::ui::markdown::events::MarkdownEvents;
 pub use super::ui::canvas;
 pub use super::ui::imageviewer;
 pub use super::ui::password;
