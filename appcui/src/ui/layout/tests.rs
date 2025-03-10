@@ -7,6 +7,7 @@ use super::Coordonate16;
 use super::PointAndSizeLayout;
 use super::Dimension16;
 use super::Dimension;
+use super::Anchors;
 
 use super::LayoutMode;
 
@@ -255,6 +256,56 @@ fn layout_mode_anchor_lr_dont_allow_x() {
 fn layout_mode_anchor_lr_invalid_alignament() {
     // this code should panic because only (top,bottom and center) alignaments can not be used in a Left-Right layout mode
     validate_pos!("l:5,r:7,y:0,h:10,a:left",50,30,5,0,38,10);
+}
+
+#[test]
+fn layout_mode_anchor_tb() {
+    validate_pos!("t:5,b:7,x:0,w:10,a:l",30,50,0,5,10,38);
+    validate_pos!("t:5,b:7,x:10,w:10,a:c",30,50,5,5,10,38);
+    validate_pos!("t:5,b:7,x:20,w:10,a:r",30,50,10,5,10,38);
+    // no alignament - default is center
+    validate_pos!("t:5,b:7,x:0,w:10",30,50,-5,5,10,38);
+    
+    validate_pos!("t:10%,a:l,x:50%,b:20%,w:4",30,50,15,5,4,35);
+    validate_pos!("t:10%,a:c,x:50%,b:20%,w:4",30,50,13,5,4,35);
+    validate_pos!("t:10%,a:r,x:50%,b:20%,w:4",30,50,11,5,4,35);
+
+    validate_pos!("t:10%,a:l,x:50%,b:20%,w:50%",30,50,15,5,15,35);
+    validate_pos!("t:10%,a:c,x:50%,b:20%,w:50%",30,50, 8,5,15,35);
+    validate_pos!("t:10%,a:r,x:50%,b:20%,w:50%",30,50, 0,5,15,35);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tb_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Top-Down layout mode
+    validate_pos!("t:5,b:7,y:0,w:10,a:l",30,50,0,5,10,38);
+}
+#[test]
+#[should_panic]
+fn layout_mode_anchor_td_invalid_alignament() {
+    // this code should panic because only (left,right and center) alignaments can not be used in a Top-Down layout mode
+    validate_pos!("t:5,b:7,x:0,w:10,a:top",30,50,0,5,10,38);
+}
+
+#[test]
+fn check_anchors_new() {
+    assert_eq!(Anchors::new(false,false,false,false),Anchors::None);
+    assert_eq!(Anchors::new(true,false,false,false),Anchors::Left);
+    assert_eq!(Anchors::new(false,true,false,false),Anchors::Top);
+    assert_eq!(Anchors::new(false,false,true,false),Anchors::Right);
+    assert_eq!(Anchors::new(false,false,false,true),Anchors::Bottom);
+    assert_eq!(Anchors::new(true,true,false,false),Anchors::TopLeft);
+    assert_eq!(Anchors::new(true,false,true,false),Anchors::LeftRight);
+    assert_eq!(Anchors::new(true,false,false,true),Anchors::BottomLeft);
+    assert_eq!(Anchors::new(false,true,true,false),Anchors::TopRight);
+    assert_eq!(Anchors::new(false,true,false,true),Anchors::TopBottom);
+    assert_eq!(Anchors::new(false,false,true,true),Anchors::BottomRight);
+    assert_eq!(Anchors::new(true,true,true,false),Anchors::LeftTopRight);
+    assert_eq!(Anchors::new(true,false,true,true),Anchors::LeftBottomRight);
+    assert_eq!(Anchors::new(false,true,true,true),Anchors::TopRightBottom);
+    assert_eq!(Anchors::new(true,true,false,true),Anchors::TopLeftBottom);
+    assert_eq!(Anchors::new(true,true,true,true),Anchors::All);
 }
 
 #[test]
