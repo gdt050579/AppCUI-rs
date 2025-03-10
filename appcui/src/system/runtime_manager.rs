@@ -4,6 +4,7 @@ use std::sync::mpsc::{Receiver, Sender};
 use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
 
+use super::background_task::BackgroundTaskManager;
 use super::runtime_manager_traits::*;
 use super::timer::TimerManager;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
@@ -60,6 +61,7 @@ pub(crate) struct RuntimeManager {
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
     timers_manager: TimerManager,
+    task_manager: BackgroundTaskManager,
     desktop_handle: Handle<UIElement>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
@@ -143,6 +145,7 @@ impl RuntimeManager {
             menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             timers_manager: TimerManager::new(builder.max_timer_count),
+            task_manager: BackgroundTaskManager::new(),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
@@ -428,6 +431,10 @@ impl RuntimeManager {
     #[inline(always)]
     pub(crate) fn get_system_event_sender(&self) -> std::sync::mpsc::Sender<SystemEvent> {
         self.event_sender.clone()
+    }
+    #[inline(always)]
+    pub(crate) fn get_background_task_manager(&mut self) -> &mut BackgroundTaskManager {
+        &mut self.task_manager
     }
 
     #[inline(always)]
