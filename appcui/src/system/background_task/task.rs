@@ -24,7 +24,7 @@ impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
             data: None,
         }
     }
-    fn run(&mut self, task: fn(conector: &BackgroundTaskConector<T, R>)) {
+    pub(super) fn run(&mut self, task: fn(conector: &BackgroundTaskConector<T, R>)) {
         let conector = BackgroundTaskConector::new(
             0,
             RuntimeManager::get().get_system_event_sender(),
