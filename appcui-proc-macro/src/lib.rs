@@ -349,7 +349,7 @@ pub fn listitem_derive(input: TokenStream) -> TokenStream {
     crate::derives::listitem::derive(input)
 }
 
-#[proc_macro_derive(EnumSelector, attributes(name, Name, n, N, description, Description, details, Details, d, D, init))]
+#[proc_macro_derive(EnumSelector, attributes(VariantInfo))]
 pub fn enumselector_derive(input: TokenStream) -> TokenStream {
     crate::derives::enumselector::derive(input)
 }

@@ -35,33 +35,36 @@ fn generate_variant_match_arms(variant: &EnumVariant, index: usize) -> (String, 
     let mut name: Option<&String> = None;
     let mut description: Option<&String> = None;
     let mut init_code: Option<&String> = None;
-
+    
+    // modify to use VariantInfo
     for (attr_name, value) in variant.attributes.iter() {
-        match attr_name.trim() {
-            "name" | "Name" | "N" | "n" => {
-                if name.is_some() {
-                    panic!("Duplicate 'name' attributes found for variant '{}'. Use only one!", variant.name);
+        if attr_name.starts_with("VariantInfo.") {
+            match attr_name[12..].trim() {
+                "name" | "Name" | "N" | "n" => {
+                    if name.is_some() {
+                        panic!("Duplicate 'name' attributes found for variant '{}'. Use only one!", variant.name);
+                    }
+                    name = Some(value);
                 }
-                name = Some(value);
-            }
-            "description" | "Description" | "details" | "Details" | "D" | "d" => {
-                if description.is_some() {
-                    panic!("Duplicate 'description' attributes found for variant '{}'. Use only one!", variant.name);
+                "description" | "Description" | "details" | "Details" | "D" | "d" => {
+                    if description.is_some() {
+                        panic!("Duplicate 'description' attributes found for variant '{}'. Use only one!", variant.name);
+                    }
+                    description = Some(value);
                 }
-                description = Some(value);
-            }
-            "init" => {
-                if init_code.is_some() {
-                    panic!("Duplicate 'initialization' attributes found for variant '{}'. Use only one!", variant.name);
+                "init" => {
+                    if init_code.is_some() {
+                        panic!("Duplicate 'initialization' attributes found for variant '{}'. Use only one!", variant.name);
+                    }
+                    init_code = Some(value)
                 }
-                init_code = Some(value)
-            }
-            _ => {
-                panic!(
-                    "Unknown attribute: '{}' for field '{}'. Available attributes are: 'name' and 'description' and 'init'.",
-                    &attr_name,
-                    variant.name
-                );
+                _ => {
+                    panic!(
+                        "Unknown attribute: '{}' for field '{}'. Available attributes are: 'name' and 'description' and 'init'.",
+                        &attr_name,
+                        variant.name
+                    );
+                }
             }
         }
     }

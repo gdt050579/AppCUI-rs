@@ -78,21 +78,16 @@ This means that the previous `Shape` enum can be rewritten as follows:
 ```rs
 #[derive(EnumSelector)]
 enum Shape {
-    #[name = "Square"]
-    #[description = "a red square"]
+    #[VariantInfo(name = "Square", description = "a red square")]
     Square,
 
-    #[name = "Rectangle"]
-    #[description = "a green rectangle"]
+    #[VariantInfo(name = "Rectangle", description = "a green rectangle")]
     Rectangle,
 
-    #[name = "Triangle"]
-    #[description = "a blue triangle"]
+    #[VariantInfo(name = "Triangle", description = "a blue triangle")]
     Triangle,
 
-    #[name = "Circle"]
-    #[description = "a white circle"]
+    #[VariantInfo(name = "Circle", description = "a white circle")]
     Circle,
 }
 ```
-

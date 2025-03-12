@@ -222,6 +222,9 @@ impl Enum {
                 }
                 return Ok(start + 1);
             }
+            else {
+                return  Ok(start); // no pub specifier
+            }
         }
         Err(format!("Expecting 'pub' keyword but found: '{:?}'", tokens[start]))
     }
