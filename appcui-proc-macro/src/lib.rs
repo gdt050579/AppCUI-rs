@@ -349,6 +349,11 @@ pub fn listitem_derive(input: TokenStream) -> TokenStream {
     crate::derives::listitem::derive(input)
 }
 
+#[proc_macro_derive(EnumSelector, attributes(name, Name, n, N, description, Description, details, Details, d, D, init))]
+pub fn enumselector_derive(input: TokenStream) -> TokenStream {
+    crate::derives::enumselector::derive(input)
+}
+
 /// Use to quickly identify a key or a combination via a string
 /// Usage examples:
 /// * key!("F2")
