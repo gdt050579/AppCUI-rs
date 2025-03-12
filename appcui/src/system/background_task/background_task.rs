@@ -20,8 +20,8 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
     pub fn run(self, task: fn(conector: &BackgroundTaskConector<T, R>)) {
         let btm = RuntimeManager::get().get_background_task_manager();
         let id = btm.add_task(InnerTask::<T,R>::new());
-        if let Some(t) = btm.get(id) {
-            
+        if let Some(t) = btm.get_mut::<T,R>(id) {
+            t.run(task);
         }
     }
 }

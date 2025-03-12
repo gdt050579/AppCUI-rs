@@ -1,4 +1,4 @@
-use super::task::Task;
+use super::task::{InnerTask, Task};
 
 pub(crate) struct BackgroundTaskManager {
     tasks: Vec<Option<Box<dyn Task>>>,
@@ -18,7 +18,32 @@ impl BackgroundTaskManager {
             self.tasks.len() - 1
         }
     }
-    pub(crate) fn get<T: Send+'static, R: Send+'static>(&self, index: usize) -> Option<&Box<dyn Task>> {
-        self.tasks.get(index).map(|x| x.as_ref().unwrap())
+    pub(crate) fn get<T: Send+'static, R: Send+'static>(&self, index: usize) -> Option<&InnerTask<T,R>> {
+        if index>=self.tasks.len() {
+            return None;
+        }
+        if let Some(interface) = &self.tasks[index] {
+            if let Some(task) = interface.as_any().downcast_ref::<InnerTask<T,R>>() {
+                Some(task)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+    pub(crate) fn get_mut<T: Send+'static, R: Send+'static>(&mut self, index: usize) -> Option<&mut InnerTask<T,R>> {
+        if index>=self.tasks.len() {
+            return None;
+        }
+        if let Some(interface) = &mut self.tasks[index] {
+            if let Some(task) = interface.as_any_mut().downcast_mut::<InnerTask<T,R>>() {
+                Some(task)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 }

@@ -5,6 +5,8 @@ use std::{any::Any, sync::{Arc, Condvar, Mutex}, thread};
 pub(crate) trait Task {
     fn read_data(&mut self) -> Option<&dyn Any>;
     fn update_control_handle(&mut self, control_handle: Handle<()>);
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 pub(crate) struct InnerTask<T: Send, R: Send> {
     pub(crate) control: Handle<()>,
@@ -50,5 +52,11 @@ impl<T: Send + 'static, R: Send + 'static> Task for InnerTask<T, R> {
     }
     fn update_control_handle(&mut self, control_handle: Handle<()>) {
         self.control = control_handle;
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }
