@@ -83,6 +83,7 @@
         - [ScrollBars]()
     - [Object Traits](chapter-3/object_traits.rs)
         - [ListItem](chapter-3/object-traits/listitem.md)
+        - [EnumSelector](chapter-3/object-traits/enumselector.md)
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops](chapter-4/custom_desktop.md)
