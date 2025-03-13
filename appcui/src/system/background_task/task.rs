@@ -17,18 +17,18 @@ pub(crate) struct InnerTask<T: Send, R: Send> {
 }
 
 impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
-    pub(crate) fn new() -> InnerTask<T, R> {
+    pub(crate) fn new(control_handle: Handle<()>) -> InnerTask<T, R> {
         InnerTask {
-            control: Handle::None,
+            control: control_handle,
             main_to_task: SingleChannel::new(),
             task_to_main: SingleChannel::new(),
             state: Arc::new((Mutex::new(StatusUpdateRequest::None), Condvar::new())),
             data: None,
         }
     }
-    pub(super) fn run(&mut self, task: fn(conector: &BackgroundTaskConector<T, R>)) {
+    pub(super) fn run(&mut self, task: fn(conector: &BackgroundTaskConector<T, R>), id: u32) {
         let conector = BackgroundTaskConector::new(
-            0,
+            id,
             RuntimeManager::get().get_system_event_sender(),
             self.task_to_main.to_own_sender().unwrap(),
             self.main_to_task.to_own_receiver().unwrap(),
