@@ -354,6 +354,10 @@ pub fn enumselector_derive(input: TokenStream) -> TokenStream {
     crate::derives::enumselector::derive(input)
 }
 
+#[proc_macro_derive(DropDownListType, attributes(VariantInfo))]
+pub fn dropdownlisttype_derive(input: TokenStream) -> TokenStream {
+    crate::derives::dropdownlisttype::derive(input)
+}
 /// Use to quickly identify a key or a combination via a string
 /// Usage examples:
 /// * key!("F2")
