@@ -1,40 +1,21 @@
 use crate::prelude::*;
 
+#[derive(DropDownListType)]
 enum MathOp {
+    #[VariantInfo(description = "(Add multiple numbers)", symbol = "∑")]
     Sum,
+
+    #[VariantInfo(description = "(Multiply multiple numbers)", symbol = "∏")]
     Product,
+
+    #[VariantInfo(description = "(Calculate the integral of a function)", symbol = "∫")]
     Integral,
+
+    #[VariantInfo(description = "(Calculate the radical of a number)", symbol = "√")]
     Radical,
+
+    #[VariantInfo(description = "(Check if all elements from a set are different)", symbol = "≠")]
     Different,
-}
-impl DropDownListType for MathOp {
-    fn name(&self) -> &str {
-        match self {
-            MathOp::Sum => "Sum",
-            MathOp::Product => "Product",
-            MathOp::Integral => "Integral",
-            MathOp::Radical => "Radical",
-            MathOp::Different => "Different",
-        }
-    }
-    fn description(&self) -> &str {
-        match self {
-            MathOp::Sum => "(Add multiple numbers)",
-            MathOp::Product => "(Multiply multiple numbers)",
-            MathOp::Integral => "(Calculate the integral of a function)",
-            MathOp::Radical => "(Calculate the radical of a number)",
-            MathOp::Different => "(Check if all elements from a set are different)",
-        }
-    }
-    fn symbol(&self) -> &str {
-        match self {
-            MathOp::Sum => "∑",
-            MathOp::Product => "∏",
-            MathOp::Integral => "∫",
-            MathOp::Radical => "√",
-            MathOp::Different => "≠",
-        }
-    }
 }
 
 #[test]
