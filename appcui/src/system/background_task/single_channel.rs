@@ -23,7 +23,7 @@ impl<T> SingleChannel<T> {
         if let Some(receiver) = &self.receiver {
             receiver.try_recv().ok()
         } else {
-            None
+            None 
         }
     }
 
