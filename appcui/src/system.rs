@@ -38,3 +38,5 @@ pub (crate) use self::runtime_manager_traits::TimerMethods;
 pub (crate) use self::tooltip::ToolTip;
 pub use self::builder::Builder;
 pub use self::timer::Timer;
+pub use self::background_task::BackgroundTask;
+pub use self::background_task::BackgroundTaskConector;

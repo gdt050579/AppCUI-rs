@@ -248,7 +248,7 @@ impl Window {
     {
         RuntimeManager::get().request_focus_for_control(handle.cast());
     }
-    
+
     pub fn toolbar(&mut self) -> &mut ToolBar {
         &mut self.toolbar
     }
@@ -607,6 +607,12 @@ impl Window {
     //     }
     //     None
     // }
+
+    /// Returns a generic handle to the current window.
+    #[inline(always)]
+    pub fn handle(&self) -> Handle<Window> {
+        self.handle.cast()
+    }
 }
 
 impl OnWindowRegistered for Window {

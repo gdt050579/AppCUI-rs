@@ -92,6 +92,7 @@ pub trait TimerEvents {
     }
 }
 
+
 pub trait Control:
     OnPaint
     + OnKeyPressed
