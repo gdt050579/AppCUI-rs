@@ -482,7 +482,7 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 pub(crate) static BACKGROUNDTASK_TRAIT_DEF: &str = "
-trait BackgroundTaskEvents<T: Send'static, R: Send+'static> {
+trait BackgroundTaskEvents<T: Send+'static, R: Send+'static> {
     fn on_start(&mut self, task: &BackgroundTask<T,R>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
