@@ -473,3 +473,39 @@ impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     }
 }
 ";
+
+pub(crate) static BACKGROUNDTASK_ON_UPDATE_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<TreeView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    let i: Handle<treeview::Item<$(TYPE)>> = unsafe { item_handle.unsafe_cast() };
+    return TreeViewEvents::<$(TYPE)>::on_item_action(self, h, i);
+}
+";
+pub(crate) static BACKGROUNDTASK_TRAIT_DEF: &str = "
+trait BackgroundTaskEvents<T: Send'static, R: Send+'static> {
+    fn on_start(&mut self, task: &BackgroundTask<T,R>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_update(&mut self, value: T, task: &BackgroundTask<T,R>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_finish(&mut self, task: &BackgroundTask<T,R>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+impl$(TEMPLATE_TYPE) GenericBackgroundTaskEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+
+    fn on_start(&mut self, id: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_START)
+        EventProcessStatus::Ignored
+    }
+    fn on_update(&mut self, id: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_UPDATE)
+        EventProcessStatus::Ignored
+    }
+    fn on_finish(&mut self, id: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_FINISH)
+        EventProcessStatus::Ignored
+    }
+}
+";
