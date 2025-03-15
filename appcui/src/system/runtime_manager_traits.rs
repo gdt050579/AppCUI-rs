@@ -54,3 +54,11 @@ pub(crate) trait TimerMethods {
     fn process_timer_start_event(&mut self, id: u8, tick: u64);
     fn timer_id_to_control(&mut self, id: u8) -> Option<&mut ControlManager>;
 }
+
+pub(crate) trait BackgroundTaskMethods {
+    fn background_task_handle_to_control(&mut self, backgoundtask_handle: Handle<()>) -> Option<&mut ControlManager>;
+    fn on_start(&mut self, handle: Handle<()>);
+    fn on_notify(&mut self, handle: Handle<()>);
+    fn on_finish(&mut self, handle: Handle<()>);
+    fn on_query(&mut self, handle: Handle<()>);
+}

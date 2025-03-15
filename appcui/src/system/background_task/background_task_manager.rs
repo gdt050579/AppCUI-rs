@@ -1,3 +1,5 @@
+use crate::system::Handle;
+
 use super::task::{InnerTask, Task};
 
 pub(crate) struct BackgroundTaskManager {
@@ -42,6 +44,17 @@ impl BackgroundTaskManager {
             } else {
                 None
             }
+        } else {
+            None
+        }
+    }
+    #[inline(always)]
+    pub(crate) fn receiver_control_handle(&self, index: usize) -> Option<Handle<()>> {
+        if index>=self.tasks.len() {
+            return None;
+        }
+        if let Some(interface) = &self.tasks[index] {
+            Some(interface.receiver_control_handle())
         } else {
             None
         }

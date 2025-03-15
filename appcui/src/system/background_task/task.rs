@@ -8,6 +8,7 @@ pub(crate) trait Task {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
     fn validate(&self, t: TypeId, r: TypeId) -> bool;
+    fn receiver_control_handle(&self) -> Handle<()>;
 }
 pub(crate) struct InnerTask<T: Send, R: Send> {
     pub(crate) control: Handle<()>,
@@ -63,5 +64,9 @@ impl<T: Send + 'static, R: Send + 'static> Task for InnerTask<T, R> {
     #[inline(always)]
     fn validate(&self, t: TypeId, r: TypeId) -> bool {
         TypeId::of::<T>() == t && TypeId::of::<R>() == r
+    }
+    #[inline(always)]
+    fn receiver_control_handle(&self) -> Handle<()> {
+        self.control
     }
 }

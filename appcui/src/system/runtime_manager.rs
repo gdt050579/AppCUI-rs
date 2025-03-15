@@ -191,16 +191,20 @@ impl RuntimeManager {
     }
     pub(crate) fn is_instantiated() -> bool {
         #[cfg(feature = "GLOBAL_RUNTIME")]
-        unsafe { RUNTIME_MANAGER.is_some() }
+        unsafe {
+            RUNTIME_MANAGER.is_some()
+        }
 
         #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.with(|manager| manager.borrow().is_some())
     }
     pub(crate) fn get() -> &'static mut RuntimeManager {
         #[cfg(feature = "GLOBAL_RUNTIME")]
-        unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
-        
-        #[cfg(not(feature = "GLOBAL_RUNTIME"))]        
+        unsafe {
+            RUNTIME_MANAGER.as_mut().unwrap()
+        }
+
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.with(|manager| {
             let mut binding = manager.borrow_mut();
             let mut_ref = binding.as_mut().expect("RuntimeManager is not initialized");
@@ -594,10 +598,10 @@ impl RuntimeManager {
             SystemEvent::TimerTickUpdate(event) => self.process_timer_tick_update_event(event.id, event.tick.value()),
             SystemEvent::TimerStart(event) => self.process_timer_start_event(event.id, event.tick.value()),
             SystemEvent::TimerPaused(event) => self.process_timer_paused_event(event.id, event.tick.value()),
-            SystemEvent::BackgroundTaskStart(_) => todo!(),
-            SystemEvent::BackgroundTaskEnd(_) => todo!(),
-            SystemEvent::BackgroundTaskNotify(_) => todo!(),
-            SystemEvent::BackgroundTaskQuery(_) => todo!(),            
+            SystemEvent::BackgroundTaskStart(h) => BackgroundTaskMethods::on_start(self, h),
+            SystemEvent::BackgroundTaskEnd(h) => BackgroundTaskMethods::on_finish(self, h),
+            SystemEvent::BackgroundTaskNotify(h) => BackgroundTaskMethods::on_notify(self, h),
+            SystemEvent::BackgroundTaskQuery(h) => BackgroundTaskMethods::on_query(self, h),
         }
     }
     fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
@@ -1826,6 +1830,46 @@ impl TimerMethods for RuntimeManager {
             // invalid control (should terminate the timer)
             self.timers_manager.terminate_thread(id as usize);
         }
+    }
+}
+
+impl BackgroundTaskMethods for RuntimeManager {
+    #[inline(always)]
+    fn background_task_handle_to_control(&mut self, backgoundtask_handle: Handle<()>) -> Option<&mut ControlManager> {
+        if let Some(h) = self.task_manager.receiver_control_handle(backgoundtask_handle.index()) {
+            let controls = unsafe { &mut *self.controls };
+            controls.get_mut(h.cast())
+        } else {
+            None
+        }
+    }
+
+    fn on_start(&mut self, handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(handle) {
+            if GenericBackgroundTaskEvents::on_start(c.control_mut(), handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+    }
+
+    fn on_notify(&mut self, handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(handle) {
+            if GenericBackgroundTaskEvents::on_update(c.control_mut(), handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+    }
+
+    fn on_finish(&mut self, handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(handle) {
+            if GenericBackgroundTaskEvents::on_finish(c.control_mut(), handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+    }
+
+    fn on_query(&mut self, handle: Handle<()>) {
+        todo!()
     }
 }
 
