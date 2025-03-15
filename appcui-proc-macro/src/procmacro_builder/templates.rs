@@ -475,10 +475,20 @@ impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 ";
 
 pub(crate) static BACKGROUNDTASK_ON_UPDATE_DEF: &str = "
-if std::any::TypeId::of::<$(TYPE)>() == type_id {
-    let h: Handle<TreeView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
-    let i: Handle<treeview::Item<$(TYPE)>> = unsafe { item_handle.unsafe_cast() };
-    return TreeViewEvents::<$(TYPE)>::on_item_action(self, h, i);
+if let Some(bt) = self.background_task(unsafe { handle.unsafe_cast() }) {
+    if let Some(data_received) = bt.read() {
+        return BackgroundTaskEvents::<$(TYPE)>::on_update(self, data_received, &bt);
+    }
+}
+";
+pub(crate) static BACKGROUNDTASK_ON_START_DEF: &str = "
+if let Some(bt) = self.background_task(unsafe { handle.unsafe_cast() }) {
+    return BackgroundTaskEvents::<$(TYPE)>::on_start(self, &bt);
+}
+";
+pub(crate) static BACKGROUNDTASK_ON_FINISH_DEF: &str = "
+if let Some(bt) = self.background_task(unsafe { handle.unsafe_cast() }) {
+    return BackgroundTaskEvents::<$(TYPE)>::on_finish(self, &bt);
 }
 ";
 pub(crate) static BACKGROUNDTASK_TRAIT_DEF: &str = "
@@ -495,15 +505,15 @@ trait BackgroundTaskEvents<T: Send+'static, R: Send+'static> {
 }
 impl$(TEMPLATE_TYPE) GenericBackgroundTaskEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
-    fn on_start(&mut self, id: u32) -> EventProcessStatus {
+    fn on_start(&mut self, handle: Handle<()>) -> EventProcessStatus {
         $(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_START)
         EventProcessStatus::Ignored
     }
-    fn on_update(&mut self, id: u32) -> EventProcessStatus {
+    fn on_update(&mut self, handle: Handle<()>) -> EventProcessStatus {
         $(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_UPDATE)
         EventProcessStatus::Ignored
     }
-    fn on_finish(&mut self, id: u32) -> EventProcessStatus {
+    fn on_finish(&mut self, handle: Handle<()>) -> EventProcessStatus {
         $(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_FINISH)
         EventProcessStatus::Ignored
     }

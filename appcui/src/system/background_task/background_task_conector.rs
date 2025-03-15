@@ -1,26 +1,29 @@
+use super::{BackgroundTask, StatusUpdateRequest};
+use crate::{system::Handle, terminals::SystemEvent};
 use std::sync::{Arc, Condvar, Mutex};
-use super::StatusUpdateRequest;
-use crate::terminals::SystemEvent;
 
-
-pub struct BackgroundTaskConector<T: Sized, R: Sized> {
-    id: u32,
+pub struct BackgroundTaskConector<T: Send + 'static, R: Send + 'static> {
+    handle: Handle<BackgroundTask<T, R>>,
     sysevent_sender: std::sync::mpsc::Sender<SystemEvent>,
     sender: std::sync::mpsc::Sender<T>,
     receiver: std::sync::mpsc::Receiver<R>,
     state: Arc<(Mutex<StatusUpdateRequest>, Condvar)>,
 }
 
-impl<T, R> BackgroundTaskConector<T, R> {
+impl<T, R> BackgroundTaskConector<T, R>
+where
+    T: Send + 'static,
+    R: Send + 'static,
+{
     pub(super) fn new(
-        id: u32,
+        handle: Handle<BackgroundTask<T, R>>,
         sysevent_sender: std::sync::mpsc::Sender<SystemEvent>,
         sender: std::sync::mpsc::Sender<T>,
         receiver: std::sync::mpsc::Receiver<R>,
         state: Arc<(Mutex<StatusUpdateRequest>, Condvar)>,
     ) -> Self {
         Self {
-            id,
+            handle,
             sysevent_sender,
             sender,
             receiver,
@@ -33,13 +36,13 @@ impl<T, R> BackgroundTaskConector<T, R> {
         if self.sender.send(data).is_err() {
             return false;
         }
-        self.sysevent_sender.send(SystemEvent::BackgroundTaskNotify(self.id)).is_ok()
+        self.sysevent_sender.send(SystemEvent::BackgroundTaskNotify(self.handle.cast())).is_ok()
     }
     pub(super) fn notify_start(&self) {
-        self.sysevent_sender.send(SystemEvent::BackgroundTaskStart(self.id));
+        self.sysevent_sender.send(SystemEvent::BackgroundTaskStart(self.handle.cast()));
     }
     pub(super) fn notify_end(&self) {
-        self.sysevent_sender.send(SystemEvent::BackgroundTaskEnd(self.id));
+        self.sysevent_sender.send(SystemEvent::BackgroundTaskEnd(self.handle.cast()));
     }
     /// Query the main thread with some data. Returns the result of the query.
     /// This method works synchronously.
@@ -47,7 +50,7 @@ impl<T, R> BackgroundTaskConector<T, R> {
         if self.sender.send(data).is_err() {
             return None;
         }
-        if self.sysevent_sender.send(SystemEvent::BackgroundTaskQuery(self.id)).is_err() {
+        if self.sysevent_sender.send(SystemEvent::BackgroundTaskQuery(self.handle.cast())).is_err() {
             return None;
         }
         self.receiver.recv().ok()
@@ -56,7 +59,7 @@ impl<T, R> BackgroundTaskConector<T, R> {
     /// If there is a task request to pause the task from the main thread, it pauses the task and waits until the task is resumed.
     /// If there is a task request to close the task from the main thread, it returns true. Otherwise, it returns false.
     /// This method should be used in the background task to validate that the task should continue.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_compile
     /// fn run_background_task_function(conector: &BackgroundTaskConector<T, R>) {
@@ -78,5 +81,4 @@ impl<T, R> BackgroundTaskConector<T, R> {
             StatusUpdateRequest::Close => return true,
         }
     }
-    
 }

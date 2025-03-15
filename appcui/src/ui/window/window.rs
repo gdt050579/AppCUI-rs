@@ -613,6 +613,12 @@ impl Window {
     pub fn handle(&self) -> Handle<Window> {
         self.handle.cast()
     }
+
+    /// Returns the background task associated with a specific handle or None if the handle is invalid.
+    #[inline(always)]
+    pub fn background_task<T: Send+'static, R: Send+'static>(&self, handle: Handle<BackgroundTask<T,R>>) -> Option<BackgroundTask<T,R>> {
+        BackgroundTask::from_handle(handle)
+    }
 }
 
 impl OnWindowRegistered for Window {

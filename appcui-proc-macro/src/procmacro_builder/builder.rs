@@ -209,9 +209,9 @@ fn generate_backgroundtask_events(a: &mut Arguments) -> String {
     let mut on_update = String::new();
     let mut on_finish = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericBackgroundTaskEvents].iter() {
-        on_start.push_str(templates::TREEVIEW_ON_CURRENT_ITEM_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
-        on_update.push_str(templates::TREEVIEW_ON_ITEM_COLLAPSED_DEF.replace("$(TYPE)", trait_name).as_str());
-        on_finish.push_str(templates::TREEVIEW_ON_ITEM_EXPANDED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_start.push_str(templates::BACKGROUNDTASK_ON_START_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_update.push_str(templates::BACKGROUNDTASK_ON_UPDATE_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_finish.push_str(templates::BACKGROUNDTASK_ON_FINISH_DEF.replace("$(TYPE)", trait_name).as_str());
     }
     templates::BACKGROUNDTASK_TRAIT_DEF
         .replace("$(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_START)", &on_start)

@@ -1,12 +1,13 @@
-use super::{BackgroundTaskConector, SingleChannel, StatusUpdateRequest};
+use super::{BackgroundTask, BackgroundTaskConector, SingleChannel, StatusUpdateRequest};
 use crate::system::{Handle, RuntimeManager};
-use std::{any::Any, sync::{Arc, Condvar, Mutex}, thread};
+use std::{any::{Any, TypeId}, sync::{Arc, Condvar, Mutex}, thread};
 
 pub(crate) trait Task {
     fn read_data(&mut self) -> Option<&dyn Any>;
     fn update_control_handle(&mut self, control_handle: Handle<()>);
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
+    fn validate(&self, t: TypeId, r: TypeId) -> bool;
 }
 pub(crate) struct InnerTask<T: Send, R: Send> {
     pub(crate) control: Handle<()>,
@@ -26,9 +27,9 @@ impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
             data: None,
         }
     }
-    pub(super) fn run(&mut self, task: fn(conector: &BackgroundTaskConector<T, R>), id: u32) {
+    pub(super) fn run(&mut self, task: fn(conector: &BackgroundTaskConector<T, R>), handle: Handle<BackgroundTask<T, R>>) {
         let conector = BackgroundTaskConector::new(
-            id,
+            handle,
             RuntimeManager::get().get_system_event_sender(),
             self.task_to_main.to_own_sender().unwrap(),
             self.main_to_task.to_own_receiver().unwrap(),
@@ -58,5 +59,9 @@ impl<T: Send + 'static, R: Send + 'static> Task for InnerTask<T, R> {
     }
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
+    }
+    #[inline(always)]
+    fn validate(&self, t: TypeId, r: TypeId) -> bool {
+        TypeId::of::<T>() == t && TypeId::of::<R>() == r
     }
 }
