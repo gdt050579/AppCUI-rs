@@ -3,7 +3,7 @@ use appcui::prelude::*;
 enum Status {
     Start(u32),
     Progress(u32),
-    ReachHaltShouldContinue,
+    ReachHaltShouldContinue,    
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -48,6 +48,7 @@ impl ButtonEvents for MyWin {
         } else if handle == self.b_pause {
             Window::update_control(self.b_pause, |b| b.set_enabled(false));
             Window::update_control(self.b_resume, |b| b.set_enabled(true));
+            Window::update_control(self.p, |p| p.pause());
             if let Some(bt) = self.background_task(self.bt) {
                 bt.pause();
             }
@@ -55,6 +56,7 @@ impl ButtonEvents for MyWin {
         } else if handle == self.b_resume {
             Window::update_control(self.b_pause, |b| b.set_enabled(true));
             Window::update_control(self.b_resume, |b| b.set_enabled(false));
+            Window::update_control(self.p, |p| p.resume());
             if let Some(bt) = self.background_task(self.bt) {
                 bt.resume();
             }
@@ -77,6 +79,24 @@ impl BackgroundTaskEvents<Status, Response> for MyWin {
         } else {
             EventProcessStatus::Ignored
         }
+    }
+    fn on_query(&mut self, value: Status, _: &BackgroundTask<Status, Response>) -> Response {
+        match value {
+            Status::ReachHaltShouldContinue => {
+                if dialogs::proceed("Question", "Reached 50% progress. Do you want to continue?") {
+                    Response::Yes
+                } else {
+                    Response::No
+                }
+            }
+            _ => Response::No,
+        }
+    }
+    fn on_finish(&mut self, _: &BackgroundTask<Status, Response>) -> EventProcessStatus {
+        Window::update_control(self.b_start, |b| b.set_enabled(true));
+        Window::update_control(self.b_pause, |b| b.set_enabled(false));
+        Window::update_control(self.b_resume, |b| b.set_enabled(false));        
+        EventProcessStatus::Processed
     }
 }
 

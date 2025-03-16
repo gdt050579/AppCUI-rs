@@ -491,6 +491,15 @@ if let Some(bt) = self.background_task(unsafe { handle.unsafe_cast() }) {
     return BackgroundTaskEvents::<$(TYPE)>::on_finish(self, &bt);
 }
 ";
+pub(crate) static BACKGROUNDTASK_ON_QUERY_DEF: &str = "
+if let Some(bt) = self.background_task(unsafe { handle.unsafe_cast() }) {
+    if let Some(data_received) = bt.read() {
+        let response = BackgroundTaskEvents::<$(TYPE)>::on_query(self, data_received, &bt);
+        bt.send(response);
+        return EventProcessStatus::Processed;
+    }
+}
+";
 pub(crate) static BACKGROUNDTASK_TRAIT_DEF: &str = "
 trait BackgroundTaskEvents<T: Send+'static, R: Send+'static> {
     fn on_start(&mut self, task: &BackgroundTask<T,R>) -> EventProcessStatus {
@@ -502,6 +511,7 @@ trait BackgroundTaskEvents<T: Send+'static, R: Send+'static> {
     fn on_finish(&mut self, task: &BackgroundTask<T,R>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    fn on_query(&mut self, value: T, task: &BackgroundTask<T,R>) -> R;
 }
 impl$(TEMPLATE_TYPE) GenericBackgroundTaskEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
@@ -515,6 +525,10 @@ impl$(TEMPLATE_TYPE) GenericBackgroundTaskEvents for $(STRUCT_NAME)$(TEMPLATE_DE
     }
     fn on_finish(&mut self, handle: Handle<()>) -> EventProcessStatus {
         $(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_FINISH)
+        EventProcessStatus::Ignored
+    }
+    fn on_query(&mut self, handle: Handle<()>) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_QUERY)
         EventProcessStatus::Ignored
     }
 }

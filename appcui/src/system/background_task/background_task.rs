@@ -49,6 +49,12 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
             None
         }
     }
+    pub fn send(&self, value: R) {
+        let btm = RuntimeManager::get().get_background_task_manager();
+        if let Some(t) = btm.get_mut::<T, R>(self.id as usize) {
+            t.main_to_task.send(value);
+        } 
+    }
     pub fn pause(&self) {
         let btm = RuntimeManager::get().get_background_task_manager();
         if let Some(t) = btm.get_mut::<T, R>(self.id as usize) {

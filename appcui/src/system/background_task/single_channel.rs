@@ -26,5 +26,10 @@ impl<T> SingleChannel<T> {
             None 
         }
     }
+    pub(super) fn send(&self, value: T)  {
+        if let Some(sender) = &self.sender {
+            let _ = sender.send(value);
+        } 
+    }
 
 }

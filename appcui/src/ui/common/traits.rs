@@ -102,6 +102,9 @@ pub trait GenericBackgroundTaskEvents {
     fn on_finish(&mut self, _handle: Handle<()>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    fn on_query(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
 }
 
 

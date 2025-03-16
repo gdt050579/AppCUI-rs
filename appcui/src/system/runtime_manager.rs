@@ -1835,9 +1835,9 @@ impl TimerMethods for RuntimeManager {
 
 impl BackgroundTaskMethods for RuntimeManager {
     #[inline(always)]
-    fn background_task_handle_to_control(&mut self, backgoundtask_handle: Handle<()>) -> Option<&mut ControlManager> {
-        //log!("RM","background_task_handle_to_control({:?})",backgoundtask_handle);
-        if let Some(h) = self.task_manager.receiver_control_handle(backgoundtask_handle.index()) {
+    fn background_task_handle_to_control(&mut self, backgroundtask_handle: Handle<()>) -> Option<&mut ControlManager> {
+        //log!("RM","background_task_handle_to_control({:?})",backgroundtask_handle);
+        if let Some(h) = self.task_manager.receiver_control_handle(backgroundtask_handle.index()) {
             let controls = unsafe { &mut *self.controls };
             controls.get_mut(h.cast())
         } else {
@@ -1845,32 +1845,36 @@ impl BackgroundTaskMethods for RuntimeManager {
         }
     }
 
-    fn on_start(&mut self, backgoundtask_handle: Handle<()>) {
-        if let Some(c) = self.background_task_handle_to_control(backgoundtask_handle) {
-            if GenericBackgroundTaskEvents::on_start(c.control_mut(), backgoundtask_handle) == EventProcessStatus::Processed {
+    fn on_start(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_start(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
                 self.repaint = true;
             }
         }
     }
 
-    fn on_notify(&mut self, backgoundtask_handle: Handle<()>) {
-        if let Some(c) = self.background_task_handle_to_control(backgoundtask_handle) {
-            if GenericBackgroundTaskEvents::on_update(c.control_mut(), backgoundtask_handle) == EventProcessStatus::Processed {
+    fn on_notify(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_update(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
                 self.repaint = true;
             }
         }
     }
 
-    fn on_finish(&mut self, backgoundtask_handle: Handle<()>) {
-        if let Some(c) = self.background_task_handle_to_control(backgoundtask_handle) {
-            if GenericBackgroundTaskEvents::on_finish(c.control_mut(), backgoundtask_handle) == EventProcessStatus::Processed {
+    fn on_finish(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_finish(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
                 self.repaint = true;
             }
         }
     }
 
-    fn on_query(&mut self, backgoundtask_handle: Handle<()>) {
-        todo!()
+    fn on_query(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_query(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
     }
 }
 
