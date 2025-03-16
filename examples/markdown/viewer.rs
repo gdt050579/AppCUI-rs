@@ -50,10 +50,8 @@ impl Viewer {
                     md.set_content(&file_content);
                     self.base.set_title(&full_path);
                 }
-            } else {
-                if let Some(md) = self.control_mut(handle) {
-                    md.set_content(&format!("Could not load file at {}", current_path));
-                }
+            } else if let Some(md) = self.control_mut(handle) {
+                md.set_content(&format!("Could not load file at {}", current_path));
             }
         }
     }

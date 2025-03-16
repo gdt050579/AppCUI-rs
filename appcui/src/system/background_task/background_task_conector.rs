@@ -60,7 +60,7 @@ where
     /// If there is a task request to close the task from the main thread, it returns true. Otherwise, it returns false.
     /// This method should be used in the background task to validate that the task should continue.
     ///
-    /// # Example
+    /// # Example 
     /// ```rust, no_compile
     /// use appcui::prelude::*;
     /// 
@@ -79,12 +79,12 @@ where
         let (lock, cvar) = &*self.state;
         let mut status = lock.lock().unwrap();
         match *status {
-            StatusUpdateRequest::None => return false,
+            StatusUpdateRequest::None => false,
             StatusUpdateRequest::Pause => {
                 status = cvar.wait_while(status, |s| *s == StatusUpdateRequest::Pause).unwrap();
-                return *status == StatusUpdateRequest::Close;
+                *status == StatusUpdateRequest::Close
             }
-            StatusUpdateRequest::Close => return true,
+            StatusUpdateRequest::Close => true,
         }
     }
 }

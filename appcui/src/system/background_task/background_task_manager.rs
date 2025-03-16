@@ -52,14 +52,10 @@ impl BackgroundTaskManager {
         if index>=self.tasks.len() {
             return None;
         }
-        if let Some(interface) = &self.tasks[index] {
-            Some(interface.receiver_control_handle())
-        } else {
-            None
-        }
+        self.tasks[index].as_ref().map(|interface| interface.receiver_control_handle())
     }
     pub(crate) fn remove_task(&mut self, handle: Handle<()>) {
-        let index = handle.index() as usize;
+        let index = handle.index();
         if index<self.tasks.len() {
             self.tasks[index] = None;
         }

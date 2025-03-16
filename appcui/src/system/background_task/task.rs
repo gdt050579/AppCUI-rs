@@ -29,8 +29,8 @@ impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
         let conector = BackgroundTaskConector::new(
             handle,
             RuntimeManager::get().get_system_event_sender(),
-            self.task_to_main.to_own_sender().unwrap(),
-            self.main_to_task.to_own_receiver().unwrap(),
+            self.task_to_main.take_ownership_for_sender().unwrap(),
+            self.main_to_task.take_ownership_for_receiver().unwrap(),
             self.state.clone(),
         );
         thread::spawn(move || {

@@ -13,10 +13,10 @@ impl<T> SingleChannel<T> {
             receiver: Some(receiver),
         }
     }
-    pub(super) fn to_own_sender(&mut self) -> Option<Sender<T>> {
+    pub(super) fn take_ownership_for_sender(&mut self) -> Option<Sender<T>> {
         self.sender.take()
     }
-    pub(super) fn to_own_receiver(&mut self) -> Option<Receiver<T>> {
+    pub(super) fn take_ownership_for_receiver(&mut self) -> Option<Receiver<T>> {
         self.receiver.take()
     }
     pub(super) fn read(&self) -> Option<T> {
