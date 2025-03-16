@@ -1,6 +1,6 @@
 use std::sync::mpsc::{Receiver, Sender};
 
-pub(super) struct SingleChannel<T> {
+pub(crate) struct SingleChannel<T> {
     sender: Option<Sender<T>>,
     receiver: Option<Receiver<T>>,
 }
