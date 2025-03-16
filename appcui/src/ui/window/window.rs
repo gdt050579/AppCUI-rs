@@ -628,7 +628,7 @@ impl Window {
     ///    let mut app = App::new().build().unwrap();
     ///    let mut w = window!("Title,d:c,w:20,h:10");
     ///    let handle_b = w.add(button!("Button,d:C,w:10"));
-    ///    w.execute(handle_b, |button| { button.set_text("New text"); });
+    ///    Window::update_control(handle_b, |button| { button.set_caption("New text"); });
     /// ```
     pub fn update_control<T: Control + 'static>(handle: Handle<T>, run: fn(&mut T)) {
         if let Some(control) = RuntimeManager::get().get_control_mut(handle) {

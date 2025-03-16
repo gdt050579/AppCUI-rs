@@ -62,10 +62,16 @@ where
     ///
     /// # Example
     /// ```rust, no_compile
-    /// fn run_background_task_function(conector: &BackgroundTaskConector<T, R>) {
-    ///     while (/* still things to be done */) {
+    /// use appcui::prelude::*;
+    /// 
+    /// fn run_background_task_function<T,R>(conector: &BackgroundTaskConector<T, R>) 
+    /// where 
+    ///     T:Send+'static,
+    ///     R:Send+'static
+    /// {
+    ///     loop {
     ///        if !conector.should_stop() { break; }
-    ///       // do something
+    ///        // do some tasks
     ///     }
     /// }
     /// ```
