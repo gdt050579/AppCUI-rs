@@ -73,4 +73,10 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
             t.stop();
         }
     }
+    pub fn update_control_handle(&self, control_handle: Handle<()>) {
+        let btm = RuntimeManager::get().get_background_task_manager();
+        if let Some(t) = btm.get_mut::<T, R>(self.id as usize) {
+            t.update_control_handle(control_handle);
+        }
+    }
 }

@@ -58,4 +58,10 @@ impl BackgroundTaskManager {
             None
         }
     }
+    pub(crate) fn remove_task(&mut self, handle: Handle<()>) {
+        let index = handle.index() as usize;
+        if index<self.tasks.len() {
+            self.tasks[index] = None;
+        }
+    }
 }

@@ -1867,6 +1867,7 @@ impl BackgroundTaskMethods for RuntimeManager {
                 self.repaint = true;
             }
         }
+        self.task_manager.remove_task(backgroundtask_handle);
     }
 
     fn on_query(&mut self, backgroundtask_handle: Handle<()>) {
