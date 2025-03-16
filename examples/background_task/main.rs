@@ -43,12 +43,13 @@ impl ButtonEvents for MyWin {
         if handle == self.b_start {
             Window::update_control(self.b_start, |b| b.set_enabled(false));
             Window::update_control(self.b_pause, |b| b.set_enabled(true));
+            Window::update_control(self.p, |p| p.update_text(""));
             self.bt = BackgroundTask::<Status, Response>::run(do_something, self.handle());
             EventProcessStatus::Processed
         } else if handle == self.b_pause {
             Window::update_control(self.b_pause, |b| b.set_enabled(false));
             Window::update_control(self.b_resume, |b| b.set_enabled(true));
-            Window::update_control(self.p, |p| p.pause());
+            Window::update_control(self.p, |p| { p.pause(); p.update_text("Paused"); });
             if let Some(bt) = self.background_task(self.bt) {
                 bt.pause();
             }
@@ -56,7 +57,7 @@ impl ButtonEvents for MyWin {
         } else if handle == self.b_resume {
             Window::update_control(self.b_pause, |b| b.set_enabled(true));
             Window::update_control(self.b_resume, |b| b.set_enabled(false));
-            Window::update_control(self.p, |p| p.resume());
+            Window::update_control(self.p, |p| { p.resume(); p.update_text(""); });
             if let Some(bt) = self.background_task(self.bt) {
                 bt.resume();
             }
@@ -95,7 +96,8 @@ impl BackgroundTaskEvents<Status, Response> for MyWin {
     fn on_finish(&mut self, _: &BackgroundTask<Status, Response>) -> EventProcessStatus {
         Window::update_control(self.b_start, |b| b.set_enabled(true));
         Window::update_control(self.b_pause, |b| b.set_enabled(false));
-        Window::update_control(self.b_resume, |b| b.set_enabled(false));        
+        Window::update_control(self.b_resume, |b| b.set_enabled(false));  
+        Window::update_control(self.p, |p| p.update_text("Finished"));      
         EventProcessStatus::Processed
     }
 }
