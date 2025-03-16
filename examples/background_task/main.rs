@@ -3,9 +3,16 @@ use appcui::prelude::*;
 enum Status {
     Start(u32),
     Progress(u32),
+    ReachHaltShouldContinue,
 }
 
-#[Window(events = ButtonEvents+BackgroundTaskEvents<Status,bool>)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+enum Response {
+    Yes,
+    No,
+}
+
+#[Window(events = ButtonEvents+BackgroundTaskEvents<Status,Response>)]
 struct MyWin {
     p: Handle<ProgressBar>,
     b_start: Handle<Button>,
@@ -16,7 +23,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("'Background Task',d:c,w:50,h:15,flags:sizeable"),
+            base: window!("'Background Task',d:c,w:50,h:8,flags:sizeable"),
             p: Handle::None,
             b_pause: Handle::None,
             b_resume: Handle::None,
@@ -30,18 +37,23 @@ impl MyWin {
     }
 }
 impl ButtonEvents for MyWin {
-    fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
-        BackgroundTask::<Status, bool>::new().run(do_something, self.handle());
-        EventProcessStatus::Processed
+    fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
+        if handle == self.b_start {
+            BackgroundTask::<Status, Response>::new().run(do_something, self.handle());
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
     }
 }
-impl BackgroundTaskEvents<Status, bool> for MyWin {
-    fn on_update(&mut self, value: Status, _: &BackgroundTask<Status, bool>) -> EventProcessStatus {
+impl BackgroundTaskEvents<Status, Response> for MyWin {
+    fn on_update(&mut self, value: Status, _: &BackgroundTask<Status, Response>) -> EventProcessStatus {
         let h = self.p;
         if let Some(p) = self.control_mut(h) {
             match value {
                 Status::Start(value) => p.reset(value as u64),
                 Status::Progress(value) => p.update_progress(value as u64),
+                Status::ReachHaltShouldContinue => {}
             }
             EventProcessStatus::Processed
         } else {
@@ -50,12 +62,24 @@ impl BackgroundTaskEvents<Status, bool> for MyWin {
     }
 }
 
-fn do_something(conector: &BackgroundTaskConector<Status, bool>) {
+fn do_something(conector: &BackgroundTaskConector<Status, Response>) {
     conector.notify(Status::Start(100));
     for i in 0..100 {
+        if conector.should_stop() {
+            return;
+        }
         std::thread::sleep(std::time::Duration::from_millis(100));
         conector.notify(Status::Progress(i));
+        if i == 50 {
+            if let Some(response) = conector.query(Status::ReachHaltShouldContinue) {
+                match response {
+                    Response::Yes => {}
+                    Response::No => return,
+                }
+            }
+        }
     }
+    conector.notify(Status::Progress(100));
 }
 
 fn main() -> Result<(), appcui::system::Error> {
