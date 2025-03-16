@@ -39,7 +39,8 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
         }
     }
     pub fn run(self, task: fn(conector: &BackgroundTaskConector<T, R>), receiver: Handle<Window>) -> Handle<BackgroundTask<T, R>> {
-        if self.id == Self::INVALID {
+        // if it was already started
+        if self.id != Self::INVALID {
             return Handle::None;
         }
         let btm = RuntimeManager::get().get_background_task_manager();
