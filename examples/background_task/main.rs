@@ -18,6 +18,7 @@ struct MyWin {
     b_start: Handle<Button>,
     b_pause: Handle<Button>,
     b_resume: Handle<Button>,
+    bt: Handle<BackgroundTask<Status, Response>>,
 }
 
 impl MyWin {
@@ -28,6 +29,7 @@ impl MyWin {
             b_pause: Handle::None,
             b_resume: Handle::None,
             b_start: Handle::None,
+            bt: Handle::None,
         };
         w.p = w.add(progressbar!("l:1,t:1,r:1,h:2"));
         w.b_start = w.add(button!("&Start,l:1,b:0,w:10"));
@@ -39,7 +41,21 @@ impl MyWin {
 impl ButtonEvents for MyWin {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
         if handle == self.b_start {
-            BackgroundTask::<Status, Response>::new().run(do_something, self.handle());
+            Window::update_control(self.b_start, |b| b.set_enabled(false));
+            Window::update_control(self.b_pause, |b| b.set_enabled(true));
+            self.bt = BackgroundTask::<Status, Response>::run(do_something, self.handle());
+            EventProcessStatus::Processed
+        } else if handle == self.b_pause {
+            Window::update_control(self.b_pause, |b| b.set_enabled(false));
+            Window::update_control(self.b_resume, |b| b.set_enabled(true));
+            if let Some(bt) = self.background_task(self.bt) {
+                bt.pause();
+            }
+            EventProcessStatus::Processed
+        } else if handle == self.b_resume {
+            Window::update_control(self.b_pause, |b| b.set_enabled(true));
+            Window::update_control(self.b_resume, |b| b.set_enabled(false));
+            
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored

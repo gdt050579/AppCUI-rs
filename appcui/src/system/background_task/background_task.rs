@@ -14,14 +14,6 @@ pub struct BackgroundTask<T: Send + 'static, R: Send + 'static> {
 }
 
 impl<T: Send, R: Send> BackgroundTask<T, R> {
-    const INVALID: u32 = u32::MAX;
-    pub fn new() -> BackgroundTask<T, R> {
-        // add task to runtime manager
-        BackgroundTask {
-            id: Self::INVALID,
-            _phantom: std::marker::PhantomData,
-        }
-    }
     pub(crate) fn from_handle(handle: Handle<BackgroundTask<T, R>>) -> Option<BackgroundTask<T, R>> {
         let id = handle.index();
         let btm = RuntimeManager::get().get_background_task_manager();
@@ -38,11 +30,7 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
             None
         }
     }
-    pub fn run(self, task: fn(conector: &BackgroundTaskConector<T, R>), receiver: Handle<Window>) -> Handle<BackgroundTask<T, R>> {
-        // if it was already started
-        if self.id != Self::INVALID {
-            return Handle::None;
-        }
+    pub fn run(task: fn(conector: &BackgroundTaskConector<T, R>), receiver: Handle<Window>) -> Handle<BackgroundTask<T, R>> {
         let btm = RuntimeManager::get().get_background_task_manager();
         let id = btm.add_task(InnerTask::<T, R>::new(receiver.cast()));
         if let Some(t) = btm.get_mut::<T, R>(id) {
@@ -54,14 +42,29 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
         }
     }
     pub fn read(&self) -> Option<T> {
-        if self.id == Self::INVALID {
-            return None;
-        }
         let btm = RuntimeManager::get().get_background_task_manager();
         if let Some(t) = btm.get_mut::<T, R>(self.id as usize) {
             t.task_to_main.read()
         } else {
             None
+        }
+    }
+    pub fn pause(&self) {
+        let btm = RuntimeManager::get().get_background_task_manager();
+        if let Some(t) = btm.get_mut::<T, R>(self.id as usize) {
+            t.pause();
+        }
+    }
+    pub fn resume(&self) {
+        let btm = RuntimeManager::get().get_background_task_manager();
+        if let Some(t) = btm.get_mut::<T, R>(self.id as usize) {
+            t.resume();
+        }
+    }
+    pub fn stop(&self) {
+        let btm = RuntimeManager::get().get_background_task_manager();
+        if let Some(t) = btm.get_mut::<T, R>(self.id as usize) {
+            t.stop();
         }
     }
 }

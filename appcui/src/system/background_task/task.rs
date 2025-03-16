@@ -42,6 +42,35 @@ impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
             conector.notify_end();
         });
     }
+    pub(super) fn pause(&mut self) {
+        let (lock, cvar) = &*self.state;
+        let mut status = lock.lock().unwrap();
+        // if status is Paused or Close then exit
+        if (*status) != StatusUpdateRequest::None {
+            return;
+        }
+        *status = StatusUpdateRequest::Pause;
+        cvar.notify_one();
+    }
+    pub(super) fn resume(&mut self) {
+        let (lock, cvar) = &*self.state;
+        let mut status = lock.lock().unwrap();
+        // if status is None or Close then exit
+        if (*status) != StatusUpdateRequest::Pause {
+            return;
+        }
+        *status = StatusUpdateRequest::None;
+        cvar.notify_one();
+    }
+    pub(super) fn stop(&mut self) {
+        let (lock, cvar) = &*self.state;
+        let mut status = lock.lock().unwrap();
+        if (*status) == StatusUpdateRequest::Close {
+            return;
+        }
+        *status = StatusUpdateRequest::Close;
+        cvar.notify_one();
+    }
 }
 impl<T: Send + 'static, R: Send + 'static> Task for InnerTask<T, R> {
     fn read_data(&mut self) -> Option<&dyn Any> {

@@ -616,8 +616,24 @@ impl Window {
 
     /// Returns the background task associated with a specific handle or None if the handle is invalid.
     #[inline(always)]
-    pub fn background_task<T: Send+'static, R: Send+'static>(&self, handle: Handle<BackgroundTask<T,R>>) -> Option<BackgroundTask<T,R>> {
+    pub fn background_task<T: Send + 'static, R: Send + 'static>(&self, handle: Handle<BackgroundTask<T, R>>) -> Option<BackgroundTask<T, R>> {
         BackgroundTask::from_handle(handle)
+    }
+
+    /// Executes a callback function over a specific control (if that control handle is valid)
+    ///
+    /// # Example
+    /// ```rust,no_run
+    ///    use appcui::prelude::*;
+    ///    let mut app = App::new().build().unwrap();
+    ///    let mut w = window!("Title,d:c,w:20,h:10");
+    ///    let handle_b = w.add(button!("Button,d:C,w:10"));
+    ///    w.execute(handle_b, |button| { button.set_text("New text"); });
+    /// ```
+    pub fn update_control<T: Control + 'static>(handle: Handle<T>, run: fn(&mut T)) {
+        if let Some(control) = RuntimeManager::get().get_control_mut(handle) {
+            run(control);
+        }
     }
 }
 
