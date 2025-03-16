@@ -55,7 +55,9 @@ impl ButtonEvents for MyWin {
         } else if handle == self.b_resume {
             Window::update_control(self.b_pause, |b| b.set_enabled(true));
             Window::update_control(self.b_resume, |b| b.set_enabled(false));
-            
+            if let Some(bt) = self.background_task(self.bt) {
+                bt.resume();
+            }
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
