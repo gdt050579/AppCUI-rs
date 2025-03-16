@@ -1,6 +1,4 @@
 use crate::system::Handle;
-use crate::prelude::*;
-
 use super::task::{InnerTask, Task};
 
 pub(crate) struct BackgroundTaskManager {

@@ -39,10 +39,10 @@ where
         self.sysevent_sender.send(SystemEvent::BackgroundTaskNotify(self.handle.cast())).is_ok()
     }
     pub(super) fn notify_start(&self) {
-        self.sysevent_sender.send(SystemEvent::BackgroundTaskStart(self.handle.cast()));
+        let _ = self.sysevent_sender.send(SystemEvent::BackgroundTaskStart(self.handle.cast()));
     }
     pub(super) fn notify_end(&self) {
-        self.sysevent_sender.send(SystemEvent::BackgroundTaskEnd(self.handle.cast()));
+        let _ = self.sysevent_sender.send(SystemEvent::BackgroundTaskEnd(self.handle.cast()));
     }
     /// Query the main thread with some data. Returns the result of the query.
     /// This method works synchronously.

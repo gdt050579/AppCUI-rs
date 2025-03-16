@@ -1869,7 +1869,7 @@ impl BackgroundTaskMethods for RuntimeManager {
         }
     }
 
-    fn on_query(&mut self, handle: Handle<()>) {
+    fn on_query(&mut self, backgoundtask_handle: Handle<()>) {
         todo!()
     }
 }
