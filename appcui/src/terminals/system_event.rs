@@ -1,4 +1,4 @@
-use crate::input::{Key, KeyModifier, MouseButton, MouseWheelDirection};
+use crate::{input::{Key, KeyModifier, MouseButton, MouseWheelDirection}, system::Handle};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(crate) struct MouseButtonDownEvent {
@@ -95,6 +95,10 @@ pub(crate) enum SystemEvent {
     TimerTickUpdate(TimerTickUpdateEvent),
     TimerStart(TimerStartEvent),
     TimerPaused(TimerPausedEvent),
+    BackgroundTaskStart(Handle<()>),
+    BackgroundTaskEnd(Handle<()>),
+    BackgroundTaskNotify(Handle<()>),
+    BackgroundTaskQuery(Handle<()>),
 }
 
 impl SystemEvent {

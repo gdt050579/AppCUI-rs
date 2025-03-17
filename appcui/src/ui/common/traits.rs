@@ -92,6 +92,22 @@ pub trait TimerEvents {
     }
 }
 
+pub trait GenericBackgroundTaskEvents {
+    fn on_start(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_update(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_finish(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_query(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+
+
 pub trait Control:
     OnPaint
     + OnKeyPressed
@@ -130,6 +146,7 @@ pub trait Control:
     + TimerEvents
     + GenericTreeViewEvents
     + MarkdownEvents
+    + GenericBackgroundTaskEvents
 {
 }
 

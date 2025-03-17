@@ -171,3 +171,7 @@ path = "timer/main.rs"
 [[example]]
 name = "treeview"
 path = "treeview/main.rs"
+
+[[example]]
+name = "background_task"
+path = "background_task/main.rs"

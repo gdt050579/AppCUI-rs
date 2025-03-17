@@ -105,7 +105,7 @@ impl MenuEvents for MyDesktop {
                         if let Some(filename) = std::path::Path::new(&file_path).file_name() {
                             self.add_window(Viewer::new(
                                 parent_dir.to_string_lossy().to_string(),
-                                &filename.to_string_lossy().to_string(),
+                                filename.to_string_lossy().as_ref(),
                             ));
                         }
                     }

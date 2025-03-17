@@ -326,7 +326,7 @@ impl Enum {
         }
         let generics = tokens[start..index]
             .iter()
-            .map(|t| Self::token_to_string(t))
+            .map(Self::token_to_string)
             .collect::<Vec<_>>()
             .join("");
         Ok((generics, index))
