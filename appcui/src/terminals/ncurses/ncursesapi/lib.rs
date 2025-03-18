@@ -54,6 +54,10 @@ pub fn ncurses_wrefresh(w: WINDOW) -> i32{
     unsafe { wrefresh(w) } 
 }
 
+pub fn ncurses_wresize(w: WINDOW, height: i32, width: i32) -> i32 {
+    unsafe { wresize(w, height, width) }
+}
+
 pub fn ncurses_getmouse(event: *mut MEVENT) -> i32
 { unsafe { getmouse(event) } }
 
@@ -208,10 +212,9 @@ pub fn ncurses_COLOR_PAIR(n: i16) -> attr_t {
     }
 }
 
-pub fn ncurses_stdscr() -> WINDOW {
-    unsafe {
-        stdscr()
-    }
+pub fn ncurses_stdscr() -> WINDOW {        
+    stdscr()
+
 }
 
 pub fn ncurses_addstr(s: &str) -> Result<i32, std::ffi::NulError>

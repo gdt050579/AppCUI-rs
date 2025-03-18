@@ -61,3 +61,35 @@ pub enum LcCategory {
     time = LC_TIME,
     messages = LC_MESSAGES,
 }
+
+#[repr(C)]
+#[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
+#[derive(Default, Copy, Clone, Debug)]
+pub(crate) struct SMALL_RECT {
+    pub left: i16,
+    pub top: i16,
+    pub right: i16,
+    pub bottom: i16,
+}
+
+#[repr(C)]
+#[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
+#[derive(Default, Copy, Clone, Debug)]
+pub(super) struct COORD {
+    pub X: i16,
+    pub Y: i16,
+}
+
+#[repr(C)]
+#[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
+#[derive(Default, Copy, Clone, Debug)]
+pub(super) struct CONSOLE_SCREEN_BUFFER_INFO {
+    pub dwSize: COORD,
+    pub dwCursorPosition: COORD,
+    pub wAttributes: u16,
+    pub srWindow: SMALL_RECT,
+    pub dwMaximumWindowSize: COORD,
+}

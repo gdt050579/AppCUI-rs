@@ -112,6 +112,7 @@ extern "C"{
     pub fn endwin() -> c_int;
     pub fn refresh() -> c_int;
     pub fn wrefresh(w:WINDOW) -> c_int;
+    pub fn wresize(win: WINDOW, lines: c_int, columns: c_int) -> c_int;
     pub fn getch() -> c_int;
     pub fn nodelay(win: WINDOW, bf: c_bool) -> c_int;
     pub fn halfdelay(tens: c_int) -> c_int;
