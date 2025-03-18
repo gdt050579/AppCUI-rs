@@ -149,15 +149,14 @@ impl SystemEventReader for Input {
                     return returned;
                 }
             }
-            
             Some(WchResult::KeyCode(KEY_RESIZE)) => {
+                let w = self.get_shared_window_value()?;
                 let mut x: i32 = 0;
                 let mut y: i32 = 0;
-                ncurses_getmaxyx(self.get_shared_window_value()?, &mut y, &mut x);
+                ncurses_getmaxyx(w, &mut y, &mut x);
                 let new_size = Size::new(x as u32, y as u32);
                 return Some(SystemEvent::Resize(new_size));
             }
-            
             // F1 - F12
             Some(WchResult::KeyCode(265..=276)) => {
                 let key_code = match ch {

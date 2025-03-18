@@ -44,8 +44,9 @@ impl NcursesTerminal {
         let window = ncursesapi::lib::ncurses_initscr();
         // ncursesapi::lib::ncurses_clear();
 
+        // ncursesapi::lib::ncurses_nodelay(ncursesapi::lib::ncurses_stdscr(), true);
         ncursesapi::lib::ncurses_nodelay(ncursesapi::lib::ncurses_stdscr(), false);
-        //ncursesapi::lib::ncurses_halfdelay(1);
+        //ncursesapi::lib::ncurses_halfdelay(3);
         ncursesapi::lib::ncurses_keypad(ncursesapi::lib::ncurses_stdscr(), true);
         ncursesapi::lib::ncurses_cbreak();
         ncursesapi::lib::ncurses_noecho();
