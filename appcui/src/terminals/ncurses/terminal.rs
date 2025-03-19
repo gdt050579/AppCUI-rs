@@ -1,19 +1,10 @@
 use super::super::SystemEvent;
 use super::super::Terminal;
 use super::colors::ColorManager;
-use super::ncursesapi::input::get_key_struct;
-use crate::input::Key;
-use crate::input::KeyCode;
-use crate::input::KeyModifier;
-use crate::input::MouseButton;
-use crate::input::MouseWheelDirection;
 use crate::terminals::ncurses::ncursesapi::input::Input;
-use crate::terminals::ncurses::ncursesapi::structs;
-use crate::terminals::*;
 
 use std::sync::atomic::AtomicPtr;
 use std::sync::mpsc::Sender;
-use std::sync::{Arc, Mutex};
 
 use crate::graphics::*;
 use crate::system::Error;
@@ -44,7 +35,7 @@ impl NcursesTerminal {
         let window = ncursesapi::lib::ncurses_initscr();
         // ncursesapi::lib::ncurses_clear();
 
-        // ncursesapi::lib::ncurses_nodelay(ncursesapi::lib::ncurses_stdscr(), true);
+        //ncursesapi::lib::ncurses_nodelay(ncursesapi::lib::ncurses_stdscr(), true);
         ncursesapi::lib::ncurses_nodelay(ncursesapi::lib::ncurses_stdscr(), false);
         //ncursesapi::lib::ncurses_halfdelay(3);
         ncursesapi::lib::ncurses_keypad(ncursesapi::lib::ncurses_stdscr(), true);
