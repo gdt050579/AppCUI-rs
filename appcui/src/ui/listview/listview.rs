@@ -5,7 +5,7 @@ use super::{Flags, Group, GroupInformation, Item, ListItem, ViewMode};
 use crate::utils;
 use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 use components::listitem::render_method::RenderData;
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 #[derive(Clone, Copy)]
 enum CheckMode {

@@ -11,7 +11,7 @@ use crate::{
     utils::{Caption, ExtractHotKeyMethod, Strategy, VectorIndex},
 };
 use std::sync::atomic::{AtomicUsize, Ordering};
-use AppCUIProcMacro::key;
+use appcui_proc_macro::key;
 const MAX_ITEMS: usize = 128;
 static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 

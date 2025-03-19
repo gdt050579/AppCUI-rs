@@ -10,7 +10,7 @@ use crate::terminals::MouseButtonUpEvent;
 use crate::terminals::MouseMoveEvent;
 use crate::terminals::MouseWheelEvent;
 use crate::terminals::{SystemEvent, Terminal};
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 use super::RuntimeManager;
 

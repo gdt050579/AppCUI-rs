@@ -63,7 +63,7 @@ pub use super::graphics::*;
 pub use super::system::*;
 pub use super::input::*;
 pub use super::dialogs;
-pub use AppCUIProcMacro::*;
+pub use appcui_proc_macro::*;
 pub use super::log;
 #[cfg(debug_assertions)]
 pub use super::utils::log::write_log_to_file;
