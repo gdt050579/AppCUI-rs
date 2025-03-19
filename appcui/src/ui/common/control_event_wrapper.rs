@@ -140,7 +140,7 @@ impl ControlEvent {
                     MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast())
                 },
                 markdown::events::Data::LinkClickEvent(link) => {
-                    MarkdownEvents::on_external_link(receiver, self.emitter.cast(), &link)
+                    MarkdownEvents::on_external_link(receiver, self.emitter.cast(), link)
                 },
             }
         }

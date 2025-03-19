@@ -1,5 +1,5 @@
 use super::Flags;
-use AppCUIProcMacro::CustomControl;
+use appcui_proc_macro::CustomControl;
 
 #[CustomControl(overwrite = OnPaint, internal = true)]
 pub struct HLine {

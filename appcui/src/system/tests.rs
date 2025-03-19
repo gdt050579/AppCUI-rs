@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 use super::App;
 use super::Theme;

@@ -6,7 +6,7 @@ edition = "2021"
 
 [dev-dependencies]
 appcui = { version = "1.0.0", path = "../appcui" }
-AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"}
+appcui_proc_macro = { version = "1.0.0", path = "../appcui-proc-macro"}
 chrono = "0.4.38"
 
 
@@ -171,3 +171,7 @@ path = "timer/main.rs"
 [[example]]
 name = "treeview"
 path = "treeview/main.rs"
+
+[[example]]
+name = "background_task"
+path = "background_task/main.rs"

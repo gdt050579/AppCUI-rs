@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 #[test]
 fn check_theme_update() {

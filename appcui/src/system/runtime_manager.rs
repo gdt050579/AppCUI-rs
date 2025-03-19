@@ -4,6 +4,7 @@ use std::sync::mpsc::{Receiver, Sender};
 use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
 
+use super::background_task::BackgroundTaskManager;
 use super::runtime_manager_traits::*;
 use super::timer::TimerManager;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
@@ -60,6 +61,7 @@ pub(crate) struct RuntimeManager {
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
     timers_manager: TimerManager,
+    task_manager: BackgroundTaskManager,
     desktop_handle: Handle<UIElement>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
@@ -143,6 +145,7 @@ impl RuntimeManager {
             menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             timers_manager: TimerManager::new(builder.max_timer_count),
+            task_manager: BackgroundTaskManager::new(),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
@@ -188,16 +191,20 @@ impl RuntimeManager {
     }
     pub(crate) fn is_instantiated() -> bool {
         #[cfg(feature = "GLOBAL_RUNTIME")]
-        unsafe { RUNTIME_MANAGER.is_some() }
+        unsafe {
+            RUNTIME_MANAGER.is_some()
+        }
 
         #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.with(|manager| manager.borrow().is_some())
     }
     pub(crate) fn get() -> &'static mut RuntimeManager {
         #[cfg(feature = "GLOBAL_RUNTIME")]
-        unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
-        
-        #[cfg(not(feature = "GLOBAL_RUNTIME"))]        
+        unsafe {
+            RUNTIME_MANAGER.as_mut().unwrap()
+        }
+
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.with(|manager| {
             let mut binding = manager.borrow_mut();
             let mut_ref = binding.as_mut().expect("RuntimeManager is not initialized");
@@ -429,6 +436,10 @@ impl RuntimeManager {
     pub(crate) fn get_system_event_sender(&self) -> std::sync::mpsc::Sender<SystemEvent> {
         self.event_sender.clone()
     }
+    #[inline(always)]
+    pub(crate) fn get_background_task_manager(&mut self) -> &mut BackgroundTaskManager {
+        &mut self.task_manager
+    }
 
     #[inline(always)]
     pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {
@@ -587,6 +598,10 @@ impl RuntimeManager {
             SystemEvent::TimerTickUpdate(event) => self.process_timer_tick_update_event(event.id, event.tick.value()),
             SystemEvent::TimerStart(event) => self.process_timer_start_event(event.id, event.tick.value()),
             SystemEvent::TimerPaused(event) => self.process_timer_paused_event(event.id, event.tick.value()),
+            SystemEvent::BackgroundTaskStart(h) => BackgroundTaskMethods::on_start(self, h),
+            SystemEvent::BackgroundTaskEnd(h) => BackgroundTaskMethods::on_finish(self, h),
+            SystemEvent::BackgroundTaskNotify(h) => BackgroundTaskMethods::on_notify(self, h),
+            SystemEvent::BackgroundTaskQuery(h) => BackgroundTaskMethods::on_query(self, h),
         }
     }
     fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
@@ -1814,6 +1829,52 @@ impl TimerMethods for RuntimeManager {
         } else {
             // invalid control (should terminate the timer)
             self.timers_manager.terminate_thread(id as usize);
+        }
+    }
+}
+
+impl BackgroundTaskMethods for RuntimeManager {
+    #[inline(always)]
+    fn background_task_handle_to_control(&mut self, backgroundtask_handle: Handle<()>) -> Option<&mut ControlManager> {
+        //log!("RM","background_task_handle_to_control({:?})",backgroundtask_handle);
+        if let Some(h) = self.task_manager.receiver_control_handle(backgroundtask_handle.index()) {
+            let controls = unsafe { &mut *self.controls };
+            controls.get_mut(h.cast())
+        } else {
+            None
+        }
+    }
+
+    fn on_start(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_start(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+    }
+
+    fn on_notify(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_update(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+    }
+
+    fn on_finish(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_finish(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+        self.task_manager.remove_task(backgroundtask_handle);
+    }
+
+    fn on_query(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_query(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
         }
     }
 }
