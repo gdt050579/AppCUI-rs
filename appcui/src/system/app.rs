@@ -35,6 +35,7 @@ impl App {
         Ok(App { _phantom: Default::default() })
     }
     /// Creates a new builder object using the default terminal for the current operating system
+    #[allow(clippy::new_ret_no_self)]
     pub fn new() -> crate::system::Builder {
         crate::system::Builder::new()
     }
