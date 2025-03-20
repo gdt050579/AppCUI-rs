@@ -28,7 +28,7 @@ jobs:
     - name: Audit
       run: cargo audit
     - name: Upload test count
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: test-count
         path: test-count.txt
@@ -51,7 +51,7 @@ jobs:
     - name: Audit
       run: cargo audit
     - name: Upload test count
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: test-count
         path: test-count.txt
