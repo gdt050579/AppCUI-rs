@@ -5,8 +5,8 @@ publish = false
 edition = "2021"
 
 [dev-dependencies]
-appcui = { version = "1.0.0", path = "../appcui" }
-appcui_proc_macro = { version = "1.0.0", path = "../appcui-proc-macro"}
+appcui = { path = "../appcui" }
+appcui_proc_macro = { path = "../appcui-proc-macro"}
 chrono = "0.4.38"
 
 
