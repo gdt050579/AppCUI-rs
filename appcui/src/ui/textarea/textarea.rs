@@ -1,14 +1,8 @@
 use super::initialization_flags::Flags;
 
 use crate::prelude::*;
-use std::cmp::Ordering;
-use std::fmt;
+use std::{cmp::Ordering, fmt, mem::swap};
 
-use std::{fs::File, io::Write, mem::swap};
-
-
-// TODO: implement a second Cursor that is used as absolute position on screen and is discarded whenever we
-// move horizontally
 #[derive(Debug)]
 struct Cursor {
     pos_x: usize,
@@ -62,8 +56,6 @@ pub struct TextArea {
 
     // Current line
     line_offset: u32,
-
-    file: File,
 
     scrollbars: ScrollBars,
     scrollbar_x: u32,
@@ -305,8 +297,6 @@ impl TextArea {
         }
         
         self.update_scrollbar_pos();
-
-        let _ = self.file.write_all(format!("Cursor {:?}\n", self.cursor).as_bytes());
     }
 
     fn get_cursor_position_in_line(line_text: &str, row_offset: usize, cursor_index: usize, linebar_size: usize) -> usize {
@@ -361,6 +351,8 @@ impl TextArea {
             log!("TextArea", "Repositioning diff: {}", 0 - diff as i32);
             self.move_cursor_horizontal(0 - diff as i32);
         }
+
+        self.update_scrollbar_pos();
     }
 
     #[inline(always)]
@@ -432,8 +424,6 @@ impl TextArea {
 
             // LineNumber tab size
             line_number_bar_size: 0,
-
-            file: File::create("debug.txt").unwrap(),
 
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             scrollbar_x: 0,
@@ -591,6 +581,7 @@ impl TextArea {
             
             self.update_line_number_tab_size();
             self.update_max_line_size();
+            self.update_scrollbar_pos();
         }
     }
 
@@ -707,6 +698,8 @@ impl TextArea {
             self.cursor.pos_y = 0;
             self.line_offset = position_start_y as u32;
         }
+
+        self.update_scrollbar_pos();
     }
 
     #[inline(always)]
@@ -766,6 +759,7 @@ impl TextArea {
 
         self.update_max_line_size();
         self.update_line_number_tab_size();
+        self.update_scrollbar_pos();
     }
 
     #[inline(always)]
@@ -918,7 +912,7 @@ impl OnPaint for TextArea {
                     let current_line_view = &current_line[self.row_offset as usize .. ];
                 
                     let mut counter = x as usize;
-                    for ch in current_line_view.chars() {
+                    for (ch_index, ch) in current_line_view.char_indices() {
                         
                         if counter >= max_line_size {
                             break;
@@ -928,7 +922,7 @@ impl OnPaint for TextArea {
                             continue;
                         }
 
-                        let absolute_position = initial_offset + self.row_offset + counter as u32;
+                        let absolute_position = initial_offset + ch_index as u32;
 
                         if self.selection.pos_start <= absolute_position as usize && (absolute_position as usize) < self.selection.pos_end {
                             surface.write_char(x, y, Character::with_attributes(ch, attr_selection));
@@ -1113,7 +1107,6 @@ impl OnKeyPressed for TextArea {
                 }
             }
             key!("Delete") => {
-                // TODO: update scrollbars when deleting \n
                 if !self.flags.contains(Flags::ReadOnly) {
                     self.reposition_cursor();
 

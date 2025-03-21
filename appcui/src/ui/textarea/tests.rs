@@ -1405,7 +1405,7 @@ fn check_mouse_drag_delete() {
     a.run();
 }
 
-// #[test]
+#[test]
 fn check_mouse_drag_4() {
     let script = "
         
@@ -1416,8 +1416,10 @@ fn check_mouse_drag_4() {
 
         Paint('Mouse Drag 1')
 
-        Mouse.Move(1, 4)
-        Mouse.Release(1, 4, left)
+        Mouse.Move(4, 5)
+        Mouse.Move(4, 2)
+
+        Mouse.Release(4, 2, left)
 
         Paint('Mouse Drag')
 
@@ -1425,8 +1427,8 @@ fn check_mouse_drag_4() {
 
         Paint('After Backspace')
 
-        CheckHash(0xF670818DB593C749)
-        CheckCursor(5, 1)
+        CheckHash(0xCDA423FD5EBA7168)
+        CheckCursor(4, 2)
     ";
 
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
@@ -1439,3 +1441,34 @@ fn check_mouse_drag_4() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_selection_copy_unicode() {
+    let script = "
+        
+        Paint.Enable(false)
+
+        Key.Pressed(Down, 1)
+        Key.Pressed(Right, 2)
+        Key.Pressed(Shift+Right, 8)
+
+        Paint('Selection Unicode')
+        CheckHash(0x4CFC4AF356572440)
+        CheckCursor(11, 2)
+
+        Key.Pressed(Ctrl+C)
+        CheckClipboardText('♡ love ♡')
+    ";
+
+    let text_print = "Unit Test Selection.\nI ♡ love ♡ Unicode";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Selection 4", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+// Unit Test pe caratere speciale
