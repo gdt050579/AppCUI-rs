@@ -1,6 +1,3 @@
-use std::sync::atomic::AtomicPtr;
-use std::sync::atomic::Ordering;
-
 use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
@@ -18,6 +15,8 @@ use super::constants::*;
 use crate::graphics::*;
 use super::lib::*;
 use super::structs::*;  
+use std::time::Instant;
+
     
 const SHFIT_NUM: [i32; 10] = [41, 33, 64, 35, 36, 37, 94, 38, 42, 40];
 pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
@@ -28,19 +27,19 @@ pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
     if ch == 13{
         key_code = KeyCode::Enter;
     }
-    else if ch >= 97 && ch <= 122 {
+    else if (97..=122).contains(&ch) {
         key_code = KeyCode::from((ch - 69) as u8);
-    } else if ch >= 65 && ch <= 90 {
+    } else if (65..=90).contains(&ch) {
         key_code = KeyCode::from((ch - 37) as u8);
         key_modifier = KeyModifier::Shift;
-    } else if ch >= 48 && ch <= 57 {
+    } else if (48..=57).contains(&ch) {
         key_code = KeyCode::from((ch + 6) as u8);
     } else if SHFIT_NUM.contains(&(ch as i32)) {
         let pos = SHFIT_NUM.iter().position(|&r| r == ch as i32).unwrap();
         key_code = KeyCode::from((pos + 54) as u8);
         key_modifier = KeyModifier::Shift;
-    } else if ch >= 1 && ch <= 26 && ch != 13{
-        key_code = KeyCode::from((ch + 27 as u32) as u8);
+    } else if (1..=26).contains(&ch) && ch != 13{
+        key_code = KeyCode::from((ch + 27_u32) as u8);
         key_modifier = KeyModifier::Ctrl;
     } else {
         match ch {
@@ -62,35 +61,25 @@ pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
 }
 
 pub(crate) struct Input {
-    shared_window: AtomicPtr<i8>
+    last_event: Option<SystemEvent>,
+    next_event: Option<SystemEvent>,
+    diff: Instant,
 }
 
 impl Input {
-    pub(crate) fn new(shared_window: AtomicPtr<i8>) -> Self {
+    pub(crate) fn new() -> Self {
         Self {
-            shared_window: shared_window
+            last_event: None,
+            next_event: None,
+            diff: Instant::now(),
         }
     }
 
-    pub(crate) fn get_shared_window_value(&self) -> Option<WINDOW> {
-        let ptr = self.shared_window.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            Some(ptr)
-        } else {
-            None
-        }
-    }
-}
 
-
-
-impl SystemEventReader for Input {
-    fn read(&mut self) -> Option<SystemEvent> {
-        let window = self.get_shared_window_value()?;
+    fn read_event(&mut self) -> Option<SystemEvent> {
+        let window = ncurses_stdscr();
         let ch = ncurses_wget_wch(window);
-        if ch.is_none() {
-            return None;
-        }
+        ch.as_ref()?;
 
         match ch {
             Some(WchResult::KeyCode(KEY_MOUSE)) => {
@@ -102,8 +91,8 @@ impl SystemEventReader for Input {
                     bstate: 0,
                 };
                 if ncurses_getmouse(&mut mevent) == OK {
-                    let x = mevent.x as i32;
-                    let y = mevent.y as i32;
+                    let x = mevent.x;
+                    let y = mevent.y;
                     let button = match mevent.bstate as i32 {
                         BUTTON1_PRESSED => MouseButton::Left,
                         BUTTON1_RELEASED => MouseButton::Left,
@@ -139,10 +128,11 @@ impl SystemEventReader for Input {
                         returned = Some(SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button }));
                     } else if mevent.bstate as i32 & BUTTON1_RELEASED != 0 {
                         returned = Some(SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button }));
-                    } else if mevent.bstate as i32 & BUTTON1_CLICKED != 0 {
-                        returned = Some(SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button }));
-                    } else if mevent.bstate as i32 & BUTTON1_DOUBLE_CLICKED != 0 {
-                        returned = Some(SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button }));
+                        if (self.last_event == returned) && (self.diff.elapsed().as_millis() < 300) {
+                            self.next_event = Some(SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button }));
+                        }
+                        self.diff = Instant::now();
+                        self.last_event = returned;
                     } else if mevent.bstate as i32 & REPORT_MOUSE_POSITION != 0 {
                         returned = Some(SystemEvent::MouseMove(MouseMoveEvent { x, y, button }));
                     }
@@ -150,7 +140,7 @@ impl SystemEventReader for Input {
                 }
             }
             Some(WchResult::KeyCode(KEY_RESIZE)) => {
-                let w = self.get_shared_window_value()?;
+                let w = ncurses_stdscr();
                 let mut x: i32 = 0;
                 let mut y: i32 = 0;
                 ncurses_getmaxyx(w, &mut y, &mut x);
@@ -259,5 +249,19 @@ impl SystemEventReader for Input {
         };
 
         None
+    }
+
+}
+
+impl SystemEventReader for Input {
+    fn read(&mut self) -> Option<SystemEvent> {
+        if let Some(e) = self.next_event.take() {
+            return Some(e);
+        }
+       if let Some(result) = self.read_event() {
+            return Some(result);
+       }
+       self.last_event = None;
+       None
     }
 }

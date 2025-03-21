@@ -35,8 +35,8 @@ use super::constants::*;
 use super::externs::*;
 use super::structs::{LcCategory, WchResult, CURSOR_VISIBILITY, MEVENT};
 
+#[allow(clippy::upper_case_acronyms)]
 pub type WINDOW = *mut i8;
-
 
 pub fn ncurses_initscr() -> WINDOW {
     unsafe { initscr() }
@@ -168,7 +168,7 @@ trait ToCStr {
     fn to_c_str(&self) -> Result<CString, std::ffi::NulError>;
 }
 
-impl <'a>ToCStr for &'a str {
+impl ToCStr for &str {
     fn to_c_str(&self) -> Result<CString, std::ffi::NulError> {
         CString::new(*self)
     }
@@ -180,7 +180,7 @@ pub fn setlocale(lc: LcCategory, locale: &str) -> Result<String, std::ffi::NulEr
     let c_str = locale.to_c_str()?;
     let buf = c_str.as_ptr();
     let ret = libc::setlocale(lc as libc::c_int, buf);
-    if ret == ptr::null_mut() {
+    if ret.is_null() {
         Ok(String::new())
     } else {
         // The clone is necessary, as the returned pointer

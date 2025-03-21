@@ -42,6 +42,7 @@ pub enum CURSOR_VISIBILITY
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
+#[allow(clippy::upper_case_acronyms)]
 pub struct MEVENT { pub id: c_short, pub x: c_int, pub y: c_int, pub z: c_int, pub bstate: mmask_t}
 
 #[derive(Debug)]
