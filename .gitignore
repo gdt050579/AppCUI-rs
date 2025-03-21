@@ -6,3 +6,5 @@ test.bat
 record_events.bat
 .tags
 /examples/dev_test.rs
+tarpaulin-report.html
+*.profraw

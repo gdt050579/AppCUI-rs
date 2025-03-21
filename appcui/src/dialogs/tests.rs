@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use crate::dialogs;
 use crate::prelude::*;
 
+use super::FileMask;
 use super::OpenFileDialogFlags;
 use super::SaveFileDialogFlags;
 use super::SelectFolderDialogFlags;
@@ -152,7 +153,7 @@ impl FolderSelectDialog {
 }
 impl ButtonEvents for FolderSelectDialog {
     fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
-        let nav = crate::utils::fs::NavSimulator::with_csv(VFS, true, "C:\\Program Files\\");
+        let nav = crate::utils::fs::NavSimulator::with_csv(VFS, true, "C:\\");
         let p = PathBuf::from(self.loc.as_str());
         let loc = match self.loc.as_str() {
             "" => dialogs::Location::Last,
@@ -834,4 +835,197 @@ fn check_folder_select_dialog_with_icons() {
     let mut a = App::debug(80, 30, script).build().unwrap();
     a.add_window(FolderSelectDialog::new("C:\\Program Files\\Windows\\System32\\drivers", SelectFolderDialogFlags::Icons));
     a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_cancel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xD04C3E714AC5A212)
+        Key.Pressed(Space)
+        Paint('3. Program Files expanded')   
+        CheckHash(0xB4761C157E0BC65C)
+        Key.Pressed(Down)
+        Paint('4. Windows selected')   
+        CheckHash(0x5DD2E869CAAA2C2F)
+        Key.Pressed(Escape)
+        Paint('5. Nothing selected')   
+        CheckHash(0x4BA44613FC503131)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_cancel_via_button() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xD04C3E714AC5A212)
+        Key.Pressed(Space)
+        Paint('3. Program Files expanded')   
+        CheckHash(0xB4761C157E0BC65C)
+        Key.Pressed(Down)
+        Paint('4. Windows selected')   
+        CheckHash(0x5DD2E869CAAA2C2F)
+        Key.Pressed(Tab,2)
+        Key.Pressed(Enter)
+        Paint('5. Nothing selected')   
+        CheckHash(0x4BA44613FC503131)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_ok_via_button() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xD04C3E714AC5A212)
+        Key.Pressed(Space)
+        Paint('3. Program Files expanded')   
+        CheckHash(0xB4761C157E0BC65C)
+        Key.Pressed(Down)
+        Paint('4. Windows selected')   
+        CheckHash(0x5DD2E869CAAA2C2F)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('5. C:\\Program Files\\Windows selected')   
+        CheckHash(0x57FDC0A388354481)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_navigator() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0x9F2DE0204475624D)
+        Key.Pressed(Alt+P)
+        Key.TypeText('Program Files\\Windows\\')
+        Key.Pressed(Enter)
+        Paint('3. C:\\Program Files\\Windows selected from Navigator')   
+        CheckHash(0x2D7EA2EA5CC21257)
+        Key.Pressed(Tab)
+        Key.Pressed(Down)
+        Paint('4. D:\\ selected')   
+        CheckHash(0xBCF70255B3E29322)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('5. D:\\ selected')   
+        CheckHash(0xE2640A216D7BFEDC)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_folder_select_dialog_mouse_usage() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+        Key.Pressed(Enter)
+        Mouse.Wheel(40,15,up,2)
+        Paint('2. Folder Select Dialog shown')   
+        CheckHash(0xDE086D26B8B708B7)
+        Mouse.Click(9,9,left)
+        Paint('3. C:\\ expanded')   
+        CheckHash(0xDD33C7F7498AD706)
+        Mouse.Click(15,10,left)
+        Paint('4. C:\\Program Files\\ expanded')   
+        CheckHash(0x6F576C7EE1F145D7)
+    ";
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("D:\\Windows", SelectFolderDialogFlags::None));
+    a.run();
+}
+
+#[test]
+fn check_file_mask_errors() {
+    let fm = FileMask::parse("abc");
+    assert!(fm.is_err());
+    assert!(fm.err().unwrap().starts_with("Unexpecting end of file mask definition. Expecting a assignment operator ('=' or ':')"));
+
+    let fm = FileMask::parse("###");
+    assert!(fm.is_err());
+    assert!(fm.err().unwrap().starts_with("Expected word character (A-Z, a-z, 0-9, _, -, .) but got invalid character"));
+
+    let fm = FileMask::parse("test:123");
+    assert!(fm.is_err());
+    assert!(fm.err().unwrap().starts_with("Expected open square bracket ('[') but got word character (A-Z, a-z, 0-9, _, -, .)"));
+
+    let fm = FileMask::parse("test:[1,,3]");
+    assert!(fm.is_err());
+    assert!(fm.err().unwrap().starts_with("Expected comma (',') separator or close square bracket (']') but got word character (A-Z, a-z, 0-9, _, -, .)"));
+
+    let fm = FileMask::parse("test:[1,");
+    assert!(fm.is_err());    
+    assert!(fm.err().unwrap().starts_with("Unexpecting end of file mask definition. Expecting either a comma (',') separator or a close square bracket (']')"));
+
+    // println!("{}",fm.err().unwrap());
+}
+
+#[test]
+fn check_file_mask_empty() {
+    let fm = FileMask::parse("");
+    assert!(fm.is_ok());
+    assert!(fm.ok().unwrap().is_empty());
+    let fm = FileMask::parse("   ").unwrap();
+    assert!(fm.is_empty());    
+
+    let fm = FileMask::parse("key = []").unwrap();
+    assert!(fm.len() == 1);
+    assert!(fm[0].extensions_hash.is_empty());
+    assert!(fm[0].name() == "key");
+    assert!(fm[0].matches("test.txt"));
+    assert!(fm[0].matches("C:\\windows\\test.txt"));
+    assert!(fm[0].matches("/etc/test.txt"));
+    assert!(fm[0].matches("test"));
+    assert!(fm[0].matches("C:\\windows\\test"));
+    assert!(fm[0].matches("/etc/test"));
+}
+
+#[test]
+fn check_file_mask_array() {
+    let fm = FileMask::parse("  first key = [value1,  value2 , value3  ], key2 = [1,2,3,4,5]").unwrap();
+    assert_eq!(fm.len(),2);
+    assert_eq!(fm[0].name(),"first key");
+    assert_eq!(fm[0].extensions_hash.len(),3);
+    assert_eq!(fm[1].name(),"key2");
+    assert_eq!(fm[1].extensions_hash.len(),5);
+}
+
+#[test]
+fn check_file_mask_ignore_case() {
+    let fm = FileMask::parse("images = [png,JPG]").unwrap();
+    assert!(fm.len() == 1);
+    assert!(fm[0].extensions_hash.len() == 2);
+    assert!(fm[0].name() == "images");
+    assert!(fm[0].matches("test.png"));
+    assert!(fm[0].matches("test.pNG"));
+    assert!(fm[0].matches("test.jpg"));
+    assert!(fm[0].matches("test.JPG"));
+    assert!(!fm[0].matches("test.png123"));
+    assert!(!fm[0].matches("test.JpG123")); 
 }

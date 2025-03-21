@@ -358,6 +358,9 @@ impl Arguments {
                     // if its not the first character then it is secondary template: xxx<yyy....> so we wll stop the validation here
                     break;
                 }
+                if (ch == ',') || (ch == ' ') {
+                    continue;
+                }
                 if (ch as u32) > 127 {
                     panic!("Invalid character for generic type: '{}' in '{}'", ch, self.template_content);
                 }

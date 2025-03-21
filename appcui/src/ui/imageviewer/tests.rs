@@ -1141,3 +1141,56 @@ fn check_resize() {
     a.run();
 
 }
+
+#[test]
+fn check_clear_background() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x336411586F530FA4)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, back: {X,Red}");
+    i.clear_background();
+    w.add(i);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_events() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0xFBEE66EEC5614266)
+        Mouse.Drag(56,8,5,1)
+        Paint('Image dragged')
+        CheckHash(0xC119738A865D078)
+        Mouse.Wheel(56,8,right,10)
+        Paint('Image Scrolled to Right')
+        CheckHash(0x4885632755FDD7F4)
+        Mouse.Wheel(56,8,down,10)
+        Paint('Image Scrolled to Bottom')
+        CheckHash(0xE762606E224B44A)
+        Mouse.Drag(59,4,59,7)
+        Paint('Full scroll to bottom-right corner')
+        CheckHash(0x96606E6E116E4015)
+        Mouse.Move(58,0)
+        Paint('Mouse over [X] button')
+        CheckHash(0xDF59C35326154442)
+        Mouse.Wheel(56,8,up,2)
+        Mouse.Wheel(56,8,left,2)
+        Paint('Scroll 2 position towards top-left corner')
+        CheckHash(0xDB2058C74BA2BD4B)
+        Mouse.DoubleClick(30,10,left)
+        Paint('Double clicked on image - nothing happens')
+        CheckHash(0xDB2058C74BA2BD4B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    let i = ImageViewer::new(ferris_image(), Layout::new("d:c"), RendererType::SmallBlocks, Scale::NoScale, imageviewer::Flags::ScrollBars);
+    w.add(i);
+    a.add_window(w);
+    a.run();
+}

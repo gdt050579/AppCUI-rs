@@ -102,7 +102,8 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
-
+    config.set(AppCUITrait::MarkdownEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -186,6 +187,8 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::MarkdownEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
@@ -243,6 +246,9 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::MarkdownEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::Default);
+
 
 
     // custom events
@@ -326,7 +332,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
-
+    config.set(AppCUITrait::MarkdownEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -346,6 +353,15 @@ pub fn listitem_derive(input: TokenStream) -> TokenStream {
     crate::derives::listitem::derive(input)
 }
 
+#[proc_macro_derive(EnumSelector, attributes(VariantInfo))]
+pub fn enumselector_derive(input: TokenStream) -> TokenStream {
+    crate::derives::enumselector::derive(input)
+}
+
+#[proc_macro_derive(DropDownListType, attributes(VariantInfo))]
+pub fn dropdownlisttype_derive(input: TokenStream) -> TokenStream {
+    crate::derives::dropdownlisttype::derive(input)
+}
 /// Use to quickly identify a key or a combination via a string
 /// Usage examples:
 /// * key!("F2")
@@ -551,4 +567,14 @@ pub fn pathfinder(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn treeview(input: TokenStream) -> TokenStream {
     crate::controls::treeview::create(input)
+}
+
+#[proc_macro]
+pub fn markdown(input: TokenStream) -> TokenStream {
+    crate::controls::markdown::create(input)
+}
+
+#[proc_macro]
+pub fn progressbar(input: TokenStream) -> TokenStream {
+    crate::controls::progressbar::create(input)
 }

@@ -24,12 +24,12 @@ Mouse related commands are a set of commands that simulate various mouse events
 | Command                            | Purpose                                                                                                                                                                                                                                      |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Mouse.Hold(x,y,button)`           | simulates an event where the mouse button is being pressed while the mouse is located at a specific position on screen. The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center` |
-| `Mouse.Release(x,y)`               | simulates the release of all mouse buttons while the mouse is located at a specific screen position.                                                                                                                                         |
+| `Mouse.Release(x,y,button)`        | simulates the release of the mouse buttons while the mouse is located at a specific screen position.  The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center`                   |
 | `Mouse.Click(x,y,button)`          | simulates a click (hold and release). It is equivalent to<br> - Mouse.Hold(x,y,button)<br> - Mouse.Release(x,y)                                                                                                                              |
 | `Mouse.DoubleClick(x,y,button)`    | simulates a double-click (for a specific button)                                                                                                                                                                                             |
 | `Mouse.Move(x,y)`                  | simulates the movement of a mouse to coordonates (x,y). No mouse button are being pressed.                                                                                                                                                   |
 | `Mouse.Drag(x1,y1,x2,y2)`          | simulates the movement of a mouse from (x1,y1) to (x2,y2) while the `left` button is being pressed                                                                                                                                           |
-| `Mouse.Wheel(x,y,direction,times)` | simulates the wheel mouse being rotated into a direction (one of `up`, `down`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0.                                                                        |
+| `Mouse.Wheel(x,y,direction,times)` | simulates the wheel mouse being rotated into a direction (one of `up`, `down`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0.                                                                          |
      
 ## Keyboard related commands
 
@@ -67,26 +67,26 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
 
 ## System events
 
-| Command                | Purpose |
-|------------------------|---------|  
+| Command                | Purpose                                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
 | `Resize(width,height)` | simulates a resize of the virtual terminal to the size represented by `width` and `height` parameters |
      
 ## Clipboard commands
 
-| Command                   | Purpose |
-|---------------------------|---------|  
+| Command                   | Purpose                                                                                                          |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `Clipboard.SetText(text)` | sets a new text into a simulated clipboard. That text will be available to all controls if they want to paste it |
-| `Clipboard.Clear()`       | clears the text from the simulated clipboard. |
+| `Clipboard.Clear()`       | clears the text from the simulated clipboard.                                                                    |
 
 ## Validation commands
 
-| Command                    | Purpose |
-|----------------------------|---------|  
-| `CheckHash(hash)`          | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing. |
-| `CheckCursor(x,y)`         | checks if the cursor (caret) is at a specify position |
-| `CheckCursor(hidden)`      | checks is the cursor (caret) is hidden (not visible). You cal also check this by using `false` instead of `hidden` |
+| Command                    | Purpose                                                                                                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CheckHash(hash)`          | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing.                                                |
+| `CheckCursor(x,y)`         | checks if the cursor (caret) is at a specify position                                                                                                                             |
+| `CheckCursor(hidden)`      | checks is the cursor (caret) is hidden (not visible). You cal also check this by using `false` instead of `hidden`                                                                |
 | `CheckClipboardText(text)` | checks to see if the clipboard if the clipboard contains a specific text. This method is used to validate if the `Copy`/`Cut` to clipboard command from a control worked properly |
-| `Error.Disable(value)`     | enables or disables errors when testing the the hashes or cursor position. `value` is a boolean value (**true** or **false**). By default, errors are **NOT** disabled |
+| `Error.Disable(value)`     | enables or disables errors when testing the the hashes or cursor position. `value` is a boolean value (**true** or **false**). By default, errors are **NOT** disabled            |
 
 ## Example
 
@@ -115,22 +115,22 @@ Let's break the event script in pieces and see exactly what is supposed to happe
     +===================================================================+
     | Name  : initial state                                             |
     | Hash  : 0xB1471A30B30F5C6C                                        |
-    | Cursor: Hidden                                                    |
-    |-------------------------------------------------------------------|
-    |    |           11111111112222222222333333333344444444445555555555 |
-    |    | 012345678901234567890123456789012345678901234567890123456789 |
-    |-------------------------------------------------------------------|
-    |  0 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  1 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  2 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  3 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  4 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  5 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  6 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  7 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  8 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  9 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |-------------------------------------------------------------------|
+    | Cursor: Hidden                                                      |
+    | ------------------------------------------------------------------- |
+    |                                                                     | 11111111112222222222333333333344444444445555555555           |
+    |                                                                     | 012345678901234567890123456789012345678901234567890123456789 |
+    | ------------------------------------------------------------------- |
+    | 0                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 1                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 2                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 3                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 4                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 5                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 6                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 7                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 8                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 9                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | ------------------------------------------------------------------- |
 ```
 We can inspect inspect if the position of the window is correct. We can also notice the hash compited for the entire virtual screen: `0xB1471A30B30F5C6C` (this could help us do further checks).
 
@@ -148,22 +148,22 @@ We can inspect inspect if the position of the window is correct. We can also not
     +===================================================================+
     | Name  : window was moved                                          |
     | Hash  : 0x419533D4BBEFE538                                        |
-    | Cursor: Hidden                                                    |
-    |-------------------------------------------------------------------|
-    |    |           11111111112222222222333333333344444444445555555555 |
-    |    | 012345678901234567890123456789012345678901234567890123456789 |
-    |-------------------------------------------------------------------|
-    |  0 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  1 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  2 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  3 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  4 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  5 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  6 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  7 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  8 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |  9 | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    |-------------------------------------------------------------------|
+    | Cursor: Hidden                                                      |
+    | ------------------------------------------------------------------- |
+    |                                                                     | 11111111112222222222333333333344444444445555555555           |
+    |                                                                     | 012345678901234567890123456789012345678901234567890123456789 |
+    | ------------------------------------------------------------------- |
+    | 0                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 1                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 2                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 3                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 4                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 5                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 6                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 7                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 8                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 9                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | ------------------------------------------------------------------- |
 ```
 
 25. `CheckHash(0x419533D4BBEFE538)` - finally we check the new hash to see if it maches the one we expect.

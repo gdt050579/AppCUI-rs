@@ -14,28 +14,8 @@ It can be create using `Selector::new(...)` or the `selector!` macro. Using `Sel
     ```rs
     let s = Selector::<T>::new(...);
     ```
-**Remarks**: It is important to notice that the `T` type must implement a special trait `EnumSelector` as well as `Copy`, `Clone`, `Eq` and `PartialEq`. The `EnumSelector` trait is defined as follows:
+**Remarks**: It is important to notice that the `T` type must implement a special trait [EnumSelector](../object-traits/enumselector.md) as well as `Copy`, `Clone`, `Eq` and `PartialEq`.
 
-```rs
-pub trait EnumSelector {
-    const COUNT: u32;
-    fn from_index(index: u32) -> Option<Self> where Self: Sized;
-    fn name(&self) -> &'static str;
-    fn description(&self) -> &'static str {
-        ""
-    }
-}
-```
-
-where:
-* `COUNT` must contain thet number of variants
-* `from_index(...)` is a method that converts an index (from `0` to `COUNT`) to a variant
-* `name()` is a method that provides a string representation (name) for a specific variant
-* `description()` is a method that provides a detailed description for a specific variant
-
-**Remarks**: While a `Selector` should normally be used with an enum, it can be used with any type that implements `Copy`, `Clone`, `Eq`, `PartialEq` and `EnumSelector`.
-
-The proc macro should be used in the following way: `selector!(enum=T,...)`
 
 ## Examples
 

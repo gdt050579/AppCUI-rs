@@ -15,6 +15,7 @@ use crate::ui::{
     datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
     listview::events::GenericListViewEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents,
     radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
+    markdown, markdown::events::MarkdownEvents
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -44,6 +45,7 @@ pub(crate) enum ControlEventData {
     ListView(listview::events::EventData),
     PathFinder(pathfinder::events::EventData),
     TreeView(treeview::events::EventData),
+    Markdown(markdown::events::EventData)
 }
 
 pub(crate) struct ControlEvent {
@@ -133,6 +135,14 @@ impl ControlEvent {
                     GenericTreeViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
                 }
             },
+            ControlEventData::Markdown(data) => match &data.event_type {
+                markdown::events::Data::BackEvent => {
+                    MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast())
+                },
+                markdown::events::Data::LinkClickEvent(link) => {
+                    MarkdownEvents::on_external_link(receiver, self.emitter.cast(), link)
+                },
+            }
         }
     }
 }

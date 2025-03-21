@@ -1,7 +1,7 @@
 use super::events::EventData;
 use super::{Flags, FoldStatus, Item, TreeDataManager};
 use components::listitem::render_method::RenderData;
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 use crate::prelude::*;
 
@@ -424,7 +424,7 @@ where
         self.update_scrollbars();
     }
 
-    ///
+    /// Recursively deletes all children of the item with the specified handle (but keeps the item itself)
     pub fn delete_item_children(&mut self, item_handle: Handle<Item<T>>) {
         self.manager.delete_children(item_handle);
         self.update_item_list(UpdateVisibleItemsOperation::Refresh);

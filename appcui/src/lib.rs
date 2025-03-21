@@ -4,6 +4,7 @@
 //! AppCUI has a lot of out-of-the-box controls, and can also provide quick macros to create custom controls. The list of current supported controls are:
 //! * Button
 //! * Checkbox 
+//! * ColorPicker
 //!
 
 

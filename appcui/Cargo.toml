@@ -9,7 +9,7 @@ edition = "2021"
 EnumBitFlags = "1.0.10"
 flat_string = "1.0.0"
 chrono = "0.4.38"
-AppCUIProcMacro = {path = "../appcui-proc-macro"}
+appcui_proc_macro = {path = "../appcui-proc-macro"}
 
 [target.'cfg(target_os = "linux")'.dependencies]
 copypasta = "0.10.1"

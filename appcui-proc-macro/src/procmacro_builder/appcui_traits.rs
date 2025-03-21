@@ -49,6 +49,8 @@ pub(crate) enum AppCUITrait {
     PathFinderEvents = 40,
     TimerEvents = 41,
     GenericTreeViewEvents = 42,
+    MarkdownEvents = 43,
+    GenericBackgroundTaskEvents = 44,
 }
 
 #[repr(u8)]
@@ -108,6 +110,8 @@ impl AppCUITrait {
             AppCUITrait::PathFinderEvents => "PathFinderEvents",
             AppCUITrait::TimerEvents => "TimerEvents",
             AppCUITrait::GenericTreeViewEvents => "TreeViewEvents", // important to be without Generic
+            AppCUITrait::MarkdownEvents => "MarkdownEvents",
+            AppCUITrait::GenericBackgroundTaskEvents => "BackgroundTaskEvents", // important to be without Generic
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -158,6 +162,8 @@ impl AppCUITrait {
             AppCUITrait::PathFinderEvents => TraitType::ControlEvent,
             AppCUITrait::TimerEvents => TraitType::ControlEvent,
             AppCUITrait::GenericTreeViewEvents => TraitType::ControlEvent,
+            AppCUITrait::MarkdownEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericBackgroundTaskEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -208,6 +214,8 @@ impl AppCUITrait {
             AppCUITrait::PathFinderEvents => "",
             AppCUITrait::TimerEvents => "",
             AppCUITrait::GenericTreeViewEvents => "",
+            AppCUITrait::MarkdownEvents => "",
+            AppCUITrait::GenericBackgroundTaskEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -258,6 +266,8 @@ impl AppCUITrait {
             AppCUITrait::PathFinderEvents => "impl$(TEMPLATE_TYPE) PathFinderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::TimerEvents => "impl$(TEMPLATE_TYPE) TimerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericTreeViewEvents => "impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::MarkdownEvents => "impl$(TEMPLATE_TYPE) MarkdownEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericBackgroundTaskEvents => "impl$(TEMPLATE_TYPE) GenericBackgroundTaskEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -268,6 +278,7 @@ impl AppCUITrait {
                 | AppCUITrait::GenericNumericSelectorEvents
                 | AppCUITrait::GenericListViewEvents
                 | AppCUITrait::GenericTreeViewEvents
+                | AppCUITrait::GenericBackgroundTaskEvents
         )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -308,6 +319,8 @@ impl AppCUITrait {
             "PathFinderEvents" | "PathFinder" => Some(AppCUITrait::PathFinderEvents),
             "TimerEvents" | "Timer" => Some(AppCUITrait::TimerEvents),
             "TreeViewEvents" | "TreeView" => Some(AppCUITrait::GenericTreeViewEvents),
+            "MarkdownEvents" | "Markdown" => Some(AppCUITrait::MarkdownEvents),
+            "BackgroundTaskEvents" | "BackgroundTask" => Some(AppCUITrait::GenericBackgroundTaskEvents),
             _ => None,
         }
     }
@@ -359,6 +372,8 @@ impl AppCUITrait {
             40 => Some(AppCUITrait::PathFinderEvents),
             41 => Some(AppCUITrait::TimerEvents),
             42 => Some(AppCUITrait::GenericTreeViewEvents),
+            43 => Some(AppCUITrait::MarkdownEvents),
+            44 => Some(AppCUITrait::GenericBackgroundTaskEvents),
             _ => None,
         };
         result?;

@@ -2,89 +2,35 @@ use crate::prelude::*;
 
 use super::EnumSelector;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, EnumSelector)]
 enum Options {
     A,
     B,
     C,
 }
-impl EnumSelector for Options {
-    const COUNT: u32 = 3;
 
-    fn from_index(index: u32) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        match index {
-            0 => Some(Options::A),
-            1 => Some(Options::B),
-            2 => Some(Options::C),
-            _ => None,
-        }
-    }
-
-    fn name(&self) -> &'static str {
-        match self {
-            Options::A => "A",
-            Options::B => "B",
-            Options::C => "C",
-        }
-    }
-}
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, EnumSelector)]
 enum Cars {
+    #[VariantInfo(description="list of cars :)")]
     Dacia,
+    #[VariantInfo(description="list of cars :)")]
     Toyota,
+    #[VariantInfo(description="list of cars :)", name: "BMW")]
     Bmw,
+    #[VariantInfo(description="list of cars :)")]
     Mazda,
+    #[VariantInfo(description="list of cars :)")]
     Mercedes,
+    #[VariantInfo(description="list of cars :)")]
     Ford,
+    #[VariantInfo(description="list of cars :)")]
     Ferrari,
+    #[VariantInfo(description="list of cars :)")]
     Lamborghini,
+    #[VariantInfo(description="list of cars :)")]
     Skoda,
+    #[VariantInfo(description="list of cars :)")]
     Renault,
-}
-impl EnumSelector for Cars {
-    const COUNT: u32 = 10;
-
-    fn from_index(index: u32) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        match index {
-            0 => Some(Cars::Dacia),
-            1 => Some(Cars::Toyota),
-            2 => Some(Cars::Bmw),
-            3 => Some(Cars::Mazda),
-            4 => Some(Cars::Mercedes),
-            5 => Some(Cars::Ford),
-            6 => Some(Cars::Ferrari),
-            7 => Some(Cars::Lamborghini),
-            8 => Some(Cars::Skoda),
-            9 => Some(Cars::Renault),
-
-            _ => None,
-        }
-    }
-
-    fn name(&self) -> &'static str {
-        match self {
-            Cars::Dacia => "Dacia",
-            Cars::Toyota => "Toyota",
-            Cars::Bmw => "BMW",
-            Cars::Mazda => "Mazda",
-            Cars::Mercedes => "Mercedes",
-            Cars::Ford => "Ford",
-            Cars::Ferrari => "Ferrari",
-            Cars::Lamborghini => "Lamborghini",
-            Cars::Skoda => "Skoda",
-            Cars::Renault => "Renault",
-        }
-    }
-
-    fn description(&self) -> &'static str {
-        "list of cars :)"
-    }
 }
 
 #[test]

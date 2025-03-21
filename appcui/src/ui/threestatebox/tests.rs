@@ -99,3 +99,24 @@ impl ThreeStateBoxEvents for MyWindow {
     a.add_window(MyWindow::new());
     a.run();
 }
+
+#[test]
+fn check_methods() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x827905C817F4F8DD)   
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:78,h:11");
+    let mut t = threestatebox!("Options,x:1,y:1,w:16,h:4,state=unchecked");
+    assert_eq!(t.caption(),"Options");
+    assert_eq!(t.state(),threestatebox::State::Unchecked);
+    t.set_caption("New caption");
+    assert_eq!(t.caption(),"New caption");
+    t.set_state(threestatebox::State::Unknown);
+    assert_eq!(t.state(),threestatebox::State::Unknown);
+    w.add(t);
+    a.add_window(w);
+    a.run();
+}

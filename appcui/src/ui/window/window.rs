@@ -248,7 +248,7 @@ impl Window {
     {
         RuntimeManager::get().request_focus_for_control(handle.cast());
     }
-    
+
     pub fn toolbar(&mut self) -> &mut ToolBar {
         &mut self.toolbar
     }
@@ -607,6 +607,34 @@ impl Window {
     //     }
     //     None
     // }
+
+    /// Returns a generic handle to the current window.
+    #[inline(always)]
+    pub fn handle(&self) -> Handle<Window> {
+        self.handle.cast()
+    }
+
+    /// Returns the background task associated with a specific handle or None if the handle is invalid.
+    #[inline(always)]
+    pub fn background_task<T: Send + 'static, R: Send + 'static>(&self, handle: Handle<BackgroundTask<T, R>>) -> Option<BackgroundTask<T, R>> {
+        BackgroundTask::from_handle(handle)
+    }
+
+    /// Executes a callback function over a specific control (if that control handle is valid)
+    ///
+    /// # Example
+    /// ```rust,no_run
+    ///    use appcui::prelude::*;
+    ///    let mut app = App::new().build().unwrap();
+    ///    let mut w = window!("Title,d:c,w:20,h:10");
+    ///    let handle_b = w.add(button!("Button,d:C,w:10"));
+    ///    Window::update_control(handle_b, |button| { button.set_caption("New text"); });
+    /// ```
+    pub fn update_control<T: Control + 'static>(handle: Handle<T>, run: fn(&mut T)) {
+        if let Some(control) = RuntimeManager::get().get_control_mut(handle) {
+            run(control);
+        }
+    }
 }
 
 impl OnWindowRegistered for Window {

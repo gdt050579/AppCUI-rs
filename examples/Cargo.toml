@@ -5,8 +5,8 @@ publish = false
 edition = "2021"
 
 [dev-dependencies]
-appcui = { version = "1.0.0", path = "../appcui" }
-AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"}
+appcui = { path = "../appcui" }
+appcui_proc_macro = { path = "../appcui-proc-macro"}
 chrono = "0.4.38"
 
 
@@ -67,6 +67,10 @@ path = "menus/main.rs"
 [[example]]
 name = "password"
 path = "password/main.rs"
+
+[[example]]
+name = "markdown"
+path = "markdown/main.rs"
 
 [[example]]
 name = "notification_dialogs"
@@ -167,3 +171,11 @@ path = "timer/main.rs"
 [[example]]
 name = "treeview"
 path = "treeview/main.rs"
+
+[[example]]
+name = "background_task"
+path = "background_task/main.rs"
+
+[[example]]
+name = "logo"
+path = "logo/main.rs"

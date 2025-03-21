@@ -82,6 +82,7 @@ impl Root {
     }
 }
 impl NavigatorRoot for Root {
+    #[cfg(test)]
     fn path(&self) -> &str {
         &self.path
     }

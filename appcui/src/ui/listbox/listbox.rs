@@ -3,7 +3,7 @@ use super::Flags;
 use super::Item;
 use crate::ui::components::ListScrollBars;
 use listbox::events::ListBoxEventTypes;
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 #[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal = true)]
 pub struct ListBox {
