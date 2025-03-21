@@ -58,14 +58,26 @@ impl Ord for Status {
         let self_order = self.order();
         let other_order = other.order();
         match self_order.cmp(&other_order) {
-            std::cmp::Ordering::Equal => match self {
-                Status::Running(value) | Status::Paused(value) => {
-                    value.partial_cmp(&other.value()).unwrap_or(std::cmp::Ordering::Equal)
+            std::cmp::Ordering::Equal => {
+                match self {
+                    Status::Running(value) => {
+                        if let Some(result) = value.partial_cmp(&other.value()) {
+                            result
+                        } else {
+                            std::cmp::Ordering::Equal
+                        }
+                    }
+                    Status::Paused(value) => {
+                        if let Some(result) = value.partial_cmp(&other.value()) {
+                            result
+                        } else {
+                            std::cmp::Ordering::Equal
+                        }
+                    }
+                    _ => std::cmp::Ordering::Equal,
                 }
-                _ => std::cmp::Ordering::Equal,
-            },
-            std::cmp::Ordering::Less => std::cmp::Ordering::Less,
-            std::cmp::Ordering::Greater => std::cmp::Ordering::Greater,
+            }
+            other => other,
         }
     }
 }

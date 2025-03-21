@@ -15,8 +15,8 @@ enum Cars {
     Dacia,
     #[VariantInfo(description="list of cars :)")]
     Toyota,
-    #[VariantInfo(description="list of cars :)")]
-    BMW,
+    #[VariantInfo(description="list of cars :)", name: "BMW")]
+    Bmw,
     #[VariantInfo(description="list of cars :)")]
     Mazda,
     #[VariantInfo(description="list of cars :)")]
