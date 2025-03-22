@@ -1,5 +1,5 @@
-use libc::{statvfs, statvfs64};
-use std::{ffi::CStr, fs::File, io::BufRead, io::BufReader};
+use libc::statvfs;
+use std::{fs::File, io::BufRead, io::BufReader};
 use super::{RootType, Root};
 
 pub(super) fn get_os_roots() -> Vec<Root> {
