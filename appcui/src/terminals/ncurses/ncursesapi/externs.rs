@@ -29,8 +29,10 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
+
 use libc::{c_char, c_int, c_short};
 
+#[allow(clippy::upper_case_acronyms)]
 pub type WINDOW = *mut i8;
 use super::constants::*;
 use super::structs::MEVENT;
@@ -79,9 +81,7 @@ wrap_extern!(ESCDELAY: c_int);
 wrap_extern!(LINES: c_int);
 wrap_extern!(TABSIZE: c_int);
 pub fn acs_map() -> *const chtype {
-    unsafe {
-        &wrapped::acs_map as *const chtype
-    }
+    &raw const wrapped::acs_map as *const chtype
 }
 // #[cfg(target_family = "windows")]
 // #[link(name = "pdcurses")]
@@ -112,6 +112,7 @@ extern "C"{
     pub fn endwin() -> c_int;
     pub fn refresh() -> c_int;
     pub fn wrefresh(w:WINDOW) -> c_int;
+    pub fn wresize(win: WINDOW, lines: c_int, columns: c_int) -> c_int;
     pub fn getch() -> c_int;
     pub fn nodelay(win: WINDOW, bf: c_bool) -> c_int;
     pub fn halfdelay(tens: c_int) -> c_int;
@@ -128,6 +129,7 @@ extern "C"{
     pub fn set_escdelay(ms: c_int) -> c_int;
     pub fn wclear(w: WINDOW) -> c_int;
     pub fn mvaddch(y: c_int, x: c_int, ch: chtype) -> c_int;
+    pub fn mvaddwstr(y: c_int, x: c_int, str: *const i8) -> c_int;
     pub fn getmaxy(w: WINDOW) -> c_int;
     pub fn getmaxx(w: WINDOW) -> c_int;
     pub fn wget_wch(w: WINDOW, _:*mut winttype) -> c_int;

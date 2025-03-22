@@ -140,5 +140,5 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().size(Size::new(120, 24)).menu_bar().build()?;
     a.add_window(MyWindow::new());
     a.run();
-    Ok(())  
+    Ok(())
 }

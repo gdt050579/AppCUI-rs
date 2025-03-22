@@ -35,8 +35,8 @@ use super::constants::*;
 use super::externs::*;
 use super::structs::{LcCategory, WchResult, CURSOR_VISIBILITY, MEVENT};
 
+#[allow(clippy::upper_case_acronyms)]
 pub type WINDOW = *mut i8;
-
 
 pub fn ncurses_initscr() -> WINDOW {
     unsafe { initscr() }
@@ -52,6 +52,10 @@ pub fn ncurses_refresh() -> i32 {
 
 pub fn ncurses_wrefresh(w: WINDOW) -> i32{ 
     unsafe { wrefresh(w) } 
+}
+
+pub fn ncurses_wresize(w: WINDOW, height: i32, width: i32) -> i32 {
+    unsafe { wresize(w, height, width) }
 }
 
 pub fn ncurses_getmouse(event: *mut MEVENT) -> i32
@@ -164,7 +168,7 @@ trait ToCStr {
     fn to_c_str(&self) -> Result<CString, std::ffi::NulError>;
 }
 
-impl <'a>ToCStr for &'a str {
+impl ToCStr for &str {
     fn to_c_str(&self) -> Result<CString, std::ffi::NulError> {
         CString::new(*self)
     }
@@ -176,7 +180,7 @@ pub fn setlocale(lc: LcCategory, locale: &str) -> Result<String, std::ffi::NulEr
     let c_str = locale.to_c_str()?;
     let buf = c_str.as_ptr();
     let ret = libc::setlocale(lc as libc::c_int, buf);
-    if ret == ptr::null_mut() {
+    if ret.is_null() {
         Ok(String::new())
     } else {
         // The clone is necessary, as the returned pointer
@@ -208,10 +212,9 @@ pub fn ncurses_COLOR_PAIR(n: i16) -> attr_t {
     }
 }
 
-pub fn ncurses_stdscr() -> WINDOW {
-    unsafe {
-        stdscr()
-    }
+pub fn ncurses_stdscr() -> WINDOW {        
+    stdscr()
+
 }
 
 pub fn ncurses_addstr(s: &str) -> Result<i32, std::ffi::NulError>
