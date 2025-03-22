@@ -123,6 +123,10 @@ pub fn ncurses_mvaddch(y: i32, x: i32, ch: chtype) -> i32 {
     unsafe { mvaddch(y, x, ch) }
 }
 
+pub fn ncurses_wcwidth(c: char) -> i32 {
+    unsafe { wcwidth((c as u32) as i32) }
+}
+
 pub fn ncurses_getmaxyx(w: WINDOW,  y: &mut i32, x: &mut i32) {
     unsafe {
         *y = getmaxy(w);

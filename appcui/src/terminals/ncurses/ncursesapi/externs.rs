@@ -146,6 +146,8 @@ extern "C"{
     pub fn mvaddstr(_:c_int, _:c_int, _:*const c_char) -> c_int;
     pub fn addstr(_:*const c_char) -> c_int;
     pub fn curs_set(_:c_int) -> c_int;
+
+    pub fn wcwidth(c: i32) -> c_int;
     
     // pub fn impl_ACS_ULCORNER() -> chtype;
     // pub fn impl_ACS_LLCORNER() -> chtype;
