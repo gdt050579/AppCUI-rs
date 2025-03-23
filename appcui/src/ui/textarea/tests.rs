@@ -1471,4 +1471,397 @@ fn check_selection_copy_unicode() {
     a.run();
 }
 
+#[test]
+fn check_selection_7_mouse_backspace_2() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Left, 3)
+
+        Mouse.Drag(13,1,17,1)
+        Paint('Before Backspace')
+
+        Key.Pressed(Backspace)
+        Paint('After Backspace')
+
+        CheckHash(0xEE8927570D0DE206)
+        CheckCursor(13, 1)
+    ";
+
+    let text_print = "Unit Test zzzzSelection 7 - Mouse";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::ShowLineNumber);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Selection 7", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn show_line_number_increase() {
+    let script = "
+        // Paint.Enable(false)
+
+        Paint('Initial State')
+        CheckHash(0x4E9A5E71C0DB16C1)
+        CheckCursor(3, 1)
+
+        Key.Pressed(Right, 4)
+
+        Paint('Cursor on space')
+        CheckCursor(7, 1)
+
+        Key.Pressed(Enter)
+
+        Paint('Cursor on space, new line')
+        CheckHash(0xA96EF9168B8DFBB7)
+        CheckCursor(4, 2)
+    ";
+
+    let text_print = "Unit Test\n\n\n\n\n\n\n\nShowLineNumber";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::ShowLineNumber);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test 1", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn show_line_number_decrease() {
+    let script = "
+        // Paint.Enable(false)
+
+        Paint('Initial State')
+        CheckHash(0x601AF9C95E6A93B7)
+        CheckCursor(4, 1)
+
+        Key.Pressed(Down, 1)
+
+        CheckCursor(4, 2)
+
+        Key.Pressed(Backspace)
+
+        Paint('Cursor at the end of the line')
+        CheckHash(0x4E9A5E71C0DB16C1)
+        CheckCursor(12, 1)
+    ";
+
+    let text_print = "Unit Test\n\n\n\n\n\n\n\n\nShowLineNumber";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::ShowLineNumber);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test 1", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_right() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Right, 3)
+
+        Paint('After Move to end of Test')
+
+        CheckHash(0x57840FC2539DCB6E)
+        CheckCursor(10, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_right_left() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Right, 3)
+        Key.Pressed(Ctrl+Left, 1)
+
+        Paint('After Move to beginning of Test')
+
+        CheckHash(0x57840FC2539DCB6E)
+        CheckCursor(6, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_shift_right() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Shift+Right, 3)
+
+        Paint('After Move to end of Test')
+
+        CheckHash(0xC20834940D3C8385)
+        CheckCursor(10, 1)
+
+        Key.Pressed(Ctrl+C)
+        CheckClipboardText('Unit Test')
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_shift_right_shift_left() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Shift+Right, 3)
+        Key.Pressed(Ctrl+Shift+Left, 1)
+
+        Paint('After Move to beginning of Test')
+
+        CheckHash(0xA4F9F46A799AAF21)
+        CheckCursor(6, 1)
+
+        Key.Pressed(Ctrl+C)
+        CheckClipboardText('Unit ')
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_right_shift_left() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Right, 3)
+        Key.Pressed(Ctrl+Shift+Left, 1)
+
+        Paint('After Move to beginning of Test')
+
+        CheckHash(0x5567B86FCDC7C972)
+        CheckCursor(6, 1)
+
+        Key.Pressed(Ctrl+C)
+        CheckClipboardText('Test')
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn ctrl_shift_left_shift_right() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Right, 3)
+        Paint('After Move to end of Test')
+        Key.Pressed(Ctrl+Shift+Left, 2)
+        Paint('After Move to end of Unit')
+        Key.Pressed(Ctrl+Shift+Right, 1)
+
+        Paint('After Move to beginning of Test')
+
+        CheckHash(0x5567B86FCDC7C972)
+        CheckCursor(6, 1)
+
+        Key.Pressed(Ctrl+C)
+        CheckClipboardText('Test')
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_delete() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Delete, 2)
+
+        Paint('After Delete')
+
+        CheckHash(0xAB1C34EA8C6AA8F8)
+        CheckCursor(1, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_right_ctrl_delete_1() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Shift+Right, 1)
+        Key.Pressed(Ctrl+Delete, 2)
+
+        Paint('After Delete')
+
+        CheckHash(0xAB1C34EA8C6AA8F8)
+        CheckCursor(1, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_right_ctrl_delete_2() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Shift+Right, 2)
+        Key.Pressed(Ctrl+Delete, 1)
+
+        Paint('After Delete')
+
+        CheckHash(0xAB1C34EA8C6AA8F8)
+        CheckCursor(1, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_backspace() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Right, 2)
+        Key.Pressed(Ctrl+Backspace, 2)
+
+        Paint('After Delete')
+
+        CheckHash(0xAB1C34EA8C6AA8F8)
+        CheckCursor(1, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn ctrl_right_ctrl_backspace_1() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Ctrl+Shift+Right, 2)
+        Paint('After Delete')
+
+        Key.Pressed(Ctrl+Backspace, 1)
+
+        Paint('After Delete')
+
+        CheckHash(0xAB1C34EA8C6AA8F8)
+        CheckCursor(1, 1)
+    ";
+
+    let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Mouse Drag", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
 // Unit Test pe caratere speciale
