@@ -1,7 +1,7 @@
 use super::super::SystemEvent;
 use super::super::Terminal;
-use super::colors::ColorManager;
 use super::ncursesapi::lib::ncurses_wcwidth;
+use super::ncursesapi::externs::*;
 use crate::terminals::ncurses::ncursesapi::input::Input;
 use std::sync::mpsc::Sender;
 
@@ -18,8 +18,8 @@ use ncursesapi::constants::mmask_t;
 
 #[cfg(target_family = "unix")]
 pub struct NcursesTerminal {
-    color_manager: ColorManager,
     size: Size,
+    win: WINDOW,
 }
 
 #[cfg(target_family = "unix")]
@@ -27,15 +27,17 @@ impl NcursesTerminal {
     pub(crate) fn new(_builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         ncursesapi::lib::ncurses_endwin();
         ncursesapi::lib::setlocale(ncursesapi::structs::LcCategory::all, "").unwrap();
-        let _ = ncursesapi::lib::ncurses_initscr();
+        let win = ncursesapi::lib::ncurses_initscr();
+        ncursesapi::lib::ncurses_start_color();
+        ncursesapi::lib::ncurses_use_default_colors();
 
-        ncursesapi::lib::ncurses_nodelay(ncursesapi::lib::ncurses_stdscr(), false);
-        ncursesapi::lib::ncurses_keypad(ncursesapi::lib::ncurses_stdscr(), true);
+        ncursesapi::lib::ncurses_nodelay(win, false);
+        ncursesapi::lib::ncurses_keypad(win, true);
         ncursesapi::lib::ncurses_cbreak();
         ncursesapi::lib::ncurses_noecho();
         ncursesapi::lib::ncurses_nonl();
         ncursesapi::lib::ncurses_raw();
-        ncursesapi::lib::ncurses_meta(ncursesapi::lib::ncurses_stdscr(), true);
+        ncursesapi::lib::ncurses_meta(win, true);
         ncursesapi::lib::ncurses_mousemask(
             (ncursesapi::constants::ALL_MOUSE_EVENTS as mmask_t | ncursesapi::constants::REPORT_MOUSE_POSITION as mmask_t) as mmask_t,
             None,
@@ -44,21 +46,53 @@ impl NcursesTerminal {
         ncursesapi::lib::ncurses_mouseinterval(0);
         ncursesapi::lib::ncurses_set_escdelay(0);
 
+        // set color paires
+        for f in 0i16..=15i16 {
+            for b in 0i16..=15i16 {
+                ncursesapi::lib::ncurses_init_pair(
+                    b * 16 + f,
+                    NcursesTerminal::color_index(Color::from_value(f as i32).unwrap()),
+                    NcursesTerminal::color_index(Color::from_value(b as i32).unwrap()),
+                );
+            }
+        }
+
         // get the size
         let mut x: i32 = 0;
         let mut y: i32 = 0;
-        ncursesapi::lib::ncurses_getmaxyx(ncursesapi::lib::ncurses_stdscr(), &mut y, &mut x);
-                
+        ncursesapi::lib::ncurses_getmaxyx(win, &mut y, &mut x);
 
         let term = NcursesTerminal {
-            color_manager: ColorManager::new(),
-            size: Size::new(x as u32, y as u32)
+            size: Size::new(x as u32, y as u32),
+            win,
         };
 
         // Start the event thread
         Input::new().start(sender);
 
         Ok(term)
+    }
+    #[inline(always)]
+    fn color_index(color: Color) -> i16 {
+        match color {
+            Color::Black => 0,
+            Color::DarkRed => 1,
+            Color::DarkGreen => 2,
+            Color::Olive => 3,
+            Color::DarkBlue => 4,
+            Color::Magenta => 5,
+            Color::Teal => 6,
+            Color::Silver => 7,
+            Color::Gray => 8,
+            Color::Red => 9,
+            Color::Green => 10,
+            Color::Yellow => 11,
+            Color::Blue => 12,
+            Color::Pink => 13,
+            Color::Aqua => 14,
+            Color::White => 15,
+            Color::Transparent => 0,
+        }
     }
 }
 
@@ -75,29 +109,23 @@ impl Terminal for NcursesTerminal {
             if skip_chars > 0 {
                 skip_chars -= 1;
             } else {
-                self.color_manager.set_color_pair(&ch.foreground, &ch.background);
+                let fc = ch.foreground as i16;
+                let bc = ch.background as i16;
+                let idx = fc + bc * 16;
+                ncursesapi::lib::ncurses_wattron(self.win, ncursesapi::lib::ncurses_COLOR_PAIR(idx));
+
                 if ch.flags.contains(CharFlags::Underline) {
-                    ncursesapi::lib::ncurses_wattron(ncursesapi::lib::ncurses_stdscr(), ncursesapi::constants::A_UNDERLINE);
+                    ncursesapi::lib::ncurses_wattron(self.win, ncursesapi::constants::A_UNDERLINE);
                 }
 
                 if ch.flags.contains(CharFlags::Bold) {
-                    ncursesapi::lib::ncurses_wattron(ncursesapi::lib::ncurses_stdscr(), ncursesapi::constants::A_BOLD);
+                    ncursesapi::lib::ncurses_wattron(self.win, ncursesapi::constants::A_BOLD);
                 }
 
                 let _ = ncursesapi::lib::ncurses_mvaddstr(y, x, ch.code.encode_utf8(&mut utf8_buf));
 
-                if ch.flags.contains(CharFlags::Underline) {
-                    ncursesapi::lib::ncurses_wattroff(ncursesapi::lib::ncurses_stdscr(), ncursesapi::constants::A_UNDERLINE);
-                }
-
-                if ch.flags.contains(CharFlags::Bold) {
-                    ncursesapi::lib::ncurses_wattroff(ncursesapi::lib::ncurses_stdscr(), ncursesapi::constants::A_BOLD);
-                }
-                self.color_manager.unset_color_pair(&ch.foreground, &ch.background);
-
                 let cw = ncurses_wcwidth(ch.code).max(1) - 1;
                 skip_chars += cw;
-
             }
 
             x += 1;
@@ -109,12 +137,12 @@ impl Terminal for NcursesTerminal {
 
         if surface.cursor.is_visible() {
             ncursesapi::lib::ncurses_curs_set(ncursesapi::structs::CURSOR_VISIBILITY::CURSOR_VISIBLE);
-            ncursesapi::lib::ncurses_wmove(ncursesapi::lib::ncurses_stdscr(), surface.cursor.y as i32, surface.cursor.x as i32);
+            ncursesapi::lib::ncurses_wmove(self.win, surface.cursor.y as i32, surface.cursor.x as i32);
         } else {
             ncursesapi::lib::ncurses_curs_set(ncursesapi::structs::CURSOR_VISIBILITY::CURSOR_INVISIBLE);
         }
 
-        ncursesapi::lib::ncurses_wrefresh(ncursesapi::lib::ncurses_stdscr());
+        ncursesapi::lib::ncurses_wrefresh(self.win);
     }
 
     fn get_size(&self) -> Size {
