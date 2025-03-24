@@ -29,31 +29,36 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
-use libc::{c_short, c_int};
 use super::constants::*;
+use libc::{c_int, c_short};
 
 #[derive(Debug, Clone, Copy)]
-pub enum CURSOR_VISIBILITY
-{
-  CURSOR_INVISIBLE = 0,
-  CURSOR_VISIBLE,
-  CURSOR_VERY_VISIBLE
+pub(crate) enum CURSOR_VISIBILITY {
+    CURSOR_INVISIBLE = 0,
+    CURSOR_VISIBLE,
+    CURSOR_VERY_VISIBLE,
 }
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 #[allow(clippy::upper_case_acronyms)]
-pub struct MEVENT { pub id: c_short, pub x: c_int, pub y: c_int, pub z: c_int, pub bstate: mmask_t}
+pub(crate) struct MEVENT {
+    pub(crate) id: c_short,
+    pub(crate) x: c_int,
+    pub(crate) y: c_int,
+    pub(crate) z: c_int,
+    pub(crate) bstate: mmask_t,
+}
 
 #[derive(Debug)]
-pub enum WchResult {
+pub(crate) enum WchResult {
     KeyCode(i32),
     Char(winttype),
 }
 
 #[derive(Debug)]
 #[repr(i32)]
-pub enum LcCategory {
+pub(crate) enum LcCategory {
     all = LC_ALL,
     collate = LC_COLLATE,
     ctype = LC_CTYPE,
@@ -61,36 +66,4 @@ pub enum LcCategory {
     numeric = LC_NUMERIC,
     time = LC_TIME,
     messages = LC_MESSAGES,
-}
-
-#[repr(C)]
-#[allow(non_camel_case_types)]
-#[allow(clippy::upper_case_acronyms)]
-#[derive(Default, Copy, Clone, Debug)]
-pub(crate) struct SMALL_RECT {
-    pub left: i16,
-    pub top: i16,
-    pub right: i16,
-    pub bottom: i16,
-}
-
-#[repr(C)]
-#[allow(non_camel_case_types)]
-#[allow(clippy::upper_case_acronyms)]
-#[derive(Default, Copy, Clone, Debug)]
-pub(super) struct COORD {
-    pub X: i16,
-    pub Y: i16,
-}
-
-#[repr(C)]
-#[allow(non_camel_case_types)]
-#[allow(clippy::upper_case_acronyms)]
-#[derive(Default, Copy, Clone, Debug)]
-pub(super) struct CONSOLE_SCREEN_BUFFER_INFO {
-    pub dwSize: COORD,
-    pub dwCursorPosition: COORD,
-    pub wAttributes: u16,
-    pub srWindow: SMALL_RECT,
-    pub dwMaximumWindowSize: COORD,
 }

@@ -33,7 +33,7 @@
 use libc::{c_char, c_int, c_short};
 
 #[allow(clippy::upper_case_acronyms)]
-pub type WINDOW = *mut i8;
+pub(crate) type WINDOW = *mut i8;
 use super::constants::*;
 use super::structs::MEVENT;
 
@@ -45,25 +45,25 @@ mod wrapped {
     
     extern "C"
     {
-        pub static curscr: WINDOW;
-        pub static newscr: WINDOW;
-        pub static stdscr: WINDOW;
-        pub static ttytype: *mut c_char;
-        pub static COLORS: c_int;
-        pub static COLOR_PAIRS: c_int;
-        pub static COLS: c_int;
-        pub static ESCDELAY: c_int;
-        pub static LINES: c_int;
-        pub static TABSIZE: c_int;
+        pub(crate) static curscr: WINDOW;
+        pub(crate) static newscr: WINDOW;
+        pub(crate) static stdscr: WINDOW;
+        pub(crate) static ttytype: *mut c_char;
+        pub(crate) static COLORS: c_int;
+        pub(crate) static COLOR_PAIRS: c_int;
+        pub(crate) static COLS: c_int;
+        pub(crate) static ESCDELAY: c_int;
+        pub(crate) static LINES: c_int;
+        pub(crate) static TABSIZE: c_int;
 
         /* Line graphics */
-        pub static mut acs_map: [chtype; 0];
+        pub(crate) static mut acs_map: [chtype; 0];
     }
 }
 
 macro_rules! wrap_extern {
     ($name:ident: $t:ty) => {
-        pub fn $name() -> $t {
+        pub(crate) fn $name() -> $t {
             unsafe { wrapped::$name }
         }
     }
@@ -80,116 +80,54 @@ wrap_extern!(COLS: c_int);
 wrap_extern!(ESCDELAY: c_int);
 wrap_extern!(LINES: c_int);
 wrap_extern!(TABSIZE: c_int);
-pub fn acs_map() -> *const chtype {
+pub(crate) fn acs_map() -> *const chtype {
     &raw const wrapped::acs_map as *const chtype
 }
-// #[cfg(target_family = "windows")]
-// #[link(name = "pdcurses")]
-// extern {
-//     fn initscr() -> WINDOW;
-//     fn endwin() -> i32;
-//     fn printw(s: *const i8);
-//     fn refresh() -> i32;
-//     fn getch() -> i32;
-//     fn nodelay(win: WINDOW, bf: c_int) -> i32;
-//     fn halfdelay(tens: c_int) -> i32;
-//     fn keypad(win: WINDOW, bf: c_bool) -> c_int;
-//     fn cbreak() -> i32;
-//     fn noecho() -> i32;
-//     fn nonl() -> i32;
-//     fn raw() -> i32;
-//     fn meta(win: WINDOW, bf: c_int) -> i32;
-//     fn mousemask(newmask: c_uint, oldmask: *mut c_uint) -> c_uint;
-//     fn mouseinterval(interval: c_int) -> c_int;
-//     fn set_escdelay(ms: c_int) -> i32;
-// }
+
 
 #[cfg_attr(target_os = "linux", link(name = "ncursesw"))]
 #[cfg_attr(target_os = "macos", link(name = "ncurses"))]  // on macos `ncurses` already includes wide chars support
 #[cfg(target_family = "unix")]
 extern "C"{
-    pub fn initscr() -> WINDOW;
-    pub fn endwin() -> c_int;
-    pub fn refresh() -> c_int;
-    pub fn wrefresh(w:WINDOW) -> c_int;
-    pub fn wresize(win: WINDOW, lines: c_int, columns: c_int) -> c_int;
-    pub fn getch() -> c_int;
-    pub fn nodelay(win: WINDOW, bf: c_bool) -> c_int;
-    pub fn halfdelay(tens: c_int) -> c_int;
-    pub fn keypad(win: WINDOW, bf: c_bool) -> c_int;
-    pub fn cbreak() -> c_int;
-    pub fn noecho() -> c_int;
-    pub fn nonl() -> c_int;
-    pub fn raw() -> c_int;
-    pub fn meta(win: WINDOW, bf: c_bool) -> c_int;
-    pub fn mousemask(_:mmask_t,_:*mut mmask_t) -> mmask_t;
-    pub fn mouseinterval(interval: c_int) -> c_int;
-    pub fn getmouse(_:*mut MEVENT) -> c_int;
-    pub fn wmove(_:WINDOW,_:c_int,_:c_int) -> c_int;
-    pub fn set_escdelay(ms: c_int) -> c_int;
-    pub fn wclear(w: WINDOW) -> c_int;
-    pub fn mvaddch(y: c_int, x: c_int, ch: chtype) -> c_int;
-    pub fn mvaddwstr(y: c_int, x: c_int, str: *const i8) -> c_int;
-    pub fn getmaxy(w: WINDOW) -> c_int;
-    pub fn getmaxx(w: WINDOW) -> c_int;
-    pub fn wget_wch(w: WINDOW, _:*mut winttype) -> c_int;
-    pub fn get_wch(_:*mut winttype) -> c_int;
+    pub(crate) fn initscr() -> WINDOW;
+    pub(crate) fn endwin() -> c_int;
+    pub(crate) fn refresh() -> c_int;
+    pub(crate) fn wrefresh(w:WINDOW) -> c_int;
+    pub(crate) fn wresize(win: WINDOW, lines: c_int, columns: c_int) -> c_int;
+    pub(crate) fn getch() -> c_int;
+    pub(crate) fn nodelay(win: WINDOW, bf: c_bool) -> c_int;
+    pub(crate) fn halfdelay(tens: c_int) -> c_int;
+    pub(crate) fn keypad(win: WINDOW, bf: c_bool) -> c_int;
+    pub(crate) fn cbreak() -> c_int;
+    pub(crate) fn noecho() -> c_int;
+    pub(crate) fn nonl() -> c_int;
+    pub(crate) fn raw() -> c_int;
+    pub(crate) fn meta(win: WINDOW, bf: c_bool) -> c_int;
+    pub(crate) fn mousemask(_:mmask_t,_:*mut mmask_t) -> mmask_t;
+    pub(crate) fn mouseinterval(interval: c_int) -> c_int;
+    pub(crate) fn getmouse(_:*mut MEVENT) -> c_int;
+    pub(crate) fn wmove(_:WINDOW,_:c_int,_:c_int) -> c_int;
+    pub(crate) fn set_escdelay(ms: c_int) -> c_int;
+    pub(crate) fn wclear(w: WINDOW) -> c_int;
+    pub(crate) fn mvaddch(y: c_int, x: c_int, ch: chtype) -> c_int;
+    pub(crate) fn mvaddwstr(y: c_int, x: c_int, str: *const i8) -> c_int;
+    pub(crate) fn getmaxy(w: WINDOW) -> c_int;
+    pub(crate) fn getmaxx(w: WINDOW) -> c_int;
+    pub(crate) fn wget_wch(w: WINDOW, _:*mut winttype) -> c_int;
+    pub(crate) fn get_wch(_:*mut winttype) -> c_int;
     
-    pub fn start_color() -> c_int;
-    pub fn use_default_colors() -> c_int;
-    pub fn init_pair(_:c_short,_:c_short,_:c_short) -> c_int;
-    pub fn wattron(_:WINDOW, _:NCURSES_ATTR_T) -> c_int;
-    pub fn wattroff(_:WINDOW, _:NCURSES_ATTR_T) -> c_int;
-    pub fn COLOR_PAIR(_:c_int) -> c_int;
+    pub(crate) fn start_color() -> c_int;
+    pub(crate) fn use_default_colors() -> c_int;
+    pub(crate) fn init_pair(_:c_short,_:c_short,_:c_short) -> c_int;
+    pub(crate) fn wattron(_:WINDOW, _:NCURSES_ATTR_T) -> c_int;
+    pub(crate) fn wattroff(_:WINDOW, _:NCURSES_ATTR_T) -> c_int;
+    pub(crate) fn COLOR_PAIR(_:c_int) -> c_int;
 
     
-    pub fn mvaddstr(_:c_int, _:c_int, _:*const c_char) -> c_int;
-    pub fn addstr(_:*const c_char) -> c_int;
-    pub fn curs_set(_:c_int) -> c_int;
+    pub(crate) fn mvaddstr(_:c_int, _:c_int, _:*const c_char) -> c_int;
+    pub(crate) fn addstr(_:*const c_char) -> c_int;
+    pub(crate) fn curs_set(_:c_int) -> c_int;
 
-    pub fn wcwidth(c: i32) -> c_int;
+    pub(crate) fn wcwidth(c: i32) -> c_int;
     
-    // pub fn impl_ACS_ULCORNER() -> chtype;
-    // pub fn impl_ACS_LLCORNER() -> chtype;
-    // pub fn impl_ACS_URCORNER() -> chtype;
-    // pub fn impl_ACS_LRCORNER() -> chtype;
-    // pub fn impl_ACS_LTEE() -> chtype;
-    // pub fn impl_ACS_RTEE() -> chtype;
-    // pub fn impl_ACS_BTEE() -> chtype;
-    // pub fn impl_ACS_TTEE() -> chtype;
-    // pub fn impl_ACS_HLINE() -> chtype;
-    // pub fn impl_ACS_VLINE() -> chtype;
-    // pub fn impl_ACS_PLUS() -> chtype;
-    // pub fn impl_ACS_S1() -> chtype;
-    // pub fn impl_ACS_S9() -> chtype;
-    // pub fn impl_ACS_DIAMOND() -> chtype;
-    // pub fn impl_ACS_CKBOARD() -> chtype;
-    // pub fn impl_ACS_DEGREE() -> chtype;
-    // pub fn impl_ACS_PLMINUS() -> chtype;
-    // pub fn impl_ACS_BULLET() -> chtype;
-    // pub fn impl_ACS_LARROW() -> chtype;
-    // pub fn impl_ACS_RARROW() -> chtype;
-    // pub fn impl_ACS_DARROW() -> chtype;
-    // pub fn impl_ACS_UARROW() -> chtype;
-    // pub fn impl_ACS_BOARD() -> chtype;
-    // pub fn impl_ACS_LANTERN() -> chtype;
-    // pub fn impl_ACS_BLOCK() -> chtype;
-    // pub fn impl_ACS_S3() -> chtype;
-    // pub fn impl_ACS_S7() -> chtype;
-    // pub fn impl_ACS_LEQUAL() -> chtype;
-    // pub fn impl_ACS_GEQUAL() -> chtype;
-    // pub fn impl_ACS_PI() -> chtype;
-    // pub fn impl_ACS_NEQUAL() -> chtype;
-    // pub fn impl_ACS_STERLING() -> chtype;
-    // pub fn impl_ACS_BSSB() -> chtype;
-    // pub fn impl_ACS_SSBB() -> chtype;
-    // pub fn impl_ACS_BBSS() -> chtype;
-    // pub fn impl_ACS_SBBS() -> chtype;
-    // pub fn impl_ACS_SBSS() -> chtype;
-    // pub fn impl_ACS_SSSB() -> chtype;
-    // pub fn impl_ACS_SSBS() -> chtype;
-    // pub fn impl_ACS_BSSS() -> chtype;
-    // pub fn impl_ACS_BSBS() -> chtype;
-    // pub fn impl_ACS_SBSB() -> chtype;
-    // pub fn impl_ACS_SSSS() -> chtype;
 }
