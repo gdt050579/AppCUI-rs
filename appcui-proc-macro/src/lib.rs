@@ -414,39 +414,124 @@ pub fn headercolumn(input: TokenStream) -> TokenStream {
 /// * `type` - the type of the button. The following values are supported:
 ///   - **Normal** - a normal button
 ///   - **Flat** - a flat button
-/// * position attrobute: `x` and  `y`,
+/// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias)
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
 /// * Alignament attributes: 
-///   - `align` or `a`(alias) - one of `Left`, `Right`, `Top`, `Bottom`, `Center`, `TopLeft`, `TopRight`, `BottomLeft`, `BottomRight`
-///   - `dock` or `d`(alias) - one of `Left`, `Right`, `Top`, `Bottom`, `Center`, `TopLeft`, `TopRight`, `BottomLeft`, `BottomRight`
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
 /// 
 /// # Example
+/// 
 /// ```button!("caption=`Click me!`, type=Flat, x=10, y=10, width=20")```
 /// 
-/// Alternativelly, the first parametru (if the key is not specified) is consider the caption:
-/// ```button!("'Click me!', x:0,y:10, w:20")```
+/// Alternatively, the first parameter (if the key is not specified) is consider the caption:
+/// 
+/// ```button!("'Click me!', x:0, y:10, w:20")```
 #[proc_macro]
 pub fn button(input: TokenStream) -> TokenStream {
     crate::controls::button::create(input)
 }
 
+/// Creates a new checkbox control. The format is `checkbox!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `caption` or `text` - the text displayed near the checkbox
+/// * `checked` or `check` - if the checkbox is checked or not
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias), 
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)   
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```checkbox!("caption=`Check me!`, x=10, y=10, width=20, height=2")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the caption:
+/// 
+/// ```checkbox!("'Check me!', x:0, y=10, w:20")```
 #[proc_macro]
 pub fn checkbox(input: TokenStream) -> TokenStream {
     crate::controls::checkbox::create(input)
 }
 
+/// Creates a new radiobox control. The format is `radiobox!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `caption` or `text` - the text displayed near the radiobox
+/// * `selected` or `selec` - if the radiobox is selected or not
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias), 
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)   
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```radiobox!("caption=`Select me!`, x=10, y=10, width=20, height=2")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the caption:
+/// 
+/// ```radiobox!("'Select me!', x:0, y=10, w:20")```
 #[proc_macro]
 pub fn radiobox(input: TokenStream) -> TokenStream {
     crate::controls::radiobox::create(input)
 }
 
+/// Creates a new label control. The format is `label!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `caption` or `text` - the text displayed on the label
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```label!("caption=`Hello!`, x=10, y=10, width=20, height=2")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the caption:
+/// 
+/// ```label!("'Hello!', x:0, y=10, w:20")```
 #[proc_macro]
 pub fn label(input: TokenStream) -> TokenStream {
     crate::controls::label::create(input)
 }
 
+/// Creates a new panel control. The format is `panel!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `caption` or `tile` or `text` - the text displayed on the panel
+/// * `type` - the type of the panel. The following values are supported:
+///  - **Border** - a normal panel with a border
+///  - **Window** - a panel that looks like a window
+///  - **Page** - a panel that looks like a page
+///  - **TopBar** - a panel that looks like a top bar
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```panel!("caption=`Hello!`, x=10, y=10, width=20, height=10")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the caption:
+/// 
+/// ```panel!("'Hello!', x:0, y=10, w:20, h:10, type=Window")```
 #[proc_macro]
 pub fn panel(input: TokenStream) -> TokenStream {
     crate::controls::panel::create(input)
