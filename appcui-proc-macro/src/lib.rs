@@ -406,6 +406,27 @@ pub fn headercolumn(input: TokenStream) -> TokenStream {
     crate::column::create(input)
 }
 
+
+/// Creates a new button control. The format is `button!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`. 
+/// If the `value` is a string, use single quotes to delimit the value. 
+/// The following attributes are supported:
+/// * `name` or `caption` or `text` - the text displayed on the button
+/// * `type` - the type of the button. The following values are supported:
+///   - **Normal** - a normal button
+///   - **Flat** - a flat button
+/// * position attrobute: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias)
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes: 
+///   - `align` or `a`(alias) - one of `Left`, `Right`, `Top`, `Bottom`, `Center`, `TopLeft`, `TopRight`, `BottomLeft`, `BottomRight`
+///   - `dock` or `d`(alias) - one of `Left`, `Right`, `Top`, `Bottom`, `Center`, `TopLeft`, `TopRight`, `BottomLeft`, `BottomRight`
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// ```button!("caption=`Click me!`, type=Flat, x=10, y=10, width=20")```
+/// 
+/// Alternativelly, the first parametru (if the key is not specified) is consider the caption:
+/// ```button!("'Click me!', x:0,y:10, w:20")```
 #[proc_macro]
 pub fn button(input: TokenStream) -> TokenStream {
     crate::controls::button::create(input)
