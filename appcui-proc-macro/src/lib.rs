@@ -14,10 +14,6 @@ use procmacro_builder::{AppCUITrait, TraitImplementation, TraitsConfig, BaseCont
 
 extern crate proc_macro;
 
-
-
-
-
 /// Used to create a custom control
 /// The general format is: `#[CustomControl(overwrite = ..., events= ...)]`
 /// Where the **overwrite** parameter is a list of traits that can be overwritten that include:
@@ -428,7 +424,7 @@ pub fn headercolumn(input: TokenStream) -> TokenStream {
 /// 
 /// Alternatively, the first parameter (if the key is not specified) is consider the caption:
 /// 
-/// ```button!("'Click me!', x:0, y:10, w:20")```
+/// ```button!("'Click me!', x:0, y=10, w:20")```
 #[proc_macro]
 pub fn button(input: TokenStream) -> TokenStream {
     crate::controls::button::create(input)
@@ -729,68 +725,226 @@ pub fn menu(input: TokenStream) -> TokenStream {
     crate::menu::menu::create(input, None)
 }
 
-/// Creates a new horizontal line control. The format is `hline!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
-/// If the `value` is a string, use single quotes to delimit the value.
-/// The following attributes are supported:
-/// * `flags` - the flags of the horizontal line. The following values are supported:
-///   - **DoubleLine** - the line will be a double line
-/// * position attributes: `x` and  `y`,
-/// * size attributes: `width` or `w` (alias),
-/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
-///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
-///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
-/// * State attributes: `enabled`, `visible`
+/// Creates a new horizontal line control.
+/// The format is `hline!("attributes")` where the attributes are pairs of key-value, separated by comma.
 /// 
-/// # Example
+/// # Parameters
+/// * `text` or `caption` (optional, first positional parameter) - Text to display if HasTitle flag is set
+/// * `flags` - Line initialization flags (optional). Can be:
+///   - **DoubleLine** - Uses double line characters instead of single
+///   - **HasTitle** - Shows the text/caption in the middle of the line
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w` - Width of the line (required)
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
 /// 
-/// ```hline!("x=10, y=10, width=20")```
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Simple line
+/// let line = hline!("x=0, y=0, width=40");
+/// 
+/// // Double line with title
+/// let line = hline!("'Section Title', flags: [DoubleLine,HasTitle], width=40");
+/// ```
 #[proc_macro]
 pub fn hline(input: TokenStream) -> TokenStream {
     crate::controls::hline::create(input)
 }
 
-/// Creates a new vertical line control. The format is `vline!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
-/// If the `value` is a string, use single quotes to delimit the value.
-/// The following attributes are supported:
-/// * `flags` - the flags of the vertical line. The following values are supported:
-///   - **DoubleLine** - the line will be a double line
-/// * position attributes: `x` and  `y`,
-/// * size attributes: `height` or `h` (alias),
-/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
-///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
-///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
-/// * State attributes: `enabled`, `visible`
+/// Creates a new vertical line control.
+/// The format is `vline!("attributes")` where the attributes are pairs of key-value, separated by comma.
 /// 
-/// # Example
+/// # Parameters
+/// * `flags` - Line initialization flags (optional). Can be:
+///   - **DoubleLine** - Uses double line characters instead of single
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `height`/`h` - Height of the line (required)
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
 /// 
-/// ```vline!("x=10, y=10, height=20")```
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Simple line
+/// let line = vline!("x=0, y=0, height=20");
+/// 
+/// // Double line
+/// let line = vline!("flags: DoubleLine, height=20, dock: left");
+/// ```
 #[proc_macro]
 pub fn vline(input: TokenStream) -> TokenStream {
     crate::controls::vline::create(input)
 }
 
-#[proc_macro]
-pub fn datepicker(input: TokenStream) -> TokenStream {
-    crate::controls::datepicker::create(input)
-}
-
+/// Creates a new vertical splitter control for resizing two vertical panes.
+/// The format is `vsplitter!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `pos` (optional, first positional parameter) - Initial position of the splitter
+/// * `resize`, `resize-behavior`, `on-resize`, `rb` - Resize behavior (optional). Can be:
+///   - **PreserveAspectRatio** (default) - Maintains relative sizes when parent resizes
+///   - **PreserveLeftPanelSize** - Keeps left panel size fixed
+///   - **PreserveRightPanelSize** - Keeps right panel size fixed
+/// * `min-left-width`, `mintopwidth`, `mlw` - Minimum width for the left panel
+/// * `min-right-width`, `minbottomwidth`, `mrw` - Minimum width for the right panel
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `height`/`h` - Height of the splitter (required)
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Simple splitter
+/// let split = vsplitter!("width=40, height=20");
+/// 
+/// // Advanced configuration
+/// let split = vsplitter!(
+///     "x=0, y=0, height=20, width=40,
+///     resize: PreserveLeftPanelSize, 
+///     minleftwidth: 30, 
+///     minrightwidth: 40"
+/// );
+/// ```
 #[proc_macro]
 pub fn vsplitter(input: TokenStream) -> TokenStream {
     crate::controls::vsplitter::create(input)
 }
 
+/// Creates a new horizontal splitter control for resizing two horizontal panes.
+/// The format is `hsplitter!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `pos` (optional, first positional parameter) - Initial position of the splitter
+/// * `resize`, `resize-behavior`, `on-resize`, `rb` - Resize behavior (optional). Can be:
+///   - **PreserveAspectRatio** (default) - Maintains relative sizes when parent resizes
+///   - **PreserveTopPanelSize** - Keeps top panel size fixed
+///   - **PreserveBottomPanelSize** - Keeps bottom panel size fixed
+/// * `min-top-height`, `mintopheight`, `mth` - Minimum height for the top panel
+/// * `min-bottom-height`, `minbottomheight`, `mbh` - Minimum height for the bottom panel
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w` - Width of the splitter (required)
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Simple splitter
+/// let split = hsplitter!("x:0, y:0, width=40, height=20");
+/// 
+/// // Advanced configuration
+/// let split = hsplitter!(
+///     "x=0, y=0, width=40, height=20,
+///     resize: PreserveTopPanelSize, 
+///     mintopheight: 10, 
+///     minbottomheight: 15"
+/// );
+/// ```
 #[proc_macro]
 pub fn hsplitter(input: TokenStream) -> TokenStream {
     crate::controls::hsplitter::create(input)
 }
+
+/// Creates a new DatePicker control for selecting dates.
+/// The format is `datepicker!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `date` (optional, first positional parameter) - Initial date in YYYY-MM-DD format or any format supported by NaiveDate
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // With explicit date
+/// let dp = datepicker!("2024-06-13, x=1, y=1, width=19, height=1");
+/// 
+/// // With named parameter and layout
+/// let dp = datepicker!("date: 2024-06-13, dock: center, width: 19, margin: 1");
+/// ```
+#[proc_macro]
+pub fn datepicker(input: TokenStream) -> TokenStream {
+    crate::controls::datepicker::create(input)
+}
+
 
 #[proc_macro]
 pub fn listbox(input: TokenStream) -> TokenStream {
     crate::controls::listbox::create(input)
 }
 
+/// Creates a new ListView control for displaying a list of items of type T.
+/// The format is `listview!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `type` or `class` (required, first positional parameter) - The type T of items to display
+/// * `flags` - ListView initialization flags (optional). Can be:
+///   - **ScrollBars** - Shows scroll bars
+///   - **SearchBar** - Enables search functionality
+///   - **CheckBoxes** - Adds checkboxes to items
+///   - **ShowGroups** - Enables item grouping
+///   - **SmallIcons** - Uses small icons
+///   - **LargeIcons** - Uses large icons
+///   - **CustomFilter** - Enables custom filtering
+///   - **NoSelection** - Disables item selection
+/// * `view` or `viewmode` or `vm` - View mode (optional). Can be:
+///   - **Details** - Shows items in details view with columns
+///   - **Columns(N)** - Shows items in N columns (N from 1 to 10)
+/// * `columns` - Column definitions for details view (optional). Format: [{Name,Width,Align},...] 
+/// * `lsm` or `left-scroll-margin` - Left scroll margin in characters (optional)
+/// * `tsm` or `top-scroll-margin` - Top scroll margin in characters (optional)
+/// * Layout parameters: x, y, width/w, height/h, align/a, dock/d, etc.
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic usage
+/// let lv = listview!("type: MyType, flags: ScrollBars, x=0, y=0, width=40, height=20");
+/// 
+/// // With columns in details view
+/// let lv = listview!(
+///     "MyType, 
+///     view: Details, 
+///     columns: [{Name,10,left}, {Age,5,right}], 
+///     dock: Fill"
+/// );
+/// 
+/// // Multi-column view
+/// let lv = listview!("class: MyType, view: Columns(3), width: 100%, height: 100%");
+/// ```
+/// 
+/// The type T must implement the `ListItem` trait. For columns, use the `#[Column]` attribute 
+/// on struct fields to define how they should be displayed.
 #[proc_macro]
 pub fn listview(input: TokenStream) -> TokenStream {
     crate::controls::listview::create(input)
