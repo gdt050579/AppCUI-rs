@@ -424,7 +424,7 @@ pub fn headercolumn(input: TokenStream) -> TokenStream {
 /// 
 /// # Example
 /// 
-/// ```button!("caption=`Click me!`, type=Flat, x=10, y=10, width=20")```
+/// ```button!("caption='Click me!', type=Flat, x=10, y=10, width=20")```
 /// 
 /// Alternatively, the first parameter (if the key is not specified) is consider the caption:
 /// 
@@ -449,7 +449,7 @@ pub fn button(input: TokenStream) -> TokenStream {
 /// 
 /// # Example
 /// 
-/// ```checkbox!("caption=`Check me!`, x=10, y=10, width=20, height=2")```
+/// ```checkbox!("caption='Check me!', x=10, y=10, width=20, height=2")```
 /// 
 /// Alternatively, the first parameter (if the key is not specified) is consider the caption:
 /// 
@@ -474,7 +474,7 @@ pub fn checkbox(input: TokenStream) -> TokenStream {
 /// 
 /// # Example
 /// 
-/// ```radiobox!("caption=`Select me!`, x=10, y=10, width=20, height=2")```
+/// ```radiobox!("caption='Select me!', x=10, y=10, width=20, height=2")```
 /// 
 /// Alternatively, the first parameter (if the key is not specified) is consider the caption:
 /// 
@@ -498,7 +498,7 @@ pub fn radiobox(input: TokenStream) -> TokenStream {
 /// 
 /// # Example
 /// 
-/// ```label!("caption=`Hello!`, x=10, y=10, width=20, height=2")```
+/// ```label!("caption='Hello!', x=10, y=10, width=20, height=2")```
 /// 
 /// Alternatively, the first parameter (if the key is not specified) is consider the caption:
 /// 
@@ -527,7 +527,7 @@ pub fn label(input: TokenStream) -> TokenStream {
 /// 
 /// # Example
 /// 
-/// ```panel!("caption=`Hello!`, x=10, y=10, width=20, height=10")```
+/// ```panel!("caption='Hello!', x=10, y=10, width=20, height=10")```
 /// 
 /// Alternatively, the first parameter (if the key is not specified) is consider the caption:
 /// 
@@ -537,6 +537,21 @@ pub fn panel(input: TokenStream) -> TokenStream {
     crate::controls::panel::create(input)
 }
 
+/// Creates a new password control. The format is `password!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `password` or `pass`- the password displayed in the control
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+///
+/// ```password!("password='1234', x=10, y=10, width=20")```
 #[proc_macro]
 pub fn password(input: TokenStream) -> TokenStream {
     crate::controls::password::create(input)
@@ -552,11 +567,53 @@ pub fn toolbaritem(input: TokenStream) -> TokenStream {
     crate::controls::toolbaritem::create(input)
 }
 
+/// Creates a new colorpicker control. The format is `colorpicker!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `color` - the color selected by the colorpicker. Could be one of the following: **Black**, **DakrBlue**, **DarkGreen**, **Teal**, **DarkRed**, **Magenta**, **Olive**, **Gray**, **Silver**, **Blue**, **Green**, **Aqua**, **Red**, **Pink**, **Yellow**, **White** or **Transparent**
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+///
+/// ```colorpicker!("color=Red, x=10, y=10, width=20")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the color:
+/// 
+/// ```colorpicker!("Red, x:0, y=10, w:20")```
 #[proc_macro]
 pub fn colorpicker(input: TokenStream) -> TokenStream {
     crate::controls::colorpicker::create(input)
 }
 
+/// Creates a new three-state box control. The format is `threestatebox!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `caption` or `text` - the text displayed near the threestatebox
+/// * `state` - the state of the threestatebox. The following values are supported:
+///   - **Checked** - the threestatebox is checked
+///   - **Unchecked** - the threestatebox is unchecked
+///   - **Unknown** - the threestatebox is in indeterminate state
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```threestatebox!("caption='Check me!', x=10, y=10, width=20, height=2")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the caption:
+/// 
+/// ```threestatebox!("'Check me!', x:0, y=10, w:20")```
 #[proc_macro]
 pub fn threestatebox(input: TokenStream) -> TokenStream {
     crate::controls::threestatebox::create(input)
@@ -582,11 +639,58 @@ pub fn accordion(input: TokenStream) -> TokenStream {
     crate::controls::accordion::create(input)
 }
 
+/// Creates a new keyselector control. The format is `keyselector!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `key` - the key selected by the keyselector. The key should be a valid key (see the `key!` macro)
+/// * `flags` - the flags of the keyselector. The following values are supported:
+///   - **AcceptEnter** - the keyselector will process the Enter key
+///   - **AcceptEscape** - the keyselector will process the Escape key
+///   - **AcceptTab** - the keyselector will process the Tab key
+///   - **ReadOnly** - the keyselector is read-only
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias), 
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```keyselector!("key='F2', x=10, y=10, width=20")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the key:
+/// 
+/// ```keyselector!("'Ctrl+Alt+F2', x:0, y=10, w:20")```
 #[proc_macro]
 pub fn keyselector(input: TokenStream) -> TokenStream {
     crate::controls::keyselector::create(input)
 }
 
+/// Creates a new textfield control. The format is `textfield!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `text` - the text displayed in the textfield
+/// * `flags` - the flags of the textfield. The following values are supported:
+///   - **ProcessEnter** - the textfield will process the Enter key
+///   - **ReadOnly** - the textfield is read-only
+///   - **DisableAutoSelectOnFocus** - the text will not be selected when the textfield receives the focus
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```textfield!("text='Hello!', x=10, y=10, width=20, height=2")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the text:
+/// 
+/// ```textfield!("'Hello!', x:0, y=10, w:20")```
 #[proc_macro]
 pub fn textfield(input: TokenStream) -> TokenStream {
     crate::controls::textfield::create(input)
@@ -625,11 +729,43 @@ pub fn menu(input: TokenStream) -> TokenStream {
     crate::menu::menu::create(input, None)
 }
 
+/// Creates a new horizontal line control. The format is `hline!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `flags` - the flags of the horizontal line. The following values are supported:
+///   - **DoubleLine** - the line will be a double line
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```hline!("x=10, y=10, width=20")```
 #[proc_macro]
 pub fn hline(input: TokenStream) -> TokenStream {
     crate::controls::hline::create(input)
 }
 
+/// Creates a new vertical line control. The format is `vline!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `flags` - the flags of the vertical line. The following values are supported:
+///   - **DoubleLine** - the line will be a double line
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `height` or `h` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```vline!("x=10, y=10, height=20")```
 #[proc_macro]
 pub fn vline(input: TokenStream) -> TokenStream {
     crate::controls::vline::create(input)
@@ -665,6 +801,28 @@ pub fn togglebutton(input: TokenStream) -> TokenStream {
     crate::controls::togglebutton::create(input)
 }
 
+/// Creates a new pathfinder control. The format is `pathfinder!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `path` - the path displayed in the pathfinder
+/// * `flags` - the flags of the pathfinder. The following values are supported:
+///   - **ReadOnly** - the pathfinder is read-only
+///   - **CaseSensitive** - the pathfinder is case-sensitive
+/// * position attributes: `x` and  `y`,
+/// * size attributes: `width` or `w` (alias),
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)   
+/// * Alignament attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+/// 
+/// # Example
+/// 
+/// ```pathfinder!("path='C:\\', x=10, y=10, width=20")```
+/// 
+/// Alternatively, the first parameter (if the key is not specified) is consider the path:
+/// 
+/// ```pathfinder!("'C:\\Windows\\', x:0, y=10, w:20")```
 #[proc_macro]
 pub fn pathfinder(input: TokenStream) -> TokenStream {
     crate::controls::pathfinder::create(input)
