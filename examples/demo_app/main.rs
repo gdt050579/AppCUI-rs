@@ -23,7 +23,6 @@ const LOGO: [&str; 15] = [
           overwrite = OnPaint, 
           commands  = [Lists, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
-    index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
     menu_arrange: Handle<Menu>,
     menu_examples: Handle<Menu>,
@@ -32,7 +31,6 @@ impl MyDesktop {
     fn new() -> Self {
         Self {
             base: Desktop::new(),
-            index: 1,
             arrange_method: None,
             menu_arrange: Handle::None,
             menu_examples: Handle::None,
