@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+mod file_navigator;
 
 const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
@@ -20,11 +21,12 @@ const LOGO: [&str; 15] = [
 
 #[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [AddWindow,Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
+          commands  = [Lists, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
     menu_arrange: Handle<Menu>,
+    menu_examples: Handle<Menu>,
 }
 impl MyDesktop {
     fn new() -> Self {
@@ -33,6 +35,7 @@ impl MyDesktop {
             index: 1,
             arrange_method: None,
             menu_arrange: Handle::None,
+            menu_examples: Handle::None,
         }
     }
 }
@@ -58,6 +61,11 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
+        self.menu_examples = self.register_menu(menu!("
+            &Examples, class: MyDesktop, items:[
+                { Lists, cmd: Lists}
+            ]
+        "));
         self.menu_arrange = self.register_menu(menu!("
             &Windows,class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
@@ -72,14 +80,13 @@ impl DesktopEvents for MyDesktop {
 }
 impl CommandBarEvents for MyDesktop {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("Insert"), "Add new_window", mydesktop::Commands::AddWindow);
         commandbar.set(key!("Escape"), "Exit", mydesktop::Commands::Exit);
     }
 
     fn on_event(&mut self, command_id: mydesktop::Commands) {
         match command_id {
-            mydesktop::Commands::AddWindow => {
-                // create a new window
+            mydesktop::Commands::Lists => {
+                self.add_window(file_navigator::Win::new());
             }
             mydesktop::Commands::Exit => self.close(), 
             _ => {}
@@ -103,12 +110,13 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self,menubar: &mut MenuBar){
+    fn on_update_menubar(&self,menubar: &mut MenuBar) {
+        menubar.add(self.menu_examples);
         menubar.add(self.menu_arrange);
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).command_bar().menu_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
     Ok(())
 }
