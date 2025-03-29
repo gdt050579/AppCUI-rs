@@ -83,9 +83,6 @@ impl CommandBarEvents for MyDesktop {
 
     fn on_event(&mut self, command_id: mydesktop::Commands) {
         match command_id {
-            mydesktop::Commands::Lists => {
-                self.add_window(file_navigator::Win::new());
-            }
             mydesktop::Commands::Exit => self.close(), 
             _ => {}
 
@@ -108,10 +105,27 @@ impl MenuEvents for MyDesktop {
         }
     }
 
+    
+
     fn on_update_menubar(&self,menubar: &mut MenuBar) {
         menubar.add(self.menu_examples);
         menubar.add(self.menu_arrange);
     }
+    
+    
+    fn on_command(&mut self,_:Handle<Menu>,_:Handle<menu::Command>,command:mydesktop::Commands){
+        match command {
+            mydesktop::Commands::Lists => {
+                self.add_window(file_navigator::Win::new());
+            }
+            _ => {}
+        }
+        let m = self.arrange_method;
+        if let Some(method) = m {
+            self.arrange_windows(method);
+        }
+    }
+    
 }
 
 fn main() -> Result<(), appcui::system::Error> {
