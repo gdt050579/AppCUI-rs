@@ -1,5 +1,7 @@
 use appcui::prelude::*;
 mod file_navigator;
+mod base_controls;
+mod image_win;
 
 const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
@@ -21,7 +23,7 @@ const LOGO: [&str; 15] = [
 
 #[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [Lists, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
+          commands  = [Lists, BaseControls, Images, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
     menu_arrange: Handle<Menu>,
@@ -61,7 +63,8 @@ impl DesktopEvents for MyDesktop {
         // define and register a menu
         self.menu_examples = self.register_menu(menu!("
             &Examples, class: MyDesktop, items:[
-                { Lists, cmd: Lists}
+                { Lists, cmd: Lists}, 
+                { Images, cmd: Images}
             ]
         "));
         self.menu_arrange = self.register_menu(menu!("
@@ -115,8 +118,11 @@ impl MenuEvents for MyDesktop {
     
     fn on_command(&mut self,_:Handle<Menu>,_:Handle<menu::Command>,command:mydesktop::Commands){
         match command {
-            mydesktop::Commands::Lists => {
-                self.add_window(file_navigator::Win::new());
+            mydesktop::Commands::Lists => { self.add_window(file_navigator::Win::new()); },
+            mydesktop::Commands::Images => { self.add_window(image_win::Win::new()); },
+            
+            mydesktop::Commands::BaseControls => {
+                //base_controls::open_base_controls_window();
             }
             _ => {}
         }
