@@ -122,7 +122,7 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::Images => { self.add_window(image_win::Win::new()); },
             
             mydesktop::Commands::BaseControls => {
-                //base_controls::open_base_controls_window();
+                self.add_window(base_controls::Win::new());
             }
             _ => {}
         }
