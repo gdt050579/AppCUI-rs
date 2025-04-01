@@ -1,6 +1,6 @@
 use super::{Entry, EntryType, Root};
-use crate::utils::NavigatorEntry;
 use crate::prelude::*;
+use crate::utils::NavigatorEntry;
 use chrono::DateTime;
 use chrono::NaiveDateTime;
 use std::fs;
@@ -13,9 +13,9 @@ pub(crate) struct Navigator {
 }
 
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
-    #[cfg(target_os = "windows")]
+    #[cfg(any(target_os = "windows", wasm_windows))]
     fn entries(&self, path: &PathBuf) -> Vec<Entry> {
-        log!("FS","entries({})", path.display()); 
+        log!("FS", "entries({})", path.display());
         if path.as_os_str().is_empty() {
             return vec![];
         }
@@ -26,7 +26,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
         }
     }
 
-    #[cfg(target_family = "unix")]
+    #[cfg(any(target_family = "unix", wasm_unix))]
     fn entries(&self, path: &PathBuf) -> Vec<Entry> {
         Self::get_folder_listing(path).unwrap_or_default()
     }
@@ -35,12 +35,12 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
         super::get_os_roots()
     }
 
-    #[cfg(target_os = "windows")]
+    #[cfg(any(target_os = "windows", wasm_windows))]
     fn new() -> Self {
         Self { windows_model: true }
     }
 
-    #[cfg(target_family = "unix")]
+    #[cfg(any(target_family = "unix", wasm_unix))]
     fn new() -> Self {
         Self { windows_model: false }
     }
@@ -102,7 +102,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
 
 impl Navigator {
     fn get_folder_listing(path: &Path) -> std::io::Result<Vec<Entry>> {
-        log!("FS","get_folder_listing({})", path.display());    
+        log!("FS", "get_folder_listing({})", path.display());
         let mut result: Vec<Entry> = vec![];
         // Read the directory entries
         for dir_entry in fs::read_dir(path)? {

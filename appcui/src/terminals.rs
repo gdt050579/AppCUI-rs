@@ -1,10 +1,12 @@
 mod debug;
-mod system_event;
-#[cfg(target_family = "unix")]
-mod termios;
 #[cfg(target_os = "linux")]
 mod ncurses;
+mod system_event;
 mod system_event_thread;
+#[cfg(target_family = "unix")]
+mod termios;
+#[cfg(target_arch = "wasm32")]
+mod web_terminal;
 #[cfg(target_os = "windows")]
 mod windows_console;
 
@@ -22,18 +24,20 @@ pub(crate) use self::system_event::MouseDoubleClickEvent;
 pub(crate) use self::system_event::MouseMoveEvent;
 pub(crate) use self::system_event::MouseWheelEvent;
 pub(crate) use self::system_event::SystemEvent;
-pub(crate) use self::system_event::TimerTickUpdateEvent;
-pub(crate) use self::system_event::TimerStartEvent;
 pub(crate) use self::system_event::TimerPausedEvent;
+pub(crate) use self::system_event::TimerStartEvent;
+pub(crate) use self::system_event::TimerTickUpdateEvent;
 
 pub(super) use self::system_event_thread::SystemEventReader;
 
 use self::debug::DebugTerminal;
 
-#[cfg(target_family = "unix")]
-use self::termios::TermiosTerminal;
 #[cfg(target_os = "linux")]
 use self::ncurses::NcursesTerminal;
+#[cfg(target_family = "unix")]
+use self::termios::TermiosTerminal;
+#[cfg(target_arch = "wasm32")]
+use self::web_terminal::WebTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_console::WindowsTerminal;
 
@@ -44,12 +48,14 @@ pub(crate) trait Terminal {
     fn get_clipboard_text(&self) -> Option<String>;
     fn set_clipboard_text(&mut self, text: &str);
     fn has_clipboard_text(&self) -> bool;
-    fn query_system_event(&mut self) -> Option<SystemEvent> { None }
+    fn query_system_event(&mut self) -> Option<SystemEvent> {
+        None
+    }
     fn is_single_threaded(&self) -> bool;
 }
 
 #[repr(u8)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum TerminalType {
     #[cfg(target_os = "windows")]
     WindowsConsole,
@@ -57,6 +63,8 @@ pub enum TerminalType {
     Termios,
     #[cfg(target_os = "linux")]
     NcursesTerminal,
+    #[cfg(target_arch = "wasm32")]
+    WebTerminal,
 }
 
 pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
@@ -93,11 +101,24 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
         }
         #[cfg(target_family = "unix")]
         TerminalType::Termios => TermiosTerminal::new(builder, sender),
-        
+
         #[cfg(target_os = "linux")]
         TerminalType::NcursesTerminal => NcursesTerminal::new(builder),
+
+        #[cfg(target_arch = "wasm32")]
+        TerminalType::WebTerminal => {
+            let term = WebTerminal::new(builder, sender)?;
+            return Ok(Box::new(term));
+        }
     }
 }
+
+#[cfg(target_arch = "wasm32")]
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+    let term = WebTerminal::new(builder, sender)?;
+    Ok(Box::new(term))
+}
+
 #[cfg(target_os = "windows")]
 fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     let term = WindowsTerminal::new(builder, sender)?;
@@ -112,7 +133,7 @@ fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<Syste
 fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     TermiosTerminal::new(builder, sender)
 }
-#[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
+#[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos", target_arch = "wasm32")))]
 fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     // anything else
     TermiosTerminal::new(builder, sender)

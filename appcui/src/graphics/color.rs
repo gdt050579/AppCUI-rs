@@ -43,10 +43,10 @@ pub enum Color {
 
     /// <table><tr><td style="background-color: #FF00FF; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>
     Pink = 0x0D,
-    
+
     /// <table><tr><td style="background-color: #FFFF00; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>
     Yellow = 0x0E,
-    
+
     /// <table><tr><td style="background-color: #FFFFFF; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>
     White = 0x0F,
 
@@ -54,7 +54,7 @@ pub enum Color {
     Transparent = 0x10,
 }
 impl Color {
-    pub fn from_value(value: i32)->Option<Color> {
+    pub fn from_value(value: i32) -> Option<Color> {
         match value {
             0 => Some(Color::Black),
             1 => Some(Color::DarkBlue),
@@ -73,10 +73,10 @@ impl Color {
             14 => Some(Color::Yellow),
             15 => Some(Color::White),
             16 => Some(Color::Transparent),
-            _ => None
+            _ => None,
         }
     }
-    pub fn name(&self)->&str {
+    pub fn name(&self) -> &str {
         match self {
             Color::Black => "Black",
             Color::DarkBlue => "DarkBlue",
@@ -95,6 +95,28 @@ impl Color {
             Color::Yellow => "Yellow",
             Color::White => "White",
             Color::Transparent => "Transparent",
+        }
+    }
+
+    pub fn to_rgba(&self) -> [f32; 3] {
+        match self {
+            Color::Black => [0.0, 0.0, 0.0],
+            Color::DarkBlue => [0.0, 0.0, 0.5],
+            Color::DarkGreen => [0.0, 0.5, 0.0],
+            Color::Teal => [0.0, 0.5, 0.5],
+            Color::DarkRed => [0.5, 0.0, 0.0],
+            Color::Magenta => [0.5, 0.0, 0.5],
+            Color::Olive => [0.5, 0.5, 0.0],
+            Color::Silver => [0.75, 0.75, 0.75],
+            Color::Gray => [0.5, 0.5, 0.5],
+            Color::Blue => [0.0, 0.0, 1.0],
+            Color::Green => [0.0, 1.0, 0.0],
+            Color::Aqua => [0.0, 1.0, 1.0],
+            Color::Red => [1.0, 0.0, 0.0],
+            Color::Pink => [1.0, 0.0, 1.0],
+            Color::Yellow => [1.0, 1.0, 0.0],
+            Color::White => [1.0, 1.0, 1.0],
+            Color::Transparent => [0.0, 0.0, 0.0],
         }
     }
 }

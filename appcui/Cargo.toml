@@ -11,6 +11,34 @@ flat_string = "1.0.0"
 chrono = "0.4.38"
 AppCUIProcMacro = {path = "../appcui-proc-macro"}
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+    "Blob",
+    "BlobPropertyBag",
+    "Url",
+    "KeyboardEvent",
+    "WheelEvent",
+    "Worker", 
+    "WebGlUniformLocation",
+    "Window", 
+    "Document", 
+    "HtmlCanvasElement", 
+    "WebGlRenderingContext", 
+    "WebGl2RenderingContext",
+    "WebGlBuffer", 
+    "WebGlProgram", 
+    "WebGlShader", 
+    "WebGlTexture", 
+    "MouseEvent", 
+    "console", 
+    "CanvasRenderingContext2d",
+    "TextMetrics"]}
+js-sys = "0.3"
+
 [target.'cfg(target_os = "linux")'.dependencies]
 copypasta = "0.10.1"
 
@@ -22,6 +50,7 @@ default = []
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
 EVENT_RECORDER = []
 GLOBAL_RUNTIME = []
+
 
 [lints]
 workspace = true
