@@ -51,15 +51,48 @@ impl WebTerminal {
             Size { width, height }
         };
 
-        web_sys::console::log_1(&format!("WebGL canvas size: {}x{}", size.width, size.height).into());
+        let cols = 211;
+        let rows = 56;
+        let cell_width_px = 9;
+        let cell_height_px = 20;
 
-        webgl_canvas.set_width(size.width);
-        webgl_canvas.set_height(size.height);
-        text_canvas.set_width(size.width);
-        text_canvas.set_height(size.height);
+        let canvas_width = cols * cell_width_px;
+        let canvas_height = rows * cell_height_px;
 
         let gl = Self::get_webgl_context(&webgl_canvas)?;
-        gl.viewport(0, 0, size.width as i32, size.height as i32);
+
+        webgl_canvas.set_width(canvas_width);
+        webgl_canvas.set_height(canvas_height);
+        text_canvas.set_width(canvas_width);
+        text_canvas.set_height(canvas_height);
+
+        webgl_canvas
+            .style()
+            .set_property("width", &format!("{}px", canvas_width))
+            .expect("Failed to set canvas CSS width");
+        webgl_canvas
+            .style()
+            .set_property("height", &format!("{}px", canvas_height))
+            .expect("Failed to set canvas CSS height");
+
+        text_canvas
+            .style()
+            .set_property("width", &format!("{}px", canvas_width))
+            .expect("Failed to set canvas CSS width");
+        text_canvas
+            .style()
+            .set_property("height", &format!("{}px", canvas_height))
+            .expect("Failed to set canvas CSS height");
+
+        gl.viewport(0, 0, canvas_width as i32, canvas_height as i32);
+        web_sys::console::log_1(&format!("WebGL canvas size: {canvas_width}x{canvas_height}").into());
+
+        // webgl_canvas.set_width(size.width);
+        // webgl_canvas.set_height(size.height);
+        // text_canvas.set_width(size.width);
+        // text_canvas.set_height(size.height);
+        // web_sys::console::log_1(&format!("WebGL canvas size: {}x{}", size.width, size.height).into());
+        // gl.viewport(0, 0, size.width as i32, size.height as i32);
 
         let program = Self::init_program(&gl)?;
         let pos_attrib_location = gl.get_attrib_location(&program, "position") as u32;
@@ -80,7 +113,7 @@ impl WebTerminal {
             pos_attrib_location,
             color_attrib_location,
             event_queue: queue,
-            size: Size { width: 211, height: 56 },
+            size: Size { width: cols, height: rows },
         };
 
         terminal
@@ -169,9 +202,10 @@ impl WebTerminal {
 
         let canvas_width = self.webgl_canvas.width() as f32;
         let canvas_height = self.webgl_canvas.height() as f32;
-        let cell_width = canvas_width / surface.size.width as f32;
-        let cell_height = canvas_height / surface.size.height as f32;
+        let cell_width = canvas_width / self.size.width as f32;
+        let cell_height = canvas_height / self.size.height as f32;
 
+        web_sys::console::log_1(&format!("Canvas size: {}x{}", canvas_width, canvas_height).into());
         web_sys::console::log_1(&format!("Background Cell size: {}x{}", cell_width, cell_height).into());
 
         let mut vertices: Vec<f32> = Vec::new();
@@ -180,7 +214,7 @@ impl WebTerminal {
                 if let Some(cell) = &surface.char(x as i32, y as i32) {
                     let pos_x = x as f32 * cell_width;
                     let pos_y = y as f32 * cell_height;
-                    let bg_color = cell.background.to_rgba();
+                    let bg_color = cell.background.to_rgb();
 
                     let x_ndc = 2.0 * (pos_x / canvas_width) - 1.0;
                     let y_ndc = 1.0 - 2.0 * (pos_y / canvas_height);
@@ -234,6 +268,7 @@ impl WebTerminal {
 
         let canvas_width = self.text_canvas.width() as f64;
         let canvas_height = self.text_canvas.height() as f64;
+
         context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
 
         let num_cols = surface.size.width as f64;
@@ -243,28 +278,24 @@ impl WebTerminal {
 
         context.save();
 
-        context.set_font("1px monospace");
+        context.set_font("20px Consolas Mono, monospace");
         context.set_text_baseline("top");
-        context.set_text_align("start");
+        context.set_text_align("middle");
 
         for y in 0..surface.size.height {
             for x in 0..surface.size.width {
                 if let Some(cell) = &surface.char(x as i32, y as i32) {
-                    let foreground = cell.foreground.to_rgba();
-                    let css_color = format!("rgb({},{},{})", foreground[0], foreground[1], foreground[2]);
+                    let foreground = cell.foreground.to_rgb();
+                    let css_color = format!("rgb({},{},{})", foreground[0] * 255.0, foreground[1] * 255.0, foreground[2] * 255.0);
                     context.set_fill_style(&JsValue::from_str(&css_color));
 
-                    context.save();
-                    context.translate(x as f64 * cell_width, y as f64 * cell_height)?;
-                    context.scale(cell_width, cell_height)?;
-
-                    context.fill_text(&cell.code.to_string(), 0.0, 0.0)?;
-                    context.restore();
+                    let pos_x = (x as f64 * cell_width) as i32;
+                    let pos_y = (y as f64 * cell_height) as i32;
+                    context.fill_text(&cell.code.to_string(), pos_x.into(), pos_y.into())?;
                 }
             }
         }
 
-        // Restore the context state.
         context.restore();
         Ok(())
     }
@@ -273,16 +304,20 @@ impl WebTerminal {
         let document = window().ok_or("No window")?.document().ok_or("No document")?;
         let doc_target: &EventTarget = document.as_ref();
 
-        let canvas_width = self.webgl_canvas.width() as f32;
-        let canvas_height = self.webgl_canvas.height() as f32;
-        let cell_width = canvas_width / 211 as f32;
-        let cell_height = canvas_height / 56 as f32;
+        let event_queue = self.event_queue.clone();
+        let sender_mouse = sender.clone();
+        let cell_width = self.webgl_canvas.width() as f32 / (211 as f32);
+        let cell_height = self.webgl_canvas.height() as f32 / (56 as f32);
 
         let sender_key = sender.clone();
         let event_queue = self.event_queue.clone();
 
         let keydown = Closure::wrap(Box::new(move |event: KeyboardEvent| {
             let key_str = event.key();
+            if matches!(key_str.as_str(), "F1" | "F2" | "F3" | "F4" | "F5" | "F6" | "F7" | "F8" | "F9" | "F10") {
+                event.prevent_default();
+            }
+
             let index: u8 = match key_str.as_str() {
                 "F1" => 1,
                 "F2" => 2,
@@ -363,10 +398,21 @@ impl WebTerminal {
                 modifiers |= crate::input::KeyModifier::Shift;
             }
 
+            let character = if key_str.chars().count() == 1 {
+                let c = key_str.chars().next().unwrap();
+                if c.is_alphanumeric() {
+                    c
+                } else {
+                    '\0'
+                }
+            } else {
+                '\0'
+            };
             let sys_event = SystemEvent::KeyPressed(crate::terminals::KeyPressedEvent {
                 key: crate::input::Key::new(key_code, modifiers),
-                character: key_str.chars().next().unwrap_or('\0'),
+                character,
             });
+            web_sys::console::log_1(&format!("Key event: {:?}", sys_event).into());
 
             let _ = sender_key.send(sys_event);
             if let Ok(mut q) = event_queue.lock() {
@@ -378,13 +424,18 @@ impl WebTerminal {
         keydown.forget();
 
         let canvas_target: &EventTarget = self.webgl_canvas.as_ref();
+        let canvas = self.webgl_canvas.clone();
         let event_queue = self.event_queue.clone();
 
         let sender_mouse = sender.clone();
         let mousemove = Closure::wrap(Box::new(move |event: MouseEvent| {
+            let rect = canvas.get_bounding_client_rect();
+            let canvas_x = event.client_x() as f32 - rect.left() as f32;
+            let canvas_y = event.client_y() as f32 - rect.top() as f32;
+
             let sys_event = SystemEvent::MouseMove(crate::terminals::MouseMoveEvent {
-                x: (event.client_x() as f32 / cell_width) as i32,
-                y: (event.client_y() as f32 / cell_height) as i32,
+                x: (canvas_x as f32 / cell_width) as i32,
+                y: (canvas_y as f32 / cell_height) as i32,
                 button: crate::input::MouseButton::None,
             });
 
@@ -396,9 +447,14 @@ impl WebTerminal {
         canvas_target.add_event_listener_with_callback("mousemove", mousemove.as_ref().unchecked_ref())?;
         mousemove.forget();
 
+        let canvas = self.webgl_canvas.clone();
         let sender_mousedown = sender.clone();
         let event_queue = self.event_queue.clone();
         let mousedown = Closure::wrap(Box::new(move |event: MouseEvent| {
+            let rect = canvas.get_bounding_client_rect();
+            let canvas_x = event.client_x() as f32 - rect.left() as f32;
+            let canvas_y = event.client_y() as f32 - rect.top() as f32;
+
             let button = match event.button() {
                 0 => crate::input::MouseButton::Left,
                 1 => crate::input::MouseButton::Center,
@@ -406,8 +462,8 @@ impl WebTerminal {
                 _ => crate::input::MouseButton::None,
             };
             let sys_event = SystemEvent::MouseButtonDown(crate::terminals::MouseButtonDownEvent {
-                x: (event.client_x() as f32 / cell_width) as i32,
-                y: (event.client_y() as f32 / cell_height) as i32,
+                x: (canvas_x as f32 / cell_width) as i32,
+                y: (canvas_y as f32 / cell_height) as i32,
                 button,
             });
 
@@ -421,8 +477,13 @@ impl WebTerminal {
 
         let sender_mouseup = sender.clone();
         let event_queue = self.event_queue.clone();
+        let canvas = self.webgl_canvas.clone();
 
         let mouseup = Closure::wrap(Box::new(move |event: MouseEvent| {
+            let rect = canvas.get_bounding_client_rect();
+            let canvas_x = event.client_x() as f32 - rect.left() as f32;
+            let canvas_y = event.client_y() as f32 - rect.top() as f32;
+
             let button = match event.button() {
                 0 => crate::input::MouseButton::Left,
                 1 => crate::input::MouseButton::Center,
@@ -430,8 +491,8 @@ impl WebTerminal {
                 _ => crate::input::MouseButton::None,
             };
             let sys_event = SystemEvent::MouseButtonUp(crate::terminals::MouseButtonUpEvent {
-                x: (event.client_x() as f32 / cell_width) as i32,
-                y: (event.client_y() as f32 / cell_height) as i32,
+                x: (canvas_x as f32 / cell_width) as i32,
+                y: (canvas_y as f32 / cell_height) as i32,
                 button,
             });
 
@@ -445,6 +506,7 @@ impl WebTerminal {
 
         let sender_wheel = sender.clone();
         let event_queue = self.event_queue.clone();
+        let canvas = self.webgl_canvas.clone();
 
         let wheel = Closure::wrap(Box::new(move |event: WheelEvent| {
             let delta_y = event.delta_y();
@@ -453,9 +515,13 @@ impl WebTerminal {
             } else {
                 crate::input::MouseWheelDirection::Down
             };
+            let rect = canvas.get_bounding_client_rect();
+            let canvas_x = event.client_x() as f32 - rect.left() as f32;
+            let canvas_y = event.client_y() as f32 - rect.top() as f32;
+
             let sys_event = SystemEvent::MouseWheel(crate::terminals::MouseWheelEvent {
-                x: (event.client_x() as f32 / cell_width) as i32,
-                y: (event.client_y() as f32 / cell_height) as i32,
+                x: (canvas_x as f32 / cell_width) as i32,
+                y: (canvas_y as f32 / cell_height) as i32,
                 direction,
             });
 
@@ -478,6 +544,7 @@ impl Terminal for WebTerminal {
         self.webgl_canvas.set_height(new_size.height);
         self.text_canvas.set_width(new_size.width);
         self.text_canvas.set_height(new_size.height);
+        self.gl.viewport(0, 0, new_size.width as i32, new_size.height as i32);
     }
 
     fn is_single_threaded(&self) -> bool {
