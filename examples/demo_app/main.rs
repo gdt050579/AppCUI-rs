@@ -2,6 +2,7 @@ use appcui::prelude::*;
 mod file_navigator;
 mod base_controls;
 mod image_win;
+mod animation;
 
 const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
@@ -23,7 +24,7 @@ const LOGO: [&str; 15] = [
 
 #[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [Lists, BaseControls, Images, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
+          commands  = [Lists, BaseControls, Images, Animation, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
     menu_arrange: Handle<Menu>,
@@ -65,7 +66,8 @@ impl DesktopEvents for MyDesktop {
             &Examples, class: MyDesktop, items:[
                 { Lists, cmd: Lists}, 
                 { 'Base Controls', cmd: BaseControls},
-                { Images, cmd: Images}
+                { Images, cmd: Images},
+                { Animation, cmd: Animation}
             ]
         "));
         self.menu_arrange = self.register_menu(menu!("
@@ -118,6 +120,7 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::Lists => { self.add_window(file_navigator::Win::new()); },
             mydesktop::Commands::Images => { self.add_window(image_win::Win::new()); },
             mydesktop::Commands::BaseControls => { self.add_window(base_controls::Win::new()); },
+            mydesktop::Commands::Animation => { self.add_window(animation::Win::new()); },
             _ => {}
         }
         let m = self.arrange_method;
