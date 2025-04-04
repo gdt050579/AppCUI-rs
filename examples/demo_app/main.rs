@@ -64,6 +64,7 @@ impl DesktopEvents for MyDesktop {
         self.menu_examples = self.register_menu(menu!("
             &Examples, class: MyDesktop, items:[
                 { Lists, cmd: Lists}, 
+                { 'Base Controls', cmd: BaseControls},
                 { Images, cmd: Images}
             ]
         "));
@@ -88,7 +89,6 @@ impl CommandBarEvents for MyDesktop {
         match command_id {
             mydesktop::Commands::Exit => self.close(), 
             _ => {}
-
         }
     }
 }
@@ -108,22 +108,16 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    
-
     fn on_update_menubar(&self,menubar: &mut MenuBar) {
         menubar.add(self.menu_examples);
         menubar.add(self.menu_arrange);
     }
     
-    
     fn on_command(&mut self,_:Handle<Menu>,_:Handle<menu::Command>,command:mydesktop::Commands){
         match command {
             mydesktop::Commands::Lists => { self.add_window(file_navigator::Win::new()); },
             mydesktop::Commands::Images => { self.add_window(image_win::Win::new()); },
-            
-            mydesktop::Commands::BaseControls => {
-                //self.add_window(base_controls::Win::new());
-            }
+            mydesktop::Commands::BaseControls => { self.add_window(base_controls::Win::new()); },
             _ => {}
         }
         let m = self.arrange_method;
@@ -131,7 +125,6 @@ impl MenuEvents for MyDesktop {
             self.arrange_windows(method);
         }
     }
-    
 }
 
 fn main() -> Result<(), appcui::system::Error> {
