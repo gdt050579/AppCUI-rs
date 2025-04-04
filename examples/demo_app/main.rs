@@ -24,11 +24,12 @@ const LOGO: [&str; 15] = [
 
 #[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [Lists, BaseControls, Images, Animation, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
+          commands  = [Lists, BaseControls, Images, Animation, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
     menu_arrange: Handle<Menu>,
     menu_examples: Handle<Menu>,
+    menu_theme: Handle<Menu>,
 }
 impl MyDesktop {
     fn new() -> Self {
@@ -37,6 +38,7 @@ impl MyDesktop {
             arrange_method: None,
             menu_arrange: Handle::None,
             menu_examples: Handle::None,
+            menu_theme: Handle::None,
         }
     }
 }
@@ -79,6 +81,12 @@ impl DesktopEvents for MyDesktop {
                 {&Grid,cmd: Grid, select: false},
             ]
         "));
+        self.menu_theme = self.register_menu(menu!("
+            &Theme,class: MyDesktop, items:[
+                {&Default,cmd: DefaultTheme, select: true},
+                {'Dark &Gray',cmd: DarkGrayTheme, select: false}
+            ]
+        "));
     }
         
 }
@@ -102,6 +110,8 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::Vertical => self.arrange_method = Some(desktop::ArrangeWindowsMethod::Vertical),
             mydesktop::Commands::Horizontal => self.arrange_method = Some(desktop::ArrangeWindowsMethod::Horizontal),
             mydesktop::Commands::Grid => self.arrange_method = Some(desktop::ArrangeWindowsMethod::Grid),
+            mydesktop::Commands::DefaultTheme => App::set_theme(Theme::new(Themes::Default)),
+            mydesktop::Commands::DarkGrayTheme => App::set_theme(Theme::new(Themes::DarkGray)),
             _ => {}
         }
         let m = self.arrange_method;
@@ -113,6 +123,7 @@ impl MenuEvents for MyDesktop {
     fn on_update_menubar(&self,menubar: &mut MenuBar) {
         menubar.add(self.menu_examples);
         menubar.add(self.menu_arrange);
+        menubar.add(self.menu_theme);
     }
     
     fn on_command(&mut self,_:Handle<Menu>,_:Handle<menu::Command>,command:mydesktop::Commands){
