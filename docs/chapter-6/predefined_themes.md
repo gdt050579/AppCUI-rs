@@ -7,3 +7,6 @@ AppCUI comes with a set of predefined themes that can be used out of the box via
 
 2. **DarkGray** - a dark gray theme.
     <img src="img/darkgray_theme.png" width=500/>
+
+3. **Light** - a light theme.
+    <img src="img/light_theme.png" width=500/>

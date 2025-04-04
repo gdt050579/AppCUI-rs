@@ -708,12 +708,51 @@ pub fn dropdownlist(input: TokenStream) -> TokenStream {
     crate::controls::dropdownlist::create(input)
 }
 
+/// Creates a new listbox control. The format is `listbox!("attributes")` where the attributes are pairs of key-value, separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `flags` - The flags of the listbox. The following values are supported:
+///   - **ScrollBars** - Adds scrollbars to the listbox
+///   - **SearchBar** - Adds a search bar for filtering items
+///   - **CheckBoxes** - Adds checkboxes for multiple selection
+///   - **AutoScroll** - Automatically scrolls to newly added items
+///   - **HighlightSelectedItemWhenInactive** - Highlights selected item even when inactive
+/// * `items` - A list of strings to populate the listbox with. Format: `['item1', 'item2', ...]`
+/// * `index` or `selected_index` - The index of the initially selected item (0-based)
+/// * `lsm` or `left-scroll-margin` - Left scroll margin in characters
+/// * `tsm` or `top-scroll-margin` - Top scroll margin in characters
+/// * `em` or `empty-message` - Message to display when the listbox is empty
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, TopLeft, TopRight, BottomLeft, BottomRight
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, TopLeft, TopRight, BottomLeft, BottomRight
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic listbox with items
+/// let lb = listbox!("items=['Red', 'Green', 'Blue'], x=1, y=1, width=20, height=10");
+/// 
+/// // Listbox with scrollbars and search
+/// let lb = listbox!("flags: ScrollBars+SearchBar, x=0, y=0, width=30, height=15");
+/// 
+/// // Listbox with checkboxes and initial selection
+/// let lb = listbox!("flags: CheckBoxes, items=['Option 1', 'Option 2'], index: 1, x=2, y=2, width=25, height=8");
+/// ```
+#[proc_macro]
+pub fn listbox(input: TokenStream) -> TokenStream {
+    crate::controls::listbox::create(input)
+}
 
 #[proc_macro]
 pub fn numericselector(input: TokenStream) -> TokenStream {
     crate::controls::numericselector::create(input)
 }
-
 
 #[proc_macro]
 pub fn menuitem(input: TokenStream) -> TokenStream {
@@ -896,12 +935,6 @@ pub fn datepicker(input: TokenStream) -> TokenStream {
     crate::controls::datepicker::create(input)
 }
 
-
-#[proc_macro]
-pub fn listbox(input: TokenStream) -> TokenStream {
-    crate::controls::listbox::create(input)
-}
-
 /// Creates a new ListView control for displaying a list of items of type T.
 /// The format is `listview!("attributes")` where the attributes are pairs of key-value, separated by comma.
 /// 
@@ -936,11 +969,11 @@ pub fn listbox(input: TokenStream) -> TokenStream {
 ///     "MyType, 
 ///     view: Details, 
 ///     columns: [{Name,10,left}, {Age,5,right}], 
-///     dock: Fill"
+///     x=1, y=1, width=50, height=25"
 /// );
 /// 
 /// // Multi-column view
-/// let lv = listview!("class: MyType, view: Columns(3), width: 100%, height: 100%");
+/// let lv = listview!("class: MyType, view: Columns(3), x=2, y=2, width=60, height=30");
 /// ```
 /// 
 /// The type T must implement the `ListItem` trait. For columns, use the `#[Column]` attribute 
