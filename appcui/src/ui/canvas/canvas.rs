@@ -60,6 +60,8 @@ impl Canvas {
         self.scrollbars.update(sz.width as u64, sz.height as u64, self.size());
         self.move_scroll_to(self.x, self.y);
     }
+
+    /// Returns a mutable reference to the inner surface of the canvas.
     #[inline(always)]
     pub fn get_drawing_surface(&mut self) -> &mut Surface {
         &mut self.surface

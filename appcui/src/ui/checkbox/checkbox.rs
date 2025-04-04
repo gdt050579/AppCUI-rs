@@ -8,6 +8,14 @@ pub struct CheckBox {
 }
 
 impl CheckBox {
+    /// Creates a new checkbox with the specified caption, layout and initial checked state.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut checkbox = CheckBox::new("Check me", Layout::new("x:1,y:1,w:20,h:1"), false);
+    /// ```
     pub fn new(caption: &str, layout: Layout, checked: bool) -> Self {
         let mut cb = CheckBox {
             base: ControlBase::with_status_flags(
@@ -22,14 +30,20 @@ impl CheckBox {
         cb.set_hotkey(hotkey);
         cb
     }
+
+    /// Returns **true** if the checkbox is checked, **false** otherwise.
     #[inline(always)]
     pub fn is_checked(&self) -> bool {
         self.checked
     }
+
+    /// Sets the checkbox state to checked or unchecked.
     #[inline(always)]
     pub fn set_checked(&mut self, checked: bool)  {
         self.checked = checked;
     }
+
+    /// Sets the checkbox caption. The caption can contain a hotkey, which is indicated by an ampersand (&) before the character.
     pub fn set_caption(&mut self, caption: &str) {
         self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
         let hotkey = self.caption.hotkey();
