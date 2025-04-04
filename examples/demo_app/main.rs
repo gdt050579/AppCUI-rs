@@ -24,7 +24,7 @@ const LOGO: [&str; 15] = [
 
 #[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [Lists, BaseControls, Images, Animation, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme])]
+          commands  = [Lists, BaseControls, Images, Animation, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
     menu_arrange: Handle<Menu>,
@@ -84,7 +84,8 @@ impl DesktopEvents for MyDesktop {
         self.menu_theme = self.register_menu(menu!("
             &Theme,class: MyDesktop, items:[
                 {&Default,cmd: DefaultTheme, select: true},
-                {'Dark &Gray',cmd: DarkGrayTheme, select: false}
+                {'Dark &Gray',cmd: DarkGrayTheme, select: false},
+                {'&Light',cmd: LightTheme, select: false}
             ]
         "));
     }
@@ -112,6 +113,7 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::Grid => self.arrange_method = Some(desktop::ArrangeWindowsMethod::Grid),
             mydesktop::Commands::DefaultTheme => App::set_theme(Theme::new(Themes::Default)),
             mydesktop::Commands::DarkGrayTheme => App::set_theme(Theme::new(Themes::DarkGray)),
+            mydesktop::Commands::LightTheme => App::set_theme(Theme::new(Themes::Light)),
             _ => {}
         }
         let m = self.arrange_method;

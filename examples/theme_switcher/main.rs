@@ -11,7 +11,7 @@ struct FileInformation {
     created: NaiveDate,
 }
 
-#[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme)]
+#[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme)]
 struct MyWindow {
     h_file: Handle<Menu>,
     h_theme: Handle<Menu>,
@@ -37,6 +37,7 @@ impl MyWindow {
             "&Theme,class: MyWindow, items=[
             {&Default,cmd:DefaultTheme,selected: true},
             {'Dark Gray',cmd:DarkGrayTheme, selected: false},
+            {'&Light',cmd:LightTheme, selected: false}
         ]"
         ));
 
@@ -123,11 +124,12 @@ impl MenuEvents for MyWindow {
         let stock_theme = match cmd {
             mywindow::Commands::DefaultTheme => Some(Themes::Default),
             mywindow::Commands::DarkGrayTheme => Some(Themes::DarkGray),
+            mywindow::Commands::LightTheme => Some(Themes::Light),
             _ => None,
         };
         if let Some(theme) = stock_theme {
             App::set_theme(Theme::new(theme));
-        }
+        }   
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
