@@ -30,6 +30,8 @@ AppCUI is a simple, easy-to-use and cross-platform library for creating text-bas
 
 ## 📸 Screenshots 
 
+<img src="./docs/chapter-1/img/appcui-rs-demo.gif" align="center" />
+
 ## 🚀 Quick Start
 
 Add the following to your `Cargo.toml`:
