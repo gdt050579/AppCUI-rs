@@ -2,14 +2,14 @@ use super::image;
 use super::Renderer;
 
 use super::CharAttribute;
-use super::Rect;
-use super::Size;
 use super::Character;
 use super::ClipArea;
 use super::Cursor;
 use super::Image;
 use super::LineType;
 use super::Point;
+use super::Rect;
+use super::Size;
 use super::TextAlignament;
 use super::TextFormat;
 
@@ -43,9 +43,18 @@ pub struct Surface {
     pub(crate) size: Size,
     pub(crate) chars: Vec<Character>,
     pub(crate) cursor: Cursor,
+
+    #[cfg(target_arch = "wasm32")]
+    pub origin: Point,
+    #[cfg(target_arch = "wasm32")]
+    pub clip: ClipArea,
+
+    #[cfg(not(target_arch = "wasm32"))]
     origin: Point,
-    base_origin: Point,
+    #[cfg(not(target_arch = "wasm32"))]
     clip: ClipArea,
+
+    base_origin: Point,
     base_clip: ClipArea,
     right_most: i32,
     bottom_most: i32,
@@ -774,9 +783,8 @@ impl Surface {
                     text.chars().count() as u16
                 };
                 self.write_text_single_line(text, format.y, chars_count, 0, format, width);
-            }
-            // TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),
-            // TextWrap::Word => self.write_text_multi_line_word_wrap(text, format),
+            } // TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),
+              // TextWrap::Word => self.write_text_multi_line_word_wrap(text, format),
         }
         // if format.is_multi_line() {
         //     if format.has_width() {

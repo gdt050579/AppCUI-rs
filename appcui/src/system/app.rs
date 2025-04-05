@@ -99,7 +99,15 @@ impl App {
 
     #[cfg(target_arch = "wasm32")]
     pub fn run(self) {
-        // For wasm, simply delegate to the RuntimeManager run loop.
+        // For wasm, initialize console error hook for better debugging
+        console_error_panic_hook::set_once();
+        web_sys::console::log_1(&"AppCUI application starting in WebGL mode".into());
+
+        // Make sure the initial state is set to force rendering
+        let rm = RuntimeManager::get();
+        rm.request_update();
+
+        // Start the animation loop
         RuntimeManager::run_wasm();
     }
 

@@ -104,6 +104,18 @@ impl WebTerminal {
             .set_property("height", &format!("{}px", canvas_height))
             .expect("Failed to set canvas CSS height");
 
+        // --- new code ---
+        webgl_canvas
+            .style()
+            .set_property("position", "absolute")
+            .expect("Failed to set canvas CSS position");
+        webgl_canvas.style().set_property("z-index", "1").expect("Failed to set canvas z-index");
+        text_canvas
+            .style()
+            .set_property("position", "absolute")
+            .expect("Failed to set canvas CSS position");
+        text_canvas.style().set_property("z-index", "2").expect("Failed to set canvas z-index");
+
         gl.viewport(0, 0, canvas_width as i32, canvas_height as i32);
         web_sys::console::log_1(&format!("WebGL canvas size: {canvas_width}x{canvas_height}").into());
 
@@ -287,29 +299,53 @@ impl WebTerminal {
         let canvas_width = self.text_canvas.width() as f64;
         let canvas_height = self.text_canvas.height() as f64;
 
-        context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
+        // Here we compute the cell dimensions based on the full surface size.
+        let full_cols = surface.size.width as f64;
+        let full_rows = surface.size.height as f64;
+        let cell_width = canvas_width / full_cols;
+        let cell_height = canvas_height / full_rows;
 
-        let num_cols = surface.size.width as f64;
-        let num_rows = surface.size.height as f64;
-        let cell_width = canvas_width / num_cols;
-        let cell_height = canvas_height / num_rows;
+        // Optionally, clear only the clip area.
+        let clip_left = surface.clip.left as f64;
+        let clip_top = surface.clip.top as f64;
+        let clip_width = (surface.clip.right - surface.clip.left) as f64;
+        let clip_height = (surface.clip.bottom - surface.clip.top) as f64;
+        context.clear_rect(
+            clip_left * cell_width,
+            clip_top * cell_height,
+            clip_width * cell_width,
+            clip_height * cell_height,
+        );
 
         context.save();
-
-        // Use the configured font and size from the DOM.
         context.set_font(&format!("{}px {}", self.font_size, self.font));
         context.set_text_baseline("top");
-        context.set_text_align("middle");
+        context.set_text_align("center");
 
         for y in 0..surface.size.height {
             for x in 0..surface.size.width {
                 if let Some(cell) = &surface.char(x as i32, y as i32) {
-                    let foreground = cell.foreground.to_rgb();
-                    let css_color = format!("rgb({},{},{})", foreground[0] * 255.0, foreground[1] * 255.0, foreground[2] * 255.0);
-                    context.set_fill_style(&JsValue::from_str(&css_color));
+                    // Compute global cell coordinates
+                    let global_x = x + surface.origin.x as u32;
+                    let global_y = y + surface.origin.y as u32;
 
-                    let pos_x = (x as f64 * cell_width) as i32;
-                    let pos_y = (y as f64 * cell_height) as i32;
+                    // Skip cells outside the clip
+                    if !surface.clip.contains(global_x.try_into().unwrap(), global_y.try_into().unwrap()) {
+                        continue;
+                    }
+
+                    // Compute drawing position relative to the clip region.
+                    let pos_x = (((global_x as i32) - surface.clip.left) as f64 * cell_width) as i32;
+                    let pos_y = (((global_y as i32) - surface.clip.top) as f64 * cell_height) as i32;
+
+                    let foreground = cell.foreground.to_rgb();
+                    let css_color = format!(
+                        "rgb({},{},{})",
+                        (foreground[0] * 255.0) as u8,
+                        (foreground[1] * 255.0) as u8,
+                        (foreground[2] * 255.0) as u8
+                    );
+                    context.set_fill_style(&JsValue::from_str(&css_color));
                     context.fill_text(&cell.code.to_string(), pos_x.into(), pos_y.into())?;
                 }
             }
@@ -555,6 +591,34 @@ impl WebTerminal {
 
         Ok(())
     }
+
+    fn render_cursor(&self, surface: &Surface) -> Result<(), JsValue> {
+        // Only draw the cursor if it is visible
+        if !surface.cursor.is_visible() {
+            return Ok(());
+        }
+
+        let context = self
+            .text_canvas
+            .get_context("2d")?
+            .ok_or("2d context not available")?
+            .dyn_into::<CanvasRenderingContext2d>()?;
+
+        let canvas_width = self.text_canvas.width() as f64;
+        let canvas_height = self.text_canvas.height() as f64;
+        let num_cols = surface.size.width as f64;
+        let num_rows = surface.size.height as f64;
+        let cell_width = canvas_width / num_cols;
+        let cell_height = canvas_height / num_rows;
+
+        let cursor_x = surface.cursor.x as f64;
+        let cursor_y = surface.cursor.y as f64;
+
+        context.set_fill_style(&JsValue::from_str("rgba(255,255,255,0.5)"));
+        context.fill_rect(cursor_x * cell_width, cursor_y * cell_height, cell_width, cell_height);
+
+        Ok(())
+    }
 }
 
 impl Terminal for WebTerminal {
@@ -571,9 +635,20 @@ impl Terminal for WebTerminal {
     }
 
     fn update_screen(&mut self, surface: &Surface) {
+        // web_sys::console::log_1(
+        //     &format!(
+        //         "Update screen: origin {:?}, base_origin: {:?}, clip: {:?}, base_clip: {:?}, right_most: {}, bottom_most: {}",
+        //         surface.origin, surface.base_origin, surface.clip, surface.base_clip, surface.right_most, surface.bottom_most
+        //     )
+        //     .into(),
+        // );
         self.render_background(surface);
         if let Err(e) = self.render_text(surface) {
             web_sys::console::log_1(&format!("Error rendering text: {:?}", e).into());
+        }
+
+        if let Err(e) = self.render_cursor(surface) {
+            web_sys::console::log_1(&format!("Error rendering cursor: {:?}", e).into());
         }
     }
 
@@ -593,7 +668,7 @@ impl Terminal for WebTerminal {
         let mut queue = self.event_queue.lock().unwrap();
         if !queue.is_empty() {
             let event = Some(queue.remove(0));
-            web_sys::console::log_1(&format!("Event: {:?}", event).into());
+            // web_sys::console::log_1(&format!("Event: {:?}", event).into());
             event
         } else {
             None

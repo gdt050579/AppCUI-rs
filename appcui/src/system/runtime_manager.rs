@@ -490,20 +490,28 @@ impl RuntimeManager {
     pub fn run_wasm() {
         use wasm_bindgen::prelude::*;
         use web_sys::window;
+
+        // Initialize console error handling for better debugging
+        console_error_panic_hook::set_once();
+        web_sys::console::log_1(&"Starting AppCUI in WebAssembly mode".into());
+
+        // Process desktop on start event since we're running for the first time
+        let rt = RuntimeManager::get();
+        if !rt.desktop_os_start_called {
+            rt.process_terminal_resize_event(rt.terminal.get_size());
+            rt.process_desktop_on_start();
+        }
+
         let window = window().expect("No global `window` exists");
-        // Clone the window so that we can move one copy into the closure.
         let window_clone = window.clone();
 
-        // Create an Rc<RefCell<Option<Closure<dyn FnMut()>>>> to hold our callback.
         let callback_holder = std::rc::Rc::new(std::cell::RefCell::new(None::<Closure<dyn FnMut()>>));
         let callback_holder_clone = callback_holder.clone();
 
         // Create the closure that represents one tick.
         *callback_holder.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-            // Process one tick of the event loop.
             RuntimeManager::get().tick();
 
-            // Schedule the next tick if not instructed to stop.
             if RuntimeManager::get().loop_status != LoopStatus::StopApp {
                 window_clone
                     .request_animation_frame(callback_holder_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref())
@@ -511,7 +519,6 @@ impl RuntimeManager {
             }
         }) as Box<dyn FnMut()>));
 
-        // Schedule the first tick.
         window
             .request_animation_frame(callback_holder.borrow().as_ref().unwrap().as_ref().unchecked_ref())
             .expect("Failed to request animation frame");
@@ -519,9 +526,6 @@ impl RuntimeManager {
 
     #[cfg(target_arch = "wasm32")]
     pub(crate) fn tick(&mut self) {
-        use std::cell::RefCell;
-        use std::rc::Rc;
-
         // Process command bar event, if any.
         if let Some(event) = self.commandbar_event.take() {
             self.process_commandbar_event(event);
@@ -552,6 +556,9 @@ impl RuntimeManager {
             self.repaint = true;
             self.request_update_command_and_menu_bars = true;
         }
+
+        // Force recompute layout and repaint for WebGL context
+
         // Recompute layouts.
         if self.recompute_layout {
             self.recompute_layouts();
@@ -563,9 +570,13 @@ impl RuntimeManager {
         // Paint the UI.
         if self.repaint || self.recompute_layout {
             self.paint();
+            // Debug logging for WebGL rendering
+            web_sys::console::log_1(&"Painting UI elements to WebGL context".into());
         }
+
         self.recompute_layout = false;
         self.repaint = false;
+
         // Update timer threads.
         if self.request_update_timer_threads {
             self.timers_manager.update_threads();
@@ -1674,8 +1685,6 @@ impl MouseMethods for RuntimeManager {
                     base.update_mouse_over_flag(true);
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
-                    let response = control.control_mut().on_mouse_event(&MouseEvent::Enter);
-                    self.repaint |= response == EventProcessStatus::Processed;
                     let response = control
                         .control_mut()
                         .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
