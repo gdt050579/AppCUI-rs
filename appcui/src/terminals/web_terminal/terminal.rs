@@ -22,6 +22,11 @@ pub struct WebTerminal {
     pos_attrib_location: u32,
     color_attrib_location: u32,
     pub(super) event_queue: Arc<Mutex<Vec<SystemEvent>>>,
+    // New configuration fields read from the DOM:
+    pub font: String,
+    pub font_size: u32,
+    pub cell_width_px: u32,
+    pub cell_height_px: u32,
 }
 
 unsafe impl Send for WebTerminal {}
@@ -30,31 +35,46 @@ unsafe impl Sync for WebTerminal {}
 impl WebTerminal {
     pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let document = Self::document()?;
+
+        // Read configuration values from the DOM (or fall back to defaults)
+        let cols = document
+            .get_element_by_id("terminal-cols")
+            .and_then(|el| el.text_content())
+            .and_then(|s| s.parse::<u32>().ok())
+            .unwrap_or(211);
+
+        let rows = document
+            .get_element_by_id("terminal-rows")
+            .and_then(|el| el.text_content())
+            .and_then(|s| s.parse::<u32>().ok())
+            .unwrap_or(56);
+
+        let font = document
+            .get_element_by_id("terminal-font")
+            .and_then(|el| el.text_content())
+            .unwrap_or("Consolas Mono, monospace".to_string());
+
+        let font_size = document
+            .get_element_by_id("terminal-font-size")
+            .and_then(|el| el.text_content())
+            .and_then(|s| s.parse::<u32>().ok())
+            .unwrap_or(20);
+
+        // Optionally allow cell width and height to be configurable;
+        // fall back to defaults (for cell height, use the font size as default)
+        let cell_width_px = document
+            .get_element_by_id("terminal-cell-width")
+            .and_then(|el| el.text_content())
+            .and_then(|s| s.parse::<u32>().ok())
+            .unwrap_or(9);
+        let cell_height_px = document
+            .get_element_by_id("terminal-cell-height")
+            .and_then(|el| el.text_content())
+            .and_then(|s| s.parse::<u32>().ok())
+            .unwrap_or(font_size);
+
         let webgl_canvas = Self::get_canvas(&document, "canvas")?;
         let text_canvas = Self::get_canvas(&document, "textCanvas")?;
-
-        let size = {
-            let width = web_sys::window()
-                .unwrap()
-                .inner_width()
-                .unwrap_or_else(|_| JsValue::from(webgl_canvas.width()))
-                .as_f64()
-                .unwrap_or(webgl_canvas.width() as f64) as u32;
-
-            let height = web_sys::window()
-                .unwrap()
-                .inner_height()
-                .unwrap_or_else(|_| JsValue::from(webgl_canvas.height()))
-                .as_f64()
-                .unwrap_or(webgl_canvas.height() as f64) as u32;
-
-            Size { width, height }
-        };
-
-        let cols = 211;
-        let rows = 56;
-        let cell_width_px = 9;
-        let cell_height_px = 20;
 
         let canvas_width = cols * cell_width_px;
         let canvas_height = rows * cell_height_px;
@@ -87,13 +107,6 @@ impl WebTerminal {
         gl.viewport(0, 0, canvas_width as i32, canvas_height as i32);
         web_sys::console::log_1(&format!("WebGL canvas size: {canvas_width}x{canvas_height}").into());
 
-        // webgl_canvas.set_width(size.width);
-        // webgl_canvas.set_height(size.height);
-        // text_canvas.set_width(size.width);
-        // text_canvas.set_height(size.height);
-        // web_sys::console::log_1(&format!("WebGL canvas size: {}x{}", size.width, size.height).into());
-        // gl.viewport(0, 0, size.width as i32, size.height as i32);
-
         let program = Self::init_program(&gl)?;
         let pos_attrib_location = gl.get_attrib_location(&program, "position") as u32;
         let color_attrib_location = gl.get_attrib_location(&program, "color") as u32;
@@ -114,6 +127,11 @@ impl WebTerminal {
             color_attrib_location,
             event_queue: queue,
             size: Size { width: cols, height: rows },
+            // Save configuration values for later use:
+            font,
+            font_size,
+            cell_width_px,
+            cell_height_px,
         };
 
         terminal
@@ -278,7 +296,8 @@ impl WebTerminal {
 
         context.save();
 
-        context.set_font("20px Consolas Mono, monospace");
+        // Use the configured font and size from the DOM.
+        context.set_font(&format!("{}px {}", self.font_size, self.font));
         context.set_text_baseline("top");
         context.set_text_align("middle");
 
@@ -553,7 +572,9 @@ impl Terminal for WebTerminal {
 
     fn update_screen(&mut self, surface: &Surface) {
         self.render_background(surface);
-        if let Err(e) = self.render_text(surface) {}
+        if let Err(e) = self.render_text(surface) {
+            web_sys::console::log_1(&format!("Error rendering text: {:?}", e).into());
+        }
     }
 
     fn get_clipboard_text(&self) -> Option<String> {
