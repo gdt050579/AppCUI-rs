@@ -11,7 +11,7 @@
         - [Recording events](chapter-2/event_recording.md)
         - [Logging](chapter-2/logging.md)
     - [Terminals](chapter-2/terminals.md)
-        - [Windows Console]()
+        - [Windows Console](chapter-2/terminals/windows_console.md)
         - [NCurses](chapter-2/terminals/ncurses.md)
         - [Termios](chapter-2/terminals/termios.md)
     - [Screen area and sizes](chapter-2/screen.md)
@@ -60,11 +60,12 @@
         - [HSplitter](chapter-3/stock-controls/hsplitter.md)
         - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
         - [KeySelector](chapter-3/stock-controls/keyselector.md)
+        - [Markdown](chapter-3/stock-controls/markdown.md)
         - [NumericSelector](chapter-3/stock-controls/numericselector.md)
         - [Panel](chapter-3/stock-controls/panel.md)
         - [Password](chapter-3/stock-controls/password.md)
         - [PathFinder](chapter-3/stock-controls/pathfinder.md)
-        - [ProgressBar]()
+        - [ProgressBar](chapter-3/stock-controls/progressbar.md)
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
         - [Selector](chapter-3/stock-controls/selector.md)
         - [Slider]()
@@ -82,6 +83,7 @@
         - [ScrollBars]()
     - [Object Traits](chapter-3/object_traits.rs)
         - [ListItem](chapter-3/object-traits/listitem.md)
+        - [EnumSelector](chapter-3/object-traits/enumselector.md)
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops](chapter-4/custom_desktop.md)
@@ -102,7 +104,6 @@
     - [Notifications dialogs](chapter-5/notification_dialogs.md)
     - [Open/Save dialog](chapter-5/opensave_dialogs.md)
     - [Folder selection dialog](chapter-5/folder_selection_dialogs.md)
-    - [Window manager dialog]()
 
 - [Themes](chapter-6/themes.md)
     - [Predefined Themes](chapter-6/predefined_themes.md)
@@ -110,4 +111,4 @@
 
 - [Multi-Threading](chapter-7/multi-threading.md)
     - [Timers](chapter-7/timers.md)
-    - [Background tasks]()<!--(chapter-7/background_tasks.md)-->
+    - [Background tasks](chapter-7/background_tasks.md)

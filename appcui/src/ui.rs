@@ -34,9 +34,11 @@ pub mod datepicker;
 pub mod listbox;
 pub mod listview;
 pub mod togglebutton;
+pub mod markdown;
 pub mod pathfinder;
 pub mod hnumericslider;
 pub mod treeview;
+pub mod progressbar;
 
 // re-export
 pub use common::ControlBase;
@@ -71,5 +73,7 @@ pub use datepicker::DatePicker;
 pub use listbox::ListBox;
 pub use listview::ListView;
 pub use togglebutton::ToggleButton;
+pub use markdown::Markdown;
 pub use pathfinder::PathFinder;
 pub use treeview::TreeView;
+pub use progressbar::ProgressBar;

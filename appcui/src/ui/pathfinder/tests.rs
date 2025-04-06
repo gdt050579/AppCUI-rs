@@ -56,6 +56,7 @@ const CSV_DATA_UNICODE: &str = "
 //     a.run();
 // }
 
+#[cfg(target_os = "windows")]
 #[test]
 fn check_display_out_of_focus() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
@@ -102,6 +103,7 @@ fn check_display_out_of_focus() {
     a.run();
 }
 
+#[cfg(target_os = "windows")]
 #[test]
 fn check_suggestion_box_navigation() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
@@ -143,6 +145,7 @@ fn check_suggestion_box_navigation() {
     a.run();
 }
 
+#[cfg(target_os = "windows")]
 #[test]
 fn check_suggestion_box_top_navigation() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
@@ -184,6 +187,7 @@ fn check_suggestion_box_top_navigation() {
     a.run();
 }
 
+#[cfg(target_os = "windows")]
 #[test]
 fn check_case_sensitive() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
@@ -202,6 +206,7 @@ fn check_case_sensitive() {
     a.run();
 }
 
+#[cfg(target_os = "windows")]
 #[test]
 fn check_case_insensitive() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
@@ -315,6 +320,7 @@ fn check_mouse_click_move_cursor() {
     a.run();
 }
 
+#[cfg(target_os = "windows")]
 #[test]
 fn check_mouse_hover() {
     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
@@ -407,6 +413,7 @@ fn check_pathfinder_macro() {
     a.run();
 }
 
+#[cfg(target_os = "windows")]
 #[test]
 fn check_pathfinder_unicode() {
     let nav = NavSimulator::with_csv(CSV_DATA_UNICODE, true, "C:\\");

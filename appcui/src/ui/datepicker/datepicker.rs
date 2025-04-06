@@ -1,6 +1,6 @@
 use chrono::{Datelike, Days, Months, NaiveDate};
 use datepicker::events::EventData;
-use AppCUIProcMacro::CustomControl;
+use appcui_proc_macro::CustomControl;
 
 const MINSPACE_FOR_SHORT_DATE: u32 = 15;
 const MINSPACE_FOR_LONG_DATE: u32 = 18;

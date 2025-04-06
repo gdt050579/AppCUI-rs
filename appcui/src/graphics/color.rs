@@ -1,7 +1,8 @@
 #[repr(u8)]
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub enum Color {
     /// <table><tr><td style="background-color: #000000; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>
+    #[default]
     Black = 0x00,
 
     /// <table><tr><td style="background-color: #000080; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>

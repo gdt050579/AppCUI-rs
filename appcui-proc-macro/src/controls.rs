@@ -32,3 +32,5 @@ pub (crate) mod hnumericslider;
 pub (crate) mod togglebutton;
 pub (crate) mod pathfinder;
 pub (crate) mod treeview;
+pub (crate) mod markdown;
+pub (crate) mod progressbar;

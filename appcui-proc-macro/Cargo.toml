@@ -1,5 +1,5 @@
 [package]
-name = "AppCUIProcMacro"
+name = "appcui_proc_macro"
 version = "1.0.0"
 edition = "2021"
 authors = ["gavrilut.dragos@gmail.com"]

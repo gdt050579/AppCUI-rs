@@ -144,7 +144,7 @@ impl ListItem for Student {
 }
 ```
 
-Alternatively, you can use the `LisItem` derive macro to automatically implement the `ListItem` trait for a structure. The macro has to be combined with the `#[Column(...)]` proc macro that has to be added to each field of the structure that has to be displayed in the listview. The `#[Column(...)]` macro has the following parameters:
+Alternatively, you can use the `LisItem` derive macro to automatically implement the `ListItem` trait for a structure. The macro has to be combined with the `#[Column(...)]` attribute that has to be added to each field of the structure that has to be displayed in the listview. The `#[Column(...)]` attribute has the following parameters:
 
 | Parameter        | Type   | Required | Default value | Description                                                                                                                                                                                                    |
 | ---------------- | ------ | -------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

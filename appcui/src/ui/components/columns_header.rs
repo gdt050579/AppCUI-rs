@@ -3,7 +3,7 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
 use crate::ui::ControlBase;
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 #[derive(Copy, Clone, Default, PartialEq)]
 enum SelectedComponent {

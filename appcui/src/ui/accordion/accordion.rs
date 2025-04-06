@@ -8,6 +8,19 @@ pub struct Accordion {
     hovered_page_idx: Option<usize>,
 }
 impl Accordion {
+
+    /// Creates a new Accordion control with the specified `layout` and `flags`.
+    /// The flags parameter is a bitmask tthat contains the following flags:
+    /// - `TransparentBackground`: If set, the background of the accordion will be transparent.
+    /// 
+    /// # Examples
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// let mut ac = Accordion::new(Layout::new("x:1,y:1,w:15,h:10"), accordion::Flags::None);
+    /// ac.add_panel("Panel 1");
+    /// ac.add_panel("Panel 2");
+    /// ac.add_panel("Panel 3");
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -83,6 +96,10 @@ impl Accordion {
             None
         }
     }
+
+    /// Adds a new panel to the accordion with the given `caption` parameter.
+    /// The `caption` parameter is the text that will be displayed on the panel.
+    /// This method returns the index of the newly created panel.
     pub fn add_panel(&mut self, caption: &str) -> u32 {
         let idx = self.base.children.len() as u32;
         self.base.add_child(super::AccordionPanel::new(idx == 0));
@@ -92,6 +109,10 @@ impl Accordion {
         }
         idx
     }
+
+    /// Adds a new control to the accordion panel designated by the `tabindex` parameter.
+    /// The `tabindex` parameter must be a valid index of the accordion panels.
+    /// This method returns a handle to the control that was added.
     #[inline(always)]
     pub fn add<T>(&mut self, tabindex: u32, control: T) -> Handle<T>
     where
@@ -109,6 +130,8 @@ impl Accordion {
             Handle::None
         }
     }
+    /// Returns the current panel index or None if the accordion is empty.
+    /// The index is the index of the panel that is currently selected.
     #[inline(always)]
     pub fn current_panel(&self) -> Option<usize> {
         let idx = self.base.focused_child_index.index();
@@ -118,6 +141,8 @@ impl Accordion {
             None
         }
     }
+    /// Sets the current panel to the one with the given `index` parameter.
+    /// The `index` parameter must be a valid index of the accordion panels.
     pub fn set_current_panel(&mut self, index: usize) {
         // Q: what is the tab is disabled ? can it still change a page
         // for the moment we will not allow this behavior
@@ -144,6 +169,7 @@ impl Accordion {
         }
     }
 
+    /// Returns the caption o a giverm panel from the accordion or None if the `index` parameter is invalid
     #[inline]
     pub fn panel_caption(&self, index: usize) -> Option<&str> {
         if index < self.panels.len() {
@@ -152,6 +178,7 @@ impl Accordion {
             None
         }
     }
+    /// Sets the panel caption for a given panel from the accordion that is refered by its index.
     pub fn set_panel_caption(&mut self, index: usize, caption: &str) {
         if index < self.panels.len() {
             self.panels[index].set_text(caption, ExtractHotKeyMethod::AltPlusKey);

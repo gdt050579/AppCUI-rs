@@ -217,6 +217,27 @@ fn generate_hnumericslider_events(a: &mut Arguments) -> String {
 }
 
 
+fn generate_backgroundtask_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericBackgroundTaskEvents) {
+        panic!("Missing generic type for BackgroundTask event (Have you used events=BackgroundTask<Type-1,Type-2> ?)");
+    }
+    let mut on_start = String::new();
+    let mut on_update = String::new();
+    let mut on_finish = String::new();
+    let mut on_query = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericBackgroundTaskEvents].iter() {
+        on_start.push_str(templates::BACKGROUNDTASK_ON_START_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_update.push_str(templates::BACKGROUNDTASK_ON_UPDATE_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_finish.push_str(templates::BACKGROUNDTASK_ON_FINISH_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_query.push_str(templates::BACKGROUNDTASK_ON_QUERY_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    templates::BACKGROUNDTASK_TRAIT_DEF
+        .replace("$(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_START)", &on_start)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_UPDATE)", &on_update)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_FINISH)", &on_finish)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_BACKGROUNDTASK_ON_QUERY)", &on_query)
+}
+
 pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseControlType, config: &mut TraitsConfig) -> TokenStream {
     let mut a = Arguments::new(base_control);
     a.parse(args, config);
@@ -268,6 +289,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericListViewEvents => code.push_str(generate_listview_events(&mut a).as_str()),
                         AppCUITrait::GenericTreeViewEvents => code.push_str(generate_treeview_events(&mut a).as_str()),
                         AppCUITrait::GenericHNumericSliderEvents => code.push_str(generate_hnumericslider_events(&mut a).as_str()),
+                        AppCUITrait::GenericBackgroundTaskEvents=> code.push_str(generate_backgroundtask_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

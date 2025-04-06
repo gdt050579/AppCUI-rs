@@ -8,6 +8,23 @@ pub struct RadioBox {
 }
 
 impl RadioBox {
+    /// Creates a new RadioBox with the specified caption, layout and initial selected state.
+    /// When a radio box is selected, it will notify its parent control to update the selection state of its siblings. 
+    /// Usually multiple radioboxes are being used as part of the same parent control (e.g., a panel)
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut panel = Panel::new("Radioboxes group",
+    ///                            Layout::new("x:1,y:1,w:20,h:10"),
+    ///                            panel::Type::Border);
+    /// panel.add(RadioBox::new("Select me &1", Layout::new("x:1,y:1,w:20,h:1"), false));
+    /// panel.add(RadioBox::new("Select me &2", Layout::new("x:1,y:1,w:20,h:1"), false));
+    /// panel.add(RadioBox::new("Select me &3", Layout::new("x:1,y:1,w:20,h:1"), true));
+    /// ```
+    /// All o the obove radio boxes will be part of the same parent control (the panel).
+    /// When one of them is selected, the others will be automatically deselected.
     pub fn new(caption: &str, layout: Layout, selected: bool) -> Self {
         let mut cb = RadioBox {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -19,10 +36,15 @@ impl RadioBox {
         cb.set_hotkey(hotkey);
         cb
     }
+
+    /// Returns **true** if the radio box is selected, **false** otherwise.
     #[inline(always)]
     pub fn is_selected(&self) -> bool {
         self.selected
     }
+
+    /// Sets the radio box state to selected.
+    /// When a radio box is selected, it will notify its parent control to update the selection state of its siblings to **unselected**.
     #[inline(always)]
     pub fn set_selected(&mut self) {
         if self.handle.is_none() {
@@ -32,6 +54,8 @@ impl RadioBox {
             parent.base().notify_children_of_selection(self.handle);
         }
     }
+
+    /// Sets the radio box caption. The caption can contain a hotkey, which is indicated by an ampersand (&) before the character.
     pub fn set_caption(&mut self, caption: &str) {
         self.caption.set_text(caption, ExtractHotKeyMethod::AltPlusKey);
         let hotkey = self.caption.hotkey();
