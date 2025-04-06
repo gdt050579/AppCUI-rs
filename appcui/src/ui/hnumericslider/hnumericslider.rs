@@ -285,10 +285,10 @@ where
         match _event {
             MouseEvent::Enter => return EventProcessStatus::Processed,
             MouseEvent::Leave => return EventProcessStatus::Processed,
-            MouseEvent::Over(point) => return EventProcessStatus::Ignored,
-            MouseEvent::Released(mouse_event_data) => return EventProcessStatus::Ignored,
-            MouseEvent::DoubleClick(mouse_event_data) => return EventProcessStatus::Ignored,
-            MouseEvent::Wheel(mouse_wheel_direction) => return EventProcessStatus::Ignored,
+            MouseEvent::Over(_point) => return EventProcessStatus::Ignored,
+            MouseEvent::Released(_mouse_event_data) => return EventProcessStatus::Ignored,
+            MouseEvent::DoubleClick(_mouse_event_data) => return EventProcessStatus::Ignored,
+            MouseEvent::Wheel(_mouse_wheel_direction) => return EventProcessStatus::Ignored,
             MouseEvent::Pressed(mouse_event_data) | MouseEvent::Drag(mouse_event_data) => {
                 if mouse_event_data.button != MouseButton::Left {
                     return EventProcessStatus::Ignored;
@@ -342,8 +342,9 @@ impl<T> OnResize for HNumericSlider<T>
 where
     T: Number + 'static,
 {
-    fn on_resize(&mut self, old_size: Size, new_size: Size) {
+    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.bound = new_size.width as i32;
+        log!("test", "New bound = {}", self.bound);
         self.compute_math_fields();
 
         self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;

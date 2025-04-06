@@ -1,5 +1,4 @@
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
-use super::HNumericSlider;
 use std::any::TypeId;
 
 pub trait GenericHNumericSliderEvents {

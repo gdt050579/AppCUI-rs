@@ -33,7 +33,7 @@ fn check_aspect_up() {
 fn check_click() {
     let script = "
         Paint.Enable(false)
-        Paint('Test if clicks work as intended')
+        Paint('Test if hover works as intended')
         CheckHash(0x117FB20F2E02572F)
         Mouse.Click(20, 4, left)
         Paint('After one click')
@@ -140,3 +140,44 @@ fn check_buttons() {
     a.run();
 }
 
+#[test]
+fn check_hover() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x7AFE7981CA1E1774)
+        Mouse.Move(9, 4)
+        Paint('After one move')
+        CheckHash(0x7AFE7981CA1E1774)
+        Mouse.Move(9, 8)
+        Paint('After move out')
+        CheckHash(0x7AFE7981CA1E1774)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test, d:c, w:60, h:9");
+    w.add(hnumericslider!("i32, min:0, max:10, step:2, value:4, x:1, y:1, w:100%"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_set_and_get() {
+    let script = "
+    Paint.Enable(false)
+    Paint('State after sets')   
+    CheckHash(0xDF7F9E42BBF61E84)
+    ";
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test, d:c, w:60, h:9");
+
+    let mut test = hnumericslider!("i32, min:0, max:10, step:2, value:4, x:1, y:1, w:100%");
+    assert_eq!(test.get_selected_value(), 4);
+    
+    test.set_selected_value(6);
+    assert_eq!(test.get_selected_value(), 6);
+
+    w.add(test);
+    a.add_window(w);
+    a.run();
+}
