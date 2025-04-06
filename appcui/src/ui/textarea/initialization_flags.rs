@@ -6,8 +6,6 @@ pub enum Flags {
     ReadOnly                 = 0x0002,
     // CodeWrap                 = 0x0004,
     // TextHighlight            = 0x0008,
-    
-    // TODO: must
     ScrollBars                = 0x0010,
     // SearchBar                = 0x0020,
     HighlightCursor          = 0x0040,

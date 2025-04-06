@@ -557,7 +557,7 @@ impl TextArea {
                     },
             ),
             flags,
-            text: text.to_string().replace('\t', " "),
+            text: text.to_string().replace('\t', "    ").replace("\r\n", "\n"),
 
             cursor: Cursor { pos_x: 0, pos_y: 0, pressed: false},
             selection: Selection {pos_start: 0, pos_end: 0, direction: SelectionDirection::None},
@@ -1015,7 +1015,10 @@ impl TextArea {
         self.save_mouse_data(mouse_data);
     }
 
-
+    #[inline(always)]
+    pub fn text(&self) -> &str {
+        &self.text
+    }
 
 }
 
