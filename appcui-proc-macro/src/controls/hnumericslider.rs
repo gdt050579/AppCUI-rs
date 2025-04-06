@@ -2,7 +2,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&["OnTop", "DoubleLine"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["OnTop"]);
 
 static NUMERIC_FORMAT: FlagsSignature = FlagsSignature::new(&["Decimal", "Percentage", "DigitGrouping", "Hex", "Size"]);
 

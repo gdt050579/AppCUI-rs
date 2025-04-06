@@ -21,6 +21,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [ListView](stock-controls/listview.md)               | ui::ListView&lt;T&gt;        | `listview!`        | <img src="stock-controls/img/listview.png" width=300/>        |
 | [Markdown](stock-controls/markdown.md)               | ui::Markdown                 | `markdown!`        | <img src="stock-controls/img/markdown.png" width=300/>        |
 | [NumericSelector](stock-controls/numericselector.md) | ui::NumericSelector&lt;T&gt; | `numericselector!` | <img src="stock-controls/img/numericselector.png" width=300/> |
+| [HNumericSlider](stock-controls/hnumericslider.md)   | ui::HNumericSlider&lt;T&gt;  | `hnumericslider!`  | <img src="stock-controls/img/hnumericslider.png" width=300/> |
 | [Panel](stock-controls/panel.md)                     | ui::Panel                    | `panel!`           | <img src="stock-controls/img/panel.png" width=300/>           |
 | [Password](stock-controls/password.md)               | ui::Password                 | `password!`        | <img src="stock-controls/img/password.png" width=300/>        |
 | [PathFinder](stock-controls/pathfinder.md)           | ui::PathFinder               | `pathfinder!`      | <img src="stock-controls/img/pathfinder.png" width=300/>      |

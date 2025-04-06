@@ -207,7 +207,7 @@ where
     }
 
     pub fn set_selected_value(&mut self, value: T) {
-        self.value = value;
+        self.value = Self::to_interval(value, self.min, self.max);
     }
     pub fn get_selected_value(&self) -> T {
         self.value
