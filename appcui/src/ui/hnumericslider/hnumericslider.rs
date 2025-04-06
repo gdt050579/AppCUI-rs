@@ -279,12 +279,12 @@ where
 {
     fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
         match _event {
-            MouseEvent::Enter => return EventProcessStatus::Processed,
-            MouseEvent::Leave => return EventProcessStatus::Processed,
-            MouseEvent::Over(_point) => return EventProcessStatus::Ignored,
-            MouseEvent::Released(_mouse_event_data) => return EventProcessStatus::Ignored,
-            MouseEvent::DoubleClick(_mouse_event_data) => return EventProcessStatus::Ignored,
-            MouseEvent::Wheel(_mouse_wheel_direction) => return EventProcessStatus::Ignored,
+            MouseEvent::Enter => EventProcessStatus::Processed,
+            MouseEvent::Leave => EventProcessStatus::Processed,
+            MouseEvent::Over(_point) => EventProcessStatus::Ignored,
+            MouseEvent::Released(_mouse_event_data) => EventProcessStatus::Ignored,
+            MouseEvent::DoubleClick(_mouse_event_data) => EventProcessStatus::Ignored,
+            MouseEvent::Wheel(_mouse_wheel_direction) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(mouse_event_data) | MouseEvent::Drag(mouse_event_data) => {
                 if mouse_event_data.button != MouseButton::Left {
                     return EventProcessStatus::Ignored;
@@ -292,9 +292,9 @@ where
                 self.last_pressed_coods.x = mouse_event_data.x;
                 self.last_pressed_coods.y = mouse_event_data.y;
                 self.update_cursor_pos(mouse_event_data.x.clamp(0, self.bound - 1));
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
-        };
+        }
     }
 }
 
@@ -308,28 +308,28 @@ where
                 self.value = Self::to_interval(self.value - self.ok_step, self.min, self.computed_max);
                 self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
                 self.emit_changed_event();
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             KeyCode::Right => {
                 self.value = Self::to_interval(self.value + self.ok_step, self.min, self.computed_max);
                 self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
                 self.emit_changed_event();
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             KeyCode::Home => {
                 self.value = self.min;
                 self.poz_triunghi = 0;
                 self.emit_changed_event();
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             KeyCode::End => {
                 self.value = self.computed_max;
                 self.poz_triunghi = (((self.value - self.min) / self.ok_step).cast_to_u32() * self.sec_dim as u32) as i32;
                 self.emit_changed_event();
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
-            _ => return EventProcessStatus::Ignored,
-        };
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
 
