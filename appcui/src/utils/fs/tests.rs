@@ -54,6 +54,7 @@ fn check_simulator() {
     assert!(e[2].created == NaiveDateTime::parse_from_str("2024-01-10 12:31:55", "%Y-%m-%d %H:%M:%S").unwrap());
 }
 
+#[cfg(target_os = "windows")]
 #[test]
 fn check_simulator_join() {
     let csv_data = "

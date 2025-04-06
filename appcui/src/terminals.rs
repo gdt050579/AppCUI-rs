@@ -95,7 +95,10 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
         TerminalType::Termios => TermiosTerminal::new(builder, sender),
         
         #[cfg(target_os = "linux")]
-        TerminalType::NcursesTerminal => NcursesTerminal::new(builder),
+        TerminalType::NcursesTerminal => {
+            let term = NcursesTerminal::new(builder, sender)?;
+            Ok(Box::new(term))
+        }
     }
 }
 #[cfg(target_os = "windows")]
@@ -106,7 +109,8 @@ fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<Syste
 #[cfg(target_os = "linux")]
 fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
     // TermiosTerminal::new(builder)
-    NcursesTerminal::new(builder)
+    let term = NcursesTerminal::new(builder, sender)?;
+    Ok(Box::new(term))
 }
 #[cfg(target_os = "macos")]
 fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {

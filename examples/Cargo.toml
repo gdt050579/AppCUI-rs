@@ -8,6 +8,7 @@ edition = "2021"
 appcui = { path = "../appcui" }
 appcui_proc_macro = { path = "../appcui-proc-macro"}
 chrono = "0.4.38"
+rand = "0.8.5"
 
 
 [[example]]
@@ -179,6 +180,10 @@ path = "background_task/main.rs"
 [[example]]
 name = "logo"
 path = "logo/main.rs"
+
+[[example]]
+name = "demo_app"
+path = "demo_app/main.rs"
 
 [[example]]
 name = "textarea"

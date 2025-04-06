@@ -3,7 +3,7 @@
 When using AppCUI and needing to test the interface, it is recommended to write the unit tests using `App::debug(...)` method. This method allows one to write a succesion of system events (mouse clicks, keys being pressed, etc) and validate if the output is the expected one. This succesion of command is considered an event script - form out of multiple commands, each command written on a line. A command can have parameters. You can also use `//` to comment a command.
 
 **General format for a script**
-```rs
+```rs,no_compile
 Command-1(param1,param2,param3)
 Command-2()
 // comment
@@ -12,7 +12,7 @@ Command-2()
 **Remarks**: 
 * `App::debug(...)` will panic if the script is incorect (a command is not valid, the number of parameters is incorect, etc).
 * `AppCUI` allows only one instance at one time (this is done via a mutex object). If you have multiple unit test and you try to run them with `cargo test` command, you might get an error as **cargo** might try to use multiple threads to do this and it is likely that one thread might try to start an `AppCUI` application while another one is already running on another thread. The solution in this case is to run the tests using a single thread:
-```
+```no_compile
 cargo test -- --test-threads=1
 ```
 
@@ -111,7 +111,7 @@ fn check_if_window_can_be_moved() {
 
 Let's break the event script in pieces and see exactly what is supposed to happen:
 1. `Paint('initial state')` - this will print the virtual screen. It should look like the following (but with colors):
-```
+```no_compile
     +===================================================================+
     | Name  : initial state                                             |
     | Hash  : 0xB1471A30B30F5C6C                                        |
@@ -144,7 +144,7 @@ We can inspect inspect if the position of the window is correct. We can also not
 
 4. `Paint('window was moved')` now we should see something like the following. Notice that indeed, the window was moved to a new position. We also have a new hash for the virtual screen: `0x419533D4BBEFE538`
 
-```
+```no_compile
     +===================================================================+
     | Name  : window was moved                                          |
     | Hash  : 0x419533D4BBEFE538                                        |
@@ -171,6 +171,8 @@ We can inspect inspect if the position of the window is correct. We can also not
 **Remark**: using unit tests (while it works with the `Paint` command activated) might look strange on the actual screen (especially if all you need is to validate an example). As such, it is best that after one example such as the previous one was validated, to add another command at the begining of the script: `Paint.Enable(false)`. This will not change the logic of the script, instead it will not print anything on the screen. As such, the final test function should look like this:
 
 ```rs
+use appcui::prelude::*;
+
 #[test]
 fn check_if_window_can_be_moved() {
     let script = "
@@ -190,7 +192,7 @@ fn check_if_window_can_be_moved() {
 
 and its execution should produce an output similar to the next one:
 
-```
+```no_compile
 running 1 test
 test check_if_window_can_be_moved ... ok
 ```
