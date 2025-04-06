@@ -14,7 +14,7 @@ use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents,
     datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
     listview::events::GenericListViewEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents,
-    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents, hnumericslider::events::GenericHNumericSliderEvents
+    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents, hnumericslider::events::GenericHNumericSliderEvents,
     markdown, markdown::events::MarkdownEvents
 };
 use crate::ui::{hnumericslider, pathfinder, treeview};
@@ -45,11 +45,8 @@ pub(crate) enum ControlEventData {
     ListView(listview::events::EventData),
     PathFinder(pathfinder::events::EventData),
     TreeView(treeview::events::EventData),
-<<<<<<< HEAD
     HNumericSlider(hnumericslider::events::EventData),
-=======
     Markdown(markdown::events::EventData)
->>>>>>> f8a042dd1be522e44f3b7c798a95885b60a10031
 }
 
 pub(crate) struct ControlEvent {
@@ -139,12 +136,10 @@ impl ControlEvent {
                     GenericTreeViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
                 }
             },
-<<<<<<< HEAD
             ControlEventData::HNumericSlider(data) => {
                 GenericHNumericSliderEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id)
             },
             
-=======
             ControlEventData::Markdown(data) => match &data.event_type {
                 markdown::events::Data::BackEvent => {
                     MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast())
@@ -153,7 +148,6 @@ impl ControlEvent {
                     MarkdownEvents::on_external_link(receiver, self.emitter.cast(), link)
                 },
             }
->>>>>>> f8a042dd1be522e44f3b7c798a95885b60a10031
         }
     }
 }

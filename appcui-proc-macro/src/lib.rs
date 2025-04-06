@@ -1025,10 +1025,11 @@ pub fn treeview(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-<<<<<<< HEAD
 pub fn hnumericslider(input: TokenStream) -> TokenStream {
     crate::controls::hnumericslider::create(input)
-=======
+}
+
+#[proc_macro]
 pub fn markdown(input: TokenStream) -> TokenStream {
     crate::controls::markdown::create(input)
 }
@@ -1036,5 +1037,4 @@ pub fn markdown(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn progressbar(input: TokenStream) -> TokenStream {
     crate::controls::progressbar::create(input)
->>>>>>> f8a042dd1be522e44f3b7c798a95885b60a10031
 }
