@@ -2,7 +2,6 @@ use appcui::prelude::*;
 mod file_navigator;
 mod base_controls;
 mod image_win;
-mod animation;
 mod tree_example;
 
 const LOGO: [&str; 15] = [
@@ -25,7 +24,7 @@ const LOGO: [&str; 15] = [
 
 #[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [Lists, BaseControls, Images, Animation, TreeExample, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
+          commands  = [Lists, BaseControls, Images, TreeExample, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
     menu_arrange: Handle<Menu>,
@@ -70,7 +69,6 @@ impl DesktopEvents for MyDesktop {
                 { Lists, cmd: Lists}, 
                 { 'Base Controls', cmd: BaseControls},
                 { Images, cmd: Images},
-                { Animation, cmd: Animation},
                 { 'Tree Example', cmd: TreeExample}
             ]
         "));
@@ -135,7 +133,6 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::Lists => { self.add_window(file_navigator::Win::new()); },
             mydesktop::Commands::Images => { self.add_window(image_win::Win::new()); },
             mydesktop::Commands::BaseControls => { self.add_window(base_controls::Win::new()); },
-            mydesktop::Commands::Animation => { self.add_window(animation::Win::new()); },
             mydesktop::Commands::TreeExample => { self.add_window(tree_example::Win::new()); },
             _ => {}
         }
