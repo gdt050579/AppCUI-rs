@@ -23,8 +23,7 @@
 //! * TextBox
 //! * VLine
 //! * Window
-//! and many more.
-//!
+//!   and many more.
 
 
 
