@@ -47,7 +47,7 @@ impl<T> Handle<T> {
     }
     /// # Safety
     ///
-    /// This function should not be used (its purpose is to serve some proc-macros such as #[CustomControl]) to convert a handle. Using this will imply an unsafe block and the results can be undetermined.
+    /// This function should not be used (its purpose is to serve some proc-macros such as **#\[CustomControl\])** to convert a handle. Using this will imply an unsafe block and the results can be undetermined.
     #[inline(always)]
     pub unsafe fn unsafe_cast<U>(&self) -> Handle<U> {
         let r: Handle<U> = Handle {
