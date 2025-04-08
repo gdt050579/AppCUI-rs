@@ -318,7 +318,7 @@ impl Surface {
 
     /// Fills a vertical line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
     /// if the height is bigger than 0, this method will call `fill_vertical_line` method
-    pub fn fill_vertical_line_width_size(&mut self, x: i32, y: i32, height: u32, ch: Character) {
+    pub fn fill_vertical_line_with_size(&mut self, x: i32, y: i32, height: u32, ch: Character) {
         if height > 0 {
             self.fill_vertical_line(x, y, y + ((height - 1) as i32), ch);
         }
