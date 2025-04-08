@@ -750,6 +750,56 @@ pub fn listbox(input: TokenStream) -> TokenStream {
     crate::controls::listbox::create(input)
 }
 
+/// Creates a new numeric selector control for selecting numeric values.
+/// The format is `numericselector!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `type` or `class` (required, first positional parameter) - The numeric type to use. Supported types:
+///   - Integer types: `i8`, `i16`, `i32`, `i64`, `i128`, `u8`, `u16`, `u32`, `u64`, `u128`, `isize`, `usize`
+///   - Floating point types: `f32`, `f64`
+/// * `value` (optional, second positional parameter) - Initial value
+/// * `min` (optional, third positional parameter) - Minimum allowed value
+/// * `max` (optional, fourth positional parameter) - Maximum allowed value
+/// * `step` (optional, fifth positional parameter) - Step size for increment/decrement
+/// * `flags` - Control flags (optional). Can be:
+///   - **HideButtons** - Hides the increment/decrement buttons
+///   - **ReadOnly** - Makes the control read-only
+/// * `format` or `numericformat` or `nf` - Number format (optional). Can be:
+///   - **Decimal** (default) - Standard decimal format
+///   - **Percentage** - Displays value as percentage
+///   - **DigitGrouping** - Uses digit grouping (e.g. 1,000)
+///   - **Hex** - Displays value in hexadecimal
+///   - **Size** - Displays value as a size (e.g. KB, MB)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic integer selector
+/// let ns = numericselector!("i32, value: 42, x=1, y=1, width=10");
+/// 
+/// // Float selector with custom range and step
+/// let ns = numericselector!(
+///     "f64, 
+///     value: 3.14, 
+///     min: 0.0, 
+///     max: 10.0, 
+///     step: 0.1, 
+///     format: Percentage,
+///     x=2, y=2, width=15"
+/// );
+/// 
+/// // Read-only selector with digit grouping
+/// let ns = numericselector!("u64, flags: ReadOnly, format: DigitGrouping, x=3, y=3, width=20");
+/// ```
 #[proc_macro]
 pub fn numericselector(input: TokenStream) -> TokenStream {
     crate::controls::numericselector::create(input)
@@ -984,6 +1034,49 @@ pub fn listview(input: TokenStream) -> TokenStream {
     crate::controls::listview::create(input)
 }
 
+/// Creates a new toggle button control that can be toggled on/off.
+/// The format is `togglebutton!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `caption` or `name` or `text` (required, first positional parameter) - The text displayed on the button
+/// * `tooltip` or `description` or `desc` (optional, second positional parameter) - Tooltip text shown on hover
+/// * `type` - Button type (optional). Can be:
+///   - **Normal** (default) - Standard toggle button
+///   - **Underlined** - Button with underlined text
+/// * `select` or `selected` or `state` - Initial selected state (optional, defaults to false)
+/// * `group` or `single_selection` - Whether the button is part of a single-selection group (optional, defaults to false)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic toggle button
+/// let btn = togglebutton!("'Enable Feature', x=1, y=1, width=20");
+/// 
+/// // Toggle button with tooltip and initial state
+/// let btn = togglebutton!(
+///     "caption: 'Auto-save',
+///     tooltip: 'Enable automatic saving of changes',
+///     selected: true,
+///     x=2, y=2, width=25"
+/// );
+/// 
+/// // Underlined toggle button in a single-selection group
+/// let btn = togglebutton!(
+///     "'Option A',
+///     type: Underlined,
+///     group: true,
+///     x=3, y=3, width=15"
+/// );
+/// ```
 #[proc_macro]
 pub fn togglebutton(input: TokenStream) -> TokenStream {
     crate::controls::togglebutton::create(input)
@@ -1021,6 +1114,43 @@ pub fn treeview(input: TokenStream) -> TokenStream {
     crate::controls::treeview::create(input)
 }
 
+/// Creates a new markdown viewer control for displaying formatted text content.
+/// The format is `markdown!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `content` or `text` (required, first positional parameter) - The markdown content to display
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows scroll bars when content exceeds the control size
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic markdown viewer
+/// let md = markdown!("'# Hello World\nThis is a **markdown** example', x=1, y=1, width=40, height=10");
+/// 
+/// // Markdown with scrollbars and margins
+/// let md = markdown!(
+///     "content: '# Documentation\n\n## Features\n* Feature 1\n* Feature 2',
+///     flags: ScrollBars,
+///     lsm: 2,
+///     tsm: 1,
+///     x=2, y=2, width=50, height=15"
+/// );
+/// 
+/// // Docked markdown viewer
+/// let md = markdown!("'# Help\n\nPress F1 for more information', dock: right, width=30");
+/// ```
 #[proc_macro]
 pub fn markdown(input: TokenStream) -> TokenStream {
     crate::controls::markdown::create(input)
