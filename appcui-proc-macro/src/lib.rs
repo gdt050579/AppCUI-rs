@@ -616,11 +616,117 @@ pub fn threestatebox(input: TokenStream) -> TokenStream {
     crate::controls::threestatebox::create(input)
 }
 
+/// Creates a new canvas control for custom drawing operations.
+/// The format is `canvas!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `size` or `sz` or `surface` (required, first positional parameter) - Size of the canvas. Can be specified in two formats:
+///   - `width,height` - Using comma as separator (e.g. `40,20`)
+///   - `width x height` - Using 'x' as separator (e.g. `40x20`)
+///   Values must be positive integers between 1 and 32000
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows scroll bars when content exceeds the canvas size
+/// * `background` or `back` - Background character and attributes (optional). Format: `{char,color,background_color}`
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic canvas with size using comma
+/// let canvas = canvas!("'40,20', x=1, y=1");
+/// 
+/// // Basic canvas with size using 'x' format
+/// let canvas = canvas!("40x20, x=1, y=1");
+/// 
+/// // Canvas with scrollbars and background
+/// let canvas = canvas!(
+///     "size: 50x25,
+///     flags: ScrollBars,
+///     back: {' ', White, Blue},
+///     lsm: 2,
+///     tsm: 1,
+///     x=2, y=2"
+/// );
+/// 
+/// // Canvas with custom background
+/// let canvas = canvas!(
+///     "'30,15',
+///     back: {'#', Yellow, DarkBlue},
+///     x=3, y=3"
+/// );
+/// ```
 #[proc_macro]
 pub fn canvas(input: TokenStream) -> TokenStream {
     crate::controls::canvas::create(input)
 }
 
+/// Creates a new image viewer control for displaying images.
+/// The format is `imageviewer!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `image` - String representation of the image to display (optional). The string should be formatted as follows:
+///   - Each line represents a row of pixels
+///   - Each character represents a pixel with its color
+///   - Colors are represented by characters (e.g., 'R' for red, 'G' for green, 'B' for blue, 'Y' for yellow)
+///   - Use ' ' (space) for transparent pixels
+///   - Use '\n' for new lines
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows scroll bars when image exceeds the viewer size
+/// * `render` or `rendermethod` or `rm` - Image rendering method (optional, defaults to SmallBlocks). Can be:
+///   - **SmallBlocks** - Uses small blocks for rendering
+///   - **LargeBlocks64Colors** - Uses large blocks with 64 colors
+///   - **GrayScale** - Renders in grayscale
+///   - **AsciiArt** - Renders as ASCII art
+/// * `scale` - Image scale percentage (optional, defaults to 100%). Supported values:
+///   - 100% (NoScale)
+///   - 50% (Scale50)
+///   - 33% (Scale33)
+///   - 25% (Scale25)
+///   - 20% (Scale20)
+///   - 10% (Scale10)
+///   - 5% (Scale5)
+/// * `background` or `back` - Background character and attributes (optional). Format: `{char,color,background_color}`
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic image viewer with a smiley face
+/// let viewer = imageviewer!(
+///     "image: '  YY  \n Y  Y \nY    Y\nY    Y\nY    Y\n Y  Y \n  YY  ',
+///     x=1, y=1, width=40, height=20"
+/// );
+/// 
+/// // Image viewer with custom rendering and background
+/// let viewer = imageviewer!(
+///     "image: '  YY  \n Y  Y \nY    Y\nY    Y\nY    Y\n Y  Y \n  YY  ',
+///     render: GrayScale,
+///     back: {' ', White, Blue},
+///     lsm: 2,
+///     tsm: 1,
+///     x=2, y=2, width=50, height=25"
+/// );
+/// ```
 #[proc_macro]
 pub fn imageviewer(input: TokenStream) -> TokenStream {
     crate::controls::imageviewer::create(input)
@@ -694,16 +800,138 @@ pub fn textfield(input: TokenStream) -> TokenStream {
 }
 
 
+/// Creates a new selector control for choosing enum values.
+/// The format is `selector!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `enum` or `class` (required, first positional parameter) - The enum type to use for selection
+/// * `value` - Initial selected enum variant (optional)
+/// * `flags` - Control flags (optional). Can be:
+///   - **AllowNoneVariant** - Allows selecting no value (None)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic selector
+/// let sel = selector!("MyEnum, x=1, y=1, width=20");
+/// 
+/// // Selector with initial value
+/// let sel = selector!(
+///     "enum: MyEnum,
+///     value: Variant1,
+///     x=2, y=2, width=25"
+/// );
+/// 
+/// // Selector that allows no selection
+/// let sel = selector!(
+///     "MyEnum,
+///     flags: AllowNoneVariant,
+///     x=3, y=3, width=30"
+/// );
+/// ```
 #[proc_macro]
 pub fn selector(input: TokenStream) -> TokenStream {
     crate::controls::selector::create(input)
 }
 
+/// Creates a new combobox control for selecting from a list of items.
+/// The format is `combobox!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `items` - List of strings to populate the combobox (required). Format: `['item1', 'item2', ...]`
+/// * `index` or `selected_index` - Index of the initially selected item (optional, 0-based)
+/// * `flags` - Control flags (optional). Can be:
+///   - **ShowDescription** - Shows a description for each item
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic combobox with items
+/// let cb = combobox!("items=['Option 1', 'Option 2', 'Option 3'], x=1, y=1, width=20");
+/// 
+/// // Combobox with initial selection
+/// let cb = combobox!(
+///     "items: ['Red', 'Green', 'Blue'],
+///     index: 1,
+///     x=2, y=2, width=25"
+/// );
+/// 
+/// // Combobox with descriptions
+/// let cb = combobox!(
+///     "items: ['Item 1', 'Item 2'],
+///     flags: ShowDescription,
+///     x=3, y=3, width=30"
+/// );
+/// ```
 #[proc_macro]
 pub fn combobox(input: TokenStream) -> TokenStream {
     crate::controls::combobox::create(input)
 }
 
+/// Creates a new dropdown list control for selecting from a list of items.
+/// The format is `dropdownlist!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `class` or `type` (required, first positional parameter) - The type of items to display in the dropdown
+/// * `flags` - Control flags (optional). Can be:
+///   - **AllowNoneSelection** - Allows selecting no value (None)
+///   - **ShowDescription** - Shows a description for each item
+/// * `symbolsize` - Size of the symbol displayed for each item (optional). Can be:
+///   - **0** - No symbol
+///   - **1** - Small symbol
+///   - **2** - Medium symbol
+///   - **3** - Large symbol
+/// * `none` - Text to display when no item is selected (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic dropdown list
+/// let dd = dropdownlist!("MyEnum, x=1, y=1, width=20");
+/// 
+/// // Dropdown with flags and symbol size
+/// let dd = dropdownlist!(
+///     "type: MyEnum,
+///     flags: AllowNoneSelection+ShowDescription,
+///     symbolsize: 2,
+///     none: 'Select an option',
+///     x=2, y=2, width=25"
+/// );
+/// 
+/// // Dropdown with custom none text
+/// let dd = dropdownlist!(
+///     "MyEnum,
+///     none: 'No selection',
+///     x=3, y=3, width=30"
+/// );
+/// ```
 #[proc_macro]
 pub fn dropdownlist(input: TokenStream) -> TokenStream {
     crate::controls::dropdownlist::create(input)
@@ -805,11 +1033,122 @@ pub fn numericselector(input: TokenStream) -> TokenStream {
     crate::controls::numericselector::create(input)
 }
 
+/// Creates a new menu item for use in menus.
+/// The format is `menuitem!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `caption` or `text` (required, first positional parameter) - The text displayed in the menu
+/// * `shortcut` or `shortcutkey` or `key` (optional, second positional parameter) - Keyboard shortcut for the menu item
+/// * `cmd` or `command` or `cmd-id` or `command-id` (required, third positional parameter) - Command identifier
+/// * `type` - Menu item type (optional, auto-detected based on other parameters). Can be:
+///   - **Command** (default) - Regular menu command
+///   - **CheckBox** - Checkable menu item
+///   - **SingleChoice** - Radio button style menu item
+///   - **SubMenu** - Menu item that opens a submenu
+///   - **Line** or **Separator** - Menu separator line
+/// * `enable` or `enabled` - Whether the menu item is enabled (optional, defaults to true)
+/// * `check` or `checked` - Whether a checkbox menu item is checked (optional, defaults to false)
+/// * `select` or `selected` - Whether a single choice menu item is selected (optional, defaults to false)
+/// * `items` or `subitems` - List of submenu items (required for SubMenu type)
+/// * `class` - Class name for command resolution (optional)
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic command menu item
+/// let item = menuitem!("'Open File', shortcut: 'Ctrl+O', cmd: 'OpenFile'");
+/// 
+/// // Checkbox menu item
+/// let item = menuitem!(
+///     "caption: 'Show Toolbar',
+///     shortcut: 'Ctrl+T',
+///     cmd: 'ToggleToolbar',
+///     checked: true"
+/// );
+/// 
+/// // Single choice menu item
+/// let item = menuitem!(
+///     "'View Mode',
+///     shortcut: 'Ctrl+M',
+///     cmd: 'ChangeViewMode',
+///     selected: true"
+/// );
+/// 
+/// // Submenu with items
+/// let item = menuitem!(
+///     "'Recent Files',
+///     items: [
+///         {'Open File 1', cmd: 'OpenFile1'},
+///         {'Open File 2', cmd: 'OpenFile2'}
+///     ]"
+/// );
+/// 
+/// // Separator line
+/// let item = menuitem!("'---'");
+/// ```
 #[proc_macro]
 pub fn menuitem(input: TokenStream) -> TokenStream {
     crate::menu::menuitem::create(input, None)
 }
 
+/// Creates a new menu that can contain menu items.
+/// The format is `menu!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `caption` or `text` (required, first positional parameter) - The text displayed as the menu title
+/// * `items` or `subitems` - List of menu items to include in the menu (optional)
+/// * `class` - Class name for command resolution (optional)
+/// 
+/// Menu items can be created using the `menuitem!` macro and can be of various types:
+/// * Regular commands
+/// * Checkboxes
+/// * Single choice items
+/// * Submenus
+/// * Separator lines
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic menu with items
+/// let menu = menu!(
+///     "'File',
+///     items: [
+///         {'Open File', shortcut: 'Ctrl+O', cmd: 'OpenFile'},
+///         {'Save', shortcut: 'Ctrl+S', cmd: 'SaveFile'},
+///         {'---'},
+///         {'Exit', shortcut: 'Alt+F4', cmd: 'Exit'}
+///     ]"
+/// );
+/// 
+/// // Menu with submenus
+/// let menu = menu!(
+///     "'View',
+///     items: [
+///         {'Show Toolbar', shortcut: 'Ctrl+T', cmd: 'ToggleToolbar', checked: true},
+///         {'---'},
+///         {'Zoom',
+///             items: [
+///                 {'Zoom In', shortcut: 'Ctrl++', cmd: 'ZoomIn'},
+///                 {'Zoom Out', shortcut: 'Ctrl+-', cmd: 'ZoomOut'},
+///                 {'Reset Zoom', shortcut: 'Ctrl+0', cmd: 'ResetZoom'}
+///             ]
+///         }
+///     ]"
+/// );
+/// 
+/// // Menu with class specification
+/// let menu = menu!(
+///     "'Edit',
+///     class: 'MyWindow',
+///     items: [
+///         {'Cut', shortcut: 'Ctrl+X', cmd: 'Cut'},
+///         {'Copy', shortcut: 'Ctrl+C', cmd: 'Copy'},
+///         {'Paste', shortcut: 'Ctrl+V', cmd: 'Paste'}
+///     ]"
+/// );
+/// ```
 #[proc_macro]
 pub fn menu(input: TokenStream) -> TokenStream {
     crate::menu::menu::create(input, None)
@@ -1109,6 +1448,56 @@ pub fn pathfinder(input: TokenStream) -> TokenStream {
     crate::controls::pathfinder::create(input)
 }
 
+/// Creates a new tree view control for displaying hierarchical data.
+/// The format is `treeview!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `type` or `class` (required, first positional parameter) - The type of items to display in the tree
+/// * `columns` - Column definitions for the tree view (optional). Format: `[{Name,Width,Align},...]`
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows scroll bars
+///   - **SearchBar** - Enables search functionality
+///   - **ShowGroups** - Enables item grouping
+///   - **SmallIcons** - Uses small icons
+///   - **LargeIcons** - Uses large icons
+///   - **CustomFilter** - Enables custom filtering
+///   - **NoSelection** - Disables item selection
+///   - **HideHeader** - Hides the column header
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic tree view
+/// let tv = treeview!("MyItemType, x=1, y=1, width=40, height=20");
+/// 
+/// // Tree view with columns and search
+/// let tv = treeview!(
+///     "type: MyItemType,
+///     columns: [{Name,20,Left}, {Size,10,Right}, {Date,15,Left}],
+///     flags: ScrollBars+SearchBar,
+///     x=2, y=2, width=50, height=25"
+/// );
+/// 
+/// // Tree view with icons and custom margins
+/// let tv = treeview!(
+///     "MyItemType,
+///     flags: SmallIcons+ShowGroups,
+///     lsm: 2,
+///     tsm: 1,
+///     x=3, y=3, width=60, height=30"
+/// );
+/// ```
 #[proc_macro]
 pub fn treeview(input: TokenStream) -> TokenStream {
     crate::controls::treeview::create(input)
@@ -1156,6 +1545,49 @@ pub fn markdown(input: TokenStream) -> TokenStream {
     crate::controls::markdown::create(input)
 }
 
+/// Creates a new progress bar control for displaying progress of an operation.
+/// The format is `progressbar!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `count` or `c` or `total` - Total number of steps/items to process (optional)
+/// * `value` or `progress` or `v` - Current progress value (optional)
+/// * `text` or `caption` - Text to display on the progress bar (optional)
+/// * `paused` or `pause` - Whether the progress bar is paused (optional)
+/// * `flags` - Control flags (optional). Can be:
+///   - **HidePercentage** - Hides the percentage display
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic progress bar
+/// let pb = progressbar!("x=1, y=1, width=40");
+/// 
+/// // Progress bar with total count and current value
+/// let pb = progressbar!(
+///     "count: 100,
+///     value: 42,
+///     text: 'Processing...',
+///     x=2, y=2, width=50"
+/// );
+/// 
+/// // Paused progress bar without percentage
+/// let pb = progressbar!(
+///     "count: 50,
+///     value: 25,
+///     paused: true,
+///     flags: HidePercentage,
+///     x=3, y=3, width=30"
+/// );
+/// ```
 #[proc_macro]
 pub fn progressbar(input: TokenStream) -> TokenStream {
     crate::controls::progressbar::create(input)
