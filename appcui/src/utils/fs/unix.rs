@@ -27,8 +27,8 @@ pub(super) fn get_os_roots() -> Vec<Root> {
 
                     if result == 0 {
                         // Calculate sizes
-                        let total_size = stats.f_blocks * stats.f_frsize as u64;
-                        let free_space = stats.f_bfree * stats.f_frsize as u64;
+                        let total_size = stats.f_blocks as u64 * stats.f_frsize as u64;
+                        let free_space = stats.f_bfree as u64 * stats.f_frsize as u64;
 
                         let root_type = if mount_point.starts_with("/media") || mount_point.starts_with("/mnt") {
                             RootType::Removable

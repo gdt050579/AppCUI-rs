@@ -8,6 +8,10 @@ mod nav_simulator;
 mod windows;
 #[cfg(target_os="linux")]
 mod unix;
+#[cfg(target_os="macos")]
+mod unix;
+
+
 
 #[cfg(test)]
 mod tests;
@@ -24,4 +28,6 @@ pub(crate) use entry::EntryType;
 #[cfg(target_os="windows")]
 use windows::get_os_roots;
 #[cfg(target_os="linux")]
+use unix::get_os_roots;
+#[cfg(target_os="macos")]
 use unix::get_os_roots;
