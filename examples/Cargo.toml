@@ -184,3 +184,7 @@ path = "logo/main.rs"
 [[example]]
 name = "demo_app"
 path = "demo_app/main.rs"
+
+[[example]]
+name = "textarea"
+path = "textarea/main.rs"

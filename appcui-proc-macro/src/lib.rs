@@ -1592,3 +1592,8 @@ pub fn markdown(input: TokenStream) -> TokenStream {
 pub fn progressbar(input: TokenStream) -> TokenStream {
     crate::controls::progressbar::create(input)
 }
+
+#[proc_macro]
+pub fn textarea(input: TokenStream) -> TokenStream {
+    crate::controls::textarea::create(input)
+}
