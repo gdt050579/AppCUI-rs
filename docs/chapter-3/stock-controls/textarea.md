@@ -7,6 +7,19 @@ To create a textarea use `TextArea::new` method (with 3 parameters: a caption, a
 let tx = TextArea::new("Some text", Layout::new("x:10,y:5,w:15"), textarea::Flags::None);
 ```
 
+or use the macro `textarea!()`
+```rs
+let textarea1 = textarea!("text='some text to edit',d:c,h:100%");
+let textarea2 = textarea!("'some text to print',d:c,h:100%,flags:ReadOnly");
+```
+
+A textarea supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
+
+| Parameter name      | Type   | Positional parameter                | Purpose                                                                                                              |
+| ------------------- | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `text` | String | **Yes** (first postional parameter) | The text from a text area. If ommited an empty string will be considered as the caption of the textarea. |
+| `flags`             | List   | **No**                              | TextArea initialization flags that control how the TextArea should look and behave(ReadOnly, having line numbers)                 |
+
 Text Area supports the following initialization flags:
 * `textarea::Flags::ShowLineNumber` (0x0001) - This flag enables the display of line numbers in the text area, typically in a gutter on the left side. It helps users keep track of their position within the text, making navigation and debugging easier. This feature is especially useful for programming and document editing, where line references are important.
 * `textarea::Flags::ReadOnly` (0x0002) - When this flag is set, the text area becomes non-editable, meaning users can view but not modify the text. This is useful for displaying logs, reference documents, or any content where accidental modifications should be prevented. Although users cannot change the text, they may still be able to select and copy it.
