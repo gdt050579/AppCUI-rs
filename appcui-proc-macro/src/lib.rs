@@ -713,13 +713,13 @@ pub fn canvas(input: TokenStream) -> TokenStream {
 /// 
 /// // Basic image viewer with a smiley face
 /// let viewer = imageviewer!(
-///     "image: '  YY  \n Y  Y \nY    Y\nY    Y\nY    Y\n Y  Y \n  YY  ',
+///     "image: '  YYYYY  \n Y     Y \nY  Y Y  Y\nY       Y\nY  YYY  Y\n Y     Y \n  YYYYY  ',
 ///     x=1, y=1, width=40, height=20"
 /// );
 /// 
 /// // Image viewer with custom rendering and background
 /// let viewer = imageviewer!(
-///     "image: '  YY  \n Y  Y \nY    Y\nY    Y\nY    Y\n Y  Y \n  YY  ',
+///     "image: '  YYYYY  \n Y     Y \nY  Y Y  Y\nY       Y\nY  YYY  Y\n Y     Y \n  YYYYY  ',
 ///     render: GrayScale,
 ///     back: {' ', White, Blue},
 ///     lsm: 2,
