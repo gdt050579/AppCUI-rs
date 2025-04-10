@@ -70,8 +70,8 @@
         - [Selector](chapter-3/stock-controls/selector.md)
         - [Slider]()
         - [Tab](chapter-3/stock-controls/tab.md)
+        - [TextArea](chapter-3/stock-controls/textarea.md)
         - [TextField](chapter-3/stock-controls/textfield.md)
-        - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
         - [ToggleButton](chapter-3/stock-controls/togglebutton.md)
         - [TreeView](chapter-3/stock-controls/treeview.md)

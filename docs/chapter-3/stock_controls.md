@@ -28,7 +28,8 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [RadioBox](stock-controls/radiobox.md)               | ui::RadioBox                 | `radiobox!`        | <img src="stock-controls/img/radiobox.png" width=300/>        |
 | [Selector](stock-controls/selector.md)               | ui::Selector&lt;T&gt;        | `selector!`        | <img src="stock-controls/img/selector.png" width=300/>        |
 | [Tab](stock-controls/tab.md)                         | ui::Tab                      | `tab!`             | <img src="stock-controls/img/tab.png" width=300/>             |
-| [TextField](stock-controls/textField.md)             | ui::TextField                | `textfield!`       | <img src="stock-controls/img/textfield.png" width=300/>       |
+| [TextArea](stock-controls/textarea.md)               | ui::TextArea                 | `textarea!`        | <img src="stock-controls/img/textarea.png" width=300/>        |
+| [TextField](stock-controls/textfield.md)             | ui::TextField                | `textfield!`       | <img src="stock-controls/img/textfield.png" width=300/>       |
 | [ThreeStateBox](stock-controls/threestatebox.md)     | ui::ThreeStateBox            | `threestatebox!`   | <img src="stock-controls/img/threestatebox.png" width=300/>   |
 | [ToggleButton](stock-controls/togglebutton.md)       | ui::ToggleButton             | `togglebutton!`    | <img src="stock-controls/img/togglebutton.png" width=300/>    |
 | [TreeView](stock-controls/treeview.md)               | ui::TreeView&lt;T&gt;        | `treeview!`        | <img src="stock-controls/img/treeview.png" width=300/>        |
