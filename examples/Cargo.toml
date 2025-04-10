@@ -186,5 +186,5 @@ name = "demo_app"
 path = "demo_app/main.rs"
 
 [[example]]
-name = "textarea"
-path = "textarea/main.rs"
+name = "editor"
+path = "editor/main.rs"

@@ -3,12 +3,13 @@ use crate::Viewer;
 
 use std::fs;
 
-const LOGO: [&str; 5] = [
-    "TTTTT  EEEEE  X   X  TTTTT     AAAAA   RRRR    EEEEE  AAAAA  ",
-    "  T    E       X X     T      A     A  R   R   E     A     A ",
-    "  T    EEEE     X      T      AAAAAAA  RRRR    EEEE  AAAAAAA ",
-    "  T    E       X X     T      A     A  R  R    E     A     A ",
-    "  T    EEEEE  X   X    T      A     A  R   R   EEEEE A     A "                                                            
+const LOGO: [&str; 6] = [
+    "████████╗███████╗██╗  ██╗████████╗    ███████╗██████╗ ██╗████████╗ ██████╗ ██████╗ ", 
+    "╚══██╔══╝██╔════╝╚██╗██╔╝╚══██╔══╝    ██╔════╝██╔══██╗██║╚══██╔══╝██╔═══██╗██╔══██╗",
+    "   ██║   █████╗   ╚███╔╝    ██║       █████╗  ██║  ██║██║   ██║   ██║   ██║██████╔╝",
+    "   ██║   ██╔══╝   ██╔██╗    ██║       ██╔══╝  ██║  ██║██║   ██║   ██║   ██║██╔══██╗",
+    "   ██║   ███████╗██╔╝ ██╗   ██║       ███████╗██████╔╝██║   ██║   ╚██████╔╝██║  ██║",
+    "   ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚══════╝╚═════╝ ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝",                                                       
 ];
 
 #[Desktop(events    = [MenuEvents,DesktopEvents], 
@@ -35,7 +36,7 @@ impl OnPaint for MyDesktop {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.clear(theme.desktop.character);
         let attr = CharAttribute::with_color(theme.desktop.character.foreground,theme.desktop.character.background);
-        let x = ((surface.size().width as i32) / 2 ) - 38;
+        let x = ((surface.size().width as i32) / 2 ) - 42;
         let mut y = ((surface.size().height as i32) / 2 ) - 3;
         for line in LOGO {
             surface.write_string(x, y, line, attr, false);
@@ -56,6 +57,7 @@ impl DesktopEvents for MyDesktop {
         self.menu_file = self.register_menu(menu!("
             &File, class: MyDesktop, items:[
                 {'&Open',cmd: Open, key: F3},
+                {---},
                 {'E&xit',cmd: Exit, key: Escape},
             ]
         "));
@@ -94,7 +96,7 @@ impl MenuEvents for MyDesktop {
                 if let Some(file_path) = dialogs::open("Open",
                     "",
                     dialogs::Location::Last,
-                    Some("Comma separated values = []"),
+                    Some("Text files = []"),
                     dialogs::OpenFileDialogFlags::Icons
                 ) {
                     if let Ok(text_print) = fs::read_to_string(&file_path) {
