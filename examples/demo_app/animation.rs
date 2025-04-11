@@ -1,7 +1,6 @@
 use std::time::Duration;
-
 use appcui::prelude::*;
-use rand;
+
 
 #[derive(Copy, Clone, Default)]
 struct Bar {
@@ -45,9 +44,10 @@ impl Win {
         let bars_count = self.bars.len();
         let sz = self.size().reduce_by(2); // window margins
         let mut arr: [Bar; 100] = [Bar::default(); 100];
-        for i in 0..bars_count.min(100) {
-            arr[i] = self.bars[i];
-        }
+        // for i in 0..bars_count.min(100) {
+        //     arr[i] = self.bars[i];
+        // }
+        arr[..bars_count.min(100)].copy_from_slice(&self.bars[..bars_count.min(100)]);
         if let Some(canvas) = self.control_mut(h) {
             let surface = canvas.get_drawing_surface();
             surface.clear(char!("' ',w,black"));

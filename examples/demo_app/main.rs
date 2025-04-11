@@ -99,10 +99,7 @@ impl CommandBarEvents for MyDesktop {
     }
 
     fn on_event(&mut self, command_id: mydesktop::Commands) {
-        match command_id {
-            mydesktop::Commands::Exit => self.close(), 
-            _ => {}
-        }
+        if command_id == mydesktop::Commands::Exit { self.close() }
     }
 }
 impl MenuEvents for MyDesktop {

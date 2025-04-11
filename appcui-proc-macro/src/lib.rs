@@ -623,7 +623,7 @@ pub fn threestatebox(input: TokenStream) -> TokenStream {
 /// * `size` or `sz` or `surface` (required, first positional parameter) - Size of the canvas. Can be specified in two formats:
 ///   - `width,height` - Using comma as separator (e.g. `40,20`)
 ///   - `width x height` - Using 'x' as separator (e.g. `40x20`)
-///   Values must be positive integers between 1 and 32000
+///     Values must be positive integers between 1 and 32000
 /// * `flags` - Control flags (optional). Can be:
 ///   - **ScrollBars** - Shows scroll bars when content exceeds the canvas size
 /// * `background` or `back` - Background character and attributes (optional). Format: `{char,color,background_color}`

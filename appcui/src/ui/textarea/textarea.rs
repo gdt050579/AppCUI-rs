@@ -123,7 +123,7 @@ impl TextArea {
             start -= 1;
         }
 
-        return std::str::from_utf8(&bytes[start..position]).ok().and_then(|s| s.chars().next().map(|c| (start, c)));
+        std::str::from_utf8(&bytes[start..position]).ok().and_then(|s| s.chars().next().map(|c| (start, c)))
     }
     fn get_start_of_word(&mut self, absolute_position_start: usize) -> (usize, i32) {
 
