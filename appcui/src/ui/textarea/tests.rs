@@ -2286,3 +2286,28 @@ fn backspace_first_char() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn out_ouf_bounds_mouse_click() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Mouse.Click(5, 5, left)
+
+        Paint('After Click')
+        CheckHash(0xAFD43010ED21E34F)
+        CheckCursor(19, 1)
+    ";
+
+    let text_print = "Laus Cargo et Rust";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Issue #80 Mouse Click", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
