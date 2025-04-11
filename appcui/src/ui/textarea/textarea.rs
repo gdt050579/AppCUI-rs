@@ -987,6 +987,11 @@ impl TextArea {
         }
         self.cursor.pos_y = self.mouse_y as usize;
 
+        if self.cursor.pos_y >= self.line_sizes.len() {
+            self.cursor.pos_y = self.line_sizes.len() - 1;
+            self.move_cursor_horizontal(self.line_sizes[self.line_sizes.len() - 1] as i32);
+        }
+
         self.reposition_cursor();
     }
     fn update_cursor_pos_from_mouse(&mut self, mouse_data: &MouseEventData) {
