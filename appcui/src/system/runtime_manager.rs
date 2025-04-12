@@ -929,7 +929,6 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         // process cmdbar
         if let Some(cmdbar) = self.commandbar.as_mut() {
-            web_sys::console::log_1(&format!("Update command bar for handle").into());
             cmdbar.clear();
             // start from the focused control and call on_update_commandbar for each control
             let mut h = focused_handle;
