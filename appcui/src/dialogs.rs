@@ -252,17 +252,17 @@ pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Op
 /// * `title` - The title of the dialog.
 /// * `location` - The initial location of the dialog (one of Current, Last or Path). If Last is used, the dialog will open in the last location used by the user.
 /// * `flags` - Flags that specify the behavior of the dialog (ex: display icons).
-/// 
+///
 /// # Example
 /// ```rust,no_run
 /// use appcui::dialogs;
-/// 
-/// if let Some(path) = dialogs::select_folder("Select folder", 
-///                                            dialogs::Location::Current, 
-///                                            dialogs::SelectFolderDialogFlags::Icons) 
+///
+/// if let Some(path) = dialogs::select_folder("Select folder",
+///                                            dialogs::Location::Current,
+///                                            dialogs::SelectFolderDialogFlags::Icons)
 /// {
 ///    println!("Folder selected: {:?}", path);
 /// }
-pub fn select_folder(title:&str, location: Location, flags: SelectFolderDialogFlags) -> Option<PathBuf> {
+pub fn select_folder(title: &str, location: Location, flags: SelectFolderDialogFlags) -> Option<PathBuf> {
     inner_select_folder(title, location, flags, utils::fs::Navigator::new())
 }

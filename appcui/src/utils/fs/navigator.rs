@@ -13,7 +13,7 @@ pub(crate) struct Navigator {
 }
 
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
-    #[cfg(any(target_os = "windows", wasm_windows))]
+    #[cfg(all(not(target_arch = "wasm32"), target_os = "windows"))]
     fn entries(&self, path: &PathBuf) -> Vec<Entry> {
         log!("FS", "entries({})", path.display());
         if path.as_os_str().is_empty() {
@@ -26,7 +26,28 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
         }
     }
 
-    #[cfg(any(target_family = "unix", wasm_unix))]
+    // Native Unix implementation (only compile when not targeting wasm32)
+    #[cfg(all(not(target_arch = "wasm32"), target_family = "unix"))]
+    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
+        Self::get_folder_listing(path).unwrap_or_default()
+    }
+
+    // wasm32 implementation with Windows-like behavior
+    #[cfg(all(target_arch = "wasm32", wasm_windows))]
+    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
+        log!("FS", "entries({})", path.display());
+        if path.as_os_str().is_empty() {
+            return vec![];
+        }
+        if let Some(normalized_root) = Self::normalize_windows_root(path) {
+            Self::get_folder_listing(normalized_root.as_path()).unwrap_or_default()
+        } else {
+            Self::get_folder_listing(path).unwrap_or_default()
+        }
+    }
+
+    // wasm32 implementation with Unix-like behavior
+    #[cfg(all(target_arch = "wasm32", wasm_unix))]
     fn entries(&self, path: &PathBuf) -> Vec<Entry> {
         Self::get_folder_listing(path).unwrap_or_default()
     }
@@ -35,12 +56,26 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
         super::get_os_roots()
     }
 
-    #[cfg(any(target_os = "windows", wasm_windows))]
+    // Native Windows constructor (only compile when not targeting wasm32)
+    #[cfg(all(not(target_arch = "wasm32"), target_os = "windows"))]
     fn new() -> Self {
         Self { windows_model: true }
     }
 
-    #[cfg(any(target_family = "unix", wasm_unix))]
+    // Native Unix constructor (only compile when not targeting wasm32)
+    #[cfg(all(not(target_arch = "wasm32"), target_family = "unix"))]
+    fn new() -> Self {
+        Self { windows_model: false }
+    }
+
+    // wasm32 constructor with Windows-like behavior
+    #[cfg(all(target_arch = "wasm32", wasm_windows))]
+    fn new() -> Self {
+        Self { windows_model: true }
+    }
+
+    // wasm32 constructor with Unix-like behavior
+    #[cfg(all(target_arch = "wasm32", wasm_unix))]
     fn new() -> Self {
         Self { windows_model: false }
     }

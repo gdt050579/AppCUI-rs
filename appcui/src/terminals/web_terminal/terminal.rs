@@ -1,8 +1,13 @@
 use super::helpers::{compile_shader, link_program};
-use crate::prelude::{ErrorKind, Size, Surface};
-use crate::system::Error;
-use crate::terminals::{SystemEvent, Terminal};
-use std::sync::{Arc, Mutex};
+use crate::{
+    prelude::{ErrorKind, Size, Surface},
+    system::Error,
+    terminals::{SystemEvent, Terminal},
+};
+use std::sync::{
+    mpsc::Sender,
+    {Arc, Mutex},
+};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
@@ -10,23 +15,20 @@ use web_sys::{
     WebGlRenderingContext as GL, WheelEvent,
 };
 
-use std::sync::mpsc::Sender;
-
 pub struct WebTerminal {
-    gl: GL,
-    pub size: Size,
-    pub webgl_canvas: HtmlCanvasElement,
-    pub text_canvas: HtmlCanvasElement,
-    program: WebGlProgram,
-    buffer: WebGlBuffer,
-    pos_attrib_location: u32,
-    color_attrib_location: u32,
+    gl:                     GL,
+    pub size:               Size,
+    pub webgl_canvas:       HtmlCanvasElement,
+    pub text_canvas:        HtmlCanvasElement,
+    program:                WebGlProgram,
+    buffer:                 WebGlBuffer,
+    pos_attrib_location:    u32,
+    color_attrib_location:  u32,
     pub(super) event_queue: Arc<Mutex<Vec<SystemEvent>>>,
-    // New configuration fields read from the DOM:
-    pub font: String,
-    pub font_size: u32,
-    pub cell_width_px: u32,
-    pub cell_height_px: u32,
+    pub font:               String,
+    pub font_size:          u32,
+    cell_width_px:          f32,
+    cell_height_px:         f32,
 }
 
 unsafe impl Send for WebTerminal {}
@@ -36,7 +38,12 @@ impl WebTerminal {
     pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let document = Self::document()?;
 
-        // Read configuration values from the DOM (or fall back to defaults)
+        if let Some(title) = &builder.title {
+            document.set_title(&title);
+        } else {
+            document.set_title("AppCUI Web Terminal");
+        }
+
         let cols = document
             .get_element_by_id("terminal-cols")
             .and_then(|el| el.text_content())
@@ -60,8 +67,6 @@ impl WebTerminal {
             .and_then(|s| s.parse::<u32>().ok())
             .unwrap_or(20);
 
-        // Optionally allow cell width and height to be configurable;
-        // fall back to defaults (for cell height, use the font size as default)
         let cell_width_px = document
             .get_element_by_id("terminal-cell-width")
             .and_then(|el| el.text_content())
@@ -86,6 +91,11 @@ impl WebTerminal {
         text_canvas.set_width(canvas_width);
         text_canvas.set_height(canvas_height);
 
+        text_canvas
+            .style()
+            .set_property("background-color", "transparent")
+            .expect("Failed to set canvas background color");
+
         webgl_canvas
             .style()
             .set_property("width", &format!("{}px", canvas_width))
@@ -104,7 +114,6 @@ impl WebTerminal {
             .set_property("height", &format!("{}px", canvas_height))
             .expect("Failed to set canvas CSS height");
 
-        // --- new code ---
         webgl_canvas
             .style()
             .set_property("position", "absolute")
@@ -117,7 +126,7 @@ impl WebTerminal {
         text_canvas.style().set_property("z-index", "2").expect("Failed to set canvas z-index");
 
         gl.viewport(0, 0, canvas_width as i32, canvas_height as i32);
-        web_sys::console::log_1(&format!("WebGL canvas size: {canvas_width}x{canvas_height}").into());
+        // web_sys::console::log_1(&format!("WebGL canvas size: {canvas_width}x{canvas_height}").into());
 
         let program = Self::init_program(&gl)?;
         let pos_attrib_location = gl.get_attrib_location(&program, "position") as u32;
@@ -139,11 +148,10 @@ impl WebTerminal {
             color_attrib_location,
             event_queue: queue,
             size: Size { width: cols, height: rows },
-            // Save configuration values for later use:
             font,
             font_size,
-            cell_width_px,
-            cell_height_px,
+            cell_width_px: cell_width_px as f32,
+            cell_height_px: cell_height_px as f32,
         };
 
         terminal
@@ -232,18 +240,18 @@ impl WebTerminal {
 
         let canvas_width = self.webgl_canvas.width() as f32;
         let canvas_height = self.webgl_canvas.height() as f32;
-        let cell_width = canvas_width / self.size.width as f32;
-        let cell_height = canvas_height / self.size.height as f32;
+        let cell_width = self.cell_width_px as f32;
+        let cell_height = self.cell_height_px as f32;
 
-        web_sys::console::log_1(&format!("Canvas size: {}x{}", canvas_width, canvas_height).into());
-        web_sys::console::log_1(&format!("Background Cell size: {}x{}", cell_width, cell_height).into());
+        // web_sys::console::log_1(&format!("Canvas size: {}x{}", canvas_width, canvas_height).into());
+        // web_sys::console::log_1(&format!("Background Cell size: {}x{}", cell_width, cell_height).into());
 
         let mut vertices: Vec<f32> = Vec::new();
         for y in 0..surface.size.height {
             for x in 0..surface.size.width {
                 if let Some(cell) = &surface.char(x as i32, y as i32) {
-                    let pos_x = x as f32 * cell_width;
-                    let pos_y = y as f32 * cell_height;
+                    let pos_x = (x as i32 + surface.clip.left) as f32 * cell_width;
+                    let pos_y = (y as i32 + surface.clip.top) as f32 * cell_height;
                     let bg_color = cell.background.to_rgb();
 
                     let x_ndc = 2.0 * (pos_x / canvas_width) - 1.0;
@@ -298,46 +306,37 @@ impl WebTerminal {
 
         let canvas_width = self.text_canvas.width() as f64;
         let canvas_height = self.text_canvas.height() as f64;
-
-        // Here we compute the cell dimensions based on the full surface size.
         let full_cols = surface.size.width as f64;
         let full_rows = surface.size.height as f64;
-        let cell_width = canvas_width / full_cols;
-        let cell_height = canvas_height / full_rows;
+        let cell_width = self.cell_width_px as f64;
+        let cell_height = self.cell_height_px as f64;
 
-        // Optionally, clear only the clip area.
-        let clip_left = surface.clip.left as f64;
-        let clip_top = surface.clip.top as f64;
-        let clip_width = (surface.clip.right - surface.clip.left) as f64;
-        let clip_height = (surface.clip.bottom - surface.clip.top) as f64;
-        context.clear_rect(
-            clip_left * cell_width,
-            clip_top * cell_height,
-            clip_width * cell_width,
-            clip_height * cell_height,
-        );
+        // context.clear_rect(
+        //     0.0 + surface.clip.left as f64 * cell_width,
+        //     0.0 + surface.clip.top as f64 * cell_height,
+        //     (surface.clip.right - surface.clip.left) as f64 * cell_width,
+        //     (surface.clip.bottom - surface.clip.top) as f64 * cell_height,
+        // );
+
+        context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
 
         context.save();
         context.set_font(&format!("{}px {}", self.font_size, self.font));
         context.set_text_baseline("top");
         context.set_text_align("center");
 
-        for y in 0..surface.size.height {
-            for x in 0..surface.size.width {
-                if let Some(cell) = &surface.char(x as i32, y as i32) {
-                    // Compute global cell coordinates
-                    let global_x = x + surface.origin.x as u32;
-                    let global_y = y + surface.origin.y as u32;
+        let clip_left = surface.clip.left;
+        let clip_top = surface.clip.top;
+        let clip_right = surface.clip.right;
+        let clip_bottom = surface.clip.bottom;
 
-                    // Skip cells outside the clip
-                    if !surface.clip.contains(global_x.try_into().unwrap(), global_y.try_into().unwrap()) {
-                        continue;
-                    }
-
-                    // Compute drawing position relative to the clip region.
-                    let pos_x = (((global_x as i32) - surface.clip.left) as f64 * cell_width) as i32;
-                    let pos_y = (((global_y as i32) - surface.clip.top) as f64 * cell_height) as i32;
-
+        for global_y in clip_top..=clip_bottom {
+            for global_x in clip_left..=clip_right {
+                let cell_x = global_x - surface.origin.x as i32;
+                let cell_y = global_y - surface.origin.y as i32;
+                if let Some(cell) = &surface.char(cell_x, cell_y) {
+                    let pos_x = global_x as f64 * cell_width;
+                    let pos_y = global_y as f64 * cell_height;
                     let foreground = cell.foreground.to_rgb();
                     let css_color = format!(
                         "rgb({},{},{})",
@@ -359,8 +358,6 @@ impl WebTerminal {
         let document = window().ok_or("No window")?.document().ok_or("No document")?;
         let doc_target: &EventTarget = document.as_ref();
 
-        let event_queue = self.event_queue.clone();
-        let sender_mouse = sender.clone();
         let cell_width = self.webgl_canvas.width() as f32 / (211 as f32);
         let cell_height = self.webgl_canvas.height() as f32 / (56 as f32);
 
@@ -467,7 +464,7 @@ impl WebTerminal {
                 key: crate::input::Key::new(key_code, modifiers),
                 character,
             });
-            web_sys::console::log_1(&format!("Key event: {:?}", sys_event).into());
+            // web_sys::console::log_1(&format!("Key event: {:?}", sys_event).into());
 
             let _ = sender_key.send(sys_event);
             if let Ok(mut q) = event_queue.lock() {
@@ -489,8 +486,8 @@ impl WebTerminal {
             let canvas_y = event.client_y() as f32 - rect.top() as f32;
 
             let sys_event = SystemEvent::MouseMove(crate::terminals::MouseMoveEvent {
-                x: (canvas_x as f32 / cell_width) as i32,
-                y: (canvas_y as f32 / cell_height) as i32,
+                x:      (canvas_x as f32 / cell_width) as i32,
+                y:      (canvas_y as f32 / cell_height) as i32,
                 button: crate::input::MouseButton::None,
             });
 
@@ -593,7 +590,6 @@ impl WebTerminal {
     }
 
     fn render_cursor(&self, surface: &Surface) -> Result<(), JsValue> {
-        // Only draw the cursor if it is visible
         if !surface.cursor.is_visible() {
             return Ok(());
         }
@@ -631,7 +627,7 @@ impl Terminal for WebTerminal {
     }
 
     fn is_single_threaded(&self) -> bool {
-        true
+        false
     }
 
     fn update_screen(&mut self, surface: &Surface) {
@@ -652,12 +648,12 @@ impl Terminal for WebTerminal {
         }
     }
 
-    fn get_clipboard_text(&self) -> Option<String> {
-        None
-    }
-
     fn get_size(&self) -> crate::prelude::Size {
         self.size
+    }
+
+    fn get_clipboard_text(&self) -> Option<String> {
+        None
     }
 
     fn has_clipboard_text(&self) -> bool {

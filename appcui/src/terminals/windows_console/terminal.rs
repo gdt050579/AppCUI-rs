@@ -18,13 +18,13 @@ use crate::system::Error;
 
 pub struct WindowsTerminal {
     //stdin_handle: HANDLE, // to be moved
-    stdout: HANDLE,
-    size: Size,
-    chars: Vec<CHAR_INFO>,
+    stdout:                HANDLE,
+    size:                  Size,
+    chars:                 Vec<CHAR_INFO>,
     //shift_state: KeyModifier, // to be moved
     //last_mouse_pos: Point, // to be moved
-    visible_region: SMALL_RECT, // to be moved ?!?
-    _original_mode_flags: u32,
+    visible_region:        SMALL_RECT, // to be moved ?!?
+    _original_mode_flags:  u32,
     shared_visible_region: Arc<Mutex<SMALL_RECT>>,
 }
 
@@ -92,9 +92,9 @@ impl WindowsTerminal {
             ));
         }
         let window_size = SMALL_RECT {
-            left: 0,
-            top: 0,
-            right: size.width as i16 - 1,
+            left:   0,
+            top:    0,
+            right:  size.width as i16 - 1,
             bottom: size.height as i16 - 1,
         };
         unsafe {
@@ -351,9 +351,9 @@ impl Terminal for WindowsTerminal {
                 if surrogate_used > 0 {
                     let sz = COORD { x: w as i16, y: y - start_y };
                     let vis_region = SMALL_RECT {
-                        left: self.visible_region.left,
-                        top: self.visible_region.top + start_y,
-                        right: self.visible_region.right,
+                        left:   self.visible_region.left,
+                        top:    self.visible_region.top + start_y,
+                        right:  self.visible_region.right,
                         bottom: self.visible_region.top + y - 1,
                     };
                     unsafe {
@@ -377,9 +377,9 @@ impl Terminal for WindowsTerminal {
         } else if start_y < y {
             let sz = COORD { x: w as i16, y: y - start_y };
             let vis_region = SMALL_RECT {
-                left: self.visible_region.left,
-                top: self.visible_region.top + start_y,
-                right: self.visible_region.right,
+                left:   self.visible_region.left,
+                top:    self.visible_region.top + start_y,
+                right:  self.visible_region.right,
                 bottom: self.visible_region.top + y - 1,
             };
             unsafe {

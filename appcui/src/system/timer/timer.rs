@@ -1,15 +1,19 @@
-use crate::system::RuntimeManager;
 use crate::system::runtime_manager_traits::TimerMethods;
+use crate::system::RuntimeManager;
 use crate::terminals::SystemEvent;
 
 use super::Command;
 use super::{super::Handle, thread_logic::ThreadLogic};
 use std::sync::mpsc::Sender;
+
+#[cfg(target_arch = "wasm32")]
+use instant::Duration;
+#[cfg(not(target_arch = "wasm32"))]
+use std::thread;
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
-use std::{
-    sync::{Arc, Condvar, Mutex},
-    thread,
-};
+
+use std::sync::{Arc, Condvar, Mutex};
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u8)]
@@ -23,11 +27,11 @@ enum TimerState {
 
 #[derive(Debug)]
 pub struct Timer {
-    synk: Arc<(Mutex<Command>, Condvar)>,
-    control_handle: Handle<()>,
-    handle: Handle<Timer>,
+    synk:              Arc<(Mutex<Command>, Condvar)>,
+    control_handle:    Handle<()>,
+    handle:            Handle<Timer>,
     requested_command: Command,
-    state: TimerState,
+    state:             TimerState,
 }
 impl Timer {
     pub(super) fn new(control_handle: Handle<()>, handle: Handle<Timer>) -> Self {
@@ -66,17 +70,23 @@ impl Timer {
         self.state == TimerState::Terminate
     }
     pub(super) fn start_thread(&mut self, sender: Sender<SystemEvent>) {
-        let mut thread_logic = ThreadLogic::new(self.handle.index() as u8, self.requested_command.iterval().unwrap_or(1000).max(1) );
+        let mut thread_logic = ThreadLogic::new(self.handle.index() as u8, self.requested_command.iterval().unwrap_or(1000).max(1));
         if let Ok(mut guard) = self.synk.0.lock() {
             *guard = self.requested_command;
         }
-        let synk = self.synk.clone();        
+        let synk = self.synk.clone();
         self.state = match self.requested_command {
             Command::Start(_) | Command::Resume => TimerState::Running,
             _ => TimerState::Paused,
         };
-        // last --> start the thread
+
+        #[cfg(not(target_arch = "wasm32"))]
         thread::spawn(move || {
+            thread_logic.run(synk, sender);
+        });
+
+        #[cfg(target_arch = "wasm32")]
+        rayon::spawn(move || {
             thread_logic.run(synk, sender);
         });
     }
@@ -109,7 +119,7 @@ impl Timer {
         self.send_command(Command::Resume);
     }
     /// Set the interval of the timer. If the timer is running, the interval will be changed imediatelly. If the timer is paused, the interval will be changed when the timer is resumed.
-    /// The interval (**duration** parameter) will be clamped between 1 and 0xFFFFFFFE miliseconds. 
+    /// The interval (**duration** parameter) will be clamped between 1 and 0xFFFFFFFE miliseconds.
     pub fn set_interval(&mut self, duration: Duration) {
         self.send_command(Command::SetInterval(Timer::duration_to_miliseconds(duration)));
     }

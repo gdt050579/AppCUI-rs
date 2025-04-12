@@ -5,34 +5,34 @@ use crate::ui::common::traits::*;
 use crate::ui::common::*;
 
 pub struct Builder {
-    pub(crate) size: Option<Size>,
-    pub(crate) terminal: Option<TerminalType>,
-    pub(crate) debug_script: Option<String>,
-    pub(crate) title: Option<String>,
+    pub(crate) size:            Option<Size>,
+    pub(crate) terminal:        Option<TerminalType>,
+    pub(crate) debug_script:    Option<String>,
+    pub(crate) title:           Option<String>,
     pub(crate) desktop_manager: Option<ControlManager>,
-    pub(crate) has_menu_bar: bool,
+    pub(crate) has_menu_bar:    bool,
     pub(crate) has_command_bar: bool,
-    pub(crate) single_window: bool,
-    pub(crate) theme: Theme,
+    pub(crate) single_window:   bool,
+    pub(crate) theme:           Theme,
     pub(crate) max_timer_count: u8,
-    pub(crate) log_file: Option<String>,
-    pub(crate) log_append: bool,
+    pub(crate) log_file:        Option<String>,
+    pub(crate) log_append:      bool,
 }
 impl Builder {
     pub(crate) fn new() -> Self {
         Self {
-            size: None,
-            title: None,
-            terminal: None,
-            debug_script: None,
+            size:            None,
+            title:           None,
+            terminal:        None,
+            debug_script:    None,
             desktop_manager: None,
-            has_menu_bar: false,
+            has_menu_bar:    false,
             has_command_bar: false,
-            single_window: false,
+            single_window:   false,
             max_timer_count: 4,
-            theme: Theme::new(Themes::Default),
-            log_file: None,
-            log_append: false,
+            theme:           Theme::new(Themes::Default),
+            log_file:        None,
+            log_append:      false,
         }
     }
     #[inline(always)]

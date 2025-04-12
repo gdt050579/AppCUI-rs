@@ -4,8 +4,8 @@ use crate::ui::button::{events::EventData, Type};
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Button {
     button_type: Type,
-    caption: Caption,
-    pressed: bool,
+    caption:     Caption,
+    pressed:     bool,
 }
 impl Button {
     /// Creates a new button with the specified caption, layout and flags
@@ -52,9 +52,9 @@ impl Button {
 impl OnDefaultAction for Button {
     fn on_default_action(&mut self) {
         self.raise_event(ControlEvent {
-            emitter: self.handle,
+            emitter:  self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::Button(EventData {}),
+            data:     ControlEventData::Button(EventData {}),
         });
     }
 }

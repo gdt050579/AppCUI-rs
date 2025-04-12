@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 EnumBitFlags = "1.0.10"
 flat_string = "1.0.0"
-chrono = "0.4.38"
+chrono = {version = "0.4.38", features = ["wasmbind"]}
 AppCUIProcMacro = {path = "../appcui-proc-macro"}
 
 [lib]
@@ -27,6 +27,8 @@ web-sys = { version = "0.3", features = [
     "Window", 
     "Document", 
     "DomRect",
+    "Navigator",
+    "Clipboard",
     "HtmlCanvasElement", 
     "HtmlElement",
     "CssStyleDeclaration", 
@@ -42,7 +44,11 @@ web-sys = { version = "0.3", features = [
     "TextMetrics"]}
 js-sys = "0.3"
 console_error_panic_hook = "0.1"
-
+instant = {version = "*", features = ["wasm-bindgen"]}
+wasm-bindgen-rayon = { version = "1.2", features = ["no-bundler"] }
+rayon = {version = "1.5", features = ["web_spin_lock"]}
+wasm-bindgen-futures = "0.4.45"
+futures = "0.3.31"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 copypasta = "0.10.1"

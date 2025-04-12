@@ -15,25 +15,25 @@ const INVALID_INDEX: u32 = 0xFFFFFFFF;
 
 #[derive(Default)]
 struct Item {
-    text: String,
-    key: &'static str,
-    left: i32,
-    right: i32,
-    command: u32,
-    version: u32,
-    size: u16,
+    text:             String,
+    key:              &'static str,
+    left:             i32,
+    right:            i32,
+    command:          u32,
+    version:          u32,
+    size:             u16,
     receiver_control: Handle<UIElement>,
 }
 pub struct CommandBar {
-    width: u32,
-    y: i32,
-    version: u32,
-    modifier: KeyModifier,
-    items: Vec<Item>,
-    indexes: [Vec<u32>; MAX_SHIFT_STATES],
-    has_shifts: [bool; MAX_SHIFT_STATES],
-    hovered_index: u32,
-    pressed_index: u32,
+    width:                   u32,
+    y:                       i32,
+    version:                 u32,
+    modifier:                KeyModifier,
+    items:                   Vec<Item>,
+    indexes:                 [Vec<u32>; MAX_SHIFT_STATES],
+    has_shifts:              [bool; MAX_SHIFT_STATES],
+    hovered_index:           u32,
+    pressed_index:           u32,
     receiver_control_handle: Handle<UIElement>,
 }
 
@@ -56,13 +56,13 @@ impl CommandBar {
         }
         for _ in 0..(MAX_KEYS * MAX_SHIFT_STATES) {
             obj.items.push(Item {
-                text: String::new(),
-                key: "",
-                left: -1,
-                right: -1,
-                command: 0,
-                version: 0,
-                size: 0,
+                text:             String::new(),
+                key:              "",
+                left:             -1,
+                right:            -1,
+                command:          0,
+                version:          0,
+                size:             0,
                 receiver_control: Handle::None,
             });
         }
@@ -159,7 +159,7 @@ impl CommandBar {
             return None;
         }
         Some(CommandBarEvent {
-            command_id: item.command,
+            command_id:              item.command,
             control_receiver_handle: item.receiver_control,
         })
     }
@@ -281,7 +281,7 @@ impl CommandBar {
 
         if (idx != INVALID_INDEX) && ((idx as usize) < self.items.len()) {
             return Some(CommandBarEvent {
-                command_id: self.items[idx as usize].command,
+                command_id:              self.items[idx as usize].command,
                 control_receiver_handle: self.items[idx as usize].receiver_control,
             });
         }

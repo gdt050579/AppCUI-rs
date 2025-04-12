@@ -41,8 +41,8 @@ enum MouseLockedObject {
 
 #[derive(Default)]
 struct ExpandedControlInfo {
-    handle: Handle<UIElement>,
-    min_size: Size,
+    handle:        Handle<UIElement>,
+    min_size:      Size,
     prefered_size: Size,
 }
 
@@ -55,44 +55,44 @@ enum ExpandStatus {
 }
 
 pub(crate) struct RuntimeManager {
-    theme: Theme,
-    terminal: Box<dyn Terminal>,
-    surface: Surface,
-    controls: *mut ControlHandleManager,
-    menus: *mut MenuHandleManager,
-    timers_manager: TimerManager,
-    task_manager: BackgroundTaskManager,
-    desktop_handle: Handle<UIElement>,
-    tooltip: ToolTip,
-    commandbar: Option<CommandBar>,
-    menubar: Option<MenuBar>,
-    recompute_layout: bool,
-    repaint: bool,
-    mouse_pos: Point,
-    key_modifier: KeyModifier,
-    desktop_os_start_called: bool,
-    recompute_parent_indexes: bool,
+    theme:                                Theme,
+    terminal:                             Box<dyn Terminal>,
+    surface:                              Surface,
+    controls:                             *mut ControlHandleManager,
+    menus:                                *mut MenuHandleManager,
+    timers_manager:                       TimerManager,
+    task_manager:                         BackgroundTaskManager,
+    desktop_handle:                       Handle<UIElement>,
+    tooltip:                              ToolTip,
+    commandbar:                           Option<CommandBar>,
+    menubar:                              Option<MenuBar>,
+    recompute_layout:                     bool,
+    repaint:                              bool,
+    mouse_pos:                            Point,
+    key_modifier:                         KeyModifier,
+    desktop_os_start_called:              bool,
+    recompute_parent_indexes:             bool,
     request_update_command_and_menu_bars: bool,
-    request_update_timer_threads: bool,
-    single_window: bool,
-    loop_status: LoopStatus,
-    request_focus: Option<Handle<UIElement>>,
-    current_focus: Option<Handle<UIElement>>,
-    request_default_action: Option<Handle<UIElement>>,
-    expanded_control: ExpandedControlInfo,
-    mouse_over_control: Handle<UIElement>,
-    focus_chain: Vec<Handle<UIElement>>,
-    events: Vec<ControlEvent>,
-    commandbar_event: Option<CommandBarEvent>,
-    menu_event: Option<MenuEvent>,
-    mouse_locked_object: MouseLockedObject,
-    opened_menu_handle: Handle<Menu>,
-    modal_windows: Vec<Handle<UIElement>>,
-    to_remove_list: Vec<Handle<UIElement>>,
-    event_receiver: Receiver<SystemEvent>,
-    event_sender: Sender<SystemEvent>,
+    request_update_timer_threads:         bool,
+    single_window:                        bool,
+    loop_status:                          LoopStatus,
+    request_focus:                        Option<Handle<UIElement>>,
+    current_focus:                        Option<Handle<UIElement>>,
+    request_default_action:               Option<Handle<UIElement>>,
+    expanded_control:                     ExpandedControlInfo,
+    mouse_over_control:                   Handle<UIElement>,
+    focus_chain:                          Vec<Handle<UIElement>>,
+    events:                               Vec<ControlEvent>,
+    commandbar_event:                     Option<CommandBarEvent>,
+    menu_event:                           Option<MenuEvent>,
+    mouse_locked_object:                  MouseLockedObject,
+    opened_menu_handle:                   Handle<Menu>,
+    modal_windows:                        Vec<Handle<UIElement>>,
+    to_remove_list:                       Vec<Handle<UIElement>>,
+    event_receiver:                       Receiver<SystemEvent>,
+    event_sender:                         Sender<SystemEvent>,
     #[cfg(feature = "EVENT_RECORDER")]
-    event_recorder: super::event_recorder::EventRecorder,
+    event_recorder:                       super::event_recorder::EventRecorder,
 }
 
 #[cfg(feature = "GLOBAL_RUNTIME")]
@@ -487,20 +487,22 @@ impl RuntimeManager {
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn run_wasm() {
+    pub fn run(&mut self) {
         use wasm_bindgen::prelude::*;
         use web_sys::window;
 
         // Initialize console error handling for better debugging
         console_error_panic_hook::set_once();
-        web_sys::console::log_1(&"Starting AppCUI in WebAssembly mode".into());
 
         // Process desktop on start event since we're running for the first time
-        let rt = RuntimeManager::get();
-        if !rt.desktop_os_start_called {
-            rt.process_terminal_resize_event(rt.terminal.get_size());
-            rt.process_desktop_on_start();
+        if !self.desktop_os_start_called {
+            self.process_terminal_resize_event(self.terminal.get_size());
+            self.process_desktop_on_start();
+            if self.single_window && self.get_controls_mut().desktop_mut().base().children.len() != 1 {
+                panic!("You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")
+            }
         }
+        self.request_update();
 
         let window = window().expect("No global `window` exists");
         let window_clone = window.clone();
@@ -508,14 +510,25 @@ impl RuntimeManager {
         let callback_holder = std::rc::Rc::new(std::cell::RefCell::new(None::<Closure<dyn FnMut()>>));
         let callback_holder_clone = callback_holder.clone();
 
-        // Create the closure that represents one tick.
-        *callback_holder.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-            RuntimeManager::get().tick();
+        self.recompute_layout = true;
+        self.repaint = true;
+        self.recompute_parent_indexes = true;
+        self.commandbar_event = None;
+        self.menu_event = None;
 
-            if RuntimeManager::get().loop_status != LoopStatus::StopApp {
+        // Create the closure that represents one tick of the animation loop
+        *callback_holder.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+            let rt = RuntimeManager::get();
+            rt.tick();
+
+            if rt.loop_status != LoopStatus::StopApp && rt.loop_status != LoopStatus::ExitCurrentLoop {
+                // Continue the animation loop
                 window_clone
                     .request_animation_frame(callback_holder_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref())
                     .expect("Failed to request animation frame");
+            } else {
+                // Cleanup when the app stops
+                RuntimeManager::destroy();
             }
         }) as Box<dyn FnMut()>));
 
@@ -526,30 +539,29 @@ impl RuntimeManager {
 
     #[cfg(target_arch = "wasm32")]
     pub(crate) fn tick(&mut self) {
-        // Process command bar event, if any.
         if let Some(event) = self.commandbar_event.take() {
             self.process_commandbar_event(event);
         }
-        // Process menu event, if any.
+
         if let Some(event) = self.menu_event.take() {
             self.process_menu_event(event);
         }
-        // Process control events.
+
         if !self.events.is_empty() {
             self.process_events_queue();
         }
-        // Remove deleted controls.
+
         if !self.to_remove_list.is_empty() {
             self.remove_deleted_controls();
             self.recompute_parent_indexes = true;
             self.request_update_command_and_menu_bars = true;
         }
-        // Recompute parent indexes if needed.
+
         if self.recompute_parent_indexes {
             self.update_parent_indexes(self.get_root_control_handle());
             self.recompute_parent_indexes = false;
         }
-        // Update focus if requested.
+
         if let Some(handle) = self.request_focus.take() {
             self.update_focus(handle);
             self.request_default_action = None;
@@ -557,32 +569,23 @@ impl RuntimeManager {
             self.request_update_command_and_menu_bars = true;
         }
 
-        // Force recompute layout and repaint for WebGL context
-
-        // Recompute layouts.
         if self.recompute_layout {
             self.recompute_layouts();
         }
-        // Update command and menu bars.
         if self.request_update_command_and_menu_bars {
             self.update_command_and_menu_bars();
         }
-        // Paint the UI.
         if self.repaint || self.recompute_layout {
             self.paint();
-            // Debug logging for WebGL rendering
-            web_sys::console::log_1(&"Painting UI elements to WebGL context".into());
         }
 
         self.recompute_layout = false;
         self.repaint = false;
 
-        // Update timer threads.
         if self.request_update_timer_threads {
             self.timers_manager.update_threads();
             self.request_update_timer_threads = false;
         }
-        // Process a system event if available.
         if self.terminal.is_single_threaded() {
             if let Some(sys_event) = self.terminal.query_system_event() {
                 self.process_system_event(sys_event);
@@ -591,7 +594,6 @@ impl RuntimeManager {
             self.process_system_event(sys_event);
         }
 
-        // Check for modal exit.
         if self.loop_status == LoopStatus::ExitCurrentLoop {
             if let Some(modal_handle) = self.modal_windows.pop() {
                 self.request_remove(modal_handle);
@@ -606,6 +608,7 @@ impl RuntimeManager {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) fn run(&mut self) {
         self.recompute_layout = true;
         self.repaint = true;
@@ -926,6 +929,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         // process cmdbar
         if let Some(cmdbar) = self.commandbar.as_mut() {
+            web_sys::console::log_1(&format!("Update command bar for handle").into());
             cmdbar.clear();
             // start from the focused control and call on_update_commandbar for each control
             let mut h = focused_handle;
@@ -1653,9 +1657,9 @@ impl MouseMethods for RuntimeManager {
             let scr_x = base.screen_clip.left;
             let scr_y = base.screen_clip.top;
             let response = control.control_mut().on_mouse_event(&MouseEvent::Drag(MouseEventData {
-                x: event.x - scr_x,
-                y: event.y - scr_y,
-                button: event.button,
+                x:        event.x - scr_x,
+                y:        event.y - scr_y,
+                button:   event.button,
                 modifier: self.key_modifier,
             }));
             let do_update = response == EventProcessStatus::Processed;
@@ -1758,9 +1762,9 @@ impl MouseMethods for RuntimeManager {
                 //let has_margins = base.should_increase_margins_on_focus().is_some();
 
                 let _ = control.control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
-                    x: event.x - scr_x,
-                    y: event.y - scr_y,
-                    button: event.button,
+                    x:        event.x - scr_x,
+                    y:        event.y - scr_y,
+                    button:   event.button,
                     modifier: self.key_modifier,
                 }));
                 //if response == EventProcessStatus::Processed {
@@ -1791,9 +1795,9 @@ impl MouseMethods for RuntimeManager {
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
                     control.control_mut().on_mouse_event(&MouseEvent::Released(MouseEventData {
-                        x: event.x - scr_x,
-                        y: event.y - scr_y,
-                        button: event.button,
+                        x:        event.x - scr_x,
+                        y:        event.y - scr_y,
+                        button:   event.button,
                         modifier: self.key_modifier,
                     }));
                     self.repaint = true;
@@ -1833,9 +1837,9 @@ impl MouseMethods for RuntimeManager {
                 //let has_margins = base.should_increase_margins_on_focus().is_some();
 
                 let response = control.control_mut().on_mouse_event(&MouseEvent::DoubleClick(MouseEventData {
-                    x: event.x - scr_x,
-                    y: event.y - scr_y,
-                    button: event.button,
+                    x:        event.x - scr_x,
+                    y:        event.y - scr_y,
+                    button:   event.button,
                     modifier: self.key_modifier,
                 }));
                 if response == EventProcessStatus::Processed {

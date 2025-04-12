@@ -1,6 +1,4 @@
-use std::cell::RefCell;
 use std::marker::PhantomData;
-use std::rc::Rc;
 use std::sync::Mutex;
 
 use super::Error;
@@ -99,16 +97,25 @@ impl App {
 
     #[cfg(target_arch = "wasm32")]
     pub fn run(self) {
+        use wasm_bindgen_rayon::init_thread_pool; // Explicitly import
+
         // For wasm, initialize console error hook for better debugging
         console_error_panic_hook::set_once();
-        web_sys::console::log_1(&"AppCUI application starting in WebGL mode".into());
 
-        // Make sure the initial state is set to force rendering
-        let rm = RuntimeManager::get();
-        rm.request_update();
+        if RuntimeManager::is_instantiated() {
+            // RuntimeManager::destroy();
+            let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
+            *app_created = false;
+        }
 
-        // Start the animation loop
-        RuntimeManager::run_wasm();
+        RuntimeManager::get().run();
+
+        // Do not call destroy here; let the WASM runtime handle it when loop_status == StopApp
+        crate::dialogs::clear_last_path();
+
+        // Only reset the mutex, but keep RUNTIME_MANAGER alive
+        let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
+        *app_created = false;
     }
 
     /// Adds a new window to AppCUI framework and returns a Handle towords it.

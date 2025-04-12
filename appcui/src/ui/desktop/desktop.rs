@@ -13,9 +13,11 @@ pub struct Desktop {}
 
 impl Desktop {
     pub fn new() -> Self {
+        #[cfg(not(target_arch = "wasm32"))]
         if RuntimeManager::is_instantiated() {
             panic!("A desktop object can only be created once (when the application is started) !");
         }
+
         Self {
             base: ControlBase::with_status_flags(
                 Layout::new("x:0,y:0,w:100%,h:100%"),

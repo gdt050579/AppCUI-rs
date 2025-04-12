@@ -1,19 +1,23 @@
 use super::initialization_flags::Flags;
 use crate::prelude::*;
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::{Duration, Instant};
+
+#[cfg(target_arch = "wasm32")]
+use instant::{Duration, Instant};
 
 #[CustomControl(overwrite=OnPaint, internal=true)]
 pub struct ProgressBar {
-    items_count: u64,
+    items_count:     u64,
     items_processed: u64,
-    proc_buf: [u8; 4],
-    eta: [u8; 8], // hh:mm:ss
-    text: String,
-    percentage: u8,
-    flags: Flags,
-    start: Instant,
-    extra_duration: Duration,
-    paused: bool,
+    proc_buf:        [u8; 4],
+    eta:             [u8; 8], // hh:mm:ss
+    text:            String,
+    percentage:      u8,
+    flags:           Flags,
+    start:           Instant,
+    extra_duration:  Duration,
+    paused:          bool,
 }
 impl ProgressBar {
     pub fn new(items_count: u64, layout: Layout, flags: Flags) -> Self {

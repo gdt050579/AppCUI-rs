@@ -3,14 +3,19 @@ use crate::terminals::*;
 use super::Command;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Condvar, Mutex};
+
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
+
+#[cfg(target_arch = "wasm32")]
+use instant::Duration;
 
 #[derive(Copy, Clone)]
 pub(crate) struct ThreadLogic {
-    tick: u64,
+    tick:     u64,
     interval: u32,
-    id: u8,
-    paused: bool,
+    id:       u8,
+    paused:   bool,
 }
 
 impl ThreadLogic {
@@ -36,7 +41,7 @@ impl ThreadLogic {
                 self.tick += 1;
                 if sender
                     .send(SystemEvent::TimerTickUpdate(TimerTickUpdateEvent {
-                        id: self.id,
+                        id:   self.id,
                         tick: self.tick.into(),
                     }))
                     .is_err()
@@ -62,7 +67,10 @@ impl ThreadLogic {
                 self.tick = 0;
                 self.paused = false;
                 if sender
-                    .send(SystemEvent::TimerStart(TimerStartEvent { id: self.id, tick: 0.into() }))
+                    .send(SystemEvent::TimerStart(TimerStartEvent {
+                        id:   self.id,
+                        tick: 0.into(),
+                    }))
                     .is_err()
                 {
                     self.paused = true;
@@ -77,7 +85,7 @@ impl ThreadLogic {
             Command::Resume => {
                 if sender
                     .send(SystemEvent::TimerStart(TimerStartEvent {
-                        id: self.id,
+                        id:   self.id,
                         tick: self.tick.into(),
                     }))
                     .is_err()
@@ -97,7 +105,7 @@ impl ThreadLogic {
                 self.paused = true;
                 sender
                     .send(SystemEvent::TimerPaused(TimerPausedEvent {
-                        id: self.id,
+                        id:   self.id,
                         tick: self.tick.into(),
                     }))
                     .is_err()
