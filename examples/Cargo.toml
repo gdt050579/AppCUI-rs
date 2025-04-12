@@ -16,7 +16,6 @@ name = "test"
 path = "dev_test.rs"
 
 
-
 [[example]]
 name = "buttons"
 path = "buttons/main.rs"
@@ -188,3 +187,7 @@ path = "demo_app/main.rs"
 [[example]]
 name = "editor"
 path = "editor/main.rs"
+
+[[example]]
+name = "painter"
+path = "painter/main.rs"
