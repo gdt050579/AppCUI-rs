@@ -732,11 +732,119 @@ pub fn imageviewer(input: TokenStream) -> TokenStream {
     crate::controls::imageviewer::create(input)
 }
 
+/// Creates a new tab control for organizing content into multiple pages.
+/// The format is `tab!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `tabs` - List of tab captions. Format: `[Tab1, Tab2, ...]`
+/// * `type` - Tab type (optional). Can be:
+///   - **OnTop** (default) - Tabs are displayed at the top
+///   - **OnBottom** - Tabs are displayed at the bottom
+///   - **OnLeft** - Tabs are displayed on the left side
+///   - **HiddenTabs** - Tabs are hidden
+/// * `flags` - Control flags (optional). Can be:
+///   - **TransparentBackground** - Uses transparent background
+///   - **TabsBar** - Shows a bar for tabs
+/// * `tabwidth` or `tab-width` or `tw` - Width of each tab (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic tab with top tabs
+/// let tab = tab!("tabs=['Tab 1', 'Tab 2'], x=1, y=1, width=40, height=20");
+/// 
+/// // Tab with bottom tabs and transparent background
+/// let tab = tab!(
+///     "tabs: ['First', 'Second', 'Third'],
+///     type: OnBottom,
+///     flags: TransparentBackground,
+///     x=2, y=2, width=50, height=25"
+/// );
+/// 
+/// // Tab with left tabs and custom width
+/// let tab = tab!(
+///     "tabs=['Settings', 'Help'],
+///     type: OnLeft,
+///     tabwidth: 15,
+///     x=3, y=3, width=60, height=30"
+/// );
+/// ```
+/// 
+/// The caption of each tab may contain the special character `&` that indicates that the next character is a hot-key.
+/// For example, constructing a tab with the caption `&Start` will set up the text of the tab to `Start` and will set up character `S` as the hot key to activate that tab.
 #[proc_macro]
 pub fn tab(input: TokenStream) -> TokenStream {
     crate::controls::tab::create(input)
 }
 
+/// Creates a new accordion control for displaying collapsible content sections.
+/// The format is `accordion!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `panels` (required) - List of panel captions. Format: `[Panel1, Panel2, ...]`
+/// * `flags` - Control flags (optional). Can be:
+///   - **TransparentBackground** - Uses transparent background
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment value (optional). Can be:
+///     - **topleft**/**lefttop**/**tl**/**lt** - Aligns from top-left corner
+///     - **top**/**t** - Aligns from top center
+///     - **topright**/**righttop**/**tr**/**rt** - Aligns from top-right corner
+///     - **right**/**r** - Aligns from right center
+///     - **bottomright**/**rightbottom**/**br**/**rb** - Aligns from bottom-right corner
+///     - **bottom**/**b** - Aligns from bottom center
+///     - **bottomleft**/**leftbottom**/**lb**/**bl** - Aligns from bottom-left corner
+///     - **left**/**l** - Aligns from left center
+///     - **center**/**c** - Aligns from center
+///   - `dock`/`d` - Docking value (optional). Can be:
+///     - **topleft**/**lefttop**/**tl**/**lt** - Docks to top-left corner
+///     - **top**/**t** - Docks to top
+///     - **topright**/**righttop**/**tr**/**rt** - Docks to top-right corner
+///     - **right**/**r** - Docks to right
+///     - **bottomright**/**rightbottom**/**br**/**rb** - Docks to bottom-right corner
+///     - **bottom**/**b** - Docks to bottom
+///     - **bottomleft**/**leftbottom**/**lb**/**bl** - Docks to bottom-left corner
+///     - **left**/**l** - Docks to left
+///     - **center**/**c** - Docks to center
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic accordion with panels
+/// let acc = accordion!("panels=['Section 1', 'Section 2'], x=1, y=1, width=40, height=20");
+/// 
+/// // Accordion with transparent background
+/// let acc = accordion!(
+///     "panels: ['First', 'Second', 'Third'],
+///     flags: TransparentBackground,
+///     x=2, y=2, width=50, height=25"
+/// );
+/// 
+/// // Accordion with custom layout
+/// let acc = accordion!(
+///     "panels=['Settings', 'Help'],
+///     dock: left,
+///     width: 20,
+///     height: 30"
+/// );
+/// ```
+/// 
+/// The caption of each panel may contain the special character `&` that indicates that the next character is a hot-key.
+/// For example, constructing a panel with the caption `&Start` will set up the text of the panel to `Start` and will set up character `S` as the hot key to activate that panel.
 #[proc_macro]
 pub fn accordion(input: TokenStream) -> TokenStream {
     crate::controls::accordion::create(input)
@@ -1593,6 +1701,47 @@ pub fn progressbar(input: TokenStream) -> TokenStream {
     crate::controls::progressbar::create(input)
 }
 
+/// Creates a new text area control for multi-line text input and display.
+/// The format is `textarea!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `text` (optional, first positional parameter) - Initial text content to display
+/// * `flags` - Control flags (optional). Can be:
+///   - **ShowLineNumber** - Displays line numbers on the left side
+///   - **ReadOnly** - Makes the text area read-only
+///   - **ScrollBars** - Shows scroll bars when content exceeds the control size
+///   - **HighlightCursor** - Highlights the current cursor position
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic text area
+/// let ta = textarea!("x=1, y=1, width=40, height=10");
+/// 
+/// // Text area with initial content and line numbers
+/// let ta = textarea!(
+///     "text: 'Hello\nWorld!',
+///     flags: ShowLineNumber+ScrollBars,
+///     x=2, y=2, width=50, height=15"
+/// );
+/// 
+/// // Read-only text area with highlighted cursor
+/// let ta = textarea!(
+///     "'This is read-only text',
+///     flags: ReadOnly+HighlightCursor,
+///     dock: right,
+///     width=30"
+/// );
+/// ```
 #[proc_macro]
 pub fn textarea(input: TokenStream) -> TokenStream {
     crate::controls::textarea::create(input)
