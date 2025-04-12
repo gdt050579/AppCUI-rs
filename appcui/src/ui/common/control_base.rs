@@ -1,5 +1,4 @@
 use self::control_event_wrapper::CustomEventData;
-use crate::system::TimerMethods;
 use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;
@@ -7,6 +6,7 @@ use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::Theme;
 use crate::system::ThemeMethods;
 use crate::system::Timer;
+use crate::system::TimerMethods;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
@@ -62,6 +62,7 @@ pub struct ControlBase {
 }
 
 impl ControlBase {
+    /// Creates a new control with the specified layout. The argument `accept_input` specifies if the control can receive input or not. 
     pub fn new(layout: Layout, accept_input: bool) -> Self {
         ControlBase::with_status_flags(
             layout,
@@ -70,6 +71,18 @@ impl ControlBase {
             } else {
                 StatusFlags::Enabled | StatusFlags::Visible
             },
+        )
+    }
+    /// Creates a new control with the specified layout that has support for scrollbars.
+    /// When such a control is created if it has focus it will increase its bottom and right margins by one character (so that a scrollbar can be drawn).
+    pub fn with_scrollbars(layout: Layout) -> Self {
+        ControlBase::with_status_flags( 
+            layout,
+            StatusFlags::AcceptInput
+                | StatusFlags::Enabled
+                | StatusFlags::Visible
+                | StatusFlags::IncreaseBottomMarginOnFocus
+                | StatusFlags::IncreaseRightMarginOnFocus,
         )
     }
     pub(crate) fn with_status_flags(layout: Layout, status_flags: StatusFlags) -> Self {
@@ -149,6 +162,7 @@ impl ControlBase {
         RuntimeManager::get().request_recompute_layout();
     }
 
+    /// Sets the enabled state of a control. This method has no effect on a Desktop or a Window control that will always be enabled.
     #[inline(always)]
     pub fn set_enabled(&mut self, enabled: bool) {
         if enabled {

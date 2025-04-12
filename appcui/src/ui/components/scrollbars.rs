@@ -59,4 +59,10 @@ impl ScrollBars {
     pub fn vertical_index(&self) -> u64 {
         self.vertical.value()
     }
+    #[inline(always)]
+    pub fn offset(&self) -> Point {
+        let x = self.horizontal.value() as i32;
+        let y = self.vertical.value() as i32;
+        Point::new(-x, -y)
+    }
 }
