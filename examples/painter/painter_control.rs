@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-#[CustomControl(overwrite = OnPaint + OnMouseEvent + OnResize)]
+#[CustomControl(overwrite = OnPaint + OnMouseEvent + OnResize + OnKeyPressed)]
 pub struct PainterControl {
     drawing_char: Character,
     surface: Surface,
@@ -10,7 +10,7 @@ pub struct PainterControl {
 impl PainterControl {
     pub fn new(layout: Layout) -> Self {
         Self {
-            base: ControlBase::with_scrollbars(layout),
+            base: ControlBase::with_focus_overlay(layout),
             drawing_char: Character::with_char('█'),
             surface: Surface::new(100, 100),
             scrollbars: ScrollBars::new(true),
@@ -63,6 +63,35 @@ impl OnMouseEvent for PainterControl {
             }
             _ => EventProcessStatus::Ignored,
         }
+    }
+}
+
+impl OnKeyPressed for PainterControl {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Up") => {
+                self.scrollbars
+                    .set_indexes(self.scrollbars.horizontal_index(), self.scrollbars.vertical_index().saturating_sub(1));
+                EventProcessStatus::Processed
+            }
+            key!("Down") => {
+                self.scrollbars
+                    .set_indexes(self.scrollbars.horizontal_index(), self.scrollbars.vertical_index() + 1);
+                EventProcessStatus::Processed
+            }
+            key!("Left") => {
+                self.scrollbars
+                    .set_indexes(self.scrollbars.horizontal_index().saturating_sub(1), self.scrollbars.vertical_index());
+                EventProcessStatus::Processed
+            }
+            key!("Right") => {
+                self.scrollbars
+                    .set_indexes(self.scrollbars.horizontal_index() + 1, self.scrollbars.vertical_index());
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored
+        }
+        
     }
 }
 
