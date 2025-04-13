@@ -18,7 +18,7 @@ impl ScrollBars {
             should_paint: false,
         }
     }
-    pub fn update(&mut self, horizontal_indexes: u64, vertical_indexes: u64, size: Size) {
+    pub(crate) fn update(&mut self, horizontal_indexes: u64, vertical_indexes: u64, size: Size) {
         self.horizontal.update(size.width as u64, horizontal_indexes);
         self.vertical.update(size.height as u64, vertical_indexes);
     }
