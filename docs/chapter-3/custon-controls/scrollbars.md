@@ -2,6 +2,8 @@
 
 Scrollbars are a set of components that are used to navigate through a control that has a large content. They are typically used in controls that handle a large amount of data, such as text editors, image viewers, and other controls that display a lot of information. Scrollbars are usually displayed only when the control has the focus and they are not visible when the control does not have the focus. 
 
+<img src="img/scrollbars.png" />
+
 AppCUI provides a special structure (called `ScrollBars`) that can be used to create a set of scrollbars for a control. The `ScrollBars` structure is created by calling the `ScrollBars::new` method and it takes two parameters (the `width` and the `height` of the content to be displayed).
 
 Scrollbars can only be used with controls that have a focus overlay. This means that the control must be created with the `ControlBase::with_focus_overlay` method.
