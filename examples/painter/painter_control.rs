@@ -9,12 +9,14 @@ pub struct PainterControl {
 
 impl PainterControl {
     pub fn new(layout: Layout) -> Self {
-        Self {
+        let mut me = Self {
             base: ControlBase::with_focus_overlay(layout),
             drawing_char: Character::with_char('█'),
             surface: Surface::new(100, 100),
             scrollbars: ScrollBars::new(true),
-        }
+        };
+        me.set_components_toolbar_margins(3, 0);
+        me
     }
 
     pub fn set_drawing_char(&mut self, ch: char) {

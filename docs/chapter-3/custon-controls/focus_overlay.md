@@ -83,3 +83,30 @@ impl OnPaint for MyControl {
 
 Keep in mind that if focus ovelay is being used you may still want to convay mouse events to the parent control. Lets consider a custom control that fills up the entire window. If the window is sizeable, it means that the bottom-right corner of the window has a grip that allows the user to resize the window. If the custom control is not passing the mouse events to the parent, the user will not be able to resize the window anymore. This means that you need to be carefull where you draw when in the overlay area as well as what events you pass to the parent.
 
+You can however use the `ControlBase::set_components_toolbar_margins(...)` method to set the left and top margins for the overlay components (this will allow the AppCUI framework to avoid sending mouse events if they originated from the overlay area, but are outside the margins).
+
+For example:
+
+```rs
+use appcui::prelude::*;
+
+#[CustomControl(overwrite = OnPaint)]
+struct MyControl {
+    // aditional fields
+}
+impl MyControl {
+    fn new(layout: Layout) -> Self {
+        let mut me = Self { 
+            base: ControlBase::with_focus_overlay(layout) 
+            // initialization of aditional fields
+        };
+        me.set_components_toolbar_margins(5,4);
+        me
+    }
+}
+```
+
+Assuming the control size is 20 x 10 characters. Then, with this setup , when it has the focus, the overlay area will be 21 x 11 characters but the mouse event will be send only in the following cases:
+* if the mouse coordonate (relative to the control) is between **(0,0)** and **(20,10)** - the normal area
+* if the mouse coordonate (relative to the control) is between **(5,10)** and **(21,10)** - the bottom side of the overlay area (but only from the 5th character as it was specified in the `me.set_components_toolbar_margins(5,4);` command)
+* if the mouse coordonate (relative to the control) is between **(20,4)** and **(21,11)** - the right side of the overlay area (but only from the 4th character as it was specified in the `me.set_components_toolbar_margins(5,4);` command)

@@ -53,7 +53,7 @@ A typical usage of the `ScrollBars` structure would look like this:
         fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
             if self.base.has_focus() {
                 // draw the scrollbars
-                self.sb.paint(surface, theme);
+                self.sb.paint(surface, theme, self);
                 // reduce the clip area to the size of the 
                 // control (without the overlay area)
                 surface.reduce_clip_by(0, 0, 1, 1);
@@ -132,3 +132,9 @@ A typical usage of the `ScrollBars` structure would look like this:
         }
     }
     ```
+
+## Scrollbar size
+
+You can change the scrollbars size by using the `ControlBase::set_components_toolbar_margins(left,top)` method to specify:
+* where on the X-axes (left parameter) the horizontal scrollbars should be drawn (relative to the control)
+* where on the Y-axes (top parameter) the vertical scrollbars should be drawn (relative to the control)
