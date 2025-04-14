@@ -17,7 +17,7 @@ impl HLine {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut hline = HLine::new("My Title", Layout::new("x:1,y:1,w:30"), Flags::DoubleLine | Flags::HasTitle);
+    /// let mut hline = HLine::new("My Title", Layout::new("x:1,y:1,w:30"), hline::Flags::DoubleLine | hline::Flags::HasTitle);
     /// ```
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
