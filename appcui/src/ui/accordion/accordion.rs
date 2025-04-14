@@ -48,7 +48,7 @@ impl Accordion {
         self.update_margins_for(self.focused_child_index.index());
     }
     #[inline(always)]
-    fn get_panelattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
+    fn panelattr(&self, theme: &Theme, idx: usize) -> (CharAttribute, CharAttribute) {
         if !self.is_enabled() {
             (theme.accordion.text.inactive, theme.accordion.hotkey.inactive)
         } else if idx == self.focused_child_index.index() {
@@ -64,7 +64,7 @@ impl Accordion {
         }
     }
     #[inline(always)]
-    fn get_backattr(&self, theme: &Theme) -> CharAttribute {
+    fn backattr(&self, theme: &Theme) -> CharAttribute {
         match () {
             _ if !self.is_enabled() => theme.accordion.text.inactive,
             _ => theme.tab.text.pressed_or_selectd,
@@ -188,7 +188,7 @@ impl Accordion {
 impl OnPaint for Accordion {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if !self.flags.contains(Flags::TransparentBackground) {
-            surface.clear(Character::with_attributes(' ', self.get_backattr(theme)));
+            surface.clear(Character::with_attributes(' ', self.backattr(theme)));
         }
         let sz = self.size();
         // let mut format = TextFormat {
@@ -209,7 +209,7 @@ impl OnPaint for Accordion {
         let cidx = self.base.focused_child_index.index();
         let count = self.base.children.len();
         for (index, page) in self.panels.iter().enumerate() {
-            let (text_attr, hotkey_attr) = self.get_panelattr(theme, index);
+            let (text_attr, hotkey_attr) = self.panelattr(theme, index);
             format.set_chars_count(page.chars_count() as u16);
             format.set_attribute(text_attr);
             format.set_hotkey_from_caption(hotkey_attr, page);

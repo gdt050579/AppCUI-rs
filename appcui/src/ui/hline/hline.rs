@@ -8,6 +8,17 @@ pub struct HLine {
 }
 
 impl HLine {
+    /// Creates a new horizontal line with the specified title, layout and flags.
+    /// The flags can be a combination of the following values:
+    /// * `Flags::DoubleLine` - if set, the line will be drawn with double lines
+    /// * `Flags::HasTitle` - if set, the line will have a title (otherwise the title field will be ignored)
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut hline = HLine::new("My Title", Layout::new("x:1,y:1,w:30"), Flags::DoubleLine | Flags::HasTitle);
+    /// ```
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             title: String::from(title),
@@ -18,10 +29,13 @@ impl HLine {
         obj
     }
 
+    /// Returns the title of the line (if any)
+    #[inline(always)]
     pub fn title(&self) -> &str {
         &self.title
     }
 
+    /// Sets the title of the line.
     pub fn set_title(&mut self, new_title: &str) {
         self.title.clear();
         self.title.push_str(new_title);

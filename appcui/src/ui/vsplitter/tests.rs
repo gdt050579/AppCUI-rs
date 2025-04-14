@@ -444,7 +444,7 @@ Multiple convolutional and pooling layers are stacked together, allowing the net
     let mut w = window!("Test,x:0,y:0,w:60,h:10,flags: Sizeable");
     let mut vs = VSplitter::new(5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
     let mut c = canvas!("'80x300',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(0, 0, CNN, CharAttribute::with_color(Color::White, Color::Black), true);
     vs.add(vsplitter::Panel::Right, c);
     w.add(vs);

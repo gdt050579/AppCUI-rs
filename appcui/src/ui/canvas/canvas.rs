@@ -63,7 +63,7 @@ impl Canvas {
 
     /// Returns a mutable reference to the inner surface of the canvas.
     #[inline(always)]
-    pub fn get_drawing_surface(&mut self) -> &mut Surface {
+    pub fn drawing_surface_mut(&mut self) -> &mut Surface {
         &mut self.surface
     }
 

@@ -55,7 +55,7 @@ fn check_keyboard() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
     let mut c = Canvas::new(Size::new(20, 10), Layout::new("x:1,y:1,w:15,h:4"), canvas::Flags::None);
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(
         0,
         0,
@@ -139,7 +139,7 @@ fn check_keyboard_2() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
     let mut c = Canvas::new(Size::new(20, 10), Layout::new("x:1,y:1,w:4,h:3"), canvas::Flags::None);
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(
         0,
         0,
@@ -192,7 +192,7 @@ fn check_background_char() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
     let mut c = Canvas::new(Size::new(2, 2), Layout::new("x:1,y:1,w:15,h:4"), canvas::Flags::None);
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.clear(Character::new('X', Color::Yellow, Color::DarkRed, CharFlags::None));
     c.set_background(Character::new('.', Color::White, Color::Black, CharFlags::None));
     w.add(c);
@@ -296,7 +296,7 @@ fn check_mouse_on_scrollbars() {
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
     let mut c = Canvas::new(Size::new(30, 10), Layout::new("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
     w.add(button!("Test,l:1,t:1,a:tl,w:10"));
@@ -372,7 +372,7 @@ fn check_mouse_on_scrollbars_resize() {
     let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
     let mut c = Canvas::new(Size::new(30, 10), Layout::new("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
     c.set_components_toolbar_margins(2, 1);
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
     w.add(button!("Test,l:1,t:1,a:tl,w:10"));
@@ -404,7 +404,7 @@ fn check_macro_init_1() {
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
     let mut c = canvas!("'30 x 10',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=2,tsm=1");
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
     w.add(button!("Test,l:1,t:1,a:tl,w:10"));
@@ -425,7 +425,7 @@ fn check_macro_init_2() {
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
     let mut c = canvas!("'4 x 2',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=3,tsm=1,back={X,fore:Green,Back:Yellow}");
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.clear(char!("<->,r,black"));
     w.add(c);
     w.add(button!("Test,l:1,t:1,a:tl,w:10"));
@@ -475,7 +475,7 @@ CheckHash(0xc9196f52d863ff88)
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
     let mut c = canvas!("'60x15',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
     a.add_window(w);
@@ -521,7 +521,7 @@ fn check_resize_surface() {
                 viewer: Handle::None,
             };
             let mut c = Canvas::new(Size::new(6, 3), Layout::new("l:15,t:0,b:0,r:0"), canvas::Flags::ScrollBars);
-            let s = c.get_drawing_surface();
+            let s = c.drawing_surface_mut();
             s.write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
             win.viewer = win.add(c);
             win.add(button!("Test,l:1,t:1,a:tl,w:10"));
@@ -534,7 +534,7 @@ fn check_resize_surface() {
             if let Some(canvas) = self.control_mut(h) {
                 canvas.resize_surface(Size::new(60, 15));
                 canvas
-                    .get_drawing_surface()
+                    .drawing_surface_mut()
                     .write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
             }
             EventProcessStatus::Processed

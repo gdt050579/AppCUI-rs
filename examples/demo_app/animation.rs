@@ -49,7 +49,7 @@ impl Win {
         // }
         arr[..bars_count.min(100)].copy_from_slice(&self.bars[..bars_count.min(100)]);
         if let Some(canvas) = self.control_mut(h) {
-            let surface = canvas.get_drawing_surface();
+            let surface = canvas.drawing_surface_mut();
             surface.clear(char!("' ',w,black"));
 
             // draw the lines
