@@ -98,25 +98,25 @@ impl Color {
         }
     }
 
-    pub fn to_rgb(&self) -> [f32; 3] {
+    pub fn to_rgba(&self) -> [f32; 4] {
         match self {
-            Color::Black => [0.0, 0.0, 0.0],
-            Color::DarkBlue => [0.0, 0.0, 127.5],
-            Color::DarkGreen => [0.0, 127.5, 0.0],
-            Color::Teal => [0.0, 127.5, 127.5],
-            Color::DarkRed => [127.5, 0.0, 0.0],
-            Color::Magenta => [127.5, 0.0, 127.5],
-            Color::Olive => [127.5, 127.5, 0.0],
-            Color::Silver => [191.25, 191.25, 191.25],
-            Color::Gray => [127.5, 127.5, 127.5],
-            Color::Blue => [0.0, 0.0, 255.0],
-            Color::Green => [0.0, 255.0, 0.0],
-            Color::Aqua => [0.0, 255.0, 255.0],
-            Color::Red => [255.0, 0.0, 0.0],
-            Color::Pink => [255.0, 0.0, 255.0],
-            Color::Yellow => [255.0, 255.0, 0.0],
-            Color::White => [255.0, 255.0, 255.0],
-            Color::Transparent => [0.0, 0.0, 0.0],
+            Color::Black => [0.0, 0.0, 0.0, 1.0],
+            Color::DarkBlue => [0.0, 0.0, 127.5, 1.0],
+            Color::DarkGreen => [0.0, 127.5, 0.0, 1.0],
+            Color::Teal => [0.0, 127.5, 127.5, 1.0],
+            Color::DarkRed => [127.5, 0.0, 0.0, 1.0],
+            Color::Magenta => [127.5, 0.0, 127.5, 1.0],
+            Color::Olive => [127.5, 127.5, 0.0, 1.0],
+            Color::Silver => [191.25, 191.25, 191.25, 1.0],
+            Color::Gray => [127.5, 127.5, 127.5, 1.0],
+            Color::Blue => [0.0, 0.0, 255.0, 1.0],
+            Color::Green => [0.0, 255.0, 0.0, 1.0],
+            Color::Aqua => [0.0, 255.0, 255.0, 1.0],
+            Color::Red => [255.0, 0.0, 0.0, 1.0],
+            Color::Pink => [255.0, 0.0, 255.0, 1.0],
+            Color::Yellow => [255.0, 255.0, 0.0, 1.0],
+            Color::White => [255.0, 255.0, 255.0, 1.0],
+            Color::Transparent => [0.0, 0.0, 0.0, 0.0],
         }
     }
 }

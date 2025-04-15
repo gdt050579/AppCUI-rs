@@ -26,7 +26,6 @@ pub struct WebTerminal {
     color_attrib_location:  u32,
     pub(super) event_queue: Arc<Mutex<Vec<SystemEvent>>>,
     pub font:               String,
-    pub font_size:          u32,
     cell_width_px:          f32,
     cell_height_px:         f32,
 }
@@ -86,6 +85,20 @@ impl WebTerminal {
 
         let gl = Self::get_webgl_context(&webgl_canvas)?;
 
+        gl.enable(GL::BLEND);
+        gl.blend_func(GL::SRC_ALPHA, GL::ONE_MINUS_SRC_ALPHA);
+        gl.clear_color(0.0, 0.0, 0.0, 0.0);
+        gl.clear(GL::COLOR_BUFFER_BIT);
+
+        webgl_canvas
+            .style()
+            .set_property("background-color", "transparent")
+            .expect("Failed to set canvas background color");
+        text_canvas
+            .style()
+            .set_property("background-color", "transparent")
+            .expect("Failed to set text_canvas background color");
+
         webgl_canvas.set_width(canvas_width);
         webgl_canvas.set_height(canvas_height);
         text_canvas.set_width(canvas_width);
@@ -126,7 +139,6 @@ impl WebTerminal {
         text_canvas.style().set_property("z-index", "2").expect("Failed to set canvas z-index");
 
         gl.viewport(0, 0, canvas_width as i32, canvas_height as i32);
-        // web_sys::console::log_1(&format!("WebGL canvas size: {canvas_width}x{canvas_height}").into());
 
         let program = Self::init_program(&gl)?;
         let pos_attrib_location = gl.get_attrib_location(&program, "position") as u32;
@@ -137,6 +149,7 @@ impl WebTerminal {
             .ok_or_else(|| Error::new(ErrorKind::InitializationFailure, "Failed to create WebGL buffer!".to_string()))?;
 
         let queue = Arc::new(Mutex::new(Vec::new()));
+        let font = format!("{font_size}px {font}");
 
         let terminal = Self {
             gl,
@@ -149,7 +162,6 @@ impl WebTerminal {
             event_queue: queue,
             size: Size { width: cols, height: rows },
             font,
-            font_size,
             cell_width_px: cell_width_px as f32,
             cell_height_px: cell_height_px as f32,
         };
@@ -195,10 +207,12 @@ impl WebTerminal {
     }
 
     fn get_webgl_context(canvas: &HtmlCanvasElement) -> Result<GL, Error> {
+        let opts = js_sys::Object::new();
+        js_sys::Reflect::set(&opts, &"alpha".into(), &true.into()).unwrap();
         canvas
-            .get_context("webgl")
+            .get_context_with_context_options("webgl", &opts)
             .map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Error getting WebGL context: {e:?}")))?
-            .ok_or_else(|| Error::new(ErrorKind::InitializationFailure, "WebGL not supported on this browser.".to_string()))?
+            .ok_or_else(|| Error::new(ErrorKind::InitializationFailure, "WebGL not supported".to_string()))?
             .dyn_into::<GL>()
             .map_err(|e| {
                 Error::new(
@@ -211,18 +225,19 @@ impl WebTerminal {
     fn init_program(gl: &GL) -> Result<WebGlProgram, Error> {
         let vertex_shader_source = r#"
             attribute vec2 position;
-            attribute vec3 color;
-            varying vec3 v_color;
+            attribute vec4 color;
+            varying vec4 v_color;
             void main() {
                 gl_Position = vec4(position, 0.0, 1.0);
                 v_color = color;
             }
         "#;
+
         let fragment_shader_source = r#"
             precision mediump float;
-            varying vec3 v_color;
+            varying vec4 v_color;
             void main() {
-                gl_FragColor = vec4(v_color, 1.0);
+                gl_FragColor = v_color;
             }
         "#;
 
@@ -235,39 +250,95 @@ impl WebTerminal {
     }
 
     fn render_background(&self, surface: &Surface) {
-        self.gl.clear_color(0.0, 0.0, 0.0, 1.0);
-        self.gl.clear(GL::COLOR_BUFFER_BIT);
-
         let canvas_width = self.webgl_canvas.width() as f32;
         let canvas_height = self.webgl_canvas.height() as f32;
-        let cell_width = self.cell_width_px as f32;
-        let cell_height = self.cell_height_px as f32;
+        let cell_width = self.cell_width_px;
+        let cell_height = self.cell_height_px;
 
-        // web_sys::console::log_1(&format!("Canvas size: {}x{}", canvas_width, canvas_height).into());
-        // web_sys::console::log_1(&format!("Background Cell size: {}x{}", cell_width, cell_height).into());
+        let clip_left = surface.clip.left as i32;
+        let clip_top = surface.clip.top as i32;
+        let clip_right = surface.clip.right as i32;
+        let clip_bottom = surface.clip.bottom as i32;
 
         let mut vertices: Vec<f32> = Vec::new();
-        for y in 0..surface.size.height {
-            for x in 0..surface.size.width {
-                if let Some(cell) = &surface.char(x as i32, y as i32) {
-                    let pos_x = (x as i32 + surface.clip.left) as f32 * cell_width;
-                    let pos_y = (y as i32 + surface.clip.top) as f32 * cell_height;
-                    let bg_color = cell.background.to_rgb();
+
+        let mut min_px_x = i32::MAX;
+        let mut min_px_y = i32::MAX;
+        let mut max_px_x = 0;
+        let mut max_px_y = 0;
+
+        for global_y in clip_top..=clip_bottom {
+            for global_x in clip_left..=clip_right {
+                let cell_x = global_x - surface.origin.x;
+                let cell_y = global_y - surface.origin.y;
+                if let Some(cell) = &surface.char(cell_x, cell_y) {
+                    let pos_x = global_x as f32 * cell_width;
+                    let pos_y = global_y as f32 * cell_height;
+                    let bg_color = cell.background.to_rgba();
+
+                    min_px_x = min_px_x.min(pos_x as i32);
+                    min_px_y = min_px_y.min(pos_y as i32);
+                    max_px_x = max_px_x.max((pos_x + cell_width) as i32);
+                    max_px_y = max_px_y.max((pos_y + cell_height) as i32);
 
                     let x_ndc = 2.0 * (pos_x / canvas_width) - 1.0;
                     let y_ndc = 1.0 - 2.0 * (pos_y / canvas_height);
                     let w_ndc = 2.0 * (cell_width / canvas_width);
                     let h_ndc = 2.0 * (cell_height / canvas_height);
 
-                    vertices.extend_from_slice(&[x_ndc, y_ndc, bg_color[0], bg_color[1], bg_color[2]]);
-                    vertices.extend_from_slice(&[x_ndc, y_ndc - h_ndc, bg_color[0], bg_color[1], bg_color[2]]);
-                    vertices.extend_from_slice(&[x_ndc + w_ndc, y_ndc - h_ndc, bg_color[0], bg_color[1], bg_color[2]]);
-                    vertices.extend_from_slice(&[x_ndc, y_ndc, bg_color[0], bg_color[1], bg_color[2]]);
-                    vertices.extend_from_slice(&[x_ndc + w_ndc, y_ndc - h_ndc, bg_color[0], bg_color[1], bg_color[2]]);
-                    vertices.extend_from_slice(&[x_ndc + w_ndc, y_ndc, bg_color[0], bg_color[1], bg_color[2]]);
+                    vertices.extend_from_slice(&[
+                        x_ndc,
+                        y_ndc,
+                        bg_color[0],
+                        bg_color[1],
+                        bg_color[2],
+                        bg_color[3],
+                        x_ndc,
+                        y_ndc - h_ndc,
+                        bg_color[0],
+                        bg_color[1],
+                        bg_color[2],
+                        bg_color[3],
+                        x_ndc + w_ndc,
+                        y_ndc - h_ndc,
+                        bg_color[0],
+                        bg_color[1],
+                        bg_color[2],
+                        bg_color[3],
+                    ]);
+                    vertices.extend_from_slice(&[
+                        x_ndc,
+                        y_ndc,
+                        bg_color[0],
+                        bg_color[1],
+                        bg_color[2],
+                        bg_color[3],
+                        x_ndc + w_ndc,
+                        y_ndc - h_ndc,
+                        bg_color[0],
+                        bg_color[1],
+                        bg_color[2],
+                        bg_color[3],
+                        x_ndc + w_ndc,
+                        y_ndc,
+                        bg_color[0],
+                        bg_color[1],
+                        bg_color[2],
+                        bg_color[3],
+                    ]);
                 }
             }
         }
+
+        let scissor_x = min_px_x.max(0);
+        let scissor_y = min_px_y.max(0);
+        let scissor_width = (max_px_x - min_px_x).max(0).min(canvas_width as i32 - scissor_x);
+        let scissor_height = (max_px_y - min_px_y).max(0).min(canvas_height as i32 - scissor_y);
+
+        // web_sys::console::log_1(&format!("Scissor rect: ({}, {}), {}x{}", scissor_x, scissor_y, scissor_width, scissor_height).into());
+
+        self.gl.enable(GL::SCISSOR_TEST);
+        self.gl.scissor(scissor_x, scissor_y, scissor_width, scissor_height);
 
         self.gl.bind_buffer(GL::ARRAY_BUFFER, Some(&self.buffer));
         unsafe {
@@ -278,23 +349,24 @@ impl WebTerminal {
 
         self.gl.use_program(Some(&self.program));
 
-        let stride = (5 * std::mem::size_of::<f32>()) as i32;
+        let stride = (6 * std::mem::size_of::<f32>()) as i32;
         self.gl.enable_vertex_attrib_array(self.pos_attrib_location);
         self.gl
             .vertex_attrib_pointer_with_i32(self.pos_attrib_location, 2, GL::FLOAT, false, stride, 0);
-
         self.gl.enable_vertex_attrib_array(self.color_attrib_location);
         self.gl.vertex_attrib_pointer_with_i32(
             self.color_attrib_location,
-            3,
+            4,
             GL::FLOAT,
             false,
             stride,
             (2 * std::mem::size_of::<f32>()) as i32,
         );
 
-        let vertex_count = (vertices.len() / 5) as i32;
+        let vertex_count = (vertices.len() / 6) as i32;
         self.gl.draw_arrays(GL::TRIANGLES, 0, vertex_count);
+
+        self.gl.disable(GL::SCISSOR_TEST);
     }
 
     fn render_text(&self, surface: &Surface) -> Result<(), JsValue> {
@@ -306,8 +378,6 @@ impl WebTerminal {
 
         let canvas_width = self.text_canvas.width() as f64;
         let canvas_height = self.text_canvas.height() as f64;
-        let full_cols = surface.size.width as f64;
-        let full_rows = surface.size.height as f64;
         let cell_width = self.cell_width_px as f64;
         let cell_height = self.cell_height_px as f64;
 
@@ -318,10 +388,17 @@ impl WebTerminal {
         //     (surface.clip.bottom - surface.clip.top) as f64 * cell_height,
         // );
 
+        // context.clear_rect(
+        //     (surface.clip.left as f64 * cell_width) as f64,
+        //     (surface.clip.top as f64 * cell_height) as f64,
+        //     ((surface.clip.right - surface.clip.left) as f64 * cell_width) as f64,
+        //     ((surface.clip.bottom - surface.clip.top) as f64 * cell_height) as f64,
+        // );
+
         context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
 
         context.save();
-        context.set_font(&format!("{}px {}", self.font_size, self.font));
+        context.set_font(self.font.as_str());
         context.set_text_baseline("top");
         context.set_text_align("center");
 
@@ -337,12 +414,13 @@ impl WebTerminal {
                 if let Some(cell) = &surface.char(cell_x, cell_y) {
                     let pos_x = global_x as f64 * cell_width;
                     let pos_y = global_y as f64 * cell_height;
-                    let foreground = cell.foreground.to_rgb();
+                    let foreground = cell.foreground.to_rgba();
                     let css_color = format!(
-                        "rgb({},{},{})",
+                        "rgba({},{},{},{})",
                         (foreground[0] * 255.0) as u8,
                         (foreground[1] * 255.0) as u8,
-                        (foreground[2] * 255.0) as u8
+                        (foreground[2] * 255.0) as u8,
+                        foreground[3],
                     );
                     context.set_fill_style(&JsValue::from_str(&css_color));
                     context.fill_text(&cell.code.to_string(), pos_x.into(), pos_y.into())?;

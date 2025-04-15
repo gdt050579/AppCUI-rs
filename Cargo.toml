@@ -5,7 +5,6 @@ members = [
   "appcui",
   "appcui-proc-macro",
   "examples",
-  "test"
 ]
 
 [workspace.lints.clippy]

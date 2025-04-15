@@ -97,7 +97,7 @@ impl App {
 
     #[cfg(target_arch = "wasm32")]
     pub fn run(self) {
-        use wasm_bindgen_rayon::init_thread_pool; // Explicitly import
+        use wasm_bindgen_rayon::init_thread_pool; // Explicitly import for WASM to export this function
 
         // For wasm, initialize console error hook for better debugging
         console_error_panic_hook::set_once();

@@ -12,19 +12,19 @@ use crate::system::Error;
 use crate::system::{PaintMethods, RuntimeManager};
 
 pub(crate) struct DebugTerminal {
-    size: Size,
-    temp_str: String,
-    commands: VecDeque<Command>,
-    sys_events: VecDeque<SystemEvent>,
-    paint: bool,
-    ignore_paint_command: bool,
-    paint_title: String,
-    hash_to_test: Option<u64>,
+    size:                  Size,
+    temp_str:              String,
+    commands:              VecDeque<Command>,
+    sys_events:            VecDeque<SystemEvent>,
+    paint:                 bool,
+    ignore_paint_command:  bool,
+    paint_title:           String,
+    hash_to_test:          Option<u64>,
     cursor_point_to_check: Option<Point>,
-    mouse_pos: Point,
-    keymodifier_state: KeyModifier,
-    errors_disabled: bool,
-    clipboard_text: String,
+    mouse_pos:             Point,
+    keymodifier_state:     KeyModifier,
+    errors_disabled:       bool,
+    clipboard_text:        String,
 }
 impl DebugTerminal {
     fn build_commands(script: &str) -> VecDeque<Command> {
