@@ -5,6 +5,17 @@ pub struct Label {
     caption: Caption,
 }
 impl Label {
+    /// Creates a new label with the specified caption and layout.
+    /// The caption can contain a hotkey (e.g. "File &Open") and the layout is used to position the label on the screen.
+    /// The label is a read-only control that can be used to display text on the screen.
+    /// The label is not a focusable control and it does not accept any input.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut label = Label::new("My Label", Layout::new("x:1,y:1,w:30"));
+    /// ```
     pub fn new(caption: &str, layout: Layout) -> Self {
         Label {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
