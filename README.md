@@ -17,12 +17,14 @@ Before you begin, make sure you have:
   Install [wasm-pack](https://rustwasm.github.io/wasm-pack/) for building your WebAssembly package.
 - **A Web Server:**  
   Use the provided `server.py` or any static server to serve your files.
-    > [!WARNING]
-    > If using threads, make sure to serve all your files in browser in with these headers:
-    > ```
-    > Cross-Origin-Opener-Policy: "same-origin"
-    > Cross-Origin-Embedder-Policy: "require-corp"
-    > ```
+  
+  
+>[!WARNING]
+> If using threads, make sure to serve all your filesin browser in with these headers:
+> ```
+> Cross-Origin-Opener-Policy: "same-origin"
+> Cross-Origin-Embedder-Policy: "require-corp"
+> ```
 
 ## Setup
 
@@ -74,6 +76,9 @@ rustup target add wasm32-unknown-unknown
 ## Example HTML File
 
 Below is an example `index.html` that sets up the canvases and loads the compiled WebAssembly package. Save this file in your project’s root directory:
+
+<details>
+<summary> Index.html Example </summary>
 
 ```html
 <!DOCTYPE html>
@@ -136,6 +141,8 @@ Below is an example `index.html` that sets up the canvases and loads the compile
 </html>
 ```
 
+</details>
+
 This file:
 - Creates two canvases – one for WebGL background rendering and one for text rendering.
 - Includes a hidden configuration section for terminal settings.
@@ -144,6 +151,9 @@ This file:
 ## Running the Server
 
 A simple Python server is provided to host the built files. Use the following `server.py`:
+
+<details>
+<summary>Python Server Example</summary>
 
 ```python
 import http.server
@@ -184,6 +194,8 @@ with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
     print(f"Serving on port {PORT}")
     httpd.serve_forever()
 ```
+
+</details>
 
 To run the server, execute:
 
