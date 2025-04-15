@@ -2,21 +2,6 @@
 
 # Web Terminal Implementation
 
-This project implements a Web Terminal for TUI applications using Rust and WebAssembly. It leverages both WebGL and Canvas 2D rendering to display the terminal’s background, text, and cursor. The terminal also handles input events such as keyboard presses, mouse movements, clicks, and wheel events.
-
-## Overview
-
-The core of the terminal is implemented in Rust and exposes functionality using `wasm-bindgen`. Its features include:
-
-- **Graphics Rendering:**  
-  - **WebGL Canvas:** Renders the terminal background, cell colors, and simple graphical effects via shader programs.  
-  - **2D Text Canvas:** Draws the terminal characters and the cursor using the Canvas 2D API.
-- **Input Handling:**  
-  - Listeners for keyboard, mouse (movement, button down/up), and mouse wheel events.
-  - Uses Rust channels and a shared event queue to manage input events.
-- **Dynamic Configuration:**  
-  - Uses hidden HTML configuration elements to set terminal dimensions, font properties, and cell sizes.
-
 ## Prerequisites
 
 Before you begin, make sure you have:
@@ -60,9 +45,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen(start)]
 pub fn start() {
-    // Your initialization code, e.g., starting your TUI application.
-    // For example:
-    // app_cui::run();
+    // your code
 }
 ```
 
@@ -128,10 +111,10 @@ Below is an example `index.html` that sets up the canvases and loads the compile
 
   <script type="module">
     console.log("SharedArrayBuffer available:", typeof SharedArrayBuffer !== "undefined");
-    import init, * as wasm from "./pkg/app_cui_test.js";
+    import init, * as wasm from "./pkg/your_application.js";
 
     init({ 
-      module: new URL("./pkg/app_cui_test_bg.wasm", import.meta.url),
+      module: new URL("./pkg/your_application.wasm", import.meta.url),
       memory: new WebAssembly.Memory({ initial: 200, maximum: 16384, shared: true })
     }).then(async () => {
       console.log("WASM module initialized");
@@ -203,27 +186,6 @@ python server.py
 ```
 
 Then navigate to [http://localhost:4000/index.html](http://localhost:4000/index.html) in your browser to see your Web Terminal in action.
-
-## Summary of Steps
-
-1. **Set Up Your Rust Project:**  
-   - Create a library package using your TUI framework (appcui).
-   - Update `Cargo.toml` with the required dependency (`wasm-bindgen`).
-
-2. **Configure the Toolchain:**  
-   - Switch to the nightly Rust toolchain.
-   - Create or update `.cargo/config.toml` as shown above.
-
-3. **Add the wasm-bindgen Entry Point:**  
-   - Annotate your library entry point with `#[wasm_bindgen(start)]`.
-
-4. **Build for WebAssembly:**  
-   - Ensure the target `wasm32-unknown-unknown` is installed.
-   - Build using `wasm-pack build --target web`.
-
-5. **Set Up the Web Environment:**  
-   - Use the provided `index.html` as your webpage.
-   - Launch a server using the provided `server.py`.
 
 ---
 
