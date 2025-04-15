@@ -20,7 +20,7 @@ Before you begin, make sure you have:
   
   
 >[!WARNING]
-> If using threads, make sure to serve all your filesin browser in with these headers:
+> If using threads, make sure to serve all your files in browser with these headers:
 > ```
 > Cross-Origin-Opener-Policy: "same-origin"
 > Cross-Origin-Embedder-Policy: "require-corp"
