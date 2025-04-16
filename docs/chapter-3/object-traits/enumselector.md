@@ -76,7 +76,7 @@ Alternatively, you can use the `EnumSelector` derive macro to automatically impl
 This means that the previous `Shape` enum can be rewritten as follows:
 
 ```rs
-#[derive(EnumSelector)]
+#[derive(EnumSelector, Eq, PartialEq, Copy, Clone)]
 enum Shape {
     #[VariantInfo(name = "Square", description = "a red square")]
     Square,
@@ -91,3 +91,5 @@ enum Shape {
     Circle,
 }
 ```
+
+Make sure that you also add the following derives: `Eq`, `PartialEq`, `Copy` and `Clone` to the enum. This is required for the `EnumSelector` derive macro to work properly.
