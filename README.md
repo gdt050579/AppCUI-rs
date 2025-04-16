@@ -8,8 +8,8 @@ Before you begin, make sure you have:
 
 - **Rust Toolchain:**  
 
-  >[!IMPORTANT]
-  > Use the nightly toolchain, as this project requires unstable features.
+>[!IMPORTANT]
+> Use the nightly toolchain, as this project requires unstablefeatures.
 
 - **wasm-bindgen:**  
   Add the following dependency in your `Cargo.toml`:
@@ -21,12 +21,12 @@ Before you begin, make sure you have:
 - **A Web Server:**  
   Use the provided `server.py` or any static server to serve your files.
   
-  >[!WARNING]
-  > If using threads, make sure to serve all your files in browser with these headers:
-  > ```
-  > Cross-Origin-Opener-Policy: "same-origin"
-  > Cross-Origin-Embedder-Policy: "require-corp"
-  > ```
+>[!WARNING]
+> If using threads, make sure to serve all your files inbrowser with these headers:
+> ```
+> Cross-Origin-Opener-Policy: "same-origin"
+> Cross-Origin-Embedder-Policy: "require-corp"
+> ```
 
 ## Setup
 
