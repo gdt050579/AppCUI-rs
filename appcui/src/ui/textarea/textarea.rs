@@ -545,6 +545,22 @@ impl TextArea {
         self.window_width = self.size().width - self.line_number_bar_size;
     }
 
+    /// Creates a new TextArea control with the specified text, layout, and flags.
+    /// The TextArea control is a multi-line text input control that allows for scrolling and selection.
+    /// The flags parameter is one of the following:
+    /// * `Flags::ScrollBars` - if set, the control will have scrollbars
+    /// * `Flags::ShowLineNumber` - if set, the control will show line numbers
+    /// * `Flags::ReadOnly` - if set, the control will be read-only
+    /// * `Flags::HighlightCursor` - if set, the control will highlight the cursor
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let textarea = TextArea::new("Hello, world!", 
+    ///                              Layout::new("x:1,y:1,w:20,h:10"), 
+    ///                              textarea::Flags::ShowLineNumber);
+    /// ```
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
         let mut control = Self {
             base: ControlBase::with_status_flags(
@@ -867,6 +883,8 @@ impl TextArea {
         // Inserting the new text in between the spliced line
         destination_line_sizes.splice(line_index + 1..line_index + 1, new_text_line_sizes[1 .. new_text_line_sizes.len() - 1].iter().cloned());
     }
+    
+    /// Inserts the text at the current cursor position within the text area.
     pub fn insert_text(&mut self, text: &str) {
         if text.contains('\n') {
             // We need to calculate the absolute position in the text for the cursor and the position in line
@@ -1020,6 +1038,7 @@ impl TextArea {
         self.save_mouse_data(mouse_data);
     }
 
+    /// Returns the text of the TextArea
     #[inline(always)]
     pub fn text(&self) -> &str {
         &self.text
