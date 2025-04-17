@@ -26,7 +26,6 @@ pub use self::surface::Surface;
 pub use self::size::Size;
 pub use self::point::Point;
 pub use self::rect::Rect;
-pub use self::cursor::Cursor;
 pub use self::image::*;
 pub use self::image::Image;
 pub use self::text_format::TextAlignament;
@@ -34,6 +33,7 @@ pub use self::text_format::TextFormat;
 pub use self::text_format::TextFormatBuilder;
 pub use self::text_format::WrapType;
 pub (crate) use self::clip_area::ClipArea;
+pub(crate) use self::cursor::Cursor;
 
 #[cfg(test)]
 pub (crate) use self::surface_tester::SurfaceTester;
