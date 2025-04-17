@@ -87,6 +87,9 @@ impl From<SpecialChar> for char {
     }
 }
 
+
+/// Represents a character with its attributes, including foreground and background colors, and flags.
+/// The `Character` struct is used to define a character that can be displayed on the screen.
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct Character {
     pub code: char,
@@ -95,6 +98,18 @@ pub struct Character {
     pub flags: CharFlags,
 }
 impl Character {
+    /// Creates a new character with the specified code, foreground color, background color, and flags.
+    /// The code could be of type `char` or a SpecialChar.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// let ch = Character::new('A', Color::Red, Color::Black, CharFlags::None);
+    /// let special_ch = Character::new(SpecialChar::BoxTopLeftCornerDoubleLine, 
+    ///                                 Color::Green, 
+    ///                                 Color::Black, 
+    ///                                 CharFlags::None);
+    /// ```
     #[inline(always)]
     pub fn new<T>(code: T, fore: Color, back: Color, flags: CharFlags) -> Self
     where
@@ -107,6 +122,16 @@ impl Character {
             flags,
         }
     }
+
+    /// Creates a new character from a specified code (a char or a SpecialChar).
+    /// The foreground and background colors are set to transparent and th e flags are set to None.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// let ch = Character::with_char('A');
+    /// let special_ch = Character::with_char(SpecialChar::BoxTopLeftCornerDoubleLine);
+    /// ```
     #[inline(always)]
     pub fn with_char<T>(code: T) -> Self
     where
@@ -119,6 +144,17 @@ impl Character {
             flags: CharFlags::None,
         }
     }
+
+    /// Creates a new character with the specified foreground and background colors.
+    /// The code is set to the null character ('\0') - meaning that it will not overwrite the existing character when displayed on the surface.
+    /// The flags are set to None.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let ch = Character::with_color(Color::Red, Color::Black);
+    /// ```
     #[inline(always)]
     pub fn with_color(fore: Color, back: Color) -> Self {
         Character {
@@ -128,6 +164,18 @@ impl Character {
             flags: CharFlags::None,
         }
     }
+
+    /// Creates a new character with the specified code (a char or a SpecialChar) and attributes.
+    /// The foreground and background colors are set to the values specified in the `CharAttribute` struct.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let attr = CharAttribute::new(Color::Red, Color::Black, CharFlags::None);
+    /// let ch = Character::with_attributes('A', attr);
+    /// let special_ch = Character::with_attributes(SpecialChar::BoxTopLeftCornerDoubleLine, attr);
+    /// ```
     #[inline(always)]
     pub fn with_attributes<T>(code: T, attr: CharAttribute) -> Self
     where
@@ -140,6 +188,12 @@ impl Character {
             flags: attr.flags,
         }
     }
+
+    /// Sets an character based on the provided `Character` instance.
+    /// The code, foreground color, and background color are updated only if they are not set to the default values 
+    /// Foe example, the character code is only set if the **ch** argument is not 0.
+    /// Similarly, if the background or foreground colors are not set to `Color::Transparent`, they will be updated.
+    /// The flags are always updated.
     #[inline(always)]
     pub fn set(&mut self, ch: Character) {
         if ch.code != (0 as char) {
@@ -156,6 +210,9 @@ impl Character {
 }
 
 impl Default for Character {
+    /// Creates a new character with default values.
+    /// The code is set to a space character (' '), the foreground color is set to `Color::White`,
+    /// the background color is set to `Color::Black`, and the flags are set to `CharFlags::None`.
     fn default() -> Self {
         Self {
             code: ' ',
