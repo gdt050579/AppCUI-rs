@@ -29,6 +29,10 @@ name = "checkboxes"
 path = "checkboxes/main.rs"
 
 [[example]]
+name = "checkboxes_types"
+path = "checkboxes_types/main.rs"
+
+[[example]]
 name = "radioboxes"
 path = "radioboxes/main.rs"
 

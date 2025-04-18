@@ -436,6 +436,14 @@ pub fn button(input: TokenStream) -> TokenStream {
 /// The following attributes are supported:
 /// * `caption` or `text` - the text displayed near the checkbox
 /// * `checked` or `check` - if the checkbox is checked or not
+/// * `type` - the type of the checkbox. The following values are supported:
+///   - **Standard** - a standard checkbox (`[✓]` or `[ ]`)
+///   - **Ascii** - an ascii checkbox (`[X]` or `[ ]`)
+///   - **CheckBox** - a checkbox with a check symbol (`☑` or `☐`)
+///   - **CheckMark** - a checkbox with a check mark (`✔` or `x`)
+///   - **FilledBox** - a checkbox with a filled box (`▣` or `▢`)
+///   - **YesNo** - a checkbox with a yes or no symbol (`[Y]` or `[N]`)
+///   - **PlusMinus** - a checkbox with a plus or minus symbol (`➕` or `➖`)
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias), 
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)   

@@ -3,6 +3,7 @@ mod searchbar;
 mod scrollbars_components;
 mod listscrollbars;
 mod scrollbars;
+mod symbol;
 pub mod column;
 mod columns_header;
 mod navigator_component;
@@ -15,6 +16,7 @@ pub(crate) use self::combobox_component::ComboBoxComponent;
 pub(crate) use self::combobox_component::ComboBoxComponentDataProvider;
 pub(crate) use self::navigator_component::NavigatorComponent;
 pub(crate) use self::navigator_component::NavigatorComponentControlFunctions;
+pub(crate) use self::symbol::Symbol;
 
 pub use self::listitem::*;
 
