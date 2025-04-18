@@ -2,7 +2,7 @@
 pub enum Type {
     Standard,
     Ascii,
-    Checkbox,
+    CheckBox,
     CheckMark,
 }
 
@@ -10,16 +10,16 @@ impl Type {
     pub(super) fn check_symbol(&self) -> &str {
         match self {
             Type::Standard => "[\u{221A}]",
-            Type::Ascii => "[ ]",
-            Type::Checkbox => "☑",
-            Type::CheckMark => "✓",
+            Type::Ascii => "[X]",
+            Type::CheckBox => "☑",
+            Type::CheckMark => "\u{221A}",
         }
     }
     pub(super) fn uncheck_symbol(&self) -> &str {
         match self {
             Type::Standard => "[ ]",
             Type::Ascii => "[ ]",
-            Type::Checkbox => "☐",
+            Type::CheckBox => "☐",
             Type::CheckMark => "x",
         }
     }

@@ -45,7 +45,7 @@ impl Tab {
     /// The flags can be a combination of the following values:
     /// * `tab::Flags::TabsBar` - if set, the tabs will be displayed in a bar
     /// * `tab::Flags::TransparentBackground` - if set, the background will be transparent
-    /// and the tab_type will be one of the following values:
+    ///   and the tab_type will be one of the following values:
     /// * `tab::Type::OnTop` - the tabs will be displayed on top of the control
     /// * `tab::Type::OnBottom` - the tabs will be displayed on the bottom of the control
     /// * `tab::Type::OnLeft` - the tabs will be displayed on the left side of the control

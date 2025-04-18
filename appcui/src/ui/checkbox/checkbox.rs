@@ -74,7 +74,7 @@ impl CheckBox {
 }
 impl OnPaint for CheckBox {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let col_text = match () {
+        let attr_text = match () {
             _ if !self.is_enabled() => theme.text.inactive,
             _ if self.has_focus() => theme.text.focused,
             _ if self.is_mouse_over() => theme.text.hovered,
@@ -88,7 +88,7 @@ impl OnPaint for CheckBox {
         if sz.width > self.symbol_width as u32 {
             let mut format = TextFormatBuilder::new()
                 .position(self.symbol_width as i32, 0)
-                .attribute(col_text)
+                .attribute(attr_text)
                 .align(TextAlignament::Left)
                 .chars_count(self.caption.chars_count() as u16)
                 .build();
@@ -101,23 +101,13 @@ impl OnPaint for CheckBox {
             surface.write_text(self.caption.text(), &format);
         }
         if self.checked {
-            self.check_symbol.paint(
-                surface,
-                0,
-                0,
-                col_text,
-                if enabled { theme.symbol.checked } else { theme.symbol.inactive },
-                col_text,
-            );
+            let attr_symbol = if enabled { theme.symbol.checked } else { theme.symbol.inactive };
+            let attr_margin = if self.symbol_width == 4 { attr_text } else { attr_symbol };
+            self.check_symbol.paint(surface, 0, 0, attr_margin, attr_symbol, attr_margin);
         } else {
-            self.uncheck_symbol.paint(
-                surface,
-                0,
-                0,
-                col_text,
-                if enabled { theme.symbol.unchecked } else { theme.symbol.inactive },
-                col_text,
-            );
+            let attr_symbol = if enabled { theme.symbol.unchecked } else { theme.symbol.inactive };
+            let attr_margin = if self.symbol_width == 4 { attr_text } else { attr_symbol };
+            self.uncheck_symbol.paint(surface, 0, 0, attr_margin, attr_symbol, attr_margin);
         }
         if self.has_focus() {
             surface.set_cursor(if self.symbol_width == 4 { 1 } else { 0 }, 0);
