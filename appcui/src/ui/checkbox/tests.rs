@@ -229,3 +229,94 @@ fn check_checkbox_checkmark_mode() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_checkbox_checkbox_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Ascii mode CheckBox')   
+        CheckHash(0x9F65CE8526917920)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkbox,checked:false"));
+    w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkbox,checked:true"));
+    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkbox,checked:false, enabled:false"));
+    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkbox,checked:true, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_checkbox_fillbox_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Ascii mode FilledBox')   
+        CheckHash(0x9E9BB3D3D61B96C2)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=FilledBox,checked:false"));
+    w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=FilledBox,checked:true"));
+    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=FilledBox,checked:false, enabled:false"));
+    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=FilledBox,checked:true, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_checkbox_yesno_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Ascii mode YesNo')   
+        CheckHash(0xE46BB51248D63FCA)  
+        CheckCursor(8,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=YesNo,checked:false"));
+    w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=YesNo,checked:true"));
+    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=YesNo,checked:false, enabled:false"));
+    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=YesNo,checked:true, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_checkbox_plusminux_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Ascii mode PlusMinus')   
+        CheckHash(0xFA6744A14E4DCA0C)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=PlusMinus,checked:false"));
+    w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=PlusMinus,checked:true"));
+    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=PlusMinus,checked:false, enabled:false"));
+    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=PlusMinus,checked:true, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_checkbox_caption() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Caption test')   
+        CheckHash(0x4BA9B547CD3BD93F)  
+        CheckCursor(8,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    let mut cb = CheckBox::new("Caption test", Layout::new("x:1,y:1,w:40"), false);
+    assert_eq!(cb.caption(), "Caption test");
+    cb.set_caption("&New caption");
+    assert_eq!(cb.caption(), "New caption");
+    w.add(cb);
+    a.add_window(w);
+    a.run();
+}
