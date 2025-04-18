@@ -313,11 +313,8 @@ impl OnPaint for SnakeGame {
         surface.clear(char!("' ',black,black"));
         
         if !self.initialized {
-            // Try to initialize if we haven't already
             let size = self.size();
             if size.width > 2 && size.height > 2 {
-                // This is a bit of a hack since on_paint is &self not &mut self
-                // We'll let the next timer tick initialize the game
                 return;
             }
         }
