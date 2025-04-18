@@ -195,3 +195,7 @@ path = "editor/main.rs"
 [[example]]
 name = "painter"
 path = "painter/main.rs"
+
+[[example]]
+name = "snake"
+path = "snake/main.rs"
