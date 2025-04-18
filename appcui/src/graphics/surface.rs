@@ -39,6 +39,10 @@ impl From<char> for CharacterType {
 const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
 
+/// A structure that represents a 2D surface for drawing characters and images.
+/// The surface is defined as a matrix (width x height) of characters, where each character is of type [Character].
+/// The surface has a size, an origin point, a clip area, and a cursor position.
+/// The size of the surface is maximum 10000 x 10000 characters.
 pub struct Surface {
     pub(crate) size: Size,
     pub(crate) chars: Vec<Character>,

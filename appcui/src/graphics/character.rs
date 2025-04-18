@@ -14,6 +14,7 @@ static UNICODE_CODES: [char; 48] = [
     
 ];
 
+/// A special character set used for drawing boxes, arrows, and other graphical elements in a terminal or console application.
 #[repr(u8)]
 #[derive(Copy, Clone, Debug)]
 pub enum SpecialChar {

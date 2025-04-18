@@ -17,7 +17,7 @@ pub struct CharAttribute {
 }
 
 impl CharAttribute {
-    /// Creates a new `CharAttribute` with the specified foreground color, background color, and flags.
+    /// Creates a new `CharAttribute` with the specified foreground [Color], background [Color], and flags.
     /// 
     /// # Example
     /// ```rust
