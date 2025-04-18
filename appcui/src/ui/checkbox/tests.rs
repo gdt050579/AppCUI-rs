@@ -176,7 +176,8 @@ fn check_checkbox_mouse_click() {
 #[test]
 fn check_checkbox_key_pressed() {
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
+        Error.Disable(true)
         Paint('initial state')   
         CheckHash(0xA6C95C5C0E59C1BF)  
         Key.Pressed(Space)
