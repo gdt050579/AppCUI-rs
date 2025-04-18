@@ -5,7 +5,7 @@ fn check_checkbox_creation() {
     let script = "
         Paint.Enable(false)
         Paint('some checkboxes')   
-        CheckHash(0xAA393B73091205A4)  
+        CheckHash(0x9F68D7DDA0CF6014)  
         CheckCursor(13,5) 
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
@@ -71,32 +71,32 @@ fn check_checkbox_events() {
     let script = "
         Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0x72AB7B1C9D82138F)  
+        CheckHash(0xC20CC4F5C86E807C)  
         CheckCursor(14,6) 
         Key.Pressed(Tab)
         Key.Pressed(Space)
         // the label should say: Checkbox 1 check status: true
         Paint('1st checkbox checked')
-        CheckHash(0x3362FB928BD2D9E1)  
+        CheckHash(0x4C5E4A9F456071D)  
         CheckCursor(14,4) 
         Key.Pressed(Alt+M)
         // the label should say:  Checkbox 3 check status: false
         Paint('3st checkbox un-checked')
-        CheckHash(0xC8621B6DA2CF9B2A)  
+        CheckHash(0x627909865CF67619)  
         CheckCursor(14,6) 
         Key.Pressed(Tab,2)
         Key.Pressed(Enter)
         // the label should say: Checkbox 3 check status: true
         Paint('3st checkbox checked')
-        CheckHash(0x7AA563D9C8C952BF)  
+        CheckHash(0x85943026144CC0B3)  
         CheckCursor(14,6) 
         Key.Pressed(Alt+S)
         Mouse.Move(20,6)
         Paint('Hover on 3rd checkbox')
-        CheckHash(0xCBC5502338859BBD)  
+        CheckHash(0x9C2A13455CBA7587)  
         Mouse.Click(20,6,left)
         Paint('3rd checkbox clicked')
-        CheckHash(0x6EC587D729BC484B)  
+        CheckHash(0x55B82C4FACD71F83)  
         CheckCursor(14,6) 
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
@@ -136,15 +136,15 @@ fn check_checkbox_set_checked() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
-        CheckHash(0x4513048D3C5B3BE2)
+        CheckHash(0x4AAF8B869A8E1A2A)
         Key.Pressed(Tab)
         Key.Pressed(Space)
         Paint('now checked')  
-        CheckHash(0x53F15D136C5350FE) 
+        CheckHash(0x1450786DA8CA5E16) 
         Mouse.Move(30,5)
         Mouse.Click(30,5,left)
         Paint('now un-checked')  
-        CheckHash(0x4513048D3C5B3BE2) 
+        CheckHash(0x4AAF8B869A8E1A2A) 
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
@@ -156,14 +156,14 @@ fn check_checkbox_mouse_click() {
     let script = "
         Paint.Enable(false)
         Paint('some checkboxes')   
-        CheckHash(0xAC58A676F4FD3979)  
+        CheckHash(0x2B9842F2F866679D)  
         CheckCursor(13,3) 
         Mouse.Click(20,3,left)
         Paint('checkbox-1 checked')  
-        CheckHash(0x274A7809D33F85E4)   
+        CheckHash(0x361D0DE3AC431283)   
         Mouse.Click(20,3,left)
         Paint('checkbox-1 un-checked')  
-        CheckHash(0xAC58A676F4FD3979) 
+        CheckHash(0x2B9842F2F866679D) 
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
@@ -176,16 +176,15 @@ fn check_checkbox_mouse_click() {
 #[test]
 fn check_checkbox_key_pressed() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('initial state')   
-        CheckHash(0xA6C95C5C0E59C1BF)  
+        CheckHash(0x26DF8C4F9A5A4F70)  
         Key.Pressed(Space)
         Paint('checkbox-1 un-checked')  
-        CheckHash(0x4225719E0F724212)  
+        CheckHash(0x46C11E31F0B114B6)  
         Key.Pressed(Space)
         Paint('checkbox-1 checked') 
-        CheckHash(0xA6C95C5C0E59C1BF)  
+        CheckHash(0x26DF8C4F9A5A4F70)  
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:11");

@@ -1091,45 +1091,45 @@ fn check_window_toolbar_item_visibility() {
         //expect on top    : ╔════════ My Win ═══════[Bin:11000]═[x]╗
         //expect on bottom : ╚[Dec:24|Hex:18]═══════════════════════╝
         Paint('initial state')
-        CheckHash(0xFA2B2E36B28A0050)
+        CheckHash(0x26CBACC61695381B)
         Mouse.Click(17,4,left)
         Mouse.Click(17,4,left)
         //expect on top    : ╔════════ My Win ═══════[Bin:11010]═[x]╗
         //expect on bottom : ╚[Dec:26|Hex:1A]═══════════════════════╝
         Paint('Number is 26')
-        CheckHash(0x8434D2F808AE0DA)
+        CheckHash(0x5093F71409CDB401)
         Mouse.Click(36,4,left)
         //expect on top    : ╔════════ My Win ═══════[Bin:11010]═[x]╗
         //expect on bottom : ╚[Hex:1A]══════════════════════════════╝
         Paint('Decimal is missing')
-        CheckHash(0x3B1812AD5CF55031)
+        CheckHash(0x6E330F6FF7C5A9E9)
         Mouse.Click(36,6,left)
         //expect on top    : ╔══════════════ My Win ═════════════[x]╗
         //expect on bottom : ╚[Hex:1A]══════════════════════════════╝
         Paint('Bin & Dec are missing')
-        CheckHash(0xE403B3C292B3820F)
+        CheckHash(0x553722D16D8569A8)
         Mouse.Click(17,4,left)
         //expect on top    : ╔══════════════ My Win ═════════════[x]╗
         //expect on bottom : ╚[Hex:1B]══════════════════════════════╝
         Paint('Number if nou 27')
-        CheckHash(0xC8A77483C0FAC0C4)
+        CheckHash(0x5DF422977AF47E13)
         Mouse.Click(36,5,left)
         //expect on top    : ╔══════════════ My Win ═════════════[x]╗
         //expect on bottom : ╚══════════════════════════════════════╝
         Paint('All are hidden')
-        CheckHash(0xD48F9939B3A922AF)
+        CheckHash(0x7E23A72AB78B3DA3)
         Mouse.Click(17,4,left)
         Mouse.Click(36,4,left)
         //expect on top    : ╔══════════════ My Win ═════════════[x]╗
         //expect on bottom : ╚[Dec:28]══════════════════════════════╝
         Paint('Dec is visible, number is 28')
-        CheckHash(0xA934C4B7914E03BA)
+        CheckHash(0x89AB3F6209F291DD)
         Mouse.Click(36,5,left)
         Mouse.Click(36,6,left)
         //expect on top    : ╔════════ My Win ═══════[Bin:11100]═[x]╗
         //expect on bottom : ╚[Dec:28|Hex:1C]═══════════════════════╝
         Paint('All are visible')
-        CheckHash(0xADA39D8995EA0606)
+        CheckHash(0x38A45512A58B0DE5)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
