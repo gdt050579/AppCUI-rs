@@ -1,10 +1,13 @@
 use crate::ui::checkbox::events::EventData;
 use crate::prelude::*;
+use super::Type;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent,internal=true)]
 pub struct CheckBox {
     caption: Caption,
     checked: bool,
+    check_symbol: Symbol,
+    uncheck_symbol: Symbol,
 }
 
 impl CheckBox {
@@ -17,13 +20,21 @@ impl CheckBox {
     /// let mut checkbox = CheckBox::new("Check me", Layout::new("x:1,y:1,w:20,h:1"), false);
     /// ```
     pub fn new(caption: &str, layout: Layout, checked: bool) -> Self {
-        let mut cb = CheckBox {
+        Self::with_type(caption, layout, checked, Type::Standard)
+    }
+
+    pub fn with_type(caption: &str, layout: Layout, checked: bool, checkbox_type: Type) -> Self {
+        let cs = checkbox_type.check_symbol();
+        let us = checkbox_type.un_check_symbol();
+        let mut cb = CheckBox {            
             base: ControlBase::with_status_flags(
                 layout,
                 StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput,
             ),
             caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
             checked,
+            check_symbol: Symbol::new(cs),
+            uncheck_symbol: Symbol::new(us),
         };
         cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
         let hotkey = cb.caption.hotkey();
