@@ -1,3 +1,7 @@
+//! Input handling module.
+//! 
+//! This module contains the definitions for the input handling systems such as keyboard and mouse.
+
 mod key;
 mod key_code;
 mod key_modifier;

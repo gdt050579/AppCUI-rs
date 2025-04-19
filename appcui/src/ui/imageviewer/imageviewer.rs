@@ -290,7 +290,6 @@ impl OnMouseEvent for ImageViewer {
             }
             MouseEvent::Wheel(dir) => {
                 match dir {
-                    MouseWheelDirection::None => {}
                     MouseWheelDirection::Left => self.move_scroll_to(self.x + 1, self.y),
                     MouseWheelDirection::Right => self.move_scroll_to(self.x - 1, self.y),
                     MouseWheelDirection::Up => self.move_scroll_to(self.x, self.y + 1),

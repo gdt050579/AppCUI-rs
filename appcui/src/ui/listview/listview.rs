@@ -1747,7 +1747,6 @@ where
                     MouseWheelDirection::Right => {
                         OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Right, KeyModifier::None), 0 as char);
                     }
-                    _ => {}
                 }
                 true
             }

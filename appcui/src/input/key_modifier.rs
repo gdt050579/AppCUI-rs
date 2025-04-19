@@ -19,6 +19,18 @@ static KEY_NAME: [&str; 8] = [
 ];
 
 impl KeyModifier {
+    /// Returns the name of the key modifier.
+    /// 
+    /// # Returns
+    /// The name of the key modifier.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let modifier = KeyModifier::Alt;
+    /// let name = modifier.name();
+    /// ```
     pub fn name(&self) -> &'static str {
         if self.value < 8 {
             return KEY_NAME[self.value as usize];
@@ -31,6 +43,20 @@ impl KeyModifier {
 }
 
 impl From<u8> for KeyModifier {
+    /// Creates a new key modifier from a u8.
+    /// 
+    /// # Arguments
+    /// * `value` - The u8 to create the key modifier from.
+    /// 
+    /// # Returns
+    /// A new key modifier created from the u8. If the u8 is not a valid key modifier, the function will return `KeyModifier::None`.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let modifier = KeyModifier::from(0x01);
+    /// ```         
     fn from(value: u8) -> Self {
         if value < 8 {
             let mut result = KeyModifier::None;
