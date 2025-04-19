@@ -90,10 +90,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     }
 
     fn exists(&self, path: &PathBuf) -> Option<bool> {
-        match path.try_exists() {
-            Ok(v) => Some(v),
-            _ => None,
-        }
+        path.try_exists().ok()
     }
     fn current_dir(&self) -> PathBuf {
         std::env::current_dir().unwrap_or_default()
