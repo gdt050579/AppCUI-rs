@@ -84,17 +84,19 @@ pub trait DropDownListEvents<T> {
 
 Besides the [Common methods for all Controls](../common_methods.md) a dropdown list also has the following aditional methods:
 
-| Method                   | Purpose                                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `index()`                | Returns the selected index from the DropDownList list                                    |
-| `set_index(...)`         | Selects a new element from the DropDownList based on its index                           |
-| `add(...)`               | Adss a new string to the list of items in the DropDownList                               |
-| `clear()`                | Clears the list of items available in the DropDownList                                   |
-| `selected_item(...)`     | Provides immutable (read-only) access to the selected item from the DropDownList         |
-| `selected_item_mut(...)` | Provides mutable access to the selected item from the DropDownList                       |
-| `has_selection()`        | **True** if an item is selected, **False** otherwise                                     |
-| `count()`                | Returns the number of items available in the combo box                                   |
-| `set_none_string(...)`   | Sets the display name for the `None` variant that will be displayed in the dropdown list |
+| Method                   | Purpose                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `index()`                | Returns the selected index from the DropDownList list                                                                    |
+| `set_index(...)`         | Selects a new element from the DropDownList based on its index                                                           |
+| `add(...)`               | Adss a new string to the list of items in the DropDownList                                                               |
+| `clear()`                | Clears the list of items available in the DropDownList                                                                   |
+| `selected_item(...)`     | Provides immutable (read-only) access to the selected item from the DropDownList                                         |
+| `selected_item_mut(...)` | Provides mutable access to the selected item from the DropDownList                                                       |
+| `item(...)`              | Returns a immutable reference to the item at the specified index. If the index is invalid, the code will return **None** |
+| `item_mut(...)`          | Returns a mutable reference to the item at the specified index. If the index is invalid, the code will return **None**   |
+| `has_selection()`        | **True** if an item is selected, **False** otherwise                                                                     |
+| `count()`                | Returns the number of items available in the combo box                                                                   |
+| `set_none_string(...)`   | Sets the display name for the `None` variant that will be displayed in the dropdown list                                 |
 
 
 

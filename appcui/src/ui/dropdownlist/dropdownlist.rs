@@ -177,6 +177,24 @@ where
         }
     }
 
+    /// Returns the item at the specified index. If the index is invalid, the code will return None
+    pub fn item(&self, index: u32) -> Option<&T> {
+        if index >= self.data.count() {
+            None
+        } else {
+            Some(&self.data.items[index as usize])
+        }
+    }
+
+    /// Returns the item at the specified index. If the index is invalid, the code will return None
+    pub fn item_mut(&mut self, index: u32) -> Option<&mut T> {
+        if index >= self.data.count() {
+            None
+        } else {
+            Some(&mut self.data.items[index as usize])
+        }
+    }
+
     /// Sets the selected item based on the provided index. If the index is invalid, the index will be ignored
     pub fn set_index(&mut self, index: u32) {
         if index < self.data.count() {
