@@ -199,3 +199,7 @@ path = "painter/main.rs"
 [[example]]
 name = "snake"
 path = "snake/main.rs"
+
+[[example]]
+name = "matrix"
+path = "matrix/main.rs"
