@@ -1,3 +1,13 @@
+//! Prelude module for the AppCUI library.
+//! 
+//! This module re-exports all the modules and types in the AppCUI library.
+//! 
+//! # Example
+//! ```rust
+//! use appcui::prelude::*; 
+//! 
+//! // now you can use all the types and modules in the AppCUI library without having to prefix them with the module name.
+//! ```
 pub use super::ui::*;
 pub use super::ui::button;
 pub use super::ui::button::events::ButtonEvents;
