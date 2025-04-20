@@ -1,3 +1,4 @@
+use super::ExtractHotKeyMethod;
 use super::FormatNumber;
 use super::FormatRatings;
 use super::GlyphParser;
@@ -7,6 +8,10 @@ use super::TempBuffer;
 use super::TempString;
 use super::ValueType;
 use super::VectorIndex;
+use super::Caption;
+use crate::input::Key;
+use crate::input::KeyCode;
+use crate::input::KeyModifier;
 use crate::system::Handle;
 use crate::system::HandleSupport;
 use crate::utils::format_datetime::FormatDuration;
@@ -1650,3 +1655,37 @@ fn check_vector_index_last() {
     assert_eq!(idx.index(), 6); // 9 - 3 = 6
 }
 
+#[test]
+fn check_caption_hotkey() {
+    let c = Caption::new("Test &Caption", ExtractHotKeyMethod::AltPlusKey);
+    assert_eq!(c.text(), "Test Caption");
+    assert_eq!(c.has_hotkey(), true);
+    assert_eq!(c.hotkey(), Key::new(KeyCode::C, KeyModifier::Alt));
+    assert_eq!(c.hotkey_pos(), Some(5));
+}
+
+
+#[test]
+fn check_caption_no_hotkey() {
+    let c = Caption::new("Test Caption", ExtractHotKeyMethod::AltPlusKey);
+    assert_eq!(c.text(), "Test Caption");
+    assert_eq!(c.has_hotkey(), false);
+    assert_eq!(c.hotkey(), Key::None);
+    assert_eq!(c.hotkey_pos(), None);
+}
+
+#[test]
+fn check_caption_chars_count() {
+    let c = Caption::new("Test", ExtractHotKeyMethod::AltPlusKey);
+    assert_eq!(c.chars_count(), 4);
+
+    let c = Caption::new("&Test", ExtractHotKeyMethod::AltPlusKey);
+    assert_eq!(c.chars_count(), 4);
+
+    let c = Caption::new("&TăȘ", ExtractHotKeyMethod::AltPlusKey);
+    assert_eq!(c.chars_count(), 3);
+
+    let c = Caption::new("&TăȘ", ExtractHotKeyMethod::AltPlusKey);
+    assert_eq!(c.chars_count(), 3);
+
+}
