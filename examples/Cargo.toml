@@ -203,3 +203,7 @@ path = "snake/main.rs"
 [[example]]
 name = "matrix"
 path = "matrix/main.rs"
+
+[[example]]
+name = "counter"
+path = "counter/main.rs"
