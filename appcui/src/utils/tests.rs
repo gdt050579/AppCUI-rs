@@ -1060,3 +1060,268 @@ fn check_format_duration_details() {
     assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_8), Some("1s"));
     
 }
+
+#[test]
+fn check_format_number_buffer_edge_cases() {
+    // Test with too small buffers
+    let mut tiny_buf: [u8; 1] = [0; 1];
+    const F1: FormatNumber = FormatNumber::new(10);
+    assert_eq!(F1.write_number(123u32, &mut tiny_buf), None);
+    
+    // Empty buffer
+    let mut empty_buf: [u8; 0] = [];
+    assert_eq!(F1.write_number(123u32, &mut empty_buf), None);
+    
+    // Exact size buffer
+    let mut exact_buf: [u8; 3] = [0; 3];
+    assert_eq!(F1.write_number(123u32, &mut exact_buf), Some("123"));
+    
+    // Test with representation digits requiring more space
+    const F2: FormatNumber = FormatNumber::new(10).representation_digits(5);
+    let mut small_buf: [u8; 4] = [0; 4];
+    assert_eq!(F2.write_number(123u32, &mut small_buf), None);
+    
+    let mut adequate_buf: [u8; 5] = [0; 5];
+    assert_eq!(F2.write_number(123u32, &mut adequate_buf), Some("00123"));
+}
+
+#[test]
+fn check_format_number_write_to_buffer() {
+    let mut buf: [u8; 10] = [0; 10];
+    
+    // Test with different values
+    assert_eq!(std::str::from_utf8(FormatNumber::write_to_buffer(0, &mut buf)).unwrap(), "0");
+    assert_eq!(std::str::from_utf8(FormatNumber::write_to_buffer(9, &mut buf)).unwrap(), "9");
+    assert_eq!(std::str::from_utf8(FormatNumber::write_to_buffer(10, &mut buf)).unwrap(), "10");
+    assert_eq!(std::str::from_utf8(FormatNumber::write_to_buffer(123, &mut buf)).unwrap(), "123");
+    assert_eq!(std::str::from_utf8(FormatNumber::write_to_buffer(9999, &mut buf)).unwrap(), "9999");
+    
+    // Test with buffer that's too small
+    let mut small_buf: [u8; 2] = [0; 2];
+    assert_eq!(std::str::from_utf8(FormatNumber::write_to_buffer(999, &mut small_buf)).unwrap(), "99");
+    
+    // Test with empty buffer
+    let mut empty_buf: [u8; 0] = [];
+    assert_eq!(FormatNumber::write_to_buffer(123, &mut empty_buf), &[]);
+}
+
+#[test]
+fn check_format_number_binary() {
+    let mut buf: [u8; 64] = [0; 64];
+    
+    // Basic binary format
+    const BIN: FormatNumber = FormatNumber::new(2);
+    assert_eq!(BIN.write_number(5u8, &mut buf), Some("101"));
+    assert_eq!(BIN.write_number(15u8, &mut buf), Some("1111"));
+    
+    // Binary with prefix and minimum digits
+    const BIN_FMT: FormatNumber = FormatNumber::new(2).prefix("0b").representation_digits(8);
+    assert_eq!(BIN_FMT.write_number(5u8, &mut buf), Some("0b00000101"));
+    assert_eq!(BIN_FMT.write_number(255u8, &mut buf), Some("0b11111111"));
+    
+    // Binary with grouping
+    const BIN_GROUP: FormatNumber = FormatNumber::new(2).group(4, b'_').prefix("0b");
+    assert_eq!(BIN_GROUP.write_number(0b1010_1010u16, &mut buf), Some("0b1010_1010"));
+    assert_eq!(BIN_GROUP.write_number(0b1111_0000_1111u16, &mut buf), Some("0b1111_0000_1111"));
+}
+
+#[test]
+fn check_format_number_octal() {
+    let mut buf: [u8; 64] = [0; 64];
+    
+    // Basic octal format
+    const OCT: FormatNumber = FormatNumber::new(8);
+    assert_eq!(OCT.write_number(8u8, &mut buf), Some("10"));
+    assert_eq!(OCT.write_number(63u8, &mut buf), Some("77"));
+    
+    // Octal with prefix and minimum digits
+    const OCT_FMT: FormatNumber = FormatNumber::new(8).prefix("0o").representation_digits(4);
+    assert_eq!(OCT_FMT.write_number(8u8, &mut buf), Some("0o0010"));
+    assert_eq!(OCT_FMT.write_number(511u16, &mut buf), Some("0o0777"));
+    
+    // Octal with grouping
+    const OCT_GROUP: FormatNumber = FormatNumber::new(8).group(3, b'_').prefix("0o");
+    assert_eq!(OCT_GROUP.write_number(0o12345670u32, &mut buf), Some("0o12_345_670"));
+}
+
+#[test]
+fn check_format_number_hex_formatting() {
+    let mut buf: [u8; 64] = [0; 64];
+    
+    // Test different hex formatting options
+    const HEX_LOWER: FormatNumber = FormatNumber::new(16).prefix("0x");
+    assert_eq!(HEX_LOWER.write_number(0xABCDu16, &mut buf), Some("0xABCD"));
+    
+    // Hex with minimum width and fill
+    const HEX_FILL: FormatNumber = FormatNumber::new(16).fill(10, b' ').prefix("0x");
+    assert_eq!(HEX_FILL.write_number(0xF0u8, &mut buf), Some("      0xF0"));
+    
+    // Hex with minimum representation digits and suffix
+    const HEX_REP: FormatNumber = FormatNumber::new(16).representation_digits(4).suffix("h");
+    assert_eq!(HEX_REP.write_number(0xAu8, &mut buf), Some("000Ah"));
+    
+    // Hex with all options combined
+    const HEX_ALL: FormatNumber = FormatNumber::new(16)
+        .group(4, b'_')
+        .representation_digits(8)
+        .prefix("0x")
+        .suffix(" (hex)")
+        .fill(20, b'#');
+    assert_eq!(HEX_ALL.write_number(0xDEADBEEFu32, &mut buf), Some("###0xDEAD_BEEF (hex)"));
+}
+
+#[test]
+fn check_format_number_signed_edge_cases() {
+    let mut buf: [u8; 64] = [0; 64];
+    
+    const F: FormatNumber = FormatNumber::new(10);
+    
+    // Test with minimum negative values
+    assert_eq!(F.write_number(i16::MIN as i32, &mut buf), Some("-32768"));
+    
+    // Test with negative values that require specific handling
+    const F_GROUP: FormatNumber = FormatNumber::new(10).group(3, b',');
+    assert_eq!(F_GROUP.write_number(-1000i16, &mut buf), Some("-1,000"));
+    assert_eq!(F_GROUP.write_number(-1000000i32, &mut buf), Some("-1,000,000"));
+    
+    // Test with negative values and fill
+    const F_FILL: FormatNumber = FormatNumber::new(10).fill(10, b' ');
+    assert_eq!(F_FILL.write_number(-99i16, &mut buf), Some("       -99"));
+    
+    // Test with representation digits
+    const F_REP: FormatNumber = FormatNumber::new(10).representation_digits(5);
+    assert_eq!(F_REP.write_number(-123i16, &mut buf), Some("-00123"));
+}
+
+#[test]
+fn check_format_number_float_edge_cases() {
+    let mut buf: [u8; 64] = [0; 64];
+    
+    // Test with various decimal places
+    const F0: FormatNumber = FormatNumber::new(10).decimals(0);
+    assert_eq!(F0.write_float(123.456, &mut buf), Some("123"));
+    assert_eq!(F0.write_float(-123.456, &mut buf), Some("-123"));
+    
+    const F1: FormatNumber = FormatNumber::new(10).decimals(1);
+    assert_eq!(F1.write_float(123.456, &mut buf), Some("123.4"));
+    assert_eq!(F1.write_float(-123.456, &mut buf), Some("-123.4"));
+    
+    const F6: FormatNumber = FormatNumber::new(10).decimals(6);
+    assert_eq!(F6.write_float(0.123456789, &mut buf), Some("0.123456"));
+    assert_eq!(F6.write_float(-0.123456789, &mut buf), Some("-0.123456"));
+    
+    // Test rounding behavior
+    const F2: FormatNumber = FormatNumber::new(10).decimals(2);
+    assert_eq!(F2.write_float(0.995, &mut buf), Some("0.99"));  // Not rounded
+    assert_eq!(F2.write_float(0.9951, &mut buf), Some("0.99")); // Not rounded
+    
+    // Test very small values
+    assert_eq!(F2.write_float(0.001, &mut buf), Some("0.00"));
+    assert_eq!(F2.write_float(-0.001, &mut buf), Some("-0.00"));
+    
+    // Test with formatting options
+    const F_FMT: FormatNumber = FormatNumber::new(10).decimals(2).prefix("$").suffix(" USD");
+    assert_eq!(F_FMT.write_float(1234.50, &mut buf), Some("$1234.50 USD"));
+    assert_eq!(F_FMT.write_float(-1234.50, &mut buf), Some("-$1234.50 USD"));
+}
+
+#[test]
+fn check_format_number_fraction_edge_cases() {
+    let mut buf: [u8; 64] = [0; 64];
+    
+    // Test basic fraction formatting
+    const F: FormatNumber = FormatNumber::new(10).decimals(2);
+    assert_eq!(F.write_fraction(1u32, 4u32, &mut buf), Some("0.25"));
+    assert_eq!(F.write_fraction(3u32, 4u32, &mut buf), Some("0.75"));
+    
+    // Test with zero divisor
+    assert_eq!(F.write_fraction(1u32, 0u32, &mut buf), None);
+    
+    // Test with different signs
+    assert_eq!(F.write_fraction(-1i32, 4i32, &mut buf), Some("-0.25"));
+    assert_eq!(F.write_fraction(1i32, -4i32, &mut buf), Some("-0.25"));
+    assert_eq!(F.write_fraction(-1i32, -4i32, &mut buf), Some("0.25"));
+    
+    // Test with various decimal places
+    const F0: FormatNumber = FormatNumber::new(10).decimals(0);
+    assert_eq!(F0.write_fraction(1u32, 4u32, &mut buf), Some("0"));
+    assert_eq!(F0.write_fraction(5u32, 4u32, &mut buf), Some("1"));
+    
+    const F4: FormatNumber = FormatNumber::new(10).decimals(4);
+    assert_eq!(F4.write_fraction(1u32, 3u32, &mut buf), Some("0.3333"));
+    assert_eq!(F4.write_fraction(2u32, 3u32, &mut buf), Some("0.6666"));
+    
+    // Test with large numbers
+    assert_eq!(F.write_fraction(1000000u32, 3u32, &mut buf), Some("333333.33"));
+    
+    // Test with formatting options
+    const F_FMT: FormatNumber = FormatNumber::new(10).decimals(2).prefix("≈ ").suffix("%");
+    assert_eq!(F_FMT.write_fraction(2500u32, 100u32, &mut buf), Some("≈ 25.00%"));
+}
+
+#[test]
+fn check_format_number_max_values() {
+    let mut buf: [u8; 128] = [0; 128];
+    
+    // Test with maximum values for different integer types
+    const F: FormatNumber = FormatNumber::new(10);
+    assert_eq!(F.write_number(u8::MAX, &mut buf), Some("255"));
+    assert_eq!(F.write_number(u16::MAX, &mut buf), Some("65535"));
+    assert_eq!(F.write_number(u32::MAX, &mut buf), Some("4294967295"));
+    assert_eq!(F.write_number(i16::MAX, &mut buf), Some("32767"));
+    assert_eq!(F.write_number(i32::MAX, &mut buf), Some("2147483647"));
+    
+    // Test with maximum value for u64 with grouping
+    const F_GROUP: FormatNumber = FormatNumber::new(10).group(3, b',');
+    assert_eq!(F_GROUP.write_number(u64::MAX, &mut buf), Some("18,446,744,073,709,551,615"));
+    
+    // Test with maximum value in different bases
+    const BIN: FormatNumber = FormatNumber::new(2);
+    assert_eq!(BIN.write_number(u8::MAX, &mut buf), Some("11111111"));
+    
+    const OCT: FormatNumber = FormatNumber::new(8);
+    assert_eq!(OCT.write_number(u8::MAX, &mut buf), Some("377"));
+    
+    const HEX: FormatNumber = FormatNumber::new(16);
+    assert_eq!(HEX.write_number(u8::MAX, &mut buf), Some("FF"));
+    
+    // Test with u128 max value
+    assert_eq!(F.write_number(u128::MAX, &mut buf), Some("340282366920938463463374607431768211455"));
+}
+
+#[test]
+fn check_format_number_of_digits() {
+    // Test values in explicit ranges (match arms)
+    assert_eq!(FormatNumber::number_of_digits(0), 1);
+    assert_eq!(FormatNumber::number_of_digits(5), 1);
+    assert_eq!(FormatNumber::number_of_digits(9), 1);
+    
+    assert_eq!(FormatNumber::number_of_digits(10), 2);
+    assert_eq!(FormatNumber::number_of_digits(50), 2);
+    assert_eq!(FormatNumber::number_of_digits(99), 2);
+    
+    assert_eq!(FormatNumber::number_of_digits(100), 3);
+    assert_eq!(FormatNumber::number_of_digits(500), 3);
+    assert_eq!(FormatNumber::number_of_digits(999), 3);
+    
+    assert_eq!(FormatNumber::number_of_digits(1000), 4);
+    assert_eq!(FormatNumber::number_of_digits(5000), 4);
+    assert_eq!(FormatNumber::number_of_digits(9999), 4);
+    
+    assert_eq!(FormatNumber::number_of_digits(10000), 5);
+    assert_eq!(FormatNumber::number_of_digits(50000), 5);
+    assert_eq!(FormatNumber::number_of_digits(99999), 5);
+    
+    // Test values that use the loop logic (larger than 99999)
+    assert_eq!(FormatNumber::number_of_digits(100000), 6);
+    assert_eq!(FormatNumber::number_of_digits(999999), 6);
+    
+    assert_eq!(FormatNumber::number_of_digits(1000000), 7);
+    assert_eq!(FormatNumber::number_of_digits(9999999), 7);
+    
+    // Test large values
+    assert_eq!(FormatNumber::number_of_digits(1_000_000_000), 10);
+    assert_eq!(FormatNumber::number_of_digits(12_345_678_901), 11);
+    assert_eq!(FormatNumber::number_of_digits(u64::MAX), 20); // 18,446,744,073,709,551,615
+}
+
