@@ -1,6 +1,6 @@
-pub struct FormatRatings;
+pub (crate) struct FormatRatings;
 impl FormatRatings {
-    pub fn two_chars(
+    pub (crate) fn two_chars(
         empty_char: char,
         fill_char: char,
         value: u32,
@@ -40,7 +40,7 @@ impl FormatRatings {
         }
         Some(unsafe { std::str::from_utf8_unchecked(&buf[..buf_pos]) })
     }
-    pub fn raport(value: u32, max_value: u32, buf: &mut [u8]) -> Option<&str> {
+    pub (crate) fn raport(value: u32, max_value: u32, buf: &mut [u8]) -> Option<&str> {
         if buf.len() < 3 {
             return None;
         }

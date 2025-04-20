@@ -3,9 +3,9 @@ use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 static SHORT_MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 static WEEK_DATS: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-pub struct FormatDateTime;
+pub(crate) struct FormatDateTime;
 impl FormatDateTime {
-    pub fn normal<'a>(dt: &NaiveDateTime, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn normal<'a>(dt: &NaiveDateTime, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 20 {
             return None;
         }
@@ -42,7 +42,7 @@ impl FormatDateTime {
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..20]) })
     }
-    pub fn full<'a>(dt: &NaiveDateTime, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn full<'a>(dt: &NaiveDateTime, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 25 {
             return None;
         }
@@ -87,7 +87,7 @@ impl FormatDateTime {
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..25]) })
     }
-    pub fn short<'a>(dt: &NaiveDateTime, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn short<'a>(dt: &NaiveDateTime, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 16 {
             return None;
         }
@@ -121,9 +121,9 @@ impl FormatDateTime {
     }
 }
 
-pub struct FormatTime;
+pub(crate) struct FormatTime;
 impl FormatTime {
-    pub fn short<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn short<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 5 {
             return None;
         }
@@ -141,7 +141,7 @@ impl FormatTime {
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..5]) })
     }
-    pub fn am_pm<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn am_pm<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 8 {
             return None;
         }
@@ -169,7 +169,7 @@ impl FormatTime {
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..8]) })
     }
-    pub fn normal<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn normal<'a>(dt: &NaiveTime, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 8 {
             return None;
         }
@@ -193,9 +193,9 @@ impl FormatTime {
     }
 }
 
-pub struct FormatDate;
+pub(crate) struct FormatDate;
 impl FormatDate {
-    pub fn ymd<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn ymd<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 10 {
             return None;
         }
@@ -215,7 +215,7 @@ impl FormatDate {
 
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..10]) })
     }
-    pub fn dmy<'a>(dt: &NaiveDate, buf: &'a mut [u8], separator: u8) -> Option<&'a str> {
+    pub(crate) fn dmy<'a>(dt: &NaiveDate, buf: &'a mut [u8], separator: u8) -> Option<&'a str> {
         if buf.len() < 10 {
             return None;
         }
@@ -236,7 +236,7 @@ impl FormatDate {
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..10]) })
     }
 
-    pub fn short<'a>(dt: &NaiveDate, buf: &'a mut [u8], separator: u8) -> Option<&'a str> {
+    pub(crate) fn short<'a>(dt: &NaiveDate, buf: &'a mut [u8], separator: u8) -> Option<&'a str> {
         if buf.len() < 8 {
             return None;
         }
@@ -255,7 +255,7 @@ impl FormatDate {
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..8]) })
     }
 
-    pub fn normal<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn normal<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 13 {
             return None;
         }
@@ -280,7 +280,7 @@ impl FormatDate {
         Some(unsafe { core::str::from_utf8_unchecked(&buf[..13]) })
     }
 
-    pub fn full<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn full<'a>(dt: &NaiveDate, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 16 {
             return None;
         }
@@ -311,9 +311,9 @@ impl FormatDate {
     }
 }
 
-pub struct FormatDuration;
+pub(crate) struct FormatDuration;
 impl FormatDuration {
-    pub fn auto_hms<'a>(d: &Duration, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn auto_hms<'a>(d: &Duration, buf: &'a mut [u8]) -> Option<&'a str> {
         let mut seconds = d.num_seconds();
         if seconds < 60 {
             if buf.len() < 3 {
@@ -372,10 +372,10 @@ impl FormatDuration {
             if hours == 0 {
                 break;
             }
-            index -= 1;
             if index == 0 {
                 return None;
             }
+            index -= 1;
         }
         Some(unsafe { core::str::from_utf8_unchecked(&buf[index..]) })
     }
@@ -396,10 +396,10 @@ impl FormatDuration {
             if value == 0 {
                 break;
             }
-            index -= 1;
             if index == 0 {
                 return None;
             }
+            index -= 1;
         }
         Some(index)
     }
@@ -411,7 +411,7 @@ impl FormatDuration {
         output[index - 1] = b' ';
         Some(index - 2)
     }
-    pub fn details<'a>(d: &Duration, buf: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn details<'a>(d: &Duration, buf: &'a mut [u8]) -> Option<&'a str> {
         if buf.len() < 2 {
             return None;
         }
@@ -452,3 +452,4 @@ impl FormatDuration {
         Some(unsafe { core::str::from_utf8_unchecked(&buf[index..]) })
     }
 }
+

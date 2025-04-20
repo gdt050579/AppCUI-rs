@@ -9,7 +9,12 @@ use super::ValueType;
 use super::VectorIndex;
 use crate::system::Handle;
 use crate::system::HandleSupport;
+use crate::utils::format_datetime::FormatDuration;
+use crate::utils::FormatDate;
+use crate::utils::FormatDateTime;
+use crate::utils::FormatTime;
 use crate::utils::HandleManager;
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Duration};
 
 #[test]
 fn check_key_value_parser_single() {
@@ -709,6 +714,7 @@ fn check_fraction() {
 
 #[test]
 fn check_rating_report() {
+    let mut buf_invalid: [u8; 1] = [0; 1];
     let mut buf_3: [u8; 3] = [0; 3];
     let mut buf_4: [u8; 4] = [0; 4];
     let mut buf_5: [u8; 5] = [0; 5];
@@ -725,6 +731,12 @@ fn check_rating_report() {
     assert_eq!(FormatRatings::raport(10, 10, &mut buf_3), None);
     assert_eq!(FormatRatings::raport(5, 10, &mut buf_3), None);
     assert_eq!(FormatRatings::raport(5, 10, &mut buf_4), Some("5/10"));
+
+    assert_eq!(FormatRatings::raport(5, 10, &mut buf_invalid), None);
+    // size of the buffer is too small for second number
+    assert_eq!(FormatRatings::raport(5, 1234, &mut buf_3), None);
+    // size of the buffer is too small for first number
+    assert_eq!(FormatRatings::raport(34, 35, &mut buf_4), None);
 }
 
 #[test]
@@ -742,6 +754,8 @@ fn check_rating_two_chars() {
     assert_eq!(FormatRatings::two_chars('-', '+', 20, 100, 5, &mut buf_5), Some("+----"));
 
     assert_eq!(FormatRatings::two_chars(' ', '+', 0, 3, 5, &mut buf_3), None);
+    assert_eq!(FormatRatings::two_chars(' ', ' ', 0, 0, 5, &mut buf_3), None);
+
 }
 
 #[test]
@@ -762,4 +776,287 @@ fn check_temp_buffer() {
     let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert!(buf.is_on_heap());
+}
+
+#[test]
+fn check_format_datetime_normal() {
+    let dt = NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 1, 1).unwrap(), NaiveTime::from_hms_opt(12, 34, 56).unwrap());
+    let mut buf = [0; 20];
+    let formatted = FormatDateTime::normal(&dt, &mut buf);
+    assert_eq!(formatted, Some("2025-Jan-01 12:34:56"));
+    let mut smaller_buf = [0; 10];
+    let formatted = FormatDateTime::normal(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+    let dt = NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 4, 4).unwrap(), NaiveTime::from_hms_opt(1, 2, 3).unwrap());
+    let mut buf = [0; 20];
+    let formatted = FormatDateTime::normal(&dt, &mut buf);
+    assert_eq!(formatted, Some("2025-Apr-04  1:02:03"));
+}
+
+#[test]
+fn check_format_datetime_full() {
+    let dt = NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 1, 1).unwrap(), NaiveTime::from_hms_opt(12, 34, 56).unwrap());
+    let mut buf = [0; 25];
+    let formatted = FormatDateTime::full(&dt, &mut buf);
+    assert_eq!(formatted, Some("Wed, 2025-Jan-01 12:34:56"));
+    let mut smaller_buf = [0; 10];
+    let formatted = FormatDateTime::full(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+    let dt = NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 4, 4).unwrap(), NaiveTime::from_hms_opt(1, 2, 3).unwrap());
+    let mut buf = [0; 25];
+    let formatted = FormatDateTime::full(&dt, &mut buf);
+    assert_eq!(formatted, Some("Fri, 2025-Apr-04  1:02:03"));    
+}
+
+#[test]
+fn check_format_datetime_short() {
+    let dt = NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 1, 1).unwrap(), NaiveTime::from_hms_opt(12, 34, 56).unwrap());
+    let mut buf = [0; 16];
+    let formatted = FormatDateTime::short(&dt, &mut buf);
+    assert_eq!(formatted, Some("2025-01-01 12:34"));
+    let mut smaller_buf = [0; 5];
+    let formatted = FormatDateTime::short(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+    let dt = NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 4, 4).unwrap(), NaiveTime::from_hms_opt(1, 2, 3).unwrap());
+    let mut buf = [0; 16];
+    let formatted = FormatDateTime::short(&dt, &mut buf);
+    assert_eq!(formatted, Some("2025-04-04  1:02"));
+}   
+
+#[test]
+fn check_format_time_short() {
+    let dt = NaiveTime::from_hms_opt(12, 34, 56).unwrap();
+    let mut buf = [0; 5];
+    let formatted = FormatTime::short(&dt, &mut buf);
+    assert_eq!(formatted, Some("12:34"));
+    let mut smaller_buf = [0; 3];
+    let formatted = FormatTime::short(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+    let dt = NaiveTime::from_hms_opt(1, 2, 3).unwrap();
+    let mut buf = [0; 5];
+    let formatted = FormatTime::short(&dt, &mut buf);
+    assert_eq!(formatted, Some(" 1:02"));
+}
+
+#[test]
+fn check_format_time_am_pm() {
+    let dt = NaiveTime::from_hms_opt(23, 34, 56).unwrap();
+    let mut buf = [0; 8];
+    let formatted = FormatTime::am_pm(&dt, &mut buf);
+    assert_eq!(formatted, Some("11:34 PM"));
+    let mut smaller_buf = [0; 3];
+    let formatted = FormatTime::am_pm(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+    let dt = NaiveTime::from_hms_opt(1, 2, 3).unwrap();
+    let mut buf = [0; 8];
+    let formatted = FormatTime::am_pm(&dt, &mut buf);
+    assert_eq!(formatted, Some(" 1:02 AM"));
+}   
+
+#[test]
+fn check_format_time_normal() {
+    let dt = NaiveTime::from_hms_opt(12, 34, 56).unwrap();
+    let mut buf = [0; 8];
+    let formatted = FormatTime::normal(&dt, &mut buf);
+    assert_eq!(formatted, Some("12:34:56"));
+    let mut smaller_buf = [0; 3];
+    let formatted = FormatTime::normal(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+    let dt = NaiveTime::from_hms_opt(1, 2, 3).unwrap();
+    let mut buf = [0; 8];
+    let formatted = FormatTime::normal(&dt, &mut buf);
+    assert_eq!(formatted, Some(" 1:02:03"));
+}
+
+#[test]
+fn check_format_date_ymd() {
+    let dt = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
+    let mut buf = [0; 10];
+    let formatted = FormatDate::ymd(&dt, &mut buf);
+    assert_eq!(formatted, Some("2025-01-01"));
+    let mut smaller_buf = [0; 3];
+    let formatted = FormatDate::ymd(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+}
+
+#[test]
+fn check_format_date_dmy() {
+    let dt = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
+    let mut buf = [0; 10];
+    let formatted = FormatDate::dmy(&dt, &mut buf, b'-');
+    assert_eq!(formatted, Some("01-01-2025"));
+    let mut smaller_buf = [0; 3];
+    let formatted = FormatDate::dmy(&dt, &mut smaller_buf, b'-');
+    assert_eq!(formatted, None);
+    let dt = NaiveDate::from_ymd_opt(2025, 4, 4).unwrap();
+    let mut buf = [0; 10];
+    let formatted = FormatDate::dmy(&dt, &mut buf, b'/');
+    assert_eq!(formatted, Some("04/04/2025"));
+}
+
+#[test]
+fn check_format_date_short() {
+    let dt = NaiveDate::from_ymd_opt(2025, 1, 5).unwrap();
+    let mut buf = [0; 10];
+    let formatted = FormatDate::short(&dt, &mut buf, b'-');
+    assert_eq!(formatted, Some("05-01-25"));
+    let mut smaller_buf = [0; 3];
+    let formatted = FormatDate::short(&dt, &mut smaller_buf, b'-');
+    assert_eq!(formatted, None);
+    let dt = NaiveDate::from_ymd_opt(2025, 4, 6).unwrap();
+    let mut buf = [0; 10];
+    let formatted = FormatDate::short(&dt, &mut buf, b'/');
+    assert_eq!(formatted, Some("06/04/25"));
+}
+
+#[test]
+fn check_format_date_normal() {
+    let dt = NaiveDate::from_ymd_opt(2025, 1, 5).unwrap();
+    let mut buf = [0; 13];
+    let formatted = FormatDate::normal(&dt, &mut buf);
+    assert_eq!(formatted, Some("2025, Jan, 05"));
+    let mut smaller_buf = [0; 3];
+    let formatted = FormatDate::normal(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+    let dt = NaiveDate::from_ymd_opt(2025, 4, 6).unwrap();
+    let mut buf = [0; 13];
+    let formatted = FormatDate::normal(&dt, &mut buf);
+    assert_eq!(formatted, Some("2025, Apr, 06"));
+}
+
+#[test]
+fn check_format_date_full() {
+    let dt = NaiveDate::from_ymd_opt(2025, 1, 5).unwrap();
+    let mut buf = [0; 16];
+    let formatted = FormatDate::full(&dt, &mut buf);
+    assert_eq!(formatted, Some("Sun, 2025-Jan-05"));
+    let mut smaller_buf = [0; 3];
+    let formatted = FormatDate::full(&dt, &mut smaller_buf);
+    assert_eq!(formatted, None);
+    let dt = NaiveDate::from_ymd_opt(2025, 4, 6).unwrap();
+    let mut buf = [0; 16];
+    let formatted = FormatDate::full(&dt, &mut buf);
+    assert_eq!(formatted, Some("Sun, 2025-Apr-06"));
+}
+
+#[test]
+fn check_format_duration_auto_hms() {
+    let d = Duration::seconds(123456);
+    let d1 = Duration::seconds(59);
+    let d2 = Duration::seconds(121);
+    let d3 = Duration::seconds(15*60+34);
+    let mut buf = [0; 10];
+    let mut smaller_buf_2 = [0; 2];
+    let mut smaller_buf_3 = [0; 3];
+    let mut smaller_buf_4 = [0; 4];
+    let mut smaller_buf_5 = [0; 5];
+    let mut smaller_buf_6 = [0; 6];
+    let mut smaller_buf_7 = [0; 7];
+    let mut smaller_buf_8 = [0; 8];
+
+    assert_eq!(FormatDuration::auto_hms(&d, &mut buf), Some("34:17:36"));
+    assert_eq!(FormatDuration::auto_hms(&d, &mut smaller_buf_2), None);
+    assert_eq!(FormatDuration::auto_hms(&d, &mut smaller_buf_3), None);
+    assert_eq!(FormatDuration::auto_hms(&d, &mut smaller_buf_4), None);
+    assert_eq!(FormatDuration::auto_hms(&d, &mut smaller_buf_5), None);
+    assert_eq!(FormatDuration::auto_hms(&d, &mut smaller_buf_6), None);
+    assert_eq!(FormatDuration::auto_hms(&d, &mut smaller_buf_7), None);
+    assert_eq!(FormatDuration::auto_hms(&d, &mut smaller_buf_8), Some("34:17:36"));
+
+    assert_eq!(FormatDuration::auto_hms(&d1, &mut buf), Some(":59"));
+    assert_eq!(FormatDuration::auto_hms(&d1, &mut smaller_buf_2), None);
+    assert_eq!(FormatDuration::auto_hms(&d1, &mut smaller_buf_3), Some(":59"));
+    assert_eq!(FormatDuration::auto_hms(&d1, &mut smaller_buf_4), Some(":59"));
+    assert_eq!(FormatDuration::auto_hms(&d1, &mut smaller_buf_5), Some(":59"));
+    assert_eq!(FormatDuration::auto_hms(&d1, &mut smaller_buf_6), Some(":59"));
+    assert_eq!(FormatDuration::auto_hms(&d1, &mut smaller_buf_7), Some(":59"));
+    assert_eq!(FormatDuration::auto_hms(&d1, &mut smaller_buf_8), Some(":59"));
+
+
+    assert_eq!(FormatDuration::auto_hms(&d2, &mut buf), Some("2:01"));
+    assert_eq!(FormatDuration::auto_hms(&d2, &mut smaller_buf_2), None);
+    assert_eq!(FormatDuration::auto_hms(&d2, &mut smaller_buf_3), None);
+    assert_eq!(FormatDuration::auto_hms(&d2, &mut smaller_buf_4), Some("2:01"));
+    assert_eq!(FormatDuration::auto_hms(&d2, &mut smaller_buf_5), Some("2:01"));
+    assert_eq!(FormatDuration::auto_hms(&d2, &mut smaller_buf_6), Some("2:01"));
+    assert_eq!(FormatDuration::auto_hms(&d2, &mut smaller_buf_7), Some("2:01"));
+    assert_eq!(FormatDuration::auto_hms(&d2, &mut smaller_buf_8), Some("2:01"));
+
+    assert_eq!(FormatDuration::auto_hms(&d3, &mut buf), Some("15:34"));
+    assert_eq!(FormatDuration::auto_hms(&d3, &mut smaller_buf_2), None);
+    assert_eq!(FormatDuration::auto_hms(&d3, &mut smaller_buf_3), None);
+    assert_eq!(FormatDuration::auto_hms(&d3, &mut smaller_buf_4), None);
+    assert_eq!(FormatDuration::auto_hms(&d3, &mut smaller_buf_5), Some("15:34"));
+    assert_eq!(FormatDuration::auto_hms(&d3, &mut smaller_buf_6), Some("15:34"));
+    assert_eq!(FormatDuration::auto_hms(&d3, &mut smaller_buf_7), Some("15:34"));
+}
+
+#[test]
+fn check_format_duration_details() {
+    let d = Duration::seconds(123456);
+    let d1 = Duration::seconds(59);
+    let d2 = Duration::seconds(121);
+    let d3 = Duration::seconds(15*60+34);
+    let d4 = Duration::seconds(1);
+    let mut buf = [0; 20];
+    let mut smaller_buf_1 = [0; 1];
+    let mut smaller_buf_2 = [0; 2];
+    let mut smaller_buf_3 = [0; 3];
+    let mut smaller_buf_4 = [0; 4];
+    let mut smaller_buf_5 = [0; 5];
+    let mut smaller_buf_6 = [0; 6];
+    let mut smaller_buf_7 = [0; 7];
+    let mut smaller_buf_8 = [0; 8];
+
+    assert_eq!(FormatDuration::details(&d, &mut buf), Some("1d 10h 17m 36s"));
+    assert_eq!(FormatDuration::details(&d, &mut smaller_buf_1), None);
+    assert_eq!(FormatDuration::details(&d, &mut smaller_buf_2), None);
+    assert_eq!(FormatDuration::details(&d, &mut smaller_buf_3), None);
+    assert_eq!(FormatDuration::details(&d, &mut smaller_buf_4), None);
+    assert_eq!(FormatDuration::details(&d, &mut smaller_buf_5), None);
+    assert_eq!(FormatDuration::details(&d, &mut smaller_buf_6), None);
+    assert_eq!(FormatDuration::details(&d, &mut smaller_buf_7), None);
+    assert_eq!(FormatDuration::details(&d, &mut smaller_buf_8), None);
+
+    assert_eq!(FormatDuration::details(&d1, &mut buf), Some("59s"));
+    assert_eq!(FormatDuration::details(&d1, &mut smaller_buf_1), None);
+    assert_eq!(FormatDuration::details(&d1, &mut smaller_buf_2), None);
+    assert_eq!(FormatDuration::details(&d1, &mut smaller_buf_3), Some("59s"));
+    assert_eq!(FormatDuration::details(&d1, &mut smaller_buf_4), Some("59s"));
+    assert_eq!(FormatDuration::details(&d1, &mut smaller_buf_5), Some("59s"));
+    assert_eq!(FormatDuration::details(&d1, &mut smaller_buf_6), Some("59s"));
+    assert_eq!(FormatDuration::details(&d1, &mut smaller_buf_7), Some("59s"));
+    assert_eq!(FormatDuration::details(&d1, &mut smaller_buf_8), Some("59s"));
+
+
+    assert_eq!(FormatDuration::details(&d2, &mut buf), Some("2m 1s"));
+    assert_eq!(FormatDuration::details(&d2, &mut smaller_buf_1), None);
+    assert_eq!(FormatDuration::details(&d2, &mut smaller_buf_2), None);
+    assert_eq!(FormatDuration::details(&d2, &mut smaller_buf_3), None);
+    assert_eq!(FormatDuration::details(&d2, &mut smaller_buf_4), None);
+    assert_eq!(FormatDuration::details(&d2, &mut smaller_buf_5), Some("2m 1s"));
+    assert_eq!(FormatDuration::details(&d2, &mut smaller_buf_6), Some("2m 1s"));
+    assert_eq!(FormatDuration::details(&d2, &mut smaller_buf_7), Some("2m 1s"));
+    assert_eq!(FormatDuration::details(&d2, &mut smaller_buf_8), Some("2m 1s"));
+
+    assert_eq!(FormatDuration::details(&d3, &mut buf), Some("15m 34s"));
+    assert_eq!(FormatDuration::details(&d3, &mut smaller_buf_1), None);
+    assert_eq!(FormatDuration::details(&d3, &mut smaller_buf_2), None);
+    assert_eq!(FormatDuration::details(&d3, &mut smaller_buf_3), None);
+    assert_eq!(FormatDuration::details(&d3, &mut smaller_buf_4), None);
+    assert_eq!(FormatDuration::details(&d3, &mut smaller_buf_5), None);
+    assert_eq!(FormatDuration::details(&d3, &mut smaller_buf_6), None);
+    assert_eq!(FormatDuration::details(&d3, &mut smaller_buf_7), Some("15m 34s"));
+    assert_eq!(FormatDuration::details(&d3, &mut smaller_buf_8), Some("15m 34s"));
+
+    assert_eq!(FormatDuration::details(&d4, &mut buf), Some("1s"));
+    assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_1), None);
+    assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_2), Some("1s"));
+    assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_3), Some("1s"));
+    assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_4), Some("1s"));
+    assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_5), Some("1s"));
+    assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_6), Some("1s"));
+    assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_7), Some("1s"));
+    assert_eq!(FormatDuration::details(&d4, &mut smaller_buf_8), Some("1s"));
+    
 }
