@@ -67,6 +67,59 @@ Then run the project with `cargo run`. You should see a window with the title `T
 
 Check out the [examples](examples) folder for more examples.
 
+## Getting started (a counter example)
+
+A very simple example that creates a window with a button that when pressed increases a counter.
+
+```rust
+use appcui::prelude::*;
+
+// Create a window that handles button events and has a counter
+#[Window(events = ButtonEvents)]
+struct CounterWindow {
+    counter: i32
+}
+
+impl CounterWindow {
+    fn new() -> Self {
+        let mut w = Self {
+            // set up the window title and position
+            base: window!("'Counter window',d:c,w:30,h:5"),
+            // initial counter is 1
+            counter: 1            
+        };
+        // add a single button with the caption "1" (like the counter)
+        w.add(button!("'1',d:b,w:20"));
+        w
+    }
+}
+impl ButtonEvents for CounterWindow {
+    // since there is only one button, when pressed this method will be called.
+    fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
+        // increase the counter
+        self.counter += 1;
+        // create a text that containe the new counter
+        let text = format!("{}",self.counter);
+        if let Some(button) = self.control_mut(handle) {
+            // set the caption of the button to th new text
+            button.set_caption(&text);
+        }
+        // tell the AppCUI framework that we have processed this event
+        // this allows AppCUI to repaint the button
+        EventProcessStatus::Processed
+    }
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    // create a new application
+    let mut a = App::new().build()?;
+    // add a new window (of type CounterWindow) to the application
+    a.add_window(CounterWindow::new());
+    // Run AppCUI framework (this wil start the window loop and messaage passing)
+    a.run();
+    Ok(())
+}
+```
 
 ## 🛣️ Roadmap
 
