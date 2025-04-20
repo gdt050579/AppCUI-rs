@@ -67,7 +67,7 @@ Then run the project with `cargo run`. You should see a window with the title `T
 
 Check out the [examples](examples) folder for more examples.
 
-## Getting started (a counter example)
+## 🛠️ A more complex example
 
 A very simple example that creates a window with a button that when pressed increases a counter.
 
