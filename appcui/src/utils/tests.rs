@@ -1325,3 +1325,328 @@ fn check_format_number_of_digits() {
     assert_eq!(FormatNumber::number_of_digits(u64::MAX), 20); // 18,446,744,073,709,551,615
 }
 
+#[test]
+fn check_vector_index_constructors() {
+    // Test constructors and constants
+    assert_eq!(VectorIndex::Invalid.index(), usize::MAX);
+    assert_eq!(VectorIndex::First.index(), 0);
+    
+    // Test last constructor
+    assert_eq!(VectorIndex::last(10).index(), 9);
+    assert_eq!(VectorIndex::last(1).index(), 0);
+    assert_eq!(VectorIndex::last(0).index(), usize::MAX); // Should be invalid
+    
+    // Test with_value constructor
+    assert_eq!(VectorIndex::with_value(5).index(), 5);
+    assert_eq!(VectorIndex::with_value(0).index(), 0);
+    
+    // Test From implementations
+    let idx_from_usize: VectorIndex = 42usize.into();
+    assert_eq!(idx_from_usize.index(), 42);
+    
+    let idx_from_u32: VectorIndex = 24u32.into();
+    assert_eq!(idx_from_u32.index(), 24);
+    
+    // Test Default implementation
+    assert_eq!(VectorIndex::default().index(), usize::MAX); // Should be invalid
+}
+
+#[test]
+fn check_vector_index_properties() {
+    // Test index() method
+    assert_eq!(VectorIndex::with_value(7).index(), 7);
+    
+    // Test is_valid() method
+    assert!(VectorIndex::with_value(0).is_valid());
+    assert!(VectorIndex::with_value(100).is_valid());
+    assert!(!VectorIndex::Invalid.is_valid());
+    
+    // Test in_range() method
+    assert!(VectorIndex::with_value(5).in_range(10));
+    assert!(VectorIndex::with_value(0).in_range(1));
+    assert!(!VectorIndex::with_value(10).in_range(10));
+    assert!(!VectorIndex::with_value(100).in_range(50));
+    assert!(!VectorIndex::Invalid.in_range(10));
+}
+
+#[test]
+fn check_vector_index_set() {
+    // Test setting within range with clamp=true
+    let mut idx = VectorIndex::with_value(5);
+    idx.set(8, 10, true);
+    assert_eq!(idx.index(), 8);
+    
+    // Test clamping to count-1 when value >= count
+    idx.set(15, 10, true);
+    assert_eq!(idx.index(), 9);
+    
+    // Test setting within range with clamp=false
+    idx = VectorIndex::with_value(5);
+    idx.set(8, 10, false);
+    assert_eq!(idx.index(), 8);
+    
+    // Test setting to invalid when value >= count and clamp=false
+    idx.set(15, 10, false);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+    
+    // Test setting with count=0 (should always set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.set(3, 0, true);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+    
+    idx = VectorIndex::with_value(5);
+    idx.set(3, 0, false);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_add_clamp() {
+    // Test Strategy::Clamp with valid index
+    let mut idx = VectorIndex::with_value(5);
+    idx.add(3, 10, Strategy::Clamp);
+    assert_eq!(idx.index(), 8);
+    
+    // Test adding beyond the range (should clamp to count-1)
+    idx.add(5, 10, Strategy::Clamp);
+    assert_eq!(idx.index(), 9);
+    
+    // Test that invalid indices stay invalid
+    idx = VectorIndex::Invalid;
+    idx.add(3, 10, Strategy::Clamp);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+    
+    // Test with count=0 (should set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.add(3, 0, Strategy::Clamp);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_add_rotate() {
+    // Test Strategy::Rotate with valid index
+    let mut idx = VectorIndex::with_value(5);
+    idx.add(3, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 8);
+    
+    // Test wrapping around
+    idx.add(5, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 3);
+    
+    // Test larger addition
+    idx = VectorIndex::with_value(5);
+    idx.add(15, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 0);
+    
+    // Test adding a multiple of count (should remain the same)
+    idx = VectorIndex::with_value(5);
+    idx.add(20, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 5);
+    
+    // Test that invalid indices stay invalid
+    idx = VectorIndex::Invalid;
+    idx.add(3, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+    
+    // Test with count=0 (should set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.add(3, 0, Strategy::Rotate);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_add_rotate_with_invalid() {
+    // Test Strategy::RotateWithInvalidState with valid index becoming invalid
+    let mut idx = VectorIndex::with_value(5);
+    idx.add(6, 10, Strategy::RotateWithInvalidState);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+    
+    // Test invalid index becoming valid (should go to 0)
+    idx = VectorIndex::Invalid;
+    idx.add(3, 10, Strategy::RotateWithInvalidState);
+    assert_eq!(idx.index(), 0);
+    
+    // Test adding within range
+    idx = VectorIndex::with_value(5);
+    idx.add(3, 10, Strategy::RotateWithInvalidState);
+    assert_eq!(idx.index(), 8);
+    
+    // Test with count=0 (should set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.add(3, 0, Strategy::RotateWithInvalidState);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_add_rotate_from_invalid() {
+    // Test Strategy::RotateFromInvalidState with valid index
+    let mut idx = VectorIndex::with_value(5);
+    idx.add(3, 10, Strategy::RotateFromInvalidState);
+    assert_eq!(idx.index(), 8);
+    
+    // Test wrapping around
+    idx.add(7, 10, Strategy::RotateFromInvalidState);
+    assert_eq!(idx.index(), 5);
+    
+    // Test invalid index becoming valid (should go to 0)
+    idx = VectorIndex::Invalid;
+    idx.add(3, 10, Strategy::RotateFromInvalidState);
+    assert_eq!(idx.index(), 0);
+    
+    // Test with count=0 (should set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.add(3, 0, Strategy::RotateFromInvalidState);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_sub_clamp() {
+    // Test Strategy::Clamp with valid index
+    let mut idx = VectorIndex::with_value(8);
+    idx.sub(3, 10, Strategy::Clamp);
+    assert_eq!(idx.index(), 5);
+    
+    // Test subtracting beyond zero (should clamp to 0)
+    idx.sub(10, 10, Strategy::Clamp);
+    assert_eq!(idx.index(), 0);
+    
+    // Test that invalid indices stay invalid
+    idx = VectorIndex::Invalid;
+    idx.sub(3, 10, Strategy::Clamp);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+    
+    // Test with count=0 (should set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.sub(3, 0, Strategy::Clamp);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_sub_rotate() {
+    // Test Strategy::Rotate with valid index
+    let mut idx = VectorIndex::with_value(8);
+    idx.sub(3, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 5);
+    
+    // Test wrapping around
+    idx.sub(7, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 8);
+    
+    // Test larger subtraction
+    idx = VectorIndex::with_value(5);
+    idx.sub(15, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 0);
+    
+    // Test subtracting a multiple of count (should remain the same)
+    idx = VectorIndex::with_value(5);
+    idx.sub(20, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 5);
+    
+    // Test that invalid indices stay invalid
+    idx = VectorIndex::Invalid;
+    idx.sub(3, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+    
+    // Test with count=0 (should set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.sub(3, 0, Strategy::Rotate);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_sub_rotate_with_invalid() {
+    // Test Strategy::RotateWithInvalidState with valid index becoming invalid
+    let mut idx = VectorIndex::with_value(5);
+    idx.sub(7, 10, Strategy::RotateWithInvalidState);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+    
+    // Test invalid index becoming valid (should go to count-1)
+    idx = VectorIndex::Invalid;
+    idx.sub(3, 10, Strategy::RotateWithInvalidState);
+    assert_eq!(idx.index(), 9);
+    
+    // Test subtracting within range
+    idx = VectorIndex::with_value(8);
+    idx.sub(3, 10, Strategy::RotateWithInvalidState);
+    assert_eq!(idx.index(), 5);
+    
+    // Test with count=0 (should set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.sub(3, 0, Strategy::RotateWithInvalidState);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_sub_rotate_from_invalid() {
+    // Test Strategy::RotateFromInvalidState with valid index
+    let mut idx = VectorIndex::with_value(8);
+    idx.sub(3, 10, Strategy::RotateFromInvalidState);
+    assert_eq!(idx.index(), 5);
+    
+    // Test wrapping around
+    idx.sub(7, 10, Strategy::RotateFromInvalidState);
+    assert_eq!(idx.index(), 8);
+    
+    // Test invalid index becoming valid (should go to count-1)
+    idx = VectorIndex::Invalid;
+    idx.sub(3, 10, Strategy::RotateFromInvalidState);
+    assert_eq!(idx.index(), 9);
+    
+    // Test with count=0 (should set to invalid)
+    idx = VectorIndex::with_value(5);
+    idx.sub(3, 0, Strategy::RotateFromInvalidState);
+    assert_eq!(idx.index(), usize::MAX);
+    assert!(!idx.is_valid());
+}
+
+#[test]
+fn check_vector_index_last() {
+    // Test last() with various counts
+    assert_eq!(VectorIndex::last(10).index(), 9);
+    assert_eq!(VectorIndex::last(5).index(), 4);
+    assert_eq!(VectorIndex::last(1).index(), 0);
+    
+    // Test last() with zero count (should return invalid index)
+    assert_eq!(VectorIndex::last(0).index(), usize::MAX);
+    assert!(!VectorIndex::last(0).is_valid());
+    
+    // Test last() with large count
+    assert_eq!(VectorIndex::last(usize::MAX).index(), usize::MAX - 1);
+    
+    // Test last() combined with other methods
+    let last_idx = VectorIndex::last(10);
+    assert!(last_idx.is_valid());
+    assert!(last_idx.in_range(10));
+    assert!(!last_idx.in_range(9));
+    
+    // Test combination with set
+    let mut idx = VectorIndex::last(10);
+    idx.set(5, 10, true);
+    assert_eq!(idx.index(), 5);
+    
+    // Test combination with add
+    idx = VectorIndex::last(10);
+    idx.add(2, 10, Strategy::Rotate);
+    assert_eq!(idx.index(), 1); // 9 + 2 = 11, 11 % 10 = 1
+    
+    // Test combination with sub
+    idx = VectorIndex::last(10);
+    idx.sub(3, 10, Strategy::Clamp);
+    assert_eq!(idx.index(), 6); // 9 - 3 = 6
+}
+
