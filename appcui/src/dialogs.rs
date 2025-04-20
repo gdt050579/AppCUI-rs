@@ -273,14 +273,11 @@ pub fn validate(title: &str, caption: &str) -> bool {
 /// ```
 pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult {
     let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNoCancel, window::Type::Notification);
-    if let Some(result) = w.show() {
-        match result {
-            DialogResult::Yes => return ValidateOrCancelResult::Yes,
-            DialogResult::No => return ValidateOrCancelResult::No,
-            _ => return ValidateOrCancelResult::Cancel,
-        }
+    match w.show() {
+        Some(DialogResult::Yes) => ValidateOrCancelResult::Yes,
+        Some(DialogResult::No) => ValidateOrCancelResult::No,
+        _ => ValidateOrCancelResult::Cancel,
     }
-    ValidateOrCancelResult::Cancel
 }
 
 /// Specifies the initial location for file and folder selection dialogs.
