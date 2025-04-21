@@ -28,6 +28,7 @@ pub(crate) use self::system_event::TimerPausedEvent;
 pub(crate) use self::system_event::TimerStartEvent;
 pub(crate) use self::system_event::TimerTickUpdateEvent;
 
+#[cfg(not(target_arch = "wasm32"))]
 pub(super) use self::system_event_thread::SystemEventReader;
 
 use self::debug::DebugTerminal;

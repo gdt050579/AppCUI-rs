@@ -45,9 +45,9 @@ pub struct Surface {
     pub(crate) cursor: Cursor,
 
     #[cfg(target_arch = "wasm32")]
-    pub origin: Point,
+    pub origin:      Point,
     #[cfg(target_arch = "wasm32")]
-    pub clip:   ClipArea,
+    pub(crate) clip: ClipArea,
 
     #[cfg(not(target_arch = "wasm32"))]
     origin: Point,

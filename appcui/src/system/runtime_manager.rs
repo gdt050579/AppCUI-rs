@@ -41,8 +41,8 @@ enum MouseLockedObject {
 
 #[derive(Default)]
 struct ExpandedControlInfo {
-    handle:        Handle<UIElement>,
-    min_size:      Size,
+    handle: Handle<UIElement>,
+    min_size: Size,
     prefered_size: Size,
 }
 
@@ -55,44 +55,44 @@ enum ExpandStatus {
 }
 
 pub(crate) struct RuntimeManager {
-    theme:                                Theme,
-    terminal:                             Box<dyn Terminal>,
-    surface:                              Surface,
-    controls:                             *mut ControlHandleManager,
-    menus:                                *mut MenuHandleManager,
-    timers_manager:                       TimerManager,
-    task_manager:                         BackgroundTaskManager,
-    desktop_handle:                       Handle<UIElement>,
-    tooltip:                              ToolTip,
-    commandbar:                           Option<CommandBar>,
-    menubar:                              Option<MenuBar>,
-    recompute_layout:                     bool,
-    repaint:                              bool,
-    mouse_pos:                            Point,
-    key_modifier:                         KeyModifier,
-    desktop_os_start_called:              bool,
-    recompute_parent_indexes:             bool,
+    theme: Theme,
+    terminal: Box<dyn Terminal>,
+    surface: Surface,
+    controls: *mut ControlHandleManager,
+    menus: *mut MenuHandleManager,
+    timers_manager: TimerManager,
+    task_manager: BackgroundTaskManager,
+    desktop_handle: Handle<UIElement>,
+    tooltip: ToolTip,
+    commandbar: Option<CommandBar>,
+    menubar: Option<MenuBar>,
+    recompute_layout: bool,
+    repaint: bool,
+    mouse_pos: Point,
+    key_modifier: KeyModifier,
+    desktop_os_start_called: bool,
+    recompute_parent_indexes: bool,
     request_update_command_and_menu_bars: bool,
-    request_update_timer_threads:         bool,
-    single_window:                        bool,
-    loop_status:                          LoopStatus,
-    request_focus:                        Option<Handle<UIElement>>,
-    current_focus:                        Option<Handle<UIElement>>,
-    request_default_action:               Option<Handle<UIElement>>,
-    expanded_control:                     ExpandedControlInfo,
-    mouse_over_control:                   Handle<UIElement>,
-    focus_chain:                          Vec<Handle<UIElement>>,
-    events:                               Vec<ControlEvent>,
-    commandbar_event:                     Option<CommandBarEvent>,
-    menu_event:                           Option<MenuEvent>,
-    mouse_locked_object:                  MouseLockedObject,
-    opened_menu_handle:                   Handle<Menu>,
-    modal_windows:                        Vec<Handle<UIElement>>,
-    to_remove_list:                       Vec<Handle<UIElement>>,
-    event_receiver:                       Receiver<SystemEvent>,
-    event_sender:                         Sender<SystemEvent>,
+    request_update_timer_threads: bool,
+    single_window: bool,
+    loop_status: LoopStatus,
+    request_focus: Option<Handle<UIElement>>,
+    current_focus: Option<Handle<UIElement>>,
+    request_default_action: Option<Handle<UIElement>>,
+    expanded_control: ExpandedControlInfo,
+    mouse_over_control: Handle<UIElement>,
+    focus_chain: Vec<Handle<UIElement>>,
+    events: Vec<ControlEvent>,
+    commandbar_event: Option<CommandBarEvent>,
+    menu_event: Option<MenuEvent>,
+    mouse_locked_object: MouseLockedObject,
+    opened_menu_handle: Handle<Menu>,
+    modal_windows: Vec<Handle<UIElement>>,
+    to_remove_list: Vec<Handle<UIElement>>,
+    event_receiver: Receiver<SystemEvent>,
+    event_sender: Sender<SystemEvent>,
     #[cfg(feature = "EVENT_RECORDER")]
-    event_recorder:                       super::event_recorder::EventRecorder,
+    event_recorder: super::event_recorder::EventRecorder,
 }
 
 #[cfg(feature = "GLOBAL_RUNTIME")]
@@ -1656,9 +1656,9 @@ impl MouseMethods for RuntimeManager {
             let scr_x = base.screen_clip.left;
             let scr_y = base.screen_clip.top;
             let response = control.control_mut().on_mouse_event(&MouseEvent::Drag(MouseEventData {
-                x:        event.x - scr_x,
-                y:        event.y - scr_y,
-                button:   event.button,
+                x: event.x - scr_x,
+                y: event.y - scr_y,
+                button: event.button,
                 modifier: self.key_modifier,
             }));
             let do_update = response == EventProcessStatus::Processed;
@@ -1761,9 +1761,9 @@ impl MouseMethods for RuntimeManager {
                 //let has_margins = base.should_increase_margins_on_focus().is_some();
 
                 let _ = control.control_mut().on_mouse_event(&MouseEvent::Pressed(MouseEventData {
-                    x:        event.x - scr_x,
-                    y:        event.y - scr_y,
-                    button:   event.button,
+                    x: event.x - scr_x,
+                    y: event.y - scr_y,
+                    button: event.button,
                     modifier: self.key_modifier,
                 }));
                 //if response == EventProcessStatus::Processed {
@@ -1794,9 +1794,9 @@ impl MouseMethods for RuntimeManager {
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
                     control.control_mut().on_mouse_event(&MouseEvent::Released(MouseEventData {
-                        x:        event.x - scr_x,
-                        y:        event.y - scr_y,
-                        button:   event.button,
+                        x: event.x - scr_x,
+                        y: event.y - scr_y,
+                        button: event.button,
                         modifier: self.key_modifier,
                     }));
                     self.repaint = true;
@@ -1836,9 +1836,9 @@ impl MouseMethods for RuntimeManager {
                 //let has_margins = base.should_increase_margins_on_focus().is_some();
 
                 let response = control.control_mut().on_mouse_event(&MouseEvent::DoubleClick(MouseEventData {
-                    x:        event.x - scr_x,
-                    y:        event.y - scr_y,
-                    button:   event.button,
+                    x: event.x - scr_x,
+                    y: event.y - scr_y,
+                    button: event.button,
                     modifier: self.key_modifier,
                 }));
                 if response == EventProcessStatus::Processed {
