@@ -331,7 +331,10 @@ fn check_app_create_with_invalid_size() {
     assert!(a.is_err());
     let err: crate::system::Error = a.err().unwrap();
     assert_eq!(err.kind, crate::system::ErrorKind::InvalidParameter);
-    assert_eq!(err.description(), "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !");
+    assert_eq!(
+        err.description(),
+        "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !"
+    );
     let desc = format!("{}", err);
     assert_eq!(desc, "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !");
 }
@@ -340,4 +343,16 @@ fn check_app_create_with_invalid_size() {
 fn check_app_create_with_timers_count() {
     let a = App::debug(60, 10, "Paint.Enable(false)").timers_count(10).build().unwrap();
     a.run();
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+fn check_create_app_with_default_terminal() {
+    let _ = App::new().build().unwrap();
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+fn check_create_app_with_windows_terminal() {
+    let _ = App::with_terminal(crate::terminals::TerminalType::WindowsConsole).build().unwrap();
 }

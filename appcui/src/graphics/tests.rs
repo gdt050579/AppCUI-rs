@@ -896,3 +896,13 @@ fn check_charattr_macro() {
     assert_eq!(charattr!("g,attr: Bold+Italic"), CharAttribute::new(Color::Green, Color::Transparent, CharFlags::Bold | CharFlags::Italic));
     assert_eq!(charattr!("?,r,attr: Bold+Italic"), CharAttribute::new(Color::Transparent, Color::Red, CharFlags::Bold | CharFlags::Italic));
 }
+
+#[test]
+fn check_size_reduce_by() {
+    let s = Size::new(100, 100);
+    let s = s.reduce_by(10);
+    assert_eq!(s, Size::new(90, 90));
+    let s = s.reduce_by(91);
+    assert_eq!(s, Size::new(0, 0));
+    
+}
