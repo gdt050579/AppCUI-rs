@@ -348,7 +348,7 @@ fn check_app_create_with_timers_count() {
 #[cfg(target_os = "windows")]
 #[test]
 fn check_create_app_with_default_terminal() {
-    let _ = App::new().build()
+    let _ = App::new().build();
 }
 
 #[cfg(target_os = "windows")]
