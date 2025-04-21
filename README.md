@@ -69,7 +69,7 @@ Check out the [examples](examples) folder for more examples.
 
 ## 🛠️ A more complex example
 
-A very simple example that creates a window with a button that when pressed increases a counter.
+Am example that creates a window with a button that when pressed increases a counter.
 
 ```rust
 use appcui::prelude::*;
@@ -94,18 +94,22 @@ impl CounterWindow {
     }
 }
 impl ButtonEvents for CounterWindow {
-    // since there is only one button, when pressed this method will be called.
+    // When the button is pressed, this function will be called
+    // with the handle of the button that was pressed
+    // Since we only have one button, we don't need to store its handle 
+    // in the struct, as we will receive the handle via the on_pressed method
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
         // increase the counter
         self.counter += 1;
         // create a text that containe the new counter
         let text = format!("{}",self.counter);
+        // aquire a mutable reference to the button using its handle
         if let Some(button) = self.control_mut(handle) {
             // set the caption of the button to th new text
             button.set_caption(&text);
         }
-        // tell the AppCUI framework that we have processed this event
-        // this allows AppCUI to repaint the button
+        // Tell the AppCUI framework that we have processed this event
+        // This allows AppCUI to repaint the button
         EventProcessStatus::Processed
     }
 }
