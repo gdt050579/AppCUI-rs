@@ -1,3 +1,8 @@
+//! Common UI components and utilities shared across multiple control types.
+//!
+//! The components module provides reusable elements and helpers that are used by various
+//! UI controls to implement common functionality like item rendering and event handling.
+
 mod combobox_component;
 mod searchbar;
 mod scrollbars_components;

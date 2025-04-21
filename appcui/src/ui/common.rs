@@ -1,3 +1,8 @@
+//! Common types and utilities used across various UI controls.
+//!
+//! The common module provides fundamental types, events, and interfaces that are
+//! shared between different UI components for consistent behavior and appearance.
+
 pub mod traits;
 pub mod ui_element;
 pub(crate) mod control_event_wrapper;

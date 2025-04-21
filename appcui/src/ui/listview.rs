@@ -1,3 +1,8 @@
+//! A listview UI control for displaying data in customizable columns.
+//!
+//! The ListView control provides a way to display tabular data with sortable columns.
+//! It supports multiple selection modes, custom cell rendering, and filtering capabilities.
+
 pub mod events;
 mod groups;
 mod initialization_flags;
