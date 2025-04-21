@@ -8,6 +8,9 @@ mod system_event_thread;
 #[cfg(target_os = "windows")]
 mod windows_console;
 
+#[cfg(test)]
+mod tests;
+
 use std::sync::mpsc::Sender;
 
 use super::graphics::Size;
