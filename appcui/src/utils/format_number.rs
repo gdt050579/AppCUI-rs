@@ -114,6 +114,9 @@ impl FormatNumber {
     }
     #[inline(always)]
     pub(crate) const fn representation_digits(mut self, value: u8) -> Self {
+        if value == 0 {
+            panic!("Invalid number of representation digits for FormatNumber (expected a number greater than 0)");
+        }
         match self.base {
             2 => {
                 if value > 128 {

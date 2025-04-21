@@ -1689,3 +1689,148 @@ fn check_caption_chars_count() {
     assert_eq!(c.chars_count(), 3);
 
 }
+
+#[test]
+#[should_panic]
+fn check_format_number_invalid_radix() {
+    // FormatNumber should panic when constructed with invalid radix (0)
+    let _f = FormatNumber::new(0);
+}
+
+#[test]
+#[should_panic]
+fn check_format_number_invalid_radix_too_large() {
+    // FormatNumber should panic when constructed with invalid radix (> 36)
+    let _f = FormatNumber::new(37);
+}
+
+#[test]
+#[should_panic]
+fn check_format_number_invalid_buffer() {
+    // Should panic when trying to write to a zero-length buffer
+    let mut empty_buf: [u8; 0] = [];
+    // Force unwrap to trigger panic when None is returned
+    FormatNumber::new(10).write_number(123u32, &mut empty_buf).unwrap();
+}
+
+#[test]
+#[should_panic]
+fn check_format_number_invalid_group() {
+    // Should panic when trying to use a zero group size
+    let _f = FormatNumber::new(10).group(0, b',');
+}
+
+#[test]
+#[should_panic]
+fn check_format_number_invalid_fill_zero() {
+    // Should panic when trying to use a zero fill width
+    let _f = FormatNumber::new(10).fill(0, b' ');
+}
+
+#[test]
+#[should_panic]
+fn check_format_number_invalid_fill_char() {
+    // Should panic if fill character is not an ASCII character
+    let _f = FormatNumber::new(10).fill(10, 0xFF);
+}
+
+#[test]
+#[should_panic]
+fn check_format_number_extreme_representation_digits() {
+    // Should panic when representation digits value is too large
+    // This may fail if the implementation handles very large values
+    let _f = FormatNumber::new(10).representation_digits(242);
+}
+
+#[test]
+#[should_panic]
+fn check_format_number_invalid_decimals() {
+    // Should panic when decimal places is extremely large
+    // This may fail if the implementation handles very large values
+    let _f = FormatNumber::new(10).decimals(211);
+}
+
+#[test]
+#[should_panic]
+fn check_format_number_fraction_zero_denominator() {
+    // Should panic when dividing by zero in fraction
+    let mut buf = [0; 10];
+    FormatNumber::new(10).decimals(2).write_fraction(1, 0, &mut buf).unwrap();
+}
+
+#[test]
+#[should_panic(expected = "Invalid number of representation digits for FormatNumber (expected a number greater than 0)")]
+fn check_format_number_representation_digits_zero() {
+    // Should panic when trying to use zero representation digits
+    let _f = FormatNumber::new(10).representation_digits(0);
+}
+
+#[test]
+#[should_panic(expected = "Invalid number of representation digits for FormatNumber (maximum number of digits is 39 for base 10)")]
+fn check_format_number_representation_digits_base10_too_large() {
+    // Should panic when representation digits value is too large for base 10
+    let _f = FormatNumber::new(10).representation_digits(40);
+}
+
+#[test]
+#[should_panic(expected = "Invalid number of representation digits for FormatNumber (maximum number of digits is 32 for base 16)")]
+fn check_format_number_representation_digits_base16_too_large() {
+    // Should panic when representation digits value is too large for base 16
+    let _f = FormatNumber::new(16).representation_digits(33);
+}
+
+#[test]
+#[should_panic(expected = "Invalid number of representation digits for FormatNumber (maximum number of digits is 43 for base 8)")]
+fn check_format_number_representation_digits_base8_too_large() {
+    // Should panic when representation digits value is too large for base 8
+    let _f = FormatNumber::new(8).representation_digits(44);
+}
+
+#[test]
+#[should_panic(expected = "Invalid number of representation digits for FormatNumber (maximum number of digits is 128 for base 2)")]
+fn check_format_number_representation_digits_base2_too_large() {
+    // Should panic when representation digits value is too large for base 2
+    let _f = FormatNumber::new(2).representation_digits(129);
+}
+
+#[test]
+#[should_panic(expected = "Invalid group size for FormatNumber (expected 0, 3 or 4)")]
+fn check_format_number_invalid_group_size_5() {
+    // Should panic when trying to use a group size other than 0, 3, or 4
+    let _f = FormatNumber::new(10).group(5, b',');
+}
+
+#[test]
+#[should_panic(expected = "Invalid group size for FormatNumber (expected 0, 3 or 4)")]
+fn check_format_number_invalid_group_size_1() {
+    // Should panic when trying to use a group size other than 0, 3, or 4
+    let _f = FormatNumber::new(10).group(1, b',');
+}
+
+#[test]
+#[should_panic(expected = "Invalid group size for FormatNumber (expected 0, 3 or 4)")]
+fn check_format_number_invalid_group_size_2() {
+    // Should panic when trying to use a group size other than 0, 3, or 4
+    let _f = FormatNumber::new(10).group(2, b',');
+}
+
+#[test]
+#[should_panic(expected = "Invalid separator char for FormatNumber (expected 0) if group size is 0")]
+fn check_format_number_invalid_separator_with_zero_group() {
+    // Should panic when using a non-zero separator with group size 0
+    let _f = FormatNumber::new(10).group(0, b',');
+}
+
+#[test]
+#[should_panic(expected = "Invalid separator char for FormatNumber (expected a printable ASCII character) if group size si bigger than 0")]
+fn check_format_number_invalid_separator_char_low() {
+    // Should panic when using a non-ASCII printable character as separator
+    let _f = FormatNumber::new(10).group(3, 0);
+}
+
+#[test]
+#[should_panic(expected = "Invalid separator char for FormatNumber (expected a printable ASCII character) if group size si bigger than 0")]
+fn check_format_number_invalid_separator_char_high() {
+    // Should panic when using a non-ASCII printable character as separator
+    let _f = FormatNumber::new(10).group(3, 127);
+}
