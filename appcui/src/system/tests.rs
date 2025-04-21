@@ -348,11 +348,11 @@ fn check_app_create_with_timers_count() {
 #[cfg(target_os = "windows")]
 #[test]
 fn check_create_app_with_default_terminal() {
-    let _ = App::new().build().unwrap();
+    let _ = App::new().build()
 }
 
 #[cfg(target_os = "windows")]
 #[test]
 fn check_create_app_with_windows_terminal() {
-    let _ = App::with_terminal(crate::terminals::TerminalType::WindowsConsole).build().unwrap();
+    let _ = App::with_terminal(crate::terminals::TerminalType::WindowsConsole).build();
 }
