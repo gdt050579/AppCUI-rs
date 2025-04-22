@@ -215,3 +215,7 @@ path = "window_toolbar_button/main.rs"
 [[example]]
 name = "window_toolbar_checkbox"
 path = "window_toolbar_checkbox/main.rs"
+
+[[example]]
+name = "window_toolbar_label"
+path = "window_toolbar_label/main.rs"

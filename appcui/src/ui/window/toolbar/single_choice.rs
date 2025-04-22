@@ -35,7 +35,7 @@ impl SingleChoice {
         self.base.request_recompute_layout();
     }
     #[inline(always)]
-    pub fn get_content(&self) -> &str {
+    pub fn caption(&self) -> &str {
         self.caption.text()
     }
     #[inline(always)]
