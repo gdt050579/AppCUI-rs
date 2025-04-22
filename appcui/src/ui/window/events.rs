@@ -1,3 +1,12 @@
+//! Events for windows and modal windows
+//! 
+//! This module contains the traits and methods for handling events from windows and modal windows.
+//! 
+//! It includes traits for handling events from windows and modal windows, such as:
+//! - WindowEvents
+//! - ModalWindowEvents 
+//! - ToolBarEvents
+
 use super::toolbar::{Button, CheckBox, SingleChoice};
 use crate::{graphics::Rect, prelude::ActionRequest, system::Handle, ui::common::traits::EventProcessStatus};
 
@@ -33,22 +42,106 @@ pub trait WindowEvents {
         ActionRequest::Allow
     }
 }
+
+/// Trait for handling events from toolbar items.
+///
+/// This trait allows windows to receive and process events from toolbar items such as buttons,
+/// checkboxes, and single choice items. When a user interacts with a toolbar item, the
+/// corresponding method on this trait is called.
+///
+/// To use this trait, you need to:
+/// 1. Include it in your Window or ModalWindow attributes with `#[Window(events = ToolBarEvents)]`
+/// 2. Implement the trait methods for your window to handle toolbar item events
+/// 3. Return `EventProcessStatus::Processed` if you've handled the event, or `EventProcessStatus::Ignored` otherwise
+///
+/// All methods have default implementations that return `EventProcessStatus::Ignored`, so you
+/// only need to implement the methods for the toolbar items you're using.
 pub trait ToolBarEvents {
+    /// Called when a toolbar button is clicked.
+    ///
+    /// # Parameters
+    ///
+    /// * `handle` - The handle to the button that was clicked
+    ///
+    /// # Returns
+    ///
+    /// * `EventProcessStatus::Processed` if the event was handled
+    /// * `EventProcessStatus::Ignored` if the event should be passed to the next handler
     fn on_button_clicked(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    
+    /// Called when a toolbar checkbox is clicked, changing its checked state.
+    ///
+    /// # Parameters
+    ///
+    /// * `handle` - The handle to the checkbox that was clicked
+    /// * `checked` - The new checked state (true for checked, false for unchecked)
+    ///
+    /// # Returns
+    ///
+    /// * `EventProcessStatus::Processed` if the event was handled
+    /// * `EventProcessStatus::Ignored` if the event should be passed to the next handler
     fn on_checkbox_clicked(&mut self, _handle: Handle<CheckBox>, _checked: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    
+    /// Called when a toolbar single choice item is selected.
+    ///
+    /// # Parameters
+    ///
+    /// * `handle` - The handle to the single choice item that was selected
+    ///
+    /// # Returns
+    ///
+    /// * `EventProcessStatus::Processed` if the event was handled
+    /// * `EventProcessStatus::Ignored` if the event should be passed to the next handler
     fn on_choice_selected(&mut self, _handle: Handle<SingleChoice>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
 
+/// Trait for managing modal window lifecycles and results.
+///
+/// This trait defines methods for showing, exiting, and returning results from modal windows.
+/// Modal windows capture the entire focus during their existence and can return a result when closed.
+/// 
+/// The type parameter `T` represents the result type that the modal window will return.
+/// 
+/// When implementing a modal window, this trait is automatically implemented by the `#[ModalWindow]` macro,
+/// so you typically don't need to implement it manually.
 pub trait ModalWindowMethods<T> {
+    /// Shows the modal window and blocks execution until the window is closed.
+    ///
+    /// This method displays the modal window, captures all input, and blocks the current thread
+    /// until the window is closed. Once closed, it returns the result (if any) that was
+    /// provided with `exit_with()`.
+    ///
+    /// # Returns
+    ///
+    /// * `Some(T)` if the window was closed with a result via `exit_with()`
+    /// * `None` if the window was closed via `exit()` or `close()`
     fn show(self) -> Option<T>;
+    
+    /// Exits the modal window and returns the specified result.
+    ///
+    /// This method closes the modal window and makes `show()` return `Some(result)` with
+    /// the provided result value.
+    ///
+    /// # Parameters
+    ///
+    /// * `result` - The value to return from the modal window
     fn exit_with(&mut self, result: T);
+    
+    /// Exits the modal window without a result.
+    ///
+    /// This method closes the modal window and makes `show()` return `None`.
     fn exit(&mut self);
+    
+    /// Alias for `exit()` that closes the modal window without a result.
+    ///
+    /// This method has the same effect as `exit()`, closing the modal window and making
+    /// `show()` return `None`.
     fn close(&mut self);
 }
 
