@@ -117,7 +117,6 @@ impl Input {
                             WHEEL_DOWN => MouseWheelDirection::Down,
                             WHEEL_LEFT => MouseWheelDirection::Left,
                             WHEEL_RIGHT => MouseWheelDirection::Right,
-                            _ => MouseWheelDirection::None,
                         };
                         if button != MouseWheelDirection::None {
                             return Some(SystemEvent::MouseWheel(MouseWheelEvent { x, y, direction: button }));
