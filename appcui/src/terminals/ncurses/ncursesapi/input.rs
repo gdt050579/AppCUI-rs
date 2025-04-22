@@ -113,12 +113,13 @@ impl Input {
 
                     if button == MouseButton::None {
                         let button = match mevent.bstate as i32 {
-                            WHEEL_UP => MouseWheelDirection::Up,
-                            WHEEL_DOWN => MouseWheelDirection::Down,
-                            WHEEL_LEFT => MouseWheelDirection::Left,
-                            WHEEL_RIGHT => MouseWheelDirection::Right,
+                            WHEEL_UP => Some(MouseWheelDirection::Up),
+                            WHEEL_DOWN => Some(MouseWheelDirection::Down),
+                            WHEEL_LEFT => Some(MouseWheelDirection::Left),
+                            WHEEL_RIGHT => Some(MouseWheelDirection::Right),
+                            _ => None,
                         };
-                        if button != MouseWheelDirection::None {
+                        if let Some(button) = button {
                             return Some(SystemEvent::MouseWheel(MouseWheelEvent { x, y, direction: button }));
                         }
                     }
