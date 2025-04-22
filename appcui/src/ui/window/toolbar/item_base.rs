@@ -255,18 +255,35 @@ impl ItemBase {
 
 macro_rules! add_toolbaritem_basic_methods {
     () => {
+        /// Sets the tooltip text for the toolbar item.
+        /// 
+        /// This method allows you to set a tooltip that will be displayed when the user hovers over the toolbar item.
+        /// The tooltip text will be displayed in a small popup window that appears near the item.
+        /// 
+        /// # Parameters
+        /// 
+        /// - `text`: A string slice that contains the tooltip text.
         #[inline(always)]
         pub fn set_tooltip(&mut self, text: &str) {
             self.base.set_tooltip(text);
         }
+
+        /// Gets the tooltip text for the toolbar item.
         #[inline(always)]
         pub fn get_tooltip(&self) -> &str {
             self.base.get_tooltip()
         }
+
+        /// Returns **true** if the toolbar item is visible, **false** otherwise.
         #[inline(always)]
         pub fn is_visible(&self) -> bool {
             self.base.is_visible()
         }   
+
+        /// Sets the visibility of the toolbar item.
+        /// 
+        /// This method allows you to control the visibility of the toolbar item.
+        /// When set to **true**, the item will be displayed on the toolbar.        
         #[inline(always)]
         pub fn set_visible(&mut self, visible: bool) {
             self.base.set_visible(visible);

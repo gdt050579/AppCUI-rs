@@ -207,3 +207,11 @@ path = "matrix/main.rs"
 [[example]]
 name = "counter"
 path = "counter/main.rs"
+
+[[example]]
+name = "window_toolbar_button"
+path = "window_toolbar_button/main.rs"
+
+# [[example]]
+# name = "window_toolbar_checkbox"
+# path = "window_toolbar_checkbox/main.rs"
