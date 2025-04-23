@@ -72,7 +72,9 @@ impl NcursesTerminal {
 
         Ok(term)
     }
+
     #[inline(always)]
+    #[cfg(target_family = "unix")]
     fn color_index(color: Color) -> i16 {
         match color {
             Color::Black => 0,
