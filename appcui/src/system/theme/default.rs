@@ -102,7 +102,7 @@ pub(crate) fn new() -> Theme {
             text: charattr!("silver"),               
             bold: charattr!("red, flags: Bold"),        
             italic: charattr!("magenta, flags: Italic"),              
-            link: charattr!("aqua, flags: Underiline"),          
+            link: charattr!("aqua, flags: Underline"),          
             code: charattr!("silver, black"),       
             h1: charattr!("white"),      
             h2: charattr!("y"),    

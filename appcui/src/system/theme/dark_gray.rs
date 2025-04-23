@@ -42,9 +42,9 @@ pub(crate) fn new() -> Theme {
         },
         menu: MenuTheme {
             text: controlattr!("black,w", "black,w", "black,silver", "gray,w", "black,silver"),
-            hotkey: controlattr!("gray,w,flags: Underlined", "black,w", "black,silver", "gray,w", "black,silver"),
-            shortcut: controlattr!("gray,w,flags: Underlined", "black,w", "black,silver", "gray,w", "black,silver"),
-            symbol: controlattr!("gray,w,flags: Underlined", "black,w", "black,silver", "gray,w", "black,silver"),
+            hotkey: controlattr!("gray,w,flags: Underline", "black,w", "black,silver", "gray,w", "black,silver"),
+            shortcut: controlattr!("gray,w,flags: Underline", "black,w", "black,silver", "gray,w", "black,silver"),
+            symbol: controlattr!("gray,w,flags: Underline", "black,w", "black,silver", "gray,w", "black,silver"),
         },
         parent_menu: MenuTheme {
             text: controlattr!("black,silver", "black,silver", "black,gray", "gray,silver", "w,gray"),
@@ -91,7 +91,7 @@ pub(crate) fn new() -> Theme {
         },
         header: HeaderTheme {
             text: controlattr!("black,silver", "black,silver", "black,white", "gray", "black,silver"),
-            hotkey: controlattr!("w,silver,flags: Underlined", "w,silver,flags: Underlined", "w,silver,flags: Underlined", "gray", "w,silver,flags: Underlined"), 
+            hotkey: controlattr!("w,silver,flags: Underline", "w,silver,flags: Underline", "w,silver,flags: Underline", "gray", "w,silver,flags: Underline"), 
             symbol: controlattr!("black,silver", "black,silver", "black,white", "gray", "black,silver"),
         },
         toggle_button: ToggleButtonTheme {

@@ -205,7 +205,7 @@ fn check_darkgray_theme() {
         Mouse.Click(3,0,left)
         Mouse.Move(3,2)
         Paint('Initial state')   
-        CheckHash(0xC1082C8D0F5735A4) 
+        CheckHash(0xC0A625A9909B2E70) 
     ";
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::DarkGray))
