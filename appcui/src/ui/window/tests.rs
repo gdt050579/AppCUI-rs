@@ -1817,6 +1817,7 @@ fn check_single_window() {
     a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
     a.run();
 }
+
 #[test]
 fn check_single_window_with_commandbar() {
     let script = "
@@ -1850,6 +1851,72 @@ fn check_single_window_with_menu_and_command_bar() {
     ";
     let mut a = App::debug(40, 10, script).single_window().menu_bar().command_bar().build().unwrap();
     a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "When `single_window(...)` is being used to initialized an application, you can only use add_window(...) method once (to add the first and single window) !")]
+fn check_single_window_panic_on_multiple_add_window() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen)')
+        // this code will not be reached
+        CheckHash(0x0)
+    ";
+    let mut a = App::debug(40, 10, script).single_window().build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !")]
+fn check_single_window_panic_on_sizeable_flags() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen)')
+        // this code will not be reached
+        CheckHash(0x0)
+    ";
+    let mut a = App::debug(40, 10, script).single_window().build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,flags:sizeable"));
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")]
+fn check_single_window_panic_no_window() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen)')
+        // this code will not be reached
+        CheckHash(0x0)
+    ";
+    let a = App::debug(40, 10, script).single_window().build().unwrap();
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "When `single_window(...)` is being used to initialized an application, you can not use `.desktop(...)` command to provide a custom desktop !")]
+fn check_single_window_panic_no_custom_desktop() {
+    #[Desktop(overwrite = OnPaint, internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl OnPaint for MyDesktop {
+        fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+            surface.clear(Character::new('x', Color::Red, Color::Green, CharFlags::None));
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('desktop with red and green')
+        CheckHash(0x0)
+    ";
+    let a = App::debug(60, 10, script).desktop(MyDesktop::new()).single_window().build().unwrap();
     a.run();
 }
 
