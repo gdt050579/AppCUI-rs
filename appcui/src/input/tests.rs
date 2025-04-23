@@ -230,3 +230,22 @@ fn check_key_from_char() {
     assert_eq!(Key::from('\n'), Key::new(KeyCode::Enter, KeyModifier::None));
     assert_eq!(Key::from('\t'), Key::new(KeyCode::Tab, KeyModifier::None));
 }
+
+#[test]
+fn check_keymodifier_from() {
+    assert_eq!(KeyModifier::from(0), KeyModifier::None);
+    assert_eq!(KeyModifier::from(1), KeyModifier::Alt);
+    assert_eq!(KeyModifier::from(2), KeyModifier::Ctrl);
+    assert_eq!(KeyModifier::from(3), KeyModifier::Alt | KeyModifier::Ctrl);
+    assert_eq!(KeyModifier::from(4), KeyModifier::Shift);
+    assert_eq!(KeyModifier::from(5), KeyModifier::Shift | KeyModifier::Alt);
+    assert_eq!(KeyModifier::from(6), KeyModifier::Ctrl | KeyModifier::Shift);
+    assert_eq!(KeyModifier::from(7), KeyModifier::Shift | KeyModifier::Ctrl | KeyModifier::Alt);
+    assert_eq!(KeyModifier::from(8), KeyModifier::None);
+}
+
+#[test]
+fn check_key_display() {
+    let key = Key::new(KeyCode::A, KeyModifier::Ctrl|KeyModifier::Shift);
+    assert_eq!(key.to_string(), "Ctrl+Shift+A");
+}
