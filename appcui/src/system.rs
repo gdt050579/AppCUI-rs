@@ -8,7 +8,6 @@ mod error;
 mod handle;
 mod control_handle_manager;
 mod menu_handle_manager;
-mod reference;
 mod timer;
 mod background_task;
 #[cfg(test)]
@@ -22,7 +21,6 @@ pub use self::theme::Themes;
 pub(crate) use self::runtime_manager_traits::ThemeMethods;
 pub use self::handle::Handle;
 pub (crate) use self::handle::HandleSupport;
-pub use self::reference::Reference;
 pub (crate) use self::theme::MenuTheme;
 pub (crate) use self::control_handle_manager::ControlHandleManager;
 pub (crate) use self::menu_handle_manager::MenuHandleManager;
