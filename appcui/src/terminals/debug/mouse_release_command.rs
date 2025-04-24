@@ -30,7 +30,7 @@ impl MouseReleaseCommand {
         }
         if b.is_none() {
             return Err(ParserError::new(
-                "Third parameter for Mouse.Hold command should an mouse button (left, right or cente)",
+                "Third parameter for Mouse.Hold command should an mouse button (left, right or center)",
             ));
         }
         Ok(Self {
