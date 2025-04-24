@@ -1,7 +1,4 @@
 use std::ops::{Deref, DerefMut};
-
-use crate::graphics::Color;
-
 use super::Surface;
 
 pub (crate) struct SurfaceTester {
@@ -13,6 +10,7 @@ impl SurfaceTester {
             surface: Surface::new(width, height),
         }
     }
+    // use crate::graphics::Color;
     // #[allow(dead_code)]
     // pub (crate) fn print(&mut self) {
     //     let mut temp_buf = String::with_capacity(1024);

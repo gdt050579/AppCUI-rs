@@ -302,6 +302,7 @@ fn check_clipboard_api() {
     a.run();
 }
 
+
 #[test]
 fn check_clipboard_api_without_app_initialization() {
     Clipboard::set_text("Hello, world!");
