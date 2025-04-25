@@ -1,4 +1,5 @@
 use crate::terminals::debug::check_clipboardtext_command::CheckClipboardTextCommand;
+use crate::terminals::debug::check_cursor_command::CheckCursorCommand;
 use crate::terminals::debug::check_hash_command::CheckHashCommand;
 use crate::terminals::debug::clipboard_clear_command::ClipboardClearCommand;
 use crate::terminals::debug::clipboard_settext_command::ClipboardSetTextCommand;
@@ -381,4 +382,17 @@ fn check_checkhash_errors() {
     assert_eq!(CheckHashCommand::new(&CommandParser::new("CheckHash()").unwrap()).is_err(), true);
     // ivalid hash value
     assert_eq!(CheckHashCommand::new(&CommandParser::new("CheckHash(blablabla)").unwrap()).is_err(), true);
+}
+
+#[test]
+fn check_checkcursor_errors() {
+    // invalid number of parameters
+    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(1,2,3,4)").unwrap()).is_err(), true);
+    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(1,2,3)").unwrap()).is_err(), true);
+    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor()").unwrap()).is_err(), true);
+    // invalid one-parameter value (should be hidden or false)
+    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(blablabla)").unwrap()).is_err(), true);
+    // invalid position values (integers)
+    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(x,0)").unwrap()).is_err(), true);
+    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(0,y)").unwrap()).is_err(), true);
 }

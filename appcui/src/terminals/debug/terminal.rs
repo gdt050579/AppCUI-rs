@@ -67,27 +67,27 @@ impl DebugTerminal {
             clipboard_text: String::new(),
         })
     }
-    fn _forecolor_to_str(col: Color) -> &'static str {
-        match col {
-            Color::Black => "30",
-            Color::DarkRed => "31",
-            Color::DarkGreen => "32",
-            Color::Olive => "33",
-            Color::DarkBlue => "34",
-            Color::Magenta => "35",
-            Color::Teal => "36",
-            Color::Silver => "37",
-            Color::Gray => "90",
-            Color::Red => "91",
-            Color::Green => "92",
-            Color::Yellow => "93",
-            Color::Blue => "94",
-            Color::Pink => "95",
-            Color::Aqua => "96",
-            Color::White => "97",
-            _ => "37", /* default is silver */
-        }
-    }
+    // fn _forecolor_to_str(col: Color) -> &'static str {
+    //     match col {
+    //         Color::Black => "30",
+    //         Color::DarkRed => "31",
+    //         Color::DarkGreen => "32",
+    //         Color::Olive => "33",
+    //         Color::DarkBlue => "34",
+    //         Color::Magenta => "35",
+    //         Color::Teal => "36",
+    //         Color::Silver => "37",
+    //         Color::Gray => "90",
+    //         Color::Red => "91",
+    //         Color::Green => "92",
+    //         Color::Yellow => "93",
+    //         Color::Blue => "94",
+    //         Color::Pink => "95",
+    //         Color::Aqua => "96",
+    //         Color::White => "97",
+    //         _ => "37", /* default is silver */
+    //     }
+    // }
     fn color_to_str(col: Color) -> &'static str {
         match col {
             Color::Black => "0;0;0",
@@ -109,27 +109,27 @@ impl DebugTerminal {
             _ => "255;255;255", /* default is white */
         }
     }
-    fn _backcolor_to_str(col: Color) -> &'static str {
-        match col {
-            Color::Black => "40",
-            Color::DarkRed => "41",
-            Color::DarkGreen => "42",
-            Color::Olive => "43",
-            Color::DarkBlue => "44",
-            Color::Magenta => "45",
-            Color::Teal => "46",
-            Color::Silver => "47",
-            Color::Gray => "100",
-            Color::Red => "101",
-            Color::Green => "102",
-            Color::Yellow => "103",
-            Color::Blue => "104",
-            Color::Pink => "105",
-            Color::Aqua => "106",
-            Color::White => "107",
-            _ => "40", /* default is black */
-        }
-    }
+    // fn _backcolor_to_str(col: Color) -> &'static str {
+    //     match col {
+    //         Color::Black => "40",
+    //         Color::DarkRed => "41",
+    //         Color::DarkGreen => "42",
+    //         Color::Olive => "43",
+    //         Color::DarkBlue => "44",
+    //         Color::Magenta => "45",
+    //         Color::Teal => "46",
+    //         Color::Silver => "47",
+    //         Color::Gray => "100",
+    //         Color::Red => "101",
+    //         Color::Green => "102",
+    //         Color::Yellow => "103",
+    //         Color::Blue => "104",
+    //         Color::Pink => "105",
+    //         Color::Aqua => "106",
+    //         Color::White => "107",
+    //         _ => "40", /* default is black */
+    //     }
+    // }
     fn compute_surface_hash(surface: &Surface) -> u64 {
         // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
         let mut hash = 0xcbf29ce484222325u64;
