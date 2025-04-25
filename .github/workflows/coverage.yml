@@ -41,20 +41,28 @@ jobs:
         echo "coverage=$coverageInt" >> $env:GITHUB_OUTPUT
         
     - name: Create Coverage Badge
-      uses: schneegans/dynamic-badges-action@v1.6.0
+      uses: emibcn/badge-action@v1
       with:
-        auth: ${{ secrets.GIST_CODECOVERAGE }}
-        gistID: f7d7e7d56b2725a3b33a265e8a9d8e9c
-        filename: appcui-rs-coverage.json
-        label: coverage
-        message: ${{ steps.coverage_summary.outputs.coverage }}%
+        label: 'coverage'
+        status: ${{ steps.coverage_summary.outputs.coverage }}%
         color: ${{ steps.coverage_summary.outputs.coverage >= 80 && 'green' || steps.coverage_summary.outputs.coverage >= 70 && 'yellow' || steps.coverage_summary.outputs.coverage >= 60 && 'orange' || 'red' }}
+        path: coverage.svg
+        
+    - name: Upload badge to Gist
+      if: github.ref == 'refs/heads/main'
+      uses: andymckay/append-gist-action@1.0.1
+      with:
+        token: ${{ secrets.GIST_CODECOVERAGE }}
+        gistURL: https://gist.github.com/gdt050579/f7d7e7d56b2725a3b33a265e8a9d8e9c
+        file: coverage.svg
         
     - name: Archive code coverage results
       uses: actions/upload-artifact@v4
       with:
         name: code-coverage-report
-        path: cobertura.xml
+        path: |
+          cobertura.xml
+          coverage.svg
         
     - name: Generate coverage report
       uses: irongut/CodeCoverageSummary@v1.3.0
