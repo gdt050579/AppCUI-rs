@@ -14,7 +14,6 @@ use crate::terminals::debug::mouse_move_command::MouseMoveCommand;
 use crate::terminals::debug::mouse_release_command::MouseReleaseCommand;
 use crate::terminals::debug::mouse_wheel_command::MouseWheelCommand;
 use crate::terminals::debug::paint_enable_command::PaintEnableCommand;
-use crate::terminals::MouseMoveEvent;
 
 use super::command_parser::CommandParser;
 use super::resize_command::ResizeCommand;

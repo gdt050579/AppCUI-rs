@@ -345,20 +345,206 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 
+/// Automatically implements the `ListItem` trait for a structure, enabling it to be displayed in controls like ListView or TreeView.
+/// 
+/// This derive macro should be used in combination with `#[Column(...)]` attributes on struct fields to define how each field
+/// should be displayed in the list.
+/// 
+/// # Column Attribute Parameters
+/// 
+/// The `#[Column(...)]` attribute supports the following parameters:
+/// 
+/// | Parameter        | Type   | Required | Default      | Description                                                                                  |
+/// | ---------------- | ------ | -------- | ------------ | -------------------------------------------------------------------------------------------- |
+/// | `name` or `text` | String | **Yes**  | N/A          | The name of the column displayed in the header                                               |
+/// | `width` or `w`   | u16    | No       | 10           | The width of the column in characters                                                        |
+/// | `align` or `a`   | Align  | No       | Left         | Alignment: `Left`/`l`, `Right`/`r`, or `Center`/`c`                                          |
+/// | `render` or `r`  | Render | No       | Auto-detect  | The render method for the column                                                             |
+/// | `format` or `f`  | Format | No       | Varies       | Format for the render method                                                                 |
+/// | `index` or `idx` | u16    | No       | Auto-assign  | Column order index (starting from 0 or 1)                                                    |
+/// 
+/// # Automatic Render Methods
+/// 
+/// If the `render` parameter is not provided, the render method will be determined based on the field type:
+/// 
+/// | Field type                | Render method | Default format   |
+/// | ------------------------- | ------------- | ---------------- |
+/// | `&str`, `String`          | Text          |                  |
+/// | `i8`, `i16`, `i32`, `i64` | Int64         | Normal           |
+/// | `u8`, `u16`, `u32`, `u64` | UInt64        | Normal           |
+/// | `f32`, `f64`              | Float         | Normal           |
+/// | `bool`                    | Bool          | CheckmarkMinus   |
+/// | `NaiveDateTime`           | DateTime      | Normal           |
+/// | `NaiveTime`               | Time          | Normal           |
+/// | `NaiveDate`               | Date          | Full             |
+/// | `Duration`                | Duration      | Auto             |
+/// | `Status`                  | Status        | Graphical        |
+/// 
+/// # Available Render Methods
+/// 
+/// When specifying a render method explicitly, the following options are available:
+/// 
+/// | Render Method | Description                                  | Format Options                                                                                                                                                                                                                        |
+/// | ------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+/// | Text          | Plain text                                   | N/A                                                                                                                                                                                                                                   |
+/// | Ascii         | ASCII-only text                              | N/A                                                                                                                                                                                                                                   |
+/// | DateTime      | Date and time                                | `Full`, `Normal`, `Short`                                                                                                                                                                                                             |
+/// | Time          | Time only                                    | `Short`, `AMPM`, `Normal`                                                                                                                                                                                                             |
+/// | Date          | Date only                                    | `Full`, `YearMonthDay`, `DayMonthYear`                                                                                                                                                                                                |
+/// | Duration      | Time duration                                | `Auto`, `Seconds`, `Details`                                                                                                                                                                                                          |
+/// | Int64         | Signed integer                               | `Normal`, `Separator`, `Hex`, `Hex16`, `Hex32`, `Hex64`                                                                                                                                                                               |
+/// | UInt64        | Unsigned integer                             | `Normal`, `Separator`, `Hex`, `Hex16`, `Hex32`, `Hex64`                                                                                                                                                                               |
+/// | Bool          | Boolean value                                | `YesNo`, `TrueFalse`, `XMinus`, `CheckmarkMinus`                                                                                                                                                                                      |
+/// | Size          | File size or memory usage                    | `Auto`, `AutoWithDecimals`, `Bytes`, `KiloBytes`, `MegaBytes`, `GigaBytes`, `TeraBytes`, `KiloBytesWithDecimals`, `MegaBytesWithDecimals`, `GigaBytesWithDecimals`, `TeraBytesWithDecimals`                                           |
+/// | Percentage    | Percentage value                             | `Normal`, `Decimals`                                                                                                                                                                                                                  |
+/// | Float         | Floating point number                        | `Normal`, `TwoDigits`, `ThreeDigits`, `FourDigits`                                                                                                                                                                                    |
+/// | Status        | Status indicator                             | `Hashtag`, `Graphical`, `Arrow`                                                                                                                                                                                                       |
+/// | Temperature   | Temperature value                            | `Celsius`, `Fahrenheit`, `Kelvin`                                                                                                                                                                                                     |
+/// | Area          | Area measurement                             | `SquaredMillimeters`, `SquaredCentimeters`, `SquaredMeters`, `SquaredKilometers`, `Hectares`, `Ares`, `SquareFeet`, `SquareInches`, `SquareYards`, `SquareMiles`                                                                      |
+/// | Rating        | Rating display                               | `Numerical`, `Stars`, `Circles`, `Asterix`                                                                                                                                                                                            |
+/// | Currency      | Currency value                               | `USD`, `USDSymbol`, `EUR`, `EURSymbol`, `GBP`, `GBPSymbol`, `YEN`, `YENSymbol`, `Bitcoin`, `BitcoinSymbol`, `RON`                                                                                                                     |
+/// | Distance      | Distance measurement                         | `Kilometers`, `Meters`, `Centimeters`, `Millimeters`, `Inches`, `Feet`, `Yards`, `Miles`                                                                                                                                              |
+/// | Volume        | Volume measurement                           | `CubicMillimeters`, `CubicCentimeters`, `CubicMeters`, `CubicKilometers`, `Liters`, `Milliliters`, `Gallons`, `CubicFeet`, `CubicInches`, `CubicYards`, `CubicMiles`                                                                  |
+/// | Weight        | Weight measurement                           | `Grans`, `Milligrams`, `Kilograms`, `Pounds`, `Tons`                                                                                                                                                                                  |
+/// | Speed         | Speed measurement                            | `KilometersPerHour`, `MetersPerHour`, `KilometersPerSecond`, `MetersPerSecond`, `MilesPerHour`, `MilesPerSecond`, `Knots`, `FeetPerSecond`, `Mach`                                                                                    |
+/// | Custom        | Custom rendering (requires `paint()` method) | N/A                                                                                                                                                                                                                                   |
+/// 
+/// # Example
+/// 
+/// ```no_compile
+/// use appcui::prelude::*;
+/// 
+/// #[derive(ListItem)]
+/// struct Student {
+///     #[Column(name: "&Name", width: 20, align: Left)]
+///     name: String,
+///     
+///     #[Column(name: "&Grade", width: 5, align: Center)]
+///     grade: u8,
+///     
+///     #[Column(name: "&Stars", width: 5, align: Center, render: Rating, format: Stars)]
+///     stars: u8,
+/// }
+/// ```
+/// 
+/// This automatically implements all required ListItem methods, including `columns_count()`, `column()`, 
+/// `render_method()`, and `compare()`. Custom implementations of `matches()` or `paint()` can still be 
+/// added for custom filtering or rendering.
 #[proc_macro_derive(ListItem, attributes(Column))]
 pub fn listitem_derive(input: TokenStream) -> TokenStream {
     crate::derives::listitem::derive(input)
 }
 
+/// Automatically implements the `EnumSelector` trait for an enum, enabling it to be used with controls like Selector.
+/// 
+/// This derive macro should be used in combination with `#[VariantInfo(...)]` attributes on enum variants to 
+/// define how each variant should be represented.
+/// 
+/// # VariantInfo Attribute Parameters
+/// 
+/// The `#[VariantInfo(...)]` attribute supports the following parameters:
+/// 
+/// | Parameter     | Type   | Required | Default                | Description                         |
+/// | ------------- | ------ | -------- | ---------------------- | ----------------------------------- |
+/// | `name`        | String | No       | Variant name as string | Display name for the variant        |
+/// | `description` | String | No       | Empty string           | Description text for the variant    |
+/// 
+/// # Generated Implementation
+/// 
+/// The macro automatically implements:
+/// 
+/// * `COUNT` constant - Set to the number of enum variants
+/// * `from_index(index: u32) -> Option<Self>` - Maps numeric index to enum variant
+/// * `name(&self) -> &'static str` - Returns the name of the variant
+/// * `description(&self) -> &'static str` - Returns the description of the variant
+/// 
+/// # Required Trait Derives
+/// 
+/// The enum must also derive `Eq`, `PartialEq`, `Copy`, and `Clone` for the `EnumSelector` derive macro 
+/// to work properly.
+/// 
+/// # Example
+/// 
+/// ```no_compile
+/// use appcui::prelude::*;
+/// 
+/// #[derive(EnumSelector, Eq, PartialEq, Copy, Clone)]
+/// enum Shape {
+///     #[VariantInfo(name = "Square", description = "a red square")]
+///     Square,
+///     
+///     #[VariantInfo(name = "Rectangle", description = "a green rectangle")]
+///     Rectangle,
+///     
+///     #[VariantInfo(name = "Triangle", description = "a blue triangle")]
+///     Triangle,
+///     
+///     #[VariantInfo(name = "Circle", description = "a white circle")]
+///     Circle,
+/// }
+/// ```
+/// 
+/// When a variant doesn't have a `#[VariantInfo]` attribute, the variant's name is used as the display name,
+/// and the description defaults to an empty string.
 #[proc_macro_derive(EnumSelector, attributes(VariantInfo))]
 pub fn enumselector_derive(input: TokenStream) -> TokenStream {
     crate::derives::enumselector::derive(input)
 }
 
+/// Automatically implements the `DropDownListType` trait for an enum, enabling it to be used with dropdown selection mechanisms.
+/// 
+/// This derive macro should be used in combination with `#[VariantInfo(...)]` attributes on enum variants to 
+/// define how each variant should be represented in a dropdown list.
+/// 
+/// # VariantInfo Attribute Parameters
+/// 
+/// The `#[VariantInfo(...)]` attribute supports the following parameters:
+/// 
+/// | Parameter     | Type   | Required | Default                | Description                            |
+/// | ------------- | ------ | -------- | ---------------------- | -------------------------------------- |
+/// | `name`        | String | No       | Variant name as string | Display name for the variant           |
+/// | `description` | String | No       | Empty string           | Description text for the variant       |
+/// | `symbol`      | String | No       | Empty string           | Symbolic representation of the variant |
+/// 
+/// # Generated Implementation
+/// 
+/// The macro automatically implements:
+/// 
+/// * `name(&self) -> &str` - Returns the display name of the variant
+/// * `description(&self) -> &str` - Returns the description of the variant
+/// * `symbol(&self) -> &str` - Returns a symbolic representation of the variant
+/// 
+/// # Example
+/// 
+/// ```no_compile
+/// use appcui::prelude::*;
+/// 
+/// #[derive(DropDownListType)]
+/// enum MathOp {
+///     #[VariantInfo(name = "Sum", description = "Add multiple numbers", symbol = "∑")]
+///     Sum,
+///     
+///     #[VariantInfo(name = "Product", description = "Multiply multiple numbers", symbol = "∏")]
+///     Product,
+///     
+///     #[VariantInfo(name = "Integral", description = "Calculate the integral of a function", symbol = "∫")]
+///     Integral,
+///     
+///     #[VariantInfo(name = "Radical", description = "Calculate the radical of a number", symbol = "√")]
+///     Radical,
+///     
+///     #[VariantInfo(name = "Different", description = "Check if all elements from a set are different", symbol = "≠")]
+///     Different,
+/// }
+/// ```
+/// 
+/// When a variant doesn't have a `#[VariantInfo]` attribute, the variant's name is used as the display name,
+/// and the description and symbol default to empty strings.
 #[proc_macro_derive(DropDownListType, attributes(VariantInfo))]
 pub fn dropdownlisttype_derive(input: TokenStream) -> TokenStream {
     crate::derives::dropdownlisttype::derive(input)
 }
+
 /// Use to quickly identify a key or a combination via a string
 /// Usage examples:
 /// * key!("F2")
@@ -388,16 +574,170 @@ pub fn key(input: TokenStream) -> TokenStream {
     crate::key::create(input)
 }
 
+/// Creates a Character object with customizable appearance. The `char!` macro provides a convenient way to create 
+/// characters with specific colors and attributes.
+/// 
+/// # Syntax
+/// 
+/// The macro supports both positional and named parameters:
+/// 
+/// ```no_compile
+/// char!(character, foreground_color, background_color)
+/// ```
+/// 
+/// or
+/// 
+/// ```no_compile
+/// char!(named_parameters)
+/// ```
+/// 
+/// # Positional Parameters
+/// 
+/// 1. **character** - A character or special character representation
+/// 2. **foreground_color** - The foreground color (supports color names and short forms)
+/// 3. **background_color** - The background color (supports color names and short forms)
+/// 
+/// # Named Parameters
+/// 
+/// * `value`, `char`, `ch` - Character or special character representation
+/// * `code`, `unicode` - Unicode value of character
+/// * `fore`, `foreground`, `forecolor`, `color` - Foreground color (default: Transparent)
+/// * `back`, `background`, `backcolor` - Background color (default: Transparent)
+/// * `attr`, `attributes` - Character attributes (Bold, Italic, Underline)
+/// 
+/// # Color Values
+/// 
+/// Colors can be specified using their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, 
+/// `db` for DarkBlue). `Transparent` can be specified as `transparent`, `invisible` or `?`.
+/// 
+/// # Special Characters
+/// 
+/// Special characters can be specified by name or special notation:
+/// * Arrow symbols: `up`, `/|\`, `down`, `\|/`, `left`, `<-`, `right`, `->`
+/// * Triangle symbols: `/\`, `\/`, `<|`, `|>`
+/// * Other symbols: `...` for three dots
+/// 
+/// # Examples
+/// 
+/// ```no_compile
+/// use appcui::prelude::*;
+/// 
+/// // Red 'A' on yellow background
+/// let c = char!("A,red,yellow");
+/// let c = char!("A,r,y");
+/// 
+/// // Bolded white 'A' on dark blue background
+/// let c = char!("A,fore=White,back=DarkBlue,attr=[Bold,Underline]");
+/// let c = char!("A,w,db,attr=Bold+Underline");
+/// 
+/// // Red left arrow with transparent background
+/// let c = char!("<-,red");
+/// let c = char!("<-,r");
+/// ```
 #[proc_macro]
 pub fn char(input: TokenStream) -> TokenStream {
     crate::chars::create(input)
 }
 
+/// Creates a CharAttribute object that defines colors and attributes for characters.
+/// 
+/// # Syntax
+/// 
+/// The macro supports both positional and named parameters:
+/// 
+/// ```no_compile
+/// charattr!(foreground_color, background_color)
+/// ```
+/// 
+/// or
+/// 
+/// ```no_compile
+/// charattr!(named_parameters)
+/// ```
+/// 
+/// # Positional Parameters
+/// 
+/// 1. **foreground_color** - The foreground color (supports color names and short forms)
+/// 2. **background_color** - The background color (supports color names and short forms)
+/// 
+/// # Named Parameters
+/// 
+/// * `fore`, `foreground`, `forecolor`, `color` - Foreground color (default: Transparent)
+/// * `back`, `background`, `backcolor` - Background color (default: Transparent)
+/// * `attr`, `attributes` - Character attributes (Bold, Italic, Underline)
+/// 
+/// # Color Values
+/// 
+/// Colors can be specified using their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, 
+/// `db` for DarkBlue). `Transparent` can be specified as `transparent`, `invisible` or `?`.
+/// 
+/// # Examples
+/// 
+/// ```no_compile
+/// use appcui::prelude::*;
+/// // Dark green foreground with transparent background, bold and underlined
+/// let attr = charattr!("DarkGreen,Transparent,attr:Bold+Underline");
+/// let attr = charattr!("dg,?,attr:Bold+Underline");
+/// 
+/// // Creating and using a character attribute
+/// let attr = charattr!("red,blue");
+/// let c = Character::with_attr('A', attr);
+/// ```
 #[proc_macro]
 pub fn charattr(input: TokenStream) -> TokenStream {
     crate::chars::create_attr(input)
 }
 
+/// Creates a Column object for use in controls like ListView or similar. This macro provides a convenient way to 
+/// define columns with caption, width, and text alignment.
+/// 
+/// # Syntax
+/// 
+/// The macro supports both positional and named parameters:
+/// 
+/// ```no_compile
+/// headercolumn!(caption, width, alignment)
+/// ```
+/// 
+/// or
+/// 
+/// ```no_compile
+/// headercolumn!(named_parameters)
+/// ```
+/// 
+/// # Positional Parameters
+/// 
+/// 1. **caption** - The text displayed in the column header
+/// 2. **width** - The width of the column in characters
+/// 3. **align** - The text alignment within the column
+/// 
+/// # Named Parameters
+/// 
+/// * `caption`, `name`, `text` - The text displayed in the column header
+/// * `width`, `w` - The width of the column in characters (if not specified, uses caption length + 2)
+/// * `align`, `a`, `alignament` - Text alignment in the column (Left, Right, or Center)
+/// 
+/// # Text Alignment Values
+/// 
+/// Alignment can be one of:
+/// * `Left` or `L` - Align text to the left
+/// * `Right` or `R` - Align text to the right
+/// * `Center` or `C` - Center the text
+/// 
+/// If not specified, alignment defaults to `Left`.
+/// 
+/// # Examples
+/// 
+/// ```no_compile
+/// // Basic column with default alignment (Left)
+/// let col = headercolumn!("'Name', 20");
+/// 
+/// // Column with right alignment
+/// let col = headercolumn!("'Price', 10, Right");
+/// 
+/// // Using named parameters
+/// let col = headercolumn!("caption='Date', width=12, align=Center");
+/// ```
 #[proc_macro]
 pub fn headercolumn(input: TokenStream) -> TokenStream {
     crate::column::create(input)
