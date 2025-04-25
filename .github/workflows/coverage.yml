@@ -1,0 +1,56 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  coverage:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
+    - name: Install cargo-tarpaulin
+      run: cargo install cargo-tarpaulin
+      
+    - name: Run cargo-tarpaulin
+      run: cargo tarpaulin --verbose --workspace --timeout 120 --out Xml --packages appcui
+      
+    - name: Upload to codecov.io
+      uses: codecov/codecov-action@v3
+      with:
+        fail_ci_if_error: true
+        
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: cobertura.xml
+        
+    - name: Generate coverage badge
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: cobertura.xml
+        badge: true
+        format: markdown
+        output: both
+        
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: github.event_name == 'pull_request'
+      with:
+        recreate: true
+        path: code-coverage-results.md 
