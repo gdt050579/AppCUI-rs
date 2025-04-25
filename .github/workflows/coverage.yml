@@ -31,14 +31,14 @@ jobs:
       
     - name: Generate coverage summary
       id: coverage_summary
+      shell: pwsh
       run: |
-        # Extract coverage percentage from cobertura.xml
-        COVERAGE=$(grep -oP 'line-rate="\K[^"]*' cobertura.xml | head -1)
-        # Convert to percentage
-        COVERAGE_PCT=$(echo "$COVERAGE * 100" | bc)
-        # Round to nearest integer
-        COVERAGE_INT=$(printf "%.0f" $COVERAGE_PCT)
-        echo "coverage=$COVERAGE_INT" >> $GITHUB_OUTPUT
+        # Extract coverage percentage from cobertura.xml using PowerShell
+        $xml = [xml](Get-Content cobertura.xml)
+        $lineRate = [double]$xml.coverage.GetAttribute("line-rate")
+        $coveragePct = $lineRate * 100
+        $coverageInt = [math]::Round($coveragePct)
+        echo "coverage=$coverageInt" >> $env:GITHUB_OUTPUT
         
     - name: Create Coverage Badge
       uses: schneegans/dynamic-badges-action@v1.6.0
