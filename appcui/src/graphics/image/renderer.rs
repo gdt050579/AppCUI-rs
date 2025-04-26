@@ -1,5 +1,16 @@
 use super::{super::{Character, Color, Image, SpecialChar, Surface}, Pixel};
 
+/// The type of renderer to use for rendering the image.
+/// 
+/// This enum defines the different rendering methods available for images.
+/// Each variant represents a specific rendering style:
+/// 
+/// - `SmallBlocks`: Renders the image using small blocks.
+/// - `LargeBlocks64Colors`: Renders the image using large blocks with 64 colors.
+/// - `GrayScale`: Renders the image using a grayscale palette.
+/// - `AsciiArt`: Renders the image using ASCII characters.
+/// 
+/// The `RendererType` enum is used to select the rendering method for an image.
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RendererType {
