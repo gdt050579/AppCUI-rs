@@ -177,7 +177,7 @@ impl MenuItem for SubMenu {
     fn into_menuitem(self) -> MenuItemWrapper {
         MenuItemWrapper::SubMenu(self)
     }
-    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<()>) {
         self.menu_handle = parent;
         self.handle = me.cast();
         if let Some(menu) = RuntimeManager::get().get_menu(self.submenu_handle) {

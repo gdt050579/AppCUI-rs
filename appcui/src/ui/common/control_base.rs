@@ -46,11 +46,11 @@ pub(crate) struct Margins {
 pub struct ControlBase {
     pub(crate) layout: ControlLayout,
     pub(crate) margins: Margins,
-    pub(crate) handle: Handle<UIElement>,
-    pub(crate) parent: Handle<UIElement>,
+    pub(crate) handle: Handle<()>,
+    pub(crate) parent: Handle<()>,
     pub(crate) timer_handle: Handle<Timer>,
-    pub(crate) event_processor: Handle<UIElement>,
-    pub(crate) children: Vec<Handle<UIElement>>,
+    pub(crate) event_processor: Handle<()>,
+    pub(crate) children: Vec<Handle<()>>,
     pub(crate) focused_child_index: VectorIndex,
     pub(crate) parent_index: VectorIndex,
     status_flags: StatusFlags,
@@ -228,7 +228,7 @@ impl ControlBase {
         self.status_flags.contains(StatusFlags::MarkedForFocus)
     }
     #[inline(always)]
-    pub(crate) fn get_focused_control(&self) -> Handle<UIElement> {
+    pub(crate) fn get_focused_control(&self) -> Handle<()> {
         if self.focused_child_index.in_range(self.children.len()) {
             return self.children[self.focused_child_index.index()];
         }
@@ -608,7 +608,7 @@ impl ControlBase {
         RuntimeManager::get().hide_tooltip();
     }
 
-    pub(crate) fn notify_children_of_selection(&self, requester: Handle<UIElement>) {
+    pub(crate) fn notify_children_of_selection(&self, requester: Handle<()>) {
         let controls = RuntimeManager::get().get_controls_mut();
         for h_child in &self.children {
             if let Some(c) = controls.get_mut(*h_child) {

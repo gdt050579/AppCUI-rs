@@ -7,7 +7,7 @@ use crate::{
     input::{Key, KeyCode, MouseWheelDirection},
     prelude::KeyModifier,
     system::{Handle, HandleSupport, RuntimeManager, Theme},
-    ui::common::{traits::EventProcessStatus, UIElement},
+    ui::common::traits::EventProcessStatus,
     utils::{Caption, ExtractHotKeyMethod, Strategy, VectorIndex},
 };
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -133,7 +133,7 @@ pub struct Menu {
     pub(super) clip: ClipArea,
     pub(super) handle: Handle<Menu>,
     pub(super) parent_handle: Handle<Menu>,
-    pub(super) receiver_control_handle: Handle<UIElement>,
+    pub(super) receiver_control_handle: Handle<()>,
 }
 
 impl Menu {
@@ -255,7 +255,7 @@ impl Menu {
         MousePositionInfo::new(x - self.clip.left, y - self.clip.top, self).is_on_menu
     }
     #[inline(always)]
-    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
     }
 
@@ -340,7 +340,7 @@ impl Menu {
         self.update_first_visible_item();
     }
 
-    pub(super) fn process_shortcut(&mut self, key: Key, receiver_control_handle: Handle<UIElement>) -> bool {
+    pub(super) fn process_shortcut(&mut self, key: Key, receiver_control_handle: Handle<()>) -> bool {
         for (index, item) in self.items.iter_mut().enumerate() {
             if !item.is_enabled() {
                 continue;
@@ -558,7 +558,7 @@ impl Menu {
     fn close(&mut self) {
         RuntimeManager::get().activate_opened_menu_parent();
     }
-    fn run_item_action(&mut self, index: usize, receiver_control_handle: Handle<UIElement>) {
+    fn run_item_action(&mut self, index: usize, receiver_control_handle: Handle<()>) {
         if index >= self.items.len() {
             return;
         }

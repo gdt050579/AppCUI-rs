@@ -3,7 +3,7 @@ use crate::{
     input::{Key, KeyCode, KeyModifier},
     prelude::TextFormatBuilder,
     system::{Handle, RuntimeManager, Theme},
-    ui::common::{traits::EventProcessStatus, UIElement},
+    ui::common::traits::EventProcessStatus,
     utils::{Strategy, VectorIndex},
 };
 
@@ -22,7 +22,7 @@ pub struct MenuBar {
     opened_item: VectorIndex,
     hovered_item: VectorIndex,
     count: usize,
-    receiver_control_handle: Handle<UIElement>,
+    receiver_control_handle: Handle<()>,
 }
 
 impl MenuBar {
@@ -121,7 +121,7 @@ impl MenuBar {
     }
 
     #[inline(always)]
-    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
     }
     pub(crate) fn clear(&mut self) {

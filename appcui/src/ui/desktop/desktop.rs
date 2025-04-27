@@ -62,7 +62,7 @@ impl Desktop {
             }
         }
     }
-    fn reposition_child(&self, handle: Handle<UIElement>, new_poz: Rect) {
+    fn reposition_child(&self, handle: Handle<()>, new_poz: Rect) {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(handle) {
             let base = control.base_mut();
             base.set_position(new_poz.left(), new_poz.top());

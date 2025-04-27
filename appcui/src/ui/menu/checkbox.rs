@@ -238,7 +238,7 @@ impl MenuItem for CheckBox {
         MenuItemWrapper::CheckBox(self)
     }
 
-    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<()>) {
         self.menu_handle = parent;
         self.handle = me.cast();
     }

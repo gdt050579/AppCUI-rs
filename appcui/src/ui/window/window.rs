@@ -19,7 +19,7 @@ enum MoveDirectionTowards {
 #[derive(Copy, Clone)]
 struct Distance {
     value: u32,
-    handle: Handle<UIElement>,
+    handle: Handle<()>,
 }
 
 #[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true, window=true)]
@@ -83,7 +83,7 @@ impl Window {
         (((object.x - origin.x) * (object.x - origin.x)) as u32) + (((object.y - origin.y) * (object.y - origin.y)) as u32)
     }
 
-    fn compute_closest_distance(handle_parent: Handle<UIElement>, object_rect: Rect, dir: MoveDirectionTowards) -> Option<Distance> {
+    fn compute_closest_distance(handle_parent: Handle<()>, object_rect: Rect, dir: MoveDirectionTowards) -> Option<Distance> {
         let controls = RuntimeManager::get().get_controls_mut();
         if let Some(parent) = controls.get(handle_parent) {
             let base = parent.base();
@@ -118,7 +118,7 @@ impl Window {
             None
         }
     }
-    fn find_closest_control(handle: Handle<UIElement>, dir: MoveDirectionTowards) -> Handle<UIElement> {
+    fn find_closest_control(handle: Handle<()>, dir: MoveDirectionTowards) -> Handle<()> {
         let rm = RuntimeManager::get();
         let controls = rm.get_controls_mut();
         let mut h = handle;
@@ -575,7 +575,7 @@ impl Window {
             VectorIndex::Invalid
         }
     }
-    fn find_next_child_control(handle: Handle<UIElement>, forward: bool, start_from_current: bool, window_level: bool) -> Option<Handle<UIElement>> {
+    fn find_next_child_control(handle: Handle<()>, forward: bool, start_from_current: bool, window_level: bool) -> Option<Handle<()>> {
         let controls = RuntimeManager::get().get_controls();
         if let Some(control) = controls.get(handle) {
             let base = control.base();
@@ -623,7 +623,7 @@ impl Window {
         None
     }
 
-    fn hotkey_to_handle(controls: &ControlHandleManager, parent: Handle<UIElement>, hotkey: Key) -> Handle<UIElement> {
+    fn hotkey_to_handle(controls: &ControlHandleManager, parent: Handle<()>, hotkey: Key) -> Handle<()> {
         if let Some(control) = controls.get(parent) {
             let base = control.base();
             // object has to be visible and enabled
@@ -787,7 +787,7 @@ impl Window {
         }
         EventProcessStatus::Processed
     }
-    fn on_toolbar_item_clicked(&mut self, handle: Handle<UIElement>) -> bool {
+    fn on_toolbar_item_clicked(&mut self, handle: Handle<()>) -> bool {
         if let Some(item) = self.toolbar.get_item_mut(handle) {
             match item {
                 ToolBarItem::CloseButton(_) => {

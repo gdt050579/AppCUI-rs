@@ -3,7 +3,6 @@ use EnumBitFlags::EnumBitFlags;
 use super::{Group, GroupPosition, PositionHelper};
 use crate::prelude::RuntimeManager;
 use crate::system::Handle;
-use crate::ui::common::UIElement;
 
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
@@ -22,8 +21,8 @@ pub(crate) struct ItemBase {
     group: Group,
     status: StatusFlags,
     tooltip: String,
-    handle: Handle<UIElement>,
-    window: Handle<UIElement>,
+    handle: Handle<()>,
+    window: Handle<()>,
 }
 
 impl ItemBase {
@@ -154,15 +153,15 @@ impl ItemBase {
         self.tooltip.push_str(content);
     }
     #[inline(always)]
-    pub(crate) fn get_handle(&self) -> Handle<UIElement> {
+    pub(crate) fn get_handle(&self) -> Handle<()> {
         self.handle
     }
     #[inline(always)]
-    pub(crate) fn set_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_handle(&mut self, handle: Handle<()>) {
         self.handle = handle;
     }
     #[inline(always)]
-    pub(crate) fn set_window_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_window_handle(&mut self, handle: Handle<()>) {
         self.window = handle;
     }
     pub(crate) fn request_recompute_layout(&mut self) {
@@ -190,7 +189,7 @@ impl ItemBase {
         };
         marker_size + group_space
     }
-    pub(super) fn update_position_from_left(&mut self, helper: &mut PositionHelper, right: i32) -> Handle<UIElement> {
+    pub(super) fn update_position_from_left(&mut self, helper: &mut PositionHelper, right: i32) -> Handle<()> {
         // in case of new group `[=` ==> 2 chars
         // in case of existing group `|` ==> 1 char
         let extra = self.compute_extra_space(helper);
@@ -220,7 +219,7 @@ impl ItemBase {
         helper.last_group_supports_markers = self.supports_markers();
         previous_handle
     }
-    pub(super) fn update_position_from_right(&mut self, helper: &mut PositionHelper, left: i32) -> Handle<UIElement> {
+    pub(super) fn update_position_from_right(&mut self, helper: &mut PositionHelper, left: i32) -> Handle<()> {
         // in case of new group `[=` ==> 2 chars
         // in case of existing group `|` ==> 1 char
         let extra = self.compute_extra_space(helper);

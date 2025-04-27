@@ -150,7 +150,7 @@ impl OnMouseEvent for RadioBox {
 }
 impl OnSiblingSelected for RadioBox {
     #[allow(private_interfaces)]
-    fn on_sibling_selected(&mut self, handle: Handle<UIElement>) {
+    fn on_sibling_selected(&mut self, handle: Handle<()>) {
         self.selected = self.handle == handle;
     }
 }

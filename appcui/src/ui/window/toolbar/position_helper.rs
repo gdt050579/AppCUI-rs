@@ -1,10 +1,9 @@
 use crate::system::Handle;
-use crate::ui::common::UIElement;
 
 pub (super) struct PositionHelper {
     pub (super) x: i32,
     pub (super) y: i32,
-    pub (super) last_handle: Handle<UIElement>,
+    pub (super) last_handle: Handle<()>,
     pub (super) last_group: u8,
     pub (super) last_group_supports_markers: bool
 }

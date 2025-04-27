@@ -52,14 +52,14 @@ pub trait GenericMenuEvents {
     fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
 }
 
-use crate::{system::Handle, ui::common::UIElement};
+use crate::system::Handle;
 
 #[derive(Copy,Clone)]
 pub(crate) struct MenuCommandEvent {
     pub(crate) command_id: u32,
     pub(crate) menu: Handle<Menu>,
     pub(crate) item: Handle<Command>,
-    pub(crate) control_receiver_handle: Handle<UIElement>,
+    pub(crate) control_receiver_handle: Handle<()>,
 }
 
 #[derive(Copy,Clone)]
@@ -68,7 +68,7 @@ pub(crate) struct MenuCheckBoxStateChangedEvent {
     pub(crate) menu: Handle<Menu>,
     pub(crate) item: Handle<CheckBox>,
     pub(crate) checked: bool,
-    pub(crate) control_receiver_handle: Handle<UIElement>,
+    pub(crate) control_receiver_handle: Handle<()>,
 }
 
 #[derive(Copy,Clone)]
@@ -76,7 +76,7 @@ pub(crate) struct MenuRadioBoxSelectedEvent {
     pub(crate) command_id: u32,
     pub(crate) menu: Handle<Menu>,
     pub(crate) item: Handle<SingleChoice>,
-    pub(crate) control_receiver_handle: Handle<UIElement>,
+    pub(crate) control_receiver_handle: Handle<()>,
 }
 
 #[repr(u8)]

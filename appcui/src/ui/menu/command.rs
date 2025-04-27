@@ -184,7 +184,7 @@ impl MenuItem for Command {
     fn into_menuitem(self) -> MenuItemWrapper {
         MenuItemWrapper::Command(self)
     }
-    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<()>) {
         self.menu_handle = parent;
         self.handle = me.cast();
     }

@@ -35,7 +35,7 @@ impl MenuItem for Separator {
     fn into_menuitem(self) -> super::MenuItemWrapper {
         MenuItemWrapper::Separator(self)
     }
-    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<()>) {
         self.menu_handle = parent;
         self.handle = me.cast();
     }
