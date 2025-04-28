@@ -502,9 +502,10 @@ fn check_has_selection_and_count_with_mouse() {
         fn remove_items(&mut self) {
             let h = self.dropdownlist_handle;
             if let Some(ddl) = self.control_mut(h) {
-                let mut v = Vec::new();
-                v.push(ddl.item(0).unwrap().clone());
-                v.push(ddl.item(2).unwrap().clone());
+                let v = vec![
+                    ddl.item(0).unwrap().clone(),
+                    ddl.item(2).unwrap().clone(),
+                ];
                 ddl.clear();
                 for item in v {
                     ddl.add(item);

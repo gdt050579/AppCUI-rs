@@ -24,7 +24,7 @@ fn check_timer_manager_allocate_for() {
     let h = timer_manager.allocate_for(Handle::new(100));
     assert_eq!(h.index(), 3);
     let h = timer_manager.allocate_for(Handle::new(100));
-    assert_eq!(h.is_none(), true);
+    assert!(h.is_none());
     // timer_manager.terminate_thread(2);
     // let h = timer_manager.allocate_for(Handle::new(100));
     // assert_eq!(h.index(), 2);
@@ -36,8 +36,8 @@ fn check_timer_manager_control_handle() {
     let ch = Handle::<()>::new(100);
     let _ = timer_manager.allocate_for(ch);
     assert_eq!(timer_manager.control_handle(0), ch);
-    assert_eq!(timer_manager.control_handle(1).is_none(), true);
-    assert_eq!(timer_manager.control_handle(100).is_none(), true);
+    assert!(timer_manager.control_handle(1).is_none());
+    assert!(timer_manager.control_handle(100).is_none());
 }
 
 
@@ -46,9 +46,9 @@ fn check_timer_manager_index_mut() {
     let mut timer_manager = TimerManager::new(4);
     let ch = Handle::<()>::new(100);
     let _ = timer_manager.allocate_for(ch);
-    assert_eq!(timer_manager.index_mut(0).is_some(), true);
-    assert_eq!(timer_manager.index_mut(1).is_none(), true);
-    assert_eq!(timer_manager.index_mut(100).is_none(), true);
+    assert!(timer_manager.index_mut(0).is_some());
+    assert!(timer_manager.index_mut(1).is_none());
+    assert!(timer_manager.index_mut(100).is_none());
 }
 
 #[test]
@@ -56,8 +56,8 @@ fn check_timer_manager_get_mut() {
     let mut timer_manager = TimerManager::new(4);
     let ch = Handle::<()>::new(100);
     let h_timer = timer_manager.allocate_for(ch);
-    assert_eq!(timer_manager.get_mut(h_timer).is_some(),true);
-    assert_eq!(timer_manager.get_mut(Handle::<Timer>::new(200)).is_some(),false);
+    assert!(timer_manager.get_mut(h_timer).is_some());
+    assert!(timer_manager.get_mut(Handle::<Timer>::new(200)).is_none());
 }
 
 #[test]
@@ -76,7 +76,7 @@ fn check_update_control_handle() {
     // the control handle was not changed because it was already set up when the control was created
     assert_eq!(t.control_handle(), ch);
     // the timer is ready (because it has a control handle)
-    assert_eq!(t.is_ready(), true);
+    assert!(t.is_ready());
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn check_update_control_handle_init_with_none() {
     let h_timer = timer_manager.allocate_for(Handle::None);
     let t = timer_manager.get_mut(h_timer).unwrap();
     // timer is not ready because it DOES not have a control handle
-    assert_eq!(t.is_ready(), false);
+    assert!(!t.is_ready());
     // valid request (this will change the control handle)
     timer_manager.update_control_handle(h_timer, new_ch);
     // invalid request
@@ -97,5 +97,5 @@ fn check_update_control_handle_init_with_none() {
     // the control handle was changed to new_ch
     assert_eq!(t.control_handle(), new_ch);
     // now the timer is ready (because it has a control handle)
-    assert_eq!(t.is_ready(), true);
+    assert!(t.is_ready());
 }

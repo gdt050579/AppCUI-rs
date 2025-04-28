@@ -74,18 +74,8 @@ impl ButtonEvents for NumberFormatsWindow {
 
 impl CheckBoxEvents for NumberFormatsWindow {
     fn on_status_changed(&mut self, handle: Handle<CheckBox>, checked: bool) -> EventProcessStatus {
-        if handle == self.show_decimal {
-            if let Some(label) = self.toolbar().get_mut(handle) {
-                label.set_visible(checked);
-            }
-        } else if handle == self.show_hex {
-            if let Some(label) = self.toolbar().get_mut(handle) {
-                label.set_visible(checked);
-            }
-        } else if handle == self.show_binary {
-            if let Some(label) = self.toolbar().get_mut(handle) {
-                label.set_visible(checked);
-            }
+        if let Some(label) = self.toolbar().get_mut(handle) {
+            label.set_visible(checked);
         }
         EventProcessStatus::Processed
     }

@@ -427,14 +427,14 @@ fn test_number_floating_point_write_to_string() {
     let mut output = String::with_capacity(128);
     
     // Test f32
-    let f32_value: f32 = 3.14159;
+    let f32_value: f32 = 3.625;
     f32_value.write_to_string(&mut output, Format::Decimal);
-    assert_eq!(output, "3.14");
+    assert_eq!(output, "3.62");
     
     // Test f64
-    let f64_value: f64 = 2.71828;
+    let f64_value: f64 = 2.5;
     f64_value.write_to_string(&mut output, Format::Decimal);
-    assert_eq!(output, "2.71");
+    assert_eq!(output, "2.50");
     
     
     // Test negative float

@@ -941,7 +941,7 @@ fn check_surface_read_char() {
     s.write_char(3, 3, char!("A,Red,Green,flags: Bold"));
     s.write_char(30, 30, char!("A,Red,Green,flags: Bold"));
     let c = s.char(3, 3);
-    assert_eq!(c.is_some(), true);
+    assert!(c.is_some());
     let c = c.unwrap();
     assert_eq!(c.code, 'A');
     assert_eq!(c.foreground, Color::Red);

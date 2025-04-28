@@ -121,11 +121,11 @@ fn check_draw_ascii_art_scale() {
 
 #[test]
 fn check_image_with_invalid_size() {
-    assert_eq!(Image::new(0,0).is_none(), true);
-    assert_eq!(Image::new(100,0).is_none(), true);
-    assert_eq!(Image::new(0xFFFF,0xFFFF).is_none(), true);
-    assert_eq!(Image::with_str("0000").is_none(), true);
-    assert_eq!(Image::with_str("||").is_none(), true);
+    assert!(Image::new(0,0).is_none());
+    assert!(Image::new(100,0).is_none());
+    assert!(Image::new(0xFFFF,0xFFFF).is_none());
+    assert!(Image::with_str("0000").is_none());
+    assert!(Image::with_str("||").is_none());
 }
 
 #[test]

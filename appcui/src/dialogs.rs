@@ -288,7 +288,7 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
 /// # Variants
 /// * `Current` - Start in the current working directory.
 /// * `Last` - Start in the last location used in a previous dialog. If no previous dialog 
-///    has been opened, falls back to the current directory.
+///   has been opened, falls back to the current directory.
 /// * `Path` - Start in the specified path.
 ///
 /// # Example

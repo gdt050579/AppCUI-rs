@@ -1659,7 +1659,7 @@ fn check_vector_index_last() {
 fn check_caption_hotkey() {
     let c = Caption::new("Test &Caption", ExtractHotKeyMethod::AltPlusKey);
     assert_eq!(c.text(), "Test Caption");
-    assert_eq!(c.has_hotkey(), true);
+    assert!(c.has_hotkey());
     assert_eq!(c.hotkey(), Key::new(KeyCode::C, KeyModifier::Alt));
     assert_eq!(c.hotkey_pos(), Some(5));
 }
@@ -1669,7 +1669,7 @@ fn check_caption_hotkey() {
 fn check_caption_no_hotkey() {
     let c = Caption::new("Test Caption", ExtractHotKeyMethod::AltPlusKey);
     assert_eq!(c.text(), "Test Caption");
-    assert_eq!(c.has_hotkey(), false);
+    assert!(!c.has_hotkey());
     assert_eq!(c.hotkey(), Key::None);
     assert_eq!(c.hotkey_pos(), None);
 }

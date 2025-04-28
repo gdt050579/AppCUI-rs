@@ -173,226 +173,226 @@ fn check_command_parser_i32_params() {
 #[test]
 fn check_resize_errors() {
     // invalid number of parameters
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(1)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize()").unwrap()).is_err(), true);
+    assert!(ResizeCommand::new(&CommandParser::new("resize(1)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize(1,2,3)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize()").unwrap()).is_err());
     // invalid numeric values
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(w,10)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(10,h)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(w,h)").unwrap()).is_err(), true);
+    assert!(ResizeCommand::new(&CommandParser::new("resize(w,10)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize(10,h)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize(w,h)").unwrap()).is_err());
     //  invalid ranges
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(3,10)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(4,10)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(10001,10)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(10,3)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(10,4)").unwrap()).is_err(), true);
-    assert_eq!(ResizeCommand::new(&CommandParser::new("resize(10,10001)").unwrap()).is_err(), true);
+    assert!(ResizeCommand::new(&CommandParser::new("resize(3,10)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize(4,10)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize(10001,10)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize(10,3)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize(10,4)").unwrap()).is_err());
+    assert!(ResizeCommand::new(&CommandParser::new("resize(10,10001)").unwrap()).is_err());
 }
 
 
 #[test]
 fn check_paint_enable_errors() {
     // invalid bool constanta
-    assert_eq!(PaintEnableCommand::new(&CommandParser::new("Paint.Enable(blablabla)").unwrap()).is_err(), true);
+    assert!(PaintEnableCommand::new(&CommandParser::new("Paint.Enable(blablabla)").unwrap()).is_err());
 }
 
 #[test]
 fn check_mouse_wheel_errors() {
     // invalid number of parameters
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(1)").unwrap()).is_err(), true);
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(1,2)").unwrap()).is_err(), true);
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel()").unwrap()).is_err(), true);
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(1)").unwrap()).is_err());
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(1,2)").unwrap()).is_err());
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(1,2,3)").unwrap()).is_err());
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel()").unwrap()).is_err());
     // invalid numeric values
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(x,0,left,1)").unwrap()).is_err(), true);
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(0,y,up,1)").unwrap()).is_err(), true);
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(x,0,left,1)").unwrap()).is_err());
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(0,y,up,1)").unwrap()).is_err());
     // invalid direction
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(0,0,blablbbla,1)").unwrap()).is_err(), true);
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(0,0,blablbbla,1)").unwrap()).is_err());
     //  invalid time value
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(0,0,down,blablabla)").unwrap()).is_err(), true);
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(-10,-10,right,-5)").unwrap()).is_err(), true);
-    assert_eq!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(10,10,left,0)").unwrap()).is_err(), true);
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(0,0,down,blablabla)").unwrap()).is_err());
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(-10,-10,right,-5)").unwrap()).is_err());
+    assert!(MouseWheelCommand::new(&CommandParser::new("Mouse.Wheel(10,10,left,0)").unwrap()).is_err());
 }
 
 #[test]
 fn check_mouse_release_errors() {
     // invalid number of parameters
-    assert_eq!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release    (1)").unwrap()).is_err(), true);
-    assert_eq!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(1,2)").unwrap()).is_err(), true);
-    assert_eq!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release()").unwrap()).is_err(), true);
+    assert!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release    (1)").unwrap()).is_err());
+    assert!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(1,2)").unwrap()).is_err());
+    assert!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(1,2,3,4)").unwrap()).is_err());
+    assert!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release()").unwrap()).is_err());
     // invalid numeric values
-    assert_eq!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(x,0,left)").unwrap()).is_err(), true);
-    assert_eq!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(0,y,right)").unwrap()).is_err(), true);
-    assert_eq!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(x,y,center)").unwrap()).is_err(), true);
+    assert!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(x,0,left)").unwrap()).is_err());
+    assert!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(0,y,right)").unwrap()).is_err());
+    assert!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(x,y,center)").unwrap()).is_err());
     // invalid button
-    assert_eq!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(0,0,blablbbla)").unwrap()).is_err(), true);
+    assert!(MouseReleaseCommand::new(&CommandParser::new("Mouse.Release(0,0,blablbbla)").unwrap()).is_err());
 }
 
 #[test]
 fn check_mouse_move_errors() {
     // invalid number of parameters
-    assert_eq!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(1)").unwrap()).is_err(), true);
-    assert_eq!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move()").unwrap()).is_err(), true);
+    assert!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(1)").unwrap()).is_err());
+    assert!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(1,2,3)").unwrap()).is_err());
+    assert!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(1,2,3,4)").unwrap()).is_err());
+    assert!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move()").unwrap()).is_err());
     // invalid numeric values
-    assert_eq!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(x,0)").unwrap()).is_err(), true);
-    assert_eq!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(0,y)").unwrap()).is_err(), true);
+    assert!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(x,0)").unwrap()).is_err());
+    assert!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(0,y)").unwrap()).is_err());
 }
 
 
 #[test]
 fn check_mouse_hold_errors() {
     // invalid number of parameters
-    assert_eq!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(1)").unwrap()).is_err(), true);
-    assert_eq!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(1,2)").unwrap()).is_err(), true);
-    assert_eq!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold()").unwrap()).is_err(), true);
+    assert!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(1)").unwrap()).is_err());
+    assert!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(1,2)").unwrap()).is_err());
+    assert!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(1,2,3,4)").unwrap()).is_err());
+    assert!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold()").unwrap()).is_err());
     // invalid numeric values
-    assert_eq!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(x,0,left)").unwrap()).is_err(), true);
-    assert_eq!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(0,y,right)").unwrap()).is_err(), true);
-    assert_eq!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(x,y,center)").unwrap()).is_err(), true);
+    assert!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(x,0,left)").unwrap()).is_err());
+    assert!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(0,y,right)").unwrap()).is_err());
+    assert!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(x,y,center)").unwrap()).is_err());
     // invalid button
-    assert_eq!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(0,0,blablbbla)").unwrap()).is_err(), true);
+    assert!(MouseHoldCommand::new(&CommandParser::new("Mouse.Hold(0,0,blablbbla)").unwrap()).is_err());
 }
 
 #[test]
 fn check_mouse_doubleclicked_errors() {
     // invalid number of parameters
-    assert_eq!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(1)").unwrap()).is_err(), true);
-    assert_eq!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(1,2)").unwrap()).is_err(), true);
-    assert_eq!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick()").unwrap()).is_err(), true);
+    assert!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(1)").unwrap()).is_err());
+    assert!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(1,2)").unwrap()).is_err());
+    assert!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(1,2,3,4)").unwrap()).is_err());
+    assert!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick()").unwrap()).is_err());
     // invalid numeric values
-    assert_eq!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(x,0,left)").unwrap()).is_err(), true);
-    assert_eq!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(0,y,right)").unwrap()).is_err(), true);
-    assert_eq!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(x,y,center)").unwrap()).is_err(), true);
+    assert!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(x,0,left)").unwrap()).is_err());
+    assert!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(0,y,right)").unwrap()).is_err());
+    assert!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(x,y,center)").unwrap()).is_err());
     // invalid button
-    assert_eq!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(0,0,blablbbla)").unwrap()).is_err(), true);
+    assert!(MouseDoubleClickCommand::new(&CommandParser::new("Mouse.DoubleClick(0,0,blablbbla)").unwrap()).is_err());
 }
 
 #[test]
 fn check_mouse_click_errors() {
     // invalid number of parameters
-    assert_eq!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(1)").unwrap()).is_err(), true);
-    assert_eq!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(1,2)").unwrap()).is_err(), true);
-    assert_eq!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck()").unwrap()).is_err(), true);
+    assert!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(1)").unwrap()).is_err());
+    assert!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(1,2)").unwrap()).is_err());
+    assert!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(1,2,3,4)").unwrap()).is_err());
+    assert!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck()").unwrap()).is_err());
     // invalid numeric values
-    assert_eq!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(x,0,left)").unwrap()).is_err(), true);
-    assert_eq!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(0,y,right)").unwrap()).is_err(), true);
-    assert_eq!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(x,y,center)").unwrap()).is_err(), true);
+    assert!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(x,0,left)").unwrap()).is_err());
+    assert!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(0,y,right)").unwrap()).is_err());
+    assert!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(x,y,center)").unwrap()).is_err());
     // invalid button
-    assert_eq!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(0,0,blablbbla)").unwrap()).is_err(), true);
+    assert!(MouseClickCommand::new(&CommandParser::new("Mouse.Clck(0,0,blablbbla)").unwrap()).is_err());
 }
 
 #[test]
 fn check_mouse_drag_errors() {
     // invalid number of parameters
-    assert_eq!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(1)").unwrap()).is_err(), true);
-    assert_eq!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(1,2)").unwrap()).is_err(), true);
-    assert_eq!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag()").unwrap()).is_err(), true);
+    assert!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(1)").unwrap()).is_err());
+    assert!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(1,2)").unwrap()).is_err());
+    assert!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(1,2,3)").unwrap()).is_err());
+    assert!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag()").unwrap()).is_err());
     // invalid numeric values
-    assert_eq!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(x1,0,0,0)").unwrap()).is_err(), true);
-    assert_eq!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(0,y1,0,0)").unwrap()).is_err(), true);
-    assert_eq!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(0,0,x2,0)").unwrap()).is_err(), true);
-    assert_eq!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(0,0,0,y2)").unwrap()).is_err(), true);
+    assert!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(x1,0,0,0)").unwrap()).is_err());
+    assert!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(0,y1,0,0)").unwrap()).is_err());
+    assert!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(0,0,x2,0)").unwrap()).is_err());
+    assert!(MouseDragCommand::new(&CommandParser::new("Mouse.Drag(0,0,0,y2)").unwrap()).is_err());
 }
 
 #[test]
 fn check_key_type_text_errors() {
     // invalid number of parameters
-    assert_eq!(KeyTypeTextCommand::new(&CommandParser::new("Key.TypeText(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(KeyTypeTextCommand::new(&CommandParser::new("Key.TypeText(1,2)").unwrap()).is_err(), true);
-    assert_eq!(KeyTypeTextCommand::new(&CommandParser::new("Key.TypeText(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(KeyTypeTextCommand::new(&CommandParser::new("Key.TypeText()").unwrap()).is_err(), true);
+    assert!(KeyTypeTextCommand::new(&CommandParser::new("Key.TypeText(1,2,3,4)").unwrap()).is_err());
+    assert!(KeyTypeTextCommand::new(&CommandParser::new("Key.TypeText(1,2)").unwrap()).is_err());
+    assert!(KeyTypeTextCommand::new(&CommandParser::new("Key.TypeText(1,2,3)").unwrap()).is_err());
+    assert!(KeyTypeTextCommand::new(&CommandParser::new("Key.TypeText()").unwrap()).is_err());
 }
 
 #[test]
 fn check_key_pressed_errors() {
     // invalid number of parameters
-    assert_eq!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed()").unwrap()).is_err(), true);
+    assert!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(1,2,3,4)").unwrap()).is_err());
+    assert!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(1,2,3)").unwrap()).is_err());
+    assert!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed()").unwrap()).is_err());
     // ivalid key
-    assert_eq!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(blablabla)").unwrap()).is_err(), true);
+    assert!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(blablabla)").unwrap()).is_err());
     // invalid number of times
-    assert_eq!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(Enter,blablabla)").unwrap()).is_err(), true);
-    assert_eq!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(Enter,0)").unwrap()).is_err(), true);
+    assert!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(Enter,blablabla)").unwrap()).is_err());
+    assert!(KeyPressedCommand::new(&CommandParser::new("Key.Pressed(Enter,0)").unwrap()).is_err());
 }
 
 #[test]
 fn check_key_modifier_errors() {
     // invalid number of parameters
-    assert_eq!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier(1,2)").unwrap()).is_err(), true);
-    assert_eq!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier()").unwrap()).is_err(), true);
+    assert!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier(1,2,3,4)").unwrap()).is_err());
+    assert!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier(1,2,3)").unwrap()).is_err());
+    assert!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier(1,2)").unwrap()).is_err());
+    assert!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier()").unwrap()).is_err());
     // ivalid modifiers
-    assert_eq!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier(blablabla)").unwrap()).is_err(), true);
+    assert!(KeyModifierCommand::new(&CommandParser::new("Key.Modifier(blablabla)").unwrap()).is_err());
 }
 
 #[test]
 fn check_error_disable_errors() {
     // invalid number of parameters
-    assert_eq!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable(1,2)").unwrap()).is_err(), true);
-    assert_eq!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable()").unwrap()).is_err(), true);
+    assert!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable(1,2,3,4)").unwrap()).is_err());
+    assert!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable(1,2,3)").unwrap()).is_err());
+    assert!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable(1,2)").unwrap()).is_err());
+    assert!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable()").unwrap()).is_err());
     // ivalid bool value
-    assert_eq!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable(blablabla)").unwrap()).is_err(), true);
+    assert!(ErrorDisableCommand::new(&CommandParser::new("Error.Disable(blablabla)").unwrap()).is_err());
 }
 
 #[test]
 fn check_clipboard_settext_errors() {
     // invalid number of parameters
-    assert_eq!(ClipboardSetTextCommand::new(&CommandParser::new("Clipboard.SetText(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(ClipboardSetTextCommand::new(&CommandParser::new("Clipboard.SetText(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(ClipboardSetTextCommand::new(&CommandParser::new("Clipboard.SetText(1,2)").unwrap()).is_err(), true);
-    assert_eq!(ClipboardSetTextCommand::new(&CommandParser::new("Clipboard.SetText()").unwrap()).is_err(), true);
+    assert!(ClipboardSetTextCommand::new(&CommandParser::new("Clipboard.SetText(1,2,3,4)").unwrap()).is_err());
+    assert!(ClipboardSetTextCommand::new(&CommandParser::new("Clipboard.SetText(1,2,3)").unwrap()).is_err());
+    assert!(ClipboardSetTextCommand::new(&CommandParser::new("Clipboard.SetText(1,2)").unwrap()).is_err());
+    assert!(ClipboardSetTextCommand::new(&CommandParser::new("Clipboard.SetText()").unwrap()).is_err());
 }
 
 #[test]
 fn check_clipboard_clear_errors() {
     // invalid number of parameters
-    assert_eq!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear(1,2)").unwrap()).is_err(), true);
-    assert_eq!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear(1)").unwrap()).is_err(), true);
-    assert_eq!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear()").unwrap()).is_ok(), true);
+    assert!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear(1,2,3,4)").unwrap()).is_err());
+    assert!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear(1,2,3)").unwrap()).is_err());
+    assert!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear(1,2)").unwrap()).is_err());
+    assert!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear(1)").unwrap()).is_err());
+    assert!(ClipboardClearCommand::new(&CommandParser::new("Clipboard.Clear()").unwrap()).is_ok());
 }
 
 #[test]
 fn check_checkclipboardtext_errors() {
     // invalid number of parameters
-    assert_eq!(CheckClipboardTextCommand::new(&CommandParser::new("CheckClipboatfText(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(CheckClipboardTextCommand::new(&CommandParser::new("CheckClipboatfText(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(CheckClipboardTextCommand::new(&CommandParser::new("CheckClipboatfText(1,2)").unwrap()).is_err(), true);
-    assert_eq!(CheckClipboardTextCommand::new(&CommandParser::new("CheckClipboatfText()").unwrap()).is_err(), true);
+    assert!(CheckClipboardTextCommand::new(&CommandParser::new("CheckClipboatfText(1,2,3,4)").unwrap()).is_err());
+    assert!(CheckClipboardTextCommand::new(&CommandParser::new("CheckClipboatfText(1,2,3)").unwrap()).is_err());
+    assert!(CheckClipboardTextCommand::new(&CommandParser::new("CheckClipboatfText(1,2)").unwrap()).is_err());
+    assert!(CheckClipboardTextCommand::new(&CommandParser::new("CheckClipboatfText()").unwrap()).is_err());
 }
 
 #[test]
 fn check_checkhash_errors() {
     // invalid number of parameters
-    assert_eq!(CheckHashCommand::new(&CommandParser::new("CheckHash(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(CheckHashCommand::new(&CommandParser::new("CheckHash(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(CheckHashCommand::new(&CommandParser::new("CheckHash(1,2)").unwrap()).is_err(), true);
-    assert_eq!(CheckHashCommand::new(&CommandParser::new("CheckHash()").unwrap()).is_err(), true);
+    assert!(CheckHashCommand::new(&CommandParser::new("CheckHash(1,2,3,4)").unwrap()).is_err());
+    assert!(CheckHashCommand::new(&CommandParser::new("CheckHash(1,2,3)").unwrap()).is_err());
+    assert!(CheckHashCommand::new(&CommandParser::new("CheckHash(1,2)").unwrap()).is_err());
+    assert!(CheckHashCommand::new(&CommandParser::new("CheckHash()").unwrap()).is_err());
     // ivalid hash value
-    assert_eq!(CheckHashCommand::new(&CommandParser::new("CheckHash(blablabla)").unwrap()).is_err(), true);
+    assert!(CheckHashCommand::new(&CommandParser::new("CheckHash(blablabla)").unwrap()).is_err());
 }
 
 #[test]
 fn check_checkcursor_errors() {
     // invalid number of parameters
-    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(1,2,3,4)").unwrap()).is_err(), true);
-    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(1,2,3)").unwrap()).is_err(), true);
-    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor()").unwrap()).is_err(), true);
+    assert!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(1,2,3,4)").unwrap()).is_err());
+    assert!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(1,2,3)").unwrap()).is_err());
+    assert!(CheckCursorCommand::new(&CommandParser::new("CheckCursor()").unwrap()).is_err());
     // invalid one-parameter value (should be hidden or false)
-    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(blablabla)").unwrap()).is_err(), true);
+    assert!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(blablabla)").unwrap()).is_err());
     // invalid position values (integers)
-    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(x,0)").unwrap()).is_err(), true);
-    assert_eq!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(0,y)").unwrap()).is_err(), true);
+    assert!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(x,0)").unwrap()).is_err());
+    assert!(CheckCursorCommand::new(&CommandParser::new("CheckCursor(0,y)").unwrap()).is_err());
 }

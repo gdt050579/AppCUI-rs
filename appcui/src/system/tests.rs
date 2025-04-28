@@ -1,5 +1,4 @@
 use appcui_proc_macro::*;
-use std::error::Error;
 
 use super::App;
 use super::Theme;
@@ -295,10 +294,10 @@ fn check_clipboard_api() {
     let a = App::debug(60, 10, "Paint.Enable(false)").build().unwrap();
     Clipboard::set_text("Hello, world!");
     assert_eq!(Clipboard::text(), Some("Hello, world!".to_string()));
-    assert_eq!(Clipboard::has_text(), true);
+    assert!(Clipboard::has_text());
     Clipboard::clear();
     assert_eq!(Clipboard::text(), None);
-    assert_eq!(Clipboard::has_text(), false);
+    assert!(!Clipboard::has_text());
     a.run();
 }
 
@@ -307,11 +306,11 @@ fn check_clipboard_api() {
 fn check_clipboard_api_without_app_initialization() {
     Clipboard::set_text("Hello, world!");
     assert_eq!(Clipboard::text(), None);
-    assert_eq!(Clipboard::has_text(), false);
+    assert!(!Clipboard::has_text());
     assert_eq!(Clipboard::text(), None);
     Clipboard::clear();
     assert_eq!(Clipboard::text(), None);
-    assert_eq!(Clipboard::has_text(), false);
+    assert!(!Clipboard::has_text());
 }
 
 #[test]
@@ -332,10 +331,10 @@ fn check_app_create_with_invalid_size() {
     assert!(a.is_err());
     let err: crate::system::Error = a.err().unwrap();
     assert_eq!(err.kind, crate::system::ErrorKind::InvalidParameter);
-    assert_eq!(
-        err.description(),
-        "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !"
-    );
+    // assert_eq!(
+    //     err.description(),
+    //     "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !"
+    // );
     let desc = format!("{}", err);
     assert_eq!(desc, "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !");
 }
