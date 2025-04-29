@@ -38,26 +38,7 @@
 //! Each terminal implementation provides these capabilities through the Terminal trait,
 //! allowing AppCUI to work consistently across different platforms while leveraging
 //! platform-specific features when available.
-//!
-//! # Example
-//! ```rust,no_run
-//! use appcui::prelude::*;
-//! 
-//! // Create a new application with a specific terminal size
-//! let app = App::new()
-//!     .size(Size::new(80, 25))  // Set terminal size to 80x25
-//!     .title("My Terminal App") // Set window title (Windows only)
-//!     .build()?;
-//!```
-//! 
-//! or
-//! 
-//! ```rust,no_run
-//! use appcui::prelude::*;
-//! 
-//! // Create a new application with a specific terminal type
-//! let app = App::new().with_termnal(TerminalType::WindowsConsole).build()?; 
-//! ```
+
 
 mod debug;
 mod system_event;
