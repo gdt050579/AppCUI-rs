@@ -1,3 +1,64 @@
+//! # Terminals
+//!
+//! This module contains the different terminal implementations.
+//! The terminal is responsible for rendering the UI and handling user input.
+//! 
+//! The terminal is not created by the user, it is created by the system based on some parameters that are provided when an Application is being initialized.
+//! ## Terminal Support and Capabilities
+//!
+//! AppCUI supports multiple terminal implementations with varying capabilities across different operating systems:
+//!
+//! - **Windows Console**: Native Windows terminal with full keyboard/mouse support
+//! - **NCurses**: Unix-based terminal with good display and input capabilities
+//! - **Termios**: Basic Unix terminal with limited features
+//!
+//! ### Default Terminals by OS:
+//! - Windows: Windows Console
+//! - Linux: NCurses
+//! - Mac/OSX: Termios
+//!
+//! ### Key Capabilities:
+//!
+//! #### Display
+//! - 16 foreground and background colors across all terminals
+//! - Unicode support (Windows Console: UTF-16, NCurses: UTF-8)
+//! - Cursor control and underline support (Windows/NCurses)
+//! - Bold text support (NCurses only)
+//!
+//! #### Input Handling
+//! - Keyboard: Full modifier support in Windows (Alt/Ctrl/Shift combinations)
+//! - Mouse: Click, move, drag and wheel support (Windows/NCurses)
+//! - System: Console resize events (Windows/NCurses)
+//!
+//! #### Additional Features
+//! - Clipboard support via native APIs (Windows) or copypasta crate (NCurses)
+//! - Window title control (Windows only)
+//! - Console dimension control (Windows/NCurses)
+//!
+//! Each terminal implementation provides these capabilities through the Terminal trait,
+//! allowing AppCUI to work consistently across different platforms while leveraging
+//! platform-specific features when available.
+//!
+//! # Example
+//! ```rust,no_run
+//! use appcui::prelude::*;
+//! 
+//! // Create a new application with a specific terminal size
+//! let app = App::new()
+//!     .size(Size::new(80, 25))  // Set terminal size to 80x25
+//!     .title("My Terminal App") // Set window title (Windows only)
+//!     .build()?;
+//!```
+//! 
+//! or
+//! 
+//! ```rust,no_run
+//! use appcui::prelude::*;
+//! 
+//! // Create a new application with a specific terminal type
+//! let app = App::new().with_termnal(TerminalType::WindowsConsole).build()?; 
+//! ```
+
 mod debug;
 mod system_event;
 #[cfg(target_family = "unix")]
