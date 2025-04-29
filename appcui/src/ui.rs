@@ -157,3 +157,4 @@ pub use pathfinder::PathFinder;
 pub use treeview::TreeView;
 pub use progressbar::ProgressBar;
 pub use textarea::TextArea;
+pub use menu::Menu;
