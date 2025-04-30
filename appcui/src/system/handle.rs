@@ -10,11 +10,18 @@ pub(crate) trait HandleSupport<T> {
     fn set_handle(&mut self, handle: Handle<T>);
 }
 
+/// The `Handle<T>` generic type provides a type-safe way to reference and manage UI components:
+/// - Type-safe references to UI controls, menus, and other components
+/// - Unique identification of components across the application
+/// - Safe component lifecycle management
+/// - Support for component hierarchy and relationships
+/// - Thread-safe component access  
 pub struct Handle<T> {
     value: u64,
     _phantom: PhantomData<T>,
 }
 impl<T> Handle<T> {
+    /// The `None` handle value
     #[allow(non_upper_case_globals)]
     pub const None: Handle<T> = Handle {
         value: u64::MAX,
@@ -56,6 +63,7 @@ impl<T> Handle<T> {
         };
         r
     }
+    /// Checks if the handle is `None`
     #[inline(always)]
     pub fn is_none(&self) -> bool {
         self.value == u64::MAX
