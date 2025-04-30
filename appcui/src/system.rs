@@ -54,24 +54,6 @@
 //! - Menu-specific theming
 //! - Color and style management
 //!
-//! ## Usage Example
-//! ```rust, no_compile
-//! use appcui::prelude::*;
-//! 
-//! // Create a new application with system configuration
-//! let app = App::new()
-//!     .size(Size::new(80, 25))
-//!     .title("My App")
-//!     .menu_bar()
-//!     .command_bar()
-//!     .theme(Theme::new(Themes::DarkGray))
-//!     .timers_count(4)
-//!     .build()?;
-//! 
-//! // Start the application's main loop
-//! app.run();
-//! ```
-//!
 //! ## Error Handling
 //! The system module provides error handling through the `Error` type:
 //! - `InitializationFailure`: Failed to initialize system components
@@ -85,43 +67,43 @@
 //! - Synchronized timer operations
 //! - Protected background task execution
 
-mod theme;
 mod app;
+mod background_task;
+mod builder;
 mod clipboard;
+mod control_handle_manager;
+mod error;
+#[cfg(feature = "EVENT_RECORDER")]
+mod event_recorder;
+mod handle;
+mod menu_handle_manager;
 mod runtime_manager;
 mod runtime_manager_traits;
-mod tooltip;
-mod error;
-mod handle;
-mod control_handle_manager;
-mod menu_handle_manager;
-mod timer;
-mod background_task;
 #[cfg(test)]
 mod tests;
-mod builder;
-#[cfg(feature="EVENT_RECORDER")]
-mod event_recorder;
+mod theme;
+mod timer;
+mod tooltip;
 
+pub(crate) use self::control_handle_manager::ControlHandleManager;
+pub use self::handle::Handle;
+pub(crate) use self::handle::HandleSupport;
+pub(crate) use self::menu_handle_manager::MenuHandleManager;
+pub(crate) use self::runtime_manager_traits::ThemeMethods;
+pub(crate) use self::theme::MenuTheme;
 pub use self::theme::Theme;
 pub use self::theme::Themes;
-pub(crate) use self::runtime_manager_traits::ThemeMethods;
-pub use self::handle::Handle;
-pub (crate) use self::handle::HandleSupport;
-pub (crate) use self::theme::MenuTheme;
-pub (crate) use self::control_handle_manager::ControlHandleManager;
-pub (crate) use self::menu_handle_manager::MenuHandleManager;
 
 pub use self::app::App;
+pub use self::background_task::BackgroundTask;
+pub use self::background_task::BackgroundTaskConector;
+pub use self::builder::Builder;
 pub use self::clipboard::Clipboard;
 pub use self::error::Error;
 pub use self::error::ErrorKind;
-pub (crate) use self::runtime_manager::RuntimeManager;
-pub (crate) use self::runtime_manager_traits::LayoutMethods;
-pub (crate) use self::runtime_manager_traits::PaintMethods;
-pub (crate) use self::runtime_manager_traits::TimerMethods;
-pub (crate) use self::tooltip::ToolTip;
-pub use self::builder::Builder;
+pub(crate) use self::runtime_manager::RuntimeManager;
+pub(crate) use self::runtime_manager_traits::LayoutMethods;
+pub(crate) use self::runtime_manager_traits::PaintMethods;
+pub(crate) use self::runtime_manager_traits::TimerMethods;
 pub use self::timer::Timer;
-pub use self::background_task::BackgroundTask;
-pub use self::background_task::BackgroundTaskConector;
+pub(crate) use self::tooltip::ToolTip;
