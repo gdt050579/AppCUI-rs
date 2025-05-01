@@ -209,6 +209,10 @@ name = "fractals"
 path = "fractals/main.rs"
 
 [[example]]
+name = "spiral"
+path = "spiral/main.rs"
+
+[[example]]
 name = "counter"
 path = "counter/main.rs"
 
