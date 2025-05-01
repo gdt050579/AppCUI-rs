@@ -205,6 +205,10 @@ name = "matrix"
 path = "matrix/main.rs"
 
 [[example]]
+name = "fractals"
+path = "fractals/main.rs"
+
+[[example]]
 name = "counter"
 path = "counter/main.rs"
 
