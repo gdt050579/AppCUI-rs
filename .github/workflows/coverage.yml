@@ -50,11 +50,12 @@ jobs:
         
     - name: Upload badge to Gist
       if: github.ref == 'refs/heads/main'
-      uses: andymckay/append-gist-action@1.0.1
+      uses: gist-updater@v1
       with:
         token: ${{ secrets.GIST_CODECOVERAGE }}
-        gistURL: https://gist.github.com/gdt050579/f7d7e7d56b2725a3b33a265e8a9d8e9c
-        file: coverage.svg
+        gist_id: f7d7e7d56b2725a3b33a265e8a9d8e9c
+        filename: coverage.svg
+        content: ${{ steps.coverage_summary.outputs.coverage }}%
         
     - name: Archive code coverage results
       uses: actions/upload-artifact@v4
