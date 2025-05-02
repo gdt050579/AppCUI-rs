@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::ui::radiobox::events::EventData;
+use super::Type;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnSiblingSelected,internal=true)]
 pub struct RadioBox {
