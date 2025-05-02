@@ -232,3 +232,53 @@ fn check_shortkeys() {
     a.add_window(MyWin::new());
     a.run();
 }
+#[test]
+fn check_radiobox_ascii_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Ascii mode')   
+        CheckHash(0x7ECA8EE81C4146D5)  
+        CheckCursor(8,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Ascii,select:false"));
+    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Ascii,select:true"));
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Ascii,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_radiobox_circle_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Circle mode')   
+        CheckHash(0xF471A26E9DA373E8)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Circle,select:false"));
+    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Circle,select:true"));
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Circle,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_radiobox_diamond_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Diamond mode')   
+        CheckHash(0xAA65B0D6A6E73527)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Diamond,select:false"));
+    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Diamond,select:true"));
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
