@@ -37,6 +37,10 @@ name = "radioboxes"
 path = "radioboxes/main.rs"
 
 [[example]]
+name = "radioboxes_types"
+path = "radioboxes_types/main.rs"
+
+[[example]]
 name = "colorpicker"
 path = "colorpicker/main.rs"
 

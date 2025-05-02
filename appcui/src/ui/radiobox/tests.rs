@@ -5,19 +5,19 @@ fn check_radiobox_creation() {
     let script = "
         Paint.Enable(false)
         Paint('some radioboxes')   
-        CheckHash(0xDCBAB7277D546411)  
+        CheckHash(0xADBC43945D44CAEE)  
         CheckCursor(13,5) 
         Key.Pressed(Space)
         Paint('third radiobox checked')  
-        CheckHash(0x9896DC05AC121749) 
+        CheckHash(0x349455E173D3F586) 
         CheckCursor(13,5) 
         Key.Pressed(Tab,2)
         Paint('second radiobox selected')  
-        CheckHash(0x16DDCF9DB5BA6AB1) 
+        CheckHash(0xAA97B2213D654C16) 
         CheckCursor(13,4) 
         Key.Pressed(Space)
         Paint('second radiobox checked')  
-        CheckHash(0x640BD0AB0F16893D)
+        CheckHash(0x3BA39654D6BE3162)
         CheckCursor(13,4) 
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
@@ -35,19 +35,19 @@ fn check_radiobox_macro_creation() {
     let script = "
         Paint.Enable(false)
         Paint('some radioboxes')   
-        CheckHash(0xDCBAB7277D546411)  
+        CheckHash(0xADBC43945D44CAEE)  
         CheckCursor(13,5) 
         Key.Pressed(Space)
         Paint('third radiobox checked')  
-        CheckHash(0x9896DC05AC121749) 
+        CheckHash(0x349455E173D3F586) 
         CheckCursor(13,5) 
         Key.Pressed(Tab,2)
         Paint('second radiobox selected')  
-        CheckHash(0x16DDCF9DB5BA6AB1) 
+        CheckHash(0xAA97B2213D654C16) 
         CheckCursor(13,4) 
         Key.Pressed(Space)
         Paint('second radiobox checked')  
-        CheckHash(0x640BD0AB0F16893D)
+        CheckHash(0x3BA39654D6BE3162)
         CheckCursor(13,4) 
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
@@ -121,114 +121,221 @@ fn check_shortkeys() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0xdb01f50869759c19)
+        CheckHash(0xD7E773EB5F49A999)
         Paint('State_3')
-        CheckHash(0xdb01f50869759c19)
+        CheckHash(0xD7E773EB5F49A999)
         Mouse.Move(33,10)
         Paint('State_4')
-        CheckHash(0x8a0e0ef9f45e1535)
+        CheckHash(0x63BBFD755F4EFB45)
         Mouse.Move(26,10)
         Mouse.Hold(26,10,left)
         Paint('State_5')
-        CheckHash(0x2130db6ff3a32fe9)
+        CheckHash(0x1F77A9D73501BD29)
         Mouse.Release(26,10,left)
         Paint('State_6')
-        CheckHash(0x6fdebf262a222867)
+        CheckHash(0x7315C053C705A14F)
         Mouse.Move(26,11)
         Paint('State_7')
-        CheckHash(0x339fee3bb426a662)
+        CheckHash(0x16E0BC6567A865A)
         Mouse.Move(25,11)
         Mouse.Hold(25,11,left)
         Paint('State_8')
-        CheckHash(0xeedd9367b4fc8307)
+        CheckHash(0xC7A8325AE08BA837)
         Mouse.Release(25,11,left)
         Paint('State_9')
-        CheckHash(0x2f44f6fc465f5c10)
+        CheckHash(0xC7C6E08882B89070)
         Mouse.Move(27,10)
         Paint('State_10')
-        CheckHash(0xfda5250f7bc1c2e4)
+        CheckHash(0xB5C00D0B9C294FCC)
         Mouse.Move(34,10)
         Paint('State_11')
-        CheckHash(0x2f44f6fc465f5c10)
+        CheckHash(0xC7C6E08882B89070)
         Mouse.Move(43,9)
         Paint('State_12')
-        CheckHash(0xd2dd420faf38fe35)
+        CheckHash(0x168B19668C630410)
         Mouse.Move(46,10)
         Paint('State_13')
-        CheckHash(0xc0ac23c798fbc058)
+        CheckHash(0x7E76ECACD7F93820)
         Mouse.Hold(46,10,left)
         Paint('State_14')
-        CheckHash(0x23f121b699896710)
+        CheckHash(0x5A3ECDF8F7E83148)
         Mouse.Release(46,10,left)
         Paint('State_15')
-        CheckHash(0x266e830fde0ef789)
+        CheckHash(0xF80CD34AE9A21C41)
         Mouse.Move(47,11)
         Paint('State_16')
-        CheckHash(0xdf9e2a313b178c64)
+        CheckHash(0x36FFC2CCA07864D4)
         Mouse.Move(48,11)
         Mouse.Hold(48,11,left)
         Paint('State_17')
-        CheckHash(0xca7c0e45efb53ed9)
+        CheckHash(0x4184A9B25FF37279)
         Mouse.Release(48,11,left)
         Paint('State_18')
-        CheckHash(0x2862c921e66e39ff)
+        CheckHash(0x744900DB66314C6F)
         Mouse.Move(72,11)
         Key.Pressed(Alt+M)
         Paint('State_19')
-        CheckHash(0xf6dfe0a9d05da72d)
+        CheckHash(0xA71DF7DA996F045D)
         Key.Pressed(Alt+R)
         Paint('State_20')
-        CheckHash(0x3c1e63362f51205)
+        CheckHash(0xC356E7EC1CB4240D)
         Key.Pressed(Alt+C)
         Paint('State_21')
-        CheckHash(0x6fdebf262a222867)
+        CheckHash(0x7315C053C705A14F)
         Key.Pressed(Alt+K)
         Paint('State_22')
-        CheckHash(0x2f44f6fc465f5c10)
+        CheckHash(0xC7C6E08882B89070)
         Key.Pressed(Tab)
         Paint('State_23')
-        CheckHash(0x38707c96cbad29d8)
+        CheckHash(0xA3EC30DFD690BEC8)
         Key.Pressed(Tab)
         Paint('State_24')
-        CheckHash(0x23f121b699896710)
+        CheckHash(0x5A3ECDF8F7E83148)
         Key.Pressed(Tab)
         Paint('State_25')
-        CheckHash(0xb372411a55203be8)
+        CheckHash(0x90583D032CABF10)
         Key.Pressed(Tab)
         Paint('State_26')
-        CheckHash(0xd4e833e75ee28d18)
+        CheckHash(0xEFC782640FAFE5F0)
         Key.Pressed(Space)
         Paint('State_27')
-        CheckHash(0x8696b1d76b96b445)
+        CheckHash(0xDB266D68A8C6C0FD)
         Key.Pressed(Tab)
         Paint('State_28')
-        CheckHash(0xe726f9d5b0e4cae5)
+        CheckHash(0x3927C193E03BD6A5)
         Key.Pressed(Tab)
         Paint('State_29')
-        CheckHash(0xc4c52ff260a018ad)
+        CheckHash(0x929B52F2AD98C46D)
         Key.Pressed(Space)
         Paint('State_30')
-        CheckHash(0x2f44f6fc465f5c10)
+        CheckHash(0xC7C6E08882B89070)
         Key.Pressed(Tab)
         Paint('State_31')
-        CheckHash(0x38707c96cbad29d8)
+        CheckHash(0xA3EC30DFD690BEC8)
         Key.Pressed(Tab)
         Paint('State_32')
-        CheckHash(0x23f121b699896710)
+        CheckHash(0x5A3ECDF8F7E83148)
         Key.Pressed(Space)
         Paint('State_33')
-        CheckHash(0x266e830fde0ef789)
+        CheckHash(0xF80CD34AE9A21C41)
         Key.Pressed(Tab)
         Paint('State_34')
-        CheckHash(0xca7c0e45efb53ed9)
+        CheckHash(0x4184A9B25FF37279)
         Key.Pressed(Enter)
         Paint('State_35')
-        CheckHash(0x2862c921e66e39ff)
+        CheckHash(0x744900DB66314C6F)
         Key.Pressed(Escape)
         Paint('State_36')
         CheckHash(0x483ede4555d977a5)    
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+#[test]
+fn check_radiobox_ascii_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Ascii mode')   
+        CheckHash(0x7ECA8EE81C4146D5)  
+        CheckCursor(8,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Ascii,select:false"));
+    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Ascii,select:true"));
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Ascii,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_radiobox_circle_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Circle mode')   
+        CheckHash(0xF471A26E9DA373E8)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Circle,select:false"));
+    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Circle,select:true"));
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Circle,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_radiobox_diamond_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Diamond mode')   
+        CheckHash(0xAA65B0D6A6E73527)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Diamond,select:false"));
+    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Diamond,select:true"));
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_radiobox_is_selected() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xAA65B0D6A6E73527)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    let r1 = radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Diamond,select:false");
+    let r2 = radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Diamond,select:true");
+    assert!(!r1.is_selected());
+    assert!(r2.is_selected());
+    w.add(r1);
+    w.add(r2);
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_radiobox_set_caption() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xF4D4B61AB48E7B81)  
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    let mut rb = radiobox!("'x',x:1,y:1,w:40,type=Ascii,select:false");
+    rb.set_caption("Test &caption");
+    assert_eq!(rb.caption(), "Test caption");
+    w.add(rb);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_radiobox_show_tooltip() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state => ( ) A real')   
+        CheckHash(0xB4EB92A5F09397A6)  
+        Mouse.Move(15,3)
+        Paint('Tool tip shown');
+        CheckHash(0xE5A899040E15763F)  
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'A really large text',x:1,y:1,w:10,type=Ascii,select:false"));
+    a.add_window(w);
     a.run();
 }
