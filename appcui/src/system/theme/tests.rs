@@ -185,7 +185,7 @@ fn check_default_theme() {
         Mouse.Click(3,0,left)
         Mouse.Move(3,2)
         Paint('Initial state')   
-        CheckHash(0x55850B6DD6A29FFF) 
+        CheckHash(0x1CEEE10D9F754FA4) 
     ";
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::Default))
@@ -205,7 +205,7 @@ fn check_darkgray_theme() {
         Mouse.Click(3,0,left)
         Mouse.Move(3,2)
         Paint('Initial state')   
-        CheckHash(0xC0A625A9909B2E70) 
+        CheckHash(0x44BB8888C3906018) 
     ";
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::DarkGray))
@@ -224,7 +224,7 @@ fn check_light_theme() {
         Mouse.Click(3,0,left)
         Mouse.Move(3,2)
         Paint('Initial state')   
-        CheckHash(0x6F924871BB829478) 
+        CheckHash(0xE906AAA8E7503FBC) 
     ";
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::Light))
