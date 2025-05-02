@@ -30,11 +30,11 @@ A radiobox can contain a multi-line text but you will have to set the height par
 
 A radiobox supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name       | Type   | Positional parameter                | Purpose                                         |
-| -------------------- | ------ | ----------------------------------- | ----------------------------------------------- |
-| `text` or `caption`  | String | **Yes** (first postional parameter) | The caption (text) written on a radiobox        |
+| Parameter name         | Type   | Positional parameter                | Purpose                                          |
+| ---------------------- | ------ | ----------------------------------- | ------------------------------------------------ |
+| `text` or `caption`    | String | **Yes** (first postional parameter) | The caption (text) written on a radiobox         |
 | `selected` or `select` | Bool   | **No**                              | Radiobox selected status: **true** for **false** |
-| `type`               | String | **No**                              | The type of the radiobox (see below)            |
+| `type`                 | String | **No**                              | The type of the radiobox (see below)             |
 
 Some examples that uses these paramateres:
 ```rs
@@ -58,14 +58,12 @@ pub enum Type {
 
 The type of the radiobox describes how the radiobox state (**selected** or **unselected**) will be represented on the screen. 
 
-| Type      | Selected State | Unselected State |
-| --------- | -------------- | ---------------- |
-| Standard  | ● Selected     | ○ Unselected     |
-| Circle    | ◉ Selected     | ○ Unselected     |
-| Diamond   | ◆ Selected     | ◇ Unselected     |
-| Square    | ■ Selected     | □ Unselected     |
-| Star      | ★ Selected     | ☆ Unselected     |
-| Dot       | • Selected     | ○ Unselected     |
+| Type     | Selected State | Unselected State |
+| -------- | -------------- | ---------------- |
+| Standard | (●) Selected   | ( ) Unselected   |
+| Ascii    | (*) Selected   | ( ) Unselected   |
+| Circle   | ◉ Selected     | ○ Unselected     |
+| Diamond  | ◆ Selected     | ◇ Unselected     |
 
 ## Events
 To intercept events from a radiobox, the following trait has to be implemented to the Window that processes the event loop:
@@ -82,16 +80,16 @@ Besides the [Common methods for all Controls](../common_methods.md) a radiobox a
 | Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Set the new caption for a radiobox. If the string provided contains the special character `&`, this method also sets the hotkey associated with a control. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any).<br>Example: `radiobox.set_caption("&Option")` - this will set the caption of the radiobox to `Option` and the hotkey to `Alt+O` |
-| `caption()`        | Returns the current caption of a radiobox                                                                                                                                                                                                                                                                                                                                                                  |
-| `is_selected()`    | **true** if the radiobox is selected, false otherwise                                                                                                                                                                                                                                                                                                                                                      |
-| `set_selected()`   | Sets the radiobox to selected state and notifies its parent control to update the selection state of its siblings to unselected                                                                                                                                                                                                                                                                            |
+| `caption()`        | Returns the current caption of a radiobox                                                                                                                                                                                                                                                                                                                                                                 |
+| `is_selected()`    | **true** if the radiobox is selected, false otherwise                                                                                                                                                                                                                                                                                                                                                     |
+| `set_selected()`   | Sets the radiobox to selected state and notifies its parent control to update the selection state of its siblings to unselected                                                                                                                                                                                                                                                                           |
 
 ## Key association
 
 The following keys are processed by a RadioBox control if it has focus:
 
-| Key                | Purpose                                                                                                                                                                                                                                                              |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Key                | Purpose                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Space` or `Enter` | Changes the selected state. It also emits  `RadioBoxEvents::on_status_changed(...)` event. It has the same action clicking the radiobox with the mouse. |
 
 Additionally, `Alt`+**letter or number** will have the same action (even if the radiobox does not have a focus) if that letter or number was set as a hot-key for a radiobox via its caption.
