@@ -124,4 +124,14 @@ impl MenuItemWrapper {
             MenuItemWrapper::SubMenu(item) => item.handle.cast(),
         }
     }
+    #[inline(always)]
+    pub(super) fn update_menu_handle(&mut self, parent: Handle<Menu>) {
+        match self {
+            MenuItemWrapper::Command(item) => item.update_handles(parent, item.handle.cast()),
+            MenuItemWrapper::CheckBox(item) => item.update_handles(parent, item.handle.cast()),
+            MenuItemWrapper::SingleChoice(item) => item.update_handles(parent, item.handle.cast()),
+            MenuItemWrapper::Separator(item) => item.update_handles(parent, item.handle.cast()),
+            MenuItemWrapper::SubMenu(item) => item.update_handles(parent, item.handle.cast()),
+        }
+    }
 }

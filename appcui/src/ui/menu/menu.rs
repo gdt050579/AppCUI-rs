@@ -259,6 +259,12 @@ impl Menu {
         self.receiver_control_handle = handle;
     }
 
+    pub(crate) fn update_menuitems_menu_handle(&mut self) {
+        for item in self.items.iter_mut() {
+            item.update_menu_handle(self.handle);
+        }
+    }
+
     fn update_first_visible_item(&mut self) {
         if !self.current.in_range(self.items.len()) {
             return;
