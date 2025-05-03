@@ -796,3 +796,45 @@ fn check_value_set_value_clear_value() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+
+#[test]
+#[should_panic(expected = "You can not instantiate a selector with `None` value without setting the flags `AllowNoneVariant`. Have you forgot to do this ?")]
+fn check_create_with_panic() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0x0)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:36,h:7");
+    let s = Selector::<Options>::new(
+        None,
+        Layout::new("x:1,y:1,w:10"),
+        selector::Flags::None,
+    );
+    w.add(s);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "You can not clear the value of a selector unless flag `AllowNoneVariant` was set. Have you forgot to do this ?")]
+fn check_clear_value_with_panic() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0x0)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:36,h:7");
+    let mut s = Selector::<Options>::new(
+        Some(Options::B),
+        Layout::new("x:1,y:1,w:10"),
+        selector::Flags::None,
+    );
+    s.clear_value(); // should panic here
+    w.add(s);
+    a.add_window(w);
+    a.run();
+}
