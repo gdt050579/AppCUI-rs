@@ -14,8 +14,8 @@ use crate::terminals::*;
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
-use crate::ui::common::{traits::*, ControlEvent};
 use crate::ui::common::ControlManager;
+use crate::ui::common::{traits::*, ControlEvent};
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
@@ -454,9 +454,20 @@ impl RuntimeManager {
     }
     pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
         let menus = unsafe { &mut *self.menus };
+        let controls = unsafe { &mut *self.controls };
         if let Some(menu) = menus.get_mut(handle) {
-            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.terminal.get_size());
+            // 1. make sure that the receiver control is set up for the menu
             menu.set_receiver_control_handle(receiver_control_handle);
+            // 2. update menu items handles (link them to the menu parent)
+            menu.update_menuitems_menu_handle();
+            // 3. call on_menu_opened here
+            // we need to call this first because if on_menu_open changes the size of the menu
+            // we can recompute its position after this
+            if let Some(ctrl) = controls.get(receiver_control_handle) {
+                GenericMenuEvents::on_menu_open(ctrl.control(), menu);
+            }
+            // 4. compute the position and show
+            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.terminal.get_size());
             self.opened_menu_handle = handle;
         }
     }
@@ -1474,33 +1485,6 @@ impl MouseMethods for RuntimeManager {
                 }
             }
         }
-
-        /*
-        void ApplicationImpl::ProcessMenuMouseClick(Controls::Menu* mnu, int x, int y)
-        {
-
-            switch (result)
-            {
-            case MousePressedResult::None:
-                break;
-            case MousePressedResult::Repaint:
-                RepaintStatus |= REPAINT_STATUS_DRAW;
-                break;
-            case MousePressedResult::CheckParent:
-                if (mcx->Parent)
-                    ProcessMenuMouseClick(mcx->Parent, x, y);
-                else
-                    this->CloseContextualMenu();
-                break;
-            case MousePressedResult::Activate:
-                RepaintStatus |= REPAINT_STATUS_DRAW;
-                ShowContextualMenu(mnu);
-                break;
-            }
-        }
-
-
-        */
     }
 
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {

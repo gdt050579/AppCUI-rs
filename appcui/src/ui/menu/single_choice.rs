@@ -233,10 +233,10 @@ impl SingleChoice {
     #[inline(always)]
     pub fn set_selected(&mut self) {
         if self.handle.is_none() {
-            panic!("`set_selected` method should only be called after a sigle choice item was added to a registered menu !");
+            panic!("`set_selected` method should only be called after a sigle choice item was added to a registered menu (1)!");
         }
         if self.menu_handle.is_none() {
-            panic!("`set_selected` method should only be called after a sigle choice item was added to a registered menu !");
+            panic!("`set_selected` method should only be called after a sigle choice item was added to a registered menu (2)!");
         }
         let index = self.handle.index();
         if let Some(menu) = RuntimeManager::get().get_menu(self.menu_handle) {
