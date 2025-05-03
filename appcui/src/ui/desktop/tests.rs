@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use super::EmptyDesktop;
+
 #[test]
 fn check_custom_paint_for_desktop() {
     #[Desktop(overwrite = OnPaint, internal = true)]
@@ -276,6 +278,53 @@ fn check_arrange() {
     a.add_window(window!("Win-3,x:31,y:1,w:20,h:10"));
     a.add_window(window!("Win-4,x:46,y:1,w:20,h:10"));
     a.add_window(window!("Win-5,x:61,y:1,w:20,h:10"));
+    a.run();
+}
+
+#[test]
+fn check_arrange_no_windows() {
+    #[Desktop(events =  CommandBarEvents,  commands: [Cascade,Vertical,Horizontal,Grid], internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl CommandBarEvents for MyDesktop {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Cascade", mydesktop::Commands::Cascade);
+            commandbar.set(key!("F2"), "Vertical", mydesktop::Commands::Vertical);
+            commandbar.set(key!("F3"), "Horizontal", mydesktop::Commands::Horizontal);
+            commandbar.set(key!("F4"), "Grid", mydesktop::Commands::Grid);
+        }
+
+        fn on_event(&mut self, command_id: mydesktop::Commands) {
+            match command_id {
+                mydesktop::Commands::Cascade => self.arrange_windows(desktop::ArrangeWindowsMethod::Cascade),
+                mydesktop::Commands::Vertical => self.arrange_windows(desktop::ArrangeWindowsMethod::Vertical),
+                mydesktop::Commands::Horizontal => self.arrange_windows(desktop::ArrangeWindowsMethod::Horizontal),
+                mydesktop::Commands::Grid => self.arrange_windows(desktop::ArrangeWindowsMethod::Grid),
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (with commandbar)')
+        CheckHash(0xF14FFEF9847C30AF)
+        Key.Pressed(F1)
+        Paint('Cascade organize (nothing happens)')
+        CheckHash(0xF14FFEF9847C30AF)
+        Key.Pressed(F2)
+        Paint('Vertical organize (nothing happens)')
+        CheckHash(0xF14FFEF9847C30AF)
+        Key.Pressed(F3)
+        Paint('Horizontal organize (nothing happens)')
+        CheckHash(0xF14FFEF9847C30AF)
+        Key.Pressed(F4)
+        Paint('Grid organize (nothing happens)')
+        CheckHash(0xF14FFEF9847C30AF)
+    ";
+    let a = App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap();
     a.run();
 }
 
@@ -563,4 +612,97 @@ fn check_auto_hotkey_on_desktop() {
 
     ";
     App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_terminal_size() {
+    #[Desktop(overwrite = OnPaint, internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl OnPaint for MyDesktop {
+        fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+            surface.clear(Character::new('x', Color::Red, Color::Green, CharFlags::None));
+            let size = self.terminal_size();
+            assert_eq!(size.width, 60);
+            assert_eq!(size.height, 10);
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('desktop with red and green')
+        CheckHash(0xD490E8FF2EC89965)
+    ";
+    let a = App::debug(60, 10, script).desktop(MyDesktop::new()).build().unwrap();
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "A desktop object can only be created once (when the application is started) !")]
+fn check_error_second_desktop() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0x0)
+    ";
+    let a = App::debug(60, 10, script).build().unwrap();
+    let _ = EmptyDesktop::new(); // should panic
+    a.run();
+}
+
+#[test]
+fn check_close_method() {
+    #[Desktop(events =  CommandBarEvents,  commands: [Close], internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl CommandBarEvents for MyDesktop {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("Insert"), "Close", mydesktop::Commands::Close);
+        }
+
+        fn on_event(&mut self, _: mydesktop::Commands) {
+            self.close();
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (no windows)')
+        CheckHash(0x39939B3C25F6B388)
+        Key.Pressed(Insert)
+        Paint('Should close the app')
+    ";
+    App::debug(80, 15, script).desktop(MyDesktop::new()).command_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_on_close_allow() {
+    #[Desktop(events = DesktopEvents, internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_close(&mut self) -> ActionRequest {
+            ActionRequest::Allow
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (with menus)')
+        CheckHash(0xAB06844D69595285)
+        Key.Pressed(Escape)
+        Paint('Exit from app')
+        CheckHash(0xD156AD73229C5DB6)
+    ";
+    let a = App::debug(40, 6, script).desktop(MyDesktop::new()).build().unwrap();
+    a.run();
 }

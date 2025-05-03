@@ -337,5 +337,70 @@ fn coordonate_from_basic_type() {
     assert_eq!(Coordonate::from(-10i64), Coordonate::Absolute(-10));
     assert_eq!(Coordonate::from(1.25f32), Coordonate::Percentage(1.25));
     assert_eq!(Coordonate::from(-1.25f64), Coordonate::Percentage(-1.25));
+}
 
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlb_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Top-Left-Bottom layout mode
+    validate_pos!("t:1,l:5,b:7,w:20,x:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlb_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Top-Left-Bottom layout mode
+    validate_pos!("t:1,l:5,b:7,w:20,y:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlb_dont_allow_height() {
+    // this code should panic because 'h' can not be used in a Top-Left-Bottom layout mode
+    validate_pos!("t:1,l:5,b:7,w:20,h:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlb_dont_allow_allign() {
+    // this code should panic because 'a' can not be used in a Top-Left-Bottom layout mode
+    validate_pos!("t:1,l:5,b:7,w:20,a:c",50,30,5,0,38,10);
+}
+
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_trb_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Top-Right-Bottom layout mode
+    validate_pos!("t:1,r:5,b:7,w:20,x:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_trb_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Top-Right-Bottom layout mode
+    validate_pos!("t:1,r:5,b:7,w:20,y:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_trb_dont_allow_height() {
+    // this code should panic because 'h' can not be used in a Top-Right-Bottom layout mode
+    validate_pos!("t:1,r:5,b:7,w:20,h:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_trb_dont_allow_allign() {
+    // this code should panic because 'a' can not be used in a Top-Right-Bottom layout mode
+    validate_pos!("t:1,r:5,b:7,w:20,a:c",50,30,5,0,38,10);
+}
+
+#[test]
+fn layout_mode_anchor_trb() {
+    validate_pos!("r:5,t:6,b:7,w:10",50,30,35,6,10,17);
+    validate_pos!("r:10%,t:6,b:7,w:20%",50,30,35,6,10,17);
+    validate_pos!("r:5,t:3,b:3,w:10",50,30,35,3,10,24);
+    validate_pos!("r:5,t:10%,b:10%,w:10",50,30,35,3,10,24);
+    validate_pos!("r:10%,t:10%,b:10%,w:20%",50,30,35,3,10,24);
 }
