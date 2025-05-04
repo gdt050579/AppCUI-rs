@@ -477,6 +477,65 @@ fn check_page_width_on_left() {
 }
 
 #[test]
+fn check_tab_caption() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x24D39A4A0C5E00DD)
+        Mouse.Click(38,3,left)
+        Paint('Second page selected')
+        CheckHash(0xE8E1404229A7AE4E)
+        Mouse.Click(72,3,left)
+        Paint('3rd page selected')
+        CheckHash(0x7BEF7089EBF9BCC2)
+    ";
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:70,h:17,flags: Sizeable");
+    let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
+    
+    // Add initial tabs
+    tab.add_tab("Page &1");
+    tab.add_tab("Page &2");
+    tab.add_tab("Page &3");
+
+    tab.set_tab_width(22);
+    
+    // Verify initial captions
+    assert_eq!(tab.tab_caption(0), Some("Page 1"));
+    assert_eq!(tab.tab_caption(1), Some("Page 2"));
+    assert_eq!(tab.tab_caption(2), Some("Page 3"));
+    
+    // Verify None for invalid indices
+    assert_eq!(tab.tab_caption(3), None);
+    assert_eq!(tab.tab_caption(999), None);
+    
+    // Change captions
+    tab.set_tab_caption(1, "New Page 2");
+    tab.set_tab_caption(2, "Updated Page 3");
+    
+    // Verify changed captions
+    assert_eq!(tab.tab_caption(0), Some("Page 1"));
+    assert_eq!(tab.tab_caption(1), Some("New Page 2"));
+    assert_eq!(tab.tab_caption(2), Some("Updated Page 3"));
+    
+    // Verify None still works after changes
+    assert_eq!(tab.tab_caption(3), None);
+    assert_eq!(tab.tab_caption(999), None);
+    
+    // Add controls to tabs
+    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+    tab.add(0, button!("Page1-B,d:c,w:10"));
+    tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
+    tab.add(1, button!("Page2-B,d:c,w:14"));
+    tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
+    tab.add(2, button!("Page3-B,d:l,w:20"));
+
+    w.add(tab);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_hidden_tabs() {
     let script = "
         Paint.Enable(false)
@@ -574,6 +633,51 @@ fn check_hiddentabs_changepage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_tab_mouse_events() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xCA9EC0919796934C)
+        Mouse.Move(38,3)
+        Paint('Hover over third tab')
+        CheckHash(0x63EE66308B70BFE8)
+        Mouse.Move(60,1)
+        Mouse.Move(60,3)
+        Paint('Hover over tab bar')
+        CheckHash(0xCA9EC0919796934C)
+        Mouse.Move(60,1)
+        Paint('Mouse leaving tab bar')
+        CheckHash(0xCA9EC0919796934C)
+        Mouse.Drag(23,3,38,3)
+        Paint('Drag from second to third tab (second tab is selected)')
+        CheckHash(0x8809C1E94AAD75C)
+        Mouse.DoubleClick(12,3,left)
+        Paint('Double click on first tab (second tab is selected, first tab is hovered)')
+        CheckHash(0x8497EC7EABF633E8)
+        Mouse.Wheel(22,3,left,1)
+        Paint('Mouse wheel on second tab (no hover as we are over the second tab)')
+        CheckHash(0x8809C1E94AAD75C)
+        Mouse.Move(60,1)
+        Mouse.Move(60,3)
+        Mouse.Click(60,3,left)
+        Paint('Click on tab bar (but not on a tab - second tab remains selected)')
+        CheckHash(0x8809C1E94AAD75C)
+    ";
+    let mut a = App::debug(80, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:70,h:7,flags: Sizeable");
+    let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
+    
+    // Add tabs with wider width to make empty space more obvious
+    tab.add_tab("Page 1");
+    tab.add_tab("Page 2");
+    tab.add_tab("Page 3");
+    
+    w.add(tab);
+    a.add_window(w);
     a.run();
 }
 
