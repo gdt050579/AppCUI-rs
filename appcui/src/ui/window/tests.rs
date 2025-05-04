@@ -1942,3 +1942,30 @@ fn check_multiple_windows_focus() {
     a.add_window(window!("Win3,x:21,y:5,w:30,h:5"));
     a.run();
 }
+
+#[test]
+fn check_window_toolbar_single_choice_caption() {
+    let script = "
+        Paint.Enable(false)
+        //expect on bottom: ╚[Option 1|Option 2]═══════════════════════╝
+        Paint('Initial state - Option 1 selected')
+        CheckHash(0x6A43F6EA0169CF5B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
+    
+    // Create toolbar with single choice items
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+    // Add items to toolbar
+    let h1 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &1"));
+    let h2 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &2"));
+    
+    // Verify initial state
+    assert_eq!(w.toolbar().get(h1).unwrap().caption(), "Option 1");
+    assert_eq!(w.toolbar().get(h2).unwrap().caption(), "Option 2");
+    assert!(!w.toolbar().get(h1).unwrap().is_selected());
+    assert!(!w.toolbar().get(h2).unwrap().is_selected());
+    
+    a.add_window(w);
+    a.run();
+}
