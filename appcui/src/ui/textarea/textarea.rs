@@ -283,6 +283,10 @@ impl TextArea {
     }
 
     pub fn move_cursor_horizontal(&mut self, no_collumns: i32) {
+        if self.window_width == 0 {
+            return;
+        }
+
         self.cursor_position_x_backup = 0;
 
         let current_position_in_line = self.cursor.pos_x as i32 + self.row_offset as i32;
@@ -408,17 +412,11 @@ impl TextArea {
                 // We need to update position, we will check where the direction on movement
                 // Checking if the movement is to the left
                 if self.row_offset > new_position as u32 {
-                    let tmp_row_offset = new_position;
-                    if tmp_row_offset < 0 {
-                        self.row_offset = new_position as u32;
-                    }
-                    else {
-                        self.row_offset = tmp_row_offset as u32;
-                    }
+                    self.row_offset = new_position as u32;
                 }
                 // The movement is to the right, we need to increase the offset
                 else {
-                    let tmp_row_offset = new_position - self.size().width as i32 + 1;
+                    let tmp_row_offset = new_position - self.window_width as i32 + 1;
                     if tmp_row_offset < 0 {
                         self.row_offset = new_position as u32;
                     }
@@ -427,8 +425,7 @@ impl TextArea {
                     }
                 }
             }
-            
-            self.cursor.pos_x = new_position as usize - self.row_offset as usize;
+            self.cursor.pos_x = (new_position as usize).saturating_sub(self.row_offset as usize);
         }
         
         self.update_scrollbar_pos();
@@ -1110,7 +1107,7 @@ impl OnPaint for TextArea {
                     let mut counter = x as usize;
                     for (ch_index, ch) in current_line_view.char_indices() {
                         
-                        if counter >= max_line_size {
+                        if counter >= max_line_size + self.line_number_bar_size as usize {
                             break;
                         }
 

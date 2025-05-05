@@ -2311,3 +2311,29 @@ fn out_ouf_bounds_mouse_click() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn scroll_with_scrollbars_and_linenumbers() {
+    let script = "
+        // Paint.Enable(false)
+
+        Paint('Before moving')
+        CheckHash(0x90B478864909CDF8)
+
+        Key.Pressed(Right, 57)
+
+        Paint('After moving')
+        CheckHash(0x3BD6EA5E0E57E262)
+        CheckCursor(58, 1)
+    ";
+
+    let text_print = "Issue #85 TextArea with LineNumber and ScrollBars enabled, causes lines to be shorter\nPlease fix";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::ShowLineNumber | textarea::Flags::ScrollBars);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Issue #85 TextArea", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
