@@ -432,3 +432,37 @@ fn layout_mode_anchor_lbr_dont_allow_allign() {
     // this code should panic because 'a' can not be used in a Left-Bottom-Right layout mode
     validate_pos!("l:1,r:5,b:7,h:20,a:c",50,30,5,0,38,10);
 }
+///
+/// 
+/// 
+/// 
+/// 
+
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlr_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Top-Left-Right layout mode
+    validate_pos!("l:1,r:5,t:7,h:20,x:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlr_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Top-Left-Right layout mode
+    validate_pos!("l:1,r:5,t:7,h:20,y:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlr_dont_allow_width() {
+    // this code should panic because 'w' can not be used in a Top-Left-Right layout mode
+    validate_pos!("l:1,r:5,t:7,h:20,w:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlr_dont_allow_allign() {
+    // this code should panic because 'a' can not be used in a Top-Left-Right layout mode
+    validate_pos!("l:1,r:5,t:7,h:20,a:c",50,30,5,0,38,10);
+}
