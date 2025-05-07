@@ -466,3 +466,49 @@ fn layout_mode_anchor_tlr_dont_allow_allign() {
     // this code should panic because 'a' can not be used in a Top-Left-Right layout mode
     validate_pos!("l:1,r:5,t:7,h:20,a:c",50,30,5,0,38,10);
 }
+
+#[test]
+#[should_panic]
+fn layout_mode_dock_dont_allow_left() {
+    // this code should panic because 'l' can not be used in a Top-Left-Right layout mode
+    validate_pos!("d:c,w:100%,h:100%,l:1",50,30,5,0,38,10);
+}
+#[test]
+#[should_panic]
+fn layout_mode_dock_dont_allow_right() {
+    // this code should panic because 'r' can not be used in a Top-Left-Right layout mode
+    validate_pos!("d:c,w:100%,h:100%,r:1",50,30,5,0,38,10);
+}
+#[test]
+#[should_panic]
+fn layout_mode_dock_dont_allow_top() {
+    // this code should panic because 'lt' can not be used in a Top-Left-Right layout mode
+    validate_pos!("d:c,w:100%,h:100%,t:1",50,30,5,0,38,10);
+}
+#[test]
+#[should_panic]
+fn layout_mode_dock_dont_allow_bottom() {
+    // this code should panic because 'b' can not be used in a Top-Left-Right layout mode
+    validate_pos!("d:c,w:100%,h:100%,b:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_simple_coord_dont_allow_right() {
+    // this code should panic because 'r' can not be used in a (X,Y)-(Width x Height) layout mode
+    validate_pos!("x:1,y:1,w:100%,h:100%,r:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_align_wh_coord_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a (Allign + Width x Height) layout mode
+    validate_pos!("a:c,w:50%,h:50%,x:0",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_align_wh_coord_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a (Allign + Width x Height) layout mode
+    validate_pos!("a:c,w:50%,h:50%,y:0",50,30,5,0,38,10);
+}
