@@ -432,12 +432,6 @@ fn layout_mode_anchor_lbr_dont_allow_allign() {
     // this code should panic because 'a' can not be used in a Left-Bottom-Right layout mode
     validate_pos!("l:1,r:5,b:7,h:20,a:c",50,30,5,0,38,10);
 }
-///
-/// 
-/// 
-/// 
-/// 
-
 
 #[test]
 #[should_panic]
@@ -511,4 +505,79 @@ fn layout_mode_align_wh_coord_dont_allow_x() {
 fn layout_mode_align_wh_coord_dont_allow_y() {
     // this code should panic because 'y' can not be used in a (Allign + Width x Height) layout mode
     validate_pos!("a:c,w:50%,h:50%,y:0",50,30,5,0,38,10);
+}
+
+#[test]
+fn check_dimension_is_absolute() {
+    assert!(Dimension::Absolute(10).is_absolute());
+    assert!(!Dimension::Percentage(0.5f32).is_absolute());
+    assert!(!Dimension::Percentage(1.0f32).is_absolute());
+    assert!(Dimension::Absolute(0).is_absolute());
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_lr_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a (Left-right) layout mode
+    validate_pos!("a:c,l:1,r:1,h:10,x:10",50,30,5,0,38,10);
+}
+
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_anchor_variant() {
+    // this code should panic because 'a' can not be 'blablablab'
+    validate_pos!("a:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_dock_variant() {
+    // this code should panic because 'd' can not be 'blablablab'
+    validate_pos!("d:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_negative_width() {
+    // this code should panic because width can not be negative
+    validate_pos!("w:-10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_negative_height() {
+    // this code should panic because height can not be negative
+    validate_pos!("h:-10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_left() {
+    // this code should panic because left is not a valid value
+    validate_pos!("l:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+fn check_tr_anchor() {
+    // this code should panic because left is not a valid value
+    validate_pos!("t:1,r:1,w:10,h:10",50,30,39,1,10,10);
+}
+
+
+#[test]
+fn check_default_layout_modes() {
+    assert_eq!(LayoutMode::default(),LayoutMode::Absolute(AbsoluteLayout::new(0, 0, 0, 0)));
+}
+
+#[test]
+fn check_coordonate_update_with_absolute_value() {
+    let mut c = Coordonate::Absolute(0);
+    c.update_with_absolute_value(10, 20);
+    assert_eq!(c, Coordonate::Absolute(10));
+
+    let mut c = Coordonate::Percentage(0.0f32);
+    c.update_with_absolute_value(10, 20);
+    assert_eq!(c, Coordonate::Percentage(0.5f32));
+
 }
