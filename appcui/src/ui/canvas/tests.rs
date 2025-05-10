@@ -545,3 +545,60 @@ fn check_resize_surface() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_mouse_wheel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x479AB05739A30F31)
+        Mouse.Wheel(25,10,down,1)
+        Paint('2. Move scrollbar down')
+        CheckHash(0x771A5BA8169E8B8)
+        Mouse.Wheel(25,10,right,3)
+        Paint('3. Move scrollbar right')
+        CheckHash(0x6E43010B3FDC45D2)
+        Mouse.Wheel(25,10,down,5)
+        Paint('4. Move scrollbar down (again)')
+        CheckHash(0x72E84695E5A9938)
+        Mouse.Wheel(25,10,right,6)
+        Paint('5. Move scrollbar right')
+        CheckHash(0x39AB1CFAC81B3418)
+        Mouse.Wheel(25,10,up,2)
+        Paint('6. Move scrollbar up')
+        CheckHash(0xC6AC6E97FD8AD032)
+        Mouse.Wheel(25,10,left,8)
+        Paint('7. Move scrollbar left')
+        CheckHash(0x1FD93707DFAA63B6)
+        Mouse.DoubleClick(25,10,left)
+        Paint('8. Double click (nothing happens - same hash as stept 7)')
+        CheckHash(0x1FD93707DFAA63B6)
+    ";
+    const TEXT: &str = r"--- From Wiki ----
+    Rust is a multi-paradigm, general-purpose 
+    programming language that emphasizes performance, 
+    type safety, and concurrency. It enforces memory 
+    safety—meaning that all references point to valid 
+    memory—without a garbage collector. To 
+    simultaneously enforce memory safety and prevent 
+    data races, its 'borrow checker' tracks the object 
+    lifetime of all references in a program during 
+    compilation. Rust was influenced by ideas from 
+    functional programming, including immutability, 
+    higher-order functions, and algebraic data types. 
+    It is popular for systems programming.
+    
+    From: https://en.wikipedia.org/wiki/Rust_(programming_language)
+    ";
+
+   
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8");
+    let mut c = canvas!("'60x15',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    c.clear_background();
+    let s = c.drawing_surface_mut();
+    s.write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
