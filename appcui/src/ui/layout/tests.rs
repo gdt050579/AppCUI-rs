@@ -559,6 +559,27 @@ fn check_panic_on_invalid_left() {
 }
 
 #[test]
+#[should_panic]
+fn check_panic_on_invalid_right() {
+    // this code should panic because right is not a valid value
+    validate_pos!("r:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_top() {
+    // this code should panic because top is not a valid value
+    validate_pos!("t:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_bottom() {
+    // this code should panic because b is not a valid value
+    validate_pos!("b    :blablabla",50,30,5,0,38,10);
+}
+
+#[test]
 fn check_tr_anchor() {
     // this code should panic because left is not a valid value
     validate_pos!("t:1,r:1,w:10,h:10",50,30,39,1,10,10);
