@@ -1760,7 +1760,6 @@ fn check_sort_no_groups_3_columns_with_commands() {
     }
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. Initial state')
         CheckHash(0x493F449BF2AB2E62)  
         Key.Pressed(F1)
@@ -1782,7 +1781,6 @@ fn check_sort_no_groups_3_columns_with_commands() {
 fn check_sort_groups_details() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. Initial state')
         CheckHash(0x242A1971CD3A8F69)  
         Key.Pressed(Ctrl+N)
@@ -2229,7 +2227,6 @@ fn check_item_check_with_keys_and_groups_3_columns() {
 fn check_item_check_with_mouse_and_groups_details() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. Initial state')
         CheckHash(0xFE38CA7939ABB271)  
         Mouse.Click(5,2,left)
@@ -2434,7 +2431,6 @@ fn check_datetime_short() {
         }
     }
     let script = "
-        //Error.Disable(true)
         Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0x4554C81261452634) 
@@ -2551,7 +2547,6 @@ fn check_datetime_full() {
 fn check_filter_details_without_groups() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. Initial state')
         CheckHash(0xCC575D7AD387F6A5)  
         Key.TypeText('mi')
