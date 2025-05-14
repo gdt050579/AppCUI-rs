@@ -112,7 +112,7 @@ where
         let entries = self.nav.entries(path);
         let mut result = None;
         let flags = self.flags;
-        log!("INFO", "Populate Node: Path={:?}, search='{}', entries='{:?}'", path, search, entries);
+        //log!("INFO", "Populate Node: Path={:?}, search='{}', entries='{:?}'", path, search, entries);
 
         if let Some(tv) = self.control_mut(h) {
             tv.add_batch(|tv| {
@@ -135,7 +135,7 @@ where
         result
     }
     fn populate_root(&mut self, search: &str) -> Option<Handle<treeview::Item<FolderName>>> {
-        log!("INFO", "Populate root with search: '{}'", search);
+        //log!("INFO", "Populate root with search: '{}'", search);
         let h = self.tv;
         let roots = self.nav.roots();
         let set_icon = self.flags.contains(SelectFolderDialogFlags::Icons);
@@ -172,7 +172,7 @@ where
         if let Some(tv) = self.control_mut(h) {
             tv.clear()
         }
-        log!("INFO", "Populate from path: {:?}", current_path);
+        //log!("INFO", "Populate from path: {:?}", current_path);
 
         let total_components = current_path.components().count();
         for (index, component) in current_path.components().enumerate() {
@@ -309,10 +309,10 @@ where
             tv.delete_item_children(item_handle);
         }
         if let Some(p) = self.item_to_path(item_handle) {
-            log!("INFO", "Item expanded: {:?}, Handle:{:?}", p, item_handle);
+            //log!("INFO", "Item expanded: {:?}, Handle:{:?}", p, item_handle);
             self.populate_node(&p, item_handle, "", false);
         } else {
-            log!("ERROR", "Failed to get path for item {:?}", item_handle);
+            //log!("ERROR", "Failed to get path for item {:?}", item_handle);
         }
         EventProcessStatus::Processed
     }
