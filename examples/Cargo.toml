@@ -236,3 +236,7 @@ path = "window_toolbar_label/main.rs"
 name = "window_toolbar_single_choice"
 path = "window_toolbar_single_choice/main.rs"
 
+
+[[example]]
+name = "threestatebox_types"
+path = "threestatebox_types/main.rs"
