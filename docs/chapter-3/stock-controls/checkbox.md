@@ -58,7 +58,7 @@ pub enum Type {
 }
 ```
 
-The type of the checkbos describes how the checkbox state (**checked** or **unchecked**) will be represented on the screen. 
+The type of the checkbox describes how the checkbox state (**checked** or **unchecked**) will be represented on the screen. 
 
 | Type      | Check State | Uncheck State |
 | --------- | ----------- | ------------- |

@@ -37,6 +37,19 @@ let multi_line_threestatebox = threestatebox!("'&Multi line\nLine2\nLine3',x:1,y
 let custom_type_threestatebox = threestatebox!("'&Custom type',x:1,y:1,w:10,h:1,type=YesNo");
 ```
 
+The type of the ThreeStateBox describes how the ThreeStateBox state (**checked** , **unchecked** or **unknown**) will be represented on the screen. 
+
+| Type      | Checked State | Unchecked State | Unknown State |
+| --------- | ------------- | --------------- | ------------- |
+| Standard  | [✓] Checked   | [ ] Unchecked   | [?] Unknown   |
+| Ascii     | [X] Checked   | [ ] Unchecked   | [?] Unknown   |
+| CheckBox  | ☑ Checked     | ☐ Unchecked     | ⍰ Unknown   |
+| CheckMark | ✔ Checked     | ✖ Unchecked     | ? Unknown   |
+| FilledBox | ▣ Checked     | ▢ Unchecked     | ◪ Unknown   |
+| YesNo     | [Y] Checked   | [N] Unchecked   | [?] Unknown   |
+| PlusMinus | ➕ Checked     | ➖ Unchecked     | ± Unknown   |
+
+
 ## Events
 To intercept events from a threestatebox, the following trait has to be implemented to the Window that processes the event loop:
 ```rs
