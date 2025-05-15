@@ -11,3 +11,4 @@ mod tests;
 
 pub use self::threestatebox::ThreeStateBox;
 pub use self::initialization_flags::State;
+pub use self::initialization_flags::Type;

@@ -4,8 +4,8 @@ use crate::prelude::*;
 fn check_three_state_box_simple() {
     let script = "
         Paint.Enable(false)
-        Paint('Border panel')   
-        CheckHash(0xFDADC2B0D10B716)   
+        Paint('1. Initial state')   
+        CheckHash(0xD52344AB78EF21D2)   
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
     let mut w = window!("Title,d:c,w:78,h:11");
@@ -32,8 +32,8 @@ fn check_three_state_box_simple() {
 fn check_three_state_box_macro() {
     let script = "
         Paint.Enable(false)
-        Paint('Border panel')   
-        CheckHash(0xD306E351C22E772D)   
+        Paint('1. Initial state')   
+        CheckHash(0xC4D48739A6B596DE)   
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
     let mut w = window!("Title,d:c,w:78,h:11");
@@ -83,17 +83,17 @@ impl ThreeStateBoxEvents for MyWindow {
 }
     let script = "
         Paint.Enable(false)
-        Paint('InitialState')   
-        CheckHash(0x2F49AA1C9B3366DA)
+        Paint('InitialState (unknown)')   
+        CheckHash(0x8EAE904E2D1BDB2D)
         Key.Pressed(Enter)
         Paint('Should be checked')   
-        CheckHash(0x8B9C885B114D3E08)
+        CheckHash(0x1E3C577A71C4F2C7)
         Key.Pressed(Space)
         Paint('Should be unchecked')  
-        CheckHash(0x1AAC5A7A4743F4B6) 
+        CheckHash(0xABB26831C7D2F752) 
         Mouse.Click(23,5,left)
         Paint('Should be unknown')  
-        CheckHash(0x2672FD6E1578804D) 
+        CheckHash(0x271B06247758B2FA) 
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
     a.add_window(MyWindow::new());
