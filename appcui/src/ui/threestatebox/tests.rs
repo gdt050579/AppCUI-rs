@@ -105,7 +105,7 @@ fn check_methods() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
-        CheckHash(0x827905C817F4F8DD)   
+        CheckHash(0x3FA2ED544BE2898A)   
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
     let mut w = window!("Title,d:c,w:78,h:11");
