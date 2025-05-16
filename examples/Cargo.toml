@@ -240,3 +240,8 @@ path = "window_toolbar_single_choice/main.rs"
 [[example]]
 name = "threestatebox_types"
 path = "threestatebox_types/main.rs"
+
+[[example]]
+name = "ramit"
+path = "ramit/main.rs"
+
