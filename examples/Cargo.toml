@@ -245,3 +245,7 @@ path = "threestatebox_types/main.rs"
 name = "ramit"
 path = "ramit/main.rs"
 
+[[example]]
+name = "minesweeper"
+path = "minesweeper/main.rs"
+
