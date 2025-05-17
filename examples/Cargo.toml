@@ -249,3 +249,7 @@ path = "ramit/main.rs"
 name = "minesweeper"
 path = "minesweeper/main.rs"
 
+[[example]]
+name = "flappy"
+path = "flappy/main.rs"
+
