@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use minesweepergame::Events;
 use rand::Rng;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -15,7 +16,7 @@ struct Cell {
     adjacent_mines: u8,
 }
 
-#[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent)]
+#[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent, emit = CloseWindow)]
 pub struct MinesweeperGame {
     grid: Vec<Vec<Cell>>,
     cursor_x: usize,
@@ -125,7 +126,7 @@ impl MinesweeperGame {
             
             // Show the error message
             appcui::dialogs::error("Game Over", "You hit a mine!");
-            
+            self.raise_event(Events::CloseWindow);
             return;
         }
 
@@ -170,6 +171,7 @@ impl MinesweeperGame {
             
             // Show congratulations message
             appcui::dialogs::message("Congratulations!", "You have cleared all mines!");
+            self.raise_event(Events::CloseWindow);
         }
     }
 
