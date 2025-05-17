@@ -206,6 +206,7 @@ impl MinesweeperGame {
 
 impl OnPaint for MinesweeperGame {
     fn on_paint(&self, surface: &mut Surface, _: &Theme) {
+        surface.clear(char!("' ',black,black"));
         let grid_attr = CharAttribute::with_color(Color::Gray, Color::Black);
         
         // Draw top border

@@ -42,9 +42,9 @@ impl MenuEvents for MyDesktop {
     fn on_command(&mut self, _: Handle<Menu>, _: Handle<menu::Command>, command: mydesktop::Commands) {
         match command {
             mydesktop::Commands::Easy => {
-                // Fixed window size for 5x5 grid with 3 bombs
+                // 5x5 grid -3 bombs
                 let mut win = Window::new(
-                    "Minesweeper - Easy", 
+                    "Easy", 
                     Layout::new("d:c,w:23,h:14"), 
                     window::Flags::None
                 );
@@ -52,27 +52,26 @@ impl MenuEvents for MyDesktop {
                 self.add_window(win);
             },
             mydesktop::Commands::Medium => {
-                // Fixed window size for 7x7 grid with 10 bombs
+                // 7x7 grid -10 bombs
                 let mut win = Window::new(
-                    "Minesweeper - Medium", 
-                    Layout::new("d:c,w:33,h:19"), 
+                    "Medium", 
+                    Layout::new("d:c,w:31,h:18"), 
                     window::Flags::None
                 );
                 win.add(MinesweeperGame::new(7, 7, 10));
                 self.add_window(win);
             },
             mydesktop::Commands::Hard => {
-                // Fixed window size for 10x10 grid with 25 bombs
+                // 10x10 grid -25 bombs
                 let mut win = Window::new(
-                    "Minesweeper - Hard", 
-                    Layout::new("d:c,w:45,h:25"), 
+                    "Hard", 
+                    Layout::new("d:c,w:43,h:24"), 
                     window::Flags::None
                 );
                 win.add(MinesweeperGame::new(10, 10, 25));
                 self.add_window(win);
             },
             mydesktop::Commands::Exit => self.close(),
-            _ => {}
         }
     }
 }
