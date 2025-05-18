@@ -21,6 +21,23 @@ impl ThreeStateBox {
         Self::with_type(caption, layout, state, Type::Standard)
     }
 
+    /// Creates a new threestatebox with the specified caption, layout and state.
+    /// The caption can contain a hotkey (e.g. "This is a &test").
+    /// The hotkey will be underlined and pressing ALT+T will trigger the default action.
+    /// The default action is to change the state of the threestatebox.
+    /// The state can be one of the following: Checked, Unchecked, Unknown.
+    /// The threestatebox_type defines the symbols used to represent the state of the threestatebox.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust,no_run
+    /// use appcui::ui::*;
+    /// 
+    /// let threestatebox = ThreeStateBox::with_type("This is a &test", 
+    ///                                              Layout::new("d:c,w:10,h:1"), 
+    ///                                              threestatebox::State::Unchecked, 
+    ///                                              threestatebox::Type::Ascii);
+    /// ```
     pub fn with_type(caption: &str, layout: Layout, state: State, threestatebox_type: Type) -> Self {
         let cs = Symbol::new(threestatebox_type.check_symbol());
         let us = Symbol::new(threestatebox_type.uncheck_symbol());
