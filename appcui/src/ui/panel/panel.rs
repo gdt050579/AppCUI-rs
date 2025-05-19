@@ -49,7 +49,7 @@ impl Panel {
 
     /// Returns the type of the panel
     #[inline(always)]
-    pub fn get_type(&self) -> Type {
+    pub fn panel_type(&self) -> Type {
         self.panel_type
     }
 

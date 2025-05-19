@@ -364,3 +364,22 @@ fn check_panel_navigate_keys() {
     a.add_window(w);
     a.run();    
 }
+
+#[test]
+fn check_panel_api() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Border panel -> New title')   
+        CheckHash(0x226838AC6C4DC67)   
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:78,h:11");
+    let mut p = panel!("Options,x:1,y:1,w:16,h:4");
+    assert_eq!(p.panel_type(), panel::Type::Border);
+    assert_eq!(p.title(), "Options");
+    p.set_title("New title");
+    assert_eq!(p.title(), "New title");    
+    w.add(p);
+    a.add_window(w);
+    a.run();
+}
