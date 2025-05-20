@@ -600,9 +600,12 @@ where
         self.selected_items_count
     }
 
+    /// Returns a reference to a column at the specified index or None if the index is out of bounds
     pub fn column(&self, index: usize) -> Option<&Column> {
         self.header.columns().get(index)
     }
+
+    /// Returns a mutable reference to a column at the specified index or None if the index is out of bounds
     pub fn column_mut(&mut self, index: usize) -> Option<&mut Column> {
         self.header.columns_mut().get_mut(index)
     }

@@ -100,7 +100,6 @@ Besides the [Common methods for all Controls](../common_methods.md) a list view 
 | Method              | Purpose                                                                                                                                                                                                                                                |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `add_group(...)`    | Creates a new group with a specified name and return a group identifier. You can further used the group identified to add an item to a group.                                                                                                          |
-| `add_column(...)`   | Adds a new column to the ListView control. This method is in particular usefull when you need to create a custom listview.                                                                                                                             |
 | `add(...)`          | Adds a new item to the ListView control.                                                                                                                                                                                                               |
 | `add_item(...)`     | Adds a new item to the ListView control. This methods allows you to specify the color, icon, group and selection state for that item.                                                                                                                  |
 | `add_items(...)`    | Adds a vector of items to the ListView control.                                                                                                                                                                                                        |
@@ -132,6 +131,14 @@ Besides the [Common methods for all Controls](../common_methods.md) a list view 
 | `group_name(...)` | Returns the name of a group based on its identifier or None if the identifier is invalid                                |
 
 
+### Column manipulation
+
+| Method            | Purpose                                                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `column(...)`     | Returns the column based on its index or None if the index is out of bounds.                                               |
+| `column_mut()`    | Returns a mutable reference to the column based on its index or None if the index is out of bounds.                        |
+| `add_column(...)` | Adds a new column to the ListView control. This method is in particular usefull when you need to create a custom listview. |
+
 ### Miscellaneous
 
 | Method                    | Purpose                                                                                                                         |
@@ -148,7 +155,7 @@ The following keys are processed by a `ListView` control if it has focus:
 
 | Key                                                                          | Purpose                                                                                                                                                                                                                                         |
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Up`, `Down`                                                                 | Changes the current item from the ListView.                                                                                                                                                                                                      |
+| `Up`, `Down`                                                                 | Changes the current item from the ListView.                                                                                                                                                                                                     |
 | `Left`, `Right`                                                              | Scrolls the view to the left or to the right (when the view is `Details` or changes the current item if the view is `Columns`)                                                                                                                  |
 | `PageUp`, `PageDown`                                                         | Navigates through the list of items page by page.                                                                                                                                                                                               |
 | `Home`                                                                       | Moves the current item to the first element in the list                                                                                                                                                                                         |
