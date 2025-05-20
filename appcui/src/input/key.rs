@@ -10,7 +10,7 @@ use super::KeyModifier;
 /// # Fields
 /// * `code` - The code of the key.
 /// * `modifier` - The modifier of the key.
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Eq)]
 pub struct Key {
     pub code: KeyCode,
     pub modifier: KeyModifier,

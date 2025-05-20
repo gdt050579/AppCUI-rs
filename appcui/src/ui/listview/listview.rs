@@ -600,6 +600,14 @@ where
         self.selected_items_count
     }
 
+    pub fn column(&self, index: usize) -> Option<&Column> {
+        self.header.columns().get(index)
+    }
+    pub fn column_mut(&mut self, index: usize) -> Option<&mut Column> {
+        self.header.columns_mut().get_mut(index)
+    }
+
+
     fn goto_element(&mut self, element: Element, emit_event: bool) -> bool {
         for (index, item) in self.filter.iter().enumerate() {
             if *item == element {

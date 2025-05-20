@@ -477,6 +477,10 @@ impl ColumnsHeader {
     pub fn columns(&self) -> &Vec<Column> {
         &self.columns
     }
+    #[inline(always)]
+    pub (crate) fn columns_mut(&mut self) -> &mut Vec<Column> {
+        &mut self.columns
+    }
     pub fn sort_column(&self) -> Option<u16> {
         if self.selected_column_index as usize >= self.columns.len() {
             None

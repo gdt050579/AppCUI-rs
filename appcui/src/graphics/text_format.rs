@@ -5,7 +5,7 @@ use EnumBitFlags::EnumBitFlags;
 
 /// Represents the alignment of the text. It can be Left, Center or Right.
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq, Default)]
+#[derive(Copy, Clone, Debug, PartialEq, Default, Eq)]
 pub enum TextAlignament {
     #[default]
     Left,

@@ -1,6 +1,6 @@
 /// Represents the code of a key.
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Eq)]
 pub enum KeyCode {
     None = 0,
     F1 = 1,

@@ -5793,3 +5793,54 @@ fn check_no_selection_mode() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_column_methods() {
+    #[derive(ListItem)]
+    struct DownloadItem {
+        #[Column(name: "&Name", width: 12, align: Left, index: 1)]
+        name: &'static str,
+        #[Column(name: "&Age", width: 10, align: Center, index:3)]
+        age: u32,
+        #[Column(name: "&Server", idx: 0)]
+        server: &'static str,
+        #[Column(name: "&Stars", width: 10, align: Center, render: Rating, format:Stars, idx: 2)]
+        stars: u8,
+        #[Column(name: "Download", width:15, idx: 6)]
+        download: listitem::Status,
+        #[Column(name: "Created", w: 20, align: Center, render: DateTime, format: Short, index: 5)]
+        created: chrono::NaiveDateTime,
+        #[Column(name: "Enabled", align: Center, index: 4)]
+        enabled: bool,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6963EDDD254CC945)
+    ";
+    let mut a = App::debug(100, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("DownloadItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    assert_eq!(l.column(0).unwrap().name(),"Server");
+    assert_eq!(l.column(1).unwrap().name(),"Name");
+    assert_eq!(l.column(3).unwrap().name(),"Age");
+    assert_eq!(l.column(2).unwrap().name(),"Stars");
+    assert_eq!(l.column(7), None);
+    assert_eq!(l.column(1).unwrap().width(), 12);
+    assert_eq!(l.column(4).unwrap().alignment(), TextAlignament::Center);
+    assert_eq!(l.column(1).unwrap().tooltip(), "");
+    // set a new name for the first column
+    l.column_mut(0).unwrap().set_name("Server2");
+    assert_eq!(l.column(0).unwrap().name(),"Server2");
+    // set a new tooltip for the first column
+    l.column_mut(0).unwrap().set_tooltip("Server2 tooltip");
+    assert_eq!(l.column(0).unwrap().tooltip(),"Server2 tooltip");
+    // set right alignment for column with index 6
+    l.column_mut(6).unwrap().set_alignment(TextAlignament::Right);
+    assert_eq!(l.column(6).unwrap().alignment(), TextAlignament::Right);
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
