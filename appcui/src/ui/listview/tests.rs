@@ -5844,3 +5844,81 @@ fn check_column_methods() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_autoresize_temperature() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: temperature, format: Celsius)]
+        v1: f32,
+        #[Column(name: "V2", width: 3, align: Left, render: temperature, format: Fahrenheit)]
+        v2: f32,
+        #[Column(name: "V3", width: 3, align: Left, render: temperature, format: Kelvin)]
+        v3: f32,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x1577B8621F47427A)
+        Mouse.DoubleClick(12,1,left)
+        Paint('2. v3 - auto resized')
+        CheckHash(0x42CB9B627940BB31)
+        Mouse.DoubleClick(8,1,left)
+        Paint('3. v2 - auto resized')
+        CheckHash(0xAC616B4142E7FF0D)
+        Mouse.DoubleClick(4,1,left)
+        Paint('4. v1 - auto resized')
+        CheckHash(0xCD289EDA906FADFE)
+    ";
+    let mut a = App::debug(100, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    l.add(MyItem {v1: -123.75f32, v2: 1234.625f32, v3: 12345.0625f32});
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_autoresize_volume() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Volume, format: CubicMilimeters )]
+        v1: u32,
+        #[Column(name: "V2", width: 3, align: Left, render: Volume, format: CubicMeters)]
+        v2: u32,
+        #[Column(name: "V3", width: 3, align: Left, render: Volume, format: CubicKilometers )]
+        v3: u32,
+        #[Column(name: "V4", width: 3, align: Left, render: Volume, format: Milliliters )]
+        v4: u32,
+        #[Column(name: "V5", width: 3, align: Left, render: Volume, format: CubicInches )]
+        v5: u32,        
+        #[Column(name: "V5", width: 3, align: Left, render: Volume, format: CubicYards )]
+        v6: u32,        
+        #[Column(name: "V5", width: 3, align: Left, render: Volume, format: CubicMiles )]
+        v7: u32,        
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x870BEA0E27BE58FD)
+        Mouse.DoubleClick(28,1,left)
+        Mouse.DoubleClick(24,1,left)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0x8115367D61AC3EB1)
+    ";
+    let mut a = App::debug(100, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    l.add(MyItem {v1: 1, v2: 11, v3: 123 ,v4: 1234, v5: 12345, v6: 123456, v7: 1234567});
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
