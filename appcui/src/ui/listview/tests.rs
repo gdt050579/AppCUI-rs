@@ -5922,3 +5922,49 @@ fn check_autoresize_volume() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_autoresize_distance() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Distance, format: Kilometers  )]
+        v1: u32,
+        #[Column(name: "V2", width: 3, align: Left, render: Distance, format: Meters )]
+        v2: u32,
+        #[Column(name: "V3", width: 3, align: Left, render: Distance, format: Centimeters  )]
+        v3: u32,
+        #[Column(name: "V4", width: 3, align: Left, render: Distance, format: Millimeters  )]
+        v4: u32,
+        #[Column(name: "V5", width: 3, align: Left, render: Distance, format: Inches  )]
+        v5: u32,        
+        #[Column(name: "V6", width: 3, align: Left, render: Distance, format: Feet  )]
+        v6: u32,        
+        #[Column(name: "V7", width: 3, align: Left, render: Distance, format: Yards  )]
+        v7: u32,        
+        #[Column(name: "V8", width: 3, align: Left, render: Distance, format: Miles  )]
+        v8: u32,        
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x8C57A9C37F39E1F3)
+        Mouse.DoubleClick(32,1,left)
+        Mouse.DoubleClick(28,1,left)
+        Mouse.DoubleClick(24,1,left)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0x8692767DFCA14261)
+    ";
+    let mut a = App::debug(100, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    l.add(MyItem {v1: 1, v2: 11, v3: 123 ,v4: 1234, v5: 12345, v6: 123456, v7: 1234567, v8: 12345});
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
