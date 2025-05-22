@@ -5496,7 +5496,6 @@ fn check_proc_macro_listviewitem() {
     a.run();
 }
 
-
 #[test]
 fn check_proc_macro_listviewitem_order_from_1() {
     #[derive(ListItem)]
@@ -5617,7 +5616,6 @@ fn check_proc_macro_listviewitem_order_from_0() {
     a.run();
 }
 
-
 #[test]
 fn check_select_item_method() {
     #[Window(events=ListViewEvents<Person>, internal: true)]
@@ -5680,7 +5678,6 @@ fn check_select_item_method() {
     a.run();
 }
 
-
 #[test]
 fn check_clear_method() {
     #[Window(events=ListViewEvents<Person>, internal: true)]
@@ -5728,7 +5725,6 @@ fn check_clear_method() {
     a.add_window(MyWin::new());
     a.run();
 }
-
 
 #[test]
 fn check_clear_search_method() {
@@ -5794,7 +5790,6 @@ fn check_no_selection_mode() {
     a.run();
 }
 
-
 #[test]
 fn check_column_methods() {
     #[derive(ListItem)]
@@ -5823,20 +5818,20 @@ fn check_column_methods() {
     let mut a = App::debug(100, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut l = listview!("DownloadItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
-    assert_eq!(l.column(0).unwrap().name(),"Server");
-    assert_eq!(l.column(1).unwrap().name(),"Name");
-    assert_eq!(l.column(3).unwrap().name(),"Age");
-    assert_eq!(l.column(2).unwrap().name(),"Stars");
+    assert_eq!(l.column(0).unwrap().name(), "Server");
+    assert_eq!(l.column(1).unwrap().name(), "Name");
+    assert_eq!(l.column(3).unwrap().name(), "Age");
+    assert_eq!(l.column(2).unwrap().name(), "Stars");
     assert_eq!(l.column(7), None);
     assert_eq!(l.column(1).unwrap().width(), 12);
     assert_eq!(l.column(4).unwrap().alignment(), TextAlignament::Center);
     assert_eq!(l.column(1).unwrap().tooltip(), "");
     // set a new name for the first column
     l.column_mut(0).unwrap().set_name("Server2");
-    assert_eq!(l.column(0).unwrap().name(),"Server2");
+    assert_eq!(l.column(0).unwrap().name(), "Server2");
     // set a new tooltip for the first column
     l.column_mut(0).unwrap().set_tooltip("Server2 tooltip");
-    assert_eq!(l.column(0).unwrap().tooltip(),"Server2 tooltip");
+    assert_eq!(l.column(0).unwrap().tooltip(), "Server2 tooltip");
     // set right alignment for column with index 6
     l.column_mut(6).unwrap().set_alignment(TextAlignament::Right);
     assert_eq!(l.column(6).unwrap().alignment(), TextAlignament::Right);
@@ -5874,7 +5869,11 @@ fn check_autoresize_temperature() {
     let mut a = App::debug(100, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(MyItem {v1: -123.75f32, v2: 1234.625f32, v3: 12345.0625f32});
+    l.add(MyItem {
+        v1: -123.75f32,
+        v2: 1234.625f32,
+        v3: 12345.0625f32,
+    });
     w.add(l);
     a.add_window(w);
     a.run();
@@ -5893,11 +5892,11 @@ fn check_autoresize_volume() {
         #[Column(name: "V4", width: 3, align: Left, render: Volume, format: Milliliters )]
         v4: u32,
         #[Column(name: "V5", width: 3, align: Left, render: Volume, format: CubicInches )]
-        v5: u32,        
+        v5: u32,
         #[Column(name: "V5", width: 3, align: Left, render: Volume, format: CubicYards )]
-        v6: u32,        
+        v6: u32,
         #[Column(name: "V5", width: 3, align: Left, render: Volume, format: CubicMiles )]
-        v7: u32,        
+        v7: u32,
     }
 
     let script = "
@@ -5917,7 +5916,15 @@ fn check_autoresize_volume() {
     let mut a = App::debug(100, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(MyItem {v1: 1, v2: 11, v3: 123 ,v4: 1234, v5: 12345, v6: 123456, v7: 1234567});
+    l.add(MyItem {
+        v1: 1,
+        v2: 11,
+        v3: 123,
+        v4: 1234,
+        v5: 12345,
+        v6: 123456,
+        v7: 1234567,
+    });
     w.add(l);
     a.add_window(w);
     a.run();
@@ -5936,13 +5943,13 @@ fn check_autoresize_distance() {
         #[Column(name: "V4", width: 3, align: Left, render: Distance, format: Millimeters  )]
         v4: u32,
         #[Column(name: "V5", width: 3, align: Left, render: Distance, format: Inches  )]
-        v5: u32,        
+        v5: u32,
         #[Column(name: "V6", width: 3, align: Left, render: Distance, format: Feet  )]
-        v6: u32,        
+        v6: u32,
         #[Column(name: "V7", width: 3, align: Left, render: Distance, format: Yards  )]
-        v7: u32,        
+        v7: u32,
         #[Column(name: "V8", width: 3, align: Left, render: Distance, format: Miles  )]
-        v8: u32,        
+        v8: u32,
     }
 
     let script = "
@@ -5963,7 +5970,71 @@ fn check_autoresize_distance() {
     let mut a = App::debug(100, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(MyItem {v1: 1, v2: 11, v3: 123 ,v4: 1234, v5: 12345, v6: 123456, v7: 1234567, v8: 12345});
+    l.add(MyItem {
+        v1: 1,
+        v2: 11,
+        v3: 123,
+        v4: 1234,
+        v5: 12345,
+        v6: 123456,
+        v7: 1234567,
+        v8: 12345,
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_autoresize_speed() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Speed, format: KilometersPerHour   )]
+        v1: u32,
+        #[Column(name: "V2", width: 3, align: Left, render: Speed, format: MetersPerHour)]
+        v2: u32,
+        #[Column(name: "V3", width: 3, align: Left, render: Speed, format: KilometersPerSecond   )]
+        v3: u32,
+        #[Column(name: "V4", width: 3, align: Left, render: Speed, format: MetersPerSecond )]
+        v4: u32,
+        #[Column(name: "V5", width: 3, align: Left, render: Speed, format: MilesPerHour )]
+        v5: u32,
+        #[Column(name: "V6", width: 3, align: Left, render: Speed, format: MilesPerSecond )]
+        v6: u32,
+        #[Column(name: "V7", width: 3, align: Left, render: Speed, format: Knots )]
+        v7: u32,
+        #[Column(name: "V8", width: 3, align: Left, render: Speed, format: FeetPerSecond )]
+        v8: u32,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x8C57A9C37F39E1F3)
+        Mouse.DoubleClick(32,1,left)
+        Mouse.DoubleClick(28,1,left)
+        Mouse.DoubleClick(24,1,left)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0xEC5A10B3D8BBD050)
+    ";
+    let mut a = App::debug(100, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    l.add(MyItem {
+        v1: 1,
+        v2: 11,
+        v3: 123,
+        v4: 1234,
+        v5: 12345,
+        v6: 123456,
+        v7: 1234567,
+        v8: 12345,
+    });
     w.add(l);
     a.add_window(w);
     a.run();
