@@ -6039,3 +6039,66 @@ fn check_autoresize_speed() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_autoresize_currency() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Currency, format: USD )]
+        v1: u32,
+        #[Column(name: "V2", width: 3, align: Left, render: Currency, format: USDSymbol )]
+        v2: u32,
+        #[Column(name: "V3", width: 3, align: Left, render: Currency, format: EUR )]
+        v3: u32,
+        #[Column(name: "V4", width: 3, align: Left, render: Currency, format: EURSymbol )]
+        v4: u32,
+        #[Column(name: "V5", width: 3, align: Left, render: Currency, format: GBP )]
+        v5: u32,
+        #[Column(name: "V6", width: 3, align: Left, render: Currency, format: YEN )]
+        v6: u32,
+        #[Column(name: "V7", width: 3, align: Left, render: Currency, format: YENSymbol )]
+        v7: u32,
+        #[Column(name: "V8", width: 3, align: Left, render: Currency, format: Bitcoin )]
+        v8: u32,
+        #[Column(name: "V9", width: 3, align: Left, render: Currency, format: BitcoinSymbol  )]
+        v9: u32,
+        #[Column(name: "V10", width: 3, align: Left, render: Currency, format: RON  )]
+        v10: u32,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x37421BBF66325ABA)
+        Mouse.DoubleClick(40,1,left)
+        Mouse.DoubleClick(36,1,left)
+        Mouse.DoubleClick(32,1,left)
+        Mouse.DoubleClick(28,1,left)
+        Mouse.DoubleClick(24,1,left)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0xAF9262DF70A0BD5B)
+    ";
+    let mut a = App::debug(120, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
+    l.add(MyItem {
+        v1: 1,
+        v2: 11,
+        v3: 123,
+        v4: 1234,
+        v5: 12345,
+        v6: 234,
+        v7: 2345,
+        v8: 20,
+        v9: 100,
+        v10: 1234
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
