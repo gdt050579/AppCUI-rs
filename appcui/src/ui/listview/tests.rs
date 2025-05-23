@@ -6064,12 +6064,15 @@ fn check_autoresize_currency() {
         v9: u32,
         #[Column(name: "V10", width: 3, align: Left, render: Currency, format: RON  )]
         v10: u32,
+        #[Column(name: "V11", width: 3, align: Left, render: Currency, format: GBPSymbol   )]
+        v11: u32,
     }
 
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x37421BBF66325ABA)
+        CheckHash(0xB633A26FD7634461)
+        Mouse.DoubleClick(44,1,left)
         Mouse.DoubleClick(40,1,left)
         Mouse.DoubleClick(36,1,left)
         Mouse.DoubleClick(32,1,left)
@@ -6081,9 +6084,9 @@ fn check_autoresize_currency() {
         Mouse.DoubleClick(8,1,left)
         Mouse.DoubleClick(4,1,left)
         Paint('2. auto resized')
-        CheckHash(0xAF9262DF70A0BD5B)
+        CheckHash(0xA821AE8CAF4D55D0)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
+    let mut a = App::debug(130, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
     l.add(MyItem {
@@ -6096,7 +6099,8 @@ fn check_autoresize_currency() {
         v7: 2345,
         v8: 20,
         v9: 100,
-        v10: 1234
+        v10: 1234,
+        v11: 12,
     });
     w.add(l);
     a.add_window(w);
