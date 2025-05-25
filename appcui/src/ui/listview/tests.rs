@@ -6170,7 +6170,6 @@ fn check_autoresize_area() {
     a.run();
 }
 
-
 #[test]
 fn check_autoresize_numeric() {
     #[derive(ListItem)]
@@ -6350,8 +6349,6 @@ fn check_autoresize_size_width_decimals() {
     a.run();
 }
 
-
-
 #[test]
 fn check_status_column_methods() {
     #[derive(ListItem)]
@@ -6380,16 +6377,301 @@ fn check_status_column_methods() {
     let mut a = App::debug(100, 15, script).build().unwrap();
     let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
     let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
-    l.add(MyItem{s1: listitem::Status::Completed});
-    l.add(MyItem{s1: listitem::Status::Error});
-    l.add(MyItem{s1: listitem::Status::Queued});
-    l.add(MyItem{s1: listitem::Status::Stopped});
-    l.add(MyItem{s1: listitem::Status::Paused(0.75f32)});
-    l.add(MyItem{s1: listitem::Status::Paused(0.5f32)});
-    l.add(MyItem{s1: listitem::Status::Running(0.75f32)});
-    l.add(MyItem{s1: listitem::Status::Running(0.25f32)});
-    l.add(MyItem{s1: listitem::Status::Running(0.5f32)});
+    l.add(MyItem {
+        s1: listitem::Status::Completed,
+    });
+    l.add(MyItem { s1: listitem::Status::Error });
+    l.add(MyItem {
+        s1: listitem::Status::Queued,
+    });
+    l.add(MyItem {
+        s1: listitem::Status::Stopped,
+    });
+    l.add(MyItem {
+        s1: listitem::Status::Paused(0.75f32),
+    });
+    l.add(MyItem {
+        s1: listitem::Status::Paused(0.5f32),
+    });
+    l.add(MyItem {
+        s1: listitem::Status::Running(0.75f32),
+    });
+    l.add(MyItem {
+        s1: listitem::Status::Running(0.25f32),
+    });
+    l.add(MyItem {
+        s1: listitem::Status::Running(0.5f32),
+    });
 
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_autoresize_ascii() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Ascii)]
+        v1: &'static str,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x8B4EA9EA4962A57E)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0xBE9DC3CB75E5EA77)
+    ";
+    let mut a = App::debug(120, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
+    l.add(MyItem { v1: "Asci String" });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_autoresize_weight() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Weight, format: Kilograms)]
+        v1: u64,
+        #[Column(name: "V2", width: 3, align: Left, render: Weight, format: Grams)]
+        v2: u64,
+        #[Column(name: "V3", width: 3, align: Left, render: Weight, format: Milligrams)]
+        v3: u64,
+        #[Column(name: "V4", width: 3, align: Left, render: Weight, format: Pounds)]
+        v4: u64,
+        #[Column(name: "V5", width: 3, align: Left, render: Weight, format: Tons)]
+        v5: u64,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xE8D2AAC329AD5730)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0x815712699193850B)
+    ";
+    let mut a = App::debug(120, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
+    l.add(MyItem {
+        v1: 1234567,
+        v2: 1234567,
+        v3: 1234567,
+        v4: 1234567890,
+        v5: 1234567890000000,
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_autoresize_numeric_float() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Float, format: Normal)]
+        v1: f64,
+        #[Column(name: "V2", width: 3, align: Left, render: Float, format: TwoDigits)]
+        v2: f64,
+        #[Column(name: "V3", width: 3, align: Left, render: Float, format: FourDigits)]
+        v3: f64,
+        #[Column(name: "V4", width: 3, align: Left, render: Float, format: ThreeDigits )]
+        v4: f64,
+        #[Column(name: "V5", width: 3, align: Left, render: Float, format: ThreeDigits)]
+        v5: f64,
+        #[Column(name: "V6", width: 3, align: Left, render: Float, format: Normal)]
+        v6: f64,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF6653489816382A4)
+        Mouse.DoubleClick(40,1,left)
+        Mouse.DoubleClick(36,1,left)
+        Mouse.DoubleClick(32,1,left)
+        Mouse.DoubleClick(28,1,left)
+        Mouse.DoubleClick(24,1,left)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0x381126BE835AA002)
+    ";
+    let mut a = App::debug(120, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
+    l.add(MyItem {
+        v1: -5.125,
+        v2: 0.0,
+        v3: 123.625,
+        v4: 123456.123456,
+        v5: -123456.123456,
+        v6: 0.625,
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_autoresize_duration() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Duration, format: Auto)]
+        v1: Duration,
+        #[Column(name: "V2", width: 3, align: Left, render: Duration, format: Auto)]
+        v2: Duration,
+        #[Column(name: "V3", width: 3, align: Left, render: Duration, format: Auto)]
+        v3: Duration,
+        #[Column(name: "V4", width: 3, align: Left, render: Duration, format: Auto )]
+        v4: Duration,
+        #[Column(name: "V5", width: 3, align: Left, render: Duration, format: Seconds)]
+        v5: Duration,
+        #[Column(name: "V6", width: 3, align: Left, render: Duration, format: Details)]
+        v6: Duration,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x680A1FCA0586C2D1)
+        Mouse.DoubleClick(40,1,left)
+        Mouse.DoubleClick(36,1,left)
+        Mouse.DoubleClick(32,1,left)
+        Mouse.DoubleClick(28,1,left)
+        Mouse.DoubleClick(24,1,left)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0xA64E1DDE04DB979D)
+    ";
+    let mut a = App::debug(120, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
+    l.add(MyItem {
+        v1: Duration::seconds(5),
+        v2: Duration::seconds(70),
+        v3: Duration::seconds(1000),
+        v4: Duration::seconds(10000),
+        v5: Duration::seconds(1000),
+        v6: Duration::seconds(1000),
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_autoresize_percentage() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: Percentage, format: Normal)]
+        v1: f32,
+        #[Column(name: "V2", width: 3, align: Left, render: Percentage, format: Normal)]
+        v2: f32,
+        #[Column(name: "V3", width: 3, align: Left, render: Percentage, format: Decimals)]
+        v3: f32,
+        #[Column(name: "V4", width: 3, align: Left, render: Percentage, format: Decimals)]
+        v4: f32,
+        #[Column(name: "V5", width: 3, align: Left, render: Percentage, format: Decimals)]
+        v5: f32,
+        #[Column(name: "V6", width: 3, align: Left, render: Percentage, format: Normal)]
+        v6: f32,
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x9A8DEA6C84CD18E5)
+        Mouse.DoubleClick(24,1,left)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0xDD9C30DFEE0A4183)
+    ";
+    let mut a = App::debug(120, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
+    l.add(MyItem {
+        v1: 0.125,
+        v2: 1.0,
+        v3: 0.5,
+        v4: 0.9999,
+        v5: 0.625,
+        v6: 0.0625
+    });
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_autoresize_date_time() {
+    #[derive(ListItem)]
+    struct MyItem {
+        #[Column(name: "V1", width: 3, align: Left, render: DateTime)]
+        v1: chrono::NaiveDateTime,
+        #[Column(name: "V2", width: 3, align: Left, render: Time, format: Short)]
+        v2: chrono::NaiveTime,
+        #[Column(name: "V3", width: 3, align: Left, render: Time, format: AMPM)]
+        v3: chrono::NaiveTime,
+        #[Column(name: "V4", width: 3, align: Left, render: Time, format: Normal)]
+        v4: chrono::NaiveTime,
+        #[Column(name: "V5", width: 3, align: Left, render: Date, format: Full)]
+        v5: chrono::NaiveDate,
+        #[Column(name: "V6", width: 3, align: Left, render: Date, format: YearMonthDay)]
+        v6: chrono::NaiveDate,
+        #[Column(name: "V6", width: 3, align: Left, render: Date, format: DayMonthYear)]
+        v7: chrono::NaiveDate,        
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC79D414CF8357AF7)
+        Mouse.DoubleClick(28,1,left)
+        Mouse.DoubleClick(24,1,left)
+        Mouse.DoubleClick(20,1,left)
+        Mouse.DoubleClick(16,1,left)
+        Mouse.DoubleClick(12,1,left)
+        Mouse.DoubleClick(8,1,left)
+        Mouse.DoubleClick(4,1,left)
+        Paint('2. auto resized')
+        CheckHash(0x6CAA3AE3A5E4E497)
+    ";
+    let mut a = App::debug(120, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut l = listview!("MyItem,d:c,view:Details,flags: ScrollBars");
+    l.add(MyItem {
+        v1: NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(), NaiveTime::from_hms_opt(14, 23, 59).unwrap()),
+        v2: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
+        v3: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
+        v4: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
+        v5: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
+        v6: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
+        v7: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap()
+    });
     w.add(l);
     a.add_window(w);
     a.run();
