@@ -1,4 +1,3 @@
-use super::helpers::{compile_shader, link_program};
 use crate::{
     prelude::{ErrorKind, Size, Surface},
     system::Error,
@@ -6,10 +5,28 @@ use crate::{
 };
 use std::sync::{mpsc::Sender, Arc, Mutex};
 use wasm_bindgen::{convert::FromWasmAbi, prelude::*, JsCast};
+use wasm_bindgen_futures::JsFuture;
 use web_sys::{
     window, CanvasRenderingContext2d, EventTarget, HtmlCanvasElement, KeyboardEvent, MouseEvent, WebGlBuffer, WebGlProgram,
     WebGlRenderingContext as GL, WheelEvent,
 };
+
+struct TerminalDomConfig {
+    cols:        u32,
+    rows:        u32,
+    font_family: String,
+    font_size:   u32,
+    cell_w:      u32,
+    cell_h:      u32,
+}
+
+struct WebGLResources {
+    gl:                    GL,
+    program:               WebGlProgram,
+    buffer:                WebGlBuffer,
+    pos_attrib_location:   u32,
+    color_attrib_location: u32,
+}
 
 pub struct WebTerminal {
     gl:                    GL,
@@ -24,68 +41,93 @@ pub struct WebTerminal {
     font:                  String,
     cell_width_px:         f32,
     cell_height_px:        f32,
+    clipboard_content:     Arc<Mutex<Option<String>>>,
 }
 
 unsafe impl Send for WebTerminal {}
 unsafe impl Sync for WebTerminal {}
 
 impl WebTerminal {
-    pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
-        // Grab the document and set the window title
-        let document = Self::document()?;
-        document.set_title(builder.title.as_deref().unwrap_or("AppCUI Web Terminal"));
+    fn load_dom_config(document: &web_sys::Document) -> TerminalDomConfig {
+        let font_size_val = Self::get_config(document, "terminal-font-size", 20);
+        TerminalDomConfig {
+            cols:        Self::get_config(document, "terminal-cols", 211),
+            rows:        Self::get_config(document, "terminal-rows", 56),
+            font_family: Self::get_config(document, "terminal-font", "Consolas Mono, monospace".to_string()),
+            font_size:   font_size_val,
+            cell_w:      Self::get_config(document, "terminal-cell-width", 9),
+            cell_h:      Self::get_config(document, "terminal-cell-height", font_size_val),
+        }
+    }
 
-        // Pull configuration (cols, rows, font, sizes) from <div id="terminal-*">
-        let cols = Self::get_config(&document, "terminal-cols", 211);
-        let rows = Self::get_config(&document, "terminal-rows", 56);
-        let font_family = Self::get_config(&document, "terminal-font", "Consolas Mono, monospace".to_string());
-        let font_size = Self::get_config(&document, "terminal-font-size", 20);
-        let cell_w = Self::get_config(&document, "terminal-cell-width", 9);
-        let cell_h = Self::get_config(&document, "terminal-cell-height", font_size);
+    fn initialize_canvases_from_dom(
+        document: &web_sys::Document,
+        config: &TerminalDomConfig,
+    ) -> Result<(HtmlCanvasElement, HtmlCanvasElement), Error> {
+        let webgl_canvas = Self::get_canvas(document, "canvas")?;
+        let text_canvas = Self::get_canvas(document, "textCanvas")?;
+        Self::init_canvas(&webgl_canvas, config.cols, config.rows, config.cell_w, config.cell_h, 1)?;
+        Self::init_canvas(&text_canvas, config.cols, config.rows, config.cell_w, config.cell_h, 2)?;
+        Ok((webgl_canvas, text_canvas))
+    }
 
-        // Fetch canvases and initialize
-        let webgl_canvas = Self::get_canvas(&document, "canvas")?;
-        let text_canvas = Self::get_canvas(&document, "textCanvas")?;
-        Self::init_canvas(&webgl_canvas, cols, rows, cell_w, cell_h, 1)?;
-        Self::init_canvas(&text_canvas, cols, rows, cell_w, cell_h, 2)?;
-
-        // Initialize WebGL state
-        let gl = Self::get_gl(&webgl_canvas)?;
+    fn initialize_webgl_resources(webgl_canvas: &HtmlCanvasElement, config: &TerminalDomConfig) -> Result<WebGLResources, Error> {
+        let gl = Self::get_gl(webgl_canvas)?;
         gl.enable(GL::BLEND);
         gl.blend_func(GL::SRC_ALPHA, GL::ONE_MINUS_SRC_ALPHA);
         gl.clear_color(0.0, 0.0, 0.0, 0.0);
         gl.clear(GL::COLOR_BUFFER_BIT);
-        gl.viewport(0, 0, (cols * cell_w) as i32, (rows * cell_h) as i32);
+        gl.viewport(0, 0, (config.cols * config.cell_w) as i32, (config.rows * config.cell_h) as i32);
 
-        // Compile + link shader
         let program = Self::init_program(&gl)?;
-        let pos_loc = gl.get_attrib_location(&program, "position") as u32;
-        let col_loc = gl.get_attrib_location(&program, "color") as u32;
+        let pos_attrib_location = gl.get_attrib_location(&program, "position") as u32;
+        let color_attrib_location = gl.get_attrib_location(&program, "color") as u32;
         let buffer = gl
             .create_buffer()
             .ok_or_else(|| Error::new(ErrorKind::InitializationFailure, "Failed to create WebGL buffer".into()))?;
 
-        let queue = Arc::new(Mutex::new(Vec::new()));
-        let font = format!("{}px {}", font_size, font_family);
-
-        let term = WebTerminal {
+        Ok(WebGLResources {
             gl,
-            size: Size { width: cols, height: rows },
-            webgl_canvas,
-            text_canvas,
             program,
             buffer,
-            pos_attrib_location: pos_loc,
-            color_attrib_location: col_loc,
-            event_queue: queue.clone(),
-            font,
-            cell_width_px: cell_w as f32,
-            cell_height_px: cell_h as f32,
+            pos_attrib_location,
+            color_attrib_location,
+        })
+    }
+
+    pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
+        let document = Self::document()?;
+        document.set_title(builder.title.as_deref().unwrap_or("AppCUI Web Terminal"));
+
+        let dom_config = Self::load_dom_config(&document);
+        let (webgl_canvas, text_canvas) = Self::initialize_canvases_from_dom(&document, &dom_config)?;
+        let webgl_resources = Self::initialize_webgl_resources(&webgl_canvas, &dom_config)?;
+
+        let event_queue = Arc::new(Mutex::new(Vec::new()));
+        let font_style = format!("{}px {}", dom_config.font_size, dom_config.font_family);
+
+        let term = WebTerminal {
+            gl: webgl_resources.gl,
+            size: Size {
+                width:  dom_config.cols,
+                height: dom_config.rows,
+            },
+            webgl_canvas,
+            text_canvas,
+            program: webgl_resources.program,
+            buffer: webgl_resources.buffer,
+            pos_attrib_location: webgl_resources.pos_attrib_location,
+            color_attrib_location: webgl_resources.color_attrib_location,
+            event_queue: event_queue.clone(),
+            font: font_style,
+            cell_width_px: dom_config.cell_w as f32,
+            cell_height_px: dom_config.cell_h as f32,
+            clipboard_content: Arc::new(Mutex::new(None)),
         };
 
-        // Hook up event listeners
-        term.setup_input_listeners(sender)
+        term.setup_input_listeners(&document, sender)
             .map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Failed to initialize input listeners: {:?}", e)))?;
+
         Ok(term)
     }
 
@@ -144,30 +186,6 @@ impl WebTerminal {
             .map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Failed to cast context: {:?}", e)))
     }
 
-    fn init_program(gl: &GL) -> Result<WebGlProgram, Error> {
-        let vs_src = r#"
-            attribute vec2 position;
-            attribute vec4 color;
-            varying vec4 v_color;
-            void main() {
-                gl_Position = vec4(position, 0.0, 1.0);
-                v_color = color;
-            }
-        "#;
-        let fs_src = r#"
-            precision mediump float;
-            varying vec4 v_color;
-            void main() {
-                gl_FragColor = v_color;
-            }
-        "#;
-        let vert = compile_shader(gl, GL::VERTEX_SHADER, vs_src)
-            .map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Vertex shader error: {}", e)))?;
-        let frag = compile_shader(gl, GL::FRAGMENT_SHADER, fs_src)
-            .map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Fragment shader error: {}", e)))?;
-        link_program(gl, &vert, &frag).map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Program linking error: {}", e)))
-    }
-
     fn key_index(k: &str) -> u8 {
         match k {
             "F1" => 1,
@@ -212,11 +230,58 @@ impl WebTerminal {
         }
     }
 
-    fn setup_input_listeners(&self, sender: Sender<SystemEvent>) -> Result<(), JsValue> {
-        let document = window().unwrap().document().unwrap();
+    fn create_mouse_event_handler<F>(&self, sender: Sender<SystemEvent>, event_mapper: F) -> Closure<dyn FnMut(MouseEvent)>
+    where
+        F: Fn(i32, i32, &MouseEvent) -> SystemEvent + 'static,
+    {
+        let queue = self.event_queue.clone();
+        let canvas = self.webgl_canvas.clone();
+        let cw = self.cell_width_px;
+        let ch = self.cell_height_px;
+
+        Closure::wrap(Box::new(move |event: MouseEvent| {
+            let r = canvas.get_bounding_client_rect();
+            let x = ((event.client_x() as f32 - r.left() as f32) / cw) as i32;
+            let y = ((event.client_y() as f32 - r.top() as f32) / ch) as i32;
+
+            let system_event = event_mapper(x, y, &event);
+
+            if sender.send(system_event.clone()).is_ok() {
+                if let Ok(mut q) = queue.lock() {
+                    q.push(system_event);
+                }
+            }
+        }))
+    }
+
+    fn create_wheel_event_handler<F>(&self, sender: Sender<SystemEvent>, event_mapper: F) -> Closure<dyn FnMut(WheelEvent)>
+    where
+        F: Fn(i32, i32, &WheelEvent) -> SystemEvent + 'static,
+    {
+        let queue = self.event_queue.clone();
+        let canvas = self.webgl_canvas.clone();
+        let cw = self.cell_width_px;
+        let ch = self.cell_height_px;
+
+        Closure::wrap(Box::new(move |event: WheelEvent| {
+            let r = canvas.get_bounding_client_rect();
+            let x = ((event.client_x() as f32 - r.left() as f32) / cw) as i32;
+            let y = ((event.client_y() as f32 - r.top() as f32) / ch) as i32;
+
+            let system_event = event_mapper(x, y, &event);
+
+            if sender.send(system_event.clone()).is_ok() {
+                if let Ok(mut q) = queue.lock() {
+                    q.push(system_event);
+                }
+            }
+            event.prevent_default();
+        }))
+    }
+
+    fn setup_input_listeners(&self, document: &web_sys::Document, sender: Sender<SystemEvent>) -> Result<(), JsValue> {
         let target: &EventTarget = document.as_ref();
 
-        // Generic helper to attach a Closure<dyn FnMut(E)> listener
         fn attach<E: 'static + JsCast>(target: &EventTarget, event_name: &str, c: Closure<dyn FnMut(E)>) -> Result<(), JsValue>
         where
             E: FromWasmAbi,
@@ -228,14 +293,16 @@ impl WebTerminal {
 
         // KEYBOARD
         {
-            let sender = sender.clone();
+            let keyboard_sender = sender.clone();
             let queue = self.event_queue.clone();
             let key_closure: Closure<dyn FnMut(KeyboardEvent)> = Closure::wrap(Box::new(move |event| {
                 let k = event.key();
                 let idx = WebTerminal::key_index(&k);
+                // Prevent default browser actions for F1-F10 keys
                 if (1..=10).contains(&idx) {
                     event.prevent_default();
                 }
+
                 let key_code = crate::input::KeyCode::from(idx);
                 let mut mods = crate::input::KeyModifier::None;
                 if event.alt_key() {
@@ -247,120 +314,67 @@ impl WebTerminal {
                 if event.shift_key() {
                     mods |= crate::input::KeyModifier::Shift;
                 }
-                let character = k.chars().next().filter(|c| c.is_alphanumeric()).unwrap_or('\0');
-                let sys = SystemEvent::KeyPressed(crate::terminals::KeyPressedEvent {
+
+                let character = if k.len() == 1 { k.chars().next().unwrap_or('\0') } else { '\0' };
+
+                let sys_event = SystemEvent::KeyPressed(crate::terminals::KeyPressedEvent {
                     key: crate::input::Key::new(key_code, mods),
                     character,
                 });
-                let _ = sender.send(sys.clone());
-                if let Ok(mut q) = queue.lock() {
-                    q.push(sys);
+
+                if keyboard_sender.send(sys_event.clone()).is_ok() {
+                    if let Ok(mut q) = queue.lock() {
+                        q.push(sys_event);
+                    }
                 }
             }));
             attach::<KeyboardEvent>(target, "keydown", key_closure)?;
         }
 
         // MOUSE MOVE
-        {
-            let sender = sender.clone();
-            let queue = self.event_queue.clone();
-            let canvas = self.webgl_canvas.clone();
-            let cw = self.cell_width_px;
-            let ch = self.cell_height_px;
-            let mv: Closure<dyn FnMut(MouseEvent)> = Closure::wrap(Box::new(move |e| {
-                let r = canvas.get_bounding_client_rect();
-                let x = ((e.client_x() as f32 - r.left() as f32) / cw) as i32;
-                let y = ((e.client_y() as f32 - r.top() as f32) / ch) as i32;
-                let sys = SystemEvent::MouseMove(crate::terminals::MouseMoveEvent {
-                    x,
-                    y,
-                    button: crate::input::MouseButton::None,
-                });
-                let _ = sender.send(sys.clone());
-                if let Ok(mut q) = queue.lock() {
-                    q.push(sys);
-                }
-            }));
-            attach::<MouseEvent>(target, "mousemove", mv)?;
-        }
+        let mouse_move_closure = self.create_mouse_event_handler(sender.clone(), |x, y, _event| {
+            SystemEvent::MouseMove(crate::terminals::MouseMoveEvent {
+                x,
+                y,
+                button: crate::input::MouseButton::None,
+            })
+        });
+        attach::<MouseEvent>(target, "mousemove", mouse_move_closure)?;
 
         // MOUSE DOWN
-        {
-            let sender = sender.clone();
-            let queue = self.event_queue.clone();
-            let canvas = self.webgl_canvas.clone();
-            let cw = self.cell_width_px;
-            let ch = self.cell_height_px;
-            let md: Closure<dyn FnMut(MouseEvent)> = Closure::wrap(Box::new(move |e| {
-                let r = canvas.get_bounding_client_rect();
-                let x = ((e.client_x() as f32 - r.left() as f32) / cw) as i32;
-                let y = ((e.client_y() as f32 - r.top() as f32) / ch) as i32;
-                let b = match e.button() {
-                    0 => crate::input::MouseButton::Left,
-                    1 => crate::input::MouseButton::Center,
-                    2 => crate::input::MouseButton::Right,
-                    _ => crate::input::MouseButton::None,
-                };
-                let sys = SystemEvent::MouseButtonDown(crate::terminals::MouseButtonDownEvent { x, y, button: b });
-                let _ = sender.send(sys.clone());
-                if let Ok(mut q) = queue.lock() {
-                    q.push(sys);
-                }
-            }));
-            attach::<MouseEvent>(target, "mousedown", md)?;
-        }
+        let mouse_down_closure = self.create_mouse_event_handler(sender.clone(), |x, y, event| {
+            let button = match event.button() {
+                0 => crate::input::MouseButton::Left,
+                1 => crate::input::MouseButton::Center,
+                2 => crate::input::MouseButton::Right,
+                _ => crate::input::MouseButton::None,
+            };
+            SystemEvent::MouseButtonDown(crate::terminals::MouseButtonDownEvent { x, y, button })
+        });
+        attach::<MouseEvent>(target, "mousedown", mouse_down_closure)?;
 
         // MOUSE UP
-        {
-            let sender = sender.clone();
-            let queue = self.event_queue.clone();
-            let canvas = self.webgl_canvas.clone();
-            let cw = self.cell_width_px;
-            let ch = self.cell_height_px;
-            let mu: Closure<dyn FnMut(MouseEvent)> = Closure::wrap(Box::new(move |e| {
-                let r = canvas.get_bounding_client_rect();
-                let x = ((e.client_x() as f32 - r.left() as f32) / cw) as i32;
-                let y = ((e.client_y() as f32 - r.top() as f32) / ch) as i32;
-                let b = match e.button() {
-                    0 => crate::input::MouseButton::Left,
-                    1 => crate::input::MouseButton::Center,
-                    2 => crate::input::MouseButton::Right,
-                    _ => crate::input::MouseButton::None,
-                };
-                let sys = SystemEvent::MouseButtonUp(crate::terminals::MouseButtonUpEvent { x, y, button: b });
-                let _ = sender.send(sys.clone());
-                if let Ok(mut q) = queue.lock() {
-                    q.push(sys);
-                }
-            }));
-            attach::<MouseEvent>(target, "mouseup", mu)?;
-        }
+        let mouse_up_closure = self.create_mouse_event_handler(sender.clone(), |x, y, event| {
+            let button = match event.button() {
+                0 => crate::input::MouseButton::Left,
+                1 => crate::input::MouseButton::Center,
+                2 => crate::input::MouseButton::Right,
+                _ => crate::input::MouseButton::None,
+            };
+            SystemEvent::MouseButtonUp(crate::terminals::MouseButtonUpEvent { x, y, button })
+        });
+        attach::<MouseEvent>(target, "mouseup", mouse_up_closure)?;
 
         // MOUSE WHEEL
-        {
-            let sender = sender.clone();
-            let queue = self.event_queue.clone();
-            let canvas = self.webgl_canvas.clone();
-            let cw = self.cell_width_px;
-            let ch = self.cell_height_px;
-            let wh: Closure<dyn FnMut(WheelEvent)> = Closure::wrap(Box::new(move |e| {
-                let r = canvas.get_bounding_client_rect();
-                let x = ((e.client_x() as f32 - r.left() as f32) / cw) as i32;
-                let y = ((e.client_y() as f32 - r.top() as f32) / ch) as i32;
-                let dir = if e.delta_y() < 0.0 {
-                    crate::input::MouseWheelDirection::Up
-                } else {
-                    crate::input::MouseWheelDirection::Down
-                };
-                let sys = SystemEvent::MouseWheel(crate::terminals::MouseWheelEvent { x, y, direction: dir });
-                let _ = sender.send(sys.clone());
-                if let Ok(mut q) = queue.lock() {
-                    q.push(sys);
-                }
-                e.prevent_default();
-            }));
-            attach::<WheelEvent>(target, "wheel", wh)?;
-        }
+        let wheel_closure = self.create_wheel_event_handler(sender, |x, y, event| {
+            let direction = if event.delta_y() < 0.0 {
+                crate::input::MouseWheelDirection::Up
+            } else {
+                crate::input::MouseWheelDirection::Down
+            };
+            SystemEvent::MouseWheel(crate::terminals::MouseWheelEvent { x, y, direction })
+        });
+        attach::<WheelEvent>(target, "wheel", wheel_closure)?;
 
         Ok(())
     }
@@ -497,21 +511,14 @@ impl WebTerminal {
         let cell_width = self.cell_width_px as f64;
         let cell_height = self.cell_height_px as f64;
 
-        // context.clear_rect(
-        //     0.0 + surface.clip.left as f64 * cell_width,
-        //     0.0 + surface.clip.top as f64 * cell_height,
-        //     (surface.clip.right - surface.clip.left) as f64 * cell_width,
-        //     (surface.clip.bottom - surface.clip.top) as f64 * cell_height,
-        // );
+        context.clear_rect(
+            (surface.clip.left as f64 * cell_width) as f64,
+            (surface.clip.top as f64 * cell_height) as f64,
+            ((surface.clip.right - surface.clip.left) as f64 * cell_width) as f64,
+            ((surface.clip.bottom - surface.clip.top) as f64 * cell_height) as f64,
+        );
 
-        // context.clear_rect(
-        //     (surface.clip.left as f64 * cell_width) as f64,
-        //     (surface.clip.top as f64 * cell_height) as f64,
-        //     ((surface.clip.right - surface.clip.left) as f64 * cell_width) as f64,
-        //     ((surface.clip.bottom - surface.clip.top) as f64 * cell_height) as f64,
-        // );
-
-        context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
+        // context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
 
         context.save();
         context.set_font(self.font.as_str());
@@ -599,11 +606,11 @@ impl Terminal for WebTerminal {
         // );
         self.render_background(surface);
         if let Err(e) = self.render_text(surface) {
-            web_sys::console::log_1(&format!("Error rendering text: {:?}", e).into());
+            web_sys::console::log_1(&format!("Error rendering text: {e:?}").into());
         }
 
         if let Err(e) = self.render_cursor(surface) {
-            web_sys::console::log_1(&format!("Error rendering cursor: {:?}", e).into());
+            web_sys::console::log_1(&format!("Error rendering cursor: {e:?}").into());
         }
     }
 
@@ -612,23 +619,51 @@ impl Terminal for WebTerminal {
     }
 
     fn get_clipboard_text(&self) -> Option<String> {
-        None
+        self.clipboard_content.lock().unwrap().clone()
     }
 
     fn has_clipboard_text(&self) -> bool {
-        false
+        self.clipboard_content.lock().unwrap().is_some()
     }
 
     fn query_system_event(&mut self) -> Option<SystemEvent> {
         let mut queue = self.event_queue.lock().unwrap();
         if !queue.is_empty() {
-            let event = Some(queue.remove(0));
-            // web_sys::console::log_1(&format!("Event: {:?}", event).into());
-            event
+            Some(queue.remove(0))
         } else {
             None
         }
     }
 
-    fn set_clipboard_text(&mut self, _text: &str) {}
+    fn set_clipboard_text(&mut self, text: &str) {
+        let text_is_empty = text.is_empty();
+        {
+            let mut local_clipboard = self.clipboard_content.lock().unwrap();
+            if text_is_empty {
+                *local_clipboard = None;
+            } else {
+                *local_clipboard = Some(text.to_string());
+            }
+        }
+
+        if !text_is_empty {
+            if let Some(window) = web_sys::window() {
+                let clipboard = window.navigator().clipboard();
+                let text_owned = text.to_string();
+                let promise = clipboard.write_text(&text_owned);
+                wasm_bindgen_futures::spawn_local(async move {
+                    match JsFuture::from(promise).await {
+                        Ok(_) => {
+                            web_sys::console::log_1(&format!("Successfully wrote to browser clipboard: '{text_owned}'").into());
+                        }
+                        Err(e) => {
+                            web_sys::console::error_1(&format!("Failed to write to browser clipboard: {e:?}").into());
+                        }
+                    }
+                });
+            } else {
+                web_sys::console::warn_1(&"Window object not available for clipboard operation.".into());
+            }
+        }
+    }
 }
