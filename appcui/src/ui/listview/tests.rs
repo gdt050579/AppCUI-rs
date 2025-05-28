@@ -6695,6 +6695,36 @@ fn check_current_group() {
     assert_eq!(lv.current_item(), None);
     let g = Person::populate_with_icon(&mut lv);
     assert_eq!(lv.current_group(),Some(g));
+    assert_eq!(lv.current_item_mut(), None);
+    assert_eq!(lv.current_item_index(),None);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_current_item() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x128B0BA6B5DAA76)  
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    assert_eq!(lv.current_item_index(),None);
+    assert_eq!(lv.current_item_mut(), None);
+    assert_eq!(lv.current_group(), None);
+    assert_eq!(lv.current_item(), None);
+    assert_eq!(lv.item(0), None);
+    assert_eq!(lv.item_mut(0), None);
+    let g = Person::populate_with_icon(&mut lv);
+    assert_eq!(lv.current_group(),Some(g));
+    assert_eq!(lv.current_item_index(),Some(0));
+    assert_eq!(lv.current_item().unwrap().name,"Popescu");
+    assert_eq!(lv.current_item_mut().unwrap().name,"Popescu");
+    assert_eq!(lv.item_mut(0).unwrap().name,"Popescu");
 
     w.add(lv);
     a.add_window(w);
