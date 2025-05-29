@@ -241,3 +241,43 @@ fn check_threestatebox_yes_no_mode() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_three_state_box_hot_key() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xC8C53061F55AA476)   
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:78,h:11");
+    w.add(threestatebox!("&Options,x:1,y:1,w:16,h:4,state=unchecked"));
+    w.add(threestatebox!("O&ptions,x:1,y:2,w:16,h:4,state=checked"));
+    w.add(threestatebox!("Op&tions,x:1,y:3,w:16,h:4,state=unknown"));
+    w.add(threestatebox!("Opt&ions,x:1,y:4,w:16,h:4"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_events() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xB6BB128869977206)   
+        Mouse.Move(10,3)
+        Paint('2. Mouse Over')   
+        CheckHash(0x1DEC17777C0BBD81)
+        Mouse.Move(0,0)   
+        Paint('3. Mouse Exit')   
+        CheckHash(0xB6BB128869977206)
+        Key.Pressed(F1)
+        Paint('4. Nothing happens - the key is not processed')   
+        CheckHash(0xB6BB128869977206)
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:78,h:11");
+    w.add(threestatebox!("'&Options with a lot of text',x:1,y:1,w:16,h:4,state=unchecked"));
+    a.add_window(w);
+    a.run();
+}
