@@ -323,3 +323,52 @@ fn check_mouse_drag_test() {
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_visible() {
+    #[Window(events = ButtonEvents, internal=true)]
+    struct MyWin {
+        but1: Handle<Button>,
+        but2: Handle<Button>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                but1: Handle::None,
+                but2: Handle::None,
+            };
+            me.but1 = me.add(Button::new("Button", Layout::new("x:1,y:3,w:13"), button::Type::Normal));
+            me.but2 = me.add(Button::new("Show/Hide", Layout::new("x:16,y:3,w:14"), button::Type::Normal));
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
+            if self.but2 == button_handle {
+                let h = self.but1;
+                if let Some(c) = self.control_mut(h) {
+                    let vis = c.is_visible();
+                    c.set_visible(!vis);
+                }
+            }
+            return EventProcessStatus::Processed;
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial State')   
+        CheckHash(0x47599F7DC8243679)
+        Key.Pressed(Space)   
+        Paint('2.Button is hidden')   
+        CheckHash(0xD1213E5ECD1D97F0)
+        Key.Pressed(Space)   
+        Paint('3.Button is visible')   
+        CheckHash(0x47599F7DC8243679)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

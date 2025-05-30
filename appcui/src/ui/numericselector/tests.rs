@@ -441,6 +441,16 @@ fn test_number_floating_point_write_to_string() {
     let negative_float: f64 = -1.5;
     negative_float.write_to_string(&mut output, Format::Decimal);
     assert_eq!(output, "-1.50");
+
+    // Test percentage
+    let value: f64 = 0.75;
+    value.write_to_string(&mut output, Format::Percentage);
+    assert_eq!(output, "75.00");
+
+    // Test percentage
+    let value: f64 = 1.25;
+    value.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "1 B");    
 }
 
 #[test]
