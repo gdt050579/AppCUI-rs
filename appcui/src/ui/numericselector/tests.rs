@@ -390,6 +390,16 @@ fn test_number_signed_integers_write_to_string() {
     
     negative.write_to_string(&mut output, Format::Hex);
     assert_eq!(output, "-0x2A");
+
+    // Test i64
+    let i64_value: i64 = 1_000_000;
+    i64_value.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "976 KB");    
+
+    // Test isize
+    let isize_value: isize = 1_000_000;
+    isize_value.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "976 KB");     
 }
 
 #[test]
@@ -451,6 +461,11 @@ fn test_number_floating_point_write_to_string() {
     let value: f64 = 1.25;
     value.write_to_string(&mut output, Format::Size);
     assert_eq!(output, "1 B");    
+
+    // Test Hex
+    let value: f64 = 0xFFEE as f64;
+    value.write_to_string(&mut output, Format::Hex);
+    assert_eq!(output, "0xFFEE");       
 }
 
 #[test]
