@@ -8,7 +8,7 @@ AppCUI supports various terminals (but each one comes with advantages and drawba
 | Windows | Yes             | ?       | -       |
 | Linux   | -               | Yes     | Yes     |
 | Mac/OSX | -               | Yes     | Yes     |
-| Web     | -               | -       | -       |
+| Web     | Yes             | Yes     | -       |
 
 
 ## Display
