@@ -144,14 +144,5 @@ impl App {
 }
 
 impl Drop for App {
-    fn drop(&mut self) {
-        if APP_CREATED_MUTEX.is_poisoned() {
-            APP_CREATED_MUTEX.clear_poison();
-        }
-        if RuntimeManager::is_instantiated() {
-            RuntimeManager::destroy();
-        }
-        let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
-        *app_created = false;
-    }
+    fn drop(&mut self) {}
 }
