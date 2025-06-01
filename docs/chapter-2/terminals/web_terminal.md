@@ -18,7 +18,7 @@ Before you begin, make sure you have:
 - **wasm-pack:**
   Install [wasm-pack](https://rustwasm.github.io/wasm-pack/) for building your WebAssembly package.
 - **A Web Server:**
-  Use the provided `server.py` (from the `test` directory in the repository) or any static server to serve your files.
+  Use the provided `server.py` below or any static server to serve your files.
   > [!WARNING]
   > If using threads, make sure to serve all your files in browser with these headers:
   > ```
