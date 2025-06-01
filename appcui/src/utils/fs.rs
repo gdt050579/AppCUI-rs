@@ -27,8 +27,6 @@ pub(crate) use root::RootType;
 
 #[cfg(any(target_os = "linux", wasm_unix))]
 use unix::get_os_roots;
-#[cfg(target_os = "linux")]
-use unix::get_os_roots;
 #[cfg(target_os = "macos")]
 use unix::get_os_roots;
 #[cfg(any(target_os = "windows", wasm_windows))]
