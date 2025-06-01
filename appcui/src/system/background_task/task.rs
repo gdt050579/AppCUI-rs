@@ -5,7 +5,6 @@ use std::{
     sync::{Arc, Condvar, Mutex},
 };
 
-// Use conditional imports
 #[cfg(not(target_arch = "wasm32"))]
 use std::thread;
 
